@@ -65,8 +65,8 @@
 struct AudioDataBuffer
 {
     BYTE *pAudioData;
-    size_t totalSize;
-    size_t currentSize;
+    uint32_t totalSize;
+    uint32_t currentSize;
 };
 
 HRESULT GetBufferAndCallBackClient(

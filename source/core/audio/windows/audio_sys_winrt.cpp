@@ -69,7 +69,7 @@ typedef struct AUDIO_SYS_DATA_TAG
     AUDIO_STATE current_output_state;
     AUDIO_STATE current_input_state;
     STRING_HANDLE hDeviceName;
-    size_t inputFrameCnt;
+    uint32_t inputFrameCnt;
 } AUDIO_SYS_DATA;
 
 

@@ -133,6 +133,21 @@ void MicrophonePumpBase::UpdateState(AUDIO_STATE state)
 
 }
 
+int MicrophonePumpBase::Process(const uint8_t* pBuffer, uint32_t size)
+{
+    int result = 0;
+    SPX_IFTRUE_THROW_HR(m_sink == nullptr, SPXERR_INVALID_ARG);
+
+    if (pBuffer != nullptr)
+    {
+        auto sharedBuffer = SpxAllocSharedAudioBuffer(size);
+        memcpy(sharedBuffer.get(), pBuffer, size);
+        m_sink->ProcessAudio(sharedBuffer, size);
+    }
+
+    return result;
+}
+
 } } } } // Microsoft::CognitiveServices::Speech::Impl
 
 

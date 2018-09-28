@@ -103,9 +103,8 @@ static bool create_audio_recorder(AUDIO_SYS_DATA *engine, audio_recorder_engine_
 static void delete_audio_recorder(AUDIO_SYS_DATA *engine);
 static bool audio_recorder_engine_service(void *ctx, uint32_t msg, void *data);
 static int open_wave_data(AUDIO_SYS_DATA* audioData, snd_pcm_stream_t streamType);
-static int output_async_read(void* userContext, uint8_t* pBuffer, size_t size);
+static int output_async_read(void* userContext, uint8_t* pBuffer, uint32_t size);
 static int output_async(void *p);
-static int output_async_read(void* userContext, uint8_t* pBuffer, size_t size);
 static int output_write_async(void *p);
 
 static AUDIO_RESULT write_audio_stream(AUDIO_SYS_DATA*audioData, const AUDIO_WAVEFORMAT*outputWaveFmt, AUDIOINPUT_WRITE readCallback, AUDIOCOMPLETE_CALLBACK completedCallback, AUDIO_BUFFERUNDERRUN_CALLBACK bufferUnderrunCallback, void* userContext);
@@ -794,7 +793,7 @@ static int output_async(void *p)
     return 0;
 }
 
-static int output_async_read(void* userContext, uint8_t* pBuffer, size_t size)
+static int output_async_read(void* userContext, uint8_t* pBuffer, uint32_t size)
 {
     struct _ASYNCAUDIO *async = (struct _ASYNCAUDIO *)userContext;
     uint32_t magic;

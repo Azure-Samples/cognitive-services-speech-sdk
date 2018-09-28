@@ -82,6 +82,18 @@ protected:
     const int m_waitMsStartPumpRequestTimeout = 5000;
     const int m_waitMsStopPumpRequestTimeout = 5000;
 
+    int Process(const uint8_t* pBuffer, uint32_t size);
+
+    static void OnInputStateChange(void* pContext, AUDIO_STATE state)
+    {
+        static_cast<MicrophonePumpBase*>(pContext)->UpdateState(state);
+    }
+
+    static int OnInputWrite(void* pContext, uint8_t* pBuffer, uint32_t size)
+    {
+        return static_cast<MicrophonePumpBase*>(pContext)->Process(pBuffer, size);
+    }
+
 private:
 
 #ifdef WIN32

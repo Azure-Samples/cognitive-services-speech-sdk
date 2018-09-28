@@ -56,7 +56,7 @@ typedef struct _AUDIO_WAVEFORMAT
 typedef void(*ON_AUDIOERROR_CALLBACK)(void* pContext, AUDIO_ERROR error);
 typedef void(*ON_AUDIOOUTPUT_STATE_CALLBACK)(void* pContext, AUDIO_STATE state);
 typedef void(*ON_AUDIOINPUT_STATE_CALLBACK)(void* pContext, AUDIO_STATE state);
-typedef int(*AUDIOINPUT_WRITE)(void* pContext, uint8_t* pBuffer, size_t size);
+typedef int(*AUDIOINPUT_WRITE)(void* pContext, uint8_t* pBuffer, uint32_t size);
 typedef void(*AUDIOCOMPLETE_CALLBACK)(void* pContext);
 typedef void(*AUDIO_BUFFERUNDERRUN_CALLBACK)(void* pContext);
 

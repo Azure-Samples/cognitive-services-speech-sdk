@@ -22,28 +22,13 @@ public:
     MicrophonePump();
 
     SPX_INTERFACE_MAP_BEGIN()
-    SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
     SPX_INTERFACE_MAP_END()
 
-private:
-    int  Process(const uint8_t* pBuffer, size_t size);
-
-    static void OnInputStateChange(void* pContext, AUDIO_STATE state)
-    {
-        static_cast<MicrophonePumpBase*>(pContext)->UpdateState(state);
-    }
-
-    static int OnInputWrite(void* pContext, uint8_t* pBuffer, size_t size)
-    {
-        // SPX_DBG_TRACE_VERBOSE("%s calling OnInputWrite callback", __FUNCTION__);
-        return static_cast<MicrophonePump*>(pContext)->Process(pBuffer, size);
-    }
 };
 
 MicrophonePump::MicrophonePump()
 {
-    SPX_DBG_TRACE_VERBOSE("%s setting up mac microphone pump callbacks", __FUNCTION__);
-
     auto result = audio_setcallbacks(m_audioHandle,
                                      NULL, NULL,
                                      &MicrophonePump::OnInputStateChange, (void*)this,
@@ -62,26 +47,8 @@ MicrophonePump::MicrophonePump()
 //    SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT_OK, SPXERR_MIC_ERROR);
 }
 
-int MicrophonePump::Process(const uint8_t* pBuffer, size_t size)
-{
-    // SPX_DBG_TRACE_VERBOSE("%s PROCESSING...", __FUNCTION__);
-    int result = 0;
-
-    SPX_IFTRUE_THROW_HR(m_sink == nullptr, SPXERR_INVALID_ARG);
-
-    if (pBuffer != nullptr)
-    {
-        auto sharedBuffer = SpxAllocSharedAudioBuffer(size);
-        memcpy(sharedBuffer.get(), pBuffer, size);
-        m_sink->ProcessAudio(sharedBuffer, size);
-    }
-
-    return result;
-}
-
 shared_ptr<ISpxAudioPump> Microphone::Create()
 {
-    SPX_DBG_TRACE_VERBOSE("%s Creating Microphone...", __FUNCTION__);
     return std::make_shared<MicrophonePump>();
 }
 
