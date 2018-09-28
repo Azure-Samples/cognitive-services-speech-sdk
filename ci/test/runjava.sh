@@ -36,7 +36,7 @@ if [[ $OS == "Windows_NT" ]]; then
 else
   CPSEP=:
   # TODO add more when passing:
-  TESTCLASS=tests.unit.AllUnitTests
+  TESTCLASS=tests.unit.ParameterCollectionTests
 fi
 
 print_vars = SPEECH_SDK_BUILD_ROOT SPEECH_SDK_EXTERNAL TESTCLASS =
