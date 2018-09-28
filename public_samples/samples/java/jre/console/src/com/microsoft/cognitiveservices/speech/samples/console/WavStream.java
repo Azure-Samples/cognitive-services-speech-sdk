@@ -68,8 +68,8 @@ public class WavStream extends PullAudioInputStreamCallback {
         // Note: assumption about order of chunks
         // Tag "RIFF"
         byte data[] = new byte[4];
-        reader.read(data, 0, 4);
-        ThrowIfFalse((data[0] == 'R') && (data[1] == 'I') && (data[2] == 'F') && (data[3] == 'F'), "RIFF");
+        int numRead = reader.read(data, 0, 4);
+        ThrowIfFalse((numRead == 4) && (data[0] == 'R') && (data[1] == 'I') && (data[2] == 'F') && (data[3] == 'F'), "RIFF");
 
         // Chunk size
         /* int fileLength = */ReadInt32(reader);
@@ -77,12 +77,12 @@ public class WavStream extends PullAudioInputStreamCallback {
         // Subchunk, Wave Header
         // Subchunk, Format
         // Tag: "WAVE"
-        reader.read(data, 0, 4);
-        ThrowIfFalse((data[0] == 'W') && (data[1] == 'A') && (data[2] == 'V') && (data[3] == 'E'), "WAVE");
+        numRead = reader.read(data, 0, 4);
+        ThrowIfFalse((numRead == 4) && (data[0] == 'W') && (data[1] == 'A') && (data[2] == 'V') && (data[3] == 'E'), "WAVE");
 
         // Tag: "fmt"
-        reader.read(data, 0, 4);
-        ThrowIfFalse((data[0] == 'f') && (data[1] == 'm') && (data[2] == 't') && (data[3] == ' '), "fmt ");
+        numRead = reader.read(data, 0, 4);
+        ThrowIfFalse((numRead == 4) && (data[0] == 'f') && (data[1] == 'm') && (data[2] == 't') && (data[3] == ' '), "fmt ");
 
         // chunk format size
         long formatSize = ReadInt32(reader);
@@ -102,13 +102,14 @@ public class WavStream extends PullAudioInputStreamCallback {
         // Until now we have read 16 bytes in format, the rest is cbSize and is ignored
         // for now.
         if (formatSize > 16) {
-            reader.read(new byte[(int) (formatSize - 16)]);
+            numRead = reader.read(new byte[(int) (formatSize - 16)]);
+            ThrowIfFalse(numRead == (int)(formatSize - 16), "could not skip extended format");
         }
 
         // Second Chunk, data
         // tag: data.
-        reader.read(data, 0, 4);
-        ThrowIfFalse((data[0] == 'd') && (data[1] == 'a') && (data[2] == 't') && (data[3] == 'a'), "data");
+        numRead = reader.read(data, 0, 4);
+        ThrowIfFalse((numRead == 4) && (data[0] == 'd') && (data[1] == 'a') && (data[2] == 't') && (data[3] == 'a'), "data");
 
         // data chunk size
         // Note: assumption is that only a single data chunk

@@ -22,6 +22,7 @@ import org.junit.Ignore;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
+import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
@@ -401,8 +402,8 @@ public class TranslationRecognizerTests {
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
 
-        // just wait one second
-        Thread.sleep(1000);
+        // just wait ten seconds
+        Thread.sleep(10000);
 
         future = r.stopContinuousRecognitionAsync();
         assertNotNull(future);

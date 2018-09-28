@@ -212,8 +212,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     new Tuple<long, long>(1700100000, 96600000),
                     new Tuple<long, long>(1796800000, 44600000),
                     new Tuple<long, long>(1853600000, 70400000),
-                    new Tuple<long, long>(1931200000, 90500000),
-                    new Tuple<long, long>(2021800000, 85400000),
+                    new Tuple<long, long>(1931200000, 90600000),
+                    new Tuple<long, long>(2021900000, 85300000),
                     new Tuple<long, long>(2111200000, 122200000),
                     new Tuple<long, long>(2233500000, 23600000),
                 };
