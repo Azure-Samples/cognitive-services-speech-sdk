@@ -78,10 +78,14 @@ public class KeywordRecognitionModel implements Closeable
      * Creates a keyword recognition model using the specified input stream.
      * @param inputStream A stream that represents data for the keyword recognition model.
      *                 Note, the file can be a zip file in which case the model will be extracted from the zip.
-     * @param name The name of the kws.
+     * @param name The name of the keyword. Note: The name needs to be unqiue for different keywords as it will be
+     *             used internally to match a particular keyword spotter model. In case you are updating the keyword
+     *             with a new version, add a version tag to the name or otherwise the previous version will be
+     *             overwritten on disk.
      * @param isZipped If true, the input stream is treated as a zip. false, if the input is just the kws table file.
      * @return The keyword recognition model being created.
      * @throws IOException If the name of the kws contains a file separator
+     * @throws IllegalArgumentException In case the kws.table file was not found.
      */
     public static KeywordRecognitionModel fromStream(InputStream inputStream, String name, boolean isZipped) throws IOException {
         Contracts.throwIfNull(inputStream, "inputStream");
@@ -117,6 +121,12 @@ public class KeywordRecognitionModel implements Closeable
                     Contracts.throwIfNullOrWhitespace(zipEntryName, "zipEntry.name");
 
                     File outputFile = new File(kwsRootDirectory, zipEntryName);
+                    if(outputFile.exists()) {
+                        if (!outputFile.delete()) {
+                            throw new IllegalArgumentException("could not delete " + outputFile.getAbsolutePath());
+                        }
+                    }
+
                     outputFile.deleteOnExit();
 
                     FileOutputStream outputStream = new FileOutputStream(outputFile);
