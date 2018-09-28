@@ -117,45 +117,41 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Assert.Fail($"Recognition Canceled: {canceled}");
                 }
 
-                receivedRecognizedEvents.Add(ResultType.Text, textResultEvents);
+                receivedRecognizedEvents.Add(ResultType.RecognizedText, textResultEvents);
                 receivedRecognizedEvents.Add(ResultType.Synthesis, synthesisResultEvents);
                 return receivedRecognizedEvents;
             }
         }
 
-        public async Task<List<List<TranslationRecognitionEventArgs>>> GetTranslationRecognizingContinuous(string path, string fromLanguage, List<string> toLanguages)
+        public async Task<Dictionary<ResultType, List<TranslationRecognitionEventArgs>>> GetTranslationRecognizingContinuous(string path, string fromLanguage, List<string> toLanguages)
         {
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
             {
                 var tcs = new TaskCompletionSource<bool>();
-                var listOfIntermediateResults = new List<List<TranslationRecognitionEventArgs>>();
-                List<TranslationRecognitionEventArgs> receivedRecognizingEvents = null;
+                var receivedEvents = new Dictionary<ResultType, List<TranslationRecognitionEventArgs>>();
+                var recognizingEvents = new List<TranslationRecognitionEventArgs>();
+                var recognizedEvents = new List<TranslationRecognitionEventArgs>();
 
-                recognizer.SessionStarted += (s, e) =>
-                {
-                    Console.WriteLine($"Session started {e.ToString()}");
-                    receivedRecognizingEvents = new List<TranslationRecognitionEventArgs>();
-                };
-                recognizer.SessionStopped += (s, e) =>
-                {
-                    Console.WriteLine($"Session stopped {e.ToString()}");
-                    tcs.TrySetResult(true);
-                };
                 recognizer.Recognizing += (s, e) =>
                 {
                     Console.WriteLine($"Got intermediate result {e.ToString()}");
-                    receivedRecognizingEvents.Add(e);
+                    recognizingEvents.Add(e);
                 };
 
                 recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Got final result {e.ToString()}");
-                    listOfIntermediateResults.Add(receivedRecognizingEvents);
-                    receivedRecognizingEvents = new List<TranslationRecognitionEventArgs>();
+                    recognizedEvents.Add(e);
                 };
 
                 string canceled = string.Empty;
                 recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
+
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    Console.WriteLine($"Session stopped {e.ToString()}");
+                    tcs.TrySetResult(true);
+                };
 
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
@@ -166,7 +162,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Assert.Fail($"Recognition canceled: {canceled}");
                 }
 
-                return listOfIntermediateResults;
+                receivedEvents.Add(ResultType.RecognizedText, recognizedEvents);
+                receivedEvents.Add(ResultType.RecognizingText, recognizingEvents);
+                return receivedEvents;
             }
         }
 
@@ -182,7 +180,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
     enum ResultType
     {
-        Text,
+        RecognizedText,
+        RecognizingText,
         Synthesis
     }
 }
