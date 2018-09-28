@@ -27,6 +27,9 @@ public class Runner {
                 System.out.println("Found test output name: " + testOutputFilename);
 
                 outputStream = new PrintStream(new FileOutputStream(new File(testOutputFilename)));
+
+                AntXmlRunListener  xmlWriter = new AntXmlRunListener(outputStream);
+                junitCoreRunner.addListener(xmlWriter);
             } catch (FileNotFoundException e) {
                 // report and ignore. will use System.out
                 e.printStackTrace();
@@ -36,8 +39,9 @@ public class Runner {
             System.out.println("No filename given in TestOutputFilename system property. Using System.out.");
         }
 
-        AntXmlRunListener xmlWriter = new AntXmlRunListener(outputStream != null ? outputStream : System.out);
-        junitCoreRunner.addListener(xmlWriter);
+        // in any case, log to console
+        AntPrintRunListener printWriter = new AntPrintRunListener(System.out);
+        junitCoreRunner.addListener(printWriter);
 
         Class[] classes = resolveTestClasses(args);
         Result result = junitCoreRunner.run(classes);

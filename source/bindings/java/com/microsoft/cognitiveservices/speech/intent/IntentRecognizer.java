@@ -45,27 +45,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNull(recoImpl, "recoImpl");
         this.recoImpl = recoImpl;
 
-        recognizingHandler = new IntentHandlerImpl(this, /*isRecognizedHandler:*/ false);
-        recoImpl.getRecognizing().AddEventListener(recognizingHandler);
-
-        recognizedHandler = new IntentHandlerImpl(this, /*isRecognizedHandler:*/ true);
-        recoImpl.getRecognized().AddEventListener(recognizedHandler);
-
-        errorHandler = new CanceledHandlerImpl(this);
-        recoImpl.getCanceled().AddEventListener(errorHandler);
-
-        recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
-        recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
-        recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
-        recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
-
-        _Parameters = new PrivatePropertyCollection(recoImpl.getProperties());
-    }
-
-    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
-        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-            super(collection);
-        }
+        initialize();
     }
 
     /**
@@ -73,9 +53,12 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
      * @param speechConfig speech configuration.
      * @return a new instance of an intent recognizer.
      */
-    public IntentRecognizer(com.microsoft.cognitiveservices.speech.SpeechConfig speechConfig)
-    {
-        this(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer.FromConfig(speechConfig.getImpl(), null), null);
+    public IntentRecognizer(com.microsoft.cognitiveservices.speech.SpeechConfig speechConfig) {
+        super(null);
+
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        this.recoImpl =  com.microsoft.cognitiveservices.speech.internal.IntentRecognizer.FromConfig(speechConfig.getImpl());
+        initialize();
     }
 
     /**
@@ -84,9 +67,18 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
      * @param audioConfig audio configuration.
      * @return a new instance of an intent recognizer.
      */
-    public IntentRecognizer(com.microsoft.cognitiveservices.speech.SpeechConfig speechConfig, AudioConfig audioConfig)
-    {
-        this(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer.FromConfig(speechConfig.getImpl(), audioConfig.getConfigImpl()), audioConfig);
+    public IntentRecognizer(com.microsoft.cognitiveservices.speech.SpeechConfig speechConfig, AudioConfig audioConfig) {
+        super(audioConfig);
+
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        if (audioConfig == null) {
+            this.recoImpl =  com.microsoft.cognitiveservices.speech.internal.IntentRecognizer.FromConfig(speechConfig.getImpl());
+
+        } else {
+            this.recoImpl =  com.microsoft.cognitiveservices.speech.internal.IntentRecognizer.FromConfig(speechConfig.getImpl(), audioConfig.getConfigImpl());
+        }
+
+        initialize();
     }
 
     /**
@@ -221,10 +213,10 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     /**
-      * Adds all intents from the specified Language Understanding Model.
-      * @param model The language understanding model containing the intents.
-      */
-      public void addAllIntents(LanguageUnderstandingModel model) {
+     * Adds all intents from the specified Language Understanding Model.
+     * @param model The language understanding model containing the intents.
+     */
+    public void addAllIntents(LanguageUnderstandingModel model) {
         Contracts.throwIfNull(model, "model");
         recoImpl.AddAllIntents(model.getModelImpl());
     }
@@ -283,10 +275,27 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         }
     }
 
-
     // TODO Remove this... After tests are updated to no longer depend upon this
     public com.microsoft.cognitiveservices.speech.internal.IntentRecognizer getRecoImpl() {
         return recoImpl;
+    }
+
+    private void initialize() {
+        recognizingHandler = new IntentHandlerImpl(this, /*isRecognizedHandler:*/ false);
+        recoImpl.getRecognizing().AddEventListener(recognizingHandler);
+
+        recognizedHandler = new IntentHandlerImpl(this, /*isRecognizedHandler:*/ true);
+        recoImpl.getRecognized().AddEventListener(recognizedHandler);
+
+        errorHandler = new CanceledHandlerImpl(this);
+        recoImpl.getCanceled().AddEventListener(errorHandler);
+
+        recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+        recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+        recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
+        recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
+
+        _Parameters = new PrivatePropertyCollection(recoImpl.getProperties());
     }
 
     private boolean disposed = false;
@@ -294,6 +303,13 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     private IntentHandlerImpl recognizingHandler;
     private IntentHandlerImpl recognizedHandler;
     private CanceledHandlerImpl errorHandler;
+
+
+    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
+        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
+            super(collection);
+        }
+    }
 
     // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class IntentHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.IntentEventListener {

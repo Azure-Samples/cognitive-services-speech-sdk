@@ -39,6 +39,7 @@ public class PropertyCollectionTests {
     // --- 
     // -----------------------------------------------------------------------
 
+    @SuppressWarnings("resource")
     @Test
     public void testPropertyCollection() {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -61,6 +62,7 @@ public class PropertyCollectionTests {
     // --- 
     // -----------------------------------------------------------------------
 
+    @SuppressWarnings("resource")
     @Test
     public void testPropertyCollectionSetpropertyId() {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -84,6 +86,7 @@ public class PropertyCollectionTests {
         p.setProperty(name, value);
     }
 
+    @SuppressWarnings("resource")
     @Test
     public void testIsString() {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -119,6 +122,7 @@ public class PropertyCollectionTests {
         assertEquals(value, p.getProperty(name, "some-other-default-" + value));
     }
 
+    @SuppressWarnings("resource")
     @Test
     public void testGetSetStringString() {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -156,6 +160,7 @@ public class PropertyCollectionTests {
         assertEquals(value, p.getProperty(name, "some-other-default-" + value));
     }
 
+    @SuppressWarnings("resource")
     @Ignore("TODO string string tests fail")
     @Test
     public void testGetStringStringString() {
@@ -182,6 +187,7 @@ public class PropertyCollectionTests {
     // --- 
     // -----------------------------------------------------------------------
 
+    @SuppressWarnings("resource")
     @Test
     public void testClose() {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);

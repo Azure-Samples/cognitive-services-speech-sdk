@@ -45,37 +45,19 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
         Contracts.throwIfNull(recoImpl, "recoImpl");
         this.recoImpl = recoImpl;
-
-        recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
-        recoImpl.getRecognizing().AddEventListener(recognizingHandler);
-
-        recognizedHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ true);
-        recoImpl.getRecognized().AddEventListener(recognizedHandler);
-
-        errorHandler = new CanceledHandlerImpl(this);
-        recoImpl.getCanceled().AddEventListener(errorHandler);
-
-        recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
-        recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
-        recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
-        recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
-
-        _Parameters = new PrivatePropertyCollection(recoImpl.getProperties());
-    }
-
-    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
-        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-            super(collection);
-        }
+        initialize();
     }
 
     /**
      * Initializes a new instance of Speech Recognizer.
      * @param speechConfig speech configuration.
      */
-    public SpeechRecognizer(SpeechConfig speechConfig)
-    {
-        this(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), null), null);
+    public SpeechRecognizer(SpeechConfig speechConfig) {
+        super(null);
+
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl());
+        initialize();
     }
 
     /**
@@ -83,9 +65,17 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      * @param speechConfig speech configuration.
      * @param audioConfig audio configuration.
      */
-    public SpeechRecognizer(SpeechConfig speechConfig, AudioConfig audioConfig)
-    {
-        this(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), audioConfig.getConfigImpl()), audioConfig);
+    public SpeechRecognizer(SpeechConfig speechConfig, AudioConfig audioConfig) {
+        super(audioConfig);
+
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        if (audioConfig == null) {
+            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl());
+        } else {
+            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), audioConfig.getConfigImpl());
+        }
+
+        initialize();
     }
 
     /**
@@ -236,11 +226,35 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         return recoImpl;
     }
 
+    private void initialize() {
+        recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
+        recoImpl.getRecognizing().AddEventListener(recognizingHandler);
+
+        recognizedHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ true);
+        recoImpl.getRecognized().AddEventListener(recognizedHandler);
+
+        errorHandler = new CanceledHandlerImpl(this);
+        recoImpl.getCanceled().AddEventListener(errorHandler);
+
+        recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+        recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+        recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
+        recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
+
+        _Parameters = new PrivatePropertyCollection(recoImpl.getProperties());
+    }
+
     private com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl;
     private ResultHandlerImpl recognizingHandler;
     private ResultHandlerImpl recognizedHandler;
     private CanceledHandlerImpl errorHandler;
     private boolean disposed = false;
+
+    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
+        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
+            super(collection);
+        }
+    }
 
     // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class ResultHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventListener {

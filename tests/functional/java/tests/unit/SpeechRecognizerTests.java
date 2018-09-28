@@ -93,6 +93,68 @@ public class SpeechRecognizerTests {
         s.close();
     }
 
+    @Test
+    public void testSpeechRecognizerInterleaved() throws InterruptedException, ExecutionException {
+
+        //
+        // Start a legal request
+        //
+
+        SpeechConfig s2 = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        assertNotNull(s2);
+
+        WavFileAudioInputStream ais2 = new WavFileAudioInputStream(Settings.WavFile);
+        assertNotNull(ais2);
+
+        AudioConfig ac2 = AudioConfig.fromStreamInput(ais2);
+        assertNotNull(ac2);
+
+        //
+        // Start: make an illegal request
+        //
+
+        SpeechConfig s = SpeechConfig.fromSubscription("illegal", "illegal");
+        assertNotNull(s);
+
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        assertNotNull(ais);
+
+        AudioConfig ac = AudioConfig.fromStreamInput(ais);
+        assertNotNull(ac);
+        
+        SpeechRecognizer r = new SpeechRecognizer(s, ac);
+        assertNotNull(r);
+        assertNotNull(r.getRecoImpl());
+        assertTrue(r instanceof Recognizer);
+
+        SpeechRecognitionResult res = r.recognizeOnceAsync().get();
+        assertNotNull(res);
+        assertTrue(res.getReason() == ResultReason.Canceled);
+
+        r.close();
+        s.close();
+
+        //
+        // End: make an illegal request
+        //
+
+        //
+        // Continue legal request
+        //
+
+        SpeechRecognizer r2 = new SpeechRecognizer(s2, ac2);
+        assertNotNull(r2);
+        assertNotNull(r2.getRecoImpl());
+        assertTrue(r2 instanceof Recognizer);
+
+        SpeechRecognitionResult res2 = r2.recognizeOnceAsync().get();
+        assertNotNull(res2);
+        assertEquals("What's the weather like?", res2.getText());
+
+        r2.close();
+        s2.close();
+    }
+
     // -----------------------------------------------------------------------
     // ---
     // -----------------------------------------------------------------------

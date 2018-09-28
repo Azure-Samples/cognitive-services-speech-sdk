@@ -48,31 +48,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
 
         Contracts.throwIfNull(recoImpl, "recoImpl");
         this.recoImpl = recoImpl;
-
-        recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
-        recoImpl.getRecognizing().AddEventListener(recognizingHandler);
-
-        recognizedHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ true);
-        recoImpl.getRecognized().AddEventListener(recognizedHandler);
-
-        synthesisResultHandler = new SynthesisHandlerImpl(this);
-        recoImpl.getSynthesizing().AddEventListener(synthesisResultHandler);
-
-        errorHandler = new CanceledHandlerImpl(this);
-        recoImpl.getCanceled().AddEventListener(errorHandler);
-
-        recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
-        recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
-        recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
-        recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
-
-        _Parameters = new PrivatePropertyCollection(recoImpl.getProperties());
-    }
-
-    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
-        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-            super(collection);
-        }
+        initialize();
     }
 
     /**
@@ -81,7 +57,17 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      * @param audioConfig audio config.
      */
     public TranslationRecognizer(com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig stc, AudioConfig audioConfig) {
-        this(com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer.FromConfig(stc.getImpl(), audioConfig.getConfigImpl()), audioConfig);
+        super(audioConfig);
+
+        Contracts.throwIfNull(stc, "stc");
+        if (audioConfig == null) {
+            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer.FromConfig(stc.getImpl());
+        }
+        else {
+            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer.FromConfig(stc.getImpl(), audioConfig.getConfigImpl());
+        }
+
+        initialize();
     }
 
     /**
@@ -89,7 +75,11 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      * @param stc speech translation config.
      */
     public TranslationRecognizer(com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig stc) {
-        this(com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer.FromConfig(stc.getImpl(), null), null);
+        super(null);
+
+        Contracts.throwIfNull(stc, "stc");
+        this.recoImpl = com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer.FromConfig(stc.getImpl());
+        initialize();
     }
 
     /**
@@ -214,12 +204,39 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         return recoImpl;
     }
 
+    private void initialize() {
+        recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
+        recoImpl.getRecognizing().AddEventListener(recognizingHandler);
+
+        recognizedHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ true);
+        recoImpl.getRecognized().AddEventListener(recognizedHandler);
+
+        synthesisResultHandler = new SynthesisHandlerImpl(this);
+        recoImpl.getSynthesizing().AddEventListener(synthesisResultHandler);
+
+        errorHandler = new CanceledHandlerImpl(this);
+        recoImpl.getCanceled().AddEventListener(errorHandler);
+
+        recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+        recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+        recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
+        recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
+
+        _Parameters = new PrivatePropertyCollection(recoImpl.getProperties());
+    }
+
     private final com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer recoImpl;
     private ResultHandlerImpl recognizingHandler;
     private ResultHandlerImpl recognizedHandler;
     private SynthesisHandlerImpl synthesisResultHandler;
     private CanceledHandlerImpl errorHandler;
     private boolean disposed = false;
+
+    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
+        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
+            super(collection);
+        }
+    }
 
     // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class ResultHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationTexEventListener

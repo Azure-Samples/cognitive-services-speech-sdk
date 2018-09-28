@@ -30,7 +30,7 @@ import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfi
 
 import tests.Settings;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "resource"})
 public class SpeechConfigTests {
 
     @BeforeClass
