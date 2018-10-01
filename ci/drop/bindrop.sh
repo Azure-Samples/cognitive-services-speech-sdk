@@ -27,7 +27,6 @@ BUILD_ROOT="$SOURCE_ROOT/build/$PLATFORM"
 
 SRCJAR="$BUILD_ROOT/lib/com.microsoft.cognitiveservices.speech.jar"
 SRCJARSRC="$BUILD_ROOT/lib/com.microsoft.cognitiveservices.speech-src.zip"
-SRCCARBONX="$BUILD_ROOT/bin/carbonx"
 
 CSHARPSUPPORTED=false
 JAVASUPPORTED=true
@@ -106,9 +105,9 @@ DESTPUBLIB="$DEST/public/lib"
 DESTPUBLIBNET461="$DEST/public/lib/net461"
 DESTPUBLIBNETSTANDARD20="$DEST/public/lib/netstandard2.0"
 DESTPUBLIBUTF8NETSTANDARD20="$DEST/public/lib/utf8/netstandard2.0"
-DESTPUBBIN="$DEST/public/bin"
 DESTPUBINC="$DEST/public/include"
 DESTPRIVLIB="$DEST/private/lib"
+DESTPRIVLIBUNSTRIPPED="$DEST/private/libunstripped"
 DESTPRIVBIN="$DEST/private/bin"
 DESTPRIVINC="$DEST/private/include"
 DESTPRIVINC2="$DEST/private/include.common"
@@ -124,8 +123,7 @@ mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBL
 CPOPT="-v -p"
 
 cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*$DYNLIBSUFFIX "$DESTPUBLIB"
-# On Windows and not Android, copy import libraries
-#   (On Debug, also copy PDBs)
+# On Windows and not Android, copy import libraries, XMLDoc, and PDBs.
 if [[ $OS = "Windows_NT" ]]; then
   if [[ $TARGET != "ANDROID" ]]; then
     cp $CPOPT "$SRCLIB"/$LIBPREFIX*.lib "$DESTPUBLIB"
@@ -137,23 +135,32 @@ if [[ $OS = "Windows_NT" ]]; then
   fi
 fi
 
-if [[ "$JAVASUPPORTED" = true ]]; then
-# Copy .jar
-cp $CPOPT "$SRCJAR" "$DESTPUBLIB"
-cp $CPOPT "$SRCJARSRC" "$DESTPUBLIB"
-cp $CPOPT "$SRCJAVABINDINGS" "$DESTPUBLIB"
+if [[ $JAVASUPPORTED == true ]]; then
+  # Copy .jar
+  cp $CPOPT "$SRCJAR" "$DESTPUBLIB"
+  cp $CPOPT "$SRCJARSRC" "$DESTPUBLIB"
+  cp $CPOPT "$SRCJAVABINDINGS" "$DESTPUBLIB"
 
-# Copy (private) test .jar
-cp $CPOPT "$SRCPRIVTESTJAR" "$DESTPRIVBIN"
+  # Copy (private) test .jar
+  cp $CPOPT "$SRCPRIVTESTJAR" "$DESTPRIVBIN"
 fi
 
-if [[ "$CSHARPSUPPORTED" = true ]]; then
+if [[ $CSHARPSUPPORTED == true ]]; then
   cp $CPOPT "$SRCCSHARPBINDINGS" "$DESTCSHARPBINDINGS"
 fi
 
-# copy carbonx if available
-[[ -e $SRCCARBONX ]] && mkdir -p "$DESTPUBBIN" && cp $CPOPT "$SRCCARBONX" "$DESTPUBBIN"
+# Linux: strip shipping binaries, but keep the unstripped version around.
+# N.B. there's an .so in disguise with the .dll extension
+if [[ $(uname) = Linux ]]; then
+  cp $CPOPT -R "$DESTPUBLIB" "$DESTPRIVLIBUNSTRIPPED"
+  find "$DESTPUBLIB" \( -name \*.so -or -name \*.dll \) -print0 | xargs -0 strip
+fi
 
+cp $CPOPT -R "$SRCINC"* "$DESTPUBINC"
+
+# copy carbonx if available (non-shipping)
+SRCCARBONX="$SRCBIN/carbonx"
+[[ -e $SRCCARBONX ]] && mkdir -p "$DESTPRIVBIN" && cp $CPOPT "$SRCCARBONX" "$DESTPRIVBIN"
 
 # N.B. no long option for -R (recursive) on OSX.
 cp $CPOPT -R "$SRCINC"* "$DESTPUBINC"
