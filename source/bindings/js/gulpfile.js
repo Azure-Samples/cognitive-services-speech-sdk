@@ -35,7 +35,7 @@
   gulp.task("build", ["build_ES5"]);
 
   gulp.task("bundle", ["build_ES5"], function () {
-      return gulp.src('samples/browser/sample_app.js')
+      return gulp.src('bundleApp.js')
       .pipe(webpack({
           output: {filename: 'microsoft.cognitiveservices.speech.sdk.bundle.js'},
           devtool: 'source-map',

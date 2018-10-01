@@ -21,8 +21,11 @@ beforeAll(() => {
 });
 
 // Test cases are run linerally, still looking for a way to get the test name to print that doesn't mean changing each test.
-// tslint:disable-next-line:no-console
-beforeEach(() => console.info("---------------------------------------Starting test case-----------------------------------"));
+beforeEach(() => {
+    // tslint:disable-next-line:no-console
+    console.info("---------------------------------------Starting test case-----------------------------------");
+    errorText = undefined;
+});
 
 const FIRST_EVENT_ID: number = 1;
 const Recognizing: string = "Recognizing";
@@ -31,6 +34,7 @@ const Session: string = "Session";
 const Canceled: string = "Canceled";
 
 let eventIdentifier: number;
+let errorText: string;
 
 test("TranslationRecognizerMicrophone", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -187,11 +191,15 @@ test("RecognizeOnceAsync1", (done: jest.DoneCallback) => {
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        if (e.result.reason === sdk.ResultReason.Canceled) {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
-            fail(e.result.reason);
+        try {
+            if (e.result.reason === sdk.ResultReason.Canceled) {
+                r.close();
+                s.close();
+                setTimeout(done, 1);
+                fail(e.result.reason);
+            }
+        } catch (error) {
+            errorText += error;
         }
     });
 
@@ -203,6 +211,7 @@ test("RecognizeOnceAsync1", (done: jest.DoneCallback) => {
             expect(res.translations.get("de", undefined) !== undefined).toEqual(true);
             expect("Wie ist das Wetter?").toEqual(res.translations.get("de", ""));
             expect(res.text).toEqual("What's the weather like?");
+            expect(errorText).toBeUndefined();
 
             r.close();
             s.close();
@@ -233,11 +242,15 @@ test("Translate Multiple Targets", (done: jest.DoneCallback) => {
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        if (e.result.reason === sdk.ResultReason.Canceled) {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
-            fail(e.result.reason);
+        try {
+            if (e.result.reason === sdk.ResultReason.Canceled) {
+                r.close();
+                s.close();
+                setTimeout(done, 1);
+                fail(e.result.reason);
+            }
+        } catch (error) {
+            errorText += error;
         }
     });
 
@@ -248,6 +261,7 @@ test("Translate Multiple Targets", (done: jest.DoneCallback) => {
             expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.TranslatedSpeech]);
             expect("Wie ist das Wetter?").toEqual(res.translations.get("de", ""));
             expect("What's the weather like?").toEqual(res.translations.get("en", ""));
+            expect(errorText).toBeUndefined();
 
             r.close();
             s.close();
@@ -348,11 +362,15 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
     };
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        if (e.result.reason === sdk.ResultReason.Canceled) {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
-            fail(e.result.reason);
+        try {
+            if (e.result.reason === sdk.ResultReason.Canceled) {
+                r.close();
+                s.close();
+                setTimeout(done, 1);
+                fail(e.result.reason);
+            }
+        } catch (error) {
+            errorText += error;
         }
     });
 
@@ -394,6 +412,7 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
 
         // make sure events we don't expect, don't get raised
         expect(Canceled in eventsMap).toEqual(false);
+        expect(errorText).toBeUndefined();
         r.close();
         s.close();
         done();
@@ -449,9 +468,12 @@ test("StopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
     r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs): void => {
-        expect(e.errorDetails).toBeUndefined();
-        expect(e.reason).not.toEqual(sdk.CancellationReason.Error);
-
+        try {
+            expect(e.errorDetails).toBeUndefined();
+            expect(e.reason).not.toEqual(sdk.CancellationReason.Error);
+        } catch (error) {
+            errorText += error;
+        }
     };
     r.startContinuousRecognitionAsync(() => {
         const end: number = Date.now() + 1000;
@@ -462,6 +484,7 @@ test("StopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
             r.stopContinuousRecognitionAsync(() => {
                 r.close();
                 s.close();
+                expect(errorText).toBeUndefined();
                 done();
             }, (error: string) => fail(error));
         });
@@ -532,37 +555,46 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
     const rEvents: { [id: number]: ArrayBuffer; } = {};
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        switch (e.result.reason) {
-            case sdk.ResultReason.Canceled:
-                r.close();
-                s.close();
-                setTimeout(done, 1);
-                fail(e.result.reason);
-                break;
-            case sdk.ResultReason.SynthesizingAudio:
-                const result: ArrayBuffer = e.result.audio;
-                rEvents[synthFragmentCount++] = result;
-                break;
-            case sdk.ResultReason.SynthesizingAudioCompleted:
-                synthCount++;
-                break;
+        try {
+            switch (e.result.reason) {
+                case sdk.ResultReason.Canceled:
+                    r.close();
+                    s.close();
+                    setTimeout(done, 1);
+                    fail(e.result.reason);
+                    break;
+                case sdk.ResultReason.SynthesizingAudio:
+                    const result: ArrayBuffer = e.result.audio;
+                    rEvents[synthFragmentCount++] = result;
+                    break;
+                case sdk.ResultReason.SynthesizingAudioCompleted:
+                    synthCount++;
+                    break;
+            }
+        } catch (error) {
+            errorText += error;
         }
     });
+    const foo: sdk.TranslationRecognitionResult;
 
     let translationDone: boolean = false;
 
     r.canceled = ((o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
-        switch (e.reason) {
-            case sdk.CancellationReason.Error:
-                r.close();
-                s.close();
-                setTimeout(done, 1);
-                fail(e);
-                break;
-            case sdk.CancellationReason.EndOfStream:
-                expect(synthCount).toEqual(1);
-                translationDone = true;
-                break;
+        try {
+            switch (e.reason) {
+                case sdk.CancellationReason.Error:
+                    r.close();
+                    s.close();
+                    setTimeout(done, 1);
+                    fail(e);
+                    break;
+                case sdk.CancellationReason.EndOfStream:
+                    expect(synthCount).toEqual(1);
+                    translationDone = true;
+                    break;
+            }
+        } catch (error) {
+            errorText += error;
         }
     });
 
@@ -598,6 +630,7 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
                     expect(speech.errorDetails).toBeUndefined();
                     expect(speech.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
                     expect(speech.text).toEqual("What's the weather like?");
+                    expect(errorText).toBeUndefined();
                     r2.close();
                     s.close();
                     done();
@@ -623,20 +656,29 @@ test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        if (e.result.reason !== sdk.ResultReason.Canceled) {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
-            fail("Should have failed, instead got status");
+        try {
+            if (e.result.reason !== sdk.ResultReason.Canceled) {
+                r.close();
+                s.close();
+                setTimeout(done, 1);
+                fail("Should have failed, instead got status");
+            }
+        } catch (error) {
+            errorText += error;
         }
     });
 
     r.canceled = ((o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
-        r.close();
-        s.close();
-        setTimeout(done, 1);
+        try {
+            r.close();
+            s.close();
+            setTimeout(done, 1);
 
-        expect(e.errorDetails).toEqual("Synthesis service failed with code:  - Could not identify the voice 'de-DE-Hedda)' for the text to speech service ");
+            expect(errorText).toBeUndefined();
+            expect(e.errorDetails).toEqual("Synthesis service failed with code:  - Could not identify the voice 'de-DE-Hedda)' for the text to speech service ");
+        } catch (error) {
+            errorText += error;
+        }
     });
 
     r.startContinuousRecognitionAsync();
@@ -666,39 +708,55 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
     const rEvents: { [id: number]: ArrayBuffer; } = {};
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        switch (e.result.reason) {
-            case sdk.ResultReason.Canceled:
-                r.close();
-                s.close();
-                setTimeout(done, 1);
-                fail(e.result.reason);
-                break;
-            case sdk.ResultReason.SynthesizingAudio:
-                const result: ArrayBuffer = e.result.audio;
-                rEvents[synthFragmentCount++] = result;
-                break;
-            case sdk.ResultReason.SynthesizingAudioCompleted:
-                synthCount++;
-                break;
+        try {
+            switch (e.result.reason) {
+                case sdk.ResultReason.Canceled:
+                    r.close();
+                    s.close();
+                    setTimeout(done, 1);
+                    fail(e.result.reason);
+                    break;
+                case sdk.ResultReason.SynthesizingAudio:
+                    const result: ArrayBuffer = e.result.audio;
+                    rEvents[synthFragmentCount++] = result;
+                    break;
+                case sdk.ResultReason.SynthesizingAudioCompleted:
+                    synthCount++;
+                    break;
+            }
+        } catch (error) {
+            errorText += error;
         }
     });
 
     let translationDone: boolean = false;
 
     r.canceled = ((o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
-        switch (e.reason) {
-            case sdk.CancellationReason.Error:
-                r.close();
-                s.close();
-                setTimeout(done, 1);
-                fail(e);
-                break;
-            case sdk.CancellationReason.EndOfStream:
-                expect(synthCount).toEqual(1);
-                translationDone = true;
-                break;
+        try {
+            switch (e.reason) {
+                case sdk.CancellationReason.Error:
+                    r.close();
+                    s.close();
+                    setTimeout(done, 1);
+                    fail(e);
+                    break;
+                case sdk.CancellationReason.EndOfStream:
+                    expect(synthCount).toEqual(1);
+                    translationDone = true;
+                    break;
+            }
+        } catch (error) {
+            errorText += error;
         }
     });
+
+    r.recognizing = (o: sdk.Recognizer, e: sdk.TranslationRecognitionEventArgs): void => {
+        try {
+            expect(e.result.reason).toEqual(sdk.ResultReason.TranslatingSpeech);
+        } catch (error) {
+            errorText += error;
+        }
+    };
 
     r.startContinuousRecognitionAsync();
 
@@ -728,12 +786,14 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
 
                 const r2: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s2, config);
                 r2.recognizeOnceAsync((speech: sdk.SpeechRecognitionResult) => {
+                    setTimeout(done, 1);
                     expect(speech.errorDetails).toBeUndefined();
                     expect(speech.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
                     expect(speech.text).toEqual("Wie ist das Wetter?");
+                    expect(errorText).toBeUndefined();
                     r2.close();
                     s.close();
-                    done();
+
                 }, (error: string) => {
                     r2.close();
                     s.close();
@@ -779,37 +839,45 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
     const rEvents: { [id: number]: ArrayBuffer; } = {};
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        switch (e.result.reason) {
-            case sdk.ResultReason.Canceled:
-                r.close();
-                s.close();
-                setTimeout(done, 1);
-                fail(sdk.ResultReason[e.result.reason]);
-                break;
-            case sdk.ResultReason.SynthesizingAudio:
-                const result: ArrayBuffer = e.result.audio;
-                rEvents[synthFragmentCount++] = result;
-                break;
-            case sdk.ResultReason.SynthesizingAudioCompleted:
-                synthCount++;
-                break;
+        try {
+            switch (e.result.reason) {
+                case sdk.ResultReason.Canceled:
+                    r.close();
+                    s.close();
+                    setTimeout(done, 1);
+                    fail(sdk.ResultReason[e.result.reason]);
+                    break;
+                case sdk.ResultReason.SynthesizingAudio:
+                    const result: ArrayBuffer = e.result.audio;
+                    rEvents[synthFragmentCount++] = result;
+                    break;
+                case sdk.ResultReason.SynthesizingAudioCompleted:
+                    synthCount++;
+                    break;
+            }
+        } catch (error) {
+            errorText += error;
         }
     });
 
     let translationDone: boolean = false;
 
     r.canceled = ((o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
-        switch (e.reason) {
-            case sdk.CancellationReason.Error:
-                r.close();
-                s.close();
-                setTimeout(done, 1);
-                fail(e);
-                break;
-            case sdk.CancellationReason.EndOfStream:
-                expect(synthCount).toEqual(numPhrases);
-                translationDone = true;
-                break;
+        try {
+            switch (e.reason) {
+                case sdk.CancellationReason.Error:
+                    r.close();
+                    s.close();
+                    setTimeout(done, 1);
+                    fail(e);
+                    break;
+                case sdk.CancellationReason.EndOfStream:
+                    expect(synthCount).toEqual(numPhrases);
+                    translationDone = true;
+                    break;
+            }
+        } catch (error) {
+            errorText += error;
         }
     });
 
@@ -866,6 +934,7 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
                                 s.close();
                                 setTimeout(done, 1);
                                 expect(numEvents).toEqual(numPhrases);
+                                expect(errorText).toBeUndefined();
                             }, (error: string) => {
                                 fail(error);
                             });
@@ -981,14 +1050,19 @@ test.skip("emptyFile", (done: jest.DoneCallback) => {
     let oneCalled: boolean = false;
 
     r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs): void => {
-        expect(e.reason).toEqual(sdk.CancellationReason.Error);
-        const cancelDetails: sdk.CancellationDetails = sdk.CancellationDetails.fromResult(e.result);
-        expect(cancelDetails.reason).toEqual(sdk.CancellationReason.Error);
+        try {
+            expect(e.reason).toEqual(sdk.CancellationReason.Error);
+            const cancelDetails: sdk.CancellationDetails = sdk.CancellationDetails.fromResult(e.result);
+            expect(cancelDetails.reason).toEqual(sdk.CancellationReason.Error);
 
-        if (true === oneCalled) {
-            done();
-        } else {
-            oneCalled = true;
+            if (true === oneCalled) {
+                expect(errorText).toBeUndefined();
+                done();
+            } else {
+                oneCalled = true;
+            }
+        } catch (error) {
+            errorText += error;
         }
     };
 
@@ -999,6 +1073,7 @@ test.skip("emptyFile", (done: jest.DoneCallback) => {
             s.close();
 
             if (true === oneCalled) {
+                expect(errorText).toBeUndefined();
                 done();
             } else {
                 oneCalled = true;
@@ -1026,11 +1101,15 @@ test("Translate Bad Language", (done: jest.DoneCallback) => {
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        if (e.result.reason === sdk.ResultReason.Canceled) {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
-            fail(e.result.reason);
+        try {
+            if (e.result.reason === sdk.ResultReason.Canceled) {
+                r.close();
+                s.close();
+                setTimeout(done, 1);
+                fail(e.result.reason);
+            }
+        } catch (error) {
+            errorText += error;
         }
     });
 
@@ -1041,6 +1120,7 @@ test("Translate Bad Language", (done: jest.DoneCallback) => {
             expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
             expect(res.translations).toBeUndefined();
             expect(res.text).toEqual("What's the weather like?");
+            expect(errorText).toBeUndefined();
 
             r.close();
             s.close();

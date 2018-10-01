@@ -465,7 +465,8 @@ export class IntentRecognizer extends Recognizer {
 
                     const reason = EnumTranslation.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
                     const result: IntentRecognitionResult = new IntentRecognitionResult(
-                        undefined, undefined,
+                        undefined,
+                        undefined,
                         reason,
                         evResult.Result.DisplayText,
                         evResult.Result.Duration,
@@ -551,7 +552,7 @@ export class IntentRecognizer extends Recognizer {
                                 ev.sessionId);
                         }
 
-                        // If intent data was sent, the terminal result for this redognizer is an intent being found.
+                        // If intent data was sent, the terminal result for this recognizer is an intent being found.
                         // If no intent data was sent, the terminal event is speech recognition being successful.
                         if (false === this.intentDataSent || ResultReason.NoMatch === ev.result.reason) {
                             sendEvent();
@@ -576,9 +577,13 @@ export class IntentRecognizer extends Recognizer {
                     const evResult = event as SpeechRecognitionResultEvent<ISpeechHypothesis>;
 
                     const result = new IntentRecognitionResult(
-                        undefined, undefined,
-                        undefined, undefined, undefined,
-                        undefined, undefined,
+                        undefined,
+                        undefined,
+                        ResultReason.RecognizingIntent,
+                        evResult.Result.Text,
+                        evResult.Result.Duration,
+                        evResult.Result.Offset,
+                        undefined,
                         JSON.stringify(evResult.Result),
                         undefined);
 

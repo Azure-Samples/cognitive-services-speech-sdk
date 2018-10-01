@@ -193,7 +193,6 @@ export abstract class Recognizer {
                     const recoEndedEvent = event as RecognitionEndedEvent;
 
                     sessionStartStopEventArgs = new SessionEventArgs(recoEndedEvent.SessionId);
-
                     if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
                         if (cb) {
                             cb(event); // call continuation, if configured.

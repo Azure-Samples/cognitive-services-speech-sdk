@@ -451,7 +451,7 @@ export class SpeechRecognizer extends Recognizer {
                     if (reason === ResultReason.Canceled) {
                         const ev = new SpeechRecognitionCanceledEventArgs(
                             EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus),
-                            "",
+                            undefined,
                             0, /*todo*/
                             evResult.SessionId);
 
@@ -515,7 +515,7 @@ export class SpeechRecognizer extends Recognizer {
                     if (reason === ResultReason.Canceled) {
                         const ev = new SpeechRecognitionCanceledEventArgs(
                             EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus),
-                            "",
+                            undefined,
                             0, /*todo*/
                             evResult.SessionId);
 
@@ -559,7 +559,8 @@ export class SpeechRecognizer extends Recognizer {
                     const evResult = event as SpeechRecognitionResultEvent<ISpeechHypothesis>;
 
                     const result = new SpeechRecognitionResult(
-                        undefined, undefined,
+                        undefined,
+                        ResultReason.RecognizingSpeech,
                         evResult.Result.Text,
                         evResult.Result.Duration,
                         evResult.Result.Offset,

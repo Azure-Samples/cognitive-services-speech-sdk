@@ -659,7 +659,7 @@ export class TranslationRecognizer extends Recognizer {
         const result = new TranslationRecognitionResult(
             translations,
             undefined,
-            ResultReason.TranslatedSpeech,
+            evResult instanceof TranslationPhraseEvent ? ResultReason.TranslatedSpeech : ResultReason.TranslatingSpeech,
             evResult.Result.Text,
             evResult.Result.Duration,
             evResult.Result.Offset,

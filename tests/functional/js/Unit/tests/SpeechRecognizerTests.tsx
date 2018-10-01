@@ -19,6 +19,7 @@ const Session: string = "Session";
 const Canceled: string = "Canceled";
 
 let eventIdentifier: number;
+let errorText: string;
 
 beforeAll(() => {
     // override inputs, if necessary
@@ -28,8 +29,11 @@ beforeAll(() => {
 
 // Test cases are run linerally, the only other mechanism to demark them in the output is to put a console line in each case and
 // report the name.
-// tslint:disable-next-line:no-console
-beforeEach(() => console.info("---------------------------------------Starting test case-----------------------------------"));
+beforeEach(() => {
+    errorText = undefined;
+    // tslint:disable-next-line:no-console
+    console.info("---------------------------------------Starting test case-----------------------------------");
+});
 
 test.skip("testDispose", () => {
     // todo: make dispose method public
@@ -322,20 +326,36 @@ test("testStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     expect(r instanceof sdk.Recognizer);
 
     let eventDone: boolean = false;
+    let canceled: boolean = false;
 
     r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
-        expect(e.result.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
-        expect(e.result.text).toEqual("What's the weather like?");
-        eventDone = true;
+        try {
+            eventDone = true;
+            expect(e.result.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
+            expect(e.result.text).toEqual("What's the weather like?");
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
+        }
+    };
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs): void => {
+        try {
+            canceled = true;
+            expect(e.errorDetails).toBeUndefined();
+            expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
+        }
     };
 
     r.startContinuousRecognitionAsync(
-        () => WaitForCondition(() => eventDone, () => {
+        () => WaitForCondition(() => (eventDone && canceled), () => {
             r.stopContinuousRecognitionAsync(
                 () => {
                     r.close();
                     s.close();
-                    done();
+                    setTimeout(done, 1);
+                    expect(errorText).toBeUndefined();
                 },
                 (err: string) => {
                     setTimeout(done, 1);
@@ -663,24 +683,33 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
     let oneReport: boolean = false;
 
     r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
-        setTimeout(done, 1);
-        fail(e.errorDetails);
+        try {
+            setTimeout(done, 1);
+            fail(e.errorDetails);
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
+        }
     };
 
     r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
-        const res: sdk.SpeechRecognitionResult = e.result;
-        expect(res).not.toBeUndefined();
-        expect(sdk.ResultReason.NoMatch).toEqual(res.reason);
-        expect(res.text).toBeUndefined();
+        try {
+            const res: sdk.SpeechRecognitionResult = e.result;
+            expect(res).not.toBeUndefined();
+            expect(sdk.ResultReason.NoMatch).toEqual(res.reason);
+            expect(res.text).toBeUndefined();
 
-        const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
-        expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
+            const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
+            expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
 
-        if (true === oneReport) {
-            done();
+            if (true === oneReport) {
+                expect(errorText).toBeUndefined();
+                done();
+            }
+
+            oneReport = true;
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
         }
-
-        oneReport = true;
     };
 
     r.recognizeOnceAsync(
@@ -697,6 +726,7 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
             r.close();
             s.close();
             if (true === oneReport) {
+                expect(errorText).toBeUndefined();
                 done();
             }
 
@@ -766,14 +796,19 @@ test("emptyFile", (done: jest.DoneCallback) => {
     let oneCalled: boolean = false;
 
     r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs): void => {
-        expect(e.reason).toEqual(sdk.CancellationReason.Error);
+        try {
+            expect(e.reason).toEqual(sdk.CancellationReason.Error);
 
-        if (true === oneCalled) {
-            r.close();
-            s.close();
-            done();
-        } else {
-            oneCalled = true;
+            if (true === oneCalled) {
+                r.close();
+                s.close();
+                expect(errorText).toBeUndefined();
+                done();
+            } else {
+                oneCalled = true;
+            }
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
         }
     };
 
@@ -786,6 +821,7 @@ test("emptyFile", (done: jest.DoneCallback) => {
             if (true === oneCalled) {
                 r.close();
                 s.close();
+                expect(errorText).toBeUndefined();
                 done();
             } else {
                 oneCalled = true;
@@ -906,10 +942,10 @@ test("RecognizeOnceAsync is async", (done: jest.DoneCallback) => {
     r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
         WaitForCondition(() => postCall, () => {
             resultSeen = true;
+            setTimeout(done, 1);
             expect(e.result.errorDetails).toBeUndefined();
             expect(e.result.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
             expect(e.result.text).toEqual(Settings.WaveFileText);
-            done();
         });
     };
 
@@ -941,11 +977,16 @@ test("InitialSilenceTimeout Continous", (done: jest.DoneCallback) => {
     expect(r instanceof sdk.Recognizer);
 
     r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
-        setTimeout(done, 1);
-        fail(e.errorDetails);
+        try {
+            setTimeout(done, 1);
+            fail(e.errorDetails);
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
+        }
     };
 
     r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
+
         const res: sdk.SpeechRecognitionResult = e.result;
         expect(res).not.toBeUndefined();
         expect(sdk.ResultReason.NoMatch).toEqual(res.reason);
@@ -954,6 +995,7 @@ test("InitialSilenceTimeout Continous", (done: jest.DoneCallback) => {
         const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
         expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
         r.stopContinuousRecognitionAsync();
+        expect(errorText).toBeUndefined();
         done();
     };
 

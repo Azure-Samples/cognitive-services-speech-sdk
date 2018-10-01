@@ -19,10 +19,15 @@ beforeAll(() => {
     Events.Instance.AttachListener(new ConsoleLoggingListener(EventType.Debug));
 });
 
+let errorText: string;
+
 // Test cases are run linerally, the only other mechanism to demark them in the output is to put a console line in each case and
 // report the name.
-// tslint:disable-next-line:no-console
-beforeEach(() => console.info("---------------------------------------Starting test case-----------------------------------"));
+beforeEach(() => {
+    errorText = undefined;
+    // tslint:disable-next-line:no-console
+    console.info("---------------------------------------Starting test case-----------------------------------");
+});
 
 const ValidateResultMatchesWaveFile = (res: sdk.SpeechRecognitionResult): void => {
     expect(res).not.toBeUndefined();
@@ -48,12 +53,13 @@ test("NoIntentsRecognizesSpeech", (done: jest.DoneCallback) => {
         (p2: sdk.IntentRecognitionResult) => {
             r.close();
             s.close();
-            setTimeout(done, 1);
+            
             const res: sdk.IntentRecognitionResult = p2;
             expect(res.errorDetails).toBeUndefined();
             expect(res.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
             expect(res).not.toBeUndefined();
             ValidateResultMatchesWaveFile(res);
+            done();
         },
         (error: string) => {
             setTimeout(done, 1);
@@ -181,26 +187,35 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
     r.addIntentWithLanguageModel(Settings.LuisValidIntentId, lm);
 
     let oneReport: boolean = false;
+    let testDone: boolean = false;
 
-    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
-        setTimeout(done, 1);
-        fail(e.errorDetails);
+    r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs) => {
+        try {
+            setTimeout(done, 1);
+            fail(e.errorDetails);
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
+        }
     };
 
-    r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
-        const res: sdk.SpeechRecognitionResult = e.result;
-        expect(res).not.toBeUndefined();
-        expect(res.reason).toEqual(sdk.ResultReason.NoMatch);
-        expect(res.text).toBeUndefined();
+    r.recognized = (o: sdk.Recognizer, e: sdk.IntentRecognitionEventArgs) => {
+        try {
+            const res: sdk.SpeechRecognitionResult = e.result;
+            expect(res).not.toBeUndefined();
+            expect(res.reason).toEqual(sdk.ResultReason.NoMatch);
+            expect(res.text).toBeUndefined();
 
-        const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
-        expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
+            const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
+            expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
 
-        if (true === oneReport) {
-            done();
+            if (true === oneReport) {
+                testDone = true;
+            }
+
+            oneReport = true;
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
         }
-
-        oneReport = true;
     };
 
     r.recognizeOnceAsync(
@@ -217,7 +232,8 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
             r.close();
             s.close();
             if (true === oneReport) {
-                done();
+                setTimeout(done, 1);
+                expect(errorText).toBeUndefined();
             }
 
             oneReport = true;
@@ -228,6 +244,12 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
             setTimeout(done, 1);
             fail(error);
         });
+
+    WaitForCondition(() => testDone, () => {
+        setTimeout(done, 1);
+        expect(errorText).toBeUndefined();
+    });
+
 }, 7500);
 
 // The service never responds beyond turn.start...
@@ -249,14 +271,19 @@ test.skip("emptyFile", (done: jest.DoneCallback) => {
     let oneCalled: boolean = false;
 
     r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs): void => {
-        expect(e.reason).toEqual(sdk.CancellationReason.Error);
-        const cancelDetails: sdk.CancellationDetails = sdk.CancellationDetails.fromResult(e.result);
-        expect(cancelDetails.reason).toEqual(sdk.CancellationReason.Error);
+        try {
+            expect(e.reason).toEqual(sdk.CancellationReason.Error);
+            const cancelDetails: sdk.CancellationDetails = sdk.CancellationDetails.fromResult(e.result);
+            expect(cancelDetails.reason).toEqual(sdk.CancellationReason.Error);
 
-        if (true === oneCalled) {
-            done();
-        } else {
-            oneCalled = true;
+            if (true === oneCalled) {
+                expect(errorText).toBeUndefined();
+                done();
+            } else {
+                oneCalled = true;
+            }
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
         }
     };
 
@@ -269,7 +296,8 @@ test.skip("emptyFile", (done: jest.DoneCallback) => {
         },
         (error: string) => {
             if (true === oneCalled) {
-                done();
+                setTimeout(done, 1);
+                expect(errorText).toBeUndefined();
             } else {
                 oneCalled = true;
             }
@@ -292,26 +320,42 @@ test("Continous Recog With Intent", (done: jest.DoneCallback) => {
     const lm: sdk.LanguageUnderstandingModel = sdk.LanguageUnderstandingModel.fromSubscription(Settings.LuisAppKey, Settings.LuisAppId, Settings.LuisRegion);
     r.addIntentWithLanguageModel(Settings.LuisValidIntentId, lm);
 
-    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
-        setTimeout(done, 1);
-        fail(e.errorDetails);
+    r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs) => {
+        try {
+            fail(e.errorDetails);
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
+        }
+    };
+
+    r.recognizing = (o: sdk.Recognizer, e: sdk.IntentRecognitionEventArgs): void => {
+        try {
+            expect(e.result.reason).toEqual(sdk.ResultReason.RecognizingIntent);
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
+        }
     };
 
     r.recognized = (o: sdk.Recognizer, e: sdk.IntentRecognitionEventArgs) => {
-        const res: sdk.IntentRecognitionResult = e.result;
-        expect(res).not.toBeUndefined();
-        expect(res.reason).toEqual(sdk.ResultReason.RecognizedIntent);
-        expect(res.intentId).toEqual(Settings.LuisValidIntentId);
-        ValidateResultMatchesWaveFile(res);
+        try {
+            const res: sdk.IntentRecognitionResult = e.result;
+            expect(res).not.toBeUndefined();
+            expect(res.reason).toEqual(sdk.ResultReason.RecognizedIntent);
+            expect(res.intentId).toEqual(Settings.LuisValidIntentId);
+            ValidateResultMatchesWaveFile(res);
 
-        r.stopContinuousRecognitionAsync(() => {
-            r.close();
-            s.close();
-            done();
-        }, (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
-        });
+            r.stopContinuousRecognitionAsync(() => {
+                r.close();
+                s.close();
+                expect(errorText).toBeUndefined();
+                done();
+            }, (error: string) => {
+                setTimeout(done, 1);
+                fail(error);
+            });
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
+        }
     };
 
     r.startContinuousRecognitionAsync(
@@ -389,31 +433,39 @@ test.skip("MultiPhrase Intent", (done: jest.DoneCallback) => {
 
     let numIntents: number = 0;
 
-    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
-        switch (e.reason) {
-            case sdk.CancellationReason.Error:
-                setTimeout(done, 1);
-                fail(e.errorDetails);
-                break;
-            case sdk.CancellationReason.EndOfStream:
-                expect(numIntents).toEqual(numPhrases);
-                r.stopContinuousRecognitionAsync(() => {
-                    r.close();
-                    s.close();
-                    done();
-                });
-                break;
+    r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs) => {
+        try {
+            switch (e.reason) {
+                case sdk.CancellationReason.Error:
+                    setTimeout(done, 1);
+                    fail(e.errorDetails);
+                    break;
+                case sdk.CancellationReason.EndOfStream:
+                    expect(numIntents).toEqual(numPhrases);
+                    r.stopContinuousRecognitionAsync(() => {
+                        r.close();
+                        s.close();
+                        expect(errorText).toBeUndefined();
+                        done();
+                    });
+                    break;
+            }
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
         }
     };
 
     r.recognized = (o: sdk.Recognizer, e: sdk.IntentRecognitionEventArgs) => {
-        const res: sdk.IntentRecognitionResult = e.result;
-        expect(res).not.toBeUndefined();
-        expect(res.reason).toEqual(sdk.ResultReason.RecognizedIntent);
-        expect(res.intentId).toEqual(Settings.LuisValidIntentId);
-        ValidateResultMatchesWaveFile(res);
-        numIntents++;
-
+        try {
+            const res: sdk.IntentRecognitionResult = e.result;
+            expect(res).not.toBeUndefined();
+            expect(res.reason).toEqual(sdk.ResultReason.RecognizedIntent);
+            expect(res.intentId).toEqual(Settings.LuisValidIntentId);
+            ValidateResultMatchesWaveFile(res);
+            numIntents++;
+        } catch (error) {
+            errorText += error.message + " " + error.stack;
+        }
     };
 
     r.startContinuousRecognitionAsync(
@@ -489,6 +541,7 @@ test("Add All Intents", (done: jest.DoneCallback) => {
             expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedIntent]);
             expect(res.intentId).toEqual(Settings.LuisValidIntentId);
             ValidateResultMatchesWaveFile(res);
+            expect(res.properties.getProperty(sdk.PropertyId.LanguageUnderstandingServiceResponse_JsonResult)).not.toBeUndefined();
         },
         (error: string) => {
             setTimeout(done, 1);

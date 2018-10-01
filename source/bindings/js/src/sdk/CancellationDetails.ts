@@ -40,23 +40,26 @@ export class CancellationDetails {
      * @returns {CancellationDetails} The cancellation details object being created.
      */
     public static fromResult(result: RecognitionResult): CancellationDetails {
-        const simpleSpeech: ISimpleSpeechPhrase = JSON.parse(result.json);
+        let reason = CancellationReason.Error;
 
-        let reason = CancellationReason.EndOfStream;
-        const recognitionStatus2: string = "" + simpleSpeech.RecognitionStatus;
-        const recstatus2 = (RecognitionStatus2 as any)[recognitionStatus2];
-        switch (recstatus2) {
-            case RecognitionStatus2.Success:
-            case RecognitionStatus2.EndOfDictation:
-            case RecognitionStatus2.NoMatch:
-                reason = CancellationReason.EndOfStream;
-                break;
-            case RecognitionStatus2.InitialSilenceTimeout:
-            case RecognitionStatus2.BabbleTimeout:
-            case RecognitionStatus2.Error:
-            default:
-                reason = CancellationReason.Error;
-                break;
+        if (!!result.json) {
+            const simpleSpeech: ISimpleSpeechPhrase = JSON.parse(result.json);
+
+            const recognitionStatus2: string = "" + simpleSpeech.RecognitionStatus;
+            const recstatus2 = (RecognitionStatus2 as any)[recognitionStatus2];
+            switch (recstatus2) {
+                case RecognitionStatus2.Success:
+                case RecognitionStatus2.EndOfDictation:
+                case RecognitionStatus2.NoMatch:
+                    reason = CancellationReason.EndOfStream;
+                    break;
+                case RecognitionStatus2.InitialSilenceTimeout:
+                case RecognitionStatus2.BabbleTimeout:
+                case RecognitionStatus2.Error:
+                default:
+                    reason = CancellationReason.Error;
+                    break;
+            }
         }
 
         return new CancellationDetails(reason, result.errorDetails);
