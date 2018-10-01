@@ -7,6 +7,7 @@ package tests.unit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -121,7 +122,7 @@ public class SpeechRecognizerTests {
 
         AudioConfig ac = AudioConfig.fromStreamInput(ais);
         assertNotNull(ac);
-        
+
         SpeechRecognizer r = new SpeechRecognizer(s, ac);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -326,6 +327,61 @@ public class SpeechRecognizerTests {
         r.close();
         s.close();
     }
+
+    @Test
+    public void testRecognizeOnceAsync1Concurrent() throws InterruptedException, ExecutionException, TimeoutException {
+        Thread threads[] = new Thread[4];
+
+        final ConcurrentLinkedQueue<String> failures = new ConcurrentLinkedQueue<String>();
+        final ConcurrentLinkedQueue<String> successes = new ConcurrentLinkedQueue<String>();
+        for(int n=0; n<threads.length; n++) {
+            threads[n] = new Thread(() -> {
+                try {
+                    SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+                    SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+
+                    Future<SpeechRecognitionResult> future = r.recognizeOnceAsync();
+
+                    future.get(30, TimeUnit.SECONDS);
+                    SpeechRecognitionResult res = future.get();
+
+                    r.close();
+                    s.close();
+
+                    if (ResultReason.RecognizedSpeech != res.getReason()) {
+                        throw new IllegalArgumentException("unexpected reason");
+                    }
+
+                    if (!res.getText().equals("What's the weather like?")) {
+                        throw new IllegalArgumentException("unexpected reason");
+                    }
+
+                    successes.add(Thread.currentThread().getName());
+                } catch (Exception e) {
+                    failures.add(e.getMessage());
+                }
+            });
+
+            threads[n].setName("WorkerThreadForTestConcurrent-" + n);
+        }
+
+        for(int n=0; n<threads.length; n++) {
+            threads[n].start();
+        }
+
+        for(int n=0; n<threads.length; n++) {
+            threads[n].join(30000);
+        }
+
+        if(!failures.isEmpty()) {
+            fail(String.join("\n", failures));
+        }
+
+        if(successes.size() != threads.length) {
+            fail(String.join("\n", successes));
+        }
+    }
+
 
     @Ignore("TODO why does not get whats the weather like")
     @Test
