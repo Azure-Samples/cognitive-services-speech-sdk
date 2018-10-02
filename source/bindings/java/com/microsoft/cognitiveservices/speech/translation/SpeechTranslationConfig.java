@@ -178,6 +178,8 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
         disposed = true;
     }
 
+    /*! \cond INTERNAL */
+
     /**
      * Returns the speech translation config implementation
      * @return The implementation of the speech translation config.
@@ -186,6 +188,8 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     public com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig getImpl() {
         return translatorConfigImpl;
     }
+
+    /*! \endcond */
 
     private com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig translatorConfigImpl;
     private boolean disposed = false;

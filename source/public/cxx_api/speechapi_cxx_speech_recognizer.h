@@ -26,16 +26,21 @@ namespace Speech {
 
 class Session;
 
+/// <summary>
+/// Base class for speech recognizers, which mainly contains common event handlers.
+/// </summary>
 class SpeechRecognizer final : public AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>
 {
 public:
 
     using BaseType = AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>;
 
-     /// <summary>
-     /// Create a speech recognizer from a speech config and audio config.
-     /// </summary>
-     /// <returns> smart pointer wrapped speech recognizer pointer.</returns>
+    /// <summary>
+    /// Create a speech recognizer from a speech config and audio config.
+    /// </summary>
+    /// <param name="speechconfig">Speech configuration.</param>
+    /// <param name="audioInput">Audio configuration.</param>
+    /// <returns> smart pointer wrapped speech recognizer pointer.</returns>
     static std::shared_ptr<SpeechRecognizer> FromConfig(std::shared_ptr<SpeechConfig> speechconfig, std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
     {
         SPXRECOHANDLE hreco;
@@ -49,6 +54,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
+    /// <param name="hreco">Recognizer handle.</param>
     explicit SpeechRecognizer(SPXRECOHANDLE hreco) : BaseType(hreco), Properties(m_properties)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);

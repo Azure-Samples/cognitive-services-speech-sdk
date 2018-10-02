@@ -58,10 +58,14 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
         this._pushStreamImpl = null;
     }
 
+    /*! \cond PROTECTED */
+
     protected PushAudioInputStream(com.microsoft.cognitiveservices.speech.internal.PushAudioInputStream stream) {
         super(stream);
         this._pushStreamImpl = stream;
     }
+
+    /*! \endcond */
 
     private com.microsoft.cognitiveservices.speech.internal.PushAudioInputStream _pushStreamImpl;
 }

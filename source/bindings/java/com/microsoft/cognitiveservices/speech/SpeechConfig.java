@@ -48,6 +48,8 @@ public class SpeechConfig implements Closeable {
         speechConfigClass = SpeechConfig.class;
     }
 
+    /*! \cond PROTECTED */
+
     /**
      * Creates an instance of speech config.
      */
@@ -56,6 +58,8 @@ public class SpeechConfig implements Closeable {
 
         this.speechConfigImpl = configImpl;
     }
+
+    /*! \endcond */
 
     /**
      * Creates an instance of a speech config with specified subscription key and service region.

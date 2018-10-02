@@ -18,6 +18,9 @@ namespace CognitiveServices {
 namespace Speech {
 
 
+/// <summary>
+/// Base class for speech recognition results.
+/// </summary>
 class SpeechRecognitionResult : public RecognitionResult
 {
 public:

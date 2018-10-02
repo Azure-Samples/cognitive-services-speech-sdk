@@ -84,6 +84,8 @@ public final class AudioConfig
     private com.microsoft.cognitiveservices.speech.internal.AudioConfig _configImpl;
     private AudioInputStream _streamKeepAlive;
 
+    /*! \cond INTERNAL */
+
     /**
       * Returns the audio input configuration.
       * @return The implementation of the config.
@@ -91,4 +93,6 @@ public final class AudioConfig
     public com.microsoft.cognitiveservices.speech.internal.AudioConfig getConfigImpl() {
         return this._configImpl;
     }
+
+    /*! \endcond */
 }

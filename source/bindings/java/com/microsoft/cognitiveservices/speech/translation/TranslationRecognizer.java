@@ -111,7 +111,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
 
     /**
      * Sets the authorization token used to communicate with the service.
-     * @param value Authorization token.
+     * @param token Authorization token.
      */
     public void setAuthorizationToken(String token) {
         Contracts.throwIfNullOrWhitespace(token, "token");
@@ -170,6 +170,8 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         });
     }
 
+    /*! \cond PROTECTED */
+
     @Override
     protected void dispose(boolean disposing)
     {
@@ -199,10 +201,16 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         }
     }
 
+    /*! \endcond */
+
+    /*! \cond INTERNAL */
+
     // TODO Remove this... After tests are updated to no longer depend upon this
     public com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer getRecoImpl() {
         return recoImpl;
     }
+
+    /*! \endcond */
 
     private void initialize() {
         recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);

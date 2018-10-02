@@ -13,7 +13,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 public class SessionEventArgs // extends EventArgs
 {
     /**
-     * Constructs a SessionEcentArgs.
+     * Constructs a SessionEventArgs object.
      * @param arg The native SessionEventArgs
      */
     public SessionEventArgs(com.microsoft.cognitiveservices.speech.internal.SessionEventArgs arg) {

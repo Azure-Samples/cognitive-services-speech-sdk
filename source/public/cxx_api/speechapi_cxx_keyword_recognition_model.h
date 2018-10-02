@@ -37,6 +37,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
+    /// <param name="hkeyword">Keyword handle.</param>
     explicit KeywordRecognitionModel(SPXKEYWORDHANDLE hkeyword = SPXHANDLE_INVALID) : m_hkwmodel(hkeyword) { }
 
     /// <summary>

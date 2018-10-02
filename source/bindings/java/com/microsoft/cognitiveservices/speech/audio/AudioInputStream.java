@@ -49,7 +49,6 @@ public class AudioInputStream
         return PullAudioInputStream.create(callback);
     }
 
-    /// <returns>A shared pointer to PullAudioInputStream</returns>
     /**
       * Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods.
       * @param callback The custom audio input object, derived from PullAudioInputStreamCallback
@@ -70,12 +69,18 @@ public class AudioInputStream
         this._streamImpl = null;
     }
 
+    /*! \cond PROTECTED */
+
     protected AudioInputStream(com.microsoft.cognitiveservices.speech.internal.AudioInputStream stream) {
         Contracts.throwIfNull(stream, "stream");
         this._streamImpl = stream;
     }
 
     protected com.microsoft.cognitiveservices.speech.internal.AudioInputStream _streamImpl;
+
+    /*! \endcond */
+
+    /*! \cond INTERNAL */
 
     /**
       * Returns the audio input configuration.
@@ -84,4 +89,6 @@ public class AudioInputStream
     public com.microsoft.cognitiveservices.speech.internal.AudioInputStream getStreamImpl() {
         return this._streamImpl;
     }
+
+    /*! \endcond */
 }

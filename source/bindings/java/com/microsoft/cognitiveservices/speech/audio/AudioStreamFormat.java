@@ -60,6 +60,8 @@ public final class AudioStreamFormat
 
     private com.microsoft.cognitiveservices.speech.internal.AudioStreamFormat _formatImpl;
 
+    /*! \cond INTERNAL */
+
     /**
       * Returns the audio stream format.
       * @return The implementation of the format.
@@ -67,4 +69,6 @@ public final class AudioStreamFormat
     public com.microsoft.cognitiveservices.speech.internal.AudioStreamFormat getFormatImpl() {
         return this._formatImpl;
     }
+
+    /*! \endcond */
 }

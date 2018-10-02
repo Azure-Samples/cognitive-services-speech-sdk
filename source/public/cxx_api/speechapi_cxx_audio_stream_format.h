@@ -20,7 +20,9 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Audio {
 
-
+/// <summary>
+/// Class to represent the audio stream format used for custom audio input configurations.
+/// </summary>
 class AudioStreamFormat
 {
 public:
@@ -49,8 +51,14 @@ public:
     }
 
     /// <summary>
-    /// Creates an audio stream format object with the specified pcm waveformat characteristics.
+    /// Creates an audio stream format object with the specified PCM waveformat characteristics.
     /// </summary>
+    /// <remarks>
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+    /// </remarks>
+    /// <param name="samplesPerSecond">Samples per second.</param>
+    /// <param name="bitsPerSample">Bits per second.</param>
+    /// <param name="channels">1.</param>
     /// <returns>A shared pointer to AudioStreamFormat</returns>
     static std::shared_ptr<AudioStreamFormat> GetWaveFormatPCM(uint32_t samplesPerSecond, uint8_t bitsPerSample = 16, uint8_t channels = 1)
     {

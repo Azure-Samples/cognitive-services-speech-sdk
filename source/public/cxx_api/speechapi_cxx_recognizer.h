@@ -23,6 +23,7 @@ public:
     /// <summary>
     /// Returns true if the recognizer is enabled.
     /// </summary>
+    /// <returns>A Boolean indicating whether the recognizer is enabled.</returns>
     virtual bool IsEnabled()
     {
         bool enabled = false;

@@ -8,6 +8,13 @@ package com.microsoft.cognitiveservices.speech;
  * Define Speech Recognizer output formats.
  */
 public enum OutputFormat {
+    /**
+     * Simple output format.
+     */
     Simple,
+
+    /**
+     * Detailed output format.
+     */
     Detailed
 }

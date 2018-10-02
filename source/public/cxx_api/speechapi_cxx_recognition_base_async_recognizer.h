@@ -27,6 +27,7 @@ public:
     /// <summary>
     /// Extracts a shared pointer to BaseAsyncRecognizer from the provided recognizer shared pointer.
     /// </summary>
+    /// <param name="recognizer">Recognizer shared pointer.</param>
     /// <returns>A shared pointer to BaseAsyncRecognizer.</returns>
     template <class T>
     static std::shared_ptr<BaseAsyncRecognizer> FromRecognizer(const std::shared_ptr<T> &recognizer)

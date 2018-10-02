@@ -1547,14 +1547,41 @@ phases:
       brew install doxygen
       cd ci/doxygen
       mkdir -p "$(ArtifactOut)"
+      rm -f doxygen.log || true
+      touch doxygen.log
       for lang in c cpp csharp java; do
         (
-          cat ${lang}_doxygen.txt;
-          echo PROJECT_NUMBER=$(SPEECHSDK_SEMVER2);
-          echo 'WARN_FORMAT="##''vso[task.logissue type=warning;sourcepath=$file;linenumber=$line;columnnumber=1]$text"';
+          cat ${lang}_doxygen.txt
+          echo PROJECT_NUMBER=$(SPEECHSDK_SEMVER2)
+          echo 'WARN_FORMAT="##''vso[task.logissue type=warning;sourcepath=$file;linenumber=$line;columnnumber=1]$text"'
           echo OUTPUT_DIRECTORY="$(ArtifactOut)"
-        ) | doxygen -
+          echo QUIET=YES
+          echo WARN_AS_ERROR=NO
+        ) | doxygen - 2>&1 | ( grep -v 'Internal inconsistency: member .* does not belong to any container' || true ) | tee -a doxygen.log
       done
+      [[ -s doxygen.log ]] && {
+        cat <<'HERE'
+      Warnings occurred when running Doxygen. Please address them.
+
+      Note:
+
+      * We typically do not document protected members (Java, C++):
+        Hide them at the source level by enclosing in the following Doxygen mark-up:
+
+          /*! \cond PROTECTED */`
+          ...
+          /*! \endcond */
+
+      * In Java, we also use the following mark-up for public things that really should be internal:
+
+          /*! \cond INTERNAL */`
+          ...
+          /*! \endcond */
+
+      * For things you do not know how to resolve contact cfdev.
+      HERE
+        exit 1
+      }
       git clone https://github.com/sourcey/moxygen.git
       cd moxygen
       git checkout c00d16803a6dfc40796cd4b76271c481ed865243
@@ -1566,6 +1593,7 @@ phases:
         -DoxygenIndexXml "$(ArtifactOut)/cppxml/index.xml" \
         -MoxygenApiMd cppapi.md \
         -OutputDir "$(ArtifactOut)/cppmd"
+    displayName: Create documentation artifacts
   - task: PublishBuildArtifacts@1
     inputs:
       PathtoPublish: $(ArtifactOut)

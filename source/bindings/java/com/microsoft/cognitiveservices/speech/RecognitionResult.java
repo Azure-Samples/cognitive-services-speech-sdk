@@ -8,6 +8,9 @@ import java.math.BigInteger;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
+/**
+ * Contains detailed information about result of a recognition operation.
+ */
 public class RecognitionResult {
     private String resultId;
     private ResultReason reason;
@@ -16,6 +19,8 @@ public class RecognitionResult {
     private BigInteger offset;
     private PropertyCollection properties;
     private com.microsoft.cognitiveservices.speech.internal.RecognitionResult _resultImpl;
+
+    /*! \cond PROTECTED */
 
     protected RecognitionResult(com.microsoft.cognitiveservices.speech.internal.RecognitionResult result) {
         Contracts.throwIfNull(result, "result");
@@ -28,6 +33,8 @@ public class RecognitionResult {
         this.offset = result.Offset();
         this.properties = new PropertyCollection(result.getProperties());
     }
+
+    /*! \endcond */
 
     /**
      * Specifies the result identifier.

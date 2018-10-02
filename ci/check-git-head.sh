@@ -84,6 +84,10 @@ checkEmptyStdout \
   "git grep -l -i -I carbon public_samples source/public source/bindings/csharp source/bindings/js source/bindings/objective-c ThirdPartyNotices.md REDIST.txt license.md | grep -v -e CMakeLists\.txt$ -e carbon_[a-z]*\.i$" \
   "Remove Carbon in files"
 
+checkEmptyStdout \
+  "git grep -I -P '///\s*<\w+>' source/bindings/java" \
+  "No XMLDoc comment in Java, please change to JavaDoc format"
+
 if [ $errorCount -ne 0 ]
 then
   echo "=============================================================================="

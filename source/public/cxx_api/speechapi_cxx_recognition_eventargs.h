@@ -25,6 +25,7 @@ public:
     /// <summary>
     /// Constructor. Creates a new instance using the provided handle.
     /// </summary>
+    /// <param name="hevent">Event handle.</param>
     explicit RecognitionEventArgs(SPXEVENTHANDLE hevent) :
         SessionEventArgs(hevent),
         Offset(m_offset),

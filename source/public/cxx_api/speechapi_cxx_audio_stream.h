@@ -27,6 +27,9 @@ class PushAudioInputStream;
 class PullAudioInputStream;
 
 
+/// <summary>
+/// Represents audio input stream used for custom audio input configurations.
+/// </summary>
 class AudioInputStream
 {
 public:
@@ -48,6 +51,7 @@ public:
     /// <summary>
     /// Creates a memory backed PushAudioInputStream with the specified audio format.
     /// </summary>
+    /// <param name="format">Audio stream format.</param>
     /// <returns>A shared pointer to PushAudioInputStream</returns>
     static std::shared_ptr<PushAudioInputStream> CreatePushStream(std::shared_ptr<AudioStreamFormat> format);
 
@@ -55,19 +59,25 @@ public:
     /// <summary>
     /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods, using the default format (16Khz 16bit mono PCM).
     /// </summary>
+    /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback = nullptr);
 
     /// <summary>
     /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods, using the default format (16Khz 16bit mono PCM).
     /// </summary>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback = nullptr);
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
-    /// Creates a PullAudioInputStream that delegates to the specified callback interface for Read() and Close() methods, using the default format (16Khz 16bit mono PCM).
+    /// Creates a PullAudioInputStream that delegates to the specified callback interface for the Read() and Close() methods, using the default format (16Khz 16bit mono PCM).
     /// </summary>
+    /// <param name="callback">Shared pointer to PullAudioInputStreamCallback instance.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(std::shared_ptr<PullAudioInputStreamCallback> callback);
 
@@ -75,19 +85,28 @@ public:
     /// <summary>
     /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods.
     /// </summary>
+    /// <param name="format">Audio stream format.</param>
+    /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(std::shared_ptr<AudioStreamFormat> format, void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback = nullptr);
 
     /// <summary>
     /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods.
     /// </summary>
+    /// <param name="format">Audio stream format.</param>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(std::shared_ptr<AudioStreamFormat> format, ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback = nullptr);
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
-    /// Creates a PullAudioInputStream that delegates to the specified callback interface for Read() and Close() methods.
+    /// Creates a PullAudioInputStream that delegates to the specified callback interface for the Close() method.
     /// </summary>
+    /// <param name="format">Audio stream format.</param>
+    /// <param name="callback">Shared pointer to PullAudioInputStreamCallback instance.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(std::shared_ptr<AudioStreamFormat> format, std::shared_ptr<PullAudioInputStreamCallback> callback);
 
@@ -128,6 +147,9 @@ private:
 };
 
 
+/// <summary>
+/// Represents memory backed push audio input stream used for custom audio input configurations.
+/// </summary>
 class PushAudioInputStream : public AudioInputStream
 {
 public:
@@ -155,6 +177,7 @@ public:
     /// <summary>
     /// Creates a memory backed PushAudioInputStream with the specified audio format.
     /// </summary>
+    /// <param name="format">Audio stream format.</param>
     /// <returns>A shared pointer to PushAudioInputStream</returns>
     static std::shared_ptr<PushAudioInputStream> Create(std::shared_ptr<AudioStreamFormat> format)
     {
@@ -216,11 +239,11 @@ public:
     virtual ~PullAudioInputStreamCallback() {}
 
     /// <summary>
-    /// This function is called to get data from the audio stream.
+    /// This function is called to synchronously get data from the audio stream.
     /// </summary>
     /// <param name="dataBuffer">The pointer to the buffer to which to copy the audio data.</param>
     /// <param name="size">The size of the buffer.</param>
-    /// <returns>The number of bytes copied into the buffer, or zero to indicate end of stream.</returns>
+    /// <returns>The number of bytes copied into the buffer, or zero to indicate end of stream</returns>
     virtual int Read(uint8_t* dataBuffer, uint32_t size) = 0;
 
     /// <summary>
@@ -245,6 +268,9 @@ private:
 };
 
 
+/// <summary>
+/// Pull audio input stream class.
+/// </summary>
 class PullAudioInputStream : public AudioInputStream
 {
 public:
@@ -253,6 +279,9 @@ public:
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() "C" callback functions pointers
     /// </summary>
+    /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> Create(void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback = nullptr)
     {
@@ -262,6 +291,8 @@ public:
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
     /// </summary>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> Create(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback = nullptr)
     {
@@ -270,8 +301,9 @@ public:
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
-    /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
+    /// Creates a PullAudioInputStream utilizing the specified Close() callback function.
     /// </summary>
+    /// <param name="callback">Shared pointer to PullAudioInputStreamCallback instance.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> Create(std::shared_ptr<PullAudioInputStreamCallback> callback)
     {
@@ -282,8 +314,12 @@ public:
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() "C" callback functions pointers
     /// </summary>
+    /// <param name="format">Audio stream format.</param>
+    /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
-    static std::shared_ptr<PullAudioInputStream> Create(std::shared_ptr<AudioStreamFormat> format, void*pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback = nullptr)
+    static std::shared_ptr<PullAudioInputStream> Create(std::shared_ptr<AudioStreamFormat> format, void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback = nullptr)
     {
         return Create(format,
             [=](uint8_t* buffer, uint32_t size) -> int { return readCallback(pvContext, buffer, size); },
@@ -293,6 +329,9 @@ public:
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
     /// </summary>
+    /// <param name="format">Audio stream format.</param>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> Create(std::shared_ptr<AudioStreamFormat> format, ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback = nullptr)
     {
@@ -304,6 +343,8 @@ public:
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
     /// </summary>
+    /// <param name="format">Audio stream format.</param>
+    /// <param name="callback">Shared pointer to PullAudioInputStreamCallback instance.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> Create(std::shared_ptr<AudioStreamFormat> format, std::shared_ptr<PullAudioInputStreamCallback> callback)
     {

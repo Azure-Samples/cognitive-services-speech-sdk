@@ -71,6 +71,9 @@ public final class LanguageUnderstandingModel
     }
 
     private com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel modelImpl;
+
+    /*! \cond INTERNAL */
+
     /**
      * Returns the language understanding model.
      * @return The implementation of the model.
@@ -79,4 +82,6 @@ public final class LanguageUnderstandingModel
     {
         return modelImpl;
     }
+
+    /*! \endcond */
 }

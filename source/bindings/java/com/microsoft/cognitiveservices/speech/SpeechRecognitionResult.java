@@ -10,9 +10,14 @@ import com.microsoft.cognitiveservices.speech.RecognitionResult;
  * Defines result of speech recognition.
  */
 public class SpeechRecognitionResult extends RecognitionResult {
+
+    /*! \cond PROTECTED */
+
     protected SpeechRecognitionResult(com.microsoft.cognitiveservices.speech.internal.RecognitionResult result) {
         super(result);
     }
+
+    /*! \endcond */
 
     /**
      * Explicitly frees any external resource attached to the object

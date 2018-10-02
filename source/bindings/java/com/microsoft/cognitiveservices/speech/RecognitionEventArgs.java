@@ -12,12 +12,21 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
  */
 public class RecognitionEventArgs extends SessionEventArgs
 {
+
+    /*! \cond INTERNAL */
+
+    /**
+     * Constructs an instance of a RecognitionEventArgs object.
+     * @param arg internal recognition event args object.
+     */
     public RecognitionEventArgs(com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs arg) {
         super(arg);
 
         Contracts.throwIfNull(arg, "arg");
         this.offset = arg.getOffset();
     }
+
+    /*! \endcond */
 
     /**
      * Represents the message offset in 100nsec increments.

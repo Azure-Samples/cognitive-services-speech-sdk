@@ -18,6 +18,9 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Translation {
 
+/// <summary>
+/// Class that defines configurations for translation with speech input.
+/// </summary>
 class SpeechTranslationConfig final : public SpeechConfig
 {
 public:
@@ -26,6 +29,7 @@ public:
     /// </summary>
     /// <param name="subscription">The subscription key.</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+    /// <returns>Shared pointer to the speech translation config instance.</returns>
     static std::shared_ptr<SpeechTranslationConfig> FromSubscription(const SPXSTRING& subscription, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
@@ -38,6 +42,7 @@ public:
     /// </summary>
     /// <param name="authToken">The authorization token.</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+    /// <returns>Shared pointer to the speech translation config instance.</returns>
     static std::shared_ptr<SpeechTranslationConfig> FromAuthorizationToken(const SPXSTRING& authToken, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
@@ -55,6 +60,7 @@ public:
     /// </summary>
     /// <param name="endpoint">The service endpoint to connect to.</param>
     /// <param name="subscription">The subscription key.</param>
+    /// <returns>Shared pointer to the speech translation config instance.</returns>
     static std::shared_ptr<SpeechTranslationConfig> FromEndpoint(const SPXSTRING& endpoint, const SPXSTRING& subscription)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
@@ -65,6 +71,7 @@ public:
     /// <summary>
     /// Adds target language for translation.
     /// </summary>
+    /// <param name="language">Translation target language to add.</param>
     void AddTargetLanguage(const SPXSTRING& language)
     {
         if (!m_targetLanguages.empty())
@@ -76,6 +83,7 @@ public:
     /// <summary>
     /// Gets target languages for translation.
     /// </summary>
+    /// <returns>Vector of translation target languages.</returns>
     std::vector<SPXSTRING> GetTargetLanguages() const
     {
         std::vector<SPXSTRING> result;
@@ -96,6 +104,7 @@ public:
     /// <summary>
     /// Sets output voice name.
     /// </summary>
+    /// <param name="voice">Voice name to set.</param>
     void SetVoiceName(const SPXSTRING& voice)
     {
         property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationFeatures), nullptr, "textToSpeech");
@@ -105,6 +114,7 @@ public:
     /// <summary>
     /// Gets output voice name.
     /// </summary>
+    /// <returns>Output voice name.</returns>
     SPXSTRING GetVoiceName() const
     {
         return GetProperty(PropertyId::SpeechServiceConnection_TranslationVoice);

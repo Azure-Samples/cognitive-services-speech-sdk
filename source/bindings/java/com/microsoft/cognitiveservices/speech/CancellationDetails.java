@@ -26,6 +26,8 @@ public class CancellationDetails {
         return new com.microsoft.cognitiveservices.speech.CancellationDetails(cancellation);
     }
 
+    /*! \cond PROTECTED */
+
     protected CancellationDetails(com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation) {
         Contracts.throwIfNull(cancellation, "cancellation");
 
@@ -33,6 +35,8 @@ public class CancellationDetails {
         this.reason = CancellationReason.values()[cancellation.getReason().swigValue() - 1]; // Native CancellationReason enum starts at 1!!
         this.errorDetails = cancellation.getErrorDetails();
     }
+
+    /*! \endcond */
 
     /**
      * Explicitly frees any external resource attached to the object

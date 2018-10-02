@@ -249,6 +249,8 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         });
     }
 
+    /*! \cond PROTECTED */
+
     @Override
     protected void dispose(boolean disposing) {
 
@@ -275,10 +277,16 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         }
     }
 
+    /*! \endcond */
+
+    /*! \cond INTERNAL */
+
     // TODO Remove this... After tests are updated to no longer depend upon this
     public com.microsoft.cognitiveservices.speech.internal.IntentRecognizer getRecoImpl() {
         return recoImpl;
     }
+
+    /*! \endcond */
 
     private void initialize() {
         recognizingHandler = new IntentHandlerImpl(this, /*isRecognizedHandler:*/ false);
@@ -303,7 +311,6 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     private IntentHandlerImpl recognizingHandler;
     private IntentHandlerImpl recognizedHandler;
     private CanceledHandlerImpl errorHandler;
-
 
     private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
         public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {

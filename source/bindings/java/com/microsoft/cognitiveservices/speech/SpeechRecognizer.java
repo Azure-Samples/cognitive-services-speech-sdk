@@ -195,6 +195,8 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         });
     }
 
+    /*! \cond PROTECTED */
+
     @Override
     protected void dispose(boolean disposing)
     {
@@ -220,6 +222,8 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
             super.dispose(disposing);
         }
     }
+
+    /*! \endcond */
 
     // TODO Remove this... After tests are updated to no longer depend upon this
     public com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer getRecoImpl() {

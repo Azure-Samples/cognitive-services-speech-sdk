@@ -4,114 +4,114 @@
 //
 package com.microsoft.cognitiveservices.speech;
 
-/// <summary>
-/// Defines property ids.
-/// </summary>
+/**
+ * Defines property ids.
+ */
 public enum PropertyId {
 
-    /// <summary>
-    /// Subscription key.
-    /// </summary>
+    /**
+     * Subscription key.
+     */
     SpeechServiceConnection_Key (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_Key),
 
-    /// <summary>
-    /// Endpoint.
-    /// </summary>
+    /**
+     * Endpoint.
+     */
     SpeechServiceConnection_Endpoint (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_Endpoint),
 
-    /// <summary>
-    /// Region.
-    /// </summary>
+    /**
+     * Region.
+     */
     SpeechServiceConnection_Region (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_Region),
 
-    /// <summary>
-    /// Authorization token.
-    /// </summary>
+    /**
+     * Authorization token.
+     */
     SpeechServiceAuthorization_Token (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceAuthorization_Token),
 
-    /// <summary>
-    /// Authorization type.
-    /// </summary>
+    /**
+     * Authorization type.
+     */
     SpeechServiceAuthorization_Type (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceAuthorization_Type),
 
-    /// <summary>
-    /// Endpoint ID.
-    /// </summary>
+    /**
+     * Endpoint ID.
+     */
     SpeechServiceConnection_EndpointId (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_EndpointId),
 
-    /// <summary>
-    /// Translation to languages.
-    /// </summary>
+    /**
+     * Translation to languages.
+     */
     SpeechServiceConnection_TranslationToLanguages (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_TranslationToLanguages),
 
-    /// <summary>
-    /// Translation output voice.
-    /// </summary>
+    /**
+     * Translation output voice.
+     */
     SpeechServiceConnection_TranslationVoice (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_TranslationVoice),
 
-    /// <summary>
-    /// Translation features.
-    /// </summary>
+    /**
+     * Translation features.
+     */
     SpeechServiceConnection_TranslationFeatures (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_TranslationFeatures),
 
-    /// <summary>
-    /// Intent region.
-    /// </summary>
+    /**
+     * Intent region.
+     */
     SpeechServiceConnection_IntentRegion (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_IntentRegion),
 
-    /// <summary>
-    /// Recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
-    /// </summary>
+    /**
+     * Recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
+     */
     SpeechServiceConnection_RecoMode (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_RecoMode),
 
-    /// <summary>
-    /// Recognition language.
-    /// </summary>
+    /**
+     * Recognition language.
+     */
     SpeechServiceConnection_RecoLanguage ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_RecoLanguage),
 
-    /// <summary>
-    /// Session ID.
-    /// </summary>
+    /**
+     * Session ID.
+     */
     Speech_SessionId ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Speech_SessionId),
 
-    /// <summary>
-    /// Detailed result required.
-    /// </summary>
+    /**
+     * Detailed result required.
+     */
     SpeechServiceResponse_RequestDetailedResultTrueFalse (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse),
 
-    /// <summary>
-    /// Profanity filtering required.
-    /// </summary>
+    /**
+     * Profanity filtering required.
+     */
     SpeechServiceResponse_RequestProfanityFilterTrueFalse (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestProfanityFilterTrueFalse),
 
-    /// <summary>
-    /// JSON result of speech recognition service.
-    /// </summary>
+    /**
+     * JSON result of speech recognition service.
+     */
     SpeechServiceResponse_JsonResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_JsonResult),
 
-    /// <summary>
-    /// Error details.
-    /// </summary>
+    /**
+     * Error details.
+     */
     SpeechServiceResponse_JsonErrorDetails ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_JsonErrorDetails),
 
-    /// <summary>
-    /// Cancellation reason.
-    /// </summary>
+    /**
+     * Cancellation reason.
+     */
     CancellationDetails_Reason ( com.microsoft.cognitiveservices.speech.internal.PropertyId.CancellationDetails_Reason),
 
-    /// <summary>
-    /// Cancellation text.
-    /// </summary>
+    /**
+     * Cancellation text.
+     */
     CancellationDetails_ReasonText ( com.microsoft.cognitiveservices.speech.internal.PropertyId.CancellationDetails_ReasonText),
 
-    /// <summary>
-    /// Cancellation detailed text.
-    /// </summary>
+    /**
+     * Cancellation detailed text.
+     */
     CancellationDetails_ReasonDetailedText ( com.microsoft.cognitiveservices.speech.internal.PropertyId.CancellationDetails_ReasonDetailedText),
 
-    /// <summary>
-    /// JSON result of language understanding service.
-    /// </summary>
+    /**
+     * JSON result of language understanding service.
+     */
     LanguageUnderstandingServiceResponse_JsonResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
 
     private PropertyId(com.microsoft.cognitiveservices.speech.internal.PropertyId id) {
@@ -121,7 +121,6 @@ public enum PropertyId {
     /**
      * Returns the internal value property id
      *
-     * @param
      * @return the speech property id
      */
     public com.microsoft.cognitiveservices.speech.internal.PropertyId getValue() { return this.id; }

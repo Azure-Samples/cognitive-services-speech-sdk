@@ -68,6 +68,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
+    /// <param name="htrigger">Trigger handle.</param>
     explicit IntentTrigger(SPXTRIGGERHANDLE htrigger) : m_htrigger(htrigger) { };
 
     /// <summary>

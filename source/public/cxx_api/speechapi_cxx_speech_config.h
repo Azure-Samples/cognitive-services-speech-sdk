@@ -17,6 +17,9 @@ namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 
+/// <summary>
+/// Class that defines configurations for speech or intent recognition.
+/// </summary>
 class SpeechConfig
 {
 public:
@@ -30,6 +33,7 @@ public:
     /// </summary>
     /// <param name="subscription">The subscription key.</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+    /// <returns>A shared pointer to the new speech config instance.</returns>
     static std::shared_ptr<SpeechConfig> FromSubscription(const SPXSTRING& subscription, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
@@ -44,6 +48,7 @@ public:
     /// </summary>
     /// <param name="authToken">The authorization token.</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+    /// <returns>A shared pointer to the new speech config instance.</returns>
     static std::shared_ptr<SpeechConfig> FromAuthorizationToken(const SPXSTRING& authToken, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
@@ -63,6 +68,7 @@ public:
     /// </summary>
     /// <param name="endpoint">The service endpoint to connect to.</param>
     /// <param name="subscription">The subscription key.</param>
+    /// <returns>A shared pointer to the new speech config instance.</returns>
     static std::shared_ptr<SpeechConfig> FromEndpoint(const SPXSTRING& endpoint, const SPXSTRING& subscription)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
@@ -85,6 +91,7 @@ public:
     /// Gets the input language to the speech recognition.
     /// The language is specified in BCP-47 format.
     /// </summary>
+    /// <returns>The speech recognition language.</returns>
     SPXSTRING GetSpeechRecognitionLanguage() const
     {
         return GetProperty(PropertyId::SpeechServiceConnection_RecoLanguage);
@@ -93,6 +100,7 @@ public:
     /// <summary>
     /// Sets the endpoint ID.
     /// </summary>
+    /// <param name="endpointId">Endpoint ID.</param>
     void SetEndpointId(const SPXSTRING& endpointId)
     {
         property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_EndpointId), nullptr, Utils::ToUTF8(endpointId).c_str());
@@ -101,30 +109,34 @@ public:
     /// <summary>
     /// Gets the endpoint ID.
     /// </summary>
+    /// <returns>Endpoint ID.</returns>
     SPXSTRING GetEndpointId() const
     {
         return GetProperty(PropertyId::SpeechServiceConnection_EndpointId);
     }
 
     /// <summary>
-    /// Sets the Authorization Token to connect to the service.
+    /// Sets the authorization token to connect to the service.
     /// </summary>
+    /// <param name="token">The authorization token.</param>
     void SetAuthorizationToken(const SPXSTRING& token)
     {
         property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceAuthorization_Token), nullptr, Utils::ToUTF8(token).c_str());
     }
 
     /// <summary>
-    /// Gets the Authorization token that is used to create a recognizer.
+    /// Gets the authorization token to connect to the service.
     /// </summary>
+    /// <returns>The authorization token.</returns>
     SPXSTRING GetAuthorizationToken() const
     {
         return GetProperty(PropertyId::SpeechServiceAuthorization_Token);
     }
 
     /// <summary>
-    /// Gets the SubscriptionKey key that used to create Speech Recognizer or Intent Recognizer or Translation Recognizer.
+    /// Gets the subscription key that is used to create Speech Recognizer or Intent Recognizer or Translation Recognizer.
     /// </summary>
+    /// <returns>The subscription key.</returns>
     SPXSTRING GetSubscriptionKey() const
     {
         return GetProperty(PropertyId::SpeechServiceConnection_Key);
@@ -133,6 +145,7 @@ public:
     /// <summary>
     /// Gets the region key that used to create Speech Recognizer or Intent Recognizer or Translation Recognizer.
     /// </summary>
+    /// <returns>Region.</returns>
     SPXSTRING GetRegion() const
     {
         return GetProperty(PropertyId::SpeechServiceConnection_Region);
@@ -141,6 +154,7 @@ public:
     /// <summary>
     /// Gets output format.
     /// </summary>
+    /// <returns>Output format.</returns>
     OutputFormat GetOutputFormat() const
     {
         auto result = GetProperty(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse);
@@ -171,6 +185,7 @@ public:
     /// Gets a property value by name.
     /// </summary>
     /// <param name="name">The parameter name.</param>
+    /// <returns>The property value.</returns>
     SPXSTRING GetProperty(const SPXSTRING& name) const
     {
         const char* value = property_bag_get_string(m_propertybag, -1, Utils::ToUTF8(name).c_str(), "");
@@ -181,6 +196,7 @@ public:
     /// Gets a property value by ID.
     /// </summary>
     /// <param name="id">The parameter id.</param>
+    /// <returns>The property value.</returns>
     SPXSTRING GetProperty(PropertyId id) const
     {
         const char* value = property_bag_get_string(m_propertybag, static_cast<int>(id), nullptr, "");

@@ -17,7 +17,12 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
  */
 public class Recognizer implements Closeable
 {
+    /*! \cond PROTECTED */
+
     protected static ExecutorService s_executorService;
+
+    /*! \endcond */
+
     static {
         s_executorService = Executors.newCachedThreadPool();
     }
@@ -45,6 +50,8 @@ public class Recognizer implements Closeable
     @SuppressWarnings("unused")
     private AudioConfig audioInputKeepAlive;
 
+    /*! \cond PROTECTED */
+
     /**
      * Creates and initializes an instance of a Recognizer
      * @param audioInput An optional audio input configuration associated with the recognizer
@@ -58,6 +65,8 @@ public class Recognizer implements Closeable
         speechEndDetectedHandler = new RecognitionEventHandlerImpl(this, false); // RecognitionEventType.SpeechEndDetectedEvent
     }
 
+    /*! \endcond */
+
     /**
      * Dispose of associated resources.
      */
@@ -65,6 +74,8 @@ public class Recognizer implements Closeable
     public void close() {
         dispose(true);
     }
+
+    /*! \cond PROTECTED */
 
     /**
      * This method performs cleanup of resources.
@@ -92,6 +103,9 @@ public class Recognizer implements Closeable
     protected SessionEventHandlerImpl sessionStoppedHandler;
     protected RecognitionEventHandlerImpl speechStartDetectedHandler;
     protected RecognitionEventHandlerImpl speechEndDetectedHandler;
+
+    /*! \endcond */
+
     private boolean disposed = false;
 
     /**

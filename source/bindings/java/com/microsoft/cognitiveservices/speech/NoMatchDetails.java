@@ -17,7 +17,7 @@ public class NoMatchDetails {
 
     /**
      * Creates an instance of NoMatchDetails object for the NoMatch SpeechRecognitionResults.
-     * @param The recognition result that has NoMatch returned in Reason.
+     * @param result The recognition result that has NoMatch returned in Reason.
      * @return The NoMatchDetails object being created.
      */
     public static com.microsoft.cognitiveservices.speech.NoMatchDetails fromResult(RecognitionResult result) {
@@ -25,12 +25,16 @@ public class NoMatchDetails {
         return new NoMatchDetails(noMatchImpl);
     }
 
+    /*! \cond PROTECTED */
+
     protected NoMatchDetails(com.microsoft.cognitiveservices.speech.internal.NoMatchDetails noMatch) {
         Contracts.throwIfNull(noMatch, "noMatch");
 
         this._noMatchImpl = noMatch;
         this._reason = com.microsoft.cognitiveservices.speech.NoMatchReason.values()[noMatch.getReason().swigValue() - 1]; // Native NoMatchReason enum starts at 1!!
     }
+
+    /*! \endcond */
 
     /**
      * Explicitly frees any external resource attached to the object

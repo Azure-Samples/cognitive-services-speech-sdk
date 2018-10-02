@@ -75,6 +75,7 @@ public:
     /// Connects the provided callback <paramref name="callback"/> to the event signal, see also <see cref="Connect"/>.
     /// </summary>
     /// <param name="callback">Callback to connect.</param>
+    /// <returns>Event signal reference.</returns>
     EventSignal<T>& operator+=(CallbackFunction callback)
     {
         Connect(callback);
@@ -86,6 +87,7 @@ public:
     /// Disconnects the provided callback <paramref name="callback"/> from the event signal, see also <see cref="Disconnect"/>.
     /// </summary>
     /// <param name="callback">Callback to disconnect.</param>
+    /// <returns>Event signal reference.</returns>
     EventSignal<T>& operator-=(CallbackFunction callback)
     {
         Disconnect(callback);
@@ -126,6 +128,7 @@ public:
     /// <remarks>
     /// When the number of connected clients changes from one to zero, the disconnect callback will be called, if provided.
     /// </remarks>
+    /// <param name="callback">Callback function.</param>
     void Disconnect(CallbackFunction callback)
     {
         std::unique_lock<std::recursive_mutex> lock(m_mutex);

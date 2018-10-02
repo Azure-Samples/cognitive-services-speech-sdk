@@ -52,10 +52,14 @@ public final class PullAudioInputStream extends com.microsoft.cognitiveservices.
         this._streamImpl = null;
     }
 
+    /*! \cond PROTECTED */
+
     protected PullAudioInputStream(com.microsoft.cognitiveservices.speech.internal.PullAudioInputStream stream, PullAudioInputStreamCallback callback) {
         super(stream);
         _callbackKeepAlive = callback;
     }
+
+    /*! \endcond */
 
     private PullAudioInputStreamCallback _callbackKeepAlive;
 }

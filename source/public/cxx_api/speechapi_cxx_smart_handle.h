@@ -16,6 +16,9 @@ namespace Speech {
 
 typedef SPXHR(SPXAPI_CALLTYPE *SmartHandleCloseFunction)(SPXHANDLE);
 
+/// <summary>
+/// Smart handle class.
+/// </summary>
 template <typename T, SmartHandleCloseFunction closeFunction>
 class SmartHandle
 {

@@ -53,6 +53,8 @@ public abstract class PullAudioInputStreamCallback
 
     private PullAudioInputStreamCallbackAdapter  _adapter;
 
+    /*! \cond INTERNAL */
+
     /**
       * Returns the audio stream format.
       * @return The implementation of the format.
@@ -60,4 +62,6 @@ public abstract class PullAudioInputStreamCallback
     public com.microsoft.cognitiveservices.speech.internal.PullAudioInputStreamCallback getAdapter() {
           return this._adapter;
     }
+
+    /*! \endcond */
 }

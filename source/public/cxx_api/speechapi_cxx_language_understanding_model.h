@@ -64,6 +64,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
+    /// <param name="hlumodel">Language understanding model handle.</param>
     explicit LanguageUnderstandingModel(SPXLUMODELHANDLE hlumodel = SPXHANDLE_INVALID) : m_hlumodel(hlumodel) { }
     
     /// <summary>

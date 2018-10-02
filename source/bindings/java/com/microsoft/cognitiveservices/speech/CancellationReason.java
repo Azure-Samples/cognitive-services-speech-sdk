@@ -27,7 +27,6 @@ public enum CancellationReason
     /**
      * Returns the internal value property id
      *
-     * @param
      * @return the speech property id
      */
     public com.microsoft.cognitiveservices.speech.internal.CancellationReason getValue() { return this.id; }

@@ -763,7 +763,7 @@ WARN_NO_PARAMDOC       = YES
 # a warning is encountered.
 # The default value is: NO.
 
-WARN_AS_ERROR          = YES
+WARN_AS_ERROR          = NO
 
 # The WARN_FORMAT tag determines the format of the warning messages that doxygen
 # can produce. The string should contain the $file, $line, and $text tags, which
@@ -1080,7 +1080,7 @@ VERBATIM_HEADERS       = YES
 # generated with the -Duse-libclang=ON option for CMake.
 # The default value is: NO.
 
-CLANG_ASSISTED_PARSING = NO
+#CLANG_ASSISTED_PARSING = NO
 
 # If clang assisted parsing is enabled you can provide the compiler with command
 # line options that you would normally use when invoking the compiler. Note that
@@ -1088,7 +1088,7 @@ CLANG_ASSISTED_PARSING = NO
 # specified with INPUT and INCLUDE_PATH.
 # This tag requires that the tag CLANG_ASSISTED_PARSING is set to YES.
 
-CLANG_OPTIONS          =
+#CLANG_OPTIONS          =
 
 # If clang assisted parsing is enabled you can provide the clang parser with the
 # path to the compilation database (see:
@@ -1099,7 +1099,7 @@ CLANG_OPTIONS          =
 # generated with the -Duse-libclang=ON option for CMake.
 # The default value is: 0.
 
-CLANG_COMPILATION_DATABASE_PATH                                        = 0
+#CLANG_COMPILATION_DATABASE_PATH                                        = 0
 
 #---------------------------------------------------------------------------
 # Configuration options related to the alphabetical class index

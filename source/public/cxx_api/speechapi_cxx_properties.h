@@ -14,10 +14,16 @@ namespace CognitiveServices {
 namespace Speech {
 
 
+/// <summary>
+/// Class to retrieve or set a property value from a property collection.
+/// </summary>
 class PropertyCollection
 {
 public:
 
+    /// <summary>
+    /// Destructor.
+    /// </summary>
     ~PropertyCollection()
     {
         if (property_bag_is_valid(m_propbag))
@@ -27,21 +33,45 @@ public:
         }
     }
 
+    /// <summary>
+    /// Set value of a property.
+    /// </summary>
+    /// <param name="propertyID">The id of property. See <see cref="PropertyId"/></param>
+    /// <param name="value">value to set</param>
     void SetProperty(PropertyId propertyID, const SPXSTRING& value)
     {
         property_bag_set_string(m_propbag, (int)propertyID, NULL, Utils::ToUTF8(value).c_str());
     }
 
+    /// <summary>
+    /// Set value of a property.
+    /// </summary>
+    /// <param name="propertyName">The name of property.</param>
+    /// <param name="value">value to set</param>
     void SetProperty(const SPXSTRING& propertyName, const SPXSTRING& value)
     {
         property_bag_set_string(m_propbag, -1, Utils::ToUTF8(propertyName).c_str(), Utils::ToUTF8(value).c_str());
     }
 
+    /// <summary>
+    /// Returns value of a property.
+    /// If the property value is not defined, the specified default value is returned.
+    /// </summary>
+    /// <param name="propertyID">The id of property. See <see cref="PropertyId"/></param>
+    /// <param name="defaultValue">The default value which is returned if no value is defined for the property (empty string by default).</param>
+    /// <returns>value of the property.</returns>
     SPXSTRING GetProperty(PropertyId propertyID, const SPXSTRING& defaultValue = SPXSTRING()) const
     {
         return Utils::ToSPXString(property_bag_get_string(m_propbag, static_cast<int>(propertyID), nullptr, Utils::ToUTF8(defaultValue).c_str()));
     }
 
+    /// <summary>
+    /// Returns value of a property.
+    /// If the property value is not defined, the specified default value is returned.
+    /// </summary>
+    /// <param name="propertyName">The name of property.</param>
+    /// <param name="defaultValue">The default value which is returned if no value is defined for the property (empty string by default).</param>
+    /// <returns>value of the property.</returns>
     SPXSTRING GetProperty(const SPXSTRING& propertyName, const SPXSTRING& defaultValue = SPXSTRING()) const
     {
         return Utils::ToSPXString(property_bag_get_string(m_propbag, -1, Utils::ToUTF8(propertyName).c_str(), Utils::ToUTF8(defaultValue).c_str()));

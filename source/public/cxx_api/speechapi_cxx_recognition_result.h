@@ -73,13 +73,17 @@ public:
     const SPXSTRING& Text;
 
     /// <summary>
-    /// Duration of the recognized speech.
+    /// Duration of recognized speech in ticks.
+    /// A single tick represents one hundred nanoseconds or one ten-millionth of a second.
     /// </summary>
+    /// <returns>Duration of recognized speech in ticks.</returns>
     uint64_t Duration() const { return m_duration; }
 
     /// <summary>
-    /// Offset of the recognized speech.
+    /// Offset of the recognized speech in ticks.
+    /// A single tick represents one hundred nanoseconds or one ten-millionth of a second.
     /// </summary>
+    /// <returns>Offset of the recognized speech in ticks.</returns>
     uint64_t Offset() const { return m_offset; }
 
     /// <summary>
@@ -173,6 +177,7 @@ public:
     /// Creates an instance of CancellationDetails object for the canceled RecognitionResult.
     /// </summary>
     /// <param name="result">The result that was canceled.</param>
+    /// <returns>A shared pointer to CancellationDetails.</returns>
     static std::shared_ptr<CancellationDetails> FromResult(std::shared_ptr<RecognitionResult> result)
     {
         // VSTS 1407221
@@ -238,6 +243,7 @@ public:
     /// Creates an instance of NoMatchDetails object for NoMatch RecognitionResults.
     /// </summary>
     /// <param name="result">The recognition result that was not recognized.</param>
+    /// <returns>A shared pointer to NoMatchDetails.</returns>
     static std::shared_ptr<NoMatchDetails> FromResult(std::shared_ptr<RecognitionResult> result)
     {
         // VSTS 1407221

@@ -13,10 +13,14 @@ import com.microsoft.cognitiveservices.speech.PropertyId;
  */
 public class PropertyCollection implements Closeable {
 
+    /*! \cond PROTECTED */
+
     protected PropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
         Contracts.throwIfNull(collection, "collection");
         collectionImpl = collection;
     }
+
+    /*! \endcond */
 
     /**
      * Returns the property value.
