@@ -450,5 +450,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
             }
         }
+
+        [TestMethod]
+        public async Task TestPropertyCollectionWithoutRecognizer()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Silence.AudioFile);
+            PropertyCollection properties;
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            {
+                properties = recognizer.Properties;
+            }
+            Assert.AreEqual("", properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token));
+        }
     }
 }

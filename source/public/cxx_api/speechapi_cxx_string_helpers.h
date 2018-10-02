@@ -36,9 +36,9 @@ inline std::wstring ToSPXString(const char* value)
     return ToSPXString(std::string(value));
 }
 #else
-inline const char* ToSPXString(const char* value)
+inline std::string ToSPXString(const char* value)
 {
-    return value;
+    return value == nullptr ? "" : value;
 }
 
 inline std::string ToSPXString(const std::string& value)
