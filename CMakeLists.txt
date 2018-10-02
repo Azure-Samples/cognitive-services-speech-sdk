@@ -16,8 +16,8 @@ message("BUILD_JAVA=${BUILD_JAVA}")
 # Configure CCache if available
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
-        set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-        set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
 
 option(SPECTRE_MITIGATION "Build with Spectre mitigation" OFF)
@@ -86,13 +86,16 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic -fPIC")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 
+  # Include debug information in release builds
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g")
-  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS} -g")
-
 elseif(ANDROID)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic -fPIC -Wno-gnu-zero-variadic-macro-arguments")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic -fPIC -Wno-gnu-zero-variadic-macro-arguments -Wno-attributes")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+
+  # Include debug information in release builds
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # compilation flags required by security checks
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector-strong -Wformat -Wformat-security -Werror=format-security")
@@ -101,14 +104,6 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -fPIC")
 
   message("compiling with ${CMAKE_CXX_FLAGS}")
-endif()
-
-# Android build complains about
-# <built-in>: In function 'float abs(float)':
-# <built-in>: warning: conflicts with previous declaration here [-Wattributes]
-# Added -Wno-attributes to suppress it.
-if(ANDROID)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wno-attributes")
 endif()
 
 set(CARBON_ROOT ${PROJECT_SOURCE_DIR})
@@ -144,7 +139,7 @@ set(AUDIO "${CARBON_CORE}/audio")
 set(USP "${CARBON_CORE}/usp")
 set(MOCK "${CARBON_CORE}/mock")
 if(CMAKE_CL_64)
-    set(UNIDEC "${CARBON_CORE}/unidec")
+  set(UNIDEC "${CARBON_CORE}/unidec")
 endif()
 
 set(TESTS "${CARBON_ROOT}/tests")
@@ -163,7 +158,6 @@ add_subdirectory(${FACTORY})
 add_subdirectory(${AUDIO})
 add_subdirectory(${USP})
 
-
 add_subdirectory(${C_API})
 add_subdirectory(${SR})
 add_subdirectory(${MOCK})
@@ -171,12 +165,11 @@ if(NOT DEFINED APPLE)
 add_subdirectory(${LIBCARBON})
 endif()
 
-
 add_subdirectory(${CARBON_BINDINGS})
 add_subdirectory(${TESTS})
 
 if(CMAKE_CL_64)
-    add_subdirectory(${UNIDEC})
+  add_subdirectory(${UNIDEC})
 endif()
 
 add_subdirectory(${CARBONX})
@@ -188,9 +181,9 @@ endif()
 # Dummy targets to make API header appear
 # in the generated VS solution.
 add_custom_target(c_headers
-    SOURCES ${SPEECH_C_API_HEADERS})
+  SOURCES ${SPEECH_C_API_HEADERS})
 set_target_properties(c_headers PROPERTIES FOLDER api)
 
 add_custom_target(cxx_headers
-    SOURCES ${SPEECH_CXX_API_HEADERS})
+  SOURCES ${SPEECH_CXX_API_HEADERS})
 set_target_properties(cxx_headers PROPERTIES FOLDER api)

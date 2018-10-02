@@ -52,7 +52,7 @@ if [[ $OS = "Windows_NT" ]]; then
              CSHARPSUPPORTED=true
              SRCCSHARPBINDINGS="$SRCBIN/$CSHARPBINDINGSNAME.dll"
              ;;
-    ANDROID) LIBPREFIX=libMicrosoft.CognitiveServices.Speech.
+    Android-*) LIBPREFIX=libMicrosoft.CognitiveServices.Speech.
              DYNLIBSUFFIX=.so
              STATLIBSUFFIX=.a
 
@@ -62,8 +62,8 @@ if [[ $OS = "Windows_NT" ]]; then
 
              SRCJAVABINDINGS="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.so"
              ;;
-    *) echo "We should never reach this point"
-       echo "The fourth parameter should be empty or ANDROID"
+    *) echo Invalid fourth parameter $TARGET. Should be empty, UWP, or Android-PLATFORM.
+       exit 1
        ;;
   esac
 else
@@ -125,7 +125,7 @@ CPOPT="-v -p"
 cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*$DYNLIBSUFFIX "$DESTPUBLIB"
 # On Windows and not Android, copy import libraries, XMLDoc, and PDBs.
 if [[ $OS = "Windows_NT" ]]; then
-  if [[ $TARGET != "ANDROID" ]]; then
+  if [[ $TARGET != Android-* ]]; then
     cp $CPOPT "$SRCLIB"/$LIBPREFIX*.lib "$DESTPUBLIB"
     cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.pdb "$DESTPUBLIB"    
 
@@ -154,6 +154,20 @@ fi
 if [[ $(uname) = Linux ]]; then
   cp $CPOPT -R "$DESTPUBLIB" "$DESTPRIVLIBUNSTRIPPED"
   find "$DESTPUBLIB" \( -name \*.so -or -name \*.dll \) -print0 | xargs -0 strip
+fi
+
+# Android: strip shipping binaries, but keep the unstripped version around.
+if [[ $TARGET = Android-* ]]; then
+  cp $CPOPT -R "$DESTPUBLIB" "$DESTPRIVLIBUNSTRIPPED"
+  if [[ $TARGET = Android-arm64 ]]; then
+    STRIP=$ANDROID_NDK/toolchains/aarch64-linux-android-4.9/prebuilt/windows-x86_64/aarch64-linux-android/bin/strip.exe
+  elif [[ $TARGET = Android-arm32 ]]; then
+    STRIP=$ANDROID_NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/windows-x86_64/arm-linux-androideabi/bin/strip.exe
+  else
+    echo Unsupported architecture $TARGET.
+    exit 1
+  fi
+  find "$DESTPUBLIB" -name \*.so -print0 | xargs -0 $STRIP
 fi
 
 cp $CPOPT -R "$SRCINC"* "$DESTPUBINC"

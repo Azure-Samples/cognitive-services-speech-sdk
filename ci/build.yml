@@ -959,7 +959,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: './ci/drop/bindrop.sh'
-      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Out/Android-$(BuildPlatform)/$(BuildConfiguration) ANDROID'
+      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Out/Android-$(BuildPlatform)/$(BuildConfiguration) $(SPEECHSDK_TARGET_PLATFORM)'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Android'
     inputs:
