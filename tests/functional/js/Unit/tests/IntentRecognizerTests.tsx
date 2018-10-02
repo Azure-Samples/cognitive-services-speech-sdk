@@ -2,8 +2,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-
 import { setTimeout } from "timers";
+
 import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
 import { ConsoleLoggingListener } from "../../../../../source/bindings/js/src/common.browser/Exports";
 import { Events, EventType } from "../../../../../source/bindings/js/src/common/Exports";
@@ -53,7 +53,7 @@ test("NoIntentsRecognizesSpeech", (done: jest.DoneCallback) => {
         (p2: sdk.IntentRecognitionResult) => {
             r.close();
             s.close();
-            
+
             const res: sdk.IntentRecognitionResult = p2;
             expect(res.errorDetails).toBeUndefined();
             expect(res.reason).toEqual(sdk.ResultReason.RecognizedSpeech);

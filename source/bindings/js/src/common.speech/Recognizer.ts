@@ -24,6 +24,7 @@ import {
     PromiseResult,
     TranslationStatus,
 } from "../common/Exports";
+import { AudioStreamFormatImpl } from "../sdk/Audio/AudioStreamFormat";
 import {
     OutputFormat, ResultReason,
 } from "../sdk/Exports";
@@ -324,41 +325,59 @@ export abstract class ServiceRecognizerBase implements IDisposable {
         // TODO: rewrite with ES6 promises.
         const deferred = new Deferred<boolean>();
 
+        // The time we last sent data to the service.
+        let lastSendTime: number = 0;
+
+        const audioFormat: AudioStreamFormatImpl = this.audioSource.Format as AudioStreamFormatImpl;
+
         const readAndUploadCycle = (_: boolean) => {
-            audioStreamNode.Read().On(
-                (audioStreamChunk: IStreamChunk<ArrayBuffer>) => {
-                    // we have a new audio chunk to upload.
-                    if (requestSession.IsSpeechEnded) {
-                        // If service already recognized audio end then dont send any more audio
-                        deferred.Resolve(true);
-                        return;
-                    }
+            if (!this.isDisposed) {
+                audioStreamNode.Read().On(
+                    (audioStreamChunk: IStreamChunk<ArrayBuffer>) => {
+                        // we have a new audio chunk to upload.
+                        if (requestSession.IsSpeechEnded) {
+                            // If service already recognized audio end then dont send any more audio
+                            deferred.Resolve(true);
+                            return;
+                        }
 
-                    const payload = (audioStreamChunk.IsEnd) ? null : audioStreamChunk.Buffer;
-                    const uploaded = connection.Send(
-                        new SpeechConnectionMessage(
-                            MessageType.Binary, "audio", requestId, null, payload));
+                        const payload = (audioStreamChunk.IsEnd) ? null : audioStreamChunk.Buffer;
+                        const uploaded = connection.Send(
+                            new SpeechConnectionMessage(
+                                MessageType.Binary, "audio", requestId, null, payload));
 
-                    if (!audioStreamChunk.IsEnd) {
-                        uploaded.OnSuccessContinueWith(readAndUploadCycle);
-                    } else {
-                        // the audio stream has been closed, no need to schedule next
-                        // read-upload cycle.
-                        deferred.Resolve(true);
-                    }
-                },
-                (error: string) => {
-                    if (requestSession.IsSpeechEnded) {
-                        // For whatever reason, Reject is used to remove queue subscribers inside
-                        // the Queue.DrainAndDispose invoked from DetachAudioNode down blow, which
-                        // means that sometimes things can be rejected in normal circumstances, without
-                        // any errors.
-                        deferred.Resolve(true); // TODO: remove the argument, it's is completely meaningless.
-                    } else {
-                        // Only reject, if there was a proper error.
-                        deferred.Reject(error);
-                    }
-                });
+                        if (!audioStreamChunk.IsEnd) {
+
+                            // Caculate any delay to the audio stream needed. /2 to allow 2x real time transmit rate max.
+                            const minSendTime = ((payload.byteLength / audioFormat.avgBytesPerSec) / 2) * 1000;
+
+                            const delay: number = Math.max(0, (lastSendTime - Date.now() + minSendTime));
+
+                            uploaded.OnSuccessContinueWith((result: boolean) => {
+                                setTimeout(() => {
+                                    lastSendTime = Date.now();
+                                    readAndUploadCycle(result);
+                                }, delay);
+                            });
+                        } else {
+                            // the audio stream has been closed, no need to schedule next
+                            // read-upload cycle.
+                            deferred.Resolve(true);
+                        }
+                    },
+                    (error: string) => {
+                        if (requestSession.IsSpeechEnded) {
+                            // For whatever reason, Reject is used to remove queue subscribers inside
+                            // the Queue.DrainAndDispose invoked from DetachAudioNode down blow, which
+                            // means that sometimes things can be rejected in normal circumstances, without
+                            // any errors.
+                            deferred.Resolve(true); // TODO: remove the argument, it's is completely meaningless.
+                        } else {
+                            // Only reject, if there was a proper error.
+                            deferred.Reject(error);
+                        }
+                    });
+            }
         };
 
         readAndUploadCycle(true);

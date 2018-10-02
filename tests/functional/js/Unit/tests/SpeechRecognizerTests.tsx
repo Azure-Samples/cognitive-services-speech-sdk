@@ -10,6 +10,7 @@ import { Settings } from "./Settings";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 
 import { setTimeout } from "timers";
+import { ByteBufferAudioFile } from "./ByteBufferAudioFile";
 import WaitForCondition from "./Utilities";
 
 const FIRST_EVENT_ID: number = 1;
@@ -621,8 +622,8 @@ test("PullStreamHalfFill", (done: jest.DoneCallback) => {
             read: (buffer: ArrayBuffer): number => {
                 const copyArray: Uint8Array = new Uint8Array(buffer);
                 const start: number = bytesSent;
-                const fillSize: number = Math.round(fileBuffer.byteLength / 2);
-                const end: number = buffer.byteLength > (fillSize - bytesSent) ? (fillSize - 1) : (bytesSent + buffer.byteLength - 1);
+                const fillSize: number = Math.round(buffer.byteLength / 2);
+                const end: number = fillSize > (fileBuffer.byteLength - bytesSent) ? (fileBuffer.byteLength - 1) : (bytesSent + fillSize - 1);
                 copyArray.set(new Uint8Array(fileBuffer.slice(start, end)));
                 bytesSent += (end - start) + 1;
 
@@ -659,32 +660,67 @@ test("PullStreamHalfFill", (done: jest.DoneCallback) => {
         });
 });
 
-test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-    s.speechRecognitionLanguage = "en-US";
-
+test("InitialSilenceTimeout (pull)", (done: jest.DoneCallback) => {
     let p: sdk.PullAudioInputStream;
+    let bytesSent: number = 0;
+
+    // To make sure we don't send a ton of extra data.
+    // 5s * 16K * 2 * 1.25;
+    // For reference, before the throttling was implemented, we sent 6-10x the required data.
+    const expectedBytesSent: number = 5 * 16000 * 2 * 1.25;
 
     p = sdk.AudioInputStream.createPullStream(
         {
             close: () => { return; },
             read: (buffer: ArrayBuffer): number => {
+                bytesSent += buffer.byteLength;
                 return buffer.byteLength;
             },
         });
 
     const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
 
+    testInitialSilienceTimeout(config, done, () => expect(bytesSent).toBeLessThan(expectedBytesSent));
+});
+
+test("InitialSilenceTimeout (push)", (done: jest.DoneCallback) => {
+    const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
+    const bigFileBuffer: Uint8Array = new Uint8Array(200 * 1024);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+
+    p.write(bigFileBuffer.buffer);
+
+    testInitialSilienceTimeout(config, done);
+    p.close();
+
+});
+
+test("InitialSilenceTimeout (File)", (done: jest.DoneCallback) => {
+
+    const bigFileBuffer: Uint8Array = new Uint8Array(200 * 1024);
+    const bigFile: File = ByteBufferAudioFile.Load(bigFileBuffer.buffer);
+
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(bigFile);
+
+    testInitialSilienceTimeout(config, done);
+});
+
+const testInitialSilienceTimeout = (config: sdk.AudioConfig, done: jest.DoneCallback, addedChecks?: () => void): void => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    s.speechRecognitionLanguage = "en-US";
+
+    // To validate the data isn't sent too fast.
+    const startTime: number = Date.now();
+
     const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
 
-    let oneReport: boolean = false;
+    let numReports: number = 0;
 
     r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
         try {
-            setTimeout(done, 1);
             fail(e.errorDetails);
         } catch (error) {
             errorText += error.message + " " + error.stack;
@@ -700,45 +736,45 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
 
             const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
             expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
-
-            if (true === oneReport) {
-                expect(errorText).toBeUndefined();
-                done();
-            }
-
-            oneReport = true;
         } catch (error) {
             errorText += error.message + " " + error.stack;
+        } finally {
+            numReports++;
         }
+
     };
 
     r.recognizeOnceAsync(
         (p2: sdk.SpeechRecognitionResult) => {
             const res: sdk.SpeechRecognitionResult = p2;
+            numReports++;
 
             expect(res).not.toBeUndefined();
             expect(sdk.ResultReason.NoMatch).toEqual(res.reason);
+            expect(res.errorDetails).toBeUndefined();
             expect(res.text).toBeUndefined();
 
             const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
             expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
+            expect(Date.now()).toBeGreaterThan(startTime + 2500);
 
             r.close();
             s.close();
-            if (true === oneReport) {
-                expect(errorText).toBeUndefined();
-                done();
-            }
-
-            oneReport = true;
         },
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(done, 1);
             fail(error);
         });
-}, 7500);
+
+    WaitForCondition(() => (numReports === 2), () => {
+        setTimeout(done, 1);
+        expect(errorText).toBeUndefined();
+        if (!!addedChecks) {
+            addedChecks();
+        }
+    });
+};
 
 test.skip("InitialBabbleTimeout", (done: jest.DoneCallback) => {
 

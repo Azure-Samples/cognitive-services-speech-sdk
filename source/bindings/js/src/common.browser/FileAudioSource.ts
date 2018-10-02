@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
+import { AudioStreamFormatImpl } from "../../src/sdk/Audio/AudioStreamFormat";
+import { AudioStreamFormat } from "../../src/sdk/Exports";
 import {
     AudioSourceErrorEvent,
     AudioSourceEvent,
@@ -42,6 +44,8 @@ export class FileAudioSource implements IAudioSource {
     // sample rate (bytes/second) * 600 (seconds) + 44 (size of the wave header).
     private static readonly MAX_SIZE: number = FileAudioSource.SAMPLE_RATE * 600 + 44;
 
+    private static readonly FILEFORMAT: AudioStreamFormatImpl = AudioStreamFormat.getWaveFormatPCM(16000, 16, 1) as AudioStreamFormatImpl;
+
     private streams: IStringDictionary<Stream<ArrayBuffer>> = {};
 
     private id: string;
@@ -54,6 +58,10 @@ export class FileAudioSource implements IAudioSource {
         this.id = audioSourceId ? audioSourceId : CreateNoDashGuid();
         this.events = new EventSource<AudioSourceEvent>();
         this.file = file;
+    }
+
+    public get Format(): AudioStreamFormat {
+        return FileAudioSource.FILEFORMAT;
     }
 
     public TurnOn = (): Promise<boolean> => {

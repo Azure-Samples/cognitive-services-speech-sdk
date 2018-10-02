@@ -24,6 +24,8 @@ import {
 import { AudioStreamFormat, PullAudioInputStreamCallback } from "../Exports";
 import { AudioStreamFormatImpl } from "./AudioStreamFormat";
 
+const bufferSize: number = 4096;
+
 /**
  * Represents audio input stream used for custom audio input configurations.
  * @class AudioInputStream
@@ -138,6 +140,13 @@ export class PushAudioInputStreamImpl extends PushAudioInputStream implements IA
     }
 
     /**
+     * Format information for the audio
+     */
+    public get Format(): AudioStreamFormat {
+        return this.format;
+    }
+
+    /**
      * Writes the audio data specified by making an internal copy of the data.
      * @member PushAudioInputStreamImpl.prototype.write
      * @function
@@ -145,9 +154,14 @@ export class PushAudioInputStreamImpl extends PushAudioInputStream implements IA
      * @param {ArrayBuffer} dataBuffer - The audio buffer of which this function will make a copy.
      */
     public write(dataBuffer: ArrayBuffer): void {
+        // Break the data up into smaller chunks if needed.
+        let i: number;
 
-        // Store data in buffer....
-        this.stream.Write(dataBuffer);
+        for (i = bufferSize - 1; i < dataBuffer.byteLength; i += bufferSize) {
+            this.stream.Write(dataBuffer.slice(i - (bufferSize - 1), i));
+        }
+
+        this.stream.Write(dataBuffer.slice(i - (bufferSize - 1), dataBuffer.byteLength - 1));
     }
 
     /**
@@ -286,6 +300,13 @@ export class PullAudioInputStreamImpl extends PullAudioInputStream implements IA
     }
 
     /**
+     * Format information for the audio
+     */
+    public get Format(): AudioStreamFormat {
+        return this.format;
+    }
+
+    /**
      * Closes the stream.
      * @member PullAudioInputStreamImpl.prototype.close
      * @function
@@ -323,11 +344,11 @@ export class PullAudioInputStreamImpl extends PullAudioInputStream implements IA
                         return audioNodeId;
                     },
                     Read: (): Promise<IStreamChunk<ArrayBuffer>> => {
-                        const readBuff: ArrayBuffer = new ArrayBuffer(4096);
-                        this.callback.read(readBuff);
+                        const readBuff: ArrayBuffer = new ArrayBuffer(bufferSize);
+                        const pulledBytes: number = this.callback.read(readBuff);
 
                         return PromiseHelper.FromResult<IStreamChunk<ArrayBuffer>>({
-                            Buffer: readBuff,
+                            Buffer: readBuff.slice(0, pulledBytes),
                             IsEnd: this.isClosed,
                         });
                     },

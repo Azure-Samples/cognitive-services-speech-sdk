@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
+import { AudioStreamFormatImpl } from "../../src/sdk/Audio/AudioStreamFormat";
+import { AudioStreamFormat } from "../../src/sdk/Exports";
 import {
     AudioSourceErrorEvent,
     AudioSourceEvent,
@@ -36,6 +38,8 @@ interface INavigatorUserMedia extends NavigatorUserMedia {
 
 export class MicAudioSource implements IAudioSource {
 
+    private static readonly AUDIOFORMAT: AudioStreamFormatImpl = AudioStreamFormat.getDefaultInputFormat() as AudioStreamFormatImpl;
+
     private streams: IStringDictionary<Stream<ArrayBuffer>> = {};
 
     private id: string;
@@ -54,6 +58,10 @@ export class MicAudioSource implements IAudioSource {
         this.id = audioSourceId ? audioSourceId : CreateNoDashGuid();
         this.events = new EventSource<AudioSourceEvent>();
         this.recorder = recorder;
+    }
+
+    public get Format(): AudioStreamFormat {
+        return MicAudioSource.AUDIOFORMAT;
     }
 
     public TurnOn = (): Promise<boolean> => {
@@ -211,8 +219,8 @@ export class MicAudioSource implements IAudioSource {
 
         // https://developer.mozilla.org/en-US/docs/Web/API/AudioContext
         const AudioContext = ((window as any).AudioContext)
-        || ((window as any).webkitAudioContext)
-        || false;
+            || ((window as any).webkitAudioContext)
+            || false;
 
         if (!AudioContext) {
             throw new Error("Browser does not support Web Audio API (AudioContext is not available).");

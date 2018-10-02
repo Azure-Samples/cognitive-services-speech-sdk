@@ -61,7 +61,7 @@ export class AudioStreamFormatImpl extends AudioStreamFormat {
         this.bitsPerSample = bitsPerSample;
         this.samplesPerSec = samplesPerSec;
         this.channels = channels;
-        this.avgBytesPerSec = this.samplesPerSec * this.channels * this.bitsPerSample;
+        this.avgBytesPerSec = this.samplesPerSec * this.channels * (this.bitsPerSample / 8);
         this.blockAlign = this.channels * Math.max(this.bitsPerSample, 8);
     }
 

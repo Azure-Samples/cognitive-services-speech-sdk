@@ -3,6 +3,7 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
+import { AudioStreamFormat } from "../../../src/sdk/Exports";
 import { FileAudioSource, MicAudioSource, PcmRecorder } from "../../common.browser/Exports";
 import { AudioSourceEvent, EventSource, IAudioSource, IAudioStreamNode, Promise } from "../../common/exports";
 import { AudioInputStream, PullAudioInputStreamCallback } from "../Exports";
@@ -83,6 +84,13 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
     public constructor(source: IAudioSource) {
         super();
         this.source = source;
+    }
+
+    /**
+     * Format information for the audio
+     */
+    public get Format(): AudioStreamFormat {
+        return this.source.Format;
     }
 
     /**

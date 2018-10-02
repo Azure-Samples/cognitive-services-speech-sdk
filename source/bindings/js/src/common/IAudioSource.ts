@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
+import { AudioStreamFormat } from "../../src/sdk/Exports";
 import { AudioSourceEvent } from "./AudioSourceEvents";
 import { EventSource } from "./EventSource";
 import { IDetachable } from "./IDetachable";
@@ -15,6 +16,7 @@ export interface IAudioSource {
     Detach(audioNodeId: string): void;
     TurnOff(): Promise<boolean>;
     Events: EventSource<AudioSourceEvent>;
+    Format: AudioStreamFormat;
 }
 
 export interface IAudioStreamNode extends IDetachable {
