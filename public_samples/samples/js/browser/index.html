@@ -100,17 +100,17 @@
                 </td>
             </tr>
             <tr>
-                <td align="right"><b>SpeechSDK API Continous Speech Recognition:</b></td>
+                <td align="right"><b>SpeechSDK API Continuous Speech Recognition:</b></td>
                 <td>
-                    <button id="speechsdkStartContinousRecognition">startContinuousRecognitionAsync()</button>
-                    <button id="speechsdkStopContinousRecognition" disabled="disabled">STOP stopContinuousRecognitionAsync()</button>
+                    <button id="speechsdkStartContinuousRecognition">startContinuousRecognitionAsync()</button>
+                    <button id="speechsdkStopContinuousRecognition" disabled="disabled">STOP stopContinuousRecognitionAsync()</button>
                 </td>
             </tr>
             <tr>
                 <td align="right"><b>SpeechSDK API Translation:</b></td>
                 <td>
-                    <button id="speechsdkStartContinousTranslation">startContinousTranslation()</button>
-                    <button id="speechsdkStopContinousTranslation" disabled="disabled">STOP stopContinousTranslation()</button>
+                    <button id="speechsdkStartContinuousTranslation">startContinuousTranslation()</button>
+                    <button id="speechsdkStopContinuousTranslation" disabled="disabled">STOP stopContinuousTranslation()</button>
 
                     <!-- For a full list of supported languages see: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/supported-languages-->
                     <select id="languageTargetOptions">
@@ -246,10 +246,10 @@
             createBtn = document.getElementById("createBtn");
             sdkStartRecognizeOnceAsyncBtn = document.getElementById("speechsdkStartRecognizeOnceAsync");
             sdkStopRecognizeOnceAsyncBtn = document.getElementById("speechsdkStopRecognizeOnceAsync");
-            sdkStartContinousRecognitionBtn = document.getElementById("speechsdkStartContinousRecognition");
-            sdkStopContinousRecognitionBtn = document.getElementById("speechsdkStopContinousRecognition");
-            sdkStartContinousTranslationBtn = document.getElementById("speechsdkStartContinousTranslation");
-            sdkStopContinousTranslationBtn = document.getElementById("speechsdkStopContinousTranslation");
+            sdkStartContinousRecognitionBtn = document.getElementById("speechsdkStartContinuousRecognition");
+            sdkStopContinousRecognitionBtn = document.getElementById("speechsdkStopContinuousRecognition");
+            sdkStartContinousTranslationBtn = document.getElementById("speechsdkStartContinuousTranslation");
+            sdkStopContinousTranslationBtn = document.getElementById("speechsdkStopContinuousTranslation");
             sdkIntentStartRecognizeOnceAsyncBtn = document.getElementById("speechsdkIntentStartRecognizeOnceAsync");
             sdkIntentStopRecognizeOnceAsyncBtn = document.getElementById("speechsdkIntentStopRecognizeOnceAsync");
             phraseDiv = document.getElementById("phraseDiv");
@@ -264,14 +264,14 @@
             inputSource = document.getElementById("inputSource");
             filePicker = document.getElementById('filePicker');
 
-            // Starts continous voice recognition. Reconition will continue until there is ~20s of silience or ~10 minutes of speech.
+            // Starts continuous voice recognition. Recognition will continue until there is ~20s of silence or ~10 minutes of speech.
             sdkStartContinousRecognitionBtn.addEventListener("click", function () {
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
                 var lastRecognized = "";
 
                 // If an audio file was specified, use it. Else use the microphone.
-                // Depending on browser security settings, the user may be prompted to allow microphone use. Using continous recognition allows mutliple
+                // Depending on browser security settings, the user may be prompted to allow microphone use. Using continuous recognition allows multiple
                 // phrases to be recognized from a single use authorization.
                 var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
                 var speechConfig;
@@ -288,10 +288,10 @@
                 speechConfig.language = languageOptions.value;
                 reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
 
-                // Before beginging speech recognition, setup the callbacks to be invoked when an event occurs.
+                // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
                 // The event recognizing signals that an intermediate recognition result is received.
-                // You will recieve 1 or more recognizing events as a speech phrase is recognized, with each containing
+                // You will receive 1 or more recognizing events as a speech phrase is recognized, with each containing
                 // more recognized speech. The event will contain the text for the recognition since the last phrase was recognized.
                 reco.recognizing = function (s, e) {
                     window.console.log(e);
@@ -301,7 +301,7 @@
 
                 // The event recognized signals that a final recognition result is received.
                 // This is the final event that a phrase has been recognized.
-                // For continous recognition, you will get one recognized event for each phrase recognized.
+                // For continuous recognition, you will get one recognized event for each phrase recognized.
                 reco.recognized = function (s, e) {
                     window.console.log(e);
 
@@ -383,14 +383,14 @@
                 sdkStopContinousRecognitionBtn.disabled = true;
             });
 
-            // Starts continous voice translation. Reconition will continue until there is ~20s of silience or ~10 minutes of speech.
+            // Starts continuous voice translation. Recognition will continue until there is ~20s of silence or ~10 minutes of speech.
             sdkStartContinousTranslationBtn.addEventListener("click", function () {
                 var lastRecognized = "";
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
 
                 // If an audio file was specified, use it. Else use the microphone.
-                // Depending on browser security settings, the user may be prompted to allow microphone use. Using continous recognition allows mutliple
+                // Depending on browser security settings, the user may be prompted to allow microphone use. Using continuous recognition allows multiple
                 // phrases to be recognized from a single use authorization.
                 var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
                 var speechConfig;
@@ -546,7 +546,7 @@
                 statusDiv.innerHTML = "";
 
                 // If an audio file was specified, use it. Else use the microphone.
-                // Depending on browser security settings, the user may be prompted to allow microphone use. Using continous recognition allows mutliple
+                // Depending on browser security settings, the user may be prompted to allow microphone use. Using continuous recognition allows multiple
                 // phrases to be recognized from a single use authorization.
                 var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
                 var speechConfig;
@@ -566,7 +566,7 @@
                 // Before beginging speech recognition, setup the callbacks to be invoked when an event occurs.
 
                 // The event recognizing signals that an intermediate recognition result is received.
-                // You will recieve 1 or more recognizing events as a speech phrase is recognized, with each containing
+                // You will receive 1 or more recognizing events as a speech phrase is recognized, with each containing
                 // more recognized speech. The event will contain the text for the recognition since the last phrase was recognized.
                 reco.recognizing = function (s, e) {
                     window.console.log(e);
@@ -593,7 +593,7 @@
 
                 // The event recognized signals that a final recognition result is received.
                 // This is the final event that a phrase has been recognized.
-                // For continous recognition, you will get one recognized event for each phrase recognized.
+                // For continuous recognition, you will get one recognized event for each phrase recognized.
                 reco.recognized = function (s, e) {
                     window.console.log(e);
 
@@ -691,7 +691,7 @@
                 statusDiv.innerHTML = "";
 
                 // If an audio file was specified, use it. Else use the microphone.
-                // Depending on browser security settings, the user may be prompted to allow microphone use. Using continous recognition allows mutliple
+                // Depending on browser security settings, the user may be prompted to allow microphone use. Using continuous recognition allows multiple
                 // phrases to be recognized from a single use authorization.
                 var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
                 var speechConfig;
@@ -714,10 +714,10 @@
 
                     reco.addAllIntents(lm);
                 }
-                // Before beginging speech recognition, setup the callbacks to be invoked when an event occurs.
+                // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
                 // The event recognizing signals that an intermediate recognition result is received.
-                // You will recieve 1 or more recognizing events as a speech phrase is recognized, with each containing
+                // You will receive 1 or more recognizing events as a speech phrase is recognized, with each containing
                 // more recognized speech. The event will contain the text for the recognition since the last phrase was recognized.
                 reco.recognizing = function (s, e) {
                     window.console.log(e);
@@ -744,7 +744,7 @@
 
                 // The event recognized signals that a final recognition result is received.
                 // This is the final event that a phrase has been recognized.
-                // For continous recognition, you will get one recognized event for each phrase recognized.
+                // For continuous recognition, you will get one recognized event for each phrase recognized.
                 reco.recognized = function (s, e) {
                     window.console.log(e);
 
