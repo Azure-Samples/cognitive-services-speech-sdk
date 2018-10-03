@@ -15,6 +15,8 @@
     <NoWarn>1701;1702;1705;1591</NoWarn>
     <Version>0.0.0</Version>
     <DebugSymbols>true</DebugSymbols>
+    <FxCopAnalyzerVersion>2.6.2</FxCopAnalyzerVersion>
+    <CodeAnalysisRuleSet>$(USERPROFILE)\.nuget\packages\microsoft.codeanalysis.fxcopanalyzers\$(FxCopAnalyzerVersion)\rulesets\legacy\Sdl-7.1.Recommended.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <OutputPath>${CMAKE_RUNTIME_OUTPUT_DIRECTORY}\$(Configuration)\</OutputPath>
@@ -34,6 +36,9 @@
     <DefineConstants>USE_UTF8</DefineConstants>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="$(FxCopAnalyzerVersion)" PrivateAssets="all" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="${SRC_DIR}/CMakeLists.txt">
       <Link>CMakeLists.txt</Link>
