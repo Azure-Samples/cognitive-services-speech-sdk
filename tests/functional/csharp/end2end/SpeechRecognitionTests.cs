@@ -133,7 +133,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
-                
+
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.Canceled, result.Reason);
 
@@ -452,7 +452,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task TestPropertyCollectionWithoutRecognizer()
+        public void TestPropertyCollectionWithoutRecognizer()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Silence.AudioFile);
             PropertyCollection properties;

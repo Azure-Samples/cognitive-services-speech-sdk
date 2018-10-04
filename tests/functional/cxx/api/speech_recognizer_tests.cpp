@@ -84,7 +84,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    SPXTEST_SECTION("Check that recognition can set authurization token")
+    SPXTEST_SECTION("Check that recognition can set authorization token")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
@@ -167,7 +167,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
             // We're going to loop thru 11 times... The first 10, we'll use mocks. The last time we'll use the USP
             // NOTE: Please keep this at 11... It tests various "race"/"speed" configurations of the core system...
-            // NOTE: When running agains the localhost, loop 20 times... Half the time, we'll use mocks, and half - the USP.
+            // NOTE: When running against the localhost, loop 20 times... Half the time, we'll use mocks, and half - the USP.
             const int numLoops = (Config::Endpoint.empty()) ? 11 : 20;
 
             for (int i = 0; i < numLoops; i++)
