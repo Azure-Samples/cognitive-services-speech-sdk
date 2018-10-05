@@ -101,9 +101,17 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector-strong -Wformat -Wformat-security -Werror=format-security")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-strong -Wformat -Wformat-security -Werror=format-security")
 
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g")
+
   set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -fPIC")
 
-  message("compiling with ${CMAKE_CXX_FLAGS}")
+  # option to only compile embedded bitcode markers
+  if((DEFINED APPLE) AND (DEFINED IOS_PLATFORM))
+    if(ENABLE_BITCODE_MARKER)
+      set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -fembed-bitcode-marker")
+    endif(ENABLE_BITCODE_MARKER)
+  endif((DEFINED APPLE) AND (DEFINED IOS_PLATFORM))
 endif()
 
 set(CARBON_ROOT ${PROJECT_SOURCE_DIR})

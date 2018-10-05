@@ -1301,6 +1301,9 @@ phases:
   variables:
     BuildPlatform: iOS
     FrameworkName: MicrosoftCognitiveServicesSpeech
+    VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
+    JointCmakeArgs: -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DBUILD_JAVA=OFF -DBUILD_CSHARP=OFF -DBUILD_PYTHON=OFF -Duse_openssl=OFF -Duse_builtin_httpapi=ON -DCMAKE_TOOLCHAIN_FILE=../external/ios-cmake/ios.toolchain.cmake -DIOS_DEPLOYMENT_TARGET="11.4" -DENABLE_VISIBILITY=1
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set iOS target platform
@@ -1318,7 +1321,7 @@ phases:
   - task: CMake@1
     displayName: Generate makefiles for iOS simulator
     inputs:
-      cmakeArgs: ' -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DBUILD_JAVA=OFF -DBUILD_CSHARP=OFF -DBUILD_PYTHON=OFF -Duse_openssl=OFF -Duse_builtin_httpapi=ON -DCMAKE_TOOLCHAIN_FILE=../external/ios-cmake/ios.toolchain.cmake -DIOS_PLATFORM=SIMULATOR64 -DENABLE_BITCODE=1 -DIOS_DEPLOYMENT_TARGET="10.0" -DENABLE_VISIBILITY=1 ..'
+      cmakeArgs: ' $(JointCmakeArgs) -DIOS_PLATFORM=SIMULATOR64 -DENABLE_BITCODE=0 ..'
       workingDirectory: 'build_ios_simulator'
   - task: CMake@1
     displayName: CMake build for iOS simulator
@@ -1326,47 +1329,77 @@ phases:
       cmakeArgs: '--build . -- -j4'
       workingDirectory: build_ios_simulator
   - task: CMake@1
-    displayName: Generate makefiles for iOS device
+    displayName: Generate makefiles for iOS device (Release)
     inputs:
-      cmakeArgs: ' -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DBUILD_JAVA=OFF -DBUILD_CSHARP=OFF -DBUILD_PYTHON=OFF -Duse_openssl=OFF -Duse_builtin_httpapi=ON -DCMAKE_TOOLCHAIN_FILE=../external/ios-cmake/ios.toolchain.cmake -DIOS_PLATFORM=OS -DIOS_ARCH=arm64 -DENABLE_BITCODE=1 -DIOS_DEPLOYMENT_TARGET="10.0" -DENABLE_VISIBILITY=1 ..'
+      cmakeArgs: ' $(JointCmakeArgs) -DIOS_PLATFORM=OS -DIOS_ARCH=arm64 -DENABLE_BITCODE=1 ..'
       workingDirectory: build_ios_device
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+  - task: CMake@1
+    displayName: Generate makefiles for iOS device (Debug)
+    inputs:
+      cmakeArgs: ' $(JointCmakeArgs) -DIOS_PLATFORM=OS -DIOS_ARCH=arm64 -DENABLE_BITCODE_MARKER=1 -DENABLE_BITCODE=0 ..'
+      workingDirectory: build_ios_device
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))
   - task: CMake@1
     displayName: CMake build for iOS device
     inputs:
       cmakeArgs: '--build . -- -j4'
       workingDirectory: build_ios_device
-  - task: Bash@3
+  - bash: |
+      . ci/apple/apple-functions.sh
+      build_ios_universal_framework '$(OutputDirectory)' '$(FrameworkName)'
     displayName: Create universal framework
-    inputs:
-      filePath: 'ci/apple/create-ios-universal-framework.sh'
-      arguments: '$(Build.Repository.LocalPath) $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration) $(FrameworkName)'
+  - bash: |
+      . ci/apple/apple-functions.sh
+      build_dsym_bundle "build_ios_device/lib" "$(FrameworkName)"
+      build_dsym_bundle "build_ios_simulator/lib" "$(FrameworkName)"
+      combine_dsym_bundles "$(OutputDirectory)" "build_ios_"{device,simulator}"/lib/$(FrameworkName).framework.dSYM" "$(FrameworkName)"
+    condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
+    displayName: Create debug symbols
+  - bash: |
+      cd "$(OutputDirectory)"
+      zip --symlinks -r "$(VersionedFrameworkName).framework.dSYM.zip" "$(FrameworkName).framework.dSYM"
+      rm -rf "$(OutputDirectory)/$(FrameworkName).framework.dSYM"
+    condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
+    displayName: Archive debug symbols
+  - bash: |
+      strip -x "$(OutputDirectory)/$(FrameworkName).framework/$(FrameworkName)"
+    displayName: Strip dynamic library in universal framework for release builds
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+  - bash: |
+      cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$(OutputDirectory)"
+      cd "$(OutputDirectory)"
+      zip --symlinks -r "$(VersionedFrameworkName).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
+      rm -rf REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
+    displayName: Create archive for signing
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign iOS framework'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing'
-      FolderPath: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)'
-      Pattern: $(FrameworkName)-iOS.zip
+      FolderPath: '$(OutputDirectory)'
+      Pattern: $(VersionedFrameworkName).zip
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_IOS)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - bash: |
       # .zip from ESRP puts the content in a deep sub directory.
       # We re-zip it, and rename it to include the version number.
       set -e -o pipefail -x
       mkdir temp
       cd temp
-      unzip '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)/$(FrameworkName)-iOS.zip'
+      unzip '$(OutputDirectory)/$(VersionedFrameworkName).zip'
+      # Remove original package.
+      rm '$(OutputDirectory)/$(VersionedFrameworkName).zip'
       cd "$(find . -type d -name $(FrameworkName).framework -prune)"
       cd ..
-      zip --symlinks -r '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)/$(FrameworkName)-iOS-$(SPEECHSDK_SEMVER2NOMETA).zip' .
-      # Remove original package.
-      rm '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)/$(FrameworkName)-iOS.zip'
+      zip --symlinks -r '$(OutputDirectory)/$(VersionedFrameworkName).zip' .
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-  # TODO publish more
+    displayName: Package signed framework
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)'
-      ArtifactName: iOS
+      ArtifactName: "$(BuildPlatform)"
       publishLocation: Container
 
 - phase: OsxBuild
