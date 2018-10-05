@@ -22,7 +22,7 @@ endif()
 configure_file(${SRC_DIR}/packages.config
   ${CMAKE_CURRENT_BINARY_DIR}/packages.config COPYONLY)
 
-target_compile_options(${PROJECT_NAME} PRIVATE "/langversion:6")
+target_compile_options(${PROJECT_NAME} PRIVATE /langversion:6 /warnaserror /warn:4)
 target_link_libraries(${PROJECT_NAME} ${CSHARP_LIB})
 
 add_dependencies(${PROJECT_NAME} ${CSHARP_LIB} ${NUGET_RESTORE})

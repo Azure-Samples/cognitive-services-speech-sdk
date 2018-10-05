@@ -177,6 +177,9 @@ phases:
   # Checks BEGIN
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
     displayName: 'Run Roslyn Analyzers'
+    # Note: source/bindings/csharp/CMakeLists.txt (Microsoft.CognitiveServices.Speech.csharp.csproj.template)
+    #       does _not_ pick up on Roslyn analyzers options set here; for now
+    #       these need to be manually kept in sync.
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@3
     displayName: 'BinSkim (can pass only with Spectre mitigation)'
     inputs:

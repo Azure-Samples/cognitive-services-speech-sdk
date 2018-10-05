@@ -10,7 +10,7 @@ add_executable(${PROJECT_NAME}
     ${CARBON_CSHARP_CONSOLE_SOURCES}
 )
 
-target_compile_options(${PROJECT_NAME} PRIVATE "/langversion:6")
+target_compile_options(${PROJECT_NAME} PRIVATE /langversion:6 /warnaserror /warn:4)
 target_link_libraries(${PROJECT_NAME} ${CSHARP_LIB})
 add_dependencies(${PROJECT_NAME} ${CSHARP_LIB})
 
