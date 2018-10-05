@@ -891,7 +891,7 @@ phases:
         pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
         pacmd load-module module-virtual-source source_name=VirtualMic
         trap 'pulseaudio --kill' EXIT
-        /test/ci/nuget/quickstart-dotnetcore-e2e.expect $PATH_TO_AUDIO dotnet helloworld/bin/Debug/netcoreapp2.0/helloworld.dll
+        /test/ci/quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" dotnet helloworld/bin/Debug/netcoreapp2.0/helloworld.dll
       SCRIPT
     displayName: Test
   - task: PublishTestResults@2

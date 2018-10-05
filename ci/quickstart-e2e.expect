@@ -1,7 +1,8 @@
 #!/usr/bin/expect
 set timeout 30
 set pathToAudio [lindex $argv 0]
-set cmd [lrange $argv 1 end]
+set expectedRecoText [lindex $argv 1]
+set cmd [lrange $argv 2 end]
 spawn {*}$cmd
 set exitCode 1
 expect {
@@ -13,11 +14,11 @@ expect {
     expect {
       -re "We recognized: (.+)\r\n" {
         set recoText $expect_out(1,string)
-        if {$recoText == "What's the weather like?"} {
+        if {$recoText == $expectedRecoText} {
           puts "### Pass with the right recognition text"
           set exitCode 0
         } else {
-          puts "### BAD RECO TEXT: [set recoText]"
+          puts "### BAD RECO TEXT: expected != actual: [set expectedRecoText] != [set recoText]"
         }
       }
       timeout {

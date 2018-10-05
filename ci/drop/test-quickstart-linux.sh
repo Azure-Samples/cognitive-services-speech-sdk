@@ -28,13 +28,30 @@ tar -xzf "$RELEASE_DROP" --strip-components=1 -C "$TEST_DIR/speechsdk"
 cp -av "$SOURCE_ROOT/public_samples/quickstart/cpp-linux" "$TEST_DIR"
 cp -p "$SCRIPT_DIR/../run-with-pulseaudio.sh" "$TEST_DIR/cpp-linux"
 cp -p "$SOURCE_ROOT/tests/input/audio/whatstheweatherlike.wav" "$TEST_DIR/cpp-linux"
+cp -p "$SOURCE_ROOT/ci/quickstart-e2e.expect" "$TEST_DIR/cpp-linux"
 
 perl -i -pe 's(SPEECHSDK_ROOT:=.*)(SPEECHSDK_ROOT:=/test/speechsdk)' "$TEST_DIR/cpp-linux/Makefile"
-perl -i -pe 's(L"YourSubscriptionKey")(L"'$SPEECH_SUBSCRIPTION_KEY'")' "$TEST_DIR/cpp-linux/"*.cpp
-perl -i -pe 's(L"YourServiceRegion")(L"westus")' "$TEST_DIR/cpp-linux/"*.cpp
+perl -i -pe 's("YourSubscriptionKey")("'$SPEECH_SUBSCRIPTION_KEY'")' "$TEST_DIR/cpp-linux/"*.cpp
+perl -i -pe 's("YourServiceRegion")("westus")' "$TEST_DIR/cpp-linux/"*.cpp
+
+DOCKER_CMD=(docker run --rm --volume "$(readlink -f "$TEST_DIR"):/test" --workdir /test/cpp-linux)
 
 if [[ $SMOKE_TEST == 1 ]]; then
-  docker run --rm --volume "$(readlink -f "$TEST_DIR"):/test" --workdir /test/cpp-linux "$IMAGE_TAG" bash -c 'make && LD_LIBRARY_PATH=/test/speechsdk/lib/x64 ./run-with-pulseaudio.sh whatstheweatherlike.wav ./helloworld'
+
+  "${DOCKER_CMD[@]}" --interactive "$IMAGE_TAG" bash - <<'SCRIPT'
+set -e -x -o pipefail
+DEBIAN_FRONTEND=noninteractive apt-get install --quiet --no-install-recommends --yes expect
+make
+export LD_LIBRARY_PATH=/test/speechsdk/lib/x64
+PATH_TO_AUDIO=whatstheweatherlike.wav
+pulseaudio -D --exit-idle-time=-1
+sleep 1.5
+pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
+pacmd load-module module-virtual-source source_name=VirtualMic
+trap 'pulseaudio --kill' EXIT
+./quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" ./helloworld
+SCRIPT
+
 else
-  docker run --rm --volume "$(readlink -f "$TEST_DIR"):/test" --workdir /test/cpp-linux "$IMAGE_TAG" make
+  "${DOCKER_CMD[@]}" "$IMAGE_TAG" make
 fi
