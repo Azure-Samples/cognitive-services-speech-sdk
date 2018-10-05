@@ -1,3 +1,0 @@
-RUN apt-get update && \
-    apt-get --yes install \
-      openjdk-9-jre-headless

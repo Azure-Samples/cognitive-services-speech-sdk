@@ -1,7 +1,0 @@
-from-ubuntu16-x86
-
-deps
-
-swig-via-github
-
-builduser

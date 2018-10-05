@@ -3,13 +3,14 @@ set -x -e -o pipefail
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 SOURCE_ROOT="$SCRIPT_DIR/../.."
 
-USAGE="Usage: $0 [--smoke-test] release-drop"
+USAGE="Usage: $0 [--smoke-test] image-tag release-drop"
 SMOKE_TEST=0
 if [[ $1 == --smoke-test ]]; then
   SMOKE_TEST=1
   shift
 fi
-RELEASE_DROP="${1?$USAGE}"
+IMAGE_TAG="${1?$USAGE}"
+RELEASE_DROP="${2?$USAGE}"
 [[ -f $RELEASE_DROP ]]
 
 [[ -z $SPEECH_SUBSCRIPTION_KEY ]] && {
@@ -18,9 +19,6 @@ RELEASE_DROP="${1?$USAGE}"
 }
 
 # Build OOBE image
-DOCKER_TAG=csspeechdev_linuxoobe_x64
-DOCKER_DIR="$SOURCE_ROOT/ci/docker/linuxoobe/x64"
-"$SOURCE_ROOT/ci/docker/build-image.sh" "$DOCKER_TAG" "$DOCKER_DIR"
 
 TEST_DIR="$(mktemp --directory --tmpdir="$SCRIPT_DIR" oobetest-XXXXXX)"
 trap '[[ -d $TEST_DIR ]] &&  rm -rf $TEST_DIR' EXIT
@@ -36,7 +34,7 @@ perl -i -pe 's(L"YourSubscriptionKey")(L"'$SPEECH_SUBSCRIPTION_KEY'")' "$TEST_DI
 perl -i -pe 's(L"YourServiceRegion")(L"westus")' "$TEST_DIR/cpp-linux/"*.cpp
 
 if [[ $SMOKE_TEST == 1 ]]; then
-  docker run --rm --volume "$(readlink -f "$TEST_DIR"):/test" --workdir /test/cpp-linux "$DOCKER_TAG" bash -c 'make && LD_LIBRARY_PATH=/test/speechsdk/lib/x64 ./run-with-pulseaudio.sh whatstheweatherlike.wav ./helloworld'
+  docker run --rm --volume "$(readlink -f "$TEST_DIR"):/test" --workdir /test/cpp-linux "$IMAGE_TAG" bash -c 'make && LD_LIBRARY_PATH=/test/speechsdk/lib/x64 ./run-with-pulseaudio.sh whatstheweatherlike.wav ./helloworld'
 else
-  docker run --rm --volume "$(readlink -f "$TEST_DIR"):/test" --workdir /test/cpp-linux "$DOCKER_TAG" make
+  docker run --rm --volume "$(readlink -f "$TEST_DIR"):/test" --workdir /test/cpp-linux "$IMAGE_TAG" make
 fi

@@ -84,6 +84,8 @@ variables:
   SPEECHSDK_MAVEN_ARTIFACT_ID: client-sdk
   SPEECHSDK_MAVEN_GROUP_ID: com.microsoft.cognitiveservices.speech
   SPEECHSDK_NUGET_VERSION: 4.6
+  ACR_NAME: csspeechsdkacr201809
+  DOCKER_REGISTRY: $(ACR_NAME).azurecr.io
 
 phases:
 
@@ -646,7 +648,13 @@ phases:
     name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
   steps:
-  - bash: './ci/set-variables.sh && ./ci/set-test-variables.sh'
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+      ./ci/set-test-variables.sh
+      DOCKER_IMAGE="$(perl ci/docker/dockertool.pl imagetag --registry $(DOCKER_REGISTRY) oobedevjre_ubuntu1604_x64)"
+      vsts_setvar DOCKER_IMAGE "$DOCKER_IMAGE"
     displayName: Set variables
   - bash: |
       set -x -e -o pipefail
@@ -672,13 +680,17 @@ phases:
       find public_samples/quickstart/java-jre -name \*.java -print0 | xargs -0 perl -i -pe 's("YourSubscriptionKey")("'$(KeySkyman)'")'
       ./ci/run-maven.sh public_samples "$(MavenRoot)"
     displayName: Patch and build samples
+  - task: Docker@1
+    displayName: Pull docker image
+    inputs:
+      azureSubscriptionEndpoint: 'Custom Speech Development (3a96ef56-41a9-40a0-b0f3-fb125c2b8798) - RG csspeechsdk-carbon'
+      azureContainerRegistry: $(DOCKER_REGISTRY)
+      command: pull
+      arguments: $(DOCKER_IMAGE)
   - bash: |
       set -e -x -o pipefail
-      DOCKER_TAG=csspeechdev_linuxoobejre_x64
-      DOCKER_DIR=./ci/docker/linuxoobejre/x64
-      ./ci/docker/build-image.sh "$DOCKER_TAG" "$DOCKER_DIR"
       cp "$(PathToJar)" $(Build.Repository.LocalPath)
-      docker run --rm --volume "$(Build.Repository.LocalPath):/test:ro" --workdir /test "$DOCKER_TAG" ./ci/run-with-pulseaudio.sh \
+      docker run --rm --volume "$(Build.Repository.LocalPath):/test:ro" --workdir /test "$(DOCKER_IMAGE)" ./ci/run-with-pulseaudio.sh \
         /test/tests/input/audio/whatstheweatherlike.wav \
         java -cp ./public_samples/quickstart/java-jre/target/quickstart-eclipse-1.0.0-SNAPSHOT.jar:/test/"$(JarName)" speechsdk.quickstart.Main
     displayName: Test quickstart-jre
@@ -815,13 +827,26 @@ phases:
     name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
   steps:
-  - bash: './ci/set-variables.sh && ./ci/set-test-variables.sh'
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+      ./ci/set-test-variables.sh
+      DOCKER_IMAGE="$(perl ci/docker/dockertool.pl imagetag --registry $(DOCKER_REGISTRY) oobedevdnc20_ubuntu1604_x64)"
+      vsts_setvar DOCKER_IMAGE "$DOCKER_IMAGE"
     displayName: Set variables
   - task: DownloadBuildArtifacts@0
     displayName: Downloading Windows artifacts
     inputs:
       artifactName: Windows
       downloadPath: $(System.ArtifactsDirectory)/In
+  - task: Docker@1
+    displayName: Pull docker image
+    inputs:
+      azureSubscriptionEndpoint: 'Custom Speech Development (3a96ef56-41a9-40a0-b0f3-fb125c2b8798) - RG csspeechsdk-carbon'
+      azureContainerRegistry: $(DOCKER_REGISTRY)
+      command: pull
+      arguments: $(DOCKER_IMAGE)
   - bash: |
       set -e -x -o pipefail
       perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
@@ -847,18 +872,15 @@ phases:
       find public_samples/quickstart/csharp-dotnetcore -name \*.cs -print0 | xargs -0 perl -i -pe 's("YourSubscriptionKey")("'$(KeySkyman)'")'
       mkdir localnuget
       cp --verbose $(System.ArtifactsDirectory)/In/Windows/Microsoft.CognitiveServices.Speech.*.nupkg localnuget
-      DOCKER_TAG=csspeechdev_linuxoobenetcore20_x64
-      DOCKER_DIR=./ci/docker/linuxoobenetcore20/x64
-      ./ci/docker/build-image.sh "$DOCKER_TAG" "$DOCKER_DIR"
       # First run the unit tests
-      docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$DOCKER_TAG" bash - <<"SCRIPT"
+      docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$(DOCKER_IMAGE)" bash - <<"SCRIPT"
         set -e -x -o pipefail
         cd tests/functional/csharp/end2end
         dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
         dotnet test --framework netcoreapp2.0 --settings csharp.runsettings --logger 'trx;LogFileName=TEST-csharp-end2end-for-nupkg.trx'
       SCRIPT
       # Then run the end-to-end for the quickstart
-      docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$DOCKER_TAG" bash - <<"SCRIPT"
+      docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$(DOCKER_IMAGE)" bash - <<"SCRIPT"
         set -e -x -o pipefail
         PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
         cd public_samples/quickstart/csharp-dotnetcore
@@ -1184,30 +1206,36 @@ phases:
       release:
         BuildConfiguration: Release
   steps:
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Set Linux-x86 target platform
-    inputs:
-      type: InlineScript
-      script: |
-        . ci/functions.sh
-        vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x86
-        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+      DOCKER_IMAGE="$(perl ci/docker/dockertool.pl imagetag --registry $(DOCKER_REGISTRY) dev_ubuntu1604_x86)"
+      vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x86
+      vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+      vsts_setvar DOCKER_IMAGE "$DOCKER_IMAGE"
     displayName: Set variables
+  - task: Docker@1
+    displayName: Pull docker image
     inputs:
-      type: FilePath
-      scriptPath: 'ci/set-variables.sh'
+      azureSubscriptionEndpoint: 'Custom Speech Development (3a96ef56-41a9-40a0-b0f3-fb125c2b8798) - RG csspeechsdk-carbon'
+      azureContainerRegistry: $(DOCKER_REGISTRY)
+      command: pull
+      arguments: $(DOCKER_IMAGE)
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Build container, SDK, create drop
     inputs:
       type: InlineScript
       script: |
         set -e -o pipefail -x
-        export SPEECH_SUBSCRIPTION_KEY=$(KeySkyman)
-        pushd ci/docker
-        ./build.sh linux/x86
-        ./build-and-smoke-test.sh linux/x86 $(BuildConfiguration) build/Linux-x86
-        popd
+        SPEECH_SUBSCRIPTION_KEY=$(KeySkyman) \
+        docker run \
+          --rm \
+          --volume "$(Build.Repository.LocalPath)":/csspeech \
+          --env SPEECH_SUBSCRIPTION_KEY \
+          --workdir /csspeech \
+          "$(DOCKER_IMAGE)" \
+          /csspeech/ci/docker/smoke-test.sh "$(BuildConfiguration)" build/Linux-x86
         ./ci/drop/bindrop.sh "Linux-x86" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Linux-x86/$(BuildConfiguration)
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Linux x86'
@@ -1224,11 +1252,13 @@ phases:
     name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
   steps:
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+      DOCKER_IMAGE="$(perl ci/docker/dockertool.pl imagetag --registry $(DOCKER_REGISTRY) oobedevcpp_ubuntu1604_x64)"
+      vsts_setvar DOCKER_IMAGE "$DOCKER_IMAGE"
     displayName: Set variables
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/set-variables.sh'
   - task: DownloadBuildArtifacts@0
     displayName: Download Build Artifacts
     inputs:
@@ -1239,8 +1269,15 @@ phases:
       type: FilePath
       scriptPath: './ci/drop/linux-reldrop.sh'
       args: '"$(SPEECHSDK_SEMVER2NOMETA)" "$(Build.Repository.LocalPath)" "$(System.ArtifactsDirectory)/Linux" "$(Build.ArtifactStagingDirectory)/Linux/Drop"'
+  - task: Docker@1
+    displayName: Pull docker image
+    inputs:
+      azureSubscriptionEndpoint: 'Custom Speech Development (3a96ef56-41a9-40a0-b0f3-fb125c2b8798) - RG csspeechsdk-carbon'
+      azureContainerRegistry: $(DOCKER_REGISTRY)
+      command: pull
+      arguments: $(DOCKER_IMAGE)
   - bash: |
-      SPEECH_SUBSCRIPTION_KEY="$(KeySkyman)" ./ci/drop/test-quickstart-linux.sh --smoke-test "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"
+      SPEECH_SUBSCRIPTION_KEY="$(KeySkyman)" ./ci/drop/test-quickstart-linux.sh --smoke-test "$(DOCKER_IMAGE)" "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"
     displayName: Test - build and run quickstart
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Linux Release Drop'

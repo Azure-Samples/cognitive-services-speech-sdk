@@ -1,7 +1,0 @@
-from-ubuntu16-x64
-
-oobedeps
-
-jreoobedeps
-
-builduser

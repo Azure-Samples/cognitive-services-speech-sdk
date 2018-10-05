@@ -110,3 +110,8 @@ function getAuthorizationToken {
     return $exit_code
   fi
 }
+
+function exitWithError {
+  printf "$@" 1>&2
+  exit 1
+}
