@@ -18,13 +18,13 @@
                 </td>
             </tr>
             <tr>
-                <td align="right"><a href="https://www.microsoft.com/cognitive-services/en-us/sign-up" target="_blank">Subscription</a>:</td>
+                <td align="right"><a href="https://www.microsoft.com/cognitive-services/sign-up" target="_blank">Subscription</a>:</td>
                 <td><input id="key" type="text" size="40" value="YOUR_SPEECH_API_KEY"><b>YOUR_SPEECH_API_KEY</b></td>
             </tr>
             <tr>
                 <td align="right">Language:</td>
                 <td align="left">
-                    <!-- For a full list of supported languages see: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/supported-languages-->
+                    <!-- For the full list of supported languages see: https://docs.microsoft.com/azure/cognitive-services/speech-service/supported-languages -->
                     <select id="languageOptions">
                         <option value="ar-EG">Arabic - EG</option>
                         <option value="ca-ES">Catalan - ES</option>
@@ -63,8 +63,14 @@
                 <td align="right">Region:</td>
                 <td align="left">
                     <select id="regionOptions">
+                        <option value="westus" selected="selected">West US</option>
                         <option value="westus2">West US2</option>
-                        <option value="westus" selected="selected">West - US</option>
+                        <option value="eastus">East US</option>
+                        <option value="eastus2">East US2</option>
+                        <option value="eastasia">East Asia</option>
+                        <option value="southeastasia">South East Asia</option>
+                        <option value="northeurope">North Europe</option>
+                        <option value="westeurope">West Europe</option>
                     </select>
                 </td>
             </tr>
@@ -93,26 +99,26 @@
                 </td>
             </tr>
             <tr>
-                <td align="right"><b>SpeechSDK API recognizeOnceAsync:</b></td>
+                <td align="right"><b>Speech SDK API recognizeOnceAsync:</b></td>
                 <td>
                     <button id="speechsdkStartRecognizeOnceAsync">recognizeOnceAsync()</button>
                     <button id="speechsdkStopRecognizeOnceAsync" disabled="disabled">STOP recognizeOnceAsync()</button>
                 </td>
             </tr>
             <tr>
-                <td align="right"><b>SpeechSDK API Continuous Speech Recognition:</b></td>
+                <td align="right"><b>Speech SDK API Continuous Speech Recognition:</b></td>
                 <td>
                     <button id="speechsdkStartContinuousRecognition">startContinuousRecognitionAsync()</button>
                     <button id="speechsdkStopContinuousRecognition" disabled="disabled">STOP stopContinuousRecognitionAsync()</button>
                 </td>
             </tr>
             <tr>
-                <td align="right"><b>SpeechSDK API Translation:</b></td>
+                <td align="right"><b>Speech SDK API Translation:</b></td>
                 <td>
                     <button id="speechsdkStartContinuousTranslation">startContinuousTranslation()</button>
                     <button id="speechsdkStopContinuousTranslation" disabled="disabled">STOP stopContinuousTranslation()</button>
 
-                    <!-- For a full list of supported languages see: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/supported-languages-->
+                    <!-- For a full list of supported languages see: https://docs.microsoft.com/azure/cognitive-services/speech-service/supported-languages-->
                     <select id="languageTargetOptions">
                         <option value="ar-EG:Hoda">Arabic - EG</option>
                         <option value="ca-ES:Herena">Catalan - ES</option>
@@ -148,7 +154,7 @@
                 </td>
             </tr>
             <tr>
-                <td align="right"><b>SpeechSDK API Intent Recognition:</b></td>
+                <td align="right"><b>Speech SDK API Intent Recognition:</b></td>
                 <td>
                     <button id="speechsdkIntentStartRecognizeOnceAsync">recognizeOnceAsync()</button>
                     <button id="speechsdkIntentStopRecognizeOnceAsync" disabled="disabled">STOP recognizeOnceAsync()</button>
@@ -157,7 +163,7 @@
             <tr>
                 <td align="right">Application ID:</td>
                 <td>
-                    <input id="appId" type="text" size="60" value="YOUR_LANGUAGE_UNDERSTANDING_APP_ID">(Only needed for Intent)
+                    <input id="appId" type="text" size="60" value="YOUR_LANGUAGE_UNDERSTANDING_APP_ID">(only needed for intent recognition)
                 </td>
             </tr>
             <tr>
@@ -173,10 +179,10 @@
         </table>
     </div>
 
-    <!-- SpeechSDK REFERENCE -->
+    <!-- Speech SDK REFERENCE -->
     <script src="microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
 
-    <!-- Speech SpeechSDK Authorization token -->
+    <!-- Speech Speech SDK Authorization token -->
     <script>
         // Note: Replace the URL with a valid endpoint to retrieve
         //       authorization tokens for your subscription.
@@ -188,27 +194,25 @@
 
         function RequestAuthorizationToken() {
             if (authorizationEndpoint) {
-                const a = new XMLHttpRequest();
+                var a = new XMLHttpRequest();
                 a.open("GET", authorizationEndpoint);
                 a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 a.send("");
-                a.onload = function () {
-                    key.disabled = true;
-                    key.value = "using authorization token (hit F5 to refresh)";
-
-                    const token = JSON.parse(atob(this.responseText.split(".")[1]));
-                    regionOptions.value = token.region;
+                a.onload = function() {
+                    var token = JSON.parse(atob(this.responseText.split(".")[1]));
+                    regionKey.value = token.region;
                     authorizationToken = this.responseText;
-
+                    subscriptionKey.disabled = true;
+                    subscriptionKey.value = "using authorization token (hit F5 to refresh)";
                     console.log("Got an authorization token: " + token);
-                };
+                }
             }
         }
     </script>
 
-    <!-- SpeechSDK USAGE -->
+    <!-- Speech SDK USAGE -->
     <script>
-        // On document load resolve the SpeechSDK dependency
+        // On document load resolve the Speech SDK dependency
         function Initialize(onComplete) {
             if (!!window.SpeechSDK) {
                 document.getElementById('content').style.display = 'block';
@@ -264,7 +268,7 @@
             inputSource = document.getElementById("inputSource");
             filePicker = document.getElementById('filePicker');
 
-            // Starts continuous voice recognition. Recognition will continue until there is ~20s of silence or ~10 minutes of speech.
+            // Starts continuous voice recognition. Recognition will continue until there is ~20 seconds of silence or ~10 minutes of speech.
             sdkStartContinousRecognitionBtn.addEventListener("click", function () {
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
@@ -291,7 +295,7 @@
                 // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
                 // The event recognizing signals that an intermediate recognition result is received.
-                // You will receive 1 or more recognizing events as a speech phrase is recognized, with each containing
+                // You will receive one or more recognizing events as a speech phrase is recognized, with each containing
                 // more recognized speech. The event will contain the text for the recognition since the last phrase was recognized.
                 reco.recognizing = function (s, e) {
                     window.console.log(e);
@@ -318,8 +322,8 @@
                 };
 
                 // The event signals that the service has stopped processing speech.
-                // https://docs.microsoft.com/en-us/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitioncanceledeventargs?view=azure-node-latest
-                // This can happen for two broad classes or reasons.
+                // https://docs.microsoft.com/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitioncanceledeventargs?view=azure-node-latest
+                // This can happen for two broad classes of reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
                 // 2. Speech was detected to have ended.
@@ -383,7 +387,7 @@
                 sdkStopContinousRecognitionBtn.disabled = true;
             });
 
-            // Starts continuous voice translation. Recognition will continue until there is ~20s of silence or ~10 minutes of speech.
+            // Starts continuous voice translation. Recognition will continue until there is ~20 seconds of silence or ~10 minutes of speech.
             sdkStartContinousTranslationBtn.addEventListener("click", function () {
                 var lastRecognized = "";
                 phraseDiv.innerHTML = "";
@@ -419,10 +423,10 @@
 
                 reco = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
 
-                // Before beginging speech recognition, setup the callbacks to be invoked when an event occurs.
+                // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
                 // The event recognizing signals that an intermediate recognition result is received.
-                // You will recieve 1 or more recognizing events as a speech phrase is recognized, with each containing
+                // You will receive one or more recognizing events as a speech phrase is recognized, with each containing
                 // more recognized speech. The event will contain the text for the recognition since the last phrase was recognized.
                 // Both the source language text and the translation text(s) are available.
                 reco.recognizing = function (s, e) {
@@ -439,7 +443,7 @@
 
                 // The event recognized signals that a final recognition result is received.
                 // This is the final event that a phrase has been recognized.
-                // For continous recognition, you will get one recognized event for each phrase recognized.
+                // For continuous recognition, you will get one recognized event for each phrase recognized.
                 // Both the source language text and the translation text(s) are available.
                 reco.recognized = function (s, e) {
                     window.console.log(e);
@@ -455,8 +459,8 @@
                 };
 
                 // The event signals that the service has stopped processing speech.
-                // https://docs.microsoft.com/en-us/javascript/api/microsoft-cognitiveservices-speech-sdk/translationrecognitioncanceledeventargs?view=azure-node-latest
-                // This can happen for two broad classes or reasons.
+                // https://docs.microsoft.com/javascript/api/microsoft-cognitiveservices-speech-sdk/translationrecognitioncanceledeventargs?view=azure-node-latest
+                // This can happen for two broad classes of reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
                 // 2. Speech was detected to have ended.
@@ -469,7 +473,7 @@
 
                 // Signals an audio payload of synthesized speech is ready for playback.
                 // If the event result contains valid audio, it's reason will be ResultReason.SynthesizingAudio
-                // Once a complete phrase has been synthized, the event will be called with ResultReason.SynthesizingAudioComplete and a 0 byte audio payload.
+                // Once a complete phrase has been synthesized, the event will be called with ResultReason.SynthesizingAudioComplete and a 0 byte audio payload.
                 reco.synthesizing = function (s, e) {
                     window.console.log(e);
 
@@ -563,10 +567,10 @@
                 speechConfig.language = languageOptions.value;
                 reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
 
-                // Before beginging speech recognition, setup the callbacks to be invoked when an event occurs.
+                // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
                 // The event recognizing signals that an intermediate recognition result is received.
-                // You will receive 1 or more recognizing events as a speech phrase is recognized, with each containing
+                // You will receive one or more recognizing events as a speech phrase is recognized, with each containing
                 // more recognized speech. The event will contain the text for the recognition since the last phrase was recognized.
                 reco.recognizing = function (s, e) {
                     window.console.log(e);
@@ -575,7 +579,7 @@
                 };
 
                 // The event signals that the service has stopped processing speech.
-                // https://docs.microsoft.com/en-us/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitioncanceledeventargs?view=azure-node-latest
+                // https://docs.microsoft.com/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitioncanceledeventargs?view=azure-node-latest
                 // This can happen for two broad classes or reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
@@ -708,7 +712,8 @@
                 speechConfig.language = languageOptions.value;
                 reco = new SpeechSDK.IntentRecognizer(speechConfig, audioConfig);
 
-                // Setup a Language Understanding Model. See: https://www.luis.ai/home for information on Language Understanding.
+                // Set up a Language Understanding Model from Language Understanding Intelligent Service (LUIS).
+                // See https://www.luis.ai/home for more information on LUIS.
                 if (appId.value !== "" && appId.value !== "YOUR_LANGUAGE_UNDERSTANDING_APP_ID") {
                     var lm = SpeechSDK.LanguageUnderstandingModel.fromAppId(appId.value);
 
@@ -717,7 +722,7 @@
                 // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
                 // The event recognizing signals that an intermediate recognition result is received.
-                // You will receive 1 or more recognizing events as a speech phrase is recognized, with each containing
+                // You will receive one or more recognizing events as a speech phrase is recognized, with each containing
                 // more recognized speech. The event will contain the text for the recognition since the last phrase was recognized.
                 reco.recognizing = function (s, e) {
                     window.console.log(e);
@@ -726,7 +731,7 @@
                 };
 
                 // The event signals that the service has stopped processing speech.
-                // https://docs.microsoft.com/en-us/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitioncanceledeventargs?view=azure-node-latest
+                // https://docs.microsoft.com/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitioncanceledeventargs?view=azure-node-latest
                 // This can happen for two broad classes or reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
@@ -757,7 +762,7 @@
                             statusDiv.innerHTML += " Text: " + e.result.text;
                             break;
 
-                        // Both speech an an intent from the model was recognized.
+                        // Both speech an intent from the model was recognized.
                         case SpeechSDK.ResultReason.RecognizedIntent:
                             statusDiv.innerHTML += " Text: " + e.result.text + " IntentId: " + e.result.intentId;
 

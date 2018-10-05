@@ -50,7 +50,7 @@
 
   function RequestAuthorizationToken() {
     if (authorizationEndpoint) {
-      const a = new XMLHttpRequest();
+      var a = new XMLHttpRequest();
       a.open("GET", authorizationEndpoint);
       a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       a.send("");

@@ -612,7 +612,7 @@ export class IntentRecognizer extends Recognizer {
                         ev = new IntentRecognitionEventArgs(new IntentRecognitionResult(), 0 /*TODO*/, evResult.SessionId);
                     }
 
-                    // If LUIS didn't return anything, send the existng event, else
+                    // If LUIS didn't return anything, send the existing event, else
                     // modify it to show the match.
                     // See if the intent found is in the list of intents asked for.
 
