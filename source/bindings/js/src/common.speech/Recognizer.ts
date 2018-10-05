@@ -331,7 +331,8 @@ export abstract class ServiceRecognizerBase implements IDisposable {
         const audioFormat: AudioStreamFormatImpl = this.audioSource.Format as AudioStreamFormatImpl;
 
         const readAndUploadCycle = (_: boolean) => {
-            if (!this.isDisposed) {
+            // If speech is done, stop sending audio.
+            if (!this.isDisposed && !requestSession.IsSpeechEnded && !requestSession.IsCompleted) {
                 audioStreamNode.Read().On(
                     (audioStreamChunk: IStreamChunk<ArrayBuffer>) => {
                         // we have a new audio chunk to upload.

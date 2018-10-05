@@ -7,12 +7,14 @@ import { setTimeout } from "timers";
 
 import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
 import { ConsoleLoggingListener } from "../../../../../source/bindings/js/src/common.browser/Exports";
-import { Events, EventType } from "../../../../../source/bindings/js/src/common/Exports";
+import { Events, EventType, ObjectDisposedError } from "../../../../../source/bindings/js/src/common/Exports";
 
 import { ByteBufferAudioFile } from "./ByteBufferAudioFile";
 import { Settings } from "./Settings";
 import { default as WaitForCondition } from "./Utilities";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
+
+let objsToClose: any[];
 
 beforeAll(() => {
     // Override inputs, if necessary
@@ -22,10 +24,47 @@ beforeAll(() => {
 
 // Test cases are run linerally, still looking for a way to get the test name to print that doesn't mean changing each test.
 beforeEach(() => {
+    objsToClose = [];
+
     // tslint:disable-next-line:no-console
     console.info("---------------------------------------Starting test case-----------------------------------");
-    errorText = undefined;
 });
+
+afterEach(() => {
+    objsToClose.forEach((value: any, index: number, array: any[]) => {
+        if (typeof value.close === "function") {
+            value.close();
+        }
+    });
+});
+
+const BuildRecognizerFromWaveFile: (speechConfig?: sdk.SpeechTranslationConfig) => sdk.TranslationRecognizer = (speechConfig?: sdk.SpeechTranslationConfig): sdk.TranslationRecognizer => {
+
+    let s: sdk.SpeechTranslationConfig = speechConfig;
+    if (s === undefined) {
+        s = BuildSpeechConfig();
+        // Since we're not going to return it, mark it for closure.
+        objsToClose.push(s);
+    }
+
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+
+    const language: string = Settings.WaveFileLanguage;
+    s.speechRecognitionLanguage = language;
+    s.addTargetLanguage("de-DE");
+
+    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
+    expect(r).not.toBeUndefined();
+
+    return r;
+};
+
+const BuildSpeechConfig: () => sdk.SpeechTranslationConfig = (): sdk.SpeechTranslationConfig => {
+    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    return s;
+};
 
 const FIRST_EVENT_ID: number = 1;
 const Recognizing: string = "Recognizing";
@@ -34,135 +73,65 @@ const Session: string = "Session";
 const Canceled: string = "Canceled";
 
 let eventIdentifier: number;
-let errorText: string;
 
 test("TranslationRecognizerMicrophone", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    objsToClose.push(s);
     expect(s).not.toBeUndefined();
     s.addTargetLanguage("en-US");
     s.speechRecognitionLanguage = "en-US";
 
     const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
+    objsToClose.push(r);
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer).toEqual(true);
-
-    r.close();
-    s.close();
 });
 
 test("TranslationRecognizerWavFile", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    s.addTargetLanguage("en-US");
-    s.speechRecognitionLanguage = "en-US";
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-
-    expect(r instanceof sdk.Recognizer).toEqual(true);
-
-    r.close();
-    s.close();
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 });
 
 test("GetSourceLanguage", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    s.addTargetLanguage("en-us");
-
-    s.speechRecognitionLanguage = "en-us";
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
     expect(r.speechRecognitionLanguage).not.toBeUndefined();
     expect(r.speechRecognitionLanguage).not.toBeNull();
     expect(r.speechRecognitionLanguage).toEqual(r.properties.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_RecoLanguage]));
-
-    r.close();
-    s.close();
 });
 
 test("GetTargetLanguages", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    s.addTargetLanguage("en-US");
-
-    s.speechRecognitionLanguage = "en-US";
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
     expect(r.targetLanguages).not.toBeUndefined();
     expect(r.targetLanguages).not.toBeNull();
     expect(r.targetLanguages.length).toEqual(1);
-    expect(r.targetLanguages[0]).toEqual(r.properties.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_RecoLanguage]));
-
-    r.close();
-    s.close();
+    expect(r.targetLanguages[0]).toEqual(r.properties.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages]));
 });
 
 test.skip("GetOutputVoiceNameNoSetting", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    s.addTargetLanguage("en-US");
-
-    s.speechRecognitionLanguage = "en-US";
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
     expect(r.voiceName).not.toBeUndefined();
-
-    r.close();
-    s.close();
 });
 
 test("GetOutputVoiceName", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    s.addTargetLanguage("en-US");
-
-    s.speechRecognitionLanguage = "en-US";
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
 
     const voice: string = "de-DE-Katja";
     s.voiceName = voice;
 
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
 
     expect(r.voiceName).toEqual(voice);
-
-    r.close();
-    s.close();
 });
 
 test("GetParameters", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-
-    s.addTargetLanguage("en-US");
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-    s.speechRecognitionLanguage = "en-US";
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-    expect(r).not.toBeUndefined();
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     expect(r.properties).not.toBeUndefined();
     expect(r.speechRecognitionLanguage).toEqual(r.properties.getProperty(sdk.PropertyId.SpeechServiceConnection_RecoLanguage, ""));
@@ -170,38 +139,11 @@ test("GetParameters", () => {
     // TODO this cannot be true, right? comparing an array with a string parameter???
     expect(r.targetLanguages.length).toEqual(1);
     expect(r.targetLanguages[0]).toEqual(r.properties.getProperty(sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages));
-
-    r.close();
-    s.close();
 });
 
 test("RecognizeOnceAsync1", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-    s.addTargetLanguage("de-DE");
-    s.speechRecognitionLanguage = "en-US";
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-
-    expect(r).not.toBeUndefined();
-
-    expect(r instanceof sdk.Recognizer).toEqual(true);
-
-    r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        try {
-            if (e.result.reason === sdk.ResultReason.Canceled) {
-                r.close();
-                s.close();
-                setTimeout(done, 1);
-                fail(e.result.reason);
-            }
-        } catch (error) {
-            errorText += error;
-        }
-    });
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     r.recognizeOnceAsync(
         (res: sdk.TranslationRecognitionResult) => {
@@ -211,48 +153,21 @@ test("RecognizeOnceAsync1", (done: jest.DoneCallback) => {
             expect(res.translations.get("de", undefined) !== undefined).toEqual(true);
             expect("Wie ist das Wetter?").toEqual(res.translations.get("de", ""));
             expect(res.text).toEqual("What's the weather like?");
-            expect(errorText).toBeUndefined();
 
-            r.close();
-            s.close();
             done();
         },
         (error: string) => {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
 test("Translate Multiple Targets", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+    s.addTargetLanguage("en-US");
 
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    s.addTargetLanguage("de-DE,en-US");
-    s.speechRecognitionLanguage = "en-US";
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-
-    expect(r).not.toBeUndefined();
-
-    expect(r instanceof sdk.Recognizer).toEqual(true);
-
-    r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        try {
-            if (e.result.reason === sdk.ResultReason.Canceled) {
-                r.close();
-                s.close();
-                setTimeout(done, 1);
-                fail(e.result.reason);
-            }
-        } catch (error) {
-            errorText += error;
-        }
-    });
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
 
     r.recognizeOnceAsync(
         (res: sdk.TranslationRecognitionResult) => {
@@ -261,43 +176,10 @@ test("Translate Multiple Targets", (done: jest.DoneCallback) => {
             expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.TranslatedSpeech]);
             expect("Wie ist das Wetter?").toEqual(res.translations.get("de", ""));
             expect("What's the weather like?").toEqual(res.translations.get("en", ""));
-            expect(errorText).toBeUndefined();
-
-            r.close();
-            s.close();
             done();
         },
         (error: string) => {
-            r.close();
-            s.close();
-            done();
-            fail(error);
-
-        });
-});
-
-test.skip("RecognizeOnceAsync_badStream", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-
-    s.speechRecognitionLanguage = "en-US";
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-
-    expect(r instanceof sdk.Recognizer).toEqual(true);
-
-    r.recognizeOnceAsync(
-        (res: sdk.TranslationRecognitionResult) => {
-            fail("Should have hit an error");
-        },
-        (error: string) => {
-            r.close();
-            s.close();
-            done();
+            done.fail(error);
         });
 });
 
@@ -306,19 +188,9 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
     const SpeechEndDetectedEvent = "SpeechEndDetectedEvent";
     const SessionStartedEvent = "SessionStartedEvent";
     const SessionStoppedEvent = "SessionStoppedEvent";
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
 
-    s.addTargetLanguage("en-US");
-    s.speechRecognitionLanguage = "en-US";
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-
-    expect(r instanceof sdk.Recognizer).toEqual(true);
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     const eventsMap: { [id: string]: number; } = {};
     eventIdentifier = 1;
@@ -335,7 +207,6 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
 
     r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
         eventsMap[Canceled] = eventIdentifier++;
-
     };
 
     // TODO eventType should be renamed and be a function getEventType()
@@ -361,19 +232,6 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
         eventsMap[Session + ":" + SessionStoppedEvent] = now;
     };
 
-    r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        try {
-            if (e.result.reason === sdk.ResultReason.Canceled) {
-                r.close();
-                s.close();
-                setTimeout(done, 1);
-                fail(e.result.reason);
-            }
-        } catch (error) {
-            errorText += error;
-        }
-    });
-
     // TODO there is no guarantee that SessionStoppedEvent comes before the recognizeOnceAsync() call returns?!
     //      this is why below SessionStoppedEvent checks are conditional
     r.recognizeOnceAsync((res: sdk.TranslationRecognitionResult) => {
@@ -381,7 +239,7 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
         expect(res.errorDetails).toBeUndefined();
         expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.TranslatedSpeech]);
 
-        expect(res.translations.get("en", "")).toEqual("What's the weather like?");
+        expect(res.translations.get("de", "No Translation")).toEqual("Wie ist das Wetter?");
 
         // session events are first and last event
         const LAST_RECORDED_EVENT_ID: number = eventIdentifier;
@@ -412,33 +270,16 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
 
         // make sure events we don't expect, don't get raised
         expect(Canceled in eventsMap).toEqual(false);
-        expect(errorText).toBeUndefined();
-        r.close();
-        s.close();
         done();
 
     }, (error: string) => {
-        fail(error);
-        r.close();
-        s.close();
-        done();
+        done.fail(error);
     });
 });
 
 test("StartContinuousRecognitionAsync", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-
-    s.addTargetLanguage("en-US");
-    s.speechRecognitionLanguage = "en-US";
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-
-    expect(r instanceof sdk.Recognizer).toEqual(true);
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     r.startContinuousRecognitionAsync(() => {
         const end: number = Date.now() + 1000;
@@ -446,33 +287,21 @@ test("StartContinuousRecognitionAsync", (done: jest.DoneCallback) => {
         WaitForCondition(() => {
             return end <= Date.now();
         }, () => {
-            r.close();
-            s.close();
             done();
         });
-    }, (error: string) => fail(error));
+    }, (error: string) => done.fail(error));
 });
 
 test("StopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
-    s.addTargetLanguage("en-US");
-    s.speechRecognitionLanguage = "en-US";
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-
-    expect(r instanceof sdk.Recognizer).toEqual(true);
     r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs): void => {
         try {
             expect(e.errorDetails).toBeUndefined();
             expect(e.reason).not.toEqual(sdk.CancellationReason.Error);
         } catch (error) {
-            errorText += error;
+            done.fail(error);
         }
     };
     r.startContinuousRecognitionAsync(() => {
@@ -482,72 +311,44 @@ test("StopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
             return end <= Date.now();
         }, () => {
             r.stopContinuousRecognitionAsync(() => {
-                r.close();
-                s.close();
-                expect(errorText).toBeUndefined();
                 done();
             }, (error: string) => fail(error));
         });
-    }, (error: string) => fail(error));
+    }, (error: string) => done.fail(error));
 });
 
 test("StartStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-
-    s.addTargetLanguage("en-US");
-    s.speechRecognitionLanguage = "en-US";
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-
-    expect(r instanceof sdk.Recognizer).toEqual(true);
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     const rEvents: { [id: string]: string; } = {};
 
     r.recognized = ((o: sdk.Recognizer, e: sdk.TranslationRecognitionEventArgs) => {
-        const result: string = e.result.translations.get("en", "");
+        const result: string = e.result.translations.get("de", "");
         rEvents["Result@" + Date.now()] = result;
     });
 
     r.startContinuousRecognitionAsync();
 
-    // wait until we get at least on final result
-    const now: number = Date.now();
-
     WaitForCondition((): boolean => {
         return Object.keys(rEvents).length > 0;
     }, () => {
-        expect(rEvents[Object.keys(rEvents)[0]]).toEqual("What's the weather like?");
+        expect(rEvents[Object.keys(rEvents)[0]]).toEqual("Wie ist das Wetter?");
 
         r.stopContinuousRecognitionAsync(() => {
-            r.close();
-            s.close();
             done();
-        }, (error: string) => fail(error));
+        }, (error: string) => done.fail(error));
     });
 });
 
 test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
 
-    s.addTargetLanguage("en-US");
-    s.speechRecognitionLanguage = "en-US";
+    s.voiceName = "de-DE-Hedda";
 
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    s.voiceName = "en-US-Zira";
-
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-
-    expect(r).not.toBeUndefined();
-
-    expect(r instanceof sdk.Recognizer).toEqual(true);
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
 
     let synthCount: number = 0;
     let synthFragmentCount: number = 0;
@@ -555,27 +356,19 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
     const rEvents: { [id: number]: ArrayBuffer; } = {};
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        try {
-            switch (e.result.reason) {
-                case sdk.ResultReason.Canceled:
-                    r.close();
-                    s.close();
-                    setTimeout(done, 1);
-                    fail(e.result.reason);
-                    break;
-                case sdk.ResultReason.SynthesizingAudio:
-                    const result: ArrayBuffer = e.result.audio;
-                    rEvents[synthFragmentCount++] = result;
-                    break;
-                case sdk.ResultReason.SynthesizingAudioCompleted:
-                    synthCount++;
-                    break;
-            }
-        } catch (error) {
-            errorText += error;
+        switch (e.result.reason) {
+            case sdk.ResultReason.Canceled:
+                done.fail(sdk.ResultReason[e.result.reason]);
+                break;
+            case sdk.ResultReason.SynthesizingAudio:
+                const result: ArrayBuffer = e.result.audio;
+                rEvents[synthFragmentCount++] = result;
+                break;
+            case sdk.ResultReason.SynthesizingAudioCompleted:
+                synthCount++;
+                break;
         }
     });
-    const foo: sdk.TranslationRecognitionResult;
 
     let translationDone: boolean = false;
 
@@ -583,10 +376,7 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
         try {
             switch (e.reason) {
                 case sdk.CancellationReason.Error:
-                    r.close();
-                    s.close();
-                    setTimeout(done, 1);
-                    fail(e);
+                    done.fail(e.errorDetails);
                     break;
                 case sdk.CancellationReason.EndOfStream:
                     expect(synthCount).toEqual(1);
@@ -594,21 +384,17 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
                     break;
             }
         } catch (error) {
-            errorText += error;
+            done.fail(error);
         }
     });
 
     r.startContinuousRecognitionAsync();
 
-    // wait until we get at least on final result
-    const now: number = Date.now();
-
     WaitForCondition((): boolean => translationDone,
         () => {
             r.stopContinuousRecognitionAsync(() => {
-                r.close();
-
                 let byteCount: number = 0;
+
                 for (let i: number = 0; i < synthFragmentCount; i++) {
                     byteCount += rEvents[i].byteLength;
                 }
@@ -624,60 +410,43 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
                 const inputStream: File = ByteBufferAudioFile.Load(result);
                 const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(inputStream);
                 const speechConfig: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+                objsToClose.push(speechConfig);
+                speechConfig.speechRecognitionLanguage = "de-DE";
 
                 const r2: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(speechConfig, config);
+                objsToClose.push(r2);
+
                 r2.recognizeOnceAsync((speech: sdk.SpeechRecognitionResult) => {
                     expect(speech.errorDetails).toBeUndefined();
                     expect(speech.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
-                    expect(speech.text).toEqual("What's the weather like?");
-                    expect(errorText).toBeUndefined();
-                    r2.close();
-                    s.close();
+                    expect(speech.text).toEqual("Wie ist das Wetter?");
                     done();
-                }, (error: string) => fail(error));
-            }, (error: string) => fail(error));
+                }, (error: string) => done.fail(error));
+            }, (error: string) => done.fail(error));
         });
 });
 
 test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-
-    s.addTargetLanguage("en-US");
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-    s.speechRecognitionLanguage = "en-US";
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
 
     s.voiceName = "de-DE-Hedda)";
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-    expect(r).not.toBeUndefined();
 
-    expect(r instanceof sdk.Recognizer).toEqual(true);
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        try {
-            if (e.result.reason !== sdk.ResultReason.Canceled) {
-                r.close();
-                s.close();
-                setTimeout(done, 1);
-                fail("Should have failed, instead got status");
-            }
-        } catch (error) {
-            errorText += error;
+        if (e.result.reason !== sdk.ResultReason.Canceled) {
+            done.fail("Should have failed, instead got status");
         }
     });
 
     r.canceled = ((o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
         try {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
-
-            expect(errorText).toBeUndefined();
             expect(e.errorDetails).toEqual("Synthesis service failed with code:  - Could not identify the voice 'de-DE-Hedda)' for the text to speech service ");
+            done();
         } catch (error) {
-            errorText += error;
+            done.fail(error);
         }
     });
 
@@ -685,22 +454,13 @@ test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
 });
 
 test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-    s.speechRecognitionLanguage = "en-US";
-
-    s.addTargetLanguage("de-DE");
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
 
     s.voiceName = "de-DE-Hedda";
 
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-
-    expect(r).not.toBeUndefined();
-
-    expect(r instanceof sdk.Recognizer).toEqual(true);
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
 
     let synthCount: number = 0;
     let synthFragmentCount: number = 0;
@@ -711,10 +471,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
         try {
             switch (e.result.reason) {
                 case sdk.ResultReason.Canceled:
-                    r.close();
-                    s.close();
-                    setTimeout(done, 1);
-                    fail(e.result.reason);
+                    done.fail(sdk.ResultReason[e.result.reason]);
                     break;
                 case sdk.ResultReason.SynthesizingAudio:
                     const result: ArrayBuffer = e.result.audio;
@@ -725,7 +482,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
                     break;
             }
         } catch (error) {
-            errorText += error;
+            done.fail(error);
         }
     });
 
@@ -735,10 +492,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
         try {
             switch (e.reason) {
                 case sdk.CancellationReason.Error:
-                    r.close();
-                    s.close();
-                    setTimeout(done, 1);
-                    fail(e);
+                    done.fail(e.errorDetails);
                     break;
                 case sdk.CancellationReason.EndOfStream:
                     expect(synthCount).toEqual(1);
@@ -746,7 +500,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
                     break;
             }
         } catch (error) {
-            errorText += error;
+            done.fail(error);
         }
     });
 
@@ -754,7 +508,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
         try {
             expect(e.result.reason).toEqual(sdk.ResultReason.TranslatingSpeech);
         } catch (error) {
-            errorText += error;
+            done.fail(error);
         }
     };
 
@@ -764,7 +518,6 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
     WaitForCondition((): boolean => translationDone,
         () => {
             r.stopContinuousRecognitionAsync(() => {
-                r.close();
 
                 let byteCount: number = 0;
                 for (let i: number = 0; i < synthFragmentCount; i++) {
@@ -782,40 +535,33 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
                 const inputStream: File = ByteBufferAudioFile.Load(result);
                 const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(inputStream);
                 const s2: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+                objsToClose.push(s2);
                 s2.speechRecognitionLanguage = "de-DE";
 
                 const r2: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s2, config);
+                objsToClose.push(r2);
+
                 r2.recognizeOnceAsync((speech: sdk.SpeechRecognitionResult) => {
-                    setTimeout(done, 1);
                     expect(speech.errorDetails).toBeUndefined();
                     expect(speech.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
                     expect(speech.text).toEqual("Wie ist das Wetter?");
-                    expect(errorText).toBeUndefined();
-                    r2.close();
-                    s.close();
-
+                    done();
                 }, (error: string) => {
-                    r2.close();
-                    s.close();
-                    setTimeout(done, 1);
-                    fail(error);
+                    done.fail(error);
                 });
             }, (error: string) => {
-                r.close();
-                s.close();
-                setTimeout(done, 1);
-                fail(error);
+                done.fail(error);
             });
         });
 });
 
 test("MultiPhrase", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
 
-    s.addTargetLanguage("en-US");
-    s.speechRecognitionLanguage = "en-US";
-    s.voiceName = "en-US-Zira";
+    s.voiceName = "de-DE-Hedda";
+    s.addTargetLanguage("de-DE");
+    s.speechRecognitionLanguage = Settings.WaveFileLanguage;
 
     const f: ArrayBuffer = WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile);
     const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
@@ -829,10 +575,10 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
     p.close();
 
     const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
-
     expect(r).not.toBeUndefined();
-
     expect(r instanceof sdk.Recognizer).toEqual(true);
+    objsToClose.push(r);
+
     let synthCount: number = 0;
     let synthFragmentCount: number = 0;
 
@@ -842,10 +588,7 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
         try {
             switch (e.result.reason) {
                 case sdk.ResultReason.Canceled:
-                    r.close();
-                    s.close();
-                    setTimeout(done, 1);
-                    fail(sdk.ResultReason[e.result.reason]);
+                    done.fail(sdk.ResultReason[e.result.reason]);
                     break;
                 case sdk.ResultReason.SynthesizingAudio:
                     const result: ArrayBuffer = e.result.audio;
@@ -856,7 +599,7 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
                     break;
             }
         } catch (error) {
-            errorText += error;
+            done.fail(error);
         }
     });
 
@@ -866,10 +609,7 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
         try {
             switch (e.reason) {
                 case sdk.CancellationReason.Error:
-                    r.close();
-                    s.close();
-                    setTimeout(done, 1);
-                    fail(e);
+                    done.fail(e.errorDetails);
                     break;
                 case sdk.CancellationReason.EndOfStream:
                     expect(synthCount).toEqual(numPhrases);
@@ -877,7 +617,7 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
                     break;
             }
         } catch (error) {
-            errorText += error;
+            done.fail(error);
         }
     });
 
@@ -886,7 +626,6 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
     WaitForCondition((): boolean => translationDone,
         () => {
             r.stopContinuousRecognitionAsync(() => {
-                r.close();
 
                 let byteCount: number = 0;
                 for (let i: number = 0; i < synthFragmentCount; i++) {
@@ -904,14 +643,22 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
                 const inputStream: File = ByteBufferAudioFile.Load(result);
                 const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(inputStream);
                 const s2: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+                objsToClose.push(s2);
+                s2.speechRecognitionLanguage = "de-DE";
 
                 const r2: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s2, config);
+                objsToClose.push(r2);
+
                 let numEvents: number = 0;
                 let speechEnded: boolean = false;
 
                 r2.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
-                    expect(e.result.text).toEqual(Settings.WaveFileText);
-                    numEvents++;
+                    try {
+                        expect(e.result.text).toEqual("Wie ist das Wetter?");
+                        numEvents++;
+                    } catch (error) {
+                        done.fail(error);
+                    }
                 };
 
                 r2.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
@@ -920,8 +667,7 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
                             speechEnded = true;
                             break;
                         case sdk.CancellationReason.Error:
-                            setTimeout(done, 1);
-                            fail(e.errorDetails);
+                            done.fail(e.errorDetails);
                             break;
                     }
                 };
@@ -930,24 +676,19 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
                     WaitForCondition(() => speechEnded,
                         () => {
                             r2.stopContinuousRecognitionAsync(() => {
-                                r2.close();
-                                s.close();
-                                setTimeout(done, 1);
                                 expect(numEvents).toEqual(numPhrases);
-                                expect(errorText).toBeUndefined();
+                                done();
                             }, (error: string) => {
-                                fail(error);
+                                done.fail(error);
                             });
                         });
                 },
                     (error: string) => {
-                        setTimeout(done, 1);
-                        fail(error);
+                        done.fail(error);
                     });
 
             }, (error: string) => {
-                setTimeout(done, 1);
-                fail(error);
+                done.fail(error);
             });
         });
 }, 45000);
@@ -985,59 +726,119 @@ test("Config is copied on construction", () => {
 
 });
 
-test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-    s.speechRecognitionLanguage = "en-US";
-    s.addTargetLanguage("en-US");
-
+test("InitialSilenceTimeout (pull)", (done: jest.DoneCallback) => {
     let p: sdk.PullAudioInputStream;
+    let bytesSent: number = 0;
+
+    // To make sure we don't send a ton of extra data.
+    // 5s * 16K * 2 * 1.25;
+    // For reference, before the throttling was implemented, we sent 6-10x the required data.
+    const expectedBytesSent: number = 15 * 16000 * 2 * 1.25;
 
     p = sdk.AudioInputStream.createPullStream(
         {
             close: () => { return; },
             read: (buffer: ArrayBuffer): number => {
+                bytesSent += buffer.byteLength;
                 return buffer.byteLength;
             },
         });
 
     const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
 
+    testInitialSilienceTimeout(config, done, () => expect(bytesSent).toBeLessThan(expectedBytesSent));
+}, 10000);
+
+test("InitialSilenceTimeout (push)", (done: jest.DoneCallback) => {
+    const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
+    const bigFileBuffer: Uint8Array = new Uint8Array(1024 * 1024);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+
+    p.write(bigFileBuffer.buffer);
+    p.close();
+
+    testInitialSilienceTimeout(config, done);
+}, 10000);
+
+test("InitialSilenceTimeout (File)", (done: jest.DoneCallback) => {
+
+    const bigFileBuffer: Uint8Array = new Uint8Array(1024 * 1024);
+    const bigFile: File = ByteBufferAudioFile.Load(bigFileBuffer.buffer);
+
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(bigFile);
+
+    testInitialSilienceTimeout(config, done);
+}, 10000);
+
+const testInitialSilienceTimeout = (config: sdk.AudioConfig, done: jest.DoneCallback, addedChecks?: () => void): void => {
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+
+    s.addTargetLanguage("de-DE");
+    s.speechRecognitionLanguage = "en-US";
+
+    // To validate the data isn't sent too fast.
+    const startTime: number = Date.now();
+
     const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
+    objsToClose.push(r);
+
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
 
-    r.recognizeOnceAsync(
-        (p2: sdk.TranslationRecognitionResult) => {
-            const res: sdk.TranslationRecognitionResult = p2;
+    let numReports: number = 0;
 
+    r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
+        done.fail(e.errorDetails);
+    };
+
+    r.recognized = (o: sdk.Recognizer, e: sdk.TranslationRecognitionEventArgs) => {
+        try {
+            const res: sdk.SpeechRecognitionResult = e.result;
             expect(res).not.toBeUndefined();
-            expect(res.errorDetails).toBeUndefined();
             expect(sdk.ResultReason.NoMatch).toEqual(res.reason);
             expect(res.text).toBeUndefined();
 
             const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
             expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
+        } catch (error) {
+            done.fail(error);
+        } finally {
+            numReports++;
+        }
 
-            r.close();
-            s.close();
-            done();
+    };
+
+    r.recognizeOnceAsync(
+        (p2: sdk.TranslationRecognitionResult) => {
+            const res: sdk.TranslationRecognitionResult = p2;
+            numReports++;
+
+            expect(res).not.toBeUndefined();
+            expect(sdk.ResultReason.NoMatch).toEqual(res.reason);
+            expect(res.errorDetails).toBeUndefined();
+            expect(res.text).toBeUndefined();
+
+            const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
+            expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
+            expect(Date.now()).toBeGreaterThan(startTime + 7500);
+
         },
         (error: string) => {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
             fail(error);
         });
-}, 15000);
+
+    WaitForCondition(() => (numReports === 2), () => {
+        setTimeout(done, 1);
+        if (!!addedChecks) {
+            addedChecks();
+        }
+    });
+};
 
 test.skip("emptyFile", (done: jest.DoneCallback) => {
-
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-
-    s.speechRecognitionLanguage = "en-US";
-    s.addTargetLanguage("en-US");
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
 
     const blob: Blob[] = [];
     const f: File = new File(blob, "file.wav");
@@ -1045,6 +846,7 @@ test.skip("emptyFile", (done: jest.DoneCallback) => {
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
+    objsToClose.push(r);
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
     let oneCalled: boolean = false;
@@ -1056,24 +858,18 @@ test.skip("emptyFile", (done: jest.DoneCallback) => {
             expect(cancelDetails.reason).toEqual(sdk.CancellationReason.Error);
 
             if (true === oneCalled) {
-                expect(errorText).toBeUndefined();
                 done();
             } else {
                 oneCalled = true;
             }
         } catch (error) {
-            errorText += error;
+            done.fail(error);
         }
     };
 
     r.recognizeOnceAsync(
         (p2: sdk.SpeechRecognitionResult) => {
-            setTimeout(done, 1);
-            r.close();
-            s.close();
-
             if (true === oneCalled) {
-                expect(errorText).toBeUndefined();
                 done();
             } else {
                 oneCalled = true;
@@ -1081,20 +877,18 @@ test.skip("emptyFile", (done: jest.DoneCallback) => {
 
         },
         (error: string) => {
-            fail(error);
+            done.fail(error);
         });
 });
 
 test("Translate Bad Language", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
 
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
     s.addTargetLanguage("bo-GU");
-    s.speechRecognitionLanguage = "en-US";
 
-    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
 
     expect(r).not.toBeUndefined();
 
@@ -1103,13 +897,10 @@ test("Translate Bad Language", (done: jest.DoneCallback) => {
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
         try {
             if (e.result.reason === sdk.ResultReason.Canceled) {
-                r.close();
-                s.close();
-                setTimeout(done, 1);
-                fail(e.result.reason);
+                done.fail(sdk.ResultReason[e.result.reason]);
             }
         } catch (error) {
-            errorText += error;
+            done.fail(error);
         }
     });
 
@@ -1120,31 +911,24 @@ test("Translate Bad Language", (done: jest.DoneCallback) => {
             expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
             expect(res.translations).toBeUndefined();
             expect(res.text).toEqual("What's the weather like?");
-            expect(errorText).toBeUndefined();
-
-            r.close();
-            s.close();
             done();
         },
         (error: string) => {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
 test("Audio Config is optional", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-    s.speechRecognitionLanguage = "en-US";
-    s.addTargetLanguage("en-us");
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+    s.addTargetLanguage("de-DE");
+    s.speechRecognitionLanguage = Settings.WaveFileLanguage;
 
     const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
+    objsToClose.push(r);
+
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    r.close();
-    s.close();
 });
 
 test("Default mic is used when audio config is not specified.", () => {

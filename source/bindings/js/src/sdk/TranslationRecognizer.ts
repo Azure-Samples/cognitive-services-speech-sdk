@@ -584,7 +584,13 @@ export class TranslationRecognizer extends Recognizer {
                     const retEvent: TranslationSynthesisEventArgs = new TranslationSynthesisEventArgs(result, evResult.SessionId);
 
                     if (!!this.synthesizing) {
-                        this.synthesizing(this, retEvent);
+                        try {
+                            this.synthesizing(this, retEvent);
+                            /* tslint:disable:no-empty */
+                        } catch (error) {
+                            // Not going to let errors in the event handler
+                            // trip things up.
+                        }
                     }
 
                     if (!!this.canceled) {

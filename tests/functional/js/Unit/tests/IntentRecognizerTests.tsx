@@ -12,21 +12,28 @@ import { ByteBufferAudioFile } from "./ByteBufferAudioFile";
 import { Settings } from "./Settings";
 import { default as WaitForCondition } from "./Utilities";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
+let objsToClose: any[];
 
 beforeAll(() => {
-    // Override inputs, if necessary
+    // override inputs, if necessary
     Settings.LoadSettings();
     Events.Instance.AttachListener(new ConsoleLoggingListener(EventType.Debug));
 });
 
-let errorText: string;
-
 // Test cases are run linerally, the only other mechanism to demark them in the output is to put a console line in each case and
 // report the name.
 beforeEach(() => {
-    errorText = undefined;
+    objsToClose = [];
     // tslint:disable-next-line:no-console
     console.info("---------------------------------------Starting test case-----------------------------------");
+});
+
+afterEach(() => {
+    objsToClose.forEach((value: any, index: number, array: any[]) => {
+        if (typeof value.close === "function") {
+            value.close();
+        }
+    });
 });
 
 const ValidateResultMatchesWaveFile = (res: sdk.SpeechRecognitionResult): void => {
@@ -36,23 +43,39 @@ const ValidateResultMatchesWaveFile = (res: sdk.SpeechRecognitionResult): void =
     expect(res.offset).toBeCloseTo(Settings.LuisWaveFileOffset);
 };
 
-test("NoIntentsRecognizesSpeech", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
-    expect(s).not.toBeUndefined();
+const BuildRecognizerFromWaveFile: (speechConfig?: sdk.SpeechConfig) => sdk.IntentRecognizer = (speechConfig?: sdk.SpeechConfig): sdk.IntentRecognizer => {
 
-    s.speechRecognitionLanguage = Settings.LuisWaveFileLanguage;
+    let s: sdk.SpeechConfig = speechConfig;
+    if (s === undefined) {
+        s = BuildSpeechConfig();
+        // Since we're not going to return it, mark it for closure.
+        objsToClose.push(s);
+    }
 
     const f: File = WaveFileAudioInput.LoadFile(Settings.LuisWaveFile);
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
+    const language: string = Settings.WaveFileLanguage;
+    s.speechRecognitionLanguage = language;
+
     const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
     expect(r).not.toBeUndefined();
-    expect(r instanceof sdk.Recognizer);
+
+    return r;
+};
+
+const BuildSpeechConfig: () => sdk.SpeechConfig = (): sdk.SpeechConfig => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
+    expect(s).not.toBeUndefined();
+    return s;
+};
+
+test("NoIntentsRecognizesSpeech", (done: jest.DoneCallback) => {
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     r.recognizeOnceAsync(
         (p2: sdk.IntentRecognitionResult) => {
-            r.close();
-            s.close();
 
             const res: sdk.IntentRecognitionResult = p2;
             expect(res.errorDetails).toBeUndefined();
@@ -62,61 +85,27 @@ test("NoIntentsRecognizesSpeech", (done: jest.DoneCallback) => {
             done();
         },
         (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
 test("AddNullIntent", () => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
-    expect(s).not.toBeUndefined();
-
-    s.speechRecognitionLanguage = "en-US";
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.LuisWaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-    expect(r instanceof sdk.Recognizer);
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     expect(() => r.addIntent("phrase", null)).toThrow();
-
-    r.close();
-    s.close();
 });
 
 test("AddNullPhrase", () => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
-    expect(s).not.toBeUndefined();
-
-    s.speechRecognitionLanguage = "en-US";
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.LuisWaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-    expect(r instanceof sdk.Recognizer);
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     expect(() => r.addIntent(null, "ID")).toThrow();
-
-    r.close();
-    s.close();
 });
 
 test("RoundTripWithGoodIntent", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
-    expect(s).not.toBeUndefined();
-
-    s.speechRecognitionLanguage = Settings.LuisWaveFileLanguage;
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.LuisWaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-    expect(r instanceof sdk.Recognizer);
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     const lm: sdk.LanguageUnderstandingModel = sdk.LanguageUnderstandingModel.fromAppId(Settings.LuisAppId);
 
@@ -124,19 +113,16 @@ test("RoundTripWithGoodIntent", (done: jest.DoneCallback) => {
 
     r.recognizeOnceAsync(
         (p2: sdk.IntentRecognitionResult) => {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
             const res: sdk.IntentRecognitionResult = p2;
             expect(res).not.toBeUndefined();
             expect(res.errorDetails).toBeUndefined();
             expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedIntent]);
             expect(res.intentId).toEqual(Settings.LuisValidIntentId);
             ValidateResultMatchesWaveFile(res);
+            done();
         },
         (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
@@ -148,13 +134,8 @@ class BadLangModel extends sdk.LanguageUnderstandingModel {
 }
 
 test("AddIntentWithBadModel", () => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
-    expect(s).not.toBeUndefined();
-    s.speechRecognitionLanguage = "en-US";
-
-    const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s);
-    expect(r).not.toBeUndefined();
-    expect(r instanceof sdk.Recognizer);
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     const langModel: BadLangModel = new BadLangModel();
     langModel.appId = "";
@@ -162,177 +143,129 @@ test("AddIntentWithBadModel", () => {
     expect(() => r.addIntentWithLanguageModel("IntentId", langModel, "IntentName")).toThrow();
 });
 
-test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
-    expect(s).not.toBeUndefined();
-    s.speechRecognitionLanguage = "en-US";
-
+test("InitialSilenceTimeout (pull)", (done: jest.DoneCallback) => {
     let p: sdk.PullAudioInputStream;
+    let bytesSent: number = 0;
+
+    // To make sure we don't send a ton of extra data.
+    // 5s * 16K * 2 * 1.25;
+    // For reference, before the throttling was implemented, we sent 6-10x the required data.
+    const expectedBytesSent: number = 5 * 16000 * 2 * 1.25;
 
     p = sdk.AudioInputStream.createPullStream(
         {
             close: () => { return; },
             read: (buffer: ArrayBuffer): number => {
+                bytesSent += buffer.byteLength;
                 return buffer.byteLength;
             },
         });
 
     const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
 
+    testInitialSilienceTimeout(config, done, () => expect(bytesSent).toBeLessThan(expectedBytesSent));
+});
+
+test.skip("InitialSilenceTimeout (push)", (done: jest.DoneCallback) => {
+    const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
+    const bigFileBuffer: Uint8Array = new Uint8Array(1024 * 1024);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+
+    p.write(bigFileBuffer.buffer);
+    p.close();
+
+    testInitialSilienceTimeout(config, done);
+});
+
+test("InitialSilenceTimeout (File)", (done: jest.DoneCallback) => {
+
+    const bigFileBuffer: Uint8Array = new Uint8Array(1024 * 1024);
+    const bigFile: File = ByteBufferAudioFile.Load(bigFileBuffer.buffer);
+
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(bigFile);
+
+    testInitialSilienceTimeout(config, done);
+});
+
+const testInitialSilienceTimeout = (config: sdk.AudioConfig, done: jest.DoneCallback, addedChecks?: () => void): void => {
+    const s: sdk.SpeechConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+
+    // To validate the data isn't sent too fast.
+    const startTime: number = Date.now();
+
     const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
+    objsToClose.push(r);
+
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
 
-    const lm: sdk.LanguageUnderstandingModel = sdk.LanguageUnderstandingModel.fromAppId(Settings.LuisAppId);
-    r.addIntentWithLanguageModel(Settings.LuisValidIntentId, lm);
-
-    let oneReport: boolean = false;
-    let testDone: boolean = false;
+    let numReports: number = 0;
 
     r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs) => {
-        try {
-            setTimeout(done, 1);
-            fail(e.errorDetails);
-        } catch (error) {
-            errorText += error.message + " " + error.stack;
-        }
+        done.fail(e.errorDetails);
     };
 
     r.recognized = (o: sdk.Recognizer, e: sdk.IntentRecognitionEventArgs) => {
         try {
             const res: sdk.SpeechRecognitionResult = e.result;
             expect(res).not.toBeUndefined();
-            expect(res.reason).toEqual(sdk.ResultReason.NoMatch);
+            expect(sdk.ResultReason.NoMatch).toEqual(res.reason);
             expect(res.text).toBeUndefined();
 
             const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
             expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
-
-            if (true === oneReport) {
-                testDone = true;
-            }
-
-            oneReport = true;
         } catch (error) {
-            errorText += error.message + " " + error.stack;
+            done.fail(error);
+        } finally {
+            numReports++;
         }
+
     };
 
     r.recognizeOnceAsync(
-        (p2: sdk.SpeechRecognitionResult) => {
-            const res: sdk.SpeechRecognitionResult = p2;
+        (p2: sdk.IntentRecognitionResult) => {
+            const res: sdk.IntentRecognitionResult = p2;
+            numReports++;
 
             expect(res).not.toBeUndefined();
-            expect(res.reason).toEqual(sdk.ResultReason.NoMatch);
+            expect(sdk.ResultReason.NoMatch).toEqual(res.reason);
+            expect(res.errorDetails).toBeUndefined();
             expect(res.text).toBeUndefined();
 
             const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
             expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
+            expect(Date.now()).toBeGreaterThan(startTime + 2000);
 
-            r.close();
-            s.close();
-            if (true === oneReport) {
-                setTimeout(done, 1);
-                expect(errorText).toBeUndefined();
-            }
-
-            oneReport = true;
         },
         (error: string) => {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
             fail(error);
         });
 
-    WaitForCondition(() => testDone, () => {
+    WaitForCondition(() => (numReports === 2), () => {
         setTimeout(done, 1);
-        expect(errorText).toBeUndefined();
-    });
-
-}, 7500);
-
-// The service never responds beyond turn.start...
-test.skip("emptyFile", (done: jest.DoneCallback) => {
-
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
-    expect(s).not.toBeUndefined();
-
-    s.speechRecognitionLanguage = "en-US";
-
-    const blob: Blob[] = [];
-    const f: File = new File(blob, "file.wav");
-
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-    expect(r instanceof sdk.Recognizer);
-    let oneCalled: boolean = false;
-
-    r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs): void => {
-        try {
-            expect(e.reason).toEqual(sdk.CancellationReason.Error);
-            const cancelDetails: sdk.CancellationDetails = sdk.CancellationDetails.fromResult(e.result);
-            expect(cancelDetails.reason).toEqual(sdk.CancellationReason.Error);
-
-            if (true === oneCalled) {
-                expect(errorText).toBeUndefined();
-                done();
-            } else {
-                oneCalled = true;
-            }
-        } catch (error) {
-            errorText += error.message + " " + error.stack;
+        if (!!addedChecks) {
+            addedChecks();
         }
-    };
-
-    r.recognizeOnceAsync(
-        (p2: sdk.SpeechRecognitionResult) => {
-            setTimeout(done, 1);
-            r.close();
-            s.close();
-            fail("Error handler wasn't called");
-        },
-        (error: string) => {
-            if (true === oneCalled) {
-                setTimeout(done, 1);
-                expect(errorText).toBeUndefined();
-            } else {
-                oneCalled = true;
-            }
-        });
-});
+    });
+};
 
 test("Continous Recog With Intent", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
-    expect(s).not.toBeUndefined();
-
-    s.speechRecognitionLanguage = Settings.LuisWaveFileLanguage;
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.LuisWaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-    expect(r instanceof sdk.Recognizer);
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     const lm: sdk.LanguageUnderstandingModel = sdk.LanguageUnderstandingModel.fromSubscription(Settings.LuisAppKey, Settings.LuisAppId, Settings.LuisRegion);
     r.addIntentWithLanguageModel(Settings.LuisValidIntentId, lm);
 
     r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs) => {
-        try {
-            fail(e.errorDetails);
-        } catch (error) {
-            errorText += error.message + " " + error.stack;
-        }
+        done.fail(e.errorDetails);
     };
 
     r.recognizing = (o: sdk.Recognizer, e: sdk.IntentRecognitionEventArgs): void => {
         try {
             expect(e.result.reason).toEqual(sdk.ResultReason.RecognizingIntent);
         } catch (error) {
-            errorText += error.message + " " + error.stack;
+            done.fail(error);
         }
     };
 
@@ -345,16 +278,12 @@ test("Continous Recog With Intent", (done: jest.DoneCallback) => {
             ValidateResultMatchesWaveFile(res);
 
             r.stopContinuousRecognitionAsync(() => {
-                r.close();
-                s.close();
-                expect(errorText).toBeUndefined();
                 done();
             }, (error: string) => {
-                setTimeout(done, 1);
-                fail(error);
+                done.fail(error);
             });
         } catch (error) {
-            errorText += error.message + " " + error.stack;
+            done.fail(error);
         }
     };
 
@@ -368,17 +297,8 @@ test("Continous Recog With Intent", (done: jest.DoneCallback) => {
 });
 
 test("RoundTripWithGoodModelWrongIntent", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
-    expect(s).not.toBeUndefined();
-
-    s.speechRecognitionLanguage = Settings.LuisWaveFileLanguage;
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.LuisWaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-    expect(r instanceof sdk.Recognizer);
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     const lm: sdk.LanguageUnderstandingModel = sdk.LanguageUnderstandingModel.fromAppId(Settings.LuisAppId);
 
@@ -386,24 +306,23 @@ test("RoundTripWithGoodModelWrongIntent", (done: jest.DoneCallback) => {
 
     r.recognizeOnceAsync(
         (p2: sdk.IntentRecognitionResult) => {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
             const res: sdk.IntentRecognitionResult = p2;
             expect(res).not.toBeUndefined();
             expect(res.errorDetails).toBeUndefined();
             expect(res.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
             expect(res.intentId).toBeUndefined();
             ValidateResultMatchesWaveFile(res);
+            done();
         },
         (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
 test.skip("MultiPhrase Intent", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
+    const s: sdk.SpeechConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+
     expect(s).not.toBeUndefined();
 
     s.speechRecognitionLanguage = Settings.LuisWaveFileLanguage;
@@ -425,6 +344,8 @@ test.skip("MultiPhrase Intent", (done: jest.DoneCallback) => {
     p.close();
 
     const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
+    objsToClose.push(r);
+
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
 
@@ -437,21 +358,17 @@ test.skip("MultiPhrase Intent", (done: jest.DoneCallback) => {
         try {
             switch (e.reason) {
                 case sdk.CancellationReason.Error:
-                    setTimeout(done, 1);
-                    fail(e.errorDetails);
+                    done.fail(e.errorDetails);
                     break;
                 case sdk.CancellationReason.EndOfStream:
                     expect(numIntents).toEqual(numPhrases);
                     r.stopContinuousRecognitionAsync(() => {
-                        r.close();
-                        s.close();
-                        expect(errorText).toBeUndefined();
                         done();
                     });
                     break;
             }
         } catch (error) {
-            errorText += error.message + " " + error.stack;
+            done.fail(error);
         }
     };
 
@@ -464,7 +381,7 @@ test.skip("MultiPhrase Intent", (done: jest.DoneCallback) => {
             ValidateResultMatchesWaveFile(res);
             numIntents++;
         } catch (error) {
-            errorText += error.message + " " + error.stack;
+            done.fail(error);
         }
     };
 
@@ -472,23 +389,13 @@ test.skip("MultiPhrase Intent", (done: jest.DoneCallback) => {
         /* tslint:disable:no-empty */
         () => { },
         (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 }, 15000);
 
 test("IntentAlias", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
-    expect(s).not.toBeUndefined();
-
-    s.speechRecognitionLanguage = Settings.LuisWaveFileLanguage;
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.LuisWaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-    expect(r instanceof sdk.Recognizer);
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     const lm: sdk.LanguageUnderstandingModel = sdk.LanguageUnderstandingModel.fromAppId(Settings.LuisAppId);
     const intentName: string = "SomeName";
@@ -497,34 +404,22 @@ test("IntentAlias", (done: jest.DoneCallback) => {
 
     r.recognizeOnceAsync(
         (p2: sdk.IntentRecognitionResult) => {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
             const res: sdk.IntentRecognitionResult = p2;
             expect(res).not.toBeUndefined();
             expect(res.errorDetails).toBeUndefined();
             expect(res.reason).toEqual(sdk.ResultReason.RecognizedIntent);
             expect(res.intentId).toEqual(intentName);
             ValidateResultMatchesWaveFile(res);
+            done();
         },
         (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
 test("Add All Intents", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
-    expect(s).not.toBeUndefined();
-
-    s.speechRecognitionLanguage = Settings.LuisWaveFileLanguage;
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.LuisWaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-    expect(r instanceof sdk.Recognizer);
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     const lm: sdk.LanguageUnderstandingModel = sdk.LanguageUnderstandingModel.fromAppId(Settings.LuisAppId);
 
@@ -532,9 +427,6 @@ test("Add All Intents", (done: jest.DoneCallback) => {
 
     r.recognizeOnceAsync(
         (p2: sdk.IntentRecognitionResult) => {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
             const res: sdk.IntentRecognitionResult = p2;
             expect(res).not.toBeUndefined();
             expect(res.errorDetails).toBeUndefined();
@@ -542,25 +434,16 @@ test("Add All Intents", (done: jest.DoneCallback) => {
             expect(res.intentId).toEqual(Settings.LuisValidIntentId);
             ValidateResultMatchesWaveFile(res);
             expect(res.properties.getProperty(sdk.PropertyId.LanguageUnderstandingServiceResponse_JsonResult)).not.toBeUndefined();
+            done();
         },
         (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
 test("Add All Intents with alias", (done: jest.DoneCallback) => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
-    expect(s).not.toBeUndefined();
-
-    s.speechRecognitionLanguage = Settings.LuisWaveFileLanguage;
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.LuisWaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
-    expect(r).not.toBeUndefined();
-    expect(r instanceof sdk.Recognizer);
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
     const lm: sdk.LanguageUnderstandingModel = sdk.LanguageUnderstandingModel.fromAppId(Settings.LuisAppId);
 
@@ -568,32 +451,28 @@ test("Add All Intents with alias", (done: jest.DoneCallback) => {
 
     r.recognizeOnceAsync(
         (p2: sdk.IntentRecognitionResult) => {
-            r.close();
-            s.close();
-            setTimeout(done, 1);
             const res: sdk.IntentRecognitionResult = p2;
             expect(res).not.toBeUndefined();
             expect(res.errorDetails).toBeUndefined();
             expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedIntent]);
             expect(res.intentId).toEqual("alias");
             ValidateResultMatchesWaveFile(res);
+            done();
         },
         (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
 test("Audio Config is optional", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    objsToClose.push(s);
     expect(s).not.toBeUndefined();
     s.speechRecognitionLanguage = "en-US";
 
     const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s);
+    objsToClose.push(r);
     expect(r instanceof sdk.Recognizer).toEqual(true);
-
-    r.close();
-    s.close();
 });
 
 test("Default mic is used when audio config is not specified.", () => {
