@@ -1414,6 +1414,10 @@ phases:
         BuildConfiguration: Debug
       release:
         BuildConfiguration: Release
+  variables:
+    BuildPlatform: macOS
+    FrameworkName: MicrosoftCognitiveServicesSpeech
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set OSX-x64 target platform
@@ -1487,22 +1491,37 @@ phases:
     inputs:
       testResultsFiles: '**/test-*.xml'
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Create drop files
-    inputs:
-      type: FilePath
-      scriptPath: './ci/drop/bindrop.sh'
-      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/OSX-x64/$(BuildConfiguration) OSX'
-    # TODO Should be re-enabled after GA
-    condition: and(false, succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+  - bash: |
+      . ci/apple/apple-functions.sh
+      build_dsym_bundle "build/lib" "$(FrameworkName)"
+    condition: or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release'))
+    displayName: Create debug symbols
+  - bash: |
+      mkdir -p "$(OutputDirectory)"
+      mv "build/lib/$(FrameworkName).framework.dSYM" "$(OutputDirectory)"
+      cd "$(OutputDirectory)"
+      zip --symlinks -r "$(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA).framework.dSYM.zip" "$(FrameworkName).framework.dSYM"
+      rm -rf "$(OutputDirectory)/$(FrameworkName).framework.dSYM"
+    condition: or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release'))
+    displayName: Archive debug symbols
+  - bash: |
+      strip -x "build/lib/$(FrameworkName).framework/$(FrameworkName)"
+    displayName: Strip dynamic library in universal framework for release builds
+    condition: eq(variables['BuildConfiguration'], 'Release')
+  - bash: |
+      mv "build/lib/$(FrameworkName).framework" "$(OutputDirectory)"
+      cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$(OutputDirectory)"
+      cd "$(OutputDirectory)"
+      zip --symlinks -r "$(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
+      rm -rf REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
+    displayName: Create archive for signing
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: OSX
+      ArtifactName: macOS
       publishLocation: Container
-    # TODO Should be re-enabled after GA
-    condition: and(false, succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+      # condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
 
 # TODO stuff like version
 - phase: JsBuild
