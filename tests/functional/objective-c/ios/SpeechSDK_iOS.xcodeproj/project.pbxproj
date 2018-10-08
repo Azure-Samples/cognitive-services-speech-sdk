@@ -15,17 +15,21 @@
 		3CA6CF93211F471600CD2768 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CA6CF92211F471600CD2768 /* Assets.xcassets */; };
 		3CA6CF96211F471600CD2768 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3CA6CF94211F471600CD2768 /* LaunchScreen.storyboard */; };
 		3CA6CF99211F471600CD2768 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CF98211F471600CD2768 /* main.m */; };
-		3CA6CFA3211F471600CD2768 /* SpeechSDK_iOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CFA2211F471600CD2768 /* SpeechSDK_iOSTests.m */; };
 		3CC3789C2121CFD600F07A66 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */; };
 		3CCD06D52157F71E00A348DB /* test_audio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D02157F71E00A348DB /* test_audio.mm */; };
 		3CCD06D62157F71E00A348DB /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D12157F71E00A348DB /* microphone_test.m */; };
 		3CCD06D72157F71E00A348DB /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D22157F71E00A348DB /* dummytest.m */; };
 		3CCD06D92157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
 		3CCD06DA2157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F342D645216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */; };
+		F3EABACD21639F6000BA4B2C /* SPXSpeechRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */; };
+		F3EABACE21639F6300BA4B2C /* SPXTranslationRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */; };
+		F3EABAD12163AD9900BA4B2C /* MicrosoftCognitiveServicesSpeech.framework in Resources */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
+		F3EABAD22163B3E200BA4B2C /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		3CA6CF9F211F471600CD2768 /* PBXContainerItemProxy */ = {
+		F3EABAC821639F5700BA4B2C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 3CA6CF7E211F471500CD2768 /* Project object */;
 			proxyType = 1;
@@ -62,17 +66,19 @@
 		3CA6CF95211F471600CD2768 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3CA6CF97211F471600CD2768 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3CA6CF98211F471600CD2768 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		3CA6CF9E211F471600CD2768 /* SpeechSDK_iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpeechSDK_iOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		3CA6CFA2211F471600CD2768 /* SpeechSDK_iOSTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpeechSDK_iOSTests.m; sourceTree = "<group>"; };
-		3CA6CFA4211F471600CD2768 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ../../../../tests/input/audio/whatstheweatherlike.wav; sourceTree = "<group>"; };
+		3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SPXSpeechRecognitionTest.m; sourceTree = "<group>"; };
+		3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ../../../input/audio/whatstheweatherlike.wav; sourceTree = "<group>"; };
 		3CCD06CF2157F71D00A348DB /* microphone_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = microphone_test.h; path = ../../shared/microphone_test.h; sourceTree = "<group>"; };
 		3CCD06D02157F71E00A348DB /* test_audio.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = test_audio.mm; path = ../../shared/test_audio.mm; sourceTree = "<group>"; };
 		3CCD06D12157F71E00A348DB /* microphone_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = microphone_test.m; path = ../../shared/microphone_test.m; sourceTree = "<group>"; };
 		3CCD06D22157F71E00A348DB /* dummytest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = dummytest.m; path = ../../shared/dummytest.m; sourceTree = "<group>"; };
 		3CCD06D32157F71E00A348DB /* dummytest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dummytest.h; path = ../../shared/dummytest.h; sourceTree = "<group>"; };
 		3CCD06D42157F71E00A348DB /* test_audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test_audio.h; path = ../../shared/test_audio.h; sourceTree = "<group>"; };
-		3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = ../../../../../tests/MicrosoftCognitiveServicesSpeech.framework; sourceTree = "<group>"; };
+		3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
+		F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
+		F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
+		F3EABAC321639F5600BA4B2C /* SpeechSDK_iOSUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpeechSDK_iOSUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F3EABAC721639F5700BA4B2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,10 +90,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3CA6CF9B211F471600CD2768 /* Frameworks */ = {
+		F3EABAC021639F5600BA4B2C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F342D645216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,7 +108,7 @@
 				3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */,
 				3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */,
 				3CA6CF88211F471500CD2768 /* SpeechSDK_iOS */,
-				3CA6CFA1211F471600CD2768 /* SpeechSDK_iOSTests */,
+				F3EABAC421639F5700BA4B2C /* SpeechSDK_iOSUnitTests */,
 				3CA6CF87211F471500CD2768 /* Products */,
 				A2AB0BC02152FB9800171A08 /* Frameworks */,
 			);
@@ -111,7 +118,7 @@
 			isa = PBXGroup;
 			children = (
 				3CA6CF86211F471500CD2768 /* SpeechSDK_iOS.app */,
-				3CA6CF9E211F471600CD2768 /* SpeechSDK_iOSTests.xctest */,
+				F3EABAC321639F5600BA4B2C /* SpeechSDK_iOSUnitTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -140,20 +147,22 @@
 			path = SpeechSDK_iOS;
 			sourceTree = "<group>";
 		};
-		3CA6CFA1211F471600CD2768 /* SpeechSDK_iOSTests */ = {
-			isa = PBXGroup;
-			children = (
-				3CA6CFA2211F471600CD2768 /* SpeechSDK_iOSTests.m */,
-				3CA6CFA4211F471600CD2768 /* Info.plist */,
-			);
-			path = SpeechSDK_iOSTests;
-			sourceTree = "<group>";
-		};
 		A2AB0BC02152FB9800171A08 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F3EABAC421639F5700BA4B2C /* SpeechSDK_iOSUnitTests */ = {
+			isa = PBXGroup;
+			children = (
+				3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */,
+				F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */,
+				F3EABAC721639F5700BA4B2C /* Info.plist */,
+			);
+			path = SpeechSDK_iOSUnitTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -177,22 +186,22 @@
 			productReference = 3CA6CF86211F471500CD2768 /* SpeechSDK_iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
-		3CA6CF9D211F471600CD2768 /* SpeechSDK_iOSTests */ = {
+		F3EABAC221639F5600BA4B2C /* SpeechSDK_iOSUnitTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3CA6CFAA211F471600CD2768 /* Build configuration list for PBXNativeTarget "SpeechSDK_iOSTests" */;
+			buildConfigurationList = F3EABACA21639F5700BA4B2C /* Build configuration list for PBXNativeTarget "SpeechSDK_iOSUnitTests" */;
 			buildPhases = (
-				3CA6CF9A211F471600CD2768 /* Sources */,
-				3CA6CF9B211F471600CD2768 /* Frameworks */,
-				3CA6CF9C211F471600CD2768 /* Resources */,
+				F3EABABF21639F5600BA4B2C /* Sources */,
+				F3EABAC021639F5600BA4B2C /* Frameworks */,
+				F3EABAC121639F5600BA4B2C /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				3CA6CFA0211F471600CD2768 /* PBXTargetDependency */,
+				F3EABAC921639F5700BA4B2C /* PBXTargetDependency */,
 			);
-			name = SpeechSDK_iOSTests;
-			productName = SpeechSDK_iOSTests;
-			productReference = 3CA6CF9E211F471600CD2768 /* SpeechSDK_iOSTests.xctest */;
+			name = SpeechSDK_iOSUnitTests;
+			productName = SpeechSDK_iOSUnitTests;
+			productReference = F3EABAC321639F5600BA4B2C /* SpeechSDK_iOSUnitTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -208,10 +217,9 @@
 						CreatedOnToolsVersion = 9.4.1;
 						ProvisioningStyle = Automatic;
 					};
-					3CA6CF9D211F471600CD2768 = {
+					F3EABAC221639F5600BA4B2C = {
 						CreatedOnToolsVersion = 9.4.1;
 						ProvisioningStyle = Automatic;
-						TestTargetID = 3CA6CF85211F471500CD2768;
 					};
 				};
 			};
@@ -229,7 +237,7 @@
 			projectRoot = "";
 			targets = (
 				3CA6CF85211F471500CD2768 /* SpeechSDK_iOS */,
-				3CA6CF9D211F471600CD2768 /* SpeechSDK_iOSTests */,
+				F3EABAC221639F5600BA4B2C /* SpeechSDK_iOSUnitTests */,
 			);
 		};
 /* End PBXProject section */
@@ -247,10 +255,12 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3CA6CF9C211F471600CD2768 /* Resources */ = {
+		F3EABAC121639F5600BA4B2C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F3EABAD22163B3E200BA4B2C /* whatstheweatherlike.wav in Resources */,
+				F3EABAD12163AD9900BA4B2C /* MicrosoftCognitiveServicesSpeech.framework in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,21 +281,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3CA6CF9A211F471600CD2768 /* Sources */ = {
+		F3EABABF21639F5600BA4B2C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3CA6CFA3211F471600CD2768 /* SpeechSDK_iOSTests.m in Sources */,
+				F3EABACE21639F6300BA4B2C /* SPXTranslationRecognitionTest.m in Sources */,
+				F3EABACD21639F6000BA4B2C /* SPXSpeechRecognitionTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		3CA6CFA0211F471600CD2768 /* PBXTargetDependency */ = {
+		F3EABAC921639F5700BA4B2C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3CA6CF85211F471500CD2768 /* SpeechSDK_iOS */;
-			targetProxy = 3CA6CF9F211F471600CD2768 /* PBXContainerItemProxy */;
+			targetProxy = F3EABAC821639F5700BA4B2C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -346,7 +357,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech-Debug-iosuniversal/**";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -361,7 +372,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech-Debug-iosuniversal/**";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -406,7 +417,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech-Release-iosuniversal/**";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -415,7 +426,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech-Release-iosuniversal/**";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
@@ -431,7 +442,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 6H88U8258Q;
 				ENABLE_BITCODE = NO;
-				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../../tests";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = SpeechSDK_iOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -458,7 +469,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 6H88U8258Q;
 				ENABLE_BITCODE = NO;
-				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../../tests";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = SpeechSDK_iOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -477,31 +488,29 @@
 			};
 			name = Release;
 		};
-		3CA6CFAB211F471600CD2768 /* Debug */ = {
+		F3EABACB21639F5700BA4B2C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = SpeechSDK_iOSTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.cognitiveservices.SpeechSDK-iOSTests";
+				DEVELOPMENT_TEAM = NK6235ZV5V;
+				INFOPLIST_FILE = SpeechSDK_iOSUnitTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks $(SRCROOT)/../../../../xcode-build-output/";
+				PRODUCT_BUNDLE_IDENTIFIER = "testorg.SpeechSDK-iOSUnitTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SpeechSDK_iOS.app/SpeechSDK_iOS";
 			};
 			name = Debug;
 		};
-		3CA6CFAC211F471600CD2768 /* Release */ = {
+		F3EABACC21639F5700BA4B2C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = SpeechSDK_iOSTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.cognitiveservices.SpeechSDK-iOSTests";
+				DEVELOPMENT_TEAM = NK6235ZV5V;
+				INFOPLIST_FILE = SpeechSDK_iOSUnitTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks $(SRCROOT)/../../../../xcode-build-output/";
+				PRODUCT_BUNDLE_IDENTIFIER = "testorg.SpeechSDK-iOSUnitTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SpeechSDK_iOS.app/SpeechSDK_iOS";
 			};
 			name = Release;
 		};
@@ -526,11 +535,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3CA6CFAA211F471600CD2768 /* Build configuration list for PBXNativeTarget "SpeechSDK_iOSTests" */ = {
+		F3EABACA21639F5700BA4B2C /* Build configuration list for PBXNativeTarget "SpeechSDK_iOSUnitTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3CA6CFAB211F471600CD2768 /* Debug */,
-				3CA6CFAC211F471600CD2768 /* Release */,
+				F3EABACB21639F5700BA4B2C /* Debug */,
+				F3EABACC21639F5700BA4B2C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

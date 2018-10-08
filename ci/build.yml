@@ -1395,12 +1395,27 @@ phases:
       zip --symlinks -r '$(OutputDirectory)/$(VersionedFrameworkName).zip' .
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
     displayName: Package signed framework
+  - bash: |
+      set -e -o pipefail -x
+      # set up framework in the correct position - the Xcode project expects the framework here (used for both Release and Debug configs atm)
+      mkdir -p '$(Build.Repository.LocalPath)/xcode-build-output'
+      pushd '$(Build.Repository.LocalPath)/xcode-build-output'
+      unzip "$(OutputDirectory)/$(VersionedFrameworkName).zip"
+      popd
+      # run the test
+      xcodebuild test -project tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
+          -scheme SpeechSDK_iOS \
+          -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
+          SUBSCRIPTION_KEY='$(KeySkyman)' SERVICE_REGION='westus'
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+    displayName: "Run simple iOS test"
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)'
       ArtifactName: "$(BuildPlatform)"
       publishLocation: Container
+    condition: succeededOrFailed()
 
 - phase: OsxBuild
   dependsOn: Pre
