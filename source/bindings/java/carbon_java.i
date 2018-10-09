@@ -55,6 +55,16 @@ void __swig_spx_do_trace_message(int level, const char* pszTitle, const char* ps
 #include <map>
 #include <stdlib.h>
 
+void SetTempDirectory(std::string tmpDir)
+{
+#ifndef _MSC_VER
+    if(tmpDir.length() > 0)
+    {
+      setenv("TMPDIR", tmpDir.c_str(), 0);
+    }
+#endif
+}
+
 struct StdMapStringStringMapIterator {
     typedef std::map<std::string,std::string> StringStringMap;
     StdMapStringStringMapIterator(const StringStringMap& m) : it(m.begin()), map(m) {

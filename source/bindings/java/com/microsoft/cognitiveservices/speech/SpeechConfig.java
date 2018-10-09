@@ -44,6 +44,9 @@ public class SpeechConfig implements Closeable {
             System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
         }
 
+        // setup native tmpdir
+        com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.SetTempDirectory(System.getProperty("java.io.tmpdir"));
+
         // prevent classgc from freeing this class
         speechConfigClass = SpeechConfig.class;
     }
