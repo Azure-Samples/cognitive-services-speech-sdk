@@ -23,8 +23,8 @@
         resultImpl = resultHandle;
 
         _reason = [Util fromResultReasonImpl:resultHandle->Reason];
-        _resultId = [NSString stringWithString:resultHandle->ResultId];
-        _text = [NSString stringWithString:resultHandle->Text];
+        _resultId = [NSString StringWithStdString:resultHandle->ResultId];
+        _text = [NSString StringWithStdString:resultHandle->Text];
         _duration = resultHandle->Duration();
         _offset = resultHandle->Offset();
         _properties = [[RecognitionResultPropertyCollection alloc] initFrom:resultHandle];
@@ -81,7 +81,7 @@
     else
     {
         _reason = [Util fromCancellationReasonImpl:handle->Reason];
-        _errorDetails = [NSString stringWithString:handle->ErrorDetails];
+        _errorDetails = [NSString StringWithStdString:handle->ErrorDetails];
     }
     return self;
 }

@@ -3,11 +3,12 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 
 /**
   * Represents the language understanding model used for intent recognition.
   */
+SPX_EXPORT
 @interface SPXLanguageUnderstandingModel : NSObject
 
 /**

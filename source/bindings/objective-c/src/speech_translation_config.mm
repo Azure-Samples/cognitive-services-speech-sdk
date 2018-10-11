@@ -82,7 +82,7 @@
     auto langsVector = speechTranslationConfigurationImpl->GetTargetLanguages();
     NSMutableArray *mutableArray = [[NSMutableArray alloc] initWithCapacity:langsVector.size()];
     for (std::vector<std::string>::iterator it = langsVector.begin(); it != langsVector.end(); ++it){
-        [mutableArray addObject:[NSString stringWithString:*it]];
+        [mutableArray addObject:[NSString StringWithStdString:*it]];
     }
     return mutableArray;
 }
@@ -94,7 +94,7 @@
 
 - (NSString *)voiceName
 {
-    return [NSString stringWithString:speechTranslationConfigurationImpl->GetVoiceName()];
+    return [NSString StringWithStdString:speechTranslationConfigurationImpl->GetVoiceName()];
 }
 
 @end

@@ -3,13 +3,14 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 #import "SPXRecognitionEventArgs.h"
 #import "SPXSpeechRecognitionResult.h"
 
 /**
   * Defines the payload of speech recognizing/recognized event.
   */
+SPX_EXPORT
 @interface SPXSpeechRecognitionEventArgs : SPXRecognitionEventArgs
 
 /**
@@ -23,6 +24,7 @@
 /**
   * Defines the payload of speech recognition canceled events.
   */
+SPX_EXPORT
 @interface SPXSpeechRecognitionCanceledEventArgs : SPXSpeechRecognitionEventArgs
 
 /**

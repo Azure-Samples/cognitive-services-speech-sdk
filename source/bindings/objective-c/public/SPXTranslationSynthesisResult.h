@@ -3,11 +3,12 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 
 /**
   * Defines the translation synthesis result, i.e. the voice output of the translated text in the target language.
   */
+SPX_EXPORT
 @interface SPXTranslationSynthesisResult : NSObject
 
 /**

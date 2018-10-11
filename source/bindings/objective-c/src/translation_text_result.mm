@@ -18,7 +18,7 @@
     auto resultInMap = resultImpl->Translations;
     _translations = [[NSMutableDictionary alloc] initWithCapacity:resultInMap.size()];
     for (auto it : resultInMap)
-        [_translations setValue:[NSString stringWithString:it.second] forKey:[NSString stringWithString:it.first]];
+        [_translations setValue:[NSString StringWithStdString:it.second] forKey:[NSString StringWithStdString:it.first]];
 
     return self;
 }

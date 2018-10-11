@@ -3,12 +3,13 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 #import "SPXRecognitionResult.h"
 
 /**
   * Defines the translation recognition result.
   */
+SPX_EXPORT
 @interface SPXTranslationRecognitionResult : SPXRecognitionResult
 
 /**

@@ -24,6 +24,7 @@ $H{range} = qr/<(?:source.*:\d+:\d+, (?:$H{loc}|$H{col})|$H{col}|$H{col}, $H{loc
 
 # Regular expression for terminal matches. Named captures.
 $RE{_EnumExtensibilityAttr} = qr/EnumExtensibilityAttr/; # ignored
+$RE{_VisibilityAttr} = qr/VisibilityAttr/; # ignored
 $RE{_HTMLEndTagComment} = qr/HTMLEndTagComment $H{hex} $H{range} Name="(?<name>.*?)"\r?$/;
 $RE{_HTMLStartTagComment} = qr/HTMLStartTagComment $H{hex} $H{range} Name="(?<name>\w*?)"(?: Attrs:  "(?<attrs>.*))?\r?$/; # no closing quote, it seems
 $RE{_ParmVarDecl} = qr/ParmVarDecl $H{hex} $H{range} $H{col} (?<name>\w+) '(?<type>.*?)':'(?<basetype>.*?)'\r?$/;

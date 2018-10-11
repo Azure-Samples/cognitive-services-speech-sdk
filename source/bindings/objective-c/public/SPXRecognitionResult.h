@@ -3,13 +3,14 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 #import "SPXSpeechEnums.h"
 #import "SPXPropertyCollection.h"
 
 /**
   * Represents the recognition result base class.
   */
+SPX_EXPORT
 @interface SPXRecognitionResult : NSObject
 
 /**
@@ -50,6 +51,7 @@
 /**
   * Defines detailed information about why a result was canceled.
   */
+SPX_EXPORT
 @interface SPXCancellationDetails : NSObject
 
 /**
@@ -74,6 +76,7 @@
 /**
   * Defines detailed information for NoMatch recognition results.
   */
+SPX_EXPORT
 @interface SPXNoMatchDetails : NSObject
 
 /**

@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 #import "SPXSpeechTranslationConfiguration.h"
 #import "SPXAudioConfiguration.h"
 #import "SPXRecognizer.h"
@@ -14,6 +14,7 @@
 /**
  * Performs translation on the specified speech input, and gets transcribed and translated texts as result.
  */
+SPX_EXPORT
 @interface SPXTranslationRecognizer : SPXRecognizer
 
 typedef void (^SPXTranslationRecognitionEventHandler)(SPXTranslationRecognizer * _Nonnull, SPXTranslationRecognitionEventArgs * _Nonnull);

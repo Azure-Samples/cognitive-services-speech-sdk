@@ -9,6 +9,6 @@
 @interface NSString (STL)
 
 - (std::string)string;
-+ (instancetype)stringWithString:(const std::string&)str;
++ (instancetype)StringWithStdString:(const std::string&)str;
 
 @end

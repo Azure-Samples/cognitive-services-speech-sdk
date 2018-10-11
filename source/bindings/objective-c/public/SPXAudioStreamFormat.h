@@ -3,11 +3,12 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 
 /**
   * Represents the audio stream format used for custom audio input configurations.
   */
+SPX_EXPORT
 @interface SPXAudioStreamFormat : NSObject
 
 /**

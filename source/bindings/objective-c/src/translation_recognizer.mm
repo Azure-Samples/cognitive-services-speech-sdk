@@ -187,7 +187,7 @@ struct TranslationEventHandlerHelper
 
 - (NSString *)authorizationToken
 {
-    return [NSString stringWithString:translationRecoImpl->GetAuthorizationToken()];
+    return [NSString StringWithStdString:translationRecoImpl->GetAuthorizationToken()];
 }
 
 - (SPXTranslationRecognitionResult *)recognizeOnce

@@ -3,7 +3,7 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 #import "SPXAudioStreamFormat.h"
 
 typedef NSInteger (^SPXPullAudioInputStreamReadHandler)(NSMutableData * _Nonnull, NSUInteger);
@@ -13,6 +13,7 @@ typedef void (^SPXPullAudioInputStreamCloseHandler)(void);
  * Base class representing the audio input stream used for custom audio input configurations.
  * Currently no property and methods defined in the base class.
  */
+SPX_EXPORT
 @interface SPXAudioInputStream : NSObject
 
 @end
@@ -20,6 +21,7 @@ typedef void (^SPXPullAudioInputStreamCloseHandler)(void);
 /**
   * Represents memory backed push audio input stream used for custom audio input configurations.
   */
+SPX_EXPORT
 @interface SPXPushAudioInputStream : SPXAudioInputStream
 
 /**
@@ -51,6 +53,7 @@ typedef void (^SPXPullAudioInputStreamCloseHandler)(void);
 /**
   * Represents audio input stream used for custom audio input configurations.
   */
+SPX_EXPORT
 @interface SPXPullAudioInputStream : SPXAudioInputStream
 
 /**

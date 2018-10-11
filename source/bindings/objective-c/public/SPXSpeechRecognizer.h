@@ -3,7 +3,7 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 #import "SPXAudioConfiguration.h"
 #import "SPXSpeechConfiguration.h"
 #import "SPXSpeechRecognizer.h"
@@ -13,6 +13,7 @@
 /**
  * Performs speech recognition on the specified audio input, and gets transcribed text as result.
  */
+SPX_EXPORT
 @interface SPXSpeechRecognizer : SPXRecognizer
 
 typedef void (^SPXSpeechRecognitionEventHandler)(SPXSpeechRecognizer * _Nonnull, SPXSpeechRecognitionEventArgs * _Nonnull);

@@ -44,12 +44,12 @@
 
 -(NSString *)getPropertyByName:(NSString *)name
 {
-    return [NSString stringWithString:propertiesImpl->GetProperty([name string])];
+    return [NSString StringWithStdString:propertiesImpl->GetProperty([name string])];
 }
 
 -(NSString *)getPropertyByName:(NSString *)name defaultValue:(NSString *)defaultValue
 {
-    return [NSString stringWithString:propertiesImpl->GetProperty([name string], [defaultValue string])];
+    return [NSString StringWithStdString:propertiesImpl->GetProperty([name string], [defaultValue string])];
 }
 
 -(void)setPropertyTo:(NSString *)value byName:(NSString *)name
@@ -59,12 +59,12 @@
 
 -(NSString *)getPropertyById:(SPXPropertyId)propertyId
 {
-    return [NSString stringWithString:propertiesImpl->GetProperty((SpeechImpl::PropertyId)(int)propertyId)];
+    return [NSString StringWithStdString:propertiesImpl->GetProperty((SpeechImpl::PropertyId)(int)propertyId)];
 }
 
 -(NSString *)getPropertyById:(SPXPropertyId)propertyId defaultValue:(NSString *)defaultValue
 {
-    return [NSString stringWithString:propertiesImpl->GetProperty((SpeechImpl::PropertyId)(int)propertyId, [defaultValue string])];
+    return [NSString StringWithStdString:propertiesImpl->GetProperty((SpeechImpl::PropertyId)(int)propertyId, [defaultValue string])];
 }
 
 -(void)setPropertyTo:(NSString *)value byId:(SPXPropertyId)propertyId

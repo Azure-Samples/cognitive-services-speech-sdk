@@ -3,7 +3,7 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 #import "SPXRecognitionEventArgs.h"
 #import "SPXTranslationRecognitionResult.h"
 
@@ -11,6 +11,7 @@
 /**
   * Defines the payload of text translation recognizing/recognized events.
   */
+SPX_EXPORT
 @interface SPXTranslationRecognitionEventArgs : SPXRecognitionEventArgs
 
 /**
@@ -23,6 +24,7 @@
 /**
   * Defines the payload of text translation canceled events.
   */
+SPX_EXPORT
 @interface SPXTranslationRecognitionCanceledEventArgs : SPXTranslationRecognitionEventArgs
 
 /**

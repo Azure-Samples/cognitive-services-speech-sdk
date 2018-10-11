@@ -1,6 +1,8 @@
 if(WIN32)
   # Version >= 3.10 is required for generating VS 2017 solutions and ensuring SWIG to create correct dll names.
   cmake_minimum_required(VERSION 3.10)
+elseif(APPLE)
+  cmake_minimum_required(VERSION 3.9)
 else()
   cmake_minimum_required(VERSION 3.5)
 endif()
@@ -104,7 +106,13 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g")
 
-  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -fPIC")
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+  # visibility
+  cmake_policy(SET CMP0063 NEW)
+  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+  set(CMAKE_C_VISIBILITY_PRESET hidden)
+  set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
   # option to only compile embedded bitcode markers
   if((DEFINED APPLE) AND (DEFINED IOS_PLATFORM))

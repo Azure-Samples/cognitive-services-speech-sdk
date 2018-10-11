@@ -23,7 +23,7 @@
     self = [super init:e];
     auto cancellationDetails = e.GetCancellationDetails();
     _reason = [Util fromCancellationReasonImpl:cancellationDetails->Reason];
-    _errorDetails = [NSString stringWithString:cancellationDetails->ErrorDetails];
+    _errorDetails = [NSString StringWithStdString:cancellationDetails->ErrorDetails];
     
     return self;
 }

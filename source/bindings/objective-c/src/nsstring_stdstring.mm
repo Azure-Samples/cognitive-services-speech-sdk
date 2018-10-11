@@ -12,7 +12,7 @@
     return [self UTF8String];
 }
 
-+ (instancetype)stringWithString:(const std::string&)str
++ (instancetype)StringWithStdString:(const std::string&)str
 {
     return [[NSString alloc] initWithUTF8String: str.c_str()];
 }

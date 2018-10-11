@@ -10,7 +10,7 @@
 - (instancetype)init: (const SpeechImpl::SessionEventArgs&) eventArgsHandle
 {
     self = [super init];
-    _sessionId = [NSString stringWithString:eventArgsHandle.SessionId];
+    _sessionId = [NSString StringWithStdString:eventArgsHandle.SessionId];
     return self;
 }
 

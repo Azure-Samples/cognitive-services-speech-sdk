@@ -3,7 +3,7 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 #import "SPXSessionEventArgs.h"
 #import "SPXRecognitionEventArgs.h"
 
@@ -11,6 +11,7 @@
  * Defines the base class SPXRecognizer which mainly contains common event handlers.
  */
 
+SPX_EXPORT
 @interface SPXRecognizer : NSObject
 
 typedef void (^SPXSessionEventHandler)(SPXRecognizer * _Nonnull, SPXSessionEventArgs * _Nonnull);

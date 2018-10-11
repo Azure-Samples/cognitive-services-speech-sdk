@@ -3,12 +3,13 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 #import "SPXPropertyCollection.h"
 
 /**
   * Defines configurations for speech or intent recognition.
   */
+SPX_EXPORT
 @interface SPXSpeechConfiguration : NSObject
 
 /**

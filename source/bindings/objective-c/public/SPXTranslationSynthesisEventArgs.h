@@ -3,13 +3,14 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 #import "SPXSessionEventArgs.h"
 #import "SPXTranslationSynthesisResult.h"
 
 /**
   * Defines the payload of the translation synthesis result event.
   */
+SPX_EXPORT
 @interface SPXTranslationSynthesisEventArgs : SPXSessionEventArgs
 
 /**

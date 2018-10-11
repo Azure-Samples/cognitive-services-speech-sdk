@@ -3,7 +3,7 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#include <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 
 /**
   * Represents a collection of properties and their values.

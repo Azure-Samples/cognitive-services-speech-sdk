@@ -172,7 +172,7 @@ struct IntentEventHandlerHelper
 
 - (NSString *)authorizationToken
 {
-    return [NSString stringWithString:intentRecoImpl->GetAuthorizationToken()];
+    return [NSString StringWithStdString:intentRecoImpl->GetAuthorizationToken()];
 }
 
 - (void)addIntentFromPhrase:(NSString *)simplePhrase

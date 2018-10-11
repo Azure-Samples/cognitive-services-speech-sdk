@@ -3,7 +3,7 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 #import "SPXSpeechConfiguration.h"
 #import "SPXAudioConfiguration.h"
 #import "SPXPropertyCollection.h"
@@ -15,6 +15,7 @@
 /**
   * Performs intent recognition on speech input. It returns both recognized text and recognized intent.
   */
+SPX_EXPORT
 @interface SPXIntentRecognizer : SPXRecognizer
 
 typedef void (^SPXIntentRecognitionEventHandler)(SPXIntentRecognizer * _Nonnull, SPXIntentRecognitionEventArgs * _Nonnull);

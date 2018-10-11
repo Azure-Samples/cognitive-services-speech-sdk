@@ -15,7 +15,7 @@
 {
     self = [super init :resultHandle];
     resultImpl = resultHandle;
-    _intentId = [NSString stringWithString :resultHandle->IntentId];
+    _intentId = [NSString StringWithStdString :resultHandle->IntentId];
     return self;
 }
 

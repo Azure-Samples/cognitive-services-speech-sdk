@@ -170,12 +170,12 @@ struct SpeechEventHandlerHelper
 
 - (NSString *)authorizationToken
 {
-    return [NSString stringWithString:speechRecoImpl->GetAuthorizationToken()];
+    return [NSString StringWithStdString:speechRecoImpl->GetAuthorizationToken()];
 }
 
 - (NSString *)endpointId
 {
-    return [NSString stringWithString:speechRecoImpl->GetEndpointId()];
+    return [NSString StringWithStdString:speechRecoImpl->GetEndpointId()];
 }
 
 - (SPXSpeechRecognitionResult *)recognizeOnce

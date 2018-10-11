@@ -77,7 +77,7 @@
 
 - (NSString *)speechRecognitionLanguage
 {
-    return [NSString stringWithString:speechConfigImpl->GetSpeechRecognitionLanguage()];
+    return [NSString StringWithStdString:speechConfigImpl->GetSpeechRecognitionLanguage()];
 }
 
 - (void)setEndpointId: (NSString *)endpointId
@@ -87,7 +87,7 @@
 
 - (NSString *)endpointId
 {
-    return [NSString stringWithString:speechConfigImpl->GetEndpointId()];
+    return [NSString StringWithStdString:speechConfigImpl->GetEndpointId()];
 }
 
 - (void)setAuthorizationToken: (NSString *)token
@@ -97,27 +97,27 @@
 
 - (NSString *)authorizationToken
 {
-    return [NSString stringWithString:speechConfigImpl->GetAuthorizationToken()];
+    return [NSString StringWithStdString:speechConfigImpl->GetAuthorizationToken()];
 }
 
 - (NSString *)subscriptionKey
 {
-    return [NSString stringWithString:speechConfigImpl->GetSubscriptionKey()];
+    return [NSString StringWithStdString:speechConfigImpl->GetSubscriptionKey()];
 }
 
 - (NSString *)region
 {
-    return [NSString stringWithString:speechConfigImpl->GetRegion()];
+    return [NSString StringWithStdString:speechConfigImpl->GetRegion()];
 }
 
 -(NSString *)getPropertyByName:(NSString *)name
 {
-    return [NSString stringWithString:speechConfigImpl->GetProperty([name string])];
+    return [NSString StringWithStdString:speechConfigImpl->GetProperty([name string])];
 }
 
 -(NSString *)setPropertyByName:(NSString *)name
 {
-    return [NSString stringWithString:speechConfigImpl->GetProperty([name string])];
+    return [NSString StringWithStdString:speechConfigImpl->GetProperty([name string])];
 }
 
 -(void)setPropertyTo:(NSString *)value byName:(NSString *)name
@@ -127,7 +127,7 @@
 
 -(NSString *)getPropertyById:(SPXPropertyId)propertyId
 {
-    return [NSString stringWithString:speechConfigImpl->GetProperty((SpeechImpl::PropertyId)(int)propertyId)];
+    return [NSString StringWithStdString:speechConfigImpl->GetProperty((SpeechImpl::PropertyId)(int)propertyId)];
 }
 
 -(void)setPropertyTo:(NSString *)value byId:(SPXPropertyId)propertyId

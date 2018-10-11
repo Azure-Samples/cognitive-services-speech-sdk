@@ -3,12 +3,13 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-#import <Foundation/Foundation.h>
+#import "SPXFoundation.h"
 #import "SPXSpeechConfiguration.h"
 
 /**
   * Defines configurations for translation with speech input.
   */
+SPX_EXPORT
 @interface SPXSpeechTranslationConfiguration : SPXSpeechConfiguration
 
 

@@ -56,6 +56,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   # settings for generating an Xcode project
   XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
   XCODE_ATTRIBUTE_PRODUCT_NAME ${SPEECHSDK_CORE_LIBRARY}
+  CXX_VISIBILITY_PRESET hidden
+  C_VISIBILITY_PRESET hidden
+  OBJC_VISIBILITY_PRESET hidden
 )
 
 target_link_libraries(${PROJECT_NAME}
