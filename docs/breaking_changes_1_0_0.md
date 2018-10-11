@@ -340,3 +340,206 @@ recognizer.addIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
 recognizer.addIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
 recognizer.addIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 ```
+
+# C++
+
+## Creating a SpeechRecognizer, IntentRecognizer, or TranslationRecognizer
+
+The `SpeechFactory` used to create the various types of recognizers has been replaced by constructors for recognizers.
+They take a `SpeechConfig` instance and, optionally, a `AudioConfig` instance as argument. For example, for an intent recognizer:
+
+Old API:
+```cpp
+auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
+
+// for recognition from microphone:
+auto recognizer = factory->CreateIntentRecognizer();
+
+// for recognition from file:
+auto recognizer = factory->CreateIntentRecognizerWithFileInput(L"whatstheweatherlike.wav");
+```
+
+New API:
+```cpp
+auto speechConfig = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+// for recognition from microphone:
+auto recognizer = IntentRecognizer::FromConfig(speechConfig);
+
+// for recognition from file:
+auto audioInput = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");
+auto recognizer = IntentRecognizer::FromConfig(speechConfig, audioInput);
+```
+
+## Recognition Results
+
+The way the recognizers return their results has been changed.
+The `RecognitionResult.RecognitionStatus` attribute has been replaced by `RecognitionResult.Reason`, which gives the reason for the result being what it is, e.g. details on why a `NoMatch` or `Canceled` result has been returned.
+The particular API changes for cancellations are outlined [below](#cancellation).
+
+### Speech Recognition
+
+Old API:
+
+```cpp
+auto result = recognizer->RecognizeAsync().get();
+
+// Checks result.
+if (result->Reason != Reason::Recognized)
+{
+    wcout << L"Recognition Status: " << int(result->Reason) << L". ";
+    if (result->Reason == Reason::Canceled)
+    {
+        wcout << L"There was an error, reason: " << result->ErrorDetails << std::endl;
+    }
+    else
+    {
+        wcout << L"No speech could be recognized.\n";
+    }
+}
+else
+{
+    wcout << L"We recognized: " << result->Text
+            << L", starting at " << result->Offset() << L"(ticks)"
+            << L", with duration of " << result->Duration() << L"(ticks)"
+            << std::endl;
+}
+```
+
+New API:
+
+```cpp
+auto result = recognizer->RecognizeOnceAsync().get();
+
+// Checks result.
+if (result->Reason == ResultReason::RecognizedSpeech)
+{
+    cout << "RECOGNIZED: Text=" << result->Text << std::endl
+            << "  Speech Service JSON: " << result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult)
+            << std::endl;
+}
+else if (result->Reason == ResultReason::NoMatch)
+{
+    cout << "NOMATCH: Speech could not be recognized." << std::endl;
+}
+else if (result->Reason == ResultReason::Canceled)
+{
+    auto cancellation = CancellationDetails::FromResult(result);
+    cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+    if (cancellation->Reason == CancellationReason::Error)
+    {
+        cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+        cout << "CANCELED: Did you update the subscription info?" << std::endl;
+    }
+}
+```
+
+### Intent recognition
+
+Old API:
+```cpp
+if (result->Reason != Reason::Recognized)
+{
+    wcout << L"Recognition Status: " << int(result->Reason) << L". ";
+    if (result->Reason == Reason::Canceled)
+    {
+        wcout << L"There was an error, reason: " << result->ErrorDetails << std::endl;
+    }
+    else
+    {
+        wcout << L"No speech could be recognized.\n";
+    }
+}
+else
+{
+    wcout << L"We recognized: " << result->Text << std::endl;
+    wcout << L"    Intent Id: " << result->IntentId << std::endl;
+    wcout << L"    Intent response in Json: " << result->Properties[ResultProperty::LanguageUnderstandingJson].GetString() << std::endl;
+}
+```
+
+New API:
+```cpp
+auto result = recognizer->RecognizeOnceAsync().get();
+
+// Checks result.
+if (result->Reason == ResultReason::RecognizedIntent)
+{
+    cout << "RECOGNIZED: Text=" << result->Text << std::endl;
+    cout << "  Intent Id: " << result->IntentId << std::endl;
+    cout << "  Intent Service JSON: " << result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult) << std::endl;
+}
+else if (result->Reason == ResultReason::RecognizedSpeech)
+{
+    cout << "RECOGNIZED: Text=" << result->Text << " (intent could not be recognized)" << std::endl;
+}
+else if (result->Reason == ResultReason::NoMatch)
+{
+    cout << "NOMATCH: Speech could not be recognized." << std::endl;
+}
+else if (result->Reason == ResultReason::Canceled)
+{
+    auto cancellation = CancellationDetails::FromResult(result);
+    cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+    if (cancellation->Reason == CancellationReason::Error)
+    {
+        cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+        cout << "CANCELED: Did you update the subscription info?" << std::endl;
+    }
+}
+```
+
+## Cancellation
+
+In particular, the `ResultReason` for recognition results that have been canceled allows better insight into why the cancellation occurred.
+To get more details on the cancellation, a `CancellationDetails` object can be instantiated with data from the result as shown below.
+
+Old API:
+```cpp
+auto result = recognizer->RecognizeAsync().get();
+
+if (result->Reason == Reason::Canceled)
+{
+    wcout << L"There was an error, reason: " << result->ErrorDetails << std::endl;
+}
+```
+
+New API:
+```cpp
+auto result = recognizer->RecognizeOnceAsync().get();
+
+// Checks result.
+if (result->Reason == ResultReason::Canceled)
+{
+    auto cancellation = CancellationDetails::FromResult(result);
+    cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+    if (cancellation->Reason == CancellationReason::Error)
+    {
+        cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+        cout << "CANCELED: Did you update the subscription info?" << std::endl;
+    }
+}
+```
+
+## Adding Intents
+
+The order of the arguments of the `IntentRecognizer.AddIntent` method has changed.
+
+Old API:
+```cpp
+auto model = LanguageUnderstandingModel::FromAppId(L"YourLanguageUnderstandingAppId");
+recognizer->AddIntent(L"id1", model, L"YourLanguageUnderstandingIntentName1");
+recognizer->AddIntent("id2", model, L"YourLanguageUnderstandingIntentName2");
+recognizer->AddIntent("any-IntentId-here", model, L"YourLanguageUnderstandingIntentName3");
+```
+
+New API:
+```cpp
+auto model = LanguageUnderstandingModel::FromAppId("YourLanguageUnderstandingAppId");
+recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
+```
