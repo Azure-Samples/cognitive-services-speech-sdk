@@ -289,7 +289,7 @@
                     speechConfig = SpeechSDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
                 }
 
-                speechConfig.language = languageOptions.value;
+                speechConfig.speechRecognitionLanguage = languageOptions.value;
                 reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
 
                 // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
@@ -564,7 +564,7 @@
                     speechConfig = SpeechSDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
                 }
 
-                speechConfig.language = languageOptions.value;
+                speechConfig.speechRecognitionLanguage = languageOptions.value;
                 reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
 
                 // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
@@ -709,7 +709,7 @@
                     speechConfig = SpeechSDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
                 }
 
-                speechConfig.language = languageOptions.value;
+                speechConfig.speechRecognitionLanguage = languageOptions.value;
                 reco = new SpeechSDK.IntentRecognizer(speechConfig, audioConfig);
 
                 // Set up a Language Understanding Model from Language Understanding Intelligent Service (LUIS).

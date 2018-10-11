@@ -102,7 +102,7 @@
           speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, regionKey.value);
         }
 
-        speechConfig.language = "en-US";
+        speechConfig.speechRecognitionLanguage = "en-US";
         var audioConfig  = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
         recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
 
