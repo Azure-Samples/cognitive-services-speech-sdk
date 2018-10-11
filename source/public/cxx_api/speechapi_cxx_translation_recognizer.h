@@ -43,7 +43,7 @@ public:
         SPXRECOHANDLE hreco { SPXHANDLE_INVALID };
         SPX_THROW_ON_FAIL(::recognizer_create_translation_recognizer_from_config(
             &hreco,
-            HandleOrInvalid<SPXSPEECHCONFIGHANDLE, SpeechConfig>(speechconfig),
+            HandleOrInvalid<SPXSPEECHCONFIGHANDLE, SpeechTranslationConfig>(speechconfig),
             HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(audioInput)));
         return std::make_shared<TranslationRecognizer>(hreco);
     }

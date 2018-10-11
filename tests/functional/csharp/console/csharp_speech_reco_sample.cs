@@ -168,11 +168,11 @@ namespace MicrosoftSpeechSDKSamples
             {
                 if (e.Result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                    Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
                 }
                 else if (e.Result.Reason == ResultReason.NoMatch)
                 {
-                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}");
                 }
             };
 
