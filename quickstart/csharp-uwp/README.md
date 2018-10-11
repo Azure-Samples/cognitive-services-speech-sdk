@@ -32,7 +32,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging**. To run the app without debugging, press Ctrl+F5 or use **Debug** \> **Start Without Debugging**.
 
-When you see the `Enable microphone` button, click it. Then select the `Speech recognition with microphone input` button and start speaking. It will then stop and confirm what you said.
+When you see the `Enable microphone` button, click it. Then select the `Speech recognition with microphone input` button and start speaking. The next (up to) 15 seconds of English speech will be sent to the Speech service and transcribed.
 
 ## References
 
