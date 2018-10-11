@@ -1,9 +1,6 @@
 //
-//  ViewController.m
-//  SpeechSDK_iOS
-//
-//  Created by carbon on 11.08.18.
-//  Copyright © 2018 MSFT. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
 #import "ViewController.h"
@@ -12,6 +9,9 @@
 #import "../../shared/test_audio.h"
 #import "../../shared/microphone_test.h"
 #import "../../shared/dummytest.h"
+
+extern NSString *speechKey;
+
 @interface ViewController ()
 
 @end
@@ -26,8 +26,8 @@
     [MicrophoneTest runAsync];
     [MicrophoneTest runTranslation];
     [MicrophoneTest runContinuous];
-    [AudioStreamTest runPullTest];
-    [AudioStreamTest runPushTest];
+    [AudioStreamTest runPullTest:speechKey];
+    [AudioStreamTest runPushTest:speechKey];
 }
 
 

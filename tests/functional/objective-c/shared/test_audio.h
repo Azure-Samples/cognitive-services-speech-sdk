@@ -3,8 +3,6 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-
-
 #ifndef test_audio_h
 #define test_audio_h
 
@@ -12,8 +10,8 @@
 
 @interface AudioStreamTest :NSObject
 
-+(void) runPushTest;
-+(void) runPullTest;
++(void) runPushTest:(NSString *)speechKey;
++(void) runPullTest:(NSString *)speechKey;
 
 @end
 

@@ -9,7 +9,7 @@
     
 + (void)runTest
 {
-    // Testt AudioStreamFormat
+    // Test AudioStreamFormat
     SPXAudioStreamFormat *streamFormat = [[SPXAudioStreamFormat alloc] init];
     streamFormat = [[SPXAudioStreamFormat alloc] initUsingPCMWithSampleRate:16000 bitsPerSample:16 channels:1];
     
@@ -59,8 +59,11 @@
     testTranslationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithEndpoint:@"https://westus.api.com" subscription:@"dummy"];
     value = [testTranslationConfig getPropertyById:SPXSpeechServiceConnectionKey];
     [testTranslationConfig setPropertyTo:@"dummy" byId:SPXSpeechServiceConnectionKey];
+
+    [testTranslationConfig setSpeechRecognitionLanguage:@"en-us"];
     value = testTranslationConfig.speechRecognitionLanguage;
     testTranslationConfig.speechRecognitionLanguage = value;
+
     [testTranslationConfig addTargetLanguage:@"de-DE"];
     NSArray *target = [testTranslationConfig targetLanguages];
     NSString *voiceName = [testTranslationConfig voiceName];

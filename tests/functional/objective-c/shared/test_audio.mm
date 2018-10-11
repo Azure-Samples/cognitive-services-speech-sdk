@@ -3,8 +3,6 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-
-
 #import <Foundation/Foundation.h>
 
 #import "test_audio.h"
@@ -14,10 +12,6 @@
 constexpr uint16_t tagBufferSize = 4;
 constexpr uint16_t chunkTypeBufferSize = 4;
 constexpr uint16_t chunkSizeBufferSize = 4;
-
-
-extern NSString *speechKey;
-extern NSString *intentKey;
 
 // The format structure expected in wav files.
 struct WAVEFORMAT
@@ -101,9 +95,9 @@ void GetFormatFromWavFile(std::fstream& fs)
 
 @implementation AudioStreamTest
 
-+(void) runPullTest
++(void) runPullTest:(NSString *)speechKey
 {
-    NSBundle *mainBundle = [NSBundle mainBundle];
+    NSBundle *mainBundle = [NSBundle bundleForClass:[self class]];
     NSString *weatherFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType:@"wav"];
     NSLog(@"Main bundle path: %@", mainBundle);
     NSLog(@"weatherFile path: %@", weatherFile);
@@ -181,14 +175,12 @@ void GetFormatFromWavFile(std::fstream& fs)
     [speechRecognizer addRecognizingEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
         NSLog(@"Received intermediate result event. SessionId: %@, intermediate result:%@.", eventArgs.sessionId, eventArgs.result.text);
     }];
-
     
     [speechRecognizer addCanceledEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionCanceledEventArgs *eventArgs) {
         NSLog(@"Received canceled event. SessionId: %@, reason:%lu errorDetails:%@.", eventArgs.sessionId, (unsigned long)eventArgs.reason, eventArgs.errorDetails);
         SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:eventArgs.result];
         NSLog(@"Received cancellation details. reason:%lu errorDetails:%@.", (unsigned long)details.reason, details.errorDetails);
     }];
-    
     
     end = false;
     [speechRecognizer startContinuousRecognition];
@@ -199,17 +191,18 @@ void GetFormatFromWavFile(std::fstream& fs)
 }
     
     
-+(void) runPushTest
++(void) runPushTest:(NSString *)speechKey
     {
-        NSBundle *mainBundle = [NSBundle mainBundle];
+        NSBundle *mainBundle = [NSBundle bundleForClass:[self class]];
         NSString *weatherFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType:@"wav"];
         NSLog(@"Main bundle path: %@", mainBundle);
         NSLog(@"weatherFile path: %@", weatherFile);
         NSString *lampFile = [mainBundle pathForResource: @"TurnOnTheLamp" ofType:@"wav"];
         
         std::string audioFileName = [weatherFile UTF8String];
-        if (audioFileName.empty())
-        throw std::invalid_argument("Audio filename is empty");
+        if (audioFileName.empty()) {
+            throw std::invalid_argument("Audio filename is empty");
+        }
         
         std::fstream m_fs;
         std::ios_base::openmode mode = std::ios_base::binary | std::ios_base::in;

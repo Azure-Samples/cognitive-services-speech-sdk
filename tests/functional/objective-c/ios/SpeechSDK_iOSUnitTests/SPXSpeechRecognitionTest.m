@@ -22,8 +22,8 @@
     weatherFileName = @"whatstheweatherlike";
     weatherTextEnglish = @"What's the weather like?";
 
-    self.speechKey = [[[NSProcessInfo processInfo] environment] objectForKey:@"subscriptionKey"] ;
-    self.serviceRegion = [[[NSProcessInfo processInfo] environment] objectForKey:@"serviceRegion"] ;
+    self.speechKey = [[[NSProcessInfo processInfo] environment] objectForKey:@"subscriptionKey"];
+    self.serviceRegion = [[[NSProcessInfo processInfo] environment] objectForKey:@"serviceRegion"];
     
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
