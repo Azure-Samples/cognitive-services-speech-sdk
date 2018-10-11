@@ -7,7 +7,7 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK (1.0.0) on Windows 10, Ubuntu 16.04 x64, and ARM-based Android devices (API 23: Android 6.0 Marshmallow or higher).
+We tested the samples with the latest released version of the SDK (1.0.1) on Windows 10, Ubuntu 16.04 x64, and ARM-based Android devices (API 23: Android 6.0 Marshmallow or higher).
 
 ## Getting Started
 
