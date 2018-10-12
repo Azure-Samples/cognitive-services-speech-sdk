@@ -1409,6 +1409,19 @@ phases:
           SUBSCRIPTION_KEY='$(KeySkyman)' SERVICE_REGION='westus'
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
     displayName: "Run simple iOS test"
+  - bash: |
+      set -e -o pipefail -x
+      # set up framework in the correct position - the Xcode project expects the framework here (used for both Release and Debug configs atm)
+      ln -s '$(Build.Repository.LocalPath)/xcode-build-output/$(FrameworkName).framework' public_samples/quickstart/objectivec-ios/
+      # fix the keys
+      sed -ibak "s/YourSubscriptionKey/$(KeySkyman)/" public_samples/quickstart/objectivec-ios/helloworld/helloworld/ViewController.m
+      sed -ibak "s/YourServiceRegion/westus/" public_samples/quickstart/objectivec-ios/helloworld/helloworld/ViewController.m
+      # run the test
+      xcodebuild test -project public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
+          -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
+          -scheme helloworldUITests
+    displayName: "Run iOS quickstart UI test"
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
