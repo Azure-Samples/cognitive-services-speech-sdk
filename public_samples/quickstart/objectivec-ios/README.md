@@ -16,8 +16,6 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 
-The current version of the Cognitive Services Speech SDK is `1.0.0`.
-
 The Cognitive Services Speech SDK for iOS can be downloaded as a zip-file from https://aka.ms/csspeech/iosbinary. Download and copy the files to the `speechsdk` directory in the directory of this `README.md`, i.e. parallel to the `helloworld` directory that contains the XCode project.
 
 ## Build the Sample
