@@ -7,7 +7,7 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK (1.0.0) on Windows 10, Ubuntu 16.04 x64, and ARM-based Android devices (API 23: Android 6.0 Marshmallow or higher).
+We tested the samples with the latest released version of the SDK (1.0.1) on Windows 10, Ubuntu 16.04 x64, and ARM-based Android devices (API 23: Android 6.0 Marshmallow or higher).
 
 ## Getting Started
 
@@ -57,6 +57,7 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Translation WPF sample for .NET Framework on Windows](./samples/csharp/dotnet-windows/translation-wpf)     | Windows  | Demonstrates translation |
 | [Speech-to-text UWP sample](./samples/csharp/uwp/speechtotext-uwp)                                          | Windows  | Demonstrates speech recognition |
 | [Speech recognition sample for Android](./samples/java/android/sdkdemo)                                     | Android  | Demonstrates speech and intent recognition |
+| [Speech recognition and translation sample for the browser, using JavaScript](./samples/js/browser)         | Web  | Demonstrates speech recognition, intent recognition, and translation |
 
 ## Resources
 
