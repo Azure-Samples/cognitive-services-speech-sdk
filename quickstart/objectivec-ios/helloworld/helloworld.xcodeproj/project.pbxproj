@@ -16,7 +16,19 @@
 		F3184E68214685C80096193E /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = F3184E67214685C70096193E /* whatstheweatherlike.wav */; };
 		F376163E21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */; };
 		F376163F21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F3D2F4A1216A516E006E5F52 /* helloworldUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = F3D2F4A0216A516E006E5F52 /* helloworldUITests.m */; };
+		F3D2F4AC216A563C006E5F52 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3D2F4A8216A5538006E5F52 /* XCTest.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F3D2F4A3216A516E006E5F52 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F3184E3E214674D60096193E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F3184E45214674D60096193E;
+			remoteInfo = helloworld;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		F376164021540C9D0097B6F1 /* Embed Frameworks */ = {
@@ -45,6 +57,9 @@
 		F3184E58214674DA0096193E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		F3184E67214685C70096193E /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ./whatstheweatherlike.wav; sourceTree = "<group>"; };
 		F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = ../MicrosoftCognitiveServicesSpeech.framework; sourceTree = "<group>"; };
+		F3D2F4A0216A516E006E5F52 /* helloworldUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = helloworldUITests.m; sourceTree = "<group>"; };
+		F3D2F4A2216A516E006E5F52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F3D2F4A8216A5538006E5F52 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +68,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				F376163E21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3D2F49B216A516E006E5F52 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F3D2F4AC216A563C006E5F52 /* XCTest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +88,7 @@
 				F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */,
 				F3184E67214685C70096193E /* whatstheweatherlike.wav */,
 				F3184E48214674D60096193E /* helloworld */,
+				F3D2F49F216A516E006E5F52 /* helloworldUITests */,
 				F3184E47214674D60096193E /* Products */,
 				F3184E5F214675180096193E /* Frameworks */,
 			);
@@ -97,8 +121,18 @@
 		F3184E5F214675180096193E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F3D2F4A8216A5538006E5F52 /* XCTest.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F3D2F49F216A516E006E5F52 /* helloworldUITests */ = {
+			isa = PBXGroup;
+			children = (
+				F3D2F4A0216A516E006E5F52 /* helloworldUITests.m */,
+				F3D2F4A2216A516E006E5F52 /* Info.plist */,
+			);
+			path = helloworldUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -122,6 +156,23 @@
 			productReference = F3184E46214674D60096193E /* helloworld.app */;
 			productType = "com.apple.product-type.application";
 		};
+		F3D2F49D216A516E006E5F52 /* helloworldUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F3D2F4A5216A516E006E5F52 /* Build configuration list for PBXNativeTarget "helloworldUITests" */;
+			buildPhases = (
+				F3D2F49A216A516E006E5F52 /* Sources */,
+				F3D2F49B216A516E006E5F52 /* Frameworks */,
+				F3D2F49C216A516E006E5F52 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F3D2F4A4216A516E006E5F52 /* PBXTargetDependency */,
+			);
+			name = helloworldUITests;
+			productName = helloworldUITests;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -133,6 +184,10 @@
 				TargetAttributes = {
 					F3184E45214674D60096193E = {
 						CreatedOnToolsVersion = 9.4.1;
+					};
+					F3D2F49D216A516E006E5F52 = {
+						CreatedOnToolsVersion = 9.4.1;
+						TestTargetID = F3184E45214674D60096193E;
 					};
 				};
 			};
@@ -150,6 +205,7 @@
 			projectRoot = "";
 			targets = (
 				F3184E45214674D60096193E /* helloworld */,
+				F3D2F49D216A516E006E5F52 /* helloworldUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -166,6 +222,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F3D2F49C216A516E006E5F52 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -179,7 +242,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F3D2F49A216A516E006E5F52 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F3D2F4A1216A516E006E5F52 /* helloworldUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F3D2F4A4216A516E006E5F52 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F3184E45214674D60096193E /* helloworld */;
+			targetProxy = F3D2F4A3216A516E006E5F52 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		F3184E4F214674D60096193E /* Main.storyboard */ = {
@@ -357,6 +436,42 @@
 			};
 			name = Release;
 		};
+		F3D2F4A6216A516E006E5F52 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NK6235ZV5V;
+				INFOPLIST_FILE = helloworldUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = testorg.helloworldUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = helloworld;
+			};
+			name = Debug;
+		};
+		F3D2F4A7216A516E006E5F52 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NK6235ZV5V;
+				INFOPLIST_FILE = helloworldUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = testorg.helloworldUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = helloworld;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -374,6 +489,15 @@
 			buildConfigurations = (
 				F3184E5D214674DA0096193E /* Debug */,
 				F3184E5E214674DA0096193E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F3D2F4A5216A516E006E5F52 /* Build configuration list for PBXNativeTarget "helloworldUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F3D2F4A6216A516E006E5F52 /* Debug */,
+				F3D2F4A7216A516E006E5F52 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
