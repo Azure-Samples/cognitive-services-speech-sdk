@@ -38,4 +38,4 @@ If you want to host the sample on a web server:
 ## References
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-browser)
-* [Speech SDK API reference for Java](https://aka.ms/csspeech/javaref)
+* [Speech SDK API reference for JavaScript](https://aka.ms/csspeech/javascriptref)
