@@ -65,6 +65,10 @@ namespace Impl {
         // Note, this is different from the non acknowledged bytes.
         virtual uint64_t StashedSizeInBytes() const = 0;
 
+        // Number of bytes that were sent to service from the start of the turn,
+        // but have not yet been confirmed.
+        virtual uint64_t NonAcknowledgedSizeInBytes() const = 0;
+
         // Drops current chunks from the buffer.
         virtual void Drop() = 0;
 
@@ -89,6 +93,7 @@ namespace Impl {
         uint64_t StashedSizeInBytes() const override;
         void Drop() override;
         void CopyNonAcknowledgedDataTo(AudioBufferPtr buffer) const override;
+        uint64_t NonAcknowledgedSizeInBytes() const override;
 
     private:
         DISABLE_COPY_AND_MOVE(PcmAudioBuffer);
@@ -99,6 +104,9 @@ namespace Impl {
 
         uint64_t DurationToBytes(uint64_t durationInTicks) const;
         uint64_t BytesToDurationInTicks(uint64_t bytes) const;
+
+        uint64_t NonAcknowledgedSizeInBytesUnlocked() const;
+        uint64_t StashedSizeInBytesUnlocked() const;
 
         const uint32_t MillisecondsInSecond = 1000;
         const uint32_t TicksInMillisecond = 10000;

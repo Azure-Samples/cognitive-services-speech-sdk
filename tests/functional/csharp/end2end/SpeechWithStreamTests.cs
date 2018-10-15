@@ -149,7 +149,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Result recognized {e.ToString()}");
-                    results.Add(e.Result);
+                    if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                    {
+                        results.Add(e.Result);
+                    }
                 };
 
                 recognizer.SessionStarted += (s, e) =>

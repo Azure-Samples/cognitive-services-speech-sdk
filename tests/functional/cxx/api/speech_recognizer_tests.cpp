@@ -355,6 +355,15 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             result = recognizer->RecognizeOnceAsync().get();
             SPXTEST_REQUIRE(result != nullptr);
             SPXTEST_REQUIRE(result->Text.empty());
+            SPXTEST_REQUIRE(result->Reason == ResultReason::NoMatch);
+
+            auto nomatch = NoMatchDetails::FromResult(result);
+            SPXTEST_REQUIRE(nomatch != nullptr);
+            SPXTEST_REQUIRE(nomatch->Reason == NoMatchReason::InitialSilenceTimeout);
+
+            result = recognizer->RecognizeOnceAsync().get();
+            SPXTEST_REQUIRE(result != nullptr);
+            SPXTEST_REQUIRE(result->Text.empty());
             SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
 
             auto cancellation = CancellationDetails::FromResult(result);
@@ -375,24 +384,45 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
             recognizer->Recognized.Connect([&](const SpeechRecognitionEventArgs& e) {
 
-                SPXTEST_REQUIRE(sessionStartedCount == 1);
-                SPXTEST_REQUIRE(recognizedCount == 0);
-                SPXTEST_REQUIRE(endOfStreamCount == 0);
-                SPXTEST_REQUIRE(sessionStoppedCount == 0);
+                if (sessionStartedCount == 1)
+                {
+                    SPXTEST_REQUIRE(recognizedCount == 0);
+                    SPXTEST_REQUIRE(endOfStreamCount == 0);
+                    SPXTEST_REQUIRE(sessionStoppedCount == 0);
 
-                recognizedCount++;
+                    recognizedCount++;
 
-                auto result = e.Result;
-                SPXTEST_REQUIRE(!result->Text.empty());
-                SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+                    auto result = e.Result;
+                    SPXTEST_REQUIRE(!result->Text.empty());
+                    SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+                }
+                else if (sessionStartedCount == 2)
+                {
+                    SPXTEST_REQUIRE(recognizedCount == 1);
+                    SPXTEST_REQUIRE(endOfStreamCount == 0);
+                    SPXTEST_REQUIRE(sessionStoppedCount == 1);
+
+                    recognizedCount++;
+
+                    auto result = e.Result;
+                    SPXTEST_REQUIRE(result->Text.empty());
+                    SPXTEST_REQUIRE(result->Reason == ResultReason::NoMatch);
+
+                    auto nomatch = NoMatchDetails::FromResult(result);
+                    SPXTEST_REQUIRE(nomatch->Reason == NoMatchReason::InitialSilenceTimeout);
+                }
+                else
+                {
+                    SPXTEST_REQUIRE(false);
+                }
             });
 
             recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& e) {
 
-                SPXTEST_REQUIRE(sessionStartedCount == 2);
-                SPXTEST_REQUIRE(recognizedCount == 1);
+                SPXTEST_REQUIRE(sessionStartedCount == 3);
+                SPXTEST_REQUIRE(recognizedCount == 2);
                 SPXTEST_REQUIRE(endOfStreamCount == 0);
-                SPXTEST_REQUIRE(sessionStoppedCount == 1);
+                SPXTEST_REQUIRE(sessionStoppedCount == 2);
 
                 ++endOfStreamCount;
 
@@ -406,12 +436,12 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
                 SPXTEST_REQUIRE(e.Reason == CancellationReason::EndOfStream);
             });
 
-            recognizer->SessionStarted.Connect([&](const SessionEventArgs& /* e */) {
+            recognizer->SessionStarted.Connect([&](const SessionEventArgs&) {
                 ++sessionStartedCount;
                 cv.notify_all();
             });
 
-            recognizer->SessionStopped.Connect([&](const SessionEventArgs& /* e */) {
+            recognizer->SessionStopped.Connect([&](const SessionEventArgs&) {
                 ++sessionStoppedCount;
                 cv.notify_all();
             });
@@ -422,14 +452,17 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             result = recognizer->RecognizeOnceAsync().get();
             SPXTEST_REQUIRE(result != nullptr);
 
+            result = recognizer->RecognizeOnceAsync().get();
+            SPXTEST_REQUIRE(result != nullptr);
+
             std::unique_lock<std::mutex> lock(mtx);
-            cv.wait_for(lock, std::chrono::seconds(30), [&] { return recognizedCount == 1 && endOfStreamCount == 1 && sessionStartedCount == 2 && sessionStoppedCount == 2; });
+            cv.wait_for(lock, std::chrono::seconds(30), [&] { return sessionStoppedCount == 3; });
             lock.unlock();
 
-            SPXTEST_REQUIRE(sessionStartedCount == 2);
-            SPXTEST_REQUIRE(recognizedCount == 1);
+            SPXTEST_REQUIRE(sessionStartedCount == 3);
+            SPXTEST_REQUIRE(recognizedCount == 2);
             SPXTEST_REQUIRE(endOfStreamCount == 1);
-            SPXTEST_REQUIRE(sessionStoppedCount == 2);
+            SPXTEST_REQUIRE(sessionStoppedCount == 3);
         }
     }
 

@@ -135,6 +135,11 @@ namespace Impl {
     uint64_t PcmAudioBuffer::StashedSizeInBytes() const
     {
         std::unique_lock<std::mutex> guard(m_lock);
+        return StashedSizeInBytesUnlocked();
+    }
+
+    uint64_t PcmAudioBuffer::StashedSizeInBytesUnlocked() const
+    {
         uint64_t size = 0;
         for (size_t i = m_currentChunk; i < m_audioBuffers.size(); ++i)
         {
@@ -143,16 +148,23 @@ namespace Impl {
         return size;
     }
 
-    void PcmAudioBuffer::Drop()
+    uint64_t PcmAudioBuffer::NonAcknowledgedSizeInBytesUnlocked() const
     {
-        std::unique_lock<std::mutex> guard(m_lock);
-
-        // Discarding unconfirmed bytes that we have already sent to the service.
         uint64_t unconfirmedBytes = 0;
         for (size_t i = 0; i < m_currentChunk; ++i)
         {
             unconfirmedBytes += m_audioBuffers[i]->size;
         }
+
+        return unconfirmedBytes;
+    }
+
+    void PcmAudioBuffer::Drop()
+    {
+        std::unique_lock<std::mutex> guard(m_lock);
+
+        // Discarding unconfirmed bytes that we have already sent to the service.
+        uint64_t unconfirmedBytes = NonAcknowledgedSizeInBytesUnlocked();
         DiscardBytesUnlocked(unconfirmedBytes);
 
         // Discarding chunks that we have not yet sent to the service.
@@ -201,4 +213,9 @@ namespace Impl {
         DiscardBytesUnlocked(bytes);
     }
 
+    uint64_t PcmAudioBuffer::NonAcknowledgedSizeInBytes() const
+    {
+        std::unique_lock<std::mutex> guard(m_lock);
+        return NonAcknowledgedSizeInBytesUnlocked();
+    }
 }}}}

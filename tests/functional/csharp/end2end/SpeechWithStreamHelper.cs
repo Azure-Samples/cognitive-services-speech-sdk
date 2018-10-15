@@ -51,7 +51,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Received result {e.Result.ToString()}");
-                    textResultEvents.Add(e);
+                    if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                    {
+                        textResultEvents.Add(e);
+                    }
                 };
 
                 recognizer.SessionStopped += (s, e) =>

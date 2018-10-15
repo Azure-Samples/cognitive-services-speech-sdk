@@ -118,7 +118,9 @@ private:
         ProcessingAudio = 2,
         HotSwapPaused = 3,
         StoppingPump = 4,
-        WaitForAdapterCompletedSetFormatStop = 5
+        WaitForAdapterCompletedSetFormatStop = 5,
+        WaitForAdapterCompletedSetFormatStopFinished = 6,
+        ProcessingAudioLeftovers = 7
     };
 
     CSpxAsyncOp<void> StartRecognitionAsync(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
@@ -162,6 +164,7 @@ public:
     void AdapterDetectedSpeechEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
     void AdapterDetectedSoundStart(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
     void AdapterDetectedSoundEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
+    void AdapterEndOfDictation(ISpxRecoEngineAdapter* adapter, uint64_t offset, uint64_t duration) override;
 
     // -- ISpxEventArgsFactory
     std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId) override;
@@ -281,7 +284,7 @@ private:
     RecognitionKind m_recoKind;
     SessionState m_sessionState;
 
-    bool m_sawEndOfStream;
+    bool m_sawEndOfStream;      // Flag indicating that we have processed all data and got response from the service.
     bool m_fireEndOfStreamAtSessionStop;
 
     bool m_expectAdapterStartedTurn;

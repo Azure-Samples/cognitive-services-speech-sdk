@@ -761,13 +761,23 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
         SPX_DBG_TRACE_VERBOSE("%s: FireFinalResultLater()", __FUNCTION__);
         FireFinalResultLater(message);
     }
-    else if (( IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
-             (!IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
+    else if ((IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
+        (!IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
     {
         writeLock.unlock(); // calls to site shouldn't hold locks
 
-        SPX_DBG_TRACE_VERBOSE("%s: FireFinalResultNow()", __FUNCTION__);
-        FireFinalResultNow(message);
+        if (message.recognitionStatus == USP::RecognitionStatus::EndOfDictation)
+        {
+            InvokeOnSite([&](const SitePtr& site)
+            {
+                site->AdapterEndOfDictation(this, message.offset, message.duration);
+            });
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: FireFinalResultNow()", __FUNCTION__);
+            FireFinalResultNow(message);
+        }
     }
     else
     {
@@ -881,24 +891,34 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
 
         writeLock.unlock(); // calls to site shouldn't hold locks
 
-        InvokeOnSite([&](const SitePtr& site)
+        if (message.recognitionStatus == USP::RecognitionStatus::EndOfDictation)
         {
-            // Create the result
-            auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-            auto result = factory->CreateFinalResult(nullptr, ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), ToCancellationReason(message.recognitionStatus), message.text.c_str(), message.offset, message.duration);
+            InvokeOnSite([&](const SitePtr& site)
+            {
+                site->AdapterEndOfDictation(this, message.offset, message.duration);
+            });
+        }
+        else
+        {
+            InvokeOnSite([&](const SitePtr& site)
+            {
+                // Create the result
+                auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
+                auto result = factory->CreateFinalResult(nullptr, ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), ToCancellationReason(message.recognitionStatus), message.text.c_str(), message.offset, message.duration);
 
-            auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-            namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
+                auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+                namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
 
-            // Update our result to be an "TranslationText" result.
-            auto initTranslationResult = SpxQueryInterface<ISpxTranslationRecognitionResultInit>(result);
+                // Update our result to be an "TranslationText" result.
+                auto initTranslationResult = SpxQueryInterface<ISpxTranslationRecognitionResultInit>(result);
 
-            auto status = GetTranslationStatus(message.translation.translationStatus);
-            initTranslationResult->InitTranslationRecognitionResult(status, message.translation.translations, message.translation.failureReason);
+                auto status = GetTranslationStatus(message.translation.translationStatus);
+                initTranslationResult->InitTranslationRecognitionResult(status, message.translation.translations, message.translation.failureReason);
 
-            // Fire the result
-            site->FireAdapterResult_FinalResult(this, message.offset, result);
-        });
+                // Fire the result
+                site->FireAdapterResult_FinalResult(this, message.offset, result);
+            });
+        }
     }
     else
     {

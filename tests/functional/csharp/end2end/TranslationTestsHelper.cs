@@ -81,7 +81,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Received final result event: {e.ToString()}");
-                    textResultEvents.Add(e);
+                    if (e.Result.Reason == ResultReason.TranslatedSpeech)
+                    {
+                        textResultEvents.Add(e);
+                    }
                 };
 
                 recognizer.Synthesizing += (s, e) =>

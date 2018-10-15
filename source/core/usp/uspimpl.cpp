@@ -894,6 +894,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         case RecognitionStatus::InitialSilenceTimeout:
         case RecognitionStatus::InitialBabbleTimeout:
         case RecognitionStatus::NoMatch:
+        case RecognitionStatus::EndOfDictation:
             connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
             break;
         case RecognitionStatus::Error:
@@ -902,9 +903,6 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
                 connection->Invoke([&] { callbacks->OnError(false, msg.c_str()); });
                 break;
             }
-        case RecognitionStatus::EndOfDictation:
-            // Currently we do not communicate and of dictation to the user.
-            return;
         case RecognitionStatus::InvalidMessage:
         default:
             {
@@ -938,15 +936,13 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         TranslationResult translationResult;
         switch (status)
         {
-        case RecognitionStatus::EndOfDictation:
-            // Currently we do not communicate and of dictation to the user.
-            return;
         case RecognitionStatus::Success:
             translationResult = RetrieveTranslationResult(json, true);
             break;
         case RecognitionStatus::InitialSilenceTimeout:
         case RecognitionStatus::InitialBabbleTimeout:
         case RecognitionStatus::NoMatch:
+        case RecognitionStatus::EndOfDictation:
             translationResult.translationStatus = TranslationStatus::Success;
             break;
         case RecognitionStatus::Error:
