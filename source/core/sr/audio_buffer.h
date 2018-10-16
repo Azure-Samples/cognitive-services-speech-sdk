@@ -120,6 +120,6 @@ namespace Impl {
         uint64_t m_bufferStartOffsetInBytesAbsolute;
         mutable std::mutex m_lock;
         const uint32_t m_bytesPerSample;
-        const uint32_t m_samplesPerMillisecond;
+        const uint32_t m_samplesPerSecond;
     };
 }}}}

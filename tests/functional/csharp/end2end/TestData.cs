@@ -55,6 +55,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public sealed class English
         {
+            public sealed class Margarita
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "Margarita-44100.wav");
+                public static readonly string[] Utterances =
+                {
+                    "We all know and Love, a margarita and if you're anything like me, you probably had your fair share.",
+                    "And if you have you probably notice that margaritas can vary from incredible too. So I'm going to show you? How to make one of those incredibly fresh and Delicious Margaritas. There are 3 key steps you need to follow first."
+                };
+            }
+
             public sealed class Batman
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir,"batman.wav");

@@ -462,5 +462,29 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
             Assert.AreEqual("", properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token));
         }
+
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        public async Task TestContinuous44KHz()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Margarita.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            {
+                List<string> recognizedText = new List<string>();
+                helper.SubscribeToCounterEventHandlers(recognizer);
+                recognizer.Recognized += (s, e) =>
+                {
+                    if (e.Result.Text.Length > 0)
+                    {
+                        recognizedText.Add(e.Result.Text);
+                    }
+                };
+
+                await helper.CompleteContinuousRecognition(recognizer);
+
+                Assert.AreEqual(2, recognizedText.Count);
+                AssertMatching(TestData.English.Margarita.Utterances[0], recognizedText[0]);
+                AssertMatching(TestData.English.Margarita.Utterances.Last(), recognizedText[1]);
+            }
+        }
     }
 }

@@ -4,6 +4,7 @@
 //
 
 #include "stdafx.h"
+#include <cmath>
 #include "audio_buffer.h"
 
 namespace Microsoft {
@@ -18,15 +19,8 @@ namespace Impl {
           m_bufferStartOffsetInBytesTurnRelative{ 0 },
           m_bufferStartOffsetInBytesAbsolute{ 0 },
           m_bytesPerSample{ header.wBitsPerSample / 8u },
-          m_samplesPerMillisecond{ header.nSamplesPerSec / MillisecondsInSecond }
+          m_samplesPerSecond{ header.nSamplesPerSec }
     {
-        // Make sure milliseconds are precisely represent samples.
-        if (m_header.nSamplesPerSec % MillisecondsInSecond != 0)
-        {
-            throw std::runtime_error("Sample rate '" + std::to_string(m_header.nSamplesPerSec) + "' is not supported. " +
-                std::string("There should be an integer number of samples in a millisecond. Please resample."));
-        }
-
         if (m_header.wBitsPerSample % 8 != 0)
         {
             throw std::runtime_error("Bits per sample '" + std::to_string(m_header.wBitsPerSample) + "' is not supported. It should be dividable by 8.");
@@ -118,12 +112,32 @@ namespace Impl {
 
     uint64_t PcmAudioBuffer::DurationToBytes(uint64_t durationInTicks) const
     {
-        return m_header.nChannels * m_bytesPerSample * m_samplesPerMillisecond * (durationInTicks / TicksInMillisecond);
+        if (m_samplesPerSecond % MillisecondsInSecond == 0)
+        {
+            return m_header.nChannels * m_bytesPerSample *
+                  (m_samplesPerSecond / MillisecondsInSecond) *
+                  (durationInTicks / TicksInMillisecond);
+        }
+        else
+        {
+            return (uint64_t)std::ceil(((double)m_samplesPerSecond / MillisecondsInSecond) *
+                                        (durationInTicks / TicksInMillisecond))
+                * m_header.nChannels * m_bytesPerSample;
+        }
     }
 
     uint64_t PcmAudioBuffer::BytesToDurationInTicks(uint64_t bytes) const
     {
-        return (bytes * TicksInMillisecond) / (m_header.nChannels * m_bytesPerSample * m_samplesPerMillisecond);
+        if (m_samplesPerSecond % MillisecondsInSecond == 0)
+        {
+            return (bytes * TicksInMillisecond * MillisecondsInSecond) /
+                (m_header.nChannels * m_bytesPerSample * m_samplesPerSecond);
+        }
+        else
+        {
+            return (uint64_t)std::ceil(bytes * TicksInMillisecond * MillisecondsInSecond / (double)m_samplesPerSecond) /
+                (m_header.nChannels * m_bytesPerSample);
+        }
     }
 
     uint64_t PcmAudioBuffer::ToAbsolute(uint64_t offsetInTicksTurnRelative) const
