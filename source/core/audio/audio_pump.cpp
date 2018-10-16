@@ -61,7 +61,7 @@ void CSpxAudioPump::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProc
     SPX_IFTRUE_THROW_HR(m_state == State::NoInput, SPXERR_NO_AUDIO_INPUT);
     SPX_IFTRUE_THROW_HR(m_state == State::Processing, SPXERR_AUDIO_IS_PUMPING);
     SPX_IFTRUE_THROW_HR(m_state == State::Paused, SPXERR_NOT_IMPL); // TODO: FUTURE: Implement PausePump
-    SPX_DBG_ASSERT_WITH_MESSAGE(m_state == State::Idle, 
+    SPX_DBG_ASSERT_WITH_MESSAGE(m_state == State::Idle,
         "If the state is not one of the previous three checks, it MUST be Idle (there are only 4 states "
         "in the enumeration); unless someone adds a new state and doesn't change this code. This assert "
         "guards in DBG for that possibility.");
@@ -202,18 +202,21 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
     }
     catch (const std::exception& e)
     {
-        UNUSED(e);
-        SPX_DBG_TRACE_ERROR("ERROR! Unexpected exception happened during pump '%s', setting state to idle.", e.what());
+        SPX_DBG_ASSERT(GetSite() != nullptr);
+        InvokeOnSite([msg = e.what()](const SitePtr& site)
+        {
+            site->Error(msg);
+        });        
     }
     catch (...)
     {
-        SPX_DBG_TRACE_ERROR("ERROR! Unexpected exception happened during pump, setting state to idle.");
+        SPX_DBG_ASSERT(GetSite() != nullptr);
+        InvokeOnSite([&](const SitePtr& site)
+        {
+            site->Error("Error: unexpected exception in PumpThread");
+        });        
     }
 
-    // TODO: This is not correct error handling, we should communicate the error to the user and
-    // switch the audio session in an error state.
-    // The work is scheduled in the following work item:
-    // https://msasg.visualstudio.com/DefaultCollection/Skyman/_workitems/edit/1394625
     std::unique_lock<std::mutex> lock(m_mutex);
     SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(), exception happened, changing states as requested: %d => %d", m_state, State::Idle);
     m_state = State::Idle;

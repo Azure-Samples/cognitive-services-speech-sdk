@@ -23,6 +23,7 @@ namespace Impl {
     {
         if (m_header.wBitsPerSample % 8 != 0)
         {
+            SPX_TRACE_ERROR("going to throw wrong bit per sample runtime_error");
             throw std::runtime_error("Bits per sample '" + std::to_string(m_header.wBitsPerSample) + "' is not supported. It should be dividable by 8.");
         }
     }

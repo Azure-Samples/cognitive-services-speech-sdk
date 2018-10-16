@@ -17,7 +17,10 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxAudioPump : public ISpxAudioPump, public ISpxAudioPumpInit
+class CSpxAudioPump
+    : public ISpxAudioPump,
+      public ISpxAudioPumpInit,
+      public ISpxObjectWithSiteInitImpl<ISpxAudioPumpSite>
 {
 public:
 
@@ -27,6 +30,8 @@ public:
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioPumpInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioPumpInit
@@ -46,6 +51,7 @@ public:
 
     
 private:
+    using SitePtr = std::shared_ptr<ISpxAudioPumpSite>;
 
     CSpxAudioPump(const CSpxAudioPump&) = delete;
     CSpxAudioPump(const CSpxAudioPump&&) = delete;
@@ -56,7 +62,7 @@ private:
     void PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor);
     void WaitForPumpStart(std::unique_lock<std::mutex>& lock);
     void WaitForPumpIdle(std::unique_lock<std::mutex>& lock);
-
+    
     std::mutex m_mutex;
     std::condition_variable m_cv;
 
@@ -67,7 +73,7 @@ private:
     const int m_waitMsStartPumpRequestTimeout = 5000;
     const int m_waitMsStopPumpRequestTimeout = 5000;
 
-    std::thread m_thread;
+    std::thread m_thread;   
 };
 
 

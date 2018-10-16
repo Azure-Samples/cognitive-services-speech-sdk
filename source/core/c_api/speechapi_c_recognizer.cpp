@@ -166,7 +166,7 @@ SPXAPI recognizer_recognize_once_async_wait_for(SPXASYNCHANDLE hasync, uint32_t 
 
 SPXAPI recognizer_start_continuous_recognition(SPXRECOHANDLE hreco)
 {
-    SPX_INIT_HR(hr);   
+    SPX_INIT_HR(hr);
 
     SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
     if (SPX_SUCCEEDED(hr))
@@ -278,7 +278,7 @@ SPXAPI recognizer_stop_continuous_recognition_async_wait_for(SPXASYNCHANDLE hasy
 
 SPXAPI recognizer_start_keyword_recognition(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword)
 {
-    SPX_INIT_HR(hr);   
+    SPX_INIT_HR(hr);
 
     SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
     if (SPX_SUCCEEDED(hr))

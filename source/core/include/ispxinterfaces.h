@@ -406,7 +406,6 @@ public:
 
     enum class State { NoInput, Idle, Paused, Processing };
     virtual State GetState() = 0;
-
 };
 
 
@@ -655,6 +654,11 @@ public:
     virtual void Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload) = 0;
 };
 
+class ISpxAudioPumpSite : public ISpxInterfaceBaseFor<ISpxAudioPumpSite>
+{
+public:
+    virtual void Error(const std::string& msg) = 0;
+};
 
 class ISpxKwsEngineAdapter :
     public ISpxAudioProcessor,

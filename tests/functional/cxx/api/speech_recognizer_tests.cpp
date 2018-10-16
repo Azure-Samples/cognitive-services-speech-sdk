@@ -11,9 +11,6 @@
 #include "test_utils.h"
 #include "file_utils.h"
 
-#include "exception.h"
-#define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
-
 #include "speechapi_cxx.h"
 #include "mock_controller.h"
 
@@ -82,8 +79,72 @@ std::map<Callbacks, atomic_int> createCallbacksMap() {
 
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
+
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
+    SPXTEST_SECTION("throw exception when the file does not existing")
+    {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
+        UseMocks(false);
+        bool bException = false;
+        SPXTEST_REQUIRE(!IsUsingMocks());
+        try
+        {
+            auto recognizer = CreateRecognizers<SpeechRecognizer>("non-existing-file.wav");
+            auto result = recognizer->RecognizeOnceAsync().get();
+        }
+        catch (...)
+        {
+            bException = true;
+        }
+
+        SPXTEST_REQUIRE(bException == true);
+    }
+    SPXTEST_SECTION("return an error message in RecognizeOnceAsync given an invalid endpoint")
+    {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
+        UseMocks(false);
+        SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
+        SPXTEST_REQUIRE(!IsUsingMocks());
+
+        auto config = SpeechConfig::FromEndpoint("Invalid-endpoint", Keys::Speech);
+        auto audio = AudioConfig::FromWavFileInput(input_file);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audio);
+        auto result = recognizer->RecognizeOnceAsync().get();
+
+        SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
+
+        auto cancellation = CancellationDetails::FromResult(result);
+        SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
+        SPXTEST_REQUIRE(cancellation->ErrorDetails.find("Failed to create transport request.") != std::string::npos);
+    }
+    SPXTEST_SECTION("return canceled in StartContinuousRecognitionAsync given an invalid endpoint")
+    {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
+        UseMocks(false);
+        SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
+        SPXTEST_REQUIRE(!IsUsingMocks());
+
+        auto config = SpeechConfig::FromEndpoint("Invalid-endpoint", Keys::Speech);
+        auto audio = AudioConfig::FromWavFileInput(input_file);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audio);
+        std::string errorDetails;
+        recognizer->Canceled += [&](const SpeechRecognitionCanceledEventArgs& e)
+        {
+            if (e.Reason == CancellationReason::Error)
+            {
+                errorDetails = e.ErrorDetails;
+            }
+        };
+        recognizer->StartContinuousRecognitionAsync().get();
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        recognizer->StopContinuousRecognitionAsync().wait();
+
+        SPXTEST_REQUIRE(errorDetails.find("Failed to create transport request.") != std::string::npos);
+    }
     SPXTEST_SECTION("Check that recognition can set authorization token")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);

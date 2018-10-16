@@ -25,7 +25,7 @@ namespace Impl {
 
 class CSpxAudioStreamSession :
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
-    public ISpxAudioStreamSessionInit, 
+    public ISpxAudioStreamSessionInit,
     public ISpxAudioProcessor,
     public ISpxServiceProvider,
     public ISpxSession,
@@ -33,6 +33,7 @@ class CSpxAudioStreamSession :
     public ISpxRecognizerSite,
     public ISpxLuEngineAdapterSite,
     public ISpxKwsEngineAdapterSite,
+    public ISpxAudioPumpSite,
     public ISpxRecoEngineAdapterSite,
     public ISpxRecoResultFactory,
     public ISpxEventArgsFactory,
@@ -52,6 +53,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxLuEngineAdapterSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxKwsEngineAdapterSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioPumpSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecoEngineAdapterSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecoResultFactory)
         SPX_INTERFACE_MAP_ENTRY(ISpxEventArgsFactory)
@@ -66,7 +68,7 @@ public:
     void Term() override;
 
     // --- ISpxAudioStreamSessionInit
-    
+
     void InitFromFile(const wchar_t* pszFileName) override;
     void InitFromMicrophone() override;
     void InitFromStream(std::shared_ptr<ISpxAudioStream> stream) override;
@@ -101,7 +103,7 @@ public:
     CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
 
 
-private: 
+private:
 
     DISABLE_COPY_AND_MOVE(CSpxAudioStreamSession);
 
@@ -186,6 +188,9 @@ public:
     void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload) override;
     void Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload) override;
 
+    // --- ISpxAudioPumpSite
+    void Error(const std::string& error) override;
+
     // --- ISpxRecognizerSite
     std::shared_ptr<ISpxSession> GetDefaultSession() override;
 
@@ -237,8 +242,7 @@ private:
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
 
     void WaitForIdle();
-
-
+    
 private:
 
     std::shared_ptr<ISpxGenericSite> m_siteKeepAlive;
@@ -266,7 +270,7 @@ private:
 
     SpxWAVEFORMATEX_Type m_format;
     std::shared_ptr<ISpxAudioPump> m_audioPump;
-    
+
     std::shared_ptr<ISpxKwsEngineAdapter> m_kwsAdapter;
     std::shared_ptr<ISpxKwsModel> m_kwsModel;
 
@@ -295,7 +299,7 @@ private:
 
     //  When we're in the SessionState::ProcessingAudio, we'll relay "Audio Data" to from the Pump
     //  to exactly one (and only one) of the engine adapters via it's ISpxAudioProcessor interface
-    //  
+    //
     //  Using or changing the Adapter (as ISpxAudioProcessor) requires locking/unlocking the reader writer lock
     //
     ReadWriteMutex_Type m_combinedAdapterAndStateMutex;
@@ -320,7 +324,7 @@ private:
     std::condition_variable m_cv;
 
     // 1 minute as timeout value for RecognizeAsync(), which should be sufficient even for translation in conversation mode.
-    // Note using std::chrono::minutes::max() could cause wait_for to exit straight away instead of 
+    // Note using std::chrono::minutes::max() could cause wait_for to exit straight away instead of
     // infinite timeout, because wait_for() in VS is implemented via wait_until() and a possible integer
     // overflow could make new time < now.
     const minutes m_recoAsyncTimeoutDuration = minutes(1);

@@ -22,8 +22,6 @@
 #define __SPX_DO_TRACE_IMPL SpxTraceMessage
 
 
-#include "exception.h"
-#define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
 
 #include <speechapi_cxx.h>
 

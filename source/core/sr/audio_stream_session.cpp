@@ -20,6 +20,7 @@
 #include "site_helpers.h"
 #include "service_helpers.h"
 #include "property_id_2_name_map.h"
+#include "try_catch_helpers.h"
 
 
 namespace Microsoft {
@@ -56,8 +57,8 @@ CSpxAudioStreamSession::~CSpxAudioStreamSession()
 
 void CSpxAudioStreamSession::Init()
 {
-    // NOTE: Due to current owenrship model, and our late-into-the-cycle changes for SpeechConfig objects
-    // the CSpxAudioStreamSession is sited to the CSpxApiFactory. This ApiFactory is not held by the 
+    // NOTE: Due to current ownership model, and our late-into-the-cycle changes for SpeechConfig objects
+    // the CSpxAudioStreamSession is sited to the CSpxApiFactory. This ApiFactory is not held by the
     // dev user at or above the CAPI. Thus ... we must hold it alive in order for the properties to be
     // obtainable via the standard ISpxNamedProperties mechanisms... It will be released on ::Term()
     m_siteKeepAlive = GetSite();
@@ -81,7 +82,10 @@ void CSpxAudioStreamSession::Term()
 
         // We're terminating, and we were still processing audio ... So ... Let's shut down the pump
         SPX_DBG_TRACE_VERBOSE("%s: Now StoppingPump ...", __FUNCTION__);
-        m_audioPump->StopPump();
+        if (m_audioPump)
+        {
+            m_audioPump->StopPump();
+        }
 
         // Let's wait until we're actually stopped...
         WaitForIdle();
@@ -370,24 +374,52 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxAudioStreamSession::Reco
     SPX_DBG_TRACE_FUNCTION();
 
     std::shared_ptr<ISpxSession> keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
-    std::packaged_task<std::shared_ptr<ISpxRecognitionResult>()> task([=](){
+    std::packaged_task<std::shared_ptr<ISpxRecognitionResult>()> task([=]() {
 
-        SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::RecognizeAsync kicked-off THREAD started ***", "*** CSpxAudioStreamSession::RecognizeAsync kicked-off THREAD stopped ***");
-        auto keepAliveCopy = keepAlive;
+        std::shared_ptr<ISpxRecognitionResult> result;
+        try
+        {
+            SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::RecognizeAsync kicked-off THREAD started ***", "*** CSpxAudioStreamSession::RecognizeAsync kicked-off THREAD stopped ***");
+            auto keepAliveCopy = keepAlive;
 
-        // Keep track of the fact that we have a thread pending waiting to hear
-        // what the final recognition result is, and then stop recognizing...
-        m_recoAsyncWaiting = true;
-        this->StartRecognizing(RecognitionKind::SingleShot);
+            // Keep track of the fact that we have a thread pending waiting to hear
+            // what the final recognition result is, and then stop recognizing...
+            m_recoAsyncWaiting = true;
+            this->StartRecognizing(RecognitionKind::SingleShot);
 
-        // Wait for the recognition result, and then stop recognizing
-        auto result = this->WaitForRecognition();
-        this->StopRecognizing(RecognitionKind::SingleShot);
+            // Wait for the recognition result, and then stop recognizing
+            result = this->WaitForRecognition();
+            this->StopRecognizing(RecognitionKind::SingleShot);
 
-        // Wait for the session to become idle, otherwise next RecognizeAsync can come in an unexpected state.
-        WaitForIdle();
-
-        // Return our result back to the future/caller
+            // Wait for the session to become idle, otherwise next RecognizeAsync can come in an unexpected state.
+            WaitForIdle();
+        }
+        catch (SPXHR hrx)
+        {
+            SPX_REPORT_ON_FAIL(hrx);
+            Error(stringify(hrx));
+            return m_recoAsyncResult;
+        }
+        catch (const ExceptionWithCallStack& ex)
+        {
+            SPX_REPORT_ON_FAIL(ex.GetErrorCode());
+            auto msg = stringify(ex.GetErrorCode());
+            msg += " ";
+            msg += ex.GetCallStack();
+            Error(msg);
+            return m_recoAsyncResult;            
+        }
+        catch (const std::runtime_error& ex)
+        {
+            Error(ex.what());
+            return m_recoAsyncResult;
+        }
+        catch (...)
+        {
+            SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);
+            Error(stringify(SPXERR_UNHANDLED_EXCEPTION));
+            return m_recoAsyncResult;
+        }
         return result;
     });
 
@@ -427,10 +459,16 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StartRecognitionAsync(RecognitionKind 
     std::shared_ptr<ISpxSession> keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
     std::packaged_task<void()> task([=](){
 
-        SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::StartRecognitionAsync kicked-off THREAD started ***", "*** CSpxAudioStreamSession::StartRecognitionAsync kicked-off THREAD stopped ***");
-        auto keepAliveCopy = keepAlive;
+        std::string error;
+        SPXAPI_TRY()
+        {
+            SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::StartRecognitionAsync kicked-off THREAD started ***", "*** CSpxAudioStreamSession::StartRecognitionAsync kicked-off THREAD stopped ***");
+            auto keepAliveCopy = keepAlive;
 
-        this->StartRecognizing(startKind, model);
+            this->StartRecognizing(startKind, model);
+        }
+        SPXAPI_CATCH_ONLY()
+        Error(error);
     });
 
     auto taskFuture = task.get_future();
@@ -449,13 +487,19 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StopRecognitionAsync(RecognitionKind s
     std::shared_ptr<ISpxSession> keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
     std::packaged_task<void()> task([=](){
 
-        SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::StopRecognitionAsync kicked-off THREAD started ***", "*** CSpxAudioStreamSession::StopRecognitionAsync kicked-off THREAD stopped ***");
-        auto keepAliveCopy = keepAlive;
+        std::string error;
+        SPXAPI_TRY()
+        {
+            SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::StopRecognitionAsync kicked-off THREAD started ***", "*** CSpxAudioStreamSession::StopRecognitionAsync kicked-off THREAD stopped ***");
+            auto keepAliveCopy = keepAlive;
 
-        this->StopRecognizing(stopKind);
+            this->StopRecognizing(stopKind);
 
-        // Wait for the session to become idle, otherwise next RecognizeAsync can come in an unexpected state.
-        WaitForIdle();
+            // Wait for the session to become idle, otherwise next RecognizeAsync can come in an unexpected state.
+            WaitForIdle();
+        }
+        SPXAPI_CATCH_ONLY()
+        Error(error);
     });
 
     auto taskFuture = task.get_future();
@@ -666,7 +710,7 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
         lock.lock();
     }
 
-    return std::move(m_recoAsyncResult);
+    return m_recoAsyncResult;
 }
 
 void CSpxAudioStreamSession::WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionResult> result)
@@ -1102,11 +1146,20 @@ void CSpxAudioStreamSession::AdditionalMessage(ISpxRecoEngineAdapter* adapter, u
     // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
 
+// Called by audio pump thread after exceptions.
+void CSpxAudioStreamSession::Error(const std::string& error)
+{
+    if (!error.empty())
+    {
+        Error(m_recoAdapter.get(), std::make_shared<SpxRecoEngineAdapterError>(false, error));
+    }
+}
+
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
     UNUSED(adapter);
 
-    // If it is a transport error and the connection was successfull before, we retry in continuous mode.
+    // If it is a transport error and the connection was successfully before, we retry in continuous mode.
     // Otherwise report the error to the user, so that he can recreate a recognizer.
     if (IsKind(RecognitionKind::Continuous) && payload->IsTransportError() && m_shouldRetry)
     {
@@ -1160,7 +1213,7 @@ void CSpxAudioStreamSession::InitRecoEngineAdapter()
     bool tryUnidec = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Unidec", PAL::BoolToString(false).c_str()));
     bool tryMock = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Mock", PAL::BoolToString(false).c_str()));
     bool tryUsp = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Usp", PAL::BoolToString(false).c_str()));
-    
+
     // if nobody specified which type(s) of reco engine adapters this session should use, we'll use the USP
     if (!tryUnidec && !tryMock && !tryUsp)
     {
@@ -1367,18 +1420,24 @@ void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused()
     std::shared_ptr<ISpxSession> keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
     std::packaged_task<void()> task([=]() mutable {
 
-        SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused kicked-off THREAD started ***", "*** CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused kicked-off THREAD stopped ***");
-        auto keepAliveCopy = keepAlive;
+        std::string error;
+        SPXAPI_TRY()
+        {
+            SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused kicked-off THREAD started ***", "*** CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused kicked-off THREAD stopped ***");
+            auto keepAliveCopy = keepAlive;
 
-        // Keep track of the fact that we have a thread pending waiting for the single
-        // shot recognition to complete (so it can call StopRecognizing(KwsSingleShot)) and
-        // then wait for done...
-        m_recoAsyncWaiting = true;
+            // Keep track of the fact that we have a thread pending waiting for the single
+            // shot recognition to complete (so it can call StopRecognizing(KwsSingleShot)) and
+            // then wait for done...
+            m_recoAsyncWaiting = true;
 
-        SPX_DBG_ASSERT(IsKind(RecognitionKind::KwsSingleShot) && IsState(SessionState::HotSwapPaused));
-        this->HotSwapAdaptersWhilePaused(RecognitionKind::KwsSingleShot);
+            SPX_DBG_ASSERT(IsKind(RecognitionKind::KwsSingleShot) && IsState(SessionState::HotSwapPaused));
+            this->HotSwapAdaptersWhilePaused(RecognitionKind::KwsSingleShot);
 
-        this->WaitForKwsSingleShotRecognition();
+            this->WaitForKwsSingleShotRecognition();
+        }
+        SPXAPI_CATCH_ONLY()
+        Error(error);
     });
 
     m_taskHelper.RunAsync(std::move(task));
@@ -1452,7 +1511,6 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     {
         audioPump->StartPump(pISpxAudioProcessor);
     }
-
     // The call to StartPump (immediately above) will initiate calls from the pump to this::SetFormat() and then this::ProcessAudio()...
 }
 
@@ -1584,63 +1642,69 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
 {
     std::shared_ptr<ISpxSession> keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
     std::packaged_task<void()> task([=]() mutable {
-
-        SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::AdapterCompletedSetFormatStop kicked-off THREAD started ***", "*** CSpxAudioStreamSession::AdapterCompletedSetFormatStop kicked-off THREAD stopped ***");
-        auto keepAliveCopy = keepAlive;
-
-        // Since we're checking the RecoKind and SessionState multiple times, take a read lock
-        ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
-
-        if (ChangeState(RecognitionKind::KwsSingleShot, SessionState::WaitForAdapterCompletedSetFormatStop, RecognitionKind::Keyword, SessionState::ProcessingAudio))
+        std::string error;
+        SPXAPI_TRY()
         {
-            SPX_DBG_TRACE_VERBOSE("KwsSingleShot Waiting for done ... Done!! Switching back to Keyword/Processing");
-            SPX_DBG_TRACE_VERBOSE("%s: Now Keyword/ProcessingAudio ...", __FUNCTION__);
 
-            // holding readLock will cause deadlock if this calling thread holds the last reference to the recognizer.
-            readLock.unlock();
-            FireSessionStoppedEvent();
-        }
-        else if (ChangeState(SessionState::HotSwapPaused, SessionState::ProcessingAudio))
-        {
-            SPX_DBG_TRACE_VERBOSE("Previous Adapter is done processing audio ... resuming Processing with the new adapter...");
-            SPX_DBG_TRACE_VERBOSE("%s: Now ProcessingAudio ...", __FUNCTION__);
+            SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::AdapterCompletedSetFormatStop kicked-off THREAD started ***", "*** CSpxAudioStreamSession::AdapterCompletedSetFormatStop kicked-off THREAD stopped ***");
+            auto keepAliveCopy = keepAlive;
 
-            if (doneAdapter == AdapterDoneProcessingAudio::Keyword && IsKind(RecognitionKind::KwsSingleShot))
+            // Since we're checking the RecoKind and SessionState multiple times, take a read lock
+            ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
+
+            if (ChangeState(RecognitionKind::KwsSingleShot, SessionState::WaitForAdapterCompletedSetFormatStop, RecognitionKind::Keyword, SessionState::ProcessingAudio))
             {
+                SPX_DBG_TRACE_VERBOSE("KwsSingleShot Waiting for done ... Done!! Switching back to Keyword/Processing");
+                SPX_DBG_TRACE_VERBOSE("%s: Now Keyword/ProcessingAudio ...", __FUNCTION__);
+
                 // holding readLock will cause deadlock if this calling thread holds the last reference to the recognizer.
                 readLock.unlock();
-                FireSessionStartedEvent();
+                FireSessionStoppedEvent();
             }
-        }
+            else if (ChangeState(SessionState::HotSwapPaused, SessionState::ProcessingAudio))
+            {
+                SPX_DBG_TRACE_VERBOSE("Previous Adapter is done processing audio ... resuming Processing with the new adapter...");
+                SPX_DBG_TRACE_VERBOSE("%s: Now ProcessingAudio ...", __FUNCTION__);
+
+                if (doneAdapter == AdapterDoneProcessingAudio::Keyword && IsKind(RecognitionKind::KwsSingleShot))
+                {
+                    // holding readLock will cause deadlock if this calling thread holds the last reference to the recognizer.
+                    readLock.unlock();
+                    FireSessionStartedEvent();
+                }
+            }
         // Make sure we do not switch to Idle before FireSessionStoppedEvent has been fired,
         // otherwise we can cancel the next RecognizeAsync.
         else if (ChangeState(SessionState::WaitForAdapterCompletedSetFormatStop, RecognitionKind::Idle, SessionState::WaitForAdapterCompletedSetFormatStopFinished))
-        {
-            if (doneAdapter == AdapterDoneProcessingAudio::Speech)
             {
-                // holding readLock will cause deadlock if this calling thread holds the last reference to the recognizer.
-                readLock.unlock();
-                // The Reco Engine adapter request to finish processing audio has completed, that signifies that the "session" has stopped
-                FireSessionStoppedEvent();
-                readLock.lock();
-
-                // Restart the keyword spotter if necessary...
-                if (m_kwsModel != nullptr && ChangeState(SessionState::WaitForAdapterCompletedSetFormatStopFinished, RecognitionKind::Keyword, SessionState::WaitForPumpSetFormatStart))
+                if (doneAdapter == AdapterDoneProcessingAudio::Speech)
                 {
-                    // Go ahead re-start the pump
-                    SPX_DBG_TRACE_VERBOSE("%s: Now WaitForPumpSetFormatStart ...", __FUNCTION__);
+                    // holding readLock will cause deadlock if this calling thread holds the last reference to the recognizer.
+                    readLock.unlock();
+                    // The Reco Engine adapter request to finish processing audio has completed, that signifies that the "session" has stopped
+                    FireSessionStoppedEvent();
+                    readLock.lock();
 
-                    readLock.unlock(); // StartAudioPump() will take a write lock, so we need to clear our read lock
-                    StartAudioPump(RecognitionKind::Keyword, m_kwsModel);
+                    // Restart the keyword spotter if necessary...
+                if (m_kwsModel != nullptr && ChangeState(SessionState::WaitForAdapterCompletedSetFormatStopFinished, RecognitionKind::Keyword, SessionState::WaitForPumpSetFormatStart))
+                    {
+                        // Go ahead re-start the pump
+                        SPX_DBG_TRACE_VERBOSE("%s: Now WaitForPumpSetFormatStart ...", __FUNCTION__);
+
+                        readLock.unlock(); // StartAudioPump() will take a write lock, so we need to clear our read lock
+                        StartAudioPump(RecognitionKind::Keyword, m_kwsModel);
+                    }
                 }
-            }
 
             ChangeState(SessionState::WaitForAdapterCompletedSetFormatStopFinished, RecognitionKind::Idle, SessionState::Idle);
+            }
+            else
+            {
+                SPX_DBG_TRACE_WARNING("%s: Is this OK? doneAdapter=%d; sessionState=%d **************************", __FUNCTION__, doneAdapter, m_sessionState);
+            }
         }
-        else
-        {
-            SPX_DBG_TRACE_WARNING("%s: Is this OK? doneAdapter=%d; sessionState=%d **************************", __FUNCTION__, doneAdapter, m_sessionState);
-        }
+        SPXAPI_CATCH_ONLY()
+        Error(error);
     });
 
     m_taskHelper.RunAsync(std::move(task));
@@ -1708,7 +1772,7 @@ void CSpxAudioStreamSession::InitLuEngineAdapter()
     // determine which type (or types) of reco engine adapters we should try creating...
     bool tryLuisDirect = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseLuEngine-LuisDirect", "false").c_str());
     bool tryMock = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseLuEngine-Mock", "false").c_str());
-    
+
     // if nobody specified which type(s) of LU engine adapters this session should use, we'll use LuisDirect
     if (!tryLuisDirect && !tryMock)
     {

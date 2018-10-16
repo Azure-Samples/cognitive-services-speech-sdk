@@ -1930,7 +1930,23 @@ int SafeMain(const std::vector<std::string>& args)
         auto result = test.Run(args);
         return result;
     }
-    catch (std::exception e)
+    catch (SPXHR hr)
+    {
+        auto handle = reinterpret_cast<SPXERRORHANDLE>(hr);
+        auto error = error_get_error_code(handle);      
+        if (error != SPX_NOERROR)
+        {
+            auto callstack = error_get_call_stack(handle);
+            auto what = error_get_message(handle);
+            SPX_TRACE_ERROR("Carbonx: got exception %s, %s", what, callstack);
+        }
+        else
+        {
+            SPX_TRACE_ERROR("Carbonx: got exception hr=0x%x", hr);
+        }
+        exit(-1);
+    }
+    catch (const std::exception& e)
     {
         SPX_TRACE_ERROR("CarbonX: Unhandled exception on main thread! what=%s", e.what());
         exit(-1);

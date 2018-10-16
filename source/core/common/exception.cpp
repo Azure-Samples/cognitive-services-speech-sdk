@@ -50,7 +50,7 @@ namespace Impl {
     };
 #undef _MAP_ENTRY
 
-    static std::string stringify(SPXHR hr)
+    std::string stringify(SPXHR hr)
     {
         std::stringstream sstream;
         sstream << "0x" << std::hex << hr;

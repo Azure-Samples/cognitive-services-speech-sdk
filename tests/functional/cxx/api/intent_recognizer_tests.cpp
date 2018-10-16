@@ -11,9 +11,6 @@
 #include "test_utils.h"
 #include "file_utils.h"
 
-#include "exception.h"
-#define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
-
 #include "speechapi_cxx.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks

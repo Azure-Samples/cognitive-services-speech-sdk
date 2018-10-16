@@ -105,7 +105,7 @@ public:
 
                 // If the "sharedPtr" ends up being the very last reference to the "T" object
                 // the scope exit will cause T's dtor to be called, which in turn could, potentially
-                // result in a call back to this same handle table, but from another thread. That would 
+                // result in a call back to this same handle table, but from another thread. That would
                 // cause a deadlock (this thread waiting for that thread, but this thread owns the mutex
                 // and that thread will never be able to obtain it)... Unless ... We unlock the write lock
                 // and then have the shared_ptr release it's reference .. So ... That's what we'll do.
@@ -135,7 +135,7 @@ public:
 
                 // If the "sharedPtr" ends up being the very last reference to the "T" object
                 // the scope exit will cause T's dtor to be called, which in turn could, potentially
-                // result in a call back to this same handle table, but from another thread. That would 
+                // result in a call back to this same handle table, but from another thread. That would
                 // cause a deadlock (this thread waiting for that thread, but this thread owns the mutex
                 // and that thread will never be able to obtain it)... Unless ... We unlock the write lock
                 // and then have the shared_ptr release it's reference .. So ... That's what we'll do.
@@ -212,10 +212,10 @@ public:
     {
         // TODO: on OSX statics are destroyed before LibUnload is invoked,
         // so Term() should be called from the s_termFns delete first.
-        // Second time, when it's called from LibUnload, bail out if statics 
+        // Second time, when it's called from LibUnload, bail out if statics
         // are already deleted.
         // Is there a cleaner way to do the shut-down?
-        if (s_termFns == nullptr) 
+        if (s_termFns == nullptr)
         {
             return;
         }

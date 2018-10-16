@@ -37,6 +37,31 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
         x = SPXERR_UNHANDLED_EXCEPTION;                     \
     }
 
+#define SPXAPI_CATCH_ONLY()                                 \
+    catch (SPXHR hrx)                                       \
+    {                                                       \
+        SPX_REPORT_ON_FAIL(hrx);                            \
+        error = stringify(hrx);                             \
+    }                                                       \
+    catch (const ExceptionWithCallStack& ex)                \
+    {                                                       \
+       SPX_REPORT_ON_FAIL(ex.GetErrorCode());               \
+       error = stringify(ex.GetErrorCode());                \
+       error += " ";                                        \
+       error += ex.GetCallStack();                          \
+       SPX_TRACE_ERROR(error.c_str());                      \
+    }                                                       \
+    catch (const std::runtime_error& e)                     \
+    {                                                       \
+        error = e.what();                                   \
+    }                                                       \
+    catch (...)                                             \
+    {                                                       \
+        SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);     \
+        error = "SPXERR_UNHANDLED_EXCEPTION";               \
+    }                                                       \
+}                                                           \
+
 #define SPXAPI_CATCH_AND_RETURN_HR(hr)                      \
     SPXAPI_CATCH(hr);                                       \
     SPX_RETURN_HR(hr);                                      \

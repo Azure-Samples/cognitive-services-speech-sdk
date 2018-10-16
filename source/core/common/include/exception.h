@@ -9,6 +9,7 @@
 #include <string>
 #include <spxerror.h>
 #include <spx_namespace.h>
+#include <exception.h>
 
 #ifndef _Analysis_noreturn_
 #define _Analysis_noreturn_
@@ -38,5 +39,6 @@ _Analysis_noreturn_ void ThrowInvalidArgumentException(const std::string& msg, s
 _Analysis_noreturn_ void ThrowLogicError(const std::string& msg, size_t skipLevels = 0);
 
 SPXHR StoreException(ExceptionWithCallStack&& ex);
+std::string stringify(SPXHR hr);
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

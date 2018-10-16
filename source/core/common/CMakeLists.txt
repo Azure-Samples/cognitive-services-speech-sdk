@@ -33,6 +33,8 @@ set(HEADERS
     "${CARBON_INCLUDE}/ispxinterfaces.h"
     "${INC_DIR}/property_id_2_name_map.h"
     "${INC_DIR}/speech_config.h"
+    "${INC_DIR}/try_catch_helpers.h"
+
     )
 
 set(HEADERS_PRIVATE

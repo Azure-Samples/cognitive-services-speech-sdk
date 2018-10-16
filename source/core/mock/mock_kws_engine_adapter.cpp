@@ -9,6 +9,7 @@
 #include <cstring>
 #include "mock_kws_engine_adapter.h"
 #include "service_helpers.h"
+#include "try_catch_helpers.h"
 
 
 namespace Microsoft {
@@ -108,7 +109,7 @@ void CSpxMockKwsEngineAdapter::End()
 void CSpxMockKwsEngineAdapter::FireKeywordDetected(AudioData_Type data, uint32_t size)
 {
     SPX_DBG_TRACE_FUNCTION();
-    
+
     m_cbLastKeywordFired = m_cbAudioProcessed;
     m_cbFireNextKeyword += m_numMsBetweenKeywords * m_format->nAvgBytesPerSec / 1000;
 
@@ -117,9 +118,13 @@ void CSpxMockKwsEngineAdapter::FireKeywordDetected(AudioData_Type data, uint32_t
 
     std::shared_ptr<ISpxAudioProcessor> keepAlive = SpxSharedPtrFromThis<ISpxAudioProcessor>(this);
     std::packaged_task<void()> task([=](){
-
-        auto keepAliveCopy = keepAlive;
-        site->KeywordDetected(this, offset, size, data);
+        std::string error;
+        SPXAPI_TRY()
+        {
+            auto keepAliveCopy = keepAlive;
+            site->KeywordDetected(this, offset, size, data);
+        }
+        SPXAPI_CATCH_ONLY()
     });
 
     auto taskFuture = task.get_future();

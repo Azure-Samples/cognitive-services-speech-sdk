@@ -110,7 +110,12 @@ void CSpxUspRecoEngineAdapter::SetFormat(SPXWAVEFORMATEX* pformat)
     }
     else if (pformat != nullptr && IsState(UspState::Idle) && ChangeState(AudioState::Idle, AudioState::Ready))
     {
-        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
+        // we could call site when errors happen.
+        // The m_audioState is Ready at this time. So, if we have two SetFormat calls in a row, the next one won't come in here
+        // it goes to the else.
+        // 
+        writeLock.unlock();
+
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x)->PrepareFirstAudioReadyState()", __FUNCTION__, this);
         PrepareFirstAudioReadyState(pformat);
     }
@@ -213,7 +218,22 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     client.SetOutputFormat(GetOutputFormat(*properties));
 
     SPX_DBG_TRACE_VERBOSE("%s: recoMode=%d", __FUNCTION__, m_recoMode);
-    auto uspConnection = client.Connect();
+    USP::ConnectionPtr uspConnection;
+
+    try
+    {
+        uspConnection = client.Connect();
+    }
+    catch (const std::exception& e)
+    {
+        SPX_TRACE_ERROR("Error: '%s'", e.what());
+        OnError(true, e.what());
+    }
+    catch (...)
+    {
+        SPX_TRACE_ERROR("Error: Unexpected exception in UspInitialize");
+        OnError(true, "Error: Unexpected exception in UspInitialize");
+    }
 
     // Keep track of what time we initialized (so we can reset later)
     m_uspInitTime = std::chrono::system_clock::now();
