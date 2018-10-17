@@ -17,9 +17,7 @@ import {
     RecognizerConfig,
     WebsocketMessageFormatter,
 } from "./Exports";
-
-const TestHooksParamName: string = "testhooks";
-const ConnectionIdHeader: string = "X-ConnectionId";
+import { QueryParameterNames } from "./QueryParameterNames";
 
 export class SpeechConnectionFactory implements IConnectionFactory {
 
@@ -29,6 +27,30 @@ export class SpeechConnectionFactory implements IConnectionFactory {
         connectionId?: string): IConnection => {
 
         let endpoint: string = config.parameters.getProperty(PropertyId.SpeechServiceConnection_Endpoint, undefined);
+
+        const queryParams: IStringDictionary<string> = {};
+
+        const endpointId: string = config.parameters.getProperty(PropertyId.SpeechServiceConnection_EndpointId, undefined);
+        const language: string = config.parameters.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage, undefined);
+
+        if (endpointId) {
+            if (!endpoint || endpoint.search(QueryParameterNames.DeploymentIdParamName) === -1) {
+                queryParams[QueryParameterNames.DeploymentIdParamName] = endpointId;
+            }
+        } else if (language) {
+            if (!endpoint || endpoint.search(QueryParameterNames.LanguageParamName) === -1) {
+                queryParams[QueryParameterNames.LanguageParamName] = language;
+            }
+        }
+
+        if (!endpoint || endpoint.search(QueryParameterNames.FormatParamName) === -1) {
+            queryParams[QueryParameterNames.FormatParamName] = config.parameters.getProperty(OutputFormatPropertyName, OutputFormat[OutputFormat.Simple]).toLowerCase();
+        }
+
+        if (this.IsDebugModeEnabled) {
+            queryParams[QueryParameterNames.TestHooksParamName] = "1";
+        }
+
         if (!endpoint) {
             const region: string = config.parameters.getProperty(PropertyId.SpeechServiceConnection_Region, undefined);
 
@@ -45,18 +67,9 @@ export class SpeechConnectionFactory implements IConnectionFactory {
             }
         }
 
-        const queryParams: IStringDictionary<string> = {
-            format: config.parameters.getProperty(OutputFormatPropertyName, OutputFormat[OutputFormat.Simple]).toLowerCase(),
-            language: config.parameters.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage),
-        };
-
-        if (this.IsDebugModeEnabled) {
-            queryParams[TestHooksParamName] = "1";
-        }
-
         const headers: IStringDictionary<string> = {};
         headers[authInfo.HeaderName] = authInfo.Token;
-        headers[ConnectionIdHeader] = connectionId;
+        headers[QueryParameterNames.ConnectionIdHeader] = connectionId;
 
         return new WebsocketConnection(endpoint, queryParams, headers, new WebsocketMessageFormatter(), connectionId);
     }

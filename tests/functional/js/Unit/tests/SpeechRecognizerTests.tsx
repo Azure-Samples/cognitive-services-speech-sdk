@@ -4,7 +4,9 @@
 //
 import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
 import { ConsoleLoggingListener } from "../../../../../source/bindings/js/src/common.browser/Exports";
-import { Events, EventType } from "../../../../../source/bindings/js/src/common/Exports";
+import { QueryParameterNames } from "../../../../../source/bindings/js/src/common.speech/QueryParameterNames";
+import { ConnectionStartEvent } from "../../../../../source/bindings/js/src/common/Exports";
+import { Events, EventType, PlatformEvent } from "../../../../../source/bindings/js/src/common/Exports";
 
 import { Settings } from "./Settings";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
@@ -412,7 +414,7 @@ test("PushStream4KNoDelay", (done: jest.DoneCallback) => {
             const res: sdk.SpeechRecognitionResult = p2;
 
             expect(res).not.toBeUndefined();
-            expect(sdk.ResultReason.RecognizedSpeech).toEqual(res.reason);
+            expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
             expect(res.text).toEqual("What's the weather like?");
 
             done();
@@ -442,7 +444,7 @@ test("PushStream4KPostRecognizePush", (done: jest.DoneCallback) => {
             const res: sdk.SpeechRecognitionResult = p2;
 
             expect(res).not.toBeUndefined();
-            expect(sdk.ResultReason.RecognizedSpeech).toEqual(res.reason);
+            expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
             expect(res.text).toEqual("What's the weather like?");
 
             done();
@@ -503,7 +505,7 @@ test("PullStreamFullFill", (done: jest.DoneCallback) => {
             const res: sdk.SpeechRecognitionResult = p2;
 
             expect(res).not.toBeUndefined();
-            expect(sdk.ResultReason.RecognizedSpeech).toEqual(res.reason);
+            expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
             expect(res.text).toEqual("What's the weather like?");
 
             done();
@@ -554,7 +556,7 @@ test("PullStreamHalfFill", (done: jest.DoneCallback) => {
             const res: sdk.SpeechRecognitionResult = p2;
 
             expect(res).not.toBeUndefined();
-            expect(sdk.ResultReason.RecognizedSpeech).toEqual(res.reason);
+            expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
             expect(res.text).toEqual("What's the weather like?");
 
             done();
@@ -797,7 +799,7 @@ test("PullStreamSendHalfTheFile", (done: jest.DoneCallback) => {
             const res: sdk.SpeechRecognitionResult = p2;
 
             expect(res).not.toBeUndefined();
-            expect(sdk.ResultReason.RecognizedSpeech).toEqual(res.reason);
+            expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
             expect(res.text).toEqual("What's the weather?");
 
             done();
@@ -975,4 +977,50 @@ test("Using disposed recognizer invokes error callbacks.", () => {
         (error: string): void => {
             expect(error).toEqual("Error: the object is already disposed");
         });
+});
+
+test.skip("Endpoing URL Test", (done: jest.DoneCallback) => {
+    let uri: string;
+
+    Events.Instance.AttachListener({
+        OnEvent: (event: PlatformEvent) => {
+            if (event instanceof ConnectionStartEvent) {
+                const connectionEvent: ConnectionStartEvent = event as ConnectionStartEvent;
+                if (uri !== undefined) {
+                    done.fail("Connected twice");
+                }
+                uri = connectionEvent.Uri;
+            }
+        },
+    });
+
+    const s: sdk.SpeechConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+
+    s.endpointId = Settings.SpeechTestEndpointId;
+
+    const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
+
+    r.recognizeOnceAsync(
+        (p2: sdk.SpeechRecognitionResult) => {
+            try {
+                const res: sdk.SpeechRecognitionResult = p2;
+                expect(res).not.toBeUndefined();
+                expect(res.errorDetails).toBeUndefined();
+                expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
+                expect("What's the weather like?").toEqual(res.text);
+                expect(uri).not.toBeUndefined();
+                expect(uri.search(QueryParameterNames.DeploymentIdParamName + "=" + Settings.SpeechTestEndpointId)).not.toEqual(-1);
+                expect(uri.search(QueryParameterNames.LanguageParamName)).toEqual(-1);
+
+                done();
+            } catch (error) {
+                done.fail(error);
+            }
+        },
+        (error: string) => {
+            done.fail(error);
+        });
+
 });

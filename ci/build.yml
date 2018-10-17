@@ -1592,7 +1592,7 @@ phases:
     inputs:
       workingDir: tests/functional/js/Unit
       verbose: false
-  - script: RunTests.cmd SpeechSubscriptionKey:$(KeySkyman) SpeechRegion:westus LuisSubscriptionKey:$(luis-westus-s0-201809-key1) LuisRegion:westus
+  - script: RunTests.cmd SpeechSubscriptionKey:$(KeySkyman) SpeechRegion:westus LuisSubscriptionKey:$(luis-westus-s0-201809-key1) LuisRegion:westus SpeechTestModelId:$(TEST_MODEL_ID)
     displayName: 'Run tests'
     workingDirectory: tests/functional/js/Unit
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')

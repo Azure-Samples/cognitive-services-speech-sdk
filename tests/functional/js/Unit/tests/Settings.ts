@@ -12,6 +12,8 @@ export class Settings {
     public static SpeechRegion: string = "<<YOUR_REGION>>";
     public static SpeechAuthorizationToken: string = "<<YOUR_AUTH_TOKEN>>";
 
+    public static SpeechTestEndpointId: string = "3a96ef56-41a9-40a0-b0f3-fb125c2b8798";
+
     public static LuisSubscriptionKey: string = "<<YOUR_LUIS_SUBSCRIPTION_KEY>>";
     public static LuisRegion: string = "<<YOUR_LUIS_REGION>>";
     public static LuisAppEndPointHref: string = "<<YOUR_LUIS_APP_URL>>";
