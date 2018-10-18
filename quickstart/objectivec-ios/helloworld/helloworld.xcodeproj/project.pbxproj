@@ -57,6 +57,7 @@
 		F3184E58214674DA0096193E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		F3184E67214685C70096193E /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ./whatstheweatherlike.wav; sourceTree = "<group>"; };
 		F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = ../MicrosoftCognitiveServicesSpeech.framework; sourceTree = "<group>"; };
+		F3D2F49E216A516E006E5F52 /* helloworldUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = helloworldUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3D2F4A0216A516E006E5F52 /* helloworldUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = helloworldUITests.m; sourceTree = "<group>"; };
 		F3D2F4A2216A516E006E5F52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F3D2F4A8216A5538006E5F52 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
@@ -98,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				F3184E46214674D60096193E /* helloworld.app */,
+				F3D2F49E216A516E006E5F52 /* helloworldUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -171,6 +173,7 @@
 			);
 			name = helloworldUITests;
 			productName = helloworldUITests;
+			productReference = F3D2F49E216A516E006E5F52 /* helloworldUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
