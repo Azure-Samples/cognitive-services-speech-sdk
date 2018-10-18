@@ -1,2 +1,2 @@
 FROM arm32v7/ubuntu:16.04
-ADD https://github.com/multiarch/qemu-user-static/releases/download/v2.12.0-1/qemu-arm-static /usr/bin/qemu-arm-static
+ADD qemu-arm-static.tar.gz /usr/bin

@@ -24,7 +24,7 @@ std::shared_ptr<SpeechConfig> SpeechConfigForIntentTests()
 {
     auto config = !Config::Endpoint.empty()
         ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::LUIS)
-        : SpeechConfig::FromSubscription(Keys::LUIS, Config::Region);
+        : SpeechConfig::FromSubscription(Keys::LUIS, Config::LuisRegion);
     return config;
 }
 
@@ -32,7 +32,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 {
     SPXTEST_SECTION("Intent Recognition works")
     {
-        string input_file("tests/input/TurnOnTheLamp.wav");
+        string input_file(Config::InputDir + "/audio/TurnOnTheLamp.wav");
         SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
 
         auto config = SpeechConfigForIntentTests();

@@ -36,7 +36,7 @@ namespace MicrosoftSpeechSDKSamples
             /// Creates and initializes an instance of BinaryAudioStreamReader.
             /// </summary>
             /// <param name="stream">The underlying stream to read the audio data from. Note: The stream contains the bare sample data, not the container (like wave header data, etc).</param>
-            public BinaryAudioStreamReader(System.IO.Stream stream) 
+            public BinaryAudioStreamReader(System.IO.Stream stream)
                 : this(new System.IO.BinaryReader(stream))
             {
             }
@@ -166,7 +166,7 @@ namespace MicrosoftSpeechSDKSamples
             var unusedBlockAlign = reader.ReadUInt16();
             var bitsPerSample = reader.ReadUInt16();
 
-            // The following code is wrong. As the cbSize is not specified 
+            // The following code is wrong. As the cbSize is not specified
             // at this position, but should be derived from formatSize.
             // skip over reamining header bytes, if any
             //int cbSize = reader.ReadUInt16();
@@ -188,9 +188,9 @@ namespace MicrosoftSpeechSDKSamples
             return new BinaryAudioStreamReader(reader);
         }
 
-        public static async Task<string> GetToken(string key)
+        public static async Task<string> GetToken(string key, string region)
         {
-            string fetchTokenUri = "https://westus.api.cognitive.microsoft.com/sts/v1.0";
+            string fetchTokenUri = $"https://{region}.api.cognitive.microsoft.com/sts/v1.0";
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);

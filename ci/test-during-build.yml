@@ -1,0 +1,43 @@
+parameters:
+  extraTests: []
+  dockerImage: ""
+steps:
+# If we failed until here, don't try to run tests:
+- bash: . ci/functions.sh && vsts_setvar SPEECHSDK_RUN_TESTS false
+  condition: failed()
+  displayName: Skip tests on build failure.
+- bash: |
+    if [[ -n $dockerImage ]]; then
+      wrapMe=(docker run --rm --workdir /csspeech --volume "$PWD:/csspeech" "$dockerImage")
+    else
+      wrapMe=()
+    fi
+    "${wrapMe[@]}" ./ci/run-tests.sh \
+      --test-configuration ci/test-config.json \
+      --build-dir build \
+      --platform $(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION) \
+      -D luis-key=$(luis-westus-s0-201809-key1) \
+      -D speech-key=$(KeySkyman)
+  env:
+    dockerImage: ${{ parameters.dockerImage }}
+  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+  timeoutInMinutes: 30
+  displayName: Run tests
+# Note: the following step is only for the convenience of extraTests, of which we currently do not have any.
+- bash: |
+    perl ci/evaluate-test-config.pl --verbose --format azuredevops-variable --input ci/test-config.json \
+      -D luis-key=$(luis-westus-s0-201809-key1) \
+      -D speech-key=$(KeySkyman)
+  displayName: Set test variables
+- ${{ parameters.extraTests }}
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/test-*.xml'
+  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+  displayName: Publish test results (.xml)
+- task: PublishTestResults@2
+  inputs:
+    testRunner: VSTest
+    testResultsFiles: '**/test-*trx'
+  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+  displayName: Publish test results (.trx)

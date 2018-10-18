@@ -49,7 +49,9 @@ namespace Config
 {
     EXTERN std::string Endpoint;
     EXTERN std::string Region;
+    EXTERN std::string LuisRegion;
     EXTERN std::string LuisAppId;
+    EXTERN std::string InputDir;
 }
 
 
@@ -75,6 +77,7 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
 {
     // Build a new parser on top of Catch's
     using namespace Catch::clara;
+
     auto cli
         = session.cli() // Get Catch's composite command line parser
         | Opt(Keys::Speech, "SpeechSubscriptionKey") // bind variable to a new option, with a hint string
@@ -82,16 +85,22 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     ("The subscription key for speech")
         | Opt(Keys::LUIS, "LuisSubscriptionKey")
         ["--keyLUIS"]
-    ("The subscription key for LanguageUnderstanding")
+    ("The subscription key for language understanding")
         | Opt(Config::Endpoint, "endpoint")
         ["--endpoint"]
     ("The endpoint url to test against.")
         | Opt(Config::Region, "RegionId")
         ["--regionId"]
     ("The region id to be used for subscription and authorization requests")
+        | Opt(Config::LuisRegion, "LuisRegionId")
+        ["--regionIdLUIS"]
+    ("The region id to be used for language understanding subscription and authorization requests")
         | Opt(Config::LuisAppId, "LuisAppId")
         ["--luisAppId"]
     ("The language understanding app id to be used intent recognition tests")
+        | Opt(Config::InputDir, "InputDir")
+        ["--inputDir"]
+    ("The directory where test input files are placed")
     ;
 
     // Now pass the new composite back to Catch so it uses that

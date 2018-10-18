@@ -42,33 +42,33 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: Session stopped event: {0}.", e.ToString()));
         }
 
-        public static async Task SpeechRecognitionBaseModelAsync(string key, string lang, string fileName, bool useStream, bool useToken, bool useContinuousRecognition)
+        public static async Task SpeechRecognitionBaseModelAsync(string key, string region, string lang, string fileName, bool useStream, bool useToken, bool useContinuousRecognition)
         {
             Console.WriteLine("Speech Recognition using base model.");
             SpeechConfig config = null;
             if (useToken)
             {
-                config = SpeechConfig.FromAuthorizationToken(key, "westus");
+                config = SpeechConfig.FromAuthorizationToken(key, region);
             }
             else
             {
-                config = SpeechConfig.FromSubscription(key, "westus");
+                config = SpeechConfig.FromSubscription(key, region);
             }
 
             await RecognizeOnceAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
         }
 
-        public static async Task SpeechRecognitionCustomizedModelAsync(string key, string lang, string model, string fileName, bool useStream, bool useToken, bool useContinuousRecognition)
+        public static async Task SpeechRecognitionCustomizedModelAsync(string key, string region, string lang, string model, string fileName, bool useStream, bool useToken, bool useContinuousRecognition)
         {
             Console.WriteLine("Speech Recognition using customized model.");
             SpeechConfig config = null;
             if (useToken)
             {
-                config = SpeechConfig.FromAuthorizationToken(key, "westus");
+                config = SpeechConfig.FromAuthorizationToken(key, region);
             }
             else
             {
-                config = SpeechConfig.FromSubscription(key, "westus");
+                config = SpeechConfig.FromSubscription(key, region);
             }
             config.EndpointId = model;
 

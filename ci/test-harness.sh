@@ -89,16 +89,14 @@ function endTests {
 function runTest {
   local _testStateVarPrefix="$1"
   local TEST_NAME="$2"
-  local PLATFORMS_TO_RUN="$3" # comma-separated
-  local TIMEOUT_SECONDS="$4"
-  shift 4
+  local TIMEOUT_SECONDS="$3"
+  shift 3
   local COMMAND="$@"
 
   local testsRef=${_testStateVarPrefix}_tests
   local failuresRef=${_testStateVarPrefix}_failures
   local timeRef=${_testStateVarPrefix}_time
   local outputRef=${_testStateVarPrefix}_output
-  local platformRef=${_testStateVarPrefix}_platform
   local testsuiteNameRef=${_testStateVarPrefix}_testsuiteName
   local classnameRef=${_testStateVarPrefix}_classname
   local redactStringsRef=${_testStateVarPrefix}_redactStrings
@@ -117,8 +115,6 @@ function runTest {
 
   local START_SECONDS EXIT_CODE END_SECONDS TIME_SECONDS TAIL
 
-  local SKIP_CODE=999
-
   local COREUTILS_PREFIX
   if [[ $(uname) = Darwin ]]; then
     COREUTILS_PREFIX=g
@@ -126,32 +122,19 @@ function runTest {
     COREUTILS_PREFIX=
   fi
 
-  if [[ ",$PLATFORMS_TO_RUN," == *,${!platformRef},* ]]; then
-    START_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
-    ${COREUTILS_PREFIX}timeout -k 5s $TIMEOUT_SECONDS ${COREUTILS_PREFIX}stdbuf -o0 -e0 "$@" 2>&1 |
-      "${REDACT[@]}" 1>> "${!outputRef}.out"
-    EXIT_CODE=${PIPESTATUS[0]}
-    END_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
-    TIME_SECONDS=$(perl -e "printf '%0.3f', $END_SECONDS - $START_SECONDS")
-
-    TAIL="$(tail "${!outputRef}.out")"
-  else
-    TAIL="Test skipped on platform ${!platformRef} $PLATFORMS_TO_RUN"
-    echo $TAIL 1>> "${!outputRef}.out"
-    echo $TAIL # just FYI
-    EXIT_CODE=$SKIP_CODE
-    TIME_SECONDS=0.000
-  fi
+  START_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
+  ${COREUTILS_PREFIX}timeout -k 5s $TIMEOUT_SECONDS ${COREUTILS_PREFIX}stdbuf -o0 -e0 "$@" 2>&1 |
+    "${REDACT[@]}" 1>> "${!outputRef}.out"
+  EXIT_CODE=${PIPESTATUS[0]}
+  END_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
+  TIME_SECONDS=$(perl -e "printf '%0.3f', $END_SECONDS - $START_SECONDS")
+  TAIL="$(tail -20 "${!outputRef}.out")"
 
   print_vars EXIT_CODE TIME_SECONDS = |
     tee -a "${!outputRef}.out"
   echo
 
   case $EXIT_CODE in
-    $SKIP_CODE)
-      printf '<testcase classname="%s" name="%s" time="%s"><skipped message="%s"/></testcase>\n' \
-        "${!classnameRef}" "$TEST_NAME" "$TIME_SECONDS" "Skipped on ${!platformRef}" >> "${!outputRef}.xml.parts"
-      ;;
     0)
       printf '<testcase classname="%s" name="%s" time="%s"/>\n' \
         "${!classnameRef}" "$TEST_NAME" "$TIME_SECONDS" >> "${!outputRef}.xml.parts"

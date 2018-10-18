@@ -29,9 +29,10 @@ public:
 
     void Init()
     {
+        auto region = Config::Region.empty() ? "westus" : Config::Region;
         auto client = USP::Client(shared_from_this(), m_endpoint, PAL::CreateGuidWithoutDashes())
             .SetRecognitionMode(m_mode)
-            .SetRegion("westus")
+            .SetRegion(region)
             .SetAuthentication(USP::AuthenticationType::SubscriptionKey, Keys::Speech);
         if (!Config::Endpoint.empty())
         {
@@ -67,7 +68,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
         (void)(client);
     }
 
-    wstring input_file(L"tests/input/whatstheweatherlike.wav");
+    wstring input_file(PAL::ToWString(Config::InputDir + "/audio/whatstheweatherlike.wav"));
     REQUIRE(exists(input_file));
 
     SECTION("usp can be used to upload binary data")

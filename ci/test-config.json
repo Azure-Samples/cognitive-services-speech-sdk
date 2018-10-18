@@ -1,0 +1,13 @@
+{
+  "INPUTDIR": "tests/input",
+  "SPEECH": {
+    "KEY": "${speech-key}",
+    "REGION": "westus",
+    "ENDPOINTID_ENUS": "f039fdc7-5a4a-4e28-9c62-c8c0fbc0da39"
+  },
+  "LUIS": {
+    "KEY": "${luis-key}",
+    "REGION": "westus",
+    "HOMEAUTOMATION_APPID": "b687b851-56c5-4d31-816f-35a741a3f0be"
+  }
+}

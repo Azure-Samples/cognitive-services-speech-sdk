@@ -27,7 +27,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             BaseClassInit(context);
         }
-       
+
         [TestMethod]
         public void TestCreateRecognizerTypes()
         {
@@ -65,11 +65,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task ConfigFromAuthorizationToken()
         {
-            var token = await Config.GetToken(subscriptionKey);
-            var conigWithToken = SpeechConfig.FromAuthorizationToken(token, region);
+            var token = await Config.GetToken(subscriptionKey, region);
+            var configWithToken = SpeechConfig.FromAuthorizationToken(token, region);
 
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            var speechRecognizer = new SpeechRecognizer(conigWithToken, audioInput);
+            var speechRecognizer = new SpeechRecognizer(configWithToken, audioInput);
             SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
 
             Assert.AreEqual(token, speechRecognizer.AuthorizationToken, "Set of authentication token did not work as expected");
@@ -79,13 +79,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task SetAuthorizationTokenOnConfig()
         {
-            var token = await Config.GetToken(subscriptionKey);
+            var token = await Config.GetToken(subscriptionKey, region);
             var configWithToken = SpeechConfig.FromAuthorizationToken(token, region);
 
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             var speechRecognizer = new SpeechRecognizer(this.config, audioInput);
 
-            var newToken = await Config.GetToken(subscriptionKey);
+            var newToken = await Config.GetToken(subscriptionKey, region);
             speechRecognizer.AuthorizationToken = newToken;
 
             SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();

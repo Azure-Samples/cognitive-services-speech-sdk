@@ -40,6 +40,20 @@ vsts_addbuildtag() (
   echo "##vso[build.addbuildtag]$1"
 )
 
+vsts_logissue() {
+  local type="$1"
+  local message="$2"
+  shift 2
+  local out="##vso[task.logissue type=$type"
+
+  # Append additional properties (sourcepath, linenumber, columnnumber, code)
+  [[ $# == 0 ]] || out+="$(printf ';%s' "$@")"
+
+  out+="]$message"
+
+  echo "$out"
+}
+
 function existsExactlyOneDir {
   [[ $# -eq 1 && -d $1 ]]
 }
@@ -94,9 +108,7 @@ function getAuthorizationToken {
   region="${2?$usage}"
   token_endpoint="https://$region.api.cognitive.microsoft.com/sts/v1.0/issueToken"
 
-  # Use built-in + stdin to pass the key
-  output="$(printf "Content-type: application/x-www-form-urlencoded\nContent-Length: 0\nOcp-Apim-Subscription-Key: %s\n" "$key" |
-    curl -s -S -X POST "$token_endpoint" -H '@-')"
+  output="$(curl -s -S -X POST "$token_endpoint" -H "Content-type: application/x-www-form-urlencoded" -H "Content-Length: 0" -H "Ocp-Apim-Subscription-Key: $key")"
   exit_code=$?
   if [[ $exit_code == 0 ]]; then
     # Check for Base64 URL encoding
@@ -109,9 +121,60 @@ function getAuthorizationToken {
   else
     return $exit_code
   fi
+
+# The following variant requires curl 7.55.0 or up; no key as parameter.
+#  # Use built-in + stdin to pass the key
+#  output="$(printf "Content-type: application/x-www-form-urlencoded\nContent-Length: 0\nOcp-Apim-Subscription-Key: %s\n" "$key" |
+#    curl -s -S -X POST "$token_endpoint" -H '@-')"
+#  exit_code=$?
+#  if [[ $exit_code == 0 ]]; then
+#    # Check for Base64 URL encoding
+#    if [[ $output =~ ^[a-zA-Z0-9_.-]*$ ]]; then
+#      printf "%s" "$output"
+#    else
+#      printf "%s" "$output" 1>&2
+#      return 1
+#    fi
+#  else
+#    return $exit_code
+#  fi
 }
 
 function exitWithError {
   printf "$@" 1>&2
   exit 1
+}
+
+function exitWithSuccess {
+  printf "$@" 1>&2
+  exit 0
+}
+
+function isOneOf {
+  local i="$1"
+  local j
+  shift
+  for j in "$@"; do
+    [[ $i != $j ]] || return 0
+  done
+  return 1
+}
+
+function speechWebSocketsEndpoint {
+  local usage region mode format language
+  local usage="Usage: ${FUNCNAME[0]} <region> <mode> <format> <language>"
+  local region="${1?$USAGE}" # e.g., westus
+  local mode="${2?$USAGE}" # conversation dictation interactive
+  local format="${3?$USAGE}" # simple detailed
+  local language="${4?$USAGE}" # e.g., en-us
+  echo "wss://$region.stt.speech.microsoft.com/speech/recognition/$mode/cognitiveservices/v1?format=$format&language=$language"
+}
+
+function crisWebSocketsEndpoint {
+  local usage region mode endpointId
+  local usage="Usage: ${FUNCNAME[0]} <region> <mode> <endpoint-id>"
+  local region="${1?$USAGE}" # e.g., westus
+  local mode="${2?$USAGE}" # conversation dictation interactive
+  local endpointId="${3?$USAGE}" # CRIS endpoint ID
+  echo "wss://$region.stt.speech.microsoft.com/speech/recognition/$mode/cognitiveservices/v1?cid=$endpointId"
 }

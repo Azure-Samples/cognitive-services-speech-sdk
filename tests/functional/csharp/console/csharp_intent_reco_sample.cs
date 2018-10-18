@@ -41,11 +41,11 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: Session stopped event: {0}.", e.ToString()));
         }
 
-        public static async Task IntentRecognitionBaseModelAsync(string keySpeech, string fileName)
+        public static async Task IntentRecognitionBaseModelAsync(string keySpeech, string region, string fileName)
         {
             Console.WriteLine("Intent Recognition using base speech model.");
 
-            var config = SpeechConfig.FromSubscription(keySpeech, "europewest");
+            var config = SpeechConfig.FromSubscription(keySpeech, region);
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
                 using (var reco = new IntentRecognizer(config))

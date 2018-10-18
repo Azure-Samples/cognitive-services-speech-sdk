@@ -21,7 +21,10 @@ using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace std;
 
-static string input_file("tests/input/whatstheweatherlike.wav");
+static string get_input_file()
+{
+    return Config::InputDir + "/audio/whatstheweatherlike.wav";
+}
 
 static std::shared_ptr<SpeechConfig> SpeechConfigForAudioConfigTests()
 {
@@ -34,7 +37,7 @@ TEST_CASE("Audio Config Basics", "[api][cxx][audio]")
 {
     SPXTEST_SECTION("Audio Push Stream works")
     {
-        SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
+        SPXTEST_REQUIRE(exists(PAL::ToWString(get_input_file())));
 
         // Create the recognizer "with stream input" with a "push stream"
         auto config = SpeechConfigForAudioConfigTests();
@@ -44,7 +47,7 @@ TEST_CASE("Audio Config Basics", "[api][cxx][audio]")
 
         // Prepare to use the "Push stream" by opening the file, and moving to head of data chunk
         FILE* hfile = nullptr;
-        PAL::fopen_s(&hfile, input_file.c_str(), "rb");
+        PAL::fopen_s(&hfile, get_input_file().c_str(), "rb");
         fseek(hfile, 44, SEEK_CUR);
 
         // Set up a lambda we'll use to push the data

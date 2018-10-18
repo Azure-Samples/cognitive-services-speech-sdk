@@ -23,7 +23,7 @@ if [[ $OS = "Windows_NT" ]]; then
 fi
 
 SOURCE_ROOT="$SCRIPT_DIR/../.."
-BUILD_ROOT="$SOURCE_ROOT/build/$PLATFORM"
+BUILD_ROOT="$SOURCE_ROOT/build"
 
 SRCJAR="$BUILD_ROOT/lib/com.microsoft.cognitiveservices.speech.jar"
 SRCJARSRC="$BUILD_ROOT/lib/com.microsoft.cognitiveservices.speech-src.zip"
@@ -83,17 +83,17 @@ else
 
   STATLIBSUFFIX=.a
 
-  if [[ $PLATFORM = "Linux-x86" || $TARGET == "OSX" ]]; then
+  if [[ $PLATFORM == Linux-arm* || $PLATFORM == Linux-x86 || $TARGET == OSX ]]; then
     CSHARPSUPPORTED=false
   else
     CSHARPSUPPORTED=true
     SRCCSHARPBINDINGS="$SRCBIN/$CSHARPBINDINGSNAME.so"
   fi
-  
-  if [[ $TARGET == "IOS" ]]; then
+
+  if [[ $TARGET == IOS ]]; then
      CSHARPSUPPORTED=false
      JAVASUPPORTED=false
-  fi  
+  fi
 fi
 
 SRCINC="$SOURCE_ROOT/source/public"
@@ -127,11 +127,11 @@ cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*$DYNLIBSUFFIX "$DESTPUBLIB"
 if [[ $OS = "Windows_NT" ]]; then
   if [[ $TARGET != Android-* ]]; then
     cp $CPOPT "$SRCLIB"/$LIBPREFIX*.lib "$DESTPUBLIB"
-    cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.pdb "$DESTPUBLIB"    
+    cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.pdb "$DESTPUBLIB"
 
     cp $CPOPT "$SRCDYNLIB"/net461/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNET461"
-    cp $CPOPT "$SRCDYNLIB"/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNETSTANDARD20"    
-    cp $CPOPT "$SRCDYNLIB"Utf8/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBUTF8NETSTANDARD20"   
+    cp $CPOPT "$SRCDYNLIB"/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNETSTANDARD20"
+    cp $CPOPT "$SRCDYNLIB"Utf8/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBUTF8NETSTANDARD20"
   fi
 fi
 

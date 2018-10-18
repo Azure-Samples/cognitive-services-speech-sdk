@@ -3,14 +3,15 @@ set -x -e -o pipefail
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 SOURCE_ROOT="$SCRIPT_DIR/../.."
 
-USAGE="Usage: $0 [--smoke-test] image-tag release-drop"
+USAGE="Usage: $0 [--smoke-test] speech-region image-tag release-drop"
 SMOKE_TEST=0
 if [[ $1 == --smoke-test ]]; then
   SMOKE_TEST=1
   shift
 fi
-IMAGE_TAG="${1?$USAGE}"
-RELEASE_DROP="${2?$USAGE}"
+SPEECH_REGION="${1?$USAGE}"
+IMAGE_TAG="${2?$USAGE}"
+RELEASE_DROP="${3?$USAGE}"
 [[ -f $RELEASE_DROP ]]
 
 [[ -z $SPEECH_SUBSCRIPTION_KEY ]] && {
@@ -32,7 +33,7 @@ cp -p "$SOURCE_ROOT/ci/quickstart-e2e.expect" "$TEST_DIR/cpp-linux"
 
 perl -i -pe 's(SPEECHSDK_ROOT:=.*)(SPEECHSDK_ROOT:=/test/speechsdk)' "$TEST_DIR/cpp-linux/Makefile"
 perl -i -pe 's("YourSubscriptionKey")("'$SPEECH_SUBSCRIPTION_KEY'")' "$TEST_DIR/cpp-linux/"*.cpp
-perl -i -pe 's("YourServiceRegion")("westus")' "$TEST_DIR/cpp-linux/"*.cpp
+perl -i -pe 's("YourServiceRegion")("'$SPEECH_REGION'")' "$TEST_DIR/cpp-linux/"*.cpp
 
 DOCKER_CMD=(docker run --rm --volume "$(readlink -f "$TEST_DIR"):/test" --workdir /test/cpp-linux)
 

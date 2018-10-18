@@ -14,13 +14,14 @@ namespace MicrosoftSpeechSDKSamples
     {
         static void Main(string[] args)
         {
-            if (args.Length < 2)
+            if (args.Length < 3)
             {
-                Console.WriteLine("Usage: carbon_csharp_console mode(speech|intent|translation:cont|single) key(key|token:key) audioinput(mic|filename|stream:file) model:modelId|lang:language|endpoint:url");
+                Console.WriteLine("Usage: carbon_csharp_console mode(speech|intent|translation:cont|single) key(key|token:key) region audioinput(mic|filename|stream:file) model:modelId|lang:language|endpoint:url");
                 Environment.Exit(1);
             }
 
             string subKey = null;
+            string region = null;
             string fileName = null;
             bool useToken = false;
             bool useBaseModel = true;
@@ -100,9 +101,15 @@ namespace MicrosoftSpeechSDKSamples
                 throw new InvalidOperationException("The specified mode is not supported with authorization token: " + args[0]);
             }
 
-            if (args.Length >= 3)
+            region = args[2];
+            if (string.IsNullOrEmpty(region))
             {
-                var audioInputStr = args[2];
+                throw new ArgumentException("region may not be empty");
+            }
+
+            if (args.Length >= 4)
+            {
+                var audioInputStr = args[3];
 
                 if (string.Compare(audioInputStr, "mic", true) == 0)
                 {
@@ -128,9 +135,9 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
 
-            if (args.Length >= 4)
+            if (args.Length >= 5)
             {
-                var paraStr = args[3];
+                var paraStr = args[4];
                 if (paraStr.ToLower().StartsWith("lang:"))
                 {
                     useBaseModel = true;
@@ -196,12 +203,12 @@ namespace MicrosoftSpeechSDKSamples
                     if (useBaseModel)
                     {
                         Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
-                        SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, lang: lang, fileName: fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition).Wait();
+                        SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, region: region, lang: lang, fileName: fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition).Wait();
                     }
                     else
                     {
                         Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
-                        SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, lang, modelId, fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition).Wait();
+                        SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, region, lang, modelId, fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition).Wait();
                     }
                 }
             }
@@ -217,7 +224,7 @@ namespace MicrosoftSpeechSDKSamples
                     if (useBaseModel)
                     {
                         Console.WriteLine("=============== Run intent recognition samples using base speech model. ===============");
-                        IntentRecognitionSamples.IntentRecognitionBaseModelAsync(subKey, fileName).Wait();
+                        IntentRecognitionSamples.IntentRecognitionBaseModelAsync(subKey, region, fileName).Wait();
                     }
                     else
                     {
@@ -237,7 +244,7 @@ namespace MicrosoftSpeechSDKSamples
                     if (useBaseModel)
                     {
                         Console.WriteLine("=============== Run translationsamples using base speech model. ===============");
-                        TranslationSamples.TranslationBaseModelAsync(subKey, fileName, useStream: useStream).Wait();
+                        TranslationSamples.TranslationBaseModelAsync(subKey, fileName: fileName, region: region, useStream: useStream).Wait();
                     }
                     else
                     {

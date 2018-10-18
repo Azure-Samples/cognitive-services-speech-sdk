@@ -13,6 +13,7 @@ use Data::Dumper;
 use File::Temp qw/tempdir/;
 use Cwd qw/abs_path/;
 use File::Basename;
+use LWP::Simple;
 
 my ($scriptfile, $scriptdir) = fileparse(abs_path($0));
 my @dockerRmiAtExit;
@@ -60,6 +61,11 @@ my %images = (
     version => 1,
     spec => [qw/from-ubuntu1604-x86 deps swig builduser/],
   },
+  dev_ubuntu1604_arm32 => {
+    version => 1,
+    spec => [qw/from-ubuntu1604-arm32v7 deps swig builduser/],
+    urls => [qw(https://github.com/multiarch/qemu-user-static/releases/download/v2.12.0-1/qemu-arm-static.tar.gz)],
+  },
   oobedevcpp_ubuntu1604_x64 => {
     version => 1,
     spec => [qw/from-ubuntu1604-x64 oobedeps builduser/],
@@ -99,6 +105,15 @@ my %commands = (
         my $imagedir = "$tempdir/$imagename";
         mkdir $imagedir or die "Error: cannot create directory '$imagedir': $!\n";
         outputDockerfile $image, $imagedir;
+
+        # Get file dependencies
+        for my $url (@{$image->{urls}}) {
+          my ($file) = $url =~ m{([^/]+$)}
+              or die "Cannot determine file name from URL '$url'.\n";
+          my $rc = getstore($url, "$imagedir/$file");
+          is_success($rc)
+              or die "Download URL '$url' failed with error $rc.\n";
+        }
 
         my $tag = imagetag $optref, $imagename, $image;
         dockerBuild $tag, $imagedir,

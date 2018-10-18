@@ -128,9 +128,13 @@ phases:
       type: InlineScript
       script: |
         . ci/functions.sh
-        TARGET=Windows-x64
-        [[ "$(BuildPlatform)" == Win32 ]] && TARGET=Windows-x86
-        vsts_setvar SPEECHSDK_TARGET_PLATFORM "$TARGET"
+        if [[ "$(BuildPlatform)" == Win32 ]]; then
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x86"
+          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
+        else
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x64"
+          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15 Win64"
+        fi
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -145,18 +149,6 @@ phases:
       Start-Process -Wait cmd -Verb runas -ArgumentList /c, cd, (Get-Location), '&&', start, /wait, .\vs_enterprise.exe, modify, --installPath, '"%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise"', --add, Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre, --quiet, --norestart, --wait, '&&', echo, '%ERRORLEVEL%', '>', result.txt
     displayName: Install Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre VS component
     condition: and(succeeded(),eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true'))
-  - task: CmdLine@1
-    displayName: Generate set_cmake_arch.bat
-    inputs:
-      filename: echo
-      arguments: 'IF $(BuildPlatform)==x64 (set CMakeArch=15 Win64) ELSE (set CMakeArch=15) > set_cmake_arch.bat'
-      failOnStandardError: true
-  - task: BatchScript@1
-    displayName: Run set_cmake_arch.bat
-    inputs:
-      filename: 'set_cmake_arch.bat'
-      modifyEnvironment: true
-      failOnStandardError: true
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
@@ -164,12 +156,11 @@ phases:
   - task: CMake@1
     displayName: Generate solution
     inputs:
-      workingDirectory: 'build/$(BuildPlatform)'
-      cmakeArgs: '-G "Visual Studio $(CMakeArch)" -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ../..'
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
   - task: VSBuild@1
     displayName: Build solution
     inputs:
-      solution: 'build/$(BuildPlatform)/carbon.sln'
+      solution: 'build/carbon.sln'
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
       clean: true
@@ -185,7 +176,7 @@ phases:
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@3
     displayName: 'BinSkim (can pass only with Spectre mitigation)'
     inputs:
-      arguments: 'analyze build/$(BuildPlatform)/bin/$(BuildConfiguration)/*.dll --recurse'
+      arguments: 'analyze build/bin/$(BuildConfiguration)/*.dll --recurse'
     condition: and(succeeded(),eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true'))
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-antimalware.AntiMalware@3
     displayName: 'AntiMalware'
@@ -226,10 +217,10 @@ phases:
     displayName: 'Run FxCop'
     inputs:
       inputType: Basic
-      targets: 'build/$(BuildPlatform)/bin/$(BuildConfiguration)/net461'
+      targets: 'build/bin/$(BuildConfiguration)/net461'
       disableRules: 'Microsoft.Globalization#CA2101'
       verbose: true
-  - bash: rm -rf build/$(BuildPlatform)/source/bindings/java/javadoc
+  - bash: rm -rf build/source/bindings/java/javadoc
     displayName: Remove JavaDoc folder
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-moderncop.ModernCop@2
     displayName: 'ModernCop (managed JS code)'
@@ -326,9 +317,13 @@ phases:
       type: InlineScript
       script: |
         . ci/functions.sh
-        TARGET=Windows-x64
-        [[ "$(BuildPlatform)" == Win32 ]] && TARGET=Windows-x86
-        vsts_setvar SPEECHSDK_TARGET_PLATFORM "$TARGET"
+        if [[ "$(BuildPlatform)" == Win32 ]]; then
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x86"
+          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
+        else
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x64"
+          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15 Win64"
+        fi
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -346,18 +341,6 @@ phases:
       Start-Process -Wait cmd -Verb runas -ArgumentList /c, cd, (Get-Location), '&&', start, /wait, .\vs_enterprise.exe, modify, --installPath, '"%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise"', --add, Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre, --quiet, --norestart, --wait, '&&', echo, '%ERRORLEVEL%', '>', result.txt
     displayName: Install Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre VS component
     condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
-  - task: CmdLine@1
-    displayName: Generate set_cmake_arch.bat
-    inputs:
-      filename: echo
-      arguments: 'IF $(BuildPlatform)==x64 (set CMakeArch=15 Win64) ELSE (set CMakeArch=15) > set_cmake_arch.bat'
-      failOnStandardError: true
-  - task: BatchScript@1
-    displayName: Run set_cmake_arch.bat
-    inputs:
-      filename: 'set_cmake_arch.bat'
-      modifyEnvironment: true
-      failOnStandardError: true
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
@@ -365,12 +348,11 @@ phases:
   - task: CMake@1
     displayName: Generate solution
     inputs:
-      workingDirectory: 'build/$(BuildPlatform)'
-      cmakeArgs: '-G "Visual Studio $(CMakeArch)" -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ../..'
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
   - task: VSBuild@1
     displayName: Build solution
     inputs:
-      solution: 'build/$(BuildPlatform)/carbon.sln'
+      solution: 'build/carbon.sln'
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
       clean: true
@@ -379,76 +361,12 @@ phases:
     displayName: 'Sign Windows C++, C# and Java binaries'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing'
-      FolderPath: 'build/$(BuildPlatform)/bin'
+      FolderPath: 'build/bin'
       Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.bindings.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-  # If we failed until here, don't try to run tests:
-  - bash: . ci/functions.sh && vsts_setvar SPEECHSDK_RUN_TESTS false
-    condition: failed()
-  - bash: ./ci/set-test-variables.sh
-    displayName: Set test variables
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Unit tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/rununittest.sh'
-      args: './bin/$(BuildConfiguration) $(luis-westus-s0-201809-key1) $(KeySkyman)'
-      cwd: 'build/$(BuildPlatform)'
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-    timeoutInMinutes: 7
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Carbonx tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_carbonx.sh'
-      args: './bin/$(BuildConfiguration) all $(KeySkyman) westus $(luis-westus-s0-201809-key1) westus'
-      cwd: 'build/$(BuildPlatform)'
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-    timeoutInMinutes: 7
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: UspConsole tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_uspconsole.sh'
-      args: './bin/$(BuildConfiguration) $(KeySkyman)'
-      cwd: 'build/$(BuildPlatform)'
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-    timeoutInMinutes: 7
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Carbon CSharp tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_carbon_csharp_console.sh'
-      args: './bin/$(BuildConfiguration) all $(KeySkyman)'
-      cwd: 'build/$(BuildPlatform)'
-    condition: and(eq(variables['BuildConfiguration'], 'Release'),eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
-    timeoutInMinutes: 7
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Run Java (JUnit) tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runjava.sh'
-      args: '$(Build.Repository.LocalPath) ./ $(BuildConfiguration) $(luis-westus-s0-201809-key1) $(KeySkyman)'
-      cwd: 'build/$(BuildPlatform)'
-    condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['BuildPlatform'], 'x64'),eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
-    timeoutInMinutes: 7
-  - task: VSTest@1
-    displayName: Run C# tests
-    inputs:
-      testAssembly: '**\Microsoft.CognitiveServices.Speech.Tests*.dll;-:**\obj\**'
-      runSettingsFile: 'tests/functional/csharp/end2end/csharp.runsettings'
-      overrideTestrunParameters: 'UnifiedSpeechSubscriptionKey=$(KeySkyman);Region=westus;InputDir=$(Build.Repository.LocalPath)/tests/input;DeploymentId=$(TEST_MODEL_ID);LanguageUnderstandingSubscriptionKey=$(luis-westus-s0-201809-key1);LanguageUnderstandingServiceRegion=westus;LanguageUnderstandingHomeAutomationAppId=$(TEST_INTENT_HOMEAUTOMATION_APPID)'
-      runInParallel: False
-      vsTestVersion: latest
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-    timeoutInMinutes: 20
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFiles: '**/test-*.xml'
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - template: test-during-build.yml
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Create drop files
     inputs:
@@ -489,35 +407,32 @@ phases:
       type: InlineScript
       script: |
         . ci/functions.sh
-        TARGET=WindowsUwp-x64
-        [[ "$(BuildPlatform)" == Win32 ]] && TARGET=WindowsUwp-x86
-        vsts_setvar SPEECHSDK_TARGET_PLATFORM "$TARGET"
+        if [[ "$(BuildPlatform)" == Win32 ]]; then
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "WindowsUwp-x86"
+          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
+        else
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "WindowsUwp-x64"
+          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15 Win64"
+        fi
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
-  - bash: |
-      set -e -o pipefail
-      . ci/functions.sh
-      ./ci/set-variables.sh
-      SPEECHSDK_CMAKE_GENERATOR="Visual Studio 15"
-      [[ "$(BuildPlatform)" == x64 ]] && SPEECHSDK_CMAKE_GENERATOR+=" Win64"
-      vsts_setvar SPEECHSDK_CMAKE_GENERATOR "$SPEECHSDK_CMAKE_GENERATOR"
+  - bash: . ci/functions.sh && ./ci/set-variables.sh
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Install build dependencies
     inputs:
       type: FilePath
       scriptPath: 'ci/install-build-dependencies.sh'
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
+    inputs:
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
   - task: CMake@1
     displayName: Generate solution
     inputs:
-      workingDirectory: 'build/$(BuildPlatform)'
-      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0 -Duse_default_uuid=ON -Duse_openssl=ON -Duse_schannel=OFF -DOPENSSL_ROOT_DIR=../../external/uwp_ssl/lib/$(BuildPlatform) -DOPENSSL_INCLUDE_DIR=../../external/uwp_ssl/include -DOPENSSL_USE_STATIC_LIBS=TRUE -DBUILD_PYTHON=OFF -DBUILD_JAVA=OFF ../..'
-  - task: NuGetCommand@2
-    displayName: NuGet restore
-    inputs:
-      restoreSolution: 'build/$(BuildPlatform)/carbon.sln'
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0 -Duse_default_uuid=ON -Duse_openssl=ON -Duse_schannel=OFF -DOPENSSL_ROOT_DIR=$(Build.Repository.LocalPath)/external/uwp_ssl/lib/$(BuildPlatform) -DOPENSSL_INCLUDE_DIR=$(Build.Repository.LocalPath)/external/uwp_ssl/include -DOPENSSL_USE_STATIC_LIBS=TRUE -DBUILD_PYTHON=OFF -DBUILD_JAVA=OFF ..'
   - task: VSBuild@1
     displayName: Build solution
     inputs:
-      solution: 'build/$(BuildPlatform)/carbon.sln'
+      solution: 'build/carbon.sln'
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
       clean: true
@@ -526,7 +441,7 @@ phases:
     displayName: 'Sign Windows C++ and C# binaries'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing'
-      FolderPath: 'build/$(BuildPlatform)/bin/$(BuildConfiguration)'
+      FolderPath: 'build/bin/$(BuildConfiguration)'
       Pattern: 'Microsoft.CognitiveServices.Speech.core.uwp.dll,Microsoft.CognitiveServices.Speech.csharp.bindings.uwp.dll,Microsoft.CognitiveServices.Speech.csharp.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
@@ -555,7 +470,6 @@ phases:
   - bash: |
       set -x -e -o pipefail
       ./ci/set-variables.sh
-      ./ci/set-test-variables.sh
     displayName: Set variables
   - bash: |
       set -x -e -o pipefail
@@ -611,17 +525,20 @@ phases:
       ./ci/run-maven.sh public_samples "$(MavenRoot)"
     displayName: Build Maven-based samples
   - bash: |
-       set -x
+       set -x -e
+       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+         -D luis-key=$(luis-westus-s0-201809-key1) \
+         -D speech-key=$(KeySkyman))
        java \
         -cp $(printf "%s;" \
            "$(MavenPackageDirWindows)/$(ArtifactBasename).jar" \
            "$(Build.ArtifactStagingDirectory)/In/Windows/x64/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" \
            "external/junit/junit-4.12.jar" \
            "external/junit/hamcrest-core-1.3.jar") \
-         -DSpeechSubscriptionKey=$(KeySkyman) \
-         -DSpeechRegion=westus \
-         -DLuisRegion=westus2 \
-         -DWaveFile=$TEST_AUDIO_FILE \
+         -DSpeechSubscriptionKey="$SPEECHSDK_SPEECH_KEY" \
+         -DSpeechRegion="$SPEECHSDK_SPEECH_REGION" \
+         -DLuisRegion="$SPEECHSDK_LUIS_REGION" \
+         -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
          -DKeyword=Computer \
          -DKeywordModel=/data/keyword/kws.table \
          -DTestOutputFilename=test-java-unittests-package.xml \
@@ -652,7 +569,6 @@ phases:
       set -x -e -o pipefail
       . ci/functions.sh
       ./ci/set-variables.sh
-      ./ci/set-test-variables.sh
       DOCKER_IMAGE="$(perl ci/docker/dockertool.pl imagetag --registry $(DOCKER_REGISTRY) oobedevjre_ubuntu1604_x64)"
       vsts_setvar DOCKER_IMAGE "$DOCKER_IMAGE"
     displayName: Set variables
@@ -676,8 +592,11 @@ phases:
       set -e -x -o pipefail
       perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
       java -version
-      find public_samples/quickstart/java-jre -name \*.java -print0 | xargs -0 perl -i -pe 's("YourServiceRegion")("westus")'
-      find public_samples/quickstart/java-jre -name \*.java -print0 | xargs -0 perl -i -pe 's("YourSubscriptionKey")("'$(KeySkyman)'")'
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(KeySkyman))
+      find public_samples/quickstart/java-jre -name \*.java -print0 | xargs -0 perl -i -pe 's("YourServiceRegion")("'$SPEECHSDK_SPEECH_REGION'")'
+      find public_samples/quickstart/java-jre -name \*.java -print0 | xargs -0 perl -i -pe 's("YourSubscriptionKey")("'$SPEECHSDK_SPEECH_KEY'")'
       ./ci/run-maven.sh public_samples "$(MavenRoot)"
     displayName: Patch and build samples
   - task: Docker@1
@@ -696,7 +615,7 @@ phases:
     displayName: Test quickstart-jre
 
 - phase: NuGet
-  dependsOn: [Pre, LinuxBuild, LinuxX86Build, WindowsBuild, WindowsUwpBuild]
+  dependsOn: [Pre, LinuxBuild, LinuxDockerBuild, WindowsBuild, WindowsUwpBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsNuGet '))
   queue:
     name: Hosted VS2017
@@ -831,7 +750,6 @@ phases:
       set -x -e -o pipefail
       . ci/functions.sh
       ./ci/set-variables.sh
-      ./ci/set-test-variables.sh
       DOCKER_IMAGE="$(perl ci/docker/dockertool.pl imagetag --registry $(DOCKER_REGISTRY) oobedevdnc20_ubuntu1604_x64)"
       vsts_setvar DOCKER_IMAGE "$DOCKER_IMAGE"
     displayName: Set variables
@@ -851,25 +769,28 @@ phases:
       set -e -x -o pipefail
       perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
       perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(KeySkyman))
       # dotnet test does not allow to supply TestRunParameters from command-line?!
-      perl -pi - tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
+      perl -pi - \
+        UnifiedSpeechSubscriptionKey "$SPEECHSDK_SPEECH_KEY" \
+        Region "$SPEECHSDK_SPEECH_REGION" \
+        DeploymentId "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS" \
+        InputDir /test/tests/input/ \
+        LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
+        LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
+        LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
+        tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
         BEGIN {
-          %A = qw(
-            UnifiedSpeechSubscriptionKey $(KeySkyman)
-            Region westus
-            DeploymentId $(TEST_MODEL_ID)
-            InputDir /test/tests/input/
-            LanguageUnderstandingSubscriptionKey $(luis-westus-s0-201809-key1)
-            LanguageUnderstandingServiceRegion westus
-            LanguageUnderstandingHomeAutomationAppId $(TEST_INTENT_HOMEAUTOMATION_APPID)
-          );
+          %A = splice(@ARGV, 0, $#ARGV);
           $keysRe = "(?:\\b" . (join "\\b|\\b", keys %A) . "\\b)";
           $keysRe = qr/$keysRe/;
         }
         s/(<Parameter name="($keysRe)" value=")([^"]*)/$1.$A{$2}/ge
       SCRIPT
-      find public_samples/quickstart/csharp-dotnetcore -name \*.cs -print0 | xargs -0 perl -i -pe 's("YourServiceRegion")("westus")'
-      find public_samples/quickstart/csharp-dotnetcore -name \*.cs -print0 | xargs -0 perl -i -pe 's("YourSubscriptionKey")("'$(KeySkyman)'")'
+      find public_samples/quickstart/csharp-dotnetcore -name \*.cs -print0 | xargs -0 perl -i -pe 's("YourServiceRegion")("'$SPEECHSDK_SPEECH_REGION'")'
+      find public_samples/quickstart/csharp-dotnetcore -name \*.cs -print0 | xargs -0 perl -i -pe 's("YourSubscriptionKey")("'$SPEECHSDK_SPEECH_KEY'")'
       mkdir localnuget
       cp --verbose $(System.ArtifactsDirectory)/In/Windows/Microsoft.CognitiveServices.Speech.*.nupkg localnuget
       # First run the unit tests
@@ -877,7 +798,7 @@ phases:
         set -e -x -o pipefail
         cd tests/functional/csharp/end2end
         dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
-        dotnet test --framework netcoreapp2.0 --settings csharp.runsettings --logger 'trx;LogFileName=TEST-csharp-end2end-for-nupkg.trx'
+        dotnet test --framework netcoreapp2.0 --settings csharp.runsettings --logger 'trx;LogFileName=test-csharp_unit_tests-nupkg-Linux-x64-Release.trx'
       SCRIPT
       # Then run the end-to-end for the quickstart
       docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$(DOCKER_IMAGE)" bash - <<"SCRIPT"
@@ -897,7 +818,7 @@ phases:
   - task: PublishTestResults@2
     inputs:
       testRunner: VSTest
-      testResultsFiles: '**/TEST-*.trx'
+      testResultsFiles: '**/test-*.trx'
 
 - phase: AndroidBuild
   variables:
@@ -1098,8 +1019,10 @@ phases:
     matrix:
       debug:
         BuildConfiguration: Debug
+        BuildPlatform: x64
       release:
         BuildConfiguration: Release
+        BuildPlatform: x64
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set Linux-x64 target platform
@@ -1132,52 +1055,7 @@ phases:
     displayName: CMake build
     inputs:
       cmakeArgs: '--build . -- -j4'
-  # If we failed until here, don't try to run tests:
-  - bash: . ci/functions.sh && vsts_setvar SPEECHSDK_RUN_TESTS false
-    condition: failed()
-  - bash: ./ci/set-test-variables.sh
-    displayName: Set test variables
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Unit tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/rununittest.sh'
-      args: './bin $(luis-westus-s0-201809-key1) $(KeySkyman)'
-      cwd: build
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-    timeoutInMinutes: 7
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Carbonx tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_carbonx.sh'
-      args: './bin all $(KeySkyman) westus $(luis-westus-s0-201809-key1) westus'
-      cwd: build
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-    timeoutInMinutes: 7
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: UspConsole tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_uspconsole.sh'
-      args: './bin $(KeySkyman)'
-      cwd: build
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-    timeoutInMinutes: 7
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Run Java (JUnit) tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runjava.sh'
-      args: '$(Build.Repository.LocalPath) ./ "" $(luis-westus-s0-201809-key1) $(KeySkyman)'
-      cwd: build
-    condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
-    timeoutInMinutes: 7
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFiles: '**/test-*.xml'
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - template: test-during-build.yml
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Create drop files
     inputs:
@@ -1193,27 +1071,37 @@ phases:
       publishLocation: Container
     condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
 
-- phase: LinuxX86Build
+- phase: LinuxDockerBuild
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxBuild '))
   queue:
     name: Hosted Ubuntu 1604
-    timeoutInMinutes: 30
-    parallel: 2
+    timeoutInMinutes: 60
+    parallel: 3
     matrix:
-      debug:
-        BuildConfiguration: Debug
-      release:
-        BuildConfiguration: Release
+      Linux x86 Release:
+        SPEECHSDK_TARGET_PLATFORM: Linux-x86
+        SPEECHSDK_BUILD_CONFIGURATION: Release
+        DOCKER_BASE: dev_ubuntu1604_x86
+      Linux x86 Debug:
+        SPEECHSDK_TARGET_PLATFORM: Linux-x86
+        SPEECHSDK_BUILD_CONFIGURATION: Debug
+        DOCKER_BASE: dev_ubuntu1604_x86
+      Linux arm32 Debug:
+        SPEECHSDK_TARGET_PLATFORM: Linux-arm32
+        SPEECHSDK_BUILD_CONFIGURATION: Debug
+        DOCKER_BASE: dev_ubuntu1604_arm32
   steps:
   - bash: |
       set -x -e -o pipefail
+      # Emulation need only on non-Intel
+      [[ $SPEECHSDK_TARGET_PLATFORM =~ ^Linux-(x86|x64)$ ]] || {
+        sudo apt-get update
+        sudo apt-get install --yes binfmt-support qemu-user-static
+      }
       . ci/functions.sh
       ./ci/set-variables.sh
-      DOCKER_IMAGE="$(perl ci/docker/dockertool.pl imagetag --registry $(DOCKER_REGISTRY) dev_ubuntu1604_x86)"
-      vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x86
-      vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
-      vsts_setvar DOCKER_IMAGE "$DOCKER_IMAGE"
+      vsts_setvar DOCKER_IMAGE "$(perl ci/docker/dockertool.pl imagetag --registry $(DOCKER_REGISTRY) $(DOCKER_BASE))"
     displayName: Set variables
   - task: Docker@1
     displayName: Pull docker image
@@ -1222,31 +1110,36 @@ phases:
       azureContainerRegistry: $(DOCKER_REGISTRY)
       command: pull
       arguments: $(DOCKER_IMAGE)
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Build container, SDK, create drop
-    inputs:
-      type: InlineScript
-      script: |
-        set -e -o pipefail -x
-        SPEECH_SUBSCRIPTION_KEY=$(KeySkyman) \
-        docker run \
-          --rm \
-          --volume "$(Build.Repository.LocalPath)":/csspeech \
-          --env SPEECH_SUBSCRIPTION_KEY \
-          --workdir /csspeech \
-          "$(DOCKER_IMAGE)" \
-          /csspeech/ci/docker/smoke-test.sh "$(BuildConfiguration)" build/Linux-x86
-        ./ci/drop/bindrop.sh "Linux-x86" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Linux-x86/$(BuildConfiguration)
+  - bash: |
+      docker run --rm -i --workdir /csspeech --volume "$PWD:/csspeech" "$DOCKER_IMAGE" bash - <<"SCRIPT"
+        set -e
+        mkdir build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=$(SPEECHSDK_BUILD_CONFIGURATION) ..
+        cmake --build . -- -j$(nproc)
+      SCRIPT
+    displayName: CMake build
+  - template: test-during-build.yml
+    parameters:
+      dockerImage: $(DOCKER_IMAGE)
+  - bash: |
+      docker run --rm --workdir /csspeech --volume "$PWD:/csspeech" "$DOCKER_IMAGE" \
+        ci/drop/bindrop.sh $(SPEECHSDK_TARGET_PLATFORM) $(SPEECHSDK_BUILD_CONFIGURATION) _drop
+    displayName: Create drop files
+  - bash: |
+      mkdir -p $(Build.ArtifactStagingDirectory)/$(SPEECHSDK_TARGET_PLATFORM)
+      cp -R -p _drop $(Build.ArtifactStagingDirectory)/$(SPEECHSDK_TARGET_PLATFORM)/$(SPEECHSDK_BUILD_CONFIGURATION)
+    displayName: Move drop files
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: Linux x86'
+    displayName: Publish Artifact (Release)
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: Linux
       publishLocation: Container
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+    condition: and(succeeded(), eq(variables['SPEECHSDK_BUILD_CONFIGURATION'], 'Release'))
 
 - phase: LinuxDrop
-  dependsOn: [Pre, LinuxBuild, LinuxX86Build]
+  dependsOn: [Pre, LinuxBuild, LinuxDockerBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDrop '))
   queue:
     name: Hosted Ubuntu 1604
@@ -1277,7 +1170,11 @@ phases:
       command: pull
       arguments: $(DOCKER_IMAGE)
   - bash: |
-      SPEECH_SUBSCRIPTION_KEY="$(KeySkyman)" ./ci/drop/test-quickstart-linux.sh --smoke-test "$(DOCKER_IMAGE)" "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"
+      set -x -e
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(KeySkyman))
+      SPEECH_SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" ./ci/drop/test-quickstart-linux.sh --smoke-test "$SPEECHSDK_SPEECH_REGION" "$(DOCKER_IMAGE)" "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"
     displayName: Test - build and run quickstart
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Linux Release Drop'
@@ -1403,10 +1300,13 @@ phases:
       unzip "$(OutputDirectory)/$(VersionedFrameworkName).zip"
       popd
       # run the test
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(KeySkyman))
       xcodebuild test -project tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
           -scheme SpeechSDK_iOS \
           -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
-          SUBSCRIPTION_KEY='$(KeySkyman)' SERVICE_REGION='westus'
+          SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION"
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
     displayName: "Run simple iOS test"
   - bash: |
@@ -1440,8 +1340,10 @@ phases:
     matrix:
       debug:
         BuildConfiguration: Debug
+        BuildPlatform: x64
       release:
         BuildConfiguration: Release
+        BuildPlatform: x64
   variables:
     BuildPlatform: macOS
     FrameworkName: MicrosoftCognitiveServicesSpeech
@@ -1473,52 +1375,7 @@ phases:
     displayName: CMake build
     inputs:
       cmakeArgs: '--build . -- -j4'
-  # If we failed until here, don't try to run tests:
-  - bash: . ci/functions.sh && vsts_setvar SPEECHSDK_RUN_TESTS false
-    condition: failed()
-  - bash: ./ci/set-test-variables.sh
-    displayName: Set test variables
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Unit tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/rununittest.sh'
-      args: './bin $(luis-westus-s0-201809-key1) $(KeySkyman)'
-      cwd: build
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-    timeoutInMinutes: 7
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Carbonx tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_carbonx.sh'
-      args: './bin all $(KeySkyman) westus $(luis-westus-s0-201809-key1) westus'
-      cwd: build
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-    timeoutInMinutes: 7
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: UspConsole tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_uspconsole.sh'
-      args: './bin $(KeySkyman)'
-      cwd: build
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-    timeoutInMinutes: 7
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Run Java (JUnit) tests
-    inputs:
-      type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runjava.sh'
-      args: '$(Build.Repository.LocalPath) ./ "" $(luis-westus-s0-201809-key1) $(KeySkyman)'
-      cwd: build
-    condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
-    timeoutInMinutes: 7
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFiles: '**/test-*.xml'
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - template: test-during-build.yml
   - bash: |
       . ci/apple/apple-functions.sh
       build_dsym_bundle "build/lib" "$(FrameworkName)"
@@ -1592,7 +1449,12 @@ phases:
     inputs:
       workingDir: tests/functional/js/Unit
       verbose: false
-  - script: RunTests.cmd SpeechSubscriptionKey:$(KeySkyman) SpeechRegion:westus LuisSubscriptionKey:$(luis-westus-s0-201809-key1) LuisRegion:westus SpeechTestModelId:$(TEST_MODEL_ID)
+  - bash: |
+      perl ci/evaluate-test-config.pl --verbose --format azuredevops-variable --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(KeySkyman)
+    displayName: Set test variables
+  - script: RunTests.cmd SpeechSubscriptionKey:$(SPEECHSDK_SPEECH_KEY) SpeechRegion:$(SPEECHSDK_SPEECH_REGION) LuisSubscriptionKey:$(SPEECHSDK_LUIS_KEY) LuisRegion:$(SPEECHSDK_LUIS_REGION) SpeechTestModelId:$(SPEECHSDK_SPEECH_ENDPOINTID_ENUS)
     displayName: 'Run tests'
     workingDirectory: tests/functional/js/Unit
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')

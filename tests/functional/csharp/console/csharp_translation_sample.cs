@@ -53,18 +53,18 @@ namespace MicrosoftSpeechSDKSamples
             translationEndTaskCompletionSource.TrySetResult(0);
         }
 
-        public static async Task TranslationBaseModelAsync(string keyTranslation, string fileName, bool useStream)
+        public static async Task TranslationBaseModelAsync(string keyTranslation, string region, string fileName, bool useStream)
         {
-            var config = SpeechTranslationConfig.FromSubscription(keyTranslation, "westus");
+            var config = SpeechTranslationConfig.FromSubscription(keyTranslation, region);
             config.SpeechRecognitionLanguage = FromLang;
             To2Langs.ForEach(l => config.AddTargetLanguage(l));
 
-            var chineseConfig = SpeechTranslationConfig.FromSubscription(keyTranslation, "westus");
+            var chineseConfig = SpeechTranslationConfig.FromSubscription(keyTranslation, region);
             chineseConfig.SpeechRecognitionLanguage = FromLang;
             chineseConfig.VoiceName = ChineseVoice;
             chineseConfig.AddTargetLanguage(ChineseLocale);
 
-            var germanConfig = SpeechTranslationConfig.FromSubscription(keyTranslation, "westus");
+            var germanConfig = SpeechTranslationConfig.FromSubscription(keyTranslation, region);
             germanConfig.SpeechRecognitionLanguage = FromLang;
             germanConfig.VoiceName = GermanVoice;
             germanConfig.AddTargetLanguage(GermanLocale);
@@ -147,7 +147,7 @@ namespace MicrosoftSpeechSDKSamples
                 }
                 else
                 {
-                    var audioInput = Util.OpenWavFile(fileName); 
+                    var audioInput = Util.OpenWavFile(fileName);
                     using (var reco = new TranslationRecognizer(config, audioInput))
                     {
                         await DoTranslationAsync(reco).ConfigureAwait(false);

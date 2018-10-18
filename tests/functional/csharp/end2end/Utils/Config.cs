@@ -36,12 +36,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return byteArrList;
         }
 
-        public static async Task<string> GetToken(string key)
+        public static async Task<string> GetToken(string key, string region)
         {
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
-                UriBuilder uriBuilder = new UriBuilder("https://westus.api.cognitive.microsoft.com/sts/v1.0");
+                UriBuilder uriBuilder = new UriBuilder($"https://{region}.api.cognitive.microsoft.com/sts/v1.0");
                 uriBuilder.Path += "/issueToken";
 
                 using (var result = await client.PostAsync(uriBuilder.Uri.AbsoluteUri, null))
