@@ -260,7 +260,7 @@ phases:
     condition: contains(variables['SPEECHSDK_BUILD_PHASES'], ' TsaUpload ')
 
 - phase: TsaUpload
-  dependsOn: [Pre, WindowsSdlBuild]
+  dependsOn: [Pre, WindowsSdlBuild, WindowsSDLFortifyJava]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
   queue:
     name: Carbon
@@ -281,6 +281,11 @@ phases:
       }
       Move-Item $(System.ArtifactsDirectory)/In/CodeAnalysisLogs $logDir
     displayName: Move logs to target location
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download FortifySDL logs from artifacts'
+    inputs:
+      artifactName: fortify
+      downloadPath: '$(System.ArtifactsDirectory)/sca_artifacts'
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
     displayName: 'TSA upload to Codebase: Carbon_master Stamp: Bing'
     inputs:
@@ -1580,3 +1585,53 @@ phases:
       PathtoPublish: $(ArtifactOut)
       ArtifactName: Doxygen
       publishLocation: Container
+
+- phase: WindowsSDLFortifyJava
+  dependsOn: [Pre, WindowsBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
+  queue:
+    name: Carbon
+    demands: FORTIFY
+    timeoutInMinutes: 30
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download JAR Build Artifacts'
+    inputs:
+      artifactName: Windows
+      itemPattern: '**/*.jar'
+  - task: PowerShell@2
+    displayName: 'Extract internal classes from JAR SDK Artifacts'
+    inputs:
+      type: FilePath
+      filePath: './ci/sdl/PruneJar.ps1'
+      arguments: '-InputJarName $(System.ArtifactsDirectory)\Windows\x64\Release\public\lib\com.microsoft.cognitiveservices.speech.jar -OutputDir $(Build.BinariesDirectory)\PruneJar'
+  - task: ArchiveFiles@2
+    displayName: 'Create internal.JAR'
+    inputs:
+      rootFolderOrFile: '$(Build.BinariesDirectory)\PruneJar'
+      includeRootFolder: false
+      archiveFile: '$(Build.ArtifactStagingDirectory)/class/internal.jar'
+  - task: fortifyvsts.hpe-security-fortify-vsts.build-task-fortify-sca.FortifySCA@1
+    displayName: 'Run Fortify on JAVA source files'
+    inputs:
+      applicationType: java
+      buildClasspath: '$(Build.ArtifactStagingDirectory)/class/internal.jar'
+      buildSourceVersion: 1.8
+      fortifySourceTranslate: 'source/bindings/java/**/*.java'
+      fortifyBuildId: 1.2.3
+      scaVerbose: true
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+    displayName: 'SDL Fortify Post Analysis'
+    inputs:
+      FortifySCA: true
+      VstsConsole: false
+    # For post analysis we currently 'continue on error'. We know we have false-positives.
+    # Once we can solve the problem of the false-positives we can change this.
+    continueOnError: true
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts from Fortify'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/../_sdt/logs'
+      ArtifactName: fortify
+      condition: succeededOrFailed()
+
