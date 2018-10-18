@@ -1157,11 +1157,25 @@ void CSpxAudioStreamSession::Error(const std::string& error)
 
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
-    UNUSED(adapter);
-
+    if (IsState(SessionState::Idle))
+    {
+        if (adapter != m_recoAdapter.get())
+        {
+            // Unexpected runtime error. However, this is called by USP worker thread, so
+            // it should not throw exception here.
+            SPX_DBG_TRACE_ERROR("Wrong adapter instance.");
+            SPX_DBG_TRACE_VERBOSE("%s: Session is in idle state, ignore error events.", __FUNCTION__);
+        }
+        else
+        {
+            // We see an error from adapter, need to reset it when start next recognition.
+            m_resetRecoAdapter = m_recoAdapter;
+            SPX_DBG_TRACE_VERBOSE("%s: Reset adapter at the next recognition. Session is in idle state, ignore error events.", __FUNCTION__);
+        }
+    }
     // If it is a transport error and the connection was successfully before, we retry in continuous mode.
     // Otherwise report the error to the user, so that he can recreate a recognizer.
-    if (IsKind(RecognitionKind::Continuous) && payload->IsTransportError() && m_shouldRetry)
+    else if (IsKind(RecognitionKind::Continuous) && payload->IsTransportError() && m_shouldRetry)
     {
         SPX_DBG_TRACE_VERBOSE("%s: Trying to reset the engine adapter", __FUNCTION__);
         m_shouldRetry = false; // Currently no back-off, retrying only once.
@@ -1673,9 +1687,9 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
                     FireSessionStartedEvent();
                 }
             }
-        // Make sure we do not switch to Idle before FireSessionStoppedEvent has been fired,
-        // otherwise we can cancel the next RecognizeAsync.
-        else if (ChangeState(SessionState::WaitForAdapterCompletedSetFormatStop, RecognitionKind::Idle, SessionState::WaitForAdapterCompletedSetFormatStopFinished))
+            // Make sure we do not switch to Idle before FireSessionStoppedEvent has been fired,
+            // otherwise we can cancel the next RecognizeAsync.
+            else if (ChangeState(SessionState::WaitForAdapterCompletedSetFormatStop, RecognitionKind::Idle, SessionState::WaitForAdapterCompletedSetFormatStopFinished))
             {
                 if (doneAdapter == AdapterDoneProcessingAudio::Speech)
                 {
@@ -1686,7 +1700,7 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
                     readLock.lock();
 
                     // Restart the keyword spotter if necessary...
-                if (m_kwsModel != nullptr && ChangeState(SessionState::WaitForAdapterCompletedSetFormatStopFinished, RecognitionKind::Keyword, SessionState::WaitForPumpSetFormatStart))
+                    if (m_kwsModel != nullptr && ChangeState(SessionState::WaitForAdapterCompletedSetFormatStopFinished, RecognitionKind::Keyword, SessionState::WaitForPumpSetFormatStart))
                     {
                         // Go ahead re-start the pump
                         SPX_DBG_TRACE_VERBOSE("%s: Now WaitForPumpSetFormatStart ...", __FUNCTION__);
@@ -1696,7 +1710,7 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
                     }
                 }
 
-            ChangeState(SessionState::WaitForAdapterCompletedSetFormatStopFinished, RecognitionKind::Idle, SessionState::Idle);
+                ChangeState(SessionState::WaitForAdapterCompletedSetFormatStopFinished, RecognitionKind::Idle, SessionState::Idle);
             }
             else
             {
