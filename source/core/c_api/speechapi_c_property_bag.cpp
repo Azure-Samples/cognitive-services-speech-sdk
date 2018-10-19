@@ -44,6 +44,7 @@ SPXAPI property_bag_release(SPXPROPERTYBAGHANDLE hpropbag)
 }
 /*
   if name != nullptr, use name + ignore id; if name== nullptr, use id.
+  NOTE: Free allocated memory from the returned address using property_bag_free_string() method after usage
 */
 SPXAPI__(const char*) property_bag_get_string(SPXPROPERTYBAGHANDLE hpropbag, int id, const char* name, const char* defaultValue)
 {
