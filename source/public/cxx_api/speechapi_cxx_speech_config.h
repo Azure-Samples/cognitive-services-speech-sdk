@@ -22,6 +22,7 @@ namespace Speech {
 /// </summary>
 class SpeechConfig
 {
+friend class PropertyCollection;
 public:
     /// <summary>
     /// Internal operator used to get underlying handle value.
