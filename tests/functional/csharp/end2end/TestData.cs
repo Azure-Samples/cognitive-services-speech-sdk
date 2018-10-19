@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using System.IO;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
@@ -11,9 +11,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         public static string AudioDir { get; set; }
 
-        public sealed class German
+        public static class German
         {
-            public sealed class Batman
+            public static class Batman
             {
                 public static readonly string[] Utterances =
                 {
@@ -33,29 +33,34 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
             }
 
-            public sealed class Weather
+            public static class HowIsYourWork
+            {
+                public const string Utterance = "Wie geht es Ihnen heute mit den arbeitsgegenständen";
+            }
+
+            public static class Weather
             {
                 public static readonly string Utterance = "Wie ist das Wetter?";
             }
 
-            public sealed class FirstOne
+            public static class FirstOne
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "CallTheFirstOne.wav");
                 public static readonly string Utterance = "Rufe die erste an.";
             }
         }
 
-        public sealed class Chinese
+        public static class Chinese
         {
-            public sealed class Weather
+            public static class Weather
             {
                 public static readonly string Utterance = "天气怎么样？";
             }
         }
 
-        public sealed class English
+        public static class English
         {
-            public sealed class Margarita
+            public static class Margarita
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "Margarita-44100.wav");
                 public static readonly string[] Utterances =
@@ -65,7 +70,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
             }
 
-            public sealed class Batman
+            public static class Batman
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir,"batman.wav");
                 // This is expected results using StartContinuousRecognitionAsync() which uses converstation mode.
@@ -88,24 +93,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
             }
 
-            public sealed class Weather
+            public static class Weather
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "whatstheweatherlike.wav");
                 public static readonly string Utterance = "What's the weather like?";
             }
 
-            public sealed class Silence
+            public static class Silence
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "silenceshort.wav");
             }
-            public sealed class HomeAutomation
+            public static class HomeAutomation
             {
-                public sealed class TurnOn
+                public static class TurnOn
                 {
                     public static readonly string AudioFile = Path.Combine(AudioDir, "TurnOnTheLamp.wav");
                     public static readonly string Utterance = "Turn on the lamp.";
                 }
-                public sealed class TurnOff
+                public static class TurnOff
                 {
                     public static readonly string AudioFile = Path.Combine(AudioDir, "ShutDownTheComputer.wav");
                     public static readonly string Utterance = "Shut down the computer.";
@@ -113,9 +118,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public sealed class French
+        public static class French
         {
-            public sealed class Batman
+            public static class Batman
             {
                 public static readonly string[] Utterances =
                 {
@@ -123,20 +128,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
             }
         
-            public sealed class FirstOne
+            public static class FirstOne
             {
                 public static readonly string Utterance = "Appelle le premier.";
             }
 
-            public sealed class Weather
+            public static class Weather
             {
                 public static readonly string Utterance = "Quel temps fait-il?";
             }
         }
 
-        public sealed class Spanish
+        public static class Spanish
         {
-            public sealed class Batman
+            public static class Batman
             {
                 public static readonly string[] Utterances =
                 {
@@ -144,14 +149,35 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
             }
 
-            public sealed class FirstOne
+            public static class FirstOne
             {
                 public static readonly string Utterance = "Llama al primero.";
             }
 
-            public sealed class Weather
+            public static class Weather
             {
                 public static readonly string Utterance = "¿Cómo es el clima?";
+            }
+        }
+
+        public static class Catalan
+        {
+            public static readonly string AudioFile = Path.Combine(AudioDir, "ca-es.wav");
+
+            public static class HowIsYourWork
+            {
+                public static readonly string Utterance = @"Com estàs fent amb els elements de treball avui";
+            }
+
+            public static class Weather
+            {
+                public static readonly string Utterance = "Wie ist das Wetter?";
+            }
+
+            public static class FirstOne
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "CallTheFirstOne.wav");
+                public static readonly string Utterance = "Rufe die erste an.";
             }
         }
     }

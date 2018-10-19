@@ -247,5 +247,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
         }
 
+        [TestMethod]
+        public async Task TranslationFromCatalanToGerman()
+        {
+            var toLanguages = new List<string>() { Language.DE };
+
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.Catalan.AudioFile, Language.CA_ES, toLanguages);
+            Assert.AreEqual(actualTranslations[ResultType.RecognizedText].Count, 1);
+            var actualTranslationRecognition = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
+            Assert.IsNotNull(actualTranslationRecognition);
+
+            Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
+            Assert.AreEqual(TestData.Catalan.HowIsYourWork.Utterance, actualTranslationRecognition.Result.Text);
+
+            Assert.AreEqual(TestData.German.HowIsYourWork.Utterance, actualTranslationRecognition.Result.Translations[Language.DE]);
+        }
     }
 }
