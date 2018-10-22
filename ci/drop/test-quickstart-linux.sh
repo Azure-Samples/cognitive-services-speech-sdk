@@ -50,7 +50,8 @@ sleep 1.5
 pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
 pacmd load-module module-virtual-source source_name=VirtualMic
 trap 'pulseaudio --kill' EXIT
-./quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" ./helloworld
+# Note: this quickstart does not wait for a key press at the end.
+./quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" 1 ./helloworld
 SCRIPT
 
 else

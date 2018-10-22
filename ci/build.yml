@@ -614,9 +614,21 @@ phases:
   - bash: |
       set -e -x -o pipefail
       cp "$(PathToJar)" $(Build.Repository.LocalPath)
-      docker run --rm --volume "$(Build.Repository.LocalPath):/test:ro" --workdir /test "$(DOCKER_IMAGE)" ./ci/run-with-pulseaudio.sh \
+      docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$(DOCKER_IMAGE)" bash - <<"SCRIPT"
         /test/tests/input/audio/whatstheweatherlike.wav \
-        java -cp ./public_samples/quickstart/java-jre/target/quickstart-eclipse-1.0.0-SNAPSHOT.jar:/test/"$(JarName)" speechsdk.quickstart.Main
+
+        set -e -x -o pipefail
+        DEBIAN_FRONTEND=noninteractive apt-get install --quiet --no-install-recommends --yes expect
+        PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
+        pulseaudio -D --exit-idle-time=-1
+        sleep 1.5
+        pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
+        pacmd load-module module-virtual-source source_name=VirtualMic
+        trap 'pulseaudio --kill' EXIT
+        # Note: don't wait for keypress. Ignore crashes after successful reco.
+        /test/ci/quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" 1 \
+          java -cp ./public_samples/quickstart/java-jre/target/quickstart-eclipse-1.0.0-SNAPSHOT.jar:/test/"$(JarName)" speechsdk.quickstart.Main
+      SCRIPT
     displayName: Test quickstart-jre
 
 - phase: NuGet
@@ -817,7 +829,7 @@ phases:
         pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
         pacmd load-module module-virtual-source source_name=VirtualMic
         trap 'pulseaudio --kill' EXIT
-        /test/ci/quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" dotnet helloworld/bin/Debug/netcoreapp2.0/helloworld.dll
+        /test/ci/quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" 0 dotnet helloworld/bin/Debug/netcoreapp2.0/helloworld.dll
       SCRIPT
     displayName: Test
   - task: PublishTestResults@2
