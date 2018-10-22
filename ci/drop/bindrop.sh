@@ -163,6 +163,10 @@ if [[ $TARGET = Android-* ]]; then
     STRIP=$ANDROID_NDK/toolchains/aarch64-linux-android-4.9/prebuilt/windows-x86_64/aarch64-linux-android/bin/strip.exe
   elif [[ $TARGET = Android-arm32 ]]; then
     STRIP=$ANDROID_NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/windows-x86_64/arm-linux-androideabi/bin/strip.exe
+  elif [[ $TARGET = Android-x86 ]]; then
+    STRIP=$ANDROID_NDK/toolchains/x86-4.9/prebuilt/windows-x86_64/i686-linux-android/bin/strip.exe
+  elif [[ $TARGET = Android-x64 ]]; then
+    STRIP=$ANDROID_NDK/toolchains/x86_64-4.9/prebuilt/windows-x86_64/x86_64-linux-android/bin/strip.exe
   else
     echo Unsupported architecture $TARGET.
     exit 1

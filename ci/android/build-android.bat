@@ -7,6 +7,8 @@ set SOURCE_ROOT=%~dp0\..\..
 REM Determine target architecture (32-bit is default)
 set TARGET_ARCHITECTURE=armeabi-v7a
 if "%BuildPlatform%" == "arm64" set TARGET_ARCHITECTURE=arm64-v8a
+if "%BuildPlatform%" == "x86" set TARGET_ARCHITECTURE=x86
+if "%BuildPlatform%" == "x64" set TARGET_ARCHITECTURE=x86_64
 
 pushd "%SOURCE_ROOT%" && ^
 mkdir build && ^

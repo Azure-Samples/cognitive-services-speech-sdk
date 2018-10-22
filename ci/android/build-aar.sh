@@ -57,7 +57,7 @@ for flavor in Debug Release; do
   cp --verbose --preserve "$DROP_DIR"/Android-arm32/$flavor/public/lib/com.microsoft.cognitiveservices.speech.jar "$AAR_DIR/classes.jar"
 
   # Copy native libraries
-  mkdir -p "$AAR_DIR"/jni{,/armeabi-v7a,/arm64-v8a}
+  mkdir -p "$AAR_DIR"/jni{,/armeabi-v7a,/arm64-v8a,/x86,/x86_64}
 
   cp --verbose --preserve \
     "$DROP_DIR"/Android-arm32/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings}.so \
@@ -66,6 +66,14 @@ for flavor in Debug Release; do
   cp --verbose --preserve \
     "$DROP_DIR"/Android-arm64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings}.so \
     "$AAR_DIR"/jni/arm64-v8a
+
+  cp --verbose --preserve \
+    "$DROP_DIR"/Android-x86/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings}.so \
+    "$AAR_DIR"/jni/x86
+
+  cp --verbose --preserve \
+    "$DROP_DIR"/Android-x64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings}.so \
+    "$AAR_DIR"/jni/x86_64
 
   cp --verbose "$SCRIPT_DIR/../../"{REDIST.txt,license.md,ThirdPartyNotices.md} "$AAR_DIR"
 

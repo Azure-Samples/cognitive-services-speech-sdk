@@ -833,7 +833,7 @@ phases:
   queue:
     name: Hosted VS2017
     timeoutInMinutes: 30
-    parallel: 4
+    parallel: 8
     matrix:
       arm32_debug:
         BuildPlatform: arm32
@@ -846,6 +846,18 @@ phases:
         BuildConfiguration: Debug
       arm64_release:
         BuildPlatform: arm64
+        BuildConfiguration: Release
+      x64_debug:
+        BuildPlatform: x64
+        BuildConfiguration: Debug
+      x64_release:
+        BuildPlatform: x64
+        BuildConfiguration: Release
+      x86_debug:
+        BuildPlatform: x86
+        BuildConfiguration: Debug
+      x86_release:
+        BuildPlatform: x86
         BuildConfiguration: Release
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
