@@ -17,7 +17,7 @@ steps:
       --build-dir build \
       --platform $(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION) \
       -D luis-key=$(luis-westus-s0-201809-key1) \
-      -D speech-key=$(KeySkyman)
+      -D speech-key=$(NorthEuropeKeySkyman)
   env:
     dockerImage: ${{ parameters.dockerImage }}
   condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
@@ -27,7 +27,7 @@ steps:
 - bash: |
     perl ci/evaluate-test-config.pl --verbose --format azuredevops-variable --input ci/test-config.json \
       -D luis-key=$(luis-westus-s0-201809-key1) \
-      -D speech-key=$(KeySkyman)
+      -D speech-key=$(NorthEuropeKeySkyman)
   displayName: Set test variables
 - ${{ parameters.extraTests }}
 - task: PublishTestResults@2

@@ -2,8 +2,8 @@
   "INPUTDIR": "tests/input",
   "SPEECH": {
     "KEY": "${speech-key}",
-    "REGION": "westus",
-    "ENDPOINTID_ENUS": "f039fdc7-5a4a-4e28-9c62-c8c0fbc0da39"
+    "REGION": "northeurope",
+    "ENDPOINTID_ENUS": "ec3432b2-8584-4736-865a-556213b9f6fd"
   },
   "LUIS": {
     "KEY": "${luis-key}",

@@ -555,7 +555,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
         });
 });
 
-test("MultiPhrase", (done: jest.DoneCallback) => {
+test.skip("MultiPhrase", (done: jest.DoneCallback) => {
     const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
     objsToClose.push(s);
 

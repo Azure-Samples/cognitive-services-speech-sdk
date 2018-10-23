@@ -533,7 +533,7 @@ phases:
        set -x -e
        eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
          -D luis-key=$(luis-westus-s0-201809-key1) \
-         -D speech-key=$(KeySkyman))
+         -D speech-key=$(NorthEuropeKeySkyman))
        java \
         -cp $(printf "%s;" \
            "$(MavenPackageDirWindows)/$(ArtifactBasename).jar" \
@@ -599,7 +599,7 @@ phases:
       java -version
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(KeySkyman))
+        -D speech-key=$(NorthEuropeKeySkyman))
       find public_samples/quickstart/java-jre -name \*.java -print0 | xargs -0 perl -i -pe 's("YourServiceRegion")("'$SPEECHSDK_SPEECH_REGION'")'
       find public_samples/quickstart/java-jre -name \*.java -print0 | xargs -0 perl -i -pe 's("YourSubscriptionKey")("'$SPEECHSDK_SPEECH_KEY'")'
       ./ci/run-maven.sh public_samples "$(MavenRoot)"
@@ -788,7 +788,7 @@ phases:
       perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(KeySkyman))
+        -D speech-key=$(NorthEuropeKeySkyman))
       # dotnet test does not allow to supply TestRunParameters from command-line?!
       perl -pi - \
         UnifiedSpeechSubscriptionKey "$SPEECHSDK_SPEECH_KEY" \
@@ -1202,7 +1202,7 @@ phases:
       set -x -e
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(KeySkyman))
+        -D speech-key=$(NorthEuropeKeySkyman))
       SPEECH_SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" ./ci/drop/test-quickstart-linux.sh --smoke-test "$SPEECHSDK_SPEECH_REGION" "$(DOCKER_IMAGE)" "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"
     displayName: Test - build and run quickstart
   - task: PublishBuildArtifacts@1
@@ -1331,7 +1331,7 @@ phases:
       # run the test
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(KeySkyman))
+        -D speech-key=$(NorthEuropeKeySkyman))
       xcodebuild test -project tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
           -scheme SpeechSDK_iOS \
           -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
@@ -1343,8 +1343,8 @@ phases:
       # set up framework in the correct position - the Xcode project expects the framework here (used for both Release and Debug configs atm)
       ln -s '$(Build.Repository.LocalPath)/xcode-build-output/$(FrameworkName).framework' public_samples/quickstart/objectivec-ios/
       # fix the keys
-      sed -ibak "s/YourSubscriptionKey/$(KeySkyman)/" public_samples/quickstart/objectivec-ios/helloworld/helloworld/ViewController.m
-      sed -ibak "s/YourServiceRegion/westus/" public_samples/quickstart/objectivec-ios/helloworld/helloworld/ViewController.m
+      sed -ibak "s/YourSubscriptionKey/$(NorthEuropeKeySkyman)/" public_samples/quickstart/objectivec-ios/helloworld/helloworld/ViewController.m
+      sed -ibak "s/YourServiceRegion/northeurope/" public_samples/quickstart/objectivec-ios/helloworld/helloworld/ViewController.m
       # run the test
       xcodebuild test -project public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
           -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
@@ -1481,7 +1481,7 @@ phases:
   - bash: |
       perl ci/evaluate-test-config.pl --verbose --format azuredevops-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(KeySkyman)
+        -D speech-key=$(NorthEuropeKeySkyman)
     displayName: Set test variables
   - script: RunTests.cmd SpeechSubscriptionKey:$(SPEECHSDK_SPEECH_KEY) SpeechRegion:$(SPEECHSDK_SPEECH_REGION) LuisSubscriptionKey:$(SPEECHSDK_LUIS_KEY) LuisRegion:$(SPEECHSDK_LUIS_REGION) SpeechTestModelId:$(SPEECHSDK_SPEECH_ENDPOINTID_ENUS)
     displayName: 'Run tests'
