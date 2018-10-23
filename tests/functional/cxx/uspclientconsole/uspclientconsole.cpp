@@ -480,7 +480,7 @@ int main(int argc, char* argv[])
         buffer.resize(fileSize);
         data.read(buffer.data(), fileSize);
         auto bytesToWrite = static_cast<size_t>(data.gcount());
-        connection->SendMessage(inputMessagePath.c_str(), reinterpret_cast<uint8_t*>(buffer.data()), bytesToWrite);
+        connection->SendMessage(inputMessagePath.c_str(), reinterpret_cast<uint8_t*>(buffer.data()), bytesToWrite, USP::MessageType::Agent);
         totalBytesWritten += bytesToWrite;
     }
 

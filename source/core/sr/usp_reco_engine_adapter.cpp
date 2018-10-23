@@ -523,22 +523,22 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
     {
         // Since it's not empty, we'll send it (empty means we don't have either dgi or intent payload)
         std::string messagePath = "speech.context";
-        UspSendMessage(messagePath, speechContext);
+        UspSendMessage(messagePath, speechContext, USP::MessageType::Context);
     }
 }
 
-void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer)
+void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType)
 {
     SPX_DBG_TRACE_VERBOSE("%s='%s'", messagePath.c_str(), buffer.c_str());
-    UspSendMessage(messagePath, (const uint8_t*)buffer.c_str(), buffer.length());
+    UspSendMessage(messagePath, (const uint8_t*)buffer.c_str(), buffer.length(), messageType);
 }
 
-void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size)
+void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType)
 {
     SPX_DBG_ASSERT(m_uspConnection != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
     if (!IsState(UspState::Terminating) && !IsState(UspState::Zombie) && m_uspConnection != nullptr)
     {
-        m_uspConnection->SendMessage(messagePath, buffer, size);
+        m_uspConnection->SendMessage(messagePath, buffer, size, messageType);
     }
 }
 

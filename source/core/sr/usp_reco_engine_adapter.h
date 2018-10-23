@@ -136,8 +136,8 @@ private:
 
     void UspWrite(const uint8_t* buffer, size_t byteToWrite);
     void UspSendSpeechContext();
-    void UspSendMessage(const std::string& messagePath, const std::string &buffer);
-    void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size);
+    void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType);
+    void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType);
     void UspWriteFormat(SPXWAVEFORMATEX* pformat);
     void UspWriteActual(const uint8_t* buffer, size_t byteToWrite);
     void UspWriteFlush();

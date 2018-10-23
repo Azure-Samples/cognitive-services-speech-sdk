@@ -37,9 +37,9 @@ void Connection::FlushAudio()
     m_impl->QueueAudioEnd();
 }
 
-void Connection::SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size)
+void Connection::SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType)
 {
-    m_impl->QueueMessage(messagePath, buffer, size);
+    m_impl->QueueMessage(messagePath, buffer, size, messageType);
 }
 
 }}}}

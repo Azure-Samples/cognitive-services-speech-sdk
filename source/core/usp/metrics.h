@@ -31,7 +31,7 @@ static const char buffer_session_id_arg[] = "buffer_id";
 
 typedef void* PROPERTYBAG_HANDLE;
 
-typedef struct _TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
+typedef struct TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
 
 /**
  * The PTELEMETRY_WRITE type represents an application-defined
@@ -66,9 +66,10 @@ int GetISO8601Time(char *buffer, unsigned int bufferLength);
 int GetISO8601TimeOffset(char *buffer, unsigned int bufferLength, int offset);
 
 /**
- * Flushes any outstanding telemetry events.
+ * Flushes any outstanding telemetry events. Also flushes the telemetry associated with a given requestId.
+ * @param requestId used to specify what telemetry to flush
  */
-void telemetry_flush(TELEMETRY_HANDLE handle);
+void telemetry_flush(TELEMETRY_HANDLE handle, const char* requestId);
 
 
  /**
@@ -122,19 +123,21 @@ int v_telemetry_log_event(METRIC_ID event_id, const char* types, va_list args);
 /**
 * Timestamps and records telemetry event.
 * @param handle A handle that captures current telemetry state.
+* @param requestId The requestId associated with the current event.
 * @param eventName The name of the event to be recorded.
 * @param id The unique id of the event to be recorded.
 * @param key The key of the JSON element to be recorded.
 * @param value The value of the JSON element to be recorded.
 */
-void inband_event_timestamp_populate(TELEMETRY_HANDLE handle, const char *eventName, const char *id, const char *key);
+void inband_event_timestamp_populate(TELEMETRY_HANDLE handle, const char* requestId, const char *eventName, const char *id, const char *key);
 
 /**
 * Received metric event population function.
 * @param handle A handle that captures current telemetry state.
+* @param requestId The requestId associated with the received message.
 * @param receivedMsg The name of the received event from service.
 */
-void record_received_msg(TELEMETRY_HANDLE handle, const char *receivedMsg);
+void record_received_msg(TELEMETRY_HANDLE handle, const char* requestId, const char *receivedMsg);
 
 /**
 * Records connection telemetry event.
@@ -168,17 +171,18 @@ void inband_kws_telemetry(TELEMETRY_HANDLE handle, int kwsStartOffsetMS, int aud
 * @param handle A handle that captures current telemetry state.
 * @param requestId the currently active requestId.
 */
-void register_requestId_change_event(TELEMETRY_HANDLE handle, const char *requestId);
+void register_new_requestId(TELEMETRY_HANDLE handle, const char *requestId);
 
 /**
 * Populates and records telemetry event.
 * @param handle A handle that captures current telemetry state.
+* @param requestId The requestId associated with the current event.
 * @param eventName The name of the event to be recorded.
 * @param id The unique id of the event to be recorded.
 * @param key The key of the JSON element to be recorded.
 * @param value The value of the JSON element to be recorded.
 */
-void inband_event_key_value_populate(TELEMETRY_HANDLE handle, const char *eventName, const char *id, const char *key, void *value);
+void inband_event_key_value_populate(TELEMETRY_HANDLE handle, const char* requestId, const char *eventName, const char *id, const char *key, void *value);
 
 enum IncomingMsgType
 {
@@ -268,60 +272,54 @@ extern const char* kEvent_cpu_key;
 extern const char* kEvent_error_key;
 extern const char* kEvent_status_key;
 
-#define metrics_device_startup(handle, deviceid) \
-{ \
-    JSON_Value * value = json_value_init_string(deviceid); \
-    inband_event_key_value_populate(handle, kEvent_type_device, NULL, kEvent_deviceid_key, value); \
-    json_value_free(value); \
-}
-
 // Recieved the specified message from the service. 
-#define metrics_received_message(handle, x) record_received_msg(handle, x)
+#define metrics_received_message(handle, requestId, x) record_received_msg(handle, requestId, x)
 
 // Metric Events defined in telemetry spec
-#define metrics_listening_start(handle, kwsStartTime) \
+#define metrics_listening_start(handle, requestId, kwsStartTime) \
 { \
     JSON_Value * value = json_value_init_string(kwsStartTime); \
-    inband_event_key_value_populate(handle, kEvent_type_listeningTrigger, NULL, kEvent_start_key, value); \
+    inband_event_key_value_populate(handle, requestId, kEvent_type_listeningTrigger, NULL, kEvent_start_key, value); \
     json_value_free(value); \
 }
 
-#define metrics_listening_stop(handle) \
-    inband_event_timestamp_populate(handle, kEvent_type_listeningTrigger, NULL, kEvent_end_key)
+#define metrics_listening_stop(handle, requestId) \
+    inband_event_timestamp_populate(handle, requestId, kEvent_type_listeningTrigger, NULL, kEvent_end_key)
 
 /* Key word spotter model load has been completed. */
 #define metrics_keywordspotter_acceptedkeyword(kwsStartOffset, audioStartOffset) \
     inband_kws_telemetry(kwsStartOffset, audioStartOffset)
 
 /* Start of the audio stream event which includes the initial silence before KWS */
-#define metrics_recording_start(handle, audioStartTime) \
+#define metrics_recording_start(handle, requestId, audioStartTime) \
 { \
     JSON_Value * value = json_value_init_string(audioStartTime); \
-    inband_event_key_value_populate(handle, kEvent_type_audioStart, NULL, kEvent_start_key, value); \
+    inband_event_key_value_populate(handle, requestId, kEvent_type_audioStart, NULL, kEvent_start_key, value); \
     json_value_free(value); \
 }
 
-#define metrics_tts_start(handle, requestId) \
-    inband_tts_telemetry(handle, requestId, kEvent_start_key, NULL)
+#define metrics_audio_start(handle, requestId) \
+    inband_event_timestamp_populate(handle, requestId, kEvent_type_microphone, NULL, kEvent_start_key)
 
-#define metrics_tts_stop(handle, requestId)    \
-    inband_tts_telemetry(handle, requestId, kEvent_end_key, NULL)
+#define metrics_audio_end(handle, requestId)    \
+    inband_event_timestamp_populate(handle, requestId, kEvent_type_microphone, NULL, kEvent_end_key)
 
-#define metrics_audio_start(handle) \
-    inband_event_timestamp_populate(handle, kEvent_type_microphone, NULL, kEvent_start_key)
-
-#define metrics_audio_end(handle)    \
-    inband_event_timestamp_populate(handle, kEvent_type_microphone, NULL, kEvent_end_key)
-
-#define metrics_audio_error(handle, error) \
+#define metrics_audio_error(handle, requestId, error) \
 { \
     JSON_Value *  value = json_value_init_string(error); \
-    inband_event_key_value_populate(handle, kEvent_type_microphone, NULL, kEvent_error_key, value); \
+    inband_event_key_value_populate(handle, requestId, kEvent_type_microphone, NULL, kEvent_error_key, value); \
     json_value_free(value); \
 }
 
 #define metrics_transport_start(handle, connectionId) \
     inband_connection_telemetry(handle, connectionId, kEvent_start_key, NULL)
+
+#define metrics_device_startup(handle, connectionId, deviceId) \
+{ \
+    JSON_Value * value = json_value_init_string(deviceId); \
+    inband_connection_telemetry(handle, connectionId, kEvent_deviceid_key, value); \
+    json_value_free(value); \
+}
 
 #define metrics_transport_connected(handle, connectionId) \
     inband_connection_telemetry(handle, connectionId, kEvent_end_key, NULL)
@@ -342,7 +340,7 @@ extern const char* kEvent_status_key;
 
 /* Client request identifier for the current turn */
 #define metrics_transport_requestid(handle, requestId)    \
-    register_requestId_change_event(handle, requestId)
+    register_new_requestId(handle, requestId)
 
 /* Service request identifer for the current turn */
 #define metrics_transport_serviceid(__serviceId)  telemetry_log_event_s(METRIC_ID_servicetag, (__serviceId))

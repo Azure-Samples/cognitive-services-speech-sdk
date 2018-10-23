@@ -18,6 +18,7 @@
 #include <memory>
 #include <chrono>
 #include <utility>
+#include <unordered_set>
 
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
@@ -48,7 +49,7 @@
 
 typedef struct _DNS_CONTEXT* DnsCacheHandle;
 typedef struct _TransportRequest* TransportHandle;
-typedef struct _TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
+typedef struct TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
 typedef struct HTTP_HEADERS_HANDLE_DATA_TAG* HTTP_HEADERS_HANDLE;
 
 namespace Microsoft {
@@ -91,8 +92,9 @@ public:
     * @param path The path associated with the message being sent.
     * @param data The message payload.
     * @param size The length of the message in bytes.
+    * @param messageType The type of message to be sent.
     */
-    void QueueMessage(const std::string& path, const uint8_t* data, size_t size);
+    void QueueMessage(const std::string& path, const uint8_t* data, size_t size, MessageType messageType);
 
     /**
     * Requests the connection to service to be shut down.
@@ -119,6 +121,10 @@ private:
 
     std::string EncodeParameterString(const std::string& parameter) const;
     std::string ConstructConnectionUrl() const;
+
+    std::string CreateRequestId();
+    std::unordered_set<std::string> m_activeRequestIds;
+    std::string m_speechRequestId;
 
     Client m_config;
 

@@ -428,10 +428,11 @@ void Connection::Impl::Connect()
         ThrowRuntimeError("Failed to create telemetry instance.");
     }
 
-    // Log the device uuid
-    metrics_device_startup(m_telemetry.get(), PAL::DeviceUuid().c_str());
-
     std::string connectionId = PAL::ToString(m_config.m_connectionId);
+
+    // Log the device uuid
+    metrics_device_startup(m_telemetry.get(), connectionId.c_str(), PAL::DeviceUuid().c_str());
+
     m_transport = TransportPtr(TransportRequestCreate(connectionUrl.c_str(), this, m_telemetry.get(), headersPtr, connectionId.c_str()), TransportRequestDestroy);
     if (m_transport == nullptr)
     {
@@ -456,7 +457,19 @@ void Connection::Impl::Connect()
     m_cv.wait(lock, [&] {return m_connected; });
 }
 
-void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size)
+string Connection::Impl::CreateRequestId()
+{
+    auto requestId = PAL::ToString(PAL::CreateGuidWithoutDashes());
+    
+    LogInfo("RequestId: '%s'", requestId.c_str());
+    metrics_transport_requestid(m_telemetry.get(), requestId.c_str());
+    
+    m_activeRequestIds.insert(requestId);
+    
+    return requestId;
+}
+
+void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size, MessageType messageType)
 {
     unique_lock<recursive_mutex> lock(m_mutex);
 
@@ -469,7 +482,22 @@ void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, siz
 
     if (m_connected) 
     {
-        (void)TransportMessageWrite(m_transport.get(), path.c_str(), data, size);
+        // If the service receives multiple context messages for a single turn, 
+        // the service will close the WebSocket connection with an error.
+        if (messageType == MessageType::Context && !m_speechRequestId.empty())
+        {
+            ThrowLogicError("Error trying to send a context message while in the middle of a speech turn.");
+        }
+
+        // The config message does not require a X-RequestId header, because this message is not associated with a particular request.
+        string requestId;
+        if (messageType != MessageType::Config)
+        {
+           requestId = CreateRequestId();
+           m_speechRequestId = (messageType == MessageType::Context) ? requestId : m_speechRequestId;
+        }
+
+        (void)TransportMessageWrite(m_transport.get(), path.c_str(), data, size, requestId.c_str());
     }
 
     SignalWork();
@@ -500,8 +528,12 @@ void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
 
     if (m_audioOffset == 0)
     {
+        // The service uses the first audio message that contains a unique request identifier to signal the start of a new request/response cycle or turn.
+        // After receiving an audio message with a new request identifier, the service discards any queued or unsent messages
+        // that are associated with any previous turn.
+        m_speechRequestId = m_speechRequestId.empty() ? CreateRequestId() : m_speechRequestId;
         metrics_audiostream_init();
-        metrics_audio_start(m_telemetry.get());
+        metrics_audio_start(m_telemetry.get(), m_speechRequestId.c_str());
 
         ret = TransportStreamPrepare(m_transport.get(), "/audio");
         if (ret != 0)
@@ -510,7 +542,7 @@ void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
         }
     }
 
-    ret = TransportStreamWrite(m_transport.get(), data, size);
+    ret = TransportStreamWrite(m_transport.get(), data, size, m_speechRequestId.c_str());
     if (ret != 0)
     {
         ThrowRuntimeError("TransportStreamWrite failed. error=" + to_string(ret));
@@ -530,11 +562,11 @@ void Connection::Impl::QueueAudioEnd()
         return;
     }
 
-    auto ret = TransportStreamFlush(m_transport.get());
+    auto ret = TransportStreamFlush(m_transport.get(), m_speechRequestId.c_str());
 
     m_audioOffset = 0;
     metrics_audiostream_flush();
-    metrics_audio_end(m_telemetry.get());
+    metrics_audio_end(m_telemetry.get(), m_speechRequestId.c_str());
 
     if (ret != 0)
     {
@@ -766,6 +798,15 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         return;
     }
 
+    string requestId = HTTPHeaders_FindHeaderValue(responseHeader, headers::requestId);
+    if (requestId.empty() || !connection->m_activeRequestIds.count(requestId))
+    {
+        PROTOCOL_VIOLATION("Unexpected request id '%s', Path: %s", requestId.c_str(),
+                           HTTPHeaders_FindHeaderValue(responseHeader, KEYWORD_PATH));
+        metrics_unexpected_requestid(requestId.c_str());
+        return;
+    }
+
     auto path = HTTPHeaders_FindHeaderValue(responseHeader, KEYWORD_PATH);
     if (path == NULL)
     {
@@ -783,6 +824,8 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
             return;
         }
     }
+
+    metrics_received_message(connection->m_telemetry.get(), requestId.c_str(), path);
 
     LogInfo("TS:%" PRIu64 " Response Message: path: %s, content type: %s, size: %zu.", connection->getTimestamp(), path, contentType, size);
 
@@ -822,10 +865,18 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     }
     else if (pathStr == path::turnEnd)
     {
+        {
+            unique_lock<recursive_mutex> lock(connection->m_mutex);
+            if (requestId == connection->m_speechRequestId)
+            {
+                connection->m_speechRequestId.clear();
+            }
+            connection->m_activeRequestIds.erase(requestId);
+        }
+
         // flush the telemetry before invoking the onTurnEnd callback.
         // TODO: 1164154
-        telemetry_flush(connection->m_telemetry.get());
-        TransportCreateRequestId(connection->m_transport.get());
+        telemetry_flush(connection->m_telemetry.get(), requestId.c_str());
 
         connection->Invoke([&] { callbacks->OnTurnEnd({ }); });
     }

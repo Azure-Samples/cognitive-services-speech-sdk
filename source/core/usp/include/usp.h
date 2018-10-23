@@ -107,6 +107,8 @@ enum class OutputFormat : unsigned int { Simple = 0, Detailed = 1 };
 
 enum class AuthenticationType { SubscriptionKey, AuthorizationToken, SearchDelegationRPSToken };
 
+enum class MessageType { Config, Context, Agent };
+
 template<typename T>
 using deleted_unique_ptr = std::unique_ptr<T, std::function<void(T*)>>;
 
@@ -133,8 +135,15 @@ public:
     * @param messagePath The path of the user-defined message.
     * @param buffer The message payload.
     * @param size The length of the message in bytes.
+    * @param messageType The type of message to be sent. The USP currently has three different types of messages:
+    *  1. Config:  Config messages are not associated with a specific request. Some endpoints require that a config message is  
+    *              sent as the first message after opening the connection.
+    *  2. Context: Client applications can send a context message at any time before sending the first audio chunk for a request. 
+    *              You must send at most one context message for each turn.
+    *  3. Agent:   Agent messages are meant for communicating with a back end agent.
+    *              Each message represents the start of a new request.
     */
-    void SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size);
+    void SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType);
 
     /**
     * Closes the USP connection.

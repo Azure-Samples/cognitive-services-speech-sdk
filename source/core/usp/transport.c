@@ -42,9 +42,6 @@
 // uncomment the line below to see all non-binary protocol messages in the log
 // #define LOG_TEXT_MESSAGES
 
-#define ws   u1._ws
-#define http u1._http
-
 const char g_KeywordStreamId[]       = "X-StreamId";
 const char g_keywordRequestId[]      = "X-RequestId";
 const char g_keywordWSS[]            = "wss://";
@@ -101,24 +98,14 @@ typedef enum _TRANSPORT_STATE
 */
 typedef struct _TransportRequest
 {
-    union
+    struct
     {
-        struct
-        {
-            HTTP_HANDLE           requestHandle;
-            TLSIO_CONFIG            tlsIoConfig;
-        } _http;
-
-        struct
-        {
-            UWS_CLIENT_HANDLE       WSHandle;
-            size_t                  pathLen;
-            WSIO_CONFIG             config;
-            bool                    chunksent;
-            TransportStream*        streamHead;
-        } _ws;
-    } u1;
-
+        UWS_CLIENT_HANDLE WSHandle;
+        size_t pathLen;
+        WSIO_CONFIG config;
+        bool chunksent;
+        TransportStream *streamHead;
+    } ws;
     const char*                  path;
     TransportResponseCallback    onRecvResponse;
     TransportErrorCallback       onTransportError;
@@ -126,9 +113,7 @@ typedef struct _TransportRequest
     bool                         isOpen;
     char*                        url;
     void*                        context;
-    char                         requestId[NO_DASH_UUID_LEN];
     char                         connectionId[NO_DASH_UUID_LEN];
-    uint8_t                      binaryRequestId[16];
     uint32_t                     streamId;
     bool                         needAuthenticationHeader;
     TransportState               state;
@@ -313,12 +298,6 @@ static char* ConstructHeadersString(HTTP_HEADERS_HANDLE httpHeadersHandle)
     return result;
 }
 
-static void InvalidateRequestId(TransportRequest* request)
-{
-    memset(request->requestId, 0, sizeof(request->requestId) / sizeof(request->requestId[0]));
-    memset(request->binaryRequestId, 0, sizeof(request->binaryRequestId) / sizeof(request->binaryRequestId[0]));
-}
-
 static int OnStreamChunk(TransportStream* stream, const uint8_t* buffer, size_t bufferSize)
 {
     if (NULL == stream)
@@ -395,7 +374,6 @@ static void OnTransportError(TransportRequest* request, TransportErrorInfo* erro
     }
 
     OnTransportClosed(request);
-    InvalidateRequestId(request);
     if (request->onTransportError != NULL) {
         request->onTransportError(request, errorInfo, request->context);
     }
@@ -580,21 +558,6 @@ static void OnWSFrameReceived(void* context, unsigned char frame_type, const uns
             goto Exit;
         }
 
-        value = HTTPHeaders_FindHeaderValue(responseHeadersHandle, g_keywordRequestId);
-        if (!value || strcmp(value, request->requestId))
-        {
-            PROTOCOL_VIOLATION("Unexpected request id '%s', expected '%s' Path: %s", value, request->requestId,
-                HTTPHeaders_FindHeaderValue(responseHeadersHandle, KEYWORD_PATH));
-            metrics_unexpected_requestid(value);
-            goto Exit;
-        }
-
-        value = HTTPHeaders_FindHeaderValue(responseHeadersHandle, KEYWORD_PATH);
-        if (value)
-        {
-            metrics_received_message(request->telemetry, value);
-        }
-
         // optional StreamId header
         value = HTTPHeaders_FindHeaderValue(responseHeadersHandle, g_KeywordStreamId);
         if (NULL != value)
@@ -701,7 +664,7 @@ static void WsioQueue(TransportRequest* request, TransportPacket* packet)
         return;
     }
 
-    if (request->requestId[0] == '\0')
+    if (request->state == TRANSPORT_STATE_CLOSED)
     {
         LogError("Trying to send on a previously closed socket");
         metrics_transport_invalidstateerror();
@@ -719,12 +682,14 @@ static void WsioQueue(TransportRequest* request, TransportPacket* packet)
 
 static void PrepareTelemetryPayload(TransportHandle request, const uint8_t* eventBuffer, size_t eventBufferSize, TransportPacket **pPacket, const char *requestId)
 {
+    (void)request;
+    
     // serialize headers.
     size_t headerLen;
 
     size_t payloadSize = sizeof(g_telemetryHeader) +
         sizeof(g_keywordRequestId) +
-        sizeof(request->requestId) +
+        NO_DASH_UUID_LEN + // size of requestId
         sizeof(g_timeStampHeaderName) +
         TIME_STRING_MAX_SIZE +
         eventBufferSize;
@@ -748,7 +713,7 @@ static void PrepareTelemetryPayload(TransportHandle request, const uint8_t* even
         g_timeStampHeaderName,
         timeString,
         g_keywordRequestId,
-        IS_STRING_NULL_OR_EMPTY(requestId) ? request->requestId : requestId);
+        requestId);
 
     msg->length = headerLen;
     // body
@@ -764,35 +729,6 @@ void TransportWriteTelemetry(TransportHandle handle, const uint8_t* buffer, size
         TransportPacket *msg = NULL;
         PrepareTelemetryPayload(handle, buffer, bytesToWrite, &msg, requestId);
         WsioQueue(handle, msg);
-    }
-}
-
-void TransportCreateRequestId(TransportHandle transportHandle)
-{
-    TransportStream*  stream;
-    TransportRequest* request = (TransportRequest*)transportHandle;
-    if (transportHandle)
-    {
-        UniqueId_Generate(request->requestId, sizeof(request->requestId));
-        GuidDToNFormat(request->requestId);
-        for (int i = 0; request->requestId[i]; i += 2)
-        {
-            request->binaryRequestId[i / 2] = (uint8_t)
-                ((uint8_t)hexchar_to_int(request->requestId[i]) << 4) |
-                ((uint8_t)hexchar_to_int(request->requestId[i + 1]));
-        }
-
-        LogInfo("RequestId: '%s'", request->requestId);
-        metrics_transport_requestid(request->telemetry, request->requestId);
-
-        for (stream = request->ws.streamHead; stream != NULL; stream = stream->next)
-        {
-            stream->bufferSize = 0;
-            if (stream->ioBuffer)
-            {
-                IoBufferReset(stream->ioBuffer);
-            }
-        }
     }
 }
 
@@ -877,7 +813,6 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
     }
 
     strncpy(request->connectionId, connectionId, strlen(connectionId));
-    TransportCreateRequestId(request);
     HTTPHeaders_ReplaceHeaderNameValuePair(connectionHeaders, "X-ConnectionId", request->connectionId);
     char* headers = ConstructHeadersString(connectionHeaders);
     const char* proto = "USP\r\n";
@@ -997,8 +932,6 @@ void TransportRequestDestroy(TransportHandle transportHandle)
     }
 
     metrics_transport_closed();
-
-    InvalidateRequestId(request);
 
     if (request->url)
     {
@@ -1136,8 +1069,7 @@ int TransportRequestPrepare(TransportHandle transportHandle)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     int err = 0;
-    if (NULL == request ||
-        NULL == request->http.requestHandle)
+    if (NULL == request)
     {
         return -1;
     }
@@ -1185,7 +1117,7 @@ int TransportRequestPrepare(TransportHandle transportHandle)
     return err;
 }
 
-int TransportMessageWrite(TransportHandle transportHandle, const char* path, const uint8_t* buffer, size_t bufferSize)
+int TransportMessageWrite(TransportHandle transportHandle, const char* path, const uint8_t* buffer, size_t bufferSize, const char* requestId)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     int ret;
@@ -1204,10 +1136,12 @@ int TransportMessageWrite(TransportHandle transportHandle, const char* path, con
         return ret;
     }
 
+    bool includeRequestId = requestId != NULL && requestId[0] != '\0';
+
     size_t payloadSize = sizeof(g_messageHeader) +
                          (size_t)(request->ws.pathLen) +
-                         sizeof(g_keywordRequestId) +
-                         sizeof(request->requestId) +
+                         (includeRequestId ? sizeof(g_keywordRequestId) : 0) +
+                         (includeRequestId ? NO_DASH_UUID_LEN : 0) +
                          sizeof(g_timeStampHeaderName) +
                          TIME_STRING_MAX_SIZE +
                          bufferSize;
@@ -1225,14 +1159,26 @@ int TransportMessageWrite(TransportHandle transportHandle, const char* path, con
     }
 
     // add headers
-    msg->length = sprintf_s((char *)msg->buffer,
-                             payloadSize,
-                             g_messageHeader,
-                             g_timeStampHeaderName,
-                             timeString,
-                             request->path,
-                             g_keywordRequestId,
-                             request->requestId);
+    if (includeRequestId)
+    {
+        msg->length = sprintf_s((char *)msg->buffer,
+                                payloadSize,
+                                g_messageHeader,
+                                g_timeStampHeaderName,
+                                timeString,
+                                request->path,
+                                g_keywordRequestId,
+                                requestId);
+    }
+    else
+    {
+        msg->length = sprintf_s((char *)msg->buffer,
+                                payloadSize,
+                                g_messageHeader,
+                                g_timeStampHeaderName,
+                                timeString,
+                                request->path);
+    }
 
     // add body
     memcpy(msg->buffer + msg->length, buffer, bufferSize);
@@ -1266,13 +1212,10 @@ int TransportStreamPrepare(TransportHandle transportHandle, const char* path)
         return ret;
     }
 
-    // Todo: Add client context option
-    // ret = TransportMessageWrite(transportHandle, path);
-
     return ret;
 }
 
-int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer, size_t bufferSize)
+int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer, size_t bufferSize, const char* requestId)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     if (NULL == request)
@@ -1315,7 +1258,7 @@ int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer,
         sizeof(g_KeywordStreamId) +
         30 +
         sizeof(g_keywordRequestId) +
-        sizeof(request->requestId) +
+        sizeof(requestId) +
         sizeof(g_timeStampHeaderName) +
         TIME_STRING_MAX_SIZE +
         bufferSize + 2; // 2 = header length
@@ -1341,7 +1284,7 @@ int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer,
         g_KeywordStreamId,
         request->streamId,
         g_keywordRequestId,
-        request->requestId);
+        requestId);
 
     // two byte length
     msg->buffer[0] = (uint8_t)((headerLen >> 8) & 0xff);
@@ -1356,7 +1299,7 @@ int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer,
     return 0;
 }
 
-int TransportStreamFlush(TransportHandle transportHandle)
+int TransportStreamFlush(TransportHandle transportHandle, const char* requestId)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     if (NULL == request)
@@ -1364,11 +1307,16 @@ int TransportStreamFlush(TransportHandle transportHandle)
         LogError("transportHandle is null.");
         return -1;
     }
+    if (NULL == requestId || requestId[0] == '\0')
+    {
+        LogError("requestId is null or empty.");
+        return -1;
+    }
     // No need to check whether WS is open, since it is possbile that
     // flush is called even before the WS connection is established, in
     // particular if the audio file is very short. Just append the zero-sized
     // buffer as indication of end-of-audio.
-    return TransportStreamWrite(request, NULL, 0);
+    return TransportStreamWrite(request, NULL, 0, requestId);
 }
 
 void TransportDoWork(TransportHandle transportHandle)
@@ -1559,10 +1507,4 @@ void TransportSetDnsCache(TransportHandle transportHandle, DnsCacheHandle dnsCac
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     request->dnsCache = dnsCache;
-}
-
-const char* TransportGetRequestId(TransportHandle transportHandle)
-{
-    TransportRequest* request = (TransportRequest*)transportHandle;
-    return request->requestId;
 }

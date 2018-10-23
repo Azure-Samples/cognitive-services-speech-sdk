@@ -97,6 +97,7 @@ namespace USP {
         const auto searchDelegationRPSToken = "X-Search-DelegationRPSToken";
         const auto audioResponseFormat = "X-Output-AudioCodec";
         const auto contentType = "Content-Type";
+        const auto requestId = "X-RequestId";
     }
 
     namespace json_properties {

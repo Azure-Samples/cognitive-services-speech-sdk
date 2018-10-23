@@ -20,7 +20,7 @@ extern "C" {
 
 typedef struct _TransportRequest* TransportHandle;
 
-typedef struct _TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
+typedef struct TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
 
 typedef struct HTTP_HEADERS_HANDLE_DATA_TAG* HTTP_HEADERS_HANDLE;
 
@@ -72,9 +72,10 @@ int TransportStreamPrepare(TransportHandle transportHandle, const char* path);
  * @param path The path to use for message
  * @param buffer The buffer to write to the websocket.
  * @param bufferSize The byte size of the buffer.
+ * @param requestId The requestId for the given message.
  * @return A return code or zero if successful.
  */
-int TransportMessageWrite(TransportHandle transportHandle, const char* path, const uint8_t* buffer, size_t bufferSize);
+int TransportMessageWrite(TransportHandle transportHandle, const char* path, const uint8_t* buffer, size_t bufferSize, const char* requestId);
 
 
 /**
@@ -82,16 +83,18 @@ int TransportMessageWrite(TransportHandle transportHandle, const char* path, con
  * @param transportHandle The request to prepare.
  * @param buffer The buffer to write to the stream.
  * @param bufferSize The byte size of pBuffer.
+ * @param requestId The requestId for the current stream.
  * @return A return code or zero if successful.
  */
-int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer, size_t bufferSize);
+int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer, size_t bufferSize, const char* requestId);
 
 /**
  * Flushes any outstanding I/O on the transport stream.
  * @param transportHandle The request to prepare.
+ * @param requestId The requestId for the current stream.
  * @return A return code or zero if successful.
  */
-int TransportStreamFlush(TransportHandle transportHandle);
+int TransportStreamFlush(TransportHandle transportHandle, const char* requestId);
 
 /**
  * Processes any outstanding operations that need attention.
@@ -187,18 +190,6 @@ int TransportSetCallbacks(TransportHandle transportHandle, TransportErrorCallbac
  * @return A return code or zero if successful.
  */
 int TransportSetTokenStore(TransportHandle transportHandle, TokenStore token_store);
-
-/**
-* Creates a new request id on transport
-* @param transportHandle The transport handle.
-*/
-void TransportCreateRequestId(TransportHandle transportHandle);
-
-/**
-* Gets the current request id on transport
-* @param transportHandle The transport handle.
-*/
-const char* TransportGetRequestId(TransportHandle transportHandle);
 
 /**
 * Sets the DNS cache on transport
