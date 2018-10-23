@@ -284,7 +284,7 @@ phases:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download FortifySDL logs from artifacts'
     inputs:
-      artifactName: fortify
+      artifactName: sca_artifact
       downloadPath: '$(System.ArtifactsDirectory)/sca_artifacts'
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
     displayName: 'TSA upload to Codebase: Carbon_master Stamp: Bing'
@@ -1644,18 +1644,18 @@ phases:
       fortifySourceTranslate: 'source/bindings/java/**/*.java'
       fortifyBuildId: 1.2.3
       scaVerbose: true
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts from Fortify'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/sca_artifacts'
+      ArtifactName: sca_artifacts
+      condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
     displayName: 'SDL Fortify Post Analysis'
     inputs:
       FortifySCA: true
       VstsConsole: false
-    # For post analysis we currently 'continue on error'. We know we have false-positives.
+    # Currently disabled, we know we have false-positives.
     # Once we can solve the problem of the false-positives we can change this.
-    continueOnError: true
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifacts from Fortify'
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/../_sdt/logs'
-      ArtifactName: fortify
-      condition: succeededOrFailed()
-
+    # In that case we should move this part of the build also into the WindowsSdlBuild phase.
+    enabled: false
