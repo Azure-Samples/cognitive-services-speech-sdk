@@ -9,6 +9,7 @@
 
 extern NSString *speechKey;
 extern NSString *intentKey;
+extern NSString *serviceRegion;
     
 + (void)runTest
 {
@@ -22,7 +23,7 @@ extern NSString *intentKey;
     
     __block bool end = false;
     
-    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:@"westus"];
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
     SPXSpeechRecognizer* speechRecognizer;
     NSString *speechRegion = [speechConfig getPropertyByName:@"SPEECH-Region"];
     NSLog(@"Speech Config: Region is read from speech config: %@", speechRegion);
@@ -96,7 +97,7 @@ extern NSString *intentKey;
 
     // Test: Translation
     SPXTranslationRecognizer *translationRecognizer;
-    SPXSpeechTranslationConfiguration *translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithSubscription:speechKey region:@"westus"];
+    SPXSpeechTranslationConfiguration *translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
     [translationConfig setSpeechRecognitionLanguage:@"en-us"];
     [translationConfig addTargetLanguage:@"de"];
     [translationConfig addTargetLanguage:@"zh-Hans"];
@@ -177,7 +178,7 @@ extern NSString *intentKey;
     [translationRecognizer stopContinuousRecognition];
     
     // Test: Intent
-    SPXSpeechConfiguration *intentConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:intentKey region:@"westus"];
+    SPXSpeechConfiguration *intentConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:intentKey region:serviceRegion];
     SPXIntentRecognizer *intentRecognizer;
     SPXLanguageUnderstandingModel *model = [[SPXLanguageUnderstandingModel alloc] initWithAppId:@"b687b851-56c5-4d31-816f-35a741a3f0be"];
     

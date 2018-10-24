@@ -18,6 +18,7 @@
 - (void)setUp {
     [super setUp];
     self.speechKey = [[[NSProcessInfo processInfo] environment] objectForKey:@"subscriptionKey"];
+    self.serviceRegion = [[[NSProcessInfo processInfo] environment] objectForKey:@"serviceRegion"];
 }
 
 - (void)tearDown {
@@ -25,11 +26,11 @@
 }
 
 - (void)testPullAudio {
-    [AudioStreamTest runPullTest:self.speechKey];
+    [AudioStreamTest runPullTest:self.speechKey withRegion:self.serviceRegion];
 }
 
 - (void)testPushAudio {
-    [AudioStreamTest runPushTest:self.speechKey];
+    [AudioStreamTest runPushTest:self.speechKey withRegion:self.serviceRegion];
 }
 
 @end

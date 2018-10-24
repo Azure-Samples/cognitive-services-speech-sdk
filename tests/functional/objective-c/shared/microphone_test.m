@@ -10,7 +10,7 @@
 
 extern NSString *speechKey;
 extern NSString *intentKey;
-NSString *serviceRegion = @"westus";
+extern NSString *serviceRegion;
 
 + (void) runAsync
 {

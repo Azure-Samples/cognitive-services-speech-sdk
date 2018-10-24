@@ -95,7 +95,7 @@ void GetFormatFromWavFile(std::fstream& fs)
 
 @implementation AudioStreamTest
 
-+(void) runPullTest:(NSString *)speechKey
++(void) runPullTest:(NSString *)speechKey withRegion:(NSString *)region
 {
     NSBundle *mainBundle = [NSBundle bundleForClass:[self class]];
     NSString *weatherFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType:@"wav"];
@@ -152,7 +152,7 @@ void GetFormatFromWavFile(std::fstream& fs)
     
     __block bool end = false;
     
-    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:@"westus"];
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:region];
     SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:streamAudioSource];
     
     [speechRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {
@@ -191,7 +191,7 @@ void GetFormatFromWavFile(std::fstream& fs)
 }
     
     
-+(void) runPushTest:(NSString *)speechKey
++(void) runPushTest:(NSString *)speechKey withRegion:(NSString *)region
     {
         NSBundle *mainBundle = [NSBundle bundleForClass:[self class]];
         NSString *weatherFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType:@"wav"];
@@ -220,7 +220,7 @@ void GetFormatFromWavFile(std::fstream& fs)
         
         __block bool end = false;
         
-        SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:@"westus"];
+        SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:region];
         SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:streamAudioSource];
         
         [speechRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {

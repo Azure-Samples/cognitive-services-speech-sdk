@@ -10,8 +10,8 @@
 
 @interface AudioStreamTest :NSObject
 
-+(void) runPushTest:(NSString *)speechKey;
-+(void) runPullTest:(NSString *)speechKey;
++(void) runPushTest:(NSString *)speechKey withRegion:(NSString *)region;
++(void) runPullTest:(NSString *)speechKey withRegion:(NSString *)region;
 
 @end
 

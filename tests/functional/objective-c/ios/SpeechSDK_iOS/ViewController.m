@@ -11,6 +11,8 @@
 #import "../../shared/dummytest.h"
 
 extern NSString *speechKey;
+extern NSString *serviceRegion;
+
 
 @interface ViewController ()
 
@@ -26,8 +28,8 @@ extern NSString *speechKey;
     [MicrophoneTest runAsync];
     [MicrophoneTest runTranslation];
     [MicrophoneTest runContinuous];
-    [AudioStreamTest runPullTest:speechKey];
-    [AudioStreamTest runPushTest:speechKey];
+    [AudioStreamTest runPullTest:speechKey withRegion:serviceRegion];
+    [AudioStreamTest runPushTest:speechKey withRegion:serviceRegion];
 }
 
 

@@ -33,11 +33,11 @@
     SPXLanguageUnderstandingModel *luisModel;
         //luisModel = [[SPXLanguageUnderstandingModel alloc] initWithEndpoint:@"https://www.luis.ai"];
         luisModel = [[SPXLanguageUnderstandingModel alloc] initWithAppId:@"LuisAppId"];
-        luisModel = [[SPXLanguageUnderstandingModel alloc] initWithSubscription:@"werwe" withAppId:@"LuisAppId" andRegion:@"westus"];
+        luisModel = [[SPXLanguageUnderstandingModel alloc] initWithSubscription:@"werwe" withAppId:@"LuisAppId" andRegion:@"someregion"];
     
     // Test Speech Configuration
-    SPXSpeechConfiguration *testSpeechConfig = [[SPXSpeechConfiguration alloc] initWithAuthorizationToken:@"SDFSDF"  region:@"westus"];
-    testSpeechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:@"https://westus.api.com" subscription:@"dummy"];
+    SPXSpeechConfiguration *testSpeechConfig = [[SPXSpeechConfiguration alloc] initWithAuthorizationToken:@"SDFSDF"  region:@"someregion"];
+    testSpeechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:@"https://someregion.api.com" subscription:@"dummy"];
     NSString *value = [testSpeechConfig getPropertyById:SPXSpeechServiceConnectionKey];
     [testSpeechConfig setPropertyTo:@"Dummy2" byId:SPXSpeechServiceConnectionKey];
     value = testSpeechConfig.speechRecognitionLanguage;
@@ -55,8 +55,8 @@
     value = testSpeechRecognizer.authorizationToken;
     
     // Test speech translation configuration
-    SPXSpeechTranslationConfiguration *testTranslationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithAuthorizationToken:@"SDFSDF"  region:@"westus"];
-    testTranslationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithEndpoint:@"https://westus.api.com" subscription:@"dummy"];
+    SPXSpeechTranslationConfiguration *testTranslationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithAuthorizationToken:@"SDFSDF"  region:@"someregion"];
+    testTranslationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithEndpoint:@"https://someregion.api.com" subscription:@"dummy"];
     value = [testTranslationConfig getPropertyById:SPXSpeechServiceConnectionKey];
     [testTranslationConfig setPropertyTo:@"dummy" byId:SPXSpeechServiceConnectionKey];
 
