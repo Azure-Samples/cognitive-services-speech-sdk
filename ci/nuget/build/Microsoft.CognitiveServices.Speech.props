@@ -6,4 +6,13 @@
     <SpeechNativeLibDir Condition="'$(SpeechSdkUseDebugLibs)'!='1'">$(SpeechPackageRoot)build\native\$(SpeechNativePlatform)\Release</SpeechNativeLibDir>
     <SpeechNativeLibDir Condition="'$(SpeechSdkUseDebugLibs)'=='1'">$(SpeechPackageRoot)build\native\$(SpeechNativePlatform)\Debug</SpeechNativeLibDir>
   </PropertyGroup>
+  <PropertyGroup>
+    <BuildDependsOn>
+      SpeechPlatformCheck;
+      $(BuildDependsOn);
+    </BuildDependsOn>
+  </PropertyGroup>
+  <Target Name="SpeechPlatformCheck">
+    <Error Condition="'$(Platform.ToLower())' == 'anycpu'" Text="Cognitive Services Speech SDK doesn't support 'Any CPU' as a platform." />
+  </Target>
 </Project>
