@@ -284,7 +284,7 @@ phases:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download FortifySDL logs from artifacts'
     inputs:
-      artifactName: sca_artifact
+      artifactName: sca_artifacts
       downloadPath: '$(System.ArtifactsDirectory)/sca_artifacts'
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
     displayName: 'TSA upload to Codebase: Carbon_master Stamp: Bing'
