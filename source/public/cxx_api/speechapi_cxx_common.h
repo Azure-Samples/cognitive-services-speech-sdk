@@ -42,6 +42,7 @@ inline void __spx_rethrow(SPXHR hr)
     }
     auto callstack = error_get_call_stack(handle);
     auto what = error_get_message(handle);
+
     throw std::runtime_error(
         (what == nullptr ? "Exception with error code: " + std::to_string(error) : std::string(what)) +
         (callstack == nullptr ? "" : std::string(callstack)));

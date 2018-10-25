@@ -134,6 +134,7 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
 
     m_isReliableDelivery = true;
 
+
     // Defer calling InitRecoEngineAdapter() or InitKwsEngineAdapter() until later ...
 }
 
@@ -407,7 +408,7 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxAudioStreamSession::Reco
             msg += " ";
             msg += ex.GetCallStack();
             Error(msg);
-            return m_recoAsyncResult;            
+            return m_recoAsyncResult;
         }
         catch (const std::runtime_error& ex)
         {
@@ -444,6 +445,7 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StopContinuousRecognitionAsync()
 
 CSpxAsyncOp<void> CSpxAudioStreamSession::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)
 {
+    Ensure16kHzSampleRate();
     return StartRecognitionAsync(RecognitionKind::Keyword, model);
 }
 
@@ -1474,6 +1476,23 @@ void CSpxAudioStreamSession::WaitForKwsSingleShotRecognition()
         SPX_DBG_TRACE_VERBOSE("KwsSingleShot Waiting for AdapterDone...");
         m_cv.wait_for(lock, m_waitForAdapterCompletedSetFormatStopTimeout, [&] { return !this->IsState(SessionState::WaitForAdapterCompletedSetFormatStop); });
         SPX_DBG_TRACE_VERBOSE("KwsSingleShot Waiting for AdapterDone... Done!!");
+    }
+}
+
+void CSpxAudioStreamSession::Ensure16kHzSampleRate()
+{
+    if (m_audioPump)
+    {
+        auto cbFormat = m_audioPump->GetFormat(nullptr, 0);
+        auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
+        m_audioPump->GetFormat(waveformat.get(), cbFormat);
+
+        // we only support 16kHz sampling rate for Keyword spot for now.
+        if (waveformat->nSamplesPerSec != SAMPLES_PER_SECOND)
+        {
+            SPX_TRACE_ERROR("going to throw wrong sampling rate runtime_error");
+            ThrowRuntimeError("Sampling rate '" + std::to_string(waveformat->nSamplesPerSec) + "' is not supported. 16kHz is the only sampling rate that is supported.");
+        }
     }
 }
 

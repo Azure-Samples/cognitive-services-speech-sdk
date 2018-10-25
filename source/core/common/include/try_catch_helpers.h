@@ -31,6 +31,10 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
     {                                                       \
        x = StoreException(std::move(ex));                   \
     }                                                       \
+    catch(const std::runtime_error& ex)                     \
+    {                                                       \
+       x = StoreException(ex);                              \
+    }                                                       \
     catch (...)                                             \
     {                                                       \
         SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);     \

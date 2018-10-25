@@ -26,6 +26,10 @@ static std::string InputFile()
     return Config::InputDir + "/audio/whatstheweatherlike.wav";
 }
 
+static std::string wrong_sampling_rate_file()
+{
+   return Config::InputDir + "/audio/11khztest.wav";
+}
 static std::shared_ptr<SpeechConfig> CurrentSpeechConfig()
 {
     return !Config::Endpoint.empty()
@@ -81,27 +85,31 @@ std::map<Callbacks, atomic_int> createCallbacksMap() {
 
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
-
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
+    SPXTEST_SECTION("KWS throws exception given 11khz sampling rate")
+    {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
+        UseMocks(false);
+        SPXTEST_REQUIRE(exists(PAL::ToWString(wrong_sampling_rate_file())));
+        
+        SPXTEST_REQUIRE(!IsUsingMocks());
+
+        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        auto audio = AudioConfig::FromWavFileInput(wrong_sampling_rate_file());
+        auto recognizer = SpeechRecognizer::FromConfig(config, audio);
+        auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/heycortana_en-US.table");
+        REQUIRE_THROWS(recognizer->StartKeywordRecognitionAsync(model).get());
+    }
     SPXTEST_SECTION("throw exception when the file does not existing")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        bool bException = false;
-        SPXTEST_REQUIRE(!IsUsingMocks());
-        try
-        {
-            auto recognizer = CreateRecognizers<SpeechRecognizer>("non-existing-file.wav");
-            auto result = recognizer->RecognizeOnceAsync().get();
-        }
-        catch (...)
-        {
-            bException = true;
-        }
 
-        SPXTEST_REQUIRE(bException == true);
+        SPXTEST_REQUIRE(!IsUsingMocks());
+        REQUIRE_THROWS(CreateRecognizers<SpeechRecognizer>("non-existing-file.wav"));
     }
     SPXTEST_SECTION("return an error message in RecognizeOnceAsync given an invalid endpoint")
     {

@@ -243,6 +243,7 @@ private:
 
     void WaitForIdle();
     
+    void Ensure16kHzSampleRate();
 private:
 
     std::shared_ptr<ISpxGenericSite> m_siteKeepAlive;

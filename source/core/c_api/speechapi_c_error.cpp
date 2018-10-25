@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "string_utils.h"
+#include "handle_helpers.h"
 
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
@@ -52,4 +53,9 @@ SPXAPI_(const_char_ptr) error_get_message(SPXERRORHANDLE errorHandle)
         }
     }
     return nullptr;
+}
+
+SPXAPI error_release(SPXERRORHANDLE errorHandle)
+{
+    return Handle_Close<SPXERRORHANDLE, ExceptionWithCallStack>(errorHandle);
 }

@@ -122,4 +122,11 @@ namespace Impl {
         return reinterpret_cast<SPXHR>(errorHandles->TrackHandle(handle));
     }
 
+    SPXHR StoreException(const std::runtime_error& ex)
+    {
+        auto errorHandles = CSpxSharedPtrHandleTableManager::Get<ExceptionWithCallStack, SPXERRORHANDLE>();
+        std::shared_ptr<ExceptionWithCallStack> handle(new ExceptionWithCallStack(ex.what()));
+        return reinterpret_cast<SPXHR>(errorHandles->TrackHandle(handle));
+    }
+
 } } } } // Microsoft::CognitiveServices::Speech::Impl
