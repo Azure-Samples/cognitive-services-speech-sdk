@@ -26,6 +26,15 @@ static_assert((int)ResultReason_SynthesizingAudioComplete == (int)ResultReason::
 static_assert((int)CancellationReason_Error == (int)CancellationReason::Error, "CancellationReason_* enum values == CancellationReason::* enum values");
 static_assert((int)CancellationReason_EndOfStream == (int)CancellationReason::EndOfStream, "CancellationReason_* enum values == CancellationReason::* enum values");
 
+static_assert((int)CancellationErrorCode_NoError == (int)CancellationErrorCode::NoError, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
+static_assert((int)CancellationErrorCode_AuthenticationFailure == (int)CancellationErrorCode::AuthenticationFailure, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
+static_assert((int)CancellationErrorCode_BadRequestParameters == (int)CancellationErrorCode::BadRequestParameters, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
+static_assert((int)CancellationErrorCode_TooManyRequests == (int)CancellationErrorCode::TooManyRequests, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
+static_assert((int)CancellationErrorCode_ConnectionFailure == (int)CancellationErrorCode::ConnectionFailure, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
+static_assert((int)CancellationErrorCode_ServiceTimeout == (int)CancellationErrorCode::ServiceTimeout, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
+static_assert((int)CancellationErrorCode_ServiceError == (int)CancellationErrorCode::ServiceError, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
+static_assert((int)CancellationErrorCode_RuntimeError == (int)CancellationErrorCode::RuntimeError, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
+
 static_assert((int)NoMatchReason_NotRecognized == (int)NoMatchReason::NotRecognized, "NoMatchReason_* enum values == NoMatchReason::* enum values");
 static_assert((int)NoMatchReason_InitialSilenceTimeout == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason_* enum values == NoMatchReason::* enum values");
 static_assert((int)NoMatchReason_InitialBabbleTimeout == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason_* enum values == NoMatchReason::* enum values");
@@ -65,6 +74,18 @@ SPXAPI result_get_reason_canceled(SPXRESULTHANDLE hresult, Result_CancellationRe
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
         *reason = (Result_CancellationReason)result->GetCancellationReason();
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI result_get_canceled_error_code(SPXRESULTHANDLE hresult, Result_CancellationErrorCode* errorCode)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, errorCode == nullptr);
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+        *errorCode = (Result_CancellationErrorCode)result->GetCancellationErrorCode();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

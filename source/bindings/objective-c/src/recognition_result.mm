@@ -56,7 +56,8 @@
     {
         self = [super init];
         _reason = SPXCancellationReason_Error;
-        _errorDetails = @"Runtime error.";
+        _errorCode = SPXCancellationErrorCode_RuntimeError;
+        _errorDetails = @"The result handle is null.";
         return self;
     }
     else
@@ -81,6 +82,7 @@
     else
     {
         _reason = [Util fromCancellationReasonImpl:handle->Reason];
+        _errorCode = [Util fromCancellationErrorCodeImpl:handle->ErrorCode];
         _errorDetails = [NSString StringWithStdString:handle->ErrorDetails];
     }
     return self;

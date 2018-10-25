@@ -224,6 +224,7 @@ namespace Microsoft.CognitiveServices.Speech
         ///
         ///             if (cancellation.Reason == CancellationReason.Error)
         ///             {
+        ///                 Console.WriteLine($"CANCELED: ErrorCode={cancelation.ErrorCode}");
         ///                 Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
         ///                 Console.WriteLine($"CANCELED: Did you update the subscription info?");
         ///             }

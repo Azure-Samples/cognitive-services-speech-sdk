@@ -355,7 +355,7 @@ void CSpxUnidecRecoEngineAdapter::Sentence(const wchar_t* wavId, size_t sentence
         if (index == 0 && text.length() > 0)
         {
             auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-            finalResult = factory->CreateFinalResult(nullptr, ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, text.c_str(), offset, 0);
+            finalResult = factory->CreateFinalResult(nullptr, ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, CancellationErrorCode::NoError, text.c_str(), offset, 0);
         }
     }
 

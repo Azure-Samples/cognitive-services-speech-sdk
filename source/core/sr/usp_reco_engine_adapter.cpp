@@ -227,12 +227,12 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     catch (const std::exception& e)
     {
         SPX_TRACE_ERROR("Error: '%s'", e.what());
-        OnError(true, e.what());
+        OnError(true, USP::ErrorCode::ConnectionError, e.what());
     }
     catch (...)
     {
         SPX_TRACE_ERROR("Error: Unexpected exception in UspInitialize");
-        OnError(true, "Error: Unexpected exception in UspInitialize");
+        OnError(true, USP::ErrorCode::ConnectionError, "Error: Unexpected exception in UspInitialize");
     }
 
     // Keep track of what time we initialized (so we can reset later)
@@ -778,8 +778,17 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
     {
         writeLock.unlock(); // calls to site shouldn't hold locks
 
-        SPX_DBG_TRACE_VERBOSE("%s: FireFinalResultLater()", __FUNCTION__);
-        FireFinalResultLater(message);
+        if (message.recognitionStatus == USP::RecognitionStatus::EndOfDictation)
+        {
+            // Intent recognition is using interactive mode, so it should not receive any EndOfDictation message.
+            SPX_DBG_TRACE_VERBOSE("EndOfDictation message is not expected for intent recognizer.");
+            SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: FireFinalResultLater()", __FUNCTION__);
+            FireFinalResultLater(message);
+        }
     }
     else if ((IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
         (!IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
@@ -911,6 +920,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
 
         writeLock.unlock(); // calls to site shouldn't hold locks
 
+
         if (message.recognitionStatus == USP::RecognitionStatus::EndOfDictation)
         {
             InvokeOnSite([&](const SitePtr& site)
@@ -920,11 +930,19 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
         }
         else
         {
+            auto cancellationReason = ToCancellationReason(message.recognitionStatus);
+            if (cancellationReason != REASON_CANCELED_NONE)
+            {
+                // The status above should have been treated as error result, so this should not happen here.
+                SPX_TRACE_ERROR("Unexpected recognition status %d.", message.recognitionStatus);
+                SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+            }
+
             InvokeOnSite([&](const SitePtr& site)
             {
                 // Create the result
                 auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-                auto result = factory->CreateFinalResult(nullptr, ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), ToCancellationReason(message.recognitionStatus), message.text.c_str(), message.offset, message.duration);
+                auto result = factory->CreateFinalResult(nullptr, ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), cancellationReason, CancellationErrorCode::NoError, message.text.c_str(), message.offset, message.duration);
 
                 auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
                 namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
@@ -957,7 +975,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesis(const USP::TranslationSynt
         InvokeOnSite([this, &message](const SitePtr& site)
         {
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-            auto result = factory->CreateFinalResult(nullptr, ResultReason::SynthesizingAudio, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, L"", 0, 0);
+            auto result = factory->CreateFinalResult(nullptr, ResultReason::SynthesizingAudio, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, CancellationErrorCode::NoError, L"", 0, 0);
 
             // Update our result to be an "TranslationSynthesis" result.
             auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
@@ -977,7 +995,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesisEnd(const USP::TranslationS
         return;
 
     auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-    auto result = factory->CreateFinalResult(nullptr, ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, L"", 0, 0);
+    auto result = factory->CreateFinalResult(nullptr, ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, CancellationErrorCode::NoError, L"", 0, 0);
 
     // Update our result to be an "TranslationSynthesis" result.
     auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
@@ -1111,9 +1129,9 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
     }
 }
 
-void CSpxUspRecoEngineAdapter::OnError(bool isTransport, const std::string& error)
+void CSpxUspRecoEngineAdapter::OnError(bool isTransport, USP::ErrorCode errorCode, const std::string& errorMessage)
 {
-    SPX_DBG_TRACE_VERBOSE("Response: On Error: %s.\n", error.c_str());
+    SPX_DBG_TRACE_VERBOSE("Response: On Error: Code:%d, Message: %s.\n", errorCode, errorMessage.c_str());
 
     WriteLock_Type writeLock(m_stateMutex);
     if (IsBadState())
@@ -1125,8 +1143,35 @@ void CSpxUspRecoEngineAdapter::OnError(bool isTransport, const std::string& erro
     {
         writeLock.unlock(); // calls to site shouldn't hold locks
 
-        SPX_DBG_TRACE_VERBOSE("%s: site->Error() ... error='%s'", __FUNCTION__, error.c_str());
-        InvokeOnSite([this, error, isTransport](const SitePtr& p) { p->Error(this,  std::make_shared<SpxRecoEngineAdapterError>(isTransport, error)); });
+        SPX_DBG_TRACE_VERBOSE("%s: site->Error() ... error='%s'", __FUNCTION__, errorMessage.c_str());
+        CancellationErrorCode cancellationErrorCode;
+        std::string errorInfo = errorMessage;
+        switch (errorCode)
+        {
+        case USP::ErrorCode::AuthenticationError:
+            cancellationErrorCode = CancellationErrorCode::AuthenticationFailure;
+            break;
+        case USP::ErrorCode::ConnectionError:
+            cancellationErrorCode = CancellationErrorCode::ConnectionFailure;
+            break;
+        case USP::ErrorCode::RuntimeError:
+            cancellationErrorCode = CancellationErrorCode::RuntimeError;
+            break;
+        case USP::ErrorCode::ServiceError:
+            cancellationErrorCode = CancellationErrorCode::ServiceError;
+            break;
+        case USP::ErrorCode::TooManyRequests:
+            cancellationErrorCode = CancellationErrorCode::TooManyRequests;
+            break;
+        case USP::ErrorCode::BadRequest:
+            cancellationErrorCode = CancellationErrorCode::BadRequestParameters;
+            break;
+        default:
+            cancellationErrorCode = CancellationErrorCode::RuntimeError;
+            errorInfo = "Unknown error code:" + std::to_string((int)errorCode) + ". Error message:" + errorMessage;
+            break;
+        };
+        InvokeOnSite([this, errorInfo, isTransport, cancellationErrorCode](const SitePtr& p) { p->Error(this,  std::make_shared<SpxRecoEngineAdapterError>(isTransport, CancellationReason::Error, cancellationErrorCode, errorInfo)); });
     }
     else
     {
@@ -1335,6 +1380,8 @@ ResultReason CSpxUspRecoEngineAdapter::ToReason(USP::RecognitionStatus uspRecogn
         { USP::RecognitionStatus::Success, ResultReason::RecognizedSpeech },
         { USP::RecognitionStatus::NoMatch, ResultReason::NoMatch },
         { USP::RecognitionStatus::Error, ResultReason::Canceled },
+        { USP::RecognitionStatus::TooManyRequests, ResultReason::Canceled },
+        { USP::RecognitionStatus::InvalidMessage, ResultReason::Canceled },
         { USP::RecognitionStatus::InitialSilenceTimeout, ResultReason::NoMatch },
         { USP::RecognitionStatus::InitialBabbleTimeout, ResultReason::NoMatch },
     };
@@ -1354,6 +1401,8 @@ CancellationReason CSpxUspRecoEngineAdapter::ToCancellationReason(USP::Recogniti
         { USP::RecognitionStatus::Success, REASON_CANCELED_NONE },
         { USP::RecognitionStatus::NoMatch, REASON_CANCELED_NONE },
         { USP::RecognitionStatus::Error, CancellationReason::Error },
+        { USP::RecognitionStatus::TooManyRequests, CancellationReason::Error },
+        { USP::RecognitionStatus::InvalidMessage, CancellationReason::Error },
         { USP::RecognitionStatus::InitialSilenceTimeout, REASON_CANCELED_NONE },
         { USP::RecognitionStatus::InitialBabbleTimeout, REASON_CANCELED_NONE },
     };
@@ -1373,6 +1422,8 @@ NoMatchReason CSpxUspRecoEngineAdapter::ToNoMatchReason(USP::RecognitionStatus u
         { USP::RecognitionStatus::Success, NO_MATCH_REASON_NONE },
         { USP::RecognitionStatus::NoMatch, NoMatchReason::NotRecognized },
         { USP::RecognitionStatus::Error, NO_MATCH_REASON_NONE },
+        { USP::RecognitionStatus::TooManyRequests, NO_MATCH_REASON_NONE },
+        { USP::RecognitionStatus::InvalidMessage, NO_MATCH_REASON_NONE },
         { USP::RecognitionStatus::InitialSilenceTimeout, NoMatchReason::InitialSilenceTimeout },
         { USP::RecognitionStatus::InitialBabbleTimeout, NoMatchReason::InitialBabbleTimeout },
     };
@@ -1380,7 +1431,7 @@ NoMatchReason CSpxUspRecoEngineAdapter::ToNoMatchReason(USP::RecognitionStatus u
     auto item = reasonMap.find(uspRecognitionStatus);
     if (item == reasonMap.end())
     {
-        SPX_TRACE_ERROR("Unexpected recognition status %d when converting to CancellationReason.", uspRecognitionStatus);
+        SPX_TRACE_ERROR("Unexpected recognition status %d when converting to NoMatchReason.", uspRecognitionStatus);
         SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
     }
     return item->second;
@@ -1399,7 +1450,15 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
     {
         // Create the result
         auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-        auto result = factory->CreateFinalResult(nullptr, ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), ToCancellationReason(message.recognitionStatus), message.displayText.c_str(), message.offset, message.duration);
+
+        auto cancellationReason = ToCancellationReason(message.recognitionStatus);
+        if (cancellationReason != REASON_CANCELED_NONE)
+        {
+            // The status above should have been treated as error event, so this should not happen here.
+            SPX_TRACE_ERROR("Unexpected recognition status %d.", message.recognitionStatus);
+            SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+        }
+        auto result = factory->CreateFinalResult(nullptr, ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), cancellationReason, CancellationErrorCode::NoError, message.displayText.c_str(), message.offset, message.duration);
 
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
         namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());

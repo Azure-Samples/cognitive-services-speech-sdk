@@ -128,6 +128,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         auto cancellation = CancellationDetails::FromResult(result);
         SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
+        SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
         SPXTEST_REQUIRE(cancellation->ErrorDetails.find("Failed to create transport request.") != std::string::npos);
     }
     SPXTEST_SECTION("return canceled in StartContinuousRecognitionAsync given an invalid endpoint")
@@ -142,17 +143,20 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto audio = AudioConfig::FromWavFileInput(InputFile());
         auto recognizer = SpeechRecognizer::FromConfig(config, audio);
         std::string errorDetails;
+        CancellationErrorCode errorCode;
         recognizer->Canceled += [&](const SpeechRecognitionCanceledEventArgs& e)
         {
             if (e.Reason == CancellationReason::Error)
             {
                 errorDetails = e.ErrorDetails;
+                errorCode = e.ErrorCode;
             }
         };
         recognizer->StartContinuousRecognitionAsync().get();
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
         recognizer->StopContinuousRecognitionAsync().wait();
 
+        SPXTEST_REQUIRE(errorCode == CancellationErrorCode::ConnectionFailure);
         SPXTEST_REQUIRE(errorDetails.find("Failed to create transport request.") != std::string::npos);
     }
     SPXTEST_SECTION("Check that recognition can set authorization token")
@@ -352,6 +356,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         auto cancellation = CancellationDetails::FromResult(result);
         SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
+        // Bug: https://msasg.visualstudio.com/Skyman/_workitems/edit/1480495
+        //SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
         SPXTEST_REQUIRE(!cancellation->ErrorDetails.empty());
 
         // NOTE: Looks like we still do need this...
@@ -377,6 +383,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& args) {
             SPXTEST_REQUIRE(args.Reason == CancellationReason::Error);
+            SPXTEST_REQUIRE(args.ErrorCode == CancellationErrorCode::AuthenticationFailure);
             SPXTEST_REQUIRE(!args.ErrorDetails.empty());
             unique_lock<mutex> lock(mtx);
             connectionReportedError = true;

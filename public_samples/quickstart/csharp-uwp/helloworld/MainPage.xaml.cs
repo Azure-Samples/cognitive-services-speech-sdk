@@ -77,6 +77,7 @@ namespace helloworld
 
                         if (cancellation.Reason == CancellationReason.Error)
                         {
+                            sb.AppendLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
                             sb.AppendLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
                             sb.AppendLine($"CANCELED: Did you update the subscription info?");
                         }

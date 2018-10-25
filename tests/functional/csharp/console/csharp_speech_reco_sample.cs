@@ -191,7 +191,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 Console.WriteLine($"CANCELED: Reason={e.Reason}");
 
-                if (e.Reason == CancellationReason.Error)
+                if (!string.IsNullOrEmpty(e.ErrorDetails))
                 {
                     Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
                     Console.WriteLine($"CANCELED: Did you update the subscription info?");

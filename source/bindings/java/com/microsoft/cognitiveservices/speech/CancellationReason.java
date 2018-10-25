@@ -10,7 +10,7 @@ package com.microsoft.cognitiveservices.speech;
 public enum CancellationReason
 {
     /**
-     * Indicates that an error occurred during speech recognition. Use getErrorDetails() contains detailed error response.
+     * Indicates that an error occurred during speech recognition. Use getErrorCode() and getErrorDetails() to get error code and detailed error response.
      */
     Error(com.microsoft.cognitiveservices.speech.internal.CancellationReason.Error),
 
@@ -19,7 +19,6 @@ public enum CancellationReason
      */
     EndOfStream(com.microsoft.cognitiveservices.speech.internal.CancellationReason.EndOfStream);
 
-    
     private CancellationReason(com.microsoft.cognitiveservices.speech.internal.CancellationReason id) {
         this.id = id;
     }

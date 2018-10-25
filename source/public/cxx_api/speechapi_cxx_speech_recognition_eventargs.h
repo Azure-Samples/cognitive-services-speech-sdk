@@ -95,6 +95,7 @@ private:
 
     std::shared_ptr<CancellationDetails> m_cancellation;
     CancellationReason m_cancellationReason;
+    CancellationErrorCode m_errorCode;
 
 public:
 
@@ -106,7 +107,9 @@ public:
         SpeechRecognitionEventArgs(hevent),
         m_cancellation(CancellationDetails::FromResult(GetResult())),
         m_cancellationReason(m_cancellation->Reason),
+        m_errorCode(m_cancellation->ErrorCode),
         Reason(m_cancellationReason),
+        ErrorCode(m_errorCode),
         ErrorDetails(m_cancellation->ErrorDetails)
     {
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x)", __FUNCTION__, this);
@@ -130,12 +133,19 @@ private:
     /// The reason the result was canceled.
     /// </summary>
     const CancellationReason& Reason;
+
+    /// <summary>
+    /// The error code in case of an unsuccessful recognition (Reason<see cref="Reason"/> is set to Error).
+    /// If Reason is not Error, ErrorCode is set to NoError.
+    /// </summary>
+    const CancellationErrorCode& ErrorCode;
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
 
     /// <summary>
-    /// In case of an unsuccessful recognition, provides a details of why the occurred error.
+    /// The error message in case of an unsuccessful recognition (Reason<see cref="Reason"/> is set to Error).
     /// This field is only filled-out if the reason canceled (<see cref="Reason"/>) is set to Error.
     /// </summary>
     const SPXSTRING ErrorDetails;

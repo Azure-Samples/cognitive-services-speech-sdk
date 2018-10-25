@@ -6,6 +6,7 @@ package com.microsoft.cognitiveservices.speech;
 
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.CancellationErrorCode;
 
 /**
  * Contains detailed information about why a result was canceled.
@@ -14,6 +15,7 @@ public class CancellationDetails {
 
     private CancellationReason reason;
     private String errorDetails;
+    private CancellationErrorCode errorCode;
     private com.microsoft.cognitiveservices.speech.internal.CancellationDetails _cancellationImpl;
 
     /**
@@ -33,6 +35,7 @@ public class CancellationDetails {
 
         this._cancellationImpl = cancellation;
         this.reason = CancellationReason.values()[cancellation.getReason().swigValue() - 1]; // Native CancellationReason enum starts at 1!!
+        this.errorCode = CancellationErrorCode.values()[cancellation.getErrorCode().swigValue()];
         this.errorDetails = cancellation.getErrorDetails();
     }
 
@@ -57,6 +60,15 @@ public class CancellationDetails {
     }
 
     /**
+     * The error code of why the cancellation occurred.
+     * @return An error code that represents the error reason.
+     * Added in version 1.1.0.
+     */
+    public CancellationErrorCode getErrorCode() {
+        return this.errorCode;
+    }
+
+    /**
      * In case of an unsuccessful recognition, provides a details of why the occurred error.
      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
      * @return A String that represents the error details.
@@ -72,6 +84,7 @@ public class CancellationDetails {
     @Override
     public String toString() {
         return "CancellationReason:" + this.reason +
+                " ErrorCode: " + this.errorCode +
                 " ErrorDetails:" + this.errorDetails;
     }
 }

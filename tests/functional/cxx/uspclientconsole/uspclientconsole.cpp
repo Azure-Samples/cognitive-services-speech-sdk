@@ -96,6 +96,7 @@ map<USP::RecognitionStatus, string> recognitionStatusToText =
     { USP::RecognitionStatus::InitialSilenceTimeout, "Initial Silence Timeout" },
     { USP::RecognitionStatus::InitialBabbleTimeout, "Initial Babble Timeout" },
     { USP::RecognitionStatus::Error, "Error" },
+    { USP::RecognitionStatus::TooManyRequests, "Too Many Requests. The number of allowed concurrent transcriptions for the subscription is exceeded." },
     { USP::RecognitionStatus::EndOfDictation, "End of dictation" }
 };
 
@@ -143,9 +144,9 @@ virtual void OnTurnEnd(const USP::TurnEndMsg&) override
     turnEnd = true;
 }
 
-virtual void OnError(bool /*transport*/, const string& error) override
+virtual void OnError(bool /*transport*/, USP::ErrorCode errorCode, const string& errorMessage) override
 {
-    printf("Response: On Error: %s.\n", error.c_str());
+    printf("Response: On Error: ErrorCode: %d, ErrorMessage: %s.\n", (int)errorCode, errorMessage.c_str());
     turnEnd = true;
     exit(1);
 }

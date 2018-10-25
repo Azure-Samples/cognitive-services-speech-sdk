@@ -4,7 +4,7 @@
 //
 
 using System;
-using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace Microsoft.CognitiveServices.Speech
@@ -16,16 +16,16 @@ namespace Microsoft.CognitiveServices.Speech
     {
         internal RecognitionResult(Internal.RecognitionResult result)
         {
-            Trace.Assert((int)ResultReason.NoMatch == (int)Internal.ResultReason.NoMatch);
-            Trace.Assert((int)ResultReason.Canceled == (int)Internal.ResultReason.Canceled);
-            Trace.Assert((int)ResultReason.RecognizingSpeech == (int)Internal.ResultReason.RecognizingSpeech);
-            Trace.Assert((int)ResultReason.RecognizedSpeech == (int)Internal.ResultReason.RecognizedSpeech);
-            Trace.Assert((int)ResultReason.RecognizingIntent == (int)Internal.ResultReason.RecognizingIntent);
-            Trace.Assert((int)ResultReason.RecognizedIntent == (int)Internal.ResultReason.RecognizedIntent);
-            Trace.Assert((int)ResultReason.TranslatingSpeech == (int)Internal.ResultReason.TranslatingSpeech);
-            Trace.Assert((int)ResultReason.TranslatedSpeech == (int)Internal.ResultReason.TranslatedSpeech);
-            Trace.Assert((int)ResultReason.SynthesizingAudio == (int)Internal.ResultReason.SynthesizingAudio);
-            Trace.Assert((int)ResultReason.SynthesizingAudioCompleted == (int)Internal.ResultReason.SynthesizingAudioCompleted);
+            Contract.Requires((int)ResultReason.NoMatch == (int)Internal.ResultReason.NoMatch);
+            Contract.Requires((int)ResultReason.Canceled == (int)Internal.ResultReason.Canceled);
+            Contract.Requires((int)ResultReason.RecognizingSpeech == (int)Internal.ResultReason.RecognizingSpeech);
+            Contract.Requires((int)ResultReason.RecognizedSpeech == (int)Internal.ResultReason.RecognizedSpeech);
+            Contract.Requires((int)ResultReason.RecognizingIntent == (int)Internal.ResultReason.RecognizingIntent);
+            Contract.Requires((int)ResultReason.RecognizedIntent == (int)Internal.ResultReason.RecognizedIntent);
+            Contract.Requires((int)ResultReason.TranslatingSpeech == (int)Internal.ResultReason.TranslatingSpeech);
+            Contract.Requires((int)ResultReason.TranslatedSpeech == (int)Internal.ResultReason.TranslatedSpeech);
+            Contract.Requires((int)ResultReason.SynthesizingAudio == (int)Internal.ResultReason.SynthesizingAudio);
+            Contract.Requires((int)ResultReason.SynthesizingAudioCompleted == (int)Internal.ResultReason.SynthesizingAudioCompleted);
 
             resultImpl = result;
             this.ResultId = result.ResultId;
@@ -96,11 +96,21 @@ namespace Microsoft.CognitiveServices.Speech
 
         internal CancellationDetails(Internal.CancellationDetails cancellation)
         {
-            Trace.Assert((int)CancellationReason.Error == (int)Internal.CancellationReason.Error);
-            Trace.Assert((int)CancellationReason.EndOfStream == (int)Internal.CancellationReason.EndOfStream);
+            Contract.Requires((int)CancellationReason.Error == (int)Internal.CancellationReason.Error);
+            Contract.Requires((int)CancellationReason.EndOfStream == (int)Internal.CancellationReason.EndOfStream);
+
+            Contract.Requires((int)CancellationErrorCode.NoError == (int)Internal.CancellationErrorCode.NoError);
+            Contract.Requires((int)CancellationErrorCode.AuthenticationFailure == (int)Internal.CancellationErrorCode.AuthenticationFailure);
+            Contract.Requires((int)CancellationErrorCode.BadRequestParameters== (int)Internal.CancellationErrorCode.BadRequestParameters);
+            Contract.Requires((int)CancellationErrorCode.TooManyRequests == (int)Internal.CancellationErrorCode.TooManyRequests);
+            Contract.Requires((int)CancellationErrorCode.ConnectionFailure == (int)Internal.CancellationErrorCode.ConnectionFailure);
+            Contract.Requires((int)CancellationErrorCode.ServiceTimeout == (int)Internal.CancellationErrorCode.ServiceTimeout);
+            Contract.Requires((int)CancellationErrorCode.ServiceError == (int)Internal.CancellationErrorCode.ServiceError);
+            Contract.Requires((int)CancellationErrorCode.RuntimeError == (int)Internal.CancellationErrorCode.RuntimeError);
 
             canceledImpl = cancellation;
             this.Reason = (CancellationReason)((int)cancellation.Reason);
+            this.ErrorCode = (CancellationErrorCode)((int)cancellation.ErrorCode);
             this.ErrorDetails = cancellation.ErrorDetails;
         }
 
@@ -110,7 +120,13 @@ namespace Microsoft.CognitiveServices.Speech
         public CancellationReason Reason { get; private set; }
 
         /// <summary>
-        /// In case of an unsuccessful recognition, provides a details of why the occurred error.
+        /// The error code in case of an unsuccessful recognition.
+        /// Added in version 1.1.0.
+        /// </summary>
+        public CancellationErrorCode ErrorCode { get; private set; }
+
+        /// <summary>
+        /// The error message In case of an unsuccessful recognition.
         /// This field is only filled-out if the reason canceled (<see cref="Reason"/>) is set to Error.
         /// </summary>
         public string ErrorDetails { get; private set; }
@@ -146,9 +162,9 @@ namespace Microsoft.CognitiveServices.Speech
 
         internal NoMatchDetails(Internal.NoMatchDetails noMatch)
         {
-            Trace.Assert((int)NoMatchReason.NotRecognized == (int)Internal.NoMatchReason.NotRecognized);
-            Trace.Assert((int)NoMatchReason.InitialSilenceTimeout == (int)Internal.NoMatchReason.InitialSilenceTimeout);
-            Trace.Assert((int)NoMatchReason.InitialBabbleTimeout == (int)Internal.NoMatchReason.InitialBabbleTimeout);
+            Contract.Requires((int)NoMatchReason.NotRecognized == (int)Internal.NoMatchReason.NotRecognized);
+            Contract.Requires((int)NoMatchReason.InitialSilenceTimeout == (int)Internal.NoMatchReason.InitialSilenceTimeout);
+            Contract.Requires((int)NoMatchReason.InitialBabbleTimeout == (int)Internal.NoMatchReason.InitialBabbleTimeout);
 
             noMatchImpl = noMatch;
             this.Reason = (NoMatchReason)((int)noMatch.Reason);

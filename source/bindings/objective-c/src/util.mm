@@ -71,6 +71,44 @@
     return reason;
 }
 
++ (SPXCancellationErrorCode) fromCancellationErrorCodeImpl:(SpeechImpl::CancellationErrorCode)errorCodeImpl
+{
+    SPXCancellationErrorCode errorCode;
+    switch (errorCodeImpl)
+    {
+        case SpeechImpl::CancellationErrorCode::NoError:
+            errorCode = SPXCancellationErrorCode_NoError;
+            break;
+        case SpeechImpl::CancellationErrorCode::AuthenticationFailure:
+            errorCode = SPXCancellationErrorCode_AuthenticationFailure;
+            break;
+        case SpeechImpl::CancellationErrorCode::BadRequestParameters:
+            errorCode = SPXCancellationErrorCode_BadRequestParameters;
+            break;
+        case SpeechImpl::CancellationErrorCode::TooManyRequests:
+            errorCode = SPXCancellationErrorCode_TooManyRequests;
+            break;
+        case SpeechImpl::CancellationErrorCode::ConnectionFailure:
+            errorCode = SPXCancellationErrorCode_ConnectionFailure;
+            break;
+        case SpeechImpl::CancellationErrorCode::ServiceTimeout:
+            errorCode = SPXCancellationErrorCode_ServiceTimeout;
+            break;
+        case SpeechImpl::CancellationErrorCode::ServiceError:
+            errorCode = SPXCancellationErrorCode_ServiceError;
+            break;
+        case SpeechImpl::CancellationErrorCode::RuntimeError:
+            errorCode = SPXCancellationErrorCode_RuntimeError;
+            break;
+        default:
+            // Todo error handling.
+            NSLog(@"Unknown CancellationErrorCode value: %d.", (int)errorCodeImpl);
+            errorCode = SPXCancellationErrorCode_RuntimeError;
+            break;
+    }
+    return errorCode;
+}
+
 + (SPXNoMatchReason) fromNoMatchReasonImpl:(SpeechImpl::NoMatchReason)reasonImpl
 {
     SPXNoMatchReason reason;

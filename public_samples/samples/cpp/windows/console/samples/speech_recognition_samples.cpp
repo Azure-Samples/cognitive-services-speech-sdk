@@ -47,6 +47,7 @@ void SpeechRecognitionWithMicrophone()
 
         if (cancellation->Reason == CancellationReason::Error)
         {
+            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
@@ -96,6 +97,7 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
 
         if (cancellation->Reason == CancellationReason::Error)
         {
+            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
@@ -144,6 +146,7 @@ void SpeechContinuousRecognitionWithFile()
 
         if (e.Reason == CancellationReason::Error)
         {
+            cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
@@ -205,6 +208,7 @@ void SpeechRecognitionUsingCustomizedModel()
 
         if (cancellation->Reason == CancellationReason::Error)
         {
+            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
@@ -402,6 +406,7 @@ void SpeechContinuousRecognitionWithStream()
 
         if (e.Reason == CancellationReason::Error)
         {
+            cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }

@@ -6,6 +6,7 @@ package com.microsoft.cognitiveservices.speech;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
+import com.microsoft.cognitiveservices.speech.CancellationErrorCode;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 
 /**
@@ -25,6 +26,7 @@ public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionE
 
         com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation = e.GetCancellationDetails();
         this._cancellationReason  = com.microsoft.cognitiveservices.speech.CancellationReason.values()[cancellation.getReason().swigValue() - 1]; // Native CancellationReason enum starts at 1!!
+        this._errorCode = com.microsoft.cognitiveservices.speech.CancellationErrorCode.values()[cancellation.getErrorCode().swigValue()];
         this._errorDetails = cancellation.getErrorDetails();
     }
 
@@ -34,6 +36,15 @@ public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionE
      */
     public CancellationReason getReason() {
         return this._cancellationReason ;
+    }
+
+    /**
+     * The error code of why the cancellation occurred.
+     * @return An error code that represents the error reason.
+     * Added in version 1.1.0.
+     */
+    public CancellationErrorCode getErrorCode() {
+        return this._errorCode;
     }
 
     /**
@@ -53,14 +64,15 @@ public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionE
         return "SessionId:" + _SessionId +
                 " ResultId:" + _Result.getResultId() +
                 " CancellationReason:" + _cancellationReason  +
-                " Recognized text:<" + _errorDetails +
-                ">.";
+                " CancellationErrorCode:" + _errorCode +
+                " Error details:<" + _errorDetails;
     }
 
     @SuppressWarnings("unused")
     private com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventArgs _eventArgImpl;
     private String _SessionId;
     private SpeechRecognitionResult _Result;
-    private CancellationReason _cancellationReason ;
+    private CancellationReason _cancellationReason;
+    private CancellationErrorCode _errorCode;
     private String _errorDetails;
 }

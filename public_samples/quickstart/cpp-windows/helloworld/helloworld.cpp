@@ -40,8 +40,9 @@ void recognizeSpeech()
         auto cancellation = CancellationDetails::FromResult(result);
         cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
 
-        if (cancellation->Reason == CancellationReason::Error)
+        if (cancellation->Reason == CancellationReason::Error) 
         {
+            cout << "CANCELED: ErrorCode= " << (int)cancellation->ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }

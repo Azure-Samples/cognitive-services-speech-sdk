@@ -1057,7 +1057,7 @@ void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<SpeechRecogniz
     if (result->Reason == ResultReason::Canceled)
     {
         auto cancellation = CancellationDetails::FromResult(result);
-        ConsoleWriteLine("SpeechRecognitionResult: CancellationReason=%d; ErrorDetails=%s", cancellation->Reason, cancellation->ErrorDetails.c_str());
+        ConsoleWriteLine("SpeechRecognitionResult: CancellationReason=%d, ErrorCode=%d, ErrorDetails=%s", cancellation->Reason, cancellation->ErrorCode, cancellation->ErrorDetails.c_str());
     }
 
 }
@@ -1083,7 +1083,7 @@ void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<IntentRecogniz
     if (result->Reason == ResultReason::Canceled)
     {
         auto cancellation = CancellationDetails::FromResult(result);
-        ConsoleWriteLine("IntentRecognitionResult: CancellationReason=%d; ErrorDetails=%s", cancellation->Reason, cancellation->ErrorDetails.c_str());
+        ConsoleWriteLine("IntentRecognitionResult: CancellationReason=%d, ErrorCode=%d, ErrorDetails=%s", cancellation->Reason, cancellation->ErrorCode, cancellation->ErrorDetails.c_str());
     }
 }
 
@@ -1101,7 +1101,7 @@ void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<TranslationRec
     if (result->Reason == ResultReason::Canceled)
     {
         auto cancellation = CancellationDetails::FromResult(result);
-        ConsoleWriteLine("TranslationRecognitionResult: CancellationReason=%d; ErrorDetails=%s", cancellation->Reason, cancellation->ErrorDetails.c_str());
+        ConsoleWriteLine("TranslationRecognitionResult: CancellationReason=%d, ErrorCode=%d, ErrorDetails=%s", cancellation->Reason, cancellation->ErrorCode, cancellation->ErrorDetails.c_str());
     }
 
     for (auto it : result->Translations)
@@ -1303,6 +1303,15 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
     static_assert(1 == (int)CancellationReason::Error, "CancellationReason::* enum values changed!");
     static_assert(2 == (int)CancellationReason::EndOfStream, "CancellationReason::* enum values changed!");
 
+    static_assert(0 == (int)CancellationErrorCode::NoError, "CancellationErrorCode::* enum values changed!");
+    static_assert(1 == (int)CancellationErrorCode::AuthenticationFailure, "CancellationErrorCode::* enum values changed!");
+    static_assert(2 == (int)CancellationErrorCode::BadRequestParameters, "CancellationErrorCode::* enum values changed!");
+    static_assert(3 == (int)CancellationErrorCode::TooManyRequests, "CancellationErrorCode::* enum values changed!");
+    static_assert(4 == (int)CancellationErrorCode::ConnectionFailure, "CancellationErrorCode::* enum values changed!");
+    static_assert(5 == (int)CancellationErrorCode::ServiceTimeout, "CancellationErrorCode::* enum values changed!");
+    static_assert(6 == (int)CancellationErrorCode::ServiceError, "CancellationErrorCode::* enum values changed!");
+    static_assert(7 == (int)CancellationErrorCode::RuntimeError, "CancellationErrorCode::* enum values changed!");
+
     static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
     static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
     static_assert(3 == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason::* enum values changed!");
@@ -1348,7 +1357,7 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
     {
         auto cancellation = CancellationDetails::FromResult(e.Result);
         str += "    CancellationReason = CancellationReason::" + reasonsCanceled[(int)cancellation->Reason] + "\n";
-        if (cancellation->Reason == CancellationReason::Error)
+        if (!cancellation->ErrorDetails.empty())
         {
             str += "    ErrorDetails = '" + cancellation->ErrorDetails + "'\n";
         }
@@ -1372,9 +1381,6 @@ std::string CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
     static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
     static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
     static_assert(9 == (int)ResultReason::SynthesizingAudioCompleted, "ResultReason::* enum values changed!");
-
-    static_assert(1 == (int)CancellationReason::Error, "CancellationReason::* enum values changed!");
-    static_assert(2 == (int)CancellationReason::EndOfStream, "CancellationReason::* enum values changed!");
 
     static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
     static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
@@ -1421,7 +1427,7 @@ std::string CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
     {
         auto cancellation = CancellationDetails::FromResult(e.Result);
         str += "    CancellationReason = CancellationReason::" + reasonsCanceled[(int)cancellation->Reason] + "\n";
-        if (cancellation->Reason == CancellationReason::Error)
+        if (!cancellation->ErrorDetails.empty())
         {
             str += "    ErrorDetails = '" + cancellation->ErrorDetails + "'\n";
         }
@@ -1445,9 +1451,6 @@ std::string CarbonTestConsole::ToString(const TranslationRecognitionEventArgs& e
     static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
     static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
     static_assert(9 == (int)ResultReason::SynthesizingAudioCompleted, "ResultReason::* enum values changed!");
-
-    static_assert(1 == (int)CancellationReason::Error, "CancellationReason::* enum values changed!");
-    static_assert(2 == (int)CancellationReason::EndOfStream, "CancellationReason::* enum values changed!");
 
     static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
     static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
@@ -1493,7 +1496,7 @@ std::string CarbonTestConsole::ToString(const TranslationRecognitionEventArgs& e
     {
         auto cancellation = CancellationDetails::FromResult(e.Result);
         str += "    CancellationReason = CancellationReason::" + reasonsCanceled[(int)cancellation->Reason] + "\n";
-        if (cancellation->Reason == CancellationReason::Error)
+        if (!cancellation->ErrorDetails.empty())
         {
             str += "    ErrorDetails = '" + cancellation->ErrorDetails + "'\n";
         }

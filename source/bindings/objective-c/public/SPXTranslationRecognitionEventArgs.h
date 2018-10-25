@@ -33,6 +33,12 @@ SPX_EXPORT
 @property (readonly)SPXCancellationReason reason;
 
 /**
+  * The error code in case of an unsuccessful recognition.
+  * Added in version 1.1.0.
+  */
+@property (readonly)SPXCancellationErrorCode errorCode;
+
+/**
   * The error details of why the cancellation occurred.
   */
 @property (copy, readonly, nullable)NSString *errorDetails;

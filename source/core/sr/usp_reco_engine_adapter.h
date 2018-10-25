@@ -56,7 +56,7 @@ public:
     void OnSpeechFragment(const USP::SpeechFragmentMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechFragment(m); }); }
     void OnTurnStart(const USP::TurnStartMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnStart(m); }); }
     void OnTurnEnd(const USP::TurnEndMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnEnd(m); }); }
-    void OnError(bool transport, const std::string& error) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnError(transport, error); }); }
+    void OnError(bool transport, USP::ErrorCode errorCode, const std::string& errorMessage) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnError(transport, errorCode, errorMessage); }); }
     void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationHypothesis(m); }); }
     void OnTranslationPhrase(const USP::TranslationPhraseMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationPhrase(m); }); }
     void OnTranslationSynthesis(const USP::TranslationSynthesisMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationSynthesis(m); }); }
@@ -149,7 +149,7 @@ private:
     void OnSpeechPhrase(const USP::SpeechPhraseMsg&) override;
     void OnTurnStart(const USP::TurnStartMsg&) override;
     void OnTurnEnd(const USP::TurnEndMsg&) override;
-    void OnError(bool transport, const std::string& error) override;
+    void OnError(bool transport, USP::ErrorCode, const std::string& error) override;
     void OnUserMessage(const USP::UserMsg&) override;
 
     void OnTranslationHypothesis(const USP::TranslationHypothesisMsg&) override;

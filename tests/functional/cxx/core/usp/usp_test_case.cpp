@@ -42,9 +42,10 @@ public:
         m_connection = client.Connect();
     }
 
-    virtual void OnError(bool /*transport*/, const std::string& error) override
+    virtual void OnError(bool /*transport*/, USP::ErrorCode errorCode, const std::string& errorMessage) override
     {
-        FAIL(error);
+        (void)errorCode;
+        FAIL(errorMessage);
     }
 
     template <class T>

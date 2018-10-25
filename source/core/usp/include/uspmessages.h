@@ -27,7 +27,7 @@ typedef uint64_t DurationType;
  */
 enum class RecognitionStatus : int
 {
-    Success, NoMatch, InitialSilenceTimeout, InitialBabbleTimeout, Error, EndOfDictation, InvalidMessage
+    Success, NoMatch, InitialSilenceTimeout, InitialBabbleTimeout, Error, EndOfDictation, TooManyRequests, InvalidMessage
 };
 
 /**
@@ -44,6 +44,19 @@ enum class TranslationStatus : int
 enum class SynthesisStatus : int
 {
     Success, Error, InvalidMessage
+};
+
+/**
+* Represents USP error code.
+ */
+enum class ErrorCode : int
+{
+    AuthenticationError = 1,
+    BadRequest,
+    TooManyRequests,
+    ConnectionError,
+    ServiceError,
+    RuntimeError
 };
 
 struct JsonMsg

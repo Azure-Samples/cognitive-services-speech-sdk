@@ -5,6 +5,7 @@
 package com.microsoft.cognitiveservices.speech.translation;
 
 import com.microsoft.cognitiveservices.speech.CancellationReason;
+import com.microsoft.cognitiveservices.speech.CancellationErrorCode;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
@@ -20,6 +21,7 @@ public final class TranslationRecognitionCanceledEventArgs extends TranslationRe
 
         com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation = e.GetCancellationDetails();
         this._cancellationReason  = com.microsoft.cognitiveservices.speech.CancellationReason.values()[cancellation.getReason().swigValue() - 1]; // Native CancellationReason enum starts at 1!!
+        this._errorCode = com.microsoft.cognitiveservices.speech.CancellationErrorCode.values()[cancellation.getErrorCode().swigValue()];
         this._errorDetails = cancellation.getErrorDetails();
     }
 
@@ -29,6 +31,15 @@ public final class TranslationRecognitionCanceledEventArgs extends TranslationRe
      */
     public CancellationReason getReason() {
         return this._cancellationReason ;
+    }
+
+    /**
+     * The error code of why the cancellation occurred.
+     * @return An error code that represents the error reason.
+     * Added in version 1.1.0.
+     */
+    public CancellationErrorCode getErrorCode() {
+        return this._errorCode;
     }
 
     /**
@@ -49,12 +60,13 @@ public final class TranslationRecognitionCanceledEventArgs extends TranslationRe
         return "SessionId:" + this.getSessionId() +
                 " ResultId:" + this.getResult().getResultId() +
                 " CancellationReason:" + _cancellationReason  +
-                " Recognized text:<" + _errorDetails +
-                ">.";
+                " CancellationErrorCode:" + _errorCode +
+                " Error details:" + _errorDetails;
     }
 
     @SuppressWarnings("unused")
     private com.microsoft.cognitiveservices.speech.internal.TranslationRecognitionCanceledEventArgs _eventArgImpl;
-    private CancellationReason _cancellationReason ;
+    private CancellationReason _cancellationReason;
+    private CancellationErrorCode _errorCode;
     private String _errorDetails;
 }

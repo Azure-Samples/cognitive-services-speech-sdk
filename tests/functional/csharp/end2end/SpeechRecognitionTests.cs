@@ -99,6 +99,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 var cancellation = CancellationDetails.FromResult(result);
                 Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
+                Assert.AreEqual(cancellation.ErrorCode, CancellationErrorCode.AuthenticationFailure);
                 AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with an authentication error (401)");
             }
         }
@@ -115,6 +116,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 var cancellation = CancellationDetails.FromResult(result);
                 Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
+                Assert.AreEqual(cancellation.ErrorCode, CancellationErrorCode.ConnectionFailure);
                 AssertStringContains(cancellation.ErrorDetails, "Connection failed");
             }
         }
@@ -139,6 +141,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 var cancellation = CancellationDetails.FromResult(result);
                 Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
+                Assert.AreEqual(cancellation.ErrorCode, CancellationErrorCode.BadRequestParameters);
                 AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with a bad request (400)");
             }
         }
@@ -154,6 +157,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(ResultReason.Canceled, result.Reason);
 
                 var cancellation = CancellationDetails.FromResult(result);
+                Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
+                Assert.AreEqual(cancellation.ErrorCode, CancellationErrorCode.BadRequestParameters);
                 AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with a bad request (400)");
             }
         }
@@ -444,7 +449,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.NoMatch, result.Reason);
                 Assert.IsTrue(result.OffsetInTicks > 0, result.OffsetInTicks.ToString());
-                Assert.IsTrue(String.IsNullOrEmpty(result.Text), result.Text);
+                Assert.IsTrue(string.IsNullOrEmpty(result.Text), result.Text);
 
                 var noMatch = NoMatchDetails.FromResult(result);
                 Assert.AreEqual(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);

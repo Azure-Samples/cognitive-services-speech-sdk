@@ -170,6 +170,7 @@ class CancellationDetails
 private:
 
     CancellationReason m_reason;
+    CancellationErrorCode m_errorCode;
 
 public:
 
@@ -193,7 +194,13 @@ public:
     const CancellationReason& Reason;
 
     /// <summary>
-    /// In case of an unsuccessful recognition, provides a details of why the occurred error.
+    /// The error code in case of an unsuccessful recognition (Reason<see cref="Reason"/> is set to Error).
+    /// If Reason is not Error, ErrorCode is set to NoError.
+    /// </summary>
+    const CancellationErrorCode& ErrorCode;
+
+    /// <summary>
+    /// The error message in case of an unsuccessful recognition (Reason<see cref="Reason"/> is set to Error).
     /// This field is only filled-out if the reason canceled (<see cref="Reason"/>) is set to Error.
     /// </summary>
     const SPXSTRING ErrorDetails;
@@ -204,7 +211,9 @@ protected:
 
     CancellationDetails(RecognitionResult* result) :
         m_reason(GetCancellationReason(result)),
+        m_errorCode(GetCancellationErrorCode(result)),
         Reason(m_reason),
+        ErrorCode(m_errorCode),
         ErrorDetails(result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonErrorDetails))
     {
     }
@@ -223,6 +232,16 @@ private:
         SPX_IFFAILED_THROW_HR(result_get_reason_canceled(hresult, &reason));
 
         return (Speech::CancellationReason)reason;
+    }
+
+    Speech::CancellationErrorCode GetCancellationErrorCode(RecognitionResult* result)
+    {
+        Result_CancellationErrorCode errorCode;
+
+        SPXRESULTHANDLE hresult = (SPXRESULTHANDLE)(*result);
+        SPX_IFFAILED_THROW_HR(result_get_canceled_error_code(hresult, &errorCode));
+
+        return (Speech::CancellationErrorCode)errorCode;
     }
 
 };

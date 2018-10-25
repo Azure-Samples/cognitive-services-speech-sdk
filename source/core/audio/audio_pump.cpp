@@ -206,7 +206,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
         InvokeOnSite([msg = e.what()](const SitePtr& site)
         {
             site->Error(msg);
-        });        
+        });
     }
     catch (...)
     {
@@ -214,7 +214,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
         InvokeOnSite([&](const SitePtr& site)
         {
             site->Error("Error: unexpected exception in PumpThread");
-        });        
+        });
     }
 
     std::unique_lock<std::mutex> lock(m_mutex);

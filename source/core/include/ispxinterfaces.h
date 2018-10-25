@@ -438,6 +438,7 @@ public:
 
     virtual ResultReason GetReason() = 0;
     virtual CancellationReason GetCancellationReason() = 0;
+    virtual CancellationErrorCode GetCancellationErrorCode() = 0;
     virtual NoMatchReason GetNoMatchReason() = 0;
 
     virtual uint64_t GetOffset() const = 0;
@@ -451,7 +452,7 @@ class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionRes
 public:
 
     virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
-    virtual void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
+    virtual void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
 };
 
 
@@ -599,12 +600,14 @@ public:
 class SpxRecoEngineAdapterError
 {
     bool m_isTransportError;
+    CancellationReason m_reason;
+    CancellationErrorCode m_errorCode;
     std::string m_info;
 
 public:
 
-    SpxRecoEngineAdapterError(bool isTransportError, const std::string& info)
-        : m_isTransportError{ isTransportError }, m_info{ info }
+    SpxRecoEngineAdapterError(bool isTransportError, CancellationReason reason, CancellationErrorCode errorCode, const std::string& info)
+        : m_isTransportError{ isTransportError }, m_reason{ reason }, m_errorCode{ errorCode }, m_info{ info }
     {}
 
     bool IsTransportError() const
@@ -616,6 +619,17 @@ public:
     {
         return m_info;
     }
+
+    CancellationReason Reason() const
+    {
+        return m_reason;
+    }
+
+    CancellationErrorCode ErrorCode() const
+    {
+        return m_errorCode;
+    }
+
 };
 
 class ISpxRecoEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxRecoEngineAdapterSite>
@@ -681,7 +695,7 @@ class ISpxRecoResultFactory : public ISpxInterfaceBaseFor<ISpxRecoResultFactory>
 public:
 
     virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
 };
 
 

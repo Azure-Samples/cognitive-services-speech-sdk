@@ -175,11 +175,11 @@ void Connection::Impl::WorkThread(weak_ptr<Connection::Impl> ptr)
             }
             catch (const exception& e)
             {
-                connection->Invoke([&] { callbacks->OnError(false, e.what()); });
+                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, e.what()); });
             }
             catch (...)
             {
-                connection->Invoke([&] { callbacks->OnError(false, "Unhandled exception in the USP layer."); });
+                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, "Unhandled exception in the USP layer."); });
             }
 
             connection->m_cv.wait_for(lock, chrono::milliseconds(200), [&] {return connection->m_haveWork || !connection->m_connected; });
@@ -593,13 +593,13 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
     {
     case TRANSPORT_ERROR_REMOTE_CLOSED:
         connection->Invoke([&] {
-            callbacks->OnError(true, "Connection was closed by the remote host. Error code: " + to_string(errorInfo->errorCode) + ". Error details: " + errorStr);
+            callbacks->OnError(true, ErrorCode::ConnectionError, "Connection was closed by the remote host. Error code: " + to_string(errorInfo->errorCode) + ". Error details: " + errorStr);
         });
         break;
 
     case TRANSPORT_ERROR_CONNECTION_FAILURE:
         connection->Invoke([&] { 
-            callbacks->OnError(true,
+            callbacks->OnError(true, ErrorCode::ConnectionError,
                 std::string("Connection failed (no connection to the remote host). Internal error: ") +
                 std::to_string(errorInfo->errorCode) + ". Error details: " + errorStr +
                 std::string(". Please check network connection, firewall setting, and the region name used to create speech factory.")); });
@@ -609,47 +609,52 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
         switch (errorInfo->errorCode)
         {
         case HTTP_BADREQUEST:
-            connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with a bad request (400). Please check the language name and deployment id, and ensure the deployment id (if used) is correctly associated with the provided subscription key."); });
+            connection->Invoke([&] { callbacks->OnError(true, ErrorCode::BadRequest,
+                "WebSocket Upgrade failed with a bad request (400). Please check the language name and endpoint id (if used) are correctly associated with the provided subscription key."); });
             break;
         case HTTP_UNAUTHORIZED:
-            connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with an authentication error (401). Please check the subscription key or the authorization token, and the region name."); });
+            connection->Invoke([&] { callbacks->OnError(true, ErrorCode::AuthenticationError,
+                "WebSocket Upgrade failed with an authentication error (401). Please check for correct subscription key (or authorization token) and region name."); });
             break;
         case HTTP_FORBIDDEN:
-            connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with an authentication error (403). Please check the subscription key or the authorization token, and the region name."); });
+            connection->Invoke([&] { callbacks->OnError(true, ErrorCode::AuthenticationError,
+                "WebSocket Upgrade failed with an authentication error (403). Please check for correct subscription key (or authorization token) and region name."); });
             break;
         case HTTP_TOO_MANY_REQUESTS:
-            connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with too many requests error (429). Please check concurrency limits and usage on your subscription key."); });
+            connection->Invoke([&] { callbacks->OnError(true, ErrorCode::TooManyRequests,
+                "WebSocket Upgrade failed with too many requests error (429). Please check for correct subscription key (or authorization token) and region name."); });
             break;
         default:
-            connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with HTTP status code: " + std::to_string(errorInfo->errorCode)); });
+            connection->Invoke([&] { callbacks->OnError(true, ErrorCode::ConnectionError,
+                "WebSocket Upgrade failed with HTTP status code: " + std::to_string(errorInfo->errorCode)); });
             break;
         }
         break;
 
     case TRANSPORT_ERROR_WEBSOCKET_SEND_FRAME:
         connection->Invoke([&] {
-            callbacks->OnError(true,
+            callbacks->OnError(true, ErrorCode::ConnectionError,
                 std::string("Failure while sending a frame over the WebSocket connection. Internal error: ") +
                 std::to_string(errorInfo->errorCode) + ". Error details: " + errorStr);
         });
         break;
 
     case TRANSPORT_ERROR_WEBSOCKET_ERROR:
-        connection->Invoke([&] { callbacks->OnError(true,
+        connection->Invoke([&] { callbacks->OnError(true, ErrorCode::ConnectionError,
             std::string("WebSocket operation failed. Internal error: ") +
             std::to_string(errorInfo->errorCode) + ". Error details: " + errorStr);
         });
         break;
 
     case TRANSPORT_ERROR_DNS_FAILURE:
-        connection->Invoke([&] { callbacks->OnError(true,
+        connection->Invoke([&] { callbacks->OnError(true, ErrorCode::ConnectionError,
             std::string("DNS connection failed (the remote host did not respond). Internal error: ") + std::to_string(errorInfo->errorCode));
         });
         break;
 
     default:
     case TRANSPORT_ERROR_UNKNOWN:
-        connection->Invoke([&] { callbacks->OnError(true, "Unknown transport error."); });
+        connection->Invoke([&] { callbacks->OnError(true, ErrorCode::ConnectionError, "Unknown transport error."); });
         break;
     }
 
@@ -665,6 +670,7 @@ static RecognitionStatus ToRecognitionStatus(const string& str)
         { "BabbleTimeout", RecognitionStatus::InitialBabbleTimeout },
         { "Error", RecognitionStatus::Error },
         { "EndOfDictation", RecognitionStatus::EndOfDictation },
+        { "TooManyRequests", RecognitionStatus::TooManyRequests },
     };
 
     auto result = statusMap.find(str);
@@ -951,14 +957,20 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         case RecognitionStatus::Error:
             {
                 auto msg = "The recognition service encountered an internal error and could not continue. Response text:" + json.dump();
-                connection->Invoke([&] { callbacks->OnError(false, msg.c_str()); });
+                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, msg.c_str()); });
+                break;
+            }
+        case RecognitionStatus::TooManyRequests:
+            {
+                auto msg = "The number of parallel requests exceeded the number of allowed concurrent transcriptions. Response text:" + json.dump();
+                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::TooManyRequests, msg.c_str()); });
                 break;
             }
         case RecognitionStatus::InvalidMessage:
         default:
             {
-                auto msg = "Responses received is invalid. Response text:" + json.dump();
-                connection->Invoke([&] { callbacks->OnError(false, msg.c_str()); });
+                auto msg = "Invalid response. Response text:" + json.dump();
+                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, msg.c_str()); });
                 break;
             }
         }
@@ -983,6 +995,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     {
         auto status = ToRecognitionStatus(json.at(json_properties::recoStatus));
         auto speechResult = RetrieveSpeechResult(json);
+        std::string msg;
 
         TranslationResult translationResult;
         switch (status)
@@ -997,13 +1010,17 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
             translationResult.translationStatus = TranslationStatus::Success;
             break;
         case RecognitionStatus::Error:
-            translationResult.translationStatus = TranslationStatus::Error;
-            translationResult.failureReason = L"The speech recognition service encountered an internal error and could not continue. Response text:" + PAL::ToWString(json.dump());;
+             msg = "The speech recognition service encountered an internal error and could not continue. Response text:" + json.dump();
+            connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, msg); });
+            break;
+        case RecognitionStatus::TooManyRequests:
+            msg = "The number of parallel requests exceeded the number of allowed concurrent transcriptions. Response text:" + json.dump();
+            connection->Invoke([&] { callbacks->OnError(false, ErrorCode::TooManyRequests, msg); });
             break;
         case RecognitionStatus::InvalidMessage:
         default:
-            translationResult.translationStatus = TranslationStatus::InvalidMessage;
-            translationResult.failureReason = L"Response received is invalid. Response text:" + PAL::ToWString(json.dump());
+            msg = "Invalid response. Response text:" + json.dump();
+            connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, msg); });
             break;
         }
 
@@ -1019,21 +1036,17 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
                 });
             });
         }
-        else
-        {
-            connection->Invoke([&] { callbacks->OnError(false, PAL::ToString(translationResult.failureReason).c_str()); });
-        }
     }
     else if (path == path::translationSynthesisEnd)
     {
-        TranslationSynthesisEndMsg msg;
+        TranslationSynthesisEndMsg synthesisEndMsg;
         std::wstring localReason;
 
         auto statusHandle = json.find(json_properties::synthesisStatus);
         if (statusHandle != json.end())
         {
-            msg.synthesisStatus = ToSynthesisStatus(statusHandle->get<string>());
-            if (msg.synthesisStatus == SynthesisStatus::InvalidMessage)
+            synthesisEndMsg.synthesisStatus = ToSynthesisStatus(statusHandle->get<string>());
+            if (synthesisEndMsg.synthesisStatus == SynthesisStatus::InvalidMessage)
             {
                 PROTOCOL_VIOLATION("Invalid synthesis status in synthesis.end message. Json=%s", json.dump().c_str());
                 localReason = L"Invalid synthesis status in synthesis.end message.";
@@ -1042,29 +1055,29 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         else 
         {
             PROTOCOL_VIOLATION("No synthesis status in synthesis.end message. Json=%s", json.dump().c_str());
-            msg.synthesisStatus = SynthesisStatus::InvalidMessage;
+            synthesisEndMsg.synthesisStatus = SynthesisStatus::InvalidMessage;
             localReason = L"No synthesis status in synthesis.end message.";
         }
 
         auto failureHandle = json.find(json_properties::translationFailureReason);
         if (failureHandle != json.end())
         {
-            if (msg.synthesisStatus == SynthesisStatus::Success)
+            if (synthesisEndMsg.synthesisStatus == SynthesisStatus::Success)
             {
                 PROTOCOL_VIOLATION("FailureReason should be empty if SynthesisStatus is success. Json=%s", json.dump().c_str());
             }
-            msg.failureReason = PAL::ToWString(failureHandle->get<string>());
+            synthesisEndMsg.failureReason = PAL::ToWString(failureHandle->get<string>());
         }
 
-        msg.failureReason = localReason + msg.failureReason;
+        synthesisEndMsg.failureReason = localReason + synthesisEndMsg.failureReason;
 
-        if (msg.synthesisStatus == SynthesisStatus::Success)
+        if (synthesisEndMsg.synthesisStatus == SynthesisStatus::Success)
         {
-            connection->Invoke([&] { callbacks->OnTranslationSynthesisEnd(msg); });
+            connection->Invoke([&] { callbacks->OnTranslationSynthesisEnd(synthesisEndMsg); });
         }
         else
         {
-            connection->Invoke([&] { callbacks->OnError(false, PAL::ToString(msg.failureReason).c_str()); });
+            connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, PAL::ToString(synthesisEndMsg.failureReason).c_str()); });
         }
     }
     else

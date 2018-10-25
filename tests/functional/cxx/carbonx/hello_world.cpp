@@ -113,7 +113,7 @@ void CarbonTestConsole::Sample_HelloWorld_WithReasonInfo()
         auto cancellation = CancellationDetails::FromResult(result);
         ConsoleWriteLine("CANCELED: Reason=%d", cancellation->Reason);
 
-        if (cancellation->Reason == CancellationReason::Error)
+        if (!cancellation->ErrorDetails.empty())
         {
             ConsoleWriteLine("CANCELED: ErrorDetails=%s", cancellation->ErrorDetails.c_str());
             ConsoleWriteLine("CANCELED: Did you update the subscription info?");
@@ -245,7 +245,7 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
     {
         ConsoleWriteLine("CANCELED: Reason=%d", e.Reason);
 
-        if (e.Reason == CancellationReason::Error)
+        if (!e.ErrorDetails.empty())
         {
             ConsoleWriteLine("CANCELED: ErrorDetails=%s", e.ErrorDetails.c_str());
             ConsoleWriteLine("CANCELED: Did you update the subscription info?");
@@ -339,7 +339,7 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const char* subscriptionKey, co
             auto cancellation = CancellationDetails::FromResult(result);
             ConsoleWriteLine("CANCELED: Reason=%d", cancellation->Reason);
 
-            if (cancellation->Reason == CancellationReason::Error)
+            if (!cancellation->ErrorDetails.empty())
             {
                 ConsoleWriteLine("CANCELED: ErrorDetails=%s", cancellation->ErrorDetails.c_str());
                 ConsoleWriteLine("CANCELED: Did you update the subscription info?");

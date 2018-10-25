@@ -64,7 +64,7 @@ struct Callbacks
     * A callback function that will be invoked when an error occurs in handling communication with service.
     * transport - indicates if the error was origniated on transport, not USP layer.
     */
-    virtual void OnError(bool /*transport*/, const std::string& /*error*/) {}
+    virtual void OnError(bool /*transport*/, ErrorCode /*errorCode*/, const std::string& /*errorMessage*/) {}
 
     /**
     * A callback function that will be invoked when the first chunk in an audio stream is received from the service.

@@ -282,7 +282,7 @@ public class TranslationRecognizerTests {
         });
 
         r.canceled.addEventListener((o, e) -> {
-            if (e.getReason() == CancellationReason.Error) {
+            if (e.getReason() != CancellationReason.EndOfStream) {
                 eventsMap.put("canceled", eventIdentifier.getAndIncrement());
             }
         });

@@ -245,7 +245,7 @@ void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
     if (overflowHappened)
     {
         // In case of overflow we send the error and reset the adapter
-        Error(m_recoAdapter.get(), std::make_shared<SpxRecoEngineAdapterError>(false, "Service timeout. Resetting the buffer"));
+        Error(m_recoAdapter.get(), std::make_shared<SpxRecoEngineAdapterError>(false, CancellationReason::Error, CancellationErrorCode::ServiceTimeout, "Due to service inactivity the client buffer size exceeded. Resetting the buffer."));
         StartResetEngineAdapter();
         return;
     }
@@ -771,8 +771,8 @@ void CSpxAudioStreamSession::EnsureFireResultEvent()
 
          auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
          auto result = (m_fireEndOfStreamAtSessionStop && m_sawEndOfStream)
-            ? factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::EndOfStream, nullptr, 0, 0)
-            : factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::Error, L"Timeout: no recognition result received.", 0, 0);
+            ? factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::EndOfStream, CancellationErrorCode::NoError, nullptr, 0, 0)
+            : factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::Error, CancellationErrorCode::ServiceTimeout, L"Timeout: no recognition result received.", 0, 0);
 
          WaitForRecognition_Complete(result);
          m_fireEndOfStreamAtSessionStop = false;
@@ -1045,12 +1045,12 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediat
     return result;
 }
 
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, const wchar_t* text, uint64_t offset, uint64_t duration)
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration)
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
     auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
-    initResult->InitFinalResult(resultId, reason, noMatchReason, cancellation, text, offset, duration);
+    initResult->InitFinalResult(resultId, reason, noMatchReason, cancellation, errorCode, text, offset, duration);
 
     return result;
 }
@@ -1153,7 +1153,7 @@ void CSpxAudioStreamSession::Error(const std::string& error)
 {
     if (!error.empty())
     {
-        Error(m_recoAdapter.get(), std::make_shared<SpxRecoEngineAdapterError>(false, error));
+        Error(m_recoAdapter.get(), std::make_shared<SpxRecoEngineAdapterError>(false, CancellationReason::Error, CancellationErrorCode::RuntimeError, error));
     }
 }
 
@@ -1187,7 +1187,7 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
     {
         SPX_DBG_TRACE_VERBOSE("%s: Creating/firing ResultReason::Canceled result", __FUNCTION__);
         auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
-        auto error = factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::Error, PAL::ToWString(payload->Info()).c_str(), 0, 0);
+        auto error = factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, payload->Reason(), payload->ErrorCode(), PAL::ToWString(payload->Info()).c_str(), 0, 0);
         WaitForRecognition_Complete(error);
     }
 }

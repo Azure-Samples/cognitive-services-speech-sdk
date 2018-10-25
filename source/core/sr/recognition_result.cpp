@@ -24,6 +24,7 @@ namespace Impl {
 
 CSpxRecognitionResult::CSpxRecognitionResult():
     m_cancellationReason { REASON_CANCELED_NONE },
+    m_cancellationErrorCode { CancellationErrorCode::NoError },
     m_noMatchReason { NO_MATCH_REASON_NONE }
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -54,6 +55,11 @@ CancellationReason CSpxRecognitionResult::GetCancellationReason()
     return m_cancellationReason;
 }
 
+CancellationErrorCode CSpxRecognitionResult::GetCancellationErrorCode()
+{
+    return m_cancellationErrorCode;
+}
+
 NoMatchReason CSpxRecognitionResult::GetNoMatchReason()
 {
     return m_noMatchReason;
@@ -77,12 +83,13 @@ void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, cons
     SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
-void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, const wchar_t* text, uint64_t offset, uint64_t duration)
+void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration)
 {
     SPX_DBG_TRACE_FUNCTION();
 
     m_reason = reason;
     m_cancellationReason = cancellation;
+    m_cancellationErrorCode = errorCode;
     m_noMatchReason = noMatchReason;
 
     m_offset = offset;
@@ -200,6 +207,7 @@ void CSpxRecognitionResult::InitTranslationSynthesisResult(SynthesisStatusCode s
         SPX_DBG_TRACE_VERBOSE("%s: status=SynthesisStatusCode::Error; switching result to ResultReason::Canceled", __FUNCTION__);
         m_reason = ResultReason::Canceled;
         m_cancellationReason = CancellationReason::Error;
+        m_cancellationErrorCode = CancellationErrorCode::ServiceError;
 
         auto errorDetails = PAL::ToString(failureReason);
         SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());

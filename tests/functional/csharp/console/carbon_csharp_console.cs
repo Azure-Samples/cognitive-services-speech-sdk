@@ -124,7 +124,7 @@ namespace MicrosoftSpeechSDKSamples
                         throw new IndexOutOfRangeException("No file name specified as stream input.");
                     }
                     fileName = audioInputStr.Substring(index + 1);
-                    if (String.IsNullOrEmpty(fileName))
+                    if (string.IsNullOrEmpty(fileName))
                     {
                         throw new IndexOutOfRangeException("No file name specified as stream input.");
                     }
@@ -147,7 +147,7 @@ namespace MicrosoftSpeechSDKSamples
                         throw new IndexOutOfRangeException("no language is specified.");
                     }
                     lang = paraStr.Substring(index + 1);
-                    if (String.IsNullOrEmpty(lang))
+                    if (string.IsNullOrEmpty(lang))
                     {
                         throw new IndexOutOfRangeException("no language is specified.");
                     }
@@ -161,7 +161,7 @@ namespace MicrosoftSpeechSDKSamples
                         throw new IndexOutOfRangeException("no model is specified.");
                     }
                     modelId = paraStr.Substring(index + 1);
-                    if (String.IsNullOrEmpty(modelId))
+                    if (string.IsNullOrEmpty(modelId))
                     {
                         throw new IndexOutOfRangeException("no model is specified.");
                     }
@@ -180,7 +180,7 @@ namespace MicrosoftSpeechSDKSamples
                         throw new IndexOutOfRangeException("no endpoint is specified.");
                     }
                     endpoint = paraStr.Substring(index + 1);
-                    if (String.IsNullOrEmpty(endpoint))
+                    if (string.IsNullOrEmpty(endpoint))
                     {
                         throw new IndexOutOfRangeException("no endpoint is specified.");
                     }

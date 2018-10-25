@@ -202,7 +202,54 @@ typedef NS_ENUM(NSUInteger, SPXCancellationReason)
     /**
       * Indicates that the end of the audio stream was reached.
       */
-    SPXCancellationReason_EndOfStream = 2,
+    SPXCancellationReason_EndOfStream = 2
+};
+
+/**
+  * Defines error code in case that CancellationReason is set to Error. 
+  * Added in version 1.1.0. 
+  */ 
+typedef NS_ENUM(NSUInteger, SPXCancellationErrorCode)
+{
+    /**
+      * No error.
+      */
+    SPXCancellationErrorCode_NoError = 0,
+
+    /**
+      * Indicates an authentication error. The errorDetails property contains detailed error response.
+      */
+    SPXCancellationErrorCode_AuthenticationFailure = 1,
+
+    /**
+      * Indicates that one or more recognition parameters are invalid.
+      */
+    SPXCancellationErrorCode_BadRequestParameters = 2,
+
+    /**
+      * Indicates that the number of parallel requests exceeded the number of allowed concurrent transcriptions for the subscription.
+      */
+    SPXCancellationErrorCode_TooManyRequests = 3,
+
+    /**
+      * Indicates an connection error. The errorDetails property contains detailed error response.
+      */
+    SPXCancellationErrorCode_ConnectionFailure = 4,
+
+    /**
+      * Indicates a time-out error when waiting for response from service.
+      */
+    SPXCancellationErrorCode_ServiceTimeout = 5,
+
+    /**
+      * Indicates that an error is returned by the service.
+      */
+    SPXCancellationErrorCode_ServiceError = 6,
+
+    /**
+      * Indicates an unexpected runtime error. The errorDetails property contains detailed error response.
+      */
+    SPXCancellationErrorCode_RuntimeError = 7
 };
 
 /**

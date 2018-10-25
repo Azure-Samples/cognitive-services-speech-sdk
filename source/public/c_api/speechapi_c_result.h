@@ -26,9 +26,22 @@ typedef enum Result_Reason Result_Reason;
 enum Result_CancellationReason
 {
     CancellationReason_Error = 1,
-    CancellationReason_EndOfStream = 2
+    CancellationReason_EndOfStream = 2,
 };
 typedef enum Result_CancellationReason Result_CancellationReason;
+
+enum Result_CancellationErrorCode
+{
+    CancellationErrorCode_NoError = 0,
+    CancellationErrorCode_AuthenticationFailure = 1,
+    CancellationErrorCode_BadRequestParameters = 2,
+    CancellationErrorCode_TooManyRequests = 3,
+    CancellationErrorCode_ConnectionFailure = 4,
+    CancellationErrorCode_ServiceTimeout = 5,
+    CancellationErrorCode_ServiceError = 6,
+    CancellationErrorCode_RuntimeError = 7
+};
+typedef enum Result_CancellationErrorCode Result_CancellationErrorCode;
 
 enum Result_NoMatchReason
 {
@@ -40,6 +53,7 @@ typedef enum Result_NoMatchReason Result_NoMatchReason;
 
 SPXAPI result_get_reason(SPXRESULTHANDLE hresult, Result_Reason* reason);
 SPXAPI result_get_reason_canceled(SPXRESULTHANDLE hresult, Result_CancellationReason* reason);
+SPXAPI result_get_canceled_error_code(SPXRESULTHANDLE hresult, Result_CancellationErrorCode* errorCode);
 SPXAPI result_get_no_match_reason(SPXRESULTHANDLE hresult, Result_NoMatchReason* reason);
 
 SPXAPI result_get_result_id(SPXRESULTHANDLE hresult, char* pszResultId, uint32_t cchResultId);

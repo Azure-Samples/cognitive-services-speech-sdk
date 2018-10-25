@@ -109,6 +109,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/ResultReason.java
     ${CMAKE_SWIG_OUTDIR}/CancellationReason.java
     ${CMAKE_SWIG_OUTDIR}/CancellationDetails.java
+    ${CMAKE_SWIG_OUTDIR}/CancellationErrorCode.java    
     ${CMAKE_SWIG_OUTDIR}/NoMatchReason.java
     ${CMAKE_SWIG_OUTDIR}/NoMatchDetails.java
     ${CMAKE_SWIG_OUTDIR}/RecognitionEventArgs.java
@@ -181,6 +182,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/RecognitionEventArgs.java
     ${PACKAGE_DIR}/ResultReason.java
     ${PACKAGE_DIR}/CancellationReason.java
+    ${PACKAGE_DIR}/CancellationErrorCode.java
     ${PACKAGE_DIR}/NoMatchDetails.java
     ${PACKAGE_DIR}/NoMatchReason.java
     ${PACKAGE_DIR}/Recognizer.java

@@ -69,6 +69,7 @@ namespace MicrosoftSpeechSDKSamples
 
                     if (cancellation.Reason == CancellationReason.Error)
                     {
+                        Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
                         Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
                         Console.WriteLine($"CANCELED: Did you update the subscription info?");
                     }
@@ -133,6 +134,7 @@ namespace MicrosoftSpeechSDKSamples
 
                         if (e.Reason == CancellationReason.Error)
                         {
+                            Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
                             Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
                             Console.WriteLine($"CANCELED: Did you update the subscription info?");
                         }
@@ -221,6 +223,7 @@ namespace MicrosoftSpeechSDKSamples
 
                     if (cancellation.Reason == CancellationReason.Error)
                     {
+                        Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
                         Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
                         Console.WriteLine($"CANCELED: Did you update the subscription info?");
                     }

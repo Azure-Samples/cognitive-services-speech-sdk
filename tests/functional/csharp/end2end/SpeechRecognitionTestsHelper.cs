@@ -85,7 +85,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         private void CanceledEventCounter(object sender, SpeechRecognitionCanceledEventArgs e)
         {
-            if (e.Reason == CancellationReason.Error)
+            if (e.Reason != CancellationReason.EndOfStream)
             {
                 ErrorEventCount++;
             }

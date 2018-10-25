@@ -44,6 +44,7 @@ public:
     ResultReason GetReason() override;
     NoMatchReason GetNoMatchReason() override;
     CancellationReason GetCancellationReason() override;
+    CancellationErrorCode GetCancellationErrorCode() override;
 
     uint64_t GetOffset() const override { return m_offset; }
     uint64_t GetDuration() const override { return m_duration; }
@@ -51,7 +52,7 @@ public:
 
     // --- ISpxRecognitionResultInit ---
     void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
-    void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, const wchar_t* text, uint64_t offset, uint64_t duration) override;
+    void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) override;
 
     // --- ISpxIntentRecognitionResult ---
     std::wstring GetIntentId() override;
@@ -88,6 +89,7 @@ private:
     std::wstring m_text;
     ResultReason m_reason;
     CancellationReason m_cancellationReason;
+    CancellationErrorCode m_cancellationErrorCode;
     NoMatchReason m_noMatchReason;
 
     std::wstring m_intentId;

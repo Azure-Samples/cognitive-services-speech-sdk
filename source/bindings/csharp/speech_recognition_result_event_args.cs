@@ -46,6 +46,7 @@ namespace Microsoft.CognitiveServices.Speech
             eventArgImpl = e;
             var cancellation = e.GetCancellationDetails();
             Reason = (CancellationReason)cancellation.Reason;
+            ErrorCode = (CancellationErrorCode)cancellation.ErrorCode;
             ErrorDetails = cancellation.ErrorDetails;
         }
 
@@ -55,8 +56,15 @@ namespace Microsoft.CognitiveServices.Speech
         public CancellationReason Reason { get; }
 
         /// <summary>
-        /// In case of an unsuccessful recognition, provides a details of why the occurred error.
-        /// This field is only filled-out if the reason canceled (<see cref="Reason"/>) is set to Error.
+        /// The error code in case of an unsuccessful recognition (Reason<see cref="Reason"/> is set to Error).
+        /// If Reason is not Error, ErrorCode returns NoError.
+        /// Added in version 1.1.0.
+        /// </summary>
+        public CancellationErrorCode ErrorCode { get; }
+
+        /// <summary>
+        /// The error message in case of an unsuccessful recognition (Reason<see cref="Reason"/> is set to Error).
+        /// This field is only filled-out if Reason is Error.
         /// </summary>
         public string ErrorDetails { get; }
 
@@ -66,7 +74,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A string that represents the speech recognition result event.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture,"SessionId:{0} ResultId:{1} CancellationReason:{2}.", SessionId, Result.ResultId, Reason);
+            return string.Format(CultureInfo.InvariantCulture,"SessionId:{0} ResultId:{1} CancellationReason:{2}. CancellationErrorCode:{3}", SessionId, Result.ResultId, Reason, ErrorCode);
         }
 
         // Hold the reference
