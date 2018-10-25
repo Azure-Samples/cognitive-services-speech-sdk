@@ -4,31 +4,20 @@
 //
 
 import {
-    EnumTranslation,
+    AddedLmIntent,
     IAuthentication,
     IConnectionFactory,
-    IDetailedSpeechPhrase,
-    IIntentResponse,
     IntentConnectionFactory,
     IntentServiceRecognizer,
-    InternalErrorEvent,
-    ISimpleSpeechPhrase,
-    ISpeechHypothesis,
     PlatformConfig,
-    RecognitionCompletionStatus,
-    RecognitionEndedEvent,
     RecognitionMode,
-    RecognitionStatus2,
     RecognizerConfig,
     ServiceRecognizerBase,
-    SpeechRecognitionEvent,
-    SpeechRecognitionResultEvent,
 } from "../common.speech/Exports";
 import { AudioConfigImpl } from "./Audio/AudioConfig";
 import { Contracts } from "./Contracts";
 import {
     AudioConfig,
-    CancellationReason,
     IntentRecognitionCanceledEventArgs,
     IntentRecognitionEventArgs,
     IntentRecognitionResult,
@@ -37,7 +26,6 @@ import {
     PropertyCollection,
     PropertyId,
     Recognizer,
-    ResultReason,
     SpeechConfig,
 } from "./Exports";
 import { LanguageUnderstandingModelImpl } from "./LanguageUnderstandingModel";
@@ -51,7 +39,7 @@ export class IntentRecognizer extends Recognizer {
     private disposedIntentRecognizer: boolean;
     private privProperties: PropertyCollection;
     private reco: ServiceRecognizerBase;
-    private pendingIntentArgs: IntentRecognitionEventArgs;
+
     private addedIntents: string[][];
     private addedLmIntents: { [id: string]: AddedLmIntent; };
     private intentDataSent: boolean;
@@ -165,12 +153,6 @@ export class IntentRecognizer extends Recognizer {
 
             this.implCloseExistingRecognizer();
 
-            this.reco = this.implRecognizerSetup(
-                RecognitionMode.Interactive,
-                this.properties,
-                this.audioConfig,
-                new IntentConnectionFactory());
-
             let contextJson: string;
 
             if (Object.keys(this.addedLmIntents).length !== 0 || undefined !== this.umbrellaIntent) {
@@ -178,13 +160,17 @@ export class IntentRecognizer extends Recognizer {
                 this.intentDataSent = true;
             }
 
-            this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
-                if (this.disposedIntentRecognizer || !this.reco) {
-                    return;
-                }
+            this.reco = this.implRecognizerSetup(
+                RecognitionMode.Interactive,
+                this.properties,
+                this.audioConfig,
+                new IntentConnectionFactory());
 
-                this.implDispatchMessageHandler(event, cb, err);
-            }, contextJson);
+            const intentReco: IntentServiceRecognizer = this.reco as IntentServiceRecognizer;
+            intentReco.setIntents(this.addedLmIntents, this.umbrellaIntent);
+
+            this.implRecognizerStart(this.reco, cb, err, contextJson);
+
         } catch (error) {
             if (!!err) {
                 if (error instanceof Error) {
@@ -212,12 +198,6 @@ export class IntentRecognizer extends Recognizer {
 
             this.implCloseExistingRecognizer();
 
-            this.reco = this.implRecognizerSetup(
-                RecognitionMode.Conversation,
-                this.properties,
-                this.audioConfig,
-                new IntentConnectionFactory());
-
             let contextJson: string;
 
             if (Object.keys(this.addedLmIntents).length !== 0) {
@@ -225,13 +205,16 @@ export class IntentRecognizer extends Recognizer {
                 this.intentDataSent = true;
             }
 
-            this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
-                if (this.disposedIntentRecognizer || !this.reco) {
-                    return;
-                }
+            this.reco = this.implRecognizerSetup(
+                RecognitionMode.Conversation,
+                this.properties,
+                this.audioConfig,
+                new IntentConnectionFactory());
 
-                this.implDispatchMessageHandler(event, undefined, undefined);
-            }, contextJson);
+            const intentReco: IntentServiceRecognizer = this.reco as IntentServiceRecognizer;
+            intentReco.setIntents(this.addedLmIntents, this.umbrellaIntent);
+
+            this.implRecognizerStart(this.reco, undefined, undefined, contextJson);
 
             // report result to promise.
             if (!!cb) {
@@ -397,7 +380,7 @@ export class IntentRecognizer extends Recognizer {
     }
     protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
         const audioImpl: AudioConfigImpl = audioConfig as AudioConfigImpl;
-        return new IntentServiceRecognizer(authentication, connectionFactory, audioImpl, recognizerConfig);
+        return new IntentServiceRecognizer(authentication, connectionFactory, audioImpl, recognizerConfig, this, this.intentDataSent);
     }
 
     protected dispose(disposing: boolean): void {
@@ -409,318 +392,6 @@ export class IntentRecognizer extends Recognizer {
             this.disposedIntentRecognizer = true;
             super.dispose(disposing);
         }
-    }
-
-    private implDispatchMessageHandler(event: SpeechRecognitionEvent, cb?: (e: IntentRecognitionResult) => void, err?: (e: string) => void): void {
-        /*
-         Alternative syntax for typescript devs.
-         if (event instanceof SDK.RecognitionTriggeredEvent)
-        */
-        switch (event.Name) {
-            case "RecognitionEndedEvent":
-                {
-                    const recoEndedEvent: RecognitionEndedEvent = event as RecognitionEndedEvent;
-
-                    if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
-                        const result: IntentRecognitionResult = new IntentRecognitionResult(
-                            undefined, undefined,
-                            ResultReason.Canceled,
-                            undefined, undefined, undefined,
-                            RecognitionCompletionStatus[recoEndedEvent.Status] + ": " + recoEndedEvent.Error,
-                            undefined, undefined);
-
-                        const errorEvent: IntentRecognitionCanceledEventArgs = new IntentRecognitionCanceledEventArgs(
-                            CancellationReason.Error,
-                            recoEndedEvent.Error,
-                            result,
-                            0, recoEndedEvent.SessionId);
-
-                        if (this.canceled) {
-                            try {
-                                this.canceled(this, errorEvent);
-                                /* tslint:disable:no-empty */
-                            } catch (error) {
-                                // Not going to let errors in the event handler
-                                // trip things up.
-                            }
-                        }
-
-                        // report result to promise.
-                        if (!!cb) {
-                            try {
-                                cb(result);
-                                /* tslint:disable:no-empty */
-                            } catch (e) {
-                                if (!!err) {
-                                    err(e);
-                                }
-                            }
-                        }
-                    }
-                    break;
-                }
-            case "SpeechSimplePhraseEvent":
-                {
-                    const evResult = event as SpeechRecognitionResultEvent<ISimpleSpeechPhrase>;
-
-                    const reason = EnumTranslation.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
-                    const result: IntentRecognitionResult = new IntentRecognitionResult(
-                        undefined,
-                        undefined,
-                        reason,
-                        evResult.Result.DisplayText,
-                        evResult.Result.Duration,
-                        evResult.Result.Offset,
-                        undefined,
-                        JSON.stringify(evResult.Result),
-                        undefined);
-
-                    if (reason === ResultReason.Canceled) {
-                        const ev = new IntentRecognitionCanceledEventArgs(
-                            EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus),
-                            "",
-                            result,
-                            0, evResult.SessionId);
-
-                        if (!!this.canceled) {
-                            try {
-                                this.canceled(this, ev);
-                                /* tslint:disable:no-empty */
-                            } catch (error) {
-                                // Not going to let errors in the event handler
-                                // trip things up.
-                            }
-                        }
-
-                        // report result to promise.
-                        if (!!cb) {
-                            try {
-                                cb(result);
-                                /* tslint:disable:no-empty */
-                            } catch (e) {
-                                if (!!err) {
-                                    err(e);
-                                }
-                            }
-                        }
-                    } else {
-                        let ev = new IntentRecognitionEventArgs(result, 0 /*TODO*/, evResult.SessionId);
-
-                        const sendEvent: () => void = () => {
-                            if (!!this.recognized) {
-                                try {
-                                    this.recognized(this, ev);
-                                    /* tslint:disable:no-empty */
-                                } catch (error) {
-                                    // Not going to let errors in the event handler
-                                    // trip things up.
-                                }
-                            }
-
-                            // report result to promise.
-                            if (!!cb) {
-                                try {
-                                    cb(ev.result);
-                                } catch (e) {
-                                    if (!!err) {
-                                        err(e);
-                                    }
-                                }
-                                // Only invoke the call back once.
-                                // and if it's successful don't invoke the
-                                // error after that.
-                                cb = undefined;
-                                err = undefined;
-                            }
-                        };
-
-                        const status = (RecognitionStatus2 as any)[evResult.Result.RecognitionStatus];
-                        if (status === RecognitionStatus2.InitialSilenceTimeout ||
-                            status === RecognitionStatus2.BabbleTimeout) {
-                            ev = new IntentRecognitionEventArgs(
-                                new IntentRecognitionResult(
-                                    ev.result.intentId,
-                                    ev.result.resultId,
-                                    ResultReason.NoMatch,
-                                    ev.result.text,
-                                    ev.result.duration,
-                                    ev.result.offset,
-                                    ev.result.errorDetails,
-                                    ev.result.json,
-                                    ev.result.properties),
-                                ev.offset,
-                                ev.sessionId);
-                        }
-
-                        // If intent data was sent, the terminal result for this recognizer is an intent being found.
-                        // If no intent data was sent, the terminal event is speech recognition being successful.
-                        if (false === this.intentDataSent || ResultReason.NoMatch === ev.result.reason) {
-                            sendEvent();
-                        } else {
-                            // Squirrel away the args, when the response event arrives it will build upon them
-                            // and then return
-                            this.pendingIntentArgs = ev;
-
-                            //// Also, set a one minute delay, if the response hasn't come back, or more speech events do, move on.
-                            // setTimeout(() => {
-                            //    if (undefined !== this.pendingIntentArgs && !this.disposedIntentRecognizer) {
-                            //        sendEvent();
-                            //        this.pendingIntentArgs = undefined;
-                            //    }
-                            // }, 60000);
-                        }
-                    }
-                }
-                break;
-            case "SpeechHypothesisEvent":
-                {
-                    const evResult = event as SpeechRecognitionResultEvent<ISpeechHypothesis>;
-
-                    const result = new IntentRecognitionResult(
-                        undefined,
-                        undefined,
-                        ResultReason.RecognizingIntent,
-                        evResult.Result.Text,
-                        evResult.Result.Duration,
-                        evResult.Result.Offset,
-                        undefined,
-                        JSON.stringify(evResult.Result),
-                        undefined);
-
-                    const ev = new IntentRecognitionEventArgs(result, 0 /*TODO*/, evResult.SessionId);
-
-                    if (!!this.recognizing) {
-                        try {
-                            this.recognizing(this, ev);
-                            /* tslint:disable:no-empty */
-                        } catch (error) {
-                            // Not going to let errors in the event handler
-                            // trip things up.
-                        }
-                    }
-                }
-                break;
-            case "IntentResponseEvent":
-                {
-                    let ev: IntentRecognitionEventArgs = this.pendingIntentArgs;
-                    this.pendingIntentArgs = undefined;
-
-                    const evResult: SpeechRecognitionResultEvent<IIntentResponse> = event as SpeechRecognitionResultEvent<IIntentResponse>;
-
-                    if (undefined === ev) {
-                        // Odd... Not sure this can happen
-                        ev = new IntentRecognitionEventArgs(new IntentRecognitionResult(), 0 /*TODO*/, evResult.SessionId);
-                    }
-
-                    // If LUIS didn't return anything, send the existing event, else
-                    // modify it to show the match.
-                    // See if the intent found is in the list of intents asked for.
-
-                    let addedIntent: AddedLmIntent = this.addedLmIntents[evResult.Result.topScoringIntent.intent];
-
-                    if (this.umbrellaIntent !== undefined) {
-                        addedIntent = this.umbrellaIntent;
-                    }
-
-                    if (null !== evResult.Result && addedIntent !== undefined) {
-                        const intentId = addedIntent.intentName === undefined ? evResult.Result.topScoringIntent.intent : addedIntent.intentName;
-                        let reason = ev.result.reason;
-
-                        if (undefined !== intentId) {
-                            reason = ResultReason.RecognizedIntent;
-                        }
-
-                        // make sure, properties is set.
-                        const properties = (undefined !== ev.result.properties) ?
-                            ev.result.properties : new PropertyCollection();
-
-                        properties.setProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult, JSON.stringify(evResult.Result));
-
-                        ev = new IntentRecognitionEventArgs(
-                            new IntentRecognitionResult(
-                                intentId,
-                                ev.result.resultId,
-                                reason,
-                                ev.result.text,
-                                ev.result.duration,
-                                ev.result.offset,
-                                ev.result.errorDetails,
-                                ev.result.json,
-                                properties),
-                            ev.offset,
-                            ev.sessionId);
-                    }
-
-                    if (!!this.recognized) {
-                        try {
-                            this.recognized(this, ev);
-                            /* tslint:disable:no-empty */
-                        } catch (error) {
-                            // Not going to let errors in the event handler
-                            // trip things up.
-                        }
-                    }
-
-                    // report result to promise.
-                    if (!!cb) {
-                        try {
-                            cb(ev.result);
-                        } catch (e) {
-                            if (!!err) {
-                                err(e);
-                            }
-                        }
-                        // Only invoke the call back once.
-                        // and if it's successful don't invoke the
-                        // error after that.
-                        cb = undefined;
-                        err = undefined;
-                    }
-                }
-                break;
-            case "InternalErrorEvent":
-                {
-                    const evResult: InternalErrorEvent = event as InternalErrorEvent;
-                    const result: IntentRecognitionResult = new IntentRecognitionResult(
-                        undefined,
-                        undefined,
-                        ResultReason.Canceled,
-                        undefined,
-                        undefined,
-                        undefined,
-                        evResult.Result);
-                    const canceledResult: IntentRecognitionCanceledEventArgs = new IntentRecognitionCanceledEventArgs(
-                        CancellationReason.Error,
-                        result.errorDetails,
-                        result);
-
-                    try {
-                        this.canceled(this, canceledResult);
-                        /* tslint:disable:no-empty */
-                    } catch (error) {
-                        // Not going to let errors in the event handler
-                        // trip things up.
-                    }
-
-                    // report result to promise.
-                    if (!!cb) {
-                        try {
-                            cb(result);
-                        } catch (e) {
-                            if (!!err) {
-                                err(e);
-                            }
-                        }
-                        // Only invoke the call back once.
-                        // and if it's successful don't invoke thebundle
-                        // error after that.
-                        cb = undefined;
-                        err = undefined;
-                    }
-                }
-                break;
-        }
-
     }
 
     private implCloseExistingRecognizer(): void {
@@ -786,25 +457,5 @@ export class IntentRecognizer extends Recognizer {
                 provider: "LUIS",
             },
         });
-    }
-}
-
-/**
- * @class AddedLmIntent
- */
-// tslint:disable-next-line:max-classes-per-file
-class AddedLmIntent {
-    public modelImpl: LanguageUnderstandingModelImpl;
-    public intentName: string;
-
-    /**
-     * Creates and initializes an instance of this class.
-     * @constructor
-     * @param modelImpl - The model.
-     * @param intentName - The intent name.
-     */
-    public constructor(modelImpl: LanguageUnderstandingModelImpl, intentName: string) {
-        this.modelImpl = modelImpl;
-        this.intentName = intentName;
     }
 }

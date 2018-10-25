@@ -2,7 +2,10 @@
 // copyright (c) Microsoft. All rights reserved.
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
-import { PropertyCollection, RecognitionEventArgs, ResultReason, SpeechRecognitionResult } from "./Exports";
+import {
+    RecognitionEventArgs,
+    SpeechRecognitionResult,
+} from "./Exports";
 
 /**
  * Defines contents of speech recognizing/recognized event.

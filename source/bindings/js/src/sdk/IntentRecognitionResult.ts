@@ -3,7 +3,11 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-import { PropertyCollection, RecognitionResult, ResultReason, SpeechRecognitionResult } from "./Exports";
+import {
+    PropertyCollection,
+    ResultReason,
+    SpeechRecognitionResult,
+} from "./Exports";
 
 /**
  * Intent recognition result.

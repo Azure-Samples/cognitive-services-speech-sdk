@@ -166,7 +166,7 @@ test("InitialSilenceTimeout (pull)", (done: jest.DoneCallback) => {
     testInitialSilienceTimeout(config, done, () => expect(bytesSent).toBeLessThan(expectedBytesSent));
 });
 
-test.skip("InitialSilenceTimeout (push)", (done: jest.DoneCallback) => {
+test("InitialSilenceTimeout (push)", (done: jest.DoneCallback) => {
     const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
     const bigFileBuffer: Uint8Array = new Uint8Array(1024 * 1024);
     const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);

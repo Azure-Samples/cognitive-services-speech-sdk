@@ -2,43 +2,28 @@
 // copyright (c) Microsoft. All rights reserved.
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
+
 import {
-    EnumTranslation,
     IAuthentication,
     IConnectionFactory,
-    InternalErrorEvent,
-    ISimpleSpeechPhrase,
     PlatformConfig,
-    RecognitionCompletionStatus,
-    RecognitionEndedEvent,
     RecognitionMode,
     RecognizerConfig,
     ServiceRecognizerBase,
-    SpeechRecognitionEvent,
-    SpeechRecognitionResultEvent,
     TranslationConnectionFactory,
-    TranslationFailedEvent,
-    TranslationHypothesisEvent,
-    TranslationPhraseEvent,
     TranslationServiceRecognizer,
-    TranslationSynthesisErrorEvent,
-    TranslationSynthesisEvent,
 } from "../common.speech/Exports";
 import { AudioConfigImpl } from "./Audio/AudioConfig";
 import { Contracts } from "./Contracts";
 import {
     AudioConfig,
-    CancellationReason,
     PropertyCollection,
     PropertyId,
     Recognizer,
-    ResultReason,
     TranslationRecognitionCanceledEventArgs,
     TranslationRecognitionEventArgs,
     TranslationRecognitionResult,
-    Translations,
     TranslationSynthesisEventArgs,
-    TranslationSynthesisResult,
 } from "./Exports";
 import { SpeechTranslationConfig, SpeechTranslationConfigImpl } from "./SpeechTranslationConfig";
 
@@ -200,13 +185,10 @@ export class TranslationRecognizer extends Recognizer {
                 this.audioConfig,
                 new TranslationConnectionFactory());
 
-            this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
-                if (this.disposedTranslationRecognizer || !this.reco) {
-                    return;
-                }
-
-                this.implDispatchMessageHandler(event, cb, err);
-            });
+            this.implRecognizerStart(
+                this.reco,
+                cb,
+                err);
         } catch (error) {
             if (!!err) {
                 if (error instanceof Error) {
@@ -240,13 +222,7 @@ export class TranslationRecognizer extends Recognizer {
                 this.audioConfig,
                 new TranslationConnectionFactory());
 
-            this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
-                if (this.disposedTranslationRecognizer || !this.reco) {
-                    return;
-                }
-
-                this.implDispatchMessageHandler(event, undefined, undefined);
-            });
+            this.implRecognizerStart(this.reco, undefined, undefined);
 
             // report result to promise.
             if (!!cb) {
@@ -338,7 +314,7 @@ export class TranslationRecognizer extends Recognizer {
 
         const configImpl: AudioConfigImpl = audioConfig as AudioConfigImpl;
 
-        return new TranslationServiceRecognizer(authentication, connectionFactory, configImpl, recognizerConfig);
+        return new TranslationServiceRecognizer(authentication, connectionFactory, configImpl, recognizerConfig, this);
     }
 
     // tslint:disable-next-line:member-ordering
@@ -350,330 +326,5 @@ export class TranslationRecognizer extends Recognizer {
             this.reco.Dispose();
             this.reco = undefined;
         }
-    }
-
-    private implDispatchMessageHandler(event: SpeechRecognitionEvent, cb?: (e: TranslationRecognitionResult) => void, err?: (e: string) => void): void {
-
-        if (!this.reco) {
-            return;
-        }
-        switch (event.Name) {
-            case "RecognitionEndedEvent":
-                {
-                    const recoEndedEvent: RecognitionEndedEvent = event as RecognitionEndedEvent;
-
-                    if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
-                        const result = new TranslationRecognitionResult(
-                            undefined, undefined,
-                            ResultReason.Canceled,
-                            undefined, undefined, undefined,
-                            RecognitionCompletionStatus[recoEndedEvent.Status] + ": " + recoEndedEvent.Error,
-                            undefined, undefined);
-
-                        const errorEvent: TranslationRecognitionCanceledEventArgs = new TranslationRecognitionCanceledEventArgs(
-                            recoEndedEvent.SessionId,
-                            CancellationReason.Error,
-                            recoEndedEvent.Error,
-                            result);
-
-                        if (!!this.canceled) {
-                            try {
-                                this.canceled(this, errorEvent);
-                                /* tslint:disable:no-empty */
-                            } catch (error) {
-                                // Not going to let errors in the event handler
-                                // trip things up.
-                            }
-                        }
-
-                        // report result to promise.
-                        if (!!cb) {
-                            try {
-                                cb(errorEvent.result);
-                            } catch (e) {
-                                if (!!err) {
-                                    err(e);
-                                }
-                            }
-                            // Only invoke the call back once.
-                            // and if it's successful don't invoke the
-                            // error after that.
-                            cb = undefined;
-                            err = undefined;
-                        }
-                    }
-                }
-                break;
-            case "RecognitionFailedEvent":
-                const evResult = event as SpeechRecognitionResultEvent<ISimpleSpeechPhrase>;
-
-                const reason = EnumTranslation.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
-                const result = new TranslationRecognitionResult(
-                    undefined, undefined,
-                    reason,
-                    evResult.Result.DisplayText,
-                    evResult.Result.Duration,
-                    evResult.Result.Offset,
-                    undefined,
-                    JSON.stringify(evResult.Result),
-                    undefined);
-
-                if (reason === ResultReason.Canceled) {
-                    const ev = new TranslationRecognitionCanceledEventArgs(
-                        evResult.SessionId,
-                        EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus),
-                        null,
-                        result);
-
-                    if (!!this.canceled) {
-                        try {
-                            this.canceled(this, ev);
-                            /* tslint:disable:no-empty */
-                        } catch (error) {
-                            // Not going to let errors in the event handler
-                            // trip things up.
-                        }
-                    }
-                } else {
-                    const ev = new TranslationRecognitionEventArgs(result, 0/*offset*/, evResult.SessionId);
-
-                    if (!!this.recognized) {
-                        try {
-                            this.recognized(this, ev);
-                            /* tslint:disable:no-empty */
-                        } catch (error) {
-                            // Not going to let errors in the event handler
-                            // trip things up.
-                        }
-                    }
-                }
-
-                // report result to promise.
-                if (!!cb) {
-                    try {
-                        cb(result);
-                    } catch (e) {
-                        if (!!err) {
-                            err(e);
-                        }
-                    }
-                    // Only invoke the call back once.
-                    // and if it's successful don't invoke the
-                    // error after that.
-                    cb = undefined;
-                    err = undefined;
-                }
-
-                break;
-            case "TranslationPhraseEvent":
-                {
-                    const evResult = event as TranslationPhraseEvent;
-                    const result: TranslationRecognitionEventArgs = this.FireEventForResult(evResult);
-
-                    if (!!this.recognized) {
-                        try {
-                            this.recognized(this, result);
-                            /* tslint:disable:no-empty */
-                        } catch (error) {
-                            // Not going to let errors in the event handler
-                            // trip things up.
-                        }
-                    }
-
-                    // report result to promise.
-                    if (!!cb) {
-                        try {
-                            cb(result.result);
-                        } catch (e) {
-                            if (!!err) {
-                                err(e);
-                            }
-                        }
-                        // Only invoke the call back once.
-                        // and if it's successful don't invoke the
-                        // error after that.
-                        cb = undefined;
-                        err = undefined;
-                    }
-                }
-                break;
-            case "TranslationHypothesisEvent":
-                {
-                    const evResult = event as TranslationHypothesisEvent;
-
-                    const result: TranslationRecognitionEventArgs = this.FireEventForResult(evResult);
-
-                    if (!!this.recognizing) {
-                        try {
-                            this.recognizing(this, result);
-                            /* tslint:disable:no-empty */
-                        } catch (error) {
-                            // Not going to let errors in the event handler
-                            // trip things up.
-                        }
-                    }
-
-                }
-                break;
-            case "TranslationFailedEvent":
-                {
-                    const evResult = event as TranslationFailedEvent;
-
-                    const result = new TranslationRecognitionResult(
-                        undefined, undefined,
-                        ResultReason.RecognizedSpeech,
-                        evResult.Result.Text,
-                        evResult.Result.Duration,
-                        evResult.Result.Offset,
-                        undefined, undefined, undefined);
-
-                    const retEvent: TranslationRecognitionEventArgs = new TranslationRecognitionEventArgs(result, 0 /*todo*/, evResult.SessionId);
-
-                    if (!!this.recognized) {
-                        try {
-                            this.recognized(this, retEvent);
-                            /* tslint:disable:no-empty */
-                        } catch (error) {
-                            // Not going to let errors in the event handler
-                            // trip things up.
-                        }
-                    }
-
-                    // report result to promise.
-                    if (!!cb) {
-                        try {
-                            cb(retEvent.result);
-                        } catch (e) {
-                            if (!!err) {
-                                err(e);
-                            }
-                        }
-                        // Only invoke the call back once.
-                        // and if it's successful don't invoke thebundle
-                        // error after that.
-                        cb = undefined;
-                        err = undefined;
-                    }
-                }
-                break;
-            case "TranslationSynthesisEvent":
-                {
-                    const evResut: TranslationSynthesisEvent = event as TranslationSynthesisEvent;
-
-                    const audio = evResut.Result;
-                    const reason = (undefined === audio) ? ResultReason.SynthesizingAudioCompleted : ResultReason.SynthesizingAudio;
-                    const result = new TranslationSynthesisResult(reason, audio);
-                    const retEvent: TranslationSynthesisEventArgs = new TranslationSynthesisEventArgs(result, evResut.SessionId);
-
-                    if (!!this.synthesizing) {
-                        try {
-                            this.synthesizing(this, retEvent);
-                            /* tslint:disable:no-empty */
-                        } catch (error) {
-                            // Not going to let errors in the event handler
-                            // trip things up.
-                        }
-                    }
-                }
-                break;
-            case "TranslationSynthesisErrorEvent":
-                {
-                    const evResult: TranslationSynthesisErrorEvent = event as TranslationSynthesisErrorEvent;
-
-                    const result = new TranslationSynthesisResult(evResult.Result.SynthesisStatus, undefined);
-                    const retEvent: TranslationSynthesisEventArgs = new TranslationSynthesisEventArgs(result, evResult.SessionId);
-
-                    if (!!this.synthesizing) {
-                        try {
-                            this.synthesizing(this, retEvent);
-                            /* tslint:disable:no-empty */
-                        } catch (error) {
-                            // Not going to let errors in the event handler
-                            // trip things up.
-                        }
-                    }
-
-                    if (!!this.canceled) {
-                        // And raise a canceled event to send the rich(er) error message back.
-                        const canceledResult: TranslationRecognitionCanceledEventArgs = new TranslationRecognitionCanceledEventArgs(
-                            evResult.SessionId,
-                            CancellationReason.Error,
-                            evResult.Result.FailureReason,
-                            null);
-
-                        try {
-                            this.canceled(this, canceledResult);
-                            /* tslint:disable:no-empty */
-                        } catch (error) {
-                            // Not going to let errors in the event handler
-                            // trip things up.
-                        }
-                    }
-                }
-                break;
-            case "InternalErrorEvent":
-                {
-                    const evResult: InternalErrorEvent = event as InternalErrorEvent;
-                    const result: TranslationRecognitionResult = new TranslationRecognitionResult(
-                        undefined,
-                        evResult.RequestId,
-                        ResultReason.Canceled,
-                        undefined,
-                        undefined,
-                        undefined,
-                        evResult.Result);
-                    const canceledResult: TranslationRecognitionCanceledEventArgs = new TranslationRecognitionCanceledEventArgs(
-                        evResult.SessionId,
-                        CancellationReason.Error,
-                        result.errorDetails,
-                        result);
-
-                    try {
-                        this.canceled(this, canceledResult);
-                        /* tslint:disable:no-empty */
-                    } catch (error) {
-                        // Not going to let errors in the event handler
-                        // trip things up.
-                    }
-
-                    // report result to promise.
-                    if (!!cb) {
-                        try {
-                            cb(result);
-                        } catch (e) {
-                            if (!!err) {
-                                err(e);
-                            }
-                        }
-                        // Only invoke the call back once.
-                        // and if it's successful don't invoke thebundle
-                        // error after that.
-                        cb = undefined;
-                        err = undefined;
-                    }
-                }
-                break;
-        }
-    }
-
-    private FireEventForResult(evResult: TranslationPhraseEvent | TranslationHypothesisEvent): TranslationRecognitionEventArgs {
-        const translations = new Translations();
-        for (const translation of evResult.Result.Translation.Translations) {
-            translations.set(translation.Language, translation.Text);
-        }
-
-        const result = new TranslationRecognitionResult(
-            translations,
-            undefined,
-            evResult instanceof TranslationPhraseEvent ? ResultReason.TranslatedSpeech : ResultReason.TranslatingSpeech,
-            evResult.Result.Text,
-            evResult.Result.Duration,
-            evResult.Result.Offset,
-            undefined,
-            JSON.stringify(evResult.Result),
-            undefined);
-
-        const ev = new TranslationRecognitionEventArgs(result, 0, evResult.SessionId);
-        return ev;
     }
 }

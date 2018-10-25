@@ -6,17 +6,6 @@ import {
     EventType,
     PlatformEvent,
 } from "../common/Exports";
-import {
-    IDetailedSpeechPhrase,
-    IIntentResponse,
-    ISimpleSpeechPhrase,
-    ISpeechEndDetectedResult,
-    ISpeechHypothesis,
-    ISpeechStartDetected,
-    ITranslationHypothesis,
-    ITranslationPhrase,
-    ITranslationSynthesisEnd,
-} from "./Exports";
 
 export class SpeechRecognitionEvent extends PlatformEvent {
     private requestId: string;
@@ -35,20 +24,6 @@ export class SpeechRecognitionEvent extends PlatformEvent {
 
     public get SessionId(): string {
         return this.sessionId;
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class SpeechRecognitionResultEvent<TResult> extends SpeechRecognitionEvent {
-    private result: TResult;
-
-    constructor(eventName: string, requestId: string, sessionId: string, result: TResult) {
-        super(eventName, requestId, sessionId);
-        this.result = result;
-    }
-
-    public get Result(): TResult {
-        return this.result;
     }
 }
 
@@ -131,103 +106,6 @@ export class RecognitionStartedEvent extends SpeechRecognitionEvent {
 
     public get AuthFetchEventId(): string {
         return this.authFetchEventId;
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class SpeechStartDetectedEvent extends SpeechRecognitionResultEvent<ISpeechStartDetected> {
-    constructor(requestId: string, sessionId: string, result: ISpeechStartDetected) {
-        super("SpeechStartDetectedEvent", requestId, sessionId, result);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class SpeechHypothesisEvent extends SpeechRecognitionResultEvent<ISpeechHypothesis> {
-    constructor(requestId: string, sessionId: string, result: ISpeechHypothesis) {
-        super("SpeechHypothesisEvent", requestId, sessionId, result);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class SpeechFragmentEvent extends SpeechRecognitionResultEvent<ISpeechHypothesis> {
-    constructor(requestId: string, sessionId: string, result: ISpeechHypothesis) {
-        super("SpeechFragmentEvent", requestId, sessionId, result);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class SpeechEndDetectedEvent extends SpeechRecognitionResultEvent<ISpeechEndDetectedResult> {
-    constructor(requestId: string, sessionId: string, result: ISpeechEndDetectedResult) {
-        super("SpeechEndDetectedEvent", requestId, sessionId, result);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class SpeechSimplePhraseEvent extends SpeechRecognitionResultEvent<ISimpleSpeechPhrase> {
-    constructor(requestId: string, sessionId: string, result: ISimpleSpeechPhrase) {
-        super("SpeechSimplePhraseEvent", requestId, sessionId, result);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class SpeechDetailedPhraseEvent extends SpeechRecognitionResultEvent<IDetailedSpeechPhrase> {
-    constructor(requestId: string, sessionId: string, result: IDetailedSpeechPhrase) {
-        super("SpeechDetailedPhraseEvent", requestId, sessionId, result);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class TranslationHypothesisEvent extends SpeechRecognitionResultEvent<ITranslationHypothesis> {
-    constructor(requestId: string, sessionId: string, result: ITranslationHypothesis) {
-        super("TranslationHypothesisEvent", requestId, sessionId, result);
-    }
-}
-// tslint:disable-next-line:max-classes-per-file
-export class TranslationPhraseEvent extends SpeechRecognitionResultEvent<ITranslationPhrase> {
-    constructor(requestId: string, sessionId: string, result: ITranslationPhrase) {
-        super("TranslationPhraseEvent", requestId, sessionId, result);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class TranslationFailedEvent extends SpeechRecognitionResultEvent<ITranslationPhrase> {
-    constructor(requestId: string, sessionId: string, result: ITranslationPhrase) {
-        super("TranslationFailedEvent", requestId, sessionId, result);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class RecognitionFailedEvent extends SpeechRecognitionResultEvent<ISimpleSpeechPhrase> {
-    constructor(requestId: string, sessionId: string, result: ISimpleSpeechPhrase) {
-        super("RecognitionFailedEvent", requestId, sessionId, result);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class TranslationSynthesisEvent extends SpeechRecognitionResultEvent<ArrayBuffer> {
-    constructor(requestId: string, sessionId: string, result: ArrayBuffer) {
-        super("TranslationSynthesisEvent", requestId, sessionId, result);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class TranslationSynthesisErrorEvent extends SpeechRecognitionResultEvent<ITranslationSynthesisEnd> {
-    constructor(requestId: string, sessionId: string, result: ITranslationSynthesisEnd) {
-        super("TranslationSynthesisErrorEvent", requestId, sessionId, result);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class IntentResponseEvent extends SpeechRecognitionResultEvent<IIntentResponse> {
-    constructor(requestId: string, sessionId: string, result: IIntentResponse) {
-        super("IntentResponseEvent", requestId, sessionId, result);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class InternalErrorEvent extends SpeechRecognitionResultEvent<string> {
-    constructor(requestId: string, sessionId: string, result: string) {
-        super("InternalErrorEvent", requestId, sessionId, result);
     }
 }
 

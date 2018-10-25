@@ -4,8 +4,8 @@
 //
 
 import {
-    ISimpleSpeechPhrase,
-    RecognitionStatus2,
+    RecognitionStatus,
+    SimpleSpeechPhrase,
 } from "../../src/common.speech/Exports";
 import {
     IntentRecognitionResult,
@@ -13,7 +13,6 @@ import {
     SpeechRecognitionResult,
     TranslationRecognitionResult,
 } from "./Exports";
-import { RecognitionResult } from "./RecognitionResult";
 
 /**
  * Contains detailed information for NoMatch recognition results.
@@ -40,17 +39,15 @@ export class NoMatchDetails {
      * @returns {NoMatchDetails} The no match details object being created.
      */
     public static fromResult(result: SpeechRecognitionResult | IntentRecognitionResult | TranslationRecognitionResult): NoMatchDetails {
-        const simpleSpeech: ISimpleSpeechPhrase = JSON.parse(result.json);
+        const simpleSpeech: SimpleSpeechPhrase = SimpleSpeechPhrase.FromJSON(result.json);
 
         let reason: NoMatchReason = NoMatchReason.NotRecognized;
 
-        const realReason = (RecognitionStatus2 as any)[simpleSpeech.RecognitionStatus];
-
-        switch (realReason) {
-            case RecognitionStatus2.BabbleTimeout:
+        switch (simpleSpeech.RecognitionStatus) {
+            case RecognitionStatus.BabbleTimeout:
                 reason = NoMatchReason.InitialBabbleTimeout;
                 break;
-            case RecognitionStatus2.InitialSilenceTimeout:
+            case RecognitionStatus.InitialSilenceTimeout:
                 reason = NoMatchReason.InitialSilenceTimeout;
                 break;
             default:

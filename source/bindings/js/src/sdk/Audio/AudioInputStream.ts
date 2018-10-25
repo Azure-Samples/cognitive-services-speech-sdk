@@ -156,12 +156,13 @@ export class PushAudioInputStreamImpl extends PushAudioInputStream implements IA
     public write(dataBuffer: ArrayBuffer): void {
         // Break the data up into smaller chunks if needed.
         let i: number;
-
         for (i = bufferSize - 1; i < dataBuffer.byteLength; i += bufferSize) {
-            this.stream.Write(dataBuffer.slice(i - (bufferSize - 1), i));
+            this.stream.Write(dataBuffer.slice(i - (bufferSize - 1), i + 1));
         }
 
-        this.stream.Write(dataBuffer.slice(i - (bufferSize - 1), dataBuffer.byteLength - 1));
+        if ((i - (bufferSize - 1)) !== dataBuffer.byteLength) {
+            this.stream.Write(dataBuffer.slice(i - (bufferSize - 1), dataBuffer.byteLength));
+        }
     }
 
     /**

@@ -3,23 +3,13 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 import {
-    EnumTranslation,
     IAuthentication,
     IConnectionFactory,
-    IDetailedSpeechPhrase,
-    InternalErrorEvent,
-    ISimpleSpeechPhrase,
-    ISpeechHypothesis,
     OutputFormatPropertyName,
     PlatformConfig,
-    RecognitionCompletionStatus,
-    RecognitionEndedEvent,
     RecognitionMode,
-    RecognitionStatus2,
     RecognizerConfig,
     ServiceRecognizerBase,
-    SpeechRecognitionEvent,
-    SpeechRecognitionResultEvent,
     SpeechServiceRecognizer,
 } from "../common.speech/Exports";
 import { SpeechConnectionFactory } from "../common.speech/SpeechConnectionFactory";
@@ -27,13 +17,11 @@ import { AudioConfigImpl } from "./Audio/AudioConfig";
 import { Contracts } from "./Contracts";
 import {
     AudioConfig,
-    CancellationReason,
     KeywordRecognitionModel,
     OutputFormat,
     PropertyCollection,
     PropertyId,
     Recognizer,
-    ResultReason,
     SpeechRecognitionCanceledEventArgs,
     SpeechRecognitionEventArgs,
     SpeechRecognitionResult,
@@ -188,13 +176,7 @@ export class SpeechRecognizer extends Recognizer {
                 this.audioConfig,
                 new SpeechConnectionFactory());
 
-            this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
-                if (this.disposedSpeechRecognizer || !this.reco) {
-                    return;
-                }
-
-                this.implDispatchMessageHandler(event, cb, err);
-            });
+            this.implRecognizerStart(this.reco, cb, err);
         } catch (error) {
             if (!!err) {
                 if (error instanceof Error) {
@@ -228,13 +210,7 @@ export class SpeechRecognizer extends Recognizer {
                 this.audioConfig,
                 new SpeechConnectionFactory());
 
-            this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
-                if (this.disposedSpeechRecognizer || !this.reco) {
-                    return;
-                }
-
-                this.implDispatchMessageHandler(event, undefined, undefined);
-            });
+            this.implRecognizerStart(this.reco, undefined, undefined);
 
             // report result to promise.
             if (!!cb) {
@@ -369,7 +345,7 @@ export class SpeechRecognizer extends Recognizer {
 
     protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
         const configImpl: AudioConfigImpl = audioConfig as AudioConfigImpl;
-        return new SpeechServiceRecognizer(authentication, connectionFactory, configImpl, recognizerConfig);
+        return new SpeechServiceRecognizer(authentication, connectionFactory, configImpl, recognizerConfig, this);
     }
 
     // tslint:disable-next-line:member-ordering
@@ -380,246 +356,6 @@ export class SpeechRecognizer extends Recognizer {
             this.reco.AudioSource.TurnOff();
             this.reco.Dispose();
             this.reco = undefined;
-        }
-    }
-
-    private implDispatchMessageHandler(event: SpeechRecognitionEvent, cb?: (e: SpeechRecognitionResult) => void, err?: (e: string) => void): void {
-        /*
-         Alternative syntax for typescript devs.
-         if (event instanceof SDK.RecognitionTriggeredEvent)
-        */
-        switch (event.Name) {
-            case "RecognitionEndedEvent":
-                {
-                    const recoEndedEvent: RecognitionEndedEvent = event as RecognitionEndedEvent;
-                    if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
-                        const errorText: string = RecognitionCompletionStatus[recoEndedEvent.Status] + ": " + recoEndedEvent.Error;
-                        const errorEvent: SpeechRecognitionCanceledEventArgs = new SpeechRecognitionCanceledEventArgs(
-                            CancellationReason.Error,
-                            errorText,
-                            0, /*todo*/
-                            recoEndedEvent.SessionId);
-
-                        if (this.canceled) {
-                            try {
-                                this.canceled(this, errorEvent);
-                                /* tslint:disable:no-empty */
-                            } catch (error) {
-                                // Not going to let errors in the event handler
-                                // trip things up.
-                            }
-                        }
-
-                        const result = new SpeechRecognitionResult(
-                            undefined,
-                            ResultReason.Canceled,
-                            undefined, undefined, undefined,
-                            errorText,
-                            undefined, undefined);
-
-                        // report result to promise.
-                        if (!!cb) {
-                            try {
-                                cb(result);
-                                /* tslint:disable:no-empty */
-                            } catch (e) {
-                                if (!!err) {
-                                    err(e);
-                                }
-                            }
-                        }
-                    }
-                }
-                break;
-
-            case "SpeechSimplePhraseEvent":
-                {
-                    const evResult = event as SpeechRecognitionResultEvent<ISimpleSpeechPhrase>;
-
-                    const reason = EnumTranslation.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
-
-                    const result = new SpeechRecognitionResult(
-                        undefined,
-                        reason,
-                        evResult.Result.DisplayText,
-                        evResult.Result.Duration,
-                        evResult.Result.Offset,
-                        undefined,
-                        JSON.stringify(evResult.Result),
-                        undefined);
-
-                    if (reason === ResultReason.Canceled) {
-                        const ev = new SpeechRecognitionCanceledEventArgs(
-                            EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus),
-                            undefined,
-                            0, /*todo*/
-                            evResult.SessionId);
-
-                        if (!!this.canceled) {
-                            try {
-                                this.canceled(this, ev);
-                                /* tslint:disable:no-empty */
-                            } catch (error) {
-                                // Not going to let errors in the event handler
-                                // trip things up.
-                            }
-                        }
-                    } else {
-                        const ev = new SpeechRecognitionEventArgs(result, 0/*todo*/, evResult.SessionId);
-
-                        if (!!this.recognized) {
-                            try {
-                                this.recognized(this, ev);
-                                /* tslint:disable:no-empty */
-                            } catch (error) {
-                                // Not going to let errors in the event handler
-                                // trip things up.
-                            }
-                        }
-                    }
-
-                    // report result to promise.
-                    if (!!cb) {
-                        try {
-                            cb(result);
-                        } catch (e) {
-                            if (!!err) {
-                                err(e);
-                            }
-                        }
-                        // Only invoke the call back once.
-                        // and if it's successful don't invoke the
-                        // error after that.
-                        cb = undefined;
-                        err = undefined;
-                    }
-                }
-                break;
-
-            case "SpeechDetailedPhraseEvent":
-                {
-                    const evResult = event as SpeechRecognitionResultEvent<IDetailedSpeechPhrase>;
-
-                    const reason = EnumTranslation.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
-
-                    const result = new SpeechRecognitionResult(
-                        undefined,
-                        reason,
-                        (reason === ResultReason.RecognizedSpeech) ? evResult.Result.NBest[0].Display : undefined,
-                        evResult.Result.Duration,
-                        evResult.Result.Offset,
-                        undefined,
-                        JSON.stringify(evResult.Result),
-                        undefined);
-
-                    if (reason === ResultReason.Canceled) {
-                        const ev = new SpeechRecognitionCanceledEventArgs(
-                            EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus),
-                            undefined,
-                            0, /*todo*/
-                            evResult.SessionId);
-
-                        if (!!this.canceled) {
-                            try {
-                                this.canceled(this, ev);
-                                /* tslint:disable:no-empty */
-                            } catch (error) {
-                                // Not going to let errors in the event handler
-                                // trip things up.
-                            }
-                        }
-                    } else {
-                        const ev = new SpeechRecognitionEventArgs(result, 0/*todo*/, evResult.SessionId);
-
-                        if (!!this.recognized) {
-                            try {
-                                this.recognized(this, ev);
-                                /* tslint:disable:no-empty */
-                            } catch (error) {
-                                // Not going to let errors in the event handler
-                                // trip things up.
-                            }
-                        }
-
-                    }
-                    // report result to promise.
-                    if (!!cb) {
-                        try {
-                            cb(result);
-                            /* tslint:disable:no-empty */
-                        } catch (error) {
-                            // Not going to let errors in the event handler
-                            // trip things up.
-                        }
-                    }
-                }
-                break;
-            case "SpeechHypothesisEvent":
-                {
-                    const evResult = event as SpeechRecognitionResultEvent<ISpeechHypothesis>;
-
-                    const result = new SpeechRecognitionResult(
-                        undefined,
-                        ResultReason.RecognizingSpeech,
-                        evResult.Result.Text,
-                        evResult.Result.Duration,
-                        evResult.Result.Offset,
-                        undefined,
-                        JSON.stringify(evResult.Result),
-                        undefined);
-
-                    const ev = new SpeechRecognitionEventArgs(result, 0/*todo*/, evResult.SessionId);
-
-                    if (!!this.recognizing) {
-                        try {
-                            this.recognizing(this, ev);
-                            /* tslint:disable:no-empty */
-                        } catch (error) {
-                            // Not going to let errors in the event handler
-                            // trip things up.
-                        }
-                    }
-                }
-                break;
-            case "InternalErrorEvent":
-                {
-                    const evResult: InternalErrorEvent = event as InternalErrorEvent;
-                    const result: SpeechRecognitionResult = new SpeechRecognitionResult(
-                        evResult.RequestId,
-                        ResultReason.Canceled,
-                        undefined,
-                        undefined,
-                        undefined,
-                        evResult.Result);
-                    const canceledResult: SpeechRecognitionCanceledEventArgs = new SpeechRecognitionCanceledEventArgs(
-                        CancellationReason.Error,
-                        result.errorDetails);
-
-                    try {
-                        this.canceled(this, canceledResult);
-                        /* tslint:disable:no-empty */
-                    } catch (error) {
-                        // Not going to let errors in the event handler
-                        // trip things up.
-                    }
-
-                    // report result to promise.
-                    if (!!cb) {
-                        try {
-                            cb(result);
-                        } catch (e) {
-                            if (!!err) {
-                                err(e);
-                            }
-                        }
-                        // Only invoke the call back once.
-                        // and if it's successful don't invoke thebundle
-                        // error after that.
-                        cb = undefined;
-                        err = undefined;
-                    }
-                }
-                break;
         }
     }
 }

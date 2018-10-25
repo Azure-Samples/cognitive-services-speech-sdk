@@ -8,25 +8,23 @@ import {
     ResultReason,
 } from "../sdk/Exports";
 import {
-    RecognitionStatus2,
+    RecognitionStatus,
 } from "./Exports";
 
 export class EnumTranslation {
-    public static implTranslateRecognitionResult(recognitionStatus: RecognitionStatus2): ResultReason {
+    public static implTranslateRecognitionResult(recognitionStatus: RecognitionStatus): ResultReason {
         let reason = ResultReason.Canceled;
-        const recognitionStatus2: string = "" + recognitionStatus;
-        const recstatus2 = (RecognitionStatus2 as any)[recognitionStatus2];
-        switch (recstatus2) {
-            case RecognitionStatus2.Success:
+        switch (recognitionStatus) {
+            case RecognitionStatus.Success:
                 reason = ResultReason.RecognizedSpeech;
                 break;
-            case RecognitionStatus2.NoMatch:
-            case RecognitionStatus2.InitialSilenceTimeout:
-            case RecognitionStatus2.BabbleTimeout:
+            case RecognitionStatus.NoMatch:
+            case RecognitionStatus.InitialSilenceTimeout:
+            case RecognitionStatus.BabbleTimeout:
                 reason = ResultReason.NoMatch;
                 break;
-            case RecognitionStatus2.EndOfDictation:
-            case RecognitionStatus2.Error:
+            case RecognitionStatus.EndOfDictation:
+            case RecognitionStatus.Error:
             default:
                 reason = ResultReason.Canceled;
                 break;
@@ -35,19 +33,17 @@ export class EnumTranslation {
         return reason;
     }
 
-    public static implTranslateCancelResult(recognitionStatus: RecognitionStatus2): CancellationReason {
+    public static implTranslateCancelResult(recognitionStatus: RecognitionStatus): CancellationReason {
         let reason = CancellationReason.EndOfStream;
-        const recognitionStatus2: string = "" + recognitionStatus;
-        const recstatus2 = (RecognitionStatus2 as any)[recognitionStatus2];
-        switch (recstatus2) {
-            case RecognitionStatus2.Success:
-            case RecognitionStatus2.EndOfDictation:
-            case RecognitionStatus2.NoMatch:
+        switch (recognitionStatus) {
+            case RecognitionStatus.Success:
+            case RecognitionStatus.EndOfDictation:
+            case RecognitionStatus.NoMatch:
                 reason = CancellationReason.EndOfStream;
                 break;
-            case RecognitionStatus2.InitialSilenceTimeout:
-            case RecognitionStatus2.BabbleTimeout:
-            case RecognitionStatus2.Error:
+            case RecognitionStatus.InitialSilenceTimeout:
+            case RecognitionStatus.BabbleTimeout:
+            case RecognitionStatus.Error:
             default:
                 reason = CancellationReason.Error;
                 break;

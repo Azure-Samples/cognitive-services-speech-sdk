@@ -4,8 +4,8 @@
 //
 
 import {
-    ISimpleSpeechPhrase,
-    RecognitionStatus2,
+    EnumTranslation,
+    SimpleSpeechPhrase,
 } from "../common.speech/Exports";
 import {
     CancellationReason,
@@ -43,23 +43,8 @@ export class CancellationDetails {
         let reason = CancellationReason.Error;
 
         if (!!result.json) {
-            const simpleSpeech: ISimpleSpeechPhrase = JSON.parse(result.json);
-
-            const recognitionStatus2: string = "" + simpleSpeech.RecognitionStatus;
-            const recstatus2 = (RecognitionStatus2 as any)[recognitionStatus2];
-            switch (recstatus2) {
-                case RecognitionStatus2.Success:
-                case RecognitionStatus2.EndOfDictation:
-                case RecognitionStatus2.NoMatch:
-                    reason = CancellationReason.EndOfStream;
-                    break;
-                case RecognitionStatus2.InitialSilenceTimeout:
-                case RecognitionStatus2.BabbleTimeout:
-                case RecognitionStatus2.Error:
-                default:
-                    reason = CancellationReason.Error;
-                    break;
-            }
+            const simpleSpeech: SimpleSpeechPhrase = SimpleSpeechPhrase.FromJSON(result.json);
+            reason = EnumTranslation.implTranslateCancelResult(simpleSpeech.RecognitionStatus);
         }
 
         return new CancellationDetails(reason, result.errorDetails);

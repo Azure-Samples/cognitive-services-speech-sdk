@@ -2,30 +2,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
+
 import { RecognitionCompletionStatus } from "../../src/common.speech/Exports";
-import { ResultReason } from "../sdk/Exports";
 import { TranslationStatus } from "./TranslationStatus";
-
-export enum RecognitionStatus2 {
-    Success,
-    NoMatch,
-    InitialSilenceTimeout,
-    BabbleTimeout,
-    Error,
-    EndOfDictation,
-}
-
-// speech.endDetected
-export interface ISpeechStartDetected {
-    Offset?: number;
-}
-
-// speech.hypothesis
-export interface ISpeechHypothesis {
-    Text: string;
-    Offset?: number;
-    Duration?: number;
-}
 
 export interface ITranslations {
     TranslationStatus: TranslationStatus;
@@ -40,72 +19,6 @@ export interface ITranslation {
 
 export interface ISpeechEndDetectedResult {
     Offset?: number;
-}
-
-// speech.phrase
-export interface ISimpleSpeechPhrase {
-    RecognitionStatus: RecognitionStatus2;
-    DisplayText: string;
-    Offset?: number;
-    Duration?: number;
-}
-
-// translation.hypothesis
-export interface ITranslationHypothesis {
-    Duration: number;
-    Offset: number;
-    Text: string;
-    Translation: ITranslations;
-}
-
-// translation.phrase
-export interface ITranslationPhrase {
-    RecognitionStatus: RecognitionStatus2;
-    Offset: number;
-    Duration: number;
-    Text: string;
-    Translation: ITranslations;
-}
-
-export interface IDetailedSpeechPhrase {
-    RecognitionStatus: RecognitionStatus2;
-    NBest: IPhrase[];
-    Duration?: number;
-    Offset?: number;
-}
-
-export interface IPhrase {
-    Confidence?: number;
-    Lexical: string;
-    ITN: string;
-    MaskedITN: string;
-    Display: string;
-}
-
-// translation.synthesis.end
-export interface ITranslationSynthesisEnd {
-    SynthesisStatus: ResultReason;
-    FailureReason: string;
-}
-
-// response
-export interface IIntentResponse {
-    query: string;
-    topScoringIntent: ISingleIntent;
-    entities: IIntentEntity[];
-}
-
-export interface IIntentEntity {
-    entity: string;
-    type: string;
-    startIndex: number;
-    endIndex: number;
-    score: number;
-}
-
-export interface ISingleIntent {
-    intent: string;
-    score: number;
 }
 
 // turn.start

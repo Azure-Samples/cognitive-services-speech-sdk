@@ -14,13 +14,7 @@ import {
     RecognitionMode,
     RecognizerConfig,
     ServiceRecognizerBase,
-    SpeechRecognitionEvent,
 } from "../common.speech/Exports";
-import {
-    InternalErrorEvent,
-    RecognitionCompletionStatus,
-    RecognitionEndedEvent,
-} from "../common.speech/RecognitionEvents";
 import {
     Promise,
     PromiseHelper,
@@ -32,6 +26,7 @@ import {
     PropertyId,
     RecognitionEventArgs,
     SessionEventArgs,
+    SpeechRecognitionResult,
 } from "./Exports";
 
 /**
@@ -160,79 +155,19 @@ export abstract class Recognizer {
     }
 
     // Start the recognition
-    protected implRecognizerStart(recognizer: ServiceRecognizerBase, cb: (event: SpeechRecognitionEvent) => void, speechContext?: string): void {
-        recognizer.Recognize((event: SpeechRecognitionEvent) => {
-            if (this.disposed) {
-                return;
-            }
-
-            let sessionStartStopEventArgs: SessionEventArgs;
-            let speechStartStopEventArgs: RecognitionEventArgs;
-
-            /*
-                Alternative syntax for typescript devs.
-                if (event instanceof SDK.RecognitionTriggeredEvent)
-            */
-            // TODO: The mapping of internal service events to API surface events is... bad. Needs to be cleaned up to have a common mapping
-            // that's understandable.
-            switch (event.Name) {
-                case "RecognitionTriggeredEvent":
-                case "ListeningStartedEvent":
-                    // Internal events, ignore
-                    break;
-
-                case "RecognitionStartedEvent": // Fires when the client connects to the service successfuly.
-                    sessionStartStopEventArgs = new SessionEventArgs(event.SessionId);
-
-                    if (!!this.sessionStarted) {
-                        this.sessionStarted(this, sessionStartStopEventArgs);
-                    }
-                    break;
-
-                case "RecognitionEndedEvent":
-                    const recoEndedEvent = event as RecognitionEndedEvent;
-
-                    sessionStartStopEventArgs = new SessionEventArgs(recoEndedEvent.SessionId);
-                    if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
-                        if (cb) {
-                            cb(event); // call continuation, if configured.
-                        }
-                    }
-
-                    if (!!this.sessionStopped) {
-                        this.sessionStopped(this, sessionStartStopEventArgs);
-                    }
-                    break;
-
-                case "SpeechStartDetectedEvent":
-                    speechStartStopEventArgs = new RecognitionEventArgs(0 /*TODO*/, event.SessionId);
-
-                    if (!!this.speechStartDetected) {
-                        this.speechStartDetected(this, speechStartStopEventArgs);
-                    }
-                    break;
-
-                case "SpeechEndDetectedEvent":
-                    speechStartStopEventArgs = new RecognitionEventArgs(0 /*TODO*/, event.SessionId);
-
-                    if (!!this.speechEndDetected) {
-                        this.speechEndDetected(this, speechStartStopEventArgs);
-                    }
-                    break;
-
-                default:
-                    if (cb) {
-                        cb(event); // call continuation, if configured.
-                    }
-            }
-        }, speechContext).On(
+    protected implRecognizerStart(
+        recognizer: ServiceRecognizerBase,
+        successCallback: (e: SpeechRecognitionResult) => void,
+        errorCallback: (e: string) => void,
+        speechContext?: string,
+    ): void {
+        recognizer.Recognize(speechContext, successCallback, errorCallback).On(
             /* tslint:disable:no-empty */
             (result: boolean): void => { },
             (error: string): void => {
-                if (!!cb) {
+                if (!!errorCallback) {
                     // Internal error with service communication.
-                    const errorEvent: InternalErrorEvent = new InternalErrorEvent(undefined, undefined, "Runtime error: " + error);
-                    cb(errorEvent);
+                    errorCallback("Runtime error: " + error);
                 }
             });
     }

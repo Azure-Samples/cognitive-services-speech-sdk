@@ -4,6 +4,7 @@
 //
 import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
 import { ConsoleLoggingListener } from "../../../../../source/bindings/js/src/common.browser/Exports";
+import { ServiceRecognizerBase } from "../../../../../source/bindings/js/src/common.speech/Exports";
 import { QueryParameterNames } from "../../../../../source/bindings/js/src/common.speech/QueryParameterNames";
 import { ConnectionStartEvent } from "../../../../../source/bindings/js/src/common/Exports";
 import { Events, EventType, PlatformEvent } from "../../../../../source/bindings/js/src/common/Exports";
@@ -154,9 +155,15 @@ test("testGetParameters", () => {
     expect(r.endpointId === r.properties.getProperty(sdk.PropertyId.SpeechServiceConnection_EndpointId, null)); // todo: is this really the correct mapping?
 });
 
-test("testRecognizeOnceAsync1", (done: jest.DoneCallback) => {
+test("RecognizeOnce", (done: jest.DoneCallback) => {
     const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile();
     objsToClose.push(r);
+
+    let telemetryEvents: number = 0;
+
+    ServiceRecognizerBase.TelemetryData = (json: string): void => {
+        telemetryEvents++;
+    };
 
     r.recognizeOnceAsync(
         (p2: sdk.SpeechRecognitionResult) => {
@@ -165,7 +172,7 @@ test("testRecognizeOnceAsync1", (done: jest.DoneCallback) => {
             expect(res).not.toBeUndefined();
             expect("What's the weather like?").toEqual(res.text);
             expect(res.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
-
+            expect(telemetryEvents).toEqual(1);
         },
         (error: string) => {
             setTimeout(done, 1);
@@ -173,7 +180,7 @@ test("testRecognizeOnceAsync1", (done: jest.DoneCallback) => {
         });
 });
 
-test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
+test("Event Tests (RecognizeOnce)", (done: jest.DoneCallback) => {
     const SpeechStartDetectedEvent = "SpeechStartDetectedEvent";
     const SpeechEndDetectedEvent = "SpeechEndDetectedEvent";
     const SessionStartedEvent = "SessionStartedEvent";
@@ -230,7 +237,7 @@ test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
             expect(res.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
 
             // session events are first and last event
-            const LAST_RECORDED_EVENT_ID: number = eventIdentifier;
+            const LAST_RECORDED_EVENT_ID: number = --eventIdentifier;
 
             expect(LAST_RECORDED_EVENT_ID).toBeGreaterThan(FIRST_EVENT_ID);
 
@@ -251,9 +258,9 @@ test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
             expect((FIRST_EVENT_ID + 1)).toEqual(eventsMap[SpeechStartDetectedEvent]);
 
             // make sure, first end of speech, then final result
-            expect((LAST_RECORDED_EVENT_ID - 2)).toEqual(eventsMap[SpeechEndDetectedEvent]);
+            expect((LAST_RECORDED_EVENT_ID - 1)).toEqual(eventsMap[SpeechEndDetectedEvent]);
 
-            expect((LAST_RECORDED_EVENT_ID - 1)).toEqual(eventsMap[Recognized]);
+            expect((LAST_RECORDED_EVENT_ID)).toEqual(eventsMap[Recognized]);
 
             // recognition events come after session start but before session end events
             expect(eventsMap[Session + SessionStartedEvent])
@@ -287,17 +294,129 @@ test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
 
 });
 
+test("Event Tests (Continuous)", (done: jest.DoneCallback) => {
+    const SpeechStartDetectedEvent = "SpeechStartDetectedEvent";
+    const SpeechEndDetectedEvent = "SpeechEndDetectedEvent";
+    const SessionStartedEvent = "SessionStartedEvent";
+    const SessionStoppedEvent = "SessionStoppedEvent";
+    const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
+
+    let sessionStopped: boolean = false;
+
+    const eventsMap: { [id: string]: number; } = {};
+    eventIdentifier = 1;
+
+    r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
+        eventsMap[Recognized] = eventIdentifier++;
+    };
+
+    r.recognizing = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
+        const now: number = eventIdentifier++;
+        eventsMap[Recognizing + "-" + Date.now().toPrecision(4)] = now;
+        eventsMap[Recognizing] = now;
+    };
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
+        eventsMap[Canceled] = eventIdentifier++;
+    };
+
+    // todo eventType should be renamed and be a function getEventType()
+    r.speechStartDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs) => {
+        const now: number = eventIdentifier++;
+        // tslint:disable-next-line:no-string-literal
+        eventsMap[SpeechStartDetectedEvent] = now;
+    };
+    r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs) => {
+        const now: number = eventIdentifier++;
+        eventsMap[SpeechEndDetectedEvent] = now;
+    };
+
+    r.sessionStarted = (o: sdk.Recognizer, e: sdk.SessionEventArgs) => {
+        const now: number = eventIdentifier++;
+        eventsMap[Session + SessionStartedEvent] = now;
+        eventsMap[Session + SessionStartedEvent + "-" + Date.now().toPrecision(4)] = now;
+    };
+
+    r.sessionStopped = (o: sdk.Recognizer, e: sdk.SessionEventArgs) => {
+        const now: number = eventIdentifier++;
+        eventsMap[Session + SessionStoppedEvent] = now;
+        eventsMap[Session + SessionStoppedEvent + "-" + Date.now().toPrecision(4)] = now;
+        sessionStopped = true;
+    };
+
+    r.startContinuousRecognitionAsync();
+
+    WaitForCondition(() => sessionStopped, () => {
+        // session events are first and last event
+        const LAST_RECORDED_EVENT_ID: number = --eventIdentifier;
+        expect(LAST_RECORDED_EVENT_ID).toBeGreaterThan(FIRST_EVENT_ID);
+
+        expect(Session + SessionStartedEvent in eventsMap).toEqual(true);
+        expect(eventsMap[Session + SessionStartedEvent]).toEqual(FIRST_EVENT_ID);
+
+        expect(Session + SessionStoppedEvent in eventsMap).toEqual(true);
+        expect(LAST_RECORDED_EVENT_ID).toEqual(eventsMap[Session + SessionStoppedEvent]);
+
+        // end events come after start events.
+        if (Session + SessionStoppedEvent in eventsMap) {
+            expect(eventsMap[Session + SessionStartedEvent])
+                .toBeLessThan(eventsMap[Session + SessionStoppedEvent]);
+        }
+
+        expect(eventsMap[SpeechStartDetectedEvent])
+            .toBeLessThan(eventsMap[SpeechEndDetectedEvent]);
+        expect((FIRST_EVENT_ID + 1)).toEqual(eventsMap[SpeechStartDetectedEvent]);
+
+        // make sure, first end of speech, then final result
+        expect((LAST_RECORDED_EVENT_ID - 1)).toEqual(eventsMap[Canceled]);
+        expect((LAST_RECORDED_EVENT_ID - 2)).toEqual(eventsMap[SpeechEndDetectedEvent]);
+        expect((LAST_RECORDED_EVENT_ID - 3)).toEqual(eventsMap[Recognized]);
+
+        // recognition events come after session start but before session end events
+        expect(eventsMap[Session + SessionStartedEvent])
+            .toBeLessThan(eventsMap[SpeechStartDetectedEvent]);
+
+        if (Session + SessionStoppedEvent in eventsMap) {
+            expect(eventsMap[SpeechEndDetectedEvent])
+                .toBeLessThan(eventsMap[Session + SessionStoppedEvent]);
+        }
+
+        // there is no partial result reported after the final result
+        // (and check that we have intermediate and final results recorded)
+        if (Recognizing in eventsMap) {
+            expect(eventsMap[Recognizing])
+                .toBeGreaterThan(eventsMap[SpeechStartDetectedEvent]);
+        }
+
+        // speech should not stop before getting the final result.
+        expect(eventsMap[Recognized]).toBeLessThan(eventsMap[SpeechEndDetectedEvent]);
+
+        expect(eventsMap[Recognizing]).toBeLessThan(eventsMap[Recognized]);
+
+        // make sure we got a cancel event.
+        expect(Canceled in eventsMap).toEqual(true);
+
+        done();
+    });
+});
+
 test("testStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile();
     objsToClose.push(r);
 
     let eventDone: boolean = false;
     let canceled: boolean = false;
+    let telemetryEvents: number = 0;
+
+    ServiceRecognizerBase.TelemetryData = (json: string): void => {
+        telemetryEvents++;
+    };
 
     r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
         try {
             eventDone = true;
-            expect(e.result.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
+            expect(sdk.ResultReason[e.result.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
             expect(e.result.text).toEqual("What's the weather like?");
         } catch (error) {
             done.fail(error);
@@ -318,7 +437,11 @@ test("testStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
         () => WaitForCondition(() => (eventDone && canceled), () => {
             r.stopContinuousRecognitionAsync(
                 () => {
-                    setTimeout(done, 1);
+                    // Three? One for the phrase that was recognized.
+                    // Once for the end of stream.
+                    // Once when closed.
+                    expect(telemetryEvents).toEqual(3);
+                    done();
                 },
                 (err: string) => {
                     done.fail(err);
@@ -397,10 +520,10 @@ test("PushStream4KNoDelay", (done: jest.DoneCallback) => {
     const sendSize: number = 4096;
 
     for (i = sendSize - 1; i < f.byteLength; i += sendSize) {
-        p.write(f.slice(i - (sendSize - 1), i));
+        p.write(f.slice(i - (sendSize - 1), i + 1));
     }
 
-    p.write(f.slice(i - (sendSize - 1), f.byteLength - 1));
+    p.write(f.slice(i - (sendSize - 1), f.byteLength));
     p.close();
 
     const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);

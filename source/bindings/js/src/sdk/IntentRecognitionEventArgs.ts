@@ -2,7 +2,10 @@
 // copyright (c) Microsoft. All rights reserved.
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
-import { IntentRecognitionResult, PropertyCollection, RecognitionEventArgs, RecognitionResult, ResultReason } from "./Exports";
+import {
+    IntentRecognitionResult,
+    RecognitionEventArgs,
+} from "./Exports";
 
 /**
  * Intent recognition result event arguments.

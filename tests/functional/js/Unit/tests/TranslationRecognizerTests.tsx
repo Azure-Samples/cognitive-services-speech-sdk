@@ -907,7 +907,7 @@ test("Translate Bad Language", (done: jest.DoneCallback) => {
     r.recognizeOnceAsync(
         (res: sdk.TranslationRecognitionResult) => {
             expect(res).not.toBeUndefined();
-            expect(res.errorDetails).toBeUndefined();
+            expect(res.errorDetails).toContain("400036");
             expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
             expect(res.translations).toBeUndefined();
             expect(res.text).toEqual("What's the weather like?");
