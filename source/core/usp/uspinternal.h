@@ -81,7 +81,7 @@ public:
     void QueueAudioSegment(const uint8_t* data, size_t size);
 
     /**
-    * Adds an empty audio sigment to the outgoing queue, which serves as a singnal to the service that the audio 
+    * Adds an empty audio segment to the outgoing queue, which serves as a signal to the service that the audio
     * stream has ended (i.e., has been uploaded completely).
     * @param uspHandle the UspHandle for sending the audio.
     */

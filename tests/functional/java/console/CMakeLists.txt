@@ -23,6 +23,10 @@ add_jar(${PROJECT_NAME}
     INCLUDE_JARS com.microsoft.cognitiveservices.speech
     OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  FOLDER tools
+  )
+
 add_custom_command(
     TARGET ${PROJECT_NAME}
     POST_BUILD

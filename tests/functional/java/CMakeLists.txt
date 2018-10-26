@@ -44,9 +44,13 @@ add_jar(${PROJECT_NAME}
     INCLUDE_JARS ${PROJECT_NAME} com.microsoft.cognitiveservices.speech ${CARBON_EXTERNAL}/junit/junit-4.12.jar ${CARBON_EXTERNAL}/junit/hamcrest-core-1.3.jar
     OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  FOLDER tests
+  )
+
 add_custom_command(
     TARGET ${PROJECT_NAME}
     POST_BUILD
-    COMMAND  ${CMAKE_COMMAND} -E tar cvf "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}-src.zip" --format=zip tests
+    COMMAND ${CMAKE_COMMAND} -E tar cvf "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}-src.zip" --format=zip tests
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     COMMENT "Generating src package including javadoc information")

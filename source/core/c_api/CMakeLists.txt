@@ -13,7 +13,7 @@ set(HEADERS)
 set(HEADERS_PRIVATE
     "${SRC_DIR}/stdafx.h"
     "${SRC_DIR}/event_helpers.h"    
-     "${SRC_DIR}/handle_helpers.h"
+    "${SRC_DIR}/handle_helpers.h"
     )
 
 set(SOURCES
@@ -55,6 +55,6 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 set_target_properties (c_api PROPERTIES
-    FOLDER carbon_libs
+    FOLDER core
     COMPILE_DEFINITIONS "SPX_CONFIG_EXPORTAPIS"
 )

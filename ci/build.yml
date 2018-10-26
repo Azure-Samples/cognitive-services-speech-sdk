@@ -94,18 +94,13 @@ phases:
     name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
   steps:
-  - task: Bash@3
-    name: var
-    inputs:
-      filePath: ci/set-variables.sh
+  - bash: ./ci/set-variables.sh
     displayName: Set variables
-  - task: Bash@3
-    inputs:
-      targetType: inline
-      script: |
-        . ci/functions.sh
-        vsts_updatebuildnumber $(SPEECHSDK_SEMVER2NOMETA)
-        vsts_addbuildtag $(SPEECHSDK_BUILD_TYPE)
+    name: var
+  - bash: |
+      . ci/functions.sh
+      vsts_updatebuildnumber $(SPEECHSDK_SEMVER2NOMETA)
+      vsts_addbuildtag $(SPEECHSDK_BUILD_TYPE)
   - bash:
       ./ci/check-git-head.sh &&
       find public_samples -name \*.java -or -name \*.cpp -or -name \*.cs -or -name \*.m -or -name pom.xml -or -name \*.html -or -name \*.xaml | xargs perl ci/check-docfx-codetags.pl
@@ -138,11 +133,8 @@ phases:
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/install-build-dependencies.sh'
   # TODO detect installation failures, export diagnostics. For now, we'll fail in msbuild a little bit down.
   - powershell: |
       Invoke-WebRequest -OutFile vs_enterprise.exe https://aka.ms/vs/15/release/vs_enterprise.exe
@@ -156,7 +148,7 @@ phases:
   - task: CMake@1
     displayName: Generate solution
     inputs:
-      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
   - task: VSBuild@1
     displayName: Build solution
     inputs:
@@ -335,11 +327,8 @@ phases:
   - bash: . ./ci/functions.sh && vsts_setvar SPEECHSDK_SPECTRE_MITIGATION false
     displayName: Reset SPEECHSDK_SPECTRE_MITIGATION in Debug
     condition: eq(variables['BuildConfiguration'], 'Debug')
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/install-build-dependencies.sh'
   # TODO detect installation failures, export diagnostics. For now, we'll fail in msbuild a little bit down.
   - powershell: |
       Invoke-WebRequest -OutFile vs_enterprise.exe https://aka.ms/vs/15/release/vs_enterprise.exe
@@ -353,7 +342,7 @@ phases:
   - task: CMake@1
     displayName: Generate solution
     inputs:
-      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
   - task: VSBuild@1
     displayName: Build solution
     inputs:
@@ -421,11 +410,8 @@ phases:
         fi
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
   - bash: . ci/functions.sh && ./ci/set-variables.sh
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/install-build-dependencies.sh'
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
@@ -433,7 +419,7 @@ phases:
   - task: CMake@1
     displayName: Generate solution
     inputs:
-      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0 -Duse_default_uuid=ON -Duse_openssl=ON -Duse_schannel=OFF -DOPENSSL_ROOT_DIR=$(Build.Repository.LocalPath)/external/uwp_ssl/lib/$(BuildPlatform) -DOPENSSL_INCLUDE_DIR=$(Build.Repository.LocalPath)/external/uwp_ssl/include -DOPENSSL_USE_STATIC_LIBS=TRUE -DBUILD_PYTHON=OFF -DBUILD_JAVA=OFF ..'
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) ..'
   - task: VSBuild@1
     displayName: Build solution
     inputs:
@@ -472,9 +458,7 @@ phases:
     name: Hosted VS2017
     timeoutInMinutes: 30
   steps:
-  - bash: |
-      set -x -e -o pipefail
-      ./ci/set-variables.sh
+  - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: |
       set -x -e -o pipefail
@@ -618,6 +602,7 @@ phases:
         /test/tests/input/audio/whatstheweatherlike.wav \
 
         set -e -x -o pipefail
+        DEBIAN_FRONTEND=noninteractive apt-get update --yes
         DEBIAN_FRONTEND=noninteractive apt-get install --quiet --no-install-recommends --yes expect
         PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
         pulseaudio -D --exit-idle-time=-1
@@ -638,11 +623,8 @@ phases:
     name: Hosted VS2017
     timeoutInMinutes: 30
   steps:
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/set-variables.sh
     displayName: Set variables
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/set-variables.sh'
   - task: DownloadBuildArtifacts@0
     displayName: 'Downloading Windows artifacts'
     inputs:
@@ -880,16 +862,10 @@ phases:
         . ci/functions.sh
         vsts_setvar SPEECHSDK_TARGET_PLATFORM Android-$(BuildPlatform)
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/set-variables.sh
     displayName: Set variables
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/set-variables.sh'
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/install-build-dependencies.sh'
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Get NDK
     inputs:
@@ -1061,16 +1037,10 @@ phases:
         . ci/functions.sh
         vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x64
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/set-variables.sh
     displayName: Set variables
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/set-variables.sh'
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/install-build-dependencies.sh'
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: C API can be parsed by GCC
     inputs:
@@ -1079,7 +1049,7 @@ phases:
   - task: CMake@1
     displayName: Generate makefiles
     inputs:
-      cmakeArgs: '-DCMAKE_BUILD_TYPE=$(BuildConfiguration) ..'
+      cmakeArgs: '-DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) ..'
   - task: CMake@1
     displayName: CMake build
     inputs:
@@ -1229,7 +1199,7 @@ phases:
     FrameworkName: MicrosoftCognitiveServicesSpeech
     VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
-    JointCmakeArgs: -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DBUILD_JAVA=OFF -DBUILD_CSHARP=OFF -DBUILD_PYTHON=OFF -Duse_openssl=OFF -Duse_builtin_httpapi=ON -DCMAKE_TOOLCHAIN_FILE=../external/ios-cmake/ios.toolchain.cmake -DIOS_DEPLOYMENT_TARGET="11.4" -DENABLE_VISIBILITY=1
+    JointCmakeArgs: -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set iOS target platform
@@ -1239,15 +1209,12 @@ phases:
         . ci/functions.sh
         vsts_setvar SPEECHSDK_TARGET_PLATFORM IOS
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/set-variables.sh
     displayName: Set variables
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/set-variables.sh'
   - task: CMake@1
     displayName: Generate makefiles for iOS simulator
     inputs:
-      cmakeArgs: ' $(JointCmakeArgs) -DIOS_PLATFORM=SIMULATOR64 -DENABLE_BITCODE=0 ..'
+      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x64 ..'
       workingDirectory: 'build_ios_simulator'
   - task: CMake@1
     displayName: CMake build for iOS simulator
@@ -1257,13 +1224,13 @@ phases:
   - task: CMake@1
     displayName: Generate makefiles for iOS device (Release)
     inputs:
-      cmakeArgs: ' $(JointCmakeArgs) -DIOS_PLATFORM=OS -DIOS_ARCH=arm64 -DENABLE_BITCODE=1 ..'
+      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-arm64 ..'
       workingDirectory: build_ios_device
     condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
   - task: CMake@1
     displayName: Generate makefiles for iOS device (Debug)
     inputs:
-      cmakeArgs: ' $(JointCmakeArgs) -DIOS_PLATFORM=OS -DIOS_ARCH=arm64 -DENABLE_BITCODE_MARKER=1 -DENABLE_BITCODE=0 ..'
+      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-arm64 ..'
       workingDirectory: build_ios_device
     condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))
   - task: CMake@1
@@ -1386,20 +1353,14 @@ phases:
         . ci/functions.sh
         vsts_setvar SPEECHSDK_TARGET_PLATFORM OSX-x64
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/set-variables.sh
     displayName: Set variables
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/set-variables.sh'
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/install-build-dependencies.sh'
   - task: CMake@1
     displayName: Generate makefiles
     inputs:
-      cmakeArgs: '-DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DMACOSX=ON -DBUILD_CSHARP=OFF -Duse_builtin_httpapi=ON ..'
+      cmakeArgs: '-DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) ..'
   - task: CMake@1
     displayName: CMake build
     inputs:
@@ -1447,10 +1408,7 @@ phases:
   variables:
     NPM_REGISTRY: https://csspeechstorage.blob.core.windows.net/npm/de13462a
   steps:
-  - task: Bash@3
-    name: var
-    inputs:
-      filePath: ci/set-variables.sh
+  - bash: ./ci/set-variables.sh
     displayName: Set variables
   - task: Npm@1
     displayName: 'npm run build'

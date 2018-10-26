@@ -34,7 +34,7 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 set_target_properties (factory PROPERTIES
-    FOLDER carbon_libs
+    FOLDER core
 )
 
 target_link_libraries(factory sr audio usp ${CMAKE_DL_LIBS})

@@ -166,7 +166,7 @@ static int PropertybagSetValue(PROPERTYBAG_HANDLE propertyHandle, const char* na
     return -1;
 }
 
-static PROPERTYBAG_HANDLE PropertybagInitializeWithKeyValue(const char *key,    void *value)
+static PROPERTYBAG_HANDLE PropertybagInitializeWithKeyValue(const char *key, void *value)
 {
     PROPERTYBAG_HANDLE propertyHandle = json_value_init_object();
     if (propertyHandle && key)

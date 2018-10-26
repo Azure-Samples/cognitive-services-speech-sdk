@@ -10,24 +10,14 @@
 #include "string_utils.h"
 #include "service_helpers.h"
 #include "property_id_2_name_map.h"
-
-#ifdef _MSC_VER
-#pragma warning( push )
-// disable: (8300,27): error 28020:  : The expression '0&lt;=_Param_(1)&amp;&amp;_Param_(1)&lt;=64-1' is not true at this call.
-#pragma warning( disable : 28020 )
-#include "json.hpp"
-#pragma warning( pop )
-#else
-#include "json.hpp"
-#endif
-using json = nlohmann::json;
-
+#include "json.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+using json = nlohmann::json;
 
 void CSpxLuisDirectEngineAdapter::Term()
 {
@@ -48,7 +38,7 @@ void CSpxLuisDirectEngineAdapter::AddIntentTrigger(const wchar_t* id, std::share
         m_intentPhraseToIdMap[phrase] = !intentId.empty() ? intentId : phrase;
     }
 
-    // Luis Direct only works with luis models ... not phrase triggers ... 
+    // Luis Direct only works with luis models ... not phrase triggers ...
     auto model = trigger->GetModel();
     if (model != nullptr)
     {

@@ -37,15 +37,7 @@
 #include "string_utils.h"
 #include "guid_utils.h"
 
-#ifdef _MSC_VER
-#pragma warning( push )
-// disable: (8300,27): error 28020:  : The expression '0&lt;=_Param_(1)&amp;&amp;_Param_(1)&lt;=64-1' is not true at this call.
-#pragma warning( disable : 28020 )
-#include "json.hpp"
-#pragma warning( pop )
-#else
-#include "json.hpp"
-#endif
+#include "json.h"
 
 using namespace std;
 
@@ -84,20 +76,13 @@ const vector<string> g_recoModeStrings = { "interactive", "conversation", "dicta
 const vector<string> g_outFormatStrings = { "simple", "detailed" };
 
 
-// TODO: remove this as soon as metrics.c is re-written in cpp.
+// TODO: remove this as soon as transport.c is re-written in cpp.
 extern "C" {
     const char* g_keywordContentType = headers::contentType;
-    const char* g_messagePathSpeechHypothesis = path::speechHypothesis.c_str();
-    const char* g_messagePathSpeechPhrase = path::speechPhrase.c_str();
-    const char* g_messagePathSpeechFragment = path::speechFragment.c_str();
-    const char* g_messagePathTurnStart = path::turnStart.c_str();
-    const char* g_messagePathTurnEnd = path::turnEnd.c_str();
-    const char* g_messagePathSpeechEndDetected = path::speechEndDetected.c_str();
-    const char* g_messagePathSpeechStartDetected = path::speechStartDetected.c_str();
 }
 
 
-// This is called from telemetry_flush, invoked on a worker thread in turn-end. 
+// This is called from telemetry_flush, invoked on a worker thread in turn-end.
 void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId)
 {
     Connection::Impl *connection = (Connection::Impl*)context;
@@ -123,7 +108,7 @@ Connection::Impl::Impl(const Client& config)
     Validate();
 }
 
-uint64_t Connection::Impl::getTimestamp() 
+uint64_t Connection::Impl::getTimestamp()
 {
     return telemetry_gettime() - m_creationTime;
 }
@@ -383,7 +368,7 @@ void Connection::Impl::Connect()
         HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::audioResponseFormat, "riff-16khz-16bit-mono-pcm");
         HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::userAgent, g_userAgent);
     }
-    
+
     assert(!m_config.m_authData.empty());
 
     switch (m_config.m_authType)
@@ -460,12 +445,12 @@ void Connection::Impl::Connect()
 string Connection::Impl::CreateRequestId()
 {
     auto requestId = PAL::ToString(PAL::CreateGuidWithoutDashes());
-    
+
     LogInfo("RequestId: '%s'", requestId.c_str());
     metrics_transport_requestid(m_telemetry.get(), requestId.c_str());
-    
+
     m_activeRequestIds.insert(requestId);
-    
+
     return requestId;
 }
 
@@ -480,9 +465,9 @@ void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, siz
         ThrowInvalidArgumentException("The path is null or empty.");
     }
 
-    if (m_connected) 
+    if (m_connected)
     {
-        // If the service receives multiple context messages for a single turn, 
+        // If the service receives multiple context messages for a single turn,
         // the service will close the WebSocket connection with an error.
         if (messageType == MessageType::Context && !m_speechRequestId.empty())
         {
@@ -598,7 +583,7 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
         break;
 
     case TRANSPORT_ERROR_CONNECTION_FAILURE:
-        connection->Invoke([&] { 
+        connection->Invoke([&] {
             callbacks->OnError(true, ErrorCode::ConnectionError,
                 std::string("Connection failed (no connection to the remote host). Internal error: ") +
                 std::to_string(errorInfo->errorCode) + ". Error details: " + errorStr +
@@ -859,7 +844,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         {
             connection->Invoke([&] { callbacks->OnSpeechStartDetected({ PAL::ToWString(json.dump()), offset }); });
         }
-        else 
+        else
         {
             connection->Invoke([&] { callbacks->OnSpeechEndDetected({ PAL::ToWString(json.dump()), offset }); });
         }
@@ -899,7 +884,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
                 offset,
                 duration,
                 PAL::ToWString(text)
-                }); 
+                });
             });
         }
         else
@@ -1052,7 +1037,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
                 localReason = L"Invalid synthesis status in synthesis.end message.";
             }
         }
-        else 
+        else
         {
             PROTOCOL_VIOLATION("No synthesis status in synthesis.end message. Json=%s", json.dump().c_str());
             synthesisEndMsg.synthesisStatus = SynthesisStatus::InvalidMessage;
@@ -1087,7 +1072,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
             string(contentType == nullptr ? "" : contentType),
             buffer,
             size
-            }); 
+            });
         });
     }
 }

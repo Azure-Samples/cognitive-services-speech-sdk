@@ -135,6 +135,7 @@ private:
     USP::OutputFormat GetOutputFormat(const ISpxNamedProperties& properties) const;
 
     void UspWrite(const uint8_t* buffer, size_t byteToWrite);
+    void UspSendSpeechConfig();
     void UspSendSpeechContext();
     void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType);
     void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType);

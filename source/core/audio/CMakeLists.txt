@@ -108,7 +108,7 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 set_target_properties (audio PROPERTIES
-    FOLDER carbon_libs
+    FOLDER core
 )
 
 target_link_libraries(audio PRIVATE ${AUDIO_LIBS})

@@ -15,7 +15,9 @@ proguard-rules.pro text
 
 *.appxmanifest text
 *.bat text
+*.bats text
 *.c text
+*.cmake text
 *.cmd text
 *.config text
 *.cpp text
@@ -68,6 +70,7 @@ proguard-rules.pro text
 
 # Bash and "git apply" only like Unix line endings
 *.sh text eol=lf
+*.bats text eol=lf
 *.patch text eol=lf
 
 # Binary extensions:

@@ -87,14 +87,14 @@ public:
     std::vector<SPXSTRING> GetTargetLanguages() const
     {
         std::vector<SPXSTRING> result;
-        auto targetLanguges = Utils::ToUTF8(GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages));
-        if (targetLanguges.empty())
+        auto targetLanguages = Utils::ToUTF8(GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages));
+        if (targetLanguages.empty())
             return result;
 
         // Getting languages one by one.
-        std::stringstream langaugeStream(targetLanguges);
+        std::stringstream languageStream(targetLanguages);
         std::string token;
-        while (std::getline(langaugeStream, token, ','))
+        while (std::getline(languageStream, token, ','))
         {
             result.push_back(Utils::ToSPXString(token));
         }

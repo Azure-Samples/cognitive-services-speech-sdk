@@ -42,9 +42,9 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 set_target_properties (unidec PROPERTIES
-    DEFINE_SYMBOL  "SPX_CONFIG_EXPORTAPIS" 
+    DEFINE_SYMBOL "SPX_CONFIG_EXPORTAPIS"
     OUTPUT_NAME "carbon-unidec"
-    FOLDER carbon_libs
+    FOLDER core
 )
 
 target_link_libraries(unidec PRIVATE ${UNIDEC_LIBS} common)

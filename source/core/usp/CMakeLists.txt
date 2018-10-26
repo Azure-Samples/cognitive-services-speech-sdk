@@ -72,7 +72,7 @@ if(WIN32)
 endif()
 
 set_target_properties (usp PROPERTIES
-    FOLDER carbon_libs
+    FOLDER core
 )
 
 target_link_libraries(usp ${USP_LIBS})

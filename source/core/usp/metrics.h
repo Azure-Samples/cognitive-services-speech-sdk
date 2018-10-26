@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// metrics.h: metic messages related structure and methods
+// metrics.h: metric messages related structure and methods
 //
 
 // Todo: refactor to add/remove messages according to USP specification
@@ -82,7 +82,6 @@ TELEMETRY_HANDLE telemetry_create(PTELEMETRY_WRITE callback, void* context);
 
 /**
  * Clears all memory. To be called at the completion of all telemetry operations
- *
  */
 void telemetry_destroy(TELEMETRY_HANDLE handle);
 
@@ -206,7 +205,7 @@ typedef struct _request_telemetry_object_data
 {
     char requestId[NO_DASH_UUID_LEN];
     int bPayloadSet;
-    // TODO: This does not make sense, why telementry does not have 
+    // TODO: This does not make sense, why telementry does not have
     // a proper set inside?
     PROPERTYBAG_HANDLE receivedMsgsJsonArray[countOfMsgTypes];
 
@@ -272,7 +271,7 @@ extern const char* kEvent_cpu_key;
 extern const char* kEvent_error_key;
 extern const char* kEvent_status_key;
 
-// Recieved the specified message from the service. 
+// Received the specified message from the service.
 #define metrics_received_message(handle, requestId, x) record_received_msg(handle, requestId, x)
 
 // Metric Events defined in telemetry spec
@@ -346,7 +345,7 @@ extern const char* kEvent_status_key;
 #define metrics_transport_serviceid(__serviceId)  telemetry_log_event_s(METRIC_ID_servicetag, (__serviceId))
 
 /* Client UPL */
-#define metrics_transportlibrary_clientupl(__i0)   
+#define metrics_transportlibrary_clientupl(__i0)
 
 // Transport error metrics
 
@@ -398,19 +397,19 @@ extern const char* kEvent_status_key;
 
 // Microphone events
 /* The microphone device has starting recording audio. */
-#define metrics_microphone_start()    
+#define metrics_microphone_start()
 
 /* The microphone device has stopped recording audio. */
-#define metrics_microphone_stop()    
+#define metrics_microphone_stop()
 
 /* The platform is being initialized. */
-#define metrics_platform_start()    
+#define metrics_platform_start()
 
 /* The platform has been shutdown. */
-#define metrics_platform_stop()    
+#define metrics_platform_stop()
 
 /* When a skill context has been sent. */
-#define metrics_skill_contextsent()    
+#define metrics_skill_contextsent()
 
 /* When a skill is not supported. */
 #define metrics_skill_unhandled(skillId)
@@ -759,7 +758,7 @@ actually fire on the client. */
 #define metrics_skype_call_state(__state, __callid)     telemetry_log_event(METRIC_ID_skype_call_state, "ss", "state", __state, "callid", __callid)
 #define metrics_skype_login_failed(__errmsg)            telemetry_log_event_s(METRIC_ID_metrics_skype_login_failed, __errmsg)
 
-/*logs when we receive an incoming WNS message from CCS 
+/*logs when we receive an incoming WNS message from CCS
  * Sample command:
  *{"_type": "VolumeControl", "id": "skill:audioPlayer", "action": "setVolume", "amount": 84, "sessionId": "36bb684f-b365-4920-80b2-00e3b618b408"  }*/
 #define metrics_ccs_command(__command)            telemetry_log_event(METRIC_ID_ccs_command_received, "s", "command", __command)
@@ -773,7 +772,7 @@ actually fire on the client. */
 /* Metric for time to connect to Wifi */
 #define metrics_wificonnected(__latencyms)   telemetry_log_event_i(METRIC_ID_wificonnected, __latencyms)
 
-/* Metric for NTP syncronization and latency */
+/* Metric for NTP synchronization and latency */
 #define metrics_ntpsync(__latencyms)         telemetry_log_event_i(METRIC_ID_ntpsync, __latencyms)
 
 /* Metric for DNS event changes. */

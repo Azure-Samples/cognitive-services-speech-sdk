@@ -126,7 +126,6 @@ public:
 
     /**
     * Finalizes sending audio data to indicate the end of audio.
-    * @return A UspResult indicating success or error.
     */
     void FlushAudio();
 
@@ -172,7 +171,7 @@ public:
     /**
     * Creates a USP client.
     * @param callbacks The struct defines callback functions that will be invoked when various USP events occur.
-    * @param type  The speech service to be used, Speech, Intent, Translation, and etc.
+    * @param endpoint The speech service to be used, Speech, Intent, Translation, and etc.
     * @param connectionId Connection id, that will be passed to the service in the X-ConnectionId header and can be used for diagnostics.
     */
     Client(CallbacksPtr callbacks, EndpointType endpoint, const std::wstring& connectionId):
@@ -196,9 +195,9 @@ public:
     }
 
     /**
-    * Sets the URL of the service endpoint. It should contain the host name, resoure path and all query parameters needed.
+    * Sets the URL of the service endpoint. It should contain the host name, resource path and all query parameters needed.
     */
-    Client& SetEndpointUrl(const std::string& endpointUrl) 
+    Client& SetEndpointUrl(const std::string& endpointUrl)
     {
         m_customEndpointUrl = endpointUrl;
         return *this;
@@ -207,7 +206,7 @@ public:
     /**
     * Sets the speech service type.
     */
-    Client& SetEndpointType(EndpointType type) 
+    Client& SetEndpointType(EndpointType type)
     {
         m_endpoint = type;
         return *this;
@@ -216,7 +215,7 @@ public:
     /**
     * Sets the recognition mode, e.g. Interactive, Conversation, Dictation.
     */
-    Client& SetRecognitionMode(RecognitionMode mode) 
+    Client& SetRecognitionMode(RecognitionMode mode)
     {
         m_recoMode = mode;
         return *this;
@@ -235,10 +234,10 @@ public:
     }
 
     /**
-    * Sets the source audio language, which must be one of the supported languages specified using 
+    * Sets the source audio language, which must be one of the supported languages specified using
     * an IETF language tag BCP 47 (https://en.wikipedia.org/wiki/IETF_language_tag).
     */
-    Client& SetLanguage(const std::string& language) 
+    Client& SetLanguage(const std::string& language)
     {
         m_language = language;
         return *this;
@@ -247,7 +246,7 @@ public:
     /**
     * Sets the output format, can be either Simple or Detailed.
     */
-    Client& SetOutputFormat(OutputFormat format) 
+    Client& SetOutputFormat(OutputFormat format)
     {
         m_outputFormat = format;
         return *this;
@@ -256,7 +255,7 @@ public:
     /**
     * Sets the custom speech model id.
     */
-    Client& SetModelId(const std::string& modelId) 
+    Client& SetModelId(const std::string& modelId)
     {
         m_modelId = modelId;
         return *this;
@@ -292,51 +291,53 @@ public:
     /**
     * Sets the language understanding region.
     */
-   Client& SetIntentRegion(const std::string& region)
-   {
-       m_intentRegion = region;
-       return *this;
-   }
-
-    /**
-    * Establishes connection to the service.
-    */
-    ConnectionPtr Connect();
-
-    // TODO: add other getters if/as needed.
-    const EndpointType& GetEndpointType()
+    Client& SetIntentRegion(const std::string& region)
     {
-        return m_endpoint;
+        m_intentRegion = region;
+        return *this;
     }
 
-    Client(const Client&) = default;
-    ~Client() = default;
+     /**
+     * Establishes connection to the service.
+     */
+     ConnectionPtr Connect();
+
+     /**
+     * Get the endpoint type.
+     */
+     const EndpointType& GetEndpointType()
+     {
+         return m_endpoint;
+     }
+
+     Client(const Client&) = default;
+     ~Client() = default;
 
 private:
 
-    friend class Connection::Impl;
+     friend class Connection::Impl;
 
-    CallbacksPtr m_callbacks;
+     CallbacksPtr m_callbacks;
 
-    EndpointType m_endpoint;
-    RecognitionMode m_recoMode;
-    std::string m_customEndpointUrl;
-    std::string m_region;
+     EndpointType m_endpoint;
+     RecognitionMode m_recoMode;
+     std::string m_customEndpointUrl;
+     std::string m_region;
 
-    OutputFormat m_outputFormat;
-    std::string m_language;
-    std::string m_modelId;
+     OutputFormat m_outputFormat;
+     std::string m_language;
+     std::string m_modelId;
 
-    std::string m_translationSourceLanguage;
-    std::string m_translationTargetLanguages;
-    std::string m_translationVoice;
+     std::string m_translationSourceLanguage;
+     std::string m_translationTargetLanguages;
+     std::string m_translationVoice;
 
-    std::string m_intentRegion;
+     std::string m_intentRegion;
 
-    AuthenticationType m_authType;
-    std::string m_authData;
+     AuthenticationType m_authType;
+     std::string m_authData;
 
-    std::wstring m_connectionId;
+     std::wstring m_connectionId;
 };
 
 }}}}

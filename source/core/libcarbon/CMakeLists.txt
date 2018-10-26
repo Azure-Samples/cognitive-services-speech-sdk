@@ -52,6 +52,9 @@ if (${use_openssl})
 endif()
 endif()
 
+set_target_properties (${PROJECT_NAME} PROPERTIES
+    FOLDER core)
+
 if(ANDROID)
 
 target_link_libraries(${PROJECT_NAME}

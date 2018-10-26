@@ -7,9 +7,123 @@ else()
   cmake_minimum_required(VERSION 3.5)
 endif()
 
-option(BUILD_PYTHON "Build Python SWIG module" OFF)
-option(BUILD_CSHARP "Build C# SWIG module" ON)
-option(BUILD_JAVA "Build Java/Android SWIG module" ON)
+# Only interpret ``if()`` arguments as variables or keywords when unquoted.
+# cmake --help-policy CMP0054
+cmake_policy(SET CMP0054 NEW)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(speechsdk_functions)
+
+set(SPEECHSDK_BUILD_TYPE "local" CACHE STRING "SDK build type (local, dev, int, prod)")
+get_local_version(_LOCAL_VERSION)
+set(SPEECHSDK_VERSION "${_LOCAL_VERSION}" CACHE STRING "Version to use")
+
+parse_version(
+  BUILD_TYPE ${SPEECHSDK_BUILD_TYPE}
+  VERSION ${SPEECHSDK_VERSION}
+  PREFIX SPEECHSDK
+  )
+
+get_local_platform(_LOCAL_PLATFORM)
+set(SPEECHSDK_TARGET_PLATFORM "${_LOCAL_PLATFORM}" CACHE STRING
+  "SDK target platform ({Windows,WindowsUwp,Linux,OSX,Android,IOS,IOSSIMULATOR}-{x86,x64,arm32,arm64}; not all combinations are supported)")
+
+parse_platform(TARGET_PLATFORM ${SPEECHSDK_TARGET_PLATFORM} PREFIX SPEECHSDK)
+
+option(SPECTRE_MITIGATION "Build with Spectre mitigation" OFF)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+endif()
+
+if(SPEECHSDK_OS STREQUAL "WindowsUwp")
+  option(BUILD_PYTHON "Build Python SWIG module" OFF)
+  option(BUILD_CSHARP "Build C# SWIG module" ON)
+  option(BUILD_JAVA "Build Java/Android SWIG module" OFF)
+  set(use_default_uuid ON CACHE BOOL "")
+  set(use_schannel OFF CACHE BOOL "")
+  set(use_openssl ON CACHE BOOL "")
+  if(SPEECHSDK_ARCH STREQUAL "x64")
+    set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/uwp_ssl/lib/x64" CACHE STRING "")
+  elseif(SPEECHSDK_ARCH STREQUAL "x86")
+    set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/uwp_ssl/lib/Win32" CACHE STRING "")
+  else()
+    # Should not reach based on earlier checks.
+    message(FATAL_ERROR "internal error")
+  endif()
+  set(OPENSSL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/uwp_ssl/include" CACHE STRING "")
+  set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "")
+  set(CMAKE_SYSTEM_NAME WindowsStore)
+  set(CMAKE_SYSTEM_VERSION 10.0)
+elseif(SPEECHSDK_OS MATCHES "^IOS")
+  option(BUILD_PYTHON "Build Python SWIG module" OFF)
+  option(BUILD_CSHARP "Build C# SWIG module" OFF)
+  option(BUILD_JAVA "Build Java/Android SWIG module" OFF)
+  set(use_builtin_httpapi ON CACHE BOOL "")
+  set(use_openssl OFF CACHE BOOL "")
+  set(ENABLE_VISIBILITY TRUE CACHE BOOL "Whether or not to hide symbols (-fvisibility=hidden)")
+  if(SPEECHSDK_OS STREQUAL "IOSSIMULATOR")
+    # SPEECHSDK_ARCH must be x64
+    set(ENABLE_BITCODE FALSE CACHE BOOL "Whether or not to enable bitcode")
+    set(IOS_PLATFORM SIMULATOR64)
+  else()
+    set(IOS_PLATFORM OS)
+    set(IOS_ARCH arm64)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+      set(ENABLE_BITCODE FALSE CACHE BOOL "Whether or not to enable bitcode")
+      set(ENABLE_BITCODE_MARKER 1)
+    else()
+      set(ENABLE_BITCODE TRUE CACHE BOOL "Whether or not to enable bitcode")
+    endif()
+  endif()
+  set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/external/ios-cmake/ios.toolchain.cmake")
+  set(IOS_DEPLOYMENT_TARGET 11.4)
+elseif(SPEECHSDK_OS STREQUAL "OSX")
+  option(BUILD_PYTHON "Build Python SWIG module" OFF)
+  option(BUILD_CSHARP "Build C# SWIG module" OFF)
+  option(BUILD_JAVA "Build Java/Android SWIG module" ON)
+  set(use_builtin_httpapi ON CACHE BOOL "")
+  set(use_openssl OFF CACHE BOOL "") # TODO why wasn't this there before?
+  set(MACOSX ON)
+elseif(SPEECHSDK_OS STREQUAL "Android")
+  option(BUILD_PYTHON "Build Python SWIG module" OFF)
+  option(BUILD_CSHARP "Build C# SWIG module" OFF)
+  option(BUILD_JAVA "Build Java/Android SWIG module" ON)
+  set(use_default_uuid ON CACHE BOOL "")
+  set(CMAKE_SYSTEM_NAME Android)
+  set(CMAKE_SYSTEM_VERSION 21)
+  set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION clang)
+  if(SPEECHSDK_ARCH STREQUAL "arm32")
+    set(CMAKE_ANDROID_ARCH_ABI "armeabi-v7a")
+  elseif(SPEECHSDK_ARCH STREQUAL arm64)
+    set(CMAKE_ANDROID_ARCH_ABI "arm64-v8a")
+  elseif(SPEECHSDK_ARCH STREQUAL x86)
+    set(CMAKE_ANDROID_ARCH_ABI "x86")
+  elseif(SPEECHSDK_ARCH STREQUAL "x64")
+    set(CMAKE_ANDROID_ARCH_ABI x86_64)
+  else()
+    # Should never reach this based on earlier checks.
+    message(FATAL_ERROR "internal error")
+  endif()
+  set(CMAKE_ANDROID_STL_TYPE c++_static)
+  set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/android_ssl_curl/libs/${CMAKE_ANDROID_ARCH_ABI}" CACHE STRING "")
+elseif(SPEECHSDK_OS STREQUAL "Windows")
+  option(BUILD_PYTHON "Build Python SWIG module" OFF)
+  option(BUILD_CSHARP "Build C# SWIG module" ON)
+  option(BUILD_JAVA "Build Java/Android SWIG module" ON)
+elseif(SPEECHSDK_OS STREQUAL "Linux")
+  option(BUILD_PYTHON "Build Python SWIG module" OFF)
+  option(BUILD_JAVA "Build Java/Android SWIG module" ON)
+  if(SPEECHSDK_ARCH STREQUAL "x64")
+    option(BUILD_CSHARP "Build C# SWIG module" ON)
+  else()
+    option(BUILD_CSHARP "Build C# SWIG module" OFF)
+  endif()
+else()
+  message(FATAL_ERROR "internal error")
+endif()
 
 message("BUILD_PYTHON=${BUILD_PYTHON}")
 message("BUILD_CSHARP=${BUILD_CSHARP}")
@@ -20,17 +134,7 @@ find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif(CCACHE_FOUND)
-
-option(SPECTRE_MITIGATION "Build with Spectre mitigation" OFF)
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
-      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
-      FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
+endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14)
@@ -76,7 +180,7 @@ if(MSVC)
   set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
 
   # add flags for windows store app
-  if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
+  if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSPX_UWP")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /APPCONTAINER /DYNAMICBASE /NXCOMPAT")
@@ -118,7 +222,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   if((DEFINED APPLE) AND (DEFINED IOS_PLATFORM))
     if(ENABLE_BITCODE_MARKER)
       set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -fembed-bitcode-marker")
-    endif(ENABLE_BITCODE_MARKER)
+    endif()
   endif((DEFINED APPLE) AND (DEFINED IOS_PLATFORM))
 endif()
 
@@ -134,16 +238,16 @@ set(CARBON_C_API "${CARBON_PUBLIC}/c_api")
 set(CARBON_CXX_API "${CARBON_PUBLIC}/cxx_api")
 set(CARBON_INCLUDE "${CARBON_CORE}/include")
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
   set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core.uwp")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(SPEECHSDK_CORE_LIBRARY "MicrosoftCognitiveServicesSpeech")
 else()
   set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core")
 endif()
 
-FILE(GLOB SPEECH_C_API_HEADERS "${CARBON_C_API}/*.h")
-FILE(GLOB SPEECH_CXX_API_HEADERS "${CARBON_CXX_API}/*.h")
+file(GLOB SPEECH_C_API_HEADERS "${CARBON_C_API}/*.h")
+file(GLOB SPEECH_CXX_API_HEADERS "${CARBON_CXX_API}/*.h")
 
 # individual components
 set(COMMON "${CARBON_CORE}/common")
@@ -165,6 +269,8 @@ set(JAVA_SAMPLES "${CARBON_ROOT}/tests/functional/java/console")
 
 set(CARBONX "${TESTS}/functional/cxx/carbonx")
 
+set(COMMON_GENERATED_INCLUDE ${CMAKE_BINARY_DIR}/common-generated-include)
+
 add_subdirectory("${CARBON_EXTERNAL}")
 
 include_directories(${AZURE_SHARED_UTIL_INCLUDE})
@@ -178,7 +284,7 @@ add_subdirectory(${C_API})
 add_subdirectory(${SR})
 add_subdirectory(${MOCK})
 if(NOT DEFINED APPLE)
-add_subdirectory(${LIBCARBON})
+  add_subdirectory(${LIBCARBON})
 endif()
 
 add_subdirectory(${CARBON_BINDINGS})

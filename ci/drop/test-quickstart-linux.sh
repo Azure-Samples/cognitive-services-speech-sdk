@@ -41,6 +41,7 @@ if [[ $SMOKE_TEST == 1 ]]; then
 
   "${DOCKER_CMD[@]}" --interactive "$IMAGE_TAG" bash - <<'SCRIPT'
 set -e -x -o pipefail
+DEBIAN_FRONTEND=noninteractive apt-get update --yes
 DEBIAN_FRONTEND=noninteractive apt-get install --quiet --no-install-recommends --yes expect
 make
 export LD_LIBRARY_PATH=/test/speechsdk/lib/x64

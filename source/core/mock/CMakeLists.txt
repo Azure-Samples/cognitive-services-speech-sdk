@@ -46,9 +46,9 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 set_target_properties (mock PROPERTIES
-    DEFINE_SYMBOL  "SPX_CONFIG_EXPORTAPIS" 
+    DEFINE_SYMBOL "SPX_CONFIG_EXPORTAPIS"
     OUTPUT_NAME "carbon-mock"
-    FOLDER carbon_libs
+    FOLDER core
 )
 
 target_link_libraries(mock PRIVATE common ${SPEECHSDK_CORE_LIBRARY})

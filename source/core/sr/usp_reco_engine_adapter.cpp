@@ -16,13 +16,15 @@
 #include "create_object_helpers.h"
 #include "exception.h"
 #include "property_id_2_name_map.h"
-
+#include "spx_build_information.h"
+#include "json.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+using json = nlohmann::json;
 
 CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
     m_resetUspAfterAudioByteCount(0),
@@ -113,7 +115,7 @@ void CSpxUspRecoEngineAdapter::SetFormat(SPXWAVEFORMATEX* pformat)
         // we could call site when errors happen.
         // The m_audioState is Ready at this time. So, if we have two SetFormat calls in a row, the next one won't come in here
         // it goes to the else.
-        // 
+        //
         writeLock.unlock();
 
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x)->PrepareFirstAudioReadyState()", __FUNCTION__, this);
@@ -501,6 +503,12 @@ SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromEndpoint(const std::wstring& endp
     }
 
     return hr;
+}
+
+void CSpxUspRecoEngineAdapter::UspSendSpeechConfig()
+{
+    std::string x = BuildInformation::g_fullVersion;
+    UNUSED(x);
 }
 
 void CSpxUspRecoEngineAdapter::UspSendSpeechContext()

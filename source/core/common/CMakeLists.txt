@@ -71,6 +71,11 @@ else()
     )
 endif()
 
+configure_file(
+    spx_build_information.h.in
+    ${COMMON_GENERATED_INCLUDE}/spx_build_information.h
+    ESCAPE_QUOTES)
+
 # make this the last source file to avoid link warning LNK4221 
 list(APPEND SOURCES "${SRC_DIR}/stdafx.cpp")
 
@@ -85,7 +90,7 @@ if(WIN32 AND SPECTRE_MITIGATION)
 endif()
 
 set_target_properties (common PROPERTIES
-    FOLDER carbon_libs
+    FOLDER core
 )
 target_link_libraries(common ${AZURE_SHARED_LIB})
 
