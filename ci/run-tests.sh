@@ -6,6 +6,7 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 # Associative array for most options
 declare -A options
+options[timeout]="1200s"
 
 # Defines we collect separately in an array
 defines=()
@@ -44,6 +45,12 @@ do
       [[ $2 =~ [^=]*=.* ]] ||
         exitWithError "Error: expected key=value arguments for %s option, got '%s'\n" "$key" "$2"
       defines+=(--define "$2")
+      shift
+      ;;
+    --timeout)
+      [[ -n $2 ]] ||
+        exitWithError "Error: expected argument for %s option\n" "$key"
+      options[${key:2}]="$2"
       shift
       ;;
     --verbose|-v)
@@ -108,8 +115,8 @@ pass=0
 total=0
 for testfile in "${tests[@]}"; do
   T="$(basename "$testfile" .sh)"
-  echo Starting $T with timeout 1200 s
-  ${coreutilsPrefix}timeout -k 5s 1200 ${coreutilsPrefix}stdbuf -o0 -e0 \
+  echo Starting $T with timeout ${options[timeout]}
+  ${coreutilsPrefix}timeout -k 5s "${options[timeout]}" ${coreutilsPrefix}stdbuf -o0 -e0 \
   "$testfile" "${options[build-dir]}" "${options[platform]}" "$binaryDir"
   exitCode=$?
   if [[ $exitCode == 0 ]]; then

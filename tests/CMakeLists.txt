@@ -23,6 +23,7 @@ if(NOT ANDROID)
 if (BUILD_CSHARP)
   add_subdirectory("${SRC_DIR}/functional/csharp/end2end")
   add_subdirectory("${SRC_DIR}/functional/csharp/console")
+  add_subdirectory("${SRC_DIR}/functional/csharp/parallel_runner")
 endif()
 endif()
 

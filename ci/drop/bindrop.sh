@@ -176,9 +176,10 @@ fi
 
 cp $CPOPT -R "$SRCINC"* "$DESTPUBINC"
 
-# copy carbonx if available (non-shipping)
-SRCCARBONX="$SRCBIN/carbonx"
-[[ -e $SRCCARBONX ]] && mkdir -p "$DESTPRIVBIN" && cp $CPOPT "$SRCCARBONX" "$DESTPRIVBIN"
+# copy additional private binaries (non-shipping)
+for var in carbonx Microsoft.CognitiveServices.Speech.Tests.ParallelRunner; do
+  [[ -e "$SRCBIN/$var" ]] && mkdir -p "$DESTPRIVBIN" && cp $CPOPT "$SRCBIN/$var" "$DESTPRIVBIN"
+done
 
 # N.B. no long option for -R (recursive) on OSX.
 cp $CPOPT -R "$SRCINC"* "$DESTPUBINC"

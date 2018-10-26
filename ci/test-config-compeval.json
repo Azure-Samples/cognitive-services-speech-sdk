@@ -1,0 +1,10 @@
+{
+  "COMPEVAL": {
+    "KEY": "${compeval-key}",
+    "ENDPOINT": "wss://northeurope.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US",
+    "INPUT_DIR": "${input_dir}",
+    "OUTPUT_DIR": "${output_dir}",
+    "NUM_THREADS": "10",
+    "MODE": "continuous"
+  }
+}

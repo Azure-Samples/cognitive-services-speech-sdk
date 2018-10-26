@@ -287,6 +287,41 @@ phases:
     continueOnError: true
     condition: succeededOrFailed()
 
+# This phase is responsible for running CompEval test (Windows C# only)
+# For now, it is triggered by a separate build definition in AzureDevOps: "CompEval Test"
+- phase: CompEvalTest
+  dependsOn: [Pre, WindowsBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CompEvalTest '))
+  queue:
+    name: Hosted VS2017
+    timeoutInMinutes: 400
+  steps:
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Windows artifacts'
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)\In
+  - powershell: |
+      $tools = Start-Process -FilePath "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" -Wait -NoNewWindow -ArgumentList /Source:https://csspeechtestdata.blob.core.windows.net/tools/NormAndAlign, /Dest:CompEvalRun\, /SourceKey:$(TestDataStorageKey), /S, /Y, /XO
+      $data = Start-Process -FilePath "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" -Wait -NoNewWindow -ArgumentList /Source:https://csspeechtestdata.blob.core.windows.net/datasets/CompEval, /Dest:CompEvalRun\, /SourceKey:$(TestDataStorageKey), /S, /Y, /XO
+      if (($tools.ExitCode -ne 0) -or ($data.ExitCode -ne 0)) {
+          throw "an error occurred"
+      }
+    displayName: 'Downloading CompEval data'
+  - bash: |
+      # --build-dir is used as a drop directory here
+      ./ci/run-tests.sh \
+        --test-configuration ci/test-config-compeval.json \
+        --build-dir "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/In \
+        --platform Windows-x64-Release \
+        --timeout 400m \
+        -D compeval-key="$(NorthEuropeKeySkyman)" \
+        -D input_dir=CompEvalRun \
+        -D output_dir=CompEvalRun -- compeval_tests
+    displayName: 'Transcription'
+
 - phase: WindowsBuild
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsBuild '))
