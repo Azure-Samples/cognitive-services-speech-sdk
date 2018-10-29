@@ -304,8 +304,8 @@ phases:
       artifactName: Windows
       downloadPath: $(System.ArtifactsDirectory)\In
   - powershell: |
-      $tools = Start-Process -FilePath "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" -Wait -NoNewWindow -ArgumentList /Source:https://csspeechtestdata.blob.core.windows.net/tools/NormAndAlign, /Dest:CompEvalRun\, /SourceKey:$(TestDataStorageKey), /S, /Y, /XO
-      $data = Start-Process -FilePath "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" -Wait -NoNewWindow -ArgumentList /Source:https://csspeechtestdata.blob.core.windows.net/datasets/CompEval, /Dest:CompEvalRun\, /SourceKey:$(TestDataStorageKey), /S, /Y, /XO
+      $tools = Start-Process -FilePath "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" -Wait -PassThru -NoNewWindow -ArgumentList /Source:https://csspeechtestdata.blob.core.windows.net/tools/NormAndAlign, /Dest:CompEvalRun\, /SourceKey:$(TestDataStorageKey), /S, /Y, /XO
+      $data = Start-Process -FilePath "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" -Wait -PassThru -NoNewWindow -ArgumentList /Source:https://csspeechtestdata.blob.core.windows.net/datasets/CompEval, /Dest:CompEvalRun\, /SourceKey:$(TestDataStorageKey), /S, /Y, /XO
       if (($tools.ExitCode -ne 0) -or ($data.ExitCode -ne 0)) {
           throw "an error occurred"
       }
