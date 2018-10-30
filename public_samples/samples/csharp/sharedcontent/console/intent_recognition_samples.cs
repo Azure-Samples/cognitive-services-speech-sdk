@@ -171,7 +171,6 @@ namespace MicrosoftSpeechSDKSamples
         // Intent recognition in the specified language, using microphone.
         public static async Task RecognitionWithMicrophoneUsingLanguageAsync()
         {
-            // <intentRecognitionWithLanguage>
             // Creates an instance of a speech config with specified subscription key
             // and service region. Note that in contrast to other services supported by
             // the Cognitive Services Speech SDK, the Language Understanding service
@@ -229,7 +228,6 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 }
             }
-            // </intentRecognitionWithLanguage>
         }
     }
 }

@@ -77,7 +77,6 @@ void TranslationWithMicrophone()
 // Continuous translation.
 void TranslationContinuousRecognition()
 {
-    // <TranslationContinuousRecognition>
     // Creates an instance of a speech translation config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechTranslationConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
@@ -151,5 +150,4 @@ void TranslationContinuousRecognition()
 
     // Stops recognition.
     recognizer->StopContinuousRecognitionAsync().wait();
-    // </TranslationContinuousRecognition>
 }

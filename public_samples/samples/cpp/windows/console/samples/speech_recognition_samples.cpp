@@ -59,7 +59,6 @@ void SpeechRecognitionWithMicrophone()
 // Speech recognition in the specified language, using microphone, and requesting detailed output format.
 void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
 {
-    // <SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat>
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
@@ -102,7 +101,6 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
     }
-    // </SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat>
 }
 
 void SpeechContinuousRecognitionWithFile()
@@ -220,7 +218,6 @@ void SpeechRecognitionUsingCustomizedModel()
 
 void SpeechContinuousRecognitionWithStream()
 {
-    // <SpeechContinuousRecognitionWithStream>
     // First, define your own pull audio input stream callback class that implements the
     // PullAudioInputStreamCallback interface. The sample here illustrates how to define such
     // a callback that reads audio data from a wav file.
@@ -428,5 +425,4 @@ void SpeechContinuousRecognitionWithStream()
 
     // Stops recognition.
     recognizer->StopContinuousRecognitionAsync().wait();
-    // </SpeechContinuousRecognitionWithStream>
 }

@@ -62,7 +62,6 @@ namespace MicrosoftSpeechSDKSamples
         // Speech recognition in the specified spoken language and uses detailed output format.
         public static async Task RecognitionWithLanguageAndDetailedOutputAsync()
         {
-            // <recognitionWithLanguageAndDetailedOutputFormat>
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
@@ -113,7 +112,6 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 }
             }
-            // </recognitionWithLanguageAndDetailedOutputFormat>
         }
 
         // Speech recognition using a customized model.
@@ -238,7 +236,6 @@ namespace MicrosoftSpeechSDKSamples
         // Speech recognition with audio stream
         public static async Task RecognitionWithAudioStreamAsync()
         {
-            // <recognitionAudioStream>
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
@@ -307,7 +304,6 @@ namespace MicrosoftSpeechSDKSamples
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 }
             }
-            // </recognitionAudioStream>
         }
     }
 }

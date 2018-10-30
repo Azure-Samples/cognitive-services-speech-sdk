@@ -236,7 +236,6 @@ namespace MicrosoftSpeechSDKSamples
         // Translation using audio stream.
         public static async Task TranslationWithAudioStreamAsync()
         {
-            // <TranslationWithAudioStreamAsync>
             // Translation source language.
             // Replace with a language of your choice.
             string fromLanguage = "en-US";
@@ -339,7 +338,6 @@ namespace MicrosoftSpeechSDKSamples
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 }
             }
-            // </TranslationWithAudioStreamAsync>
         }
     }
 }
