@@ -34,12 +34,14 @@ enum Result_CancellationErrorCode
 {
     CancellationErrorCode_NoError = 0,
     CancellationErrorCode_AuthenticationFailure = 1,
-    CancellationErrorCode_BadRequestParameters = 2,
+    CancellationErrorCode_BadRequest = 2,
     CancellationErrorCode_TooManyRequests = 3,
-    CancellationErrorCode_ConnectionFailure = 4,
-    CancellationErrorCode_ServiceTimeout = 5,
-    CancellationErrorCode_ServiceError = 6,
-    CancellationErrorCode_RuntimeError = 7
+    CancellationErrorCode_Forbidden = 4,
+    CancellationErrorCode_ConnectionFailure = 5,
+    CancellationErrorCode_ServiceTimeout = 6,
+    CancellationErrorCode_ServiceError = 7,
+    CancellationErrorCode_ServiceUnavailable = 8,
+    CancellationErrorCode_RuntimeError = 9
 };
 typedef enum Result_CancellationErrorCode Result_CancellationErrorCode;
 

@@ -205,8 +205,6 @@ enum class CancellationReason
     /// Indicates that the end of the audio stream was reached.
     /// </summary>
     EndOfStream = 2,
-
-
 };
 
 /// <summary>
@@ -222,14 +220,14 @@ enum class CancellationErrorCode
     NoError = 0,
 
     /// <summary>
-    /// Indicates an authentication error. The errorDetails property contains detailed error response.
+    /// Indicates an authentication error.
     /// </summary>
     AuthenticationFailure = 1,
 
     /// <summary>
-    /// Indicates that one or more recognition parameters are invalid.
+    /// Indicates that one or more recognition parameters are invalid or the audio format is not supported.
     /// </summary>
-    BadRequestParameters = 2,
+    BadRequest = 2,
 
     /// <summary>
     /// Indicates that the number of parallel requests exceeded the number of allowed concurrent transcriptions for the subscription.
@@ -237,24 +235,34 @@ enum class CancellationErrorCode
     TooManyRequests = 3,
 
     /// <summary>
-    /// Indicates an connection error. The errorDetails property contains detailed error response.
+    /// Indicates that the free subscription used by the request ran out of quota.
     /// </summary>
-    ConnectionFailure = 4,
+    Forbidden = 4,
+
+    /// <summary>
+    /// Indicates a connection error.
+    /// </summary>
+    ConnectionFailure = 5,
 
     /// <summary>
     /// Indicates a time-out error when waiting for response from service.
     /// </summary>
-    ServiceTimeout = 5,
+    ServiceTimeout = 6,
 
     /// <summary>
     /// Indicates that an error is returned by the service.
     /// </summary>
-    ServiceError = 6,
+    ServiceError = 7,
 
     /// <summary>
-    /// Indicates an unexpected runtime error. The errorDetails property contains detailed error response.
+    /// Indicates that the service is currently unavailable.
     /// </summary>
-    RuntimeError = 7
+    ServiceUnavailable = 8,
+
+    /// <summary>
+    /// Indicates an unexpected runtime error.
+    /// </summary>
+    RuntimeError = 9
 };
 
 /// <summary>

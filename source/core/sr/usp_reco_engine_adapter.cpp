@@ -1165,14 +1165,20 @@ void CSpxUspRecoEngineAdapter::OnError(bool isTransport, USP::ErrorCode errorCod
         case USP::ErrorCode::RuntimeError:
             cancellationErrorCode = CancellationErrorCode::RuntimeError;
             break;
-        case USP::ErrorCode::ServiceError:
-            cancellationErrorCode = CancellationErrorCode::ServiceError;
+        case USP::ErrorCode::BadRequest:
+            cancellationErrorCode = CancellationErrorCode::BadRequest;
             break;
         case USP::ErrorCode::TooManyRequests:
             cancellationErrorCode = CancellationErrorCode::TooManyRequests;
             break;
-        case USP::ErrorCode::BadRequest:
-            cancellationErrorCode = CancellationErrorCode::BadRequestParameters;
+        case USP::ErrorCode::Forbidden:
+            cancellationErrorCode = CancellationErrorCode::Forbidden;
+            break;
+        case USP::ErrorCode::ServiceError:
+            cancellationErrorCode = CancellationErrorCode::ServiceError;
+            break;
+        case USP::ErrorCode::ServiceUnavailable:
+            cancellationErrorCode = CancellationErrorCode::ServiceUnavailable;
             break;
         default:
             cancellationErrorCode = CancellationErrorCode::RuntimeError;
@@ -1384,65 +1390,83 @@ std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dg
 
 ResultReason CSpxUspRecoEngineAdapter::ToReason(USP::RecognitionStatus uspRecognitionStatus)
 {
-    const static std::map<USP::RecognitionStatus, ResultReason> reasonMap = {
-        { USP::RecognitionStatus::Success, ResultReason::RecognizedSpeech },
-        { USP::RecognitionStatus::NoMatch, ResultReason::NoMatch },
-        { USP::RecognitionStatus::Error, ResultReason::Canceled },
-        { USP::RecognitionStatus::TooManyRequests, ResultReason::Canceled },
-        { USP::RecognitionStatus::InvalidMessage, ResultReason::Canceled },
-        { USP::RecognitionStatus::InitialSilenceTimeout, ResultReason::NoMatch },
-        { USP::RecognitionStatus::InitialBabbleTimeout, ResultReason::NoMatch },
-    };
-
-    auto item = reasonMap.find(uspRecognitionStatus);
-    if (item == reasonMap.end())
+    switch (uspRecognitionStatus)
     {
+    case USP::RecognitionStatus::Success:
+        return ResultReason::RecognizedSpeech;
+
+    case USP::RecognitionStatus::NoMatch:
+    case USP::RecognitionStatus::InitialSilenceTimeout:
+    case USP::RecognitionStatus::InitialBabbleTimeout:
+        return ResultReason::NoMatch;
+
+    case USP::RecognitionStatus::Error:
+    case USP::RecognitionStatus::TooManyRequests:
+    case USP::RecognitionStatus::BadRequest:
+    case USP::RecognitionStatus::Forbidden:
+    case USP::RecognitionStatus::ServiceUnavailable:
+    case USP::RecognitionStatus::InvalidMessage:
+        return ResultReason::Canceled;
+
+    default:
         SPX_TRACE_ERROR("Unexpected recognition status %d when converting to ResultReason.", uspRecognitionStatus);
         SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+        return ResultReason::Canceled;
     }
-    return item->second;
 }
 
 CancellationReason CSpxUspRecoEngineAdapter::ToCancellationReason(USP::RecognitionStatus uspRecognitionStatus)
 {
-    const static std::map<USP::RecognitionStatus, CancellationReason> reasonMap = {
-        { USP::RecognitionStatus::Success, REASON_CANCELED_NONE },
-        { USP::RecognitionStatus::NoMatch, REASON_CANCELED_NONE },
-        { USP::RecognitionStatus::Error, CancellationReason::Error },
-        { USP::RecognitionStatus::TooManyRequests, CancellationReason::Error },
-        { USP::RecognitionStatus::InvalidMessage, CancellationReason::Error },
-        { USP::RecognitionStatus::InitialSilenceTimeout, REASON_CANCELED_NONE },
-        { USP::RecognitionStatus::InitialBabbleTimeout, REASON_CANCELED_NONE },
-    };
-
-    auto item = reasonMap.find(uspRecognitionStatus);
-    if (item == reasonMap.end())
+    switch (uspRecognitionStatus)
     {
+    case USP::RecognitionStatus::Success:
+    case USP::RecognitionStatus::NoMatch:
+    case USP::RecognitionStatus::InitialSilenceTimeout:
+    case USP::RecognitionStatus::InitialBabbleTimeout:
+        return REASON_CANCELED_NONE;
+
+    case USP::RecognitionStatus::Error:
+    case USP::RecognitionStatus::TooManyRequests:
+    case USP::RecognitionStatus::BadRequest:
+    case USP::RecognitionStatus::Forbidden:
+    case USP::RecognitionStatus::ServiceUnavailable:
+    case USP::RecognitionStatus::InvalidMessage:
+        return CancellationReason::Error;
+
+    default:
         SPX_TRACE_ERROR("Unexpected recognition status %d when converting to CancellationReason.", uspRecognitionStatus);
         SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+        return CancellationReason::Error;
     }
-    return item->second;
 }
 
 NoMatchReason CSpxUspRecoEngineAdapter::ToNoMatchReason(USP::RecognitionStatus uspRecognitionStatus)
 {
-    const static std::map<USP::RecognitionStatus, NoMatchReason> reasonMap = {
-        { USP::RecognitionStatus::Success, NO_MATCH_REASON_NONE },
-        { USP::RecognitionStatus::NoMatch, NoMatchReason::NotRecognized },
-        { USP::RecognitionStatus::Error, NO_MATCH_REASON_NONE },
-        { USP::RecognitionStatus::TooManyRequests, NO_MATCH_REASON_NONE },
-        { USP::RecognitionStatus::InvalidMessage, NO_MATCH_REASON_NONE },
-        { USP::RecognitionStatus::InitialSilenceTimeout, NoMatchReason::InitialSilenceTimeout },
-        { USP::RecognitionStatus::InitialBabbleTimeout, NoMatchReason::InitialBabbleTimeout },
-    };
-
-    auto item = reasonMap.find(uspRecognitionStatus);
-    if (item == reasonMap.end())
+    switch (uspRecognitionStatus)
     {
+    case USP::RecognitionStatus::Success:
+    case USP::RecognitionStatus::Error:
+    case USP::RecognitionStatus::TooManyRequests:
+    case USP::RecognitionStatus::BadRequest:
+    case USP::RecognitionStatus::Forbidden:
+    case USP::RecognitionStatus::ServiceUnavailable:
+    case USP::RecognitionStatus::InvalidMessage:
+        return NO_MATCH_REASON_NONE;
+
+    case USP::RecognitionStatus::NoMatch:
+        return NoMatchReason::NotRecognized;
+
+    case USP::RecognitionStatus::InitialSilenceTimeout:
+        return NoMatchReason::InitialSilenceTimeout;
+
+    case USP::RecognitionStatus::InitialBabbleTimeout:
+        return NoMatchReason::InitialBabbleTimeout;
+
+    default:
         SPX_TRACE_ERROR("Unexpected recognition status %d when converting to NoMatchReason.", uspRecognitionStatus);
         SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+        return NO_MATCH_REASON_NONE;
     }
-    return item->second;
 }
 
 void CSpxUspRecoEngineAdapter::FireFinalResultLater(const USP::SpeechPhraseMsg& message)

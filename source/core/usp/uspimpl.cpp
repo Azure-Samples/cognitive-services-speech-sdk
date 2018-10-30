@@ -656,6 +656,9 @@ static RecognitionStatus ToRecognitionStatus(const string& str)
         { "Error", RecognitionStatus::Error },
         { "EndOfDictation", RecognitionStatus::EndOfDictation },
         { "TooManyRequests", RecognitionStatus::TooManyRequests },
+        { "BadRequest", RecognitionStatus::BadRequest },
+        { "Forbidden", RecognitionStatus::Forbidden },
+        { "ServiceUnavailable", RecognitionStatus::ServiceUnavailable}
     };
 
     auto result = statusMap.find(str);
@@ -939,25 +942,9 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         case RecognitionStatus::EndOfDictation:
             connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
             break;
-        case RecognitionStatus::Error:
-            {
-                auto msg = "The recognition service encountered an internal error and could not continue. Response text:" + json.dump();
-                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, msg.c_str()); });
-                break;
-            }
-        case RecognitionStatus::TooManyRequests:
-            {
-                auto msg = "The number of parallel requests exceeded the number of allowed concurrent transcriptions. Response text:" + json.dump();
-                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::TooManyRequests, msg.c_str()); });
-                break;
-            }
-        case RecognitionStatus::InvalidMessage:
         default:
-            {
-                auto msg = "Invalid response. Response text:" + json.dump();
-                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, msg.c_str()); });
-                break;
-            }
+            connection->InvokeRecognitionErrorCallback(result.recognitionStatus, json.dump());
+            break;
         }
     }
     else if (path == path::translationHypothesis)
@@ -994,18 +981,8 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         case RecognitionStatus::EndOfDictation:
             translationResult.translationStatus = TranslationStatus::Success;
             break;
-        case RecognitionStatus::Error:
-             msg = "The speech recognition service encountered an internal error and could not continue. Response text:" + json.dump();
-            connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, msg); });
-            break;
-        case RecognitionStatus::TooManyRequests:
-            msg = "The number of parallel requests exceeded the number of allowed concurrent transcriptions. Response text:" + json.dump();
-            connection->Invoke([&] { callbacks->OnError(false, ErrorCode::TooManyRequests, msg); });
-            break;
-        case RecognitionStatus::InvalidMessage:
         default:
-            msg = "Invalid response. Response text:" + json.dump();
-            connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, msg); });
+            connection->InvokeRecognitionErrorCallback(status, json.dump());
             break;
         }
 
@@ -1074,6 +1051,52 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
             size
             });
         });
+    }
+}
+
+void Connection::Impl::InvokeRecognitionErrorCallback(RecognitionStatus status, const std::string& response)
+{
+    auto callbacks = m_config.m_callbacks;
+    string msg;
+
+    switch (status)
+    {
+    case RecognitionStatus::Error:
+        msg = "The speech recognition service encountered an internal error and could not continue. Response text:" + response;
+        this->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, msg); });
+        break;
+    case RecognitionStatus::TooManyRequests:
+        msg = "The number of parallel requests exceeded the number of allowed concurrent transcriptions. Response text:" + response;
+        this->Invoke([&] { callbacks->OnError(false, ErrorCode::TooManyRequests, msg); });
+        break;
+    case RecognitionStatus::BadRequest:
+        msg = "Invalid parameter or unsupported audio format in the request. Response text:" + response;
+        this->Invoke([&] { callbacks->OnError(false, ErrorCode::BadRequest, msg.c_str()); });
+        break;
+    case RecognitionStatus::Forbidden:
+        msg = "The recognizer is using a free subscription that ran out of quota. Response text:" + response;
+        this->Invoke([&] { callbacks->OnError(false, ErrorCode::Forbidden, msg.c_str()); });
+        break;
+    case RecognitionStatus::ServiceUnavailable:
+        msg = "The service is currently unavailable. Response text:" + response;
+        this->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceUnavailable, msg.c_str()); });
+        break;
+    case RecognitionStatus::InvalidMessage:
+        msg = "Invalid response. Response text:" + response;
+        this->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, msg.c_str()); });
+        break;
+    case RecognitionStatus::Success:
+    case RecognitionStatus::EndOfDictation:
+    case RecognitionStatus::InitialSilenceTimeout:
+    case RecognitionStatus::InitialBabbleTimeout:
+    case RecognitionStatus::NoMatch:
+        msg = "Runtime Error: invoke error callback for non-error recognition status. Response text:" + response;
+        this->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, msg.c_str()); });
+        break;
+    default:
+        msg = "Runtime Error: invalid recognition status. Response text:" + response;
+        this->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, msg.c_str()); });
+        break;
     }
 }
 

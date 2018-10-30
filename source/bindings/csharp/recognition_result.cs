@@ -101,11 +101,13 @@ namespace Microsoft.CognitiveServices.Speech
 
             Contract.Requires((int)CancellationErrorCode.NoError == (int)Internal.CancellationErrorCode.NoError);
             Contract.Requires((int)CancellationErrorCode.AuthenticationFailure == (int)Internal.CancellationErrorCode.AuthenticationFailure);
-            Contract.Requires((int)CancellationErrorCode.BadRequestParameters== (int)Internal.CancellationErrorCode.BadRequestParameters);
+            Contract.Requires((int)CancellationErrorCode.BadRequest== (int)Internal.CancellationErrorCode.BadRequest);
             Contract.Requires((int)CancellationErrorCode.TooManyRequests == (int)Internal.CancellationErrorCode.TooManyRequests);
+            Contract.Requires((int)CancellationErrorCode.Forbidden == (int)Internal.CancellationErrorCode.Forbidden);
             Contract.Requires((int)CancellationErrorCode.ConnectionFailure == (int)Internal.CancellationErrorCode.ConnectionFailure);
             Contract.Requires((int)CancellationErrorCode.ServiceTimeout == (int)Internal.CancellationErrorCode.ServiceTimeout);
             Contract.Requires((int)CancellationErrorCode.ServiceError == (int)Internal.CancellationErrorCode.ServiceError);
+            Contract.Requires((int)CancellationErrorCode.ServiceUnavailable == (int)Internal.CancellationErrorCode.ServiceUnavailable);
             Contract.Requires((int)CancellationErrorCode.RuntimeError == (int)Internal.CancellationErrorCode.RuntimeError);
 
             canceledImpl = cancellation;

@@ -1305,12 +1305,14 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
 
     static_assert(0 == (int)CancellationErrorCode::NoError, "CancellationErrorCode::* enum values changed!");
     static_assert(1 == (int)CancellationErrorCode::AuthenticationFailure, "CancellationErrorCode::* enum values changed!");
-    static_assert(2 == (int)CancellationErrorCode::BadRequestParameters, "CancellationErrorCode::* enum values changed!");
+    static_assert(2 == (int)CancellationErrorCode::BadRequest, "CancellationErrorCode::* enum values changed!");
     static_assert(3 == (int)CancellationErrorCode::TooManyRequests, "CancellationErrorCode::* enum values changed!");
-    static_assert(4 == (int)CancellationErrorCode::ConnectionFailure, "CancellationErrorCode::* enum values changed!");
-    static_assert(5 == (int)CancellationErrorCode::ServiceTimeout, "CancellationErrorCode::* enum values changed!");
-    static_assert(6 == (int)CancellationErrorCode::ServiceError, "CancellationErrorCode::* enum values changed!");
-    static_assert(7 == (int)CancellationErrorCode::RuntimeError, "CancellationErrorCode::* enum values changed!");
+    static_assert(4 == (int)CancellationErrorCode::Forbidden, "CancellationErrorCode::* enum values changed!");
+    static_assert(5 == (int)CancellationErrorCode::ConnectionFailure, "CancellationErrorCode::* enum values changed!");
+    static_assert(6 == (int)CancellationErrorCode::ServiceTimeout, "CancellationErrorCode::* enum values changed!");
+    static_assert(7 == (int)CancellationErrorCode::ServiceError, "CancellationErrorCode::* enum values changed!");
+    static_assert(8 == (int)CancellationErrorCode::ServiceUnavailable, "CancellationErrorCode::* enum values changed!");
+    static_assert(9 == (int)CancellationErrorCode::RuntimeError, "CancellationErrorCode::* enum values changed!");
 
     static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
     static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");

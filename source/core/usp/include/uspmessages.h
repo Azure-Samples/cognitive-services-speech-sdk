@@ -27,7 +27,17 @@ typedef uint64_t DurationType;
  */
 enum class RecognitionStatus : int
 {
-    Success, NoMatch, InitialSilenceTimeout, InitialBabbleTimeout, Error, EndOfDictation, TooManyRequests, InvalidMessage
+    Success,
+    NoMatch,
+    InitialSilenceTimeout,
+    InitialBabbleTimeout,
+    Error,
+    EndOfDictation,
+    TooManyRequests,
+    BadRequest,
+    Forbidden,
+    ServiceUnavailable,
+    InvalidMessage
 };
 
 /**
@@ -54,7 +64,9 @@ enum class ErrorCode : int
     AuthenticationError = 1,
     BadRequest,
     TooManyRequests,
+    Forbidden,
     ConnectionError,
+    ServiceUnavailable,
     ServiceError,
     RuntimeError
 };

@@ -151,6 +151,8 @@ private:
 
     static void OnTransportData(TransportHandle transportHandle, HTTP_HEADERS_HANDLE responseHeader, const unsigned char* buffer, size_t size, unsigned int errorCode, void* context);
 
+    void InvokeRecognitionErrorCallback(RecognitionStatus status, const std::string& response);
+
     uint64_t getTimestamp();
 };
 

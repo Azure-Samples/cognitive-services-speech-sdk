@@ -141,7 +141,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 var cancellation = CancellationDetails.FromResult(result);
                 Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
-                Assert.AreEqual(cancellation.ErrorCode, CancellationErrorCode.BadRequestParameters);
+                Assert.AreEqual(cancellation.ErrorCode, CancellationErrorCode.BadRequest);
                 AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with a bad request (400)");
             }
         }
@@ -158,7 +158,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 var cancellation = CancellationDetails.FromResult(result);
                 Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
-                Assert.AreEqual(cancellation.ErrorCode, CancellationErrorCode.BadRequestParameters);
+                Assert.AreEqual(cancellation.ErrorCode, CancellationErrorCode.BadRequest);
                 AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with a bad request (400)");
             }
         }

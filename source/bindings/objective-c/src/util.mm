@@ -82,11 +82,14 @@
         case SpeechImpl::CancellationErrorCode::AuthenticationFailure:
             errorCode = SPXCancellationErrorCode_AuthenticationFailure;
             break;
-        case SpeechImpl::CancellationErrorCode::BadRequestParameters:
-            errorCode = SPXCancellationErrorCode_BadRequestParameters;
+        case SpeechImpl::CancellationErrorCode::BadRequest:
+            errorCode = SPXCancellationErrorCode_BadRequest;
             break;
         case SpeechImpl::CancellationErrorCode::TooManyRequests:
             errorCode = SPXCancellationErrorCode_TooManyRequests;
+            break;
+        case SpeechImpl::CancellationErrorCode::Forbidden:
+            errorCode = SPXCancellationErrorCode_Forbidden;
             break;
         case SpeechImpl::CancellationErrorCode::ConnectionFailure:
             errorCode = SPXCancellationErrorCode_ConnectionFailure;
@@ -96,6 +99,9 @@
             break;
         case SpeechImpl::CancellationErrorCode::ServiceError:
             errorCode = SPXCancellationErrorCode_ServiceError;
+            break;
+        case SpeechImpl::CancellationErrorCode::ServiceUnavailable:
+            errorCode = SPXCancellationErrorCode_ServiceUnavailable;
             break;
         case SpeechImpl::CancellationErrorCode::RuntimeError:
             errorCode = SPXCancellationErrorCode_RuntimeError;

@@ -217,14 +217,14 @@ typedef NS_ENUM(NSUInteger, SPXCancellationErrorCode)
     SPXCancellationErrorCode_NoError = 0,
 
     /**
-      * Indicates an authentication error. The errorDetails property contains detailed error response.
+      * Indicates an authentication error.
       */
     SPXCancellationErrorCode_AuthenticationFailure = 1,
 
     /**
-      * Indicates that one or more recognition parameters are invalid.
+      * Indicates that one or more recognition parameters are invalid or the audio format is not supported.
       */
-    SPXCancellationErrorCode_BadRequestParameters = 2,
+    SPXCancellationErrorCode_BadRequest = 2,
 
     /**
       * Indicates that the number of parallel requests exceeded the number of allowed concurrent transcriptions for the subscription.
@@ -232,24 +232,34 @@ typedef NS_ENUM(NSUInteger, SPXCancellationErrorCode)
     SPXCancellationErrorCode_TooManyRequests = 3,
 
     /**
-      * Indicates an connection error. The errorDetails property contains detailed error response.
+      * Indicates that the free subscription used by the request ran out of quota.
       */
-    SPXCancellationErrorCode_ConnectionFailure = 4,
+    SPXCancellationErrorCode_Forbidden = 4,
+
+    /**
+      * Indicates a connection error.
+      */
+    SPXCancellationErrorCode_ConnectionFailure = 5,
 
     /**
       * Indicates a time-out error when waiting for response from service.
       */
-    SPXCancellationErrorCode_ServiceTimeout = 5,
+    SPXCancellationErrorCode_ServiceTimeout = 6,
 
     /**
       * Indicates that an error is returned by the service.
       */
-    SPXCancellationErrorCode_ServiceError = 6,
+    SPXCancellationErrorCode_ServiceError = 7,
 
     /**
-      * Indicates an unexpected runtime error. The errorDetails property contains detailed error response.
+      * Indicates that the service is currently unavailable.
       */
-    SPXCancellationErrorCode_RuntimeError = 7
+    SPXCancellationErrorCode_ServiceUnavailable = 8,
+
+    /**
+      * Indicates an unexpected runtime error.
+      */
+    SPXCancellationErrorCode_RuntimeError = 9
 };
 
 /**

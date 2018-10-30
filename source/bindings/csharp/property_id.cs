@@ -114,6 +114,5 @@ namespace Microsoft.CognitiveServices.Speech
         /// JSON result of language understanding service.
         /// </summary>
         LanguageUnderstandingServiceResponse_JsonResult = Internal.PropertyId.LanguageUnderstandingServiceResponse_JsonResult,
-
     }
 }

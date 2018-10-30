@@ -28,11 +28,13 @@ static_assert((int)CancellationReason_EndOfStream == (int)CancellationReason::En
 
 static_assert((int)CancellationErrorCode_NoError == (int)CancellationErrorCode::NoError, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
 static_assert((int)CancellationErrorCode_AuthenticationFailure == (int)CancellationErrorCode::AuthenticationFailure, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
-static_assert((int)CancellationErrorCode_BadRequestParameters == (int)CancellationErrorCode::BadRequestParameters, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
+static_assert((int)CancellationErrorCode_BadRequest == (int)CancellationErrorCode::BadRequest, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
 static_assert((int)CancellationErrorCode_TooManyRequests == (int)CancellationErrorCode::TooManyRequests, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
+static_assert((int)CancellationErrorCode_Forbidden == (int)CancellationErrorCode::Forbidden, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
 static_assert((int)CancellationErrorCode_ConnectionFailure == (int)CancellationErrorCode::ConnectionFailure, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
 static_assert((int)CancellationErrorCode_ServiceTimeout == (int)CancellationErrorCode::ServiceTimeout, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
 static_assert((int)CancellationErrorCode_ServiceError == (int)CancellationErrorCode::ServiceError, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
+static_assert((int)CancellationErrorCode_ServiceUnavailable == (int)CancellationErrorCode::ServiceUnavailable, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
 static_assert((int)CancellationErrorCode_RuntimeError == (int)CancellationErrorCode::RuntimeError, "CancellationErrorCode_* enum values == CancellationErrorCode::* enum values");
 
 static_assert((int)NoMatchReason_NotRecognized == (int)NoMatchReason::NotRecognized, "NoMatchReason_* enum values == NoMatchReason::* enum values");

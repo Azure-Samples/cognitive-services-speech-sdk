@@ -16,14 +16,14 @@ public enum CancellationErrorCode
     NoError(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.NoError),
 
     /**
-     * Indicates an authentication error. The errorDetails property contains detailed error response.
+     * Indicates an authentication error.
      */
     AuthenticationFailure(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.AuthenticationFailure),
 
     /**
-     * Indicates that one or more recognition parameters are invalid.
+     * Indicates that one or more recognition parameters are invalid or the audio format is not supported.
      */
-    BadRequestParameters(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.BadRequestParameters),
+    BadRequest(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.BadRequest),
 
     /**
      * Indicates that the number of parallel requests exceeded the number of allowed concurrent transcriptions for the subscription.
@@ -31,7 +31,12 @@ public enum CancellationErrorCode
     TooManyRequests(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.TooManyRequests),
 
     /**
-     * Indicates an connection error. The errorDetails property contains detailed error response.
+     * Indicates that the free subscription used by the request ran out of quota.
+     */
+    Forbidden(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.Forbidden),
+
+    /**
+     * Indicates a connection error.
      */
     ConnectionFailure(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.ConnectionFailure),
 
@@ -46,7 +51,12 @@ public enum CancellationErrorCode
     ServiceError(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.ServiceError),
 
     /**
-     * Indicates an unexpected runtime error. The errorDetails property contains detailed error response.
+     * Indicates that the service is currently unavailable.
+     */
+    ServiceUnavailable(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.ServiceUnavailable),
+
+    /**
+     * Indicates an unexpected runtime error.
      */
     RuntimeError(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.RuntimeError);
 
