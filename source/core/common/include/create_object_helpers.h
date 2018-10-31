@@ -85,5 +85,22 @@ inline void SpxTermAndClear(std::shared_ptr<T>& ptr)
     }
 }
 
+template <class T>
+inline void SpxTermAndClearNothrow(std::shared_ptr<T>& ptr) noexcept
+{
+    if (ptr != nullptr)
+    {
+        try
+        {
+            SpxTerm(ptr);
+        }
+        catch (...)
+        {
+            // ignored
+        }
+        ptr = nullptr;
+    }
+}
+
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

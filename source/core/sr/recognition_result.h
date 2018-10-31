@@ -96,7 +96,7 @@ private:
 
     std::map<std::wstring, std::wstring> m_translations;
 
-    const uint8_t* m_audioBuffer;
+    std::vector<uint8_t> m_audioBuffer;
     size_t m_audioLength{0};
     uint64_t m_offset{0};
     uint64_t m_duration{0};

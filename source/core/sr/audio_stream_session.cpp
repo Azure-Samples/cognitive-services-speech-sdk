@@ -34,6 +34,7 @@ constexpr std::chrono::seconds CSpxAudioStreamSession::ShutdownTimeout;
 
 CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_sessionId(PAL::CreateGuidWithoutDashes()),
+    m_stateMutex(),
     m_recoKind(RecognitionKind::Idle),
     m_sessionState(SessionState::Idle),
     m_sawEndOfStream(false),
@@ -42,6 +43,7 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_expectAdapterStoppedTurn(false),
     m_adapterAudioMuted(false),
     m_turnEndStopKind(RecognitionKind::Idle),
+    m_combinedAdapterAndStateMutex(),
     m_recoAsyncWaiting(false)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -62,11 +64,15 @@ void CSpxAudioStreamSession::Init()
     // dev user at or above the CAPI. Thus ... we must hold it alive in order for the properties to be
     // obtainable via the standard ISpxNamedProperties mechanisms... It will be released on ::Term()
     m_siteKeepAlive = GetSite();
+    m_firedEventWorker = std::make_shared<CSpxAudioSessionEventThreadService>();
 }
 
 void CSpxAudioStreamSession::Term()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    // stop delivering of events
+    m_firedEventWorker->Shutdown();
 
     // To "protect" against shutdown issues...
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -394,6 +400,9 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxAudioStreamSession::Reco
 
             // Wait for the session to become idle, otherwise next RecognizeAsync can come in an unexpected state.
             WaitForIdle();
+
+            // return the result
+            return result;
         }
         catch (SPXHR hrx)
         {
@@ -421,15 +430,12 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxAudioStreamSession::Reco
             Error(stringify(SPXERR_UNHANDLED_EXCEPTION));
             return m_recoAsyncResult;
         }
-        return result;
     });
 
-    auto taskFuture = task.get_future();
-    std::thread taskThread(std::move(task));
-    taskThread.detach();
+    auto taskFuture = m_taskHelper.RunAsync(std::move(task));
 
     return CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>>(
-        std::forward<std::future<std::shared_ptr<ISpxRecognitionResult>>>(taskFuture),
+        taskFuture,
         AOS_Started);
 }
 
@@ -473,12 +479,10 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StartRecognitionAsync(RecognitionKind 
         Error(error);
     });
 
-    auto taskFuture = task.get_future();
-    std::thread taskThread(std::move(task));
-    taskThread.detach();
+    auto taskFuture = m_taskHelper.RunAsync(std::move(task));
 
     return CSpxAsyncOp<void>(
-        std::forward<std::future<void>>(taskFuture),
+        taskFuture,
         AOS_Started);
 }
 
@@ -504,12 +508,10 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StopRecognitionAsync(RecognitionKind s
         Error(error);
     });
 
-    auto taskFuture = task.get_future();
-    std::thread taskThread(std::move(task));
-    taskThread.detach();
+    auto taskFuture = m_taskHelper.RunAsync(std::move(task));
 
     return CSpxAsyncOp<void>(
-        std::forward<std::future<void>>(taskFuture),
+        taskFuture,
         AOS_Started);
 }
 
@@ -733,7 +735,7 @@ void CSpxAudioStreamSession::FireSessionStartedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    FireEvent(EventType::SessionStart);
+    FireEvent(CSpxAudioSessionEventThreadService::EventType::SessionStart);
     m_fireEndOfStreamAtSessionStop = true;
 }
 
@@ -742,21 +744,21 @@ void CSpxAudioStreamSession::FireSessionStoppedEvent()
     SPX_DBG_TRACE_FUNCTION();
     EnsureFireResultEvent();
 
-    FireEvent(EventType::SessionStop);
+    FireEvent(CSpxAudioSessionEventThreadService::EventType::SessionStop);
 }
 
 void CSpxAudioStreamSession::FireSpeechStartDetectedEvent(uint64_t offset)
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    FireEvent(EventType::SpeechStart, nullptr, nullptr, offset);
+    FireEvent(CSpxAudioSessionEventThreadService::EventType::SpeechStart, nullptr, nullptr, offset);
 }
 
 void CSpxAudioStreamSession::FireSpeechEndDetectedEvent(uint64_t offset)
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    FireEvent(EventType::SpeechEnd, nullptr, nullptr, offset);
+    FireEvent(CSpxAudioSessionEventThreadService::EventType::SpeechEnd, nullptr, nullptr, offset);
 }
 
 void CSpxAudioStreamSession::EnsureFireResultEvent()
@@ -783,50 +785,22 @@ void CSpxAudioStreamSession::FireResultEvent(const std::wstring& sessionId, std:
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    FireEvent(EventType::RecoResultEvent, result, const_cast<wchar_t*>(sessionId.c_str()));
+    FireEvent(CSpxAudioSessionEventThreadService::EventType::RecoResultEvent, result, const_cast<wchar_t*>(sessionId.c_str()));
 }
 
-void CSpxAudioStreamSession::FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result, wchar_t* sessionId, uint64_t offset)
+void CSpxAudioStreamSession::FireEvent(CSpxAudioSessionEventThreadService::EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result, wchar_t* sessionId, uint64_t offset)
 {
     // Make a copy of the recognizers (under lock), to use to send events;
     // otherwise the underlying list could be modified while we're sending events...
 
     std::unique_lock<std::mutex> lock(m_mutex);
-    decltype(m_recognizers) weakRecognizers(m_recognizers.begin(), m_recognizers.end());
+
+    std::list<std::weak_ptr<ISpxRecognizer>> weakRecognizers(m_recognizers.begin(), m_recognizers.end());
     lock.unlock();
 
     auto sessionId_local = (sessionId != nullptr) ? sessionId : m_sessionId;
 
-    for (auto weakRecognizer : weakRecognizers)
-    {
-        auto recognizer = weakRecognizer.lock();
-        auto ptr = SpxQueryInterface<ISpxRecognizerEvents>(recognizer);
-        if (recognizer)
-        {
-            switch (sessionType)
-            {
-                case EventType::SessionStart:
-                    ptr->FireSessionStarted(sessionId_local);
-                break;
-
-                case EventType::SessionStop:
-                    ptr->FireSessionStopped(sessionId_local);
-                break;
-
-                case EventType::SpeechStart:
-                    ptr->FireSpeechStartDetected(sessionId_local, offset);
-                break;
-
-                case EventType::SpeechEnd:
-                    ptr->FireSpeechEndDetected(sessionId_local, offset);
-                break;
-
-                case EventType::RecoResultEvent:
-                    ptr->FireResultEvent(sessionId_local, result);
-                break;
-            }
-        }
-    }
+    m_firedEventWorker->FireEvent(sessionType, weakRecognizers, result, sessionId_local, offset);
 }
 
 void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint32_t size, AudioData_Type audioData)

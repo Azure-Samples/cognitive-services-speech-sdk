@@ -18,8 +18,8 @@ public:
 
     CSpxAsyncOp(CSpxAsyncOp&& other) = default;
 
-    CSpxAsyncOp(std::future<T>&& future, AsyncOpState state) :
-        Future(std::move(future)),
+    CSpxAsyncOp(std::shared_future<T>& future, AsyncOpState state) :
+        Future(future),
         State(state)
     {
     };
@@ -50,7 +50,7 @@ public:
         return completed;
     }
 
-    std::future<T> Future;
+    std::shared_future<T> Future;
     AsyncOpState State;
 };
 

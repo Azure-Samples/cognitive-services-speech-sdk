@@ -13,6 +13,7 @@
 #include "packaged_task_helpers.h"
 #include "service_helpers.h"
 #include "audio_buffer.h"
+#include "audio_stream_event_worker.h"
 
 #include <shared_mutex>
 
@@ -21,7 +22,6 @@ namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
-
 
 class CSpxAudioStreamSession :
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
@@ -143,9 +143,8 @@ private:
     void EnsureFireResultEvent();
     void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result);
 
-    enum EventType {SessionStart, SessionStop, SpeechStart, SpeechEnd, RecoResultEvent};
-    void FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, wchar_t* sessionId = nullptr, uint64_t offset = 0);
-
+    std::shared_ptr<CSpxAudioSessionEventThreadService> m_firedEventWorker;
+    void FireEvent(CSpxAudioSessionEventThreadService::EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, wchar_t* sessionId = nullptr, uint64_t offset = 0);
 
 public:
 

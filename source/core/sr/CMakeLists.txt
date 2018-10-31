@@ -19,6 +19,7 @@ set(HEADERS
 set(HEADERS_PRIVATE
     "${SRC_DIR}/stdafx.h"
     "${SRC_DIR}/audio_stream_session.h"
+    "${SRC_DIR}/audio_stream_event_worker.h"
     "${SRC_DIR}/create_module_object.h"
     "${SRC_DIR}/speech_api_factory.h"
     "${SRC_DIR}/intent_recognizer.h"
@@ -37,6 +38,7 @@ set(HEADERS_PRIVATE
 
 set(SOURCES
     "${SRC_DIR}/audio_stream_session.cpp"
+    "${SRC_DIR}/audio_stream_event_worker.cpp"
     "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/speech_api_factory.cpp"
     "${SRC_DIR}/intent_recognizer.cpp"

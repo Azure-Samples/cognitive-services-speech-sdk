@@ -72,8 +72,8 @@ inline bool contains(const string& content, const string& name)
 
 // Todo(1126805) url builder + auth interfaces
 
-const vector<string> g_recoModeStrings = { "interactive", "conversation", "dictation" };
-const vector<string> g_outFormatStrings = { "simple", "detailed" };
+const std::string g_recoModeStrings[] = { "interactive", "conversation", "dictation" };
+const std::string g_outFormatStrings[] = { "simple", "detailed" };
 
 
 // TODO: remove this as soon as transport.c is re-written in cpp.
@@ -143,7 +143,8 @@ void Connection::Impl::WorkThread(weak_ptr<Connection::Impl> ptr)
             if (connection == nullptr)
             {
                 // connection is destroyed, our work here is done.
-                return;
+                LogInfo("%s connection destryoed.", __FUNCTION__);
+                break;
             }
 
             unique_lock<recursive_mutex> lock(connection->m_mutex);
@@ -281,7 +282,7 @@ string Connection::Impl::ConstructConnectionUrl() const
     }
 
     // Todo: use libcurl or another library to encode the url as whole, instead of each parameter.
-    switch(m_config.m_endpoint)
+    switch (m_config.m_endpoint)
     {
     case EndpointType::Speech:
         if (!m_config.m_modelId.empty())
@@ -648,61 +649,37 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
 
 static RecognitionStatus ToRecognitionStatus(const string& str)
 {
-    const static map<string, RecognitionStatus> statusMap = {
-        { "Success", RecognitionStatus::Success },
-        { "NoMatch", RecognitionStatus::NoMatch },
-        { "InitialSilenceTimeout", RecognitionStatus::InitialSilenceTimeout },
-        { "BabbleTimeout", RecognitionStatus::InitialBabbleTimeout },
-        { "Error", RecognitionStatus::Error },
-        { "EndOfDictation", RecognitionStatus::EndOfDictation },
-        { "TooManyRequests", RecognitionStatus::TooManyRequests },
-        { "BadRequest", RecognitionStatus::BadRequest },
-        { "Forbidden", RecognitionStatus::Forbidden },
-        { "ServiceUnavailable", RecognitionStatus::ServiceUnavailable}
-    };
+    if (0 == str.compare("Success")) return  RecognitionStatus::Success;
+    if (0 == str.compare("NoMatch")) return  RecognitionStatus::NoMatch;
+    if (0 == str.compare("InitialSilenceTimeout")) return  RecognitionStatus::InitialSilenceTimeout;
+    if (0 == str.compare("BabbleTimeout")) return RecognitionStatus::InitialBabbleTimeout;
+    if (0 == str.compare("Error")) return RecognitionStatus::Error;
+    if (0 == str.compare("EndOfDictation")) return RecognitionStatus::EndOfDictation;
+    if (0 == str.compare("TooManyRequests")) return RecognitionStatus::TooManyRequests;
+    if (0 == str.compare("BadRequest")) return RecognitionStatus::BadRequest;
+    if (0 == str.compare("Forbidden")) return RecognitionStatus::Forbidden;
+    if (0 == str.compare("ServiceUnavailable")) return RecognitionStatus::ServiceUnavailable;
 
-    auto result = statusMap.find(str);
-
-    if (result == statusMap.end())
-    {
-        PROTOCOL_VIOLATION("Unknown RecognitionStatus: %s", str.c_str());
-        return RecognitionStatus::InvalidMessage;
-    }
-    return result->second;
+    PROTOCOL_VIOLATION("Unknown RecognitionStatus: %s", str.c_str());
+    return RecognitionStatus::InvalidMessage;
 }
 
 static TranslationStatus ToTranslationStatus(const string& str)
 {
-    const static map<string, TranslationStatus> statusMap = {
-        { "Success", TranslationStatus::Success },
-        { "Error", TranslationStatus::Error },
-    };
+    if (0 == str.compare("Success")) return  TranslationStatus::Success;
+    if (0 == str.compare("Error")) return  TranslationStatus::Error;
 
-    auto result = statusMap.find(str);
-
-    if (result == statusMap.end())
-    {
-        PROTOCOL_VIOLATION("Unknown TranslationStatus: %s", str.c_str());
-        return TranslationStatus::InvalidMessage;
-    }
-    return result->second;
+    PROTOCOL_VIOLATION("Unknown TranslationStatus: %s", str.c_str());
+    return TranslationStatus::InvalidMessage;
 }
 
 static SynthesisStatus ToSynthesisStatus(const string& str)
 {
-    const static map<string, SynthesisStatus> statusMap = {
-        { "Success", SynthesisStatus::Success },
-        { "Error", SynthesisStatus::Error },
-    };
+    if (0 == str.compare("Success")) return  SynthesisStatus::Success;
+    if (0 == str.compare("Error")) return  SynthesisStatus::Error;
 
-    auto result = statusMap.find(str);
-
-    if (result == statusMap.end())
-    {
-        PROTOCOL_VIOLATION("Unknown SynthesisStatus: %s", str.c_str());
-        return SynthesisStatus::InvalidMessage;
-    }
-    return result->second;
+    PROTOCOL_VIOLATION("Unknown SynthesisStatus: %s", str.c_str());
+    return SynthesisStatus::InvalidMessage;
 }
 
 static SpeechHypothesisMsg RetrieveSpeechResult(const nlohmann::json& json)

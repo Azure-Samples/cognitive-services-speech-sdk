@@ -63,7 +63,7 @@ const char* kEvent_status_key = "Status";
 const char *kRcvd_msg_audio_key = "audio";
 const char *kRcvd_msg_response_key = "response";
 
-static std::map<IncomingMsgType, std::string> messageIndexToName;
+static std::map<IncomingMsgType, std::string> *messageIndexToName;
 
 #define GOTO_EXIT_IF_NONZERO(exp) { retval = exp; if (retval != 0) { goto Exit; } }
 #define RESET(val)  val = NULL
@@ -98,7 +98,7 @@ static void initialize_message_name_array()
         return;
     initialized = 1;
 
-    messageIndexToName = std::map<IncomingMsgType, std::string>
+    messageIndexToName = new std::map<IncomingMsgType, std::string>
     {
         { turnStart, path::turnStart },
         { turnEnd, path::turnEnd },
@@ -431,7 +431,7 @@ static PROPERTYBAG_HANDLE telemetry_add_recvmsgs(TELEMETRY_DATA *telemetry_objec
         PROPERTYBAG_HANDLE recvObj = NULL;
         if (telemetry_object->receivedMsgsJsonArray[i])
         {
-            recvObj = PropertybagInitializeWithKeyValue(messageIndexToName[(IncomingMsgType)i].c_str(), telemetry_object->receivedMsgsJsonArray[i]);
+            recvObj = PropertybagInitializeWithKeyValue((*messageIndexToName)[(IncomingMsgType)i].c_str(), telemetry_object->receivedMsgsJsonArray[i]);
             PropertybagAddValueToArray(json_array, recvObj);
         }
     }
@@ -566,7 +566,7 @@ void record_received_msg(TELEMETRY_HANDLE handle, const char* requestId, const c
 
     IncomingMsgType msgType = countOfMsgTypes;
     bool found = false;
-    for (const auto& msg : messageIndexToName)
+    for (const auto& msg : *messageIndexToName)
     {
         if (msg.second == receivedMsg)
         {

@@ -45,22 +45,31 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerFromConfig
     auto factoryAsSite = SpxSiteFromThis(this);
     auto session = SpxCreateObjectWithSite<ISpxSession>(sessionClassName, factoryAsSite);
 
-    // Initialize the session
-    InitSessionFromAudioInputConfig(session, audioInput);
+    try
+    {
+        // Initialize the session
+        InitSessionFromAudioInputConfig(session, audioInput);
 
-    // Create the recognizer
-    auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
-    auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>(recognizerClassName, sessionAsSite);
+        // Create the recognizer
+        auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
+        auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>(recognizerClassName, sessionAsSite);
 
-    // Set the recognizer properties
-    auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
-    SetRecognizerProperties(namedProperties, language, format);
+        // Set the recognizer properties
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
+        SetRecognizerProperties(namedProperties, language, format);
 
-    // Add the recognizer to the session
-    session->AddRecognizer(recognizer);
+        // Add the recognizer to the session
+        session->AddRecognizer(recognizer);
 
-    // We're done!
-    return recognizer;
+        // We're done!
+        return recognizer;
+    }
+    catch (...)
+    {
+        SpxTermAndClearNothrow(session);
+
+        throw;
+    }
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerFromConfigInternal(const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& voice, std::shared_ptr<ISpxAudioConfig> audioInput)
@@ -69,22 +78,31 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognize
     auto factoryAsSite = SpxSiteFromThis(this);
     auto session = SpxCreateObjectWithSite<ISpxSession>("CSpxAudioStreamSession", factoryAsSite);
 
-    // Initialize the session
-    InitSessionFromAudioInputConfig(session, audioInput);
+    try
+    {
+        // Initialize the session
+        InitSessionFromAudioInputConfig(session, audioInput);
 
-    // Create the translation recognizer
-    auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
-    auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxTranslationRecognizer", sessionAsSite);
+        // Create the translation recognizer
+        auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
+        auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxTranslationRecognizer", sessionAsSite);
 
-    // Set the translation properties
-    auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
-    SetTranslationProperties(namedProperties, sourceLanguage, targetLanguages, voice);
+        // Set the translation properties
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
+        SetTranslationProperties(namedProperties, sourceLanguage, targetLanguages, voice);
 
-    // Add the recognizer to the session
-    session->AddRecognizer(recognizer);
+        // Add the recognizer to the session
+        session->AddRecognizer(recognizer);
 
-    //// We're done!
-    return recognizer;
+        //// We're done!
+        return recognizer;
+    }
+    catch (...)
+    {
+        SpxTermAndClearNothrow(session);
+
+        throw;
+    }
 }
 
 void CSpxSpeechApiFactory::InitSessionFromAudioInputConfig(std::shared_ptr<ISpxSession> session, std::shared_ptr<ISpxAudioConfig> audioInput)
