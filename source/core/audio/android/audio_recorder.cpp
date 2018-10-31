@@ -17,6 +17,10 @@
 #include <cstring>
 #include <cstdlib>
 #include "audio_recorder.h"
+#include "azure_c_shared_utility/xlogging.h"
+#include "data_buffer.h"
+
+using Microsoft::CognitiveServices::Speech::Impl::DataBuffer;
 /*
 * bqRecorderCallback(): called for every buffer is full;
 *                       pass directly to handler
@@ -30,35 +34,42 @@ void AudioRecorder::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq) {
     recLog_->logTime();
 #endif
     SPX_IFFALSE_THROW_HR(bq == recBufQueueItf_, SPXERR_INVALID_ARG);
-
-    sample_buf *dataBuf = NULL;
-    devShadowQueue_->front(&dataBuf);
-    devShadowQueue_->pop();
-    dataBuf->size_ = dataBuf->cap_;  // device only calls us when it is really full
-
-    callback_(ctx_, ENGINE_SERVICE_MSG_RECORDED_AUDIO_AVAILABLE, dataBuf);
-    recQueue_->push(dataBuf);
-
-    sample_buf *freeBuf;
-    while (freeQueue_->front(&freeBuf) && devShadowQueue_->push(freeBuf)) {
-        freeQueue_->pop();
-        SLresult result = (*bq)->Enqueue(bq, freeBuf->buf_, freeBuf->cap_);
-        SLASSERT(result);
-    }
-
-    ++audioBufCount;
-
-    // should leave the device to sleep to save power if no buffers
-    if (devShadowQueue_->size() == 0) {
-        (*recItf_)->SetRecordState(recItf_, SL_RECORDSTATE_STOPPED);
-    }
+    ReadAudioBuffer();
 }
 
-AudioRecorder::AudioRecorder(SampleFormat *sampleFormat, SLEngineItf slEngine)
-    : freeQueue_(nullptr),
-    recQueue_(nullptr),
-    devShadowQueue_(nullptr),
-    callback_(nullptr)
+void AudioRecorder::ReadAudioBuffer() {
+    SLuint32 state = GetRecordState();
+    if (state != SL_RECORDSTATE_RECORDING) {
+        LogError("[%s] incorrect state: %d", __FUNCTION__, state);
+        return;
+    }
+
+    DataBuffer dataBuf;
+    dataBuf.data = static_cast<unsigned char*>(audioBuffers_[audioBufferIndex_].get());
+    dataBuf.size = sampleInfo_.bufSize_;
+
+#ifdef ENABLE_LOG
+    recLog_->log(dataBuf.data, dataBuf.size);
+#endif
+
+    callback_(ctx_, ENGINE_SERVICE_MSG_RECORDED_AUDIO_AVAILABLE, &dataBuf);
+    EnqueueAudioBuffer();
+}
+
+bool AudioRecorder::EnqueueAudioBuffer() {
+    SLresult err = (*recBufQueueItf_)->Enqueue(recBufQueueItf_, audioBuffers_[audioBufferIndex_].get(), sampleInfo_.bufSize_);
+    if (SL_RESULT_SUCCESS != err) {
+        LogError("%s Enqueue fails and return false, err: %d", __FUNCTION__, err);
+        SLASSERT(err);
+        return false;
+    }
+    audioBufferIndex_ = (audioBufferIndex_ + 1) % DEVICE_SHADOW_BUFFER_QUEUE_LEN;
+    return true;
+}
+
+AudioRecorder::AudioRecorder(SampleFormat *sampleFormat, SLEngineItf slEngine) : 
+    callback_(nullptr),
+    audioBufferIndex_(0)
 {
     SLresult result;
     sampleInfo_ = *sampleFormat;
@@ -95,8 +106,13 @@ AudioRecorder::AudioRecorder(SampleFormat *sampleFormat, SLEngineItf slEngine)
         ->RegisterCallback(recBufQueueItf_, bqRecorderCallback, this);
     SLASSERT(result);
 
-    devShadowQueue_ = new AudioQueue(DEVICE_SHADOW_BUFFER_QUEUE_LEN);
-    SPX_IFFALSE_THROW_HR(devShadowQueue_ != nullptr, SPXERR_INVALID_ARG);
+    sampleInfo_.bufSize_ = sampleInfo_.framesPerBuf_ * sampleInfo_.channels_ * SL_PCMSAMPLEFORMAT_FIXED_16;
+
+    audioBuffers_.reset(new std::unique_ptr<SLuint8[]>[DEVICE_SHADOW_BUFFER_QUEUE_LEN]);
+
+    for (int i = 0; i < DEVICE_SHADOW_BUFFER_QUEUE_LEN; i++) {
+        audioBuffers_[i].reset(new SLuint8[sampleInfo_.bufSize_]);
+    }
 
 #ifdef ENABLE_LOG
     std::string name = "rec";
@@ -105,12 +121,11 @@ AudioRecorder::AudioRecorder(SampleFormat *sampleFormat, SLEngineItf slEngine)
 }
 
 SLboolean AudioRecorder::Start(void) {
-    if (!freeQueue_ || !recQueue_ || !devShadowQueue_) {
-        LOGE("====NULL poiter to Start(%p, %p, %p)", (void*)freeQueue_, (void*)recQueue_,
-            (void*)devShadowQueue_);
+
+    if (!audioBuffers_.get()) {
+        LogInfo("%s audioBuffers_ is null, return false", __FUNCTION__);
         return SL_BOOLEAN_FALSE;
     }
-    audioBufCount = 0;
 
     SLresult result;
     // in case already recording, stop recording and clear buffer queue
@@ -119,18 +134,14 @@ SLboolean AudioRecorder::Start(void) {
     result = (*recBufQueueItf_)->Clear(recBufQueueItf_);
     SLASSERT(result);
 
-    for (int i = 0; i < RECORD_DEVICE_KICKSTART_BUF_COUNT; i++) {
-        sample_buf *buf = NULL;
-        if (!freeQueue_->front(&buf)) {
-            LOGE("=====OutOfFreeBuffers @ startingRecording @ (%d)", i);
-            break;
+    // Check is there already buffers in the queue, OpenSL Enqueue call will fail with
+    // SL_RESULT_BUFFER_INSUFFICIENT error if the buffers are full when trying to enqueue more data
+    int buffersInQueue = (int) GetBufferCount();
+    for (int i = 0; i < DEVICE_SHADOW_BUFFER_QUEUE_LEN - buffersInQueue; i++) {
+        if(!EnqueueAudioBuffer()) {
+            LogInfo("%s No audiobuffers available for start, return false", __FUNCTION__);
+            return SL_BOOLEAN_FALSE;
         }
-        freeQueue_->pop();
-        SPX_IFFALSE_THROW_HR(buf->buf_ && buf->cap_ && !buf->size_, SPXERR_INVALID_ARG);
-
-        result = (*recBufQueueItf_)->Enqueue(recBufQueueItf_, buf->buf_, buf->cap_);
-        SLASSERT(result);
-        devShadowQueue_->push(buf);
     }
 
     result = (*recItf_)->SetRecordState(recItf_, SL_RECORDSTATE_RECORDING);
@@ -161,19 +172,17 @@ SLboolean AudioRecorder::Stop(void) {
 }
 
 AudioRecorder::~AudioRecorder() {
+
     // destroy audio recorder object, and invalidate all associated interfaces
+    if (recBufQueueItf_ != NULL) {
+        (*recBufQueueItf_)->RegisterCallback(recBufQueueItf_, nullptr, nullptr);
+        recBufQueueItf_ = NULL;
+    }
+
     if (recObjectItf_ != NULL) {
         (*recObjectItf_)->Destroy(recObjectItf_);
     }
 
-    if (devShadowQueue_) {
-        sample_buf *buf = NULL;
-        while (devShadowQueue_->front(&buf)) {
-            devShadowQueue_->pop();
-            freeQueue_->push(buf);
-        }
-        delete (devShadowQueue_);
-    }
 #ifdef ENABLE_LOG
     if (recLog_) {
         delete recLog_;
@@ -181,16 +190,35 @@ AudioRecorder::~AudioRecorder() {
 #endif
 }
 
-void AudioRecorder::SetBufQueues(AudioQueue *freeQ, AudioQueue *recQ) {
-    SPX_IFFALSE_THROW_HR(freeQ && recQ, SPXERR_INVALID_ARG);
-    freeQueue_ = freeQ;
-    recQueue_ = recQ;
-}
-
 void AudioRecorder::RegisterCallback(ENGINE_CALLBACK cb, void *ctx) {
     callback_ = cb;
     ctx_ = ctx;
 }
-int32_t AudioRecorder::dbgGetDevBufCount(void) {
-    return devShadowQueue_->size();
+
+SLAndroidSimpleBufferQueueState AudioRecorder::GetBufferQueueState() const {
+
+    SLAndroidSimpleBufferQueueState state = {};
+
+    if (recBufQueueItf_) {
+        SLresult err = (*recBufQueueItf_)->GetState(recBufQueueItf_, &state);
+        if (SL_RESULT_SUCCESS != err) {
+            LogError("[%s] failed: %d", __FUNCTION__, err);
+        }
+
+    }
+    return state;
+}
+
+SLuint32 AudioRecorder::GetBufferCount() const {
+    SLAndroidSimpleBufferQueueState state = GetBufferQueueState();
+    return state.count;
+}
+
+SLuint32 AudioRecorder::GetRecordState() const {
+    SLuint32 state;
+    SLresult err = (*recItf_)->GetRecordState(recItf_, &state);
+    if (SL_RESULT_SUCCESS != err) {
+        LogError("[%s] failed: %d", __FUNCTION__, err);
+    }
+    return state;
 }

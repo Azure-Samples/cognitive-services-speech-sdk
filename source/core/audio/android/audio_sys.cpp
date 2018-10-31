@@ -20,7 +20,7 @@
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
-
+#include "data_buffer.h"
 
 #define MAGIC_TAG_RIFF      0x46464952
 #define MAGIC_TAG_WAVE      0x45564157
@@ -43,6 +43,7 @@
 #define SND_PCM_STREAM_PLAYBACK 2
 typedef int snd_pcm_stream_t;
 
+using Microsoft::CognitiveServices::Speech::Impl::DataBuffer;
 typedef struct AUDIO_SYS_DATA_TAG
 {
     ON_AUDIOERROR_CALLBACK        errorCallback;
@@ -83,12 +84,6 @@ typedef struct AUDIO_SYS_DATA_TAG
     SLObjectItf slEngineObject;
     SLEngineItf slEngineInterface;
 
-    AudioQueue *freeBufferQueue;  // Owner of the queue
-    AudioQueue *receiveBufferQueue;   // Owner of the queue
-
-    sample_buf *buffers;
-    uint32_t bufferCount;
-    uint32_t frameCount;
 } AUDIO_SYS_DATA;
 
 
@@ -99,6 +94,7 @@ typedef struct AUDIO_SYS_DATA_TAG
 typedef bool(*audio_recorder_engine_service_function)(void *ctx, uint32_t msg, void *data);
 
 static void create_sl_engine(AUDIO_SYS_DATA *audioData);
+static void delete_sl_engine(AUDIO_SYS_DATA *audioData);
 static bool create_audio_recorder(AUDIO_SYS_DATA *engine, audio_recorder_engine_service_function audio_recorder_engine_service, void *ctx);
 static void delete_audio_recorder(AUDIO_SYS_DATA *engine);
 static bool audio_recorder_engine_service(void *ctx, uint32_t msg, void *data);
@@ -164,7 +160,7 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
         Lock_Deinit(audioData->outputCanceledLock);
         Lock_Deinit(audioData->audioBufferLock);
         sem_destroy(&audioData->audioFramesAvailable);
-
+        delete_sl_engine(audioData);
         free(audioData);
     }
 }
@@ -553,21 +549,16 @@ static void create_sl_engine(AUDIO_SYS_DATA *audioData)
 
     result = (*audioData->slEngineObject)->GetInterface(audioData->slEngineObject, SL_IID_ENGINE, &audioData->slEngineInterface);
     SLASSERT(result);
+}
 
-    uint32_t bufSize = audioData->fastPathFramesPerBuffer * audioData->channels * audioData->bitsPerSample;
-    bufSize = (bufSize + 7) >> 3;
-    audioData->bufferCount = BUF_COUNT;
+static void delete_sl_engine(AUDIO_SYS_DATA *engine)
+{
 
-    audioData->buffers = allocateSampleBufs(audioData->bufferCount, bufSize);
-    assert(audioData->buffers);
-
-    audioData->freeBufferQueue = new AudioQueue(audioData->bufferCount);
-    audioData->receiveBufferQueue = new AudioQueue(audioData->bufferCount);
-    assert(audioData->freeBufferQueue && audioData->receiveBufferQueue);
-
-    for (uint32_t i = 0; i < audioData->bufferCount; i++)
+    if (engine->slEngineObject != NULL)
     {
-        audioData->freeBufferQueue->push(&audioData->buffers[i]);
+        (*(engine->slEngineObject))->Destroy(engine->slEngineObject);
+        engine->slEngineObject = NULL;
+        engine->slEngineInterface = NULL;
     }
 }
 
@@ -588,7 +579,6 @@ static bool create_audio_recorder(AUDIO_SYS_DATA *engine, audio_recorder_engine_
         return false;
     }
 
-    engine->pcmHandle->SetBufQueues(engine->freeBufferQueue, engine->receiveBufferQueue);
     engine->pcmHandle->RegisterCallback(audio_recorder_engine_service, ctx);
     return true;
 }
@@ -616,26 +606,15 @@ static bool audio_recorder_engine_service(void *ctx, uint32_t msg, void *data)
 
     case ENGINE_SERVICE_MSG_RECORDED_AUDIO_AVAILABLE:
     {
-        sample_buf *buf = static_cast<sample_buf *>(data);
+        DataBuffer* buf = static_cast<DataBuffer*>(data);
 
         if (audioData->currentInputState == AUDIO_STATE_RUNNING) {
             if (audioData->audioWriteCallback)
             {
                 audioData->audioWriteCallback(
                     audioData->userWriteContext,
-                    (uint8_t*)buf->buf_,
-                    (size_t)buf->size_);
-            }
-
-            // Note: we would not need the buffer queue since we are copying
-            //       the data anyway.
-            // free any pending buffer
-            sample_buf *freeBuf;
-            while (audioData->receiveBufferQueue &&
-                audioData->receiveBufferQueue->front(&freeBuf))
-            {
-                audioData->receiveBufferQueue->pop();
-                audioData->freeBufferQueue->push(freeBuf);
+                    (uint8_t*)buf->data,
+                    (size_t)buf->size);
             }
         }
         break;

@@ -22,7 +22,6 @@
 
 #include "android_debug.h"
 #include "debug_utils.h"
-#include "buf_manager.h"
 
 /*
 * Audio Sample Controls...
@@ -43,6 +42,7 @@ struct SampleFormat {
     uint16_t channels_;
     uint16_t pcmFormat_;  // 8 bit, 16 bit, 24 bit ...
     uint32_t representation_;  // android extensions
+    uint32_t bufSize_;
 };
 extern void ConvertToSLSampleFormat(SLAndroidDataFormat_PCM_EX* pFormat,
     SampleFormat* format);
