@@ -7,6 +7,7 @@
 #include <atomic>
 #include <map>
 #include <string>
+#include <array>
 
 #include "test_utils.h"
 #include "file_utils.h"
@@ -56,7 +57,7 @@ void UseMockUsp(bool value)
     SpxSetMockParameterBool("CARBON-INTERNAL-MOCK-UspRecoEngine", value);
 }
 
-bool IsUsingMocks(bool uspMockRequired = true)
+bool IsUsingMocks(bool uspMockRequired)
 {
     return SpxGetMockParameterBool("CARBON-INTERNAL-MOCK-Microphone") &&
            SpxGetMockParameterBool("CARBON-INTERNAL-MOCK-SdkKwsEngine") &&
@@ -68,7 +69,46 @@ void SetMockRealTimeSpeed(int value)
     SpxSetMockParameterNumber("CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", value);
 }
 
+fstream OpenWaveFile(const string& filename)
+{
+    if (filename.empty())
+    {
+        throw invalid_argument("Audio filename is empty");
+    }
 
+    fstream fs;
+    fs.open(filename, ios_base::binary | ios_base::in);
+    if (!fs.good())
+    {
+        throw invalid_argument("Failed to open the specified audio file.");
+    }
+
+    //skip the wave header
+    fs.seekg(44);
+
+    return fs;
+}
+int ReadBuffer(fstream& fs, uint8_t* dataBuffer, uint32_t size)
+{
+    if (fs.eof())
+    {
+        // returns 0 to indicate that the stream reaches end.
+        return 0;
+    }
+
+    fs.read((char*)dataBuffer, size);
+
+    if (!fs.eof() && !fs.good())
+    {
+        // returns 0 to close the stream on read error.
+        return 0;
+    }
+    else
+    {
+        // returns the number of bytes that have been read.
+        return (int)fs.gcount();
+    }
+}
 enum class Callbacks { final_result, intermediate_result, no_match, session_started, session_stopped, speech_start_detected, speech_end_detected };
 
 std::map<Callbacks, atomic_int> createCallbacksMap() {
@@ -86,6 +126,82 @@ std::map<Callbacks, atomic_int> createCallbacksMap() {
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPXTEST_SECTION("push stream with continuous reco")
+    {
+        UseMocks(false);
+        SPXTEST_REQUIRE(exists(PAL::ToWString(InputFile())));
+
+        auto config = CurrentSpeechConfig();
+        auto pushStream = AudioInputStream::CreatePushStream();
+        auto audioConfig = AudioConfig::FromStreamInput(pushStream);
+
+        // Creates a speech recognizer from stream input;
+        auto audioInput = AudioConfig::FromStreamInput(pushStream);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        // promise for synchronization of recognition end.
+        promise<void> recognitionEnd;
+
+        string  result;
+        recognizer->Recognized.Connect([&result](const SpeechRecognitionEventArgs& e)
+        {
+            if (e.Result->Reason == ResultReason::RecognizedSpeech)
+            {
+                result = e.Result->Text;
+                SPX_TRACE_VERBOSE("RECOGNIZED: Text= %s, Offset= %d, Duration= %d", e.Result->Text.c_str(), e.Result->Offset(), e.Result->Duration());
+            }
+            else if (e.Result->Reason == ResultReason::NoMatch)
+            {
+                SPX_TRACE_VERBOSE("NOMATCH: Speech could not be recognized.");
+            }
+        });
+        string error;
+        recognizer->Canceled.Connect([&recognitionEnd, &error](const SpeechRecognitionCanceledEventArgs& e)
+        {
+            switch (e.Reason)
+            {
+            case CancellationReason::EndOfStream:
+                SPX_TRACE_VERBOSE("CANCELED: Reach the end of the file.");
+                break;
+
+            case CancellationReason::Error:
+                error = !e.ErrorDetails.empty() ? e.ErrorDetails : "Errors!";
+                SPX_TRACE_VERBOSE("CANCELED: ErrorCode=%d, ErrorDetails=%s", (int)e.ErrorCode, e.ErrorDetails.c_str());
+                recognitionEnd.set_value();
+                break;
+
+            default:
+                SPX_TRACE_VERBOSE("unknown Reason!");
+            }
+        });
+        recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
+        {
+            SPX_TRACE_VERBOSE("Session stopped. Id = %s", e.SessionId.c_str());
+            recognitionEnd.set_value();
+        });
+
+        auto fs = OpenWaveFile(InputFile());
+
+        std::array<uint8_t, 1000> buffer;
+        recognizer->StartContinuousRecognitionAsync().wait();
+        while (1)
+        {
+            auto readSamples = ReadBuffer(fs, buffer.data(), (uint32_t)buffer.size());
+            if (readSamples == 0)
+            {
+                break;
+            }
+            pushStream->Write(buffer.data(), readSamples);
+        }
+
+        pushStream->Close();
+        recognitionEnd.get_future().wait();
+        recognizer->StopContinuousRecognitionAsync().wait();
+
+        SPXTEST_REQUIRE(result.compare("What's the weather like?") == 0);
+        SPXTEST_REQUIRE(error.empty());
+    }
 
     SPXTEST_SECTION("KWS throws exception given 11khz sampling rate")
     {

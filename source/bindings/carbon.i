@@ -54,6 +54,10 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::RecognitionResult,Microsoft::CognitiveServices::Speech::RecognitionEventArgs,Microsoft::CognitiveServices::Speech::RecognitionEventArgs >::PrivatePropertyCollection)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer< Microsoft::CognitiveServices::Speech::SpeechRecognitionResult,Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs,Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs >::PrivatePropertyCollection)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult,Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs,Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionCanceledEventArgs >::PrivatePropertyCollection)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult,Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs,Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs >::PrivatePropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig)
 
@@ -62,6 +66,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioStreamFormat)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PushAudioInputStream)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PullAudioInputStream)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PullAudioInputStream::FunctionCallbackWrapper)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PullAudioInputStreamCallback)
 
 #ifdef SPX_UWP

@@ -35,6 +35,27 @@ static std::shared_ptr<SpeechConfig> SpeechConfigForAudioConfigTests()
 
 TEST_CASE("Audio Config Basics", "[api][cxx][audio]")
 {
+    SPXTEST_SECTION("Audio Pull Stream works")
+    {
+        SPXTEST_REQUIRE(exists(PAL::ToWString(get_input_file())));
+
+        // Prepare for the stream to be "Pulled"
+        auto fs = OpenWaveFile(get_input_file());
+
+        // Create the "pull stream" object with C++ lambda callbacks
+        auto pullStream = AudioInputStream::CreatePullStream(
+            AudioStreamFormat::GetWaveFormatPCM(16000, 16, 1),
+            [ &fs](uint8_t* buffer, uint32_t size) -> int { return (int)ReadBuffer(fs, buffer,size); },
+            [=]() { });
+
+        // Create the recognizer with the pull stream
+        auto config = SpeechConfigForAudioConfigTests();
+        auto audioConfig = AudioConfig::FromStreamInput(pullStream);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE_RESULT_RECOGNIZED_SPEECH(result);
+    }
     SPXTEST_SECTION("Audio Push Stream works")
     {
         SPXTEST_REQUIRE(exists(PAL::ToWString(get_input_file())));
@@ -52,7 +73,8 @@ TEST_CASE("Audio Config Basics", "[api][cxx][audio]")
 
         // Set up a lambda we'll use to push the data
         auto pushData = [=](const int bufferSize, int sleepBetween = 0, int sleepBefore = 0, int sleepAfter = 0, bool closeStream = true) {
-            std::unique_ptr<uint8_t[]> buffer(new uint8_t[bufferSize]);
+            auto deleter = [](uint8_t * p) { delete[] p; };
+            std::unique_ptr<uint8_t[], decltype(deleter)> buffer(new uint8_t[bufferSize], deleter);
             std::this_thread::sleep_for(std::chrono::milliseconds(sleepBefore));
             for (;;) {
                 auto size = (int)fread(buffer.get(), 1, bufferSize, hfile);

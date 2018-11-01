@@ -118,7 +118,7 @@ namespace Impl {
         return reinterpret_cast<SPXHR>(errorHandles->TrackHandle(handle));
     }
 
-    SPXHR StoreException(const std::runtime_error& ex)
+    SPXHR StoreException(const std::exception& ex)
     {
         auto errorHandles = CSpxSharedPtrHandleTableManager::Get<ExceptionWithCallStack, SPXERRORHANDLE>();
         std::shared_ptr<ExceptionWithCallStack> handle(new ExceptionWithCallStack(ex.what()));

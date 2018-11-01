@@ -14,7 +14,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     /// Represents audio stream format used for custom audio input configurations.
     /// </summary>
     public sealed class AudioStreamFormat : IDisposable
-    { 
+    {
         /// <summary>
         /// Creates an audio stream format object representing the default microphone input format (16Khz 16bit mono PCM).
         /// </summary>
@@ -64,7 +64,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     /// Represents audio input stream used for custom audio input configurations.
     /// </summary>
     public class AudioInputStream : IDisposable
-    { 
+    {
         /// <summary>
         /// Creates a memory backed PushAudioInputStream using the default format (16Khz 16bit mono PCM).
         /// </summary>
@@ -149,7 +149,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     /// Represents audio input configuration used for specifying what type of input to use (microphone, file, stream).
     /// </summary>
     public sealed class AudioConfig : IDisposable
-    { 
+    {
         /// <summary>
         /// Creates an AudioConfig object representing the default microphone on the system.
         /// </summary>
@@ -243,11 +243,11 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     /// Represents memory backed push audio input stream used for custom audio input configurations.
     /// </summary>
     public sealed class PushAudioInputStream : AudioInputStream
-    { 
+    {
         /// <summary>
         /// Creates a memory backed PushAudioInputStream using the default format (16Khz 16bit mono PCM).
         /// </summary>
-        public PushAudioInputStream() : 
+        public PushAudioInputStream() :
             this(Microsoft.CognitiveServices.Speech.Internal.PushAudioInputStream.CreatePushStream())
         {
         }
@@ -256,7 +256,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// Creates a memory backed PushAudioInputStream with the specified audio format.
         /// </summary>
         /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16Khz 16bit mono PCM).</param>
-        public PushAudioInputStream(AudioStreamFormat format) : 
+        public PushAudioInputStream(AudioStreamFormat format) :
             this(Microsoft.CognitiveServices.Speech.Internal.PushAudioInputStream.CreatePushStream(format.formatImpl))
         {
         }
@@ -268,6 +268,16 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         public void Write(byte[] dataBuffer)
         {
             pushImpl.Write(dataBuffer, (uint)dataBuffer.Length);
+        }
+
+        /// <summary>
+        /// Writes the audio data specified by making an internal copy of the data.
+        /// </summary>
+        /// <param name="dataBuffer">The audio buffer of which this function will make a copy.</param>
+        /// <param name="size">The size of the data in the audio buffer. Note the size could be smaller than dataBuffer.Length</param>
+        public void Write(byte[] dataBuffer, int size)
+        {
+            pushImpl.Write(dataBuffer, (uint)size);
         }
 
         /// <summary>
@@ -321,7 +331,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// </summary>
         /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
         /// <returns>The pull audio input stream being created.</returns>
-        public PullAudioInputStream(PullAudioInputStreamCallback callback) : 
+        public PullAudioInputStream(PullAudioInputStreamCallback callback) :
             this(Microsoft.CognitiveServices.Speech.Internal.PullAudioInputStream.CreatePullStream(callback.Adapter), callback)
         {
         }
@@ -332,7 +342,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
         /// <param name="format">The audio data format in which audio will be returned from the callback's read() method (currently only support 16Khz 16bit mono PCM).</param>
         /// <returns>The pull audio input stream being created.</returns>
-        public PullAudioInputStream(PullAudioInputStreamCallback callback, AudioStreamFormat format) : 
+        public PullAudioInputStream(PullAudioInputStreamCallback callback, AudioStreamFormat format) :
             this(Microsoft.CognitiveServices.Speech.Internal.PullAudioInputStream.CreatePullStream(format.formatImpl, callback.Adapter), callback)
         {
         }
@@ -376,7 +386,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     public abstract class PullAudioInputStreamCallback : IDisposable
     {
         /// <summary>
-        /// The adapter to the internal 
+        /// The adapter to the internal
         /// </summary>
         internal PullAudioInputStreamCallbackInternalAdapter Adapter { get; private set; }
 

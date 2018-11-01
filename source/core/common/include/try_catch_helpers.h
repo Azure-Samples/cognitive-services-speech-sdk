@@ -31,7 +31,7 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
     {                                                       \
        x = StoreException(std::move(ex));                   \
     }                                                       \
-    catch(const std::runtime_error& ex)                     \
+    catch(const std::exception& ex)                         \
     {                                                       \
        x = StoreException(ex);                              \
     }                                                       \
@@ -55,9 +55,10 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
        error += ex.GetCallStack();                          \
        SPX_TRACE_ERROR(error.c_str());                      \
     }                                                       \
-    catch (const std::runtime_error& e)                     \
+    catch (const std::exception& e)                         \
     {                                                       \
         error = e.what();                                   \
+        SPX_TRACE_ERROR(error.c_str());                     \
     }                                                       \
     catch (...)                                             \
     {                                                       \

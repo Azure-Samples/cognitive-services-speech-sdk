@@ -132,3 +132,8 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     SPXTEST_REQUIRE(result != nullptr);                                 \
     SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);  \
     SPXTEST_REQUIRE(!result->Text.empty()); } while (0)
+
+void UseMocks(bool value);
+bool IsUsingMocks(bool uspMockRequired = true);
+int ReadBuffer(std::fstream& fs, uint8_t* dataBuffer, uint32_t size);
+std::fstream OpenWaveFile(const std::string& filename);
