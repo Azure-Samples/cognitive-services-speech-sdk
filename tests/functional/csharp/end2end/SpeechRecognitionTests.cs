@@ -486,8 +486,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await helper.CompleteContinuousRecognition(recognizer);
 
-                Assert.AreEqual(1, recognizedText.Count);
-                AssertMatching(TestData.English.Margarita.Utterance, recognizedText[0]);
+                Assert.AreEqual(TestData.English.Margarita.Utterance.Length, recognizedText.Count);
+                for (var i = 0; i < recognizedText.Count; i++)
+                {
+                    AssertMatching(TestData.English.Margarita.Utterance[i], recognizedText[i]);
+                }
+                
             }
         }
     }

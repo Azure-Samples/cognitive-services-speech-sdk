@@ -149,9 +149,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Result recognized {e.ToString()}");
+                    Console.WriteLine($"Result OffsetInTicks {e.Result.OffsetInTicks.ToString()}");
+                    Console.WriteLine($"Result Duration {e.Result.Duration.Ticks.ToString()}\n");
+
                     if (e.Result.Reason == ResultReason.RecognizedSpeech)
                     {
                         results.Add(e.Result);
+                    
                     }
                 };
 
@@ -180,7 +184,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 // Checking text results.
                 var texts = results.Select(r => r.Text).Where(t => !string.IsNullOrEmpty(t)).ToList();
                 var expected = string.Join(" ", TestData.English.Batman.Utterances);
-                expected = string.Join(" ", Enumerable.Repeat(expected, Times).ToArray());
+                expected += " ";
+                expected += string.Join(" ", TestData.English.Batman.Utterances2);                
+
                 var actual = string.Join(" ", texts.ToArray());
                 Assert.AreEqual(TestData.English.Batman.Utterances.Length * Times, results.Count);
                 AssertMatching(expected, actual);
@@ -192,18 +198,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     .ToList();
                 var expectedOffsets = new List<Tuple<long, long>>
                 {
-                    new Tuple<long, long>(5400000, 214100000),
-                    new Tuple<long, long>(229200000, 300000000),
-                    new Tuple<long, long>(537200000, 153200000),
+                    new Tuple<long, long>(5400000, 200000000),                                                   
+                    new Tuple<long, long>(213400000, 6100000),
+                    new Tuple<long, long>(229200000, 200000000),
+                    new Tuple<long, long>(440500000, 200000000),
+                    new Tuple<long, long>(648500000, 41900000),
                     new Tuple<long, long>(708000000, 68600000),
-                    new Tuple<long, long>(788700000, 300000000),
-                    new Tuple<long, long>(1096700000, 13000000),
-                    new Tuple<long, long>(1151900000, 214200000),
-                    new Tuple<long, long>(1375800000, 300000000),
-                    new Tuple<long, long>(1683800000, 153200000),
+                    new Tuple<long, long>(788700000, 200000000),
+                    new Tuple<long, long>(996700000, 113000000),
+                    new Tuple<long, long>(1151900000, 200000000),
+                    new Tuple<long, long>(1359900000, 6200000),
+                    new Tuple<long, long>(1375800000, 200000000),
+                    new Tuple<long, long>(1587100000, 200000000),
+                    new Tuple<long, long>(1795100000, 41900000),
                     new Tuple<long, long>(1854600000, 68600000),
-                    new Tuple<long, long>(1935300000, 300000000),
-                    new Tuple<long, long>(2243300000, 13000000),
+                    new Tuple<long, long>(1935300000, 200000000),
+                    new Tuple<long, long>(2143300000, 113000000)
                 };
                 Assert.AreEqual(expectedOffsets.Count, offsets.Count, "Number of offsets should match");
                 var zipped = expectedOffsets
