@@ -60,7 +60,9 @@ const BuildRecognizerFromWaveFile: (speechConfig?: sdk.SpeechConfig) => sdk.Spee
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const language: string = Settings.WaveFileLanguage;
-    s.speechRecognitionLanguage = language;
+    if (s.speechRecognitionLanguage === undefined) {
+        s.speechRecognitionLanguage = language;
+    }
 
     const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
     expect(r).not.toBeUndefined();
@@ -69,7 +71,14 @@ const BuildRecognizerFromWaveFile: (speechConfig?: sdk.SpeechConfig) => sdk.Spee
 };
 
 const BuildSpeechConfig: () => sdk.SpeechConfig = (): sdk.SpeechConfig => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+
+    let s: sdk.SpeechConfig;
+    if (undefined === Settings.SpeechEndpoint) {
+        s = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    } else {
+        s = sdk.SpeechConfig.fromEndpoint(new URL(Settings.SpeechEndpoint), Settings.SpeechSubscriptionKey);
+    }
+
     expect(s).not.toBeUndefined();
     return s;
 };
@@ -783,7 +792,7 @@ const testInitialSilienceTimeout = (config: sdk.AudioConfig, done: jest.DoneCall
 
             const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
             expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
-            expect(Date.now()).toBeGreaterThan(startTime + 2500);
+            expect(Date.now()).toBeGreaterThan(startTime + 2400);
 
         },
         (error: string) => {
@@ -1020,8 +1029,8 @@ test("InitialSilenceTimeout Continous", (done: jest.DoneCallback) => {
 
     r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
         try {
-            setTimeout(done, 1);
             fail(e.errorDetails);
+            done();
         } catch (error) {
             done.fail(error);
         }
@@ -1102,16 +1111,13 @@ test("Using disposed recognizer invokes error callbacks.", () => {
         });
 });
 
-test.skip("Endpoing URL Test", (done: jest.DoneCallback) => {
+test.skip("Endpoint URL Test", (done: jest.DoneCallback) => {
     let uri: string;
 
     Events.Instance.AttachListener({
         OnEvent: (event: PlatformEvent) => {
             if (event instanceof ConnectionStartEvent) {
                 const connectionEvent: ConnectionStartEvent = event as ConnectionStartEvent;
-                if (uri !== undefined) {
-                    done.fail("Connected twice");
-                }
                 uri = connectionEvent.Uri;
             }
         },
@@ -1145,5 +1151,127 @@ test.skip("Endpoing URL Test", (done: jest.DoneCallback) => {
         (error: string) => {
             done.fail(error);
         });
+});
 
+test("Endpoint URL With Parameter Test", (done: jest.DoneCallback) => {
+    let uri: string;
+
+    Events.Instance.AttachListener({
+        OnEvent: (event: PlatformEvent) => {
+            if (event instanceof ConnectionStartEvent) {
+                const connectionEvent: ConnectionStartEvent = event as ConnectionStartEvent;
+                uri = connectionEvent.Uri;
+            }
+        },
+    });
+
+        const s: sdk.SpeechConfig = sdk.SpeechConfig.fromEndpoint(new URL("wss://fake.host.name?somequeryParam=Value"), "fakekey");
+        objsToClose.push(s);
+
+        const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile(s);
+        objsToClose.push(r);
+
+        r.recognizeOnceAsync(
+            (p2: sdk.SpeechRecognitionResult) => {
+                done.fail("bad URL connected?");
+            },
+            (error: string) => {
+                try {
+                    expect(uri).not.toBeUndefined();
+                    // Make sure there's only a single ? in the URL.
+                    expect(uri.indexOf("?")).toEqual(uri.lastIndexOf("?"));
+                    done();
+                } catch (error) {
+                    done.fail(error);
+                }
+            });
+});
+
+test("Connection Errors Propogate Async", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription("badKey", Settings.SpeechRegion);
+    objsToClose.push(s);
+
+    const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
+        try {
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
+            expect(sdk.CancellationErrorCode[e.errorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.ConnectionFailure]);
+            done();
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.startContinuousRecognitionAsync();
+
+});
+
+test("Connection Errors Propogate Sync", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription("badKey", Settings.SpeechRegion);
+    objsToClose.push(s);
+
+    const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
+
+    let doneCount: number = 0;
+    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
+        try {
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
+            expect(sdk.CancellationErrorCode[e.errorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.ConnectionFailure]);
+            expect(e.errorDetails).toContain("1006");
+            doneCount++;
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.recognizeOnceAsync((result: sdk.SpeechRecognitionResult) => {
+        done.fail("RecognizeOnceAsync did not fail");
+    }, (error: string) => {
+        try {
+            expect(error).toContain("1006");
+        } catch (error) {
+            done.fail(error);
+        }
+        doneCount++;
+    });
+
+    WaitForCondition(() => (doneCount === 2), done);
+
+});
+
+test("RecognizeOnce Bad Language", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+    s.speechRecognitionLanguage = "BadLanguage";
+
+    const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
+    let doneCount: number = 0;
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
+        try {
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
+            expect(sdk.CancellationErrorCode[e.errorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.ConnectionFailure]);
+            expect(e.errorDetails).toContain("1006");
+            doneCount++;
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.recognizeOnceAsync((result: sdk.SpeechRecognitionResult) => {
+        done.fail("RecognizeOnceAsync did not fail");
+    }, (error: string) => {
+        try {
+            expect(error).toContain("1006");
+        } catch (error) {
+            done.fail(error);
+        }
+        doneCount++;
+    });
+
+    WaitForCondition(() => (doneCount === 2), done);
 });

@@ -7,6 +7,9 @@ import {
     IConnection,
 } from "../common/Exports";
 import {
+    CancellationErrorCode,
+    CancellationReason,
+    IntentRecognitionCanceledEventArgs,
     IntentRecognitionEventArgs,
     IntentRecognitionResult,
     IntentRecognizer,
@@ -16,6 +19,7 @@ import {
 } from "../sdk/Exports";
 import {
     AddedLmIntent,
+    CancellationErrorCodePropertyName,
     EnumTranslation,
     IntentResponse,
     RequestSession,
@@ -239,4 +243,36 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
                 break;
         }
     }
+
+    protected ConnectionError(sessionId: string, requestId: string, error: string): void {
+        if (!!this.intentRecognizer.canceled) {
+            const properties: PropertyCollection = new PropertyCollection();
+            properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[CancellationErrorCode.ConnectionFailure]);
+
+            const result: IntentRecognitionResult = new IntentRecognitionResult(
+                undefined,
+                requestId,
+                ResultReason.Canceled,
+                undefined,
+                undefined,
+                undefined,
+                error,
+                undefined,
+                properties);
+
+            const cancelEvent: IntentRecognitionCanceledEventArgs = new IntentRecognitionCanceledEventArgs(
+                CancellationReason.Error,
+                error,
+                CancellationErrorCode.ConnectionFailure,
+                undefined,
+                undefined,
+                sessionId);
+            try {
+                this.intentRecognizer.canceled(this.intentRecognizer, cancelEvent);
+                /* tslint:disable:no-empty */
+            } catch { }
+        }
+
+    }
+
 }

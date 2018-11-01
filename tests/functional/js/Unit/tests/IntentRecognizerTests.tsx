@@ -56,7 +56,9 @@ const BuildRecognizerFromWaveFile: (speechConfig?: sdk.SpeechConfig) => sdk.Inte
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const language: string = Settings.WaveFileLanguage;
-    s.speechRecognitionLanguage = language;
+    if (s.speechRecognitionLanguage === undefined) {
+        s.speechRecognitionLanguage = language;
+    }
 
     const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
     expect(r).not.toBeUndefined();
@@ -492,4 +494,94 @@ test("Default mic is used when audio config is not specified.", () => {
         (error: string): void => {
             expect(error).toEqual("Error: Browser does not support Web Audio API (AudioContext is not available).");
         });
+});
+
+test("Connection Errors Propogate Async", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription("badKey", Settings.SpeechRegion);
+    objsToClose.push(s);
+
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs) => {
+        try {
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
+            expect(sdk.CancellationErrorCode[e.errorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.ConnectionFailure]);
+            done();
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.startContinuousRecognitionAsync();
+
+});
+
+test("Connection Errors Propogate Sync", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription("badKey", Settings.SpeechRegion);
+    objsToClose.push(s);
+
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
+
+    let doneCount: number = 0;
+    r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs) => {
+        try {
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
+            expect(sdk.CancellationErrorCode[e.errorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.ConnectionFailure]);
+            expect(e.errorDetails).toContain("1006");
+            doneCount++;
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.recognizeOnceAsync((result: sdk.IntentRecognitionResult) => {
+        done.fail("RecognizeOnceAsync did not fail");
+    }, (error: string) => {
+        try {
+            expect(error).toContain("1006");
+        } catch (error) {
+            done.fail(error);
+        }
+        doneCount++;
+    });
+
+    WaitForCondition(() => (doneCount === 2), done);
+
+});
+
+// Truman does not behave the same as SkyMan for a bad language. It closes the connection far more gracefully.
+test.skip("RecognizeOnce Bad Language", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+    s.speechRecognitionLanguage = "BadLanguage";
+
+    const r: sdk.IntentRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
+    let doneCount: number = 0;
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs) => {
+        try {
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
+            expect(sdk.CancellationErrorCode[e.errorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.ConnectionFailure]);
+            expect(e.errorDetails).toContain("1007");
+            doneCount++;
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.recognizeOnceAsync((result: sdk.IntentRecognitionResult) => {
+        done.fail("RecognizeOnceAsync did not fail");
+    }, (error: string) => {
+        try {
+            expect(error).toContain("1007");
+        } catch (error) {
+            done.fail(error);
+        }
+        doneCount++;
+    });
+
+    WaitForCondition(() => (doneCount === 2), done);
 });

@@ -11,6 +11,7 @@ export class Settings {
     public static SpeechSubscriptionKey: string = "<<YOUR_SUBSCRIPTION_KEY>>";
     public static SpeechRegion: string = "<<YOUR_REGION>>";
     public static SpeechAuthorizationToken: string = "<<YOUR_AUTH_TOKEN>>";
+    public static SpeechEndpoint: string;
 
     public static SpeechTestEndpointId: string = "<<YOUR_TEST_ENDPOINT_ID>>";
 

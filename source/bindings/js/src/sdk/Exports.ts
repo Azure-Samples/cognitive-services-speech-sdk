@@ -38,3 +38,4 @@ export { NoMatchDetails } from "./NoMatchDetails";
 export { TranslationRecognitionCanceledEventArgs } from "./TranslationRecognitionCanceledEventArgs";
 export { IntentRecognitionCanceledEventArgs } from "./IntentRecognitionCanceledEventArgs";
 export { CancellationDetails } from "./CancellationDetails";
+export { CancellationErrorCode } from "./CancellationErrorCodes";

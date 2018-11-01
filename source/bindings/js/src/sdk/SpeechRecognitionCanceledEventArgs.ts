@@ -3,7 +3,11 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-import { CancellationReason, RecognitionEventArgs } from "./Exports";
+import {
+    CancellationErrorCode,
+    CancellationReason,
+    RecognitionEventArgs,
+} from "./Exports";
 
 /**
  * Defines content of a RecognitionErrorEvent.
@@ -12,6 +16,7 @@ import { CancellationReason, RecognitionEventArgs } from "./Exports";
 export class SpeechRecognitionCanceledEventArgs extends RecognitionEventArgs {
     private privReason: CancellationReason;
     private privErrorDetails: string;
+    private privErrorCode: CancellationErrorCode;
 
     /**
      * Creates and initializes an instance of this class.
@@ -21,11 +26,12 @@ export class SpeechRecognitionCanceledEventArgs extends RecognitionEventArgs {
      * @param {number} offset - The offset.
      * @param {string} sessionId - The session id.
      */
-    public constructor(reason: CancellationReason, errorDetails: string, offset?: number, sessionId?: string) {
+    public constructor(reason: CancellationReason, errorDetails: string, errorCode: CancellationErrorCode, offset?: number, sessionId?: string) {
         super(offset, sessionId);
 
         this.privReason = reason;
         this.privErrorDetails = errorDetails;
+        this.privErrorCode = errorCode;
     }
 
     /**
@@ -37,6 +43,15 @@ export class SpeechRecognitionCanceledEventArgs extends RecognitionEventArgs {
      */
     public get reason(): CancellationReason {
         return this.privReason;
+    }
+
+    /**
+     * The error code of why the cancellation occurred.
+     * @return An error code that represents the error reason.
+     * Added in version 1.1.0.
+     */
+    public get errorCode(): CancellationErrorCode {
+        return this.privErrorCode;
     }
 
     /**

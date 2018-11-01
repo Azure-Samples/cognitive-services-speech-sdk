@@ -121,7 +121,7 @@ export abstract class ServiceRecognizerBase implements IDisposable {
                 const audioNode = result.Result;
 
                 return this.FetchConnection(requestSession)
-                    .OnSuccessContinueWithPromise((connection: IConnection) => {
+                    .On((connection: IConnection) => {
                         const messageRetrievalPromise = this.ReceiveMessage(connection, requestSession, successCallback, errorCallBack);
                         const messageSendPromise = this.SendSpeechConfig(requestSession.RequestId, connection, this.recognizerConfig.PlatformConfig.Serialize())
                             .OnSuccessContinueWithPromise((_: boolean) => {
@@ -142,7 +142,9 @@ export abstract class ServiceRecognizerBase implements IDisposable {
                         });
 
                         return completionPromise;
-                    }).OnSuccessContinueWithPromise((_: boolean) => {
+                    }, (error: string) => {
+                        this.ConnectionError(requestSession.SessionId, requestSession.RequestId, error);
+                    }).OnSuccessContinueWithPromise(() => {
                         return requestSession.CompletionPromise;
                     });
             });
@@ -151,6 +153,8 @@ export abstract class ServiceRecognizerBase implements IDisposable {
     // Called when telemetry data is sent to the service.
     // Used for testing Telemetry capture.
     public static TelemetryData: (json: string) => void;
+
+    protected abstract ConnectionError(sessionId: string, requestId: string, error: string): void;
 
     protected abstract ProcessTypeSpecificMessages(
         connectionMessage: SpeechConnectionMessage,

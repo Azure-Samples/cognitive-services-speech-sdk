@@ -4,9 +4,11 @@
 //
 
 import {
+    CancellationErrorCode,
     CancellationReason,
     TranslationRecognitionResult,
 } from "./Exports";
+
 /**
  * Define payload of speech recognition canceled result events.
  * @class TranslationRecognitionCanceledEventArgs
@@ -16,6 +18,7 @@ export class TranslationRecognitionCanceledEventArgs {
     private privSessionId: string;
     private privCancelReason: CancellationReason;
     private privErrorDetails: string;
+    private privErrorCode: CancellationErrorCode;
 
     /**
      * Creates and initializes an instance of this class.
@@ -25,11 +28,12 @@ export class TranslationRecognitionCanceledEventArgs {
      * @param {string} errorDetails - Error details, if provided.
      * @param {TranslationRecognitionResult} result - The result.
      */
-    public constructor(sessionid: string, cancellationReason: CancellationReason, errorDetails: string, result: TranslationRecognitionResult) {
+    public constructor(sessionid: string, cancellationReason: CancellationReason, errorDetails: string, errorCode: CancellationErrorCode, result: TranslationRecognitionResult) {
         this.privCancelReason = cancellationReason;
         this.privErrorDetails = errorDetails;
         this.privResult = result;
         this.privSessionId = sessionid;
+        this.privErrorCode = errorCode;
     }
 
     /**
@@ -63,6 +67,15 @@ export class TranslationRecognitionCanceledEventArgs {
      */
     public get reason(): CancellationReason {
         return this.privCancelReason;
+    }
+
+    /**
+     * The error code of why the cancellation occurred.
+     * @return An error code that represents the error reason.
+     * Added in version 1.1.0.
+     */
+    public get errorCode(): CancellationErrorCode {
+        return this.privErrorCode;
     }
 
     /**

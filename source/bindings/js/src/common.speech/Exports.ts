@@ -34,3 +34,4 @@ export * from "./ServiceMessages/IntentResponse";
 export * from "./RequestSession";
 
 export const OutputFormatPropertyName: string = "OutputFormat";
+export const CancellationErrorCodePropertyName: string = "CancellationErrorCode";

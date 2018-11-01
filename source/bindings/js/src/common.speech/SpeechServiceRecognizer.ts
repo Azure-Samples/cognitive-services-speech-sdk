@@ -7,7 +7,10 @@ import {
     IConnection,
 } from "../common/Exports";
 import {
+    CancellationErrorCode,
+    CancellationReason,
     OutputFormat,
+    PropertyCollection,
     ResultReason,
     SpeechRecognitionCanceledEventArgs,
     SpeechRecognitionEventArgs,
@@ -15,6 +18,7 @@ import {
     SpeechRecognizer,
 } from "../sdk/Exports";
 import {
+    CancellationErrorCodePropertyName,
     DetailedSpeechPhrase,
     EnumTranslation,
     OutputFormatPropertyName,
@@ -106,6 +110,7 @@ export class SpeechServiceRecognizer extends ServiceRecognizerBase {
                             EnumTranslation.implTranslateCancelResult(simple.RecognitionStatus),
                             undefined,
                             undefined,
+                            EnumTranslation.implTranslateCancelResult(simple.RecognitionStatus) === CancellationReason.Error ? CancellationErrorCode.ServiceError : CancellationErrorCode.NoError,
                             requestSession.SessionId);
                         try {
                             this.speechRecognizer.canceled(this.speechRecognizer, cancelEvent);
@@ -170,5 +175,24 @@ export class SpeechServiceRecognizer extends ServiceRecognizerBase {
             default:
                 break;
         }
+    }
+
+    protected ConnectionError(sessionId: string, requestId: string, error: string): void {
+        if (!!this.speechRecognizer.canceled) {
+            const properties: PropertyCollection = new PropertyCollection();
+            properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[CancellationErrorCode.ConnectionFailure]);
+
+            const cancelEvent: SpeechRecognitionCanceledEventArgs = new SpeechRecognitionCanceledEventArgs(
+                CancellationReason.Error,
+                error,
+                CancellationErrorCode.ConnectionFailure,
+                undefined,
+                sessionId);
+            try {
+                this.speechRecognizer.canceled(this.speechRecognizer, cancelEvent);
+                /* tslint:disable:no-empty */
+            } catch { }
+        }
+
     }
 }

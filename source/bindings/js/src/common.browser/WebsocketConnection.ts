@@ -49,7 +49,7 @@ export class WebsocketConnection implements IConnection {
         if (queryParameters) {
             for (const paramName in queryParameters) {
                 if (paramName) {
-                    queryParams += i === 0 ? "?" : "&";
+                    queryParams += ((i === 0) && (uri.indexOf("?") === -1)) ? "?" : "&";
                     const val = encodeURIComponent(queryParameters[paramName]);
                     queryParams += `${paramName}=${val}`;
                     i++;

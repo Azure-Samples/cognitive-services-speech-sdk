@@ -9,7 +9,9 @@ import {
     TranslationStatus,
 } from "../common/Exports";
 import {
+    CancellationErrorCode,
     CancellationReason,
+    PropertyCollection,
     ResultReason,
     TranslationRecognitionCanceledEventArgs,
     TranslationRecognitionEventArgs,
@@ -20,6 +22,7 @@ import {
     TranslationSynthesisResult,
 } from "../sdk/Exports";
 import {
+    CancellationErrorCodePropertyName,
     EnumTranslation,
     RecognitionStatus,
     RequestSession,
@@ -128,10 +131,13 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                         undefined);
 
                     if (reason === ResultReason.Canceled) {
+                        const cancelReason: CancellationReason = EnumTranslation.implTranslateCancelResult(translatedPhrase.RecognitionStatus);
+
                         const ev = new TranslationRecognitionCanceledEventArgs(
                             requestSession.SessionId,
-                            EnumTranslation.implTranslateCancelResult(translatedPhrase.RecognitionStatus),
+                            cancelReason,
                             null,
+                            cancelReason === CancellationReason.Error ? CancellationErrorCode.ServiceError : CancellationErrorCode.NoError,
                             result);
 
                         if (!!this.translationRecognizer.canceled) {
@@ -203,6 +209,7 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                                 requestSession.SessionId,
                                 CancellationReason.Error,
                                 synthEnd.FailureReason,
+                                CancellationErrorCode.ServiceError,
                                 null);
 
                             try {
@@ -224,6 +231,37 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
             default:
                 break;
         }
+    }
+
+    protected ConnectionError(sessionId: string, requestId: string, error: string): void {
+        if (!!this.translationRecognizer.canceled) {
+            const properties: PropertyCollection = new PropertyCollection();
+            properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[CancellationErrorCode.ConnectionFailure]);
+
+            const result: TranslationRecognitionResult = new TranslationRecognitionResult(
+                undefined,
+                requestId,
+                ResultReason.Canceled,
+                undefined,
+                undefined,
+                undefined,
+                error,
+                undefined,
+                properties);
+
+            const cancelEvent: TranslationRecognitionCanceledEventArgs = new TranslationRecognitionCanceledEventArgs(
+                sessionId,
+                CancellationReason.Error,
+                error,
+                CancellationErrorCode.ConnectionFailure,
+                result,
+            );
+            try {
+                this.translationRecognizer.canceled(this.translationRecognizer, cancelEvent);
+                /* tslint:disable:no-empty */
+            } catch { }
+        }
+
     }
 
     private FireEventForResult(serviceResult: TranslationHypothesis | TranslationPhrase, requestSession: RequestSession): TranslationRecognitionEventArgs {

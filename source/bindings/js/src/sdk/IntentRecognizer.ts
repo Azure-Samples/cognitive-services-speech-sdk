@@ -57,7 +57,6 @@ export class IntentRecognizer extends Recognizer {
         Contracts.throwIfNullOrUndefined(configImpl, "speechConfig");
 
         super(audioConfig);
-
         this.intentDataSent = false;
         this.addedIntents = [];
         this.addedLmIntents = {};

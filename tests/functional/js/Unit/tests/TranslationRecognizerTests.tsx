@@ -25,7 +25,6 @@ beforeAll(() => {
 // Test cases are run linerally, still looking for a way to get the test name to print that doesn't mean changing each test.
 beforeEach(() => {
     objsToClose = [];
-
     // tslint:disable-next-line:no-console
     console.info("---------------------------------------Starting test case-----------------------------------");
 });
@@ -51,7 +50,9 @@ const BuildRecognizerFromWaveFile: (speechConfig?: sdk.SpeechTranslationConfig) 
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const language: string = Settings.WaveFileLanguage;
-    s.speechRecognitionLanguage = language;
+    if (s.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_RecoLanguage]) === undefined) {
+        s.speechRecognitionLanguage = language;
+    }
     s.addTargetLanguage("de-DE");
 
     const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
@@ -949,4 +950,96 @@ test("Default mic is used when audio config is not specified.", () => {
         (error: string): void => {
             expect(error).toEqual("Error: Browser does not support Web Audio API (AudioContext is not available).");
         });
+});
+
+test("Connection Errors Propogate Async", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription("badKey", Settings.SpeechRegion);
+    objsToClose.push(s);
+    s.addTargetLanguage("en-US");
+
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
+        try {
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
+            expect(sdk.CancellationErrorCode[e.errorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.ConnectionFailure]);
+            done();
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.startContinuousRecognitionAsync();
+
+});
+
+test("Connection Errors Propogate Sync", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription("badKey", Settings.SpeechRegion);
+    objsToClose.push(s);
+    s.addTargetLanguage("en-US");
+
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
+
+    let doneCount: number = 0;
+    r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
+        try {
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
+            expect(sdk.CancellationErrorCode[e.errorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.ConnectionFailure]);
+            expect(e.errorDetails).toContain("1006");
+            doneCount++;
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.recognizeOnceAsync((result: sdk.TranslationRecognitionResult) => {
+        done.fail("RecognizeOnceAsync did not fail");
+    }, (error: string) => {
+        try {
+            expect(error).toContain("1006");
+        } catch (error) {
+            done.fail(error);
+        }
+        doneCount++;
+    });
+
+    WaitForCondition(() => (doneCount === 2), done);
+
+});
+
+test.only("RecognizeOnce Bad Language", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+    s.speechRecognitionLanguage = "BadLanguage";
+    s.addTargetLanguage("en-US");
+
+    const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
+    let doneCount: number = 0;
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
+        try {
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
+            expect(sdk.CancellationErrorCode[e.errorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.ConnectionFailure]);
+            expect(e.errorDetails).toContain("1006");
+            doneCount++;
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.recognizeOnceAsync((result: sdk.TranslationRecognitionResult) => {
+        done.fail("RecognizeOnceAsync did not fail");
+    }, (error: string) => {
+        try {
+            expect(error).toContain("1006");
+        } catch (error) {
+            done.fail(error);
+        }
+        doneCount++;
+    });
+
+    WaitForCondition(() => (doneCount === 2), done);
 });

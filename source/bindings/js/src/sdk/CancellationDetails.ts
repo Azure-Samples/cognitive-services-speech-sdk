@@ -4,10 +4,12 @@
 //
 
 import {
+    CancellationErrorCodePropertyName,
     EnumTranslation,
     SimpleSpeechPhrase,
 } from "../common.speech/Exports";
 import {
+    CancellationErrorCode,
     CancellationReason,
     RecognitionResult,
 } from "./Exports";
@@ -19,6 +21,7 @@ import {
 export class CancellationDetails {
     private privReason: CancellationReason;
     private privErrorDetails: string;
+    private privErrorCode: CancellationErrorCode;
 
     /**
      * Creates and initializes an instance of this class.
@@ -26,9 +29,10 @@ export class CancellationDetails {
      * @param {CancellationReason} reason - The cancellation reason.
      * @param {string} errorDetails - The error details, if provided.
      */
-    private constructor(reason: CancellationReason, errorDetails: string) {
+    private constructor(reason: CancellationReason, errorDetails: string, errorCode: CancellationErrorCode) {
         this.privReason = reason;
         this.privErrorDetails = errorDetails;
+        this.privErrorCode = errorCode;
     }
 
     /**
@@ -41,13 +45,18 @@ export class CancellationDetails {
      */
     public static fromResult(result: RecognitionResult): CancellationDetails {
         let reason = CancellationReason.Error;
+        let errorCode: CancellationErrorCode = CancellationErrorCode.NoError;
 
         if (!!result.json) {
             const simpleSpeech: SimpleSpeechPhrase = SimpleSpeechPhrase.FromJSON(result.json);
             reason = EnumTranslation.implTranslateCancelResult(simpleSpeech.RecognitionStatus);
         }
 
-        return new CancellationDetails(reason, result.errorDetails);
+        if (!!result.properties) {
+            errorCode = (CancellationErrorCode as any)[result.properties.getProperty(CancellationErrorCodePropertyName, CancellationErrorCode[CancellationErrorCode.NoError])];
+        }
+
+        return new CancellationDetails(reason, result.errorDetails, errorCode);
 
     }
 
@@ -73,4 +82,14 @@ export class CancellationDetails {
     public get errorDetails(): string {
         return this.privErrorDetails;
     }
+
+    /**
+     * The error code of why the cancellation occurred.
+     * @return An error code that represents the error reason.
+     * Added in version 1.1.0.
+     */
+    public get ErrorCode(): CancellationErrorCode {
+        return this.privErrorCode;
+    }
+
 }

@@ -4,11 +4,10 @@
 //
 
 import {
+    CancellationErrorCode,
     CancellationReason,
     IntentRecognitionEventArgs,
     IntentRecognitionResult,
-    PropertyCollection,
-    ResultReason,
 } from "./Exports";
 
 /**
@@ -18,6 +17,7 @@ import {
 export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventArgs {
     private privReason: CancellationReason;
     private privErrorDetails: string;
+    private privErrorCode: CancellationErrorCode;
 
     /**
      * Creates and initializes an instance of this class.
@@ -26,11 +26,12 @@ export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventAr
      * @param {string} offset - The offset.
      * @param {IntentRecognitionResult} sessionId - The session id.
      */
-    public constructor(reason: CancellationReason, errorDetails: string, result?: IntentRecognitionResult, offset?: number, sessionId?: string) {
+    public constructor(reason: CancellationReason, errorDetails: string, errorCode: CancellationErrorCode, result?: IntentRecognitionResult, offset?: number, sessionId?: string) {
         super(result, offset, sessionId);
 
         this.privReason = reason;
         this.privErrorDetails = errorDetails;
+        this.privErrorCode = errorCode;
     }
 
     /**
@@ -42,6 +43,15 @@ export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventAr
      */
     public get reason(): CancellationReason {
         return this.privReason;
+    }
+
+    /**
+     * The error code of why the cancellation occurred.
+     * @return An error code that represents the error reason.
+     * Added in version 1.1.0.
+     */
+    public get errorCode(): CancellationErrorCode {
+        return this.privErrorCode;
     }
 
     /**

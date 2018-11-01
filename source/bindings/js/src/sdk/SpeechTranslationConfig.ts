@@ -210,7 +210,6 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      */
     public set speechRecognitionLanguage(value: string) {
         Contracts.throwIfNullOrWhitespace(value, "value");
-
         this.properties.setProperty(PropertyId.SpeechServiceConnection_RecoLanguage, value);
     }
 
