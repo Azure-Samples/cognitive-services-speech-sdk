@@ -907,13 +907,24 @@ phases:
       type: InlineScript
       script: |
         . ci/functions.sh
-        set -x -e -o pipefail
         NDK_VER=r16b
         NDK_SHA1SUM=f3f1909ed1052e98dda2c79d11c22f3da28daf25
         NDK_BASE="$(System.ArtifactsDirectory)\ndk-$NDK_VER"
         NDK_BASE_UNIX="$(cygpath -au "$NDK_BASE")"
         NDK_ZIP="$NDK_BASE_UNIX.zip"
-        curl https://dl.google.com/android/repository/android-ndk-$NDK_VER-windows-x86_64.zip -o "$NDK_ZIP"
+        MAX_RETRIES=3
+        RETRY=0
+        until [[ $RETRY -ge $MAX_RETRIES ]]
+        do
+          curl https://dl.google.com/android/repository/android-ndk-$NDK_VER-windows-x86_64.zip -o "$NDK_ZIP" && break
+          RETRY=$((RETRY+1))
+        done
+        if [[ $RETRY -ge $MAX_RETRIES ]]; then
+            echo "Could not successfully download NDK, exiting"
+            exit 1
+        fi
+
+        set -x -e -o pipefail
         echo "$NDK_SHA1SUM  $NDK_ZIP" | sha1sum -c --strict -
         unzip -q -o "$NDK_ZIP" -d "$NDK_BASE_UNIX.tmp"
         # A single nested directory should be inside
