@@ -194,7 +194,6 @@ public class TranslationSamples {
     // </TranslationWithFileAsync>
 
     // Translation using audio stream.
-    // <TranslationWithAudioStreamAsync>
     private static Semaphore stopTranslationWithAudioStreamSemaphore;
 
     public static void translationWithAudioStreamAsync() throws InterruptedException, ExecutionException, FileNotFoundException
@@ -283,5 +282,4 @@ public class TranslationSamples {
             recognizer.stopContinuousRecognitionAsync().get();
         }
     }
-    // </TranslationWithAudioStreamAsync>
 }

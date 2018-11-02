@@ -103,7 +103,7 @@ phases:
       vsts_addbuildtag $(SPEECHSDK_BUILD_TYPE)
   - bash:
       ./ci/check-git-head.sh &&
-      find public_samples -name \*.java -or -name \*.cpp -or -name \*.cs -or -name \*.m -or -name pom.xml -or -name \*.html -or -name \*.xaml | xargs perl ci/check-docfx-codetags.pl
+      perl ci/check-docfx-codetags.pl public_samples
     displayName: Repository checks
 
 - phase: WindowsSdlBuild
