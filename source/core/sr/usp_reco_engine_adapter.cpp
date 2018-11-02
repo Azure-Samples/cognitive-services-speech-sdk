@@ -18,6 +18,7 @@
 #include "property_id_2_name_map.h"
 #include "spx_build_information.h"
 #include "json.h"
+#include "platform.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -219,6 +220,9 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     SetUspAuthentication(properties, client);
     client.SetOutputFormat(GetOutputFormat(*properties));
 
+    // Construct speech.config payload
+    SetSpeechConfig(properties);
+
     SPX_DBG_TRACE_VERBOSE("%s: recoMode=%d", __FUNCTION__, m_recoMode);
     USP::ConnectionPtr uspConnection;
 
@@ -244,6 +248,11 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     // We're done!!
     m_uspCallbacks = uspCallbacks;
     m_uspConnection = std::move(uspConnection);
+
+    if (m_uspConnection != nullptr)
+    {
+        UspSendSpeechConfig();
+    }
 }
 
 void CSpxUspRecoEngineAdapter::UspTerminate()
@@ -481,6 +490,32 @@ USP::OutputFormat CSpxUspRecoEngineAdapter::GetOutputFormat(const ISpxNamedPrope
     return USP::OutputFormat::Simple; // Make compiler happy.
 }
 
+void CSpxUspRecoEngineAdapter::SetSpeechConfig(std::shared_ptr<ISpxNamedProperties>& properties)
+{
+    static constexpr const char *systemLanguagePropertyName = "SPEECHSDK-SPEECH-CONFIG-SYSTEM-LANGUAGE";
+    static constexpr const char *systemName = "SpeechSDK";
+    static constexpr const char *osPropertyName = "SPEECHSDK-SPEECH-CONFIG-OS";
+
+    auto osPropertyValue = properties->GetStringValue(osPropertyName);
+
+    json osJson;
+
+    json speechConfig;
+    speechConfig["context"]["system"]["version"] = BuildInformation::g_fullVersion;
+    speechConfig["context"]["system"]["name"] = systemName;
+    speechConfig["context"]["system"]["build"] = BuildInformation::g_buildPlatform;
+    auto languagePropertyValue = properties->GetStringValue(systemLanguagePropertyName);
+    if (languagePropertyValue != "")
+    {
+        speechConfig["context"]["system"]["lang"] = languagePropertyValue;
+    }
+    auto osInfo = PAL::getOperatingSystem();
+    speechConfig["context"]["os"]["platform"] = osInfo.platform;
+    speechConfig["context"]["os"]["name"] = osInfo.name;
+    speechConfig["context"]["os"]["version"] = osInfo.version;
+    m_speechConfig = speechConfig.dump();
+}
+
 SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& recoMode)
 {
     SPXHR hr = SPX_NOERROR;
@@ -507,8 +542,9 @@ SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromEndpoint(const std::wstring& endp
 
 void CSpxUspRecoEngineAdapter::UspSendSpeechConfig()
 {
-    std::string x = BuildInformation::g_fullVersion;
-    UNUSED(x);
+    std::string messagePath = "speech.config";
+    SPX_DBG_TRACE_VERBOSE("%s %s", messagePath.c_str(), m_speechConfig.c_str());
+    UspSendMessage(messagePath, m_speechConfig, USP::MessageType::Config);
 }
 
 void CSpxUspRecoEngineAdapter::UspSendSpeechContext()

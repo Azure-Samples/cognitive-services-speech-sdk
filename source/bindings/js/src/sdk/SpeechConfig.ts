@@ -118,7 +118,7 @@ export abstract class SpeechConfig {
      * @public
      * @param {string} value - The authorization token.
      */
-    public abstract set speechRecognitionLanguage(vale: string);
+    public abstract set speechRecognitionLanguage(value: string);
 
     /**
      * Sets an arbitrary property.

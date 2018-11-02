@@ -61,7 +61,7 @@ set(SOURCES
     "${SRC_DIR}/speech_config.cpp"
     )
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
     list(APPEND SOURCES
             "${SRC_DIR}/debug_utils_winrt.cpp"
     )
@@ -89,7 +89,13 @@ if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET common PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()
 
-set_target_properties (common PROPERTIES
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
+    # Need C++17 for WinRT API access via cppwinrt.
+    set_target_properties(common PROPERTIES CXX_STANDARD 17)
+    target_compile_definitions(common PUBLIC _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
+endif()
+
+set_target_properties(common PROPERTIES
     FOLDER core
 )
 target_link_libraries(common ${AZURE_SHARED_LIB})

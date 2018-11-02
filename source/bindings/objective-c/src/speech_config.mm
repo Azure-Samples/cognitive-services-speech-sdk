@@ -62,6 +62,9 @@
         return nil;
     }
     speechConfigImpl = configImpl;
+
+    speechConfigImpl->SetProperty("SPEECHSDK-SPEECH-CONFIG-SYSTEM-LANGUAGE", "Objective-C");
+
     return self;
 }
 

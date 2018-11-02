@@ -47,6 +47,7 @@ const char g_keywordRequestId[]      = "X-RequestId";
 const char g_keywordWSS[]            = "wss://";
 const char g_keywordWS[]             = "ws://";
 const char g_messageHeader[]         = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n%s:%s\r\n\r\n";
+const char g_messageHeaderWithoutRequestId[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n\r\n";
 
 const char g_requestFormat[]  = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n";
 const char g_telemetryHeader[] = "%s:%s\r\nPath: telemetry\r\nContent-Type: application/json; charset=utf-8\r\n%s:%s\r\n\r\n";
@@ -683,7 +684,7 @@ static void WsioQueue(TransportRequest* request, TransportPacket* packet)
 static void PrepareTelemetryPayload(TransportHandle request, const uint8_t* eventBuffer, size_t eventBufferSize, TransportPacket **pPacket, const char *requestId)
 {
     (void)request;
-    
+
     // serialize headers.
     size_t headerLen;
 
@@ -1174,7 +1175,7 @@ int TransportMessageWrite(TransportHandle transportHandle, const char* path, con
     {
         msg->length = sprintf_s((char *)msg->buffer,
                                 payloadSize,
-                                g_messageHeader,
+                                g_messageHeaderWithoutRequestId,
                                 g_timeStampHeaderName,
                                 timeString,
                                 request->path);

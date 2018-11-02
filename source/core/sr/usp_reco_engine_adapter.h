@@ -20,7 +20,6 @@
 #include <shared_mutex>
 #endif // _MSC_VER
 
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -134,6 +133,8 @@ private:
     SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;
     USP::OutputFormat GetOutputFormat(const ISpxNamedProperties& properties) const;
 
+    void SetSpeechConfig(std::shared_ptr<ISpxNamedProperties>& properties);
+
     void UspWrite(const uint8_t* buffer, size_t byteToWrite);
     void UspSendSpeechConfig();
     void UspSendSpeechContext();
@@ -235,6 +236,7 @@ private:
     std::shared_ptr<USP::Connection> m_uspConnection;
 
     USP::RecognitionMode m_recoMode = USP::RecognitionMode::Interactive;
+    std::string m_speechConfig;
     bool m_customEndpoint = false;
 
     const bool m_allowUspResetAfterAudioByteCount = true;

@@ -24,4 +24,12 @@ std::string GetTypeName(const T& t) {
     return demangle(typeid(t).name());
 }
 
+struct OperatingSystemInfo {
+    std::string platform;
+    std::string name;
+    std::string version;
+};
+
+OperatingSystemInfo getOperatingSystem();
+
 } // PAL

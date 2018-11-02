@@ -24,7 +24,7 @@ namespace BuildInformation {
     static constexpr const char *g_prereleaseVersion = "${SPEECHSDK_PRERELEASE}";
     static constexpr const char *g_fullVersion = "${SPEECHSDK_VERSION}";
 
-    static constexpr const char *g_buildType = "${SPEECHSDK_BUILDTYPE}";
+    static constexpr const char *g_buildType = "${SPEECHSDK_BUILD_TYPE}";
     static constexpr const char *g_buildPlatform = "${SPEECHSDK_TARGET_PLATFORM}";
 
 } } } } } // Microsoft::CognitiveServices::Speech::Impl::BuildInformation

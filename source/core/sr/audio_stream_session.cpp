@@ -1188,7 +1188,7 @@ std::string CSpxAudioStreamSession::GetStringValue(const char* name, const char*
 std::shared_ptr<ISpxRecoEngineAdapter> CSpxAudioStreamSession::EnsureInitRecoEngineAdapter()
 {
     std::unique_lock<std::mutex> lock(m_mutex);
-    if (m_recoAdapter == nullptr ||  m_resetRecoAdapter == m_recoAdapter)
+    if (m_recoAdapter == nullptr || m_resetRecoAdapter == m_recoAdapter)
     {
         EnsureResetEngineEngineAdapterComplete();
         InitRecoEngineAdapter();

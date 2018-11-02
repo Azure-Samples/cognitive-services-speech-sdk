@@ -60,6 +60,7 @@ public class SpeechConfig implements Closeable {
         Contracts.throwIfNull(configImpl, "configImpl");
 
         this.speechConfigImpl = configImpl;
+        speechConfigImpl.SetProperty("SPEECHSDK-SPEECH-CONFIG-SYSTEM-LANGUAGE", "Java");
     }
 
     /*! \endcond */

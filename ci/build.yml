@@ -1160,7 +1160,12 @@ phases:
         set -e
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=$(SPEECHSDK_BUILD_CONFIGURATION) ..
+        cmake \
+          -DCMAKE_BUILD_TYPE=$(SPEECHSDK_BUILD_CONFIGURATION) \
+          -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) \
+          -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) \
+          -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) \
+          ..
         cmake --build . -- -j$(nproc)
       SCRIPT
     displayName: CMake build
@@ -1415,7 +1420,7 @@ phases:
   - bash: |
       . ci/apple/apple-functions.sh
       build_dsym_bundle "build/lib" "$(FrameworkName)"
-    condition: or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release'))
+    condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
     displayName: Create debug symbols
   - bash: |
       mkdir -p "$(OutputDirectory)"
@@ -1423,12 +1428,12 @@ phases:
       cd "$(OutputDirectory)"
       zip --symlinks -r "$(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA).framework.dSYM.zip" "$(FrameworkName).framework.dSYM"
       rm -rf "$(OutputDirectory)/$(FrameworkName).framework.dSYM"
-    condition: or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release'))
+    condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
     displayName: Archive debug symbols
   - bash: |
       strip -x "build/lib/$(FrameworkName).framework/$(FrameworkName)"
     displayName: Strip dynamic library in universal framework for release builds
-    condition: eq(variables['BuildConfiguration'], 'Release')
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
   - bash: |
       mv "build/lib/$(FrameworkName).framework" "$(OutputDirectory)"
       cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$(OutputDirectory)"
@@ -1444,7 +1449,6 @@ phases:
       publishLocation: Container
       # condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
 
-# TODO stuff like version
 - phase: JsBuild
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JsBuild '))

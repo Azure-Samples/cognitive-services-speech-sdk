@@ -18,6 +18,7 @@ namespace Microsoft.CognitiveServices.Speech
         internal SpeechConfig(Internal.SpeechConfig impl)
         {
             this.configImpl = impl;
+            this.configImpl.SetProperty("SPEECHSDK-SPEECH-CONFIG-SYSTEM-LANGUAGE", "C#");
         }
 
         /// <summary>
