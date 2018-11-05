@@ -1482,6 +1482,14 @@ phases:
       workingDir: source/bindings/js
       verbose: false
       customCommand: version $(SPEECHSDK_SEMVER2NOMETA)
+  - bash: |
+      F=source/bindings/js/src/common.speech/RecognizerConfig.ts
+      perl -i.bak -p -e 'BEGIN { $c = 0 } $c += s/(?<=const SPEECHSDK_CLIENTSDK_VERSION = ")[^"]*/$(SPEECHSDK_SEMVER2NOMETA)/g; END { die "Patched SPEECHSDK_CLIENTSDK_VERSION $c time(s), expected 1.\n" if $c != 1 }' "$F"
+      E=$?
+      rm -f "$F.bak"
+      git diff
+      exit $E
+    displayName: Stamp SPEECHSDK_CLIENTSDK_VERSION
   - task: Npm@1
     displayName: 'npm run bundle'
     inputs:

@@ -25,7 +25,7 @@ export class RecognizerConfig {
         platformConfig: PlatformConfig,
         recognitionMode: RecognitionMode = RecognitionMode.Interactive,
         speechConfig: PropertyCollection) {
-        this.platformConfig = platformConfig ? platformConfig : new PlatformConfig(new Context(null, null));
+        this.platformConfig = platformConfig ? platformConfig : new PlatformConfig(new Context(null));
         this.recognitionMode = recognitionMode;
         this.recognitionActivityTimeout = recognitionMode === RecognitionMode.Interactive ? 8000 : 25000;
         this.speechConfig = speechConfig;
@@ -85,12 +85,10 @@ export class PlatformConfig {
 export class Context {
     private system: System;
     private os: OS;
-    private device: Device;
 
-    constructor(os: OS, device: Device) {
+    constructor(os: OS) {
         this.system = new System();
         this.os = os;
-        this.device = device;
     }
 
     public get System(): System {
@@ -100,22 +98,30 @@ export class Context {
     public get OS(): OS {
         return this.os;
     }
-
-    public get Device(): Device {
-        return this.device;
-    }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class System {
+    private name: string;
     private version: string;
+    private build: string;
+    private lang: string;
     constructor() {
-        // TODO: Tie this with the sdk Version somehow
-        this.version = "1.0.00000";
+        // Note: below will be patched for official builds.
+        const SPEECHSDK_CLIENTSDK_VERSION = "1.1.0-alpha.0.1";
+
+        this.name = "SpeechSDK";
+        this.version = SPEECHSDK_CLIENTSDK_VERSION;
+        this.build = "JavaScript";
+        this.lang = "JavaScript";
     }
     public get Version(): string {
         // Controlled by sdk
         return this.version;
+    }
+    public get Lang(): string {
+        // Controlled by sdk
+        return this.lang;
     }
 }
 

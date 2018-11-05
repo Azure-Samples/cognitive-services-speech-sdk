@@ -127,11 +127,19 @@ export abstract class Recognizer {
     // Setup the recognizer
     protected implRecognizerSetup(recognitionMode: RecognitionMode, speechProperties: PropertyCollection, audioConfig: AudioConfig, speechConnectionFactory: IConnectionFactory): ServiceRecognizerBase {
 
+        let osPlatform = (window !== undefined) ? "Browser" : "Node";
+        let osName = "unknown";
+        let osVersion = "unknown";
+
+        if (navigator !== undefined) {
+            osPlatform = osPlatform  + "/" + navigator.platform;
+            osName = navigator.userAgent;
+            osVersion = navigator.appVersion;
+        }
+
         const recognizerConfig = this.CreateRecognizerConfig(
             new PlatformConfig(
-                new Context(
-                    new OS("navigator.userAgent", "Browser", null),
-                    new Device("Microsoft", "SpeechSDK", "1.0.0"))), // TODO: Need to get these values from the caller?
+                new Context(new OS(osPlatform, osName, osVersion))),
             recognitionMode); // SDK.SpeechResultFormat.Simple (Options - Simple/Detailed)
 
         const subscriptionKey = speechProperties.getProperty(PropertyId.SpeechServiceConnection_Key, undefined);
