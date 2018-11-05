@@ -162,19 +162,43 @@ function isOneOf {
 
 function speechWebSocketsEndpoint {
   local usage region mode format language
-  local usage="Usage: ${FUNCNAME[0]} <region> <mode> <format> <language>"
-  local region="${1?$USAGE}" # e.g., westus
-  local mode="${2?$USAGE}" # conversation dictation interactive
-  local format="${3?$USAGE}" # simple detailed
-  local language="${4?$USAGE}" # e.g., en-us
+  usage="Usage: ${FUNCNAME[0]} <region> <mode> <format> <language>"
+  region="${1?$USAGE}" # e.g., westus
+  mode="${2?$USAGE}" # conversation dictation interactive
+  format="${3?$USAGE}" # simple detailed
+  language="${4?$USAGE}" # e.g., en-us
   echo "wss://$region.stt.speech.microsoft.com/speech/recognition/$mode/cognitiveservices/v1?format=$format&language=$language"
 }
 
 function crisWebSocketsEndpoint {
   local usage region mode endpointId
-  local usage="Usage: ${FUNCNAME[0]} <region> <mode> <endpoint-id>"
-  local region="${1?$USAGE}" # e.g., westus
-  local mode="${2?$USAGE}" # conversation dictation interactive
-  local endpointId="${3?$USAGE}" # CRIS endpoint ID
+  usage="Usage: ${FUNCNAME[0]} <region> <mode> <endpoint-id>"
+  region="${1?$USAGE}" # e.g., westus
+  mode="${2?$USAGE}" # conversation dictation interactive
+  endpointId="${3?$USAGE}" # CRIS endpoint ID
   echo "wss://$region.stt.speech.microsoft.com/speech/recognition/$mode/cognitiveservices/v1?cid=$endpointId"
 }
+
+function patchSamplesFromTestConfig() (
+  # N.B. subshell.
+  set -u -e -o pipefail
+  local usage samplesDir testConfig vars
+  usage="Usage: ${FUNCNAME[0]} <samples-dir> <test-config> [<additional evaluate-test-config.pl parameters, e.g., -D>]"
+  samplesDir="${1?$usage}"
+  testConfig="${2?$usage}"
+  shift 2
+  scriptDir="$(dirname "${BASH_SOURCE[0]}")"
+  vars="$(perl "$scriptDir/evaluate-test-config.pl" --input "$testConfig" --format bash-variable "$@")" ||
+    exitWithError "Error: could not evaluate test config '%s'.\n" "$testConfig"
+  eval -- "$vars"
+  perl "$scriptDir/patch-samples-config.pl" "$samplesDir" "$SPEECHSDK_INPUTDIR/audio/whatstheweatherlike.wav" \
+    $SPEECHSDK_SPEECH_KEY \
+    $SPEECHSDK_SPEECH_REGION \
+    $SPEECHSDK_SPEECH_ENDPOINTID_ENUS \
+    $SPEECHSDK_LUIS_KEY \
+    $SPEECHSDK_LUIS_REGION \
+    $SPEECHSDK_LUIS_HOMEAUTOMATION_APPID \
+    HomeAutomation.TurnOn \
+    another-intent \
+    yet-another-intent
+)

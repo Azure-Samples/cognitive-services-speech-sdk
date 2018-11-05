@@ -3,21 +3,10 @@ set -x -e -o pipefail
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 SOURCE_ROOT="$SCRIPT_DIR/../.."
 
-USAGE="Usage: $0 [--smoke-test] speech-region image-tag release-drop"
-SMOKE_TEST=0
-if [[ $1 == --smoke-test ]]; then
-  SMOKE_TEST=1
-  shift
-fi
-SPEECH_REGION="${1?$USAGE}"
-IMAGE_TAG="${2?$USAGE}"
-RELEASE_DROP="${3?$USAGE}"
+USAGE="Usage: $0 image-tag release-drop"
+IMAGE_TAG="${1?$USAGE}"
+RELEASE_DROP="${2?$USAGE}"
 [[ -f $RELEASE_DROP ]]
-
-[[ -z $SPEECH_SUBSCRIPTION_KEY ]] && {
-  echo Environment variable SPEECH_SUBSCRIPTION_KEY not set.
-  exit 1
-}
 
 # Build OOBE image
 
@@ -32,14 +21,10 @@ cp -p "$SOURCE_ROOT/tests/input/audio/whatstheweatherlike.wav" "$TEST_DIR/cpp-li
 cp -p "$SOURCE_ROOT/ci/quickstart-e2e.expect" "$TEST_DIR/cpp-linux"
 
 perl -i -pe 's(SPEECHSDK_ROOT:=.*)(SPEECHSDK_ROOT:=/test/speechsdk)' "$TEST_DIR/cpp-linux/Makefile"
-perl -i -pe 's("YourSubscriptionKey")("'$SPEECH_SUBSCRIPTION_KEY'")' "$TEST_DIR/cpp-linux/"*.cpp
-perl -i -pe 's("YourServiceRegion")("'$SPEECH_REGION'")' "$TEST_DIR/cpp-linux/"*.cpp
 
 DOCKER_CMD=(docker run --rm --volume "$(readlink -f "$TEST_DIR"):/test" --workdir /test/cpp-linux)
 
-if [[ $SMOKE_TEST == 1 ]]; then
-
-  "${DOCKER_CMD[@]}" --interactive "$IMAGE_TAG" bash - <<'SCRIPT'
+"${DOCKER_CMD[@]}" --interactive "$IMAGE_TAG" bash - <<'SCRIPT'
 set -e -x -o pipefail
 DEBIAN_FRONTEND=noninteractive apt-get update --yes
 DEBIAN_FRONTEND=noninteractive apt-get install --quiet --no-install-recommends --yes expect
@@ -54,7 +39,3 @@ trap 'pulseaudio --kill' EXIT
 # Note: this quickstart does not wait for a key press at the end.
 ./quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" 1 ./helloworld
 SCRIPT
-
-else
-  "${DOCKER_CMD[@]}" "$IMAGE_TAG" make
-fi

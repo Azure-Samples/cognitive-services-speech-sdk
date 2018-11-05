@@ -545,7 +545,7 @@ phases:
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - bash: |
       set -e -x -o pipefail
-      perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
       ./ci/run-maven.sh public_samples "$(MavenRoot)"
     displayName: Build Maven-based samples
   - bash: |
@@ -613,14 +613,14 @@ phases:
       artifactName: $(PublishArtifactName)
       downloadPath: $(Build.ArtifactStagingDirectory)/In
   - bash: |
-      set -e -x -o pipefail
-      perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
       java -version
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+      patchSamplesFromTestConfig public_samples/quickstart/java-jre \
+        ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman))
-      find public_samples/quickstart/java-jre -name \*.java -print0 | xargs -0 perl -i -pe 's("YourServiceRegion")("'$SPEECHSDK_SPEECH_REGION'")'
-      find public_samples/quickstart/java-jre -name \*.java -print0 | xargs -0 perl -i -pe 's("YourSubscriptionKey")("'$SPEECHSDK_SPEECH_KEY'")'
+        -D speech-key=$(NorthEuropeKeySkyman)
       ./ci/run-maven.sh public_samples "$(MavenRoot)"
     displayName: Patch and build samples
   - task: Docker@1
@@ -698,7 +698,7 @@ phases:
          # Drop is not needed anymore
          rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In")"
          git clean -fdx public_samples
-         perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+         perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
          cp --verbose --recursive --preserve public_samples "$(ZipBasename)"
          NOW=$(date -Iseconds)
          find "$(ZipBasename)" | xargs touch --date=$NOW
@@ -800,9 +800,10 @@ phases:
       command: pull
       arguments: $(DOCKER_IMAGE)
   - bash: |
-      set -e -x -o pipefail
-      perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
-      perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman))
@@ -823,8 +824,10 @@ phases:
         }
         s/(<Parameter name="($keysRe)" value=")([^"]*)/$1.$A{$2}/ge
       SCRIPT
-      find public_samples/quickstart/csharp-dotnetcore -name \*.cs -print0 | xargs -0 perl -i -pe 's("YourServiceRegion")("'$SPEECHSDK_SPEECH_REGION'")'
-      find public_samples/quickstart/csharp-dotnetcore -name \*.cs -print0 | xargs -0 perl -i -pe 's("YourSubscriptionKey")("'$SPEECHSDK_SPEECH_KEY'")'
+      patchSamplesFromTestConfig public_samples/quickstart/csharp-dotnetcore \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman)
       mkdir localnuget
       cp --verbose $(System.ArtifactsDirectory)/In/Windows/Microsoft.CognitiveServices.Speech.*.nupkg localnuget
       # First run the unit tests
@@ -1049,7 +1052,7 @@ phases:
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - bash: |
       set -e -x -o pipefail
-      perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
       ./ci/run-gradle.sh public_samples "$(MavenRoot)"
     displayName: Build Gradle-based samples
   - task: PublishBuildArtifacts@1
@@ -1220,11 +1223,13 @@ phases:
       command: pull
       arguments: $(DOCKER_IMAGE)
   - bash: |
-      set -x -e
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+      set -u -x -e -o pipefail
+      . ci/functions.sh
+      patchSamplesFromTestConfig public_samples/quickstart/cpp-linux \
+        ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman))
-      SPEECH_SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" ./ci/drop/test-quickstart-linux.sh --smoke-test "$SPEECHSDK_SPEECH_REGION" "$(DOCKER_IMAGE)" "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"
+        -D speech-key=$(NorthEuropeKeySkyman)
+      ./ci/drop/test-quickstart-linux.sh "$(DOCKER_IMAGE)" "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"
     displayName: Test - build and run quickstart
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Linux Release Drop'
@@ -1357,12 +1362,15 @@ phases:
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
     displayName: "Run simple iOS test"
   - bash: |
-      set -e -o pipefail -x
+      set -u -e -o pipefail -x
+      . ci/functions.sh
       # set up framework in the correct position - the Xcode project expects the framework here (used for both Release and Debug configs atm)
       ln -s '$(Build.Repository.LocalPath)/xcode-build-output/$(FrameworkName).framework' public_samples/quickstart/objectivec-ios/
       # fix the keys
-      sed -ibak "s/YourSubscriptionKey/$(NorthEuropeKeySkyman)/" public_samples/quickstart/objectivec-ios/helloworld/helloworld/ViewController.m
-      sed -ibak "s/YourServiceRegion/northeurope/" public_samples/quickstart/objectivec-ios/helloworld/helloworld/ViewController.m
+      patchSamplesFromTestConfig public_samples/quickstart/objectivec-ios/helloworld/helloworld \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman)
       # run the test
       xcodebuild test -project public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
           -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
