@@ -20,6 +20,10 @@
     static_assert((int)SPXSpeechServiceAuthorizationToken == (int)SpeechImpl::PropertyId::SpeechServiceAuthorization_Token, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceAuthorizationType == (int)SpeechImpl::PropertyId::SpeechServiceAuthorization_Type, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceConnectionEndpointId == (int)SpeechImpl::PropertyId::SpeechServiceConnection_EndpointId, "inconsistent enum definition of property id");
+    static_assert((int)SPXSpeechServiceConnectionProxyHostName == (int)SpeechImpl::PropertyId::SpeechServiceConnection_ProxyHostName, "inconsistent enum definition of property id");
+    static_assert((int)SPXSpeechServiceConnectionProxyPort == (int)SpeechImpl::PropertyId::SpeechServiceConnection_ProxyPort, "inconsistent enum definition of property id");
+    static_assert((int)SPXSpeechServiceConnectionProxyUserName == (int)SpeechImpl::PropertyId::SpeechServiceConnection_ProxyUserName, "inconsistent enum definition of property id");
+    static_assert((int)SPXSpeechServiceConnectionProxyPassword == (int)SpeechImpl::PropertyId::SpeechServiceConnection_ProxyPassword, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceConnectionTranslationToLanguages == (int)SpeechImpl::PropertyId::SpeechServiceConnection_TranslationToLanguages, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceConnectionTranslationVoice == (int)SpeechImpl::PropertyId::SpeechServiceConnection_TranslationVoice, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceConnectionTranslationFeatures == (int)SpeechImpl::PropertyId::SpeechServiceConnection_TranslationFeatures, "inconsistent enum definition of property id");

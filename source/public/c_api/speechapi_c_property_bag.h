@@ -26,6 +26,11 @@ enum  PropertyId
     SpeechServiceAuthorization_Type = 1004,
     SpeechServiceConnection_EndpointId = 1005,
 
+    SpeechServiceConnection_ProxyHostName = 1100,
+    SpeechServiceConnection_ProxyPort = 1101,
+    SpeechServiceConnection_ProxyUserName = 1102,
+    SpeechServiceConnection_ProxyPassword = 1103,
+
     SpeechServiceConnection_TranslationToLanguages = 2000,
     SpeechServiceConnection_TranslationVoice = 2001,
     SpeechServiceConnection_TranslationFeatures = 2002,

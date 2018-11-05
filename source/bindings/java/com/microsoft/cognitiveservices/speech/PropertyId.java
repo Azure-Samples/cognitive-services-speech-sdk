@@ -6,6 +6,7 @@ package com.microsoft.cognitiveservices.speech;
 
 /**
  * Defines property ids.
+ * Changed in version 1.1.0.
  */
 public enum PropertyId {
 
@@ -38,6 +39,30 @@ public enum PropertyId {
      * Endpoint ID.
      */
     SpeechServiceConnection_EndpointId (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_EndpointId),
+
+    /**
+     * The host name of the proxy server.
+     * Added in version 1.1.0.
+     */
+    SpeechServiceConnection_ProxyHostName (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_ProxyHostName),
+
+    /**
+     * The port of the proxy server.
+     * Added in version 1.1.0.
+     */
+    SpeechServiceConnection_ProxyPort (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_ProxyPort),
+
+    /**
+     * The user name of the proxy server.
+     * Added in version 1.1.0.
+     */
+    SpeechServiceConnection_ProxyUserName (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_ProxyUserName),
+
+    /**
+     * The password of the proxy server.
+     * Added in version 1.1.0.
+     */
+    SpeechServiceConnection_ProxyPassword (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_ProxyPassword),
 
     /**
      * Translation to languages.

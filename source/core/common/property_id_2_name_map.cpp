@@ -26,6 +26,10 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::SpeechServiceAuthorization_Token: return "SPEECH-AuthToken";
     case PropertyId::SpeechServiceAuthorization_Type: return "SpeechServiceAuthorization_Type";
     case PropertyId::SpeechServiceConnection_EndpointId: return "SPEECH-ModelId";
+    case PropertyId::SpeechServiceConnection_ProxyHostName: return "SPEECH-ProxyHostName";
+    case PropertyId::SpeechServiceConnection_ProxyPort: return "SPEECH-ProxyPort";
+    case PropertyId::SpeechServiceConnection_ProxyUserName: return "SPEECH-ProxyUserName";
+    case PropertyId::SpeechServiceConnection_ProxyPassword: return "SPEECH-ProxyPassword";
     case PropertyId::SpeechServiceConnection_TranslationToLanguages: return "TRANSLATION-ToLanguages";
     case PropertyId::SpeechServiceConnection_TranslationVoice: return "TRANSLATION-Voice";
     case PropertyId::SpeechServiceConnection_TranslationFeatures: return "TRANSLATION-Features";

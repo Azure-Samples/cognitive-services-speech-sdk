@@ -16,6 +16,7 @@ namespace Speech {
 
 /// <summary>
 /// Defines speech property ids.
+/// Changed in version 1.1.0.
 /// </summary>
 enum class PropertyId
 {
@@ -48,6 +49,30 @@ enum class PropertyId
     /// Endpoint ID.
     /// </summary>
     SpeechServiceConnection_EndpointId = 1005,
+
+    /// <summary>
+    /// The host name of the proxy server.
+    /// Added in version 1.1.0.
+    /// </summary>
+    SpeechServiceConnection_ProxyHostName = 1100,
+
+    /// <summary>
+    /// The port of the proxy server.
+    /// Added in version 1.1.0.
+    /// </summary>
+    SpeechServiceConnection_ProxyPort = 1101,
+
+    /// <summary>
+    /// The user name of the proxy server.
+    /// Added in version 1.1.0.
+    /// </summary>
+    SpeechServiceConnection_ProxyUserName = 1102,
+
+    /// <summary>
+    /// The password of the proxy server.
+    /// Added in version 1.1.0.
+    /// </summary>
+    SpeechServiceConnection_ProxyPassword = 1103,
 
     /// <summary>
     /// Translation to languages.

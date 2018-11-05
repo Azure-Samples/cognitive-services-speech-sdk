@@ -73,6 +73,16 @@ SPX_EXPORT
 - (nullable instancetype)initWithEndpoint:(nonnull NSString *)endpointUri subscription:(nonnull NSString *)subscriptionKey;
 
 /**
+ * Sets proxy configuration
+ * Added in version 1.1.0
+ * @param proxyHostName the host name of the proxy server.
+ * @param proxyPort the port number of the proxy server.
+ * @param proxyUserName the user name of the proxy server.
+ * @param proxyPassword the password of the proxy server.
+ */
+-(void)setProxyUsingHost:(nonnull NSString *)proxyHostName Port:(uint32_t)proxyPort UserName:(nullable NSString *)proxyUserName Password:(nullable NSString *)proxyPassword;
+
+/**
  * Returns the property value.
  * If the name is not available, it returns an empty string.
  * @param name property name.

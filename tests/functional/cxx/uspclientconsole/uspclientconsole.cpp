@@ -226,6 +226,7 @@ int main(int argc, char* argv[])
     auto testCallbacks = std::make_shared<UspCallbacks>();
 
     bool isAudioMessage = true;
+    bool useFiddlerProxy = false;
     string inputMessagePath;
     string authData;
     string endpointTypeStr;
@@ -258,6 +259,7 @@ int main(int argc, char* argv[])
         printf("      lang:language\n");
         printf("      model:id\n");
         printf("      output:simple|detailed\n");
+        printf("      useFiddlerProxy");
         exit(1);
     }
 
@@ -333,6 +335,10 @@ int main(int argc, char* argv[])
             pos = argStr.find(':');
             format = argStr.substr(pos + 1);
         }
+        else if (argStr.find("useFiddlerProxy") != string::npos)
+        {
+            useFiddlerProxy = true;
+        }
         else
         {
             if (!inputFile.empty())
@@ -396,6 +402,11 @@ int main(int argc, char* argv[])
         }
 
         client.SetAuthentication(type, authData);
+    }
+
+    if (useFiddlerProxy == true)
+    {
+        client.SetProxyServerInfo("localhost", 8888);
     }
 
     if (!recoMode.empty())

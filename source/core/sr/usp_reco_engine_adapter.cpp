@@ -218,6 +218,7 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     SetUspEndpoint(properties, client);
     SetUspRecoMode(properties, client);
     SetUspAuthentication(properties, client);
+    SetUspProxyInfo(properties, client);
     client.SetOutputFormat(GetOutputFormat(*properties));
 
     // Construct speech.config payload
@@ -435,6 +436,26 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISpx
     ThrowInvalidArgumentException("No Authentication parameters were specified.");
 
     return client; // fixes "not all control paths return a value"
+}
+
+USP::Client& CSpxUspRecoEngineAdapter::SetUspProxyInfo(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+{
+    // Get proxy related properties.
+    auto proxyHostName = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyHostName));
+
+    if (!proxyHostName.empty())
+    {
+        auto proxyPort = std::stoi(properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPort)));
+        if (proxyPort <= 0)
+        {
+            ThrowInvalidArgumentException("Invalid proxy port: %d", proxyPort);
+        }
+        auto proxyUserName = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName));
+        auto proxyPassword = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword));
+
+        return client.SetProxyServerInfo(proxyHostName, proxyPort, proxyUserName, proxyPassword);
+    }
+    return client;
 }
 
 SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const

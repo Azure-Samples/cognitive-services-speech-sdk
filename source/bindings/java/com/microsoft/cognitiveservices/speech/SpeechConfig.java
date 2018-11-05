@@ -195,6 +195,19 @@ public class SpeechConfig implements Closeable {
     }
 
     /**
+     * Sets proxy configuration
+     * Added in version 1.1.0
+     * @param proxyHostName the host name of the proxy server.
+     * @param proxyPort the port number of the proxy server.
+     * @param proxyUserName the user name of the proxy server.
+     * @param proxyPassword the password of the proxy server.
+     */
+    public void setProxy(String proxyHostName, int proxyPort, String proxyUserName, String proxyPassword) {
+        Contracts.throwIfNullOrWhitespace(proxyHostName, "proxyHostName");
+        speechConfigImpl.SetProxy(proxyHostName, proxyPort, proxyUserName, proxyPassword);
+    }
+
+    /**
      * Sets a named property as value
      * @param name the name of the property
      * @param value the value

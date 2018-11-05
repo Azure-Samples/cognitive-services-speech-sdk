@@ -30,12 +30,13 @@
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/socketio.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility_http_proxy_io_wrapper.h"
 
 #include "metrics.h"
 #include "iobuffer.h"
 #include "transport.h"
-#include "uspcommon.h"
 
 #define COUNT_OF(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -733,7 +734,7 @@ void TransportWriteTelemetry(TransportHandle handle, const uint8_t* buffer, size
     }
 }
 
-TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId)
+TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId, const ProxyServerInfo* proxyInfo)
 {
     TransportRequest *request;
     int err = -1;
@@ -802,7 +803,6 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
     else if(strstr(host, g_keywordWS) == host)
     {
         request->ws.config.port = port == -1 ? 80 : port;
-
         use_ssl = false;
     }
 
@@ -831,8 +831,8 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
     // workaround until we migrate to something more decent.
     request->ws.config.protocol = str;
 
-    size_t l = strlen(host);
-    request->url = (char*)malloc(l + 2); // 2=2 x NULL
+    len = strlen(host);
+    request->url = (char*)malloc(len + 2); // 2=2 x NULL
     if (request->url != NULL)
     {
         host += strlen(use_ssl ? g_keywordWSS : g_keywordWS);
@@ -848,12 +848,62 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
             dst += (src - host);
             *dst = 0; dst++;
             request->ws.config.resource_name = dst;
-            strcpy_s(dst, l + 2 - (dst - request->url), src);
+            strcpy_s(dst, len + 2 - (dst - request->url), src);
 
-            WSIO_CONFIG cfg = request->ws.config;
-            WS_PROTOCOL ws_proto;
-            ws_proto.protocol = cfg.protocol;
-            request->ws.WSHandle = uws_client_create(cfg.hostname, cfg.port, cfg.resource_name, use_ssl, &ws_proto, 1);
+            if (proxyInfo != NULL)
+            {
+                HTTP_PROXY_IO_CONFIG proxy_config;
+                proxy_config.hostname = request->ws.config.hostname;
+                proxy_config.port = request->ws.config.port;
+                proxy_config.proxy_hostname = proxyInfo->host;
+                proxy_config.proxy_port = proxyInfo->port;
+                proxy_config.username = proxyInfo->username;
+                proxy_config.password = proxyInfo->password;
+                const IO_INTERFACE_DESCRIPTION *underlying_io_interface = http_proxy_io_get_interface_description();
+                if (underlying_io_interface == NULL)
+                {
+                    LogError("NULL proxy interface description");
+                    free(request->url);
+                    free(request);
+                    free(headers);
+                    free(str);
+                    return NULL;
+                }
+                void *underlying_io_parameters = &proxy_config;
+                
+                TLSIO_CONFIG tlsio_config;
+                if (use_ssl == true)
+                {
+                    const IO_INTERFACE_DESCRIPTION *tlsio_interface = platform_get_default_tlsio();
+                    if (tlsio_interface == NULL)
+                    {
+                        LogError("NULL TLSIO interface description");
+                        free(request->url);
+                        free(request);
+                        free(headers);
+                        free(str);
+                        return NULL;
+                    }
+                    else
+                    {
+                        tlsio_config.hostname = request->ws.config.hostname;
+                        tlsio_config.port = request->ws.config.port;
+                        tlsio_config.underlying_io_interface = underlying_io_interface;
+                        tlsio_config.underlying_io_parameters = underlying_io_parameters;
+                        underlying_io_interface = tlsio_interface;
+                        underlying_io_parameters = &tlsio_config;
+                    }
+                }
+
+                request->ws.WSHandle = uws_client_create_with_io(underlying_io_interface, underlying_io_parameters, request->ws.config.hostname, request->ws.config.port, request->ws.config.resource_name, (WS_PROTOCOL *)&request->ws.config.protocol, 1);
+            }
+            else
+            {
+                WSIO_CONFIG cfg = request->ws.config;
+                WS_PROTOCOL ws_proto;
+                ws_proto.protocol = cfg.protocol;
+                request->ws.WSHandle = uws_client_create(cfg.hostname, cfg.port, cfg.resource_name, use_ssl, &ws_proto, 1);
+            }
 
             // TODO: this was LWS-specific option, check if we still need it and replace with
             // one of tcp_keepalive options.

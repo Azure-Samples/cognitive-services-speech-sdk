@@ -173,6 +173,26 @@ public:
     }
 
     /// <summary>
+    /// Sets proxy configuration
+    /// Added in version 1.1.0
+    /// </summary>
+    /// <param name="proxyHostName">The host name of the proxy server</param>
+    /// <param name="proxyPort">The port number of the proxy server</param>
+    /// <param name="proxyUserName">The user name of the proxy server</param>
+    /// <param name="proxyPassword">The password of the proxy server</param>
+    void SetProxy(const SPXSTRING& proxyHostName, uint32_t proxyPort, const SPXSTRING& proxyUserName = SPXSTRING(), const SPXSTRING& proxyPassword = SPXSTRING())
+    {
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_ProxyHostName), nullptr,
+            Utils::ToUTF8(proxyHostName).c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_ProxyPort), nullptr,
+            std::to_string(proxyPort).c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_ProxyUserName), nullptr,
+            Utils::ToUTF8(proxyUserName).c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_ProxyPassword), nullptr,
+            Utils::ToUTF8(proxyPassword).c_str());
+    }
+
+    /// <summary>
     /// Sets a property value by name.
     /// </summary>
     /// <param name="name">The property name.</param>

@@ -25,6 +25,14 @@
 #define PROTOCOL_VIOLATION(__fmt, ...)  LogError("ProtocolViolation:" __fmt, ##__VA_ARGS__)
 #endif
 
+typedef struct ProxyServerInfo
+{
+    const char* host;
+    int port;
+    const char* username;
+    const char* password;
+} ProxyServerInfo;
+
 #ifdef __cplusplus
 
 #include <string>

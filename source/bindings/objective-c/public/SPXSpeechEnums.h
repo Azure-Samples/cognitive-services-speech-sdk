@@ -5,6 +5,7 @@
 
 /**
   * Defines property ids.
+  * Changed in version 1.1.0
   */
 typedef NS_ENUM(NSUInteger, SPXPropertyId)
 {
@@ -37,6 +38,30 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
       * Endpoint ID.
       */
     SPXSpeechServiceConnectionEndpointId = 1005,
+
+    /**
+     * The host name of the proxy server.
+     * Added in version 1.1.0.
+     */
+    SPXSpeechServiceConnectionProxyHostName = 1100,
+
+    /**
+     * The port of the proxy server.
+     * Added in version 1.1.0.
+     */
+    SPXSpeechServiceConnectionProxyPort = 1101,
+
+    /**
+     * The user name of the proxy server.
+     * Added in version 1.1.0.
+     */
+    SPXSpeechServiceConnectionProxyUserName = 1102,
+
+    /**
+     * The password of the proxy server.
+     * Added in version 1.1.0.
+     */
+    SPXSpeechServiceConnectionProxyPassword = 1103,
 
     /**
       * Translation to languages.

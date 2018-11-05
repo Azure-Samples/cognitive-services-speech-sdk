@@ -7,6 +7,7 @@ namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Defines speech property ids.
+    /// Changed in version 1.1.0.
     /// </summary>
     public enum PropertyId
     {
@@ -39,6 +40,30 @@ namespace Microsoft.CognitiveServices.Speech
         /// Endpoint ID.
         /// </summary>
         SpeechServiceConnection_EndpointId = Internal.PropertyId.SpeechServiceConnection_EndpointId,
+
+        /// <summary>
+        /// The host name of the proxy server.
+        /// Added in version 1.1.0
+        /// </summary>
+        SpeechServiceConnection_ProxyHostName = Internal.PropertyId.SpeechServiceConnection_ProxyHostName,
+
+        /// <summary>
+        /// The port of the proxy server.
+        /// Added in version 1.1.0
+        /// </summary>
+        SpeechServiceConnection_ProxyPort  = Internal.PropertyId.SpeechServiceConnection_ProxyPort,
+
+        /// <summary>
+        /// The user name of the proxy server.
+        /// Added in version 1.1.0
+        /// </summary>
+        SpeechServiceConnection_ProxyUserName  = Internal.PropertyId.SpeechServiceConnection_ProxyUserName,
+
+        /// <summary>
+        /// The password of the proxy server.
+        /// Added in version 1.1.0
+        /// </summary>
+        SpeechServiceConnection_ProxyPassword = Internal.PropertyId.SpeechServiceConnection_ProxyPassword,
 
         /// <summary>
         /// Translation to languages.

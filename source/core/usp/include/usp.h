@@ -13,6 +13,8 @@
 
 #include "uspmessages.h"
 
+struct ProxyServerInfo;
+
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -204,6 +206,11 @@ public:
     }
 
     /**
+    * Sets the proxy server information, which is used to configure the connection to go through a proxy server.
+    */
+    Client& SetProxyServerInfo(const std::string& proxyHost, int proxyPort, const std::string& proxyUsername = std::string(), const std::string& proxyPassword = std::string());
+
+    /**
     * Sets the speech service type.
     */
     Client& SetEndpointType(EndpointType type)
@@ -323,6 +330,8 @@ private:
      RecognitionMode m_recoMode;
      std::string m_customEndpointUrl;
      std::string m_region;
+
+     std::shared_ptr<ProxyServerInfo> m_proxyServerInfo;
 
      OutputFormat m_outputFormat;
      std::string m_language;

@@ -128,6 +128,7 @@ private:
 
     USP::Client& SetUspRecoMode(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspProxyInfo(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
 
     SPXHR GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& mode);
     SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;

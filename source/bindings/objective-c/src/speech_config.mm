@@ -113,6 +113,11 @@
     return [NSString StringWithStdString:speechConfigImpl->GetRegion()];
 }
 
+-(void)setProxyUsingHost:(NSString *)proxyHostName Port:(unsigned int)proxyPort UserName:(NSString *)proxyUserName Password:(NSString *)proxyPassword
+{
+    speechConfigImpl->SetProxy([proxyHostName string], proxyPort, [proxyUserName string], [proxyPassword string]);
+}
+
 -(NSString *)getPropertyByName:(NSString *)name
 {
     return [NSString StringWithStdString:speechConfigImpl->GetProperty([name string])];

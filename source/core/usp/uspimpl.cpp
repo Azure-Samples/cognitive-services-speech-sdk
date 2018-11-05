@@ -20,6 +20,7 @@
 #include "azure_c_shared_utility_httpheaders_wrapper.h"
 #include "azure_c_shared_utility_platform_wrapper.h"
 #include "azure_c_shared_utility_urlencode_wrapper.h"
+#include "azure_c_shared_utility_http_proxy_io_wrapper.h"
 
 #include "uspcommon.h"
 #include "uspinternal.h"
@@ -98,10 +99,31 @@ Connection::Impl::Impl(const Client& config)
     m_creationTime(telemetry_gettime())
 {
     static once_flag initOnce;
-
-    call_once(initOnce, [] {
+    
+    call_once(initOnce, [this] {
         if (platform_init() != 0) {
             ThrowRuntimeError("Failed to initialize platform (azure-c-shared)");
+        }
+
+        // Set proxy if needed.
+        if (m_config.m_proxyServerInfo != nullptr)
+        {
+            auto proxy = m_config.m_proxyServerInfo;
+            if (proxy->host == nullptr || *proxy->host == '\0' || proxy->port <= 0)
+            {
+                ThrowRuntimeError("Invalid host name or port of the proxy server.");
+            }
+            string hostAndPort = proxy->host + string(":") + to_string(proxy->port);
+            string userNameAndPassword;
+            if (proxy->username != nullptr)
+            {
+                if (proxy->password == nullptr)
+                {
+                    ThrowRuntimeError("Invalid password of the proxy service. It should not be null if user name is specified");
+                }
+                userNameAndPassword = proxy->username + string(":") + proxy->password;
+            }
+            platform_set_http_proxy(hostAndPort.c_str(), userNameAndPassword.c_str());
         }
     });
 
@@ -419,7 +441,8 @@ void Connection::Impl::Connect()
     // Log the device uuid
     metrics_device_startup(m_telemetry.get(), connectionId.c_str(), PAL::DeviceUuid().c_str());
 
-    m_transport = TransportPtr(TransportRequestCreate(connectionUrl.c_str(), this, m_telemetry.get(), headersPtr, connectionId.c_str()), TransportRequestDestroy);
+    m_transport = TransportPtr(TransportRequestCreate(connectionUrl.c_str(), this, m_telemetry.get(), headersPtr, connectionId.c_str(), m_config.m_proxyServerInfo.get()), TransportRequestDestroy);
+
     if (m_transport == nullptr)
     {
         ThrowRuntimeError("Failed to create transport request.");

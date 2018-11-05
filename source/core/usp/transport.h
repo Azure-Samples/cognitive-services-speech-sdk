@@ -11,6 +11,7 @@
 
 #include "tokenstore.h"
 #include "dnscache.h"
+#include "uspcommon.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,13 +28,14 @@ typedef struct HTTP_HEADERS_HANDLE_DATA_TAG* HTTP_HEADERS_HANDLE;
 /**
  * Creates a new transport request.
  * @param host The host name.
+ * @param proxyConfig The proxy configuration info.
  * @param context The application defined context that will be passed back during callback.
  * @param telemetry Telemetry handle to record various transport events.
  * @param connectionHeaders A handle to headers that will be used to establish a connection.
  * @param connectionId An identifier of a connection, used for diagnostics of errors on the server side.
  * @return A new transport handle.
  */
-TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId);
+TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId, const ProxyServerInfo* proxyInfo);
 
 /**
  * Destroys a transport request.
