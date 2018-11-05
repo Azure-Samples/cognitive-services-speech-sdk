@@ -653,7 +653,7 @@ phases:
 
 - phase: NuGet
   dependsOn: [Pre, LinuxBuild, LinuxDockerBuild, WindowsBuild, WindowsUwpBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsNuGet '))
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGet '))
   queue:
     name: Hosted VS2017
     timeoutInMinutes: 30
@@ -775,7 +775,7 @@ phases:
 
 - phase: NuGetLinuxTest
   dependsOn: [Pre, NuGet]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsNuGet '))
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGet '))
   queue:
     name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
@@ -1675,3 +1675,36 @@ phases:
     # Once we can solve the problem of the false-positives we can change this.
     # In that case we should move this part of the build also into the WindowsSdlBuild phase.
     enabled: false
+
+- phase: CheckSignatures
+  dependsOn: [Pre, NuGet, AndroidPackage, JavaJrePackage]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CheckSignatures '))
+  queue:
+    name: Hosted VS2017
+  steps:
+  - task: NuGetToolInstaller@0
+    displayName: 'NuGet Installer'
+    inputs:
+      versionSpec: 4.6.0
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts Windows'
+    inputs:
+      artifactName: Windows
+      itemPattern: '**/*.nupkg'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts Android'
+    inputs:
+      artifactName: Android
+      itemPattern: '**/*.aar'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build JavaJrePackage'
+    inputs:
+      artifactName: JavaJrePackage
+      itemPattern: '**/*.jar'
+  - task: PowerShell@2
+    displayName: 'Check Signatures'
+    inputs:
+      type: FilePath
+      filePath: './ci/build/sigcheck.ps1'
+      arguments: '-RootDirectory $(System.ArtifactsDirectory)'
+

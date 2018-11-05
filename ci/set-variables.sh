@@ -47,7 +47,7 @@
 #     Defaults to our CarbonPre VSTS feed for 'dev' builds, Carbon otherwise.
 # * SPEECHSDK_BUILD_AGENT_PLATFORM - can be "Windows-x64", "OSX-x64", "Linux-x64"
 # * SPEECHSDK_BUILD_PHASES - space-separated and space-enclosed list of build phases to run
-#     Default: " WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage WindowsSdlBuild JsBuild "
+#     Default: " WindowsBuild NuGet LinuxBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage WindowsSdlBuild JsBuild "
 #     For int (nightly) builds, "TsaUpload" is added to the default phased.
 #     Check phase condition in build.yml for valid phase names.
 # * SPEECHSDK_RUN_TESTS - whether to run tests. Can be 'true' (default) or 'false'.
@@ -191,7 +191,7 @@ else
 fi
 
 # Build phases to run (currently: all for all build types)
-SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage JsBuild WindowsSdlBuild "
+SPEECHSDK_BUILD_PHASES=" WindowsBuild NuGet LinuxBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage JsBuild WindowsSdlBuild "
 
 # Running tests is default
 SPEECHSDK_RUN_TESTS=true
@@ -231,6 +231,10 @@ case $SPEECHSDK_BUILD_TYPE in
     SPEECHSDK_SDL_ALL=true
     ;;
 esac
+
+if $SPEECHSDK_SIGN; then
+  SPEECHSDK_BUILD_PHASES+="CheckSignatures "
+fi
 
 # Set the _output_ variables used for conditionally running phases.
 
@@ -277,3 +281,4 @@ do
 
   vsts_setoutvar $var "${overrideValue:-${!var}}"
 done
+
