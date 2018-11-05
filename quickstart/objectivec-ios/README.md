@@ -6,7 +6,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A Mac with XCode 9.4.1 installed as iOS development environment. This tutorial targets iOS versions 10 or later.
+* A Mac with XCode 9.4.1 installed as iOS development environment. This tutorial targets iOS versions 11.4.
 
 ## Get the Code for the Sample App
 
