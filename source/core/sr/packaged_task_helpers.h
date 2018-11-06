@@ -102,7 +102,7 @@ public:
 
             lock.unlock();
 
-            SPX_TRACE_ERROR("Task<> helper - checking thread %p", thread.native_handle());
+            SPX_DBG_TRACE_INFO("Task<> helper - checking thread %p", thread.native_handle());
             thread.join();
 
             lock.lock();
