@@ -958,8 +958,10 @@ phases:
         RETRY=0
         until [[ $RETRY -ge $MAX_RETRIES ]]
         do
-          curl https://dl.google.com/android/repository/android-ndk-$NDK_VER-windows-x86_64.zip -o "$NDK_ZIP" && break
+          curl --http1.1 -C - https://dl.google.com/android/repository/android-ndk-$NDK_VER-windows-x86_64.zip -o "$NDK_ZIP" && break
           RETRY=$((RETRY+1))
+          # Sleep 3..7 seconds
+          sleep $(((RANDOM % 5) + 3))
         done
         if [[ $RETRY -ge $MAX_RETRIES ]]; then
             echo "Could not successfully download NDK, exiting"
