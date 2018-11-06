@@ -411,7 +411,7 @@ phases:
 
 - phase: WindowsUwpBuild
   dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsBuild '))
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsUwpBuild '))
   queue:
     name: Hosted VS2017
     timeoutInMinutes: 30
@@ -584,7 +584,7 @@ phases:
 
 - phase: JavaJrePackageLinuxTest
   dependsOn: [Pre, JavaJrePackage]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JavaJrePackage '))
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JavaJrePackageLinuxTest '))
   queue:
     name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
@@ -652,7 +652,8 @@ phases:
     displayName: Test quickstart-jre
 
 - phase: NuGet
-  dependsOn: [Pre, LinuxBuild, LinuxDockerBuild, WindowsBuild, WindowsUwpBuild]
+  # Note: NuGet currently does not depend on LinuxDockerBuild (only needs x64 binaries)
+  dependsOn: [Pre, LinuxBuild, WindowsBuild, WindowsUwpBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGet '))
   queue:
     name: Hosted VS2017
@@ -710,11 +711,8 @@ phases:
       archiveType: zip
       archiveFile: $(Build.ArtifactStagingDirectory)/Windows/$(ZipBasename).zip
     displayName: 'Create .zip'
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    inputs:
-      type: InlineScript
-      script: |
-         ./ci/nuget/restore-from-local.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)/Windows")" public_samples
+  - bash: |
+      ./ci/nuget/restore-from-local.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)/Windows")" public_samples
     displayName: 'Test - restore packages'
   # Note: for now building any platform. In the future, should build all available.
   - task: VSBuild@1
@@ -773,9 +771,50 @@ phases:
     condition: succeededOrFailed()
     displayName: 'Publish .zip and .nupkg'
 
+- phase: WackTest
+  dependsOn: [Pre, NuGet]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WackTest '))
+  queue:
+    name: Hosted VS2017
+    timeoutInMinutes: 30
+  variables:
+    UwpSampleDir: public_samples/quickstart/csharp-uwp
+  steps:
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading NuGet package'
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: '**/*.nupkg'
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
+    inputs:
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - bash: |
+      set -u -e -x -o pipefail
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" "$(UwpSampleDir)"
+      ./ci/nuget/restore-from-local.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)/In/Windows")" "$(UwpSampleDir)"
+    displayName: 'Patch version and restore packages'
+  - powershell: |
+      New-Item -ErrorAction Stop -ItemType Directory "$(Build.ArtifactStagingDirectory)/WACK"
+      ./ci/Invoke-Wack.ps1 `
+        -Solution "$(UwpSampleDir)/helloworld.sln" `
+        -CertPath "$(UwpSampleDir)/helloworld/helloworld_TemporaryKey.pfx" `
+        -Path "$(Build.ArtifactStagingDirectory)/WACK/appcertreport.xml"
+    displayName: Build and run Windows AppCert Kit
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/WACK'
+      ArtifactName: WACK
+      publishLocation: Container
+    condition: succeededOrFailed()
+    displayName: 'Publish WACK report'
+
 - phase: NuGetLinuxTest
   dependsOn: [Pre, NuGet]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGet '))
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetLinuxTest '))
   queue:
     name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
@@ -1121,7 +1160,7 @@ phases:
 
 - phase: LinuxDockerBuild
   dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxBuild '))
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDockerBuild '))
   queue:
     name: Hosted Ubuntu 1604
     timeoutInMinutes: 60
@@ -1636,7 +1675,7 @@ phases:
 
 - phase: WindowsSDLFortifyJava
   dependsOn: [Pre, WindowsBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsSDLFortifyJava '))
   queue:
     name: Carbon
     demands: FORTIFY

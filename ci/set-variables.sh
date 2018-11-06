@@ -47,8 +47,9 @@
 #     Defaults to our CarbonPre VSTS feed for 'dev' builds, Carbon otherwise.
 # * SPEECHSDK_BUILD_AGENT_PLATFORM - can be "Windows-x64", "OSX-x64", "Linux-x64"
 # * SPEECHSDK_BUILD_PHASES - space-separated and space-enclosed list of build phases to run
-#     Default: " WindowsBuild NuGet LinuxBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage WindowsSdlBuild JsBuild "
-#     For int (nightly) builds, "TsaUpload" is added to the default phased.
+#     Default: " WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage JavaJrePackageLinuxTest JsBuild WindowsSdlBuild "
+#     For int (nightly) builds, "TsaUpload WindowsSDLFortifyJava WackTest CheckSignatures" are added to the default phases.
+#     For prod (release) builds, "WackTest CheckSignatures" are added to the default phases.
 #     Check phase condition in build.yml for valid phase names.
 # * SPEECHSDK_RUN_TESTS - whether to run tests. Can be 'true' (default) or 'false'.
 #
@@ -105,7 +106,7 @@ if $IN_VSTS; then
 
   SPEECHSDK_MAIN_BUILD=$([[ $MAIN_BUILD_DEFS == *,$SYSTEM_COLLECTIONID/$SYSTEM_DEFINITIONID,* ]] && echo true || echo false)
 
-  if [[ $SPEECHSDK_MAIN_BUILD ]]; then
+  if $SPEECHSDK_MAIN_BUILD; then
     # Non-draft build definition
 
     if [[ $BUILD_SOURCEBRANCH == refs/heads/release/* ]]; then
@@ -190,8 +191,8 @@ else
   fi
 fi
 
-# Build phases to run (currently: all for all build types)
-SPEECHSDK_BUILD_PHASES=" WindowsBuild NuGet LinuxBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage JsBuild WindowsSdlBuild "
+# Build phases to run
+SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage JavaJrePackageLinuxTest JsBuild WindowsSdlBuild "
 
 # Running tests is default
 SPEECHSDK_RUN_TESTS=true
@@ -209,7 +210,7 @@ case $SPEECHSDK_BUILD_TYPE in
   int)
     # TSA Upload only for Nightly, not for manually scheduled
     if [[ $BUILD_REASON == Schedule ]]; then
-      SPEECHSDK_BUILD_PHASES+="TsaUpload "
+      SPEECHSDK_BUILD_PHASES+="TsaUpload WindowsSDLFortifyJava WackTest "
     fi
     PRERELEASE_VERSION=-beta.0.$_BUILD_ID
     META=+$_BUILD_COMMIT
@@ -222,6 +223,7 @@ case $SPEECHSDK_BUILD_TYPE in
   prod)
     # Prod builds take exactly the version from version.txt, no extra
     # pre-release or meta.
+    SPEECHSDK_BUILD_PHASES+="WackTest "
     PRERELEASE_VERSION=
     META=
     SPEECHSDK_SIGN=true
