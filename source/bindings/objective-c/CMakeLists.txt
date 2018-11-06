@@ -31,7 +31,7 @@ add_library(${PROJECT_NAME} SHARED ${ALL_FRAMEWORK_HEADERS} ${HEADERS_PRIVATE} $
 if(DEFINED APPLE)
     if (DEFINED IOS_PLATFORM)
         set(FRAMEWORK_MINIMUM_OS_VERSION_KEY "MinimumOSVersion")
-        set(FRAMEWORK_MINIMUM_OS_VERSION_VALUE "10.0")
+        set(FRAMEWORK_MINIMUM_OS_VERSION_VALUE ${IOS_DEPLOYMENT_TARGET})
     else()
         set(FRAMEWORK_MINIMUM_OS_VERSION_KEY "LSMinimumSystemVersion")
         set(FRAMEWORK_MINIMUM_OS_VERSION_VALUE "10.0")
@@ -42,20 +42,24 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   FRAMEWORK TRUE
   FRAMEWORK_VERSION A
   # settings for Info.plist file
-  # use the default template
+  # specify the template
   MACOSX_FRAMEWORK_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Info.plist.in
   MACOSX_FRAMEWORK_IDENTIFIER com.microsoft.cognitiveservices.SpeechSDK
-  MACOSX_FRAMEWORK_BUNDLE_VERSION 1.0.0
-  MACOSX_FRAMEWORK_SHORT_VERSION_STRING 1
-  # "current version" in semantic format in Mach-O binary file - ???
-  VERSION 1.0.0
-  # "compatibility version" in semantic format in Mach-O binary file - ???
-  SOVERSION 1.0.0
+  # CFBundleVersion
+  MACOSX_FRAMEWORK_BUNDLE_VERSION ${SPEECHSDK_VERSION}
+  # CFBundleShortVersionString
+  MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${SPEECHSDK_MAJOR}.${SPEECHSDK_MINOR}.${SPEECHSDK_PATCH}
+  # "current version" in semantic format in Mach-O binary file
+  VERSION ${SPEECHSDK_VERSION}
+  # "compatibility version" in semantic format in Mach-O binary file
+  SOVERSION ${SPEECHSDK_MAJOR}.0
+
   PUBLIC_HEADER "${ALL_FRAMEWORK_HEADERS}"
   PRIVATE_HEADER "${PRIVATE_HEADERS}"
   # settings for generating an Xcode project
   XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
   XCODE_ATTRIBUTE_PRODUCT_NAME ${SPEECHSDK_CORE_LIBRARY}
+
   CXX_VISIBILITY_PRESET hidden
   C_VISIBILITY_PRESET hidden
   OBJC_VISIBILITY_PRESET hidden
