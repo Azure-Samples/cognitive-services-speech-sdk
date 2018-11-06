@@ -69,6 +69,7 @@ namespace MicrosoftSpeechSDKSamples
 
                     if (cancellation.Reason == CancellationReason.Error)
                     {
+                        Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
                         Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
                         Console.WriteLine($"CANCELED: Did you update the subscription info?");
                     }
@@ -133,6 +134,7 @@ namespace MicrosoftSpeechSDKSamples
 
                         if (e.Reason == CancellationReason.Error)
                         {
+                            Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
                             Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
                             Console.WriteLine($"CANCELED: Did you update the subscription info?");
                         }
@@ -169,7 +171,6 @@ namespace MicrosoftSpeechSDKSamples
         // Intent recognition in the specified language, using microphone.
         public static async Task RecognitionWithMicrophoneUsingLanguageAsync()
         {
-            // <intentRecognitionWithLanguage>
             // Creates an instance of a speech config with specified subscription key
             // and service region. Note that in contrast to other services supported by
             // the Cognitive Services Speech SDK, the Language Understanding service
@@ -221,12 +222,12 @@ namespace MicrosoftSpeechSDKSamples
 
                     if (cancellation.Reason == CancellationReason.Error)
                     {
+                        Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
                         Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
                         Console.WriteLine($"CANCELED: Did you update the subscription info?");
                     }
                 }
             }
-            // </intentRecognitionWithLanguage>
         }
     }
 }

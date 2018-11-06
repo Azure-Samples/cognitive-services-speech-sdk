@@ -8,6 +8,7 @@
 // <toplevel>
 #include <speechapi_cxx.h>
 #include <fstream>
+#include "wav_file_reader.h"
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
@@ -47,6 +48,7 @@ void SpeechRecognitionWithMicrophone()
 
         if (cancellation->Reason == CancellationReason::Error)
         {
+            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
@@ -58,7 +60,6 @@ void SpeechRecognitionWithMicrophone()
 // Speech recognition in the specified language, using microphone, and requesting detailed output format.
 void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
 {
-    // <SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat>
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
@@ -96,11 +97,11 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
 
         if (cancellation->Reason == CancellationReason::Error)
         {
+            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
     }
-    // </SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat>
 }
 
 void SpeechContinuousRecognitionWithFile()
@@ -144,6 +145,7 @@ void SpeechContinuousRecognitionWithFile()
 
         if (e.Reason == CancellationReason::Error)
         {
+            cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
@@ -205,6 +207,7 @@ void SpeechRecognitionUsingCustomizedModel()
 
         if (cancellation->Reason == CancellationReason::Error)
         {
+            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
@@ -212,41 +215,18 @@ void SpeechRecognitionUsingCustomizedModel()
     // </SpeechRecognitionUsingCustomizedModel>
 }
 
-
-
-void SpeechContinuousRecognitionWithStream()
+void SpeechContinuousRecognitionWithPullStream()
 {
-    // <SpeechContinuousRecognitionWithStream>
     // First, define your own pull audio input stream callback class that implements the
     // PullAudioInputStreamCallback interface. The sample here illustrates how to define such
     // a callback that reads audio data from a wav file.
-
-    // Defines common constants for WAV format.
-    constexpr uint16_t tagBufferSize = 4;
-    constexpr uint16_t chunkTypeBufferSize = 4;
-    constexpr uint16_t chunkSizeBufferSize = 4;
-
     // AudioInputFromFileCallback implements PullAudioInputStreamCallback interface, and uses a wav file as source
     class AudioInputFromFileCallback final : public PullAudioInputStreamCallback
     {
-    public: 
+    public:
         // Constructor that creates an input stream from a file.
         AudioInputFromFileCallback(const string& audioFileName)
-        {
-            if (audioFileName.empty())
-                throw invalid_argument("Audio filename is empty");
-
-            ios_base::openmode mode = ios_base::binary | ios_base::in;
-            m_fs.open(audioFileName, mode);
-            if (!m_fs.good())
-                throw invalid_argument("Failed to open the specified audio file.");
-
-            // Get audio format from the file header.
-            GetFormatFromWavFile();
-        }
-
-        // Destructor.
-        ~AudioInputFromFileCallback()
+            :m_reader(audioFileName)
         {
         }
 
@@ -258,105 +238,16 @@ void SpeechContinuousRecognitionWithStream()
         // It returns 0 to indicate that the stream reaches end or is closed.
         int Read(uint8_t* dataBuffer, uint32_t size) override
         {
-            if (m_fs.eof())
-                // returns 0 to indicate that the stream reaches end.
-                return 0;
-            m_fs.read((char*)dataBuffer, size);
-            if (!m_fs.eof() && !m_fs.good())
-                // returns 0 to close the stream on read error.
-                return 0;
-            else
-                // returns the number of bytes that have been read.
-                return (int)m_fs.gcount();
+            return m_reader.Read(dataBuffer, size);
         }
-
         // Implements AudioInputStream::Close() which is called when the stream needs to be closed.
         void Close() override
         {
-            m_fs.close();
+            m_reader.Close();
         }
 
     private:
-        // Get format data from a wav file.
-        void GetFormatFromWavFile()
-        {
-            char tag[tagBufferSize];
-            char chunkType[chunkTypeBufferSize];
-            char chunkSizeBuffer[chunkSizeBufferSize];
-            uint32_t chunkSize = 0;
-
-            // Set to throw exceptions when reading file header.
-            m_fs.exceptions(ifstream::failbit | ifstream::badbit);
-
-            try {
-                // Checks the RIFF tag
-                m_fs.read(tag, tagBufferSize);
-                if (memcmp(tag, "RIFF", tagBufferSize) != 0)
-                    throw runtime_error("Invalid file header, tag 'RIFF' is expected.");
-
-                // The next is the RIFF chunk size, ignore now.
-                m_fs.read(chunkSizeBuffer, chunkSizeBufferSize);
-
-                // Checks the 'WAVE' tag in the wave header.
-                m_fs.read(chunkType, chunkTypeBufferSize);
-                if (memcmp(chunkType, "WAVE", chunkTypeBufferSize) != 0)
-                    throw runtime_error("Invalid file header, tag 'WAVE' is expected.");
-
-                // The next chunk must be the 'fmt ' chunk.
-                ReadChunkTypeAndSize(chunkType, &chunkSize);
-                if (memcmp(chunkType, "fmt ", chunkTypeBufferSize) != 0)
-                    throw runtime_error("Invalid file header, tag 'fmt ' is expected.");
-
-                // Reads format data.
-                m_fs.read((char *)&m_formatHeader, sizeof(m_formatHeader));
-
-                // Skips the rest of format data.
-                if (chunkSize > sizeof(m_formatHeader))
-                    m_fs.seekg(chunkSize - sizeof(m_formatHeader), ios_base::cur);
-
-                // The next must be the 'data' chunk.
-                ReadChunkTypeAndSize(chunkType, &chunkSize);
-                if (memcmp(chunkType, "data", chunkTypeBufferSize) != 0)
-                    throw runtime_error("Currently the 'data' chunk must directly follow the fmt chunk.");
-                if (m_fs.eof() && chunkSize > 0)
-                    throw runtime_error("Unexpected end of file, before any audio data can be read.");
-            }
-            catch (ifstream::failure e) {
-                throw runtime_error("Unexpected end of file or error when reading audio file.");
-            }
-            // Set to not throw exceptions when starting to read audio data, since istream::read() throws exception if the data read is less than required.
-            // Instead, in AudioInputStream::Read(), we manually check whether there is an error or not.
-            m_fs.exceptions(ifstream::goodbit);
-        }
-
-        void ReadChunkTypeAndSize(char* chunkType, uint32_t* chunkSize)
-        {
-            // Read the chunk type
-            m_fs.read(chunkType, chunkTypeBufferSize);
-
-            // Read the chunk size
-            uint8_t chunkSizeBuffer[chunkSizeBufferSize];
-            m_fs.read((char*)chunkSizeBuffer, chunkSizeBufferSize);
-
-            // chunk size is little endian
-            *chunkSize = ((uint32_t)chunkSizeBuffer[3] << 24) |
-                ((uint32_t)chunkSizeBuffer[2] << 16) |
-                ((uint32_t)chunkSizeBuffer[1] << 8) |
-                (uint32_t)chunkSizeBuffer[0];
-        }
-
-        // The format structure expected in wav files.
-        struct WAVEFORMAT
-        {
-            uint16_t FormatTag;        // format type.
-            uint16_t Channels;         // number of channels (i.e. mono, stereo...).
-            uint32_t SamplesPerSec;    // sample rate.
-            uint32_t AvgBytesPerSec;   // for buffer estimation.
-            uint16_t BlockAlign;       // block size of data.
-            uint16_t BitsPerSample;    // Number of bits per sample of mono data.
-        } m_formatHeader;
-        static_assert(sizeof(m_formatHeader) == 16, "unexpected size of m_formatHeader");
-        fstream m_fs;
+        WavFileReader m_reader;
     };
 
     // Creates an instance of a speech config with specified subscription key and service region.
@@ -379,7 +270,7 @@ void SpeechContinuousRecognitionWithStream()
     // Subscribes to events.
     recognizer->Recognizing.Connect([](const SpeechRecognitionEventArgs& e)
     {
-        cout << "Recognizing:" << e.Result->Text << endl;
+        cout << "Recognizing:" << e.Result->Text << std::endl;
     });
 
     recognizer->Recognized.Connect([] (const SpeechRecognitionEventArgs& e)
@@ -398,15 +289,21 @@ void SpeechContinuousRecognitionWithStream()
 
     recognizer->Canceled.Connect([&recognitionEnd](const SpeechRecognitionCanceledEventArgs& e)
     {
-        cout << "CANCELED: Reason=" << (int)e.Reason << std::endl;
-
-        if (e.Reason == CancellationReason::Error)
+        switch (e.Reason)
         {
+        case CancellationReason::EndOfStream:
+            cout << "CANCELED: Reach the end of the file." << std::endl;
+            break;
+            
+        case CancellationReason::Error:
+            cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
-            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+            recognitionEnd.set_value();
+            break;
+            
+        default:
+            cout << "unknown reason ?!" << std::endl;
         }
-
-        recognitionEnd.set_value(); // Notify to stop recognition.
     });
 
     recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
@@ -423,5 +320,91 @@ void SpeechContinuousRecognitionWithStream()
 
     // Stops recognition.
     recognizer->StopContinuousRecognitionAsync().wait();
-    // </SpeechContinuousRecognitionWithStream>
+}
+
+void SpeechContinuousRecognitionWithPushStream()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    // Creates a push stream
+    auto pushStream = AudioInputStream::CreatePushStream();
+
+    // Creates a speech recognizer from stream input;
+    auto audioInput = AudioConfig::FromStreamInput(pushStream);
+    auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+    // promise for synchronization of recognition end.
+    promise<void> recognitionEnd;
+
+    // Subscribes to events.
+    recognizer->Recognizing.Connect([](const SpeechRecognitionEventArgs& e)
+    {
+        cout << "Recognizing:" << e.Result->Text << std::endl;
+    });
+
+    recognizer->Recognized.Connect([](const SpeechRecognitionEventArgs& e)
+    {
+        if (e.Result->Reason == ResultReason::RecognizedSpeech)
+        {
+            cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl
+                << "  Offset=" << e.Result->Offset() << std::endl
+                << "  Duration=" << e.Result->Duration() << std::endl;
+        }
+        else if (e.Result->Reason == ResultReason::NoMatch)
+        {
+            cout << "NOMATCH: Speech could not be recognized." << std::endl;
+        }
+    });
+
+    recognizer->Canceled.Connect([&recognitionEnd](const SpeechRecognitionCanceledEventArgs& e)
+    {
+        switch (e.Reason)
+        {
+        case CancellationReason::EndOfStream:
+            cout << "CANCELED: Reach the end of the file." << std::endl;
+            break;
+            
+        case CancellationReason::Error:
+            cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << std::endl;
+            cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
+            recognitionEnd.set_value();
+            break;
+            
+        default:
+            cout << "CANCELED: received unknown reason." << std::endl;
+        }
+
+    });
+
+    recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
+    {
+        cout << "Session stopped.";
+        recognitionEnd.set_value(); // Notify to stop recognition.
+    });
+
+    WavFileReader reader("whatstheweatherlike.wav");
+
+    vector<uint8_t> buffer(1000);
+    
+    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+    recognizer->StartContinuousRecognitionAsync().wait();
+    
+    // Read data and push them into the stream
+    int readSamples = 0;
+    while((readSamples = reader.Read(buffer.data(), (uint32_t)buffer.size())) != 0)
+    {
+        // Push a buffer into the stream
+        pushStream->Write(buffer.data(), readSamples);
+    }
+
+    // Close the push stream.
+    pushStream->Close();
+
+    // Waits for recognition end.
+    recognitionEnd.get_future().wait();
+
+    // Stops recognition.
+    recognizer->StopContinuousRecognitionAsync().wait();
 }

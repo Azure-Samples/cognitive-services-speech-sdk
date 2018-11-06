@@ -60,6 +60,7 @@ public class IntentRecognitionSamples {
             System.out.println("CANCELED: Reason=" + cancellation.getReason());
 
             if (cancellation.getReason() == CancellationReason.Error) {
+                System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
                 System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                 System.out.println("CANCELED: Did you update the subscription info?");
             }
@@ -111,6 +112,7 @@ public class IntentRecognitionSamples {
             System.out.println("CANCELED: Reason=" + cancellation.getReason());
 
             if (cancellation.getReason() == CancellationReason.Error) {
+                System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
                 System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                 System.out.println("CANCELED: Did you update the subscription info?");
             }
@@ -163,6 +165,7 @@ public class IntentRecognitionSamples {
             System.out.println("CANCELED: Reason=" + e.getReason());
 
             if (e.getReason() == CancellationReason.Error) {
+                System.out.println("CANCELED: ErrorCode=" + e.getErrorCode());
                 System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
                 System.out.println("CANCELED: Did you update the subscription info?");
             }
