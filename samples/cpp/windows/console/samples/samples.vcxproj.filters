@@ -21,6 +21,9 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="wav_file_reader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -40,11 +43,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="whatstheweatherlike.wav">
+    <None Include="whatstheweatherlike.wav">
       <Filter>Resource Files</Filter>
-    </Resource>
+    </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

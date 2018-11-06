@@ -78,6 +78,7 @@ public class TranslationSamples {
                 System.out.println("CANCELED: Reason=" + e.getReason());
 
                 if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + e.getErrorCode());
                     System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
@@ -159,6 +160,7 @@ public class TranslationSamples {
                 System.out.println("CANCELED: Reason=" + e.getReason());
 
                 if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + e.getErrorCode());
                     System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
@@ -192,7 +194,6 @@ public class TranslationSamples {
     // </TranslationWithFileAsync>
 
     // Translation using audio stream.
-    // <TranslationWithAudioStreamAsync>
     private static Semaphore stopTranslationWithAudioStreamSemaphore;
 
     public static void translationWithAudioStreamAsync() throws InterruptedException, ExecutionException, FileNotFoundException
@@ -250,6 +251,7 @@ public class TranslationSamples {
                 System.out.println("CANCELED: Reason=" + e.getReason());
 
                 if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + e.getErrorCode());
                     System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
@@ -280,5 +282,4 @@ public class TranslationSamples {
             recognizer.stopContinuousRecognitionAsync().get();
         }
     }
-    // </TranslationWithAudioStreamAsync>
 }
