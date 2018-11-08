@@ -30,7 +30,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             public static class HowIsYourWork
             {
-                public const string Utterance = "Wie geht es Ihnen heute mit den arbeitsgegenständen";
+                public const string Utterance = "Wie machen Sie heute mit den Arbeitsstücken";
             }
 
             public static class Weather
