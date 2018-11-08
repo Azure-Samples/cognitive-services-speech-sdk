@@ -1,0 +1,42 @@
+resources:
+- repo: self
+  fetchDepth: 1
+queue:
+  name: Hosted VS2017
+steps:
+- task: AzureCLI@1
+  displayName: Get storage key
+  inputs:
+    azureSubscription: 'Custom Speech Development (3a96ef56-41a9-40a0-b0f3-fb125c2b8798) - RG csspeechsdk-carbon'
+    scriptLocation: inlineScript
+    inlineScript: |
+      @echo off
+      for /f %%i in ('call az storage account keys list --account-name csspeechstorage --resource-group csspeechsdk-carbon --query "[0].value" -o tsv') DO set KEY=%%i
+      echo ##vso[task.setvariable variable=BlobStorageKey;issecret=true]%KEY%
+      set KEY=
+- powershell: |
+    $cookedDir = "$(System.ArtifactsDirectory)/cookednuget"
+    New-Item -ItemType Directory -Path $cookedDir
+    try {
+      ./ci/usage/ProcessNuGetDownloadCounts.ps1 -Verbose `
+        -CookedDir $cookedDir `
+        -DownloadCooked -UploadCooked `
+        -BlobStorageKey $(BlobStorageKey)
+    } finally {
+      Remove-Item -Force -Recurse -LiteralPath $cookedDir -ErrorAction SilentlyContinue
+    }
+  continueOnError: true
+  displayName: Update NuGet Counts
+- powershell: |
+    $rawDir = "$(System.ArtifactsDirectory)/raw"
+    $cookedDir = "$(System.ArtifactsDirectory)/cooked"
+    New-Item -ItemType Directory -Path $rawDir, $cookedDir
+    try {
+      ./ci/usage/ProcessBlobLogs.ps1 -Verbose `
+        -RawDir $rawDir -CookedDir $cookedDir `
+        -DownloadRaw -DownloadCooked -UploadCooked `
+        -BlobStorageKey $(BlobStorageKey)
+    } finally {
+      Remove-Item -Force -Recurse -LiteralPath $rawDir, $cookedDir -ErrorAction SilentlyContinue
+    }
+  displayName: Process Blob Logs
