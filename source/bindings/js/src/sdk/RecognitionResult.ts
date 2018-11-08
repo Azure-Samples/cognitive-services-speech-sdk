@@ -97,8 +97,7 @@ export class RecognitionResult {
     }
 
     /**
-     * In case of an unsuccessful recognition, provides a brief description of an occurred error.
-     * This field is only filled-out if the recognition status (@see RecognitionStatus) is set to Canceled.
+     * In case of an unsuccessful recognition, provides details of the occurred error.
      * @member RecognitionResult.prototype.errorDetails
      * @function
      * @public

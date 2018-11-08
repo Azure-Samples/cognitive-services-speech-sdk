@@ -70,7 +70,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A string that represents the speech recognition result.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture,"ResultId:{0} Reason:{1} Recognized text:<{2}>. Json:{3}", 
+            return string.Format(CultureInfo.InvariantCulture,"ResultId:{0} Reason:{1} Recognized text:<{2}>. Json:{3}",
                 ResultId, Reason, Text, Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult));
         }
 
@@ -122,14 +122,14 @@ namespace Microsoft.CognitiveServices.Speech
         public CancellationReason Reason { get; private set; }
 
         /// <summary>
-        /// The error code in case of an unsuccessful recognition.
+        /// The error code in case of an unsuccessful recognition (<see cref="Reason"/> is set to Error).
+        /// If Reason is not Error, ErrorCode returns NoError.
         /// Added in version 1.1.0.
         /// </summary>
         public CancellationErrorCode ErrorCode { get; private set; }
 
         /// <summary>
-        /// The error message In case of an unsuccessful recognition.
-        /// This field is only filled-out if the reason canceled (<see cref="Reason"/>) is set to Error.
+        /// The error message in case of an unsuccessful recognition (<see cref="Reason"/> is set to Error).
         /// </summary>
         public string ErrorDetails { get; private set; }
 

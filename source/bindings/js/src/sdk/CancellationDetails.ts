@@ -72,8 +72,7 @@ export class CancellationDetails {
     }
 
     /**
-     * In case of an unsuccessful recognition, provides a details of why the occurred error.
-     * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
+     * In case of an unsuccessful recognition, provides details of the occurred error.
      * @member CancellationDetails.prototype.errorDetails
      * @function
      * @public
@@ -84,9 +83,9 @@ export class CancellationDetails {
     }
 
     /**
-     * The error code of why the cancellation occurred.
-     * @return An error code that represents the error reason.
+     * The error code in case of an unsuccessful recognition.
      * Added in version 1.1.0.
+     * @return An error code that represents the error reason.
      */
     public get ErrorCode(): CancellationErrorCode {
         return this.privErrorCode;

@@ -9,7 +9,7 @@
  */
 export enum CancellationReason {
     /**
-     * Indicates that an error occurred during speech recognition. Use getErrorDetails() contains detailed error response.
+     * Indicates that an error occurred during speech recognition.
      * @member CancellationReason.Error
      */
     Error,

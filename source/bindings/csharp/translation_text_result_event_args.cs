@@ -58,17 +58,16 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// The reason the recognition was canceled.
         /// </summary>
         public CancellationReason Reason { get; }
-        
+
         /// <summary>
-        /// The error code in case of an unsuccessful recognition (Reason<see cref="Reason"/> is set to Error).
+        /// The error code in case of an unsuccessful recognition (<see cref="Reason"/> is set to Error).
         /// If Reason is not Error, ErrorCode returns NoError.
         /// Added in version 1.1.0.
         /// </summary>
         public CancellationErrorCode ErrorCode { get; }
 
         /// <summary>
-        /// The error message in case of an unsuccessful recognition (Reason<see cref="Reason"/> is set to Error).
-        /// This field is only filled-out if Reason is Error.
+        /// The error message in case of an unsuccessful recognition (<see cref="Reason"/> is set to Error).
         /// </summary>
         public string ErrorDetails { get; }
 

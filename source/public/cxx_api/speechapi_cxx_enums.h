@@ -222,7 +222,7 @@ enum class ResultReason
 enum class CancellationReason
 {
     /// <summary>
-    /// Indicates that an error occurred during speech recognition. The ErrorDetails property contains detailed error response.
+    /// Indicates that an error occurred during speech recognition.
     /// </summary>
     Error = 1,
 
@@ -233,10 +233,9 @@ enum class CancellationReason
 };
 
 /// <summary>
-/// Defines error code in case that CancellationReason is Error. 
+/// Defines error code in case that CancellationReason is Error.
 /// Added in version 1.1.0.
 /// </summary>
-
 enum class CancellationErrorCode
 {
     /// <summary>

@@ -9,12 +9,12 @@
  */
 export enum CancellationErrorCode {
     /**
-     * Indicates that an error occurred during speech recognition. Use errorDetails() contains detailed error response.
+     * Indicates that no error occurred during speech recognition.
      */
     NoError,
 
     /**
-     * Indicates an authentication error. The errorDetails property contains detailed error response.
+     * Indicates an authentication error.
      */
     AuthenticationFailure,
 
@@ -29,7 +29,7 @@ export enum CancellationErrorCode {
     TooManyRequests,
 
     /**
-     * Indicates an connection error. The errorDetails property contains detailed error response.
+     * Indicates a connection error.
      */
     ConnectionFailure,
 
@@ -44,7 +44,7 @@ export enum CancellationErrorCode {
     ServiceError,
 
     /**
-     * Indicates an unexpected runtime error. The errorDetails property contains detailed error response.
+     * Indicates an unexpected runtime error.
      */
     RuntimeError,
 }

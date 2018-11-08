@@ -11,7 +11,7 @@ namespace Microsoft.CognitiveServices.Speech
     public enum CancellationReason
     {
         /// <summary>
-        /// Indicates that an error occurred during speech recognition. Use ErrorDetails property contains detailed error response.
+        /// Indicates that an error occurred during speech recognition.
         /// </summary>
         Error = 1,
 
@@ -22,10 +22,9 @@ namespace Microsoft.CognitiveServices.Speech
     }
 
     /// <summary>
-    /// Defines error code in case that CancellationReason is Error. 
+    /// Defines error code in case that CancellationReason is Error.
     /// Added in version 1.1.0.
     /// </summary>
-
     public enum CancellationErrorCode
     {
         /// <summary>

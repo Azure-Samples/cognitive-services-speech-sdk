@@ -135,8 +135,9 @@ private:
     const CancellationReason& Reason;
 
     /// <summary>
-    /// The error code in case of an unsuccessful recognition (Reason<see cref="Reason"/> is set to Error).
+    /// The error code in case of an unsuccessful recognition (<see cref="Reason"/> is set to Error).
     /// If Reason is not Error, ErrorCode is set to NoError.
+    /// Added in version 1.1.0.
     /// </summary>
     const CancellationErrorCode& ErrorCode;
 
@@ -145,8 +146,7 @@ private:
 #endif
 
     /// <summary>
-    /// The error message in case of an unsuccessful recognition (Reason<see cref="Reason"/> is set to Error).
-    /// This field is only filled-out if the reason canceled (<see cref="Reason"/>) is set to Error.
+    /// The error message in case of an unsuccessful recognition (<see cref="Reason"/> is set to Error).
     /// </summary>
     const SPXSTRING ErrorDetails;
 

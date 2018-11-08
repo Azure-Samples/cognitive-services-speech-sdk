@@ -31,7 +31,7 @@ private:
     class PrivatePropertyCollection : public PropertyCollection
     {
     public:
-        PrivatePropertyCollection(SPXRESULTHANDLE hresult) : 
+        PrivatePropertyCollection(SPXRESULTHANDLE hresult) :
             PropertyCollection(
                 [=]() {
                 SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
@@ -194,14 +194,14 @@ public:
     const CancellationReason& Reason;
 
     /// <summary>
-    /// The error code in case of an unsuccessful recognition (Reason<see cref="Reason"/> is set to Error).
+    /// The error code in case of an unsuccessful recognition (<see cref="Reason"/> is set to Error).
     /// If Reason is not Error, ErrorCode is set to NoError.
+    /// Added in version 1.1.0.
     /// </summary>
     const CancellationErrorCode& ErrorCode;
 
     /// <summary>
-    /// The error message in case of an unsuccessful recognition (Reason<see cref="Reason"/> is set to Error).
-    /// This field is only filled-out if the reason canceled (<see cref="Reason"/>) is set to Error.
+    /// The error message in case of an unsuccessful recognition (<see cref="Reason"/> is set to Error).
     /// </summary>
     const SPXSTRING ErrorDetails;
 
@@ -222,7 +222,7 @@ protected:
 
 private:
 
-    DISABLE_DEFAULT_CTORS(CancellationDetails); 
+    DISABLE_DEFAULT_CTORS(CancellationDetails);
 
     Speech::CancellationReason GetCancellationReason(RecognitionResult* result)
     {

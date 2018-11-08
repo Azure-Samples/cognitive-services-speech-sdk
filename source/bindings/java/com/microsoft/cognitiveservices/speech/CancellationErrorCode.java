@@ -5,13 +5,13 @@
 package com.microsoft.cognitiveservices.speech;
 
 /**
- *  Defines error code in case that CancellationReason is Error. 
+ *  Defines error code in case that CancellationReason is Error.
  *  Added in version 1.1.0.
  */
 public enum CancellationErrorCode
 {
     /**
-     * Indicates that an error occurred during speech recognition. Use getErrorDetails() contains detailed error response.
+     * Indicates that no error occurred during speech recognition.
      */
     NoError(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.NoError),
 
@@ -71,5 +71,5 @@ public enum CancellationErrorCode
      */
     public com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode getValue() { return this.id; }
 
-    private final com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode id;    
+    private final com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode id;
 }

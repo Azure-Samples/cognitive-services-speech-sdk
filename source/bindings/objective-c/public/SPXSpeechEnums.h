@@ -220,7 +220,7 @@ typedef NS_ENUM(NSUInteger, SPXResultReason)
 typedef NS_ENUM(NSUInteger, SPXCancellationReason)
 {
     /**
-      * Indicates that an error occurred during speech recognition. The ErrorDetails property contains a detailed error response.
+      * Indicates that an error occurred during speech recognition.
       */
     SPXCancellationReason_Error = 1,
 
@@ -231,9 +231,9 @@ typedef NS_ENUM(NSUInteger, SPXCancellationReason)
 };
 
 /**
-  * Defines error code in case that CancellationReason is set to Error. 
-  * Added in version 1.1.0. 
-  */ 
+  * Defines error code in case that CancellationReason is set to Error.
+  * Added in version 1.1.0.
+  */
 typedef NS_ENUM(NSUInteger, SPXCancellationErrorCode)
 {
     /**

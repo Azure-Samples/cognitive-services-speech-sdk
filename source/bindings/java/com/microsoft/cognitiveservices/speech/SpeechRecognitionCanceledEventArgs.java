@@ -39,16 +39,16 @@ public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionE
     }
 
     /**
-     * The error code of why the cancellation occurred.
-     * @return An error code that represents the error reason.
+     * The error code in case of an unsuccessful recognition (when getReason() returns Error).
      * Added in version 1.1.0.
+     * @return An error code that represents the error reason.
      */
     public CancellationErrorCode getErrorCode() {
         return this._errorCode;
     }
 
     /**
-     * The error details of why the cancellation occurred.
+     * The error message in case of an unsuccessful recognition (when getReason() returns Error).
      * @return A String that represents the error details.
      */
     public String getErrorDetails() {
