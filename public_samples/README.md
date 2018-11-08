@@ -2,6 +2,12 @@
 
 This project hosts the **samples** for the Microsoft Cognitive Services Speech SDK. To find out more about the Microsoft Cognitive Services Speech SDK itself, please visit the [SDK documentation site](https://aka.ms/csspeech).
 
+## News
+
+* Speech SDK Release 1.1.0
+
+  Beginning of November we released version 1.1.0 of the Speech SDK. The release notes can be found [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/releasenotes#speech-service-sdk-110).
+
 ## Features
 
 This repository hosts samples that help you to get started with several features of the SDK.
