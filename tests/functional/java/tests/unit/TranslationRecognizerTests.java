@@ -170,7 +170,7 @@ public class TranslationRecognizerTests {
         assertNotNull(ais);
 
         String language = "en-US";
-        String voice = "de-DE-Katja";
+        String voice = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
         s.setVoiceName(voice);

@@ -496,24 +496,24 @@ test("Config is copied on construction", () => {
     const ranVal: string = Math.random().toString();
 
     s.setProperty("RandomProperty", ranVal);
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], "en-US-Zira");
+    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], "Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)");
 
     const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile(s);
     objsToClose.push(r);
 
     expect(r.speechRecognitionLanguage).toEqual("en-US");
     expect(r.properties.getProperty("RandomProperty")).toEqual(ranVal);
-    expect(r.properties.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice])).toEqual("en-US-Zira");
+    expect(r.properties.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice])).toEqual("Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)");
 
     // Change them.
     s.speechRecognitionLanguage = "de-DE";
     s.setProperty("RandomProperty", Math.random.toString());
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], "de-DE-Hedda");
+    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)");
 
     // Validate no change.
     expect(r.speechRecognitionLanguage).toEqual("en-US");
     expect(r.properties.getProperty("RandomProperty")).toEqual(ranVal);
-    expect(r.properties.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice])).toEqual("en-US-Zira");
+    expect(r.properties.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice])).toEqual("Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)");
 
 });
 

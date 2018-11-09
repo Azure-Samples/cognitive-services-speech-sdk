@@ -27,7 +27,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///     config.AddTargetLanguage("de");
     ///
     ///     // Sets voice name of synthesis output.
-    ///     const string GermanVoice = "de-DE-Hedda";
+    ///     const string GermanVoice = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
     ///     config.VoiceName = GermanVoice;
     ///     // Creates a translation recognizer using microphone as audio input.
     ///     using (var recognizer = new TranslationRecognizer(config))

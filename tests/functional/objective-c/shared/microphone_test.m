@@ -77,7 +77,7 @@ extern NSString *serviceRegion;
     [translationConfig setSpeechRecognitionLanguage:@"en-us"];
     [translationConfig addTargetLanguage:@"de"];
     [translationConfig addTargetLanguage:@"zh-Hans"];
-    [translationConfig setVoiceName:@"de-DE-Hedda"];
+    [translationConfig setVoiceName:@"Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)"];
 
     translationRecognizer = [[SPXTranslationRecognizer alloc] init:translationConfig];
 

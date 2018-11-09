@@ -986,18 +986,15 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
             break;
         }
 
-        if (translationResult.translationStatus == TranslationStatus::Success)
-        {
-            connection->Invoke([&] { callbacks->OnTranslationPhrase({
-                std::move(speechResult.json),
-                speechResult.offset,
-                speechResult.duration,
-                std::move(speechResult.text),
-                std::move(translationResult),
-                status
-                });
+        connection->Invoke([&] { callbacks->OnTranslationPhrase({
+            std::move(speechResult.json),
+            speechResult.offset,
+            speechResult.duration,
+            std::move(speechResult.text),
+            std::move(translationResult),
+            status
             });
-        }
+        });
     }
     else if (path == path::translationSynthesisEnd)
     {

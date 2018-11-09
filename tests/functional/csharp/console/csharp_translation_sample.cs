@@ -47,9 +47,9 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: canceled. SessionId: {0}, Reason: {1}", e.SessionId, e.Reason));
         }
 
-        private static void MySpeechEndDetectedHandler(object sender, RecognitionEventArgs e)
+        private static void MySessionStoppedHandler(object sender, SessionEventArgs e)
         {
-            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: Speech end detected event: {0}.", e.ToString()));
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: Session stopped event: {0}.", e.ToString()));
             translationEndTaskCompletionSource.TrySetResult(0);
         }
 
@@ -163,7 +163,7 @@ namespace MicrosoftSpeechSDKSamples
             reco.Recognized += MyRecognizedEventHandler;
             reco.Synthesizing += MySynthesizingEventHandler;
             reco.Canceled += MyCanceledEventHandler;
-            reco.SpeechEndDetected += MySpeechEndDetectedHandler;
+            reco.SessionStopped += MySessionStoppedHandler;
 
             translationEndTaskCompletionSource = new TaskCompletionSource<int>();
 
@@ -182,8 +182,8 @@ namespace MicrosoftSpeechSDKSamples
         private static string FromLang = "en-us";
         private static List<string> To2Langs = new List<string>() { "de-DE", "zh-CN" };
         private static string GermanLocale = "de-DE";
-        private static string GermanVoice = "de-DE-Hedda";
+        private static string GermanVoice = "Microsoft Server Speech Text to Speech Voice (de-DE, HeddaRUS)";
         private static string ChineseLocale = "zh-CN";
-        private static string ChineseVoice = "zh-CN-Yaoyao";
+        private static string ChineseVoice = "Microsoft Server Speech Text to Speech Voice (zh-CN, Yaoyao, Apollo)";
     }
 }

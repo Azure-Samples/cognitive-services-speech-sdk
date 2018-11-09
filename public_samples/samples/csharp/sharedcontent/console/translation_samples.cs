@@ -28,7 +28,7 @@ namespace MicrosoftSpeechSDKSamples
             string fromLanguage = "en-US";
 
             // Voice name of synthesis output.
-            const string GermanVoice = "de-DE-Hedda";
+            const string GermanVoice = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
 
             // Creates an instance of a speech translation config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").

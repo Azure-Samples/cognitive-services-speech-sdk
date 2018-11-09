@@ -158,7 +158,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning)]
-        public async Task TranslationBatmanEnToDeKatjaSynthesisResultContinuous()
+        public async Task TranslationBatmanEnToDeHeddaRUSSynthesisResultContinuous()
         {
             var toLanguages = new List<string>() { Language.DE };
 

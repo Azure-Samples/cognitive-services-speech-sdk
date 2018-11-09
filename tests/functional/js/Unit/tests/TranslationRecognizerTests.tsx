@@ -121,7 +121,7 @@ test("GetOutputVoiceName", () => {
     const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
     objsToClose.push(s);
 
-    const voice: string = "de-DE-Katja";
+    const voice: string = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
     s.voiceName = voice;
 
     const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
@@ -346,7 +346,7 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
     const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
     objsToClose.push(s);
 
-    s.voiceName = "de-DE-Hedda";
+    s.voiceName = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
 
     const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
     objsToClose.push(r);
@@ -431,7 +431,7 @@ test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
     const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
     objsToClose.push(s);
 
-    s.voiceName = "de-DE-Hedda)";
+    s.voiceName = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
 
     const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
     objsToClose.push(r);
@@ -444,7 +444,7 @@ test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
 
     r.canceled = ((o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
         try {
-            expect(e.errorDetails).toEqual("Synthesis service failed with code:  - Could not identify the voice 'de-DE-Hedda)' for the text to speech service ");
+            expect(e.errorDetails).toEqual("Synthesis service failed with code:  - Could not identify the voice 'Microsoft Server Speech Text to Speech Voice (de-DE, Hedda))' for the text to speech service ");
             done();
         } catch (error) {
             done.fail(error);
@@ -458,7 +458,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
     const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
     objsToClose.push(s);
 
-    s.voiceName = "de-DE-Hedda";
+    s.voiceName = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
 
     const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
     objsToClose.push(r);
@@ -560,7 +560,7 @@ test.skip("MultiPhrase", (done: jest.DoneCallback) => {
     const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
     objsToClose.push(s);
 
-    s.voiceName = "de-DE-Hedda";
+    s.voiceName = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
     s.addTargetLanguage("de-DE");
     s.speechRecognitionLanguage = Settings.WaveFileLanguage;
 
@@ -702,7 +702,7 @@ test("Config is copied on construction", () => {
 
     const ranVal: string = Math.random().toString();
     s.setProperty("RandomProperty", ranVal);
-    s.voiceName = "en-US-Zira";
+    s.voiceName = "Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)";
 
     const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
@@ -713,17 +713,17 @@ test("Config is copied on construction", () => {
 
     expect(r.speechRecognitionLanguage).toEqual("en-US");
     expect(r.properties.getProperty("RandomProperty")).toEqual(ranVal);
-    expect(r.properties.getProperty(sdk.PropertyId.SpeechServiceConnection_TranslationVoice)).toEqual("en-US-Zira");
+    expect(r.properties.getProperty(sdk.PropertyId.SpeechServiceConnection_TranslationVoice)).toEqual("Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)");
 
     // Change them.
     s.speechRecognitionLanguage = "de-DE";
     s.setProperty("RandomProperty", Math.random.toString());
-    s.voiceName = "de-DE-Hedda";
+    s.voiceName = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
 
     // Validate no change.
     expect(r.speechRecognitionLanguage).toEqual("en-US");
     expect(r.properties.getProperty("RandomProperty")).toEqual(ranVal);
-    expect(r.properties.getProperty(sdk.PropertyId.SpeechServiceConnection_TranslationVoice)).toEqual("en-US-Zira");
+    expect(r.properties.getProperty(sdk.PropertyId.SpeechServiceConnection_TranslationVoice)).toEqual("Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)");
 
 });
 

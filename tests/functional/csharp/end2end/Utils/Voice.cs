@@ -6,7 +6,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     sealed class Voice
     {
-        public static readonly string FR = "fr-CA-Caroline";
-        public static readonly string DE = "de-DE-Katja";
+        public static readonly string FR = "Microsoft Server Speech Text to Speech Voice (fr-CA, Caroline)";
+        public static readonly string DE = "Microsoft Server Speech Text to Speech Voice (de-DE, HeddaRUS)";
     }
 }

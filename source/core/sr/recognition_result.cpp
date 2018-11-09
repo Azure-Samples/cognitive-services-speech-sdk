@@ -145,7 +145,7 @@ void CSpxRecognitionResult::InitTranslationRecognitionResult(TranslationStatusCo
 
     m_translations = translations;
 
-    if (status != TranslationStatusCode::Error)
+    if (status == TranslationStatusCode::Success)
     {
         switch (m_reason)
         {
@@ -163,12 +163,18 @@ void CSpxRecognitionResult::InitTranslationRecognitionResult(TranslationStatusCo
             break;
         }
     }
-
-    if (status == TranslationStatusCode::Error)
+    else if (status == TranslationStatusCode::Error)
     {
-        SPX_DBG_TRACE_VERBOSE("%s: status=TranslationStatusCode::Error; switching result to ResultReason::Canceled", __FUNCTION__);
+        // Since speech recognition is successful but only translation returns an error, we do not create a recognition error event.
+        // Instead, m_reason is not upgraded to TranslatingSpeech/TranslatedSpeech, but remains as RecognizingSpeech/RecognizedSpeech,
+        // and the property SpeechServiceResponse_JsonErrorDetails is set with the translation error details.
         auto errorDetails = PAL::ToString(failureReason);
+        SPX_DBG_TRACE_VERBOSE("%s: Recognition succeeded but translation has error. Error details: %s", __FUNCTION__, errorDetails.c_str());
         SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
+    }
+    else
+    {
+        SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
     }
 }
 
