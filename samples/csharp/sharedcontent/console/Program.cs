@@ -18,14 +18,15 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("2. Speech recognition in the specified language and using detailed output format.");
             Console.WriteLine("3. Speech continuous recognition with file input.");
             Console.WriteLine("4. Speech recognition using customized model.");
-            Console.WriteLine("5. Speech recognition with audio stream.");
-            Console.WriteLine("6. Translation with microphone input.");
-            Console.WriteLine("7. Translation with file input.");
-            Console.WriteLine("8. Translation with audio stream.");
-            Console.WriteLine("9. Speech continuous recognition using authorization token.");
-            Console.WriteLine("A. Intent recognition with microphone input.");
-            Console.WriteLine("B. Intent continuous recognition with file input.");
-            Console.WriteLine("C. Intent recognition in the specified language with microphone input.");
+            Console.WriteLine("5. Speech recognition with pull audio stream.");
+            Console.WriteLine("6. Speech recognition with push audio stream.");
+            Console.WriteLine("7. Translation with microphone input.");
+            Console.WriteLine("8. Translation with file input.");
+            Console.WriteLine("9. Translation with audio stream.");
+            Console.WriteLine("A. Speech continuous recognition using authorization token.");
+            Console.WriteLine("B. Intent recognition with microphone input.");
+            Console.WriteLine("C. Intent continuous recognition with file input.");
+            Console.WriteLine("D. Intent recognition in the specified language with microphone input.");
 
             Console.Write("Your choice (0: Stop.): ");
 
@@ -49,27 +50,30 @@ namespace MicrosoftSpeechSDKSamples
                         SpeechRecognitionSamples.RecognitionUsingCustomizedModelAsync().Wait();
                         break;
                     case ConsoleKey.D5:
-                        SpeechRecognitionSamples.RecognitionWithAudioStreamAsync().Wait();
+                        SpeechRecognitionSamples.RecognitionWithPullAudioStreamAsync().Wait();
                         break;
                     case ConsoleKey.D6:
-                        TranslationSamples.TranslationWithMicrophoneAsync().Wait();
+                        SpeechRecognitionSamples.RecognitionWithPushAudioStreamAsync().Wait();
                         break;
                     case ConsoleKey.D7:
-                        TranslationSamples.TranslationWithFileAsync().Wait();
+                        TranslationSamples.TranslationWithMicrophoneAsync().Wait();
                         break;
                     case ConsoleKey.D8:
-                        TranslationSamples.TranslationWithAudioStreamAsync().Wait();
+                        TranslationSamples.TranslationWithFileAsync().Wait();
                         break;
                     case ConsoleKey.D9:
-                        SpeechRecognitionWithTokenSample.ContinuousRecognitionWithAuthorizationTokenAsync().Wait();
+                        TranslationSamples.TranslationWithAudioStreamAsync().Wait();
                         break;
                     case ConsoleKey.A:
-                        IntentRecognitionSamples.RecognitionWithMicrophoneAsync().Wait();
+                        SpeechRecognitionWithTokenSample.ContinuousRecognitionWithAuthorizationTokenAsync().Wait();
                         break;
                     case ConsoleKey.B:
-                        IntentRecognitionSamples.ContinuousRecognitionWithFileAsync().Wait();
+                        IntentRecognitionSamples.RecognitionWithMicrophoneAsync().Wait();
                         break;
                     case ConsoleKey.C:
+                        IntentRecognitionSamples.ContinuousRecognitionWithFileAsync().Wait();
+                        break;
+                    case ConsoleKey.D:
                         IntentRecognitionSamples.RecognitionWithMicrophoneUsingLanguageAsync().Wait();
                         break;
                     case ConsoleKey.D0:

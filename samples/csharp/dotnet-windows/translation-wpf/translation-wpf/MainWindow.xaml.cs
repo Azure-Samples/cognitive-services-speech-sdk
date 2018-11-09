@@ -256,7 +256,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         {
 
             this.settingsPanel.IsEnabled = false;
-            if (String.IsNullOrEmpty(this.SubscriptionKey))
+            if (string.IsNullOrEmpty(this.SubscriptionKey))
             {
                 this.SubscriptionKey = this.GetSubscriptionKeyFromFile(SubscriptionKeyFileName);
             }

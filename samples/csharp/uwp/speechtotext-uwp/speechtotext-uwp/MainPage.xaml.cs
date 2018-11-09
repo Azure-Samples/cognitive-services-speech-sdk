@@ -144,6 +144,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
 
                             if (e.Reason == CancellationReason.Error)
                             {
+                                sb.AppendLine($"CANCELED: ErrorCode={e.ErrorCode}");
                                 sb.AppendLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
                                 sb.AppendLine($"CANCELED: Did you update the subscription info?");
                             }
@@ -240,6 +241,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
 
                         if (ee.Reason == CancellationReason.Error)
                         {
+                            sb.AppendLine($"CANCELED: ErrorCode={ee.ErrorCode}");
                             sb.AppendLine($"CANCELED: ErrorDetails={ee.ErrorDetails}");
                             sb.AppendLine($"CANCELED: Did you update the subscription info?");
                         }
@@ -328,7 +330,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
         };
         private bool AreKeysValid()
         {
-            if (String.IsNullOrEmpty(this.subscriptionKey) || String.IsNullOrEmpty(this.RecognitionLanguage))
+            if (string.IsNullOrEmpty(this.subscriptionKey) || string.IsNullOrEmpty(this.RecognitionLanguage))
             {
                 return false;
             }

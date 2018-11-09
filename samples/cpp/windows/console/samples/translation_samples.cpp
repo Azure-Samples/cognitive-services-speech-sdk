@@ -66,6 +66,7 @@ void TranslationWithMicrophone()
 
         if (cancellation->Reason == CancellationReason::Error)
         {
+            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
@@ -76,7 +77,6 @@ void TranslationWithMicrophone()
 // Continuous translation.
 void TranslationContinuousRecognition()
 {
-    // <TranslationContinuousRecognition>
     // Creates an instance of a speech translation config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechTranslationConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
@@ -124,9 +124,9 @@ void TranslationContinuousRecognition()
     recognizer->Canceled.Connect([](const TranslationRecognitionCanceledEventArgs& e)
     {
         cout << "CANCELED: Reason=" << (int)e.Reason << std::endl;
-
         if (e.Reason == CancellationReason::Error)
         {
+            cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
@@ -150,5 +150,4 @@ void TranslationContinuousRecognition()
 
     // Stops recognition.
     recognizer->StopContinuousRecognitionAsync().wait();
-    // </TranslationContinuousRecognition>
 }

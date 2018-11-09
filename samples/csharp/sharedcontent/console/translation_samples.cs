@@ -99,6 +99,7 @@ namespace MicrosoftSpeechSDKSamples
 
                     if (e.Reason == CancellationReason.Error)
                     {
+                        Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
                         Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
                         Console.WriteLine($"CANCELED: Did you update the subscription info?");
                     }
@@ -191,6 +192,7 @@ namespace MicrosoftSpeechSDKSamples
 
                         if (e.Reason == CancellationReason.Error)
                         {
+                            Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
                             Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
                             Console.WriteLine($"CANCELED: Did you update the subscription info?");
                         }
@@ -234,7 +236,6 @@ namespace MicrosoftSpeechSDKSamples
         // Translation using audio stream.
         public static async Task TranslationWithAudioStreamAsync()
         {
-            // <TranslationWithAudioStreamAsync>
             // Translation source language.
             // Replace with a language of your choice.
             string fromLanguage = "en-US";
@@ -295,6 +296,7 @@ namespace MicrosoftSpeechSDKSamples
 
                         if (e.Reason == CancellationReason.Error)
                         {
+                            Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
                             Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
                             Console.WriteLine($"CANCELED: Did you update the subscription info?");
                         }
@@ -336,7 +338,6 @@ namespace MicrosoftSpeechSDKSamples
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 }
             }
-            // </TranslationWithAudioStreamAsync>
         }
     }
 }

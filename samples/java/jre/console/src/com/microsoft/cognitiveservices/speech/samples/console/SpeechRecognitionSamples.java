@@ -49,6 +49,7 @@ public class SpeechRecognitionSamples {
                 System.out.println("CANCELED: Reason=" + cancellation.getReason());
 
                 if (cancellation.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
                     System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
@@ -61,8 +62,7 @@ public class SpeechRecognitionSamples {
     // Speech recognition in the specified spoken language.
     public static void recognitionWithLanguageAsync() throws InterruptedException, ExecutionException
     {
-        // <recognitionWithLanguage>
-        // Creates an instance of a speech config with specified
+         // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
@@ -91,13 +91,13 @@ public class SpeechRecognitionSamples {
                 System.out.println("CANCELED: Reason=" + cancellation.getReason());
 
                 if (cancellation.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
                     System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
             }
         }
         recognizer.close();
-        // </recognitionWithLanguage>
     }
 
     // Speech recognition using a customized model.
@@ -132,6 +132,7 @@ public class SpeechRecognitionSamples {
                 System.out.println("CANCELED: Reason=" + cancellation.getReason());
 
                 if (cancellation.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
                     System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
@@ -174,6 +175,7 @@ public class SpeechRecognitionSamples {
                 System.out.println("CANCELED: Reason=" + e.getReason());
 
                 if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + e.getErrorCode());
                     System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
@@ -199,8 +201,7 @@ public class SpeechRecognitionSamples {
         // </recognitionContinuousWithFile>
     }
 
-    // <recognitionAudioStream>
-    // The Source to stop recognition.
+     // The Source to stop recognition.
     private static Semaphore stopRecognitionSemaphore;
 
     // Speech recognition with audio stream
@@ -239,6 +240,7 @@ public class SpeechRecognitionSamples {
                 System.out.println("CANCELED: Reason=" + e.getReason());
 
                 if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + e.getErrorCode());
                     System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
@@ -268,5 +270,4 @@ public class SpeechRecognitionSamples {
             recognizer.stopContinuousRecognitionAsync().get();
         }
     }
-    // </recognitionAudioStream>
 }
