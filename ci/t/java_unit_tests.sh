@@ -22,7 +22,7 @@ if [[ $OS == "Windows_NT" ]]; then
 else
   CPSEP=:
   # TODO add more when passing:
-  TESTCLASS=tests.unit.ParameterCollectionTests
+  TESTCLASS=tests.unit.PropertyCollectionTests
 fi
 
 SPEECH_SDK_EXTERNAL="$SCRIPT_DIR/../../external"

@@ -17,7 +17,7 @@ import java.util.List;
 @SuppressWarnings("rawtypes")
 public class Runner {
 
-    public static boolean mainRunner(String... args) {
+    public static boolean mainRunner(String... args) throws ClassNotFoundException {
         JUnitCore junitCoreRunner = new JUnitCore();
 
         PrintStream outputStream = null;
@@ -53,18 +53,14 @@ public class Runner {
         return result.wasSuccessful();
     }
 
-    public static void main(String... args) {
+    public static void main(String... args) throws ClassNotFoundException {
         System.exit(mainRunner(args) ? 0 : 1);
     }
 
-    private static Class[] resolveTestClasses(String[] args) {
+    private static Class[] resolveTestClasses(String[] args) throws ClassNotFoundException {
         List<Class> testClasses = new ArrayList<Class>(args.length);
         for (String arg : args) {
-            try {
-                testClasses.add(Class.forName(arg));
-            } catch (ClassNotFoundException e) {
-                System.out.println("Could not find class " + e.getMessage());
-            }
+            testClasses.add(Class.forName(arg));
         }
         return testClasses.toArray(new Class[testClasses.size()]);
     }
