@@ -38,7 +38,8 @@ sub dockerBuild {
 sub slurp {
   my $file = shift or die "Error: missing file\n";
   local $/;
-  open my $fh, '<', $file or die;
+  open my $fh, '<', $file
+    or die "Cannot open '$file': $!\n";
   my $result = <$fh>;
   close $fh;
   return $result;
@@ -56,6 +57,10 @@ sub outputDockerfile {
   close $fh;
 }
 
+sub aptInstallWith {
+   return 'apt-deps-begin', @_, 'apt-deps-end';
+}
+
 my %images = (
   dev_ubuntu1604_x86 => {
     version => 1,
@@ -67,8 +72,12 @@ my %images = (
     urls => [qw(https://github.com/multiarch/qemu-user-static/releases/download/v2.12.0-1/qemu-arm-static.tar.gz)],
   },
   oobedevcpp_ubuntu1604_x64 => {
+    version => 2,
+    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps test_deps/), 'builduser'],
+  },
+  oobedevcpp_ubuntu1604_x86 => {
     version => 1,
-    spec => [qw/from-ubuntu1604-x64 oobedeps builduser/],
+    spec => ['from-ubuntu1604-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps test_deps/), 'builduser'],
   },
   oobedevjre_ubuntu1604_x64 => {
     version => 1,

@@ -1,0 +1,4 @@
+        && \
+    apt-get autoremove --quiet --yes && \
+    rm -rf /var/lib/apt/lists/*
+

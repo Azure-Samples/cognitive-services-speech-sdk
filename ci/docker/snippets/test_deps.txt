@@ -1,0 +1,5 @@
+      # Test dependencies
+      wget ca-certificates \
+      expect \
+      pulseaudio \
+      pulseaudio-utils \

@@ -1,0 +1,38 @@
+# Assumes caller provides $(AZURE_CONTAINER_REGISTRY) and $(AZURE_SUBSCRIPTION_ENDPOINT) implicitly
+parameters:
+  # Base name of the image
+  imageBase: ''
+  # Which variable to output the image name too (including version):
+  outvarImage: ''
+steps:
+- bash: |
+    set -u -e -o pipefail
+    . ci/functions.sh
+    for v in imageBase outvarImage; do
+      [[ -n ${!v} ]] || exitWithError 'get-docker-image.yml: %s template parameter not set\n' "$v"
+    done
+    image="$(perl ci/docker/dockertool.pl imagetag --registry $(AZURE_CONTAINER_REGISTRY) "$imageBase")"
+    [[ $? == 0 ]]
+
+    if [[ $image = *:TESTLOCAL ]]; then
+      printf 'Image %s marked for local build! Running now...\n' "$imageBase"
+      image="$(perl ci/docker/dockertool.pl imagetag "$imageBase")"
+      perl ci/docker/dockertool.pl build "$imageBase"
+      vsts_setvar __getDockerImageInternal_DoPull false
+    else
+      vsts_setvar __getDockerImageInternal_DoPull true
+    fi
+    vsts_setvar "$outvarImage" "$image"
+    vsts_setvar __getDockerImageInternal_Image "$image"
+  displayName: ${{ format('Resolve {0} Docker image', parameters.imageBase) }}
+  env:
+    imageBase: ${{ parameters.imageBase }}
+    outvarImage: ${{ parameters.outvarImage }}
+- task: Docker@1
+  displayName: ${{ format('Pull {0} Docker image', parameters.imageBase) }}
+  inputs:
+    azureSubscriptionEndpoint: $(AZURE_SUBSCRIPTION_ENDPOINT)
+    azureContainerRegistry: $(AZURE_CONTAINER_REGISTRY)
+    command: pull
+    arguments: $(__getDockerImageInternal_Image)
+  condition: and(succeeded(), eq(variables.__getDockerImageInternal_DoPull, 'true'))
