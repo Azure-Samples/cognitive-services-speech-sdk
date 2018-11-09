@@ -182,16 +182,16 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         private void InitializeVoiceMap()
         {
             voiceMap = new Dictionary<string, string>();
-            voiceMap.Add("en-US", "en-US-JessaRUS");
-            voiceMap.Add("ar-EG", "ar-EG-Hoda");
-            voiceMap.Add("zh-CN", "zh-CN-Yaoyao");
-            voiceMap.Add("fr-FR", "fr-FR-Julie");
-            voiceMap.Add("de-DE", "de-DE-Hedda");
-            voiceMap.Add("it-IT", "it-IT-Cosimo");
-            voiceMap.Add("ja-JP", "ja-JP-Ayumi");
-            voiceMap.Add("pt-BR", "pt-BR-Daniel");
-            voiceMap.Add("ru-RU", "ru-RU-Irina");
-            voiceMap.Add("es-ES", "es-ES-Laura");
+            voiceMap.Add("en-US", "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)");
+            voiceMap.Add("ar-EG", "Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)");
+            voiceMap.Add("zh-CN", "Microsoft Server Speech Text to Speech Voice (zh-CN, Yaoyao, Apollo)");
+            voiceMap.Add("fr-FR", "Microsoft Server Speech Text to Speech Voice (fr-FR, Julie, Apollo)");
+            voiceMap.Add("de-DE", "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)");
+            voiceMap.Add("it-IT", "Microsoft Server Speech Text to Speech Voice (it-IT, Cosimo, Apollo)");
+            voiceMap.Add("ja-JP", "Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)");
+            voiceMap.Add("pt-BR", "Microsoft Server Speech Text to Speech Voice (pt-BR, Daniel, Apollo)");
+            voiceMap.Add("ru-RU", "Microsoft Server Speech Text to Speech Voice (ru-RU, Irina, Apollo)");
+            voiceMap.Add("es-ES", "Microsoft Server Speech Text to Speech Voice (es-ES, Laura, Apollo)");
         }
 
         #endregion
