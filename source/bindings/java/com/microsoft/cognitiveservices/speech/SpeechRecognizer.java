@@ -36,19 +36,6 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     final public EventHandlerImpl<SpeechRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<SpeechRecognitionCanceledEventArgs>();
 
     /**
-     * SpeechRecognizer constructor.
-     * @param recoImpl The recognizer implementation
-     * @param audioInput An optional audio input configuration associated with the recognizer
-     */
-    private SpeechRecognizer(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl, AudioConfig audioConfig) {
-        super(audioConfig);
-
-        Contracts.throwIfNull(recoImpl, "recoImpl");
-        this.recoImpl = recoImpl;
-        initialize();
-    }
-
-    /**
      * Initializes a new instance of Speech Recognizer.
      * @param speechConfig speech configuration.
      */

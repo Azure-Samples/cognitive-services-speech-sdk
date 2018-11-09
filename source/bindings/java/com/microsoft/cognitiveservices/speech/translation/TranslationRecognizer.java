@@ -40,19 +40,6 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
 
     /**
      * Constructs an instance of a translation recognizer.
-     * @param recoImpl The internal recognizer implementation.
-     * @param audioInput An optional audio input configuration associated with the recognizer
-     */
-    private TranslationRecognizer(com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer recoImpl, AudioConfig audioInput) {
-        super(audioInput);
-
-        Contracts.throwIfNull(recoImpl, "recoImpl");
-        this.recoImpl = recoImpl;
-        initialize();
-    }
-
-    /**
-     * Constructs an instance of a translation recognizer.
      * @param stc speech translation config.
      * @param audioConfig audio config.
      */

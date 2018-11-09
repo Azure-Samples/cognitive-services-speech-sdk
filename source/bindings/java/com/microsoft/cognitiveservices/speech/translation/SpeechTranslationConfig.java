@@ -22,7 +22,7 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
             Class.forName(SpeechConfig.class.getName());
         }
         catch (ClassNotFoundException ex) {
-            // ignored.
+            throw new IllegalStateException(ex);
         }
     }
 

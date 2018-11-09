@@ -28,8 +28,29 @@ public class SpeechConfig implements Closeable {
             // helper class and call the load function.
             // Fall back to standard loadLibrary, in case that fails.
             Class<?> ncl = Class.forName("com.microsoft.cognitiveservices.speech.NativeLibraryLoader");
-            java.lang.reflect.Method nclm = ncl.getMethod("loadNativeBinding");
-            nclm.invoke(null); // static.
+
+            // Note: in case the class exists, we call it, ignoring ANY error it raises.
+            //       This is on purpose as ONLY the native loader is responsible for loading
+            //       the native binding.
+            //       In case the loader does not exist, fall back to depending on the runtime
+            //       to locate the library for us. This is e.g. necessary on Android.
+            if (ncl != null) {
+                try {
+                    java.lang.reflect.Method nclm = ncl.getMethod("loadNativeBinding");
+                    nclm.invoke(null); // static.
+                }
+                catch (Exception ex) {
+                    // ignored.
+                    // in particular, we DON'T want to fallback to the platform
+                    // loader here as the native loader has already failed and
+                    // we don't want to pick up some random library.
+                }
+            }
+            else {
+                // trigger an exception so the handler below calls the
+                // default loader.
+                throw new NullPointerException("no native loader available");
+            }
         }
         catch(java.lang.Error ex) {
             // In case, we cannot load the helper class, fall back to loading

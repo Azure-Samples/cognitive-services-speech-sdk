@@ -5,6 +5,7 @@
 package com.microsoft.cognitiveservices.speech;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -61,7 +62,12 @@ class NativeLibraryLoader {
 
             // Load the libraries in the order provided by the NATIVE_MANIFEST
             for (String libName: nativeList) {
-                System.load(tempDir.getAbsolutePath() + File.separator + libName);
+                String fullPathName = new File(tempDir.getAbsolutePath(), libName).getAbsolutePath();
+                if(!fullPathName.startsWith(tempDir.getAbsolutePath())) {
+                    throw new SecurityException("illegal path");
+                }
+
+                System.load(fullPathName);
             }
         }
         catch (Exception e) {
@@ -122,19 +128,24 @@ class NativeLibraryLoader {
 
         ArrayList<String> lines = new ArrayList<String>();
         for (String line; (line = resourceReader.readLine()) != null; ) {
-            lines.add(line);
+            // Note: the additional null check if for fortify.
+            if(line != null && !line.isEmpty()) {
+                lines.add(line);
+            }
         }
 
-        resourceReader.close();
-        inStream.close();
+        safeClose(resourceReader);
+        safeClose(inStream);
         return lines.toArray(new String[lines.size()]);
     }
 
     private static String getResourcesPath() {
-        String operatingSystem = System.getProperty("os.name").toLowerCase();
+        String operatingSystem = System.getProperty("os.name");
+        operatingSystem  = (operatingSystem != null) ? operatingSystem.toLowerCase() : "unknown";
+
         String speechPrefix = "/ASSETS/%s%s/";
 
-        // determine if the VM aruns on 64 or 32 bit
+        // determine if the VM runs on 64 or 32 bit
         String dataModelSize = System.getProperty("sun.arch.data.model");
         if(dataModelSize != null && dataModelSize.equals("64")) {
             dataModelSize = "64";
@@ -159,7 +170,11 @@ class NativeLibraryLoader {
     }
 
     private static void extractResourceFromPath(String libName, String prefix) throws IOException {
-        File temp = new File(tempDir.getPath() + File.separator + libName);
+        File temp = new File(tempDir.getAbsolutePath(), libName);
+        if (!temp.getAbsolutePath().startsWith(tempDir.getAbsolutePath())) {
+            throw new SecurityException("illegal name " + temp.getAbsolutePath());
+        }
+
         temp.createNewFile();
         temp.deleteOnExit();
 
@@ -175,17 +190,28 @@ class NativeLibraryLoader {
             throw new FileNotFoundException(String.format("Could not find resource %s in jar.", path));
         }
 
-        FileOutputStream outStream = new FileOutputStream(temp);
+        FileOutputStream outStream = null;
         byte[] buffer = new byte[1024*1024];
         int bytesRead;
 
         try {
+            outStream = new FileOutputStream(temp);
             while ((bytesRead = inStream.read(buffer)) >= 0) {
                 outStream.write(buffer, 0, bytesRead);
             }
         } finally {
-            outStream.close();
-            inStream.close();
+            safeClose(outStream);
+            safeClose(inStream);
+        }
+    }
+
+    private static void safeClose(Closeable is) {
+        if (is != null) {
+            try {
+                is.close();
+            } catch (IOException e) {
+                // ignored.
+            }
         }
     }
 }

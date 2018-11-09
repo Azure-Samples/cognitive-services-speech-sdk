@@ -35,20 +35,6 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     final public EventHandlerImpl<IntentRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<IntentRecognitionCanceledEventArgs>();
 
     /**
-     * Initializes an instance of the IntentRecognizer.
-     * @param recoImpl The internal recognizer implementation.
-     * @param audioInput An audio input configuration associated with the recognizer.
-     */
-    private IntentRecognizer(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl, AudioConfig audioInput) {
-        super(audioInput);
-
-        Contracts.throwIfNull(recoImpl, "recoImpl");
-        this.recoImpl = recoImpl;
-
-        initialize();
-    }
-
-    /**
      * Creates a new instance of an intent recognizer.
      * @param speechConfig speech configuration.
      * @return a new instance of an intent recognizer.

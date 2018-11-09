@@ -78,29 +78,35 @@ public class KeywordRecognitionModel implements Closeable
      * Creates a keyword recognition model using the specified input stream.
      * @param inputStream A stream that represents data for the keyword recognition model.
      *                 Note, the file can be a zip file in which case the model will be extracted from the zip.
-     * @param name The name of the keyword. Note: The name needs to be unqiue for different keywords as it will be
+     * @param name The name of the keyword. Note: The name needs to be unique for different keywords as it will be
      *             used internally to match a particular keyword spotter model. In case you are updating the keyword
      *             with a new version, add a version tag to the name or otherwise the previous version will be
      *             overwritten on disk.
      * @param isZipped If true, the input stream is treated as a zip. false, if the input is just the kws table file.
      * @return The keyword recognition model being created.
-     * @throws IOException If the name of the kws contains a file separator
-     * @throws IllegalArgumentException In case the kws.table file was not found.
+     * @throws IllegalArgumentException In case the kws.table file was not found or the temp directory could not be created.
+     * @throws IOException If the name of the kws contains an illegal separator char, or in case the temp path and/or names are not valid.
      */
     public static KeywordRecognitionModel fromStream(InputStream inputStream, String name, boolean isZipped) throws IOException {
         Contracts.throwIfNull(inputStream, "inputStream");
         Contracts.throwIfNullOrWhitespace(name, "name");
-
-        if(name.contains(File.separator)) {
-            throw new IOException("name must not contain separator");
+        if(name.contains(File.separator) || name.contains(".") || name.contains(":") ) {
+            throw new IOException("name must not contain separator, ., or :");
         }
 
         String tempFolder = System.getProperty("java.io.tmpdir");
         Contracts.throwIfNullOrWhitespace(tempFolder, "tempFolder");
 
-        File kwsRootDirectory = new File(tempFolder + File.separator + "speech-sdk-keyword-" + name);
+        File kwsRootDirectory = new File(tempFolder, "speech-sdk-keyword-" + name).getAbsoluteFile();
+        if(!kwsRootDirectory.getAbsolutePath().startsWith(tempFolder)) {
+            throw new IOException("invalid kws temp directory " + kwsRootDirectory.getAbsolutePath());
+        }
+
         if(!kwsRootDirectory.exists()) {
-            kwsRootDirectory.mkdirs();
+            if (!kwsRootDirectory.mkdirs()) {
+                throw new IllegalArgumentException("cannot create directory");
+            }
+
             kwsRootDirectory.deleteOnExit();
 
             if(!kwsRootDirectory.isDirectory()) {
@@ -121,6 +127,10 @@ public class KeywordRecognitionModel implements Closeable
                     Contracts.throwIfNullOrWhitespace(zipEntryName, "zipEntry.name");
 
                     File outputFile = new File(kwsRootDirectory, zipEntryName);
+                    if(!outputFile.getAbsolutePath().startsWith(kwsRootDirectory.getAbsolutePath())) {
+                        throw new IOException("invalid file " + outputFile.getAbsolutePath());
+                    }
+
                     if(outputFile.exists()) {
                         if (!outputFile.delete()) {
                             throw new IllegalArgumentException("could not delete " + outputFile.getAbsolutePath());
@@ -129,23 +139,31 @@ public class KeywordRecognitionModel implements Closeable
 
                     outputFile.deleteOnExit();
 
-                    FileOutputStream outputStream = new FileOutputStream(outputFile);
-                    while((len = zip.read(buffer)) > 0) {
-                        outputStream.write(buffer, 0, len);
+                    FileOutputStream outputStream = null;
+                    try {
+                        outputStream = new FileOutputStream(outputFile);
+                        while((len = zip.read(buffer)) > 0) {
+                            outputStream.write(buffer, 0, len);
+                        }
                     }
-
-                    outputStream.close();
+                    finally {
+                        safeClose(outputStream);
+                    }
                 }
 
                 zip.close();
             }
             else {
-                FileOutputStream outputStream = new FileOutputStream(new File(kwsRootDirectory, "kws.table"));
-                while((len = inputStream.read(buffer)) > 0) {
-                    outputStream.write(buffer, 0, len);
+                FileOutputStream outputStream = null;
+                try {
+                    outputStream = new FileOutputStream(new File(kwsRootDirectory, "kws.table"));
+                    while((len = inputStream.read(buffer)) > 0) {
+                        outputStream.write(buffer, 0, len);
+                    }
                 }
-
-                outputStream.close();
+                finally {
+                    safeClose(outputStream);
+                }
             }
         }
 
@@ -188,5 +206,15 @@ public class KeywordRecognitionModel implements Closeable
     public com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel getModelImpl()
     {
         return modelImpl;
+    }
+
+    private static void safeClose(Closeable is) {
+        if (is != null) {
+            try {
+                is.close();
+            } catch (IOException e) {
+                // ignored.
+            }
+        }
     }
 }

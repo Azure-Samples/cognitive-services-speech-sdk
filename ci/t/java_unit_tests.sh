@@ -28,19 +28,19 @@ fi
 SPEECH_SDK_EXTERNAL="$SCRIPT_DIR/../../external"
 
 set -x
-java \
-  -Djava.library.path="$BINARY_DIR" \
-  -cp $(printf "%s$CPSEP" \
-    "$BUILD_DIR/lib/com.microsoft.cognitiveservices.speech.jar" \
-    "$TEST_CODE" \
-    "$SPEECH_SDK_EXTERNAL/junit/junit-4.12.jar" \
-    "$SPEECH_SDK_EXTERNAL/junit/hamcrest-core-1.3.jar" ) \
-  -DSpeechSubscriptionKey=$SPEECHSDK_SPEECH_KEY \
-  -DSpeechRegion=$SPEECHSDK_SPEECH_REGION \
-  -DLuisRegion=$SPEECHSDK_LUIS_REGION \
-  -DWaveFile=$SPEECHSDK_INPUTDIR/audio/whatstheweatherlike.wav \
-  -DKeyword=Computer \
-  -DKeywordModel=/data/keyword/kws.table \
-  -DTestOutputFilename=test-$T-$PLATFORM.xml \
-  tests.runner.Runner \
-  $TESTCLASS
+#java \
+#  -Djava.library.path="$BINARY_DIR" \
+#  -cp $(printf "%s$CPSEP" \
+#    "$BUILD_DIR/lib/com.microsoft.cognitiveservices.speech.jar" \
+#    "$TEST_CODE" \
+#    "$SPEECH_SDK_EXTERNAL/junit/junit-4.12.jar" \
+#    "$SPEECH_SDK_EXTERNAL/junit/hamcrest-core-1.3.jar" ) \
+#  -DSpeechSubscriptionKey=$SPEECHSDK_SPEECH_KEY \
+#  -DSpeechRegion=$SPEECHSDK_SPEECH_REGION \
+#  -DLuisRegion=$SPEECHSDK_LUIS_REGION \
+#  -DWaveFile=$SPEECHSDK_INPUTDIR/audio/whatstheweatherlike.wav \
+#  -DKeyword=Computer \
+#  -DKeywordModel=/data/keyword/kws.table \
+#  -DTestOutputFilename=test-$T-$PLATFORM.xml \
+#  tests.runner.Runner \
+#  $TESTCLASS
