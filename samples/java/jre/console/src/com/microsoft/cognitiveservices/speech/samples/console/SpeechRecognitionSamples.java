@@ -62,7 +62,7 @@ public class SpeechRecognitionSamples {
     // Speech recognition in the specified spoken language.
     public static void recognitionWithLanguageAsync() throws InterruptedException, ExecutionException
     {
-         // Creates an instance of a speech config with specified
+        // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
@@ -201,7 +201,7 @@ public class SpeechRecognitionSamples {
         // </recognitionContinuousWithFile>
     }
 
-     // The Source to stop recognition.
+    // The Source to stop recognition.
     private static Semaphore stopRecognitionSemaphore;
 
     // Speech recognition with audio stream

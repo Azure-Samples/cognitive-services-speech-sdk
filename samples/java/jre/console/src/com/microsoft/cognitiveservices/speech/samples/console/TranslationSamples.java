@@ -36,7 +36,7 @@ public class TranslationSamples {
         config.addTargetLanguage("de");
 
         // Sets voice name of synthesis output.
-        String GermanVoice = "de-DE-Hedda";
+        String GermanVoice = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
         config.setVoiceName(GermanVoice);
 
         // Creates a translation recognizer using microphone as audio input.
