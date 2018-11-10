@@ -58,8 +58,7 @@ public:
     void OnError(bool transport, USP::ErrorCode errorCode, const std::string& errorMessage) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnError(transport, errorCode, errorMessage); }); }
     void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationHypothesis(m); }); }
     void OnTranslationPhrase(const USP::TranslationPhraseMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationPhrase(m); }); }
-    void OnTranslationSynthesis(const USP::TranslationSynthesisMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationSynthesis(m); }); }
-    void OnTranslationSynthesisEnd(const USP::TranslationSynthesisEndMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationSynthesisEnd(m); }); }
+    void OnAudioOutputChunk(const USP::AudioOutputChunkMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnAudioOutputChunk(m); }); }
     void OnUserMessage(const USP::UserMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnUserMessage(m); }); }
 
 
@@ -157,8 +156,7 @@ private:
 
     void OnTranslationHypothesis(const USP::TranslationHypothesisMsg&) override;
     void OnTranslationPhrase(const USP::TranslationPhraseMsg&) override;
-    void OnTranslationSynthesis(const USP::TranslationSynthesisMsg&) override;
-    void OnTranslationSynthesisEnd(const USP::TranslationSynthesisEndMsg&) override;
+    void OnAudioOutputChunk(const USP::AudioOutputChunkMsg&) override;
 
     uint8_t* FormatBufferWriteBytes(uint8_t* buffer, const uint8_t* source, size_t bytes);
     uint8_t* FormatBufferWriteNumber(uint8_t* buffer, uint32_t number);

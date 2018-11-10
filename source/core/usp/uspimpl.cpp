@@ -385,11 +385,9 @@ void Connection::Impl::Connect()
 
     auto headersPtr = connectionHeaders.get();
 
-    if (m_config.m_endpoint == EndpointType::CDSDK)
+    if (!m_config.m_audioResponseFormat.empty())
     {
-        // TODO: MSFT: 1135317 Allow for configurable audio format
-        HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::audioResponseFormat, "riff-16khz-16bit-mono-pcm");
-        HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::userAgent, g_userAgent);
+        HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::audioResponseFormat, m_config.m_audioResponseFormat.c_str());
     }
 
     assert(!m_config.m_authData.empty());
@@ -696,15 +694,6 @@ static TranslationStatus ToTranslationStatus(const string& str)
     return TranslationStatus::InvalidMessage;
 }
 
-static SynthesisStatus ToSynthesisStatus(const string& str)
-{
-    if (0 == str.compare("Success")) return  SynthesisStatus::Success;
-    if (0 == str.compare("Error")) return  SynthesisStatus::Error;
-
-    PROTOCOL_VIOLATION("Unknown SynthesisStatus: %s", str.c_str());
-    return SynthesisStatus::InvalidMessage;
-}
-
 static SpeechHypothesisMsg RetrieveSpeechResult(const nlohmann::json& json)
 {
     auto offset = json.at(json_properties::offset).get<OffsetType>();
@@ -773,45 +762,44 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
 }
 
 // Callback for data available on tranport
-void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEADERS_HANDLE responseHeader, const unsigned char* buffer, size_t size, unsigned int errorCode, void* context)
+void Connection::Impl::OnTransportData(TransportHandle transportHandle, TransportResponse *response, void *context)
 {
     (void)transportHandle;
     throw_if_null(context, "context");
 
-    Connection::Impl *connection = static_cast<Connection::Impl*>(context);
+    Connection::Impl *connection = static_cast<Connection::Impl *>(context);
 
-    if (errorCode != 0)
+    if (response->frameType == FRAME_TYPE_UNKNOWN)
     {
-        LogError("Response error %d.", errorCode);
-        // TODO: Lower layers need appropriate signals
+        LogError("Response frame type is unknown.");
         return;
     }
-    else if (responseHeader == NULL)
+
+    if (response->responseHeader == NULL)
     {
         LogError("ResponseHeader is NULL.");
         return;
     }
 
-    string requestId = HTTPHeaders_FindHeaderValue(responseHeader, headers::requestId);
-    if (requestId.empty() || !connection->m_activeRequestIds.count(requestId))
-    {
-        PROTOCOL_VIOLATION("Unexpected request id '%s', Path: %s", requestId.c_str(),
-                           HTTPHeaders_FindHeaderValue(responseHeader, KEYWORD_PATH));
-        metrics_unexpected_requestid(requestId.c_str());
-        return;
-    }
-
-    auto path = HTTPHeaders_FindHeaderValue(responseHeader, KEYWORD_PATH);
+    auto path = HTTPHeaders_FindHeaderValue(response->responseHeader, KEYWORD_PATH);
     if (path == NULL)
     {
         PROTOCOL_VIOLATION("response missing '%s' header", KEYWORD_PATH);
         return;
     }
 
-    const char* contentType = NULL;
-    if (size != 0)
+    string requestId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::requestId);
+    if (requestId.empty() || !connection->m_activeRequestIds.count(requestId))
     {
-        contentType = HTTPHeaders_FindHeaderValue(responseHeader, headers::contentType);
+        PROTOCOL_VIOLATION("Empty or unexpected request id '%s', Path: %s", requestId.c_str(), path);
+        metrics_unexpected_requestid(requestId.c_str());
+        return;
+    }
+
+    const char *contentType = NULL;
+    if (response->bufferSize != 0)
+    {
+        contentType = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::contentType);
         if (contentType == NULL)
         {
             PROTOCOL_VIOLATION("response '%s' contains body with no content-type", path);
@@ -821,233 +809,243 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
 
     metrics_received_message(connection->m_telemetry.get(), requestId.c_str(), path);
 
-    LogInfo("TS:%" PRIu64 " Response Message: path: %s, content type: %s, size: %zu.", connection->getTimestamp(), path, contentType, size);
+    LogInfo("TS:%" PRIu64 " Response Message: path: %s, content type: %s, size: %zu.", connection->getTimestamp(), path, contentType, response->bufferSize);
 
     string pathStr(path);
     auto callbacks = connection->m_config.m_callbacks;
 
-    // TODO: pass the frame type (binary/text) so that we can check frame type before calling json::parse.
-    if (pathStr == path::translationSynthesis)
+    if (response->frameType == FRAME_TYPE_BINARY)
     {
-        TranslationSynthesisMsg msg;
-        msg.audioBuffer = (uint8_t *)buffer;
-        msg.audioLength = size;
-        connection->Invoke([&] { callbacks->OnTranslationSynthesis(msg); });
-        return;
-    }
-
-    auto json = (size > 0) ? nlohmann::json::parse(buffer, buffer + size) : nlohmann::json();
-    if (pathStr == path::speechStartDetected || path == path::speechEndDetected)
-    {
-        auto offsetObj = json[json_properties::offset];
-        // For whatever reason, offset is sometimes missing on the end detected message.
-        auto offset = offsetObj.is_null() ? 0 : offsetObj.get<OffsetType>();
-
-        if (path == path::speechStartDetected)
+        if (pathStr == path::translationSynthesis || pathStr == path::audio)
         {
-            connection->Invoke([&] { callbacks->OnSpeechStartDetected({ PAL::ToWString(json.dump()), offset }); });
+            // streamId is optional
+            auto streamId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::streamId);
+
+            AudioOutputChunkMsg msg;
+            msg.streamId = streamId == nullptr ? -1 : atoi(streamId);
+            msg.audioBuffer = (uint8_t *)response->buffer;
+            msg.audioLength = response->bufferSize;
+            connection->Invoke([&] { callbacks->OnAudioOutputChunk(msg); });
         }
         else
         {
-            connection->Invoke([&] { callbacks->OnSpeechEndDetected({ PAL::ToWString(json.dump()), offset }); });
+            PROTOCOL_VIOLATION("Binary frame received with unexpected path: %s", pathStr.c_str());
         }
     }
-    else if (pathStr == path::turnStart)
+    else if (response->frameType == FRAME_TYPE_TEXT)
     {
-        auto tag = json[json_properties::context][json_properties::tag].get<string>();
-        connection->Invoke([&] { callbacks->OnTurnStart({ PAL::ToWString(json.dump()), tag }); });
-    }
-    else if (pathStr == path::turnEnd)
-    {
+        auto json = (response->bufferSize > 0) ? nlohmann::json::parse(response->buffer, response->buffer + response->bufferSize) : nlohmann::json();
+        if (pathStr == path::speechStartDetected || path == path::speechEndDetected)
         {
-            unique_lock<recursive_mutex> lock(connection->m_mutex);
-            if (requestId == connection->m_speechRequestId)
+            auto offsetObj = json[json_properties::offset];
+            // For whatever reason, offset is sometimes missing on the end detected message.
+            auto offset = offsetObj.is_null() ? 0 : offsetObj.get<OffsetType>();
+
+            if (path == path::speechStartDetected)
             {
-                connection->m_speechRequestId.clear();
+                connection->Invoke([&] { callbacks->OnSpeechStartDetected({PAL::ToWString(json.dump()), offset}); });
             }
-            connection->m_activeRequestIds.erase(requestId);
-        }
-
-        // flush the telemetry before invoking the onTurnEnd callback.
-        // TODO: 1164154
-        telemetry_flush(connection->m_telemetry.get(), requestId.c_str());
-
-        connection->Invoke([&] { callbacks->OnTurnEnd({ }); });
-    }
-    else if (path == path::speechHypothesis || path == path::speechFragment)
-    {
-        auto offset = json[json_properties::offset].get<OffsetType>();
-        auto duration = json[json_properties::duration].get<DurationType>();
-        auto text = json[json_properties::text].get<string>();
-
-        if (path == path::speechHypothesis)
-        {
-            connection->Invoke([&] { callbacks->OnSpeechHypothesis({
-                PAL::ToWString(json.dump()),
-                offset,
-                duration,
-                PAL::ToWString(text)
-                });
-            });
-        }
-        else
-        {
-            connection->Invoke([&] { callbacks->OnSpeechFragment({
-                PAL::ToWString(json.dump()),
-                offset,
-                duration,
-                PAL::ToWString(text)
-                });
-            });
-        }
-    }
-    else if (path == path::speechPhrase)
-    {
-        SpeechPhraseMsg result;
-        result.json = PAL::ToWString(json.dump());
-        result.offset = json[json_properties::offset].get<OffsetType>();
-        result.duration = json[json_properties::duration].get<DurationType>();
-        result.recognitionStatus = ToRecognitionStatus(json[json_properties::recoStatus].get<string>());
-
-        switch (result.recognitionStatus)
-        {
-        case RecognitionStatus::Success:
-            if (json.find(json_properties::displayText) != json.end())
+            else
             {
-                // The DisplayText field will be present only if the RecognitionStatus field has the value Success.
-                // and the format output is simple
-                result.displayText = PAL::ToWString(json[json_properties::displayText].get<string>());
+                connection->Invoke([&] { callbacks->OnSpeechEndDetected({PAL::ToWString(json.dump()), offset}); });
             }
-            else // Detailed
+        }
+        else if (pathStr == path::turnStart)
+        {
+            auto tag = json[json_properties::context][json_properties::tag].get<string>();
+            connection->Invoke([&] { callbacks->OnTurnStart({PAL::ToWString(json.dump()), tag}); });
+        }
+        else if (pathStr == path::turnEnd)
+        {
             {
-                auto phrases  = json.at(json_properties::nbest);
-
-                double confidence = 0;
-                for (const auto& object : phrases)
+                unique_lock<recursive_mutex> lock(connection->m_mutex);
+                if (requestId == connection->m_speechRequestId)
                 {
-                    auto currentConfidence = object.at(json_properties::confidence).get<double>();
-                    // Picking up the result with the highest confidence.
-                    if (currentConfidence > confidence)
+                    connection->m_speechRequestId.clear();
+                }
+                connection->m_activeRequestIds.erase(requestId);
+            }
+
+            // flush the telemetry before invoking the onTurnEnd callback.
+            // TODO: 1164154
+            telemetry_flush(connection->m_telemetry.get(), requestId.c_str());
+
+            connection->Invoke([&] { callbacks->OnTurnEnd({}); });
+        }
+        else if (path == path::speechHypothesis || path == path::speechFragment)
+        {
+            auto offset = json[json_properties::offset].get<OffsetType>();
+            auto duration = json[json_properties::duration].get<DurationType>();
+            auto text = json[json_properties::text].get<string>();
+
+            if (path == path::speechHypothesis)
+            {
+                connection->Invoke([&] {
+                    callbacks->OnSpeechHypothesis({PAL::ToWString(json.dump()),
+                                                   offset,
+                                                   duration,
+                                                   PAL::ToWString(text)});
+                });
+            }
+            else
+            {
+                connection->Invoke([&] {
+                    callbacks->OnSpeechFragment({PAL::ToWString(json.dump()),
+                                                 offset,
+                                                 duration,
+                                                 PAL::ToWString(text)});
+                });
+            }
+        }
+        else if (path == path::speechPhrase)
+        {
+            SpeechPhraseMsg result;
+            result.json = PAL::ToWString(json.dump());
+            result.offset = json[json_properties::offset].get<OffsetType>();
+            result.duration = json[json_properties::duration].get<DurationType>();
+            result.recognitionStatus = ToRecognitionStatus(json[json_properties::recoStatus].get<string>());
+
+            switch (result.recognitionStatus)
+            {
+            case RecognitionStatus::Success:
+                if (json.find(json_properties::displayText) != json.end())
+                {
+                    // The DisplayText field will be present only if the RecognitionStatus field has the value Success.
+                    // and the format output is simple
+                    result.displayText = PAL::ToWString(json[json_properties::displayText].get<string>());
+                }
+                else // Detailed
+                {
+                    auto phrases = json.at(json_properties::nbest);
+
+                    double confidence = 0;
+                    for (const auto& object : phrases)
                     {
-                        confidence = currentConfidence;
-                        result.displayText = PAL::ToWString(object.at(json_properties::display).get<string>());
+                        auto currentConfidence = object.at(json_properties::confidence).get<double>();
+                        // Picking up the result with the highest confidence.
+                        if (currentConfidence > confidence)
+                        {
+                            confidence = currentConfidence;
+                            result.displayText = PAL::ToWString(object.at(json_properties::display).get<string>());
+                        }
                     }
                 }
+                connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
+                break;
+            case RecognitionStatus::InitialSilenceTimeout:
+            case RecognitionStatus::InitialBabbleTimeout:
+            case RecognitionStatus::NoMatch:
+            case RecognitionStatus::EndOfDictation:
+                connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
+                break;
+            default:
+                connection->InvokeRecognitionErrorCallback(result.recognitionStatus, json.dump());
+                break;
             }
-            connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
-            break;
-        case RecognitionStatus::InitialSilenceTimeout:
-        case RecognitionStatus::InitialBabbleTimeout:
-        case RecognitionStatus::NoMatch:
-        case RecognitionStatus::EndOfDictation:
-            connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
-            break;
-        default:
-            connection->InvokeRecognitionErrorCallback(result.recognitionStatus, json.dump());
-            break;
         }
-    }
-    else if (path == path::translationHypothesis)
-    {
-        auto speechResult = RetrieveSpeechResult(json);
-        auto translationResult = RetrieveTranslationResult(json, false);
-        // TranslationStatus is always success for translation.hypothesis
-        translationResult.translationStatus = TranslationStatus::Success;
-
-        connection->Invoke([&] { callbacks->OnTranslationHypothesis({
-            std::move(speechResult.json),
-            speechResult.offset,
-            speechResult.duration,
-            std::move(speechResult.text),
-            std::move(translationResult)
-            });
-        });
-    }
-    else if (path == path::translationPhrase)
-    {
-        auto status = ToRecognitionStatus(json.at(json_properties::recoStatus));
-        auto speechResult = RetrieveSpeechResult(json);
-        std::string msg;
-
-        TranslationResult translationResult;
-        switch (status)
+        else if (path == path::translationHypothesis)
         {
-        case RecognitionStatus::Success:
-            translationResult = RetrieveTranslationResult(json, true);
-            break;
-        case RecognitionStatus::InitialSilenceTimeout:
-        case RecognitionStatus::InitialBabbleTimeout:
-        case RecognitionStatus::NoMatch:
-        case RecognitionStatus::EndOfDictation:
+            auto speechResult = RetrieveSpeechResult(json);
+            auto translationResult = RetrieveTranslationResult(json, false);
+            // TranslationStatus is always success for translation.hypothesis
             translationResult.translationStatus = TranslationStatus::Success;
-            break;
-        default:
-            connection->InvokeRecognitionErrorCallback(status, json.dump());
-            break;
-        }
 
-        connection->Invoke([&] { callbacks->OnTranslationPhrase({
-            std::move(speechResult.json),
-            speechResult.offset,
-            speechResult.duration,
-            std::move(speechResult.text),
-            std::move(translationResult),
-            status
+            connection->Invoke([&] {
+                callbacks->OnTranslationHypothesis({std::move(speechResult.json),
+                                                    speechResult.offset,
+                                                    speechResult.duration,
+                                                    std::move(speechResult.text),
+                                                    std::move(translationResult)});
             });
-        });
-    }
-    else if (path == path::translationSynthesisEnd)
-    {
-        TranslationSynthesisEndMsg synthesisEndMsg;
-        std::wstring localReason;
-
-        auto statusHandle = json.find(json_properties::synthesisStatus);
-        if (statusHandle != json.end())
+        }
+        else if (path == path::translationPhrase)
         {
-            synthesisEndMsg.synthesisStatus = ToSynthesisStatus(statusHandle->get<string>());
-            if (synthesisEndMsg.synthesisStatus == SynthesisStatus::InvalidMessage)
+            auto status = ToRecognitionStatus(json.at(json_properties::recoStatus));
+            auto speechResult = RetrieveSpeechResult(json);
+
+            TranslationResult translationResult;
+            switch (status)
             {
-                PROTOCOL_VIOLATION("Invalid synthesis status in synthesis.end message. Json=%s", json.dump().c_str());
-                localReason = L"Invalid synthesis status in synthesis.end message.";
+            case RecognitionStatus::Success:
+                translationResult = RetrieveTranslationResult(json, true);
+                break;
+            case RecognitionStatus::InitialSilenceTimeout:
+            case RecognitionStatus::InitialBabbleTimeout:
+            case RecognitionStatus::NoMatch:
+            case RecognitionStatus::EndOfDictation:
+                translationResult.translationStatus = TranslationStatus::Success;
+                break;
+            default:
+                connection->InvokeRecognitionErrorCallback(status, json.dump());
+                break;
+            }
+
+            if (translationResult.translationStatus == TranslationStatus::Success)
+            {
+                connection->Invoke([&] {
+                    callbacks->OnTranslationPhrase({std::move(speechResult.json),
+                                                    speechResult.offset,
+                                                    speechResult.duration,
+                                                    std::move(speechResult.text),
+                                                    std::move(translationResult),
+                                                    status});
+                });
+            }
+        }
+        else if (path == path::translationSynthesisEnd)
+        {
+            std::string failureReason;
+            bool synthesisSuccess = false;
+
+            auto statusHandle = json.find(json_properties::synthesisStatus);
+            if (statusHandle != json.end())
+            {
+                auto synthesisStatus = statusHandle->get<string>();
+                if (synthesisStatus != "Success" && synthesisStatus != "Error")
+                {
+                    PROTOCOL_VIOLATION("Invalid synthesis status in synthesis.end message. Json=%s", json.dump().c_str());
+                    failureReason = "Invalid synthesis status in synthesis.end message.";
+                }
+                synthesisSuccess = synthesisStatus == "Success";
+            }
+            else
+            {
+                PROTOCOL_VIOLATION("No synthesis status in synthesis.end message. Json=%s", json.dump().c_str());
+                failureReason = "No synthesis status in synthesis.end message.";
+            }
+
+            auto failureHandle = json.find(json_properties::translationFailureReason);
+            if (failureHandle != json.end())
+            {
+                if (synthesisSuccess)
+                {
+                    PROTOCOL_VIOLATION("FailureReason should be empty if SynthesisStatus is success. Json=%s", json.dump().c_str());
+                }
+                failureReason = failureReason + failureHandle->get<string>();
+            }
+
+            if (synthesisSuccess)
+            {
+                AudioOutputChunkMsg msg;
+                msg.streamId = -1;
+                msg.audioBuffer = NULL;
+                msg.audioLength = 0;
+                connection->Invoke([&] { callbacks->OnAudioOutputChunk(msg); });
+            }
+            else
+            {
+                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, failureReason.c_str()); });
             }
         }
         else
         {
-            PROTOCOL_VIOLATION("No synthesis status in synthesis.end message. Json=%s", json.dump().c_str());
-            synthesisEndMsg.synthesisStatus = SynthesisStatus::InvalidMessage;
-            localReason = L"No synthesis status in synthesis.end message.";
-        }
-
-        auto failureHandle = json.find(json_properties::translationFailureReason);
-        if (failureHandle != json.end())
-        {
-            if (synthesisEndMsg.synthesisStatus == SynthesisStatus::Success)
-            {
-                PROTOCOL_VIOLATION("FailureReason should be empty if SynthesisStatus is success. Json=%s", json.dump().c_str());
-            }
-            synthesisEndMsg.failureReason = PAL::ToWString(failureHandle->get<string>());
-        }
-
-        synthesisEndMsg.failureReason = localReason + synthesisEndMsg.failureReason;
-
-        if (synthesisEndMsg.synthesisStatus == SynthesisStatus::Success)
-        {
-            connection->Invoke([&] { callbacks->OnTranslationSynthesisEnd(synthesisEndMsg); });
-        }
-        else
-        {
-            connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, PAL::ToString(synthesisEndMsg.failureReason).c_str()); });
-        }
-    }
-    else
-    {
-        connection->Invoke([&] { callbacks->OnUserMessage({
-            pathStr,
-            string(contentType == nullptr ? "" : contentType),
-            buffer,
-            size
+            connection->Invoke([&] {
+                callbacks->OnUserMessage({pathStr,
+                                          string(contentType == nullptr ? "" : contentType),
+                                          response->buffer,
+                                          response->bufferSize});
             });
-        });
+        }
     }
 }
 

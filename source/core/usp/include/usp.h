@@ -69,11 +69,6 @@ struct Callbacks
     virtual void OnError(bool /*transport*/, ErrorCode /*errorCode*/, const std::string& /*errorMessage*/) {}
 
     /**
-    * A callback function that will be invoked when the first chunk in an audio stream is received from the service.
-    */
-    virtual void OnAudioStreamStart(const AudioStreamStartMsg&) {}
-
-    /**
     * A callback function that will be invoked when a translation.hypothesis message is received from service.
     */
     virtual void OnTranslationHypothesis(const TranslationHypothesisMsg&) {}
@@ -84,14 +79,9 @@ struct Callbacks
     virtual void OnTranslationPhrase(const TranslationPhraseMsg&) {}
 
     /**
-    * A callback function that will be invoked when a translation.synthesis message is received from service.
+    * A callback function that will be invoked when an audio output chunk message is received from service.
     */
-    virtual void OnTranslationSynthesis(const TranslationSynthesisMsg&) {}
-
-    /**
-    * A callback function that will be invoked when a translation.synthesis.end message is received from service.
-    */
-    virtual void OnTranslationSynthesisEnd(const TranslationSynthesisEndMsg&) {}
+    virtual void OnAudioOutputChunk(const AudioOutputChunkMsg&) {}
 
     /**
     * A callback function that will be invoked when a message having a path defined by user is received from service.
@@ -185,6 +175,16 @@ public:
         m_authType(AuthenticationType::SubscriptionKey),
         m_connectionId(connectionId)
     {
+    }
+
+    /**
+    * Sets the audio response format that will be passed to the service in the X-Output-AudioCodec header.
+    * More info can be found here: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-apis
+    */
+    Client& SetAudioResponseFormat(const std::string& format)
+    {
+        m_audioResponseFormat = format;
+        return *this;
     }
 
     /**
@@ -347,6 +347,8 @@ private:
      std::string m_authData;
 
      std::wstring m_connectionId;
+
+     std::string m_audioResponseFormat;
 };
 
 }}}}

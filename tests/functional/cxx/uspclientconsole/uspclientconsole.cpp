@@ -35,59 +35,6 @@ using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
 bool turnEnd = false;
-thread ttsThread;
-
-// TODO: MSFT 1135317 Move TTS to own source file
-// We receive the audio response chunk by chunk (for example from TTS) and store it into a file.
-// Once the entire response is received, we play out the audio file using the audio system of the OS.
-static int TTSRenderLoop(IOBUFFER* ioBuffer)
-{
-    ofstream file("data2.bin", ios::out | ios::binary);
-    vector<char> buffer;
-    AUDIO_SYS_HANDLE hAudio;
-
-    while (IoBufferWaitForNewBytes(ioBuffer, 500) == 0)
-    {
-        int size = IoBufferGetUnReadBytes(ioBuffer);
-        if (size == 0)
-        {
-            printf("Response: Final Audio Chunk received.\n");
-            break;
-        }
-        if ((int)buffer.size() < size) {
-            buffer.resize(size);
-        }
-        IoBufferRead(ioBuffer, buffer.data(), 0, size, 100);
-        file.write(buffer.data(), size);
-    }
-    file.flush();
-    auto fileSize = file.tellp();
-    file.close();
-
-    printf("Response: Playing TTS Audio...\n");
-
-#ifdef __MACH__
-    // TODO: merge 182438c675f0459f91a4c4f53ad5fd1cbba63ef0 from CortanaSDK
-    printf("ERROR: audio system is not yet supported on OSX.");
-#else
-    hAudio = audio_create();
-    audio_output_set_volume(hAudio, 50);
-    if (hAudio == NULL)
-    {
-        printf("WARNING: No audio device");
-        return -1;
-    }
-    audio_playwavfile(hAudio, "test.wav");
-
-    // HACK: Rather than sleeping for the length of the audio...
-    // we should modify audio_playwavfile to have a callback to be called when the audio is done playing.
-    auto numMilliSeconds = (fileSize * 8) / (256);
-    this_thread::sleep_for(chrono::milliseconds(numMilliSeconds));
-#endif
-
-    IoBufferDelete(ioBuffer);
-    return 1;
-}
 
 map<USP::RecognitionStatus, string> recognitionStatusToText =
 {
@@ -157,14 +104,6 @@ virtual void OnError(bool /*transport*/, USP::ErrorCode errorCode, const string&
 virtual void OnUserMessage(const USP::UserMsg& msg) override
 {
     printf("Response: User defined message. Path: %s, contentType: %s, size: %zu, content: %s.\n", msg.path.c_str(), msg.contentType.c_str(), msg.size, msg.buffer);
-}
-
-
-virtual void OnAudioStreamStart(const USP::AudioStreamStartMsg& msg) override
-{
-    printf("Response: First Audio Chunk received.\n");
-    IoBufferAddRef(msg.ioBuffer);
-    ttsThread = thread(TTSRenderLoop, msg.ioBuffer);
 }
 
 virtual void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message) override
@@ -516,11 +455,6 @@ int main(int argc, char* argv[])
     }
 
     connection.reset();
-
-    if (ttsThread.joinable())
-    {
-        ttsThread.join();
-    }
 
     data.close();
 }

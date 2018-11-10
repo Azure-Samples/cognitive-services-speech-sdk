@@ -30,7 +30,6 @@ set(HEADERS
     "${INC_DIR}/usp.h"
     "${INC_DIR}/usperror.h"
     "${INC_DIR}/uspmessages.h"
-    "${INC_DIR}/iobuffer.h"
     )
 
 set(HEADERS_PRIVATE
@@ -42,6 +41,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/propbag.h"
     "${SRC_DIR}/tokenstore.h"
     "${SRC_DIR}/transport.h"
+    "${SRC_DIR}/iobuffer.h"
     )
 
 set(SOURCES
@@ -49,7 +49,6 @@ set(SOURCES
     "${SRC_DIR}/iobuffer.c"
     "${SRC_DIR}/metrics.cpp"
     "${SRC_DIR}/propbag.c"
-    "${SRC_DIR}/responses.cpp"
     "${SRC_DIR}/transport.c"
     "${SRC_DIR}/usp.cpp"
     "${SRC_DIR}/uspimpl.cpp"

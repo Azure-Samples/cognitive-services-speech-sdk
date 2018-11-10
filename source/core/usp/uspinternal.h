@@ -149,7 +149,7 @@ private:
 
     static void OnTransportError(TransportHandle transportHandle, TransportErrorInfo* errorInfo, void* context);
 
-    static void OnTransportData(TransportHandle transportHandle, HTTP_HEADERS_HANDLE responseHeader, const unsigned char* buffer, size_t size, unsigned int errorCode, void* context);
+    static void OnTransportData(TransportHandle transportHandle, TransportResponse* response, void* context);
 
     void InvokeRecognitionErrorCallback(RecognitionStatus status, const std::string& response);
 

@@ -766,8 +766,6 @@ public:
     virtual void InitTranslationRecognitionResult(TranslationStatusCode status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) = 0;
 };
 
-enum class SynthesisStatusCode { Success, SynthesisEnd, Error };
-
 class ISpxTranslationSynthesisResult : public ISpxInterfaceBaseFor<ISpxTranslationSynthesisResult>
 {
 public:
@@ -780,7 +778,7 @@ class ISpxTranslationSynthesisResultInit : public ISpxInterfaceBaseFor<ISpxTrans
 {
 public:
 
-    virtual void InitTranslationSynthesisResult(SynthesisStatusCode status, const uint8_t* audioData, size_t audioLength, const std::wstring& failureReason) = 0;
+    virtual void InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength) = 0;
 };
 
 class ISpxLanguageUnderstandingModel : public ISpxInterfaceBaseFor<ISpxLanguageUnderstandingModel>

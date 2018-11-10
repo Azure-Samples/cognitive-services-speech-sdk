@@ -188,10 +188,9 @@ size_t CSpxRecognitionResult::GetLength() const
     return m_audioLength;
 }
 
-void CSpxRecognitionResult::InitTranslationSynthesisResult(SynthesisStatusCode status, const uint8_t* audioData, size_t audioLength, const wstring& failureReason)
+void CSpxRecognitionResult::InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength)
 {
     SPX_DBG_TRACE_FUNCTION();
-    SPX_DBG_ASSERT(audioLength == 0 || status == SynthesisStatusCode::Success);
 
     m_audioBuffer.assign(audioData, audioData + audioLength);
     m_audioLength = audioLength;
@@ -199,17 +198,6 @@ void CSpxRecognitionResult::InitTranslationSynthesisResult(SynthesisStatusCode s
     m_reason = m_audioLength > 0
         ? ResultReason::SynthesizingAudio
         : ResultReason::SynthesizingAudioCompleted;
-
-    if (status == SynthesisStatusCode::Error)
-    {
-        SPX_DBG_TRACE_VERBOSE("%s: status=SynthesisStatusCode::Error; switching result to ResultReason::Canceled", __FUNCTION__);
-        m_reason = ResultReason::Canceled;
-        m_cancellationReason = CancellationReason::Error;
-        m_cancellationErrorCode = CancellationErrorCode::ServiceError;
-
-        auto errorDetails = PAL::ToString(failureReason);
-        SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
-    }
 }
 
 void CSpxRecognitionResult::SetStringValue(const char* name, const char* value)

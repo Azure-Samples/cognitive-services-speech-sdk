@@ -164,17 +164,29 @@ typedef struct _TransportErrorInfo
  */
 typedef void(*TransportErrorCallback)(TransportHandle transportHandle, TransportErrorInfo* errorInfo, void* context);
 
+typedef enum _ResponseFrameType
+{
+    FRAME_TYPE_UNKNOWN = 0,
+    FRAME_TYPE_TEXT,
+    FRAME_TYPE_BINARY
+} ResponseFrameType;
+
+typedef struct _TransportResponse
+{
+    ResponseFrameType frameType;
+    HTTP_HEADERS_HANDLE responseHeader;
+    const unsigned char* buffer;
+    size_t bufferSize;
+} TransportResponse;
+
 /**
  * The TransportReponseCallback type represents an application-defined
  * status callback function used for signaling when data has been received.
  * @param transportHandle The transport handle.
- * @param responseHeader A response header handle.
- * @param buffer A pointer to the received content.
- * @param bufferLen The length of pBuffer.
- * @param errorCode The transport error code.
+ * @param response Pointer to struct containing response information.
  * @param context A pointer to the application-defined callback context.
  */
-typedef void(*TransportResponseCallback)(TransportHandle transportHandle, HTTP_HEADERS_HANDLE  responseHeader, const unsigned char* buffer, size_t bufferLen, unsigned int errorCode, void* context); 
+typedef void(*TransportResponseCallback)(TransportHandle transportHandle, TransportResponse* response, void* context); 
 
 /**
  * Registers for events from the transport.

@@ -61,16 +61,6 @@ static const char g_RPSDelegationHeaderName[] = "X-Search-DelegationRPSToken";
 
 #define ANSWER_TIMEOUT_MS   15000
 
-typedef struct _TransportStream
-{
-    int id;
-    IOBUFFER* ioBuffer;
-    size_t bufferSize;
-    STRING_HANDLE contentType;
-    void* context;
-    struct _TransportStream* next;
-} TransportStream;
-
 typedef struct _TransportPacket
 {
     struct _TransportPacket*  next;
@@ -79,9 +69,6 @@ typedef struct _TransportPacket
     size_t                    length;
     uint8_t                   buffer[1]; // must be last
 } TransportPacket;
-
-static TransportStream* TransportCreateStream(TransportHandle transportHandle, int streamId, const char* contentType, void* context);
-static TransportStream* TransportGetStream(TransportHandle transportHandle, int streamId);
 
 typedef enum _TRANSPORT_STATE
 {
@@ -106,7 +93,6 @@ typedef struct _TransportRequest
         size_t pathLen;
         WSIO_CONFIG config;
         bool chunksent;
-        TransportStream *streamHead;
     } ws;
     const char*                  path;
     TransportResponseCallback    onRecvResponse;
@@ -300,64 +286,6 @@ static char* ConstructHeadersString(HTTP_HEADERS_HANDLE httpHeadersHandle)
     return result;
 }
 
-static int OnStreamChunk(TransportStream* stream, const uint8_t* buffer, size_t bufferSize)
-{
-    if (NULL == stream)
-    {
-        return -1;
-    }
-
-    if (NULL == stream->ioBuffer)
-    {
-        stream->ioBuffer = IoBufferNew();
-        if (NULL == stream->ioBuffer)
-        {
-            LogError("IoBufferNew failed");
-            return -1;
-        }
-    }
-
-    if (NULL == stream->contentType)
-    {
-        PROTOCOL_VIOLATION("Content-Type not defined");
-        return -1;
-    }
-
-    if (0 == stream->bufferSize)
-    {
-        LogInfo("First chunk for %s", STRING_c_str(stream->contentType));
-        metrics_tts_first_chunk();
-
-        ContentDispatch(
-            stream->context,
-            NULL,  // path
-            STRING_c_str(stream->contentType),
-            stream->ioBuffer,
-            NULL, // responseContentHandle
-            stream->bufferSize);
-    }
-    else if (0 == bufferSize)
-    {
-        LogInfo("Last chunk for %s", STRING_c_str(stream->contentType));
-        metrics_tts_last_chunk();
-    }
-
-    if (bufferSize != 0)
-    {
-        IoBufferWrite(stream->ioBuffer, buffer, 0, (int)bufferSize);
-        stream->bufferSize += bufferSize;
-    }
-    else if (stream->bufferSize > 0 && NULL != stream->contentType)
-    {
-        IoBufferWrite(stream->ioBuffer, 0, 0, 0); // mark buffer completed
-        IoBufferDelete(stream->ioBuffer);
-        stream->ioBuffer = 0;
-        stream->bufferSize = 0;
-    }
-
-    return 0;
-}
-
 static void OnTransportClosed(TransportRequest* request)
 {
     request->isOpen = false;
@@ -508,15 +436,25 @@ static void OnWSFrameSent(void* context, WS_SEND_FRAME_RESULT sendResult)
     free(msg);
 }
 
+ResponseFrameType WSFrameEnumToResponseFrameEnum(WS_FRAME_TYPE frameType)
+{
+    switch (frameType)
+    {
+    case WS_FRAME_TYPE_TEXT:
+        return FRAME_TYPE_TEXT;
+    case WS_FRAME_TYPE_BINARY:
+        return FRAME_TYPE_BINARY;
+    default:
+        return FRAME_TYPE_UNKNOWN;
+    }
+}
+
 static void OnWSFrameReceived(void* context, unsigned char frame_type, const unsigned char* buffer, size_t size)
 {
     TransportRequest*  request = (TransportRequest*)context;
     HTTP_HEADERS_HANDLE responseHeadersHandle;
     int offset;
     uint16_t headerSize;
-    const char* value;
-    TransportStream* stream;
-    int streamId;
 
     if (context && request->onRecvResponse)
     {
@@ -560,38 +498,18 @@ static void OnWSFrameReceived(void* context, unsigned char frame_type, const uns
             goto Exit;
         }
 
-        // optional StreamId header
-        value = HTTPHeaders_FindHeaderValue(responseHeadersHandle, g_KeywordStreamId);
-        if (NULL != value)
-        {
-            streamId = atoi(value);
-            stream = TransportGetStream((TransportHandle)request, streamId);
-            if (NULL == stream)
-            {
-                stream = TransportCreateStream(
-                    (TransportHandle)request,
-                    streamId,
-                    HTTPHeaders_FindHeaderValue(responseHeadersHandle, g_keywordContentType),
-                    request->context);
-                if (NULL == stream)
-                {
-                    LogError("alloc TransportStream failed");
-                    goto Exit;
-                }
-            }
+        TransportResponse response;
+        response.frameType = WSFrameEnumToResponseFrameEnum(frame_type);
+        response.responseHeader = responseHeadersHandle;
+        response.buffer = buffer + offset;
+        response.bufferSize = size - offset;
 
-            (void)OnStreamChunk(stream, buffer + offset, size - offset);
-        }
-        else
-        {
-            request->onRecvResponse((TransportHandle)request, responseHeadersHandle, buffer + offset, size - offset, 0, request->context);
-        }
+        request->onRecvResponse((TransportHandle)request, &response, request->context);
 
     Exit:
         HTTPHeaders_Free(responseHeadersHandle);
     }
 }
-
 
 static void DnsComplete(DnsCacheHandle handle, int error, DNS_RESULT_HANDLE resultHandle, void *context)
 {
@@ -936,8 +854,6 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
 void TransportRequestDestroy(TransportHandle transportHandle)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
-    TransportStream*  stream;
-    TransportStream*  streamNext = NULL;
 
     if (!request)
     {
@@ -963,23 +879,6 @@ void TransportRequestDestroy(TransportHandle transportHandle)
         }
 
         uws_client_destroy(request->ws.WSHandle);
-    }
-
-    for (stream = request->ws.streamHead; NULL != stream; stream = streamNext)
-    {
-        streamNext = stream->next;
-
-        if (stream->ioBuffer)
-        {
-            IoBufferDelete(stream->ioBuffer);
-        }
-
-        if (stream->contentType)
-        {
-            STRING_delete(stream->contentType);
-        }
-
-        free(stream);
     }
 
     metrics_transport_closed();
@@ -1479,79 +1378,6 @@ int TransportSetTokenStore(TransportHandle transportHandle, TokenStore tokenStor
     request->tokenStore = tokenStore;
 
     return 0;
-}
-
-static TransportStream* TransportGetStream(TransportHandle transportHandle, int streamId)
-{
-    TransportStream* stream;
-    TransportRequest* request = (TransportRequest*)transportHandle;
-
-    if (NULL == request)
-    {
-        return NULL;
-    }
-
-    for (stream = request->ws.streamHead; stream != NULL; stream = stream->next)
-    {
-        if (stream->id == streamId)
-        {
-            return stream;
-        }
-    }
-
-    return NULL;
-}
-
-static TransportStream* TransportCreateStream(TransportHandle transportHandle, int streamId, const char* contentType, void* context)
-{
-    TransportRequest* request = (TransportRequest*)transportHandle;
-    TransportStream* stream;
-
-    if (NULL == request || !contentType)
-    {
-        return NULL;
-    }
-
-    for (stream = request->ws.streamHead; stream != NULL; stream = stream->next)
-    {
-        if (stream->bufferSize == 0)
-        {
-            break;
-        }
-    }
-
-    // stream wasn't found, prepare a new one.
-    if (NULL == stream)
-    {
-        // there wasn't a free stream, alloc a new one
-        stream = (TransportStream*)malloc(sizeof(TransportStream));
-        if (NULL == stream)
-        {
-            LogError("alloc TransportStream failed");
-            return NULL;
-        }
-
-        memset(stream, 0, sizeof(TransportStream));
-
-        // attach the stream to the list
-        stream->next = request->ws.streamHead;
-        request->ws.streamHead = stream;
-    }
-
-    stream->id = streamId;
-    stream->context = context;
-
-    // copy the content type
-    if (NULL == stream->contentType)
-    {
-        stream->contentType = STRING_construct(contentType);
-    }
-    else if (NULL == stream->contentType)
-    {
-        STRING_copy(stream->contentType, contentType);
-    }
-
-    return stream;
 }
 
 void TransportSetDnsCache(TransportHandle transportHandle, DnsCacheHandle dnsCache)

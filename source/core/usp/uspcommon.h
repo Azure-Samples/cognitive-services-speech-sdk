@@ -94,6 +94,7 @@ namespace USP {
         const std::string translationPhrase = "translation.phrase";
         const std::string translationSynthesis = "translation.synthesis";
         const std::string translationSynthesisEnd = "translation.synthesis.end";
+        const std::string audio = "audio";
     }
     //Todo: Figure out what to do about user agent build hash and version number
     const auto g_userAgent = "CortanaSDK (Windows;Win32;DeviceType=Near;SpeechClient=2.0.4)";
@@ -105,6 +106,7 @@ namespace USP {
         const auto searchDelegationRPSToken = "X-Search-DelegationRPSToken";
         const auto audioResponseFormat = "X-Output-AudioCodec";
         const auto contentType = "Content-Type";
+        const auto streamId = "X-StreamId";
         const auto requestId = "X-RequestId";
     }
 
@@ -144,35 +146,4 @@ extern const char* g_messagePathTurnEnd;
 extern const char* g_messagePathSpeechEndDetected;
 extern const char* g_messagePathSpeechStartDetected;
 
-#endif
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    typedef struct BUFFER_TAG* BUFFER_HANDLE;
-    typedef struct _IOBUFFER IOBUFFER;
-
-    /**
-    * Handles response messages from service based on content type.
-    * @param context The content context.
-    * @param path The content path.
-    * @param mime The content type.
-    * @param ioBuffer The pointer to ioBuffer.
-    * @param responseContent The content buffer of the response.
-    * @param responseSize The size of responseContent.
-    * @return A UspResult indicating success or error.
-    */
-    UspResult ContentDispatch(
-        void* context,
-        const char* path,
-        const char* mime,
-        IOBUFFER* ioBuffer,
-        BUFFER_HANDLE responseContent,
-        size_t responseSize);
-
-#ifdef __cplusplus
-}
 #endif

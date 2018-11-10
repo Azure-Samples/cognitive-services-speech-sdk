@@ -1030,63 +1030,21 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
     }
 }
 
-void CSpxUspRecoEngineAdapter::OnTranslationSynthesis(const USP::TranslationSynthesisMsg& message)
+void CSpxUspRecoEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg& message)
 {
-    SPX_DBG_TRACE_VERBOSE("Response: Translation.Synthesis message. Audio data size: %d\n", message.audioLength);
+    SPX_DBG_TRACE_VERBOSE("Response: Audio output chunk message. Audio data size: %d\n", message.audioLength);
 
-    SPX_DBG_ASSERT(message.audioLength > 0);
-    if (message.audioLength > 0)
+    InvokeOnSite([this, &message](const SitePtr &site)
     {
-        InvokeOnSite([this, &message](const SitePtr& site)
-        {
-            auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-            auto result = factory->CreateFinalResult(nullptr, ResultReason::SynthesizingAudio, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, CancellationErrorCode::NoError, L"", 0, 0);
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
+        auto result = factory->CreateFinalResult(nullptr, ResultReason::SynthesizingAudio, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, CancellationErrorCode::NoError, L"", 0, 0);
 
-            // Update our result to be an "TranslationSynthesis" result.
-            auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
-            initTranslationResult->InitTranslationSynthesisResult(SynthesisStatusCode::Success, message.audioBuffer, message.audioLength, L"");
+        // Update our result to be an "TranslationSynthesis" result.
+        auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
+        initTranslationResult->InitTranslationSynthesisResult(message.audioBuffer, message.audioLength);
 
-            site->FireAdapterResult_TranslationSynthesis(this, result);
-        });
-    }
-}
-
-void CSpxUspRecoEngineAdapter::OnTranslationSynthesisEnd(const USP::TranslationSynthesisEndMsg& message)
-{
-    SPX_DBG_TRACE_VERBOSE("Response: Translation.Synthesis.End message. Status: %d, Reason: %ls\n", (int)message.synthesisStatus, message.failureReason.c_str());
-
-    auto site = GetSite();
-    if (!site)
-        return;
-
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-    auto result = factory->CreateFinalResult(nullptr, ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, CancellationErrorCode::NoError, L"", 0, 0);
-
-    // Update our result to be an "TranslationSynthesis" result.
-    auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
-    SynthesisStatusCode status;
-    switch (message.synthesisStatus)
-    {
-    case ::USP::SynthesisStatus::Success: // Indicates the end of synthesis.
-        status = SynthesisStatusCode::SynthesisEnd;
-        break;
-    case ::USP::SynthesisStatus::Error:
-        status = SynthesisStatusCode::Error;
-        break;
-    case ::USP::SynthesisStatus::InvalidMessage:
-        // The failureReason contains additional error messages.
-        // Todo: have better error handling for different statuses.
-        status = SynthesisStatusCode::Error;
-        break;
-    default:
-        status = SynthesisStatusCode::Error;
-        SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
-        break;
-    }
-    initTranslationResult->InitTranslationSynthesisResult(status, nullptr, 0, message.failureReason);
-
-    // Fire the result
-    site->FireAdapterResult_TranslationSynthesis(this, result);
+        site->FireAdapterResult_TranslationSynthesis(this, result);
+    });
 }
 
 void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)

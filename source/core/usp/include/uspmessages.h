@@ -12,8 +12,6 @@
 #include <vector>
 #include <map>
 
-#include "iobuffer.h"
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -44,14 +42,6 @@ enum class RecognitionStatus : int
 * Represents translation status in translation phrase.
 */
 enum class TranslationStatus : int
-{
-    Success, Error, InvalidMessage
-};
-
-/**
-* Represents synthesis status in translation synthesis.
-*/
-enum class SynthesisStatus : int
 {
     Success, Error, InvalidMessage
 };
@@ -195,17 +185,6 @@ struct SpeechPhraseMsg : public SpeechMsg
 };
 
 /**
- * Represents that the start of an audio stream has been received.
- */
-struct AudioStreamStartMsg
-{
-    // Whenever a chunk in the audio stream is received, it is appended to this ioBuffer.
-    // Reading in a data chunk of size 0, or checking the ioBuffer->hasCompleted flag indicates
-    // that the buffer has finished receiving new data.
-    IOBUFFER* ioBuffer { nullptr };
-};
-
-/**
 * Represents translation results.
 */
 struct TranslationResult
@@ -243,22 +222,13 @@ struct TranslationPhraseMsg : public TranslationHypothesisMsg
 };
 
 /**
-* Represents translation.synthesis message
+* Represents an audio output chunk message
 */
-struct TranslationSynthesisMsg
+struct AudioOutputChunkMsg
 {
-    const uint8_t* audioBuffer;
-    size_t audioLength { 0 };
-};
-
-/**
-* Represents translation.synthesis.end message
-*/
-struct TranslationSynthesisEndMsg
-{
-    SynthesisStatus synthesisStatus{ SynthesisStatus::Error };
-    // A string indicates failure reasons in case that the synthesisStatus is an error.
-    std::wstring failureReason;
+    int streamId { -1 };
+    const uint8_t* audioBuffer { nullptr };
+    size_t audioLength { 0 };    
 };
 
 /**

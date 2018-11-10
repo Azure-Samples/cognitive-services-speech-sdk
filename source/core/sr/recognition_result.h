@@ -71,7 +71,7 @@ public:
     size_t GetLength() const override;
 
     // ISpxTranslationSynthesisResultInit
-    void InitTranslationSynthesisResult(SynthesisStatusCode status, const uint8_t* audioData, size_t audioLength, const std::wstring& failureReason) override;
+    void InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength) override;
 
     // --- ISpxNamedProperties (overrides)
     void SetStringValue(const char* name, const char* value) override;
