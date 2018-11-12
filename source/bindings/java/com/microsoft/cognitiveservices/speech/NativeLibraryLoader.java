@@ -62,8 +62,8 @@ class NativeLibraryLoader {
 
             // Load the libraries in the order provided by the NATIVE_MANIFEST
             for (String libName: nativeList) {
-                String fullPathName = new File(tempDir.getAbsolutePath(), libName).getAbsolutePath();
-                if(!fullPathName.startsWith(tempDir.getAbsolutePath())) {
+                String fullPathName = new File(tempDir.getCanonicalPath(), libName).getCanonicalPath();
+                if(!fullPathName.startsWith(tempDir.getCanonicalPath())) {
                     throw new SecurityException("illegal path");
                 }
 
@@ -96,46 +96,58 @@ class NativeLibraryLoader {
     private static String[] getResourceLines(String resourceName) throws IOException {
         // Read resource file if it exists
         InputStream inStream = SpeechConfig.class.getResourceAsStream(getResourcesPath() + resourceName);
-
-        // in case there is no embedded jni-manifest, use fixed names
-        if (inStream == null) {
-            String operatingSystem = System.getProperty("os.name").toLowerCase();
-
-            if (operatingSystem.contains("linux")) {
-                return new String[] {
-                        "libMicrosoft.CognitiveServices.Speech.core.so",
-                        "libMicrosoft.CognitiveServices.Speech.java.bindings.so"
-                };
-            }
-            else if (operatingSystem.contains("windows")) {
-                return new String[] {
-                        "Microsoft.CognitiveServices.Speech.core.dll",
-                        "Microsoft.CognitiveServices.Speech.java.bindings.dll"
-                };
-            }
-            else if (operatingSystem.contains("mac") || operatingSystem.contains("darwin")) {
-                return new String[] {
-                        "libMicrosoft.CognitiveServices.Speech.core.dylib",
-                        "libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
-                };
-            }
-
-            throw new UnsatisfiedLinkError(
-                    String.format("The Speech SDK doesn't currently have native support for operating system: %s", operatingSystem));
-        }
-
-        BufferedReader resourceReader = new BufferedReader(new InputStreamReader(inStream, "UTF-8"));
-
+        BufferedReader resourceReader = null;
         ArrayList<String> lines = new ArrayList<String>();
-        for (String line; (line = resourceReader.readLine()) != null; ) {
-            // Note: the additional null check if for fortify.
-            if(line != null && !line.isEmpty()) {
+
+        try {
+            // in case there is no embedded jni-manifest, use fixed names
+            if (inStream == null) {
+                String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
+
+                if (operatingSystem.contains("linux")) {
+                    return new String[] {
+                            "libMicrosoft.CognitiveServices.Speech.core.so",
+                            "libMicrosoft.CognitiveServices.Speech.java.bindings.so"
+                    };
+                }
+                else if (operatingSystem.contains("windows")) {
+                    return new String[] {
+                            "Microsoft.CognitiveServices.Speech.core.dll",
+                            "Microsoft.CognitiveServices.Speech.java.bindings.dll"
+                    };
+                }
+                else if (operatingSystem.contains("mac") || operatingSystem.contains("darwin")) {
+                    return new String[] {
+                            "libMicrosoft.CognitiveServices.Speech.core.dylib",
+                            "libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
+                    };
+                }
+
+                throw new UnsatisfiedLinkError(
+                        String.format("The Speech SDK doesn't currently have native support for operating system: %s", operatingSystem));
+            }
+
+            resourceReader = new BufferedReader(new InputStreamReader(inStream, "UTF-8"));
+
+            int numLibs = 0;
+            final int maxLibNameLength = 128;
+            for (String line; (numLibs < 10) && (line = resourceReader.readLine()) != null; numLibs++) {
+                // strip all whitespace at the endings.
+                line = line.trim();
+
+                // validate input
+                if(line.isEmpty() || line.length() > maxLibNameLength || line.indexOf('\n') >= 0) {
+                    continue;
+                }
+
                 lines.add(line);
             }
         }
+        finally {
+            safeClose(resourceReader);
+            safeClose(inStream);
+        }
 
-        safeClose(resourceReader);
-        safeClose(inStream);
         return lines.toArray(new String[lines.size()]);
     }
 
@@ -170,9 +182,9 @@ class NativeLibraryLoader {
     }
 
     private static void extractResourceFromPath(String libName, String prefix) throws IOException {
-        File temp = new File(tempDir.getAbsolutePath(), libName);
-        if (!temp.getAbsolutePath().startsWith(tempDir.getAbsolutePath())) {
-            throw new SecurityException("illegal name " + temp.getAbsolutePath());
+        File temp = new File(tempDir.getCanonicalPath(), libName);
+        if (!temp.getCanonicalPath().startsWith(tempDir.getCanonicalPath())) {
+            throw new SecurityException("illegal name " + temp.getCanonicalPath());
         }
 
         temp.createNewFile();
@@ -181,7 +193,7 @@ class NativeLibraryLoader {
         if (!temp.exists()) {
             throw new FileNotFoundException(String.format(
                     "Temporary file %s could not be created. Make sure you can write to this location.",
-                    temp.getAbsolutePath()));
+                    temp.getCanonicalPath()));
         }
 
         String path = prefix + libName;

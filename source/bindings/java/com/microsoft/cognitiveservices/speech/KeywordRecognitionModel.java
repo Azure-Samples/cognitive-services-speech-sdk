@@ -61,7 +61,7 @@ public class KeywordRecognitionModel implements Closeable
             else {
                 // if not zipped, just take the original file.
                 inputStream.close();
-                ret = new KeywordRecognitionModel(com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel.FromFile(f.getAbsolutePath()));
+                ret = new KeywordRecognitionModel(com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel.FromFile(f.getCanonicalPath()));
             }
 
             return ret;
@@ -97,9 +97,9 @@ public class KeywordRecognitionModel implements Closeable
         String tempFolder = System.getProperty("java.io.tmpdir");
         Contracts.throwIfNullOrWhitespace(tempFolder, "tempFolder");
 
-        File kwsRootDirectory = new File(tempFolder, "speech-sdk-keyword-" + name).getAbsoluteFile();
-        if(!kwsRootDirectory.getAbsolutePath().startsWith(tempFolder)) {
-            throw new IOException("invalid kws temp directory " + kwsRootDirectory.getAbsolutePath());
+        File kwsRootDirectory = new File(tempFolder, "speech-sdk-keyword-" + name).getCanonicalFile();
+        if(!kwsRootDirectory.getCanonicalPath().startsWith(tempFolder)) {
+            throw new IOException("invalid kws temp directory " + kwsRootDirectory.getCanonicalPath());
         }
 
         if(!kwsRootDirectory.exists()) {
@@ -123,17 +123,20 @@ public class KeywordRecognitionModel implements Closeable
                     if(zipEntry.isDirectory())
                         continue;
 
-                    String zipEntryName = zipEntry.getName();
+                    String zipEntryName = "" + zipEntry.getName();
+                    if(zipEntryName.length() > 128 || zipEntryName.contains("..")) {
+                        zipEntryName = "";
+                    }
                     Contracts.throwIfNullOrWhitespace(zipEntryName, "zipEntry.name");
 
                     File outputFile = new File(kwsRootDirectory, zipEntryName);
-                    if(!outputFile.getAbsolutePath().startsWith(kwsRootDirectory.getAbsolutePath())) {
-                        throw new IOException("invalid file " + outputFile.getAbsolutePath());
+                    if(!outputFile.getCanonicalPath().startsWith(kwsRootDirectory.getCanonicalPath())) {
+                        throw new IOException("invalid file " + outputFile.getCanonicalPath());
                     }
 
                     if(outputFile.exists()) {
                         if (!outputFile.delete()) {
-                            throw new IllegalArgumentException("could not delete " + outputFile.getAbsolutePath());
+                            throw new IllegalArgumentException("could not delete " + outputFile.getCanonicalPath());
                         }
                     }
 
@@ -172,7 +175,7 @@ public class KeywordRecognitionModel implements Closeable
             throw new IllegalArgumentException("zip did not contain kws.table");
         }
 
-        return new KeywordRecognitionModel(com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel.FromFile(kwsTableFile.getAbsolutePath()));
+        return new KeywordRecognitionModel(com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel.FromFile(kwsTableFile.getCanonicalPath()));
     }
 
     /**
