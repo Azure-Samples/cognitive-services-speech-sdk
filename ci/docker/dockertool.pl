@@ -73,15 +73,15 @@ my %images = (
   },
   oobedevcpp_ubuntu1604_x64 => {
     version => 2,
-    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps test_deps/), 'builduser'],
+    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps test_deps/), 'builduser'],
   },
   oobedevcpp_ubuntu1604_x86 => {
     version => 1,
-    spec => ['from-ubuntu1604-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps test_deps/), 'builduser'],
+    spec => ['from-ubuntu1604-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps test_deps/), 'builduser'],
   },
-  oobedevjre_ubuntu1604_x64 => {
+  oobejre_ubuntu1604_x64 => {
     version => 1,
-    spec => [qw/from-ubuntu1604-x64 oobedeps jreoobedeps builduser/],
+    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobejre_ubuntu1604_deps test_deps/), 'builduser'],
   },
   oobedevdnc20_ubuntu1604_x64 => {
     version => 1,

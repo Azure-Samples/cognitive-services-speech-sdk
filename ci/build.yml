@@ -624,17 +624,13 @@ phases:
     displayName: Patch and build samples
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevjre_ubuntu1604_x64
+      imageBase: oobejre_ubuntu1604_x64
       outvarImage: DOCKER_IMAGE
   - bash: |
       set -e -x -o pipefail
       cp "$(PathToJar)" $(Build.Repository.LocalPath)
       docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$(DOCKER_IMAGE)" bash - <<"SCRIPT"
-        /test/tests/input/audio/whatstheweatherlike.wav \
-
         set -e -x -o pipefail
-        DEBIAN_FRONTEND=noninteractive apt-get update --yes
-        DEBIAN_FRONTEND=noninteractive apt-get install --quiet --no-install-recommends --yes expect
         PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
         pulseaudio -D --exit-idle-time=-1
         sleep 1.5
