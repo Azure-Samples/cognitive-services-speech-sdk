@@ -821,6 +821,7 @@ phases:
     inputs:
       artifactName: Windows
       downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: '**/*.nupkg'
   - template: get-docker-image.yml
     parameters:
       imageBase: oobedevdnc20_ubuntu1604_x64

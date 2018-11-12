@@ -84,8 +84,8 @@ my %images = (
     spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobejre_ubuntu1604_deps test_deps/), 'builduser'],
   },
   oobedevdnc20_ubuntu1604_x64 => {
-    version => 1,
-    spec => [qw/from-ubuntu1604-x64 oobedeps netcoreruntime20 builduser/],
+    version => 2,
+    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps test_deps/), 'oobedevdnc20_ubuntu1604_x64_deps', 'builduser'],
   },
 );
 
