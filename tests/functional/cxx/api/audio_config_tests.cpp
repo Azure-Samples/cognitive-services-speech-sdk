@@ -11,6 +11,7 @@
 
 #include "test_utils.h"
 #include "file_utils.h"
+#include "recognizer_utils.h"
 
 #include "speechapi_cxx.h"
 #include "mock_controller.h"
@@ -20,11 +21,6 @@ using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace std;
-
-static string get_input_file()
-{
-    return Config::InputDir + "/audio/whatstheweatherlike.wav";
-}
 
 static std::shared_ptr<SpeechConfig> SpeechConfigForAudioConfigTests()
 {
@@ -37,10 +33,11 @@ TEST_CASE("Audio Config Basics", "[api][cxx][audio]")
 {
     SPXTEST_SECTION("Audio Pull Stream works")
     {
-        SPXTEST_REQUIRE(exists(PAL::ToWString(get_input_file())));
+        weather.UpdateFullFilename(Config::InputDir);
+        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
 
         // Prepare for the stream to be "Pulled"
-        auto fs = OpenWaveFile(get_input_file());
+        auto fs = OpenWaveFile(weather.m_audioFilename);
 
         // Create the "pull stream" object with C++ lambda callbacks
         auto pullStream = AudioInputStream::CreatePullStream(
@@ -58,7 +55,8 @@ TEST_CASE("Audio Config Basics", "[api][cxx][audio]")
     }
     SPXTEST_SECTION("Audio Push Stream works")
     {
-        SPXTEST_REQUIRE(exists(PAL::ToWString(get_input_file())));
+        weather.UpdateFullFilename(Config::InputDir);
+        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
 
         // Create the recognizer "with stream input" with a "push stream"
         auto config = SpeechConfigForAudioConfigTests();
@@ -68,7 +66,7 @@ TEST_CASE("Audio Config Basics", "[api][cxx][audio]")
 
         // Prepare to use the "Push stream" by opening the file, and moving to head of data chunk
         FILE* hfile = nullptr;
-        PAL::fopen_s(&hfile, get_input_file().c_str(), "rb");
+        PAL::fopen_s(&hfile, weather.m_audioFilename.c_str(), "rb");
         fseek(hfile, 44, SEEK_CUR);
 
         // Set up a lambda we'll use to push the data

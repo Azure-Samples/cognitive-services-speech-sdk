@@ -101,7 +101,7 @@ void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, ResultReaso
         SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
     }
 
-    SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
+    SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls reason=%d, cancellationReason=%d, text='%S'", __FUNCTION__, m_resultId.c_str(), (int)m_reason, (int)m_cancellationReason, m_text.c_str());
 }
 
 wstring CSpxRecognitionResult::GetIntentId()

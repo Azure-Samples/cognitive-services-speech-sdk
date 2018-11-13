@@ -69,7 +69,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
         (void)(client);
     }
 
-    wstring input_file(PAL::ToWString(Config::InputDir + "/audio/whatstheweatherlike.wav"));
+    string input_file{ Config::InputDir + "/audio/whatstheweatherlike.wav" };
     REQUIRE(exists(input_file));
 
     SECTION("usp can be used to upload binary data")

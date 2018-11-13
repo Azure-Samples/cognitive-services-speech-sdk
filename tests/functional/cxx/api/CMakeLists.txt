@@ -9,6 +9,7 @@ include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
 include_directories("${COMMON}/include")
 include_directories(${TEST_INCLUDE})
+include_directories(${SRC_DIR})
 
 set(SOURCES
     "${SRC_DIR}/main.cpp"
@@ -16,6 +17,7 @@ set(SOURCES
     "${SRC_DIR}/speech_recognizer_tests.cpp"
     "${SRC_DIR}/intent_recognizer_tests.cpp"
     "${SRC_DIR}/speech_event_signal_tests.cpp"
+    "${SRC_DIR}/recognizer_utils.cpp"
     )
 
 source_group("Source Files" FILES ${SOURCES})

@@ -10,6 +10,7 @@
 
 #include "test_utils.h"
 #include "file_utils.h"
+#include "recognizer_utils.h"
 
 #include "speechapi_cxx.h"
 
@@ -32,11 +33,11 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 {
     SPXTEST_SECTION("Intent Recognition works")
     {
-        string input_file(Config::InputDir + "/audio/TurnOnTheLamp.wav");
-        SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
+        turnOnLamp.UpdateFullFilename(Config::InputDir);        
+        SPXTEST_REQUIRE(exists(turnOnLamp.m_audioFilename));
 
         auto config = SpeechConfigForIntentTests();
-        auto audioConfig = AudioConfig::FromWavFileInput(input_file);
+        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_audioFilename);
         auto recognizer = IntentRecognizer::FromConfig(config, audioConfig);
 
         SPXTEST_REQUIRE(!Config::LuisAppId.empty());

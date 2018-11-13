@@ -55,12 +55,12 @@ namespace Config
 }
 
 
-inline bool exists(const std::wstring& name) {
-    return std::ifstream(PAL::ToString(name).c_str()).good();
+inline bool exists(const std::string& name) {
+    return std::ifstream(name.c_str()).good();
 }
 
-inline std::ifstream get_stream(const std::wstring& name) {
-    return std::ifstream(PAL::ToString(name).c_str(), std::ifstream::binary);
+inline std::ifstream get_stream(const std::string& name) {
+    return std::ifstream(name.c_str(), std::ifstream::binary);
 }
 
 typedef std::linear_congruential_engine<uint_fast32_t, 1664525, 1013904223, UINT_FAST32_MAX> random_engine;
@@ -133,7 +133,3 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);  \
     SPXTEST_REQUIRE(!result->Text.empty()); } while (0)
 
-void UseMocks(bool value);
-bool IsUsingMocks(bool uspMockRequired = true);
-int ReadBuffer(std::fstream& fs, uint8_t* dataBuffer, uint32_t size);
-std::fstream OpenWaveFile(const std::string& filename);

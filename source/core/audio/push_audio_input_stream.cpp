@@ -11,6 +11,8 @@
 #include <cstring>
 #include <chrono>
 
+// change it to 1 to debug.
+#define TURN_ON_VERBOSE_AUDIO_DEBUGGING 0
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -33,18 +35,21 @@ void CSpxPushAudioInputStream::SetFormat(SPXWAVEFORMATEX* format)
     // Allocate the buffer for the format
     auto formatSize = sizeof(SPXWAVEFORMATEX) + format->cbSize;
     m_format = SpxAllocWAVEFORMATEX(formatSize);
-
+    SPX_DBG_TRACE_VERBOSE_IF(TURN_ON_VERBOSE_AUDIO_DEBUGGING, "CSpxPushAudioInputStream::SetFormat is called with format 0x%x", format);
     // Copy the format
     memcpy(m_format.get(), format, formatSize);
 }
 
 void CSpxPushAudioInputStream::SetRealTimePercentage(uint8_t percentage)
 {
+    SPX_DBG_TRACE_VERBOSE_IF(TURN_ON_VERBOSE_AUDIO_DEBUGGING, "SetRealTimePercentage is %d", percentage);
+
     m_simulateRealtimePercentage = percentage;
 }
 
 void CSpxPushAudioInputStream::Write(uint8_t* buffer, uint32_t size)
 {
+    SPX_DBG_TRACE_VERBOSE_IF(TURN_ON_VERBOSE_AUDIO_DEBUGGING, "CSpxPushAudioInputStream::Write buffer %x size=%d", buffer, size);
     if (buffer != nullptr && size > 0)
     {
         WriteBuffer(buffer, size);
@@ -58,6 +63,7 @@ void CSpxPushAudioInputStream::Write(uint8_t* buffer, uint32_t size)
 uint16_t CSpxPushAudioInputStream::GetFormat(SPXWAVEFORMATEX* formatBuffer, uint16_t formatSize)
 {
     uint16_t formatSizeRequired = sizeof(SPXWAVEFORMATEX) + m_format->cbSize;
+    SPX_DBG_TRACE_VERBOSE_IF(TURN_ON_VERBOSE_AUDIO_DEBUGGING, "CSpxPushAudioInputStream::GetFormat is called formatBuffer is %s formatSize=%d", formatBuffer? "not null":"null", formatSize);
 
     if (formatBuffer != nullptr)
     {
@@ -70,7 +76,7 @@ uint16_t CSpxPushAudioInputStream::GetFormat(SPXWAVEFORMATEX* formatBuffer, uint
 
 uint32_t CSpxPushAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
 {
-    SPX_DBG_TRACE_VERBOSE("%s: bytesToRead=%d", __FUNCTION__, bytesToRead);
+    SPX_DBG_TRACE_VERBOSE("CSpxPushAudioInputStream::Read: bytesToRead=%d", bytesToRead);
 
     uint32_t totalBytesRead = 0;
     while (bytesToRead > 0)
@@ -93,6 +99,8 @@ uint32_t CSpxPushAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
         // If we still don't have a buffer to work with...
         if (m_bytesLeftInBuffer == 0)
         {
+             SPX_DBG_TRACE_VERBOSE_IF(TURN_ON_VERBOSE_AUDIO_DEBUGGING, "CSpxPushAudioInputStream::Read: endOfStream is %s", m_endOfStream ? "true" : "false");
+
             if (m_endOfStream)
             {
                 // Caller told us we're done; we're outta here!
@@ -124,7 +132,7 @@ uint32_t CSpxPushAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
         SimulateRealtime(bytesThisLoop);
     }
 
-    SPX_DBG_TRACE_VERBOSE("%s: totalBytesRead=%d", __FUNCTION__, totalBytesRead);
+    SPX_DBG_TRACE_VERBOSE("CSpxPushAudioInputStream::Read: totalBytesRead=%d", totalBytesRead);
     return totalBytesRead;
 }
 
@@ -162,6 +170,7 @@ bool CSpxPushAudioInputStream::WaitForMoreData()
 void CSpxPushAudioInputStream::SignalEndOfStream()
 {
     std::unique_lock<std::mutex> lock(m_mutex);
+    SPX_DBG_TRACE_VERBOSE_IF(TURN_ON_VERBOSE_AUDIO_DEBUGGING, "Signal End of Stream is called");
     m_endOfStream = true;
     m_cv.notify_all();
 }
