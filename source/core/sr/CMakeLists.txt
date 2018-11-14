@@ -34,6 +34,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/usp_reco_engine_adapter.h"
     "${SRC_DIR}/translation_recognizer.h"
     "${SRC_DIR}/audio_buffer.h"
+    "${SRC_DIR}/thread_service.h"
     )
 
 set(SOURCES
@@ -54,6 +55,7 @@ set(SOURCES
     "${SRC_DIR}/translation_recognizer.cpp"
     "${SRC_DIR}/audio_buffer.cpp"
     "${SRC_DIR}/stdafx.cpp"
+    "${SRC_DIR}/thread_service.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

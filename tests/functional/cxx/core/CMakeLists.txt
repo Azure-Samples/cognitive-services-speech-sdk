@@ -1,22 +1,29 @@
-project(usp_tests)
+project(core_tests)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
-include_directories ("${USP}/include")
-include_directories ("${CARBON_EXTERNAL}/Catch2")
+include_directories("${CARBON_CORE}/include")
 include_directories("${COMMON}/include")
+include_directories("${USP}/include")
+include_directories("${SR}")
+include_directories("${AUDIO}")
+include_directories("${CARBON_EXTERNAL}/Catch2")
+include_directories(${CARBON_C_API})
+include_directories(${CARBON_CXX_API})
 include_directories(${TEST_INCLUDE})
 
 set(SOURCES
     "${SRC_DIR}/main.cpp"
     "${SRC_DIR}/usp_test_case.cpp"
+    "${SRC_DIR}/mic_test_case.cpp"
+    "${SRC_DIR}/sr_test_case.cpp"
     )
 
 source_group("Source Files" FILES ${SOURCES})
 source_group("Header Files" FILES ${TEST_HEADERS})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
-target_link_libraries(${PROJECT_NAME} usp common ${TEST_LIBS})
+target_link_libraries(${PROJECT_NAME} usp sr common audio ${TEST_LIBS})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})
@@ -29,6 +36,7 @@ if (NOT WIN32)
     target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-set_target_properties (${PROJECT_NAME} PROPERTIES
-    FOLDER tests/usp
+set_target_properties (core_tests PROPERTIES
+    FOLDER tests
+    OUTPUT_NAME core_tests
 )

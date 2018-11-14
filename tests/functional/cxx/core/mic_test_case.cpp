@@ -213,7 +213,7 @@ void CheckThatSinkReceivedAudioData(const shared_ptr<AudioTestSink>& sink)
 }
 
 
-TEST_CASE("Mic is properly functioning", "[audio][mic]")
+TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
 {
 
     const auto& mic = Microphone::Create();

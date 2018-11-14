@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <chrono>
 #include "spxcore_common.h"
 #include "platform.h"
 #include "asyncop.h"
@@ -868,5 +869,44 @@ public:
     virtual void InitAuthorizationToken(const char * authToken, const char * region) = 0;
 };
 
+class ISpxThreadService : public ISpxInterfaceBaseFor<ISpxThreadService>
+{
+public:
+    using TaskId = int;
+
+    enum class Affinity
+    {
+        User = 0,
+        Background = 1
+    };
+
+    // Execute a task on a thread. All tasks scheduled with the same affinity using this function
+    // are executed in FIFO order.
+    virtual TaskId Execute(std::packaged_task<void()>&& task,
+        Affinity affinity = Affinity::Background) = 0;
+
+    // Execute a task on a thread. All tasks scheduled with the same affinity using this function
+    // are executed in FIFO order. 'canceled' promise can be used to subscribe for tasks that have
+    // been aborted before execution.
+    virtual TaskId Execute(std::packaged_task<void()>&& task,
+        std::promise<void>&& canceled,
+        Affinity affinity = Affinity::Background) = 0;
+
+    // Execute a task on a thread with a delay 'count' number of times.
+    virtual TaskId Execute(std::packaged_task<void()>&& task, std::chrono::milliseconds delay,
+        int count = 1, Affinity affinity = Affinity::Background) = 0;
+
+    // Execute a task on a thread with a delay 'count' number of times. 'canceled' promise can be
+    // used to subscribe for tasks that have been aborted before execution.
+    virtual TaskId Execute(std::packaged_task<void()>&& task, std::promise<void>&& canceled,
+        std::chrono::milliseconds delay, int count = 1, Affinity affinity = Affinity::Background) = 0;
+
+    // Cancels the task. If the task is canceled,
+    // the corresponding 'canceled' promise is fulfilled.
+    virtual bool Cancel(TaskId id) = 0;
+
+    // Cancels all tasks.
+    virtual void CancelAllTasks() = 0;
+};
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl
