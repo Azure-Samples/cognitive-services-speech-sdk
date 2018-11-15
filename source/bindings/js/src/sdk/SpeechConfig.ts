@@ -235,7 +235,7 @@ export class SpeechConfigImpl extends SpeechConfig {
     }
 
     public get outputFormat(): OutputFormat {
-        return (OutputFormat as any)[this.privProperties.getProperty(OutputFormatPropertyName, OutputFormat[OutputFormat.Simple])];
+        return (OutputFormat as any)[this.privProperties.getProperty(OutputFormatPropertyName, undefined)];
     }
 
     public set outputFormat(value: OutputFormat) {

@@ -198,7 +198,7 @@
                 a.open("GET", authorizationEndpoint);
                 a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 a.send("");
-                a.onload = function() {
+                a.onload = function () {
                     var token = JSON.parse(atob(this.responseText.split(".")[1]));
                     regionKey.value = token.region;
                     authorizationToken = this.responseText;
@@ -413,12 +413,12 @@
 
                 // Defines the language(s) that speech should be translated to.
                 // Multiple languages can be specified for text translation and will be returned in a map.
-                speechConfig.addTargetLanguage(languageTargetOptions.value.split(":")[0]);
+                speechConfig.addTargetLanguage(languageTargetOptions.value.split("(")[1].substring(0, 5));
 
                 // If voice output is requested, set the target voice.
                 // If multiple text translations were requested, only the first one added will have audio synthesised for it.
                 if (voiceOutput.checked) {
-                    speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, languageTargetOptions.value.replace(":", "-"));
+                    speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, languageTargetOptions.value);
                 }
 
                 reco = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
@@ -433,7 +433,7 @@
                     window.console.log(e);
                     statusDiv.innerHTML += "(recognizing) Reason: " + SpeechSDK.ResultReason[e.result.reason] + " Text: " + e.result.text + " Translations:";
 
-                    var language = languageTargetOptions.value.split("-")[0];
+                    var language = languageTargetOptions.value.split("(")[1].substring(0, 2);
 
                     statusDiv.innerHTML += " [" + language + "] " + e.result.translations.get(language);
                     statusDiv.innerHTML += "\r\n";
@@ -449,7 +449,7 @@
                     window.console.log(e);
                     statusDiv.innerHTML += "(recognized)  Reason: " + SpeechSDK.ResultReason[e.result.reason] + " Text: " + e.result.text + " Translations:";
 
-                    var language = languageTargetOptions.value.split("-")[0];
+                    var language = languageTargetOptions.value.split("(")[1].substring(0, 2);
 
                     statusDiv.innerHTML += " [" + language + "] " + e.result.translations.get(language);
                     statusDiv.innerHTML += "\r\n";

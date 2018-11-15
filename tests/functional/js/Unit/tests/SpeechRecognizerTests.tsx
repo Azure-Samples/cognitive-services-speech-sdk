@@ -1165,26 +1165,26 @@ test("Endpoint URL With Parameter Test", (done: jest.DoneCallback) => {
         },
     });
 
-        const s: sdk.SpeechConfig = sdk.SpeechConfig.fromEndpoint(new URL("wss://fake.host.name?somequeryParam=Value"), "fakekey");
-        objsToClose.push(s);
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromEndpoint(new URL("wss://fake.host.name?somequeryParam=Value"), "fakekey");
+    objsToClose.push(s);
 
-        const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile(s);
-        objsToClose.push(r);
+    const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile(s);
+    objsToClose.push(r);
 
-        r.recognizeOnceAsync(
-            (p2: sdk.SpeechRecognitionResult) => {
-                done.fail("bad URL connected?");
-            },
-            (error: string) => {
-                try {
-                    expect(uri).not.toBeUndefined();
-                    // Make sure there's only a single ? in the URL.
-                    expect(uri.indexOf("?")).toEqual(uri.lastIndexOf("?"));
-                    done();
-                } catch (error) {
-                    done.fail(error);
-                }
-            });
+    r.recognizeOnceAsync(
+        (p2: sdk.SpeechRecognitionResult) => {
+            done.fail("bad URL connected?");
+        },
+        (error: string) => {
+            try {
+                expect(uri).not.toBeUndefined();
+                // Make sure there's only a single ? in the URL.
+                expect(uri.indexOf("?")).toEqual(uri.lastIndexOf("?"));
+                done();
+            } catch (error) {
+                done.fail(error);
+            }
+        });
 });
 
 test("Connection Errors Propogate Async", (done: jest.DoneCallback) => {

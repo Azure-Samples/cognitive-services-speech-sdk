@@ -182,7 +182,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
     public constructor() {
         super();
         this.speechProperties = new PropertyCollection();
-
+        this.outputFormat = OutputFormat.Simple;
     }
     /**
      * Sets the authorization token.
@@ -196,7 +196,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
     public set authorizationToken(value: string) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        this.properties.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);
+        this.speechProperties.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);
     }
 
     /**
@@ -210,7 +210,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      */
     public set speechRecognitionLanguage(value: string) {
         Contracts.throwIfNullOrWhitespace(value, "value");
-        this.properties.setProperty(PropertyId.SpeechServiceConnection_RecoLanguage, value);
+        this.speechProperties.setProperty(PropertyId.SpeechServiceConnection_RecoLanguage, value);
     }
 
     /**
@@ -228,7 +228,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @public
      */
     public get outputFormat(): OutputFormat {
-        return (OutputFormat as any)[this.speechProperties.getProperty(OutputFormatPropertyName, OutputFormat[OutputFormat.Simple])];
+        return (OutputFormat as any)[this.speechProperties.getProperty(OutputFormatPropertyName, undefined)];
     }
 
     /**
@@ -269,7 +269,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
 
         const languages: string[] = this.targetLanguages;
         languages.push(value);
-        this.properties.setProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages, languages.join(","));
+        this.speechProperties.setProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages, languages.join(","));
     }
 
     /**
@@ -308,7 +308,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
     public set voiceName(value: string) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        this.properties.setProperty(PropertyId.SpeechServiceConnection_TranslationVoice, value);
+        this.speechProperties.setProperty(PropertyId.SpeechServiceConnection_TranslationVoice, value);
     }
 
     /**
@@ -331,7 +331,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @param {string} value - The value of the property.
      */
     public setProperty(name: string, value: string): void {
-        this.properties.setProperty(name, value);
+        this.speechProperties.setProperty(name, value);
     }
 
     /**
