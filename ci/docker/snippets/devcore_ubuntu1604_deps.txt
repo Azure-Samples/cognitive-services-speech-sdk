@@ -1,0 +1,5 @@
+        # Speech SDK Core build dependencies (on top of cmake)
+        build-essential \
+        libssl-dev \
+        uuid-dev \
+        libasound2-dev \

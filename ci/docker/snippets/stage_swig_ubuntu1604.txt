@@ -1,0 +1,32 @@
+# Note: this is to within a stage, so there are more layers than usual,
+#       aligning with layers used in other stages.
+
+RUN DEBIAN_FRONTEND=noninteractive && \
+    apt-get update --quiet
+
+RUN DEBIAN_FRONTEND=noninteractive && \
+    apt-get install --quiet --yes --no-install-recommends \
+        wget \
+        ca-certificates
+
+RUN DEBIAN_FRONTEND=noninteractive && \
+    apt-get install --quiet --yes --no-install-recommends \
+        build-essential
+
+RUN DEBIAN_FRONTEND=noninteractive && \
+    apt-get install --quiet --yes --no-install-recommends \
+        libpcre++-dev
+
+ARG SWIG_VERSION=3.0.12
+
+RUN wget --no-verbose --output-document - http://prdownloads.sourceforge.net/swig/swig-$SWIG_VERSION.tar.gz | \
+        tar xvfz - && \
+    cd swig-$SWIG_VERSION && \
+    ./configure && \
+    make -j $(nproc) && \
+    make install && \
+    cd .. && \
+    rm -rf swig-$SWIG_VERSION
+
+# Note: the run-time dependency libpcre3 seems to be always installed
+

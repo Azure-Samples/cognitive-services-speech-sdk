@@ -1,0 +1,6 @@
+# cmake and swig come from the two previous stages
+
+COPY --from=0 /usr/local/ /usr/local/
+
+COPY --from=1 /usr/local/ /usr/local/
+

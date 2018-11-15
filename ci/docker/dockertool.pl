@@ -62,14 +62,42 @@ sub aptInstallWith {
 }
 
 my %images = (
-  dev_ubuntu1604_x86 => {
+  dev_ubuntu1604_x64 => { # Not used yet
     version => 1,
-    spec => [qw/from-ubuntu1604-x86 deps swig builduser/],
+    spec => [
+        # Stage 0
+        qw/from-ubuntu1604-x64 stage_cmake_binary_ubuntu1604_x64/,
+        # Stage 1
+        qw/from-ubuntu1604-x64 stage_swig_ubuntu1604/,
+        # Image
+        qw/from-ubuntu1604-x64 copy-layer-01-usr-local/,
+        aptInstallWith(qw/devcore_ubuntu1604_deps devjava_ubuntu1604_deps/),
+        'builduser'],
+  },
+  dev_ubuntu1604_x86 => {
+    version => 2,
+    spec => [
+        # Stage 0
+        qw/from-ubuntu1604-x86 stage_cmake_fromsource_ubuntu1604/,
+        # Stage 1
+        qw/from-ubuntu1604-x86 stage_swig_ubuntu1604/,
+        # Image
+        qw/from-ubuntu1604-x86 copy-layer-01-usr-local/,
+        aptInstallWith(qw/devcore_ubuntu1604_deps devjava_ubuntu1604_deps/),
+        'builduser'],
   },
   dev_ubuntu1604_arm32 => {
-    version => 1,
-    spec => [qw/from-ubuntu1604-arm32v7 deps swig builduser/],
+    version => 2,
     urls => [qw(https://github.com/multiarch/qemu-user-static/releases/download/v2.12.0-1/qemu-arm-static.tar.gz)],
+    spec => [
+        # Stage 0
+        qw/from-ubuntu1604-arm32v7 stage_cmake_fromsource_ubuntu1604/,
+        # Stage 1
+        qw/from-ubuntu1604-arm32v7 stage_swig_ubuntu1604/,
+        # Image
+        qw/from-ubuntu1604-arm32v7 copy-layer-01-usr-local/,
+        aptInstallWith(qw/devcore_ubuntu1604_deps devjava_ubuntu1604_deps/),
+        'builduser'],
   },
   oobedevcpp_ubuntu1604_x64 => {
     version => 2,

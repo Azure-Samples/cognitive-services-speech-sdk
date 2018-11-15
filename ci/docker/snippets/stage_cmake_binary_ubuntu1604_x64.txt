@@ -1,0 +1,16 @@
+RUN DEBIAN_FRONTEND=noninteractive && \
+    apt-get update --quiet
+
+RUN DEBIAN_FRONTEND=noninteractive && \
+    apt-get install --quiet --yes --no-install-recommends \
+        wget \
+        ca-certificates
+
+# Override at docker build time, as appropriate:
+ARG CMAKE_VERSION=3.12.4
+
+RUN CMAKE_MAJOR_MINOR=$(echo $CMAKE_VERSION | cut -d. -f1-2) && \
+    CMAKE_BASE_NAME=cmake-$CMAKE_VERSION && \
+    wget --no-verbose --output-document - https://cmake.org/files/v$CMAKE_MAJOR_MINOR/$CMAKE_BASE_NAME-Linux-x86_64.tar.gz | \
+        tar -xzf - --strip-components=1 --directory /usr/local
+

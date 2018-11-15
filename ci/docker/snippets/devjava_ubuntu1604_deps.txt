@@ -1,0 +1,4 @@
+        # Speech SDK Java binding build dependencies (on top of swig)
+        # (AFAIR, default-jdk-headless could not be used in Ubuntu 16.04 since
+        # it lacked JNI headers. Double-check on newer versions.)
+        default-jdk \
