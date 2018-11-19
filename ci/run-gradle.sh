@@ -14,17 +14,29 @@ else
   PACKAGE_PATH=
 fi
 
-echo $PACKAGE_PATH
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-set -e -x -o pipefail
+. "$SCRIPT_DIR/functions.sh" || exit 1
+
+set -u -e -o pipefail
 
 readarray -t PROJECTS < <(find "$SAMPLES_DIR" -name gradlew.bat -printf '%h\n')
 
+# Allowing for a few number of (global) retries to accomodate for downloads
+# failures (filling up the package cache).
+MAX_RETRIES=2
+RETRY=0
+
+ERRORS=0
 for dir in "${PROJECTS[@]}"; do
-  echo $dir
-  pushd "$dir"
-  [[ -e gradlew.bat ]]
-  [[ -e build.gradle ]]
+  pushd "$dir" > /dev/null
+  [[ -e gradlew.bat ]] ||
+    exitWithError 'Error: cannot find gradlew.bat in directory %s\n' "$dir"
+
+  [[ -e build.gradle ]] ||
+    exitWithError 'Error: cannot find build.gradle in directory %s\n' "$dir"
+
+  echo === Trying to build directory $dir.
 
   # Patch in local repo if package path specified
 
@@ -41,7 +53,27 @@ allprojects {
 MAVEN
     }
 
+    while ((++RETRY <= MAX_RETRIES)); do
+      ./gradlew assemble || {
+        message="'gradlew assemble' failed for directory '$dir', global retry $RETRY/$MAX_RETRIES."
+        vsts_logissue warning "$message"
+        echo Warning: $message
+        sleep 10
+      }
+    done
+
     ./gradlew assemble
 
-  popd
+    [[ $? == 0 ]] || {
+      message="run-gradle.sh: 'gradlew assemble' failed for directory '$dir', no more global retries."
+      vsts_logissue error "'gradlew assemble' failed for directory '$dir', no more global retries."
+      echo Error: $message
+      ((ERRORS++))
+    }
+  popd 1> /dev/null
 done
+
+[[ $ERRORS == 0 ]] || {
+  echo Error: not all builds successful.
+  exit 1
+}
