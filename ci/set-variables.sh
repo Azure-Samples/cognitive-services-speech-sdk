@@ -15,7 +15,7 @@
 #
 # Outputs:
 # * SPEECHSDK_MAIN_BUILD - equal to "true" if running from our main build
-#   definition (4062), "false" otherwise. TODO no need to export?
+#   definition (4833), "false" otherwise. TODO no need to export?
 # * SPEECHSDK_BUILD_TYPE - can be "dev", "int", "prod", which (roughly) correspond to
 #   dev-box / PR / feature-branch, nightly, release-branch builds. "int" and "prod"
 #   can only come from the main build definition (i.e., no clone, and no draft).
@@ -101,8 +101,12 @@ IN_VSTS=$([[ -n $SYSTEM_DEFINITIONID && -n $SYSTEM_COLLECTIONID ]] && echo true 
 if $IN_VSTS; then
   # We're running in VSTS
 
-  # TODO remove the first one once we've switched off the old Carbon Build
-  MAIN_BUILD_DEFS=,19422243-19b9-4d85-9ca6-bc961861d287/4062,19422243-19b9-4d85-9ca6-bc961861d287/4833,
+  # Note: build template expressions we are using elsewhere (e.g.,
+  #   linux-docker-build.yml) duplicate the logic of determining build types. Both
+  #   definitions should be kept in sync; build template expression cannot
+  #   reuse the logic here.
+
+  MAIN_BUILD_DEFS=,19422243-19b9-4d85-9ca6-bc961861d287/4833,
 
   SPEECHSDK_MAIN_BUILD=$([[ $MAIN_BUILD_DEFS == *,$SYSTEM_COLLECTIONID/$SYSTEM_DEFINITIONID,* ]] && echo true || echo false)
 
