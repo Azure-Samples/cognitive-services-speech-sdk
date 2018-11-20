@@ -240,7 +240,7 @@ extern NSString *serviceRegion;
         NSLog(@"Received LUIS JSON: %@", [eventArgs.result.properties getPropertyByName:@"RESULT-LanguageUnderstandingJson"]);
     }];
     [intentRecognizer addRecognizingEventHandler: ^ (SPXIntentRecognizer * recognizer, SPXIntentRecognitionEventArgs *eventArgs) {
-        NSLog(@"Received intermediate result event. SessionId: %@, intermediate result:%@. IntentId %@", eventArgs.sessionId, eventArgs.result.text, eventArgs.result.intentId);
+        NSLog(@"Received intermediate result event. SessionId: %@, status: %ld. intermediate result:%@. IntentId %@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.intentId);
     }];
     [intentRecognizer addCanceledEventHandler: ^ (SPXIntentRecognizer *recognizer, SPXIntentRecognitionCanceledEventArgs *eventArgs) {
         NSLog(@"Received canceled event. SessionId: %@, reason:%lu errorDetails:%@.", eventArgs.sessionId, (unsigned long)eventArgs.reason, eventArgs.errorDetails);

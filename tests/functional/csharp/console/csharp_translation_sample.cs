@@ -26,7 +26,22 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MyRecognizedEventHandler(object sender, TranslationRecognitionEventArgs e)
         {
-            Console.WriteLine($"Translation: final result: {e.ToString()}.");
+            if (e.Result.Reason == ResultReason.TranslatedSpeech)
+            {
+                Console.WriteLine($"Translated: {e.ToString()}");
+            }
+            else if (e.Result.Reason == ResultReason.RecognizedSpeech)
+            {
+                Console.WriteLine($"ONLY Speech recognized : {e.ToString()}");
+            }
+            else if (e.Result.Reason == ResultReason.NoMatch)
+            {
+                Console.WriteLine($"NOMATCH: Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+            }
+            else
+            {
+                Console.WriteLine($"Unexpected result. {e.ToString()}");
+            }
         }
 
         private static void MySynthesizingEventHandler(object sender, TranslationSynthesisEventArgs e)
@@ -44,16 +59,16 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MyCanceledEventHandler(object sender, TranslationRecognitionCanceledEventArgs e)
         {
-            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: canceled. SessionId: {0}, Reason: {1}", e.SessionId, e.Reason));
+            Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+            if (e.Reason == CancellationReason.Error)
+            {
+                Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+            }
         }
 
-        private static void MySessionStoppedHandler(object sender, SessionEventArgs e)
-        {
-            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: Session stopped event: {0}.", e.ToString()));
-            translationEndTaskCompletionSource.TrySetResult(0);
-        }
-
-        public static async Task TranslationBaseModelAsync(string keyTranslation, string region, string fileName, bool useStream)
+        public static async Task TranslationBaseModelAsync(string keyTranslation, string region, string fileName, bool useStream, bool useContinuousRecognition)
         {
             var config = SpeechTranslationConfig.FromSubscription(keyTranslation, region);
             config.SpeechRecognitionLanguage = FromLang;
@@ -75,13 +90,13 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine($"Translation into languages: {To2Langs[0]}, and {To2Langs[1]}:");
                 using (var reco = new TranslationRecognizer(config))
                 {
-                    await DoTranslationAsync(reco).ConfigureAwait(false);
+                    await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                 }
 
                 Console.WriteLine($"Translation into {ChineseLocale} with voice {ChineseVoice}");
                 using (var reco = new TranslationRecognizer(chineseConfig))
                 {
-                    await DoTranslationAsync(reco).ConfigureAwait(false);
+                    await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                 }
             }
             else
@@ -92,7 +107,7 @@ namespace MicrosoftSpeechSDKSamples
                     var audioInput = Util.OpenWavFile(fileName);
                     using (var reco = new TranslationRecognizer(config, audioInput))
                     {
-                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                        await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                     }
                 }
                 else
@@ -100,25 +115,25 @@ namespace MicrosoftSpeechSDKSamples
                     var audioInput = AudioConfig.FromWavFileInput(fileName);
                     using (var reco = new TranslationRecognizer(config, audioInput))
                     {
-                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                        await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                     }
 
                     Console.WriteLine($"Translation into {ChineseLocale} with voice {ChineseVoice}");
                     using (var reco = new TranslationRecognizer(chineseConfig, audioInput))
                     {
-                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                        await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                     }
 
                     Console.WriteLine($"Translation into {GermanLocale} with voice {GermanVoice}");
                     using (var reco = new TranslationRecognizer(germanConfig, audioInput))
                     {
-                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                        await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                     }
                 }
             }
         }
 
-        public static async Task TranslationByEndpointAsync(string subKey, string endpoint, string fileName, bool useStream)
+        public static async Task TranslationByEndpointAsync(string subKey, string endpoint, string fileName, bool useStream, bool useContinuousRecognition)
         {
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Translation using endpoint:{0}.", endpoint));
 
@@ -132,7 +147,7 @@ namespace MicrosoftSpeechSDKSamples
                 // The language setting does not have any effect if the endpoint is specified.
                 using (var reco = new TranslationRecognizer(config))
                 {
-                    await DoTranslationAsync(reco).ConfigureAwait(false);
+                    await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                 }
             }
             else
@@ -142,7 +157,7 @@ namespace MicrosoftSpeechSDKSamples
                     var audioInput = Util.OpenWavFile(fileName);
                     using (var reco = new TranslationRecognizer(config, audioInput))
                     {
-                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                        await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                     }
                 }
                 else
@@ -150,20 +165,60 @@ namespace MicrosoftSpeechSDKSamples
                     var audioInput = Util.OpenWavFile(fileName);
                     using (var reco = new TranslationRecognizer(config, audioInput))
                     {
-                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                        await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                     }
                 }
             }
         }
 
-        public static async Task DoTranslationAsync(TranslationRecognizer reco)
+        private static async Task DoTranslationAsync(TranslationRecognizer reco, bool useContinuousRecognition)
+        {
+            if (useContinuousRecognition)
+            {
+                await ContinuousTranslationAsync(reco);
+            }
+            else
+            {
+                await SingleShotTranslationAsync(reco);
+            }
+        }
+
+        private static async Task SingleShotTranslationAsync(TranslationRecognizer reco)
+        {
+            Console.WriteLine("Single-shot translation.");
+
+            // Subscribes to events.
+            reco.Recognizing += MyRecognizingEventHandler;
+            reco.Recognized += MyRecognizedEventHandler;
+            reco.Canceled += MyCanceledEventHandler;
+            reco.SessionStopped += (s, e) =>
+            {
+                Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: Session stopped event: {0}.", e.ToString()));
+            };
+
+            // Starts recognition.
+            var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
+
+            Console.WriteLine("Translation result: " + result);
+
+            // Unsubscribe to events.
+            reco.Recognizing -= MyRecognizingEventHandler;
+            reco.Recognized -= MyRecognizedEventHandler;
+            reco.Canceled -= MyCanceledEventHandler;
+        }
+
+        private static async Task ContinuousTranslationAsync(TranslationRecognizer reco)
         {
             // Subscribes to events.
             reco.Recognizing += MyRecognizingEventHandler;
             reco.Recognized += MyRecognizedEventHandler;
             reco.Synthesizing += MySynthesizingEventHandler;
             reco.Canceled += MyCanceledEventHandler;
-            reco.SessionStopped += MySessionStoppedHandler;
+            reco.SessionStopped += (s, e) =>
+            {
+                Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: Session stopped event: {0}.", e.ToString()));
+                translationEndTaskCompletionSource.TrySetResult(0);
+            };
 
             translationEndTaskCompletionSource = new TaskCompletionSource<int>();
 

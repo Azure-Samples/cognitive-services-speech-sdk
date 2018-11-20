@@ -58,11 +58,6 @@ namespace MicrosoftSpeechSDKSamples
 
                 if (index != -1)
                 {
-                    if (isIntentReco || isTranslation)
-                    {
-                        throw new InvalidOperationException("Only speech reco supports selection of continuous or singleshot");
-                    }
-
                     var str = args[0].Substring(index + 1);
                     if (string.Compare(str, "cont", true) == 0)
                     {
@@ -217,14 +212,14 @@ namespace MicrosoftSpeechSDKSamples
                 if (useEndpoint)
                 {
                     Console.WriteLine("=============== Run intent recognition samples by specifying endpoint. ===============");
-                    IntentRecognitionSamples.IntentRecognitionByEndpointAsync(subKey, endpoint, fileName).Wait();
+                    IntentRecognitionSamples.IntentRecognitionByEndpointAsync(subKey, endpoint, fileName, useContinuousRecognition: useContinuousRecognition).Wait();
                 }
                 else
                 {
                     if (useBaseModel)
                     {
                         Console.WriteLine("=============== Run intent recognition samples using base speech model. ===============");
-                        IntentRecognitionSamples.IntentRecognitionBaseModelAsync(subKey, region, fileName).Wait();
+                        IntentRecognitionSamples.IntentRecognitionBaseModelAsync(subKey, region, fileName, useContinuousRecognition: useContinuousRecognition).Wait();
                     }
                     else
                     {
@@ -237,14 +232,14 @@ namespace MicrosoftSpeechSDKSamples
                 if (useEndpoint)
                 {
                     Console.WriteLine("=============== Run translation samples by specifying endpoint. ===============");
-                    TranslationSamples.TranslationByEndpointAsync(subKey, endpoint, fileName, useStream: useStream).Wait();
+                    TranslationSamples.TranslationByEndpointAsync(subKey, endpoint, fileName, useStream: useStream, useContinuousRecognition: useContinuousRecognition).Wait();
                 }
                 else
                 {
                     if (useBaseModel)
                     {
                         Console.WriteLine("=============== Run translationsamples using base speech model. ===============");
-                        TranslationSamples.TranslationBaseModelAsync(subKey, fileName: fileName, region: region, useStream: useStream).Wait();
+                        TranslationSamples.TranslationBaseModelAsync(subKey, fileName: fileName, region: region, useStream: useStream, useContinuousRecognition: useContinuousRecognition).Wait();
                     }
                     else
                     {

@@ -23,12 +23,43 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MyRecognizedEventHandler(object sender, IntentRecognitionEventArgs e)
         {
-            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: final result: {0} ", e.ToString()));
+            if (e.Result.Reason == ResultReason.RecognizedIntent)
+            {
+                Console.WriteLine($"Intent Recognized: IntentId={e.Result.IntentId}, Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+            }
+            else if (e.Result.Reason == ResultReason.RecognizedSpeech)
+            {
+                Console.WriteLine($"ONLY Speech recognized : Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+            }
+            else if (e.Result.Reason == ResultReason.NoMatch)
+            {
+                Console.WriteLine($"NOMATCH: Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+            }
+            else
+            {
+                Console.WriteLine($"Unexpected result. Reason={e.Result.Reason}, result={e.Result}");
+            }
         }
 
         private static void MyCanceledEventHandler(object sender, IntentRecognitionCanceledEventArgs e)
         {
-            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: canceled. SessionId: {0}, Reason: {1}", e.SessionId, e.Reason));
+            Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+            if (e.Reason == CancellationReason.Error)
+            {
+                Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+            }
+        }
+
+        private static void MySpeechStartDetectedEventHandler(object sender, RecognitionEventArgs e)
+        { 
+            Console.WriteLine($"SpeechStartDetected received: offset: {e.Offset}.");
+        }
+
+        private static void MySpeechEndDetectedEventHandler(object sender, RecognitionEventArgs e)
+        {
+            Console.WriteLine($"SpeechEndDetected received: offset: {e.Offset}.");
         }
 
         private static void MySessionStartedEventHandler(object sender, SessionEventArgs e)
@@ -36,12 +67,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: Session started event: {0}.", e.ToString()));
         }
 
-        private static void MySessionStoppedEventHandler(object sender, SessionEventArgs e)
-        {
-            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: Session stopped event: {0}.", e.ToString()));
-        }
-
-        public static async Task IntentRecognitionBaseModelAsync(string keySpeech, string region, string fileName)
+        public static async Task IntentRecognitionBaseModelAsync(string keySpeech, string region, string fileName, bool useContinuousRecognition)
         {
             Console.WriteLine("Intent Recognition using base speech model.");
 
@@ -50,7 +76,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 using (var reco = new IntentRecognizer(config))
                 {
-                    await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
+                    await DoIntentRecognitionAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                 }
             }
             else
@@ -58,12 +84,12 @@ namespace MicrosoftSpeechSDKSamples
                 var audioInput = AudioConfig.FromWavFileInput(fileName);
                 using (var reco = new IntentRecognizer(config, audioInput))
                 {
-                    await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
+                    await DoIntentRecognitionAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                 }
             }
         }
 
-        public static async Task IntentRecognitionByEndpointAsync(string subKey, string endpoint, string fileName)
+        public static async Task IntentRecognitionByEndpointAsync(string subKey, string endpoint, string fileName, bool useContinuousRecognition)
         {
             var config = SpeechConfig.FromEndpoint(new Uri(endpoint), subKey);
 
@@ -73,7 +99,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 using (var reco = new IntentRecognizer(config))
                 {
-                    await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
+                    await DoIntentRecognitionAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                 }
             }
             else
@@ -81,22 +107,40 @@ namespace MicrosoftSpeechSDKSamples
                 var audioInput = AudioConfig.FromWavFileInput(fileName);
                 using (var reco = new IntentRecognizer(config, audioInput))
                 {
-                    await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
+                    await DoIntentRecognitionAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                 }
             }
         }
 
-        public static async Task DoIntentRecognitionAsync(IntentRecognizer reco)
+        private static async Task DoIntentRecognitionAsync(IntentRecognizer reco, bool useContinuousRecognition)
         {
+            string intentAppId = "b687b851-56c5-4d31-816f-35a741a3f0be";
+            var model = LanguageUnderstandingModel.FromAppId(intentAppId);
+            reco.AddIntent(model, "HomeAutomation.TurnOn", "HomeAutomationTurnOn");
+
+            if (useContinuousRecognition)
+            {
+                await ContinuousIntentRecognitionAsync(reco);
+            }
+            else
+            {
+                await SingleShotIntentRecognitionAsync(reco);
+            }
+        }
+
+        private static async Task SingleShotIntentRecognitionAsync(IntentRecognizer reco)
+        { 
             // Subscribes to events.
             reco.Recognizing += MyRecognizingEventHandler;
             reco.Recognized += MyRecognizedEventHandler;
             reco.Canceled += MyCanceledEventHandler;
+            reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
+            reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
             reco.SessionStarted += MySessionStartedEventHandler;
-            reco.SessionStopped += MySessionStoppedEventHandler;
-
-            // Todo: Add LUIS intent.
-            reco.AddIntent("weather", "WeatherIntent");
+            reco.SessionStopped += (s, e) =>
+            {
+                Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: Session stopped event: {0}.", e.ToString()));
+            };
 
             // Starts recognition.
             var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
@@ -108,7 +152,35 @@ namespace MicrosoftSpeechSDKSamples
             reco.Recognized -= MyRecognizedEventHandler;
             reco.Canceled -= MyCanceledEventHandler;
             reco.SessionStarted -= MySessionStartedEventHandler;
-            reco.SessionStopped -= MySessionStoppedEventHandler;
+            reco.SpeechStartDetected -= MySpeechStartDetectedEventHandler;
+            reco.SpeechEndDetected -= MySpeechEndDetectedEventHandler;
+        }
+
+        private static async Task ContinuousIntentRecognitionAsync(IntentRecognizer reco)
+        {
+            Console.WriteLine("Continuous recognition.");
+            var tcsLocal = new TaskCompletionSource<int>();
+
+            reco.Recognized += MyRecognizedEventHandler;
+            reco.Canceled += MyCanceledEventHandler;
+            reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
+            reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
+            reco.SessionStarted += MySessionStartedEventHandler;
+            reco.SessionStopped += (s, e) =>
+            {
+                Console.WriteLine($"Session Stop detected. Event: {e.ToString()}. Stop the recognition.");
+                tcsLocal.TrySetResult(0);
+            };
+
+            // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+            await reco.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+            // Waits for completion.
+            // Use Task.WaitAny to make sure that the task is rooted.
+            Task.WaitAny(new[] { tcsLocal.Task });
+
+            // Stops translation.
+            await reco.StopContinuousRecognitionAsync().ConfigureAwait(false);
         }
 
     }

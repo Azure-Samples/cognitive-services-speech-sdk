@@ -24,22 +24,44 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MyRecognizedEventHandler(object sender, SpeechRecognitionEventArgs e)
         {
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: final result: {0}, Offset: {1}, Duration: {2} ", e.ToString(), e.Result.OffsetInTicks, e.Result.Duration));
+            if (e.Result.Reason == ResultReason.RecognizedSpeech)
+            {
+                Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+            }
+            else if (e.Result.Reason == ResultReason.NoMatch)
+            {
+                Console.WriteLine($"NOMATCH: Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+            }
+            else
+            {
+                Console.WriteLine($"Unexpected result. Reason={e.Result.Reason}, result={e.Result}");
+            }
         }
 
         private static void MyCanceledEventHandler(object sender, SpeechRecognitionCanceledEventArgs e)
         {
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: canceled. SessionId: {0}, Reason: {1}", e.SessionId, e.Reason));
+            Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+            if (e.Reason == CancellationReason.Error)
+            {
+                Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+            }
+        }
+
+        private static void MySpeechStartDetectedEventHandler(object sender, RecognitionEventArgs e)
+        {
+            Console.WriteLine($"SpeechStartDetected received: offset: {e.Offset}.");
+        }
+
+        private static void MySpeechEndDetectedEventHandler(object sender, RecognitionEventArgs e)
+        {
+            Console.WriteLine($"SpeechEndDetected received: offset: {e.Offset}.");
         }
 
         private static void MySessionStartedEventHandler(object sender, SessionEventArgs e)
         {
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: Session started event: {0}.", e.ToString()));
-        }
-
-        private static void MySessionStoppedEventHandler(object sender, SessionEventArgs e)
-        {
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: Session stopped event: {0}.", e.ToString()));
         }
 
         public static async Task SpeechRecognitionBaseModelAsync(string key, string region, string lang, string fileName, bool useStream, bool useToken, bool useContinuousRecognition)
@@ -55,7 +77,7 @@ namespace MicrosoftSpeechSDKSamples
                 config = SpeechConfig.FromSubscription(key, region);
             }
 
-            await RecognizeOnceAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
+            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
         }
 
         public static async Task SpeechRecognitionCustomizedModelAsync(string key, string region, string lang, string model, string fileName, bool useStream, bool useToken, bool useContinuousRecognition)
@@ -72,7 +94,7 @@ namespace MicrosoftSpeechSDKSamples
             }
             config.EndpointId = model;
 
-            await RecognizeOnceAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
+            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
         }
 
         public static async Task SpeechRecognitionByEndpointAsync(string subscriptionKey, string endpoint, string lang, string model, string fileName, bool useStream, bool useContinuousRecognition)
@@ -90,16 +112,16 @@ namespace MicrosoftSpeechSDKSamples
                 config.EndpointId = model;
             }
 
-            await RecognizeOnceAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
+            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
         }
 
-        public static async Task RecognizeOnceAsync(SpeechConfig config, string fileName, bool useStream, bool useContinuousRecognition)
+        public static async Task RecognizeAsync(SpeechConfig config, string fileName, bool useStream, bool useContinuousRecognition)
         {
             if (string.IsNullOrEmpty(fileName) || String.Compare(fileName, "mic", true) == 0)
             {
                 using (var reco = new SpeechRecognizer(config))
                 {
-                    await StartRecognitionAsync(reco, useContinuousRecognition);
+                    await LaunchRecognizerAsync(reco, useContinuousRecognition);
                 }
             }
             else
@@ -110,20 +132,20 @@ namespace MicrosoftSpeechSDKSamples
                     var audioInput = Util.OpenWavFile(fileName);
                     using (var reco = new SpeechRecognizer(config, audioInput))
                     {
-                        await StartRecognitionAsync(reco, useContinuousRecognition);
+                        await LaunchRecognizerAsync(reco, useContinuousRecognition);
                     }
                 }
                 else
                 {
                     using (var reco = new SpeechRecognizer(config, AudioConfig.FromWavFileInput(fileName)))
                     {
-                        await StartRecognitionAsync(reco, useContinuousRecognition);
+                        await LaunchRecognizerAsync(reco, useContinuousRecognition);
                     }
                 }
             }
         }
 
-        private static async Task StartRecognitionAsync(SpeechRecognizer reco, bool useContinuousRecognition)
+        private static async Task LaunchRecognizerAsync(SpeechRecognizer reco, bool useContinuousRecognition)
         {
             if (useContinuousRecognition)
             {
@@ -143,8 +165,13 @@ namespace MicrosoftSpeechSDKSamples
             reco.Recognizing += MyRecognizingEventHandler;
             reco.Recognized += MyRecognizedEventHandler;
             reco.Canceled += MyCanceledEventHandler;
+            reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
+            reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
             reco.SessionStarted += MySessionStartedEventHandler;
-            reco.SessionStopped += MySessionStoppedEventHandler;
+            reco.SessionStopped += (s, e) =>
+            {
+                Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: Session stopped event: {0}.", e.ToString()));
+            };
 
             // Starts recognition.
             var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
@@ -155,8 +182,9 @@ namespace MicrosoftSpeechSDKSamples
             reco.Recognizing -= MyRecognizingEventHandler;
             reco.Recognized -= MyRecognizedEventHandler;
             reco.Canceled -= MyCanceledEventHandler;
+            reco.SpeechStartDetected -= MySpeechStartDetectedEventHandler;
+            reco.SpeechEndDetected -= MySpeechEndDetectedEventHandler;
             reco.SessionStarted -= MySessionStartedEventHandler;
-            reco.SessionStopped -= MySessionStoppedEventHandler;
         }
 
         private static async Task ContinuousRecognitionAsync(SpeechRecognizer reco)
@@ -164,44 +192,11 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("Continuous recognition.");
             var tcsLocal = new TaskCompletionSource<int>();
 
-            reco.Recognized += (s, e) =>
-            {
-                if (e.Result.Reason == ResultReason.RecognizedSpeech)
-                {
-                    Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
-                }
-                else if (e.Result.Reason == ResultReason.NoMatch)
-                {
-                    Console.WriteLine($"NOMATCH: Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}");
-                }
-            };
-
-            reco.SpeechStartDetected += (s, e) =>
-            {
-                Console.WriteLine($"SpeechStartDetected received: offset: {e.Offset}.");
-            };
-
-            reco.SpeechEndDetected += (s, e) =>
-            {
-                Console.WriteLine($"SpeechEndDetected received: offset: {e.Offset}.");
-                Console.WriteLine($"Speech end detected.");
-            };
-
-            reco.Canceled += (s, e) =>
-            {
-                Console.WriteLine($"CANCELED: Reason={e.Reason}");
-
-                if (!string.IsNullOrEmpty(e.ErrorDetails))
-                {
-                    Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
-                    Console.WriteLine($"CANCELED: Did you update the subscription info?");
-                }
-            };
-
-            reco.SessionStarted += (s, e) =>
-            {
-                Console.WriteLine($"\n    Session started event. Event: {e.ToString()}.");
-            };
+            reco.Recognized += MyRecognizedEventHandler;
+            reco.Canceled += MyCanceledEventHandler;
+            reco.SessionStarted += MySessionStartedEventHandler;
+            reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
+            reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
 
             reco.SessionStopped += (s, e) =>
             {

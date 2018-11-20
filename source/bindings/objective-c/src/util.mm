@@ -25,7 +25,7 @@
             reason = SPXResultReason_RecognizedSpeech;
             break;
         case SpeechImpl::ResultReason::RecognizingIntent:
-            reason = SPXResultReason_RecognizedIntent;
+            reason = SPXResultReason_RecognizingIntent;
             break;
         case SpeechImpl::ResultReason::RecognizedIntent:
             reason = SPXResultReason_RecognizedIntent;

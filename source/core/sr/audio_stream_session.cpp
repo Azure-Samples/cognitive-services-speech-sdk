@@ -1617,9 +1617,9 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
                    comingFromState == SessionState::WaitForAdapterCompletedSetFormatStop);
     if (comingFromState == SessionState::StoppingPump)
     {
-        SPX_DBG_TRACE_VERBOSE("%s: ProcessingAudio - size=%d", __FUNCTION__, 0);
         if (m_audioProcessor)
         {
+            SPX_DBG_TRACE_VERBOSE("%s: ProcessingAudio - Send zero size audio.", __FUNCTION__);
             m_audioProcessor->ProcessAudio(nullptr, 0);
         }
     }

@@ -1155,7 +1155,6 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
 void CSpxUspRecoEngineAdapter::OnError(bool isTransport, USP::ErrorCode errorCode, const std::string& errorMessage)
 {
     SPX_DBG_TRACE_VERBOSE("Response: On Error: Code:%d, Message: %s.\n", errorCode, errorMessage.c_str());
-
     WriteLock_Type writeLock(m_stateMutex);
     if (IsBadState())
     {
