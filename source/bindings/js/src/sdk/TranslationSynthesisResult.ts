@@ -1,9 +1,7 @@
-import { ResultReason } from "./ResultReason";
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
 
-//
-// copyright (c) Microsoft. All rights reserved.
-// See https://aka.ms/csspeech/license201809 for the full license information.
-//
+import { ResultReason } from "./ResultReason";
 
 /**
  * Defines translation synthesis result, i.e. the voice output of the translated text in the target language.

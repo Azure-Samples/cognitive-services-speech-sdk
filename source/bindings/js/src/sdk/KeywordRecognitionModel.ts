@@ -1,9 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
 import { Contracts } from "./Contracts";
-
-//
-// copyright (c) Microsoft. All rights reserved.
-// See https://aka.ms/csspeech/license201809 for the full license information.
-//
 
 /**
  * Represents a keyword recognition model for recognizing when

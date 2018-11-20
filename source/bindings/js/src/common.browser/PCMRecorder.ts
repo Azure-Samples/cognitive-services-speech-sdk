@@ -1,7 +1,5 @@
-//
-// Copyright (c) Microsoft. All rights reserved.
-// See https://aka.ms/csspeech/license201809 for the full license information.
-//
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
 import { RiffPcmEncoder, Stream } from "../common/Exports";
 import { IRecorder } from "./IRecorder";
 
@@ -11,7 +9,6 @@ export class PcmRecorder implements IRecorder {
     public Record = (context: AudioContext, mediaStream: MediaStream, outputStream: Stream<ArrayBuffer>): void => {
         const desiredSampleRate = 16000;
 
-        // https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createScriptProcessor
         const scriptNode = (() => {
             let bufferSize = 0;
             try {
@@ -43,7 +40,6 @@ export class PcmRecorder implements IRecorder {
             }
         };
 
-        // https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createMediaStreamSource
         const micInput = context.createMediaStreamSource(mediaStream);
 
         this.mediaResources = {

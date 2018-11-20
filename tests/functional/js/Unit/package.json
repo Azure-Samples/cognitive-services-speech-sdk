@@ -19,8 +19,8 @@
     "lint": "tslint -p tsconfig.json"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Microsoft",
+  "license": "MIT",
   "jest-junit": {
     "suiteName": "jest tests",
     "output": "./test-javascript-junit.xml",

@@ -1,7 +1,5 @@
-//
-// Copyright (c) Microsoft. All rights reserved.
-// See https://aka.ms/csspeech/license201809 for the full license information.
-//
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
 import { IConnection } from "../common/Exports";
 import { AuthInfo } from "./IAuthentication";
 import { RecognizerConfig } from "./RecognizerConfig";

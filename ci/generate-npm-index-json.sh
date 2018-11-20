@@ -105,7 +105,7 @@ cat <<HEREDOC
   "author": {
     "name": "Microsoft"
   },
-  "license": "https://aka.ms/csspeech/license201809",
+  "license": "MIT",
   "readmeFilename": "README.md"
 }
 

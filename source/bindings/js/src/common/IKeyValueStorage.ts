@@ -1,8 +1,5 @@
-//
-// Copyright (c) Microsoft. All rights reserved.
-// See https://aka.ms/csspeech/license201809 for the full license information.
-//
-
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
 export interface IKeyValueStorage {
     Get(key: string): string;
     GetOrAdd(key: string, valueToAdd: string): string;

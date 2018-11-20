@@ -1,3 +1,5 @@
+@REM Copyright (c) Microsoft Corporation. All rights reserved.
+@REM Licensed under the MIT license.
 @echo off
 setlocal
 if "%~1" equ "/?" goto :Usage
