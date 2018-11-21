@@ -15,9 +15,16 @@ TEST_CODE="$BINARY_DIR/core_tests"
 [[ -x $TEST_CODE ]] ||
   exitWithSuccess "Test %s: skip, no test code\n" "$T"
 
-set -x
-"$TEST_CODE" \
-  --keySpeech "$SPEECHSDK_SPEECH_KEY" \
-  --regionId "$SPEECHSDK_SPEECH_REGION" \
-  --inputDir "$SPEECHSDK_INPUTDIR" \
-  --reporter junit --out "test-$T-$PLATFORM.xml" --success
+. "$SCRIPT_DIR/../test-harness.sh" || exit 1
+
+runCatchSuite \
+  TESTRUNNER \
+  "test-$T-$PLATFORM" \
+  "$PLATFORM" \
+  "$SPEECHSDK_SPEECH_KEY" \
+  "$T" \
+  240 \
+  "$TEST_CODE" \
+    --keySpeech "$SPEECHSDK_SPEECH_KEY" \
+    --regionId "$SPEECHSDK_SPEECH_REGION" \
+    --inputDir "$SPEECHSDK_INPUTDIR"

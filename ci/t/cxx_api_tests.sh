@@ -15,12 +15,19 @@ TEST_CODE="$BINARY_DIR/cxx_api_tests"
 [[ -x $TEST_CODE ]] ||
   exitWithSuccess "Test %s: skip, no test code\n" "$T"
 
-set -x
-"$TEST_CODE" \
-  --keySpeech "$SPEECHSDK_SPEECH_KEY" \
-  --regionId "$SPEECHSDK_SPEECH_REGION" \
-  --keyLUIS "$SPEECHSDK_LUIS_KEY" \
-  --regionIdLUIS "$SPEECHSDK_LUIS_REGION" \
-  --luisAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-  --inputDir "$SPEECHSDK_INPUTDIR" \
-  --reporter junit --out "test-$T-$PLATFORM.xml" --success
+. "$SCRIPT_DIR/../test-harness.sh" || exit 1
+
+runCatchSuite \
+  TESTRUNNER \
+  "test-$T-$PLATFORM" \
+  "$PLATFORM" \
+  "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_LUIS_KEY" \
+  "$T" \
+  240 \
+  "$TEST_CODE" \
+    --keySpeech "$SPEECHSDK_SPEECH_KEY" \
+    --regionId "$SPEECHSDK_SPEECH_REGION" \
+    --keyLUIS "$SPEECHSDK_LUIS_KEY" \
+    --regionIdLUIS "$SPEECHSDK_LUIS_REGION" \
+    --luisAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
+    --inputDir "$SPEECHSDK_INPUTDIR"

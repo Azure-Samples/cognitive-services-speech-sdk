@@ -114,7 +114,7 @@ void ConnectCallbacks(SpeechRecognizer* recognizer, promise<string>& result)
                 result.set_value(INITIAL_SILENCE_TIMEOUT_STRING);
                 break;
             case NoMatchReason::InitialBabbleTimeout:
-                result.set_value(INITIAL_BABBAL_TIMEOUT_STRING);
+                result.set_value(INITIAL_BABBLE_TIMEOUT_STRING);
                 break;
             case NoMatchReason::NotRecognized:
                 result.set_value(NOT_RECOGNIZED_STRING);
@@ -150,7 +150,7 @@ void ConnectCallbacks(SpeechRecognizer* recognizer, promise<string>& result)
 string  WaitForResult(future<string>&& f, MilliSeconds duration)
 {
     auto status = f.wait_for(duration);
-    REQUIRE(status == future_status::ready);    
+    REQUIRE(status == future_status::ready);
     return f.get();
 }
 
@@ -180,7 +180,7 @@ void PushData(PushAudioInputStream* pushStream, const string& filename)
         pushStream->Write(buffer.data(), readSamples);
     }
     fs.close();
-    pushStream->Close();    
+    pushStream->Close();
 }
 
 void DoContinuousReco(SpeechRecognizer* recognizer, PushAudioInputStream* pushStream)
@@ -202,7 +202,7 @@ void DoKWS(SpeechRecognizer* recognizer, PushAudioInputStream* pushStream)
     ConnectCallbacks(recognizer, res);
     PushData(pushStream, cortana.m_audioFilename);
     auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/heycortana_en-US.table");
-    recognizer->StartKeywordRecognitionAsync(model).wait();    
+    recognizer->StartKeywordRecognitionAsync(model).wait();
     auto text = WaitForResult(res.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopKeywordRecognitionAsync().wait();
     SPXTEST_REQUIRE(text.compare(cortana.m_utterance) == 0);

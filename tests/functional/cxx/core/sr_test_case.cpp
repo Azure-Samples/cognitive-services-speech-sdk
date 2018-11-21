@@ -26,34 +26,34 @@ const vector<ISpxThreadService::Affinity> g_affinities =
     ISpxThreadService::Affinity::Background
 };
 
-TEST_CASE("ThreadService: Start/Stop", "[sr]")
+TEST_CASE("ThreadService: Start/Stop", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Start twice fails")
+TEST_CASE("ThreadService: Start twice fails", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
     REQUIRE_THROWS_WITH(service->Init(), Catch::Contains("INVALID_STATE"));
 }
 
-TEST_CASE("ThreadService: Term not initialized")
+TEST_CASE("ThreadService: Term not initialized", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Term twice, term is idempotent")
+TEST_CASE("ThreadService: Term twice, term is idempotent", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Term());
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Execute a task on uninitialized service fails")
+TEST_CASE("ThreadService: Execute a task on uninitialized service fails", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     int counter = 0;
@@ -65,7 +65,7 @@ TEST_CASE("ThreadService: Execute a task on uninitialized service fails")
     REQUIRE_THROWS_WITH(service->Execute(move(task)), Catch::Contains("INVALID_STATE"));
 }
 
-TEST_CASE("ThreadService: Execute tasks on background/user threads")
+TEST_CASE("ThreadService: Execute tasks on background/user threads", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
 
@@ -98,7 +98,7 @@ TEST_CASE("ThreadService: Execute tasks on background/user threads")
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: User and background threads are different")
+TEST_CASE("ThreadService: User and background threads are different", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     vector<thread::id> ids;
@@ -136,7 +136,7 @@ TEST_CASE("ThreadService: User and background threads are different")
     REQUIRE(ids[1] != this_thread::get_id());
 }
 
-TEST_CASE("ThreadService: Throw in a task and next task succeeds")
+TEST_CASE("ThreadService: Throw in a task and next task succeeds", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
 
@@ -165,7 +165,7 @@ TEST_CASE("ThreadService: Throw in a task and next task succeeds")
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Schedule a timer several times.")
+TEST_CASE("ThreadService: Schedule a timer several times.", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
 
@@ -189,7 +189,7 @@ TEST_CASE("ThreadService: Schedule a timer several times.")
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Schedule several timers.")
+TEST_CASE("ThreadService: Schedule several timers.", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
 
@@ -235,7 +235,7 @@ TEST_CASE("ThreadService: Schedule several timers.")
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Shutdown with immediate tasks and timers")
+TEST_CASE("ThreadService: Shutdown with immediate tasks and timers", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
 
@@ -266,7 +266,7 @@ TEST_CASE("ThreadService: Shutdown with immediate tasks and timers")
     REQUIRE(counterOld == counter);
 }
 
-TEST_CASE("ThreadService: Shutdown on a background thread fails")
+TEST_CASE("ThreadService: Shutdown on a background thread fails", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
@@ -281,7 +281,7 @@ TEST_CASE("ThreadService: Shutdown on a background thread fails")
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Shutdown on a user thread succeeds")
+TEST_CASE("ThreadService: Shutdown on a user thread succeeds", "[!hide][sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());

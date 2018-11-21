@@ -20,8 +20,8 @@ using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Intent;
 using namespace std;
 
-#define INITIAL_SILENCE_TIMEOUT_STRING  "InitialSilenceTimeout"
-#define INITIAL_BABBAL_TIMEOUT_STRING "InitialBabbleTimeout"
+#define INITIAL_SILENCE_TIMEOUT_STRING "InitialSilenceTimeout"
+#define INITIAL_BABBLE_TIMEOUT_STRING "InitialBabbleTimeout"
 #define NOT_RECOGNIZED_STRING "NotRecognized"
 #define UNKNOWN_REASON "unknown reason"
 
@@ -32,7 +32,7 @@ struct TestData
 {
     TestData(const string& audioFilename, const string& utt)
         : m_audioFilename(audioFilename), m_utterance(utt)
-    {        
+    {
     }
 
     void UpdateFullFilename(const string& dir)

@@ -86,6 +86,11 @@ function endTests {
   ${!allpassRef}
 }
 
+function redact {
+  # N.B. receiving stdin as first command in function.
+  $([[ $(uname) = Darwin ]] && printf 'g' ]])stdbuf -o0 -e0 perl -lpe 'BEGIN { if (@ARGV) { $re = sprintf "(?:%s)", (join "|", map { quotemeta $_ } splice @ARGV); $re = qr/$re/ } } $re and s/$re/***/gi' $@
+}
+
 function runTest {
   local _testStateVarPrefix="$1"
   local TEST_NAME="$2"
@@ -101,16 +106,8 @@ function runTest {
   local classnameRef=${_testStateVarPrefix}_classname
   local redactStringsRef=${_testStateVarPrefix}_redactStrings
 
-  local REDACT
-
-  if [[ -n ${!redactStringsRef} ]]; then
-    REDACT=(perl -lpe 'BEGIN { $re = sprintf "(?:%s)", (join "|", map { quotemeta $_ } splice @ARGV); $re = qr/$re/ } s/$re/***/gi' ${!redactStringsRef})
-  else
-    REDACT=(cat)
-  fi
-
   print_vars = TEST_NAME TIMEOUT_SECONDS COMMAND - |
-    "${REDACT[@]}" |
+    redact ${!redactStringsRef} |
     tee -a "${!outputRef}.out"
 
   local START_SECONDS EXIT_CODE END_SECONDS TIME_SECONDS TAIL
@@ -124,7 +121,7 @@ function runTest {
 
   START_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
   ${COREUTILS_PREFIX}timeout -k 5s $TIMEOUT_SECONDS ${COREUTILS_PREFIX}stdbuf -o0 -e0 "$@" 2>&1 |
-    "${REDACT[@]}" 1>> "${!outputRef}.out"
+    redact ${!redactStringsRef} 1>> "${!outputRef}.out"
   EXIT_CODE=${PIPESTATUS[0]}
   END_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
   TIME_SECONDS=$(perl -e "printf '%0.3f', $END_SECONDS - $START_SECONDS")
@@ -155,4 +152,61 @@ function runTest {
   eval $timeRef=\"$(perl -e "printf '%0.3f', ${!timeRef} + $TIME_SECONDS")\"
 
   eval "(( $testsRef++ ))"
+
+  [[ $EXIT_CODE == 0 ]]
+}
+
+function addToTestOutput {
+  local _testStateVarPrefix="$1"
+  shift
+
+  local outputRef=${_testStateVarPrefix}_output
+  local redactStringsRef=${_testStateVarPrefix}_redactStrings
+
+  "$@" |
+    redact ${!redactStringsRef} |
+    tee -a "${!outputRef}.out"
+}
+
+# Run Catch2 test suite, each test-case in a separate process, for robustness.
+# Use the Catch2 XML reporter is streaming and will have more details than the
+# JUnit one in case of crashes.
+function runCatchSuite {
+  local usage testStateVarPrefix output platform redactStrings testsuiteName timeoutSeconds testCases testCaseIndex catchOut
+  usage="Usage: ${FUNCNAME[0]} <testStateVarPrefix> <output> <platform> <redactStrings> <testsuiteName> <timeoutSeconds> <command...>"
+  testStateVarPrefix="${1?$usage}"
+  output="${2?$usage}"
+  platform="${3?$usage}"
+  redactStrings="${4?$usage}"
+  testsuiteName="${5?$usage}"
+  timeoutSeconds="${6?$usage}"
+  shift 6
+
+  testCases=()
+  readarray -t testCases < <("$1" --list-test-names-only | tr -d \\r)
+  [[ ${#testCases[@]} != 0 ]] || {
+    echo Failed to discover any test cases.
+    return 1
+  }
+
+  startTests "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
+  startSuite "$testStateVarPrefix" "$testsuiteName"
+
+  # Remove individual catch output files, ignoring errors
+  rm -f "catch$output-"*.xml
+
+  testCaseIndex=0
+  for testCase in "${testCases[@]}"; do
+    ((testCaseIndex++))
+    catchOut="catch$output-$testCaseIndex.xml"
+    runTest "$testStateVarPrefix" "$testCase" "$timeoutSeconds" \
+      "$@" --reporter xml --durations yes --out "$catchOut" \
+        "$testCase" || if [[ -s $catchOut ]]; then
+            echo 'Test failed. Potential details here (cf. success="false"), or in the logs included in the test results file:'
+            addToTestOutput "$testStateVarPrefix" cat "$catchOut"
+          fi
+  done
+
+  endSuite "$testStateVarPrefix"
+  endTests "$testStateVarPrefix"
 }

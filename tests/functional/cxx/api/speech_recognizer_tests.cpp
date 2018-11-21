@@ -36,7 +36,7 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
         SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
 
         //todo: we should allow switching recog mode. Fix this later.
-        //pushData(pushStream.get(), weather.m_audioFilename);        
+        //pushData(pushStream.get(), weather.m_audioFilename);
         //REQUIRE_THROWS(recognizer->RecognizeOnceAsync().get());
     }
     SPXTEST_SECTION("continuous and kws")
@@ -79,10 +79,11 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     UseMocks(false);
+    weather.UpdateFullFilename(Config::InputDir);
     SPXTEST_REQUIRE(exists(weather.m_audioFilename));
-    
+
     auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_audioFilename);
-    
+
     // a normal case.
     SPXTEST_SECTION("start and stop once")
     {
@@ -105,7 +106,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
 
         SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
     }
-    SPXTEST_SECTION("two starts in a raw")
+    SPXTEST_SECTION("two starts in a row")
     {
         promise<string> result;
         ConnectCallbacks(recognizer.get(), result);
@@ -116,7 +117,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         auto text = WaitForResult(result.get_future(), 1s);
 
         SPXTEST_REQUIRE(text.find("SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION") != string::npos);
-    }    
+    }
 #if 0
     // start and stop immediately
     SPXTEST_SECTION("start and then stop immediately")
@@ -150,6 +151,8 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    weather.UpdateFullFilename(Config::InputDir);
 
     SPXTEST_SECTION("push stream with continuous reco")
     {
@@ -233,7 +236,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         wrongSamplingRateFile.UpdateFullFilename(Config::InputDir);
         UseMocks(false);
         SPXTEST_REQUIRE(exists(wrongSamplingRateFile.m_audioFilename));
-        
+
         SPXTEST_REQUIRE(!IsUsingMocks());
 
         auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
@@ -542,7 +545,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
     SPXTEST_SECTION("German Speech Recognition works")
     {
-        callTheFirstOne.UpdateFullFilename(Config::InputDir);        
+        callTheFirstOne.UpdateFullFilename(Config::InputDir);
         SPXTEST_REQUIRE(exists(callTheFirstOne.m_audioFilename));
 
         auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
@@ -765,6 +768,8 @@ TEST_CASE("KWS basics", "[api][cxx]")
 TEST_CASE("Speech on local server", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    weather.UpdateFullFilename(Config::InputDir);
+
     SPXTEST_SECTION("Stress testing against the local server")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
@@ -808,6 +813,8 @@ TEST_CASE("Speech on local server", "[api][cxx]")
 TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    weather.UpdateFullFilename(Config::InputDir);
 
     SPXTEST_REQUIRE(exists(weather.m_audioFilename));
 
