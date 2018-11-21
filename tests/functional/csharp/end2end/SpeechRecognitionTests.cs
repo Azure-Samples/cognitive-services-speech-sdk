@@ -494,5 +494,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 
             }
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public async Task AsyncRecognitionAfterDisposingSpeechRecognizer()
+        {
+            this.config.SpeechRecognitionLanguage = Language.DE_DE;
+            var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
+            var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput));
+            recognizer.Dispose();
+            await recognizer.StartContinuousRecognitionAsync();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void DisposingSpeechRecognizerWhileAsyncRecognition()
+        {
+            this.config.SpeechRecognitionLanguage = Language.EN;
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput));
+            recognizer = helper.GetSpeechRecognizingAsyncNotAwaited(recognizer);
+        }
     }
 }

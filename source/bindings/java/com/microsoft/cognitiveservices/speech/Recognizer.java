@@ -72,7 +72,12 @@ public class Recognizer implements Closeable
      */
     @Override
     public void close() {
-        dispose(true);
+        synchronized (recognizerLock) {
+            if (activeAsyncRecognitionCounter != 0) {
+                throw new IllegalStateException("Cannot dispose a recognizer while async recognition is running. Await async recognitions to avoid unexpected disposals.");
+            }
+            dispose(true);
+        }
     }
 
     /*! \cond PROTECTED */
@@ -107,6 +112,8 @@ public class Recognizer implements Closeable
     /*! \endcond */
 
     private boolean disposed = false;
+    private final Object recognizerLock = new Object();
+    private int activeAsyncRecognitionCounter = 0;
 
     /**
      * Define an internal class which raise an event when a corresponding callback is invoked from the native layer.
@@ -177,6 +184,25 @@ public class Recognizer implements Closeable
 
         private Recognizer recognizer;
         private Boolean recognitionEventStarted;
-
     }
+
+    /*! \cond PROTECTED */
+
+    protected void doAsyncRecognitionAction(Runnable recoImplAction) {
+        synchronized (recognizerLock) {
+            activeAsyncRecognitionCounter++;
+        }
+        if (disposed) {
+            throw new IllegalStateException(this.getClass().getName());
+        }
+        try {
+            recoImplAction.run();
+        } finally {
+            synchronized (recognizerLock) {
+                activeAsyncRecognitionCounter--;
+            }
+        }
+    }
+
+    /*! \endcond */
 }

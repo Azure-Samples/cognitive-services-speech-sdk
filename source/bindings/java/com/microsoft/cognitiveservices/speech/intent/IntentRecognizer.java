@@ -109,7 +109,11 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
      */
     public Future<IntentRecognitionResult> recognizeOnceAsync() {
         return s_executorService.submit(() -> {
-            return  new IntentRecognitionResult(recoImpl.Recognize());
+            // A variable defined in an enclosing scope must be final or effectively final.
+            // The compiler treats an array initialized once as an effectively final.
+            IntentRecognitionResult[] result = new IntentRecognitionResult[1];
+            super.doAsyncRecognitionAction(() -> result[0] = new IntentRecognitionResult(recoImpl.Recognize()));
+            return result[0];
         });
     }
 
@@ -120,7 +124,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
      */
     public Future<Void> startContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-            recoImpl.StartContinuousRecognition();
+            super.doAsyncRecognitionAction(() -> recoImpl.StartContinuousRecognition());
             return null;
         });
     }
@@ -131,7 +135,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
      */
     public Future<Void> stopContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-            recoImpl.StopContinuousRecognition();
+            super.doAsyncRecognitionAction(() -> recoImpl.StopContinuousRecognition());
             return null;
         });
     }
@@ -218,7 +222,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNull(model, "model");
 
         return s_executorService.submit(() -> {
-            recoImpl.StartKeywordRecognition(model.getModelImpl());
+            super.doAsyncRecognitionAction(() -> recoImpl.StartKeywordRecognition(model.getModelImpl()));
             return null;
         });
     }
@@ -230,8 +234,8 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
      */
     public Future<Void> stopKeywordRecognitionAsync() {
         return s_executorService.submit(() -> {
-            recoImpl.StopKeywordRecognition();
-            return null;
+                super.doAsyncRecognitionAction(() -> recoImpl.StopKeywordRecognition());
+                return null;
         });
     }
 
@@ -239,7 +243,6 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
 
     @Override
     protected void dispose(boolean disposing) {
-
         if (disposed) {
             return;
         }

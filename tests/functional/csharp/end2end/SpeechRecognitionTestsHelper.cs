@@ -5,8 +5,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -156,6 +155,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.IsTrue(
                     plainActualText.Contains(plainExpectedText),
                     $"'{plainActualText}' does not contain '{plainExpectedText}' as expected");
+            }
+        }
+
+        public SpeechRecognizer GetSpeechRecognizingAsyncNotAwaited(SpeechRecognizer recognizer)
+        {
+            using (var rec = recognizer)
+            {
+                rec.RecognizeOnceAsync();
+                Thread.Sleep(100);
+                return rec;
             }
         }
 

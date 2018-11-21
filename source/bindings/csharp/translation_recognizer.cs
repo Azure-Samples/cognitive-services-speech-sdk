@@ -265,7 +265,12 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// </example>
         public Task<TranslationRecognitionResult> RecognizeOnceAsync()
         {
-            return Task.Run(() => { return new TranslationRecognitionResult(this.recoImpl.Recognize()); });
+            return Task.Run(() =>
+            {
+                TranslationRecognitionResult result = null;
+                base.DoAsyncRecognitionAction(() => result = new TranslationRecognitionResult(this.recoImpl.Recognize()));
+                return result;
+            });
         }
 
         /// <summary>
@@ -275,7 +280,10 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <returns>A task representing the asynchronous operation that starts the recognition.</returns>
         public Task StartContinuousRecognitionAsync()
         {
-            return Task.Run(() => { this.recoImpl.StartContinuousRecognition(); });
+            return Task.Run(() =>
+            {
+                base.DoAsyncRecognitionAction(this.recoImpl.StartContinuousRecognition);
+            });
         }
 
         /// <summary>
@@ -284,7 +292,10 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <returns>A task representing the asynchronous operation that stops the translation.</returns>
         public Task StopContinuousRecognitionAsync()
         {
-            return Task.Run(() => { this.recoImpl.StopContinuousRecognition(); });
+            return Task.Run(() =>
+            {
+                base.DoAsyncRecognitionAction(this.recoImpl.StopContinuousRecognition);
+            });
         }
 
         /// <summary>
@@ -296,7 +307,10 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <returns>A task representing the asynchronous operation that starts the recognition.</returns>
         public Task StartKeywordRecognitionAsync(KeywordRecognitionModel model)
         {
-            return Task.Run(() => { this.recoImpl.StartKeywordRecognition(model.modelImpl); });
+            return Task.Run(() =>
+            {
+                base.DoAsyncRecognitionAction(() => this.recoImpl.StartKeywordRecognition(model.modelImpl));
+            });
         }
 
         /// <summary>
@@ -306,7 +320,10 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <returns>A task representing the asynchronous operation that stops the recognition.</returns>
         public Task StopKeywordRecognitionAsync()
         {
-            return Task.Run(() => { this.recoImpl.StopKeywordRecognition(); });
+            return Task.Run(() =>
+            {
+                base.DoAsyncRecognitionAction(this.recoImpl.StopKeywordRecognition);
+            });
         }
 
         protected override void Dispose(bool disposing)

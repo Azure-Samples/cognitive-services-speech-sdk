@@ -5,6 +5,7 @@
 
 using System;
 using System.Globalization;
+using System.Threading;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -46,8 +47,15 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            lock (recognizerLock)
+            {
+                if (activeAsyncRecognitionCounter != 0)
+                {
+                    throw new InvalidOperationException("Cannot dispose a recognizer while async recognition is running. Await async recognitions to avoid unexpected disposals.");
+                }
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
         }
 
         /// <summary>
@@ -80,6 +88,8 @@ namespace Microsoft.CognitiveServices.Speech
         internal RecognitionEventHandlerImpl speechStartDetectedHandler;
         internal RecognitionEventHandlerImpl speechEndDetectedHandler;
         private bool disposed = false;
+        private readonly object recognizerLock = new object();
+        private int activeAsyncRecognitionCounter = 0;
 
         /// <summary>
         /// Define an internal class which raise a C# event when a corresponding callback is invoked from the native layer.
@@ -146,6 +156,37 @@ namespace Microsoft.CognitiveServices.Speech
 
             private Recognizer recognizer;
             private RecognitionEventType eventType;
+        }
+
+        /// <summary>
+        /// This methods checks if a recognizer is disposed before performing async recognition action.
+        /// The Action parameter <paramref name="recoImplAction"/> can be any internal async recognition method of Speech, Translation and Intent Recognizer.
+        /// The method is called from all async recognition methods (e.g. <see cref="SpeechRecognizer.StartContinuousRecognitionAsync"/>).
+        /// ObjectDisposedException will be thrown and the action will not be performed if its recognizer is not available anymore.
+        /// The purpose of this method is to prevent possible race condition if async recognitions are not awaited.
+        /// </summary>
+        /// <param name="recoImplAction">Actual implementation.</param>
+        protected void DoAsyncRecognitionAction(Action recoImplAction)
+        {
+            lock (recognizerLock)
+            {
+                activeAsyncRecognitionCounter++;
+            }
+            if (disposed)
+            {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+            try
+            {
+                recoImplAction();
+            }
+            finally
+            {
+                lock (recognizerLock)
+                {
+                    activeAsyncRecognitionCounter--;
+                }
+            }
         }
     }
 }

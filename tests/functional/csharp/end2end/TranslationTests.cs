@@ -262,5 +262,23 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             Assert.AreEqual(TestData.German.HowIsYourWork.Utterance, actualTranslationRecognition.Result.Translations[Language.DE]);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public async Task AsyncRecognitionAfterDisposingTranslationRecognizer()
+        {
+            var toLanguages = new List<string>() { Language.DE };
+            var recognizer = this.translationHelper.CreateTranslationRecognizer(TestData.Catalan.AudioFile, Language.CA_ES, toLanguages);
+            recognizer.Dispose();
+            await recognizer.StopContinuousRecognitionAsync();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void DisposingTranslationRecognizerWhileAsyncRecognition()
+        {
+            var toLanguages = new List<string>() { Language.DE };
+            var recognizer = this.translationHelper.GetTranslationRecognizingAsyncNotAwaited(TestData.English.Batman.AudioFile, Language.CA_ES, toLanguages);
+        }
     }
 }

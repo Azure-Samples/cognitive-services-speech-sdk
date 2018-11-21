@@ -38,7 +38,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return config;
         }
 
-        TranslationRecognizer CreateTranslationRecognizer(string path, string fromLanguage, List<string> toLanguages, string voice = null)
+        public TranslationRecognizer CreateTranslationRecognizer(string path, string fromLanguage, List<string> toLanguages, string voice = null)
         {
             var audioInput = AudioConfig.FromWavFileInput(path);
             return new TranslationRecognizer(GetConfig(path, fromLanguage, toLanguages, voice), audioInput);
@@ -168,6 +168,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 receivedEvents.Add(ResultType.RecognizedText, recognizedEvents);
                 receivedEvents.Add(ResultType.RecognizingText, recognizingEvents);
                 return receivedEvents;
+            }
+        }
+
+        public TranslationRecognizer GetTranslationRecognizingAsyncNotAwaited(string path, string fromLanguage, List<string> toLanguages)
+        {
+            using (var recognizer = CreateTranslationRecognizer(path, fromLanguage, toLanguages))
+            {
+                recognizer.RecognizeOnceAsync();
+                Thread.Sleep(100);
+                return recognizer;
             }
         }
 

@@ -17,6 +17,7 @@ using Microsoft.CognitiveServices.Speech.Intent;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using System.Threading;
     using static AssertHelpers;
     using static SpeechRecognitionTestsHelper;
 
@@ -122,6 +123,36 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 }
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public async Task AsyncRecognitionAfterDisposingIntentRecognizer()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
+            var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput));
+            recognizer.AddIntent(TestData.English.HomeAutomation.TurnOn.Utterance);
+            recognizer.Dispose();
+            await recognizer.StartContinuousRecognitionAsync();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void DisposingIntentRecognizerWhileAsyncRecognition()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
+            var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput));
+            recognizer.AddIntent(TestData.English.HomeAutomation.TurnOn.Utterance);
+            recognizer = DoAsyncRecognitionNotAwaited(recognizer);
+        }
+
+        IntentRecognizer DoAsyncRecognitionNotAwaited(IntentRecognizer rec)
+        {
+            using (var recognizer = rec)
+            {
+                recognizer.RecognizeOnceAsync();
+                Thread.Sleep(100);
+                return recognizer;
+            }
+        }
     }
 }
-

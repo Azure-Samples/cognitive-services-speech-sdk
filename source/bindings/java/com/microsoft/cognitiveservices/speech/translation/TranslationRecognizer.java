@@ -130,7 +130,11 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      */
     public Future<TranslationRecognitionResult> recognizeOnceAsync() {
         return s_executorService.submit(() -> {
-            return new TranslationRecognitionResult(recoImpl.Recognize());
+            // A variable defined in an enclosing scope must be final or effectively final.
+            // The compiler treats an array initialized once as an effectively final.
+            TranslationRecognitionResult[] result = new TranslationRecognitionResult[1];
+            super.doAsyncRecognitionAction(() -> result[0] = new TranslationRecognitionResult(recoImpl.Recognize()));
+            return result[0];
         });
     }
 
@@ -141,7 +145,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      */
     public Future<Void> startContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-            recoImpl.StartContinuousRecognition();
+            super.doAsyncRecognitionAction(() -> recoImpl.StartContinuousRecognition());
             return null;
         });
     }
@@ -152,7 +156,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      */
     public Future<Void> stopContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-            recoImpl.StopContinuousRecognition();
+            super.doAsyncRecognitionAction(() ->  recoImpl.StopContinuousRecognition());
             return null;
         });
     }

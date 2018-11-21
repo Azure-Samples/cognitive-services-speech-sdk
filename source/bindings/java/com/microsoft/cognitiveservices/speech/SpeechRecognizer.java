@@ -127,7 +127,11 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      */
     public Future<SpeechRecognitionResult> recognizeOnceAsync() {
         return s_executorService.submit(() -> {
-            return new SpeechRecognitionResult(recoImpl.Recognize());
+            // A variable defined in an enclosing scope must be final or effectively final.
+            // The compiler treats an array initialized once as an effectively final.
+            SpeechRecognitionResult[] result = new SpeechRecognitionResult[1];
+            super.doAsyncRecognitionAction(() -> result[0] = new SpeechRecognitionResult(recoImpl.Recognize()));
+            return result[0];
         });
     }
 
@@ -138,7 +142,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      */
     public Future<Void> startContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-            recoImpl.StartContinuousRecognition();
+            super.doAsyncRecognitionAction(() -> recoImpl.StartContinuousRecognition());
             return null;
         });
     }
@@ -149,7 +153,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      */
     public Future<Void> stopContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-            recoImpl.StopContinuousRecognition();
+            super.doAsyncRecognitionAction(() -> recoImpl.StopContinuousRecognition());
             return null;
         });
     }
@@ -165,7 +169,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNull(model, "model");
 
         return s_executorService.submit(() -> {
-            recoImpl.StartKeywordRecognition(model.getModelImpl());
+            super.doAsyncRecognitionAction(() -> recoImpl.StartKeywordRecognition(model.getModelImpl()));
             return null;
         });
     }
@@ -177,7 +181,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      */
     public Future<Void> stopKeywordRecognitionAsync() {
         return s_executorService.submit(() -> {
-            recoImpl.StopKeywordRecognition();
+            super.doAsyncRecognitionAction(() -> recoImpl.StopKeywordRecognition());
             return null;
         });
     }
