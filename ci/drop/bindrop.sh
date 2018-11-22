@@ -177,7 +177,7 @@ fi
 cp $CPOPT -R "$SRCINC"* "$DESTPUBINC"
 
 # copy additional private binaries (non-shipping)
-for var in carbonx Microsoft.CognitiveServices.Speech.Tests.ParallelRunner; do
+for var in carbonx Microsoft.CognitiveServices.Speech.Tests.ParallelRunner core_tests cxx_api_tests; do
   [[ -e "$SRCBIN/$var" ]] && mkdir -p "$DESTPRIVBIN" && cp $CPOPT "$SRCBIN/$var" "$DESTPRIVBIN"
 done
 

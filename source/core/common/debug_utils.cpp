@@ -74,85 +74,12 @@ static std::string FormatWin32Error(DWORD error)
 }
 #endif
 
-#if !defined(ANDROID) && !defined(__ANDROID__)
-// make the unmangled name a bit more readable
-// Insert spaces around the main function name for better visual parsability; and double-spaces between function arguments.
-// This uses some heuristics for C++ names that may be fragile, but that's OK since this only adds/removes spaces.
-static std::string MakeFunctionNameStandOut(std::string origName)
-{
-    try // guard against exception, since this is used for exception reporting
-    {
-        auto name = origName;
-        // strip off modifiers for parsing (will be put back at the end)
-        std::string modifiers;
-        auto pos = name.find_last_not_of(" abcdefghijklmnopqrstuvwxyz");
-        if (pos != std::string::npos)
-        {
-            modifiers = name.substr(pos + 1);
-            name = name.substr(0, pos + 1);
-        }
-        bool hasArgList = !name.empty() && name.back() == ')';
-        size_t angleDepth = 0;
-        size_t parenDepth = 0;
-        bool hitEnd = !hasArgList; // hit end of function name already?
-        bool hitStart = false;
-        // we parse the function name from the end; escape nested <> and ()
-        // We look for the end and start of the function name itself (without namespace qualifiers),
-        // and for commas separating function arguments.
-        for (size_t i = name.size(); i--> 0;)
-        {
-            // account for nested <> and ()
-            if (name[i] == '>')
-                angleDepth++;
-            else if (name[i] == '<')
-                angleDepth--;
-            else if (name[i] == ')')
-                parenDepth++;
-            else if (name[i] == '(')
-                parenDepth--;
-            // space before '>'
-            if (name[i] == ' ' && i + 1 < name.size() && name[i + 1] == '>')
-                name.erase(i, 1); // remove
-                                  // commas
-            if (name[i] == ',')
-            {
-                if (i + 1 < name.size() && name[i + 1] == ' ')
-                    name.erase(i + 1, 1);  // remove spaces after comma
-                if (!hitEnd && angleDepth == 0 && parenDepth == 1)
-                    name.insert(i + 1, "  "); // except for top-level arguments, we separate them by 2 spaces for better readability
-            }
-            // function name
-            if ((name[i] == '(' || name[i] == '<') &&
-                parenDepth == 0 && angleDepth == 0 &&
-                (i == 0 || name[i - 1] != '>') &&
-                !hitEnd && !hitStart) // we hit the start of the argument list
-            {
-                hitEnd = true;
-                name.insert(i, "  ");
-            }
-            else if ((name[i] == ' ' || name[i] == ':' || name[i] == '>') && hitEnd && !hitStart && i > 0) // we hit the start of the function name
-            {
-                if (name[i] != ' ')
-                    name.insert(i + 1, " ");
-                name.insert(i + 1, " "); // in total insert 2 spaces
-                hitStart = true;
-            }
-        }
-        return name + modifiers;
-    }
-    catch (...)
-    {
-        return origName;
-    }
-}
-#endif
-
 /// <summary>This function collects the stack tracke and writes it through the provided write function
 /// <param name="write">Function for writing the text associated to a the callstack</param>
 /// </summary>
-static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, const std::function<void(std::string)>& write)
+static void CollectCallStack(size_t skipLevels, const std::function<void(std::string)>& write)
 {
-    write("\n[CALL STACK]\n");
+    write("\n[CALL STACK BEGIN]\n");
 
 #ifdef _WIN32
     static const int MAX_CALLERS = 62;
@@ -203,7 +130,7 @@ static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
 
         if (SymFromAddr(process, (DWORD64)(callStack[i]), 0, symbolInfo))
         {
-            callStackLine += makeFunctionNamesStandOut ? MakeFunctionNameStandOut(symbolInfo->Name) : symbolInfo->Name;
+            callStackLine += symbolInfo->Name;
             write(callStackLine + "\n");
         }
         else
@@ -236,30 +163,24 @@ static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
         std::string current(symbolList[i]);
 
         auto beginName = current.find('(');
-        auto beginOffset = current.find('+');
-        auto endOffset = current.find(')');
+        auto beginOffset = current.find('+', beginName);
 
         std::ostringstream buffer;
 
-        if (beginName != std::string::npos && beginOffset != std::string::npos && endOffset != std::string::npos && (beginName < beginOffset))
+        if (beginName != std::string::npos && beginOffset != std::string::npos && beginName < beginOffset)
         {
+            buffer << current.substr(0, beginName + 1);
             auto mangled_name = current.substr(beginName + 1, beginOffset - beginName - 1);
-            auto offset = current.substr(beginOffset + 1, endOffset - beginOffset - 1);
-
-            // Mangled name is now in [beginName, beginOffset) and caller offset in [beginOffset, beginAddress).
             int status = 0;
             char* ret = abi::__cxa_demangle(mangled_name.c_str(), NULL, NULL, &status);
-            std::string fName(mangled_name);
             if (status == 0)
-                fName = makeFunctionNamesStandOut ? MakeFunctionNameStandOut(ret) : ret; // make it a bit more readable
-
+                buffer << ret;
+            else
+                buffer << mangled_name;
             free(ret);
-
-            buffer << std::setw(20) << std::left << current.substr(endOffset + 1)
-                << std::setw(50) << std::left << fName
-                << "+" << offset;
+            buffer << current.substr(beginOffset);
         }
-        else // Couldn't parse the line. Print the whole line as it came.
+        else // Nothing to demangle. Print the whole line as it came.
             buffer << current;
 
         write(buffer.str());
@@ -268,7 +189,6 @@ static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
     free(symbolList);
 #else
     UNUSED(skipLevels);
-    UNUSED(makeFunctionNamesStandOut);
 
     void *androidStackFrames[32];
     AndroidStackFrame state = { &androidStackFrames[0], &androidStackFrames [31] };
@@ -292,15 +212,17 @@ static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
     }
     write(os.str().c_str());
 #endif
+
+    write("\n[CALL STACK END]\n");
 }
 
 
-std::string GetCallStack(size_t skipLevels/* = 0*/, bool makeFunctionNamesStandOut/* = false*/)
+std::string GetCallStack(size_t skipLevels/* = 0*/)
 {
     try
     {
         std::ostringstream buffer;
-        CollectCallStack(skipLevels + 1/*skip this function*/, makeFunctionNamesStandOut, [&](std::string stack)
+        CollectCallStack(skipLevels + 1/*skip this function*/, [&](std::string stack)
         {
             buffer << stack << std::endl;
         });
@@ -314,7 +236,7 @@ std::string GetCallStack(size_t skipLevels/* = 0*/, bool makeFunctionNamesStandO
 
 static void SignalHandler()
 {
-    auto callstack = Debug::GetCallStack(1, false);
+    auto callstack = Debug::GetCallStack(1);
 
     SPX_TRACE_VERBOSE(callstack.c_str());
 

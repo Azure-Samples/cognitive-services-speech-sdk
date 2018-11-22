@@ -92,6 +92,11 @@ function redact {
 }
 
 function runTest {
+  local testOutput
+  if [[ $1 = --output ]]; then
+    testOutput="$2"
+    shift 2
+  fi
   local _testStateVarPrefix="$1"
   local TEST_NAME="$2"
   local TIMEOUT_SECONDS="$3"
@@ -121,7 +126,10 @@ function runTest {
 
   START_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
   ${COREUTILS_PREFIX}timeout -k 5s $TIMEOUT_SECONDS ${COREUTILS_PREFIX}stdbuf -o0 -e0 "$@" 2>&1 |
-    redact ${!redactStringsRef} 1>> "${!outputRef}.out"
+    redact ${!redactStringsRef} |
+    if [[ -n $testOutput ]]; then tee "$testOutput"; else cat; fi \
+      1>> "${!outputRef}.out"
+
   EXIT_CODE=${PIPESTATUS[0]}
   END_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
   TIME_SECONDS=$(perl -e "printf '%0.3f', $END_SECONDS - $START_SECONDS")
@@ -172,7 +180,7 @@ function addToTestOutput {
 # Use the Catch2 XML reporter is streaming and will have more details than the
 # JUnit one in case of crashes.
 function runCatchSuite {
-  local usage testStateVarPrefix output platform redactStrings testsuiteName timeoutSeconds testCases testCaseIndex catchOut
+  local usage testStateVarPrefix output platform redactStrings testsuiteName timeoutSeconds testCases testCaseIndex catchOut exitCode
   usage="Usage: ${FUNCNAME[0]} <testStateVarPrefix> <output> <platform> <redactStrings> <testsuiteName> <timeoutSeconds> <command...>"
   testStateVarPrefix="${1?$usage}"
   output="${2?$usage}"
@@ -193,17 +201,20 @@ function runCatchSuite {
   startSuite "$testStateVarPrefix" "$testsuiteName"
 
   # Remove individual catch output files, ignoring errors
-  rm -f "catch$output-"*.xml
+  rm -f "catch$output-"*.{xml,txt}
 
   testCaseIndex=0
   for testCase in "${testCases[@]}"; do
     ((testCaseIndex++))
-    catchOut="catch$output-$testCaseIndex.xml"
-    runTest "$testStateVarPrefix" "$testCase" "$timeoutSeconds" \
-      "$@" --reporter xml --durations yes --out "$catchOut" \
-        "$testCase" || if [[ -s $catchOut ]]; then
+    catchOut="catch$output-$testCaseIndex"
+    runTest --output "$catchOut.txt" "$testStateVarPrefix" "$testCase" "$timeoutSeconds" \
+      "$@" --reporter xml --durations yes --out "$catchOut.xml" \
+        "$testCase" || if [[ -s $catchOut.xml ]]; then
             echo 'Test failed. Potential details here (cf. success="false"), or in the logs included in the test results file:'
-            addToTestOutput "$testStateVarPrefix" cat "$catchOut"
+            addToTestOutput "$testStateVarPrefix" cat "$catchOut.xml"
+            if [[ $(uname) = Linux ]] && grep -q FatalErrorCondition "$catchOut.xml"; then
+              addToTestOutput perl "$SCRIPT_DIR/decode-stack.pl" "$catchOut.txt"
+            fi
           fi
   done
 

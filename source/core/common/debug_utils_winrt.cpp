@@ -9,10 +9,9 @@
 
 namespace Debug {
 
-    std::string GetCallStack(size_t skipLevels/* = 0*/, bool makeFunctionNamesStandOut/* = false*/)
+    std::string GetCallStack(size_t skipLevels/* = 0*/)
     {
         UNUSED(skipLevels);
-        UNUSED(makeFunctionNamesStandOut);
 
         return "not implemented in WinRT\n";
     }

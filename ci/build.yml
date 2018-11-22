@@ -1136,21 +1136,19 @@ jobs:
     displayName: CMake build
     inputs:
       cmakeArgs: '--build . -- -j4'
-  - template: test-during-build.yml
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Create drop files
     inputs:
       type: FilePath
       scriptPath: './ci/drop/bindrop.sh'
       args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Linux-x64/$(BuildConfiguration)'
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: Linux
       publishLocation: Container
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+  - template: test-during-build.yml
 
 - template: linux-docker-build.yml
 

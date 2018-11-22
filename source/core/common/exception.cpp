@@ -61,14 +61,14 @@ namespace Impl {
 
     ExceptionWithCallStack::ExceptionWithCallStack(SPXHR error, size_t skipLevels/* = 0*/) :
         std::runtime_error("Exception with an error code: " + stringify(error)),
-        m_callstack(Debug::GetCallStack(skipLevels + 1, /*makeFunctionNamesStandOut=*/true)),
+        m_callstack(Debug::GetCallStack(skipLevels + 1)),
         m_error(error)
     {
     }
 
     ExceptionWithCallStack::ExceptionWithCallStack(const std::string& message, SPXHR error/* = SPXERR_UNHANDLED_EXCEPTION*/, size_t skipLevels /*= 0*/) :
         std::runtime_error(message),
-        m_callstack(Debug::GetCallStack(skipLevels + 1, /*makeFunctionNamesStandOut=*/true)),
+        m_callstack(Debug::GetCallStack(skipLevels + 1)),
         m_error(error)
     {
     }

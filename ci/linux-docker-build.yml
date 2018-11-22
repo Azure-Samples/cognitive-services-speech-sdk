@@ -59,9 +59,6 @@ jobs:
         cmake --build . -- -j$(nproc)
       SCRIPT
     displayName: CMake build
-  - template: test-during-build.yml
-    parameters:
-      dockerImage: $(DOCKER_IMAGE)
   - bash: |
       docker run --rm --workdir /csspeech --volume "$PWD:/csspeech" "$DOCKER_IMAGE" \
         ci/drop/bindrop.sh $(SPEECHSDK_TARGET_PLATFORM) $(SPEECHSDK_BUILD_CONFIGURATION) _drop
@@ -76,4 +73,6 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: Linux
       publishLocation: Container
-    condition: and(succeeded(), eq(variables['SPEECHSDK_BUILD_CONFIGURATION'], 'Release'))
+  - template: test-during-build.yml
+    parameters:
+      dockerImage: $(DOCKER_IMAGE)
