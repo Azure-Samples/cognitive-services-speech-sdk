@@ -87,12 +87,12 @@ variables:
   AZURE_CONTAINER_REGISTRY: csspeechsdkacr201809.azurecr.io
   AZURE_SUBSCRIPTION_ENDPOINT: 'Custom Speech Development (3a96ef56-41a9-40a0-b0f3-fb125c2b8798) - RG csspeechsdk-carbon'
 
-phases:
+jobs:
 
-- phase: Pre
-  queue:
+- job: Pre
+  pool:
     name: Hosted Ubuntu 1604
-    timeoutInMinutes: 30
+  timeoutInMinutes: 30
   steps:
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -107,12 +107,12 @@ phases:
       perl ci/check-docfx-codetags.pl public_samples
     displayName: Repository checks
 
-- phase: WindowsSdlBuild
+- job: WindowsSdlBuild
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsSdlBuild '))
-  queue:
+  pool:
     name: Hosted VS2017
-    timeoutInMinutes: 120
+  timeoutInMinutes: 120
   variables:
     BuildPlatform: x64
     BuildConfiguration: Release
@@ -252,12 +252,12 @@ phases:
     continueOnError: true
     condition: contains(variables['SPEECHSDK_BUILD_PHASES'], ' TsaUpload ')
 
-- phase: TsaUpload
+- job: TsaUpload
   dependsOn: [Pre, WindowsSdlBuild, WindowsSDLFortifyJava]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
-  queue:
+  pool:
     name: Carbon
-    timeoutInMinutes: 30
+  timeoutInMinutes: 30
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Downloading CodeAnalysisLogs artifacts'
@@ -290,12 +290,12 @@ phases:
 
 # This phase is responsible for running CompEval test (Windows C# only)
 # For now, it is triggered by a separate build definition in AzureDevOps: "CompEval Test"
-- phase: CompEvalTest
+- job: CompEvalTest
   dependsOn: [Pre, WindowsBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CompEvalTest '))
-  queue:
+  pool:
     name: Hosted VS2017
-    timeoutInMinutes: 400
+  timeoutInMinutes: 400
   steps:
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -323,13 +323,14 @@ phases:
         -D output_dir=CompEvalRun -- compeval_tests
     displayName: 'Transcription'
 
-- phase: WindowsBuild
+- job: WindowsBuild
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsBuild '))
-  queue:
+  pool:
     name: Hosted VS2017
-    timeoutInMinutes: 60
-    parallel: 4
+  timeoutInMinutes: 60
+  strategy:
+    maxParallel: 4
     matrix:
       x64_debug:
         BuildPlatform: x64
@@ -410,13 +411,14 @@ phases:
       ArtifactName: Windows
       publishLocation: Container
 
-- phase: WindowsUwpBuild
+- job: WindowsUwpBuild
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsUwpBuild '))
-  queue:
+  pool:
     name: Hosted VS2017
-    timeoutInMinutes: 30
-    parallel: 4
+  timeoutInMinutes: 30
+  strategy:
+    maxParallel: 4
     matrix:
       x64_debug:
         BuildPlatform: x64
@@ -487,12 +489,12 @@ phases:
       publishLocation: Container
 
 # Note: for now this packages up only {Linux,Windows}-x64-Release
-- phase: JavaJrePackage
+- job: JavaJrePackage
   dependsOn: [Pre, LinuxBuild, WindowsBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JavaJrePackage '))
-  queue:
+  pool:
     name: Hosted VS2017
-    timeoutInMinutes: 30
+  timeoutInMinutes: 30
   steps:
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -583,12 +585,12 @@ phases:
     displayName: 'Publish .jar'
     condition: succeededOrFailed()
 
-- phase: JavaJrePackageLinuxTest
+- job: JavaJrePackageLinuxTest
   dependsOn: [Pre, JavaJrePackage]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JavaJrePackageLinuxTest '))
-  queue:
+  pool:
     name: Hosted Ubuntu 1604
-    timeoutInMinutes: 30
+  timeoutInMinutes: 30
   steps:
   - bash: |
       set -x -e -o pipefail
@@ -643,13 +645,13 @@ phases:
       SCRIPT
     displayName: Test quickstart-jre
 
-- phase: NuGet
+- job: NuGet
   # Note: NuGet currently does not depend on LinuxDockerBuild (only needs x64 binaries)
   dependsOn: [Pre, LinuxBuild, WindowsBuild, WindowsUwpBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGet '))
-  queue:
+  pool:
     name: Hosted VS2017
-    timeoutInMinutes: 30
+  timeoutInMinutes: 30
   steps:
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -763,12 +765,12 @@ phases:
     condition: succeededOrFailed()
     displayName: 'Publish .zip and .nupkg'
 
-- phase: WackTest
+- job: WackTest
   dependsOn: [Pre, NuGet]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WackTest '))
-  queue:
+  pool:
     name: Hosted VS2017
-    timeoutInMinutes: 30
+  timeoutInMinutes: 30
   variables:
     UwpSampleDir: public_samples/quickstart/csharp-uwp
   steps:
@@ -804,12 +806,12 @@ phases:
     condition: succeededOrFailed()
     displayName: 'Publish WACK report'
 
-- phase: NuGetLinuxTest
+- job: NuGetLinuxTest
   dependsOn: [Pre, NuGet]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetLinuxTest '))
-  queue:
+  pool:
     name: Hosted Ubuntu 1604
-    timeoutInMinutes: 30
+  timeoutInMinutes: 30
   steps:
   - bash: |
       set -x -e -o pipefail
@@ -884,15 +886,16 @@ phases:
       testRunner: VSTest
       testResultsFiles: '**/test-*.trx'
 
-- phase: AndroidBuild
+- job: AndroidBuild
   variables:
     ANDROID_NDK: $(System.ArtifactsDirectory)\ndk-r16b
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidBuild '))
-  queue:
+  pool:
     name: Hosted VS2017
-    timeoutInMinutes: 30
-    parallel: 8
+  timeoutInMinutes: 30
+  strategy:
+    maxParallel: 8
     matrix:
       arm32_debug:
         BuildPlatform: arm32
@@ -995,12 +998,12 @@ phases:
       ArtifactName: Android
       publishLocation: Container
 
-- phase: AndroidPackage
+- job: AndroidPackage
   dependsOn: [Pre, AndroidBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidPackage '))
-  queue:
+  pool:
     name: Hosted VS2017
-    timeoutInMinutes: 30
+  timeoutInMinutes: 30
   steps:
   - bash: ./ci/set-variables.sh
     displayName: Set variables
@@ -1092,13 +1095,14 @@ phases:
     displayName: 'Publish'
     condition: succeededOrFailed()
 
-- phase: LinuxBuild
+- job: LinuxBuild
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxBuild '))
-  queue:
+  pool:
     name: Hosted Ubuntu 1604
-    timeoutInMinutes: 60
-    parallel: 2
+  timeoutInMinutes: 60
+  strategy:
+    maxParallel: 2
     matrix:
       debug:
         BuildConfiguration: Debug
@@ -1150,12 +1154,12 @@ phases:
 
 - template: linux-docker-build.yml
 
-- phase: LinuxDrop
+- job: LinuxDrop
   dependsOn: [Pre, LinuxBuild, LinuxDockerBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDrop '))
-  queue:
+  pool:
     name: Hosted Ubuntu 1604
-    timeoutInMinutes: 30
+  timeoutInMinutes: 30
   steps:
   - bash: |
       set -x -e -o pipefail
@@ -1200,13 +1204,14 @@ phases:
       ArtifactName: Linux
       publishLocation: Container
 
-- phase: IosBuild
+- job: IosBuild
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosBuild '))
-  queue:
+  pool:
     name: Hosted macOS Preview
-    timeoutInMinutes: 30
-    parallel: 2
+  timeoutInMinutes: 30
+  strategy:
+    maxParallel: 2
     matrix:
       debug:
         BuildConfiguration: Debug
@@ -1347,13 +1352,14 @@ phases:
       publishLocation: Container
     condition: succeededOrFailed()
 
-- phase: OsxBuild
+- job: OsxBuild
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuild '))
-  queue:
+  pool:
     name: Hosted macOS Preview
-    timeoutInMinutes: 60
-    parallel: 2
+  timeoutInMinutes: 60
+  strategy:
+    maxParallel: 2
     matrix:
       debug:
         BuildConfiguration: Debug
@@ -1419,10 +1425,10 @@ phases:
       publishLocation: Container
       # condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
 
-- phase: JsBuild
+- job: JsBuild
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JsBuild '))
-  queue:
+  pool:
     name: Hosted VS2017
     demands: npm
   variables:
@@ -1516,12 +1522,12 @@ phases:
       ArtifactName: JavaScript
       publishLocation: Container
 
-- phase: Doxygen
+- job: Doxygen
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' Doxygen '))
-  queue:
+  pool:
     name: Hosted macOS Preview
-    timeoutInMinutes: 30
+  timeoutInMinutes: 30
   variables:
     ArtifactOut: $(Build.ArtifactStagingDirectory)/Out
   steps:
@@ -1596,13 +1602,13 @@ phases:
       ArtifactName: Doxygen
       publishLocation: Container
 
-- phase: WindowsSDLFortifyJava
+- job: WindowsSDLFortifyJava
   dependsOn: [Pre, WindowsBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsSDLFortifyJava '))
-  queue:
+  pool:
     name: Carbon
     demands: FORTIFY
-    timeoutInMinutes: 30
+  timeoutInMinutes: 30
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download JAR Build Artifacts'
@@ -1646,11 +1652,12 @@ phases:
     # In that case we should move this part of the build also into the WindowsSdlBuild phase.
     enabled: false
 
-- phase: CheckSignatures
+- job: CheckSignatures
   dependsOn: [Pre, NuGet, AndroidPackage, JavaJrePackage]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CheckSignatures '))
-  queue:
+  pool:
     name: Hosted VS2017
+  timeoutInMinutes: 10
   steps:
   - task: NuGetToolInstaller@0
     displayName: 'NuGet Installer'
