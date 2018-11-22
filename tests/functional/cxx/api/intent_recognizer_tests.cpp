@@ -33,7 +33,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 {
     SPXTEST_SECTION("Intent Recognition works")
     {
-        turnOnLamp.UpdateFullFilename(Config::InputDir);        
+        turnOnLamp.UpdateFullFilename(Config::InputDir);
         SPXTEST_REQUIRE(exists(turnOnLamp.m_audioFilename));
 
         auto config = SpeechConfigForIntentTests();
@@ -42,11 +42,18 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 
         SPXTEST_REQUIRE(!Config::LuisAppId.empty());
         auto model = LanguageUnderstandingModel::FromAppId(Config::LuisAppId);
+        std::string sessionId;
+
+        recognizer->SessionStarted.Connect([&sessionId](const SessionEventArgs& e)
+        {
+            sessionId = e.SessionId;
+        });
 
         SPXTEST_WHEN("using single model, all intents, no intent name, no intent ids")
         {
             recognizer->AddAllIntents(model, "override-all-intent-ids-with-this");
             auto result = recognizer->RecognizeOnceAsync().get();
+            CAPTURE(sessionId);
             SPXTEST_REQUIRE(result != nullptr);
             SPXTEST_REQUIRE(!result->Text.empty());
             SPXTEST_REQUIRE(!result->IntentId.empty());
@@ -56,6 +63,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
         {
             recognizer->AddAllIntents(model, "override-all-intent-ids-with-this");
             auto result = recognizer->RecognizeOnceAsync().get();
+            CAPTURE(sessionId);
             SPXTEST_REQUIRE(result != nullptr);
             SPXTEST_REQUIRE(result->IntentId == "override-all-intent-ids-with-this");
         }
@@ -64,6 +72,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
         {
             recognizer->AddIntent(model, "HomeAutomation.TurnOn");
             auto result = recognizer->RecognizeOnceAsync().get();
+            CAPTURE(sessionId);
             SPXTEST_REQUIRE(result != nullptr);
             SPXTEST_REQUIRE(result->IntentId == "HomeAutomation.TurnOn");
         }
@@ -72,6 +81,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
         {
             recognizer->AddIntent(model, "HomeAutomation.TurnOn", "override-turn-on-id-with-this");
             auto result = recognizer->RecognizeOnceAsync().get();
+            CAPTURE(sessionId);
             SPXTEST_REQUIRE(result != nullptr);
             SPXTEST_REQUIRE(result->IntentId == "override-turn-on-id-with-this");
         }
@@ -80,6 +90,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
         {
             recognizer->AddIntent(model, "HomeAutomation.TurnOff");
             auto result = recognizer->RecognizeOnceAsync().get();
+            CAPTURE(sessionId);
             SPXTEST_REQUIRE(result != nullptr);
             SPXTEST_REQUIRE(result->IntentId.empty());
         }
@@ -89,6 +100,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
             recognizer->AddIntent(model, "HomeAutomation.TurnOff");
             recognizer->AddAllIntents(model, "override-all-intent-ids-with-this");
             auto result = recognizer->RecognizeOnceAsync().get();
+            CAPTURE(sessionId);
             SPXTEST_REQUIRE(result != nullptr);
             SPXTEST_REQUIRE(result->IntentId == "override-all-intent-ids-with-this");
         }
@@ -98,6 +110,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
             recognizer->AddIntent(model, "HomeAutomation.TurnOn");
             recognizer->AddAllIntents(model, "override-all-intent-ids-with-this");
             auto result = recognizer->RecognizeOnceAsync().get();
+            CAPTURE(sessionId);
             SPXTEST_REQUIRE(result != nullptr);
             SPXTEST_REQUIRE(result->IntentId == "HomeAutomation.TurnOn");
         }
