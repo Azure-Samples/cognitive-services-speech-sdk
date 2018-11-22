@@ -40,12 +40,25 @@ inline void __spx_rethrow(SPXHR hr)
     {
         throw hr;
     }
+
     auto callstack = error_get_call_stack(handle);
     auto what = error_get_message(handle);
 
-    throw std::runtime_error(
-        (what == nullptr ? "Exception with error code: " + std::to_string(error) : std::string(what)) +
-        (callstack == nullptr ? "" : std::string(callstack)));
+    std::runtime_error er("");
+    try
+    {
+        er = std::runtime_error(
+            (what == nullptr ? "Exception with error code: " + std::to_string(error) : std::string(what)) +
+            (callstack == nullptr ? "" : std::string(callstack)));
+    }
+    catch (...)
+    {
+        error_release(handle);
+        throw hr;
+    }
+
+    error_release(handle);
+    throw er;
 }
 
 #ifndef __SPX_THROW_HR_IMPL

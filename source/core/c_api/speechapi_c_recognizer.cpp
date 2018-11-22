@@ -31,7 +31,9 @@ SPXAPI_(bool) recognizer_async_handle_is_valid(SPXASYNCHANDLE hasync)
 
 SPXAPI recognizer_async_handle_release(SPXASYNCHANDLE hasync)
 {
-    return Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<void>>(hasync);
+    return Handle_IsValid<SPXASYNCHANDLE, CSpxAsyncOp<void>>(hasync)
+        ? Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<void>>(hasync)
+        : Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>>>(hasync);
 }
 
 SPXAPI_(bool) recognizer_result_handle_is_valid(SPXRESULTHANDLE hresult)
