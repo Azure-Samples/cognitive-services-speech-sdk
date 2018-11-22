@@ -2,9 +2,9 @@
 // Licensed under the MIT license.
 import { setTimeout } from "timers";
 
-import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
-import { ConsoleLoggingListener } from "../../../../../source/bindings/js/src/common.browser/Exports";
-import { Events, EventType } from "../../../../../source/bindings/js/src/common/Exports";
+import * as sdk from "../../../microsoft.cognitiveservices.speech.sdk";
+import { ConsoleLoggingListener } from "../../../src/common.browser/Exports";
+import { Events, EventType } from "../../../src/common/Exports";
 
 import { ByteBufferAudioFile } from "./ByteBufferAudioFile";
 import { Settings } from "./Settings";

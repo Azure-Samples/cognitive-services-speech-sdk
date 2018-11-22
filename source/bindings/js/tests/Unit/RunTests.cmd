@@ -8,7 +8,7 @@ if "%~1" equ "?" goto :Usage
 if "%~1" equ "/h" goto :Usage
 if "%~1" equ "-h" goto :Usage
 
-set TEST_SETTING_FILE_NAME=%~dp0..\..\..\..\build\tests\functional\js\Unit\TestConfiguration.ts
+set TEST_SETTING_FILE_NAME=%~dp0..\..\..\..\..\build\source\bindings\js\tests\Unit\TestConfiguration.ts
 
 set TEST_SETTING_FILE_EXISTED=0
 if EXIST "%TEST_SETTING_FILE_NAME%" set TEST_SETTING_FILE_EXISTED=1

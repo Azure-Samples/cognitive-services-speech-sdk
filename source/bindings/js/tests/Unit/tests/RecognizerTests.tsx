@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
+import * as sdk from "../../../microsoft.cognitiveservices.speech.sdk";
 import { Settings } from "./Settings";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 

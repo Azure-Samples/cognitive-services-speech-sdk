@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 import { isString } from "util";
-import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
-import { CreateNoDashGuid } from "../../../../../source/bindings/js/src/common/Guid";
+import * as sdk from "../../../microsoft.cognitiveservices.speech.sdk";
+import { CreateNoDashGuid } from "../../../src/common/Guid";
 import { Settings } from "./Settings";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 

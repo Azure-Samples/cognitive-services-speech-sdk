@@ -9,5 +9,5 @@ module.exports = {
     moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
     collectCoverage: true,
     "reporters": [ "default", "jest-junit" ],
-    setupTestFrameworkScriptFile:"../../../../build/tests/functional/js/Unit/TestConfiguration.ts"
+    setupTestFrameworkScriptFile:"../../../../../build/source/bindings/js/tests/Unit/TestConfiguration.ts"
 };

@@ -1468,7 +1468,7 @@ jobs:
   - task: Npm@1
     displayName: 'npm tests installer'
     inputs:
-      workingDir: tests/functional/js/Unit
+      workingDir: source/bindings/js/tests/Unit
       verbose: false
   - bash: |
       perl ci/evaluate-test-config.pl --verbose --format azuredevops-variable --input ci/test-config.json \
@@ -1477,7 +1477,7 @@ jobs:
     displayName: Set test variables
   - script: RunTests.cmd SpeechSubscriptionKey:$(SPEECHSDK_SPEECH_KEY) SpeechRegion:$(SPEECHSDK_SPEECH_REGION) LuisSubscriptionKey:$(SPEECHSDK_LUIS_KEY) LuisRegion:$(SPEECHSDK_LUIS_REGION) SpeechTestModelId:$(SPEECHSDK_SPEECH_ENDPOINTID_ENUS)
     displayName: 'Run tests'
-    workingDirectory: tests/functional/js/Unit
+    workingDirectory: source/bindings/js/tests/Unit
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
   - task: PublishTestResults@2
     displayName: 'Publish Test Results **/TEST-*.xml'

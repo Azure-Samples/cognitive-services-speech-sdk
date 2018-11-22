@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
-import { ConsoleLoggingListener } from "../../../../../source/bindings/js/src/common.browser/Exports";
-import { ServiceRecognizerBase } from "../../../../../source/bindings/js/src/common.speech/Exports";
-import { QueryParameterNames } from "../../../../../source/bindings/js/src/common.speech/QueryParameterNames";
-import { ConnectionStartEvent } from "../../../../../source/bindings/js/src/common/Exports";
-import { Events, EventType, PlatformEvent } from "../../../../../source/bindings/js/src/common/Exports";
+import * as sdk from "../../../microsoft.cognitiveservices.speech.sdk";
+import { ConsoleLoggingListener } from "../../../src/common.browser/Exports";
+import { ServiceRecognizerBase } from "../../../src/common.speech/Exports";
+import { QueryParameterNames } from "../../../src/common.speech/QueryParameterNames";
+import { ConnectionStartEvent } from "../../../src/common/Exports";
+import { Events, EventType, PlatformEvent } from "../../../src/common/Exports";
 
 import { Settings } from "./Settings";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
