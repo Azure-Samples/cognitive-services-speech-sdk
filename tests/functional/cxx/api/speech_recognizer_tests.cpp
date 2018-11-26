@@ -170,7 +170,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         // promise for synchronization of recognition end.
         promise<void> recognitionEnd;
 
-        string  result;
+        string result;
         recognizer->Recognized.Connect([&result](const SpeechRecognitionEventArgs& e)
         {
             if (e.Result->Reason == ResultReason::RecognizedSpeech)
@@ -446,7 +446,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
                 lock.unlock();
 
                 SPX_TRACE_VERBOSE("%s: Make sure callbacks are invoked correctly; END of loop #%d", __FUNCTION__, i);
-                CHECK(callbackCounts[Callbacks::session_started] == i+1);
+                CHECK(callbackCounts[Callbacks::session_started] == i + 1);
                 CHECK(callbackCounts[Callbacks::session_stopped] == i + 1);
                 CHECK(callbackCounts[Callbacks::final_result] == i + 1);
                 CHECK(callbackCounts[Callbacks::speech_start_detected] == i + 1);
@@ -510,7 +510,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
 
-    SPXTEST_SECTION("Wrong Key triggers Canceled Event ")
+    SPXTEST_SECTION("Wrong Key triggers Canceled Event")
     {
         SPXTEST_REQUIRE(exists(weather.m_audioFilename));
         UseMocks(false);
@@ -518,6 +518,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         condition_variable cv;
 
         bool connectionReportedError = false;
+        bool canceled = false;
         string wrongKey = "wrongKey";
 
         auto sc = SpeechConfig::FromSubscription(wrongKey, "westus");
@@ -525,22 +526,19 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto recognizer = SpeechRecognizer::FromConfig(sc, a);
 
         recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& args) {
-            SPXTEST_REQUIRE(args.Reason == CancellationReason::Error);
-            SPXTEST_REQUIRE(args.ErrorCode == CancellationErrorCode::AuthenticationFailure);
-            SPXTEST_REQUIRE(!args.ErrorDetails.empty());
             unique_lock<mutex> lock(mtx);
-            connectionReportedError = true;
+            canceled = true;
+            connectionReportedError =
+                args.Reason == CancellationReason::Error &&
+                args.ErrorCode == CancellationErrorCode::AuthenticationFailure &&
+                !args.ErrorDetails.empty();
             cv.notify_one();
         });
 
         auto result = recognizer->RecognizeOnceAsync().get();
-        // TODO ENABLE AFTER FIXING BROKEN SERVICE       SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
-
-        {
-            unique_lock<mutex> lock(mtx);
-            cv.wait_for(lock, std::chrono::seconds(10));
-            // TODO ENABLE AFTER FIXING BROKEN SERVICE           SPXTEST_REQUIRE(connectionReportedError);
-        }
+        CHECK(result->Reason == ResultReason::Canceled);
+        CHECK(canceled);
+        REQUIRE(connectionReportedError);
     }
 
     SPXTEST_SECTION("German Speech Recognition works")
@@ -597,72 +595,72 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         {
             mutex mtx;
             condition_variable cv;
-
-            auto sessionStartedCount = 0;
-            auto recognizedCount = 0;
-            auto endOfStreamCount = 0;
             auto sessionStoppedCount = 0;
+            std::vector<std::string> events;
 
             recognizer->Recognized.Connect([&](const SpeechRecognitionEventArgs& e) {
-
-                if (sessionStartedCount == 1)
+                auto result = e.Result;
+                if (result->Reason == ResultReason::RecognizedSpeech)
                 {
-                    SPXTEST_REQUIRE(recognizedCount == 0);
-                    SPXTEST_REQUIRE(endOfStreamCount == 0);
-                    SPXTEST_REQUIRE(sessionStoppedCount == 0);
-
-                    recognizedCount++;
-
-                    auto result = e.Result;
-                    SPXTEST_REQUIRE(!result->Text.empty());
-                    SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+                    if (!result->Text.empty())
+                    {
+                        events.push_back("RecognizedSpeech-NonEmpty");
+                    }
+                    else
+                    {
+                        events.push_back("RecognizedSpeech-Other");
+                    }
                 }
-                else if (sessionStartedCount == 2)
+                else if (result->Reason == ResultReason::NoMatch)
                 {
-                    SPXTEST_REQUIRE(recognizedCount == 1);
-                    SPXTEST_REQUIRE(endOfStreamCount == 0);
-                    SPXTEST_REQUIRE(sessionStoppedCount == 1);
-
-                    recognizedCount++;
-
-                    auto result = e.Result;
-                    SPXTEST_REQUIRE(result->Text.empty());
-                    SPXTEST_REQUIRE(result->Reason == ResultReason::NoMatch);
-
                     auto nomatch = NoMatchDetails::FromResult(result);
-                    SPXTEST_REQUIRE(nomatch->Reason == NoMatchReason::InitialSilenceTimeout);
+                    if (result->Text.empty() &&
+                        nomatch->Reason == NoMatchReason::InitialSilenceTimeout)
+                    {
+                        events.push_back("NoMatch-InitialSilenceTimeout");
+                    }
+                    else
+                    {
+                        events.push_back("NoMatch-Other");
+                    }
                 }
                 else
                 {
-                    SPXTEST_REQUIRE(false);
+                    events.push_back("Recognized-Other");
                 }
             });
 
             recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& e) {
-
-                SPXTEST_REQUIRE(sessionStartedCount == 3);
-                SPXTEST_REQUIRE(recognizedCount == 2);
-                SPXTEST_REQUIRE(endOfStreamCount == 0);
-                SPXTEST_REQUIRE(sessionStoppedCount == 2);
-
-                ++endOfStreamCount;
-
                 auto result = e.Result;
-                SPXTEST_REQUIRE(result->Text.empty());
-                SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
 
-                auto cancellation = CancellationDetails::FromResult(result);
-                SPXTEST_REQUIRE(cancellation->ErrorDetails.empty());
-                SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::EndOfStream);
-                SPXTEST_REQUIRE(e.Reason == CancellationReason::EndOfStream);
+                if (e.Reason == CancellationReason::EndOfStream)
+                {
+                    auto cancellation = CancellationDetails::FromResult(result);
+                    if (result->Text.empty() &&
+                        result->Reason == ResultReason::Canceled &&
+                        cancellation->ErrorDetails.empty() &&
+                        cancellation->Reason == CancellationReason::EndOfStream)
+                    {
+                        events.push_back("EndOfStream");
+                    }
+                    else
+                    {
+                        events.push_back("EndOfStream-Malformed");
+                    }
+                }
+                else
+                {
+                    events.push_back("Canceled-Other");
+                }
             });
 
             recognizer->SessionStarted.Connect([&](const SessionEventArgs&) {
-                ++sessionStartedCount;
+                events.push_back("SessionStarted");
                 cv.notify_all();
             });
 
             recognizer->SessionStopped.Connect([&](const SessionEventArgs&) {
+                events.push_back("SessionStopped");
                 ++sessionStoppedCount;
                 cv.notify_all();
             });
@@ -680,10 +678,13 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             cv.wait_for(lock, std::chrono::seconds(30), [&] { return sessionStoppedCount == 3; });
             lock.unlock();
 
-            SPXTEST_REQUIRE(sessionStartedCount == 3);
-            SPXTEST_REQUIRE(recognizedCount == 2);
-            SPXTEST_REQUIRE(endOfStreamCount == 1);
-            SPXTEST_REQUIRE(sessionStoppedCount == 3);
+            std::vector<std::string> expectedEvents = {
+                "SessionStarted", "RecognizedSpeech-NonEmpty", "SessionStopped",
+                "SessionStarted", "NoMatch-InitialSilenceTimeout", "SessionStopped",
+                "SessionStarted", "EndOfStream", "SessionStopped"
+            };
+
+            REQUIRE(expectedEvents == events);
         }
     }
 
