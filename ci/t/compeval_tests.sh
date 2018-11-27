@@ -44,7 +44,7 @@ SUMMARY="$(cygpath -aw "$SPEECHSDK_COMPEVAL_OUTPUT_DIR/summary.txt")"
 cd "$NORMALIZER_DIR"
 ./NormAndAlign "$EXPECTED_TRANSCRIPTION" "$ACTUAL_TRANSCRIPTION" "$SUMMARY"
 
-ACCEPTABLE_WER=8.7
+ACCEPTABLE_WER=8.82
 WER=$(grep -P 'Filtered\tMerged' $SUMMARY | cut -d$'\t' -f9)
 echo Calculated WER "$WER"
 

@@ -335,8 +335,18 @@ namespace Microsoft.CognitiveServices.Speech.Translation
 
             if (disposing)
             {
+                recoImpl.Recognizing.Disconnect(recognizingHandler);
+                recoImpl.Recognized.Disconnect(recognizedHandler);
+                recoImpl.Synthesizing.Disconnect(synthesisResultHandler);
+                recoImpl.Canceled.Disconnect(canceledHandler);
+                recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
+                recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
+                recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
+                recoImpl.SpeechEndDetected.Disconnect(speechEndDetectedHandler);
+
                 recoImpl?.Dispose();
 
+                synthesisResultHandler?.Dispose();
                 recognizingHandler?.Dispose();
                 recognizedHandler?.Dispose();
                 canceledHandler?.Dispose();
