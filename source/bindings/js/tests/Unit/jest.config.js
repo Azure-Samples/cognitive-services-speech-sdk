@@ -2,11 +2,11 @@
 // Licensed under the MIT license.
 module.exports = {
     transform: {
-        "^.+\\.tsx?$": "ts-jest",
+        "^.+\\.ts$": "ts-jest",
     },
-    testRegex: "tests/.*\\.tsx$",
+    testRegex: "tests/.*Tests\\.ts$",
     testPathIgnorePatterns: ["/lib/", "/node_modules/"],
-    moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+    moduleFileExtensions: ["ts", "js", "jsx", "json", "node"],
     collectCoverage: true,
     "reporters": [ "default", "jest-junit" ],
     setupTestFrameworkScriptFile:"../../../../../build/source/bindings/js/tests/Unit/TestConfiguration.ts"
