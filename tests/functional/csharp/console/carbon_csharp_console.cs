@@ -238,12 +238,13 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     if (useBaseModel)
                     {
-                        Console.WriteLine("=============== Run translationsamples using base speech model. ===============");
+                        Console.WriteLine("=============== Run translation samples using base speech model. ===============");
                         TranslationSamples.TranslationBaseModelAsync(subKey, fileName: fileName, region: region, useStream: useStream, useContinuousRecognition: useContinuousRecognition).Wait();
                     }
                     else
                     {
-                        Console.WriteLine("=============== Translation using CRIS model is not supported yet. ===============");
+                        Console.WriteLine("=============== Run translation samples using customized model. ===============");
+                        TranslationSamples.TranslationCustomizedModelAsync(subKey, fileName: fileName, region: region, modelId: modelId, useStream: useStream, useContinuousRecognition: useContinuousRecognition).Wait();
                     }
                 }
             }

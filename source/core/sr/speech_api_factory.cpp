@@ -35,7 +35,7 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognize
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerFromConfigInternal(
-    const char* sessionClassName, 
+    const char* sessionClassName,
     const char* recognizerClassName,
     const char* language,
     OutputFormat format,
@@ -94,7 +94,7 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognize
         // Add the recognizer to the session
         session->AddRecognizer(recognizer);
 
-        //// We're done!
+        // We're done!
         return recognizer;
     }
     catch (...)
@@ -150,9 +150,14 @@ void CSpxSpeechApiFactory::SetRecognizerProperties(const std::shared_ptr<ISpxNam
 
 void CSpxSpeechApiFactory::SetTranslationProperties(const std::shared_ptr<ISpxNamedProperties>& namedProperties, const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& voice)
 {
-    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, sourceLanguage.empty());
+    SPX_THROW_HR_IF(SPXERR_INVALID_ARG,
+        sourceLanguage.empty() && !namedProperties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId)));
 
-    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), sourceLanguage.c_str());
+    if (!sourceLanguage.empty())
+    {
+        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), sourceLanguage.c_str());
+    }
+
     std::string plainStr;
     // The target languages are in BCP-47 format, and should not contain the character ','.
     SPX_THROW_HR_IF(SPXERR_INVALID_ARG, targetLanguages.size() == 0);

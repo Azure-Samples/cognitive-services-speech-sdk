@@ -8,7 +8,7 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 . "$SCRIPT_DIR/../functions.sh" || exit 1
 
-isOneOf "$PLATFORM" Windows-{x86,x64}-Release ||
+isOneOf "$PLATFORM" Windows-{x86,x64}-{Debug,Release} ||
   exitWithSuccess "Test %s: skip on this platform\n" "$T"
 
 TEST_CODE="$BINARY_DIR/carbon_csharp_console"
@@ -66,8 +66,7 @@ for action in $Actions; do
     TEST_NAME="$action $variant"
 
     # Filter out unsupported combos
-    if [[ ($action == translation && $variant == crisModel) ||
-          ($action == intent && ($variant == crisModel || $variant == base*)) ]]; then
+    if [[ ($action == intent && ($variant == crisModel || $variant == base*)) ]]; then
       continue
     fi
 

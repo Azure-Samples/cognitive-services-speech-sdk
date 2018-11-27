@@ -171,6 +171,44 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
+        public static async Task TranslationCustomizedModelAsync(string subKey, string modelId, string region, string fileName, bool useStream, bool useContinuousRecognition)
+        {
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Translation using customized model: {0}.", modelId));
+
+            var config = SpeechTranslationConfig.FromSubscription(subKey, region);
+            config.SpeechRecognitionLanguage = FromLang;
+
+            To2Langs.ForEach(l => config.AddTargetLanguage(l));
+            config.EndpointId = modelId;
+
+            if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
+            {
+                using (var reco = new TranslationRecognizer(config))
+                {
+                    await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
+                }
+            }
+            else
+            {
+                if (useStream)
+                {
+                    var audioInput = Util.OpenWavFile(fileName);
+                    using (var reco = new TranslationRecognizer(config, audioInput))
+                    {
+                        await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    var audioInput = Util.OpenWavFile(fileName);
+                    using (var reco = new TranslationRecognizer(config, audioInput))
+                    {
+                        await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
+                    }
+                }
+            }
+        }
+
         private static async Task DoTranslationAsync(TranslationRecognizer reco, bool useContinuousRecognition)
         {
             if (useContinuousRecognition)
