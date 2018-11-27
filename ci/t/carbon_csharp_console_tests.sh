@@ -22,8 +22,7 @@ crisEndpoint="$(crisWebSocketsEndpoint "$SPEECHSDK_SPEECH_REGION" interactive "$
 audioFile="$SPEECHSDK_INPUTDIR/audio/whatstheweatherlike.wav"
 
 # Expand actions if all is specified
-# TODO
-Action=intent
+Action=all
 if [[ $Action == all ]]; then
   Actions="speech intent translation"
 else
@@ -67,7 +66,8 @@ for action in $Actions; do
     TEST_NAME="$action $variant"
 
     # Filter out unsupported combos
-    if [[ $variant == crisModel && ( $action == intent || $action == translation ) ]]; then
+    if [[ ($action == translation && $variant == crisModel) ||
+          ($action == intent && ($variant == crisModel || $variant == base*)) ]]; then
       continue
     fi
 
