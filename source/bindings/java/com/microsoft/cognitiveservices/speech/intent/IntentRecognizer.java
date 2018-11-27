@@ -108,13 +108,19 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
      * @return A task representing the recognition operation. The task returns a value of IntentRecognitionResult
      */
     public Future<IntentRecognitionResult> recognizeOnceAsync() {
-        return s_executorService.submit(() -> {
-            // A variable defined in an enclosing scope must be final or effectively final.
-            // The compiler treats an array initialized once as an effectively final.
-            IntentRecognitionResult[] result = new IntentRecognitionResult[1];
-            super.doAsyncRecognitionAction(() -> result[0] = new IntentRecognitionResult(recoImpl.Recognize()));
-            return result[0];
-        });
+        final IntentRecognizer thisReco = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<IntentRecognitionResult>() {
+            public IntentRecognitionResult  call() {
+                // A variable defined in an enclosing scope must be final or effectively final.
+                // The compiler treats an array initialized once as an effectively final.
+                final IntentRecognitionResult[] result = new IntentRecognitionResult[1];
+
+                Runnable runnable = new Runnable() { public void run() { result[0] = new IntentRecognitionResult(recoImpl.Recognize()); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+
+                return result[0];
+        }});
     }
 
     /**
@@ -123,10 +129,14 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
      * @return A task representing the asynchronous operation that starts the recognition.
      */
     public Future<Void> startContinuousRecognitionAsync() {
-        return s_executorService.submit(() -> {
-            super.doAsyncRecognitionAction(() -> recoImpl.StartContinuousRecognition());
-            return null;
-        });
+        final IntentRecognizer thisReco = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { recoImpl.StartContinuousRecognition(); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+                return null;
+        }});
     }
 
     /**
@@ -134,10 +144,14 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
      * @return A task representing the asynchronous operation that stops the recognition.
      */
     public Future<Void> stopContinuousRecognitionAsync() {
-        return s_executorService.submit(() -> {
-            super.doAsyncRecognitionAction(() -> recoImpl.StopContinuousRecognition());
-            return null;
-        });
+        final IntentRecognizer thisReco = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { recoImpl.StopContinuousRecognition(); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+                return null;
+        }});
     }
 
     /**
@@ -221,10 +235,14 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     public Future<Void> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
         Contracts.throwIfNull(model, "model");
 
-        return s_executorService.submit(() -> {
-            super.doAsyncRecognitionAction(() -> recoImpl.StartKeywordRecognition(model.getModelImpl()));
-            return null;
-        });
+        final IntentRecognizer thisReco = this;
+        final KeywordRecognitionModel model2 = model;
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { recoImpl.StartKeywordRecognition(model2.getModelImpl()); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+                return null;
+        }});
     }
 
     /**
@@ -233,10 +251,14 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
      * @return A task representing the asynchronous operation that stops the recognition.
      */
     public Future<Void> stopKeywordRecognitionAsync() {
-        return s_executorService.submit(() -> {
-                super.doAsyncRecognitionAction(() -> recoImpl.StopKeywordRecognition());
+        final IntentRecognizer thisReco = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { recoImpl.StopKeywordRecognition(); }};
+                thisReco.doAsyncRecognitionAction(runnable);
                 return null;
-        });
+        }});
     }
 
     /*! \cond PROTECTED */

@@ -126,13 +126,19 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      * @return A task representing the recognition operation. The task returns a value of SpeechRecognitionResult
      */
     public Future<SpeechRecognitionResult> recognizeOnceAsync() {
-        return s_executorService.submit(() -> {
-            // A variable defined in an enclosing scope must be final or effectively final.
-            // The compiler treats an array initialized once as an effectively final.
-            SpeechRecognitionResult[] result = new SpeechRecognitionResult[1];
-            super.doAsyncRecognitionAction(() -> result[0] = new SpeechRecognitionResult(recoImpl.Recognize()));
-            return result[0];
-        });
+        final SpeechRecognizer thisReco = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<SpeechRecognitionResult>() {
+            public SpeechRecognitionResult  call() {
+                // A variable defined in an enclosing scope must be final or effectively final.
+                // The compiler treats an array initialized once as an effectively final.
+                final SpeechRecognitionResult[] result = new SpeechRecognitionResult[1];
+
+                Runnable runnable = new Runnable() { public void run() { result[0] = new SpeechRecognitionResult(recoImpl.Recognize()); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+
+                return result[0];
+            }});
     }
 
     /**
@@ -141,10 +147,14 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      * @return A task representing the asynchronous operation that starts the recognition.
      */
     public Future<Void> startContinuousRecognitionAsync() {
-        return s_executorService.submit(() -> {
-            super.doAsyncRecognitionAction(() -> recoImpl.StartContinuousRecognition());
-            return null;
-        });
+        final SpeechRecognizer thisReco = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { recoImpl.StartContinuousRecognition(); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+                return null;
+        }});
     }
 
     /**
@@ -152,10 +162,14 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      * @return A task representing the asynchronous operation that stops the recognition.
      */
     public Future<Void> stopContinuousRecognitionAsync() {
-        return s_executorService.submit(() -> {
-            super.doAsyncRecognitionAction(() -> recoImpl.StopContinuousRecognition());
-            return null;
-        });
+        final SpeechRecognizer thisReco = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { recoImpl.StopContinuousRecognition(); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+                return null;
+        }});
     }
 
     /**
@@ -168,10 +182,14 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     public Future<Void> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
         Contracts.throwIfNull(model, "model");
 
-        return s_executorService.submit(() -> {
-            super.doAsyncRecognitionAction(() -> recoImpl.StartKeywordRecognition(model.getModelImpl()));
-            return null;
-        });
+        final SpeechRecognizer thisReco = this;
+        final KeywordRecognitionModel model2 = model;
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { recoImpl.StartKeywordRecognition(model2.getModelImpl()); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+                return null;
+        }});
     }
 
     /**
@@ -180,10 +198,14 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
      * @return A task representing the asynchronous operation that stops the recognition.
      */
     public Future<Void> stopKeywordRecognitionAsync() {
-        return s_executorService.submit(() -> {
-            super.doAsyncRecognitionAction(() -> recoImpl.StopKeywordRecognition());
-            return null;
-        });
+        final SpeechRecognizer thisReco = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { recoImpl.StopKeywordRecognition(); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+                return null;
+        }});
     }
 
     /*! \cond PROTECTED */

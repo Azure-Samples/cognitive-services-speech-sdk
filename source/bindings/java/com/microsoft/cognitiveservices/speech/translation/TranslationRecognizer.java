@@ -129,13 +129,19 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      * @return A task representing the recognition operation. The task returns a value of TranslationRecognitionResult.
      */
     public Future<TranslationRecognitionResult> recognizeOnceAsync() {
-        return s_executorService.submit(() -> {
-            // A variable defined in an enclosing scope must be final or effectively final.
-            // The compiler treats an array initialized once as an effectively final.
-            TranslationRecognitionResult[] result = new TranslationRecognitionResult[1];
-            super.doAsyncRecognitionAction(() -> result[0] = new TranslationRecognitionResult(recoImpl.Recognize()));
-            return result[0];
-        });
+        final TranslationRecognizer thisReco = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<TranslationRecognitionResult>() {
+            public TranslationRecognitionResult  call() {
+                // A variable defined in an enclosing scope must be final or effectively final.
+                // The compiler treats an array initialized once as an effectively final.
+                final TranslationRecognitionResult[] result = new TranslationRecognitionResult[1];
+
+                Runnable runnable = new Runnable() { public void run() { result[0] = new TranslationRecognitionResult(recoImpl.Recognize()); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+
+                return result[0];
+        }});
     }
 
     /**
@@ -144,10 +150,14 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      * @return A task representing the asynchronous operation that starts the recognition.
      */
     public Future<Void> startContinuousRecognitionAsync() {
-        return s_executorService.submit(() -> {
-            super.doAsyncRecognitionAction(() -> recoImpl.StartContinuousRecognition());
-            return null;
-        });
+        final TranslationRecognizer thisReco = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { recoImpl.StartContinuousRecognition(); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+                return null;
+        }});
     }
 
     /**
@@ -155,10 +165,14 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
      * @return A task representing the asynchronous operation that stops the translation.
      */
     public Future<Void> stopContinuousRecognitionAsync() {
-        return s_executorService.submit(() -> {
-            super.doAsyncRecognitionAction(() ->  recoImpl.StopContinuousRecognition());
-            return null;
-        });
+        final TranslationRecognizer thisReco = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { recoImpl.StopContinuousRecognition(); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+                return null;
+        }});
     }
 
     /*! \cond PROTECTED */

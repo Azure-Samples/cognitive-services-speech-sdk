@@ -225,6 +225,7 @@ if(NOT ANDROID)
 endif()
 
 enable_language(Java)
+set(CMAKE_JAVA_COMPILE_FLAGS -source 1.7 -target 1.7)
 add_jar(${JAVA_LIB}
         SOURCES ${SWIG_JAVA_SOURCES} ${JAVA_SOURCES}
         OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
