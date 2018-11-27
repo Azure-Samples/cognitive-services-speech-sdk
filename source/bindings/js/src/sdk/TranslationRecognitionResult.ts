@@ -23,15 +23,19 @@ export class TranslationRecognitionResult extends SpeechRecognitionResult {
      * @param {string} json - Additional Json, if provided.
      * @param {PropertyCollection} properties - Additional properties, if provided.
      */
-    public constructor(translations: Translations, resultId?: string, reason?: ResultReason, text?: string, duration?: number, offset?: number, errorDetails?: string, json?: string, properties?: PropertyCollection) {
+    public constructor(translations: Translations, resultId?: string, reason?: ResultReason,
+                       text?: string, duration?: number, offset?: number, errorDetails?: string,
+                       json?: string, properties?: PropertyCollection) {
         super(resultId, reason, text, duration, offset, errorDetails, json, properties);
 
         this.privTranslations = translations;
     }
 
     /**
-     * Presents the translation results. Each item in the dictionary represents a translation result in one of target languages, where the key
-     * is the name of the target language, in BCP-47 format, and the value is the translation text in the specified language.
+     * Presents the translation results. Each item in the dictionary represents
+     * a translation result in one of target languages, where the key is the name
+     * of the target language, in BCP-47 format, and the value is the translation
+     * text in the specified language.
      * @member TranslationRecognitionResult.prototype.translations
      * @function
      * @public

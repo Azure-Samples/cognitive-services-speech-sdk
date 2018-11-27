@@ -1,18 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import {
-    OutputFormatPropertyName,
-} from "../common.speech/Exports";
-import {
-    Contracts,
-} from "./Contracts";
-import {
-    OutputFormat,
-    PropertyCollection,
-    PropertyId,
-    SpeechConfig,
-} from "./Exports";
+import { OutputFormatPropertyName } from "../common.speech/Exports";
+import { Contracts } from "./Contracts";
+import { OutputFormat, PropertyCollection, PropertyId, SpeechConfig } from "./Exports";
 
 /**
  * Speech translation configuration.
@@ -49,8 +40,9 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
     /**
      * Static instance of SpeechTranslationConfig returned by passing authorization token and service region.
      * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
-     * expipres, the caller needs to refresh it by setting the property authorizationToken with a new valid token.
-     * Otherwise, all the recognizers created by this SpeechTranslationConfig instance will encounter errors during recognition.
+     *       expires, the caller needs to refresh it by setting the property authorizationToken with a new
+     *       valid token. Otherwise, all the recognizers created by this SpeechTranslationConfig instance
+     *      will encounter errors during recognition.
      * @member SpeechTranslationConfig.fromAuthorizationToken
      * @function
      * @public
@@ -71,9 +63,10 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
     /**
      * Creates an instance of the speech translation config with specified endpoint and subscription key.
      * This method is intended only for users who use a non-standard service endpoint or paramters.
-     * Note: The query properties specified in the endpoint URL are not changed, even if they are set by any other APIs.
-     * For example, if language is defined in the uri as query parameter "language=de-DE", and also set by the speechRecognitionLanguage property,
-     * the language setting in uri takes precedence, and the effective language is "de-DE".
+     * Note: The query properties specified in the endpoint URL are not changed, even if they are
+     *       set by any other APIs. For example, if language is defined in the uri as query parameter
+     *       "language=de-DE", and also set by the speechRecognitionLanguage property, the language
+     *       setting in uri takes precedence, and the effective language is "de-DE".
      * Only the properties that are not specified in the endpoint URL can be set by other APIs.
      * @member SpeechTranslationConfig.fromEndpoint
      * @function
@@ -175,11 +168,11 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
  */
 // tslint:disable-next-line:max-classes-per-file
 export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
-    private speechProperties: PropertyCollection;
+    private privSpeechProperties: PropertyCollection;
 
     public constructor() {
         super();
-        this.speechProperties = new PropertyCollection();
+        this.privSpeechProperties = new PropertyCollection();
         this.outputFormat = OutputFormat.Simple;
     }
     /**
@@ -194,7 +187,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
     public set authorizationToken(value: string) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        this.speechProperties.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);
+        this.privSpeechProperties.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);
     }
 
     /**
@@ -208,7 +201,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      */
     public set speechRecognitionLanguage(value: string) {
         Contracts.throwIfNullOrWhitespace(value, "value");
-        this.speechProperties.setProperty(PropertyId.SpeechServiceConnection_RecoLanguage, value);
+        this.privSpeechProperties.setProperty(PropertyId.SpeechServiceConnection_RecoLanguage, value);
     }
 
     /**
@@ -217,7 +210,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @public
      */
     public get subscriptionKey(): string {
-        return this.speechProperties.getProperty(PropertyId[PropertyId.SpeechServiceConnection_Key]);
+        return this.privSpeechProperties.getProperty(PropertyId[PropertyId.SpeechServiceConnection_Key]);
     }
 
     /**
@@ -226,7 +219,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @public
      */
     public get outputFormat(): OutputFormat {
-        return (OutputFormat as any)[this.speechProperties.getProperty(OutputFormatPropertyName, undefined)];
+        return (OutputFormat as any)[this.privSpeechProperties.getProperty(OutputFormatPropertyName, undefined)];
     }
 
     /**
@@ -235,7 +228,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @public
      */
     public set outputFormat(value: OutputFormat) {
-        this.speechProperties.setProperty(OutputFormatPropertyName, OutputFormat[value]);
+        this.privSpeechProperties.setProperty(OutputFormatPropertyName, OutputFormat[value]);
     }
 
     /**
@@ -244,7 +237,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @public
      */
     public set endpointId(value: string) {
-        this.speechProperties.setProperty(PropertyId.SpeechServiceConnection_Endpoint, value);
+        this.privSpeechProperties.setProperty(PropertyId.SpeechServiceConnection_Endpoint, value);
     }
 
     /**
@@ -253,7 +246,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @public
      */
     public get endpointId(): string {
-        return this.speechProperties.getProperty(PropertyId.SpeechServiceConnection_EndpointId);
+        return this.privSpeechProperties.getProperty(PropertyId.SpeechServiceConnection_EndpointId);
     }
     /**
      * Add a (text) target language to translate into.
@@ -267,7 +260,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
 
         const languages: string[] = this.targetLanguages;
         languages.push(value);
-        this.speechProperties.setProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages, languages.join(","));
+        this.privSpeechProperties.setProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages, languages.join(","));
     }
 
     /**
@@ -279,8 +272,8 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      */
     public get targetLanguages(): string[] {
 
-        if (this.speechProperties.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages, undefined) !== undefined) {
-            return this.speechProperties.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages).split(",");
+        if (this.privSpeechProperties.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages, undefined) !== undefined) {
+            return this.privSpeechProperties.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages).split(",");
         } else {
             return [];
         }
@@ -306,7 +299,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
     public set voiceName(value: string) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        this.speechProperties.setProperty(PropertyId.SpeechServiceConnection_TranslationVoice, value);
+        this.privSpeechProperties.setProperty(PropertyId.SpeechServiceConnection_TranslationVoice, value);
     }
 
     /**
@@ -317,7 +310,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @returns {string} The region.
      */
     public get region(): string {
-        return this.speechProperties.getProperty(PropertyId.SpeechServiceConnection_Region);
+        return this.privSpeechProperties.getProperty(PropertyId.SpeechServiceConnection_Region);
     }
 
     /**
@@ -329,7 +322,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @param {string} value - The value of the property.
      */
     public setProperty(name: string, value: string): void {
-        this.speechProperties.setProperty(name, value);
+        this.privSpeechProperties.setProperty(name, value);
     }
 
     /**
@@ -342,7 +335,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @returns {string} The value of the property.
      */
     public getProperty(name: string, def?: string): string {
-        return this.speechProperties.getProperty(name, def);
+        return this.privSpeechProperties.getProperty(name, def);
     }
 
     /**
@@ -353,7 +346,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @returns {PropertyCollection} The properties.
      */
     public get properties(): PropertyCollection {
-        return this.speechProperties;
+        return this.privSpeechProperties;
     }
 
     /**

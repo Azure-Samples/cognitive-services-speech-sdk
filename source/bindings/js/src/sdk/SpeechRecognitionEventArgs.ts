@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import {
-    RecognitionEventArgs,
-    SpeechRecognitionResult,
-} from "./Exports";
+
+import { RecognitionEventArgs, SpeechRecognitionResult } from "./Exports";
 
 /**
  * Defines contents of speech recognizing/recognized event.

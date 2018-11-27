@@ -29,7 +29,8 @@ export abstract class AudioConfig {
      * @member AudioConfig.fromWavFileInput
      * @function
      * @public
-     * @param {File} fileName - Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+     * @param {File} fileName - Specifies the audio input file. Currently, only WAV / PCM with 16-bit
+     *        samples, 16 kHz sample rate, and a single channel (Mono) is supported.
      * @returns {AudioConfig} The audio input configuration being created.
      */
     public static fromWavFileInput(file: File): AudioConfig {
@@ -41,7 +42,9 @@ export abstract class AudioConfig {
      * @member AudioConfig.fromStreamInput
      * @function
      * @public
-     * @param {AudioInputStream | PullAudioInputStreamCallback} audioStream - Specifies the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+     * @param {AudioInputStream | PullAudioInputStreamCallback} audioStream - Specifies the custom audio input
+     *        stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel
+     *        (Mono) is supported.
      * @returns {AudioConfig} The audio input configuration being created.
      */
     public static fromStreamInput(audioStream: AudioInputStream | PullAudioInputStreamCallback): AudioConfig {
@@ -72,7 +75,7 @@ export abstract class AudioConfig {
  */
 // tslint:disable-next-line:max-classes-per-file
 export class AudioConfigImpl extends AudioConfig implements IAudioSource {
-    private source: IAudioSource;
+    private privSource: IAudioSource;
 
     /**
      * Creates and initializes an instance of this class.
@@ -81,14 +84,14 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
      */
     public constructor(source: IAudioSource) {
         super();
-        this.source = source;
+        this.privSource = source;
     }
 
     /**
      * Format information for the audio
      */
-    public get Format(): AudioStreamFormat {
-        return this.source.Format;
+    public get format(): AudioStreamFormat {
+        return this.privSource.format;
     }
 
     /**
@@ -97,66 +100,66 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
      * @public
      */
     public close(): void {
-        this.source.TurnOff();
+        this.privSource.turnOff();
     }
 
     /**
-     * @member AudioConfigImpl.prototype.Id
+     * @member AudioConfigImpl.prototype.id
      * @function
      * @public
      */
-    public Id(): string {
-        return this.source.Id();
+    public id(): string {
+        return this.privSource.id();
     }
 
     /**
-     * @member AudioConfigImpl.prototype.TurnOn
+     * @member AudioConfigImpl.prototype.turnOn
      * @function
      * @public
      * @returns {Promise<boolean>} A promise.
      */
-    public TurnOn(): Promise<boolean> {
-        return this.source.TurnOn();
+    public turnOn(): Promise<boolean> {
+        return this.privSource.turnOn();
     }
 
     /**
-     * @member AudioConfigImpl.prototype.Attach
+     * @member AudioConfigImpl.prototype.attach
      * @function
      * @public
      * @param {string} audioNodeId - The audio node id.
      * @returns {Promise<IAudioStreamNode>} A promise.
      */
-    public Attach(audioNodeId: string): Promise<IAudioStreamNode> {
-        return this.source.Attach(audioNodeId);
+    public attach(audioNodeId: string): Promise<IAudioStreamNode> {
+        return this.privSource.attach(audioNodeId);
     }
 
     /**
-     * @member AudioConfigImpl.prototype.Detach
+     * @member AudioConfigImpl.prototype.detach
      * @function
      * @public
      * @param {string} audioNodeId - The audio node id.
      */
-    public Detach(audioNodeId: string): void {
-        return this.Detach(audioNodeId);
+    public detach(audioNodeId: string): void {
+        return this.detach(audioNodeId);
     }
 
     /**
-     * @member AudioConfigImpl.prototype.TurnOff
+     * @member AudioConfigImpl.prototype.turnOff
      * @function
      * @public
      * @returns {Promise<boolean>} A promise.
      */
-    public TurnOff(): Promise<boolean> {
-        return this.source.TurnOff();
+    public turnOff(): Promise<boolean> {
+        return this.privSource.turnOff();
     }
 
     /**
-     * @member AudioConfigImpl.prototype.Events
+     * @member AudioConfigImpl.prototype.events
      * @function
      * @public
      * @returns {EventSource<AudioSourceEvent>} An event source for audio events.
      */
-    public get Events(): EventSource<AudioSourceEvent> {
-        return this.source.Events;
+    public get events(): EventSource<AudioSourceEvent> {
+        return this.privSource.events;
     }
 }

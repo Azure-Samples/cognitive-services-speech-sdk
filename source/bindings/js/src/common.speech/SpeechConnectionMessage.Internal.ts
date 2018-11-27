@@ -1,11 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import {
-    ArgumentNullError,
-    ConnectionMessage,
-    IStringDictionary,
-    MessageType,
-} from "../common/Exports";
+
+import { ArgumentNullError, ConnectionMessage, IStringDictionary, MessageType } from "../common/Exports";
 
 const PathHeaderName: string = "path";
 const ContentTypeHeaderName: string = "content-type";
@@ -14,10 +10,10 @@ const RequestTimestampHeaderName: string = "x-timestamp";
 
 export class SpeechConnectionMessage extends ConnectionMessage {
 
-    private path: string;
-    private requestId: string;
-    private contentType: string;
-    private additionalHeaders: IStringDictionary<string>;
+    private privPath: string;
+    private privRequestId: string;
+    private privContentType: string;
+    private privAdditionalHeaders: IStringDictionary<string>;
 
     public constructor(
         messageType: MessageType,
@@ -59,60 +55,60 @@ export class SpeechConnectionMessage extends ConnectionMessage {
             super(messageType, body, headers);
         }
 
-        this.path = path;
-        this.requestId = requestId;
-        this.contentType = contentType;
-        this.additionalHeaders = additionalHeaders;
+        this.privPath = path;
+        this.privRequestId = requestId;
+        this.privContentType = contentType;
+        this.privAdditionalHeaders = additionalHeaders;
     }
 
-    public get Path(): string {
-        return this.path;
+    public get path(): string {
+        return this.privPath;
     }
 
-    public get RequestId(): string {
-        return this.requestId;
+    public get requestId(): string {
+        return this.privRequestId;
     }
 
-    public get ContentType(): string {
-        return this.contentType;
+    public get contentType(): string {
+        return this.privContentType;
     }
 
-    public get AdditionalHeaders(): IStringDictionary<string> {
-        return this.additionalHeaders;
+    public get additionalHeaders(): IStringDictionary<string> {
+        return this.privAdditionalHeaders;
     }
 
-    public static FromConnectionMessage = (message: ConnectionMessage): SpeechConnectionMessage => {
+    public static fromConnectionMessage = (message: ConnectionMessage): SpeechConnectionMessage => {
         let path = null;
         let requestId = null;
         let contentType = null;
         let requestTimestamp = null;
         const additionalHeaders: IStringDictionary<string> = {};
 
-        if (message.Headers) {
-            for (const headerName in message.Headers) {
+        if (message.headers) {
+            for (const headerName in message.headers) {
                 if (headerName) {
                     if (headerName.toLowerCase() === PathHeaderName.toLowerCase()) {
-                        path = message.Headers[headerName];
+                        path = message.headers[headerName];
                     } else if (headerName.toLowerCase() === RequestIdHeaderName.toLowerCase()) {
-                        requestId = message.Headers[headerName];
+                        requestId = message.headers[headerName];
                     } else if (headerName.toLowerCase() === RequestTimestampHeaderName.toLowerCase()) {
-                        requestTimestamp = message.Headers[headerName];
+                        requestTimestamp = message.headers[headerName];
                     } else if (headerName.toLowerCase() === ContentTypeHeaderName.toLowerCase()) {
-                        contentType = message.Headers[headerName];
+                        contentType = message.headers[headerName];
                     } else {
-                        additionalHeaders[headerName] = message.Headers[headerName];
+                        additionalHeaders[headerName] = message.headers[headerName];
                     }
                 }
             }
         }
 
         return new SpeechConnectionMessage(
-            message.MessageType,
+            message.messageType,
             path,
             requestId,
             contentType,
-            message.Body,
+            message.body,
             additionalHeaders,
-            message.Id);
+            message.id);
     }
 }

@@ -1,28 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import {
     ArgumentNullError,
     ConnectionEvent,
     ConnectionMessage,
     ConnectionOpenResponse,
     ConnectionState,
-    CreateNoDashGuid,
+    createNoDashGuid,
     EventSource,
     IConnection,
     IStringDictionary,
     IWebsocketMessageFormatter,
-    PlatformEvent,
     Promise,
 } from "../common/Exports";
 import { WebsocketMessageAdapter } from "./WebsocketMessageAdapter";
 
 export class WebsocketConnection implements IConnection {
 
-    private uri: string;
-    private messageFormatter: IWebsocketMessageFormatter;
-    private connectionMessageAdapter: WebsocketMessageAdapter;
-    private id: string;
-    private isDisposed: boolean = false;
+    private privUri: string;
+    private privMessageFormatter: IWebsocketMessageFormatter;
+    private privConnectionMessageAdapter: WebsocketMessageAdapter;
+    private privId: string;
+    private privIsDisposed: boolean = false;
 
     public constructor(
         uri: string,
@@ -39,7 +39,7 @@ export class WebsocketConnection implements IConnection {
             throw new ArgumentNullError("messageFormatter");
         }
 
-        this.messageFormatter = messageFormatter;
+        this.privMessageFormatter = messageFormatter;
 
         let queryParams = "";
         let i = 0;
@@ -66,48 +66,48 @@ export class WebsocketConnection implements IConnection {
             }
         }
 
-        this.uri = uri + queryParams;
-        this.id = connectionId ? connectionId : CreateNoDashGuid();
+        this.privUri = uri + queryParams;
+        this.privId = connectionId ? connectionId : createNoDashGuid();
 
-        this.connectionMessageAdapter = new WebsocketMessageAdapter(
-            this.uri,
-            this.Id,
-            this.messageFormatter);
+        this.privConnectionMessageAdapter = new WebsocketMessageAdapter(
+            this.privUri,
+            this.id,
+            this.privMessageFormatter);
     }
 
-    public Dispose = (): void => {
-        this.isDisposed = true;
+    public dispose = (): void => {
+        this.privIsDisposed = true;
 
-        if (this.connectionMessageAdapter) {
-            this.connectionMessageAdapter.Close();
+        if (this.privConnectionMessageAdapter) {
+            this.privConnectionMessageAdapter.close();
         }
     }
 
-    public IsDisposed = (): boolean => {
-        return this.isDisposed;
+    public isDisposed = (): boolean => {
+        return this.privIsDisposed;
     }
 
-    public get Id(): string {
-        return this.id;
+    public get id(): string {
+        return this.privId;
     }
 
-    public State = (): ConnectionState => {
-        return this.connectionMessageAdapter.State;
+    public state = (): ConnectionState => {
+        return this.privConnectionMessageAdapter.state;
     }
 
-    public Open = (): Promise<ConnectionOpenResponse> => {
-        return this.connectionMessageAdapter.Open();
+    public open = (): Promise<ConnectionOpenResponse> => {
+        return this.privConnectionMessageAdapter.open();
     }
 
-    public Send = (message: ConnectionMessage): Promise<boolean> => {
-        return this.connectionMessageAdapter.Send(message);
+    public send = (message: ConnectionMessage): Promise<boolean> => {
+        return this.privConnectionMessageAdapter.send(message);
     }
 
-    public Read = (): Promise<ConnectionMessage> => {
-        return this.connectionMessageAdapter.Read();
+    public read = (): Promise<ConnectionMessage> => {
+        return this.privConnectionMessageAdapter.read();
     }
 
-    public get Events(): EventSource<ConnectionEvent> {
-        return this.connectionMessageAdapter.Events;
+    public get events(): EventSource<ConnectionEvent> {
+        return this.privConnectionMessageAdapter.events;
     }
 }

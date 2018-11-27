@@ -1,21 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 /**
- *
- *
  * @export
  * @interface IDisposable
  */
 export interface IDisposable {
 
     /**
-     *
-     *
      * @returns {boolean}
      *
      * @memberOf IDisposable
      */
-    IsDisposed(): boolean;
+    isDisposed(): boolean;
 
     /**
      * Performs cleanup operations on this instance
@@ -25,5 +22,5 @@ export interface IDisposable {
      *
      * @memberOf IDisposable
      */
-    Dispose(reason?: string): void;
+    dispose(reason?: string): void;
 }

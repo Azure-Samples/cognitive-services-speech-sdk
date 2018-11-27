@@ -1,16 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import {
-    CancellationErrorCodePropertyName,
-    EnumTranslation,
-    SimpleSpeechPhrase,
-} from "../common.speech/Exports";
-import {
-    CancellationErrorCode,
-    CancellationReason,
-    RecognitionResult,
-} from "./Exports";
+import { CancellationErrorCodePropertyName, EnumTranslation, SimpleSpeechPhrase } from "../common.speech/Exports";
+import { CancellationErrorCode, CancellationReason, RecognitionResult } from "./Exports";
 
 /**
  * Contains detailed information about why a result was canceled.
@@ -46,7 +38,7 @@ export class CancellationDetails {
         let errorCode: CancellationErrorCode = CancellationErrorCode.NoError;
 
         if (!!result.json) {
-            const simpleSpeech: SimpleSpeechPhrase = SimpleSpeechPhrase.FromJSON(result.json);
+            const simpleSpeech: SimpleSpeechPhrase = SimpleSpeechPhrase.fromJSON(result.json);
             reason = EnumTranslation.implTranslateCancelResult(simpleSpeech.RecognitionStatus);
         }
 

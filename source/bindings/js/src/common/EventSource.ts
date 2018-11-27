@@ -1,69 +1,70 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { ObjectDisposedError } from "./Error";
-import { CreateNoDashGuid } from "./Guid";
+import { createNoDashGuid } from "./Guid";
 import { IDetachable } from "./IDetachable";
 import { IStringDictionary } from "./IDictionary";
 import { IEventListener, IEventSource } from "./IEventSource";
 import { PlatformEvent } from "./PlatformEvent";
 
 export class EventSource<TEvent extends PlatformEvent> implements IEventSource<TEvent> {
-    private eventListeners: IStringDictionary<(event: TEvent) => void> = {};
-    private metadata: IStringDictionary<string>;
-    private isDisposed: boolean = false;
+    private privEventListeners: IStringDictionary<(event: TEvent) => void> = {};
+    private privMetadata: IStringDictionary<string>;
+    private privIsDisposed: boolean = false;
 
     constructor(metadata?: IStringDictionary<string>) {
-        this.metadata = metadata;
+        this.privMetadata = metadata;
     }
 
-    public OnEvent = (event: TEvent): void => {
-        if (this.IsDisposed()) {
+    public onEvent = (event: TEvent): void => {
+        if (this.isDisposed()) {
             throw (new ObjectDisposedError("EventSource"));
         }
 
-        if (this.Metadata) {
-            for (const paramName in this.Metadata) {
+        if (this.metadata) {
+            for (const paramName in this.metadata) {
                 if (paramName) {
-                    if (event.Metadata) {
-                        if (!event.Metadata[paramName]) {
-                            event.Metadata[paramName] = this.Metadata[paramName];
+                    if (event.metadata) {
+                        if (!event.metadata[paramName]) {
+                            event.metadata[paramName] = this.metadata[paramName];
                         }
                     }
                 }
             }
         }
 
-        for (const eventId in this.eventListeners) {
-            if (eventId && this.eventListeners[eventId]) {
-                this.eventListeners[eventId](event);
+        for (const eventId in this.privEventListeners) {
+            if (eventId && this.privEventListeners[eventId]) {
+                this.privEventListeners[eventId](event);
             }
         }
     }
 
-    public Attach = (onEventCallback: (event: TEvent) => void): IDetachable => {
-        const id = CreateNoDashGuid();
-        this.eventListeners[id] = onEventCallback;
+    public attach = (onEventCallback: (event: TEvent) => void): IDetachable => {
+        const id = createNoDashGuid();
+        this.privEventListeners[id] = onEventCallback;
         return {
-            Detach: () => {
-                delete this.eventListeners[id];
+            detach: () => {
+                delete this.privEventListeners[id];
             },
         };
     }
 
-    public AttachListener = (listener: IEventListener<TEvent>): IDetachable => {
-        return this.Attach(listener.OnEvent);
+    public attachListener = (listener: IEventListener<TEvent>): IDetachable => {
+        return this.attach(listener.onEvent);
     }
 
-    public IsDisposed = (): boolean => {
-        return this.isDisposed;
+    public isDisposed = (): boolean => {
+        return this.privIsDisposed;
     }
 
-    public Dispose = (): void => {
-        this.eventListeners = null;
-        this.isDisposed = true;
+    public dispose = (): void => {
+        this.privEventListeners = null;
+        this.privIsDisposed = true;
     }
 
-    public get Metadata(): IStringDictionary<string> {
-        return this.metadata;
+    public get metadata(): IStringDictionary<string> {
+        return this.privMetadata;
     }
 }

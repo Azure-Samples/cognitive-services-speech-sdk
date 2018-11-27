@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import {
     AudioSourceErrorEvent,
     AudioStreamNodeAttachedEvent,
     AudioStreamNodeAttachingEvent,
     AudioStreamNodeDetachedEvent,
     AudioStreamNodeErrorEvent,
-    ConnectionClosedEvent,
     ConnectionEstablishedEvent,
     ConnectionEstablishErrorEvent,
     ConnectionMessageReceivedEvent,
@@ -15,10 +15,7 @@ import {
     IStringDictionary,
     PlatformEvent,
 } from "../common/Exports";
-import {
-    ConnectingToServiceEvent,
-    RecognitionTriggeredEvent,
-} from "./RecognitionEvents";
+import { ConnectingToServiceEvent, RecognitionTriggeredEvent } from "./RecognitionEvents";
 
 interface ITelemetry {
     Metrics: IMetric[];
@@ -36,162 +33,162 @@ interface IMetric {
 
 // tslint:disable-next-line:max-classes-per-file
 export class ServiceTelemetryListener implements IEventListener<PlatformEvent> {
-    private isDisposed: boolean = false;
+    private privIsDisposed: boolean = false;
 
-    private requestId: string;
-    private audioSourceId: string;
-    private audioNodeId: string;
+    private privRequestId: string;
+    private privAudioSourceId: string;
+    private privAudioNodeId: string;
 
-    private listeningTriggerMetric: IMetric = null;
-    private micMetric: IMetric = null;
-    private connectionEstablishMetric: IMetric = null;
+    private privListeningTriggerMetric: IMetric = null;
+    private privMicMetric: IMetric = null;
+    private privConnectionEstablishMetric: IMetric = null;
 
-    private micStartTime: string;
+    private privMicStartTime: string;
 
-    private connectionId: string;
-    private connectionStartTime: string;
+    private privConnectionId: string;
+    private privConnectionStartTime: string;
 
-    private receivedMessages: IStringDictionary<string[]>;
+    private privReceivedMessages: IStringDictionary<string[]>;
 
     constructor(requestId: string, audioSourceId: string, audioNodeId: string) {
-        this.requestId = requestId;
-        this.audioSourceId = audioSourceId;
-        this.audioNodeId = audioNodeId;
+        this.privRequestId = requestId;
+        this.privAudioSourceId = audioSourceId;
+        this.privAudioNodeId = audioNodeId;
 
-        this.receivedMessages = {};
+        this.privReceivedMessages = {};
     }
 
-    public OnEvent = (e: PlatformEvent): void => {
-        if (this.isDisposed) {
+    public onEvent = (e: PlatformEvent): void => {
+        if (this.privIsDisposed) {
             return;
         }
 
-        if (e instanceof RecognitionTriggeredEvent && e.RequestId === this.requestId) {
-            this.listeningTriggerMetric = {
-                End: e.EventTime,
+        if (e instanceof RecognitionTriggeredEvent && e.requestId === this.privRequestId) {
+            this.privListeningTriggerMetric = {
+                End: e.eventTime,
                 Name: "ListeningTrigger",
-                Start: e.EventTime,
+                Start: e.eventTime,
             };
         }
 
-        if (e instanceof AudioStreamNodeAttachingEvent && e.AudioSourceId === this.audioSourceId && e.AudioNodeId === this.audioNodeId) {
-            this.micStartTime = e.EventTime;
+        if (e instanceof AudioStreamNodeAttachingEvent && e.audioSourceId === this.privAudioSourceId && e.audioNodeId === this.privAudioNodeId) {
+            this.privMicStartTime = e.eventTime;
         }
 
-        if (e instanceof AudioStreamNodeAttachedEvent && e.AudioSourceId === this.audioSourceId && e.AudioNodeId === this.audioNodeId) {
-            this.micStartTime = e.EventTime;
+        if (e instanceof AudioStreamNodeAttachedEvent && e.audioSourceId === this.privAudioSourceId && e.audioNodeId === this.privAudioNodeId) {
+            this.privMicStartTime = e.eventTime;
         }
 
-        if (e instanceof AudioSourceErrorEvent && e.AudioSourceId === this.audioSourceId) {
-            if (!this.micMetric) {
-                this.micMetric = {
-                    End: e.EventTime,
-                    Error: e.Error,
+        if (e instanceof AudioSourceErrorEvent && e.audioSourceId === this.privAudioSourceId) {
+            if (!this.privMicMetric) {
+                this.privMicMetric = {
+                    End: e.eventTime,
+                    Error: e.error,
                     Name: "Microphone",
-                    Start: this.micStartTime,
+                    Start: this.privMicStartTime,
                 };
             }
         }
 
-        if (e instanceof AudioStreamNodeErrorEvent && e.AudioSourceId === this.audioSourceId && e.AudioNodeId === this.audioNodeId) {
-            if (!this.micMetric) {
-                this.micMetric = {
-                    End: e.EventTime,
-                    Error: e.Error,
+        if (e instanceof AudioStreamNodeErrorEvent && e.audioSourceId === this.privAudioSourceId && e.audioNodeId === this.privAudioNodeId) {
+            if (!this.privMicMetric) {
+                this.privMicMetric = {
+                    End: e.eventTime,
+                    Error: e.error,
                     Name: "Microphone",
-                    Start: this.micStartTime,
+                    Start: this.privMicStartTime,
                 };
             }
         }
 
-        if (e instanceof AudioStreamNodeDetachedEvent && e.AudioSourceId === this.audioSourceId && e.AudioNodeId === this.audioNodeId) {
-            if (!this.micMetric) {
-                this.micMetric = {
-                    End: e.EventTime,
+        if (e instanceof AudioStreamNodeDetachedEvent && e.audioSourceId === this.privAudioSourceId && e.audioNodeId === this.privAudioNodeId) {
+            if (!this.privMicMetric) {
+                this.privMicMetric = {
+                    End: e.eventTime,
                     Name: "Microphone",
-                    Start: this.micStartTime,
+                    Start: this.privMicStartTime,
                 };
             }
         }
 
-        if (e instanceof ConnectingToServiceEvent && e.RequestId === this.requestId) {
-            this.connectionId = e.SessionId;
+        if (e instanceof ConnectingToServiceEvent && e.requestId === this.privRequestId) {
+            this.privConnectionId = e.sessionId;
         }
 
-        if (e instanceof ConnectionStartEvent && e.ConnectionId === this.connectionId) {
-            this.connectionStartTime = e.EventTime;
+        if (e instanceof ConnectionStartEvent && e.connectionId === this.privConnectionId) {
+            this.privConnectionStartTime = e.eventTime;
         }
 
-        if (e instanceof ConnectionEstablishedEvent && e.ConnectionId === this.connectionId) {
-            if (!this.connectionEstablishMetric) {
-                this.connectionEstablishMetric = {
-                    End: e.EventTime,
-                    Id: this.connectionId,
+        if (e instanceof ConnectionEstablishedEvent && e.connectionId === this.privConnectionId) {
+            if (!this.privConnectionEstablishMetric) {
+                this.privConnectionEstablishMetric = {
+                    End: e.eventTime,
+                    Id: this.privConnectionId,
                     Name: "Connection",
-                    Start: this.connectionStartTime,
+                    Start: this.privConnectionStartTime,
                 };
             }
         }
 
-        if (e instanceof ConnectionEstablishErrorEvent && e.ConnectionId === this.connectionId) {
-            if (!this.connectionEstablishMetric) {
-                this.connectionEstablishMetric = {
-                    End: e.EventTime,
-                    Error: this.GetConnectionError(e.StatusCode),
-                    Id: this.connectionId,
+        if (e instanceof ConnectionEstablishErrorEvent && e.connectionId === this.privConnectionId) {
+            if (!this.privConnectionEstablishMetric) {
+                this.privConnectionEstablishMetric = {
+                    End: e.eventTime,
+                    Error: this.getConnectionError(e.statusCode),
+                    Id: this.privConnectionId,
                     Name: "Connection",
-                    Start: this.connectionStartTime,
+                    Start: this.privConnectionStartTime,
                 };
             }
         }
 
-        if (e instanceof ConnectionMessageReceivedEvent && e.ConnectionId === this.connectionId) {
-            if (e.Message && e.Message.Headers && e.Message.Headers.path) {
-                if (!this.receivedMessages[e.Message.Headers.path]) {
-                    this.receivedMessages[e.Message.Headers.path] = new Array<string>();
+        if (e instanceof ConnectionMessageReceivedEvent && e.connectionId === this.privConnectionId) {
+            if (e.message && e.message.headers && e.message.headers.path) {
+                if (!this.privReceivedMessages[e.message.headers.path]) {
+                    this.privReceivedMessages[e.message.headers.path] = new Array<string>();
                 }
 
-                this.receivedMessages[e.Message.Headers.path].push(e.NetworkReceivedTime);
+                this.privReceivedMessages[e.message.headers.path].push(e.networkReceivedTime);
             }
         }
     }
 
-    public GetTelemetry = (): string => {
+    public getTelemetry = (): string => {
         const metrics = new Array<IMetric>();
 
-        if (this.listeningTriggerMetric) {
-            metrics.push(this.listeningTriggerMetric);
+        if (this.privListeningTriggerMetric) {
+            metrics.push(this.privListeningTriggerMetric);
         }
 
-        if (this.micMetric) {
-            metrics.push(this.micMetric);
+        if (this.privMicMetric) {
+            metrics.push(this.privMicMetric);
         }
 
-        if (this.connectionEstablishMetric) {
-            metrics.push(this.connectionEstablishMetric);
+        if (this.privConnectionEstablishMetric) {
+            metrics.push(this.privConnectionEstablishMetric);
         }
 
         const telemetry: ITelemetry = {
             Metrics: metrics,
-            ReceivedMessages: this.receivedMessages,
+            ReceivedMessages: this.privReceivedMessages,
         };
 
         const json = JSON.stringify(telemetry);
 
         // We dont want to send the same telemetry again. So clean those out.
-        this.receivedMessages = {};
-        this.listeningTriggerMetric = null;
-        this.micMetric = null;
-        this.connectionEstablishMetric = null;
+        this.privReceivedMessages = {};
+        this.privListeningTriggerMetric = null;
+        this.privMicMetric = null;
+        this.privConnectionEstablishMetric = null;
 
         return json;
     }
 
-    public Dispose = (): void => {
-        this.isDisposed = true;
+    public dispose = (): void => {
+        this.privIsDisposed = true;
     }
 
-    private GetConnectionError = (statusCode: number): string => {
+    private getConnectionError = (statusCode: number): string => {
         /*
         -- Websocket status codes --
         NormalClosure = 1000,

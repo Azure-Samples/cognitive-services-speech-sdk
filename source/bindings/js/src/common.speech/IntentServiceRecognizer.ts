@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import {
-    IAudioSource,
-    IConnection,
-} from "../common/Exports";
+
+import { IAudioSource, IConnection } from "../common/Exports";
 import {
     CancellationErrorCode,
     CancellationReason,
@@ -25,21 +23,18 @@ import {
     SimpleSpeechPhrase,
     SpeechHypothesis,
 } from "./Exports";
-import {
-    IAuthentication,
-} from "./IAuthentication";
+import { IAuthentication } from "./IAuthentication";
 import { IConnectionFactory } from "./IConnectionFactory";
 import { RecognizerConfig } from "./RecognizerConfig";
 import { SpeechConnectionMessage } from "./SpeechConnectionMessage.Internal";
 
 // tslint:disable-next-line:max-classes-per-file
 export class IntentServiceRecognizer extends ServiceRecognizerBase {
-
-    private intentRecognizer: IntentRecognizer;
-    private addedLmIntents: { [id: string]: AddedLmIntent; };
-    private intentDataSent: boolean;
-    private umbrellaIntent: AddedLmIntent;
-    private pendingIntentArgs: IntentRecognitionEventArgs;
+    private privIntentRecognizer: IntentRecognizer;
+    private privAddedLmIntents: { [id: string]: AddedLmIntent; };
+    private privIntentDataSent: boolean;
+    private privUmbrellaIntent: AddedLmIntent;
+    private privPendingIntentArgs: IntentRecognitionEventArgs;
 
     public constructor(
         authentication: IAuthentication,
@@ -49,16 +44,16 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
         recognizer: IntentRecognizer,
         intentDataSent: boolean) {
         super(authentication, connectionFactory, audioSource, recognizerConfig, recognizer);
-        this.intentRecognizer = recognizer;
-        this.intentDataSent = intentDataSent;
+        this.privIntentRecognizer = recognizer;
+        this.privIntentDataSent = intentDataSent;
     }
 
     public setIntents(addedIntents: { [id: string]: AddedLmIntent; }, umbrellaIntent: AddedLmIntent): void {
-        this.addedLmIntents = addedIntents;
-        this.umbrellaIntent = umbrellaIntent;
+        this.privAddedLmIntents = addedIntents;
+        this.privUmbrellaIntent = umbrellaIntent;
     }
 
-    protected ProcessTypeSpecificMessages(
+    protected processTypeSpecificMessages(
         connectionMessage: SpeechConnectionMessage,
         requestSession: RequestSession,
         connection: IConnection,
@@ -68,26 +63,26 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
         let result: IntentRecognitionResult;
         let ev: IntentRecognitionEventArgs;
 
-        switch (connectionMessage.Path.toLowerCase()) {
+        switch (connectionMessage.path.toLowerCase()) {
             case "speech.hypothesis":
-                const speechHypothesis: SpeechHypothesis = SpeechHypothesis.FromJSON(connectionMessage.TextBody);
+                const speechHypothesis: SpeechHypothesis = SpeechHypothesis.fromJSON(connectionMessage.textBody);
 
                 result = new IntentRecognitionResult(
                     undefined,
-                    requestSession.RequestId,
+                    requestSession.requestId,
                     ResultReason.RecognizingIntent,
                     speechHypothesis.Text,
                     speechHypothesis.Duration,
                     speechHypothesis.Offset,
                     undefined,
-                    connectionMessage.TextBody,
+                    connectionMessage.textBody,
                     undefined);
 
-                ev = new IntentRecognitionEventArgs(result, speechHypothesis.Offset, requestSession.SessionId);
+                ev = new IntentRecognitionEventArgs(result, speechHypothesis.Offset, requestSession.sessionId);
 
-                if (!!this.intentRecognizer.recognizing) {
+                if (!!this.privIntentRecognizer.recognizing) {
                     try {
-                        this.intentRecognizer.recognizing(this.intentRecognizer, ev);
+                        this.privIntentRecognizer.recognizing(this.privIntentRecognizer, ev);
                         /* tslint:disable:no-empty */
                     } catch (error) {
                         // Not going to let errors in the event handler
@@ -97,30 +92,30 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
 
                 break;
             case "speech.phrase":
-                const simple: SimpleSpeechPhrase = SimpleSpeechPhrase.FromJSON(connectionMessage.TextBody);
+                const simple: SimpleSpeechPhrase = SimpleSpeechPhrase.fromJSON(connectionMessage.textBody);
 
                 result = new IntentRecognitionResult(
                     undefined,
-                    requestSession.RequestId,
+                    requestSession.requestId,
                     EnumTranslation.implTranslateRecognitionResult(simple.RecognitionStatus),
                     simple.DisplayText,
                     simple.Duration,
                     simple.Offset,
                     undefined,
-                    connectionMessage.TextBody,
+                    connectionMessage.textBody,
                     undefined);
 
-                ev = new IntentRecognitionEventArgs(result, result.offset, requestSession.SessionId);
+                ev = new IntentRecognitionEventArgs(result, result.offset, requestSession.sessionId);
 
                 const sendEvent: () => void = () => {
-                    if (this.recognizerConfig.IsContinuousRecognition) {
+                    if (this.privRecognizerConfig.isContinuousRecognition) {
                         // For continuous recognition telemetry has to be sent for every phrase as per spec.
-                        this.SendTelemetryData(requestSession.RequestId, connection, requestSession.GetTelemetry());
+                        this.sendTelemetryData(requestSession.requestId, connection, requestSession.getTelemetry());
                     }
 
-                    if (!!this.intentRecognizer.recognized) {
+                    if (!!this.privIntentRecognizer.recognized) {
                         try {
-                            this.intentRecognizer.recognized(this.intentRecognizer, ev);
+                            this.privIntentRecognizer.recognized(this.privIntentRecognizer, ev);
                             /* tslint:disable:no-empty */
                         } catch (error) {
                             // Not going to let errors in the event handler
@@ -147,39 +142,39 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
 
                 // If intent data was sent, the terminal result for this recognizer is an intent being found.
                 // If no intent data was sent, the terminal event is speech recognition being successful.
-                if (false === this.intentDataSent || ResultReason.NoMatch === ev.result.reason) {
+                if (false === this.privIntentDataSent || ResultReason.NoMatch === ev.result.reason) {
                     sendEvent();
                 } else {
                     // Squirrel away the args, when the response event arrives it will build upon them
                     // and then return
-                    this.pendingIntentArgs = ev;
+                    this.privPendingIntentArgs = ev;
                 }
 
                 break;
             case "response":
                 // Response from LUIS
-                if (this.recognizerConfig.IsContinuousRecognition) {
+                if (this.privRecognizerConfig.isContinuousRecognition) {
                     // For continuous recognition telemetry has to be sent for every phrase as per spec.
-                    this.SendTelemetryData(requestSession.RequestId, connection, requestSession.GetTelemetry());
+                    this.sendTelemetryData(requestSession.requestId, connection, requestSession.getTelemetry());
                 }
 
-                ev = this.pendingIntentArgs;
-                this.pendingIntentArgs = undefined;
+                ev = this.privPendingIntentArgs;
+                this.privPendingIntentArgs = undefined;
 
-                const intentResponse: IntentResponse = IntentResponse.FromJSON(connectionMessage.TextBody);
+                const intentResponse: IntentResponse = IntentResponse.fromJSON(connectionMessage.textBody);
 
                 if (undefined === ev) {
                     // Odd... Not sure this can happen
-                    ev = new IntentRecognitionEventArgs(new IntentRecognitionResult(), 0 /*TODO*/, requestSession.SessionId);
+                    ev = new IntentRecognitionEventArgs(new IntentRecognitionResult(), 0 /*TODO*/, requestSession.sessionId);
                 }
 
                 // If LUIS didn't return anything, send the existing event, else
                 // modify it to show the match.
                 // See if the intent found is in the list of intents asked for.
-                let addedIntent: AddedLmIntent = this.addedLmIntents[intentResponse.topScoringIntent.intent];
+                let addedIntent: AddedLmIntent = this.privAddedLmIntents[intentResponse.topScoringIntent.intent];
 
-                if (this.umbrellaIntent !== undefined) {
-                    addedIntent = this.umbrellaIntent;
+                if (this.privUmbrellaIntent !== undefined) {
+                    addedIntent = this.privUmbrellaIntent;
                 }
 
                 if (null !== intentResponse && addedIntent !== undefined) {
@@ -194,7 +189,7 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
                     const properties = (undefined !== ev.result.properties) ?
                         ev.result.properties : new PropertyCollection();
 
-                    properties.setProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult, connectionMessage.TextBody);
+                    properties.setProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult, connectionMessage.textBody);
 
                     ev = new IntentRecognitionEventArgs(
                         new IntentRecognitionResult(
@@ -211,9 +206,9 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
                         ev.sessionId);
                 }
 
-                if (!!this.intentRecognizer.recognized) {
+                if (!!this.privIntentRecognizer.recognized) {
                     try {
-                        this.intentRecognizer.recognized(this.intentRecognizer, ev);
+                        this.privIntentRecognizer.recognized(this.privIntentRecognizer, ev);
                         /* tslint:disable:no-empty */
                     } catch (error) {
                         // Not going to let errors in the event handler
@@ -242,8 +237,8 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
         }
     }
 
-    protected ConnectionError(sessionId: string, requestId: string, error: string): void {
-        if (!!this.intentRecognizer.canceled) {
+    protected connectionError(sessionId: string, requestId: string, error: string): void {
+        if (!!this.privIntentRecognizer.canceled) {
             const properties: PropertyCollection = new PropertyCollection();
             properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[CancellationErrorCode.ConnectionFailure]);
 
@@ -266,7 +261,7 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
                 undefined,
                 sessionId);
             try {
-                this.intentRecognizer.canceled(this.intentRecognizer, cancelEvent);
+                this.privIntentRecognizer.canceled(this.privIntentRecognizer, cancelEvent);
                 /* tslint:disable:no-empty */
             } catch { }
         }

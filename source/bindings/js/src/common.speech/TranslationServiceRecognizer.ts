@@ -1,11 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import {
-    IAudioSource,
-    IConnection,
-    TranslationStatus,
-} from "../common/Exports";
+import { IAudioSource, IConnection, TranslationStatus } from "../common/Exports";
 import {
     CancellationErrorCode,
     CancellationReason,
@@ -30,16 +26,14 @@ import {
     TranslationPhrase,
     TranslationSynthesisEnd,
 } from "./Exports";
-import {
-    IAuthentication,
-} from "./IAuthentication";
+import { IAuthentication } from "./IAuthentication";
 import { IConnectionFactory } from "./IConnectionFactory";
 import { RecognizerConfig } from "./RecognizerConfig";
 import { SpeechConnectionMessage } from "./SpeechConnectionMessage.Internal";
 
 // tslint:disable-next-line:max-classes-per-file
 export class TranslationServiceRecognizer extends ServiceRecognizerBase {
-    private translationRecognizer: TranslationRecognizer;
+    private privTranslationRecognizer: TranslationRecognizer;
 
     public constructor(
         authentication: IAuthentication,
@@ -49,25 +43,25 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
         translationRecognizer: TranslationRecognizer) {
 
         super(authentication, connectionFactory, audioSource, recognizerConfig, translationRecognizer);
-        this.translationRecognizer = translationRecognizer;
+        this.privTranslationRecognizer = translationRecognizer;
 
     }
 
-    protected ProcessTypeSpecificMessages(
+    protected processTypeSpecificMessages(
         connectionMessage: SpeechConnectionMessage,
         requestSession: RequestSession,
         connection: IConnection,
         successCallback?: (e: TranslationRecognitionResult) => void,
         errorCallBack?: (e: string) => void): void {
 
-        switch (connectionMessage.Path.toLowerCase()) {
+        switch (connectionMessage.path.toLowerCase()) {
             case "translation.hypothesis":
 
-                const result: TranslationRecognitionEventArgs = this.FireEventForResult(TranslationHypothesis.FromJSON(connectionMessage.TextBody), requestSession);
+                const result: TranslationRecognitionEventArgs = this.fireEventForResult(TranslationHypothesis.fromJSON(connectionMessage.textBody), requestSession);
 
-                if (!!this.translationRecognizer.recognizing) {
+                if (!!this.privTranslationRecognizer.recognizing) {
                     try {
-                        this.translationRecognizer.recognizing(this.translationRecognizer, result);
+                        this.privTranslationRecognizer.recognizing(this.privTranslationRecognizer, result);
                         /* tslint:disable:no-empty */
                     } catch (error) {
                         // Not going to let errors in the event handler
@@ -77,19 +71,19 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
 
                 break;
             case "translation.phrase":
-                if (this.recognizerConfig.IsContinuousRecognition) {
+                if (this.privRecognizerConfig.isContinuousRecognition) {
                     // For continuous recognition telemetry has to be sent for every phrase as per spec.
-                    this.SendTelemetryData(requestSession.RequestId, connection, requestSession.GetTelemetry());
+                    this.sendTelemetryData(requestSession.requestId, connection, requestSession.getTelemetry());
                 }
 
-                const translatedPhrase: TranslationPhrase = TranslationPhrase.FromJSON(connectionMessage.TextBody);
+                const translatedPhrase: TranslationPhrase = TranslationPhrase.fromJSON(connectionMessage.textBody);
 
                 if (translatedPhrase.RecognitionStatus === RecognitionStatus.Success) {
                     // OK, the recognition was successful. How'd the translation do?
-                    const result: TranslationRecognitionEventArgs = this.FireEventForResult(translatedPhrase, requestSession);
-                    if (!!this.translationRecognizer.recognized) {
+                    const result: TranslationRecognitionEventArgs = this.fireEventForResult(translatedPhrase, requestSession);
+                    if (!!this.privTranslationRecognizer.recognized) {
                         try {
-                            this.translationRecognizer.recognized(this.translationRecognizer, result);
+                            this.privTranslationRecognizer.recognized(this.privTranslationRecognizer, result);
                             /* tslint:disable:no-empty */
                         } catch (error) {
                             // Not going to let errors in the event handler
@@ -119,28 +113,28 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
 
                     const result = new TranslationRecognitionResult(
                         undefined,
-                        requestSession.RequestId,
+                        requestSession.requestId,
                         reason,
                         translatedPhrase.Text,
                         translatedPhrase.Duration,
                         translatedPhrase.Offset,
                         undefined,
-                        connectionMessage.TextBody,
+                        connectionMessage.textBody,
                         undefined);
 
                     if (reason === ResultReason.Canceled) {
                         const cancelReason: CancellationReason = EnumTranslation.implTranslateCancelResult(translatedPhrase.RecognitionStatus);
 
                         const ev = new TranslationRecognitionCanceledEventArgs(
-                            requestSession.SessionId,
+                            requestSession.sessionId,
                             cancelReason,
                             null,
                             cancelReason === CancellationReason.Error ? CancellationErrorCode.ServiceError : CancellationErrorCode.NoError,
                             result);
 
-                        if (!!this.translationRecognizer.canceled) {
+                        if (!!this.privTranslationRecognizer.canceled) {
                             try {
-                                this.translationRecognizer.canceled(this.translationRecognizer, ev);
+                                this.privTranslationRecognizer.canceled(this.privTranslationRecognizer, ev);
                                 /* tslint:disable:no-empty */
                             } catch (error) {
                                 // Not going to let errors in the event handler
@@ -148,11 +142,11 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                             }
                         }
                     } else {
-                        const ev = new TranslationRecognitionEventArgs(result, 0/*offset*/, requestSession.SessionId);
+                        const ev = new TranslationRecognitionEventArgs(result, 0/*offset*/, requestSession.sessionId);
 
-                        if (!!this.translationRecognizer.recognized) {
+                        if (!!this.privTranslationRecognizer.recognized) {
                             try {
-                                this.translationRecognizer.recognized(this.translationRecognizer, ev);
+                                this.privTranslationRecognizer.recognized(this.privTranslationRecognizer, ev);
                                 /* tslint:disable:no-empty */
                             } catch (error) {
                                 // Not going to let errors in the event handler
@@ -180,20 +174,20 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                 break;
 
             case "translation.synthesis":
-                this.sendSynthesisAudio(connectionMessage.BinaryBody, requestSession.SessionId);
+                this.sendSynthesisAudio(connectionMessage.binaryBody, requestSession.sessionId);
                 break;
 
             case "translation.synthesis.end":
-                const synthEnd: TranslationSynthesisEnd = TranslationSynthesisEnd.FromJSON(connectionMessage.TextBody);
+                const synthEnd: TranslationSynthesisEnd = TranslationSynthesisEnd.fromJSON(connectionMessage.textBody);
 
                 switch (synthEnd.SynthesisStatus) {
                     case SynthesisStatus.Error:
-                        if (!!this.translationRecognizer.synthesizing) {
+                        if (!!this.privTranslationRecognizer.synthesizing) {
                             const result = new TranslationSynthesisResult(ResultReason.Canceled, undefined);
-                            const retEvent: TranslationSynthesisEventArgs = new TranslationSynthesisEventArgs(result, requestSession.SessionId);
+                            const retEvent: TranslationSynthesisEventArgs = new TranslationSynthesisEventArgs(result, requestSession.sessionId);
 
                             try {
-                                this.translationRecognizer.synthesizing(this.translationRecognizer, retEvent);
+                                this.privTranslationRecognizer.synthesizing(this.privTranslationRecognizer, retEvent);
                                 /* tslint:disable:no-empty */
                             } catch (error) {
                                 // Not going to let errors in the event handler
@@ -201,17 +195,17 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                             }
                         }
 
-                        if (!!this.translationRecognizer.canceled) {
+                        if (!!this.privTranslationRecognizer.canceled) {
                             // And raise a canceled event to send the rich(er) error message back.
                             const canceledResult: TranslationRecognitionCanceledEventArgs = new TranslationRecognitionCanceledEventArgs(
-                                requestSession.SessionId,
+                                requestSession.sessionId,
                                 CancellationReason.Error,
                                 synthEnd.FailureReason,
                                 CancellationErrorCode.ServiceError,
                                 null);
 
                             try {
-                                this.translationRecognizer.canceled(this.translationRecognizer, canceledResult);
+                                this.privTranslationRecognizer.canceled(this.privTranslationRecognizer, canceledResult);
                                 /* tslint:disable:no-empty */
                             } catch (error) {
                                 // Not going to let errors in the event handler
@@ -220,7 +214,7 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                         }
                         break;
                     case SynthesisStatus.Success:
-                        this.sendSynthesisAudio(undefined, requestSession.SessionId);
+                        this.sendSynthesisAudio(undefined, requestSession.sessionId);
                         break;
                     default:
                         break;
@@ -231,8 +225,8 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
         }
     }
 
-    protected ConnectionError(sessionId: string, requestId: string, error: string): void {
-        if (!!this.translationRecognizer.canceled) {
+    protected connectionError(sessionId: string, requestId: string, error: string): void {
+        if (!!this.privTranslationRecognizer.canceled) {
             const properties: PropertyCollection = new PropertyCollection();
             properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[CancellationErrorCode.ConnectionFailure]);
 
@@ -255,14 +249,14 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                 result,
             );
             try {
-                this.translationRecognizer.canceled(this.translationRecognizer, cancelEvent);
+                this.privTranslationRecognizer.canceled(this.privTranslationRecognizer, cancelEvent);
                 /* tslint:disable:no-empty */
             } catch { }
         }
 
     }
 
-    private FireEventForResult(serviceResult: TranslationHypothesis | TranslationPhrase, requestSession: RequestSession): TranslationRecognitionEventArgs {
+    private fireEventForResult(serviceResult: TranslationHypothesis | TranslationPhrase, requestSession: RequestSession): TranslationRecognitionEventArgs {
         let translations: Translations;
 
         if (undefined !== serviceResult.Translation.Translations) {
@@ -285,7 +279,7 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
 
         const result = new TranslationRecognitionResult(
             translations,
-            requestSession.RequestId,
+            requestSession.requestId,
             resultReason,
             serviceResult.Text,
             serviceResult.Duration,
@@ -294,7 +288,7 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
             JSON.stringify(serviceResult),
             undefined);
 
-        const ev = new TranslationRecognitionEventArgs(result, serviceResult.Offset, requestSession.SessionId);
+        const ev = new TranslationRecognitionEventArgs(result, serviceResult.Offset, requestSession.sessionId);
         return ev;
     }
 
@@ -303,9 +297,9 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
         const result = new TranslationSynthesisResult(reason, audio);
         const retEvent: TranslationSynthesisEventArgs = new TranslationSynthesisEventArgs(result, sessionId);
 
-        if (!!this.translationRecognizer.synthesizing) {
+        if (!!this.privTranslationRecognizer.synthesizing) {
             try {
-                this.translationRecognizer.synthesizing(this.translationRecognizer, retEvent);
+                this.privTranslationRecognizer.synthesizing(this.privTranslationRecognizer, retEvent);
                 /* tslint:disable:no-empty */
             } catch (error) {
                 // Not going to let errors in the event handler

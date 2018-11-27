@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import {
-    CreateNoDashGuid,
+    createNoDashGuid,
     Deferred,
     Events,
     IAudioStreamNode,
@@ -20,130 +21,128 @@ import {
 import { ServiceTelemetryListener } from "./ServiceTelemetryListener.Internal";
 
 export class RequestSession {
-    private isDisposed: boolean = false;
-    private serviceTelemetryListener: ServiceTelemetryListener;
-    private detachables: IDetachable[] = new Array<IDetachable>();
-    private requestId: string;
-    private audioSourceId: string;
-    private audioNodeId: string;
-    private audioNode: IAudioStreamNode;
-    private authFetchEventId: string;
-    private serviceTag: string;
-    private isAudioNodeDetached: boolean = false;
-    private isCompleted: boolean = false;
+    private privIsDisposed: boolean = false;
+    private privServiceTelemetryListener: ServiceTelemetryListener;
+    private privDetachables: IDetachable[] = new Array<IDetachable>();
+    private privRequestId: string;
+    private privAudioSourceId: string;
+    private privAudioNodeId: string;
+    private privAudioNode: IAudioStreamNode;
+    private privAuthFetchEventId: string;
+    private privIsAudioNodeDetached: boolean = false;
+    private privIsCompleted: boolean = false;
+    private privRequestCompletionDeferral: Deferred<boolean>;
 
-    private requestCompletionDeferral: Deferred<boolean>;
-
-    protected sessionId: string;
+    protected privSessionId: string;
 
     constructor(audioSourceId: string) {
-        this.audioSourceId = audioSourceId;
-        this.requestId = CreateNoDashGuid();
-        this.audioNodeId = CreateNoDashGuid();
-        this.requestCompletionDeferral = new Deferred<boolean>();
+        this.privAudioSourceId = audioSourceId;
+        this.privRequestId = createNoDashGuid();
+        this.privAudioNodeId = createNoDashGuid();
+        this.privRequestCompletionDeferral = new Deferred<boolean>();
 
-        this.serviceTelemetryListener = new ServiceTelemetryListener(this.requestId, this.audioSourceId, this.audioNodeId);
+        this.privServiceTelemetryListener = new ServiceTelemetryListener(this.privRequestId, this.privAudioSourceId, this.privAudioNodeId);
 
-        this.OnEvent(new RecognitionTriggeredEvent(this.RequestId, this.sessionId, this.audioSourceId, this.audioNodeId));
+        this.onEvent(new RecognitionTriggeredEvent(this.requestId, this.privSessionId, this.privAudioSourceId, this.privAudioNodeId));
     }
 
-    public get SessionId(): string {
-        return this.sessionId;
+    public get sessionId(): string {
+        return this.privSessionId;
     }
 
-    public get RequestId(): string {
-        return this.requestId;
+    public get requestId(): string {
+        return this.privRequestId;
     }
 
-    public get AudioNodeId(): string {
-        return this.audioNodeId;
+    public get audioNodeId(): string {
+        return this.privAudioNodeId;
     }
 
-    public get CompletionPromise(): Promise<boolean> {
-        return this.requestCompletionDeferral.Promise();
+    public get completionPromise(): Promise<boolean> {
+        return this.privRequestCompletionDeferral.promise();
     }
 
-    public get IsSpeechEnded(): boolean {
-        return this.isAudioNodeDetached;
+    public get isSpeechEnded(): boolean {
+        return this.privIsAudioNodeDetached;
     }
 
-    public get IsCompleted(): boolean {
-        return this.isCompleted;
+    public get isCompleted(): boolean {
+        return this.privIsCompleted;
     }
 
-    public ListenForServiceTelemetry(eventSource: IEventSource<PlatformEvent>): void {
-        this.detachables.push(eventSource.AttachListener(this.serviceTelemetryListener));
+    public listenForServiceTelemetry(eventSource: IEventSource<PlatformEvent>): void {
+        this.privDetachables.push(eventSource.attachListener(this.privServiceTelemetryListener));
     }
 
-    public OnAudioSourceAttachCompleted = (audioNode: IAudioStreamNode, isError: boolean, error?: string): void => {
-        this.audioNode = audioNode;
+    public onAudioSourceAttachCompleted = (audioNode: IAudioStreamNode, isError: boolean, error?: string): void => {
+        this.privAudioNode = audioNode;
         if (isError) {
-            this.OnComplete();
+            this.onComplete();
         } else {
-            this.OnEvent(new ListeningStartedEvent(this.requestId, this.sessionId, this.audioSourceId, this.audioNodeId));
+            this.onEvent(new ListeningStartedEvent(this.privRequestId, this.privSessionId, this.privAudioSourceId, this.privAudioNodeId));
         }
     }
 
-    public OnPreConnectionStart = (authFetchEventId: string, connectionId: string): void => {
-        this.authFetchEventId = authFetchEventId;
-        this.sessionId = connectionId;
-        this.OnEvent(new ConnectingToServiceEvent(this.requestId, this.authFetchEventId, this.sessionId));
+    public onPreConnectionStart = (authFetchEventId: string, connectionId: string): void => {
+        this.privAuthFetchEventId = authFetchEventId;
+        this.privSessionId = connectionId;
+        this.onEvent(new ConnectingToServiceEvent(this.privRequestId, this.privAuthFetchEventId, this.privSessionId));
     }
 
-    public OnAuthCompleted = (isError: boolean, error?: string): void => {
+    public onAuthCompleted = (isError: boolean, error?: string): void => {
         if (isError) {
-            this.OnComplete();
+            this.onComplete();
         }
     }
 
-    public OnConnectionEstablishCompleted = (statusCode: number, reason?: string): void => {
+    public onConnectionEstablishCompleted = (statusCode: number, reason?: string): void => {
         if (statusCode === 200) {
-            this.OnEvent(new RecognitionStartedEvent(this.RequestId, this.audioSourceId, this.audioNodeId, this.authFetchEventId, this.sessionId));
+            this.onEvent(new RecognitionStartedEvent(this.requestId, this.privAudioSourceId, this.privAudioNodeId, this.privAuthFetchEventId, this.privSessionId));
             return;
         } else if (statusCode === 403) {
-            this.OnComplete();
+            this.onComplete();
         } else {
-            this.OnComplete();
+            this.onComplete();
         }
     }
 
-    public OnServiceTurnEndResponse = (): void => {
-        this.OnComplete();
+    public onServiceTurnEndResponse = (): void => {
+        this.onComplete();
     }
 
-    public Dispose = (error?: string): void => {
-        if (!this.isDisposed) {
+    public dispose = (error?: string): void => {
+        if (!this.privIsDisposed) {
             // we should have completed by now. If we did not its an unknown error.
-            this.isDisposed = true;
-            for (const detachable of this.detachables) {
-                detachable.Detach();
+            this.privIsDisposed = true;
+            for (const detachable of this.privDetachables) {
+                detachable.detach();
             }
 
-            this.serviceTelemetryListener.Dispose();
+            this.privServiceTelemetryListener.dispose();
         }
     }
 
-    public GetTelemetry = (): string => {
-        return this.serviceTelemetryListener.GetTelemetry();
+    public getTelemetry = (): string => {
+        return this.privServiceTelemetryListener.getTelemetry();
     }
 
-    protected OnEvent = (event: SpeechRecognitionEvent): void => {
-        this.serviceTelemetryListener.OnEvent(event);
-        Events.Instance.OnEvent(event);
+    protected onEvent = (event: SpeechRecognitionEvent): void => {
+        this.privServiceTelemetryListener.onEvent(event);
+        Events.instance.onEvent(event);
     }
 
-    private OnComplete = (): void => {
-        if (!this.isCompleted) {
-            this.isCompleted = true;
-            this.DetachAudioNode();
+    private onComplete = (): void => {
+        if (!this.privIsCompleted) {
+            this.privIsCompleted = true;
+            this.detachAudioNode();
         }
     }
 
-    private DetachAudioNode = (): void => {
-        if (!this.isAudioNodeDetached) {
-            this.isAudioNodeDetached = true;
-            if (this.audioNode) {
-                this.audioNode.Detach();
+    private detachAudioNode = (): void => {
+        if (!this.privIsAudioNodeDetached) {
+            this.privIsAudioNodeDetached = true;
+            if (this.privAudioNode) {
+                this.privAudioNode.detach();
             }
         }
     }

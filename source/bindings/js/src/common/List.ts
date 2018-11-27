@@ -1,268 +1,269 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { ObjectDisposedError } from "./Error";
 import { IDetachable } from "./IDetachable";
 import { IStringDictionary } from "./IDictionary";
 import { IDisposable } from "./IDisposable";
 
 export interface IList<TItem> extends IDisposable {
-    Get(itemIndex: number): TItem;
-    First(): TItem;
-    Last(): TItem;
+    get(itemIndex: number): TItem;
+    first(): TItem;
+    last(): TItem;
 
-    Add(item: TItem): void;
-    InsertAt(index: number, item: TItem): void;
+    add(item: TItem): void;
+    insertAt(index: number, item: TItem): void;
 
-    RemoveFirst(): TItem;
-    RemoveLast(): TItem;
-    RemoveAt(index: number): TItem;
-    Remove(index: number, count: number): TItem[];
-    Clear(): void;
+    removeFirst(): TItem;
+    removeLast(): TItem;
+    removeAt(index: number): TItem;
+    remove(index: number, count: number): TItem[];
+    clear(): void;
 
-    Length(): number;
+    length(): number;
 
-    OnAdded(addedCallback: () => void): IDetachable;
-    OnRemoved(removedCallback: () => void): IDetachable;
-    OnDisposed(disposedCallback: () => void): IDetachable;
+    onAdded(addedCallback: () => void): IDetachable;
+    onRemoved(removedCallback: () => void): IDetachable;
+    onDisposed(disposedCallback: () => void): IDetachable;
 
-    Join(seperator?: string): string;
+    join(seperator?: string): string;
 
-    ToArray(): TItem[];
+    toArray(): TItem[];
 
-    Any(callback?: (item: TItem, index: number) => boolean): boolean;
-    All(callback: (item: TItem) => boolean): boolean;
-    ForEach(callback: (item: TItem, index: number) => void): void;
-    Select<T2>(callback: (item: TItem, index: number) => T2): List<T2>;
-    Where(callback: (item: TItem, index: number) => boolean): List<TItem>;
-    OrderBy(compareFn: (a: TItem, b: TItem) => number): List<TItem>;
-    OrderByDesc(compareFn: (a: TItem, b: TItem) => number): List<TItem>;
-    Clone(): List<TItem>;
-    Concat(list: List<TItem>): List<TItem>;
-    ConcatArray(array: TItem[]): List<TItem>;
+    any(callback?: (item: TItem, index: number) => boolean): boolean;
+    all(callback: (item: TItem) => boolean): boolean;
+    forEach(callback: (item: TItem, index: number) => void): void;
+    select<T2>(callback: (item: TItem, index: number) => T2): List<T2>;
+    where(callback: (item: TItem, index: number) => boolean): List<TItem>;
+    orderBy(compareFn: (a: TItem, b: TItem) => number): List<TItem>;
+    orderByDesc(compareFn: (a: TItem, b: TItem) => number): List<TItem>;
+    clone(): List<TItem>;
+    concat(list: List<TItem>): List<TItem>;
+    concatArray(array: TItem[]): List<TItem>;
 }
 
 export class List<TItem> implements IList<TItem>  {
-    private list: TItem[];
-    private subscriptionIdCounter: number = 0;
-    private addSubscriptions: IStringDictionary<() => void> = {};
-    private removeSubscriptions: IStringDictionary<() => void> = {};
-    private disposedSubscriptions: IStringDictionary<() => void> = {};
-    private disposeReason: string = null;
+    private privList: TItem[];
+    private privSubscriptionIdCounter: number = 0;
+    private privAddSubscriptions: IStringDictionary<() => void> = {};
+    private privRemoveSubscriptions: IStringDictionary<() => void> = {};
+    private privDisposedSubscriptions: IStringDictionary<() => void> = {};
+    private privDisposeReason: string = null;
 
     public constructor(list?: TItem[]) {
-        this.list = [];
+        this.privList = [];
         // copy the list rather than taking as is.
         if (list) {
             for (const item of list) {
-                this.list.push(item);
+                this.privList.push(item);
             }
         }
     }
 
-    public Get = (itemIndex: number): TItem => {
-        this.ThrowIfDisposed();
-        return this.list[itemIndex];
+    public get = (itemIndex: number): TItem => {
+        this.throwIfDisposed();
+        return this.privList[itemIndex];
     }
 
-    public First = (): TItem => {
-        return this.Get(0);
+    public first = (): TItem => {
+        return this.get(0);
     }
 
-    public Last = (): TItem => {
-        return this.Get(this.Length() - 1);
+    public last = (): TItem => {
+        return this.get(this.length() - 1);
     }
 
-    public Add = (item: TItem): void => {
-        this.ThrowIfDisposed();
-        this.InsertAt(this.list.length, item);
+    public add = (item: TItem): void => {
+        this.throwIfDisposed();
+        this.insertAt(this.privList.length, item);
     }
 
-    public InsertAt = (index: number, item: TItem): void => {
-        this.ThrowIfDisposed();
+    public insertAt = (index: number, item: TItem): void => {
+        this.throwIfDisposed();
         if (index === 0) {
-            this.list.unshift(item);
-        } else if (index === this.list.length) {
-            this.list.push(item);
+            this.privList.unshift(item);
+        } else if (index === this.privList.length) {
+            this.privList.push(item);
         } else {
-            this.list.splice(index, 0, item);
+            this.privList.splice(index, 0, item);
         }
-        this.TriggerSubscriptions(this.addSubscriptions);
+        this.triggerSubscriptions(this.privAddSubscriptions);
     }
 
-    public RemoveFirst = (): TItem => {
-        this.ThrowIfDisposed();
-        return this.RemoveAt(0);
+    public removeFirst = (): TItem => {
+        this.throwIfDisposed();
+        return this.removeAt(0);
     }
 
-    public RemoveLast = (): TItem => {
-        this.ThrowIfDisposed();
-        return this.RemoveAt(this.Length() - 1);
+    public removeLast = (): TItem => {
+        this.throwIfDisposed();
+        return this.removeAt(this.length() - 1);
     }
 
-    public RemoveAt = (index: number): TItem => {
-        this.ThrowIfDisposed();
-        return this.Remove(index, 1)[0];
+    public removeAt = (index: number): TItem => {
+        this.throwIfDisposed();
+        return this.remove(index, 1)[0];
     }
 
-    public Remove = (index: number, count: number): TItem[] => {
-        this.ThrowIfDisposed();
-        const removedElements = this.list.splice(index, count);
-        this.TriggerSubscriptions(this.removeSubscriptions);
+    public remove = (index: number, count: number): TItem[] => {
+        this.throwIfDisposed();
+        const removedElements = this.privList.splice(index, count);
+        this.triggerSubscriptions(this.privRemoveSubscriptions);
         return removedElements;
     }
 
-    public Clear = (): void => {
-        this.ThrowIfDisposed();
-        this.Remove(0, this.Length());
+    public clear = (): void => {
+        this.throwIfDisposed();
+        this.remove(0, this.length());
     }
 
-    public Length = (): number => {
-        this.ThrowIfDisposed();
-        return this.list.length;
+    public length = (): number => {
+        this.throwIfDisposed();
+        return this.privList.length;
     }
 
-    public OnAdded = (addedCallback: () => void): IDetachable => {
-        this.ThrowIfDisposed();
-        const subscriptionId = this.subscriptionIdCounter++;
+    public onAdded = (addedCallback: () => void): IDetachable => {
+        this.throwIfDisposed();
+        const subscriptionId = this.privSubscriptionIdCounter++;
 
-        this.addSubscriptions[subscriptionId] = addedCallback;
+        this.privAddSubscriptions[subscriptionId] = addedCallback;
 
         return {
-            Detach: () => {
-                delete this.addSubscriptions[subscriptionId];
+            detach: () => {
+                delete this.privAddSubscriptions[subscriptionId];
             },
         };
     }
 
-    public OnRemoved = (removedCallback: () => void): IDetachable => {
-        this.ThrowIfDisposed();
-        const subscriptionId = this.subscriptionIdCounter++;
+    public onRemoved = (removedCallback: () => void): IDetachable => {
+        this.throwIfDisposed();
+        const subscriptionId = this.privSubscriptionIdCounter++;
 
-        this.removeSubscriptions[subscriptionId] = removedCallback;
+        this.privRemoveSubscriptions[subscriptionId] = removedCallback;
 
         return {
-            Detach: () => {
-                delete this.removeSubscriptions[subscriptionId];
+            detach: () => {
+                delete this.privRemoveSubscriptions[subscriptionId];
             },
         };
     }
 
-    public OnDisposed = (disposedCallback: () => void): IDetachable => {
-        this.ThrowIfDisposed();
-        const subscriptionId = this.subscriptionIdCounter++;
+    public onDisposed = (disposedCallback: () => void): IDetachable => {
+        this.throwIfDisposed();
+        const subscriptionId = this.privSubscriptionIdCounter++;
 
-        this.disposedSubscriptions[subscriptionId] = disposedCallback;
+        this.privDisposedSubscriptions[subscriptionId] = disposedCallback;
 
         return {
-            Detach: () => {
-                delete this.disposedSubscriptions[subscriptionId];
+            detach: () => {
+                delete this.privDisposedSubscriptions[subscriptionId];
             },
         };
     }
 
-    public Join = (seperator?: string): string => {
-        this.ThrowIfDisposed();
-        return this.list.join(seperator);
+    public join = (seperator?: string): string => {
+        this.throwIfDisposed();
+        return this.privList.join(seperator);
     }
 
-    public ToArray = (): TItem[] => {
+    public toArray = (): TItem[] => {
         const cloneCopy = Array<TItem>();
-        this.list.forEach((val: TItem) => {
+        this.privList.forEach((val: TItem) => {
             cloneCopy.push(val);
         });
         return cloneCopy;
     }
 
-    public Any = (callback?: (item: TItem, index: number) => boolean): boolean => {
-        this.ThrowIfDisposed();
+    public any = (callback?: (item: TItem, index: number) => boolean): boolean => {
+        this.throwIfDisposed();
         if (callback) {
-            return this.Where(callback).Length() > 0;
+            return this.where(callback).length() > 0;
         } else {
-            return this.Length() > 0;
+            return this.length() > 0;
         }
     }
 
-    public All = (callback: (item: TItem) => boolean): boolean => {
-        this.ThrowIfDisposed();
-        return this.Where(callback).Length() === this.Length();
+    public all = (callback: (item: TItem) => boolean): boolean => {
+        this.throwIfDisposed();
+        return this.where(callback).length() === this.length();
     }
 
-    public ForEach = (callback: (item: TItem, index: number) => void): void => {
-        this.ThrowIfDisposed();
-        for (let i = 0; i < this.Length(); i++) {
-            callback(this.list[i], i);
+    public forEach = (callback: (item: TItem, index: number) => void): void => {
+        this.throwIfDisposed();
+        for (let i = 0; i < this.length(); i++) {
+            callback(this.privList[i], i);
         }
     }
 
-    public Select = <T2>(callback: (item: TItem, index: number) => T2): List<T2> => {
-        this.ThrowIfDisposed();
+    public select = <T2>(callback: (item: TItem, index: number) => T2): List<T2> => {
+        this.throwIfDisposed();
         const selectList: T2[] = [];
-        for (let i = 0; i < this.list.length; i++) {
-            selectList.push(callback(this.list[i], i));
+        for (let i = 0; i < this.privList.length; i++) {
+            selectList.push(callback(this.privList[i], i));
         }
 
         return new List<T2>(selectList);
     }
 
-    public Where = (callback: (item: TItem, index: number) => boolean): List<TItem> => {
-        this.ThrowIfDisposed();
+    public where = (callback: (item: TItem, index: number) => boolean): List<TItem> => {
+        this.throwIfDisposed();
         const filteredList = new List<TItem>();
-        for (let i = 0; i < this.list.length; i++) {
-            if (callback(this.list[i], i)) {
-                filteredList.Add(this.list[i]);
+        for (let i = 0; i < this.privList.length; i++) {
+            if (callback(this.privList[i], i)) {
+                filteredList.add(this.privList[i]);
             }
         }
         return filteredList;
     }
 
-    public OrderBy = (compareFn: (a: TItem, b: TItem) => number): List<TItem> => {
-        this.ThrowIfDisposed();
-        const clonedArray = this.ToArray();
+    public orderBy = (compareFn: (a: TItem, b: TItem) => number): List<TItem> => {
+        this.throwIfDisposed();
+        const clonedArray = this.toArray();
         const orderedArray = clonedArray.sort(compareFn);
         return new List(orderedArray);
     }
 
-    public OrderByDesc = (compareFn: (a: TItem, b: TItem) => number): List<TItem> => {
-        this.ThrowIfDisposed();
-        return this.OrderBy((a: TItem, b: TItem) => compareFn(b, a));
+    public orderByDesc = (compareFn: (a: TItem, b: TItem) => number): List<TItem> => {
+        this.throwIfDisposed();
+        return this.orderBy((a: TItem, b: TItem) => compareFn(b, a));
     }
 
-    public Clone = (): List<TItem> => {
-        this.ThrowIfDisposed();
-        return new List<TItem>(this.ToArray());
+    public clone = (): List<TItem> => {
+        this.throwIfDisposed();
+        return new List<TItem>(this.toArray());
     }
 
-    public Concat = (list: List<TItem>): List<TItem> => {
-        this.ThrowIfDisposed();
-        return new List<TItem>(this.list.concat(list.ToArray()));
+    public concat = (list: List<TItem>): List<TItem> => {
+        this.throwIfDisposed();
+        return new List<TItem>(this.privList.concat(list.toArray()));
     }
 
-    public ConcatArray = (array: TItem[]): List<TItem> => {
-        this.ThrowIfDisposed();
-        return new List<TItem>(this.list.concat(array));
+    public concatArray = (array: TItem[]): List<TItem> => {
+        this.throwIfDisposed();
+        return new List<TItem>(this.privList.concat(array));
     }
 
-    public IsDisposed = (): boolean => {
-        return this.list == null;
+    public isDisposed = (): boolean => {
+        return this.privList == null;
     }
 
-    public Dispose = (reason?: string): void => {
-        if (!this.IsDisposed()) {
-            this.disposeReason = reason;
-            this.list = null;
-            this.addSubscriptions = null;
-            this.removeSubscriptions = null;
-            this.TriggerSubscriptions(this.disposedSubscriptions);
+    public dispose = (reason?: string): void => {
+        if (!this.isDisposed()) {
+            this.privDisposeReason = reason;
+            this.privList = null;
+            this.privAddSubscriptions = null;
+            this.privRemoveSubscriptions = null;
+            this.triggerSubscriptions(this.privDisposedSubscriptions);
         }
     }
 
-    private ThrowIfDisposed = (): void => {
-        if (this.IsDisposed()) {
-            throw new ObjectDisposedError("List", this.disposeReason);
+    private throwIfDisposed = (): void => {
+        if (this.isDisposed()) {
+            throw new ObjectDisposedError("List", this.privDisposeReason);
         }
     }
 
-    private TriggerSubscriptions = (subscriptions: IStringDictionary<() => void>): void => {
+    private triggerSubscriptions = (subscriptions: IStringDictionary<() => void>): void => {
         if (subscriptions) {
             for (const subscriptionId in subscriptions) {
                 if (subscriptionId) {

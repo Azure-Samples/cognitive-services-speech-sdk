@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { ArgumentNullError, IKeyValueStorage } from "../common/Exports";
 
 export class SessionStorage implements IKeyValueStorage {
 
-    public Get = (key: string): string => {
+    public get = (key: string): string => {
         if (!key) {
             throw new ArgumentNullError("key");
         }
@@ -12,7 +13,7 @@ export class SessionStorage implements IKeyValueStorage {
         return sessionStorage.getItem(key);
     }
 
-    public GetOrAdd = (key: string, valueToAdd: string): string => {
+    public getOrAdd = (key: string, valueToAdd: string): string => {
         if (!key) {
             throw new ArgumentNullError("key");
         }
@@ -25,7 +26,7 @@ export class SessionStorage implements IKeyValueStorage {
         return sessionStorage.getItem(key);
     }
 
-    public Set = (key: string, value: string): void => {
+    public set = (key: string, value: string): void => {
         if (!key) {
             throw new ArgumentNullError("key");
         }
@@ -33,7 +34,7 @@ export class SessionStorage implements IKeyValueStorage {
         sessionStorage.setItem(key, value);
     }
 
-    public Remove = (key: string): void => {
+    public remove = (key: string): void => {
         if (!key) {
             throw new ArgumentNullError("key");
         }

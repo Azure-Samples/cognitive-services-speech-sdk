@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 /**
  * Defines the possible reasons a recognition result might be canceled.
  * @class CancellationReason

@@ -10,22 +10,22 @@ export interface ITranslationSynthesisEnd {
 }
 
 export class TranslationSynthesisEnd implements ITranslationSynthesisEnd {
-    private obj: ITranslationSynthesisEnd;
+    private privSynthesisEnd: ITranslationSynthesisEnd;
 
     private constructor(json: string) {
-        this.obj = JSON.parse(json);
-        this.obj.SynthesisStatus = (SynthesisStatus as any)[this.obj.SynthesisStatus];
+        this.privSynthesisEnd = JSON.parse(json);
+        this.privSynthesisEnd.SynthesisStatus = (SynthesisStatus as any)[this.privSynthesisEnd.SynthesisStatus];
     }
 
-    public static FromJSON(json: string): TranslationSynthesisEnd {
+    public static fromJSON(json: string): TranslationSynthesisEnd {
         return new TranslationSynthesisEnd(json);
     }
 
     public get SynthesisStatus(): SynthesisStatus {
-        return this.obj.SynthesisStatus;
+        return this.privSynthesisEnd.SynthesisStatus;
     }
 
     public get FailureReason(): string {
-        return this.obj.FailureReason;
+        return this.privSynthesisEnd.FailureReason;
     }
 }

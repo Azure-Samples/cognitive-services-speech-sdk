@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { InvalidOperationError } from "./Error";
-import { CreateNoDashGuid } from "./Guid";
+import { createNoDashGuid } from "./Guid";
 import { IStringDictionary } from "./IDictionary";
 
 export enum MessageType {
@@ -11,11 +12,11 @@ export enum MessageType {
 
 export class ConnectionMessage {
 
-    private messageType: MessageType;
-    private headers: IStringDictionary<string>;
-    private body: any = null;
+    private privMessageType: MessageType;
+    private privHeaders: IStringDictionary<string>;
+    private privBody: any = null;
 
-    private id: string;
+    private privId: string;
 
     public constructor(
         messageType: MessageType,
@@ -31,41 +32,41 @@ export class ConnectionMessage {
             throw new InvalidOperationError("Payload must be ArrayBuffer");
         }
 
-        this.messageType = messageType;
-        this.body = body;
-        this.headers = headers ? headers : {};
-        this.id = id ? id : CreateNoDashGuid();
+        this.privMessageType = messageType;
+        this.privBody = body;
+        this.privHeaders = headers ? headers : {};
+        this.privId = id ? id : createNoDashGuid();
     }
 
-    public get MessageType(): MessageType {
-        return this.messageType;
+    public get messageType(): MessageType {
+        return this.privMessageType;
     }
 
-    public get Headers(): any {
-        return this.headers;
+    public get headers(): any {
+        return this.privHeaders;
     }
 
-    public get Body(): any {
-        return this.body;
+    public get body(): any {
+        return this.privBody;
     }
 
-    public get TextBody(): string {
-        if (this.messageType === MessageType.Binary) {
+    public get textBody(): string {
+        if (this.privMessageType === MessageType.Binary) {
             throw new InvalidOperationError("Not supported for binary message");
         }
 
-        return this.body as string;
+        return this.privBody as string;
     }
 
-    public get BinaryBody(): ArrayBuffer {
-        if (this.messageType === MessageType.Text) {
+    public get binaryBody(): ArrayBuffer {
+        if (this.privMessageType === MessageType.Text) {
             throw new InvalidOperationError("Not supported for text message");
         }
 
-        return this.body;
+        return this.privBody;
     }
 
-    public get Id(): string {
-        return this.id;
+    public get id(): string {
+        return this.privId;
     }
 }

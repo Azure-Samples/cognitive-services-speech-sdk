@@ -1,48 +1,49 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { ArgumentNullError } from "./Error";
 import { IStringDictionary } from "./IDictionary";
 import { IKeyValueStorage } from "./IKeyValueStorage";
 
 export class InMemoryStorage implements IKeyValueStorage {
 
-    private store: IStringDictionary<string> = {};
+    private privStore: IStringDictionary<string> = {};
 
-    public Get = (key: string): string => {
+    public get = (key: string): string => {
         if (!key) {
             throw new ArgumentNullError("key");
         }
 
-        return this.store[key];
+        return this.privStore[key];
     }
 
-    public GetOrAdd = (key: string, valueToAdd: string): string => {
+    public getOrAdd = (key: string, valueToAdd: string): string => {
         if (!key) {
             throw new ArgumentNullError("key");
         }
 
-        if (this.store[key] === undefined) {
-            this.store[key] = valueToAdd;
+        if (this.privStore[key] === undefined) {
+            this.privStore[key] = valueToAdd;
         }
 
-        return this.store[key];
+        return this.privStore[key];
     }
 
-    public Set = (key: string, value: string): void => {
+    public set = (key: string, value: string): void => {
         if (!key) {
             throw new ArgumentNullError("key");
         }
 
-        this.store[key] = value;
+        this.privStore[key] = value;
     }
 
-    public Remove = (key: string): void => {
+    public remove = (key: string): void => {
         if (!key) {
             throw new ArgumentNullError("key");
         }
 
-        if (this.store[key] !== undefined) {
-            delete this.store[key];
+        if (this.privStore[key] !== undefined) {
+            delete this.privStore[key];
         }
     }
 }

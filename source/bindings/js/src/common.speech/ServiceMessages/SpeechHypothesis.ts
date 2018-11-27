@@ -9,21 +9,25 @@ export interface ISpeechHypothesis {
 }
 
 export class SpeechHypothesis implements ISpeechHypothesis {
-    private speechHypothesis: ISpeechHypothesis;
+    private privSpeechHypothesis: ISpeechHypothesis;
+
     private constructor(json: string) {
-        this.speechHypothesis = JSON.parse(json);
+        this.privSpeechHypothesis = JSON.parse(json);
     }
 
-    public static FromJSON(json: string): SpeechHypothesis {
+    public static fromJSON(json: string): SpeechHypothesis {
         return new SpeechHypothesis(json);
     }
+
     public get Text(): string {
-        return this.speechHypothesis.Text;
+        return this.privSpeechHypothesis.Text;
     }
+
     public get Offset(): number {
-        return this.speechHypothesis.Offset;
+        return this.privSpeechHypothesis.Offset;
     }
+
     public get Duration(): number {
-        return this.speechHypothesis.Duration;
+        return this.privSpeechHypothesis.Duration;
     }
 }

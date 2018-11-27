@@ -7,13 +7,15 @@
  */
 export enum ResultReason {
     /**
-     * Indicates speech could not be recognized. More details can be found in the NoMatchDetails object.
+     * Indicates speech could not be recognized. More details
+     * can be found in the NoMatchDetails object.
      * @member ResultReason.NoMatch
      */
     NoMatch,
 
     /**
-     * Indicates that the recognition was canceled. More details can be found using the CancellationDetails object.
+     * Indicates that the recognition was canceled. More details
+     * can be found using the CancellationDetails object.
      * @member ResultReason.Canceled
      */
     Canceled,

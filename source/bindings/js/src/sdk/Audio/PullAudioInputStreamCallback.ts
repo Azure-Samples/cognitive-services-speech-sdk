@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
  /**
-  * An abstract base class that defines callback methods (read() and close()) for custom audio input streams).
+  * An abstract base class that defines callback methods (read() and close()) for
+  * custom audio input streams).
   * @class PullAudioInputStreamCallback
   */
 export abstract class PullAudioInputStreamCallback {
 
     /**
-     * Reads data from audio input stream into the data buffer. The maximal number of bytes to be read is determined by the size of dataBuffer.
+     * Reads data from audio input stream into the data buffer. The maximal number of bytes
+     * to be read is determined by the size of dataBuffer.
      * @member PullAudioInputStreamCallback.prototype.read
      * @function
      * @public

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import { ArgumentNullError } from "../common/Error";
+
 import { Contracts } from "./Contracts";
 
 /**
@@ -75,13 +75,17 @@ export class LanguageUnderstandingModel {
     }
 
     /**
-     * Creates a language understanding model using hostname, subscription key and application id of Language Understanding service.
+     * Creates a language understanding model using hostname, subscription key and application
+     * id of Language Understanding service.
      * @member LanguageUnderstandingModel.fromSubscription
      * @function
      * @public
-     * @param {string} subscriptionKey - A String that represents the subscription key of Language Understanding service.
-     * @param {string} appId - A String that represents the application id of Language Understanding service.
-     * @param {LanguageUnderstandingModel} region - A String that represents the region of the Language Understanding service (see the <a href="https://aka.ms/csspeech/region">region page</a>).
+     * @param {string} subscriptionKey - A String that represents the subscription key of
+     *        Language Understanding service.
+     * @param {string} appId - A String that represents the application id of Language
+     *        Understanding service.
+     * @param {LanguageUnderstandingModel} region - A String that represents the region
+     *        of the Language Understanding service (see the <a href="https://aka.ms/csspeech/region">region page</a>).
      * @returns {LanguageUnderstandingModel} The language understanding model being created.
      */
     public static fromSubscription(subscriptionKey: string, appId: string, region: string): LanguageUnderstandingModel {

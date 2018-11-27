@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 export interface IStringDictionary<TValue> {
     [propName: string]: TValue;
 }

@@ -7,16 +7,17 @@ export interface ISpeechDetected {
 }
 
 export class SpeechDetected implements ISpeechDetected {
-    private speechStartDetected: ISpeechDetected;
+    private privSpeechStartDetected: ISpeechDetected;
+
     private constructor(json: string) {
-        this.speechStartDetected = JSON.parse(json);
+        this.privSpeechStartDetected = JSON.parse(json);
     }
 
-    public static FromJSON(json: string): SpeechDetected {
+    public static fromJSON(json: string): SpeechDetected {
         return new SpeechDetected(json);
     }
 
     public get Offset(): number {
-        return this.speechStartDetected.Offset;
+        return this.privSpeechStartDetected.Offset;
     }
 }

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import {
     IAuthentication,
     IConnectionFactory,
@@ -29,7 +30,7 @@ import { SpeechTranslationConfig, SpeechTranslationConfigImpl } from "./SpeechTr
  * @class TranslationRecognizer
  */
 export class TranslationRecognizer extends Recognizer {
-    private disposedTranslationRecognizer: boolean;
+    private privDisposedTranslationRecognizer: boolean;
     private privProperties: PropertyCollection;
 
     /**
@@ -44,15 +45,22 @@ export class TranslationRecognizer extends Recognizer {
 
         super(audioConfig);
 
-        this.disposedTranslationRecognizer = false;
+        this.privDisposedTranslationRecognizer = false;
         this.privProperties = configImpl.properties.clone();
 
         if (this.properties.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice, undefined) !== undefined) {
-            Contracts.throwIfNullOrWhitespace(this.properties.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice), PropertyId[PropertyId.SpeechServiceConnection_TranslationVoice]);
+            Contracts.throwIfNullOrWhitespace(
+                this.properties.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice),
+                 PropertyId[PropertyId.SpeechServiceConnection_TranslationVoice]);
         }
 
-        Contracts.throwIfNullOrWhitespace(this.properties.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages), PropertyId[PropertyId.SpeechServiceConnection_TranslationToLanguages]);
-        Contracts.throwIfNullOrWhitespace(this.properties.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage), PropertyId[PropertyId.SpeechServiceConnection_RecoLanguage]);
+        Contracts.throwIfNullOrWhitespace(
+            this.properties.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages),
+            PropertyId[PropertyId.SpeechServiceConnection_TranslationToLanguages]);
+
+        Contracts.throwIfNullOrWhitespace(this.properties.getProperty(
+            PropertyId.SpeechServiceConnection_RecoLanguage),
+            PropertyId[PropertyId.SpeechServiceConnection_RecoLanguage]);
     }
 
     /**
@@ -95,7 +103,7 @@ export class TranslationRecognizer extends Recognizer {
      * @returns {string} Gets the language name that was set when the recognizer was created.
      */
     public get speechRecognitionLanguage(): string {
-        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+        Contracts.throwIfDisposed(this.privDisposedTranslationRecognizer);
 
         return this.properties.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
     }
@@ -109,7 +117,7 @@ export class TranslationRecognizer extends Recognizer {
      * @returns {string[]} Gets target languages for translation that were set when the recognizer was created.
      */
     public get targetLanguages(): string[] {
-        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+        Contracts.throwIfDisposed(this.privDisposedTranslationRecognizer);
 
         return this.properties.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages).split(",");
     }
@@ -122,7 +130,7 @@ export class TranslationRecognizer extends Recognizer {
      * @returns {string} the name of output voice.
      */
     public get voiceName(): string {
-        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+        Contracts.throwIfDisposed(this.privDisposedTranslationRecognizer);
 
         return this.properties.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice, undefined);
     }
@@ -161,9 +169,11 @@ export class TranslationRecognizer extends Recognizer {
     }
 
     /**
-     * Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
+     * Starts recognition and translation, and stops after the first utterance is recognized.
+     * The task returns the translation text as result.
      * Note: recognizeOnceAsync returns when the first utterance has been recognized, so it is suitableonly
-     *       for single shot recognition like command or query. For long-running recognition, use startContinuousRecognitionAsync() instead.
+     *       for single shot recognition like command or query. For long-running recognition,
+     *       use startContinuousRecognitionAsync() instead.
      * @member TranslationRecognizer.prototype.recognizeOnceAsync
      * @function
      * @public
@@ -172,18 +182,18 @@ export class TranslationRecognizer extends Recognizer {
      */
     public recognizeOnceAsync(cb?: (e: TranslationRecognitionResult) => void, err?: (e: string) => void): void {
         try {
-            Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+            Contracts.throwIfDisposed(this.privDisposedTranslationRecognizer);
 
             this.implCloseExistingRecognizer();
 
-            this.reco = this.implRecognizerSetup(
+            this.privReco = this.implRecognizerSetup(
                 RecognitionMode.Conversation,
                 this.properties,
                 this.audioConfig,
                 new TranslationConnectionFactory());
 
             this.implRecognizerStart(
-                this.reco,
+                this.privReco,
                 cb,
                 err);
         } catch (error) {
@@ -209,17 +219,17 @@ export class TranslationRecognizer extends Recognizer {
      */
     public startContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
         try {
-            Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+            Contracts.throwIfDisposed(this.privDisposedTranslationRecognizer);
 
             this.implCloseExistingRecognizer();
 
-            this.reco = this.implRecognizerSetup(
+            this.privReco = this.implRecognizerSetup(
                 RecognitionMode.Conversation,
                 this.properties,
                 this.audioConfig,
                 new TranslationConnectionFactory());
 
-            this.implRecognizerStart(this.reco, undefined, undefined);
+            this.implRecognizerStart(this.privReco, undefined, undefined);
 
             // report result to promise.
             if (!!cb) {
@@ -254,7 +264,7 @@ export class TranslationRecognizer extends Recognizer {
      */
     public stopContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
         try {
-            Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+            Contracts.throwIfDisposed(this.privDisposedTranslationRecognizer);
 
             this.implCloseExistingRecognizer();
 
@@ -286,28 +296,29 @@ export class TranslationRecognizer extends Recognizer {
      * @public
      */
     public close(): void {
-        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+        Contracts.throwIfDisposed(this.privDisposedTranslationRecognizer);
 
         this.dispose(true);
     }
 
     protected dispose(disposing: boolean): boolean {
-        if (this.disposedTranslationRecognizer) {
+        if (this.privDisposedTranslationRecognizer) {
             return;
         }
 
         if (disposing) {
             this.implCloseExistingRecognizer();
-            this.disposedTranslationRecognizer = true;
+            this.privDisposedTranslationRecognizer = true;
             super.dispose(disposing);
         }
     }
 
-    protected CreateRecognizerConfig(speechConfig: PlatformConfig, recognitionMode: RecognitionMode): RecognizerConfig {
+    protected createRecognizerConfig(speechConfig: PlatformConfig, recognitionMode: RecognitionMode): RecognizerConfig {
         return new RecognizerConfig(speechConfig, RecognitionMode.Conversation, this.properties);
     }
 
-    protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
+    protected createServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory,
+                                      audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
 
         const configImpl: AudioConfigImpl = audioConfig as AudioConfigImpl;
 
@@ -315,13 +326,13 @@ export class TranslationRecognizer extends Recognizer {
     }
 
     // tslint:disable-next-line:member-ordering
-    private reco: ServiceRecognizerBase;
+    private privReco: ServiceRecognizerBase;
 
     private implCloseExistingRecognizer(): void {
-        if (this.reco) {
-            this.reco.AudioSource.TurnOff();
-            this.reco.Dispose();
-            this.reco = undefined;
+        if (this.privReco) {
+            this.privReco.audioSource.turnOff();
+            this.privReco.dispose();
+            this.privReco = undefined;
         }
     }
 }

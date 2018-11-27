@@ -13,30 +13,30 @@ export interface ITranslationHypothesis {
 }
 
 export class TranslationHypothesis implements ITranslationHypothesis {
-    private translationHypothesis: ITranslationHypothesis;
+    private privTranslationHypothesis: ITranslationHypothesis;
 
     private constructor(json: string) {
-        this.translationHypothesis = JSON.parse(json);
-        this.translationHypothesis.Translation.TranslationStatus = (TranslationStatus as any)[this.translationHypothesis.Translation.TranslationStatus];
+        this.privTranslationHypothesis = JSON.parse(json);
+        this.privTranslationHypothesis.Translation.TranslationStatus = (TranslationStatus as any)[this.privTranslationHypothesis.Translation.TranslationStatus];
     }
 
-    public static FromJSON(json: string): TranslationHypothesis {
+    public static fromJSON(json: string): TranslationHypothesis {
         return new TranslationHypothesis(json);
     }
 
     public get Duration(): number {
-        return this.translationHypothesis.Duration;
+        return this.privTranslationHypothesis.Duration;
     }
 
     public get Offset(): number {
-        return this.translationHypothesis.Offset;
+        return this.privTranslationHypothesis.Offset;
     }
 
     public get Text(): string {
-        return this.translationHypothesis.Text;
+        return this.privTranslationHypothesis.Text;
     }
 
     public get Translation(): ITranslations {
-        return this.translationHypothesis.Translation;
+        return this.privTranslationHypothesis.Translation;
     }
 }

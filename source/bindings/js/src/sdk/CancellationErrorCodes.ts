@@ -22,7 +22,8 @@ export enum CancellationErrorCode {
     BadRequestParameters,
 
     /**
-     * Indicates that the number of parallel requests exceeded the number of allowed concurrent transcriptions for the subscription.
+     * Indicates that the number of parallel requests exceeded the number of allowed
+     * concurrent transcriptions for the subscription.
      */
     TooManyRequests,
 

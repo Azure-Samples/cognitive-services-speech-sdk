@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { AudioStreamFormatImpl } from "../../src/sdk/Audio/AudioStreamFormat";
 import { AudioStreamFormat } from "../../src/sdk/Exports";
 import {
@@ -12,14 +13,13 @@ import {
     AudioStreamNodeAttachingEvent,
     AudioStreamNodeDetachedEvent,
     AudioStreamNodeErrorEvent,
-    CreateNoDashGuid,
+    createNoDashGuid,
     Deferred,
     Events,
     EventSource,
     IAudioSource,
     IAudioStreamNode,
     IStringDictionary,
-    PlatformEvent,
     Promise,
     PromiseHelper,
     Stream,
@@ -38,38 +38,38 @@ export class MicAudioSource implements IAudioSource {
 
     private static readonly AUDIOFORMAT: AudioStreamFormatImpl = AudioStreamFormat.getDefaultInputFormat() as AudioStreamFormatImpl;
 
-    private streams: IStringDictionary<Stream<ArrayBuffer>> = {};
+    private privStreams: IStringDictionary<Stream<ArrayBuffer>> = {};
 
-    private id: string;
+    private privId: string;
 
-    private events: EventSource<AudioSourceEvent>;
+    private privEvents: EventSource<AudioSourceEvent>;
 
-    private initializeDeferral: Deferred<boolean>;
+    private privInitializeDeferral: Deferred<boolean>;
 
-    private recorder: IRecorder;
+    private privRecorder: IRecorder;
 
-    private mediaStream: MediaStream;
+    private privMediaStream: MediaStream;
 
-    private context: AudioContext;
+    private privContext: AudioContext;
 
     public constructor(recorder: IRecorder, audioSourceId?: string) {
-        this.id = audioSourceId ? audioSourceId : CreateNoDashGuid();
-        this.events = new EventSource<AudioSourceEvent>();
-        this.recorder = recorder;
+        this.privId = audioSourceId ? audioSourceId : createNoDashGuid();
+        this.privEvents = new EventSource<AudioSourceEvent>();
+        this.privRecorder = recorder;
     }
 
-    public get Format(): AudioStreamFormat {
+    public get format(): AudioStreamFormat {
         return MicAudioSource.AUDIOFORMAT;
     }
 
-    public TurnOn = (): Promise<boolean> => {
-        if (this.initializeDeferral) {
-            return this.initializeDeferral.Promise();
+    public turnOn = (): Promise<boolean> => {
+        if (this.privInitializeDeferral) {
+            return this.privInitializeDeferral.promise();
         }
 
-        this.initializeDeferral = new Deferred<boolean>();
+        this.privInitializeDeferral = new Deferred<boolean>();
 
-        this.CreateAudioContext();
+        this.createAudioContext();
 
         const nav = window.navigator as INavigatorUserMedia;
 
@@ -91,127 +91,127 @@ export class MicAudioSource implements IAudioSource {
 
         if (!getUserMedia) {
             const errorMsg = "Browser does not support getUserMedia.";
-            this.initializeDeferral.Reject(errorMsg);
-            this.OnEvent(new AudioSourceErrorEvent(errorMsg, "")); // mic initialized error - no streamid at this point
+            this.privInitializeDeferral.reject(errorMsg);
+            this.onEvent(new AudioSourceErrorEvent(errorMsg, "")); // mic initialized error - no streamid at this point
         } else {
             const next = () => {
-                this.OnEvent(new AudioSourceInitializingEvent(this.id)); // no stream id
+                this.onEvent(new AudioSourceInitializingEvent(this.privId)); // no stream id
                 getUserMedia(
                     { audio: true, video: false },
                     (mediaStream: MediaStream) => {
-                        this.mediaStream = mediaStream;
-                        this.OnEvent(new AudioSourceReadyEvent(this.id));
-                        this.initializeDeferral.Resolve(true);
+                        this.privMediaStream = mediaStream;
+                        this.onEvent(new AudioSourceReadyEvent(this.privId));
+                        this.privInitializeDeferral.resolve(true);
                     }, (error: MediaStreamError) => {
                         const errorMsg = `Error occurred during microphone initialization: ${error}`;
-                        const tmp = this.initializeDeferral;
+                        const tmp = this.privInitializeDeferral;
                         // HACK: this should be handled through onError callbacks of all promises up the stack.
                         // Unfortunately, the current implementation does not provide an easy way to reject promises
                         // without a lot of code replication.
                         // TODO: fix promise implementation, allow for a graceful reject chaining.
-                        this.initializeDeferral = null;
-                        tmp.Reject(errorMsg); // this will bubble up through the whole chain of promises,
+                        this.privInitializeDeferral = null;
+                        tmp.reject(errorMsg); // this will bubble up through the whole chain of promises,
                         // with each new level adding extra "Unhandled callback error" prefix to the error message.
                         // The following line is not guaranteed to be executed.
-                        this.OnEvent(new AudioSourceErrorEvent(this.id, errorMsg));
+                        this.onEvent(new AudioSourceErrorEvent(this.privId, errorMsg));
                     });
             };
 
-            if (this.context.state === "suspended") {
+            if (this.privContext.state === "suspended") {
                 // NOTE: On iOS, the Web Audio API requires sounds to be triggered from an explicit user action.
                 // https://github.com/WebAudio/web-audio-api/issues/790
-                this.context.resume().then(next, (reason: any) => {
-                    this.initializeDeferral.Reject(`Failed to initialize audio context: ${reason}`);
+                this.privContext.resume().then(next, (reason: any) => {
+                    this.privInitializeDeferral.reject(`Failed to initialize audio context: ${reason}`);
                 });
             } else {
                 next();
             }
         }
 
-        return this.initializeDeferral.Promise();
+        return this.privInitializeDeferral.promise();
     }
 
-    public Id = (): string => {
-        return this.id;
+    public id = (): string => {
+        return this.privId;
     }
 
-    public Attach = (audioNodeId: string): Promise<IAudioStreamNode> => {
-        this.OnEvent(new AudioStreamNodeAttachingEvent(this.id, audioNodeId));
+    public attach = (audioNodeId: string): Promise<IAudioStreamNode> => {
+        this.onEvent(new AudioStreamNodeAttachingEvent(this.privId, audioNodeId));
 
-        return this.Listen(audioNodeId).OnSuccessContinueWith<IAudioStreamNode>(
+        return this.listen(audioNodeId).onSuccessContinueWith<IAudioStreamNode>(
             (streamReader: StreamReader<ArrayBuffer>) => {
-                this.OnEvent(new AudioStreamNodeAttachedEvent(this.id, audioNodeId));
+                this.onEvent(new AudioStreamNodeAttachedEvent(this.privId, audioNodeId));
                 return {
-                    Detach: () => {
-                        streamReader.Close();
-                        delete this.streams[audioNodeId];
-                        this.OnEvent(new AudioStreamNodeDetachedEvent(this.id, audioNodeId));
-                        this.TurnOff();
+                    detach: () => {
+                        streamReader.close();
+                        delete this.privStreams[audioNodeId];
+                        this.onEvent(new AudioStreamNodeDetachedEvent(this.privId, audioNodeId));
+                        this.turnOff();
                     },
-                    Id: () => {
+                    id: () => {
                         return audioNodeId;
                     },
-                    Read: () => {
-                        return streamReader.Read();
+                    read: () => {
+                        return streamReader.read();
                     },
                 };
             });
     }
 
-    public Detach = (audioNodeId: string): void => {
-        if (audioNodeId && this.streams[audioNodeId]) {
-            this.streams[audioNodeId].Close();
-            delete this.streams[audioNodeId];
-            this.OnEvent(new AudioStreamNodeDetachedEvent(this.id, audioNodeId));
+    public detach = (audioNodeId: string): void => {
+        if (audioNodeId && this.privStreams[audioNodeId]) {
+            this.privStreams[audioNodeId].close();
+            delete this.privStreams[audioNodeId];
+            this.onEvent(new AudioStreamNodeDetachedEvent(this.privId, audioNodeId));
         }
     }
 
-    public TurnOff = (): Promise<boolean> => {
-        for (const streamId in this.streams) {
+    public turnOff = (): Promise<boolean> => {
+        for (const streamId in this.privStreams) {
             if (streamId) {
-                const stream = this.streams[streamId];
+                const stream = this.privStreams[streamId];
                 if (stream) {
-                    stream.Close();
+                    stream.close();
                 }
             }
         }
 
-        this.OnEvent(new AudioSourceOffEvent(this.id)); // no stream now
-        this.initializeDeferral = null;
+        this.onEvent(new AudioSourceOffEvent(this.privId)); // no stream now
+        this.privInitializeDeferral = null;
 
-        this.DestroyAudioContext();
+        this.destroyAudioContext();
 
-        return PromiseHelper.FromResult(true);
+        return PromiseHelper.fromResult(true);
     }
 
-    public get Events(): EventSource<AudioSourceEvent> {
-        return this.events;
+    public get events(): EventSource<AudioSourceEvent> {
+        return this.privEvents;
     }
 
-    private Listen = (audioNodeId: string): Promise<StreamReader<ArrayBuffer>> => {
-        return this.TurnOn()
-            .OnSuccessContinueWith<StreamReader<ArrayBuffer>>((_: boolean) => {
+    private listen = (audioNodeId: string): Promise<StreamReader<ArrayBuffer>> => {
+        return this.turnOn()
+            .onSuccessContinueWith<StreamReader<ArrayBuffer>>((_: boolean) => {
                 const stream = new Stream<ArrayBuffer>(audioNodeId);
-                this.streams[audioNodeId] = stream;
+                this.privStreams[audioNodeId] = stream;
 
                 try {
-                    this.recorder.Record(this.context, this.mediaStream, stream);
+                    this.privRecorder.record(this.privContext, this.privMediaStream, stream);
                 } catch (error) {
-                    this.OnEvent(new AudioStreamNodeErrorEvent(this.id, audioNodeId, error));
+                    this.onEvent(new AudioStreamNodeErrorEvent(this.privId, audioNodeId, error));
                     throw error;
                 }
 
-                return stream.GetReader();
+                return stream.getReader();
             });
     }
 
-    private OnEvent = (event: AudioSourceEvent): void => {
-        this.events.OnEvent(event);
-        Events.Instance.OnEvent(event);
+    private onEvent = (event: AudioSourceEvent): void => {
+        this.privEvents.onEvent(event);
+        Events.instance.onEvent(event);
     }
 
-    private CreateAudioContext = (): void => {
-        if (!!this.context) {
+    private createAudioContext = (): void => {
+        if (!!this.privContext) {
             return;
         }
 
@@ -224,27 +224,27 @@ export class MicAudioSource implements IAudioSource {
             throw new Error("Browser does not support Web Audio API (AudioContext is not available).");
         }
 
-        this.context = new AudioContext();
+        this.privContext = new AudioContext();
     }
 
-    private DestroyAudioContext = (): void => {
-        if (!this.context) {
+    private destroyAudioContext = (): void => {
+        if (!this.privContext) {
             return;
         }
 
-        this.recorder.ReleaseMediaResources(this.context);
+        this.privRecorder.releaseMediaResources(this.privContext);
 
-        if ("close" in this.context) {
-            this.context.close();
-            this.context = null;
-        } else if (this.context.state === "running") {
+        if ("close" in this.privContext) {
+            this.privContext.close();
+            this.privContext = null;
+        } else if (this.privContext.state === "running") {
             // Suspend actually takes a callback, but analogous to the
             // resume method, it'll be only fired if suspend is called
             // in a direct response to a user action. The later is not always
             // the case, as TurnOff is also called, when we receive an
             // end-of-speech message from the service. So, doing a best effort
             // fire-and-forget here.
-            this.context.suspend();
+            this.privContext.suspend();
         }
     }
 }

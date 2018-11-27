@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import {
     IAuthentication,
     IConnectionFactory,
@@ -31,7 +32,7 @@ import { SpeechConfig, SpeechConfigImpl } from "./SpeechConfig";
  * @class SpeechRecognizer
  */
 export class SpeechRecognizer extends Recognizer {
-    private disposedSpeechRecognizer: boolean = false;
+    private privDisposedSpeechRecognizer: boolean = false;
     private privProperties: PropertyCollection;
 
     /**
@@ -47,8 +48,9 @@ export class SpeechRecognizer extends Recognizer {
         Contracts.throwIfNull(speechConfigImpl, "speechConfig");
         this.privProperties = speechConfigImpl.properties.clone();
 
-        Contracts.throwIfNullOrWhitespace(speechConfigImpl.properties.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage), PropertyId[PropertyId.SpeechServiceConnection_RecoLanguage]);
-
+        Contracts.throwIfNullOrWhitespace(
+            speechConfigImpl.properties.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage),
+            PropertyId[PropertyId.SpeechServiceConnection_RecoLanguage]);
     }
 
     /**
@@ -83,7 +85,7 @@ export class SpeechRecognizer extends Recognizer {
      * @returns {string} the endpoint id of a customized speech model that is used for speech recognition.
      */
     public get endpointId(): string {
-        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+        Contracts.throwIfDisposed(this.privDisposedSpeechRecognizer);
 
         return this.properties.getProperty(PropertyId.SpeechServiceConnection_EndpointId, "00000000-0000-0000-0000-000000000000");
     }
@@ -119,7 +121,7 @@ export class SpeechRecognizer extends Recognizer {
      * @returns {string} The spoken language of recognition.
      */
     public get speechRecognitionLanguage(): string {
-        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+        Contracts.throwIfDisposed(this.privDisposedSpeechRecognizer);
 
         return this.properties.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
     }
@@ -132,7 +134,7 @@ export class SpeechRecognizer extends Recognizer {
      * @returns {OutputFormat} The output format of recognition.
      */
     public get outputFormat(): OutputFormat {
-        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+        Contracts.throwIfDisposed(this.privDisposedSpeechRecognizer);
 
         if (this.properties.getProperty(OutputFormatPropertyName, OutputFormat[OutputFormat.Simple]) === OutputFormat[OutputFormat.Simple]) {
             return OutputFormat.Simple;
@@ -153,8 +155,10 @@ export class SpeechRecognizer extends Recognizer {
     }
 
     /**
-     * Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
-     * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition
+     * Starts speech recognition, and stops after the first utterance is recognized.
+     * The task returns the recognition text as result.
+     * Note: RecognizeOnceAsync() returns when the first utterance has been recognized,
+     *       so it is suitable only for single shot recognition
      *       like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
      * @member SpeechRecognizer.prototype.recognizeOnceAsync
      * @function
@@ -164,17 +168,17 @@ export class SpeechRecognizer extends Recognizer {
      */
     public recognizeOnceAsync(cb?: (e: SpeechRecognitionResult) => void, err?: (e: string) => void): void {
         try {
-            Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+            Contracts.throwIfDisposed(this.privDisposedSpeechRecognizer);
 
             this.implCloseExistingRecognizer();
 
-            this.reco = this.implRecognizerSetup(
+            this.privReco = this.implRecognizerSetup(
                 RecognitionMode.Interactive,
                 this.properties,
                 this.audioConfig,
                 new SpeechConnectionFactory());
 
-            this.implRecognizerStart(this.reco, cb, err);
+            this.implRecognizerStart(this.privReco, cb, err);
         } catch (error) {
             if (!!err) {
                 if (error instanceof Error) {
@@ -198,17 +202,17 @@ export class SpeechRecognizer extends Recognizer {
      */
     public startContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
         try {
-            Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+            Contracts.throwIfDisposed(this.privDisposedSpeechRecognizer);
 
             this.implCloseExistingRecognizer();
 
-            this.reco = this.implRecognizerSetup(
+            this.privReco = this.implRecognizerSetup(
                 RecognitionMode.Conversation,
                 this.properties,
                 this.audioConfig,
                 new SpeechConnectionFactory());
 
-            this.implRecognizerStart(this.reco, undefined, undefined);
+            this.implRecognizerStart(this.privReco, undefined, undefined);
 
             // report result to promise.
             if (!!cb) {
@@ -243,7 +247,7 @@ export class SpeechRecognizer extends Recognizer {
      */
     public stopContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
         try {
-            Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+            Contracts.throwIfDisposed(this.privDisposedSpeechRecognizer);
 
             this.implCloseExistingRecognizer();
 
@@ -269,13 +273,16 @@ export class SpeechRecognizer extends Recognizer {
     }
 
     /**
-     * Starts speech recognition with keyword spotting, until stopKeywordRecognitionAsync() is called.
+     * Starts speech recognition with keyword spotting, until
+     * stopKeywordRecognitionAsync() is called.
      * User must subscribe to events to receive recognition results.
-     * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
+     * Note: Key word spotting functionality is only available on the
+     *      Speech Devices SDK. This functionality is currently not included in the SDK itself.
      * @member SpeechRecognizer.prototype.startKeywordRecognitionAsync
      * @function
      * @public
-     * @param {KeywordRecognitionModel} model The keyword recognition model that specifies the keyword to be recognized.
+     * @param {KeywordRecognitionModel} model The keyword recognition model that
+     *        specifies the keyword to be recognized.
      * @param cb - Callback invoked once the recognition has started.
      * @param err - Callback invoked in case of an error.
      */
@@ -289,7 +296,8 @@ export class SpeechRecognizer extends Recognizer {
 
     /**
      * Stops continuous speech recognition.
-     * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
+     * Note: Key word spotting functionality is only available on the
+     *       Speech Devices SDK. This functionality is currently not included in the SDK itself.
      * @member SpeechRecognizer.prototype.stopKeywordRecognitionAsync
      * @function
      * @public
@@ -309,7 +317,7 @@ export class SpeechRecognizer extends Recognizer {
      * @public
      */
     public close(): void {
-        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+        Contracts.throwIfDisposed(this.privDisposedSpeechRecognizer);
 
         this.dispose(true);
     }
@@ -322,38 +330,39 @@ export class SpeechRecognizer extends Recognizer {
      * @param {boolean} disposing - true if disposing the object.
      */
     protected dispose(disposing: boolean): void {
-        if (this.disposedSpeechRecognizer) {
+        if (this.privDisposedSpeechRecognizer) {
             return;
         }
 
         if (disposing) {
             this.implCloseExistingRecognizer();
-            this.disposedSpeechRecognizer = true;
+            this.privDisposedSpeechRecognizer = true;
         }
 
         super.dispose(disposing);
     }
 
-    protected CreateRecognizerConfig(speechConfig: PlatformConfig, recognitionMode: RecognitionMode): RecognizerConfig {
+    protected createRecognizerConfig(speechConfig: PlatformConfig, recognitionMode: RecognitionMode): RecognizerConfig {
         return new RecognizerConfig(
             speechConfig,
             recognitionMode,
             this.properties);
     }
 
-    protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
+    protected createServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory,
+                                      audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
         const configImpl: AudioConfigImpl = audioConfig as AudioConfigImpl;
         return new SpeechServiceRecognizer(authentication, connectionFactory, configImpl, recognizerConfig, this);
     }
 
     // tslint:disable-next-line:member-ordering
-    private reco: ServiceRecognizerBase;
+    private privReco: ServiceRecognizerBase;
 
     private implCloseExistingRecognizer(): void {
-        if (this.reco) {
-            this.reco.AudioSource.TurnOff();
-            this.reco.Dispose();
-            this.reco = undefined;
+        if (this.privReco) {
+            this.privReco.audioSource.turnOff();
+            this.privReco.dispose();
+            this.privReco = undefined;
         }
     }
 }

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { ArgumentNullError, Promise, PromiseHelper } from "../common/Exports";
 import { AuthInfo, IAuthentication } from "./IAuthentication";
 
@@ -9,7 +10,7 @@ const AuthHeader: string = "Ocp-Apim-Subscription-Key";
  * @class
  */
 export class CognitiveSubscriptionKeyAuthentication implements IAuthentication {
-    private authInfo: AuthInfo;
+    private privAuthInfo: AuthInfo;
 
     /**
      * Creates and initializes an instance of the CognitiveSubscriptionKeyAuthentication class.
@@ -21,7 +22,7 @@ export class CognitiveSubscriptionKeyAuthentication implements IAuthentication {
             throw new ArgumentNullError("subscriptionKey");
         }
 
-        this.authInfo = new AuthInfo(AuthHeader, subscriptionKey);
+        this.privAuthInfo = new AuthInfo(AuthHeader, subscriptionKey);
     }
 
     /**
@@ -31,8 +32,8 @@ export class CognitiveSubscriptionKeyAuthentication implements IAuthentication {
      * @public
      * @param {string} authFetchEventId - The id to fetch.
      */
-    public Fetch = (authFetchEventId: string): Promise<AuthInfo> => {
-        return PromiseHelper.FromResult(this.authInfo);
+    public fetch = (authFetchEventId: string): Promise<AuthInfo> => {
+        return PromiseHelper.fromResult(this.privAuthInfo);
     }
 
     /**
@@ -42,7 +43,7 @@ export class CognitiveSubscriptionKeyAuthentication implements IAuthentication {
      * @public
      * @param {string} authFetchEventId - The id to fetch.
      */
-    public FetchOnExpiry = (authFetchEventId: string): Promise<AuthInfo> => {
-        return PromiseHelper.FromResult(this.authInfo);
+    public fetchOnExpiry = (authFetchEventId: string): Promise<AuthInfo> => {
+        return PromiseHelper.fromResult(this.privAuthInfo);
     }
 }

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { ConnectionEvent } from "./ConnectionEvents";
 import { ConnectionMessage } from "./ConnectionMessage";
 import { ConnectionOpenResponse } from "./ConnectionOpenResponse";
@@ -15,10 +16,10 @@ export enum ConnectionState {
 }
 
 export interface IConnection extends IDisposable {
-    Id: string;
-    State(): ConnectionState;
-    Open(): Promise<ConnectionOpenResponse>;
-    Send(message: ConnectionMessage): Promise<boolean>;
-    Read(): Promise<ConnectionMessage>;
-    Events: EventSource<ConnectionEvent>;
+    id: string;
+    state(): ConnectionState;
+    open(): Promise<ConnectionOpenResponse>;
+    send(message: ConnectionMessage): Promise<boolean>;
+    read(): Promise<ConnectionMessage>;
+    events: EventSource<ConnectionEvent>;
 }

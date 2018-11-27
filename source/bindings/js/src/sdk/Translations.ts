@@ -9,7 +9,7 @@ import { PropertyCollection } from "./Exports";
  */
 export class Translations {
     // Use an PropertyCollection internally, just wrapping it to hide the | enum syntax it has.
-    private map: PropertyCollection = new PropertyCollection();
+    private privMap: PropertyCollection = new PropertyCollection();
 
     /**
      * Returns the parameter value in type String. The parameter must have the same type as String.
@@ -23,7 +23,7 @@ export class Translations {
      * @returns {string} value of the parameter.
      */
     public get(key: string, def?: string): string {
-        return this.map.getProperty(key, def);
+        return this.privMap.getProperty(key, def);
     }
 
     /**
@@ -35,6 +35,6 @@ export class Translations {
      * @param {string} value - The value of the parameter.
      */
     public set(key: string, value: string): void {
-        this.map.setProperty(key, value);
+        this.privMap.setProperty(key, value);
     }
 }

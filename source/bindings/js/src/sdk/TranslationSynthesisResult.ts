@@ -4,7 +4,8 @@
 import { ResultReason } from "./ResultReason";
 
 /**
- * Defines translation synthesis result, i.e. the voice output of the translated text in the target language.
+ * Defines translation synthesis result, i.e. the voice output of the translated
+ * text in the target language.
  * @class TranslationSynthesisResult
  */
 export class TranslationSynthesisResult {

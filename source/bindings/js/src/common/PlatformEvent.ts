@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import { CreateNoDashGuid } from "./Guid";
+
+import { createNoDashGuid } from "./Guid";
 import { IStringDictionary } from "./IDictionary";
 
 export enum EventType {
@@ -11,37 +12,37 @@ export enum EventType {
 }
 
 export class PlatformEvent {
-    private name: string;
-    private eventId: string;
-    private eventTime: string;
-    private eventType: EventType;
-    private metadata: IStringDictionary<string>;
+    private privName: string;
+    private privEventId: string;
+    private privEventTime: string;
+    private privEventType: EventType;
+    private privMetadata: IStringDictionary<string>;
 
     constructor(eventName: string, eventType: EventType) {
-        this.name = eventName;
-        this.eventId = CreateNoDashGuid();
-        this.eventTime = new Date().toISOString();
-        this.eventType = eventType;
-        this.metadata = { };
+        this.privName = eventName;
+        this.privEventId = createNoDashGuid();
+        this.privEventTime = new Date().toISOString();
+        this.privEventType = eventType;
+        this.privMetadata = { };
     }
 
-    public get Name(): string {
-        return this.name;
+    public get name(): string {
+        return this.privName;
     }
 
-    public get EventId(): string {
-        return this.eventId;
+    public get eventId(): string {
+        return this.privEventId;
     }
 
-    public get EventTime(): string {
-        return this.eventTime;
+    public get eventTime(): string {
+        return this.privEventTime;
     }
 
-    public get EventType(): EventType {
-        return this.eventType;
+    public get eventType(): EventType {
+        return this.privEventType;
     }
 
-    public get Metadata(): IStringDictionary<string> {
-        return this.metadata;
+    public get metadata(): IStringDictionary<string> {
+        return this.privMetadata;
     }
 }

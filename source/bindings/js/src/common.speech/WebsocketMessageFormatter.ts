@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import {
     ConnectionMessage,
     Deferred,
@@ -14,28 +15,28 @@ const CRLF: string = "\r\n";
 
 export class WebsocketMessageFormatter implements IWebsocketMessageFormatter {
 
-    public ToConnectionMessage = (message: RawWebsocketMessage): Promise<ConnectionMessage> => {
+    public toConnectionMessage = (message: RawWebsocketMessage): Promise<ConnectionMessage> => {
         const deferral = new Deferred<ConnectionMessage>();
 
         try {
-            if (message.MessageType === MessageType.Text) {
-                const textMessage: string = message.TextContent;
+            if (message.messageType === MessageType.Text) {
+                const textMessage: string = message.textContent;
                 let headers: IStringDictionary<string> = {};
                 let body: string = null;
 
                 if (textMessage) {
                     const headerBodySplit = textMessage.split("\r\n\r\n");
                     if (headerBodySplit && headerBodySplit.length > 0) {
-                        headers = this.ParseHeaders(headerBodySplit[0]);
+                        headers = this.parseHeaders(headerBodySplit[0]);
                         if (headerBodySplit.length > 1) {
                             body = headerBodySplit[1];
                         }
                     }
                 }
 
-                deferral.Resolve(new ConnectionMessage(message.MessageType, body, headers, message.Id));
-            } else if (message.MessageType === MessageType.Binary) {
-                const binaryMessage: ArrayBuffer = message.BinaryContent;
+                deferral.resolve(new ConnectionMessage(message.messageType, body, headers, message.id));
+            } else if (message.messageType === MessageType.Binary) {
+                const binaryMessage: ArrayBuffer = message.binaryContent;
                 let headers: IStringDictionary<string> = {};
                 let body: ArrayBuffer = null;
 
@@ -55,35 +56,35 @@ export class WebsocketMessageFormatter implements IWebsocketMessageFormatter {
                     headersString += String.fromCharCode((dataView).getInt8(i + 2));
                 }
 
-                headers = this.ParseHeaders(headersString);
+                headers = this.parseHeaders(headersString);
 
                 if (binaryMessage.byteLength > headerLength + 2) {
                     body = binaryMessage.slice(2 + headerLength);
                 }
 
-                deferral.Resolve(new ConnectionMessage(message.MessageType, body, headers, message.Id));
+                deferral.resolve(new ConnectionMessage(message.messageType, body, headers, message.id));
             }
         } catch (e) {
-            deferral.Reject(`Error formatting the message. Error: ${e}`);
+            deferral.reject(`Error formatting the message. Error: ${e}`);
         }
 
-        return deferral.Promise();
+        return deferral.promise();
     }
 
-    public FromConnectionMessage = (message: ConnectionMessage): Promise<RawWebsocketMessage> => {
+    public fromConnectionMessage = (message: ConnectionMessage): Promise<RawWebsocketMessage> => {
         const deferral = new Deferred<RawWebsocketMessage>();
 
         try {
-            if (message.MessageType === MessageType.Text) {
-                const payload = `${this.MakeHeaders(message)}${CRLF}${message.TextBody ? message.TextBody : ""}`;
+            if (message.messageType === MessageType.Text) {
+                const payload = `${this.makeHeaders(message)}${CRLF}${message.textBody ? message.textBody : ""}`;
 
-                deferral.Resolve(new RawWebsocketMessage(MessageType.Text, payload, message.Id));
+                deferral.resolve(new RawWebsocketMessage(MessageType.Text, payload, message.id));
 
-            } else if (message.MessageType === MessageType.Binary) {
-                const headersString = this.MakeHeaders(message);
-                const content = message.BinaryBody;
+            } else if (message.messageType === MessageType.Binary) {
+                const headersString = this.makeHeaders(message);
+                const content = message.binaryBody;
 
-                const headerInt8Array = new Int8Array(this.StringToArrayBuffer(headersString));
+                const headerInt8Array = new Int8Array(this.stringToArrayBuffer(headersString));
 
                 const payload = new ArrayBuffer(2 + headerInt8Array.byteLength + (content ? content.byteLength : 0));
                 const dataView = new DataView(payload);
@@ -101,22 +102,22 @@ export class WebsocketMessageFormatter implements IWebsocketMessageFormatter {
                     }
                 }
 
-                deferral.Resolve(new RawWebsocketMessage(MessageType.Binary, payload, message.Id));
+                deferral.resolve(new RawWebsocketMessage(MessageType.Binary, payload, message.id));
             }
         } catch (e) {
-            deferral.Reject(`Error formatting the message. ${e}`);
+            deferral.reject(`Error formatting the message. ${e}`);
         }
 
-        return deferral.Promise();
+        return deferral.promise();
     }
 
-    private MakeHeaders = (message: ConnectionMessage): string => {
+    private makeHeaders = (message: ConnectionMessage): string => {
         let headersString: string = "";
 
-        if (message.Headers) {
-            for (const header in message.Headers) {
+        if (message.headers) {
+            for (const header in message.headers) {
                 if (header) {
-                    headersString += `${header}: ${message.Headers[header]}${CRLF}`;
+                    headersString += `${header}: ${message.headers[header]}${CRLF}`;
                 }
             }
         }
@@ -124,7 +125,7 @@ export class WebsocketMessageFormatter implements IWebsocketMessageFormatter {
         return headersString;
     }
 
-    private ParseHeaders = (headersString: string): IStringDictionary<string> => {
+    private parseHeaders = (headersString: string): IStringDictionary<string> => {
         const headers: IStringDictionary<string> = {};
 
         if (headersString) {
@@ -148,7 +149,7 @@ export class WebsocketMessageFormatter implements IWebsocketMessageFormatter {
         return headers;
     }
 
-    private StringToArrayBuffer = (str: string): ArrayBuffer => {
+    private stringToArrayBuffer = (str: string): ArrayBuffer => {
         const buffer = new ArrayBuffer(str.length);
         const view = new DataView(buffer);
         for (let i = 0; i < str.length; i++) {

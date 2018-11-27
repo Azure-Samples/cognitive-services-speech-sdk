@@ -15,7 +15,7 @@ let objsToClose: any[];
 beforeAll(() => {
     // override inputs, if necessary
     Settings.LoadSettings();
-    Events.Instance.AttachListener(new ConsoleLoggingListener(EventType.Debug));
+    Events.instance.attachListener(new ConsoleLoggingListener(EventType.Debug));
 });
 
 // Test cases are run linerally, the only other mechanism to demark them in the output is to put a console line in each case and

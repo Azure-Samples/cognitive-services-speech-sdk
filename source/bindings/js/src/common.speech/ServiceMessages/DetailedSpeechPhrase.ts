@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import {
-    RecognitionStatus,
-} from "../Exports";
+
+import { RecognitionStatus } from "../Exports";
 
 // speech.phrase for detailed
 export interface IDetailedSpeechPhrase {
@@ -21,26 +20,27 @@ export interface IPhrase {
 }
 
 export class DetailedSpeechPhrase implements IDetailedSpeechPhrase {
-    private detailedSpeechPhrase: IDetailedSpeechPhrase;
+    private privDetailedSpeechPhrase: IDetailedSpeechPhrase;
+
     private constructor(json: string) {
-        this.detailedSpeechPhrase = JSON.parse(json);
-        this.detailedSpeechPhrase.RecognitionStatus = (RecognitionStatus as any)[this.detailedSpeechPhrase.RecognitionStatus];
+        this.privDetailedSpeechPhrase = JSON.parse(json);
+        this.privDetailedSpeechPhrase.RecognitionStatus = (RecognitionStatus as any)[this.privDetailedSpeechPhrase.RecognitionStatus];
     }
 
-    public static FromJSON(json: string): DetailedSpeechPhrase {
+    public static fromJSON(json: string): DetailedSpeechPhrase {
         return new DetailedSpeechPhrase(json);
     }
 
     public get RecognitionStatus(): RecognitionStatus {
-        return this.detailedSpeechPhrase.RecognitionStatus;
+        return this.privDetailedSpeechPhrase.RecognitionStatus;
     }
     public get NBest(): IPhrase[] {
-        return this.detailedSpeechPhrase.NBest;
+        return this.privDetailedSpeechPhrase.NBest;
     }
     public get Duration(): number {
-        return this.detailedSpeechPhrase.Duration;
+        return this.privDetailedSpeechPhrase.Duration;
     }
     public get Offset(): number {
-        return this.detailedSpeechPhrase.Offset;
+        return this.privDetailedSpeechPhrase.Offset;
     }
 }

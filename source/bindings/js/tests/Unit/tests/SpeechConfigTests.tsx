@@ -3,7 +3,7 @@
 
 import { isString } from "util";
 import * as sdk from "../../../microsoft.cognitiveservices.speech.sdk";
-import { CreateNoDashGuid } from "../../../src/common/Guid";
+import { createNoDashGuid } from "../../../src/common/Guid";
 import { Settings } from "./Settings";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 
@@ -66,13 +66,13 @@ test("TypedParametersAccessableViaPropBag", () => {
 });
 
 const TestParam = (getAccess: () => string, setAccess: (val: string) => void, propEnum: sdk.PropertyId, config: sdk.SpeechConfig): void => {
-    const testString: string = CreateNoDashGuid();
+    const testString: string = createNoDashGuid();
 
     setAccess(testString);
     expect(config.getProperty(sdk.PropertyId[propEnum])).toEqual(testString);
     expect(getAccess()).toEqual(testString);
 
-    const testString2: string = CreateNoDashGuid();
+    const testString2: string = createNoDashGuid();
     config.setProperty(sdk.PropertyId[propEnum], testString2);
     expect(config.getProperty(sdk.PropertyId[propEnum])).toEqual(testString2);
     expect(getAccess()).toEqual(testString2);
@@ -81,8 +81,8 @@ const TestParam = (getAccess: () => string, setAccess: (val: string) => void, pr
 test("Unset param return default", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
-    const name: string = CreateNoDashGuid();
-    const value: string = CreateNoDashGuid();
+    const name: string = createNoDashGuid();
+    const value: string = createNoDashGuid();
 
     expect(s.getProperty(name, value)).toEqual(value);
     expect(s.getProperty(name)).toBeUndefined();
@@ -104,9 +104,9 @@ test("Create Recognizer", () => {
 
 test("Proeprties are passed to recognizer", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.speechRecognitionLanguage = CreateNoDashGuid();
-    s.authorizationToken = CreateNoDashGuid();
-    s.endpointId = CreateNoDashGuid();
+    s.speechRecognitionLanguage = createNoDashGuid();
+    s.authorizationToken = createNoDashGuid();
+    s.endpointId = createNoDashGuid();
 
     const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s);
     expect(r).not.toBeUndefined();

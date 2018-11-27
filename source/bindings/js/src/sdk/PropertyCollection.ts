@@ -8,8 +8,8 @@ import { PropertyId } from "./Exports";
  * @class PropertyCollection
  */
 export class PropertyCollection {
-    private keys: string[] = [] as string[];
-    private values: string[] = [] as string[];
+    private privKeys: string[] = [] as string[];
+    private privValues: string[] = [] as string[];
 
     /**
      * Returns the property value in type String. The parameter must have the same type as String.
@@ -19,7 +19,8 @@ export class PropertyCollection {
      * @function
      * @public
      * @param {string} key - The parameter name.
-     * @param {string} def - The default value which is returned if the parameter is not available in the collection.
+     * @param {string} def - The default value which is returned if the parameter
+     *        is not available in the collection.
      * @returns {string} value of the parameter.
      */
     public getProperty(key: PropertyId | string, def?: string): string {
@@ -31,9 +32,9 @@ export class PropertyCollection {
             keyToUse = PropertyId[key];
         }
 
-        for (let n = 0; n < this.keys.length; n++) {
-            if (this.keys[n] === keyToUse) {
-                return this.values[n];
+        for (let n = 0; n < this.privKeys.length; n++) {
+            if (this.privKeys[n] === keyToUse) {
+                return this.privValues[n];
             }
         }
 
@@ -57,15 +58,15 @@ export class PropertyCollection {
             keyToUse = PropertyId[key];
         }
 
-        for (let n = 0; n < this.keys.length; n++) {
-            if (this.keys[n] === keyToUse) {
-                this.values[n] = value;
+        for (let n = 0; n < this.privKeys.length; n++) {
+            if (this.privKeys[n] === keyToUse) {
+                this.privValues[n] = value;
                 return;
             }
         }
 
-        this.keys.push(keyToUse);
-        this.values.push(value);
+        this.privKeys.push(keyToUse);
+        this.privValues.push(value);
     }
 
     /**
@@ -78,9 +79,9 @@ export class PropertyCollection {
     public clone(): PropertyCollection {
         const clonedMap = new PropertyCollection();
 
-        for (let n = 0; n < this.keys.length; n++) {
-            clonedMap.keys.push(this.keys[n]);
-            clonedMap.values.push(this.values[n]);
+        for (let n = 0; n < this.privKeys.length; n++) {
+            clonedMap.privKeys.push(this.privKeys[n]);
+            clonedMap.privValues.push(this.privValues[n]);
         }
 
         return clonedMap;

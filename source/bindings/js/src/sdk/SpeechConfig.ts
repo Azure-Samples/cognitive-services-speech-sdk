@@ -3,11 +3,7 @@
 
 import { OutputFormatPropertyName } from "../common.speech/Exports";
 import { Contracts } from "./Contracts";
-import {
-    OutputFormat,
-    PropertyCollection,
-    PropertyId,
-} from "./Exports";
+import { OutputFormat, PropertyCollection, PropertyId } from "./Exports";
 
 /**
  * Speech configuration.

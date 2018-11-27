@@ -1,19 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 export class ConnectionOpenResponse {
-    private statusCode: number;
-    private reason: string;
+    private privStatusCode: number;
+    private privReason: string;
 
     constructor(statusCode: number, reason: string) {
-        this.statusCode = statusCode;
-        this.reason = reason;
+        this.privStatusCode = statusCode;
+        this.privReason = reason;
     }
 
-    public get StatusCode(): number {
-        return this.statusCode;
+    public get statusCode(): number {
+        return this.privStatusCode;
     }
 
-    public get Reason(): string {
-        return this.reason;
+    public get reason(): string {
+        return this.privReason;
     }
 }

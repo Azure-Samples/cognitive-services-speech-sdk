@@ -1,28 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { WebsocketConnection } from "../common.browser/Exports";
-import {
-    IConnection,
-    IStringDictionary,
-    Promise,
-    Storage,
-} from "../common/Exports";
+import { IConnection, IStringDictionary, Storage } from "../common/Exports";
 import { PropertyId } from "../sdk/Exports";
-import {
-    AuthInfo,
-    IAuthentication,
-    IConnectionFactory,
-    RecognizerConfig,
-    SpeechResultFormat,
-    WebsocketMessageFormatter,
-} from "./Exports";
+import { AuthInfo, IConnectionFactory, RecognizerConfig, WebsocketMessageFormatter } from "./Exports";
 
 const TestHooksParamName: string = "testhooks";
 const ConnectionIdHeader: string = "X-ConnectionId";
 
 export class IntentConnectionFactory implements IConnectionFactory {
 
-    public Create = (
+    public create = (
         config: RecognizerConfig,
         authInfo: AuthInfo,
         connectionId?: string): IConnection => {
@@ -31,7 +20,7 @@ export class IntentConnectionFactory implements IConnectionFactory {
         if (!endpoint) {
             const region: string = config.parameters.getProperty(PropertyId.SpeechServiceConnection_IntentRegion);
 
-            endpoint = this.Host() + Storage.Local.GetOrAdd("TranslationRelativeUri", "/speech/" + this.GetSpeechRegionFromIntentRegion(region) + "/recognition/interactive/cognitiveservices/v1");
+            endpoint = this.host() + Storage.local.getOrAdd("TranslationRelativeUri", "/speech/" + this.getSpeechRegionFromIntentRegion(region) + "/recognition/interactive/cognitiveservices/v1");
         }
 
         const queryParams: IStringDictionary<string> = {
@@ -39,27 +28,27 @@ export class IntentConnectionFactory implements IConnectionFactory {
             language: config.parameters.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage),
         };
 
-        if (this.IsDebugModeEnabled) {
+        if (this.isDebugModeEnabled) {
             queryParams[TestHooksParamName] = "1";
         }
 
         const headers: IStringDictionary<string> = {};
-        headers[authInfo.HeaderName] = authInfo.Token;
+        headers[authInfo.headerName] = authInfo.token;
         headers[ConnectionIdHeader] = connectionId;
 
         return new WebsocketConnection(endpoint, queryParams, headers, new WebsocketMessageFormatter(), connectionId);
     }
 
-    private Host(): string {
-        return Storage.Local.GetOrAdd("Host", "wss://speech.platform.bing.com");
+    private host(): string {
+        return Storage.local.getOrAdd("Host", "wss://speech.platform.bing.com");
     }
 
-    private get IsDebugModeEnabled(): boolean {
-        const value = Storage.Local.GetOrAdd("IsDebugModeEnabled", "false");
+    private get isDebugModeEnabled(): boolean {
+        const value = Storage.local.getOrAdd("IsDebugModeEnabled", "false");
         return value.toLowerCase() === "true";
     }
 
-    private GetSpeechRegionFromIntentRegion(intentRegion: string): string {
+    private getSpeechRegionFromIntentRegion(intentRegion: string): string {
         switch (intentRegion) {
             case "West US":
             case "US West":

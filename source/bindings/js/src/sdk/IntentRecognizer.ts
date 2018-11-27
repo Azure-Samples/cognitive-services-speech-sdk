@@ -34,14 +34,14 @@ import { SpeechConfigImpl } from "./SpeechConfig";
  * @class
  */
 export class IntentRecognizer extends Recognizer {
-    private disposedIntentRecognizer: boolean;
+    private privDisposedIntentRecognizer: boolean;
     private privProperties: PropertyCollection;
-    private reco: ServiceRecognizerBase;
+    private privReco: ServiceRecognizerBase;
 
-    private addedIntents: string[][];
-    private addedLmIntents: { [id: string]: AddedLmIntent; };
-    private intentDataSent: boolean;
-    private umbrellaIntent: AddedLmIntent;
+    private privAddedIntents: string[][];
+    private privAddedLmIntents: { [id: string]: AddedLmIntent; };
+    private privIntentDataSent: boolean;
+    private privUmbrellaIntent: AddedLmIntent;
 
     /**
      * Initializes an instance of the IntentRecognizer.
@@ -55,11 +55,11 @@ export class IntentRecognizer extends Recognizer {
         Contracts.throwIfNullOrUndefined(configImpl, "speechConfig");
 
         super(audioConfig);
-        this.intentDataSent = false;
-        this.addedIntents = [];
-        this.addedLmIntents = {};
+        this.privIntentDataSent = false;
+        this.privAddedIntents = [];
+        this.privAddedLmIntents = {};
 
-        this.disposedIntentRecognizer = false;
+        this.privDisposedIntentRecognizer = false;
         this.privProperties = configImpl.properties;
 
         Contracts.throwIfNullOrWhitespace(this.properties.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage), PropertyId[PropertyId.SpeechServiceConnection_RecoLanguage]);
@@ -97,7 +97,7 @@ export class IntentRecognizer extends Recognizer {
      * @returns {string} the spoken language of recognition.
      */
     public get speechRecognitionLanguage(): string {
-        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+        Contracts.throwIfDisposed(this.privDisposedIntentRecognizer);
 
         return this.properties.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
     }
@@ -129,15 +129,19 @@ export class IntentRecognizer extends Recognizer {
      * @member IntentRecognizer.prototype.properties
      * @function
      * @public
-     * @returns {PropertyCollection} The collection of properties and their values defined for this IntentRecognizer.
+     * @returns {PropertyCollection} The collection of properties and their
+     *          values defined for this IntentRecognizer.
      */
     public get properties(): PropertyCollection {
         return this.privProperties;
     }
 
     /**
-     * Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
-     * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+     * Starts intent recognition, and stops after the first utterance is recognized.
+     * The task returns the recognition text and intent as result.
+     * Note: RecognizeOnceAsync() returns when the first utterance has been recognized,
+     *       so it is suitable only for single shot recognition like command or query.
+     *       For long-running recognition, use StartContinuousRecognitionAsync() instead.
      * @member IntentRecognizer.prototype.recognizeOnceAsync
      * @function
      * @public
@@ -146,27 +150,27 @@ export class IntentRecognizer extends Recognizer {
      */
     public recognizeOnceAsync(cb?: (e: IntentRecognitionResult) => void, err?: (e: string) => void): void {
         try {
-            Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+            Contracts.throwIfDisposed(this.privDisposedIntentRecognizer);
 
             this.implCloseExistingRecognizer();
 
             let contextJson: string;
 
-            if (Object.keys(this.addedLmIntents).length !== 0 || undefined !== this.umbrellaIntent) {
+            if (Object.keys(this.privAddedLmIntents).length !== 0 || undefined !== this.privUmbrellaIntent) {
                 contextJson = this.buildSpeechContext();
-                this.intentDataSent = true;
+                this.privIntentDataSent = true;
             }
 
-            this.reco = this.implRecognizerSetup(
+            this.privReco = this.implRecognizerSetup(
                 RecognitionMode.Interactive,
                 this.properties,
                 this.audioConfig,
                 new IntentConnectionFactory());
 
-            const intentReco: IntentServiceRecognizer = this.reco as IntentServiceRecognizer;
-            intentReco.setIntents(this.addedLmIntents, this.umbrellaIntent);
+            const intentReco: IntentServiceRecognizer = this.privReco as IntentServiceRecognizer;
+            intentReco.setIntents(this.privAddedLmIntents, this.privUmbrellaIntent);
 
-            this.implRecognizerStart(this.reco, cb, err, contextJson);
+            this.implRecognizerStart(this.privReco, cb, err, contextJson);
 
         } catch (error) {
             if (!!err) {
@@ -191,27 +195,27 @@ export class IntentRecognizer extends Recognizer {
      */
     public startContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
         try {
-            Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+            Contracts.throwIfDisposed(this.privDisposedIntentRecognizer);
 
             this.implCloseExistingRecognizer();
 
             let contextJson: string;
 
-            if (Object.keys(this.addedLmIntents).length !== 0) {
+            if (Object.keys(this.privAddedLmIntents).length !== 0) {
                 contextJson = this.buildSpeechContext();
-                this.intentDataSent = true;
+                this.privIntentDataSent = true;
             }
 
-            this.reco = this.implRecognizerSetup(
+            this.privReco = this.implRecognizerSetup(
                 RecognitionMode.Conversation,
                 this.properties,
                 this.audioConfig,
                 new IntentConnectionFactory());
 
-            const intentReco: IntentServiceRecognizer = this.reco as IntentServiceRecognizer;
-            intentReco.setIntents(this.addedLmIntents, this.umbrellaIntent);
+            const intentReco: IntentServiceRecognizer = this.privReco as IntentServiceRecognizer;
+            intentReco.setIntents(this.privAddedLmIntents, this.privUmbrellaIntent);
 
-            this.implRecognizerStart(this.reco, undefined, undefined, contextJson);
+            this.implRecognizerStart(this.privReco, undefined, undefined, contextJson);
 
             // report result to promise.
             if (!!cb) {
@@ -246,7 +250,7 @@ export class IntentRecognizer extends Recognizer {
      */
     public stopContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
         try {
-            Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+            Contracts.throwIfDisposed(this.privDisposedIntentRecognizer);
 
             this.implCloseExistingRecognizer();
 
@@ -274,7 +278,8 @@ export class IntentRecognizer extends Recognizer {
     /**
      * Starts speech recognition with keyword spotting, until stopKeywordRecognitionAsync() is called.
      * User must subscribe to events to receive recognition results.
-     * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
+     * Note: Key word spotting functionality is only available on the Speech Devices SDK.
+     *       This functionality is currently not included in the SDK itself.
      * @member IntentRecognizer.prototype.startKeywordRecognitionAsync
      * @function
      * @public
@@ -292,7 +297,8 @@ export class IntentRecognizer extends Recognizer {
 
     /**
      * Stops continuous speech recognition.
-     * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
+     * Note: Key word spotting functionality is only available on the Speech Devices SDK.
+     *       This functionality is currently not included in the SDK itself.
      * @member IntentRecognizer.prototype.stopKeywordRecognitionAsync
      * @function
      * @public
@@ -314,11 +320,11 @@ export class IntentRecognizer extends Recognizer {
      * @param {string} phrase - A String that specifies the phrase representing the intent.
      */
     public addIntent(simplePhrase: string, intentId?: string): void {
-        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+        Contracts.throwIfDisposed(this.privDisposedIntentRecognizer);
         Contracts.throwIfNullOrWhitespace(intentId, "intentId");
         Contracts.throwIfNullOrWhitespace(simplePhrase, "simplePhrase");
 
-        this.addedIntents.push([intentId, simplePhrase]);
+        this.privAddedIntents.push([intentId, simplePhrase]);
     }
 
     /**
@@ -326,19 +332,21 @@ export class IntentRecognizer extends Recognizer {
      * @member IntentRecognizer.prototype.addIntentWithLanguageModel
      * @function
      * @public
-     * @param {string} intentId - A String that represents the identifier of the intent to be recognized. Ignored if intentName is empty.
+     * @param {string} intentId - A String that represents the identifier of the intent
+     *        to be recognized. Ignored if intentName is empty.
      * @param {string} model - The intent model from Language Understanding service.
-     * @param {string} intentName - The intent name defined in the intent model. If it is empty, all intent names defined in the model will be added.
+     * @param {string} intentName - The intent name defined in the intent model. If it
+     *        is empty, all intent names defined in the model will be added.
      */
     public addIntentWithLanguageModel(intentId: string, model: LanguageUnderstandingModel, intentName?: string): void {
-        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+        Contracts.throwIfDisposed(this.privDisposedIntentRecognizer);
         Contracts.throwIfNullOrWhitespace(intentId, "intentId");
         Contracts.throwIfNull(model, "model");
 
         const modelImpl: LanguageUnderstandingModelImpl = model as LanguageUnderstandingModelImpl;
         Contracts.throwIfNullOrWhitespace(modelImpl.appId, "model.appId");
 
-        this.addedLmIntents[intentId] = new AddedLmIntent(modelImpl, intentName);
+        this.privAddedLmIntents[intentId] = new AddedLmIntent(modelImpl, intentName);
     }
 
     /**
@@ -357,7 +365,7 @@ export class IntentRecognizer extends Recognizer {
         const modelImpl: LanguageUnderstandingModelImpl = model as LanguageUnderstandingModelImpl;
         Contracts.throwIfNullOrWhitespace(modelImpl.appId, "model.appId");
 
-        this.umbrellaIntent = new AddedLmIntent(modelImpl, intentId);
+        this.privUmbrellaIntent = new AddedLmIntent(modelImpl, intentId);
     }
 
     /**
@@ -367,35 +375,35 @@ export class IntentRecognizer extends Recognizer {
      * @public
      */
     public close(): void {
-        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+        Contracts.throwIfDisposed(this.privDisposedIntentRecognizer);
 
         this.dispose(true);
     }
 
-    protected CreateRecognizerConfig(speecgConfig: PlatformConfig, recognitionMode: RecognitionMode): RecognizerConfig {
+    protected createRecognizerConfig(speecgConfig: PlatformConfig, recognitionMode: RecognitionMode): RecognizerConfig {
         return new RecognizerConfig(speecgConfig, recognitionMode, this.properties);
     }
-    protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
+    protected createServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
         const audioImpl: AudioConfigImpl = audioConfig as AudioConfigImpl;
-        return new IntentServiceRecognizer(authentication, connectionFactory, audioImpl, recognizerConfig, this, this.intentDataSent);
+        return new IntentServiceRecognizer(authentication, connectionFactory, audioImpl, recognizerConfig, this, this.privIntentDataSent);
     }
 
     protected dispose(disposing: boolean): void {
-        if (this.disposedIntentRecognizer) {
+        if (this.privDisposedIntentRecognizer) {
             return;
         }
 
         if (disposing) {
-            this.disposedIntentRecognizer = true;
+            this.privDisposedIntentRecognizer = true;
             super.dispose(disposing);
         }
     }
 
     private implCloseExistingRecognizer(): void {
-        if (this.reco) {
-            this.reco.AudioSource.TurnOff();
-            this.reco.Dispose();
-            this.reco = undefined;
+        if (this.privReco) {
+            this.privReco.audioSource.turnOff();
+            this.privReco.dispose();
+            this.privReco = undefined;
         }
     }
 
@@ -405,15 +413,15 @@ export class IntentRecognizer extends Recognizer {
         let subscriptionKey: string;
         const refGrammers: string[] = [];
 
-        if (undefined !== this.umbrellaIntent) {
-            appId = this.umbrellaIntent.modelImpl.appId;
-            region = this.umbrellaIntent.modelImpl.region;
-            subscriptionKey = this.umbrellaIntent.modelImpl.subscriptionKey;
+        if (undefined !== this.privUmbrellaIntent) {
+            appId = this.privUmbrellaIntent.modelImpl.appId;
+            region = this.privUmbrellaIntent.modelImpl.region;
+            subscriptionKey = this.privUmbrellaIntent.modelImpl.subscriptionKey;
         }
 
         // Build the reference grammer array.
-        for (const intentId of Object.keys(this.addedLmIntents)) {
-            const addedLmIntent: AddedLmIntent = this.addedLmIntents[intentId];
+        for (const intentId of Object.keys(this.privAddedLmIntents)) {
+            const addedLmIntent: AddedLmIntent = this.privAddedLmIntents[intentId];
 
             // validate all the same model, region, and key...
             if (appId === undefined) {
@@ -446,7 +454,7 @@ export class IntentRecognizer extends Recognizer {
 
         return JSON.stringify({
             dgi: {
-                ReferenceGrammars: (undefined === this.umbrellaIntent) ? refGrammers : ["luis/" + appId + "-PRODUCTION"],
+                ReferenceGrammars: (undefined === this.privUmbrellaIntent) ? refGrammers : ["luis/" + appId + "-PRODUCTION"],
             },
             intent: {
                 id: appId,

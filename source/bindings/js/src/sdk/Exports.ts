@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 export { AudioConfig } from "./Audio/AudioConfig";
 export { AudioStreamFormat } from "./Audio/AudioStreamFormat";
 export { AudioInputStream, PullAudioInputStream, PushAudioInputStream } from "./Audio/AudioInputStream";

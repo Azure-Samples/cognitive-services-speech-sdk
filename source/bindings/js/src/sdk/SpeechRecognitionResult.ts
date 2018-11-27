@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { PropertyCollection, RecognitionResult, ResultReason } from "./Exports";
 
 /**
@@ -20,7 +21,9 @@ export class SpeechRecognitionResult extends RecognitionResult {
      * @param {string} json - Additional Json, if provided.
      * @param {PropertyCollection} properties - Additional properties, if provided.
      */
-    public constructor(resultId?: string, reason?: ResultReason, text?: string, duration?: number, offset?: number, errorDetails?: string, json?: string, properties?: PropertyCollection) {
+    public constructor(resultId?: string, reason?: ResultReason, text?: string,
+                       duration?: number, offset?: number, errorDetails?: string,
+                       json?: string, properties?: PropertyCollection) {
         super(resultId, reason, text, duration, offset, errorDetails, json, properties);
     }
 }

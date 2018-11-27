@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { PropertyCollection } from "../sdk/Exports";
 
 export enum RecognitionMode {
@@ -14,39 +15,39 @@ export enum SpeechResultFormat {
 }
 
 export class RecognizerConfig {
-    private recognitionMode: RecognitionMode = RecognitionMode.Interactive;
-    private platformConfig: PlatformConfig;
-    private recognitionActivityTimeout: number;
-    private speechConfig: PropertyCollection;
+    private privRecognitionMode: RecognitionMode = RecognitionMode.Interactive;
+    private privPlatformConfig: PlatformConfig;
+    private privRecognitionActivityTimeout: number;
+    private privSpeechConfig: PropertyCollection;
 
     constructor(
         platformConfig: PlatformConfig,
         recognitionMode: RecognitionMode = RecognitionMode.Interactive,
         speechConfig: PropertyCollection) {
-        this.platformConfig = platformConfig ? platformConfig : new PlatformConfig(new Context(null));
-        this.recognitionMode = recognitionMode;
-        this.recognitionActivityTimeout = recognitionMode === RecognitionMode.Interactive ? 8000 : 25000;
-        this.speechConfig = speechConfig;
+        this.privPlatformConfig = platformConfig ? platformConfig : new PlatformConfig(new Context(null));
+        this.privRecognitionMode = recognitionMode;
+        this.privRecognitionActivityTimeout = recognitionMode === RecognitionMode.Interactive ? 8000 : 25000;
+        this.privSpeechConfig = speechConfig;
     }
 
     public get parameters(): PropertyCollection {
-        return this.speechConfig;
+        return this.privSpeechConfig;
     }
 
-    public get RecognitionMode(): RecognitionMode {
-        return this.recognitionMode;
+    public get recognitionMode(): RecognitionMode {
+        return this.privRecognitionMode;
     }
 
-    public get PlatformConfig(): PlatformConfig {
-        return this.platformConfig;
+    public get platformConfig(): PlatformConfig {
+        return this.privPlatformConfig;
     }
 
-    public get RecognitionActivityTimeout(): number {
-        return this.recognitionActivityTimeout;
+    public get recognitionActivityTimeout(): number {
+        return this.privRecognitionActivityTimeout;
     }
 
-    public get IsContinuousRecognition(): boolean {
-        return this.recognitionMode !== RecognitionMode.Interactive;
+    public get isContinuousRecognition(): boolean {
+        return this.privRecognitionMode !== RecognitionMode.Interactive;
     }
 }
 
@@ -58,7 +59,7 @@ export class PlatformConfig {
         this.context = context;
     }
 
-    public Serialize = (): string => {
+    public serialize = (): string => {
         return JSON.stringify(this, (key: any, value: any): any => {
             if (value && typeof value === "object") {
                 const replacement: any = {};
@@ -81,29 +82,22 @@ export class PlatformConfig {
 
 // tslint:disable-next-line:max-classes-per-file
 export class Context {
-    private system: System;
-    private os: OS;
+    public system: System;
+    public os: OS;
 
     constructor(os: OS) {
         this.system = new System();
         this.os = os;
     }
-
-    public get System(): System {
-        return this.system;
-    }
-
-    public get OS(): OS {
-        return this.os;
-    }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class System {
-    private name: string;
-    private version: string;
-    private build: string;
-    private lang: string;
+    public name: string;
+    public version: string;
+    public build: string;
+    public lang: string;
+
     constructor() {
         // Note: below will be patched for official builds.
         const SPEECHSDK_CLIENTSDK_VERSION = "1.1.0-alpha.0.1";
@@ -113,64 +107,30 @@ export class System {
         this.build = "JavaScript";
         this.lang = "JavaScript";
     }
-    public get Version(): string {
-        // Controlled by sdk
-        return this.version;
-    }
-    public get Lang(): string {
-        // Controlled by sdk
-        return this.lang;
-    }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class OS {
-
-    private platform: string;
-    private name: string;
-    private version: string;
+    public platform: string;
+    public name: string;
+    public version: string;
 
     constructor(platform: string, name: string, version: string) {
         this.platform = platform;
         this.name = name;
         this.version = version;
     }
-
-    public get Platform(): string {
-        return this.platform;
-    }
-
-    public get Name(): string {
-        return this.name;
-    }
-
-    public get Version(): string {
-        return this.version;
-    }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class Device {
-
-    private manufacturer: string;
-    private model: string;
-    private version: string;
+    public manufacturer: string;
+    public model: string;
+    public version: string;
 
     constructor(manufacturer: string, model: string, version: string) {
         this.manufacturer = manufacturer;
         this.model = model;
         this.version = version;
-    }
-
-    public get Manufacturer(): string {
-        return this.manufacturer;
-    }
-
-    public get Model(): string {
-        return this.model;
-    }
-
-    public get Version(): string {
-        return this.version;
     }
 }

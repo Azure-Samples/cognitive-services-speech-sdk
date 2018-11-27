@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { MessageType } from "./ConnectionMessage";
 import { ArgumentNullError, InvalidOperationError } from "./Error";
-import { CreateNoDashGuid } from "./Guid";
+import { createNoDashGuid } from "./Guid";
 
 export class RawWebsocketMessage {
-
-    private messageType: MessageType;
-    private payload: any = null;
-    private id: string;
+    private privMessageType: MessageType;
+    private privPayload: any = null;
+    private privId: string;
 
     public constructor(messageType: MessageType, payload: any, id?: string) {
         if (!payload) {
@@ -23,36 +23,36 @@ export class RawWebsocketMessage {
             throw new InvalidOperationError("Payload must be a string");
         }
 
-        this.messageType = messageType;
-        this.payload = payload;
-        this.id = id ? id : CreateNoDashGuid();
+        this.privMessageType = messageType;
+        this.privPayload = payload;
+        this.privId = id ? id : createNoDashGuid();
     }
 
-    public get MessageType(): MessageType {
-        return this.messageType;
+    public get messageType(): MessageType {
+        return this.privMessageType;
     }
 
-    public get Payload(): any {
-        return this.payload;
+    public get payload(): any {
+        return this.privPayload;
     }
 
-    public get TextContent(): string {
-        if (this.messageType === MessageType.Binary) {
+    public get textContent(): string {
+        if (this.privMessageType === MessageType.Binary) {
             throw new InvalidOperationError("Not supported for binary message");
         }
 
-        return this.payload as string;
+        return this.privPayload as string;
     }
 
-    public get BinaryContent(): ArrayBuffer {
-        if (this.messageType === MessageType.Text) {
+    public get binaryContent(): ArrayBuffer {
+        if (this.privMessageType === MessageType.Text) {
             throw new InvalidOperationError("Not supported for text message");
         }
 
-        return this.payload;
+        return this.privPayload;
     }
 
-    public get Id(): string {
-        return this.id;
+    public get id(): string {
+        return this.privId;
     }
 }

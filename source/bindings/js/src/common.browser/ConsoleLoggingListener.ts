@@ -1,19 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { EventType, IEventListener, PlatformEvent } from "../common/Exports";
 
 export class ConsoleLoggingListener implements IEventListener<PlatformEvent> {
-    private logLevelFilter: EventType;
+    private privLogLevelFilter: EventType;
 
     public constructor(logLevelFilter: EventType = EventType.Warning) {
-        this.logLevelFilter = logLevelFilter;
+        this.privLogLevelFilter = logLevelFilter;
     }
 
-    public OnEvent = (event: PlatformEvent): void => {
-        if (event.EventType >= this.logLevelFilter) {
-            const log = this.ToString(event);
+    public onEvent = (event: PlatformEvent): void => {
+        if (event.eventType >= this.privLogLevelFilter) {
+            const log = this.toString(event);
 
-            switch (event.EventType) {
+            switch (event.eventType) {
                 case EventType.Debug:
                     // tslint:disable-next-line:no-console
                     console.debug(log);
@@ -38,14 +39,17 @@ export class ConsoleLoggingListener implements IEventListener<PlatformEvent> {
         }
     }
 
-    private ToString = (event: any): string => {
+    private toString = (event: any): string => {
         const logFragments = [
             `${event.EventTime}`,
             `${event.Name}`,
         ];
 
         for (const prop in event) {
-            if (prop && event.hasOwnProperty(prop) && prop !== "eventTime" && prop !== "eventType" && prop !== "eventId" && prop !== "name" && prop !== "constructor") {
+            if (prop && event.hasOwnProperty(prop) &&
+                prop !== "eventTime" && prop !== "eventType" &&
+                prop !== "eventId" && prop !== "name" &&
+                prop !== "constructor") {
                 const value = event[prop];
                 let valueToLog = "<NULL>";
                 if (value !== undefined && value !== null) {

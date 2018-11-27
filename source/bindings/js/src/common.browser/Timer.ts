@@ -1,23 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { ITimer } from "../common/Exports";
 
 export class Timer implements ITimer {
-    private delayInMillisec: number;
-    private timerId: number;
-    private successCallback: any;
+    private privDelayInMillisec: number;
+    private privTimerId: number;
+    private privSuccessCallback: any;
+
     constructor(delayInMillisec: number, successCallback: any) {
-        this.delayInMillisec = delayInMillisec;
-        this.successCallback = successCallback;
+        this.privDelayInMillisec = delayInMillisec;
+        this.privSuccessCallback = successCallback;
     }
     public start = (...params: any[]): void => {
-        if (this.timerId) {
+        if (this.privTimerId) {
             this.stop();
         }
-        this.timerId = setTimeout(this.successCallback, this.delayInMillisec, params);
+        this.privTimerId = setTimeout(this.privSuccessCallback, this.privDelayInMillisec, params);
     }
 
     public stop = (): void => {
-        clearTimeout(this.timerId);
+        clearTimeout(this.privTimerId);
     }
 }

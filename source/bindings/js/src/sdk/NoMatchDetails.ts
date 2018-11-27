@@ -1,16 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import {
-    RecognitionStatus,
-    SimpleSpeechPhrase,
-} from "../../src/common.speech/Exports";
-import {
-    IntentRecognitionResult,
-    NoMatchReason,
-    SpeechRecognitionResult,
-    TranslationRecognitionResult,
-} from "./Exports";
+import { RecognitionStatus, SimpleSpeechPhrase } from "../../src/common.speech/Exports";
+import { IntentRecognitionResult, NoMatchReason, SpeechRecognitionResult, TranslationRecognitionResult } from "./Exports";
 
 /**
  * Contains detailed information for NoMatch recognition results.
@@ -33,11 +25,12 @@ export class NoMatchDetails {
      * @member NoMatchDetails.fromResult
      * @function
      * @public
-     * @param {SpeechRecognitionResult | IntentRecognitionResult | TranslationRecognitionResult} result - The recognition result that was not recognized.
+     * @param {SpeechRecognitionResult | IntentRecognitionResult | TranslationRecognitionResult}
+     *        result - The recognition result that was not recognized.
      * @returns {NoMatchDetails} The no match details object being created.
      */
     public static fromResult(result: SpeechRecognitionResult | IntentRecognitionResult | TranslationRecognitionResult): NoMatchDetails {
-        const simpleSpeech: SimpleSpeechPhrase = SimpleSpeechPhrase.FromJSON(result.json);
+        const simpleSpeech: SimpleSpeechPhrase = SimpleSpeechPhrase.fromJSON(result.json);
 
         let reason: NoMatchReason = NoMatchReason.NotRecognized;
 

@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import {
     ArgumentNullError,
     ConnectionMessage,
     ConnectionOpenResponse,
     ConnectionState,
-    CreateNoDashGuid,
+    createNoDashGuid,
     Deferred,
     IAudioSource,
     IAudioStreamNode,
@@ -18,37 +19,25 @@ import {
     PromiseResult,
 } from "../common/Exports";
 import { AudioStreamFormatImpl } from "../sdk/Audio/AudioStreamFormat";
-import {
-    RecognitionEventArgs,
-    Recognizer,
-    SessionEventArgs,
-    SpeechRecognitionResult,
-} from "../sdk/Exports";
-import {
-    RequestSession,
-    SpeechDetected,
-} from "./Exports";
-import {
-    AuthInfo,
-    IAuthentication,
-} from "./IAuthentication";
+import { RecognitionEventArgs, Recognizer, SessionEventArgs, SpeechRecognitionResult } from "../sdk/Exports";
+import { RequestSession, SpeechDetected } from "./Exports";
+import { AuthInfo, IAuthentication } from "./IAuthentication";
 import { IConnectionFactory } from "./IConnectionFactory";
 import { RecognizerConfig } from "./RecognizerConfig";
 import { SpeechConnectionMessage } from "./SpeechConnectionMessage.Internal";
 
 export abstract class ServiceRecognizerBase implements IDisposable {
-    private authentication: IAuthentication;
-    private connectionFactory: IConnectionFactory;
-    private connection: IConnection;
-    private audioSource: IAudioSource;
-    private speechConfigConnectionId: string;
-    private connectionFetchPromise: Promise<IConnection>;
-    private connectionId: string;
-    private authFetchEventId: string;
-    private isDisposed: boolean;
-    private recognizer: Recognizer;
-
-    protected recognizerConfig: RecognizerConfig;
+    private privAuthentication: IAuthentication;
+    private privConnectionFactory: IConnectionFactory;
+    private privConnection: IConnection;
+    private privAudioSource: IAudioSource;
+    private privSpeechConfigConnectionId: string;
+    private privConnectionFetchPromise: Promise<IConnection>;
+    private privConnectionId: string;
+    private privAuthFetchEventId: string;
+    private privIsDisposed: boolean;
+    private privRecognizer: Recognizer;
+    protected privRecognizerConfig: RecognizerConfig;
 
     public constructor(
         authentication: IAuthentication,
@@ -73,104 +62,103 @@ export abstract class ServiceRecognizerBase implements IDisposable {
             throw new ArgumentNullError("recognizerConfig");
         }
 
-        this.authentication = authentication;
-        this.connectionFactory = connectionFactory;
-        this.audioSource = audioSource;
-        this.recognizerConfig = recognizerConfig;
-        this.isDisposed = false;
-        this.recognizer = recognizer;
+        this.privAuthentication = authentication;
+        this.privConnectionFactory = connectionFactory;
+        this.privAudioSource = audioSource;
+        this.privRecognizerConfig = recognizerConfig;
+        this.privIsDisposed = false;
+        this.privRecognizer = recognizer;
     }
 
-    public get AudioSource(): IAudioSource {
-        return this.audioSource;
+    public get audioSource(): IAudioSource {
+        return this.privAudioSource;
     }
 
-    public IsDisposed(): boolean {
-        return this.isDisposed;
+    public isDisposed(): boolean {
+        return this.privIsDisposed;
     }
-    public Dispose(reason?: string): void {
-        this.isDisposed = true;
-        if (this.connection) {
-            this.connection.Dispose(reason);
-            this.connection = undefined;
+    public dispose(reason?: string): void {
+        this.privIsDisposed = true;
+        if (this.privConnection) {
+            this.privConnection.dispose(reason);
+            this.privConnection = undefined;
         }
     }
 
-    public Recognize(
+    public recognize(
         speechContextJson: string,
         successCallback: (e: SpeechRecognitionResult) => void,
         errorCallBack: (e: string) => void,
     ): Promise<boolean> {
+        const requestSession = new RequestSession(this.privAudioSource.id());
 
-        const requestSession = new RequestSession(this.audioSource.Id());
+        requestSession.listenForServiceTelemetry(this.privAudioSource.events);
 
-        requestSession.ListenForServiceTelemetry(this.audioSource.Events);
-
-        return this.audioSource
-            .Attach(requestSession.AudioNodeId)
-            .ContinueWithPromise<boolean>((result: PromiseResult<IAudioStreamNode>) => {
-                if (result.IsError) {
-                    this.ErrorCallback(result.Error);
-                    throw new Error(result.Error);
+        return this.privAudioSource
+            .attach(requestSession.audioNodeId)
+            .continueWithPromise<boolean>((result: PromiseResult<IAudioStreamNode>) => {
+                if (result.isError) {
+                    this.errorCallback(result.error);
+                    throw new Error(result.error);
                 } else {
-                    requestSession.OnAudioSourceAttachCompleted(result.Result, false);
+                    requestSession.onAudioSourceAttachCompleted(result.result, false);
                 }
 
-                const audioNode = result.Result;
+                const audioNode = result.result;
 
-                return this.FetchConnection(requestSession)
-                    .On((connection: IConnection) => {
-                        const messageRetrievalPromise = this.ReceiveMessage(connection, requestSession, successCallback, errorCallBack);
-                        const messageSendPromise = this.SendSpeechConfig(requestSession.RequestId, connection, this.recognizerConfig.PlatformConfig.Serialize())
-                            .OnSuccessContinueWithPromise((_: boolean) => {
-                                return this.SendSpeechContext(requestSession.RequestId, connection, speechContextJson)
-                                    .OnSuccessContinueWithPromise((_: boolean) => {
-                                        return this.SendAudio(requestSession.RequestId, connection, audioNode, requestSession);
+                return this.fetchConnection(requestSession)
+                    .on((connection: IConnection) => {
+                        const messageRetrievalPromise = this.receiveMessage(connection, requestSession, successCallback, errorCallBack);
+                        const messageSendPromise = this.sendSpeechConfig(requestSession.requestId, connection, this.privRecognizerConfig.platformConfig.serialize())
+                            .onSuccessContinueWithPromise((_: boolean) => {
+                                return this.sendSpeechContext(requestSession.requestId, connection, speechContextJson)
+                                    .onSuccessContinueWithPromise((_: boolean) => {
+                                        return this.sendAudio(requestSession.requestId, connection, audioNode, requestSession);
                                     });
                             });
 
-                        const completionPromise = PromiseHelper.WhenAll([messageRetrievalPromise, messageSendPromise]);
+                        const completionPromise = PromiseHelper.whenAll([messageRetrievalPromise, messageSendPromise]);
 
-                        completionPromise.On((r: boolean) => {
-                            requestSession.Dispose();
-                            this.SendTelemetryData(requestSession.RequestId, connection, requestSession.GetTelemetry());
+                        completionPromise.on((r: boolean) => {
+                            requestSession.dispose();
+                            this.sendTelemetryData(requestSession.requestId, connection, requestSession.getTelemetry());
                         }, (error: string) => {
-                            requestSession.Dispose(error);
-                            this.SendTelemetryData(requestSession.RequestId, connection, requestSession.GetTelemetry());
+                            requestSession.dispose(error);
+                            this.sendTelemetryData(requestSession.requestId, connection, requestSession.getTelemetry());
                         });
 
                         return completionPromise;
                     }, (error: string) => {
-                        this.ConnectionError(requestSession.SessionId, requestSession.RequestId, error);
-                    }).OnSuccessContinueWithPromise(() => {
-                        return requestSession.CompletionPromise;
+                        this.connectionError(requestSession.sessionId, requestSession.requestId, error);
+                    }).onSuccessContinueWithPromise(() => {
+                        return requestSession.completionPromise;
                     });
             });
     }
 
     // Called when telemetry data is sent to the service.
     // Used for testing Telemetry capture.
-    public static TelemetryData: (json: string) => void;
+    public static telemetryData: (json: string) => void;
 
-    protected abstract ConnectionError(sessionId: string, requestId: string, error: string): void;
+    protected abstract connectionError(sessionId: string, requestId: string, error: string): void;
 
-    protected abstract ProcessTypeSpecificMessages(
+    protected abstract processTypeSpecificMessages(
         connectionMessage: SpeechConnectionMessage,
         requestSession: RequestSession,
         connection: IConnection,
         successCallback?: (e: SpeechRecognitionResult) => void,
         errorCallBack?: (e: string) => void): void;
 
-    protected SendTelemetryData = (requestId: string, connection: IConnection, telemetryData: string) => {
-        if (!!ServiceRecognizerBase.TelemetryData) {
+    protected sendTelemetryData = (requestId: string, connection: IConnection, telemetryData: string) => {
+        if (!!ServiceRecognizerBase.telemetryData) {
             try {
-                ServiceRecognizerBase.TelemetryData(telemetryData);
+                ServiceRecognizerBase.telemetryData(telemetryData);
                 /* tslint:disable:no-empty */
             } catch { }
         }
 
         return connection
-            .Send(new SpeechConnectionMessage(
+            .send(new SpeechConnectionMessage(
                 MessageType.Text,
                 "telemetry",
                 requestId,
@@ -178,97 +166,97 @@ export abstract class ServiceRecognizerBase implements IDisposable {
                 telemetryData));
     }
 
-    private ErrorCallback(error: string): void {
+    private errorCallback(error: string): void {
         throw new Error(error);
     }
 
-    private FetchConnection = (requestSession: RequestSession, isUnAuthorized: boolean = false): Promise<IConnection> => {
-        if (this.connectionFetchPromise) {
-            if (this.connectionFetchPromise.Result().IsError
-                || this.connectionFetchPromise.Result().Result.State() === ConnectionState.Disconnected) {
-                this.connectionId = null;
-                this.connectionFetchPromise = null;
-                return this.FetchConnection(requestSession);
+    private fetchConnection = (requestSession: RequestSession, isUnAuthorized: boolean = false): Promise<IConnection> => {
+        if (this.privConnectionFetchPromise) {
+            if (this.privConnectionFetchPromise.result().isError
+                || this.privConnectionFetchPromise.result().result.state() === ConnectionState.Disconnected) {
+                this.privConnectionId = null;
+                this.privConnectionFetchPromise = null;
+                return this.fetchConnection(requestSession);
             } else {
-                requestSession.OnPreConnectionStart(this.authFetchEventId, this.connectionId);
-                requestSession.OnConnectionEstablishCompleted(200);
-                requestSession.ListenForServiceTelemetry(this.connectionFetchPromise.Result().Result.Events);
-                return this.connectionFetchPromise;
+                requestSession.onPreConnectionStart(this.privAuthFetchEventId, this.privConnectionId);
+                requestSession.onConnectionEstablishCompleted(200);
+                requestSession.listenForServiceTelemetry(this.privConnectionFetchPromise.result().result.events);
+                return this.privConnectionFetchPromise;
             }
         }
 
-        this.authFetchEventId = CreateNoDashGuid();
-        this.connectionId = CreateNoDashGuid();
+        this.privAuthFetchEventId = createNoDashGuid();
+        this.privConnectionId = createNoDashGuid();
 
-        requestSession.OnPreConnectionStart(this.authFetchEventId, this.connectionId);
+        requestSession.onPreConnectionStart(this.privAuthFetchEventId, this.privConnectionId);
 
-        const authPromise = isUnAuthorized ? this.authentication.FetchOnExpiry(this.authFetchEventId) : this.authentication.Fetch(this.authFetchEventId);
+        const authPromise = isUnAuthorized ? this.privAuthentication.fetchOnExpiry(this.privAuthFetchEventId) : this.privAuthentication.fetch(this.privAuthFetchEventId);
 
-        this.connectionFetchPromise = authPromise
-            .ContinueWithPromise((result: PromiseResult<AuthInfo>) => {
-                if (result.IsError) {
-                    requestSession.OnAuthCompleted(true, result.Error);
-                    throw new Error(result.Error);
+        this.privConnectionFetchPromise = authPromise
+            .continueWithPromise((result: PromiseResult<AuthInfo>) => {
+                if (result.isError) {
+                    requestSession.onAuthCompleted(true, result.error);
+                    throw new Error(result.error);
                 } else {
-                    requestSession.OnAuthCompleted(false);
+                    requestSession.onAuthCompleted(false);
                 }
 
-                if (this.connection) {
-                    this.connection.Dispose();
-                    this.connection = undefined;
+                if (this.privConnection) {
+                    this.privConnection.dispose();
+                    this.privConnection = undefined;
                 }
 
-                this.connection = this.connectionFactory.Create(this.recognizerConfig, result.Result, this.connectionId);
-                requestSession.ListenForServiceTelemetry(this.connection.Events);
+                this.privConnection = this.privConnectionFactory.create(this.privRecognizerConfig, result.result, this.privConnectionId);
+                requestSession.listenForServiceTelemetry(this.privConnection.events);
 
-                return this.connection.Open().OnSuccessContinueWithPromise((response: ConnectionOpenResponse) => {
-                    if (response.StatusCode === 200) {
-                        requestSession.OnConnectionEstablishCompleted(response.StatusCode);
-                        return PromiseHelper.FromResult(this.connection);
-                    } else if (response.StatusCode === 403 && !isUnAuthorized) {
-                        return this.FetchConnection(requestSession, true);
+                return this.privConnection.open().onSuccessContinueWithPromise((response: ConnectionOpenResponse) => {
+                    if (response.statusCode === 200) {
+                        requestSession.onConnectionEstablishCompleted(response.statusCode);
+                        return PromiseHelper.fromResult(this.privConnection);
+                    } else if (response.statusCode === 403 && !isUnAuthorized) {
+                        return this.fetchConnection(requestSession, true);
                     } else {
-                        requestSession.OnConnectionEstablishCompleted(response.StatusCode, response.Reason);
-                        return PromiseHelper.FromError<IConnection>(`Unable to contact server. StatusCode: ${response.StatusCode}, Reason: ${response.Reason}`);
+                        requestSession.onConnectionEstablishCompleted(response.statusCode, response.reason);
+                        return PromiseHelper.fromError<IConnection>(`Unable to contact server. StatusCode: ${response.statusCode}, Reason: ${response.reason}`);
                     }
                 });
             });
 
-        return this.connectionFetchPromise;
+        return this.privConnectionFetchPromise;
     }
 
-    private ReceiveMessage = (
+    private receiveMessage = (
         connection: IConnection,
         requestSession: RequestSession,
         successCallback: (e: SpeechRecognitionResult) => void,
         errorCallBack: (e: string) => void,
     ): Promise<boolean> => {
         return connection
-            .Read()
-            .OnSuccessContinueWithPromise((message: ConnectionMessage) => {
+            .read()
+            .onSuccessContinueWithPromise((message: ConnectionMessage) => {
                 // indicates we are draining the queue and it came with no message;
                 if (!message) {
-                    return PromiseHelper.FromResult(true);
+                    return PromiseHelper.fromResult(true);
                 }
 
-                const connectionMessage = SpeechConnectionMessage.FromConnectionMessage(message);
+                const connectionMessage = SpeechConnectionMessage.fromConnectionMessage(message);
 
-                if (connectionMessage.RequestId.toLowerCase() === requestSession.RequestId.toLowerCase()) {
-                    switch (connectionMessage.Path.toLowerCase()) {
+                if (connectionMessage.requestId.toLowerCase() === requestSession.requestId.toLowerCase()) {
+                    switch (connectionMessage.path.toLowerCase()) {
                         case "turn.start":
-                            const sessionStartEventArgs: SessionEventArgs = new SessionEventArgs(requestSession.SessionId);
+                            const sessionStartEventArgs: SessionEventArgs = new SessionEventArgs(requestSession.sessionId);
 
-                            if (!!this.recognizer.sessionStarted) {
-                                this.recognizer.sessionStarted(this.recognizer, sessionStartEventArgs);
+                            if (!!this.privRecognizer.sessionStarted) {
+                                this.privRecognizer.sessionStarted(this.privRecognizer, sessionStartEventArgs);
                             }
                             break;
                         case "speech.startdetected":
-                            const speechStartDetected: SpeechDetected = SpeechDetected.FromJSON(connectionMessage.TextBody);
+                            const speechStartDetected: SpeechDetected = SpeechDetected.fromJSON(connectionMessage.textBody);
 
-                            const speechStartEventArgs = new RecognitionEventArgs(speechStartDetected.Offset, requestSession.SessionId);
+                            const speechStartEventArgs = new RecognitionEventArgs(speechStartDetected.Offset, requestSession.sessionId);
 
-                            if (!!this.recognizer.speechStartDetected) {
-                                this.recognizer.speechStartDetected(this.recognizer, speechStartEventArgs);
+                            if (!!this.privRecognizer.speechStartDetected) {
+                                this.privRecognizer.speechStartDetected(this.privRecognizer, speechStartEventArgs);
                             }
 
                             break;
@@ -276,32 +264,32 @@ export abstract class ServiceRecognizerBase implements IDisposable {
 
                             let json: string;
 
-                            if (connectionMessage.TextBody.length > 0) {
-                                json = connectionMessage.TextBody;
+                            if (connectionMessage.textBody.length > 0) {
+                                json = connectionMessage.textBody;
                             } else {
                                 // If the request was empty, the JSON returned is empty.
                                 json = "{ Offset: 0 }";
                             }
 
-                            const speechStopDetected: SpeechDetected = SpeechDetected.FromJSON(json);
+                            const speechStopDetected: SpeechDetected = SpeechDetected.fromJSON(json);
 
-                            const speechStopEventArgs = new RecognitionEventArgs(speechStopDetected.Offset, requestSession.SessionId);
+                            const speechStopEventArgs = new RecognitionEventArgs(speechStopDetected.Offset, requestSession.sessionId);
 
-                            if (!!this.recognizer.speechEndDetected) {
-                                this.recognizer.speechEndDetected(this.recognizer, speechStopEventArgs);
+                            if (!!this.privRecognizer.speechEndDetected) {
+                                this.privRecognizer.speechEndDetected(this.privRecognizer, speechStopEventArgs);
                             }
 
                             break;
                         case "turn.end":
-                            const sessionStopEventArgs: SessionEventArgs = new SessionEventArgs(requestSession.SessionId);
+                            const sessionStopEventArgs: SessionEventArgs = new SessionEventArgs(requestSession.sessionId);
 
-                            if (!!this.recognizer.sessionStopped) {
-                                this.recognizer.sessionStopped(this.recognizer, sessionStopEventArgs);
+                            if (!!this.privRecognizer.sessionStopped) {
+                                this.privRecognizer.sessionStopped(this.privRecognizer, sessionStopEventArgs);
                             }
-                            requestSession.OnServiceTurnEndResponse();
-                            return PromiseHelper.FromResult(true);
+                            requestSession.onServiceTurnEndResponse();
+                            return PromiseHelper.fromResult(true);
                         default:
-                            this.ProcessTypeSpecificMessages(
+                            this.processTypeSpecificMessages(
                                 connectionMessage,
                                 requestSession,
                                 connection,
@@ -310,15 +298,15 @@ export abstract class ServiceRecognizerBase implements IDisposable {
                     }
                 }
 
-                return this.ReceiveMessage(connection, requestSession, successCallback, errorCallBack);
+                return this.receiveMessage(connection, requestSession, successCallback, errorCallBack);
             });
     }
 
-    private SendSpeechConfig = (requestId: string, connection: IConnection, speechConfigJson: string) => {
-        if (speechConfigJson && this.connectionId !== this.speechConfigConnectionId) {
-            this.speechConfigConnectionId = this.connectionId;
+    private sendSpeechConfig = (requestId: string, connection: IConnection, speechConfigJson: string) => {
+        if (speechConfigJson && this.privConnectionId !== this.privSpeechConfigConnectionId) {
+            this.privSpeechConfigConnectionId = this.privConnectionId;
             return connection
-                .Send(new SpeechConnectionMessage(
+                .send(new SpeechConnectionMessage(
                     MessageType.Text,
                     "speech.config",
                     requestId,
@@ -326,23 +314,23 @@ export abstract class ServiceRecognizerBase implements IDisposable {
                     speechConfigJson));
         }
 
-        return PromiseHelper.FromResult(true);
+        return PromiseHelper.fromResult(true);
     }
 
-    private SendSpeechContext = (requestId: string, connection: IConnection, speechContextJson: string) => {
+    private sendSpeechContext = (requestId: string, connection: IConnection, speechContextJson: string) => {
         if (speechContextJson) {
             return connection
-                .Send(new SpeechConnectionMessage(
+                .send(new SpeechConnectionMessage(
                     MessageType.Text,
                     "speech.context",
                     requestId,
                     "application/json",
                     speechContextJson));
         }
-        return PromiseHelper.FromResult(true);
+        return PromiseHelper.fromResult(true);
     }
 
-    private SendAudio = (
+    private sendAudio = (
         requestId: string,
         connection: IConnection,
         audioStreamNode: IAudioStreamNode,
@@ -357,33 +345,33 @@ export abstract class ServiceRecognizerBase implements IDisposable {
         // The time we last sent data to the service.
         let lastSendTime: number = 0;
 
-        const audioFormat: AudioStreamFormatImpl = this.audioSource.Format as AudioStreamFormatImpl;
+        const audioFormat: AudioStreamFormatImpl = this.privAudioSource.format as AudioStreamFormatImpl;
 
         const readAndUploadCycle = (_: boolean) => {
             // If speech is done, stop sending audio.
-            if (!this.isDisposed && !requestSession.IsSpeechEnded && !requestSession.IsCompleted) {
-                audioStreamNode.Read().On(
+            if (!this.privIsDisposed && !requestSession.isSpeechEnded && !requestSession.isCompleted) {
+                audioStreamNode.read().on(
                     (audioStreamChunk: IStreamChunk<ArrayBuffer>) => {
                         // we have a new audio chunk to upload.
-                        if (requestSession.IsSpeechEnded) {
+                        if (requestSession.isSpeechEnded) {
                             // If service already recognized audio end then dont send any more audio
-                            deferred.Resolve(true);
+                            deferred.resolve(true);
                             return;
                         }
 
-                        const payload = (audioStreamChunk.IsEnd) ? null : audioStreamChunk.Buffer;
-                        const uploaded = connection.Send(
+                        const payload = (audioStreamChunk.isEnd) ? null : audioStreamChunk.buffer;
+                        const uploaded = connection.send(
                             new SpeechConnectionMessage(
                                 MessageType.Binary, "audio", requestId, null, payload));
 
-                        if (!audioStreamChunk.IsEnd) {
+                        if (!audioStreamChunk.isEnd) {
 
                             // Caculate any delay to the audio stream needed. /2 to allow 2x real time transmit rate max.
                             const minSendTime = ((payload.byteLength / audioFormat.avgBytesPerSec) / 2) * 1000;
 
                             const delay: number = Math.max(0, (lastSendTime - Date.now() + minSendTime));
 
-                            uploaded.OnSuccessContinueWith((result: boolean) => {
+                            uploaded.onSuccessContinueWith((result: boolean) => {
                                 setTimeout(() => {
                                     lastSendTime = Date.now();
                                     readAndUploadCycle(result);
@@ -392,19 +380,19 @@ export abstract class ServiceRecognizerBase implements IDisposable {
                         } else {
                             // the audio stream has been closed, no need to schedule next
                             // read-upload cycle.
-                            deferred.Resolve(true);
+                            deferred.resolve(true);
                         }
                     },
                     (error: string) => {
-                        if (requestSession.IsSpeechEnded) {
+                        if (requestSession.isSpeechEnded) {
                             // For whatever reason, Reject is used to remove queue subscribers inside
                             // the Queue.DrainAndDispose invoked from DetachAudioNode down blow, which
                             // means that sometimes things can be rejected in normal circumstances, without
                             // any errors.
-                            deferred.Resolve(true); // TODO: remove the argument, it's is completely meaningless.
+                            deferred.resolve(true); // TODO: remove the argument, it's is completely meaningless.
                         } else {
                             // Only reject, if there was a proper error.
-                            deferred.Reject(error);
+                            deferred.reject(error);
                         }
                     });
             }
@@ -412,6 +400,6 @@ export abstract class ServiceRecognizerBase implements IDisposable {
 
         readAndUploadCycle(true);
 
-        return deferred.Promise();
+        return deferred.promise();
     }
 }

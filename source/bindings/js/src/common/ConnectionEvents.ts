@@ -1,39 +1,40 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { ConnectionMessage } from "./ConnectionMessage";
 import { IStringDictionary } from "./IDictionary";
 import { EventType, PlatformEvent } from "./PlatformEvent";
 
 export class ConnectionEvent extends PlatformEvent {
-    private connectionId: string;
+    private privConnectionId: string;
 
     constructor(eventName: string, connectionId: string, eventType: EventType = EventType.Info) {
         super(eventName, eventType);
-        this.connectionId = connectionId;
+        this.privConnectionId = connectionId;
     }
 
-    public get ConnectionId(): string {
-        return this.connectionId;
+    public get connectionId(): string {
+        return this.privConnectionId;
     }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class ConnectionStartEvent extends ConnectionEvent {
-    private uri: string;
-    private headers: IStringDictionary<string>;
+    private privUri: string;
+    private privHeaders: IStringDictionary<string>;
 
     constructor(connectionId: string, uri: string, headers?: IStringDictionary<string>) {
         super("ConnectionStartEvent", connectionId);
-        this.uri = uri;
-        this.headers = headers;
+        this.privUri = uri;
+        this.privHeaders = headers;
     }
 
-    public get Uri(): string {
-        return this.uri;
+    public get uri(): string {
+        return this.privUri;
     }
 
-    public get Headers(): IStringDictionary<string> {
-        return this.headers;
+    public get headers(): IStringDictionary<string> {
+        return this.privHeaders;
     }
 }
 
@@ -46,80 +47,80 @@ export class ConnectionEstablishedEvent extends ConnectionEvent {
 
 // tslint:disable-next-line:max-classes-per-file
 export class ConnectionClosedEvent extends ConnectionEvent {
-    private reason: string;
-    private statusCode: number;
+    private privRreason: string;
+    private privStatusCode: number;
 
     constructor(connectionId: string, statusCode: number, reason: string) {
         super("ConnectionClosedEvent", connectionId, EventType.Debug);
-        this.reason = reason;
-        this.statusCode = statusCode;
+        this.privRreason = reason;
+        this.privStatusCode = statusCode;
     }
 
-    public get Reason(): string {
-        return this.reason;
+    public get reason(): string {
+        return this.privRreason;
     }
 
-    public get StatusCode(): number {
-        return this.statusCode;
+    public get statusCode(): number {
+        return this.privStatusCode;
     }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class ConnectionEstablishErrorEvent extends ConnectionEvent {
-    private statusCode: number;
-    private reason: string;
+    private privStatusCode: number;
+    private privReason: string;
 
     constructor(connectionId: string, statuscode: number, reason: string) {
         super("ConnectionEstablishErrorEvent", connectionId, EventType.Error);
-        this.statusCode = statuscode;
-        this.reason = reason;
+        this.privStatusCode = statuscode;
+        this.privReason = reason;
     }
 
-    public get Reason(): string {
-        return this.reason;
+    public get reason(): string {
+        return this.privReason;
     }
 
-    public get StatusCode(): number {
-        return this.statusCode;
+    public get statusCode(): number {
+        return this.privStatusCode;
     }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class ConnectionMessageReceivedEvent extends ConnectionEvent {
-    private networkReceivedTime: string;
-    private message: ConnectionMessage;
+    private privNetworkReceivedTime: string;
+    private privMessage: ConnectionMessage;
 
     constructor(connectionId: string, networkReceivedTimeISO: string, message: ConnectionMessage) {
         super("ConnectionMessageReceivedEvent", connectionId);
-        this.networkReceivedTime = networkReceivedTimeISO;
-        this.message = message;
+        this.privNetworkReceivedTime = networkReceivedTimeISO;
+        this.privMessage = message;
     }
 
-    public get NetworkReceivedTime(): string {
-        return this.networkReceivedTime;
+    public get networkReceivedTime(): string {
+        return this.privNetworkReceivedTime;
     }
 
-    public get Message(): ConnectionMessage {
-        return this.message;
+    public get message(): ConnectionMessage {
+        return this.privMessage;
     }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class ConnectionMessageSentEvent extends ConnectionEvent {
-    private networkSentTime: string;
-    private message: ConnectionMessage;
+    private privNetworkSentTime: string;
+    private privMessage: ConnectionMessage;
 
     constructor(connectionId: string, networkSentTimeISO: string, message: ConnectionMessage) {
         super("ConnectionMessageSentEvent", connectionId);
-        this.networkSentTime = networkSentTimeISO;
-        this.message = message;
+        this.privNetworkSentTime = networkSentTimeISO;
+        this.privMessage = message;
     }
 
-    public get NetworkSentTime(): string {
-        return this.networkSentTime;
+    public get networkSentTime(): string {
+        return this.privNetworkSentTime;
     }
 
-    public get Message(): ConnectionMessage {
-        return this.message;
+    public get message(): ConnectionMessage {
+        return this.privMessage;
     }
 }

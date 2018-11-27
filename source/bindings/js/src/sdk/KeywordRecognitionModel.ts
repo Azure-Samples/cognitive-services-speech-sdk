@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { Contracts } from "./Contracts";
 
 /**
@@ -8,7 +9,7 @@ import { Contracts } from "./Contracts";
  * @class KeywordRecognitionModel
  */
 export class KeywordRecognitionModel {
-    private disposed: boolean = false;
+    private privDisposed: boolean = false;
 
     /**
      * Create and initializes a new instance.
@@ -23,7 +24,8 @@ export class KeywordRecognitionModel {
      * @function
      * @public
      * @param {string} fileName - A string that represents file name for the keyword recognition model.
-     *                 Note, the file can point to a zip file in which case the model will be extracted from the zip.
+     *        Note, the file can point to a zip file in which case the model
+     *        will be extracted from the zip.
      * @returns {KeywordRecognitionModel} The keyword recognition model being created.
      */
     public static fromFile(fileName: string): KeywordRecognitionModel {
@@ -38,7 +40,7 @@ export class KeywordRecognitionModel {
      * @function
      * @public
      * @param {string} file - A File that represents file for the keyword recognition model.
-     *                 Note, the file can point to a zip file in which case the model will be extracted from the zip.
+     *        Note, the file can point to a zip file in which case the model will be extracted from the zip.
      * @returns {KeywordRecognitionModel} The keyword recognition model being created.
      */
     public static fromStream(file: File): KeywordRecognitionModel {
@@ -54,10 +56,10 @@ export class KeywordRecognitionModel {
      * @public
      */
     public close(): void {
-        if (this.disposed) {
+        if (this.privDisposed) {
             return;
         }
 
-        this.disposed = true;
+        this.privDisposed = true;
     }
 }

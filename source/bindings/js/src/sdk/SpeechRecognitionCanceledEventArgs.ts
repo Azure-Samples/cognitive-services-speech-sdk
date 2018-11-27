@@ -1,11 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import {
-    CancellationErrorCode,
-    CancellationReason,
-    RecognitionEventArgs,
-} from "./Exports";
+import { CancellationErrorCode, CancellationReason, RecognitionEventArgs } from "./Exports";
 
 /**
  * Defines content of a RecognitionErrorEvent.
@@ -24,7 +20,8 @@ export class SpeechRecognitionCanceledEventArgs extends RecognitionEventArgs {
      * @param {number} offset - The offset.
      * @param {string} sessionId - The session id.
      */
-    public constructor(reason: CancellationReason, errorDetails: string, errorCode: CancellationErrorCode, offset?: number, sessionId?: string) {
+    public constructor(reason: CancellationReason, errorDetails: string,
+                       errorCode: CancellationErrorCode, offset?: number, sessionId?: string) {
         super(offset, sessionId);
 
         this.privReason = reason;

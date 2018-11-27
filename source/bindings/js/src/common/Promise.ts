@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { ArgumentNullError  } from "./Error";
 
 export enum PromiseState {
@@ -9,76 +10,76 @@ export enum PromiseState {
 }
 
 export interface IPromise<T> {
-    Result(): PromiseResult<T>;
+    result(): PromiseResult<T>;
 
-    ContinueWith<TContinuationResult>(
+    continueWith<TContinuationResult>(
         continuationCallback: (promiseResult: PromiseResult<T>) => TContinuationResult): IPromise<TContinuationResult>;
 
-    ContinueWithPromise<TContinuationResult>(
+    continueWithPromise<TContinuationResult>(
         continuationCallback: (promiseResult: PromiseResult<T>) => IPromise<TContinuationResult>): IPromise<TContinuationResult>;
 
-    OnSuccessContinueWith<TContinuationResult>(
+    onSuccessContinueWith<TContinuationResult>(
         continuationCallback: (result: T) => TContinuationResult): IPromise<TContinuationResult>;
 
-    OnSuccessContinueWithPromise<TContinuationResult>(
+    onSuccessContinueWithPromise<TContinuationResult>(
         continuationCallback: (result: T) => IPromise<TContinuationResult>): IPromise<TContinuationResult>;
 
-    On(successCallback: (result: T) => void, errorCallback: (error: string) => void): IPromise<T>;
+    on(successCallback: (result: T) => void, errorCallback: (error: string) => void): IPromise<T>;
 
-    Finally(callback: () => void): IPromise<T>;
+    finally(callback: () => void): IPromise<T>;
 }
 
 export interface IDeferred<T> {
-    State(): PromiseState;
+    state(): PromiseState;
 
-    Promise(): IPromise<T>;
+    promise(): IPromise<T>;
 
-    Resolve(result: T): IDeferred<T>;
+    resolve(result: T): IDeferred<T>;
 
-    Reject(error: string): IDeferred<T>;
+    reject(error: string): IDeferred<T>;
 }
 
 export class PromiseResult<T> {
-    protected isCompleted: boolean;
-    protected isError: boolean;
-    protected error: string;
-    protected result: T;
+    protected privIsCompleted: boolean;
+    protected privIsError: boolean;
+    protected privError: string;
+    protected privResult: T;
 
     public constructor(promiseResultEventSource: PromiseResultEventSource<T>) {
-        promiseResultEventSource.On((result: T) => {
-            if (!this.isCompleted) {
-                this.isCompleted = true;
-                this.isError = false;
-                this.result = result;
+        promiseResultEventSource.on((result: T) => {
+            if (!this.privIsCompleted) {
+                this.privIsCompleted = true;
+                this.privIsError = false;
+                this.privResult = result;
             }
         }, (error: string) => {
-            if (!this.isCompleted) {
-                this.isCompleted = true;
-                this.isError = true;
-                this.error = error;
+            if (!this.privIsCompleted) {
+                this.privIsCompleted = true;
+                this.privIsError = true;
+                this.privError = error;
             }
         });
     }
 
-    public get IsCompleted(): boolean {
-        return this.isCompleted;
+    public get isCompleted(): boolean {
+        return this.privIsCompleted;
     }
 
-    public get IsError(): boolean {
-        return this.isError;
+    public get isError(): boolean {
+        return this.privIsError;
     }
 
-    public get Error(): string {
-        return this.error;
+    public get error(): string {
+        return this.privError;
     }
 
-    public get Result(): T {
-        return this.result;
+    public get result(): T {
+        return this.privResult;
     }
 
-    public ThrowIfError = (): void => {
-        if (this.IsError) {
-            throw this.Error;
+    public throwIfError = (): void => {
+        if (this.isError) {
+            throw this.error;
         }
     }
 }
@@ -86,26 +87,26 @@ export class PromiseResult<T> {
 // tslint:disable-next-line:max-classes-per-file
 export class PromiseResultEventSource<T>  {
 
-    private onSetResult: (result: T) => void;
-    private onSetError: (error: string) => void;
+    private privOnSetResult: (result: T) => void;
+    private privOnSetError: (error: string) => void;
 
-    public SetResult = (result: T): void => {
-        this.onSetResult(result);
+    public setResult = (result: T): void => {
+        this.privOnSetResult(result);
     }
 
-    public SetError = (error: string): void => {
-        this.onSetError(error);
+    public setError = (error: string): void => {
+        this.privOnSetError(error);
     }
 
-    public On = (onSetResult: (result: T) => void, onSetError: (error: string) => void): void => {
-        this.onSetResult = onSetResult;
-        this.onSetError = onSetError;
+    public on = (onSetResult: (result: T) => void, onSetError: (error: string) => void): void => {
+        this.privOnSetResult = onSetResult;
+        this.privOnSetError = onSetError;
     }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class PromiseHelper {
-    public static WhenAll = (promises: Array<Promise<any>>): Promise<boolean> => {
+    public static whenAll = (promises: Array<Promise<any>>): Promise<boolean> => {
         if (!promises || promises.length === 0) {
             throw new ArgumentNullError("promises");
         }
@@ -118,15 +119,15 @@ export class PromiseHelper {
             completedPromises++;
             if (completedPromises === promises.length) {
                 if (errors.length === 0) {
-                    deferred.Resolve(true);
+                    deferred.resolve(true);
                 } else {
-                    deferred.Reject(errors.join(", "));
+                    deferred.reject(errors.join(", "));
                 }
             }
         };
 
         for (const promise of promises) {
-            promise.On((r: any) => {
+            promise.on((r: any) => {
                 checkForCompletion();
             }, (e: string) => {
                 errors.push(e);
@@ -134,37 +135,36 @@ export class PromiseHelper {
             });
         }
 
-        return deferred.Promise();
+        return deferred.promise();
     }
 
-    public static FromResult = <TResult>(result: TResult): Promise<TResult> => {
+    public static fromResult = <TResult>(result: TResult): Promise<TResult> => {
         const deferred = new Deferred<TResult>();
-        deferred.Resolve(result);
-        return deferred.Promise();
+        deferred.resolve(result);
+        return deferred.promise();
     }
 
-    public static FromError = <TResult>(error: string): Promise<TResult> => {
+    public static fromError = <TResult>(error: string): Promise<TResult> => {
         const deferred = new Deferred<TResult>();
-        deferred.Reject(error);
-        return deferred.Promise();
+        deferred.reject(error);
+        return deferred.promise();
     }
 }
 
 // TODO: replace with ES6 promises
 // tslint:disable-next-line:max-classes-per-file
 export class Promise<T> implements IPromise<T> {
-
-    private sink: Sink<T>;
+    private privSink: Sink<T>;
 
     public constructor(sink: Sink<T>) {
-        this.sink = sink;
+        this.privSink = sink;
     }
 
-    public Result = (): PromiseResult<T> => {
-        return this.sink.Result;
+    public result = (): PromiseResult<T> => {
+        return this.privSink.result;
     }
 
-    public ContinueWith = <TContinuationResult>(
+    public continueWith = <TContinuationResult>(
         continuationCallback: (promiseResult: PromiseResult<T>) => TContinuationResult): Promise<TContinuationResult> => {
 
         if (!continuationCallback) {
@@ -173,29 +173,29 @@ export class Promise<T> implements IPromise<T> {
 
         const continuationDeferral = new Deferred<TContinuationResult>();
 
-        this.sink.on(
+        this.privSink.on(
             (r: T) => {
                 try {
-                    const continuationResult: TContinuationResult = continuationCallback(this.sink.Result);
-                    continuationDeferral.Resolve(continuationResult);
+                    const continuationResult: TContinuationResult = continuationCallback(this.privSink.result);
+                    continuationDeferral.resolve(continuationResult);
                 } catch (e) {
-                    continuationDeferral.Reject(e);
+                    continuationDeferral.reject(e);
                 }
             },
             (error: string) => {
                 try {
-                    const continuationResult: TContinuationResult = continuationCallback(this.sink.Result);
-                    continuationDeferral.Resolve(continuationResult);
+                    const continuationResult: TContinuationResult = continuationCallback(this.privSink.result);
+                    continuationDeferral.resolve(continuationResult);
                 } catch (e) {
-                    continuationDeferral.Reject(`'Error handler for error ${error} threw error ${e}'`);
+                    continuationDeferral.reject(`'Error handler for error ${error} threw error ${e}'`);
                 }
             },
         );
 
-        return continuationDeferral.Promise();
+        return continuationDeferral.promise();
     }
 
-    public OnSuccessContinueWith = <TContinuationResult>(
+    public onSuccessContinueWith = <TContinuationResult>(
         continuationCallback: (result: T) => TContinuationResult): Promise<TContinuationResult> => {
 
         if (!continuationCallback) {
@@ -204,24 +204,24 @@ export class Promise<T> implements IPromise<T> {
 
         const continuationDeferral = new Deferred<TContinuationResult>();
 
-        this.sink.on(
+        this.privSink.on(
             (r: T) => {
                 try {
                     const continuationResult: TContinuationResult = continuationCallback(r);
-                    continuationDeferral.Resolve(continuationResult);
+                    continuationDeferral.resolve(continuationResult);
                 } catch (e) {
-                    continuationDeferral.Reject(e);
+                    continuationDeferral.reject(e);
                 }
             },
             (error: string) => {
-                continuationDeferral.Reject(error);
+                continuationDeferral.reject(error);
             },
         );
 
-        return continuationDeferral.Promise();
+        return continuationDeferral.promise();
     }
 
-    public ContinueWithPromise = <TContinuationResult>(
+    public continueWithPromise = <TContinuationResult>(
         continuationCallback: (promiseResult: PromiseResult<T>) => Promise<TContinuationResult>): Promise<TContinuationResult> => {
 
         if (!continuationCallback) {
@@ -230,43 +230,43 @@ export class Promise<T> implements IPromise<T> {
 
         const continuationDeferral = new Deferred<TContinuationResult>();
 
-        this.sink.on(
+        this.privSink.on(
             (r: T) => {
                 try {
-                    const continuationPromise: Promise<TContinuationResult> = continuationCallback(this.sink.Result);
+                    const continuationPromise: Promise<TContinuationResult> = continuationCallback(this.privSink.result);
                     if (!continuationPromise) {
                         throw new Error("'Continuation callback did not return promise'");
                     }
-                    continuationPromise.On((continuationResult: TContinuationResult) => {
-                        continuationDeferral.Resolve(continuationResult);
+                    continuationPromise.on((continuationResult: TContinuationResult) => {
+                        continuationDeferral.resolve(continuationResult);
                     }, (e: string) => {
-                        continuationDeferral.Reject(e);
+                        continuationDeferral.reject(e);
                     });
                 } catch (e) {
-                    continuationDeferral.Reject(e);
+                    continuationDeferral.reject(e);
                 }
             },
             (error: string) => {
                 try {
-                    const continuationPromise: Promise<TContinuationResult> = continuationCallback(this.sink.Result);
+                    const continuationPromise: Promise<TContinuationResult> = continuationCallback(this.privSink.result);
                     if (!continuationPromise) {
                         throw new Error("Continuation callback did not return promise");
                     }
-                    continuationPromise.On((continuationResult: TContinuationResult) => {
-                        continuationDeferral.Resolve(continuationResult);
+                    continuationPromise.on((continuationResult: TContinuationResult) => {
+                        continuationDeferral.resolve(continuationResult);
                     }, (e: string) => {
-                        continuationDeferral.Reject(e);
+                        continuationDeferral.reject(e);
                     });
                 } catch (e) {
-                    continuationDeferral.Reject(`'Error handler for error ${error} threw error ${e}'`);
+                    continuationDeferral.reject(`'Error handler for error ${error} threw error ${e}'`);
                 }
             },
         );
 
-        return continuationDeferral.Promise();
+        return continuationDeferral.promise();
     }
 
-    public OnSuccessContinueWithPromise = <TContinuationResult>(
+    public onSuccessContinueWithPromise = <TContinuationResult>(
         continuationCallback: (result: T) => Promise<TContinuationResult>): Promise<TContinuationResult> => {
 
         if (!continuationCallback) {
@@ -275,31 +275,31 @@ export class Promise<T> implements IPromise<T> {
 
         const continuationDeferral = new Deferred<TContinuationResult>();
 
-        this.sink.on(
+        this.privSink.on(
             (r: T) => {
                 try {
                     const continuationPromise: Promise<TContinuationResult> = continuationCallback(r);
                     if (!continuationPromise) {
                         throw new Error("Continuation callback did not return promise");
                     }
-                    continuationPromise.On((continuationResult: TContinuationResult) => {
-                        continuationDeferral.Resolve(continuationResult);
+                    continuationPromise.on((continuationResult: TContinuationResult) => {
+                        continuationDeferral.resolve(continuationResult);
                     }, (e: string) => {
-                        continuationDeferral.Reject(e);
+                        continuationDeferral.reject(e);
                     });
                 } catch (e) {
-                    continuationDeferral.Reject(e);
+                    continuationDeferral.reject(e);
                 }
             },
             (error: string) => {
-                continuationDeferral.Reject(error);
+                continuationDeferral.reject(error);
             },
         );
 
-        return continuationDeferral.Promise();
+        return continuationDeferral.promise();
     }
 
-    public On = (
+    public on = (
         successCallback: (result: T) => void,
         errorCallback: (error: string) => void): Promise<T> => {
         if (!successCallback) {
@@ -310,11 +310,11 @@ export class Promise<T> implements IPromise<T> {
             throw new ArgumentNullError("errorCallback");
         }
 
-        this.sink.on(successCallback, errorCallback);
+        this.privSink.on(successCallback, errorCallback);
         return this;
     }
 
-    public Finally = (callback: () => void): Promise<T> => {
+    public finally = (callback: () => void): Promise<T> => {
         if (!callback) {
             throw new ArgumentNullError("callback");
         }
@@ -323,91 +323,89 @@ export class Promise<T> implements IPromise<T> {
             callback();
         };
 
-        return this.On(callbackWrapper, callbackWrapper);
+        return this.on(callbackWrapper, callbackWrapper);
     }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class Deferred<T> implements IDeferred<T> {
-
-    private promise: Promise<T>;
-    private sink: Sink<T>;
+    private privPromise: Promise<T>;
+    private privSink: Sink<T>;
 
     public constructor() {
-        this.sink = new Sink<T>();
-        this.promise = new Promise<T>(this.sink);
+        this.privSink = new Sink<T>();
+        this.privPromise = new Promise<T>(this.privSink);
     }
 
-    public State = (): PromiseState => {
-        return this.sink.State;
+    public state = (): PromiseState => {
+        return this.privSink.state;
     }
 
-    public Promise = (): Promise<T> => {
-        return this.promise;
+    public promise = (): Promise<T> => {
+        return this.privPromise;
     }
 
-    public Resolve = (result: T): Deferred<T> => {
-        this.sink.Resolve(result);
+    public resolve = (result: T): Deferred<T> => {
+        this.privSink.resolve(result);
         return this;
     }
 
-    public Reject = (error: string): Deferred<T> => {
-        this.sink.Reject(error);
+    public reject = (error: string): Deferred<T> => {
+        this.privSink.reject(error);
         return this;
     }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class Sink<T> {
+    private privState: PromiseState = PromiseState.None;
+    private privPromiseResult: PromiseResult<T> = null;
+    private privPromiseResultEvents: PromiseResultEventSource<T> = null;
 
-    private state: PromiseState = PromiseState.None;
-    private promiseResult: PromiseResult<T> = null;
-    private promiseResultEvents: PromiseResultEventSource<T> = null;
-
-    private successHandlers: Array<((result: T) => void)> = [];
-    private errorHandlers: Array<(e: string) => void> = [];
+    private privSuccessHandlers: Array<((result: T) => void)> = [];
+    private privErrorHandlers: Array<(e: string) => void> = [];
 
     public constructor() {
-        this.promiseResultEvents = new PromiseResultEventSource();
-        this.promiseResult = new PromiseResult(this.promiseResultEvents);
+        this.privPromiseResultEvents = new PromiseResultEventSource();
+        this.privPromiseResult = new PromiseResult(this.privPromiseResultEvents);
     }
 
-    public get State(): PromiseState {
-        return this.state;
+    public get state(): PromiseState {
+        return this.privState;
     }
 
-    public get Result(): PromiseResult<T> {
-        return this.promiseResult;
+    public get result(): PromiseResult<T> {
+        return this.privPromiseResult;
     }
 
-    public Resolve = (result: T): void => {
-        if (this.state !== PromiseState.None) {
+    public resolve = (result: T): void => {
+        if (this.privState !== PromiseState.None) {
             throw new Error("'Cannot resolve a completed promise'");
         }
 
-        this.state = PromiseState.Resolved;
-        this.promiseResultEvents.SetResult(result);
+        this.privState = PromiseState.Resolved;
+        this.privPromiseResultEvents.setResult(result);
 
-        for (let i = 0; i < this.successHandlers.length; i++) {
-            this.ExecuteSuccessCallback(result, this.successHandlers[i], this.errorHandlers[i]);
+        for (let i = 0; i < this.privSuccessHandlers.length; i++) {
+            this.executeSuccessCallback(result, this.privSuccessHandlers[i], this.privErrorHandlers[i]);
         }
 
-        this.DetachHandlers();
+        this.detachHandlers();
     }
 
-    public Reject = (error: string): void => {
-        if (this.state !== PromiseState.None) {
+    public reject = (error: string): void => {
+        if (this.privState !== PromiseState.None) {
             throw new Error("'Cannot reject a completed promise'");
         }
 
-        this.state = PromiseState.Rejected;
-        this.promiseResultEvents.SetError(error);
+        this.privState = PromiseState.Rejected;
+        this.privPromiseResultEvents.setError(error);
 
-        for (const errorHandler of this.errorHandlers) {
-            this.ExecuteErrorCallback(error, errorHandler);
+        for (const errorHandler of this.privErrorHandlers) {
+            this.executeErrorCallback(error, errorHandler);
         }
 
-        this.DetachHandlers();
+        this.detachHandlers();
     }
 
     public on = (
@@ -418,29 +416,29 @@ export class Sink<T> {
             successCallback = (r: T) => { return; };
         }
 
-        if (this.state === PromiseState.None) {
-            this.successHandlers.push(successCallback);
-            this.errorHandlers.push(errorCallback);
+        if (this.privState === PromiseState.None) {
+            this.privSuccessHandlers.push(successCallback);
+            this.privErrorHandlers.push(errorCallback);
         } else {
-            if (this.state === PromiseState.Resolved) {
-                this.ExecuteSuccessCallback(this.promiseResult.Result, successCallback, errorCallback);
-            } else if (this.state === PromiseState.Rejected) {
-                this.ExecuteErrorCallback(this.promiseResult.Error, errorCallback);
+            if (this.privState === PromiseState.Resolved) {
+                this.executeSuccessCallback(this.privPromiseResult.result, successCallback, errorCallback);
+            } else if (this.privState === PromiseState.Rejected) {
+                this.executeErrorCallback(this.privPromiseResult.error, errorCallback);
             }
 
-            this.DetachHandlers();
+            this.detachHandlers();
         }
     }
 
-    private ExecuteSuccessCallback = (result: T, successCallback: (result: T) => void, errorCallback: (error: string) => void): void => {
+    private executeSuccessCallback = (result: T, successCallback: (result: T) => void, errorCallback: (error: string) => void): void => {
         try {
             successCallback(result);
         } catch (e) {
-            this.ExecuteErrorCallback(`'Unhandled callback error: ${e}'`, errorCallback);
+            this.executeErrorCallback(`'Unhandled callback error: ${e}'`, errorCallback);
         }
     }
 
-    private ExecuteErrorCallback = (error: string, errorCallback: (error: string) => void): void => {
+    private executeErrorCallback = (error: string, errorCallback: (error: string) => void): void => {
         if (errorCallback) {
             try {
                 errorCallback(error);
@@ -452,8 +450,8 @@ export class Sink<T> {
         }
     }
 
-    private DetachHandlers = (): void => {
-        this.errorHandlers = [];
-        this.successHandlers = [];
+    private detachHandlers = (): void => {
+        this.privErrorHandlers = [];
+        this.privSuccessHandlers = [];
     }
 }

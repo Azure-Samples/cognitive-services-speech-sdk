@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { RiffPcmEncoder, Stream } from "../common/Exports";
 import { IRecorder } from "./IRecorder";
 
 export class PcmRecorder implements IRecorder {
-    private mediaResources: IMediaResources;
+    private privMediaResources: IMediaResources;
 
-    public Record = (context: AudioContext, mediaStream: MediaStream, outputStream: Stream<ArrayBuffer>): void => {
+    public record = (context: AudioContext, mediaStream: MediaStream, outputStream: Stream<ArrayBuffer>): void => {
         const desiredSampleRate = 16000;
 
         const scriptNode = (() => {
@@ -31,10 +32,10 @@ export class PcmRecorder implements IRecorder {
         scriptNode.onaudioprocess = (event: AudioProcessingEvent) => {
             const inputFrame = event.inputBuffer.getChannelData(0);
 
-            if (outputStream && !outputStream.IsClosed) {
-                const waveFrame = waveStreamEncoder.Encode(needHeader, inputFrame);
+            if (outputStream && !outputStream.isClosed) {
+                const waveFrame = waveStreamEncoder.encode(needHeader, inputFrame);
                 if (!!waveFrame) {
-                    outputStream.Write(waveFrame);
+                    outputStream.write(waveFrame);
                     needHeader = false;
                 }
             }
@@ -42,7 +43,7 @@ export class PcmRecorder implements IRecorder {
 
         const micInput = context.createMediaStreamSource(mediaStream);
 
-        this.mediaResources = {
+        this.privMediaResources = {
             scriptProcessorNode: scriptNode,
             source: micInput,
             stream: mediaStream,
@@ -52,16 +53,16 @@ export class PcmRecorder implements IRecorder {
         scriptNode.connect(context.destination);
     }
 
-    public ReleaseMediaResources = (context: AudioContext): void => {
-        if (this.mediaResources) {
-            if (this.mediaResources.scriptProcessorNode) {
-                this.mediaResources.scriptProcessorNode.disconnect(context.destination);
-                this.mediaResources.scriptProcessorNode = null;
+    public releaseMediaResources = (context: AudioContext): void => {
+        if (this.privMediaResources) {
+            if (this.privMediaResources.scriptProcessorNode) {
+                this.privMediaResources.scriptProcessorNode.disconnect(context.destination);
+                this.privMediaResources.scriptProcessorNode = null;
             }
-            if (this.mediaResources.source) {
-                this.mediaResources.source.disconnect();
-                this.mediaResources.stream.getTracks().forEach((track: any) => track.stop());
-                this.mediaResources.source = null;
+            if (this.privMediaResources.source) {
+                this.privMediaResources.source.disconnect();
+                this.privMediaResources.stream.getTracks().forEach((track: any) => track.stop());
+                this.privMediaResources.source = null;
             }
         }
     }

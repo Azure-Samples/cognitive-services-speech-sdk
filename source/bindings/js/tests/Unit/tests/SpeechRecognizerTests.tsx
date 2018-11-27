@@ -26,7 +26,7 @@ let objsToClose: any[];
 beforeAll(() => {
     // override inputs, if necessary
     Settings.LoadSettings();
-    Events.Instance.AttachListener(new ConsoleLoggingListener(EventType.Debug));
+    Events.instance.attachListener(new ConsoleLoggingListener(EventType.Debug));
 });
 
 // Test cases are run linerally, the only other mechanism to demark them in the output is to put a console line in each case and
@@ -168,7 +168,7 @@ test("RecognizeOnce", (done: jest.DoneCallback) => {
 
     let telemetryEvents: number = 0;
 
-    ServiceRecognizerBase.TelemetryData = (json: string): void => {
+    ServiceRecognizerBase.telemetryData = (json: string): void => {
         telemetryEvents++;
     };
 
@@ -416,7 +416,7 @@ test("testStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     let canceled: boolean = false;
     let telemetryEvents: number = 0;
 
-    ServiceRecognizerBase.TelemetryData = (json: string): void => {
+    ServiceRecognizerBase.telemetryData = (json: string): void => {
         telemetryEvents++;
     };
 
@@ -1112,11 +1112,11 @@ test("Using disposed recognizer invokes error callbacks.", () => {
 test.skip("Endpoint URL Test", (done: jest.DoneCallback) => {
     let uri: string;
 
-    Events.Instance.AttachListener({
-        OnEvent: (event: PlatformEvent) => {
+    Events.instance.attachListener({
+        onEvent: (event: PlatformEvent) => {
             if (event instanceof ConnectionStartEvent) {
                 const connectionEvent: ConnectionStartEvent = event as ConnectionStartEvent;
-                uri = connectionEvent.Uri;
+                uri = connectionEvent.uri;
             }
         },
     });
@@ -1154,11 +1154,11 @@ test.skip("Endpoint URL Test", (done: jest.DoneCallback) => {
 test("Endpoint URL With Parameter Test", (done: jest.DoneCallback) => {
     let uri: string;
 
-    Events.Instance.AttachListener({
-        OnEvent: (event: PlatformEvent) => {
+    Events.instance.attachListener({
+        onEvent: (event: PlatformEvent) => {
             if (event instanceof ConnectionStartEvent) {
                 const connectionEvent: ConnectionStartEvent = event as ConnectionStartEvent;
-                uri = connectionEvent.Uri;
+                uri = connectionEvent.uri;
             }
         },
     });

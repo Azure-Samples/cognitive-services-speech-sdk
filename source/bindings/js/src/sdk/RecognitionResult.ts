@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { PropertyCollection, ResultReason } from "./Exports";
 
 /**
@@ -28,7 +29,8 @@ export class RecognitionResult {
      * @param {string} json - Additional Json, if provided.
      * @param {PropertyCollection} properties - Additional properties, if provided.
      */
-    constructor(resultId?: string, reason?: ResultReason, text?: string, duration?: number, offset?: number, errorDetails?: string, json?: string, properties?: PropertyCollection) {
+    constructor(resultId?: string, reason?: ResultReason, text?: string, duration?: number,
+                offset?: number, errorDetails?: string, json?: string, properties?: PropertyCollection) {
         this.privResultId = resultId;
         this.privReason = reason;
         this.privText = text;

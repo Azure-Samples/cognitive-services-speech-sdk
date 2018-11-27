@@ -1,11 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import {
-    CancellationErrorCode,
-    CancellationReason,
-    TranslationRecognitionResult,
-} from "./Exports";
+import { CancellationErrorCode, CancellationReason, TranslationRecognitionResult } from "./Exports";
 
 /**
  * Define payload of speech recognition canceled result events.
@@ -26,7 +22,8 @@ export class TranslationRecognitionCanceledEventArgs {
      * @param {string} errorDetails - Error details, if provided.
      * @param {TranslationRecognitionResult} result - The result.
      */
-    public constructor(sessionid: string, cancellationReason: CancellationReason, errorDetails: string, errorCode: CancellationErrorCode, result: TranslationRecognitionResult) {
+    public constructor(sessionid: string, cancellationReason: CancellationReason, errorDetails: string,
+                       errorCode: CancellationErrorCode, result: TranslationRecognitionResult) {
         this.privCancelReason = cancellationReason;
         this.privErrorDetails = errorDetails;
         this.privResult = result;

@@ -1,22 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { ArgumentNullError } from "./Error";
 import { EventSource } from "./EventSource";
 import { IEventSource } from "./IEventSource";
 import { PlatformEvent } from "./PlatformEvent";
 
 export class Events {
-    private static instance: IEventSource<PlatformEvent> = new EventSource<PlatformEvent>();
+    private static privInstance: IEventSource<PlatformEvent> = new EventSource<PlatformEvent>();
 
-    public static SetEventSource = (eventSource: IEventSource<PlatformEvent>): void => {
+    public static setEventSource = (eventSource: IEventSource<PlatformEvent>): void => {
         if (!eventSource) {
             throw new ArgumentNullError("eventSource");
         }
 
-        Events.instance = eventSource;
+        Events.privInstance = eventSource;
     }
 
-    public static get Instance(): IEventSource<PlatformEvent> {
-        return Events.instance;
+    public static get instance(): IEventSource<PlatformEvent> {
+        return Events.privInstance;
     }
 }

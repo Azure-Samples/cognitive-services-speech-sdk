@@ -1,17 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { EventType, PlatformEvent } from "./PlatformEvent";
 
 export class AudioSourceEvent extends PlatformEvent {
-    private audioSourceId: string;
+    private privAudioSourceId: string;
 
     constructor(eventName: string, audioSourceId: string, eventType: EventType = EventType.Info) {
         super(eventName, eventType);
-        this.audioSourceId = audioSourceId;
+        this.privAudioSourceId = audioSourceId;
     }
 
-    public get AudioSourceId(): string {
-        return this.audioSourceId;
+    public get audioSourceId(): string {
+        return this.privAudioSourceId;
     }
 }
 
@@ -38,28 +39,29 @@ export class AudioSourceOffEvent extends AudioSourceEvent {
 
 // tslint:disable-next-line:max-classes-per-file
 export class AudioSourceErrorEvent extends AudioSourceEvent {
-    private error: string;
+    private privError: string;
+
     constructor(audioSourceId: string, error: string) {
         super("AudioSourceErrorEvent", audioSourceId, EventType.Error);
-        this.error = error;
+        this.privError = error;
     }
 
-    public get Error(): string {
-        return this.error;
+    public get error(): string {
+        return this.privError;
     }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class AudioStreamNodeEvent extends AudioSourceEvent {
-    private audioNodeId: string;
+    private privAudioNodeId: string;
 
     constructor(eventName: string, audioSourceId: string, audioNodeId: string) {
         super(eventName, audioSourceId);
-        this.audioNodeId = audioNodeId;
+        this.privAudioNodeId = audioNodeId;
     }
 
-    public get AudioNodeId(): string {
-        return this.audioNodeId;
+    public get audioNodeId(): string {
+        return this.privAudioNodeId;
     }
 }
 
@@ -86,14 +88,14 @@ export class AudioStreamNodeDetachedEvent extends AudioStreamNodeEvent {
 
 // tslint:disable-next-line:max-classes-per-file
 export class AudioStreamNodeErrorEvent extends AudioStreamNodeEvent {
-    private error: string;
+    private privError: string;
 
     constructor(audioSourceId: string, audioNodeId: string, error: string) {
         super("AudioStreamNodeErrorEvent", audioSourceId, audioNodeId);
-        this.error = error;
+        this.privError = error;
     }
 
-    public get Error(): string {
-        return this.error;
+    public get error(): string {
+        return this.privError;
     }
 }

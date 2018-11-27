@@ -1,34 +1,35 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import { ArgumentNullError } from "./Error";
 import { IKeyValueStorage } from "./IKeyValueStorage";
 import { InMemoryStorage } from "./InMemoryStorage";
 
 export class Storage {
-    private static sessionStorage: IKeyValueStorage = new InMemoryStorage();
-    private static localStorage: IKeyValueStorage = new InMemoryStorage();
+    private static privSessionStorage: IKeyValueStorage = new InMemoryStorage();
+    private static privLocalStorage: IKeyValueStorage = new InMemoryStorage();
 
-    public static SetSessionStorage = (sessionStorage: IKeyValueStorage): void => {
+    public static setSessionStorage = (sessionStorage: IKeyValueStorage): void => {
         if (!sessionStorage) {
             throw new ArgumentNullError("sessionStorage");
         }
 
-        Storage.sessionStorage = sessionStorage;
+        Storage.privSessionStorage = sessionStorage;
     }
 
-    public static SetLocalStorage = (localStorage: IKeyValueStorage): void => {
+    public static setLocalStorage = (localStorage: IKeyValueStorage): void => {
         if (!localStorage) {
             throw new ArgumentNullError("localStorage");
         }
 
-        Storage.localStorage = localStorage;
+        Storage.privLocalStorage = localStorage;
     }
 
-    public static get Session(): IKeyValueStorage {
-        return Storage.sessionStorage;
+    public static get session(): IKeyValueStorage {
+        return Storage.privSessionStorage;
     }
 
-    public static get Local(): IKeyValueStorage {
-        return Storage.localStorage;
+    public static get local(): IKeyValueStorage {
+        return Storage.privLocalStorage;
     }
 }

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
 import {
     CognitiveSubscriptionKeyAuthentication,
     CognitiveTokenAuthentication,
     Context,
-    Device,
     IAuthentication,
     IConnectionFactory,
     OS,
@@ -13,10 +13,7 @@ import {
     RecognizerConfig,
     ServiceRecognizerBase,
 } from "../common.speech/Exports";
-import {
-    Promise,
-    PromiseHelper,
-} from "../common/Exports";
+import { Promise, PromiseHelper } from "../common/Exports";
 import { Contracts } from "./Contracts";
 import {
     AudioConfig,
@@ -32,7 +29,7 @@ import {
  * @class Recognizer
  */
 export abstract class Recognizer {
-    private disposed: boolean;
+    private privDisposed: boolean;
     protected audioConfig: AudioConfig;
 
     /**
@@ -43,7 +40,7 @@ export abstract class Recognizer {
     protected constructor(audioConfig: AudioConfig) {
         this.audioConfig = (audioConfig !== undefined) ? audioConfig : AudioConfig.fromDefaultMicrophoneInput();
 
-        this.disposed = false;
+        this.privDisposed = false;
     }
 
     /**
@@ -85,14 +82,15 @@ export abstract class Recognizer {
      * @public
      */
     public close(): void {
-        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfDisposed(this.privDisposed);
 
         this.dispose(true);
     }
 
     /**
      * This method performs cleanup of resources.
-     * The Boolean parameter disposing indicates whether the method is called from Dispose (if disposing is true) or from the finalizer (if disposing is false).
+     * The Boolean parameter disposing indicates whether the method is called
+     * from Dispose (if disposing is true) or from the finalizer (if disposing is false).
      * Derived classes should override this method to dispose resource if needed.
      * @member Recognizer.prototype.dispose
      * @function
@@ -100,7 +98,7 @@ export abstract class Recognizer {
      * @param {boolean} disposing - Flag to request disposal.
      */
     protected dispose(disposing: boolean): void {
-        if (this.disposed) {
+        if (this.privDisposed) {
             return;
         }
 
@@ -108,7 +106,7 @@ export abstract class Recognizer {
             // disconnect
         }
 
-        this.disposed = true;
+        this.privDisposed = true;
     }
 
     //
@@ -118,12 +116,14 @@ export abstract class Recognizer {
     // ################################################################################################################
     //
 
-    protected abstract CreateRecognizerConfig(speecgConfig: PlatformConfig, recognitionMode: RecognitionMode): RecognizerConfig;
+    protected abstract createRecognizerConfig(speecgConfig: PlatformConfig, recognitionMode: RecognitionMode): RecognizerConfig;
 
-    protected abstract CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase;
+    protected abstract createServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory,
+                                               audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase;
 
     // Setup the recognizer
-    protected implRecognizerSetup(recognitionMode: RecognitionMode, speechProperties: PropertyCollection, audioConfig: AudioConfig, speechConnectionFactory: IConnectionFactory): ServiceRecognizerBase {
+    protected implRecognizerSetup(recognitionMode: RecognitionMode, speechProperties: PropertyCollection,
+                                  audioConfig: AudioConfig, speechConnectionFactory: IConnectionFactory): ServiceRecognizerBase {
 
         let osPlatform = (window !== undefined) ? "Browser" : "Node";
         let osName = "unknown";
@@ -135,7 +135,7 @@ export abstract class Recognizer {
             osVersion = navigator.appVersion;
         }
 
-        const recognizerConfig = this.CreateRecognizerConfig(
+        const recognizerConfig = this.createRecognizerConfig(
             new PlatformConfig(
                 new Context(new OS(osPlatform, osName, osVersion))),
             recognitionMode); // SDK.SpeechResultFormat.Simple (Options - Simple/Detailed)
@@ -146,14 +146,14 @@ export abstract class Recognizer {
             new CognitiveTokenAuthentication(
                 (authFetchEventId: string): Promise<string> => {
                     const authorizationToken = speechProperties.getProperty(PropertyId.SpeechServiceAuthorization_Token, undefined);
-                    return PromiseHelper.FromResult(authorizationToken);
+                    return PromiseHelper.fromResult(authorizationToken);
                 },
                 (authFetchEventId: string): Promise<string> => {
                     const authorizationToken = speechProperties.getProperty(PropertyId.SpeechServiceAuthorization_Token, undefined);
-                    return PromiseHelper.FromResult(authorizationToken);
+                    return PromiseHelper.fromResult(authorizationToken);
                 });
 
-        return this.CreateServiceRecognizer(
+        return this.createServiceRecognizer(
             authentication,
             speechConnectionFactory,
             audioConfig,
@@ -167,7 +167,7 @@ export abstract class Recognizer {
         errorCallback: (e: string) => void,
         speechContext?: string,
     ): void {
-        recognizer.Recognize(speechContext, successCallback, errorCallback).On(
+        recognizer.recognize(speechContext, successCallback, errorCallback).on(
             /* tslint:disable:no-empty */
             (result: boolean): void => { },
             (error: string): void => {

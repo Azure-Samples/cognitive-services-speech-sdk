@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 // response
+
 export interface IIntentResponse {
     query: string;
     topScoringIntent: ISingleIntent;
@@ -21,22 +22,25 @@ export interface ISingleIntent {
 }
 
 export class IntentResponse implements IIntentResponse {
-    private intentResponse: IIntentResponse;
+    private privIntentResponse: IIntentResponse;
+
     private constructor(json: string) {
-        this.intentResponse = JSON.parse(json);
+        this.privIntentResponse = JSON.parse(json);
     }
 
-    public static FromJSON(json: string): IntentResponse {
+    public static fromJSON(json: string): IntentResponse {
         return new IntentResponse(json);
     }
 
     public get query(): string {
-        return this.intentResponse.query;
+        return this.privIntentResponse.query;
     }
+
     public get topScoringIntent(): ISingleIntent {
-        return this.intentResponse.topScoringIntent;
+        return this.privIntentResponse.topScoringIntent;
     }
+
     public get entities(): IIntentEntity[] {
-        return this.intentResponse.entities;
+        return this.privIntentResponse.entities;
     }
 }

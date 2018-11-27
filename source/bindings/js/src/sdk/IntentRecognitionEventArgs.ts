@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import {
-    IntentRecognitionResult,
-    RecognitionEventArgs,
-} from "./Exports";
+
+import { IntentRecognitionResult, RecognitionEventArgs } from "./Exports";
 
 /**
  * Intent recognition result event arguments.

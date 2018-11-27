@@ -17,7 +17,7 @@ let objsToClose: any[];
 beforeAll(() => {
     // Override inputs, if necessary
     Settings.LoadSettings();
-    Events.Instance.AttachListener(new ConsoleLoggingListener(EventType.Debug));
+    Events.instance.attachListener(new ConsoleLoggingListener(EventType.Debug));
 });
 
 // Test cases are run linerally, still looking for a way to get the test name to print that doesn't mean changing each test.
