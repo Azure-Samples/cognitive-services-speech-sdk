@@ -103,7 +103,7 @@ public:
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
-    /// Creates a PullAudioInputStream that delegates to the specified callback interface for the Close() method.
+    /// Creates a PullAudioInputStream that delegates to the specified callback interface for the Read() and Close() methods, using the specified format.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
     /// <param name="callback">Shared pointer to PullAudioInputStreamCallback instance.</param>
