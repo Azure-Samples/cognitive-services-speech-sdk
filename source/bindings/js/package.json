@@ -20,9 +20,9 @@
   "author": "Microsoft",
   "license": "MIT",
   "devDependencies": {
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "gulp-minify": "0.0.15",
-    "gulp-sourcemaps": "^2.6.0",
+    "gulp-sourcemaps": "^2.6.4",
     "gulp-tslint": "^8.0.0",
     "gulp-typescript": "^3.2.3",
     "source-map-loader": "^0.2.3",
@@ -31,8 +31,6 @@
     "webpack-stream": "^4.0.0"
   },
   "scripts": {
-    "prepublishOnly": "npm install && gulp build",
-    "build": "npm install && gulp build",
-    "bundle": "npm install && gulp bundle"
+    "prepare": "gulp bundle"
   }
 }

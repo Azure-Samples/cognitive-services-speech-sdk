@@ -7,7 +7,7 @@
   var minify = require('gulp-minify');
   var webpack = require('webpack-stream');
 
-  gulp.task("build_ES5", function() {
+  gulp.task("build", function build () {
       return gulp.src([
               "src/**/*.ts",
               "microsoft.cognitiveservices.speech.sdk.ts"],
@@ -32,9 +32,7 @@
   });
 
 
-  gulp.task("build", ["build_ES5"]);
-
-  gulp.task("bundle", ["build_ES5"], function () {
+  gulp.task("bundle", gulp.series("build", function bundle () {
       return gulp.src('bundleApp.js')
       .pipe(webpack({
           output: {filename: 'microsoft.cognitiveservices.speech.sdk.bundle.js'},
@@ -48,6 +46,6 @@
           }
       }))
       .pipe(gulp.dest('distrib'));
-  });
+  }));
 
 }());

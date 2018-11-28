@@ -1434,20 +1434,6 @@ jobs:
   steps:
   - bash: ./ci/set-variables.sh
     displayName: Set variables
-  - task: Npm@1
-    displayName: 'npm run build'
-    inputs:
-      command: custom
-      workingDir: source/bindings/js
-      verbose: false
-      customCommand: 'run build'
-  - task: Npm@1
-    displayName: 'npm version'
-    inputs:
-      command: custom
-      workingDir: source/bindings/js
-      verbose: false
-      customCommand: version $(SPEECHSDK_SEMVER2NOMETA)
   - bash: |
       F=source/bindings/js/src/common.speech/RecognizerConfig.ts
       perl -i.bak -p -e 'BEGIN { $c = 0 } $c += s/(?<=const SPEECHSDK_CLIENTSDK_VERSION = ")[^"]*/$(SPEECHSDK_SEMVER2NOMETA)/g; END { die "Patched SPEECHSDK_CLIENTSDK_VERSION $c time(s), expected 1.\n" if $c != 1 }' "$F"
@@ -1456,18 +1442,15 @@ jobs:
       git diff
       exit $E
     displayName: Stamp SPEECHSDK_CLIENTSDK_VERSION
-  - task: Npm@1
-    displayName: 'npm run bundle'
-    inputs:
-      command: custom
-      workingDir: source/bindings/js
-      verbose: false
-      customCommand: 'run bundle'
-  - task: Npm@1
-    displayName: 'npm tests installer'
-    inputs:
-      workingDir: source/bindings/js/tests/Unit
-      verbose: false
+  - bash: |
+      cd source/bindings/js &&
+      npm version $(SPEECHSDK_SEMVER2NOMETA) &&
+      npm ci &&
+      npm run prepare &&
+      npm pack
+    displayName: Build and pack SDK
+  - bash: cd source/bindings/js/tests/Unit && npm ci
+    displayName: Install dependencies for test
   - bash: |
       perl ci/evaluate-test-config.pl --verbose --format azuredevops-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
@@ -1483,13 +1466,6 @@ jobs:
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-tslint.TSLint@1
     displayName: 'Run TSLint'
     enabled: false
-  - task: Npm@1
-    displayName: 'npm pack'
-    inputs:
-      command: custom
-      workingDir: source/bindings/js
-      verbose: false
-      customCommand: 'pack'
   - bash: |
       set -e -o pipefail -x
       PACKAGE_BASE=microsoft-cognitiveservices-speech-sdk
