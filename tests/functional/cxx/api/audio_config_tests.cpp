@@ -16,6 +16,11 @@
 #include "speechapi_cxx.h"
 #include "mock_controller.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable: 6237)
+// Disable: (<zero> && <expression>) is always zero.  <expression> is never evaluated and might have side effects.
+#endif
+
 using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 
 using namespace Microsoft::CognitiveServices::Speech;
@@ -29,20 +34,43 @@ static std::shared_ptr<SpeechConfig> SpeechConfigForAudioConfigTests()
         : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
 }
 
-TEST_CASE("Audio Config Basics", "[api][cxx][audio]")
+TEST_CASE("Audio Basics", "[api][cxx][audio]")
 {
-    SPXTEST_SECTION("Audio Pull Stream works")
-    {
-        weather.UpdateFullFilename(Config::InputDir);
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+    std::string sessionId;
 
+    weather.UpdateFullFilename(Config::InputDir);
+    REQUIRE(exists(weather.m_audioFilename));
+
+    auto requireRecognizedSpeech = [&sessionId](std::shared_ptr<SpeechRecognitionResult> result)
+    {
+        CAPTURE(sessionId);
+        REQUIRE(result != nullptr);
+
+        if (result->Reason == ResultReason::Canceled)
+        {
+            auto cancellation = CancellationDetails::FromResult(result);
+            CAPTURE(cancellation->Reason);
+            CAPTURE(cancellation->ErrorDetails);
+            CAPTURE(cancellation->ErrorCode);
+        }
+        else if (result->Reason == ResultReason::NoMatch)
+        {
+            auto nomatch = NoMatchDetails::FromResult(result);
+            CAPTURE(nomatch->Reason);
+        }
+        REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        REQUIRE(!result->Text.empty());
+    };
+
+    SECTION("pull stream works")
+    {
         // Prepare for the stream to be "Pulled"
         auto fs = OpenWaveFile(weather.m_audioFilename);
 
         // Create the "pull stream" object with C++ lambda callbacks
         auto pullStream = AudioInputStream::CreatePullStream(
             AudioStreamFormat::GetWaveFormatPCM(16000, 16, 1),
-            [ &fs](uint8_t* buffer, uint32_t size) -> int { return (int)ReadBuffer(fs, buffer,size); },
+            [&fs](uint8_t* buffer, uint32_t size) -> int { return (int)ReadBuffer(fs, buffer,size); },
             [=]() { });
 
         // Create the recognizer with the pull stream
@@ -50,19 +78,27 @@ TEST_CASE("Audio Config Basics", "[api][cxx][audio]")
         auto audioConfig = AudioConfig::FromStreamInput(pullStream);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
 
-        auto result = recognizer->RecognizeOnceAsync().get();
-        SPXTEST_REQUIRE_RESULT_RECOGNIZED_SPEECH(result);
-    }
-    SPXTEST_SECTION("Audio Push Stream works")
-    {
-        weather.UpdateFullFilename(Config::InputDir);
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        recognizer->SessionStarted.Connect([&sessionId](const SessionEventArgs& e)
+        {
+            sessionId = e.SessionId;
+        });
 
+        auto result = recognizer->RecognizeOnceAsync().get();
+        requireRecognizedSpeech(result);
+    }
+
+    SECTION("push stream works")
+    {
         // Create the recognizer "with stream input" with a "push stream"
         auto config = SpeechConfigForAudioConfigTests();
         auto pushStream = AudioInputStream::CreatePushStream();
         auto audioConfig = AudioConfig::FromStreamInput(pushStream);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
+
+        recognizer->SessionStarted.Connect([&sessionId](const SessionEventArgs& e)
+        {
+            sessionId = e.SessionId;
+        });
 
         // Prepare to use the "Push stream" by opening the file, and moving to head of data chunk
         FILE* hfile = nullptr;
@@ -87,49 +123,49 @@ TEST_CASE("Audio Config Basics", "[api][cxx][audio]")
             fclose(hfile);
         };
 
-        SPXTEST_WHEN("pushing audio data BEFORE recognition starts, 100000 byte buffer")
+        WHEN("pushing audio data BEFORE recognition starts, 100000 byte buffer")
         {
             pushData(100000);
             auto result = recognizer->RecognizeOnceAsync().get();
-            SPXTEST_REQUIRE_RESULT_RECOGNIZED_SPEECH(result);
+            requireRecognizedSpeech(result);
         }
 
-        SPXTEST_WHEN("pushing audio data BEFORE recognition starts, 1000 byte buffer")
+        WHEN("pushing audio data BEFORE recognition starts, 1000 byte buffer")
         {
             pushData(1000);
             auto result = recognizer->RecognizeOnceAsync().get();
-            SPXTEST_REQUIRE_RESULT_RECOGNIZED_SPEECH(result);
+            requireRecognizedSpeech(result);
         }
 
-        SPXTEST_WHEN("pushing audio data BEFORE recognition starts, 1000 byte buffer, 50ms between buffers")
+        WHEN("pushing audio data BEFORE recognition starts, 1000 byte buffer, 50ms between buffers")
         {
             pushData(1000, 50);
             auto result = recognizer->RecognizeOnceAsync().get();
-            SPXTEST_REQUIRE_RESULT_RECOGNIZED_SPEECH(result);
+            requireRecognizedSpeech(result);
         }
 
-        SPXTEST_WHEN("pushing audio data 2000ms AFTER recognition starts, 100000 byte buffer, 50ms between buffers")
+        WHEN("pushing audio data 2000ms AFTER recognition starts, 100000 byte buffer, 50ms between buffers")
         {
             auto future = recognizer->RecognizeOnceAsync();
             pushData(100000, 50, 2000);
             auto result = future.get();
-            SPXTEST_REQUIRE_RESULT_RECOGNIZED_SPEECH(result);
+            requireRecognizedSpeech(result);
         }
 
-        SPXTEST_WHEN("pushing audio data 2000ms AFTER recognition starts, 1000 byte buffer, 50ms between buffers")
+        WHEN("pushing audio data 2000ms AFTER recognition starts, 1000 byte buffer, 50ms between buffers")
         {
             auto future = recognizer->RecognizeOnceAsync();
             pushData(1000, 50, 2000);
             auto result = future.get();
-            SPXTEST_REQUIRE_RESULT_RECOGNIZED_SPEECH(result);
+            requireRecognizedSpeech(result);
         }
 
-        SPXTEST_WHEN("pushing audio data 2000ms AFTER recognition starts, 1000 byte buffer, 100ms between each")
+        WHEN("pushing audio data 2000ms AFTER recognition starts, 1000 byte buffer, 100ms between each")
         {
             auto future = recognizer->RecognizeOnceAsync();
             pushData(1000, 100, 2000);
             auto result = future.get();
-            SPXTEST_REQUIRE_RESULT_RECOGNIZED_SPEECH(result);
+            requireRecognizedSpeech(result);
         }
     }
 }

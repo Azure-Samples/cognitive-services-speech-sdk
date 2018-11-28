@@ -66,6 +66,7 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
                 auto cancellation = CancellationDetails::FromResult(result);
                 CAPTURE(cancellation->Reason);
                 CAPTURE(cancellation->ErrorDetails);
+                CAPTURE(cancellation->ErrorCode);
             }
             else if (result->Reason == ResultReason::NoMatch)
             {

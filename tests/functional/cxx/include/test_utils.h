@@ -127,9 +127,3 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     SPX_TRACE_INFO("SPXTEST_REQUIRE('%s'): %s(%d):", __SPX_EXPR_AS_STRING(expr), __FILE__, __LINE__); \
     SPX_TRACE_ERROR_IF(!(expr), "SPXTEST_REQUIRE('%s') FAILED: %s(%d):", __SPX_EXPR_AS_STRING(expr), __FILE__, __LINE__); \
     REQUIRE(expr)
-
-#define SPXTEST_REQUIRE_RESULT_RECOGNIZED_SPEECH(result) do {           \
-    SPXTEST_REQUIRE(result != nullptr);                                 \
-    SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);  \
-    SPXTEST_REQUIRE(!result->Text.empty()); } while (0)
-
