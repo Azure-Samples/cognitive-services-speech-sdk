@@ -12,6 +12,11 @@
     NSString *weatherTextGerman;
     NSString *weatherTextChinese;
     NSString *weatherFileName;
+    NSMutableDictionary *result;
+
+    NSPredicate *sessionStoppedCountPred;
+
+    double timeoutInSeconds;
 }
     @property (nonatomic, assign) NSString * speechKey;
     @property (nonatomic, assign) NSString * serviceRegion;
@@ -22,6 +27,7 @@
 
 - (void)setUp {
     [super setUp];
+    timeoutInSeconds = 20.;
     weatherTextEnglish = @"What's the weather like?";
     weatherTextGerman = @"Wie ist das Wetter?";
     weatherTextChinese =  @"天气怎么样？";
@@ -41,6 +47,32 @@
     [translationConfig setVoiceName:@"Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)"];
     
     self.translationRecognizer = [[SPXTranslationRecognizer alloc] initWithSpeechTranslationConfiguration:translationConfig audioConfiguration:weatherAudioSource];
+
+    __unsafe_unretained typeof(self) weakSelf = self;
+
+    result = [NSMutableDictionary new];
+    [result setObject:@0 forKey:@"finalResultCount"];
+    [result setObject:@0 forKey:@"sessionStoppedCount"];
+    [result setObject:@"" forKey:@"finalText"];
+
+    [self.translationRecognizer addRecognizedEventHandler: ^ (SPXTranslationRecognizer *recognizer, SPXTranslationRecognitionEventArgs *eventArgs) {
+        NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.offset, eventArgs.result.duration, eventArgs.result.resultId);
+        NSLog(@"Received JSON: %@", [eventArgs.result.properties getPropertyById:SPXSpeechServiceResponseJsonResult]);
+        [weakSelf->result setObject:eventArgs.result.text forKey: @"finalText"];
+        [weakSelf->result setObject:[NSNumber numberWithLong:[[weakSelf->result objectForKey:@"finalResultCount"] integerValue] + 1] forKey:@"finalResultCount"];
+    }];
+
+    [self.translationRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {
+        NSLog(@"Received session started event. SessionId: %@", eventArgs.sessionId);
+    }];
+
+    [self.translationRecognizer addSessionStoppedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {
+        [weakSelf->result setObject:[NSNumber numberWithLong:[[weakSelf->result objectForKey:@"sessionStoppedCount"] integerValue] + 1] forKey:@"sessionStoppedCount"];
+    }];
+
+    sessionStoppedCountPred = [NSPredicate predicateWithBlock: ^BOOL (id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings){
+        return [[evaluatedObject valueForKey:@"sessionStoppedCount"] isEqualToNumber:@1];
+    }];
 }
 
 - (void)tearDown {
@@ -62,17 +94,17 @@
 
 - (void) testContinuousTranslation {
     __block NSDictionary* translationDictionary = nil;
-    __block bool end = false;
     
     [self.translationRecognizer addRecognizedEventHandler: ^ (SPXTranslationRecognizer *recognizer, SPXTranslationRecognitionEventArgs *eventArgs)
      {
          translationDictionary = eventArgs.result.translations;
-         end = true;
      }];
     
     [self.translationRecognizer startContinuousRecognition];
-    while (end == false)
-        [NSThread sleepForTimeInterval:1.0f];
+
+    [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:self->result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+
     [self.translationRecognizer stopContinuousRecognition];
     
     id germanTranslation = [translationDictionary valueForKey:@"de"];
@@ -83,20 +115,15 @@
 }
 
 - (void)testTranslateAsync {
-    __block int finalResultCount = 0;
     __block NSDictionary* translationDictionary = @{};
-    
-    [self.translationRecognizer addRecognizedEventHandler:^(SPXTranslationRecognizer * recognizer, SPXTranslationRecognitionEventArgs * eventArgs) {
-         finalResultCount++;
-     }];
     
     [self.translationRecognizer recognizeOnceAsync: ^ (SPXTranslationRecognitionResult *result) {
          translationDictionary = result.translations;
          id germanTranslation = [translationDictionary valueForKey:@"de"];
          id chineseTranslation = [translationDictionary valueForKey:@"zh-Hans"];
          
-         XCTAssertTrue([germanTranslation isEqualToString:weatherTextGerman], "German translation does not match");
-         XCTAssertTrue([chineseTranslation isEqualToString:weatherTextChinese], "Chinese translation does not match");
+         XCTAssertTrue([germanTranslation isEqualToString:self->weatherTextGerman], "German translation does not match");
+         XCTAssertTrue([chineseTranslation isEqualToString:self->weatherTextChinese], "Chinese translation does not match");
      }];
 }
 
