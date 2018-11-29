@@ -106,6 +106,9 @@ jobs:
       ./ci/check-git-head.sh &&
       perl ci/check-docfx-codetags.pl public_samples
     displayName: Repository checks
+  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+    displayName: 'Component Detection'
+    condition: and(succeeded(), eq(variables['SPEECHSDK_BUILD_TYPE'], 'int'))
 
 - job: WindowsSdlBuild
   dependsOn: Pre
