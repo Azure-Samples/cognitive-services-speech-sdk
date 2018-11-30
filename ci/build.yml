@@ -1284,6 +1284,10 @@ jobs:
     displayName: Strip dynamic library in universal framework for release builds
     condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
   - bash: |
+      /usr/bin/codesign --force --sign - --timestamp=none "$(OutputDirectory)/$(FrameworkName).framework"
+    displayName: 'Self-Sign iOS framework'
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'false'))
+  - bash: |
       cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$(OutputDirectory)"
       cd "$(OutputDirectory)"
       zip --symlinks -r "$(VersionedFrameworkName).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
@@ -1312,6 +1316,9 @@ jobs:
       zip --symlinks -r '$(OutputDirectory)/$(VersionedFrameworkName).zip' .
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
     displayName: Package signed framework
+  - bash: . ci/functions.sh && vsts_setvar SPEECHSDK_RUN_TESTS false
+    condition: failed()
+    displayName: Skip tests on build failure.
   - bash: |
       set -e -o pipefail -x
       # set up framework in the correct position - the Xcode project expects the framework here (used for both Release and Debug configs atm)
@@ -1327,8 +1334,8 @@ jobs:
           -scheme SpeechSDK_iOS \
           -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
           SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION"
-    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
-    displayName: "Run simple iOS test"
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+    displayName: "Run iOS unit tests"
   - bash: |
       set -u -e -o pipefail -x
       . ci/functions.sh
@@ -1344,7 +1351,7 @@ jobs:
           -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
           -scheme helloworldUITests
     displayName: "Run iOS quickstart UI test"
-    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
