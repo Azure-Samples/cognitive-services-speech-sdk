@@ -17,6 +17,10 @@
 #include "audio_sys.h"
 #include "guid_utils.h"
 
+#include "exception.h"
+#define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
+#include "thread_service.h"
+
 #include <iostream>
 #include <assert.h>
 
@@ -33,6 +37,7 @@
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 bool turnEnd = false;
 
@@ -324,7 +329,9 @@ int main(int argc, char* argv[])
         printf("Connection ID '%ls' at %s\n", connectionId.c_str(), buf);
     }
 
-    USP::Client client(testCallbacks, endpointType, connectionId);
+    auto threadService = std::make_shared<CSpxThreadService>();
+    threadService->Init();
+    USP::Client client(testCallbacks, endpointType, connectionId, threadService);
     client.SetRegion(region);
     if (!customUrl.empty())
     {

@@ -5,6 +5,7 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
 include_directories(${INC_DIR})
 include_directories(${CARBON_C_API})
+include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
 include_directories ("${CARBON_EXTERNAL}/parson")
 include_directories("${CARBON_EXTERNAL}/json")
@@ -42,6 +43,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/tokenstore.h"
     "${SRC_DIR}/transport.h"
     "${SRC_DIR}/iobuffer.h"
+    "${SRC_DIR}/stdafx.h"
     )
 
 set(SOURCES
@@ -52,6 +54,7 @@ set(SOURCES
     "${SRC_DIR}/transport.c"
     "${SRC_DIR}/usp.cpp"
     "${SRC_DIR}/uspimpl.cpp"
+    "${SRC_DIR}/stdafx.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

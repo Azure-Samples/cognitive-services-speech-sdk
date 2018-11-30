@@ -12,6 +12,7 @@
 #include <string>
 
 #include "uspmessages.h"
+#include "ispxinterfaces.h"
 
 struct ProxyServerInfo;
 
@@ -165,15 +166,17 @@ public:
     * @param callbacks The struct defines callback functions that will be invoked when various USP events occur.
     * @param endpoint The speech service to be used, Speech, Intent, Translation, and etc.
     * @param connectionId Connection id, that will be passed to the service in the X-ConnectionId header and can be used for diagnostics.
+    * @param threadService Thread service.
     */
-    Client(CallbacksPtr callbacks, EndpointType endpoint, const std::wstring& connectionId):
+    Client(CallbacksPtr callbacks, EndpointType endpoint, const std::wstring& connectionId, const std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService>& threadService):
         m_callbacks(callbacks),
         m_endpoint(endpoint),
         m_recoMode(RecognitionMode::Interactive),
         m_outputFormat(OutputFormat::Simple),
         m_language(s_defaultLanguage),
         m_authType(AuthenticationType::SubscriptionKey),
-        m_connectionId(connectionId)
+        m_connectionId(connectionId),
+        m_threadService(threadService)
     {
     }
 
@@ -349,6 +352,8 @@ private:
      std::wstring m_connectionId;
 
      std::string m_audioResponseFormat;
+
+     std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> m_threadService;
 };
 
 }}}}

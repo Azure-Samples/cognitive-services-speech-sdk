@@ -48,7 +48,7 @@ void CSpxMockRecoEngineAdapter::SetAdapterMode(bool singleShot)
     m_singleShot = singleShot;
 }
 
-void CSpxMockRecoEngineAdapter::SetFormat(SPXWAVEFORMATEX* pformat)
+void CSpxMockRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
 {
     SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
     SPX_DBG_TRACE_VERBOSE_IF(pformat != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d",
@@ -99,7 +99,7 @@ void CSpxMockRecoEngineAdapter::ProcessAudio(AudioData_Type /* data */, uint32_t
     }
 }
 
-void CSpxMockRecoEngineAdapter::InitFormat(SPXWAVEFORMATEX* pformat)
+void CSpxMockRecoEngineAdapter::InitFormat(const SPXWAVEFORMATEX* pformat)
 {
     SPX_IFTRUE_THROW_HR(HasFormat(), SPXERR_ALREADY_INITIALIZED);
 

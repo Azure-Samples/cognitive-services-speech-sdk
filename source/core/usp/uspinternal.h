@@ -107,17 +107,14 @@ private:
     void Invoke(std::function<void()> callback);
 
     using DnsCachePtr = deleted_unique_ptr<std::remove_pointer<DnsCacheHandle>::type>;
-
     using TelemetryPtr = deleted_unique_ptr<std::remove_pointer<TELEMETRY_HANDLE>::type>;
-
     using TransportPtr = deleted_unique_ptr<std::remove_pointer<TransportHandle>::type>;
 
     void Validate();
+    void ScheduleWork();
 
-    static void WorkThread(std::weak_ptr<Connection::Impl> ptr);
-
-    void SignalWork();
-    void SignalConnected();
+    static void DoWork(std::weak_ptr<Connection::Impl> ptr);
+    static void WorkLoop(std::shared_ptr<Connection::Impl> ptr);
 
     std::string EncodeParameterString(const std::string& parameter) const;
     std::string ConstructConnectionUrl() const;
@@ -130,13 +127,6 @@ private:
 
     bool m_connected;
 
-    // Todo: can multiple UspContexts share the work thread?
-    bool m_haveWork;
-
-    std::recursive_mutex m_mutex;
-    std::condition_variable_any m_cv;
-    std::thread m_worker;
-
     size_t m_audioOffset;
 
     DnsCachePtr m_dnsCache;
@@ -146,14 +136,13 @@ private:
     const uint64_t m_creationTime;
 
     static void OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId);
-
     static void OnTransportError(TransportHandle transportHandle, TransportErrorInfo* errorInfo, void* context);
-
     static void OnTransportData(TransportHandle transportHandle, TransportResponse* response, void* context);
 
     void InvokeRecognitionErrorCallback(RecognitionStatus status, const std::string& response);
 
     uint64_t getTimestamp();
+    std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> m_threadService;
 };
 
 }}}}

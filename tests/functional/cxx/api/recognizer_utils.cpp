@@ -9,6 +9,7 @@
 
 
 TestData weather {"/audio/whatstheweatherlike.wav", "What's the weather like?" };
+TestData batman{ "/audio/batman.wav", "" };
 TestData wrongSamplingRateFile {"/audio/11khztest.wav", "" };
 TestData cortana {"/audio/heyCortana.wav", "Hey Cortana," };
 TestData callTheFirstOne{ "/audio/CallTheFirstOne.wav", "" };
@@ -219,3 +220,4 @@ auto createCallbacksMap() -> std::map<Callbacks, atomic_int>
     newMap[Callbacks::session_stopped] = 0;
     return newMap;
 }
+

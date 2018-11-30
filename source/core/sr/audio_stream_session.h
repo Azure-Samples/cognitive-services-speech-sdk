@@ -13,7 +13,7 @@
 #include "packaged_task_helpers.h"
 #include "service_helpers.h"
 #include "audio_buffer.h"
-#include "audio_stream_event_worker.h"
+#include "thread_service.h"
 
 #include <shared_mutex>
 
@@ -75,7 +75,7 @@ public:
 
     // --- ISpxAudioProcessor
 
-    void SetFormat(SPXWAVEFORMATEX* pformat) override;
+    void SetFormat(const SPXWAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
     // --- IServiceProvider ---
@@ -86,6 +86,7 @@ public:
     SPX_SERVICE_MAP_ENTRY(ISpxEventArgsFactory)
     SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
     SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
+    SPX_SERVICE_MAP_ENTRY_FUNC(InternalQueryService)
     SPX_SERVICE_MAP_END()
 
     // --- ISpxSession ---
@@ -101,52 +102,6 @@ public:
 
     CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) override;
     CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
-
-
-private:
-
-    DISABLE_COPY_AND_MOVE(CSpxAudioStreamSession);
-
-    enum class RecognitionKind {
-        Idle = 0,
-        Keyword = 1,
-        KwsSingleShot = 2,
-        SingleShot = 3,
-        Continuous = 4 };
-
-    enum class SessionState {
-        Idle = 0,
-        WaitForPumpSetFormatStart = 1,
-        ProcessingAudio = 2,
-        HotSwapPaused = 3,
-        StoppingPump = 4,
-        WaitForAdapterCompletedSetFormatStop = 5,
-        WaitForAdapterCompletedSetFormatStopFinished = 6,
-        ProcessingAudioLeftovers = 7
-    };
-
-    CSpxAsyncOp<void> StartRecognitionAsync(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
-    CSpxAsyncOp<void> StopRecognitionAsync(RecognitionKind stopKind);
-
-    void StartRecognizing(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
-    void StopRecognizing(RecognitionKind stopKind);
-
-    std::shared_ptr<ISpxRecognitionResult> WaitForRecognition();
-    void WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionResult> result);
-
-    void FireSessionStartedEvent();
-    void FireSessionStoppedEvent();
-
-    void FireSpeechStartDetectedEvent(uint64_t offset);
-    void FireSpeechEndDetectedEvent(uint64_t offset);
-
-    void EnsureFireResultEvent();
-    void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result);
-
-    std::shared_ptr<CSpxAudioSessionEventThreadService> m_firedEventWorker;
-    void FireEvent(CSpxAudioSessionEventThreadService::EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, wchar_t* sessionId = nullptr, uint64_t offset = 0);
-
-public:
 
     // --- ISpxKwsEngineAdapterSite
     void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint32_t size, AudioData_Type audioData) override;
@@ -198,6 +153,51 @@ public:
 
 
 private:
+    std::shared_ptr<ISpxThreadService> InternalQueryService(const char* serviceName);
+
+    void CheckError(const std::string& error);
+
+    DISABLE_COPY_AND_MOVE(CSpxAudioStreamSession);
+
+    enum class RecognitionKind {
+        Idle = 0,
+        Keyword = 1,
+        KwsSingleShot = 2,
+        SingleShot = 3,
+        Continuous = 4 };
+
+    enum class SessionState {
+        Idle = 0,
+        WaitForPumpSetFormatStart = 1,
+        ProcessingAudio = 2,
+        HotSwapPaused = 3,
+        StoppingPump = 4,
+        WaitForAdapterCompletedSetFormatStop = 5,
+        ProcessingAudioLeftovers = 6
+    };
+
+    CSpxAsyncOp<void> StartRecognitionAsync(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
+    CSpxAsyncOp<void> StopRecognitionAsync(RecognitionKind stopKind);
+
+    void StartRecognizing(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
+    void StopRecognizing(RecognitionKind stopKind);
+
+    void WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionResult> result);
+
+    void FireSessionStartedEvent();
+    void FireSessionStoppedEvent();
+
+    void FireSpeechStartDetectedEvent(uint64_t offset);
+    void FireSpeechEndDetectedEvent(uint64_t offset);
+
+    void EnsureFireResultEvent();
+    void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result);
+
+    enum EventType { SessionStart, SessionStop, SpeechStart, SpeechEnd, RecoResultEvent };
+    void FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, wchar_t* sessionId = nullptr, uint64_t offset = 0);
+
+private:
+    std::packaged_task<void()> CreateTask(std::function<void()> func, bool catchAll = true);
     std::shared_ptr<ISpxRecoEngineAdapter> EnsureInitRecoEngineAdapter();
     void InitRecoEngineAdapter();
 
@@ -213,12 +213,11 @@ private:
     bool ProcessNextAudio();
 
     void HotSwapToKwsSingleShotWhilePaused();
-    void WaitForKwsSingleShotRecognition();
 
     void StartAudioPump(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model);
     void HotSwapAdaptersWhilePaused(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
 
-    void InformAdapterSetFormatStarting(SPXWAVEFORMATEX* format);
+    void InformAdapterSetFormatStarting(const SPXWAVEFORMATEX* format);
     void InformAdapterSetFormatStopping(SessionState comingFromState);
     void EncounteredEndOfStream();
 
@@ -240,9 +239,16 @@ private:
     std::shared_ptr<ISpxLuEngineAdapter> GetLuEngineAdapter();
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
 
-    void WaitForIdle();
-    
+    void WaitForIdle(std::chrono::milliseconds timeout);
     void Ensure16kHzSampleRate();
+    void CancelPendingSingleShot();
+    void SlowDownThreadIfNecessary(uint32_t size);
+    void DispatchEvent(const std::list<std::weak_ptr<ISpxRecognizer>>& weakRecognizers,
+        const std::wstring& sessionId, EventType sessionType, uint64_t offset, const std::shared_ptr<ISpxRecognitionResult>& result);
+
+    struct Operation;
+    void RecognizeOnceAsync(const std::shared_ptr<Operation>& singleShot);
+
 private:
 
     std::shared_ptr<ISpxGenericSite> m_siteKeepAlive;
@@ -255,20 +261,11 @@ private:
     using seconds = std::chrono::seconds;
     using minutes = std::chrono::minutes;
 
-    #ifdef _MSC_VER
-    using ReadWriteMutex_Type = std::shared_mutex;
-    using WriteLock_Type = std::unique_lock<std::shared_mutex>;
-    using ReadLock_Type = std::shared_lock<std::shared_mutex>;
-    #else
-    using ReadWriteMutex_Type = std::shared_timed_mutex;
-    using WriteLock_Type = std::unique_lock<std::shared_timed_mutex>;
-    using ReadLock_Type = std::shared_lock<std::shared_timed_mutex>;
-    #endif
-
     //  To orchestrate the conversion of "Audio Data" into "Results" and "Events", we'll use utilize
     //  one "Audio Pump" and multiple "Adapters"
 
     SpxWAVEFORMATEX_Type m_format;
+    std::mutex m_formatMutex;
     std::shared_ptr<ISpxAudioPump> m_audioPump;
 
     std::shared_ptr<ISpxKwsEngineAdapter> m_kwsAdapter;
@@ -279,12 +276,15 @@ private:
 
     std::shared_ptr<ISpxLuEngineAdapter> m_luAdapter;
 
-    //  Our current "state" is kept in two parts, both protected by a reader/writer lock
-    //
+    // Our current "state" is kept in two parts and can only be changed from the background thread.
     //      1.) RecognitionKind (m_recoKind): Keeps track of what kind of recognition we're doing
     //      2.) SessionState (m_sessionState): Keeps track of what we're doing with Audio data
-    //
-    ReadWriteMutex_Type m_stateMutex;
+    // We still currently notify about the state change using the below conditional variable.
+    // (TODO: this will be removed, but currently RecognizeAsync has to wait till the session
+    // is in a clear state in order the next RecognizeAsync to succeeed.)
+    std::mutex m_stateMutex;
+    std::condition_variable m_cv;
+
     RecognitionKind m_recoKind;
     SessionState m_sessionState;
 
@@ -296,18 +296,10 @@ private:
     bool m_adapterAudioMuted;
     RecognitionKind m_turnEndStopKind;
 
-
-    //  When we're in the SessionState::ProcessingAudio, we'll relay "Audio Data" to from the Pump
-    //  to exactly one (and only one) of the engine adapters via it's ISpxAudioProcessor interface
-    //
-    //  Using or changing the Adapter (as ISpxAudioProcessor) requires locking/unlocking the reader writer lock
-    //
-    ReadWriteMutex_Type m_combinedAdapterAndStateMutex;
-
     // In order to reliably deliver audio, we always swap audio processor
     // together with its audio buffer. Otherwise data can be processed by a stale processor
     std::shared_ptr<ISpxAudioProcessor> m_audioProcessor;
-    bool m_isKwsProcessor{ false };
+    bool m_isKwsProcessor;
     AudioBufferPtr m_audioBuffer;
     DataChunkPtr m_spottedKeyword;
 
@@ -316,28 +308,40 @@ private:
     constexpr static seconds MaxBufferedBeforeOverflow = seconds(60);
     constexpr static milliseconds MaxBufferedBeforeSimulateRealtime = milliseconds(500);
     constexpr static int SimulateRealtimePercentage = 50;
-    constexpr static seconds ShutdownTimeout = seconds(3);
+    static seconds StopRecognitionTimeout;
 
-    // Other member data ...
-
-    std::mutex m_mutex;
-    std::condition_variable m_cv;
-
-    // 1 minute as timeout value for RecognizeAsync(), which should be sufficient even for translation in conversation mode.
-    // Note using std::chrono::minutes::max() could cause wait_for to exit straight away instead of
-    // infinite timeout, because wait_for() in VS is implemented via wait_until() and a possible integer
-    // overflow could make new time < now.
-    const minutes m_recoAsyncTimeoutDuration = minutes(1);
-    const seconds m_waitForAdapterCompletedSetFormatStopTimeout = seconds(20);
-
-    bool m_recoAsyncWaiting;
-    std::shared_ptr<ISpxRecognitionResult> m_recoAsyncResult;
-
-    CSpxPackagedTaskHelper m_taskHelper;
     std::list<std::weak_ptr<ISpxRecognizer>> m_recognizers;
+    std::mutex m_recognizersLock;
 
-    bool m_isReliableDelivery{ false };
-    bool m_shouldRetry{ false };
+    bool m_isReliableDelivery;
+    bool m_shouldRetry;
+
+    std::shared_ptr<CSpxThreadService> m_threadService;
+
+    struct Operation
+    {
+        // The below static constant is set to 1 minute as timeout value for
+        // RecognizeAsync()/SingleShot for KWS,
+        // which should be sufficient even for translation in conversation mode.
+        // Note using std::chrono::minutes::max() could cause wait_for to exit straight away instead of
+        // infinite timeout, because wait_for() in VS is implemented via wait_until() and a possible integer
+        // overflow could make new time < now.
+        const static minutes Timeout;
+        static std::atomic<int64_t> OperationId;
+
+        explicit Operation(RecognitionKind kind) : m_operationId{ OperationId++ }, m_kind{ kind }
+        {
+            m_future = std::shared_future<std::shared_ptr<ISpxRecognitionResult>>(m_promise.get_future());
+        }
+
+        const int64_t m_operationId;
+        const RecognitionKind m_kind;
+        std::promise<std::shared_ptr<ISpxRecognitionResult>> m_promise;
+        std::shared_future<std::shared_ptr<ISpxRecognitionResult>> m_future;
+    };
+
+    // Single shot in flight operation.
+    std::shared_ptr<Operation> m_singleShotInFlight;
 };
 
 

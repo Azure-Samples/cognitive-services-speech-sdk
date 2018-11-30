@@ -66,11 +66,11 @@ void CSpxAudioPump::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProc
         "in the enumeration); unless someone adds a new state and doesn't change this code. This assert "
         "guards in DBG for that possibility.");
 
+    m_stateRequested = State::Processing;
+
     auto pump = ((ISpxAudioPump*)this);
     auto keepAliveForThread = std::dynamic_pointer_cast<CSpxAudioPump>(pump->shared_from_this());
     m_thread = std::thread(&CSpxAudioPump::PumpThread, this, std::move(keepAliveForThread), pISpxAudioProcessor);
-
-    m_stateRequested = State::Processing; // it's ok we set the requested state after we 'start' the thread; PumpThread will wait for the lock
 
     // We must detach the thread because it will call into the session to destroy the session, thus trying to
     // delete itself. Therefore, we must not join, but instead make sure it holds the instance alive until it

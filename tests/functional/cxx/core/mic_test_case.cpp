@@ -31,7 +31,7 @@ public:
         m_processAudioCallCounter{ 0 }
     {}
 
-    virtual void SetFormat(SPXWAVEFORMATEX* format) override 
+    virtual void SetFormat(const SPXWAVEFORMATEX* format) override 
     {
         unique_lock<mutex> lock(m_mutex);
         if (format != nullptr) 

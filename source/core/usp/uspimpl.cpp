@@ -9,7 +9,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-
+#include "stdafx.h"
 #include <vector>
 #include <set>
 
@@ -94,7 +94,6 @@ void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrit
 Connection::Impl::Impl(const Client& config)
     : m_config(config),
     m_connected(false),
-    m_haveWork(false),
     m_audioOffset(0),
     m_creationTime(telemetry_gettime())
 {
@@ -127,6 +126,7 @@ Connection::Impl::Impl(const Client& config)
         }
     });
 
+    m_threadService = m_config.m_threadService;
     Validate();
 }
 
@@ -141,97 +141,80 @@ void Connection::Impl::Invoke(std::function<void()> callback)
     {
         return;
     }
-    m_mutex.unlock();
+
     callback();
-    m_mutex.lock();
 }
 
-void Connection::Impl::WorkThread(weak_ptr<Connection::Impl> ptr)
+void Connection::Impl::ScheduleWork()
+{
+    // Reschedule to make sure we do not reenter the transport
+    // from one of its callbacks.
+    auto keepAlive = shared_from_this();
+    std::packaged_task<void()> task([keepAlive]() { DoWork(keepAlive); });
+    m_threadService->ExecuteAsync(std::move(task));
+}
+
+void Connection::Impl::WorkLoop(shared_ptr<Connection::Impl> ptr)
+{
+    std::packaged_task<void()> task([ptr]()
+    {
+        if (!ptr->m_connected)
+            return;
+
+        DoWork(ptr);
+
+        std::packaged_task<void()> task([ptr]() { WorkLoop(ptr); });
+        ptr->m_threadService->ExecuteAsync(std::move(task), std::chrono::milliseconds(100));
+    });
+
+    ptr->m_threadService->ExecuteAsync(std::move(task));
+}
+
+void Connection::Impl::DoWork(weak_ptr<Connection::Impl> ptr)
 {
     try
     {
+        auto connection = ptr.lock();
+        if (connection == nullptr)
         {
-            auto connection = ptr.lock();
-            if (connection == nullptr)
-            {
-                return;
-            }
-            connection->SignalConnected();
+            return;
         }
 
-        while (true)
+        if (!connection->m_connected)
         {
-            auto connection = ptr.lock();
-            if (connection == nullptr)
-            {
-                // connection is destroyed, our work here is done.
-                LogInfo("%s connection destryoed.", __FUNCTION__);
-                break;
-            }
+            return;
+        }
 
-            unique_lock<recursive_mutex> lock(connection->m_mutex);
-            if (!connection->m_connected)
-            {
-                return;
-            }
+        auto callbacks = connection->m_config.m_callbacks;
 
-            auto callbacks = connection->m_config.m_callbacks;
-
-            try
-            {
-                TransportDoWork(connection->m_transport.get());
-            }
-            catch (const exception& e)
-            {
-                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, e.what()); });
-            }
-            catch (...)
-            {
-                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, "Unhandled exception in the USP layer."); });
-            }
-
-            connection->m_cv.wait_for(lock, chrono::milliseconds(200), [&] {return connection->m_haveWork || !connection->m_connected; });
-            connection->m_haveWork = false;
+        try
+        {
+            TransportDoWork(connection->m_transport.get());
+        }
+        catch (const exception& e)
+        {
+            connection->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, e.what()); });
+        }
+        catch (...)
+        {
+            connection->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, "Unhandled exception in the USP layer."); });
         }
     }
-    catch (const std::exception& ex) {
+    catch (const std::exception& ex)
+    {
         (void)ex; // release builds
         LogError("%s Unexpected Exception %s. Thread terminated", __FUNCTION__, ex.what());
     }
-    catch (...) {
+    catch (...)
+    {
         LogError("%s Unexpected Exception. Thread terminated", __FUNCTION__);
     }
-
-    LogInfo("%s Thread ending normally.", __FUNCTION__);
-}
-
-void Connection::Impl::SignalWork()
-{
-    m_haveWork = true;
-    m_cv.notify_one();
-}
-
-void Connection::Impl::SignalConnected()
-{
-    unique_lock<recursive_mutex> lock(m_mutex);
-    m_connected = true;
-    m_cv.notify_one();
 }
 
 void Connection::Impl::Shutdown()
 {
-    {
-        unique_lock<recursive_mutex> lock(m_mutex);
-        m_config.m_callbacks = nullptr;
-
-        // This will force the active thread to exit at some point,
-        // we do not wait on the thread in order not to block the calling side.
-        m_connected = false;
-        SignalWork();
-    }
-
-    // The thread has its own ref counted copy of callbacks.
-    m_worker.detach();
+    m_config.m_callbacks = nullptr;
+    m_connected = false;
 }
 
 void Connection::Impl::Validate()
@@ -459,9 +442,8 @@ void Connection::Impl::Connect()
     TransportSetDnsCache(m_transport.get(), m_dnsCache.get());
     TransportSetCallbacks(m_transport.get(), OnTransportError, OnTransportData);
 
-    m_worker = thread(&Connection::Impl::WorkThread, shared_from_this());
-    unique_lock<recursive_mutex> lock(m_mutex);
-    m_cv.wait(lock, [&] {return m_connected; });
+    m_connected = true;
+    WorkLoop(shared_from_this());
 }
 
 string Connection::Impl::CreateRequestId()
@@ -478,8 +460,6 @@ string Connection::Impl::CreateRequestId()
 
 void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size, MessageType messageType)
 {
-    unique_lock<recursive_mutex> lock(m_mutex);
-
     throw_if_null(data, "data");
 
     if (path.empty())
@@ -507,7 +487,7 @@ void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, siz
         (void)TransportMessageWrite(m_transport.get(), path.c_str(), data, size, requestId.c_str());
     }
 
-    SignalWork();
+    ScheduleWork();
 }
 
 void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
@@ -517,8 +497,6 @@ void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
         QueueAudioEnd();
         return;
     }
-
-    unique_lock<recursive_mutex> lock(m_mutex);
 
     LogInfo("TS:%" PRIu64 ", Write %" PRIu32 " bytes audio data.", getTimestamp(), size);
 
@@ -556,19 +534,17 @@ void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
     }
 
     m_audioOffset += size;
-    SignalWork();
+    ScheduleWork();
 }
 
 void Connection::Impl::QueueAudioEnd()
 {
-    unique_lock<recursive_mutex> lock(m_mutex);
     LogInfo("TS:%" PRIu64 ", Flush audio buffer.", getTimestamp());
 
     if (!m_connected || m_audioOffset == 0)
     {
         return;
     }
-
     auto ret = TransportStreamFlush(m_transport.get(), m_speechRequestId.c_str());
 
     m_audioOffset = 0;
@@ -579,7 +555,8 @@ void Connection::Impl::QueueAudioEnd()
     {
         ThrowRuntimeError("Returns failure, reason: TransportStreamFlush returned " + to_string(ret));
     }
-    SignalWork();
+
+    ScheduleWork();
 }
 
 // Callback for transport errors
@@ -858,7 +835,6 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, Transpor
         else if (pathStr == path::turnEnd)
         {
             {
-                unique_lock<recursive_mutex> lock(connection->m_mutex);
                 if (requestId == connection->m_speechRequestId)
                 {
                     connection->m_speechRequestId.clear();

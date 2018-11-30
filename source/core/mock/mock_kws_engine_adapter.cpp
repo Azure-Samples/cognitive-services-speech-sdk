@@ -42,7 +42,7 @@ void CSpxMockKwsEngineAdapter::Term()
     SPX_DBG_TRACE_FUNCTION();
 }
 
-void CSpxMockKwsEngineAdapter::SetFormat(SPXWAVEFORMATEX* pformat)
+void CSpxMockKwsEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
 {
     SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
     SPX_DBG_TRACE_VERBOSE_IF(pformat != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d",
@@ -81,7 +81,7 @@ void CSpxMockKwsEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
     }
 }
 
-void CSpxMockKwsEngineAdapter::InitFormat(SPXWAVEFORMATEX* pformat)
+void CSpxMockKwsEngineAdapter::InitFormat(const SPXWAVEFORMATEX* pformat)
 {
     SPX_IFTRUE_THROW_HR(HasFormat(), SPXERR_ALREADY_INITIALIZED);
 

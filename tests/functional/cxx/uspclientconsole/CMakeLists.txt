@@ -3,13 +3,17 @@ project(uspclientconsole)
 include_directories("${USP}/include")
 include_directories("${COMMON}/include")
 include_directories("${AUDIO}/include")
+include_directories("${CARBON_CORE}/include")
+include_directories("${SR}")
+include_directories(${CARBON_C_API})
+include_directories(${CARBON_CXX_API})
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(SOURCES "${SRC_DIR}/uspclientconsole.cpp")
 source_group("Source Files" FILES ${SOURCES})
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} usp audio)
+target_link_libraries(${PROJECT_NAME} usp audio sr)
 
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")

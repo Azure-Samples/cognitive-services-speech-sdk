@@ -43,7 +43,7 @@ public:
     void SetAdapterMode(bool singleShot) override;
 
     // --- ISpxAudioProcessor
-    void SetFormat(SPXWAVEFORMATEX* pformat) override;
+    void SetFormat(const SPXWAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
 
@@ -57,7 +57,7 @@ private:
 
     bool HasFormat() { return m_format.get() != nullptr; }
 
-    void InitFormat(SPXWAVEFORMATEX* pformat);
+    void InitFormat(const SPXWAVEFORMATEX* pformat);
     void TermFormat();
     void End();
 

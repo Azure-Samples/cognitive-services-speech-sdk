@@ -141,6 +141,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public static void AssertMatching(string expectedText, string actualText)
         {
+            Assert.IsFalse(actualText.Length == 0, $"Actual text should not be empty, expected '{expectedText}'");
+
             string plainActualText = Normalize(actualText);
             string plainExpectedText = Normalize(expectedText);
 

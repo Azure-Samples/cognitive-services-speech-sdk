@@ -216,8 +216,13 @@ SPXAPI recognizer_start_continuous_recognition_async_wait_for(SPXASYNCHANDLE has
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
         auto asyncop = (*asynchandles)[hasync];
 
+        hr = SPXERR_TIMEOUT;
         auto completed = asyncop->WaitFor(milliseconds);
-        hr = completed ? SPX_NOERROR : SPXERR_TIMEOUT;
+        if (completed)
+        {
+            asyncop->Future.get();
+            hr = SPX_NOERROR;
+        }
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -272,8 +277,13 @@ SPXAPI recognizer_stop_continuous_recognition_async_wait_for(SPXASYNCHANDLE hasy
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
         auto asyncop = (*asynchandles)[hasync];
 
+        hr = SPXERR_TIMEOUT;
         auto completed = asyncop->WaitFor(milliseconds);
-        hr = completed ? SPX_NOERROR : SPXERR_TIMEOUT;
+        if (completed)
+        {
+            asyncop->Future.get();
+            hr = SPX_NOERROR;
+        }
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -331,8 +341,13 @@ SPXAPI recognizer_start_keyword_recognition_async_wait_for(SPXASYNCHANDLE hasync
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
         auto asyncop = (*asynchandles)[hasync];
 
+        hr = SPXERR_TIMEOUT;
         auto completed = asyncop->WaitFor(milliseconds);
-        hr = completed ? SPX_NOERROR : SPXERR_TIMEOUT;
+        if (completed)
+        {
+            asyncop->Future.get();
+            hr = SPX_NOERROR;
+        }
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -387,8 +402,13 @@ SPXAPI recognizer_stop_keyword_recognition_async_wait_for(SPXASYNCHANDLE hasync,
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
         auto asyncop = (*asynchandles)[hasync];
 
+        hr = SPXERR_TIMEOUT;
         auto completed = asyncop->WaitFor(milliseconds);
-        hr = completed ? SPX_NOERROR : SPXERR_TIMEOUT;
+        if (completed)
+        {
+            asyncop->Future.get();
+            hr = SPX_NOERROR;
+        }
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

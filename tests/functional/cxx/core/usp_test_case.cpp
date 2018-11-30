@@ -8,12 +8,17 @@
 #include <random>
 #include <string>
 
+#include "exception.h"
+#define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
+
+#include "thread_service.h"
 #include "test_utils.h"
 #include "usp.h"
 #include "guid_utils.h"
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 class UspClient : public USP::Callbacks, public std::enable_shared_from_this<UspClient>
 {
@@ -30,7 +35,9 @@ public:
     void Init()
     {
         auto region = Config::Region.empty() ? "westus" : Config::Region;
-        auto client = USP::Client(shared_from_this(), m_endpoint, PAL::CreateGuidWithoutDashes())
+        m_threadService = std::make_shared<CSpxThreadService>();
+        m_threadService->Init();
+        auto client = USP::Client(shared_from_this(), m_endpoint, PAL::CreateGuidWithoutDashes(), m_threadService)
             .SetRecognitionMode(m_mode)
             .SetRegion(region)
             .SetAuthentication(USP::AuthenticationType::SubscriptionKey, Keys::Speech);
@@ -40,6 +47,11 @@ public:
         }
 
         m_connection = client.Connect();
+    }
+
+    void Term()
+    {
+        m_threadService->Term();
     }
 
     virtual void OnError(bool /*transport*/, USP::ErrorCode errorCode, const std::string& errorMessage) override
@@ -56,6 +68,7 @@ public:
 
 private:
     USP::ConnectionPtr m_connection;
+    std::shared_ptr<CSpxThreadService> m_threadService;
 };
 
 using UspClientPtr = std::shared_ptr<UspClient>;
@@ -65,8 +78,8 @@ TEST_CASE("USP is properly functioning", "[usp]")
     SECTION("usp can be initialized, connected and closed")
     {
         auto client = std::make_shared<UspClient>();
-        client->Init();
-        (void)(client);
+        REQUIRE_NOTHROW(client->Init());
+        REQUIRE_NOTHROW(client->Term());
     }
 
     string input_file{ Config::InputDir + "/audio/whatstheweatherlike.wav" };
@@ -76,8 +89,9 @@ TEST_CASE("USP is properly functioning", "[usp]")
     {
         string dummy = "RIFF1234567890";
         auto client = std::make_shared<UspClient>();
-        client->Init();
+        REQUIRE_NOTHROW(client->Init());
         client->WriteAudio(dummy.data(), dummy.length());
+        REQUIRE_NOTHROW(client->Term());
     }
 
     random_engine rnd(12345);
@@ -97,6 +111,8 @@ TEST_CASE("USP is properly functioning", "[usp]")
             client->WriteAudio(buffer.data(), bytesRead);
             std::this_thread::sleep_for(std::chrono::milliseconds(rnd() % 100));
         }
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        REQUIRE_NOTHROW(client->Term());
     }
 
     SECTION("usp can toggled on/off multiple times in a row")
@@ -112,6 +128,8 @@ TEST_CASE("USP is properly functioning", "[usp]")
                 client->WriteAudio(buffer.data(), bytesRead);
                 std::this_thread::sleep_for(std::chrono::milliseconds(rnd() % 100));
             }
+            std::this_thread::sleep_for(std::chrono::seconds(10));
+            REQUIRE_NOTHROW(client->Term());
         }
     }
 
@@ -142,6 +160,12 @@ TEST_CASE("USP is properly functioning", "[usp]")
             auto bytesRead = (size_t)is.gcount();
             clients[rnd() % num_handles]->WriteAudio(buffer.data(), bytesRead);
             std::this_thread::sleep_for(std::chrono::milliseconds(rnd() % 100));
+        }
+
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        for (int i = 0; i < num_handles; i++)
+        {
+            REQUIRE_NOTHROW(clients[i]->Term());
         }
     }
 }

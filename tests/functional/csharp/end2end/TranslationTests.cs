@@ -274,11 +274,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void DisposingTranslationRecognizerWhileAsyncRecognition()
         {
             var toLanguages = new List<string>() { Language.DE };
-            var recognizer = this.translationHelper.GetTranslationRecognizingAsyncNotAwaited(TestData.English.Batman.AudioFile, Language.CA_ES, toLanguages);
+            using (var recognizer = this.translationHelper.CreateTranslationRecognizer(TestData.English.Batman.AudioFile, Language.CA_ES, toLanguages))
+            {
+                Task singleShot = null;
+                Assert.ThrowsException<InvalidOperationException>(() =>
+                {
+                    singleShot = recognizer.RecognizeOnceAsync();
+                    Thread.Sleep(100);
+                    recognizer.Dispose();
+                });
+                singleShot.Wait();
+            }
         }
     }
 }

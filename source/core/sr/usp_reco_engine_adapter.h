@@ -99,7 +99,7 @@ public:
     void SetAdapterMode(bool singleShot) override;
 
     // --- ISpxAudioProcessor
-    void SetFormat(SPXWAVEFORMATEX* pformat) override;
+    void SetFormat(const SPXWAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
     // --- IServiceProvider ---
@@ -215,7 +215,7 @@ private:
     bool ChangeState(AudioState toAudioState, UspState toUspState) { return ChangeState(m_audioState, m_uspState, toAudioState, toUspState); }
     bool ChangeState(AudioState fromAudioState, UspState fromUspState, AudioState toAudioState, UspState toUspState);
 
-    void PrepareFirstAudioReadyState(SPXWAVEFORMATEX* format);
+    void PrepareFirstAudioReadyState(const SPXWAVEFORMATEX* format);
     void PrepareAudioReadyState();
     void SendPreAudioMessages();
 
@@ -249,20 +249,8 @@ private:
     std::chrono::system_clock::time_point m_uspResetTime;
 
     const bool m_allowUspResetAfterError = true;
-
-    #ifdef _MSC_VER
-    using ReadWriteMutex_Type = std::shared_mutex;
-    using WriteLock_Type = std::unique_lock<std::shared_mutex>;
-    using ReadLock_Type = std::shared_lock<std::shared_mutex>;
-    #else
-    using ReadWriteMutex_Type = std::mutex;
-    using WriteLock_Type = std::unique_lock<std::mutex>;
-    using ReadLock_Type = std::unique_lock<std::mutex>;
-    #endif
-
     bool m_singleShot = false;
     SpxWAVEFORMATEX_Type m_format;
-    ReadWriteMutex_Type m_stateMutex;
     AudioState m_audioState;
     UspState m_uspState;
 

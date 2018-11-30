@@ -171,16 +171,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public TranslationRecognizer GetTranslationRecognizingAsyncNotAwaited(string path, string fromLanguage, List<string> toLanguages)
-        {
-            using (var recognizer = CreateTranslationRecognizer(path, fromLanguage, toLanguages))
-            {
-                recognizer.RecognizeOnceAsync();
-                Thread.Sleep(100);
-                return recognizer;
-            }
-        }
-
         public static TranslationRecognizer TrackSessionId(TranslationRecognizer recognizer)
         {
             recognizer.SessionStarted += (s, e) =>

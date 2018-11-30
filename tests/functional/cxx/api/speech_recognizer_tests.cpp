@@ -82,6 +82,9 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
     weather.UpdateFullFilename(Config::InputDir);
     SPXTEST_REQUIRE(exists(weather.m_audioFilename));
 
+    batman.UpdateFullFilename(Config::InputDir);
+    SPXTEST_REQUIRE(exists(batman.m_audioFilename));
+
     auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_audioFilename);
 
     // a normal case.
@@ -108,15 +111,14 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
     }
     SPXTEST_SECTION("two starts in a row")
     {
+        auto recognizer2 = CreateRecognizers<SpeechRecognizer>(batman.m_audioFilename);
+
         promise<string> result;
-        ConnectCallbacks(recognizer.get(), result);
+        ConnectCallbacks(recognizer2.get(), result);
 
-        recognizer->StartContinuousRecognitionAsync().wait();
-        recognizer->StartContinuousRecognitionAsync().wait();
 
-        auto text = WaitForResult(result.get_future(), 1s);
-
-        SPXTEST_REQUIRE(text.find("SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION") != string::npos);
+        recognizer2->StartContinuousRecognitionAsync().wait();
+        REQUIRE_THROWS_WITH(recognizer2->StartContinuousRecognitionAsync().get(), Catch::Contains("SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION"));
     }
 #if 0
     // start and stop immediately

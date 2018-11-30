@@ -26,34 +26,34 @@ const vector<ISpxThreadService::Affinity> g_affinities =
     ISpxThreadService::Affinity::Background
 };
 
-TEST_CASE("ThreadService: Start/Stop", "[!hide][sr]")
+TEST_CASE("ThreadService: Start/Stop", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Start twice fails", "[!hide][sr]")
+TEST_CASE("ThreadService: Start twice fails", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
     REQUIRE_THROWS_WITH(service->Init(), Catch::Contains("INVALID_STATE"));
 }
 
-TEST_CASE("ThreadService: Term not initialized", "[!hide][sr]")
+TEST_CASE("ThreadService: Term not initialized", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Term twice, term is idempotent", "[!hide][sr]")
+TEST_CASE("ThreadService: Term twice, term is idempotent", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Term());
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Execute a task on uninitialized service fails", "[!hide][sr]")
+TEST_CASE("ThreadService: Execute a task on uninitialized service fails", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     int counter = 0;
@@ -62,10 +62,10 @@ TEST_CASE("ThreadService: Execute a task on uninitialized service fails", "[!hid
         counter++;
     });
 
-    REQUIRE_THROWS_WITH(service->Execute(move(task)), Catch::Contains("INVALID_STATE"));
+    REQUIRE_THROWS_WITH(service->ExecuteAsync(move(task)), Catch::Contains("INVALID_STATE"));
 }
 
-TEST_CASE("ThreadService: Execute tasks on background/user threads", "[!hide][sr]")
+TEST_CASE("ThreadService: Execute tasks on background/user threads", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
 
@@ -80,7 +80,7 @@ TEST_CASE("ThreadService: Execute tasks on background/user threads", "[!hide][sr
         {
             packaged_task<void()> task([&ids]() { ids.push_back(this_thread::get_id()); });
             futures.emplace_back(task.get_future());
-            REQUIRE_NOTHROW(service->Execute(move(task), affinity));
+            REQUIRE_NOTHROW(service->ExecuteAsync(move(task), affinity));
         }
 
         for (auto& f : futures)
@@ -98,7 +98,7 @@ TEST_CASE("ThreadService: Execute tasks on background/user threads", "[!hide][sr
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: User and background threads are different", "[!hide][sr]")
+TEST_CASE("ThreadService: User and background threads are different", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     vector<thread::id> ids;
@@ -122,8 +122,8 @@ TEST_CASE("ThreadService: User and background threads are different", "[!hide][s
     });
     futures.emplace_back(taskBackground.get_future());
 
-    REQUIRE_NOTHROW(service->Execute(move(taskUser), ISpxThreadService::Affinity::User));
-    REQUIRE_NOTHROW(service->Execute(move(taskBackground), ISpxThreadService::Affinity::Background));
+    REQUIRE_NOTHROW(service->ExecuteAsync(move(taskUser), ISpxThreadService::Affinity::User));
+    REQUIRE_NOTHROW(service->ExecuteAsync(move(taskBackground), ISpxThreadService::Affinity::Background));
 
     for (auto& f : futures)
         f.get();
@@ -136,7 +136,7 @@ TEST_CASE("ThreadService: User and background threads are different", "[!hide][s
     REQUIRE(ids[1] != this_thread::get_id());
 }
 
-TEST_CASE("ThreadService: Throw in a task and next task succeeds", "[!hide][sr]")
+TEST_CASE("ThreadService: Throw in a task and next task succeeds", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
 
@@ -150,14 +150,14 @@ TEST_CASE("ThreadService: Throw in a task and next task succeeds", "[!hide][sr]"
         });
         future<void> futureBad = taskBad.get_future();
 
-        REQUIRE_NOTHROW(service->Execute(move(taskBad), affinity));
+        REQUIRE_NOTHROW(service->ExecuteAsync(move(taskBad), affinity));
         REQUIRE_THROWS_WITH(futureBad.get(), Catch::Contains("Bad happened"));
 
         int counter = 0;
         packaged_task<void()> taskGood([&counter]() { ++counter; });
         future<void> futureGood = taskGood.get_future();
 
-        REQUIRE_NOTHROW(service->Execute(move(taskGood), affinity));
+        REQUIRE_NOTHROW(service->ExecuteAsync(move(taskGood), affinity));
         REQUIRE_NOTHROW(futureGood.get());
         REQUIRE(counter == 1);
     }
@@ -165,31 +165,7 @@ TEST_CASE("ThreadService: Throw in a task and next task succeeds", "[!hide][sr]"
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Schedule a timer several times.", "[!hide][sr]")
-{
-    auto service = make_shared<CSpxThreadService>();
-
-    REQUIRE_NOTHROW(service->Init());
-
-    int counter = 0;
-    milliseconds duration(0);
-    auto last = system_clock::now();
-    packaged_task<void()> task([&counter, &duration, &last]()
-    {
-        duration += duration_cast<milliseconds>(system_clock::now() - last);
-        last = system_clock::now();
-        counter++;
-    });
-
-    REQUIRE_NOTHROW(service->Execute(move(task), milliseconds(10), 3));
-    this_thread::sleep_for(milliseconds(50));
-    REQUIRE(counter == 3);
-    REQUIRE(duration > milliseconds(27));
-
-    REQUIRE_NOTHROW(service->Term());
-}
-
-TEST_CASE("ThreadService: Schedule several timers.", "[!hide][sr]")
+TEST_CASE("ThreadService: Schedule several timers.")
 {
     auto service = make_shared<CSpxThreadService>();
 
@@ -218,16 +194,16 @@ TEST_CASE("ThreadService: Schedule several timers.", "[!hide][sr]")
     });
 
     last = system_clock::now();
-    REQUIRE_NOTHROW(service->Execute(move(taskAfter2500ms), milliseconds(2500)));
-    REQUIRE_NOTHROW(service->Execute(move(taskAfter1500ms), milliseconds(1500)));
-    REQUIRE_NOTHROW(service->Execute(move(taskAfter500ms), milliseconds(500)));
+    REQUIRE_NOTHROW(service->ExecuteAsync(move(taskAfter2500ms), milliseconds(2500)));
+    REQUIRE_NOTHROW(service->ExecuteAsync(move(taskAfter1500ms), milliseconds(1500)));
+    REQUIRE_NOTHROW(service->ExecuteAsync(move(taskAfter500ms), milliseconds(500)));
 
     this_thread::sleep_for(seconds(5));
     REQUIRE(counter == 3);
 
-    cerr << "Expected 500 ms task took :" << duration500.count() << endl;
-    cerr << "Expected 1500 ms task took :" << duration1500.count() << endl;
-    cerr << "Expected 2500 ms task took :" << duration2500.count() << endl;
+    SPX_TRACE_INFO("Expected 500 ms task took : %s", std::to_string(duration500.count()).c_str());
+    SPX_TRACE_INFO("Expected 1500 ms task took : %s", to_string(duration1500.count()).c_str());
+    SPX_TRACE_INFO("Expected 2500 ms task took : %s", to_string(duration2500.count()).c_str());
 
     REQUIRE(duration500 < duration1500);
     REQUIRE(duration1500 < duration2500);
@@ -235,27 +211,32 @@ TEST_CASE("ThreadService: Schedule several timers.", "[!hide][sr]")
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Shutdown with immediate tasks and timers", "[!hide][sr]")
+TEST_CASE("ThreadService: Shutdown with immediate tasks and timers", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
 
     REQUIRE_NOTHROW(service->Init());
 
     int counter = 0;
+    const int NumIterations = 1000;
+
     // Schedule a timer task, shutdown can still happen if there are some timer tasks.
-    packaged_task<void()> timer([&]()
+    for (int i = 0; i < NumIterations / 2; ++i)
     {
-        cerr << "Timer" << endl;
-        counter++;
-    });
-    REQUIRE_NOTHROW(service->Execute(move(timer), milliseconds(500), 1000));
+        packaged_task<void()> timer([&]()
+        {
+            this_thread::sleep_for(milliseconds(5));
+            counter++;
+        });
+
+        REQUIRE_NOTHROW(service->ExecuteAsync(move(timer), milliseconds(100)));
+    }
 
     // Schedule immediate tasks.
-    const int NumIterations = 1000;
-    for (int i = 0; i < NumIterations; ++i)
+    for (int i = 0; i < NumIterations/2; ++i)
     {
         packaged_task<void()> task([&]() { this_thread::sleep_for(milliseconds(5)); counter++; });
-        REQUIRE_NOTHROW(service->Execute(move(task)));
+        REQUIRE_NOTHROW(service->ExecuteAsync(move(task)));
     }
 
     REQUIRE_NOTHROW(service->Term());
@@ -266,7 +247,7 @@ TEST_CASE("ThreadService: Shutdown with immediate tasks and timers", "[!hide][sr
     REQUIRE(counterOld == counter);
 }
 
-TEST_CASE("ThreadService: Shutdown on a background thread fails", "[!hide][sr]")
+TEST_CASE("ThreadService: Shutdown on a background thread fails", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
@@ -276,12 +257,12 @@ TEST_CASE("ThreadService: Shutdown on a background thread fails", "[!hide][sr]")
     });
 
     auto future = task.get_future();
-    REQUIRE_NOTHROW(service->Execute(move(task)));
+    REQUIRE_NOTHROW(service->ExecuteAsync(move(task)));
     REQUIRE_NOTHROW(future.get());
     REQUIRE_NOTHROW(service->Term());
 }
 
-TEST_CASE("ThreadService: Shutdown on a user thread succeeds", "[!hide][sr]")
+TEST_CASE("ThreadService: Shutdown on a user thread succeeds", "[sr]")
 {
     auto service = make_shared<CSpxThreadService>();
     REQUIRE_NOTHROW(service->Init());
@@ -291,7 +272,57 @@ TEST_CASE("ThreadService: Shutdown on a user thread succeeds", "[!hide][sr]")
     });
 
     auto future = task.get_future();
-    REQUIRE_NOTHROW(service->Execute(move(task), ISpxThreadService::Affinity::User));
+    REQUIRE_NOTHROW(service->ExecuteAsync(move(task), ISpxThreadService::Affinity::User));
     REQUIRE_NOTHROW(future.get());
 }
 
+TEST_CASE("ThreadService: Synchronous execution", "[sr]")
+{
+    auto service = make_shared<CSpxThreadService>();
+    REQUIRE_NOTHROW(service->Init());
+    int counter = 0;
+    packaged_task<void()> task([&]()
+    {
+        counter++;
+    });
+
+    REQUIRE_NOTHROW(service->ExecuteSync(std::move(task)));
+    REQUIRE(counter == 1);
+    REQUIRE_NOTHROW(service->Term());
+}
+
+TEST_CASE("ThreadService: Async with promise", "[sr]")
+{
+    auto service = make_shared<CSpxThreadService>();
+    REQUIRE_NOTHROW(service->Init());
+
+    int counter = 0;
+    packaged_task<void()> task1([&]()
+    {
+        this_thread::sleep_for(5s);
+        counter++;
+    });
+    auto task1Future = task1.get_future();
+
+    packaged_task<void()> task2([&]()
+    {
+        counter++;
+    });
+
+    std::promise<bool> task1Finished;
+    auto task1FinishedFuture = task1Finished.get_future();
+    REQUIRE_NOTHROW(service->ExecuteAsync(std::move(task1), ISpxThreadService::Affinity::Background,
+        std::move(task1Finished)));
+
+    std::promise<bool> task2Finished;
+    auto task2FinishedFuture = task2Finished.get_future();
+    REQUIRE_NOTHROW(service->ExecuteAsync(std::move(task2), ISpxThreadService::Affinity::Background,
+        std::move(task2Finished)));
+    this_thread::sleep_for(2s);
+    REQUIRE_NOTHROW(service->Term());
+
+    REQUIRE_NOTHROW(task1Future.get());
+    REQUIRE(task1FinishedFuture.get() == true);
+    REQUIRE(task2FinishedFuture.get() == false);
+    REQUIRE(counter == 1);
+}

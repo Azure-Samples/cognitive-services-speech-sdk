@@ -18,7 +18,10 @@
 #endif
 
 #include "trace_message.h"
+
+#ifndef __SPX_DO_TRACE_IMPL
 #define __SPX_DO_TRACE_IMPL SpxTraceMessage
+#endif
 
 #include "string_utils.h"
 #include "debug_utils.h"

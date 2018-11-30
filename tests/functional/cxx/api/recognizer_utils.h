@@ -50,6 +50,7 @@ struct TestData
 
 // declare the test data here
 extern TestData weather;
+extern TestData batman;
 extern TestData wrongSamplingRateFile;
 extern TestData callTheFirstOne;
 extern TestData turnOnLamp;

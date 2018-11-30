@@ -30,10 +30,17 @@ public:
     void Init() override;
     void Term() override;
 
-    TaskId Execute(std::packaged_task<void()>&& task, Affinity affinity = Affinity::Background) override;
-    TaskId Execute(std::packaged_task<void()>&& task, std::promise<void>&& canceled, Affinity affinity = Affinity::Background) override;
-    TaskId Execute(std::packaged_task<void()>&& task, std::chrono::milliseconds delay, int count = 1, Affinity affinity = Affinity::Background) override;
-    TaskId Execute(std::packaged_task<void()>&& task, std::promise<void>&& canceled, std::chrono::milliseconds delay, int count = 1, Affinity affinity = Affinity::Background) override;
+    TaskId ExecuteAsync(std::packaged_task<void()>&& task,
+        Affinity affinity = Affinity::Background,
+        std::promise<bool>&& executed = std::promise<bool>()) override;
+
+    TaskId ExecuteAsync(std::packaged_task<void()>&& task,
+        std::chrono::milliseconds delay,
+        Affinity affinity = Affinity::Background,
+        std::promise<bool>&& executed = std::promise<bool>()) override;
+
+    void ExecuteSync(std::packaged_task<void()>&& task,
+        Affinity affinity = Affinity::Background) override;
 
     bool Cancel(TaskId id) override;
     void CancelAllTasks() override;
@@ -46,9 +53,10 @@ private:
     class Task
     {
     public:
-        Task(TaskId id, std::packaged_task<void()>&& task, std::promise<void>&& canceled)
-            : m_task(std::move(task)), m_canceled(std::move(canceled)), m_id(id), m_state(State::New)
-        {}
+        Task(TaskId id, std::packaged_task<void()>&& task, std::promise<bool>&& executed)
+            : m_task(std::move(task)), m_executed(std::move(executed)), m_id(id), m_state(State::New)
+        {
+        }
 
         enum class State
         {
@@ -67,13 +75,13 @@ private:
         void MarkCanceled()
         {
             m_state = State::Canceled;
-            m_canceled.set_value();
+            m_executed.set_value(false);
         }
 
         void MarkFailed(const std::exception_ptr& e)
         {
             m_state = State::Canceled;
-            m_canceled.set_exception(std::make_exception_ptr(e));
+            m_executed.set_exception(std::make_exception_ptr(e));
         }
 
     protected:
@@ -85,7 +93,7 @@ private:
 
     private:
         std::packaged_task<void()> m_task;
-        std::promise<void> m_canceled;
+        std::promise<bool> m_executed;
         TaskId m_id;
         State m_state;
     };
@@ -96,10 +104,9 @@ private:
     class DelayTask : public Task
     {
     public:
-        DelayTask(TaskId id, std::packaged_task<void()>&& task, std::promise<void>&& cancelPromise,
-            std::chrono::milliseconds delay,
-            int count)
-            : Task(id, std::move(task), std::move(cancelPromise)), m_delay(delay), m_count(count)
+        DelayTask(TaskId id, std::packaged_task<void()>&& task, std::promise<bool>&& executed,
+            std::chrono::milliseconds delay)
+            : Task(id, std::move(task), std::move(executed)), m_delay(delay)
         {}
 
         void UpdateWhen()
@@ -110,17 +117,6 @@ private:
         const std::chrono::time_point<std::chrono::system_clock>& When() const
         {
             return m_when;
-        }
-
-        void Run() override
-        {
-            --m_count;
-            Task::Run();
-        }
-
-        int ExecutionCount() const
-        {
-            return m_count;
         }
 
         const std::chrono::milliseconds& Delay() const
@@ -136,7 +132,6 @@ private:
     private:
         std::chrono::time_point<std::chrono::system_clock> m_when;
         std::chrono::milliseconds m_delay;
-        int m_count;
     };
 
     using DelayTaskPtr = std::shared_ptr<DelayTask>;
@@ -153,6 +148,11 @@ private:
 
         bool Cancel(TaskId id);
         void CancelAllTasks();
+
+        std::thread::id Id() const
+        {
+            return m_thread.get_id();
+        }
 
     private:
         void MarkFailed(const std::exception_ptr& e);
@@ -179,6 +179,13 @@ private:
                 t->MarkFailed(e);
         }
 
+        template<class T>
+        void MarkAllTasksCancelled(std::deque<T>& container)
+        {
+            for (const auto& t : container)
+                t->MarkCanceled();
+        }
+
         static void WorkerLoop(std::shared_ptr<Thread> self);
 
         // Protects all state of the thread, in particular
@@ -197,7 +204,7 @@ private:
         std::atomic<bool> m_started { false };
 
         std::deque<TaskPtr> m_tasks;
-        std::deque<DelayTaskPtr> m_delayedTasks;
+        std::deque<DelayTaskPtr> m_timerTasks;
         std::atomic<bool> m_failed;
     };
 

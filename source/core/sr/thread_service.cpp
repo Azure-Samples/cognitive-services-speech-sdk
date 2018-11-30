@@ -37,40 +37,53 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
             t.second->Stop();
     }
 
-    CSpxThreadService::TaskId CSpxThreadService::Execute(packaged_task<void()>&& task, Affinity affinity)
-    {
-        return Execute(move(task), promise<void>(), affinity);
-    }
-
     void CSpxThreadService::CheckInitialized()
     {
         SPX_DBG_TRACE_ERROR_IF(m_threads.empty(), "Thread service should be initialized.");
         SPX_IFTRUE_THROW_HR(m_threads.empty(), SPXERR_INVALID_STATE);
     }
 
-    CSpxThreadService::TaskId CSpxThreadService::Execute(packaged_task<void()>&& task, promise<void>&& canceled, Affinity affinity)
+    CSpxThreadService::TaskId CSpxThreadService::ExecuteAsync(packaged_task<void()>&& task, Affinity affinity, promise<bool>&& executed)
     {
         CheckInitialized();
 
         auto taskId = m_nextTaskId++;
-        auto innerTask = make_shared<Task>(taskId, move(task), move(canceled));
+        auto innerTask = make_shared<Task>(taskId, move(task), move(executed));
         m_threads[affinity]->Queue(innerTask);
         return taskId;
     }
 
-    CSpxThreadService::TaskId CSpxThreadService::Execute(packaged_task<void()>&& task, milliseconds delay, int count, Affinity affinity)
-    {
-        return Execute(move(task), promise<void>(), delay, count, affinity);
-    }
-
-    CSpxThreadService::TaskId CSpxThreadService::Execute(packaged_task<void()>&& task, promise<void>&& canceled, milliseconds delay, int count, Affinity affinity)
+    CSpxThreadService::TaskId CSpxThreadService::ExecuteAsync(packaged_task<void()>&& task, milliseconds delay, Affinity affinity, promise<bool>&& executed)
     {
         CheckInitialized();
 
         auto taskId = m_nextTaskId++;
-        auto innerTask = make_shared<DelayTask>(taskId, move(task), move(canceled), delay, count);
+        auto innerTask = make_shared<DelayTask>(taskId, move(task), move(executed), delay);
         m_threads[affinity]->Queue(innerTask);
         return taskId;
+    }
+
+    void CSpxThreadService::ExecuteSync(std::packaged_task<void()>&& task, Affinity affinity)
+    {
+        for (const auto& t : m_threads)
+        {
+            if (t.second->Id() == this_thread::get_id())
+            {
+                SPX_DBG_TRACE_ERROR("Task cannot be executed synchronously on the thread"
+                    " from the thread service in order to avoid potential deadlocks.");
+                SPX_THROW_HR(SPXERR_ABORT);
+            }
+        }
+
+        auto future = task.get_future();
+        std::promise<bool> executed;
+        auto executedFuture = executed.get_future();
+        ExecuteAsync(std::move(task), affinity, std::move(executed));
+
+        if (executedFuture.get())
+        {
+            future.get();
+        }
     }
 
     bool CSpxThreadService::Cancel(CSpxThreadService::TaskId id)
@@ -100,19 +113,20 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
             m_state = State::Running;
             m_task();
             m_state = State::Finished;
+            m_executed.set_value(true);
         }
         catch (exception& e)
         {
             UNUSED(e);
             m_state = State::Failed;
             SPX_DBG_TRACE_ERROR("Exception happened during task execution: %s", e.what());
-            m_canceled.set_exception(current_exception());
+            m_executed.set_exception(current_exception());
         }
         catch (...)
         {
             m_state = State::Failed;
             SPX_DBG_TRACE_ERROR("Unknown exception happened during task execution");
-            m_canceled.set_exception(current_exception());
+            m_executed.set_exception(current_exception());
         }
     }
 
@@ -158,12 +172,17 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
     {
         unique_lock<mutex> lock(m_mutex);
         if (m_failed)
+        {
             SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+        }
 
         // Make sure we do not schedule new tasks
         // if the thread is being stopped.
         if (m_shouldStop)
+        {
+            task->MarkCanceled();
             return;
+        }
 
         m_tasks.push_back(task);
         m_cv.notify_all();
@@ -178,7 +197,10 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         // Make sure we do not schedule new tasks
         // if the thread is being stopped.
         if (m_shouldStop)
+        {
+            task->MarkCanceled();
             return;
+        }
 
         AddDelayTaskAtProperPlace(task);
         m_cv.notify_all();
@@ -187,7 +209,8 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
     bool CSpxThreadService::Thread::Cancel(TaskId id)
     {
         unique_lock<mutex> lock(m_mutex);
-        return CancelTask(m_tasks, id) || CancelTask(m_delayedTasks, id);
+        return CancelTask(m_tasks, id) ||
+               CancelTask(m_timerTasks, id);
     }
 
     void CSpxThreadService::Thread::CancelAllTasks()
@@ -195,15 +218,8 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         unique_lock<mutex> lock(m_mutex);
 
         // Mark all tasks as canceled.
-        for (auto& t : m_tasks)
-        {
-            t->MarkCanceled();
-        }
-
-        for (auto& t : m_delayedTasks)
-        {
-            t->MarkCanceled();
-        }
+        MarkAllTasksCancelled(m_tasks);
+        MarkAllTasksCancelled(m_timerTasks);
 
         // Remove all.
         RemoveAllTasks();
@@ -214,14 +230,14 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         unique_lock<mutex> lock(m_mutex);
         m_failed = true;
         MarkAllTasksFailed(m_tasks, e);
-        MarkAllTasksFailed(m_delayedTasks, e);
+        MarkAllTasksFailed(m_timerTasks, e);
         RemoveAllTasks();
     }
 
     void CSpxThreadService::Thread::RemoveAllTasks()
     {
         m_tasks.clear();
-        m_delayedTasks.clear();
+        m_timerTasks.clear();
     }
 
     void CSpxThreadService::Thread::AddDelayTaskAtProperPlace(DelayTaskPtr task)
@@ -234,70 +250,70 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
 
         task->UpdateWhen();
 
-        auto place = upper_bound(m_delayedTasks.begin(), m_delayedTasks.end(), task,
+        auto place = upper_bound(m_timerTasks.begin(), m_timerTasks.end(), task,
             [](const DelayTaskPtr& a, const DelayTaskPtr& b) { return a->When() < b->When(); });
-        if (place == m_delayedTasks.end())
+        if (place == m_timerTasks.end())
         {
-            m_delayedTasks.push_back(task);
+            m_timerTasks.push_back(task);
         }
         else
         {
-            m_delayedTasks.insert(place, task);
+            m_timerTasks.insert(place, task);
         }
     }
 
     void CSpxThreadService::Thread::WorkerLoop(shared_ptr<Thread> self)
     {
-        while (!self->m_shouldStop)
+        try
         {
-            try
-            {
-                unique_lock<mutex> lock(self->m_mutex);
+            const int MaxSlice = 10;
+            milliseconds delay = milliseconds(1000);
+            unique_lock<mutex> lock(self->m_mutex);
 
-                // Execute all tasks that have been scheduled.
-                while (!self->m_tasks.empty())
+            while (!self->m_shouldStop)
+            {
+
+                // Execute all tasks that have been scheduled,
+                // but not more than slice tasks to avoid timer tasks starvation.
+                int sliceCounter = 0;
+                while (!self->m_tasks.empty() && sliceCounter++ < MaxSlice)
                 {
                     auto task = self->m_tasks.front();
                     self->m_tasks.pop_front();
 
-                    // Run the task without the lock.
                     lock.unlock();
-                    // Run is a nothrow.
                     task->Run();
-                    lock.lock();
-
-                    if (self->m_shouldStop)
-                        return;
-                }
-
-                // Execute delayed tasks if required.
-                while (!self->m_delayedTasks.empty() &&
-                        self->m_delayedTasks.front()->When() < system_clock::now())
-                {
-                    auto task = self->m_delayedTasks.front();
-                    self->m_delayedTasks.pop_front();
-
-                    // Run the task without the lock.
-                    lock.unlock();
-                    // Run is a nothrow.
-                    task->Run();
-                    lock.lock();
 
                     if (self->m_shouldStop)
                         return;
 
-                    if (task->ExecutionCount() > 0)
-                    {
-                        task->Reset();
-                        self->AddDelayTaskAtProperPlace(task);
-                    }
+                    lock.lock();
                 }
 
-                milliseconds delay = milliseconds(numeric_limits<int>::max());
-                if (!self->m_delayedTasks.empty())
+                // Execute timer tasks if required,
+                // but not more than slice tasks to avoid immediate tasks starvation.
+                sliceCounter = 0;
+                while (!self->m_timerTasks.empty() &&
+                    self->m_timerTasks.front()->When() < system_clock::now() &&
+                    sliceCounter++ < MaxSlice)
                 {
-                    delay = duration_cast<milliseconds>(
-                        self->m_delayedTasks.front()->When() - system_clock::now());
+                    auto task = self->m_timerTasks.front();
+                    self->m_timerTasks.pop_front();
+
+                    lock.unlock();
+                    task->Run();
+
+                    if (self->m_shouldStop)
+                        return;
+
+                    lock.lock();
+                }
+
+                delay = milliseconds(200);
+                if (!self->m_timerTasks.empty())
+                {
+                    delay = std::min(duration_cast<milliseconds>(
+                        self->m_timerTasks.front()->When() - system_clock::now()), delay);
                 }
 
                 // Continue if there is some delay task that should be executed.
@@ -305,31 +321,29 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
                     continue;
 
                 // Sleeping for the delay till there is some task or we are asked to stop.
-                self->m_cv.wait_for(lock, delay,
-                    [self]
-                {
-                    return !self->m_tasks.empty() ||
-                           !self->m_delayedTasks.empty() ||
-                            self->m_shouldStop;
-                });
-            }
-            // If we are in the exception handler, something really bad happened.
-            // Not the task, but some of our structures misbehaved and we are in unknown state.
-            // We cannot really recover, because this can lead to hangs or live lock.
-            // so we abort all outstanding promises and set the whole thread to invalid state,
-            // so that the next access to the thread object will result in an error.
-            catch (const exception& e)
-            {
-                UNUSED(e);
-                SPX_DBG_TRACE_ERROR("Exception caused termination of the thread service: %s", e.what());
-                self->MarkFailed(current_exception());
-            }
-            catch (...)
-            {
-                SPX_DBG_TRACE_ERROR("Unknown exception happened during task execution");
-                self->MarkFailed(current_exception());
+                if(self->m_tasks.empty() && !self->m_shouldStop)
+                    self->m_cv.wait_for(lock, delay);
             }
         }
+        // If we are in the exception handler, something really bad happened.
+        // Not the task, but some of our structures misbehaved and we are in unknown state.
+        // We cannot really recover, because this can lead to hangs or live lock.
+        // so we abort all outstanding promises and set the whole thread to invalid state,
+        // so that the next access to the thread object will result in an error.
+        catch (const exception& e)
+        {
+            UNUSED(e);
+            SPX_DBG_TRACE_ERROR("Exception caused termination of the thread service: %s", e.what());
+            self->MarkFailed(current_exception());
+        }
+        catch (...)
+        {
+            SPX_DBG_TRACE_ERROR("Unknown exception happened during task execution");
+            self->MarkFailed(current_exception());
+        }
+
+        self->m_shouldStop = true;
+        self->CancelAllTasks();
     }
 
 }}}} // Microsoft::CognitiveServices::Speech::Impl
