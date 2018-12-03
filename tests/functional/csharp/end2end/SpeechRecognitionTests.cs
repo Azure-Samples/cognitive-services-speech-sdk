@@ -45,7 +45,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 helper.SubscribeToCounterEventHandlers(recognizer);
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "Duration == 0");
-                Assert.AreEqual(200000, result.OffsetInTicks, "Offset not zero");
+                Assert.AreEqual(300000, result.OffsetInTicks, "Offset not zero");
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
             }
         }

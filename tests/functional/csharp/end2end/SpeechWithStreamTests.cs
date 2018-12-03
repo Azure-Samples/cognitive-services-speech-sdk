@@ -198,22 +198,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     .ToList();
                 var expectedOffsets = new List<Tuple<long, long>>
                 {
-                    new Tuple<long, long>(5400000, 200000000),                                                   
-                    new Tuple<long, long>(213400000, 6100000),
-                    new Tuple<long, long>(229200000, 200000000),
-                    new Tuple<long, long>(440500000, 200000000),
-                    new Tuple<long, long>(648500000, 41900000),
-                    new Tuple<long, long>(708000000, 68600000),
-                    new Tuple<long, long>(788700000, 200000000),
-                    new Tuple<long, long>(996700000, 113000000),
-                    new Tuple<long, long>(1151900000, 200000000),
-                    new Tuple<long, long>(1359900000, 6200000),
-                    new Tuple<long, long>(1375800000, 200000000),
-                    new Tuple<long, long>(1587100000, 200000000),
-                    new Tuple<long, long>(1795100000, 41900000),
-                    new Tuple<long, long>(1854600000, 68600000),
-                    new Tuple<long, long>(1935300000, 200000000),
-                    new Tuple<long, long>(2143300000, 113000000)
+                    new Tuple<long, long>(5500000, 200000000),
+                    new Tuple<long, long>(213500000, 6100000),
+                    new Tuple<long, long>(229300000, 200000000),
+                    new Tuple<long, long>(440600000, 200000000),
+                    new Tuple<long, long>(648600000, 41900000),
+                    new Tuple<long, long>(708100000, 68600000),
+                    new Tuple<long, long>(788800000, 200000000),
+                    new Tuple<long, long>(996800000, 113000000),
+                    new Tuple<long, long>(1152000000, 200000000),
+                    new Tuple<long, long>(1360000000, 6200000),
+                    new Tuple<long, long>(1375900000, 200000000),
+                    new Tuple<long, long>(1587200000, 200000000),
+                    new Tuple<long, long>(1795200000, 41900000),
+                    new Tuple<long, long>(1854700000, 68600000),
+                    new Tuple<long, long>(1935400000, 200000000),
+                    new Tuple<long, long>(2143400000, 113000000)
                 };
                 Assert.AreEqual(expectedOffsets.Count, offsets.Count, "Number of offsets should match");
                 var zipped = expectedOffsets
