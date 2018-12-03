@@ -527,9 +527,12 @@ void telemetry_flush(TELEMETRY_HANDLE handle, const char* requestId)
     LIST_ITEM_HANDLE queue_item = NULL;
     while (NULL != (queue_item = singlylinkedlist_get_head_item(handle->inband_telemetry_queue)))
     {
-        TELEMETRY_DATA* telemetry_data = (TELEMETRY_DATA*)singlylinkedlist_item_get_value(queue_item);
-        prepare_send(handle, telemetry_data);
-        free(telemetry_data);
+        // BUG: if we send the queue_item now, the telemetry_data does not contain requestId, which will
+        // make Bing Speech/Intent service close the connection. Since we do not use this telemetry data
+        // for now, we disable the sending of this telemetry data.
+        // When we come back to revisit the telemetry,
+        // we need to have a proper design to send the connection data with requestId. See VSO item for details:
+        // https://msasg.visualstudio.com/Skyman/_workitems/edit/1530463.
         singlylinkedlist_remove(handle->inband_telemetry_queue, queue_item);
     }
     // Once events in the queue are flushed, flush the events associated with current requestId
