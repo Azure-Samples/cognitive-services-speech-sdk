@@ -109,6 +109,32 @@ export abstract class Recognizer {
         this.privDisposed = true;
     }
 
+    /**
+     * This method returns the current state of the telemetry setting.
+     * @member Recognizer.prototype.telemetryEnabled
+     * @function
+     * @public
+     * @returns true if the telemetry is enabled, false otherwise.
+     */
+    public static get telemetryEnabled(): boolean {
+        return ServiceRecognizerBase.telemetryDataEnabled;
+    }
+
+    /**
+     * This method globally enables or disables telemetry.
+     * @member Recognizer.prototype.enableTelemetry
+     * @function
+     * @public
+     * @param enabled - Global setting for telemetry collection.
+     * If set to true, telemetry information like microphone errors,
+     * recognition errors are collected and sent to Microsoft.
+     * If set to false, no telemetry is sent to Microsoft.
+     */
+    /* tslint:disable:member-ordering */
+    public static enableTelemetry(enabled: boolean): void {
+        ServiceRecognizerBase.telemetryDataEnabled = enabled;
+    }
+
     //
     // ################################################################################################################
     // IMPLEMENTATION.

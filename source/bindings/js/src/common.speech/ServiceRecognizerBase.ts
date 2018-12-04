@@ -139,6 +139,7 @@ export abstract class ServiceRecognizerBase implements IDisposable {
     // Called when telemetry data is sent to the service.
     // Used for testing Telemetry capture.
     public static telemetryData: (json: string) => void;
+    public static telemetryDataEnabled: boolean = true;
 
     protected abstract connectionError(sessionId: string, requestId: string, error: string): void;
 
@@ -150,6 +151,10 @@ export abstract class ServiceRecognizerBase implements IDisposable {
         errorCallBack?: (e: string) => void): void;
 
     protected sendTelemetryData = (requestId: string, connection: IConnection, telemetryData: string) => {
+        if (ServiceRecognizerBase.telemetryDataEnabled !== true) {
+            return PromiseHelper.fromResult(true);
+        }
+
         if (!!ServiceRecognizerBase.telemetryData) {
             try {
                 ServiceRecognizerBase.telemetryData(telemetryData);
@@ -303,6 +308,18 @@ export abstract class ServiceRecognizerBase implements IDisposable {
     }
 
     private sendSpeechConfig = (requestId: string, connection: IConnection, speechConfigJson: string) => {
+        // filter out anything that is not required for the service to work.
+        if (ServiceRecognizerBase.telemetryDataEnabled !== true) {
+            const withTelemetry = JSON.parse(speechConfigJson);
+
+            const replacement: any = {
+                 context: {
+                    system: withTelemetry.context.system,
+                 }};
+
+            speechConfigJson = JSON.stringify(replacement);
+        }
+
         if (speechConfigJson && this.privConnectionId !== this.privSpeechConfigConnectionId) {
             this.privSpeechConfigConnectionId = this.privConnectionId;
             return connection
