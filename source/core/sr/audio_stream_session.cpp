@@ -51,7 +51,7 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_turnEndStopKind(RecognitionKind::Idle),
     m_isKwsProcessor{ false },
     m_isReliableDelivery{ false },
-    m_shouldRetry{ false }
+    m_lastErrorGlobalOffset{ 0 }
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 }
@@ -1092,7 +1092,6 @@ void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter
     SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::WaitForPumpSetFormatStart), "ERROR! FireAdapterResult_FinalResult was called with SessionState==WaitForPumpSetFormatStart");
 
     auto buffer = m_audioBuffer;
-    m_shouldRetry = true;
     if (buffer)
     {
         result->SetOffset(buffer->ToAbsolute(offset));
@@ -1205,10 +1204,11 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
     }
     // If it is a transport error and the connection was successfully before, we retry in continuous mode.
     // Otherwise report the error to the user, so that he can recreate a recognizer.
-    else if (IsKind(RecognitionKind::Continuous) && payload->IsTransportError() && m_shouldRetry)
+    else if (IsKind(RecognitionKind::Continuous) && payload->IsTransportError() &&
+             m_audioBuffer->GetAbsoluteOffset() > m_lastErrorGlobalOffset) // There was progress...
     {
         SPX_DBG_TRACE_VERBOSE("%s: Trying to reset the engine adapter", __FUNCTION__);
-        m_shouldRetry = false; // Currently no back-off, retrying only once.
+        m_lastErrorGlobalOffset = m_audioBuffer->GetAbsoluteOffset();
         StartResetEngineAdapter();
     }
     else

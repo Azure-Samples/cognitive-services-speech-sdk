@@ -233,4 +233,10 @@ namespace Impl {
         std::unique_lock<std::mutex> guard(m_lock);
         return NonAcknowledgedSizeInBytesUnlocked();
     }
+
+    uint64_t PcmAudioBuffer::GetAbsoluteOffset() const
+    {
+        std::unique_lock<std::mutex> guard(m_lock);
+        return BytesToDurationInTicks(m_bufferStartOffsetInBytesAbsolute);
+    }
 }}}}

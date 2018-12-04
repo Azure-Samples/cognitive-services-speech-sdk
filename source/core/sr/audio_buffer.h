@@ -72,6 +72,9 @@ namespace Impl {
         // Drops current chunks from the buffer.
         virtual void Drop() = 0;
 
+        // Gets current absolute offset in HNS.
+        virtual uint64_t GetAbsoluteOffset() const = 0;
+
         // Copies unconfirmed chunks to the target buffer.
         virtual void CopyNonAcknowledgedDataTo(AudioBufferPtr buffer) const = 0;
 
@@ -94,6 +97,7 @@ namespace Impl {
         void Drop() override;
         void CopyNonAcknowledgedDataTo(AudioBufferPtr buffer) const override;
         uint64_t NonAcknowledgedSizeInBytes() const override;
+        uint64_t GetAbsoluteOffset() const override;
 
     private:
         DISABLE_COPY_AND_MOVE(PcmAudioBuffer);

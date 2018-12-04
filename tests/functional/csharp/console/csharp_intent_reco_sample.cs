@@ -159,17 +159,22 @@ namespace MicrosoftSpeechSDKSamples
         private static async Task ContinuousIntentRecognitionAsync(IntentRecognizer reco)
         {
             Console.WriteLine("Continuous recognition.");
-            var tcsLocal = new TaskCompletionSource<int>();
+            var tcsLocal = new TaskCompletionSource<bool>();
 
             reco.Recognized += MyRecognizedEventHandler;
-            reco.Canceled += MyCanceledEventHandler;
+            reco.Canceled += (s, e) =>
+            {
+                MyCanceledEventHandler(s, e);
+                tcsLocal.TrySetResult(false);
+            };
+
             reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
             reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
             reco.SessionStarted += MySessionStartedEventHandler;
             reco.SessionStopped += (s, e) =>
             {
                 Console.WriteLine($"Session Stop detected. Event: {e.ToString()}. Stop the recognition.");
-                tcsLocal.TrySetResult(0);
+                tcsLocal.TrySetResult(true);
             };
 
             // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.

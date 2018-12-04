@@ -314,7 +314,7 @@ private:
     std::mutex m_recognizersLock;
 
     bool m_isReliableDelivery;
-    bool m_shouldRetry;
+    uint64_t m_lastErrorGlobalOffset;
 
     std::shared_ptr<CSpxThreadService> m_threadService;
 
