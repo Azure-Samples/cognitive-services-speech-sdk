@@ -212,8 +212,8 @@ function runCatchSuite {
         "$testCase" || if [[ -s $catchOut.xml ]]; then
             echo 'Test failed. Potential details here (cf. success="false"), or in the logs included in the test results file:'
             addToTestOutput "$testStateVarPrefix" cat "$catchOut.xml"
-            if [[ $(uname) = Linux ]] && grep -q FatalErrorCondition "$catchOut.xml"; then
-              addToTestOutput perl "$SCRIPT_DIR/decode-stack.pl" "$catchOut.txt"
+            if [[ $(uname) = Linux ]] && grep -q -F $'<FatalErrorCondition\n<Exception' "$catchOut.xml"; then
+              addToTestOutput "$testStateVarPrefix" perl "$SCRIPT_DIR/decode-stack.pl" "$catchOut.txt"
             fi
           fi
   done

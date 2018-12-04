@@ -213,7 +213,7 @@ static void CollectCallStack(size_t skipLevels, const std::function<void(std::st
     write(os.str().c_str());
 #endif
 
-    write("\n[CALL STACK END]\n");
+    write("[CALL STACK END]\n");
 }
 
 

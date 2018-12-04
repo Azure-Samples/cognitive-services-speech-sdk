@@ -151,6 +151,7 @@ void ConnectCallbacks(SpeechRecognizer* recognizer, promise<string>& result)
 string  WaitForResult(future<string>&& f, MilliSeconds duration)
 {
     auto status = f.wait_for(duration);
+    CAPTURE(duration);
     REQUIRE(status == future_status::ready);
     return f.get();
 }
@@ -189,9 +190,9 @@ void DoContinuousReco(SpeechRecognizer* recognizer, PushAudioInputStream* pushSt
     promise<string> result;
     ConnectCallbacks(recognizer, result);
     PushData(pushStream, weather.m_audioFilename);
-    recognizer->StartContinuousRecognitionAsync().wait();
+    recognizer->StartContinuousRecognitionAsync().get();
     auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
-    recognizer->StopContinuousRecognitionAsync().wait();
+    recognizer->StopContinuousRecognitionAsync().get();
     SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
 }
 
@@ -203,9 +204,9 @@ void DoKWS(SpeechRecognizer* recognizer, PushAudioInputStream* pushStream)
     ConnectCallbacks(recognizer, res);
     PushData(pushStream, cortana.m_audioFilename);
     auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/heycortana_en-US.table");
-    recognizer->StartKeywordRecognitionAsync(model).wait();
+    recognizer->StartKeywordRecognitionAsync(model).get();
     auto text = WaitForResult(res.get_future(), WAIT_FOR_RECO_RESULT_TIME);
-    recognizer->StopKeywordRecognitionAsync().wait();
+    recognizer->StopKeywordRecognitionAsync().get();
     SPXTEST_REQUIRE(text.compare(cortana.m_utterance) == 0);
 }
 

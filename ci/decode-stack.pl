@@ -10,11 +10,15 @@ BEGIN {
     \r?$
   )x;
 }
+END {
+  print "Decoded $stackcnt stack(s). Note: not all necessarily fatal." if $stackcnt;
+}
 if (/CALL STACK BEGIN/ .. /CALL STACK END/) {
   $line ||= $.;
   push @a, $_;
 } elsif (@a) {
   print "There's a stack, line $., depth $#a!";
+  $stackcnt++;
 
   if ($#a < 1024) {
     my %bases;

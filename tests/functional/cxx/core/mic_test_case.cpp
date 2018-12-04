@@ -24,28 +24,28 @@ class AudioTestSink final : public ISpxAudioProcessor
 
 public:
     AudioTestSink(bool running = true)
-        : m_running{ running }, 
+        : m_running{ running },
         m_format{ 0, 0, 0, 0, 0, 0, 0 },
         m_setFormatCallCounter{ 0 },
         m_setFormatWithNullptrCallCounter{ 0 },
         m_processAudioCallCounter{ 0 }
     {}
 
-    virtual void SetFormat(const SPXWAVEFORMATEX* format) override 
+    virtual void SetFormat(const SPXWAVEFORMATEX* format) override
     {
         unique_lock<mutex> lock(m_mutex);
-        if (format != nullptr) 
+        if (format != nullptr)
         {
             m_setFormatCallCounter++;
             std::memcpy(&m_format, format, sizeof(SPXWAVEFORMATEX));
         }
-        else 
+        else
         {
             m_setFormatWithNullptrCallCounter++;
         }
     }
-    
-    virtual void ProcessAudio(AudioData_Type data, uint32_t size) override 
+
+    virtual void ProcessAudio(AudioData_Type data, uint32_t size) override
     {
         unique_lock<mutex> lock(m_mutex);
         if (!m_running)
@@ -53,7 +53,7 @@ public:
             return;
         }
         m_data.push_back(make_pair(data, size));
-        if (m_processAudioCallCounter++ == 0) 
+        if (m_processAudioCallCounter++ == 0)
         {
             m_cv.notify_one();
         }
@@ -63,26 +63,26 @@ public:
        unique_lock<mutex> lock(m_mutex);
        if (m_running)
        {
-           m_cv.wait_for(lock, chrono::seconds(seconds), [&] {return m_processAudioCallCounter > 0; });
+           m_cv.wait_for(lock, chrono::seconds(seconds), [&] { return m_processAudioCallCounter > 0; });
            m_running = false;
        }
     }
 
-    int GetNumCallsToSetFormat() const 
+    int GetNumCallsToSetFormat() const
     {
         unique_lock<mutex> lock(m_mutex);
         REQUIRE(!m_running);
         return m_setFormatCallCounter;
     }
 
-    int GetNumCallsToSetFormatWithNullptr() const 
+    int GetNumCallsToSetFormatWithNullptr() const
     {
         unique_lock<mutex> lock(m_mutex);
         REQUIRE(!m_running);
         return m_setFormatWithNullptrCallCounter;
     }
 
-    int GetNumCallsToProcessAudio() const 
+    int GetNumCallsToProcessAudio() const
     {
         unique_lock<mutex> lock(m_mutex);
         REQUIRE(!m_running);
@@ -96,13 +96,13 @@ public:
         return m_format;
     }
 
-    size_t GetTotalAudioBytes() const 
+    size_t GetTotalAudioBytes() const
     {
         unique_lock<mutex> lock(m_mutex);
         REQUIRE(!m_running);
         return accumulate(m_data.begin(), m_data.end(),
             size_t(0), // start with first element
-            [](size_t total, const DataBuffer& buffer ) 
+            [](size_t total, const DataBuffer& buffer )
         {
             return total + buffer.second;
         });
@@ -131,17 +131,17 @@ private:
     int m_processAudioCallCounter;
 };
 
-class CyclicBarrier 
+class CyclicBarrier
 {
 
 public:
 
-    CyclicBarrier(int count) : 
+    CyclicBarrier(int count) :
         m_count{ count },
         m_cycle { 0 }
     {
-        m_reset = [count = m_count, this] { 
-            m_cycle++; 
+        m_reset = [count = m_count, this] {
+            m_cycle++;
             m_count = count;
         };
     }
@@ -154,7 +154,7 @@ public:
             m_reset();
             m_cv.notify_all();
         }
-        else 
+        else
         {
             m_cv.wait(lock, [cycle = m_cycle, this] { return cycle != m_cycle; });
         }
@@ -170,7 +170,7 @@ public:
             m_cv.notify_all();
             result = true;
         }
-        else 
+        else
         {
             result = m_cv.wait_for(lock, timeout, [cycle = m_cycle, this] { return cycle != m_cycle; });
         }
@@ -224,14 +224,14 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
     }
 
-    SECTION("freshly created mic provides a valid audio format") 
+    SECTION("freshly created mic provides a valid audio format")
     {
         SPXWAVEFORMATEX format;
         REQUIRE(mic->GetFormat(&format, sizeof(format)) != 0);
         CheckFormatIsValid(format);
     }
 
-    SECTION("start/stop calls are reflected by corresponding state changes") 
+    SECTION("start/stop calls are reflected by corresponding state changes")
     {
         RunMicAndCheckStateTransitions(mic, make_shared<AudioTestSink>(false));
     }
@@ -243,7 +243,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         CheckThatSinkReceivedAudioData(sink);
     }
 
-    SECTION("mic can be used (switched on and off) multiple times in a row") 
+    SECTION("mic can be used (switched on and off) multiple times in a row")
     {
         const auto& sink = make_shared<AudioTestSink>();
         RunMicAndCheckStateTransitions(mic, sink);
@@ -260,14 +260,14 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
     {
         const auto& sink = make_shared<AudioTestSink>(false);
         REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
-        for (int j = 0; j < 3; ++j) 
+        for (int j = 0; j < 3; ++j)
         {
-            for (int i = 0; i < 3; ++i) 
+            for (int i = 0; i < 3; ++i)
             {
                 mic->StartPump(sink);
                 REQUIRE(mic->GetState() == ISpxAudioPump::State::Processing);
             }
-            for (int i = 0; i < 3; ++i) 
+            for (int i = 0; i < 3; ++i)
             {
                 mic->StopPump();
                 REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
@@ -275,7 +275,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         }
     }
 
-    SECTION("mic instance can be used from multiple threads (one shared sink)") 
+    SECTION("mic instance can be used from multiple threads (one shared sink)")
     {
         const auto& sink = make_shared<AudioTestSink>();
         int numThreads = 5;
@@ -292,11 +292,11 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
 
         REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
 
-        for (int j = 0; j < 3; ++j) 
+        for (int j = 0; j < 3; ++j)
         {
             vector<thread> v;
 
-            for (int i = numThreads; i >0 ; --i) 
+            for (int i = numThreads; i >0 ; --i)
             {
                 v.emplace_back(run);
             }
@@ -309,7 +309,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
             {
                 t.join();
             }
-            
+
             REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
 
             CheckThatSinkReceivedAudioData(sink);
@@ -317,7 +317,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         }
     }
 
-    SECTION("different mic instances can be used from multiple threads (different sinks)") 
+    SECTION("different mic instances can be used from multiple threads (different sinks)")
     {
         unsigned int numThreads = 3;
         CyclicBarrier barrier(numThreads + 1);
@@ -329,7 +329,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         auto run = [&]() {
             const auto& threadLocalMic = Microphone::Create();
             const auto& sink = make_shared<AudioTestSink>();
-            
+
                 {
                     unique_lock<mutex> lock(m);
                     sinks.push_back(sink);
@@ -344,7 +344,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         for (int j = 0; j < 3; ++j) {
             vector<thread> v;
 
-            for (unsigned int i = numThreads; i >0; --i) 
+            for (unsigned int i = numThreads; i >0; --i)
             {
                 v.emplace_back(run);
             }
@@ -354,7 +354,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
             {
                 unique_lock<mutex> lock(m);
                 CHECK(sinks.size() == numThreads);
-                for (auto& sink : sinks) 
+                for (auto& sink : sinks)
                 {
                     sink->WaitAndStop(3);
                 }
@@ -375,7 +375,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         }
     }
 
-    SECTION("stress-test mic with multiple threads (no lock-step syncronization)") 
+    SECTION("stress-test mic with multiple threads (no lock-step syncronization)")
     {
         int numThreads = 10;
         mutex m;
@@ -398,7 +398,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
                     unique_lock<mutex> lock(m);
                     sinks.push_back(sink);
                 }
-                for (int i = 0; i < numCycles; i++) 
+                for (int i = 0; i < numCycles; i++)
                 {
                     this_thread::sleep_for(chrono::milliseconds(lcg() % 1000));
                     threadLocalMic->StartPump(sink);
@@ -442,7 +442,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         REQUIRE(mic->GetFormat(nullptr, uint16_t(-1)) != 0);
         vector<char> x(sizeof(SPXWAVEFORMATEX)/sizeof(char));
         REQUIRE(mic->GetFormat(reinterpret_cast<SPXWAVEFORMATEX*>(x.data()), 1) != 0);
-        CHECK_THROWS(mic->StartPump(nullptr)); 
+        CHECK_THROWS(mic->StartPump(nullptr));
         REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
     }
 }

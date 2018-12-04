@@ -29,10 +29,10 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
     {
         promise<string> result;
         ConnectCallbacks(recognizer.get(), result);
-        recognizer->StartContinuousRecognitionAsync().wait();
+        recognizer->StartContinuousRecognitionAsync().get();
         PushData(pushStream.get(), weather.m_audioFilename);
         auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
-        recognizer->StopContinuousRecognitionAsync().wait();
+        recognizer->StopContinuousRecognitionAsync().get();
         SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
 
         //todo: we should allow switching recog mode. Fix this later.
@@ -54,10 +54,10 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
             // TODO: move PushData() after StartContinuousRecongtion
             // after fixing the bug Bug 1506194: PushStream Improvement, endOfStream
             PushData(pushStream.get(), weather.m_audioFilename);
-            recognizer->StartContinuousRecognitionAsync().wait();
+            recognizer->StartContinuousRecognitionAsync().get();
 
             auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
-            recognizer->StopContinuousRecognitionAsync().wait();
+            recognizer->StopContinuousRecognitionAsync().get();
             SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
         }
     }
@@ -91,18 +91,18 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
     SPXTEST_SECTION("start and stop once")
     {
         promise<string> result;
-        recognizer->StartContinuousRecognitionAsync().wait();
+        recognizer->StartContinuousRecognitionAsync().get();
 
         ConnectCallbacks(recognizer.get(), result);
         auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
-        recognizer->StopContinuousRecognitionAsync().wait();
+        recognizer->StopContinuousRecognitionAsync().get();
         SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
     }
     // Another normal case. no stop is a valid user case.
     SPXTEST_SECTION("start without stop")
     {
         promise<string> result;
-        recognizer->StartContinuousRecognitionAsync().wait();
+        recognizer->StartContinuousRecognitionAsync().get();
 
         ConnectCallbacks(recognizer.get(), result);
         auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
@@ -117,7 +117,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         ConnectCallbacks(recognizer2.get(), result);
 
 
-        recognizer2->StartContinuousRecognitionAsync().wait();
+        recognizer2->StartContinuousRecognitionAsync().get();
         REQUIRE_THROWS_WITH(recognizer2->StartContinuousRecognitionAsync().get(), Catch::Contains("SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION"));
     }
 #if 0
@@ -125,10 +125,10 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
     SPXTEST_SECTION("start and then stop immediately")
     {
         promise<string> result;
-        recognizer->StartContinuousRecognitionAsync().wait();
+        recognizer->StartContinuousRecognitionAsync().get();
 
         ConnectCallbacks(recognizer.get(), result);
-        recognizer->StopContinuousRecognitionAsync().wait();
+        recognizer->StopContinuousRecognitionAsync().get();
 
         // the recognizer should be idle after stop.
         auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
@@ -137,7 +137,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
     SPXTEST_SECTION("stop in the middle of reco")
     {
         promise<string> result;
-        recognizer->StartContinuousRecognitionAsync().wait();
+        recognizer->StartContinuousRecognitionAsync().get();
 
         ConnectCallbacks(recognizer.get(), result);
 
@@ -145,7 +145,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         // hopefully, we cut the audio session while pumping data.
         this_thread::sleep_for(500ms);
 
-        recognizer->StopContinuousRecognitionAsync().wait();
+        recognizer->StopContinuousRecognitionAsync().get();
     }
 #endif
 }
@@ -213,7 +213,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto fs = OpenWaveFile(weather.m_audioFilename);
 
         std::array<uint8_t, 1000> buffer;
-        recognizer->StartContinuousRecognitionAsync().wait();
+        recognizer->StartContinuousRecognitionAsync().get();
         while (1)
         {
             auto readSamples = ReadBuffer(fs, buffer.data(), (uint32_t)buffer.size());
@@ -225,8 +225,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         }
 
         pushStream->Close();
-        recognitionEnd.get_future().wait();
-        recognizer->StopContinuousRecognitionAsync().wait();
+        recognitionEnd.get_future().get();
+        recognizer->StopContinuousRecognitionAsync().get();
 
         SPXTEST_REQUIRE(result.compare(weather.m_utterance) == 0);
         SPXTEST_REQUIRE(error.empty());
@@ -299,7 +299,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         };
         recognizer->StartContinuousRecognitionAsync().get();
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-        recognizer->StopContinuousRecognitionAsync().wait();
+        recognizer->StopContinuousRecognitionAsync().get();
 
         SPXTEST_REQUIRE(errorCode == CancellationErrorCode::ConnectionFailure);
         SPXTEST_REQUIRE(errorDetails.find("Failed to create transport request.") != std::string::npos);
