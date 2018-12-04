@@ -516,8 +516,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
     {
         SPXTEST_REQUIRE(exists(weather.m_audioFilename));
         UseMocks(false);
-        mutex mtx;
-        condition_variable cv;
+        std::promise<void> canceledPromise;
 
         bool connectionReportedError = false;
         bool canceled = false;
@@ -528,18 +527,17 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto recognizer = SpeechRecognizer::FromConfig(sc, a);
 
         recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& args) {
-            unique_lock<mutex> lock(mtx);
             canceled = true;
             connectionReportedError =
                 args.Reason == CancellationReason::Error &&
                 args.ErrorCode == CancellationErrorCode::AuthenticationFailure &&
                 !args.ErrorDetails.empty();
-            cv.notify_one();
+            canceledPromise.set_value();
         });
 
         auto result = recognizer->RecognizeOnceAsync().get();
         CHECK(result->Reason == ResultReason::Canceled);
-        CHECK(canceled);
+        REQUIRE(canceledPromise.get_future().wait_for(5s) == future_status::ready);
         REQUIRE(connectionReportedError);
     }
 
