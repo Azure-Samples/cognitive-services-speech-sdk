@@ -823,16 +823,10 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
                 request->ws.WSHandle = uws_client_create(cfg.hostname, cfg.port, cfg.resource_name, use_ssl, &ws_proto, 1);
             }
 
-            // TODO: this was LWS-specific option, check if we still need it and replace with
-            // one of tcp_keepalive options.
-            // override the system default when there is no TCP activity.
-            // this prevents long system timeouts in the range of minutes
-            // to detect that the network went down.
-            // int val = ANSWER_TIMEOUT_MS;
-            // uws_client_set_option(request->ws.WSHandle, "timeout", &val);
-
+#ifdef SPEECHSDK_USE_OPENSSL
             int tls_version = OPTION_TLS_VERSION_1_2;
             uws_client_set_option(request->ws.WSHandle, OPTION_TLS_VERSION, &tls_version);
+#endif
         }
     }
 

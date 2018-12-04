@@ -49,7 +49,7 @@ CSpxModuleFactory::CSpxModuleFactory(const std::string& filename) :
     m_pfnCreateModuleObject(nullptr)
 {
     m_pfnCreateModuleObject = GetCreateModuleObjectFunctionPointer(filename);
-    SPX_DBG_TRACE_VERBOSE("Load Module Factory ('%s')... %s!", filename.c_str(), !m_pfnCreateModuleObject ? "FAILED!" : "SUCCEEDED");
+    SPX_DBG_TRACE_VERBOSE("Load Module Factory ('%s')... %s!", filename.c_str(), !m_pfnCreateModuleObject ? "NOT FOUND" : "SUCCEEDED");
 }
 
 void* CSpxModuleFactory::CreateObject(const char* className, const char* interfaceName)

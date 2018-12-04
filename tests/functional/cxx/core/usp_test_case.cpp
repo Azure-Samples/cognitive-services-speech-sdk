@@ -170,3 +170,35 @@ TEST_CASE("USP is properly functioning", "[usp]")
     }
 }
 
+class TlsCheck : public USP::Callbacks
+{
+    void OnError(bool /*transport*/, USP::ErrorCode /*errorCode*/, const std::string& errorMessage) override
+    {
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 6237)
+        // Disable: (<zero> && <expression>) is always zero.  <expression> is never evaluated and might have side effects.
+#endif
+        REQUIRE(errorMessage == "WebSocket Upgrade failed with HTTP status code: 301");
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+    }
+};
+
+TEST_CASE("USP uses TLS12", "[usp]")
+{
+    // GitHub doesn't allow TLSv1 and TLSv1.1 since February 2018 (https://githubengineering.com/crypto-removal-notice/).
+    auto service = std::make_shared<CSpxThreadService>();
+    service->Init();
+    auto callbacks = std::make_shared<TlsCheck>();
+    auto client = USP::Client(callbacks, USP::EndpointType::Speech, PAL::CreateGuidWithoutDashes(), service)
+        .SetRegion("westus")
+        .SetEndpointUrl("wss://www.github.com/")
+        .SetAuthentication(USP::AuthenticationType::SubscriptionKey, "test");
+
+    auto connection = client.Connect();
+    std::vector<uint8_t> buffer = { 1, 2, 3, 4, 5, 6, 7 };
+    connection->WriteAudio(buffer.data(), buffer.size());
+    this_thread::sleep_for(5s);
+}
