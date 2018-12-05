@@ -117,7 +117,7 @@ DESTCSHARPBINDINGS="$DESTPUBLIB/$CSHARPBINDINGSNAME.dll"
 printf "\nCopying files to drop location\n"
 
 # N.B. no long option for -p (parents) on OSX.
-mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBLIBUTF8NETSTANDARD20" "$(dirname "$DESTPUBINC")" "$DESTPRIVLIB" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
+mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBLIBUTF8NETSTANDARD20" "$DESTPUBINC" "$DESTPRIVLIB" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
 
 # N.B. no long option for -v (verbose) and -p (preserve) on OSX.
 CPOPT="-v -p"
@@ -174,15 +174,13 @@ if [[ $TARGET = Android-* ]]; then
   find "$DESTPUBLIB" -name \*.so -print0 | xargs -0 $STRIP
 fi
 
-cp $CPOPT -R "$SRCINC"* "$DESTPUBINC"
-
 # copy additional private binaries (non-shipping)
 for var in carbonx Microsoft.CognitiveServices.Speech.Tests.ParallelRunner core_tests cxx_api_tests; do
   [[ -e "$SRCBIN/$var" ]] && mkdir -p "$DESTPRIVBIN" && cp $CPOPT "$SRCBIN/$var" "$DESTPRIVBIN"
 done
 
 # N.B. no long option for -R (recursive) on OSX.
-cp $CPOPT -R "$SRCINC"* "$DESTPUBINC"
+cp $CPOPT -R "$SRCINC"/* "$DESTPUBINC"
 
 # N.B. Using '-I -n 1' and replacement instead of "cp --target" since --target
 # is not available on OSX.
