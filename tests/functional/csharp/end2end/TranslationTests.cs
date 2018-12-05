@@ -89,6 +89,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+
+        [TestMethod]
+        public async Task TestInvalidLanguage()
+        {
+            var toLanguages = new List<string>() { "invalidLanguages" };
+            var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
+
+            Assert.IsNotNull(result, "Translation should not be null");
+            Console.WriteLine(result.ToString());
+
+            var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
+            Console.WriteLine($"Reason: {result.Reason}, ErrorDetails: {errorDetails}");
+
+            Assert.AreEqual(errorDetails, "Timeout: no recognition result received.");            
+        }
+
         [TestMethod]
         public async Task TranslationWeatherEnToDeFinalTextResult()
         {
