@@ -26,7 +26,6 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     {
         case DLL_PROCESS_ATTACH:
             InitLogging();
-            Debug::HookSignalHandlers();
             break;
 
         case DLL_THREAD_ATTACH:
@@ -49,7 +48,6 @@ __attribute__((constructor)) static void LibLoad(int argc, char** argv, char** e
     UNUSED(argv);
     UNUSED(envp);
     InitLogging();
-    Debug::HookSignalHandlers();
 }
 
 __attribute__((destructor)) static void LibUnload()
