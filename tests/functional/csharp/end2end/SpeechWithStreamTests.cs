@@ -111,13 +111,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task InteractiveCheckFileOffsets()
         {
             this.config.SpeechRecognitionLanguage = Language.EN;
             var audioInput = Util.OpenWavFile(TestData.English.Batman.AudioFile);
             var results = new List<SpeechRecognitionResult>();
-            using (var recognizer = new SpeechRecognizer(this.config, audioInput))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 while (true)
                 {
@@ -126,11 +125,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         break;
                     }
+                    Console.WriteLine(result.Text);
+                    Console.WriteLine($"Result OffsetInTicks {result.OffsetInTicks.ToString()}");
+                    Console.WriteLine($"Result Duration {result.Duration.Ticks.ToString()}\n");
                     results.Add(result);
                 }
 
                 var texts = results.Select(r => r.Text).Where(t => !string.IsNullOrEmpty(t)).ToList();
-                var expected = string.Join(" ", TestData.English.Batman.Utterances);
+                var expected = string.Join(" ", TestData.English.Batman.UtterancesInteractiveMode);
                 var actual = string.Join(" ", texts.ToArray());
                 AssertMatching(expected, actual);
             }
