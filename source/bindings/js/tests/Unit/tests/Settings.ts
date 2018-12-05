@@ -13,6 +13,14 @@ export class Settings {
 
     public static SpeechTestEndpointId: string = "<<YOUR_TEST_ENDPOINT_ID>>";
 
+    // Endpoint and key for timeout testing.
+    // Endpoint should reduce standard speech timeout to value specified in SpeechServiceTimeoutSeconds
+    // If undefined, production timeout of 10 seconds will be used, but at the cost of greatly incrased test
+    // duration.
+    public static SpeechTimeoutEndpoint: string;
+    public static SpeechTimeoutKey: string;
+    public static SpeechServiceTimeoutSeconds: number = 60 * 10; // 10 minutes
+
     public static LuisSubscriptionKey: string = "<<YOUR_LUIS_SUBSCRIPTION_KEY>>";
     public static LuisRegion: string = "<<YOUR_LUIS_REGION>>";
     public static LuisAppEndPointHref: string = "<<YOUR_LUIS_APP_URL>>";

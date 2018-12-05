@@ -14,9 +14,9 @@ export class EnumTranslation {
             case RecognitionStatus.NoMatch:
             case RecognitionStatus.InitialSilenceTimeout:
             case RecognitionStatus.BabbleTimeout:
+            case RecognitionStatus.EndOfDictation:
                 reason = ResultReason.NoMatch;
                 break;
-            case RecognitionStatus.EndOfDictation:
             case RecognitionStatus.Error:
             default:
                 reason = ResultReason.Canceled;

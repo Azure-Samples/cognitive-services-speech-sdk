@@ -19,7 +19,13 @@ export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventAr
      * @param {string} offset - The offset.
      * @param {IntentRecognitionResult} sessionId - The session id.
      */
-    public constructor(reason: CancellationReason, errorDetails: string, errorCode: CancellationErrorCode, result?: IntentRecognitionResult, offset?: number, sessionId?: string) {
+    public constructor(
+        reason: CancellationReason,
+        errorDetails: string,
+        errorCode: CancellationErrorCode,
+        result?: IntentRecognitionResult,
+        offset?: number,
+        sessionId?: string) {
         super(result, offset, sessionId);
 
         this.privReason = reason;

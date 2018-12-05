@@ -73,12 +73,12 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
                     ResultReason.RecognizingIntent,
                     speechHypothesis.Text,
                     speechHypothesis.Duration,
-                    speechHypothesis.Offset,
+                    speechHypothesis.Offset + requestSession.currentTurnAudioOffset,
                     undefined,
                     connectionMessage.textBody,
                     undefined);
 
-                ev = new IntentRecognitionEventArgs(result, speechHypothesis.Offset, requestSession.sessionId);
+                ev = new IntentRecognitionEventArgs(result, speechHypothesis.Offset + requestSession.currentTurnAudioOffset, requestSession.sessionId);
 
                 if (!!this.privIntentRecognizer.recognizing) {
                     try {
@@ -100,17 +100,17 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
                     EnumTranslation.implTranslateRecognitionResult(simple.RecognitionStatus),
                     simple.DisplayText,
                     simple.Duration,
-                    simple.Offset,
+                    simple.Offset + requestSession.currentTurnAudioOffset,
                     undefined,
                     connectionMessage.textBody,
                     undefined);
 
-                ev = new IntentRecognitionEventArgs(result, result.offset, requestSession.sessionId);
+                ev = new IntentRecognitionEventArgs(result, result.offset + requestSession.currentTurnAudioOffset, requestSession.sessionId);
 
                 const sendEvent: () => void = () => {
                     if (this.privRecognizerConfig.isContinuousRecognition) {
                         // For continuous recognition telemetry has to be sent for every phrase as per spec.
-                        this.sendTelemetryData(requestSession.requestId, connection, requestSession.getTelemetry());
+                        this.sendTelemetryData(requestSession, requestSession.getTelemetry());
                     }
 
                     if (!!this.privIntentRecognizer.recognized) {
@@ -155,7 +155,7 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
                 // Response from LUIS
                 if (this.privRecognizerConfig.isContinuousRecognition) {
                     // For continuous recognition telemetry has to be sent for every phrase as per spec.
-                    this.sendTelemetryData(requestSession.requestId, connection, requestSession.getTelemetry());
+                    this.sendTelemetryData(requestSession, requestSession.getTelemetry());
                 }
 
                 ev = this.privPendingIntentArgs;
@@ -198,11 +198,11 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
                             reason,
                             ev.result.text,
                             ev.result.duration,
-                            ev.result.offset,
+                            ev.result.offset + requestSession.currentTurnAudioOffset,
                             ev.result.errorDetails,
                             ev.result.json,
                             properties),
-                        ev.offset,
+                        ev.offset + requestSession.currentTurnAudioOffset,
                         ev.sessionId);
                 }
 
@@ -237,26 +237,21 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
         }
     }
 
-    protected connectionError(sessionId: string, requestId: string, error: string): void {
+    // Cancels recognition.
+    protected cancelRecognition(
+        sessionId: string,
+        requestId: string,
+        cancellationReason: CancellationReason,
+        errorCode: CancellationErrorCode,
+        error: string): void {
         if (!!this.privIntentRecognizer.canceled) {
             const properties: PropertyCollection = new PropertyCollection();
-            properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[CancellationErrorCode.ConnectionFailure]);
-
-            const result: IntentRecognitionResult = new IntentRecognitionResult(
-                undefined,
-                requestId,
-                ResultReason.Canceled,
-                undefined,
-                undefined,
-                undefined,
-                error,
-                undefined,
-                properties);
+            properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[errorCode]);
 
             const cancelEvent: IntentRecognitionCanceledEventArgs = new IntentRecognitionCanceledEventArgs(
-                CancellationReason.Error,
+                cancellationReason,
                 error,
-                CancellationErrorCode.ConnectionFailure,
+                errorCode,
                 undefined,
                 undefined,
                 sessionId);
@@ -265,7 +260,5 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
                 /* tslint:disable:no-empty */
             } catch { }
         }
-
     }
-
 }

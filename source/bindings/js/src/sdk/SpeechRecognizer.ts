@@ -178,7 +178,17 @@ export class SpeechRecognizer extends Recognizer {
                 this.audioConfig,
                 new SpeechConnectionFactory());
 
-            this.implRecognizerStart(this.privReco, cb, err);
+            this.implRecognizerStart(this.privReco, (e: SpeechRecognitionResult) => {
+                // this.implCloseExistingRecognizer();
+                if (!!cb) {
+                    cb(e);
+                }
+            }, (e: string) => {
+                //  this.implCloseExistingRecognizer();
+                if (!!err) {
+                    err(e);
+                }
+            });
         } catch (error) {
             if (!!err) {
                 if (error instanceof Error) {
@@ -349,8 +359,11 @@ export class SpeechRecognizer extends Recognizer {
             this.properties);
     }
 
-    protected createServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory,
-                                      audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
+    protected createServiceRecognizer(
+        authentication: IAuthentication,
+        connectionFactory: IConnectionFactory,
+        audioConfig: AudioConfig,
+        recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
         const configImpl: AudioConfigImpl = audioConfig as AudioConfigImpl;
         return new SpeechServiceRecognizer(authentication, connectionFactory, configImpl, recognizerConfig, this);
     }

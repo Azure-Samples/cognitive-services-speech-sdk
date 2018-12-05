@@ -20,7 +20,6 @@ const Recognized: string = "Recognized";
 const Session: string = "Session";
 const Canceled: string = "Canceled";
 
-let eventIdentifier: number;
 let objsToClose: any[];
 
 beforeAll(() => {
@@ -142,12 +141,12 @@ test("testGetOutputFormatDetailed", (done: jest.DoneCallback) => {
     expect(r.outputFormat === sdk.OutputFormat.Detailed);
 
     r.recognizeOnceAsync((result: sdk.SpeechRecognitionResult) => {
+        expect(result).not.toBeUndefined();
         expect(result.text).toEqual(Settings.WaveFileText);
 
         done();
     }, (error: string) => {
-        setTimeout(done, 1);
-        fail(error);
+        done.fail(error);
     });
 });
 
@@ -168,22 +167,26 @@ test("RecognizeOnce", (done: jest.DoneCallback) => {
 
     let telemetryEvents: number = 0;
 
-    ServiceRecognizerBase.telemetryData = (json: string): void => {
+    ServiceRecognizerBase.telemetryData = (_: string): void => {
         telemetryEvents++;
     };
 
     r.recognizeOnceAsync(
         (p2: sdk.SpeechRecognitionResult) => {
-            setTimeout(done, 1);
-            const res: sdk.SpeechRecognitionResult = p2;
-            expect(res).not.toBeUndefined();
-            expect("What's the weather like?").toEqual(res.text);
-            expect(res.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
-            expect(telemetryEvents).toEqual(1);
+            try {
+                const res: sdk.SpeechRecognitionResult = p2;
+                expect(res).not.toBeUndefined();
+                expect(res.text).toEqual("What's the weather like?");
+                expect(res.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
+                expect(telemetryEvents).toEqual(1);
+                done();
+            } catch (error) {
+                done.fail(error);
+            }
+
         },
         (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
@@ -196,7 +199,7 @@ test("Event Tests (RecognizeOnce)", (done: jest.DoneCallback) => {
     objsToClose.push(r);
 
     const eventsMap: { [id: string]: number; } = {};
-    eventIdentifier = 1;
+    let eventIdentifier: number = 1;
 
     r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
         eventsMap[Recognized] = eventIdentifier++;
@@ -295,8 +298,7 @@ test("Event Tests (RecognizeOnce)", (done: jest.DoneCallback) => {
 
             done();
         }, (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 
 });
@@ -312,7 +314,7 @@ test("Event Tests (Continuous)", (done: jest.DoneCallback) => {
     let sessionStopped: boolean = false;
 
     const eventsMap: { [id: string]: number; } = {};
-    eventIdentifier = 1;
+    let eventIdentifier: number = 1;
 
     r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
         eventsMap[Recognized] = eventIdentifier++;
@@ -325,7 +327,14 @@ test("Event Tests (Continuous)", (done: jest.DoneCallback) => {
     };
 
     r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
-        eventsMap[Canceled] = eventIdentifier++;
+        try {
+            expect(e.errorDetails).toBeUndefined();
+            expect(sdk.CancellationErrorCode[e.errorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.NoError]);
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.EndOfStream]);
+            eventsMap[Canceled] = eventIdentifier++;
+        } catch (error) {
+            done.fail(error);
+        }
     };
 
     // todo eventType should be renamed and be a function getEventType()
@@ -355,58 +364,63 @@ test("Event Tests (Continuous)", (done: jest.DoneCallback) => {
     r.startContinuousRecognitionAsync();
 
     WaitForCondition(() => sessionStopped, () => {
-        // session events are first and last event
-        const LAST_RECORDED_EVENT_ID: number = --eventIdentifier;
-        expect(LAST_RECORDED_EVENT_ID).toBeGreaterThan(FIRST_EVENT_ID);
+        try {
+            // session events are first and last event
+            const LAST_RECORDED_EVENT_ID: number = --eventIdentifier;
+            expect(LAST_RECORDED_EVENT_ID).toBeGreaterThan(FIRST_EVENT_ID);
 
-        expect(Session + SessionStartedEvent in eventsMap).toEqual(true);
-        expect(eventsMap[Session + SessionStartedEvent]).toEqual(FIRST_EVENT_ID);
+            expect(Session + SessionStartedEvent in eventsMap).toEqual(true);
 
-        expect(Session + SessionStoppedEvent in eventsMap).toEqual(true);
-        expect(LAST_RECORDED_EVENT_ID).toEqual(eventsMap[Session + SessionStoppedEvent]);
+            expect(eventsMap[Session + SessionStartedEvent]).toEqual(FIRST_EVENT_ID);
 
-        // end events come after start events.
-        if (Session + SessionStoppedEvent in eventsMap) {
+            expect(Session + SessionStoppedEvent in eventsMap).toEqual(true);
+            expect(LAST_RECORDED_EVENT_ID).toEqual(eventsMap[Session + SessionStoppedEvent]);
+
+            // end events come after start events.
+            if (Session + SessionStoppedEvent in eventsMap) {
+                expect(eventsMap[Session + SessionStartedEvent])
+                    .toBeLessThan(eventsMap[Session + SessionStoppedEvent]);
+            }
+
+            expect(eventsMap[SpeechStartDetectedEvent])
+                .toBeLessThan(eventsMap[SpeechEndDetectedEvent]);
+            expect((FIRST_EVENT_ID + 1)).toEqual(eventsMap[SpeechStartDetectedEvent]);
+
+            // make sure, first end of speech, then final result
+            expect((LAST_RECORDED_EVENT_ID - 1)).toEqual(eventsMap[Canceled]);
+            expect((LAST_RECORDED_EVENT_ID - 2)).toEqual(eventsMap[SpeechEndDetectedEvent]);
+            expect((LAST_RECORDED_EVENT_ID - 3)).toEqual(eventsMap[Recognized]);
+
+            // recognition events come after session start but before session end events
             expect(eventsMap[Session + SessionStartedEvent])
-                .toBeLessThan(eventsMap[Session + SessionStoppedEvent]);
+                .toBeLessThan(eventsMap[SpeechStartDetectedEvent]);
+
+            if (Session + SessionStoppedEvent in eventsMap) {
+                expect(eventsMap[SpeechEndDetectedEvent])
+                    .toBeLessThan(eventsMap[Session + SessionStoppedEvent]);
+            }
+
+            // there is no partial result reported after the final result
+            // (and check that we have intermediate and final results recorded)
+            if (Recognizing in eventsMap) {
+                expect(eventsMap[Recognizing])
+                    .toBeGreaterThan(eventsMap[SpeechStartDetectedEvent]);
+            }
+
+            // speech should not stop before getting the final result.
+            expect(eventsMap[Recognized]).toBeLessThan(eventsMap[SpeechEndDetectedEvent]);
+
+            expect(eventsMap[Recognizing]).toBeLessThan(eventsMap[Recognized]);
+
+            // make sure we got a cancel event.
+            expect(Canceled in eventsMap).toEqual(true);
+
+            done();
+        } catch (error) {
+            done.fail(error);
         }
-
-        expect(eventsMap[SpeechStartDetectedEvent])
-            .toBeLessThan(eventsMap[SpeechEndDetectedEvent]);
-        expect((FIRST_EVENT_ID + 1)).toEqual(eventsMap[SpeechStartDetectedEvent]);
-
-        // make sure, first end of speech, then final result
-        expect((LAST_RECORDED_EVENT_ID - 1)).toEqual(eventsMap[Canceled]);
-        expect((LAST_RECORDED_EVENT_ID - 2)).toEqual(eventsMap[SpeechEndDetectedEvent]);
-        expect((LAST_RECORDED_EVENT_ID - 3)).toEqual(eventsMap[Recognized]);
-
-        // recognition events come after session start but before session end events
-        expect(eventsMap[Session + SessionStartedEvent])
-            .toBeLessThan(eventsMap[SpeechStartDetectedEvent]);
-
-        if (Session + SessionStoppedEvent in eventsMap) {
-            expect(eventsMap[SpeechEndDetectedEvent])
-                .toBeLessThan(eventsMap[Session + SessionStoppedEvent]);
-        }
-
-        // there is no partial result reported after the final result
-        // (and check that we have intermediate and final results recorded)
-        if (Recognizing in eventsMap) {
-            expect(eventsMap[Recognizing])
-                .toBeGreaterThan(eventsMap[SpeechStartDetectedEvent]);
-        }
-
-        // speech should not stop before getting the final result.
-        expect(eventsMap[Recognized]).toBeLessThan(eventsMap[SpeechEndDetectedEvent]);
-
-        expect(eventsMap[Recognizing]).toBeLessThan(eventsMap[Recognized]);
-
-        // make sure we got a cancel event.
-        expect(Canceled in eventsMap).toEqual(true);
-
-        done();
     });
-});
+}, 20000);
 
 test("testStopContinuousRecognitionAsyncWithAndWithoutTelemetry", (done: jest.DoneCallback) => {
     // start with telemetry disabled
@@ -606,12 +620,10 @@ test("PushStream4KNoDelay", (done: jest.DoneCallback) => {
             expect(res).not.toBeUndefined();
             expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
             expect(res.text).toEqual("What's the weather like?");
-
             done();
         },
         (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
@@ -640,8 +652,7 @@ test("PushStream4KPostRecognizePush", (done: jest.DoneCallback) => {
             done();
         },
         (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 
     const sendSize: number = 4096;
@@ -701,8 +712,7 @@ test("PullStreamFullFill", (done: jest.DoneCallback) => {
             done();
         },
         (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
@@ -752,9 +762,7 @@ test("PullStreamHalfFill", (done: jest.DoneCallback) => {
             done();
         },
         (error: string) => {
-            setTimeout(done, 1);
-
-            fail(error);
+            done.fail(error);
         });
 });
 
@@ -858,9 +866,13 @@ const testInitialSilienceTimeout = (config: sdk.AudioConfig, done: jest.DoneCall
         });
 
     WaitForCondition(() => (numReports === 2), () => {
-        setTimeout(done, 1);
-        if (!!addedChecks) {
-            addedChecks();
+        try {
+            if (!!addedChecks) {
+                addedChecks();
+            }
+            done();
+        } catch (error) {
+            done.fail(error);
         }
     });
 };
@@ -894,8 +906,7 @@ test.skip("InitialBabbleTimeout", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
@@ -921,7 +932,7 @@ test("emptyFile", (done: jest.DoneCallback) => {
 
     r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs): void => {
         try {
-            expect(e.reason).toEqual(sdk.CancellationReason.Error);
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
 
             if (true === oneCalled) {
                 done();
@@ -937,14 +948,13 @@ test("emptyFile", (done: jest.DoneCallback) => {
         (p2: sdk.SpeechRecognitionResult) => {
             expect(p2.reason).toEqual(sdk.ResultReason.Canceled);
             const cancelDetails: sdk.CancellationDetails = sdk.CancellationDetails.fromResult(p2);
-            expect(cancelDetails.reason).toEqual(sdk.CancellationReason.Error);
+            expect(sdk.CancellationReason[cancelDetails.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
 
             if (true === oneCalled) {
                 done();
             } else {
                 oneCalled = true;
             }
-
         },
         (error: string) => {
             done.fail(error);
@@ -1016,6 +1026,15 @@ test("burst of silence", (done: jest.DoneCallback) => {
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
 
+    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
+        try {
+            expect(e.errorDetails).toBeUndefined();
+            expect(sdk.CancellationErrorCode[e.errorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.NoError]);
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.EndOfStream]);
+        } catch (error) {
+            done.fail(error);
+        }
+    };
     r.recognizeOnceAsync(
         (p2: sdk.SpeechRecognitionResult) => {
             const res: sdk.SpeechRecognitionResult = p2;
@@ -1051,10 +1070,14 @@ test("RecognizeOnceAsync is async", (done: jest.DoneCallback) => {
     r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
         WaitForCondition(() => postCall, () => {
             resultSeen = true;
-            setTimeout(done, 1);
-            expect(e.result.errorDetails).toBeUndefined();
-            expect(e.result.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
-            expect(e.result.text).toEqual(Settings.WaveFileText);
+            try {
+                expect(e.result.errorDetails).toBeUndefined();
+                expect(e.result.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
+                expect(e.result.text).toEqual(Settings.WaveFileText);
+                done();
+            } catch (error) {
+                done.fail(error);
+            }
         });
     };
 
@@ -1113,7 +1136,7 @@ test("InitialSilenceTimeout Continous", (done: jest.DoneCallback) => {
         (error: string) => {
             done.fail(error);
         });
-}, 10000);
+}, 30000);
 
 test("Audio Config is optional", () => {
     const s: sdk.SpeechConfig = BuildSpeechConfig();
@@ -1333,3 +1356,226 @@ test("RecognizeOnce Bad Language", (done: jest.DoneCallback) => {
 
     WaitForCondition(() => (doneCount === 2), done);
 });
+
+test("Silence After Speech", (done: jest.DoneCallback) => {
+    // Pump valid speech and then silence until at least one speech end cycle hits.
+    const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
+    const bigFileBuffer: Uint8Array = new Uint8Array(32 * 1024 * 30); // ~30 seconds.
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+    const s: sdk.SpeechConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+
+    p.write(WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile));
+    p.write(bigFileBuffer.buffer);
+    p.close();
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
+    objsToClose.push(r);
+
+    let speechRecognized: boolean = false;
+    let noMatchCount: number = 0;
+    let speechEnded: number = 0;
+
+    r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
+        try {
+            if (e.result.reason === sdk.ResultReason.RecognizedSpeech) {
+                expect(speechRecognized).toEqual(false);
+                speechRecognized = true;
+                expect(sdk.ResultReason[e.result.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
+                expect(e.result.text).toEqual("What's the weather like?");
+            } else if (e.result.reason === sdk.ResultReason.NoMatch) {
+                expect(speechRecognized).toEqual(true);
+                noMatchCount++;
+            }
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs): void => {
+        try {
+            expect(e.errorDetails).toBeUndefined();
+            expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
+            expect(speechEnded).toEqual(noMatchCount + 1);
+            expect(noMatchCount).toEqual(1);
+            done();
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
+        speechEnded++;
+    };
+
+    r.startContinuousRecognitionAsync(() => { },
+        (err: string) => {
+            done.fail(err);
+        });
+}, 30000);
+
+test("Silence Then Speech", (done: jest.DoneCallback) => {
+    // Pump valid speech and then silence until at least one speech end cycle hits.
+    const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
+    const bigFileBuffer: Uint8Array = new Uint8Array(32 * 1024 * 30); // ~30 seconds.
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+    const s: sdk.SpeechConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+
+    p.write(bigFileBuffer.buffer);
+    p.write(WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile));
+    p.close();
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
+    objsToClose.push(r);
+
+    let speechRecognized: boolean = false;
+    let noMatchCount: number = 0;
+    let speechEnded: number = 0;
+
+    r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
+        try {
+            if (e.result.reason === sdk.ResultReason.RecognizedSpeech) {
+                expect(speechRecognized).toEqual(false);
+                expect(noMatchCount).toBeGreaterThanOrEqual(1);
+                speechRecognized = true;
+                expect(sdk.ResultReason[e.result.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
+                expect(e.result.text).toEqual("What's the weather like?");
+            } else if (e.result.reason === sdk.ResultReason.NoMatch) {
+                expect(speechRecognized).toEqual(false);
+                noMatchCount++;
+            }
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs): void => {
+        try {
+            expect(e.errorDetails).toBeUndefined();
+            expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
+            expect(speechEnded).toEqual(noMatchCount + 1);
+            expect(noMatchCount).toEqual(2);
+            done();
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
+        speechEnded++;
+    };
+
+    r.startContinuousRecognitionAsync(() => { },
+        (err: string) => {
+            done.fail(err);
+        });
+}, 30000);
+
+// Tests client reconnect after speech timeouts.
+test.skip("Reconnect After timeout", (done: jest.DoneCallback) => {
+    // Pump valid speech and then silence until at least one speech end cycle hits.
+    const fileBuffer: ArrayBuffer = WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile);
+
+    let p: sdk.PullAudioInputStream;
+    const bigFileBuffer: Uint8Array = new Uint8Array(32 * 1024 * 30); // ~30 seconds.
+    let s: sdk.SpeechConfig;
+    if (undefined === Settings.SpeechTimeoutEndpoint || undefined === Settings.SpeechTimeoutKey) {
+        // tslint:disable-next-line:no-console
+        console.warn("Running timeout test against production, this will be very slow...");
+        s = BuildSpeechConfig();
+    } else {
+        s = sdk.SpeechConfig.fromEndpoint(new URL(Settings.SpeechTimeoutEndpoint), Settings.SpeechTimeoutKey);
+    }
+    objsToClose.push(s);
+
+    let pumpSilence: boolean = false;
+    let bytesSent: number = 0;
+    const targetLoops: number = 250;
+
+    // Pump the audio from the wave file specified with 1 second silence between iterations indefinetly.
+    p = sdk.AudioInputStream.createPullStream(
+        {
+            close: () => { return; },
+            read: (buffer: ArrayBuffer): number => {
+                if (pumpSilence) {
+                    bytesSent += buffer.byteLength;
+                    if (bytesSent >= 8000) {
+                        bytesSent = 0;
+                        pumpSilence = false;
+                    }
+                    return buffer.byteLength;
+                } else {
+                    const copyArray: Uint8Array = new Uint8Array(buffer);
+                    const start: number = bytesSent;
+                    const end: number = buffer.byteLength > (fileBuffer.byteLength - bytesSent) ? (fileBuffer.byteLength - 1) : (bytesSent + buffer.byteLength - 1);
+                    copyArray.set(new Uint8Array(fileBuffer.slice(start, end)));
+                    const readyToSend: number = (end - start) + 1;
+                    bytesSent += readyToSend;
+
+                    if (readyToSend < buffer.byteLength) {
+                        bytesSent = 0;
+                        pumpSilence = true;
+                    }
+
+                    return readyToSend;
+                }
+
+            },
+        });
+
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
+    objsToClose.push(r);
+
+    let speechEnded: number = 0;
+    let lastOffset: number = 0;
+    let hypoCount: number = 0;
+    let recogCount: number = 0;
+
+    r.recognizing = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
+        hypoCount++;
+    };
+
+    r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
+        try {
+            expect(sdk.ResultReason[e.result.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
+            expect(e.offset).toBeGreaterThanOrEqual(lastOffset);
+            lastOffset = e.offset;
+
+            // If there is silence exactly at the moment of disconnect, an extra speech.phrase with text ="" is returned just before the
+            // connection is disconnected.
+            if ("" !== e.result.text) {
+                expect(e.result.text).toEqual(Settings.WaveFileText);
+            }
+            hypoCount = 0;
+            if (recogCount++ > targetLoops) {
+                p.close();
+            }
+
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs): void => {
+        try {
+            expect(e.errorDetails).toBeUndefined();
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.EndOfStream]);
+            expect(speechEnded).toEqual(1);
+            done();
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
+        speechEnded++;
+    };
+
+    r.startContinuousRecognitionAsync(() => { },
+        (err: string) => {
+            done.fail(err);
+        });
+}, 1000 * 60 * 15);

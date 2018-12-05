@@ -22,8 +22,12 @@ export class TranslationRecognitionCanceledEventArgs {
      * @param {string} errorDetails - Error details, if provided.
      * @param {TranslationRecognitionResult} result - The result.
      */
-    public constructor(sessionid: string, cancellationReason: CancellationReason, errorDetails: string,
-                       errorCode: CancellationErrorCode, result: TranslationRecognitionResult) {
+    public constructor(
+        sessionid: string,
+        cancellationReason: CancellationReason,
+        errorDetails: string,
+        errorCode: CancellationErrorCode,
+        result: TranslationRecognitionResult) {
         this.privCancelReason = cancellationReason;
         this.privErrorDetails = errorDetails;
         this.privResult = result;

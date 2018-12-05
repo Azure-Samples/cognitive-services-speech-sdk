@@ -73,7 +73,7 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
             case "translation.phrase":
                 if (this.privRecognizerConfig.isContinuousRecognition) {
                     // For continuous recognition telemetry has to be sent for every phrase as per spec.
-                    this.sendTelemetryData(requestSession.requestId, connection, requestSession.getTelemetry());
+                    this.sendTelemetryData(requestSession, requestSession.getTelemetry());
                 }
 
                 const translatedPhrase: TranslationPhrase = TranslationPhrase.fromJSON(connectionMessage.textBody);
@@ -225,35 +225,29 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
         }
     }
 
-    protected connectionError(sessionId: string, requestId: string, error: string): void {
+    // Cancels recognition.
+    protected cancelRecognition(
+        sessionId: string,
+        requestId: string,
+        cancellationReason: CancellationReason,
+        errorCode: CancellationErrorCode,
+        error: string): void {
         if (!!this.privTranslationRecognizer.canceled) {
             const properties: PropertyCollection = new PropertyCollection();
-            properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[CancellationErrorCode.ConnectionFailure]);
-
-            const result: TranslationRecognitionResult = new TranslationRecognitionResult(
-                undefined,
-                requestId,
-                ResultReason.Canceled,
-                undefined,
-                undefined,
-                undefined,
-                error,
-                undefined,
-                properties);
+            properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[errorCode]);
 
             const cancelEvent: TranslationRecognitionCanceledEventArgs = new TranslationRecognitionCanceledEventArgs(
                 sessionId,
-                CancellationReason.Error,
+                cancellationReason,
                 error,
-                CancellationErrorCode.ConnectionFailure,
-                result,
-            );
+                errorCode,
+                undefined);
+
             try {
                 this.privTranslationRecognizer.canceled(this.privTranslationRecognizer, cancelEvent);
                 /* tslint:disable:no-empty */
             } catch { }
         }
-
     }
 
     private fireEventForResult(serviceResult: TranslationHypothesis | TranslationPhrase, requestSession: RequestSession): TranslationRecognitionEventArgs {

@@ -258,7 +258,12 @@ test("Continous Recog With Intent", (done: jest.DoneCallback) => {
     r.addIntentWithLanguageModel(Settings.LuisValidIntentId, lm);
 
     r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs) => {
-        done.fail(e.errorDetails);
+        try {
+            expect(e.errorDetails).toBeUndefined();
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.EndOfStream]);
+        } catch (error) {
+            done.fail(error);
+        }
     };
 
     r.recognizing = (o: sdk.Recognizer, e: sdk.IntentRecognitionEventArgs): void => {
@@ -291,8 +296,7 @@ test("Continous Recog With Intent", (done: jest.DoneCallback) => {
         /* tslint:disable:no-empty */
         () => { },
         (error: string) => {
-            setTimeout(done, 1);
-            fail(error);
+            done.fail(error);
         });
 });
 
@@ -319,7 +323,7 @@ test("RoundTripWithGoodModelWrongIntent", (done: jest.DoneCallback) => {
         });
 });
 
-test.skip("MultiPhrase Intent", (done: jest.DoneCallback) => {
+test("MultiPhrase Intent", (done: jest.DoneCallback) => {
     const s: sdk.SpeechConfig = BuildSpeechConfig();
     objsToClose.push(s);
 
@@ -336,7 +340,7 @@ test.skip("MultiPhrase Intent", (done: jest.DoneCallback) => {
     // the SR engine, but rather the multi-phrase reconnect code.
     const silenceBuffer: Uint8Array = new Uint8Array(16 * 1024); // ~500ms
 
-    for (let i: number = 0; i < 2; i++) {
+    for (let i: number = 0; i <= 2; i++) {
         p.write(f);
         p.write(silenceBuffer.buffer);
     }
@@ -378,7 +382,7 @@ test.skip("MultiPhrase Intent", (done: jest.DoneCallback) => {
             expect(res).not.toBeUndefined();
             expect(res.reason).toEqual(sdk.ResultReason.RecognizedIntent);
             expect(res.intentId).toEqual(Settings.LuisValidIntentId);
-            ValidateResultMatchesWaveFile(res);
+            expect(res.text).toEqual(Settings.LuisWavFileText);
             numIntents++;
         } catch (error) {
             done.fail(error);
@@ -386,8 +390,7 @@ test.skip("MultiPhrase Intent", (done: jest.DoneCallback) => {
     };
 
     r.startContinuousRecognitionAsync(
-        /* tslint:disable:no-empty */
-        () => { },
+        undefined,
         (error: string) => {
             done.fail(error);
         });
@@ -583,3 +586,119 @@ test.skip("RecognizeOnce Bad Language", (done: jest.DoneCallback) => {
 
     WaitForCondition(() => (doneCount === 2), done);
 });
+
+test("Silence After Speech", (done: jest.DoneCallback) => {
+    // Pump valid speech and then silence until at least one speech end cycle hits.
+    const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
+    const bigFileBuffer: Uint8Array = new Uint8Array(32 * 1024 * 30); // ~30 seconds.
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+    const s: sdk.SpeechConfig = BuildSpeechConfig();
+
+    objsToClose.push(s);
+
+    p.write(WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile));
+    p.write(bigFileBuffer.buffer);
+    p.close();
+
+    const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
+    objsToClose.push(r);
+
+    let speechRecognized: boolean = false;
+    let noMatchCount: number = 0;
+    let speechEnded: number = 0;
+
+    r.recognized = (o: sdk.Recognizer, e: sdk.IntentRecognitionEventArgs) => {
+        try {
+            if (e.result.reason === sdk.ResultReason.RecognizedSpeech) {
+                expect(speechRecognized).toEqual(false);
+                speechRecognized = true;
+                expect(sdk.ResultReason[e.result.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
+                expect(e.result.text).toEqual("What's the weather like?");
+            } else if (e.result.reason === sdk.ResultReason.NoMatch) {
+                expect(speechRecognized).toEqual(true);
+                noMatchCount++;
+            }
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs): void => {
+        try {
+            expect(e.errorDetails).toBeUndefined();
+            expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
+            expect(speechEnded).toEqual(noMatchCount + 2); // +1 for the end of the valid speech. +1 more for the last speech end when recog cancels.
+            expect(noMatchCount).toEqual(6); // 5 seconds for intent based reco.
+            done();
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
+        speechEnded++;
+    };
+
+    r.startContinuousRecognitionAsync(() => { },
+        (err: string) => {
+            done.fail(err);
+        });
+}, 30000);
+
+test("Silence Then Speech", (done: jest.DoneCallback) => {
+    // Pump valid speech and then silence until at least one speech end cycle hits.
+    const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
+    const bigFileBuffer: Uint8Array = new Uint8Array(32 * 1024 * 30); // ~30 seconds.
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+    const s: sdk.SpeechConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+
+    p.write(bigFileBuffer.buffer);
+    p.write(WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile));
+    p.close();
+
+    const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s, config);
+    objsToClose.push(r);
+
+    let speechRecognized: boolean = false;
+    let noMatchCount: number = 0;
+    let speechEnded: number = 0;
+
+    r.recognized = (o: sdk.Recognizer, e: sdk.IntentRecognitionEventArgs) => {
+        try {
+            if (e.result.reason === sdk.ResultReason.RecognizedSpeech) {
+                expect(speechRecognized).toEqual(false);
+                expect(noMatchCount).toBeGreaterThanOrEqual(1);
+                speechRecognized = true;
+                expect(sdk.ResultReason[e.result.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
+                expect(e.result.text).toEqual("What's the weather like?");
+            } else if (e.result.reason === sdk.ResultReason.NoMatch) {
+                expect(speechRecognized).toEqual(false);
+                noMatchCount++;
+            }
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs): void => {
+        try {
+            expect(e.errorDetails).toBeUndefined();
+            expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
+            expect(speechEnded).toEqual(noMatchCount + 1);
+            expect(noMatchCount).toEqual(6); // 5 seconds for intent based reco.
+            done();
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
+        speechEnded++;
+    };
+
+    r.startContinuousRecognitionAsync(() => { },
+        (err: string) => {
+            done.fail(err);
+        });
+}, 30000);

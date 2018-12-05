@@ -51,7 +51,7 @@ export class TranslationRecognizer extends Recognizer {
         if (this.properties.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice, undefined) !== undefined) {
             Contracts.throwIfNullOrWhitespace(
                 this.properties.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice),
-                 PropertyId[PropertyId.SpeechServiceConnection_TranslationVoice]);
+                PropertyId[PropertyId.SpeechServiceConnection_TranslationVoice]);
         }
 
         Contracts.throwIfNullOrWhitespace(
@@ -194,8 +194,17 @@ export class TranslationRecognizer extends Recognizer {
 
             this.implRecognizerStart(
                 this.privReco,
-                cb,
-                err);
+                (e: TranslationRecognitionResult) => {
+                    this.implCloseExistingRecognizer();
+                    if (!!cb) {
+                        cb(e);
+                    }
+                }, (e: string) => {
+                    this.implCloseExistingRecognizer();
+                    if (!!err) {
+                        err(e);
+                    }
+                });
         } catch (error) {
             if (!!err) {
                 if (error instanceof Error) {
@@ -247,6 +256,7 @@ export class TranslationRecognizer extends Recognizer {
                 if (error instanceof Error) {
                     const typedError: Error = error as Error;
                     err(typedError.name + ": " + typedError.message);
+
                 } else {
                     err(error);
                 }
@@ -317,8 +327,11 @@ export class TranslationRecognizer extends Recognizer {
         return new RecognizerConfig(speechConfig, RecognitionMode.Conversation, this.properties);
     }
 
-    protected createServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory,
-                                      audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
+    protected createServiceRecognizer(
+        authentication: IAuthentication,
+        connectionFactory: IConnectionFactory,
+        audioConfig: AudioConfig,
+        recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
 
         const configImpl: AudioConfigImpl = audioConfig as AudioConfigImpl;
 

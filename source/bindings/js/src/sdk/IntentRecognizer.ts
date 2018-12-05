@@ -170,7 +170,17 @@ export class IntentRecognizer extends Recognizer {
             const intentReco: IntentServiceRecognizer = this.privReco as IntentServiceRecognizer;
             intentReco.setIntents(this.privAddedLmIntents, this.privUmbrellaIntent);
 
-            this.implRecognizerStart(this.privReco, cb, err, contextJson);
+            this.implRecognizerStart(this.privReco, (e: IntentRecognitionResult) => {
+                this.implCloseExistingRecognizer();
+                if (!!cb) {
+                    cb(e);
+                }
+            }, (e: string) => {
+                this.implCloseExistingRecognizer();
+                if (!!err) {
+                    err(e);
+                }
+            }, contextJson);
 
         } catch (error) {
             if (!!err) {

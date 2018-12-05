@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { setTimeout } from "timers";
-
 import * as sdk from "../../../microsoft.cognitiveservices.speech.sdk";
 import { ConsoleLoggingListener } from "../../../src/common.browser/Exports";
 import { Events, EventType, ObjectDisposedError } from "../../../src/common/Exports";
@@ -429,20 +427,23 @@ test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
     const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
     objsToClose.push(s);
 
-    s.voiceName = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
+    s.voiceName = "Microsoft Server Speech Text to Speech Voice (BadVoice)";
 
     const r: sdk.TranslationRecognizer = BuildRecognizerFromWaveFile(s);
     objsToClose.push(r);
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        if (e.result.reason !== sdk.ResultReason.Canceled) {
-            done.fail("Should have failed, instead got status");
+        try {
+            expect(sdk.ResultReason[e.result.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.Canceled]);
+        } catch (error) {
+            done.fail(error);
         }
+
     });
 
     r.canceled = ((o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
         try {
-            expect(e.errorDetails).toEqual("Synthesis service failed with code:  - Could not identify the voice 'Microsoft Server Speech Text to Speech Voice (de-DE, Hedda))' for the text to speech service ");
+            expect(e.errorDetails).toEqual("Synthesis service failed with code:  - Could not identify the voice 'Microsoft Server Speech Text to Speech Voice (BadVoice)' for the text to speech service ");
             done();
         } catch (error) {
             done.fail(error);
@@ -828,9 +829,13 @@ const testInitialSilienceTimeout = (config: sdk.AudioConfig, done: jest.DoneCall
         });
 
     WaitForCondition(() => (numReports === 2), () => {
-        setTimeout(done, 1);
-        if (!!addedChecks) {
-            addedChecks();
+        try {
+            if (!!addedChecks) {
+                addedChecks();
+            }
+            done();
+        } catch (error) {
+            done.fail(error);
         }
     });
 };
@@ -941,11 +946,13 @@ test("Default mic is used when audio config is not specified.", () => {
     // Node.js doesn't have a microphone natively. So we'll take the specific message that indicates that microphone init failed as evidence it was attempted.
     r.recognizeOnceAsync(() => fail("RecognizeOnceAsync returned success when it should have failed"),
         (error: string): void => {
+            expect(error).not.toBeUndefined();
             expect(error).toEqual("Error: Browser does not support Web Audio API (AudioContext is not available).");
         });
 
     r.startContinuousRecognitionAsync(() => fail("startContinuousRecognitionAsync returned success when it should have failed"),
         (error: string): void => {
+            expect(error).not.toBeUndefined();
             expect(error).toEqual("Error: Browser does not support Web Audio API (AudioContext is not available).");
         });
 });
@@ -1007,7 +1014,7 @@ test("Connection Errors Propogate Sync", (done: jest.DoneCallback) => {
 
 });
 
-test.only("RecognizeOnce Bad Language", (done: jest.DoneCallback) => {
+test("RecognizeOnce Bad Language", (done: jest.DoneCallback) => {
     const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
     objsToClose.push(s);
     s.speechRecognitionLanguage = "BadLanguage";
@@ -1041,3 +1048,124 @@ test.only("RecognizeOnce Bad Language", (done: jest.DoneCallback) => {
 
     WaitForCondition(() => (doneCount === 2), done);
 });
+
+test("Silence After Speech", (done: jest.DoneCallback) => {
+    // Pump valid speech and then silence until at least one speech end cycle hits.
+    const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
+    const bigFileBuffer: Uint8Array = new Uint8Array(32 * 1024 * 30); // ~30 seconds.
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    s.addTargetLanguage("de-DE");
+    s.speechRecognitionLanguage = "en-US";
+    objsToClose.push(s);
+
+    p.write(WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile));
+    p.write(bigFileBuffer.buffer);
+    p.close();
+
+    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
+    objsToClose.push(r);
+
+    let speechRecognized: boolean = false;
+    let noMatchCount: number = 0;
+    let speechEnded: number = 0;
+
+    r.recognized = (o: sdk.Recognizer, e: sdk.TranslationRecognitionEventArgs) => {
+        try {
+            if (e.result.reason === sdk.ResultReason.TranslatedSpeech) {
+                expect(speechRecognized).toEqual(false);
+                speechRecognized = true;
+                expect(sdk.ResultReason[e.result.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.TranslatedSpeech]);
+                expect(e.result.text).toEqual("What's the weather like?");
+            } else if (e.result.reason === sdk.ResultReason.NoMatch) {
+                expect(speechRecognized).toEqual(true);
+                noMatchCount++;
+            }
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs): void => {
+        try {
+            expect(e.errorDetails).toBeUndefined();
+            expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
+            expect(speechEnded).toEqual(noMatchCount + 1);
+            expect(noMatchCount).toEqual(1);
+            done();
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
+        speechEnded++;
+    };
+
+    /* tslint:disable:no-empty */
+    r.startContinuousRecognitionAsync(() => { },
+        (err: string) => {
+            done.fail(err);
+        });
+}, 30000);
+
+test("Silence Then Speech", (done: jest.DoneCallback) => {
+    // Pump valid speech and then silence until at least one speech end cycle hits.
+    const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
+    const bigFileBuffer: Uint8Array = new Uint8Array(32 * 1024 * 30); // ~30 seconds.
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+    s.speechRecognitionLanguage = "en-US";
+    s.addTargetLanguage("de-DE");
+
+    p.write(bigFileBuffer.buffer);
+    p.write(WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile));
+    p.close();
+
+    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
+    objsToClose.push(r);
+
+    let speechRecognized: boolean = false;
+    let noMatchCount: number = 0;
+    let speechEnded: number = 0;
+
+    r.recognized = (o: sdk.Recognizer, e: sdk.TranslationRecognitionEventArgs) => {
+        try {
+            if (e.result.reason === sdk.ResultReason.TranslatedSpeech) {
+                expect(speechRecognized).toEqual(false);
+                expect(noMatchCount).toBeGreaterThanOrEqual(1);
+                speechRecognized = true;
+                expect(sdk.ResultReason[e.result.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.TranslatedSpeech]);
+                expect(e.result.text).toEqual("What's the weather like?");
+            } else if (e.result.reason === sdk.ResultReason.NoMatch) {
+                expect(speechRecognized).toEqual(false);
+                noMatchCount++;
+            }
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs): void => {
+        try {
+            expect(e.errorDetails).toBeUndefined();
+            expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
+            expect(speechEnded).toEqual(noMatchCount + 1);
+            expect(noMatchCount).toEqual(2);
+            done();
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
+        speechEnded++;
+    };
+
+    /* tslint:disable:no-empty */
+    r.startContinuousRecognitionAsync(() => { },
+        (err: string) => {
+            done.fail(err);
+        });
+}, 30000);
