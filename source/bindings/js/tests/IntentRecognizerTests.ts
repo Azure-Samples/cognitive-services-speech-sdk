@@ -2,9 +2,9 @@
 // Licensed under the MIT license.
 import { setTimeout } from "timers";
 
-import * as sdk from "../../../microsoft.cognitiveservices.speech.sdk";
-import { ConsoleLoggingListener } from "../../../src/common.browser/Exports";
-import { Events, EventType } from "../../../src/common/Exports";
+import * as sdk from "../microsoft.cognitiveservices.speech.sdk";
+import { ConsoleLoggingListener } from "../src/common.browser/Exports";
+import { Events, EventType } from "../src/common/Exports";
 
 import { ByteBufferAudioFile } from "./ByteBufferAudioFile";
 import { Settings } from "./Settings";
@@ -235,7 +235,7 @@ const testInitialSilienceTimeout = (config: sdk.AudioConfig, done: jest.DoneCall
 
             const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
             expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
-            expect(Date.now()).toBeGreaterThan(startTime + 2000);
+            expect(Date.now()).toBeGreaterThan(startTime + ((res.offset / 1e+4) / 2));
 
         },
         (error: string) => {

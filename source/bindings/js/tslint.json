@@ -42,5 +42,10 @@
       "parameter",
       "property-declaration"
     ]
+  },
+  "linterOptions": {
+    "exclude": [
+      "secrets/*.ts"
+    ]
   }
 }

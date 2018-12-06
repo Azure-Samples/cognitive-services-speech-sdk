@@ -3,7 +3,6 @@
 
 import { AudioStreamFormatImpl } from "../../src/sdk/Audio/AudioStreamFormat";
 import { AudioStreamFormat } from "../../src/sdk/Exports";
-import { Timer } from "../common.browser/Exports";
 import {
     AudioSourceErrorEvent,
     AudioSourceEvent,
@@ -145,26 +144,13 @@ export class FileAudioSource implements IAudioSource {
 
                 let startOffset = 0;
                 let endOffset = FileAudioSource.CHUNK_SIZE;
-                let lastWriteTimestamp = 0;
 
                 const processNextChunk = (event: Event): void => {
                     if (stream.isClosed) {
                         return; // output stream was closed (somebody called TurnOff). We're done here.
                     }
 
-                    if (lastWriteTimestamp !== 0) {
-                        const delay = Date.now() - lastWriteTimestamp;
-                        if (delay < FileAudioSource.UPLOAD_INTERVAL) {
-                            // It's been less than the "upload interval" since we've uploaded the
-                            // last chunk. Schedule the next upload to make sure that we're sending
-                            // upstream roughly one chunk per upload interval.
-                            new Timer(FileAudioSource.UPLOAD_INTERVAL - delay, processNextChunk).start();
-                            return;
-                        }
-                    }
-
                     stream.write(reader.result as ArrayBuffer);
-                    lastWriteTimestamp = Date.now();
 
                     if (endOffset < this.privFile.size) {
                         startOffset = endOffset;
@@ -179,9 +165,9 @@ export class FileAudioSource implements IAudioSource {
 
                 reader.onload = processNextChunk;
 
-                reader.onerror = (event: ErrorEvent) => {
-                    const errorMsg = `Error occurred while processing '${this.privFile.name}'. ${event.error}`;
-                    this.onEvent(new AudioStreamNodeErrorEvent(this.privId, audioNodeId, event.error));
+                reader.onerror = (event: ProgressEvent) => {
+                    const errorMsg = `Error occurred while processing '${this.privFile.name}'. ${event}`;
+                    this.onEvent(new AudioStreamNodeErrorEvent(this.privId, audioNodeId, errorMsg));
                     throw new Error(errorMsg);
                 };
 

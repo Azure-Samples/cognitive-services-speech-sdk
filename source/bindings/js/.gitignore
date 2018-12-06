@@ -3,7 +3,9 @@
 # ignore auto-generated (transpiled) js files
 src/**/*.js
 distrib/*
-
+secrets/*
 /**/speech.key
 /samples/**/package-lock.json
 .idea/
+test-javascript-junit.xml
+coverage/*

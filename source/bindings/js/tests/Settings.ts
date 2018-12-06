@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import * as sdk from "../../../microsoft.cognitiveservices.speech.sdk";
-
 export class Settings {
 
     // subscription
@@ -25,7 +23,7 @@ export class Settings {
     public static LuisRegion: string = "<<YOUR_LUIS_REGION>>";
     public static LuisAppEndPointHref: string = "<<YOUR_LUIS_APP_URL>>";
 
-    public static InputDir: string = "../../../../../tests/input/audio/";
+    public static InputDir: string = "../../../tests/input/audio/";
 
     /*
      * The intent behing this setting is that at test execution time the WaveFile below will contain speech

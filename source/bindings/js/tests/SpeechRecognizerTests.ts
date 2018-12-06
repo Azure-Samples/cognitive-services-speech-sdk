@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import * as sdk from "../../../microsoft.cognitiveservices.speech.sdk";
-import { ConsoleLoggingListener } from "../../../src/common.browser/Exports";
-import { ServiceRecognizerBase } from "../../../src/common.speech/Exports";
-import { QueryParameterNames } from "../../../src/common.speech/QueryParameterNames";
-import { ConnectionStartEvent } from "../../../src/common/Exports";
-import { Events, EventType, PlatformEvent } from "../../../src/common/Exports";
+import * as sdk from "../microsoft.cognitiveservices.speech.sdk";
+import { ConsoleLoggingListener } from "../src/common.browser/Exports";
+import { ServiceRecognizerBase } from "../src/common.speech/Exports";
+import { QueryParameterNames } from "../src/common.speech/QueryParameterNames";
+import { ConnectionStartEvent } from "../src/common/Exports";
+import { Events, EventType, PlatformEvent } from "../src/common/Exports";
 
 import { Settings } from "./Settings";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
@@ -422,9 +422,13 @@ test("Event Tests (Continuous)", (done: jest.DoneCallback) => {
     });
 }, 20000);
 
-test("testStopContinuousRecognitionAsyncWithAndWithoutTelemetry", (done: jest.DoneCallback) => {
-    // start with telemetry disabled
-    {
+describe("Disables Telemetry", () => {
+
+    // Re-enable telemetry
+    afterEach(() => sdk.Recognizer.enableTelemetry(true));
+
+    test("testStopContinuousRecognitionAsyncWithoutTelemetry", (done: jest.DoneCallback) => {
+        // start with telemetry disabled
         const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile();
         objsToClose.push(r);
 
@@ -475,62 +479,62 @@ test("testStopContinuousRecognitionAsyncWithAndWithoutTelemetry", (done: jest.Do
             (err: string) => {
                 done.fail(err);
             });
-    }
+    });
+});
 
+test("testStopContinuousRecognitionAsyncWithTelemetry", (done: jest.DoneCallback) => {
     // Now, the same test, but with telemetry enabled.
-    {
-        const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile();
-        objsToClose.push(r);
+    const r: sdk.SpeechRecognizer = BuildRecognizerFromWaveFile();
+    objsToClose.push(r);
 
-        let eventDone: boolean = false;
-        let canceled: boolean = false;
-        let telemetryEvents: number = 0;
+    let eventDone: boolean = false;
+    let canceled: boolean = false;
+    let telemetryEvents: number = 0;
 
-        // enable telemetry data
-        sdk.Recognizer.enableTelemetry(true);
+    // enable telemetry data
+    sdk.Recognizer.enableTelemetry(true);
 
-        ServiceRecognizerBase.telemetryData = (json: string): void => {
-            telemetryEvents++;
-        };
+    ServiceRecognizerBase.telemetryData = (json: string): void => {
+        telemetryEvents++;
+    };
 
-        r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
-            try {
-                eventDone = true;
-                expect(sdk.ResultReason[e.result.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
-                expect(e.result.text).toEqual("What's the weather like?");
-            } catch (error) {
-                done.fail(error);
-            }
-        };
+    r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
+        try {
+            eventDone = true;
+            expect(sdk.ResultReason[e.result.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
+            expect(e.result.text).toEqual("What's the weather like?");
+        } catch (error) {
+            done.fail(error);
+        }
+    };
 
-        r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs): void => {
-            try {
-                canceled = true;
-                expect(e.errorDetails).toBeUndefined();
-                expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
-            } catch (error) {
-                done.fail(error);
-            }
-        };
+    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs): void => {
+        try {
+            canceled = true;
+            expect(e.errorDetails).toBeUndefined();
+            expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
+        } catch (error) {
+            done.fail(error);
+        }
+    };
 
-        r.startContinuousRecognitionAsync(
-            () => WaitForCondition(() => (eventDone && canceled), () => {
-                r.stopContinuousRecognitionAsync(
-                    () => {
-                        // Three? One for the phrase that was recognized.
-                        // Once for the end of stream.
-                        // Once when closed.
-                        expect(telemetryEvents).toEqual(3);
-                        done();
-                    },
-                    (err: string) => {
-                        done.fail(err);
-                    });
-            }),
-            (err: string) => {
-                done.fail(err);
-            });
-    }
+    r.startContinuousRecognitionAsync(
+        () => WaitForCondition(() => (eventDone && canceled), () => {
+            r.stopContinuousRecognitionAsync(
+                () => {
+                    // Three? One for the phrase that was recognized.
+                    // Once for the end of stream.
+                    // Once when closed.
+                    expect(telemetryEvents).toEqual(3);
+                    done();
+                },
+                (err: string) => {
+                    done.fail(err);
+                });
+        }),
+        (err: string) => {
+            done.fail(err);
+        });
 });
 
 test("testStartStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
@@ -858,7 +862,7 @@ const testInitialSilienceTimeout = (config: sdk.AudioConfig, done: jest.DoneCall
 
             const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
             expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
-            expect(Date.now()).toBeGreaterThan(startTime + 2400);
+            expect(Date.now()).toBeGreaterThanOrEqual(startTime + ((res.offset / 1e+4) / 2));
 
         },
         (error: string) => {

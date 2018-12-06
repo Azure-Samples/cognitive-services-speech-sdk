@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import * as sdk from "../../../microsoft.cognitiveservices.speech.sdk";
-import { LanguageUnderstandingModelImpl } from "../../../src/sdk/LanguageUnderstandingModel";
+import * as sdk from "../microsoft.cognitiveservices.speech.sdk";
+import { LanguageUnderstandingModelImpl } from "../src/sdk/LanguageUnderstandingModel";
 import { Settings } from "./Settings";
 
 beforeAll(() => {

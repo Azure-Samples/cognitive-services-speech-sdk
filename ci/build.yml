@@ -1459,16 +1459,14 @@ jobs:
       npm run prepare &&
       npm pack
     displayName: Build and pack SDK
-  - bash: cd source/bindings/js/tests/Unit && npm ci
-    displayName: Install dependencies for test
   - bash: |
       perl ci/evaluate-test-config.pl --verbose --format azuredevops-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman)
     displayName: Set test variables
-  - script: RunTests.cmd SpeechSubscriptionKey:$(SPEECHSDK_SPEECH_KEY) SpeechRegion:$(SPEECHSDK_SPEECH_REGION) LuisSubscriptionKey:$(SPEECHSDK_LUIS_KEY) LuisRegion:$(SPEECHSDK_LUIS_REGION) SpeechTestModelId:$(SPEECHSDK_SPEECH_ENDPOINTID_ENUS)
+  - script: RunTests.cmd SpeechSubscriptionKey:$(SPEECHSDK_SPEECH_KEY) SpeechRegion:$(SPEECHSDK_SPEECH_REGION) LuisSubscriptionKey:$(SPEECHSDK_LUIS_KEY) LuisRegion:$(SPEECHSDK_LUIS_REGION) SpeechTestEndpointId:$(SPEECHSDK_SPEECH_ENDPOINTID_ENUS)
     displayName: 'Run tests'
-    workingDirectory: source/bindings/js/tests/Unit
+    workingDirectory: source/bindings/js
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
   - task: PublishTestResults@2
     displayName: 'Publish Test Results **/TEST-*.xml'
@@ -1488,9 +1486,9 @@ jobs:
       ./ci/generate-npm-index-json.sh "$PACKAGE_IN" "$SPEECHSDK_SEMVER2NOMETA" "$(NPM_REGISTRY)" > "$PACKAGE_OUT/$PACKAGE_BASE"
       cp --preserve "$PACKAGE_IN" "$PACKAGE_OUT"
       cp --preserve --recursive public_samples/quickstart/js-browser "$QUICKSTART_OUT"
-      cp --preserve source/bindings/js/distrib/microsoft.cognitiveservices.speech.sdk.bundle.* "$QUICKSTART_OUT"
-      echo SRI hash for microsoft.cognitiveservices.speech.sdk.bundle.js: sha512-"$(openssl dgst -sha512 -binary source/bindings/js/distrib/microsoft.cognitiveservices.speech.sdk.bundle.js | openssl base64 -A)"
-      cp --preserve license.md REDIST.txt source/bindings/js/distrib/microsoft.cognitiveservices.speech.sdk.bundle.* "$ZIP_OUT"
+      cp --preserve source/bindings/js/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle.* "$QUICKSTART_OUT"
+      echo SRI hash for microsoft.cognitiveservices.speech.sdk.bundle.js: sha512-"$(openssl dgst -sha512 -binary source/bindings/js/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle.js | openssl base64 -A)"
+      cp --preserve license.md REDIST.txt source/bindings/js/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle.* "$ZIP_OUT"
   - task: ArchiveFiles@2
     inputs:
       rootFolderOrFile: $(Build.ArtifactStagingDirectory)/Out/JavaScript/SpeechSDK-JavaScript-$(SPEECHSDK_SEMVER2NOMETA)

@@ -377,9 +377,10 @@ export abstract class ServiceRecognizerBase implements IDisposable {
             const withTelemetry = JSON.parse(speechConfigJson);
 
             const replacement: any = {
-                 context: {
+                context: {
                     system: withTelemetry.context.system,
-                 }};
+                },
+            };
 
             speechConfigJson = JSON.stringify(replacement);
         }
@@ -420,7 +421,7 @@ export abstract class ServiceRecognizerBase implements IDisposable {
         const deferred = new Deferred<boolean>();
 
         // The time we last sent data to the service.
-        let lastSendTime: number = 0;
+        let lastSendTime: number = Date.now();
 
         const audioFormat: AudioStreamFormatImpl = this.privAudioSource.format as AudioStreamFormatImpl;
 

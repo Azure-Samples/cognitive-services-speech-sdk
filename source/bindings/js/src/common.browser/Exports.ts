@@ -9,7 +9,6 @@ export * from "./FileAudioSource";
 export * from "./OpusRecorder";
 export * from "./PCMRecorder";
 export * from "./SessionStorage";
-export * from "./Timer";
 export * from "./WebsocketConnection";
 export * from "./WebsocketMessageAdapter";
 export * from "./ReplayableAudioNode";

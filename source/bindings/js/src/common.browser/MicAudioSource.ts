@@ -234,10 +234,18 @@ export class MicAudioSource implements IAudioSource {
 
         this.privRecorder.releaseMediaResources(this.privContext);
 
+        // This pattern brought to you by a bug in the TypeScript compiler where it
+        // confuses the ("close" in this.privContext) with this.privContext always being null as the alternate.
+        // https://github.com/Microsoft/TypeScript/issues/11498
+        let hasClose: boolean = false;
         if ("close" in this.privContext) {
+            hasClose = true;
+        }
+
+        if (hasClose) {
             this.privContext.close();
             this.privContext = null;
-        } else if (this.privContext.state === "running") {
+        } else if (null !== this.privContext && this.privContext.state === "running") {
             // Suspend actually takes a callback, but analogous to the
             // resume method, it'll be only fired if suspend is called
             // in a direct response to a user action. The later is not always

@@ -8,7 +8,7 @@ if "%~1" equ "?" goto :Usage
 if "%~1" equ "/h" goto :Usage
 if "%~1" equ "-h" goto :Usage
 
-set TEST_SETTING_FILE_DIR=%~dp0..\..\..\..\..\build\source\bindings\js\tests\Unit
+set TEST_SETTING_FILE_DIR=%~dp0\secrets
 if NOT EXIST "%TEST_SETTING_FILE_DIR%" (
     md "%TEST_SETTING_FILE_DIR%" || (
         echo Error creating directory %TEST_SETTING_FILE_DIR%
@@ -26,7 +26,7 @@ if EXIST "%TEST_SETTING_FILE_NAME%" (
     )
 )
 
-@echo import { Settings } from "../../../../../../source/bindings/js/tests/Unit/tests/Settings" > "%TEST_SETTING_FILE_NAME%"
+@echo import { Settings } from "../tests/Settings" > "%TEST_SETTING_FILE_NAME%"
 
 :NextArg
 if "%~1" == "" (

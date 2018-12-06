@@ -5,9 +5,9 @@ module.exports = {
         "^.+\\.ts$": "ts-jest",
     },
     testRegex: "tests/.*Tests\\.ts$",
-    testPathIgnorePatterns: ["/lib/", "/node_modules/"],
+    testPathIgnorePatterns: ["/lib/", "/node_modules/", "/src/"],
     moduleFileExtensions: ["ts", "js", "jsx", "json", "node"],
     collectCoverage: true,
     "reporters": [ "default", "jest-junit" ],
-    setupTestFrameworkScriptFile:"../../../../../build/source/bindings/js/tests/Unit/TestConfiguration.ts"
+    setupTestFrameworkScriptFile:"./secrets/TestConfiguration.ts"
 };

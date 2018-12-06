@@ -25,12 +25,11 @@
               declaration: true,
               noImplicitAny: true,
               removeComments: false,
-              outDir: 'distrib'
+              outDir: 'distrib/lib'
           }))
           .pipe(sourcemaps.write('.'))
-          .pipe(gulp.dest('distrib'));
+          .pipe(gulp.dest('distrib/lib'));
   });
-
 
   gulp.task("bundle", gulp.series("build", function bundle () {
       return gulp.src('bundleApp.js')
@@ -45,7 +44,6 @@
               }]
           }
       }))
-      .pipe(gulp.dest('distrib'));
+      .pipe(gulp.dest('distrib/browser'));
   }));
-
 }());
