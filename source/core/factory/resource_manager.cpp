@@ -24,10 +24,10 @@ CSpxResourceManager::CSpxResourceManager()
     // **IMPORTANT**: Do NOT change the order in which module factories are added here!!!
     //
     //   They will be searched in order for objects to create (See ::CreateObject).
-    //   Changing the order will have adverse side effects on the intended behavior. 
+    //   Changing the order will have adverse side effects on the intended behavior.
     //
-    //   FOR EXAMPLE: CSpxResourceManager intentionally searches for mock objects first. 
-    //                This allows "at runtime testing". 
+    //   FOR EXAMPLE: CSpxResourceManager intentionally searches for mock objects first.
+    //                This allows "at runtime testing".
 
 #ifdef __linux__
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.so"));
@@ -36,10 +36,6 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.pmakws.so"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.kws.so"));
 
-    // TODO remove the following line once carbon prefixes are removed
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-pmakws.so"));
-    // TODO remove the previous line once carbon prefixes are removed
-
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
 #elif __MACH__
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.dylib"));
@@ -47,10 +43,6 @@ CSpxResourceManager::CSpxResourceManager()
     // Note: due to new naming, removing any carbon prefix in name
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.pmakws.dylib"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.kws.dylib"));
-
-    // TODO remove the following line once carbon prefixes are removed
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-pmakws.dylib"));
-    // TODO remove the previous line once carbon prefixes are removed
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
 #else
@@ -62,11 +54,6 @@ CSpxResourceManager::CSpxResourceManager()
     //       special "carbon" core component)
     m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.pmakws.dll"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.kws.dll"));
-
-    // TODO remove the following two lines once carbon prefixes are removed
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-pmakws.dll"));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-kws.dll"));
-    // TODO remove the previous two lines once carbon prefixes are removed
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon")); // this is special, internal name, no dll extension!
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-unidec.dll"));
