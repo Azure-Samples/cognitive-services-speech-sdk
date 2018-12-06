@@ -873,13 +873,16 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
 
 void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation)
 {
-    std::shared_ptr<ISpxRecognizer> recognizer;
+    unique_lock<mutex> lock(m_recognizersLock);
+    if (m_recognizers.empty())
     {
-        unique_lock<mutex> lock(m_recognizersLock);
-        SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
-        recognizer = m_recognizers.front().lock();
+        // we only support 1 recognizer today... but can be deleted if user is killing it right now.
+        *countSpeech = *countIntent = *countTranslation = 0;
+        return;
     }
 
+    SPX_DBG_ASSERT(m_recognizers.size() == 1);
+    auto recognizer = m_recognizers.front().lock();
     auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer);
     auto translationRecognizer = SpxQueryInterface<ISpxTranslationRecognizer>(recognizer);
 
@@ -1334,15 +1337,20 @@ void CSpxAudioStreamSession::EnsureIntentRegionSet()
     auto intentRegion = this->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), "");
 
     // Now ... let's check to see if we have a different region specified for intent...
-    weak_ptr<ISpxRecognizer> recognizer;
+    bool isIntentScenario = false;
     {
         unique_lock<mutex> lock(m_recognizersLock);
+        if (m_recognizers.empty()) // The recognizer is being killed...
+        {
+            return;
+        }
+
         SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
-        recognizer = m_recognizers.front();
+        auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(m_recognizers.front().lock());
+        isIntentScenario = intentRecognizer != nullptr;
     }
 
-    auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer.lock());
-    if (intentRecognizer != nullptr && m_luAdapter != nullptr)
+    if (isIntentScenario && m_luAdapter != nullptr)
     {
         // we have an intent recognizer... and an lu adapter (meaning someone called ->AddIntent())...
        std::string provider, id, key, region;
