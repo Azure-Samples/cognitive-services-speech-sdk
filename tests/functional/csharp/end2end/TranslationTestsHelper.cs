@@ -67,7 +67,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public async Task<Dictionary<ResultType, List<EventArgs>>> GetTranslationRecognizedContinuous(string path, string fromLanguage, List<string> toLanguages, string voice=null)
+        public async Task<Dictionary<ResultType, List<EventArgs>>> GetTranslationRecognizedContinuous(string path, string fromLanguage, List<string> toLanguages, string voice=null, bool requireTranslatedSpeech = true)
         {
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages, voice)))
             {
@@ -81,7 +81,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Received final result event: {e.ToString()}");
-                    if (e.Result.Reason == ResultReason.TranslatedSpeech)
+                    if (!requireTranslatedSpeech || e.Result.Reason == ResultReason.TranslatedSpeech)
                     {
                         textResultEvents.Add(e);
                     }

@@ -91,18 +91,84 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
 
         [TestMethod]
-        public async Task TestInvalidLanguage()
+        public async Task TestInvalidTargetLanguageWithRecognizedOnce()
         {
             var toLanguages = new List<string>() { "invalidLanguages" };
             var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
 
             Assert.IsNotNull(result, "Translation should not be null");
-            Console.WriteLine(result.ToString());
+            var errorDetails = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonErrorDetails, "");
+            Console.WriteLine($"Result: {result.ToString()}, Error details: ErrorDetails: {errorDetails}");
+            Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, "Unexpected result reason.");
+            Assert.AreEqual(TestData.English.Weather.Utterance, result.Text, "Unmatched recognized text.");
+            Assert.AreEqual(0, result.Translations.Count, "Unmatched translation results.");
+            Assert.AreEqual(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails, "Unmatched error details.");
+        }
 
-            var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
-            Console.WriteLine($"Reason: {result.Reason}, ErrorDetails: {errorDetails}");
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        public async Task TestInvalidTargetLanguageWithContinuousRecognition()
+        {
+            var toLanguages = new List<string>() { "invalidLanguages" };
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Batman.AudioFile, Language.EN, toLanguages, voice:null, requireTranslatedSpeech:false);
+            Assert.AreEqual(TestData.German.Batman.Utterances.Length, actualTranslations[ResultType.RecognizedText].Count, "Unmatched number of recognized utterances");
+            var actualTranslationsTextResults = actualTranslations[ResultType.RecognizedText].Cast<TranslationRecognitionEventArgs>().Select(t => t.Result).ToList();
+            for (var i = 0; i < actualTranslationsTextResults.Count; i++)
+            {
+                var result = actualTranslationsTextResults[i];
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, "Unmatched result reason.");
+                AssertMatching(TestData.English.Batman.Utterances[i], result.Text);
+                Assert.AreEqual(0, result.Translations.Count, "Unmatched translation results");
+                var errorDetails = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonErrorDetails, "");
+                Assert.AreEqual(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails, "Unmatched error details");
+            }
+        }
 
-            Assert.AreEqual(errorDetails, "Timeout: no recognition result received.");            
+        [TestMethod]
+        public async Task TestInvalidVoice()
+        {
+            var toLanguages = new List<string>() { Language.FR };
+            using (var recognizer = TrackSessionId(this.translationHelper.CreateTranslationRecognizer(TestData.English.Weather.AudioFile, Language.EN, toLanguages, "InvalidVoice")))
+            {
+                var tcs = new TaskCompletionSource<bool>();
+                bool receivedSynthesizingEvent = false;
+                CancellationErrorCode errorCode = CancellationErrorCode.NoError;
+                string errorDetails = string.Empty;
+
+                recognizer.Canceled += (s, e) =>
+                {
+                    if (e.Reason == CancellationReason.Error)
+                    {
+                        errorCode = CancellationErrorCode.ServiceError;
+                        errorDetails = e.ErrorDetails;
+                    }
+                };
+
+                recognizer.Recognized += (s, e) =>
+                {
+                    Assert.AreEqual(ResultReason.TranslatedSpeech, e.Result.Reason, "Unmatched result reason.");
+                    Assert.AreEqual(TestData.English.Weather.Utterance, e.Result.Text, "Unmatched recognized text.");
+                    Assert.AreEqual(TestData.French.Weather.Utterance, e.Result.Translations[toLanguages[0]], "Unmatched translation result.");
+                };
+
+                recognizer.Synthesizing += (s, e) =>
+                {
+                    receivedSynthesizingEvent = true;
+                };
+
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    Console.WriteLine($"Received stopped session event: {e.ToString()}");
+                    tcs.TrySetResult(true);
+                };
+
+                await recognizer.StartContinuousRecognitionAsync();
+                await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(30)));
+                await recognizer.StopContinuousRecognitionAsync();
+
+                Assert.AreEqual(CancellationErrorCode.ServiceError, errorCode, "Unmatched error code.");
+                Assert.AreEqual(TestData.ExpectedErrorDetails.InvalidVoiceNameErrorMessage, errorDetails, "Unmatched error message.");
+                Assert.IsFalse(receivedSynthesizingEvent, "Received unexpected synthesizing event.");
+            }
         }
 
         [TestMethod]
@@ -153,6 +219,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             for (var i = 0; i < actualTranslations.Count; i++)
             {
                 AssertMatching(TestData.English.Batman.Utterances[i], actualRecognitionTextResults[i]);
+                AssertMatching(TestData.German.Batman.Utterances[i], actualTranslationsTextResults[i]);
             }
         }
 

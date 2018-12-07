@@ -17,14 +17,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 public static readonly string[] Utterances =
                 {
-                    "Fähigkeiten und Fähigkeiten Batman hat keine inhärenten Superkräfte. Er setzt auf seine eigenen wissenschaftlichen Kenntnisse Detektiv-Fähigkeiten und sportliche Geschicklichkeit in den Geschichten Batman gilt als einer der größten Detektiv der Welt, wenn nicht der weltweit größte Verbrecher Löser Batman wurde immer wieder beschrieben.",
-                    "Diesem Niveau.",
-                    "Einer der größten Kampfkünstler im DC-Universum und mit höchster menschlicher körperlicher Konditionierung. Er hat die Welt bereist, um die Fähigkeiten zu erwerben, die nötig sind, um seinem Kreuzzug zu helfen. sein Wissen und seine Expertise in fast jeder Disziplin, die dem Menschen bekannt ist, ist von keinem anderen Charakter in einzig",
-                    "Bat man es unerschöpflichen Reichtum ermöglicht es ihm, auf fortschrittliche Technologie zuzugreifen, da ein kompetenter Wissenschaftler in der Lage ist, diese Technologien zu seinem Vorteil zu nutzen und zu modifizieren. Batman beschreibt Superman als den gefährlichsten Mann der Erde, der in der Lage ist, ein Team von. Super powered extra.",
-                    "Von sich aus, um seine inhaftierten Teamkollegen zu retten.",
-                    "In der ersten Storyline hält Superman auch Batman für einen der brillantesten Köpfe auf dem Planeten.",
-                    "Batman hat die Fähigkeit, unter großen körperlichen Schmerzen zu funktionieren und der Gedankenkontrolle zu widerstehen. Er ist ein Meister der Verkleidung mehrsprachig und ein Experte in der Spionage oft sammeln Informationen unter verschiedenen Identität bat man es Karate judo.",
-                    "Die Ausbildung hat ihn nach dem Meister der Verstohlenheit zu einer Flucht gemacht, die es ihm erlaubt, nach Willen zu erscheinen und zu verschwinden und sich zu befreien."
+                    "Fähigkeiten und Fähigkeiten Batman hat keine inhärenten Superkräfte. Er stützt sich auf seine eigenen wissenschaftlichen Fähigkeiten Detektiv-Fähigkeiten und sportliche Fähigkeiten in den Geschichten Batman gilt als einer der weltweit größten Detektiv, wenn nicht der weltweit größte Kriminallöser Batman wurde wiederholt beschrieben.",
+                    "Dieses Niveau.",
+                    "Einer der größten Kampfkünstler im DC-Universum und hat eine hohe menschliche körperliche Konditionierung. Er hat die Welt bereist und die Fähigkeiten erworben, die nötig sind, um seinen Kreuzfahrt-Boden Verbrechen zu helfen, sein Wissen und sein Fachwissen in fast jeder Disziplin, die dem Menschen bekannt ist, ist fast beispiellos von jedem anderen Charakter in.",
+                    "Bat man es unerschöpflichen Reichtum ermöglicht es ihm, auf fortschrittliche Technologie zuzugreifen, wie ein kompetenter Wissenschaftler in der Lage, diese Technologien zu seinem Vorteil zu nutzen und zu modifizieren Batman beschreibt Superman als den gefährlichsten Mann auf der Erde in der Lage, ein Team zu besiegen. Super powered extra.",
+                    "Von selbst, um seine inhaftierten Teamkollegen zu retten.",
+                    "In der ersten Storyline Superman hält auch Batman als einer der brillantesten Köpfe auf dem Planeten.",
+                    "Batman hat die Fähigkeit, unter großen körperlichen Schmerzen zu funktionieren und der Gedankenkontrolle standzuhalten. Er ist ein Meister der Verschleierung mehrsprachig und ein Experte für Spionage, der oft Informationen unter verschiedenen Identitätsändischen Karate Judo sammelt.",
+                    "Zur Ausbildung hat ihn nach dem Meister der Verstohlenheit eine Flucht gemacht, die es ihm erlaubt, nach Belieben aufzutauchen und zu verschwinden und sich zu befreien."
                 };
             }
 
@@ -193,6 +193,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string AudioFile = Path.Combine(AudioDir, "CallTheFirstOne.wav");
                 public static readonly string Utterance = "Rufe die erste an.";
             }
+        }
+
+        public static class ExpectedErrorDetails
+        {
+            public static string InvalidTargetLanaguageErrorMessage = @"Translation call failed: Bad Request - Unsuccessful call to the translation service: {""error"":{""code"":400036,""message"":""The target language is not valid.""}}";
+            public static string InvalidVoiceNameErrorMessage = @"Synthesis service failed with code:  - Could not identify the voice 'InvalidVoice' for the text to speech service ";
         }
     }
 }

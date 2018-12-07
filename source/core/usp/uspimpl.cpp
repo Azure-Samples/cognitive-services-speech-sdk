@@ -938,6 +938,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, Transpor
         {
             auto status = ToRecognitionStatus(json.at(json_properties::recoStatus));
             auto speechResult = RetrieveSpeechResult(json);
+            bool isErrorStatus = false;
 
             TranslationResult translationResult;
             switch (status)
@@ -952,12 +953,18 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, Transpor
                 translationResult.translationStatus = TranslationStatus::Success;
                 break;
             default:
-                connection->InvokeRecognitionErrorCallback(status, json.dump());
+                isErrorStatus = true;
                 break;
             }
 
-            if (translationResult.translationStatus == TranslationStatus::Success)
+            if (isErrorStatus)
             {
+                // There is an error in speech recognition, fire an error event.
+                connection->InvokeRecognitionErrorCallback(status, json.dump());
+            }
+            else
+            {
+                // There is no speech recognition error, we fire a translation phrase event.
                 connection->Invoke([&] {
                     callbacks->OnTranslationPhrase({std::move(speechResult.json),
                                                     speechResult.offset,
