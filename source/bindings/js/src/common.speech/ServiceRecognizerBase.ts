@@ -118,6 +118,7 @@ export abstract class ServiceRecognizerBase implements IDisposable {
 
                 if (result.isError) {
                     this.cancelRecognitionLocal(requestSession, CancellationReason.Error, CancellationErrorCode.ConnectionFailure, result.error);
+                    return PromiseHelper.fromError<boolean>(result.error);
                 } else {
                     audioNode = new ReplayableAudioNode(result.result, this.audioSource.format as AudioStreamFormatImpl);
                     requestSession.onAudioSourceAttachCompleted(audioNode, false);

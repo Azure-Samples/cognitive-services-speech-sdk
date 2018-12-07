@@ -151,11 +151,11 @@ export abstract class Recognizer {
     protected implRecognizerSetup(recognitionMode: RecognitionMode, speechProperties: PropertyCollection,
                                   audioConfig: AudioConfig, speechConnectionFactory: IConnectionFactory): ServiceRecognizerBase {
 
-        let osPlatform = (window !== undefined) ? "Browser" : "Node";
+        let osPlatform = (typeof window !== "undefined") ? "Browser" : "Node";
         let osName = "unknown";
         let osVersion = "unknown";
 
-        if (navigator !== undefined) {
+        if (typeof navigator !== "undefined") {
             osPlatform = osPlatform  + "/" + navigator.platform;
             osName = navigator.userAgent;
             osVersion = navigator.appVersion;

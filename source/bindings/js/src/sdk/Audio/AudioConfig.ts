@@ -3,7 +3,7 @@
 
 import { AudioStreamFormat } from "../../../src/sdk/Exports";
 import { FileAudioSource, MicAudioSource, PcmRecorder } from "../../common.browser/Exports";
-import { AudioSourceEvent, EventSource, IAudioSource, IAudioStreamNode, Promise } from "../../common/exports";
+import { AudioSourceEvent, EventSource, IAudioSource, IAudioStreamNode, Promise } from "../../common/Exports";
 import { AudioInputStream, PullAudioInputStreamCallback } from "../Exports";
 import { PullAudioInputStreamImpl, PushAudioInputStreamImpl } from "./AudioInputStream";
 

@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { AudioStreamFormatImpl } from "../../src/sdk/Audio/AudioStreamFormat";
-import { AudioStreamFormat } from "../../src/sdk/Exports";
+import { AudioStreamFormat, AudioStreamFormatImpl } from "../../src/sdk/Audio/AudioStreamFormat";
 import {
     AudioSourceErrorEvent,
     AudioSourceEvent,
