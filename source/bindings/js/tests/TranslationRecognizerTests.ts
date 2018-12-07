@@ -421,7 +421,7 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
                 }, (error: string) => done.fail(error));
             }, (error: string) => done.fail(error));
         });
-});
+}, 10000);
 
 test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
     const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
@@ -553,7 +553,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
                 done.fail(error);
             });
         });
-});
+}, 10000);
 
 test.skip("MultiPhrase", (done: jest.DoneCallback) => {
     const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
