@@ -1,0 +1,6 @@
+      # Test dependencies
+      wget ca-certificates \
+      expect \
+      pulseaudio \
+      pulseaudio-utils \
+      dbus default-dbus-session-bus \

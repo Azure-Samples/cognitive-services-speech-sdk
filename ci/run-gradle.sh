@@ -54,12 +54,15 @@ MAVEN
     }
 
     while ((++RETRY <= MAX_RETRIES)); do
-      ./gradlew assemble || {
+      if ./gradlew assemble; then
+        popd 1> /dev/null
+        continue 2
+      else
         message="'gradlew assemble' failed for directory '$dir', global retry $RETRY/$MAX_RETRIES."
         vsts_logissue warning "$message"
         echo Warning: $message
         sleep 10
-      }
+      fi
     done
 
     ./gradlew assemble
@@ -68,7 +71,7 @@ MAVEN
       message="run-gradle.sh: 'gradlew assemble' failed for directory '$dir', no more global retries."
       vsts_logissue error "'gradlew assemble' failed for directory '$dir', no more global retries."
       echo Error: $message
-      ((ERRORS++))
+      ((++ERRORS))
     }
   popd 1> /dev/null
 done

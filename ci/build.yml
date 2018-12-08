@@ -84,7 +84,8 @@ variables:
   SPEECHSDK_MAVEN_ARTIFACT_ID: client-sdk
   SPEECHSDK_MAVEN_GROUP_ID: com.microsoft.cognitiveservices.speech
   SPEECHSDK_NUGET_VERSION: 4.6
-  AZURE_CONTAINER_REGISTRY: csspeechsdkacr201809.azurecr.io
+  AZURE_CONTAINER_REGISTRY_NAME: csspeechsdkacr201809
+  AZURE_CONTAINER_REGISTRY: $(AZURE_CONTAINER_REGISTRY_NAME).azurecr.io
   AZURE_SUBSCRIPTION_ENDPOINT: 'Custom Speech Development (3a96ef56-41a9-40a0-b0f3-fb125c2b8798) - RG csspeechsdk-carbon'
 
 jobs:
@@ -629,23 +630,30 @@ jobs:
     displayName: Patch and build samples
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobejre_ubuntu1604_x64
-      outvarImage: DOCKER_IMAGE
+      imageBase: oobejre_ubuntu1604_x64 oobejre_ubuntu1804_x64
+      outvarImage: DOCKER_IMAGES
   - bash: |
-      set -e -x -o pipefail
-      cp "$(PathToJar)" $(Build.Repository.LocalPath)
-      docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$(DOCKER_IMAGE)" bash - <<"SCRIPT"
-        set -e -x -o pipefail
-        PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
-        pulseaudio -D --exit-idle-time=-1
-        sleep 1.5
-        pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
-        pacmd load-module module-virtual-source source_name=VirtualMic
-        trap 'pulseaudio --kill' EXIT
-        # Note: don't wait for keypress. Ignore crashes after successful reco.
-        /test/ci/quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" 1 \
-          java -cp ./public_samples/quickstart/java-jre/target/quickstart-eclipse-1.0.0-SNAPSHOT.jar:/test/"$(JarName)" speechsdk.quickstart.Main
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      cp "$(PathToJar)" $(Build.Repository.LocalPath) || exitWithFailure "cp failed"
+
+      ERRORS=0
+      for i in $(DOCKER_IMAGES); do
+        docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$i" bash - <<"SCRIPT" || \
+        { ((++ERRORS)); vsts_logissue error "Running public_samples/quickstart/java-jre for image $i failed."; }
+          set -e -x -o pipefail
+          PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
+          pulseaudio -D --exit-idle-time=-1
+          sleep 1.5
+          pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
+          pacmd load-module module-virtual-source source_name=VirtualMic
+          trap 'pulseaudio --kill' EXIT
+          # Note: don't wait for keypress. Ignore crashes after successful reco.
+          /test/ci/quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" 1 \
+            java -cp ./public_samples/quickstart/java-jre/target/quickstart-eclipse-1.0.0-SNAPSHOT.jar:/test/"$(JarName)" speechsdk.quickstart.Main
       SCRIPT
+      done
+      [[ $ERRORS == 0 ]] || exitWithError "Not all quickstarts ran successfully."
     displayName: Test quickstart-jre
 
 - job: NuGet
@@ -829,8 +837,8 @@ jobs:
       itemPattern: '**/*.nupkg'
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevdnc20_ubuntu1604_x64
-      outvarImage: DOCKER_IMAGE
+      imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64
+      outvarImage: DOCKER_IMAGES
   - bash: |
       set -u -e -x -o pipefail
       . ci/functions.sh
@@ -862,27 +870,36 @@ jobs:
         -D speech-key=$(NorthEuropeKeySkyman)
       mkdir localnuget
       cp --verbose $(System.ArtifactsDirectory)/In/Windows/Microsoft.CognitiveServices.Speech.*.nupkg localnuget
-      # First run the unit tests
-      docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$(DOCKER_IMAGE)" bash - <<"SCRIPT"
-        set -e -x -o pipefail
-        cd tests/functional/csharp/end2end
-        dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
-        dotnet test --framework netcoreapp2.0 --settings csharp.runsettings --logger 'trx;LogFileName=test-csharp_unit_tests-nupkg-Linux-x64-Release.trx'
+
+      ERRORS=0
+      for i in $(DOCKER_IMAGES); do
+        # Run the unit tests (skip Ubuntu 18.04 in dev builds)
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
+          docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$i" bash - <<"SCRIPT" || \
+          { ((++ERRORS)); vsts_logissue error "Running tests/functional/csharp/end2end for image $i failed."; }
+            set -e -x -o pipefail
+            cd tests/functional/csharp/end2end
+            dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
+            dotnet test --framework netcoreapp2.0 --settings csharp.runsettings --logger 'trx;LogFileName=test-csharp_unit_tests-nupkg-Linux-x64-Release.trx'
       SCRIPT
-      # Then run the end-to-end for the quickstart
-      docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$(DOCKER_IMAGE)" bash - <<"SCRIPT"
-        set -e -x -o pipefail
-        PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
-        cd public_samples/quickstart/csharp-dotnetcore
-        dotnet restore --no-cache --source /test/localnuget helloworld/helloworld.csproj
-        dotnet build helloworld/helloworld.csproj
-        pulseaudio -D --exit-idle-time=-1
-        sleep 1.5
-        pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
-        pacmd load-module module-virtual-source source_name=VirtualMic
-        trap 'pulseaudio --kill' EXIT
-        /test/ci/quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" 0 dotnet helloworld/bin/Debug/netcoreapp2.0/helloworld.dll
+
+        # Run the end-to-end for the quickstart
+        docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$i" bash - <<"SCRIPT" || \
+        { ((++ERRORS)); vsts_logissue error "Running quickstart/csharp-dotnetcore for image $i failed."; }
+          set -e -x -o pipefail
+          PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
+          cd public_samples/quickstart/csharp-dotnetcore
+          dotnet restore --no-cache --source /test/localnuget helloworld/helloworld.csproj
+          dotnet build helloworld/helloworld.csproj
+          pulseaudio -D --exit-idle-time=-1
+          sleep 1.5
+          pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
+          pacmd load-module module-virtual-source source_name=VirtualMic
+          trap 'pulseaudio --kill' EXIT
+          /test/ci/quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" 0 dotnet helloworld/bin/Debug/netcoreapp2.0/helloworld.dll
       SCRIPT
+      done
+      [[ $ERRORS == 0 ]] || exitWithError "Not all tests ran successfully."
     displayName: Test
   - task: PublishTestResults@2
     inputs:
@@ -942,27 +959,14 @@ jobs:
     inputs:
       type: InlineScript
       script: |
+        set -u -x -e -o pipefail
         . ci/functions.sh
         NDK_VER=r16b
         NDK_SHA1SUM=f3f1909ed1052e98dda2c79d11c22f3da28daf25
         NDK_BASE="$(System.ArtifactsDirectory)\ndk-$NDK_VER"
         NDK_BASE_UNIX="$(cygpath -au "$NDK_BASE")"
         NDK_ZIP="$NDK_BASE_UNIX.zip"
-        MAX_RETRIES=3
-        RETRY=0
-        until [[ $RETRY -ge $MAX_RETRIES ]]
-        do
-          curl --http1.1 -C - https://dl.google.com/android/repository/android-ndk-$NDK_VER-windows-x86_64.zip -o "$NDK_ZIP" && break
-          RETRY=$((RETRY+1))
-          # Sleep 3..7 seconds
-          sleep $(((RANDOM % 5) + 3))
-        done
-        if [[ $RETRY -ge $MAX_RETRIES ]]; then
-            echo "Could not successfully download NDK, exiting"
-            exit 1
-        fi
-
-        set -x -e -o pipefail
+        retry 2 curl --http1.1 -C - https://dl.google.com/android/repository/android-ndk-$NDK_VER-windows-x86_64.zip -o "$NDK_ZIP"
         echo "$NDK_SHA1SUM  $NDK_ZIP" | sha1sum -c --strict -
         unzip -q -o "$NDK_ZIP" -d "$NDK_BASE_UNIX.tmp"
         # A single nested directory should be inside
@@ -970,11 +974,6 @@ jobs:
         mv "$NDK_BASE_UNIX.tmp"/* "$NDK_BASE_UNIX"
         rmdir "$NDK_BASE_UNIX.tmp"
         rm "$NDK_ZIP"
-        # This doesn't seem to work reliably .. or with multi-configuration build?
-        # vsts_setvar ANDROID_NDK "$NDK_BASE"
-        # echo Try 2
-        # vsts_setvar ANDROID_NDK "$NDK_BASE"
-        echo Done.
   - task: BatchScript@1
     displayName: Build
     inputs:
@@ -1171,20 +1170,13 @@ jobs:
     displayName: Download Build Artifacts
     inputs:
       artifactName: Linux
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: |
+      ./ci/drop/linux-reldrop.sh "$(SPEECHSDK_SEMVER2NOMETA)" "$(Build.Repository.LocalPath)" "$(System.ArtifactsDirectory)/Linux" "$(Build.ArtifactStagingDirectory)/Linux/Drop"
     displayName: Create release drop
-    inputs:
-      type: FilePath
-      scriptPath: './ci/drop/linux-reldrop.sh'
-      args: '"$(SPEECHSDK_SEMVER2NOMETA)" "$(Build.Repository.LocalPath)" "$(System.ArtifactsDirectory)/Linux" "$(Build.ArtifactStagingDirectory)/Linux/Drop"'
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevcpp_ubuntu1604_x64
-      outvarImage: DOCKER_IMAGE_X64
-  - template: get-docker-image.yml
-    parameters:
-      imageBase: oobedevcpp_ubuntu1604_x86
-      outvarImage: DOCKER_IMAGE_X86
+      imageBase: oobedevcpp_ubuntu1604_x64 oobedevcpp_ubuntu1604_x86 oobedevcpp_ubuntu1804_x64 oobedevcpp_ubuntu1804_x86
+      outvarImage: DOCKER_IMAGES
   - bash: |
       . ci/functions.sh &&
       patchSamplesFromTestConfig public_samples/quickstart/cpp-linux \
@@ -1193,11 +1185,42 @@ jobs:
         -D speech-key=$(NorthEuropeKeySkyman)
     displayName: Patch quickstart
   - bash: |
-      ./ci/drop/test-quickstart-linux.sh "$(DOCKER_IMAGE_X64)" "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz" x64
-    displayName: Build and test quickstart for x64
-  - bash: |
-      ./ci/drop/test-quickstart-linux.sh "$(DOCKER_IMAGE_X86)" "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz" x86
-    displayName: Build and test quickstart for x86
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      ERRORS=0
+
+      # Prepare binaries / libraries from the drop as the test would expect it.
+      for architecture in x86 x64; do
+        bindir=buildfromdrop$architecture/bin
+        mkdir -p $bindir
+        cp --verbose "$(System.ArtifactsDirectory)/Linux/Linux-$architecture/Release/"{public/lib,private/{bin,lib}}/* $bindir
+        chmod 755 $bindir/*
+      done
+
+      for i in $(DOCKER_IMAGES); do
+        [[ $i =~ _([^_]*): ]] || exitWithError "Cannot parse out architecture from %s" "$i"
+        architecture="${BASH_REMATCH[1]}"
+
+        # Run quickstart
+        ./ci/drop/test-quickstart-linux.sh "$i" "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz" "$architecture" || {
+          vsts_logissue error "Running quickstart-linux for image $i failed."
+          ((++ERRORS))
+        }
+
+        # Run unit tests (skip Ubuntu 18.04 in dev builds)
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
+          docker run --rm --env LD_LIBRARY_PATH=/csspeech/buildfromdrop$architecture/bin --workdir /csspeech --volume "$PWD:/csspeech" "$i" ./ci/run-tests.sh \
+            --test-configuration ci/test-config.json \
+            --build-dir buildfromdrop$architecture \
+            --platform Linux-$architecture-Release \
+            -D luis-key=$(luis-westus-s0-201809-key1) \
+            -D speech-key=$(NorthEuropeKeySkyman) -- cxx_core_tests cxx_api_tests || {
+            vsts_logissue error "Running tests for image $i failed."
+            ((++ERRORS))
+          }
+      done
+      [[ $ERRORS == 0 ]] || exitWithError "Not all tests ran successfully."
+    displayName: Build and test quickstarts
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Linux Release Drop'
     inputs:

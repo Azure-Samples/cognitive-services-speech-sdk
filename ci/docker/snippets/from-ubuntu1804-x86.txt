@@ -1,0 +1,1 @@
+FROM i386/ubuntu:18.04

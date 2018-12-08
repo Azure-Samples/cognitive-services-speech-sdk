@@ -1,7 +1,7 @@
-RUN DEBIAN_FRONTEND=noninteractive && \
+RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update --quiet
 
-RUN DEBIAN_FRONTEND=noninteractive && \
+RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install --quiet --yes --no-install-recommends \
         wget \
         ca-certificates

@@ -40,7 +40,8 @@ vsts_addbuildtag() (
   echo "##vso[build.addbuildtag]$1"
 )
 
-vsts_logissue() {
+vsts_logissue() (
+  set +x
   local type="$1"
   local message="$2"
   shift 2
@@ -52,7 +53,7 @@ vsts_logissue() {
   out+="]$message"
 
   echo "$out"
-}
+)
 
 function existsExactlyOneDir {
   [[ $# -eq 1 && -d $1 ]]
@@ -202,3 +203,17 @@ function patchSamplesFromTestConfig() (
     another-intent \
     yet-another-intent
 )
+
+function retry() {
+  local maxRetries retry usage
+  usage="Usage: ${FUNCNAME[0]} <num-retries> <cmd...>"
+  numRetries="${1?$usage}"
+  shift 1
+  retry=0
+  while ((retry++ <= numRetries)); do
+    "$@" && return 0 \
+      || true # in case we run with "set -e"
+  done
+  printf "Command didn't succeed in $retry attempt(s): %s\n" "$*" 1>&2
+  return 1
+}

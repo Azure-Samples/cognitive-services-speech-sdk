@@ -1,19 +1,19 @@
 # Note: this is to within a stage, so there are more layers than usual,
 #       aligning with layers used in other stages.
 
-RUN DEBIAN_FRONTEND=noninteractive && \
+RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update --quiet
 
-RUN DEBIAN_FRONTEND=noninteractive && \
+RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install --quiet --yes --no-install-recommends \
         wget \
         ca-certificates
 
-RUN DEBIAN_FRONTEND=noninteractive && \
+RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install --quiet --yes --no-install-recommends \
         build-essential
 
-RUN DEBIAN_FRONTEND=noninteractive && \
+RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install --quiet --yes --no-install-recommends \
         libpcre++-dev
 

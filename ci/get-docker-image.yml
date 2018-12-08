@@ -1,38 +1,94 @@
-# Assumes caller provides $(AZURE_CONTAINER_REGISTRY) and $(AZURE_SUBSCRIPTION_ENDPOINT) implicitly
+# Assumes caller provides $(AZURE_CONTAINER_REGISTRY_NAME),
+# $(AZURE_CONTAINER_REGISTRY) and $(AZURE_SUBSCRIPTION_ENDPOINT) implicitly.
+#
+# Note: for a single image, we use the Docker@1 task to pull; for multiple we
+#       use AzureCLI@1 to log into the registry (this is quite a slow step)
+#       followed by a parallel pull from Bash.
 parameters:
-  # Base name of the image
+  # Space-separated base name of the images
   imageBase: ''
-  # Which variable to output the image name too (including version):
+  # Which variable to output the image names too (including version):
   outvarImage: ''
 steps:
-- bash: |
-    set -u -e -o pipefail
-    . ci/functions.sh
-    for v in imageBase outvarImage; do
-      [[ -n ${!v} ]] || exitWithError 'get-docker-image.yml: %s template parameter not set\n' "$v"
-    done
-    image="$(perl ci/docker/dockertool.pl imagetag --registry $(AZURE_CONTAINER_REGISTRY) "$imageBase")"
-    [[ $? == 0 ]]
+- bash: "echo get-docker-image.yml: not all template parameters set; exit 1"
+  condition: ${{ or(eq(parameters.imageBase, ''), eq(parameters.outvarImage, '')) }}
+  displayName: Check parameters
 
-    if [[ $image = *:TESTLOCAL ]]; then
-      printf 'Image %s marked for local build! Running now...\n' "$imageBase"
-      image="$(perl ci/docker/dockertool.pl imagetag "$imageBase")"
-      perl ci/docker/dockertool.pl build "$imageBase"
-      vsts_setvar __getDockerImageInternal_DoPull false
-    else
-      vsts_setvar __getDockerImageInternal_DoPull true
-    fi
-    vsts_setvar "$outvarImage" "$image"
-    vsts_setvar __getDockerImageInternal_Image "$image"
-  displayName: ${{ format('Resolve {0} Docker image', parameters.imageBase) }}
-  env:
-    imageBase: ${{ parameters.imageBase }}
-    outvarImage: ${{ parameters.outvarImage }}
-- task: Docker@1
-  displayName: ${{ format('Pull {0} Docker image', parameters.imageBase) }}
-  inputs:
-    azureSubscriptionEndpoint: $(AZURE_SUBSCRIPTION_ENDPOINT)
-    azureContainerRegistry: $(AZURE_CONTAINER_REGISTRY)
-    command: pull
-    arguments: $(__getDockerImageInternal_Image)
-  condition: and(succeeded(), eq(variables.__getDockerImageInternal_DoPull, 'true'))
+# Single-image case
+- ${{ if not(contains(parameters.imageBase, ' ')) }}:
+  - bash: |
+      set -u -e -o pipefail
+      . ci/functions.sh
+      image="$(perl ci/docker/dockertool.pl imagetag --registry $(AZURE_CONTAINER_REGISTRY) "$imageBase")"
+      [[ $? == 0 ]]
+
+      if [[ $image = *:TESTLOCAL ]]; then
+        printf 'Image %s marked for local build! Running now...\n' "$imageBase"
+        perl ci/docker/dockertool.pl build "$imageBase"
+        # Use a local image name, dropping --registry
+        image="$(perl ci/docker/dockertool.pl imagetag "$imageBase")"
+        vsts_setvar __getDockerImageInternal_DoPull false
+      else
+        vsts_setvar __getDockerImageInternal_DoPull true
+      fi
+      vsts_setvar "$outvarImage" "$image"
+      vsts_setvar __getDockerImageInternal_Image "$image"
+    displayName: "${{ format('Resolve Docker image: {0}', parameters.imageBase) }}"
+    env:
+      imageBase: ${{ parameters.imageBase }}
+      outvarImage: ${{ parameters.outvarImage }}
+  - task: Docker@1
+    displayName: "${{ format('Pull Docker image: {0}', parameters.imageBase) }}"
+    inputs:
+      azureSubscriptionEndpoint: $(AZURE_SUBSCRIPTION_ENDPOINT)
+      azureContainerRegistry: $(AZURE_CONTAINER_REGISTRY)
+      command: pull
+      arguments: $(__getDockerImageInternal_Image)
+
+# Multiple-image case
+- ${{ if contains(parameters.imageBase, ' ') }}:
+  - task: AzureCLI@1
+    displayName: Log into Docker registry
+    inputs:
+      azureSubscription: $(AZURE_SUBSCRIPTION_ENDPOINT)
+      scriptLocation: inlineScript
+      inlineScript: az acr login --name $(AZURE_CONTAINER_REGISTRY_NAME)
+  - bash: |
+      set -u -e -o pipefail
+      . ci/functions.sh
+      localBuild=()
+      forPull=()
+      outImages=()
+      for i in ${{ parameters.imageBase }}; do
+        image="$(perl ci/docker/dockertool.pl imagetag --registry $(AZURE_CONTAINER_REGISTRY) "$i")"
+        if [[ $image = *:TESTLOCAL ]]; then
+          localBuild+=("$i")
+          # Use a local image name, dropping --registry
+          image="$(perl ci/docker/dockertool.pl imagetag "$i")"
+        else
+          forPull+=("$i")
+        fi
+        outImages+=("$image")
+      done
+
+      # First do all the pulls in parallel, for up to 2 times.
+      maxAttempts=2
+      attempt=0
+      while ((++attempt <= maxAttempts)); do
+        printf "%s\0" "${forPull[@]}" |
+          xargs --verbose --no-run-if-empty --max-args=1 --null --max-procs=4 \
+            perl ci/docker/dockertool.pl pull --registry $(AZURE_CONTAINER_REGISTRY) &&
+              break ||
+                continue # needed because of "set -e"
+      done
+      ((attempt <= maxAttempts)) || exitWithError "Could not pull all images"
+
+      # Then do all local builds sequentially
+      [[ ${#localBuild[@]} = 0 ]] ||
+        for i in "${localBuild[@]}"; do
+          printf 'Image %s marked for local build! Running now...\n' "$i"
+          perl ci/docker/dockertool.pl build "$i"
+        done
+
+      vsts_setvar "${{ parameters.outvarImage }}" "${outImages[*]}"
+    displayName: "${{ format('Resolve and pull Docker images: {0}', parameters.imageBase) }}"
