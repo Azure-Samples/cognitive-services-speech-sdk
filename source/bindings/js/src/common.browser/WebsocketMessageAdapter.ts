@@ -22,6 +22,8 @@ import {
     RawWebsocketMessage,
 } from "../common/Exports";
 
+import ws = require("ws");
+
 interface ISendItem {
     Message: ConnectionMessage;
     RawWebsocketMessage: RawWebsocketMessage;
@@ -31,7 +33,7 @@ interface ISendItem {
 export class WebsocketMessageAdapter {
     private privConnectionState: ConnectionState;
     private privMessageFormatter: IWebsocketMessageFormatter;
-    private privWebsocketClient: WebSocket;
+    private privWebsocketClient: WebSocket | ws;
 
     private privSendMessageQueue: Queue<ISendItem>;
     private privReceivingMessageQueue: Queue<ConnectionMessage>;
@@ -40,6 +42,8 @@ export class WebsocketMessageAdapter {
     private privConnectionEvents: EventSource<ConnectionEvent>;
     private privConnectionId: string;
     private privUri: string;
+
+    public static forceNpmWebSocket: boolean = false;
 
     public constructor(
         uri: string,
@@ -78,7 +82,12 @@ export class WebsocketMessageAdapter {
         this.privConnectionState = ConnectionState.Connecting;
 
         try {
-            this.privWebsocketClient = new WebSocket(this.privUri);
+            if (typeof WebSocket !== "undefined" && !WebsocketMessageAdapter.forceNpmWebSocket) {
+                this.privWebsocketClient = new WebSocket(this.privUri);
+            } else {
+                this.privWebsocketClient = new ws(this.privUri);
+            }
+
             this.privWebsocketClient.binaryType = "arraybuffer";
             this.privReceivingMessageQueue = new Queue<ConnectionMessage>();
             this.privDisconnectDeferral = new Deferred<boolean>();
@@ -91,13 +100,13 @@ export class WebsocketMessageAdapter {
 
         this.onEvent(new ConnectionStartEvent(this.privConnectionId, this.privUri));
 
-        this.privWebsocketClient.onopen = (e: Event) => {
+        this.privWebsocketClient.onopen = (e: { target: WebSocket | ws }) => {
             this.privConnectionState = ConnectionState.Connected;
             this.onEvent(new ConnectionEstablishedEvent(this.privConnectionId));
             this.privConnectionEstablishDeferral.resolve(new ConnectionOpenResponse(200, ""));
         };
 
-        this.privWebsocketClient.onerror = (e: Event) => {
+        this.privWebsocketClient.onerror = (e: { error: any; message: string; type: string; target: WebSocket | ws }) => {
             // TODO: Understand what this is error is. Will we still get onClose ?
             if (this.privConnectionState !== ConnectionState.Connecting) {
                 // TODO: Is this required ?
@@ -105,7 +114,7 @@ export class WebsocketMessageAdapter {
             }
         };
 
-        this.privWebsocketClient.onclose = (e: CloseEvent) => {
+        this.privWebsocketClient.onclose = (e: { wasClean: boolean; code: number; reason: string; target: WebSocket | ws }) => {
             if (this.privConnectionState === ConnectionState.Connecting) {
                 this.privConnectionState = ConnectionState.Disconnected;
                 // this.onEvent(new ConnectionEstablishErrorEvent(this.connectionId, e.code, e.reason));
@@ -117,7 +126,7 @@ export class WebsocketMessageAdapter {
             this.onClose(e.code, e.reason);
         };
 
-        this.privWebsocketClient.onmessage = (e: MessageEvent) => {
+        this.privWebsocketClient.onmessage = (e: { data: ws.Data; type: string; target: WebSocket | ws }) => {
             const networkReceivedTime = new Date().toISOString();
             if (this.privConnectionState === ConnectionState.Connected) {
                 const deferred = new Deferred<ConnectionMessage>();

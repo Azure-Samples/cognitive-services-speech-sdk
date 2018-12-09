@@ -179,12 +179,12 @@ export class SpeechRecognizer extends Recognizer {
                 new SpeechConnectionFactory());
 
             this.implRecognizerStart(this.privReco, (e: SpeechRecognitionResult) => {
-                // this.implCloseExistingRecognizer();
+                this.implCloseExistingRecognizer();
                 if (!!cb) {
                     cb(e);
                 }
             }, (e: string) => {
-                //  this.implCloseExistingRecognizer();
+                this.implCloseExistingRecognizer();
                 if (!!err) {
                     err(e);
                 }

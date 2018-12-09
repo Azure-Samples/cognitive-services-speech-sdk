@@ -291,6 +291,11 @@ export abstract class ServiceRecognizerBase implements IDisposable {
             return connection.read()
                 .onSuccessContinueWithPromise((message: ConnectionMessage) => {
 
+                    if (this.privIsDisposed) {
+                        // We're done.
+                        return PromiseHelper.fromResult(true);
+                    }
+
                     // indicates we are draining the queue and it came with no message;
                     if (!message) {
                         if (requestSession.isCompleted) {

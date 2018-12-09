@@ -142,15 +142,17 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                             }
                         }
                     } else {
-                        const ev = new TranslationRecognitionEventArgs(result, 0/*offset*/, requestSession.sessionId);
+                        if (!(requestSession.isSpeechEnded && reason === ResultReason.NoMatch && translatedPhrase.RecognitionStatus !== RecognitionStatus.InitialSilenceTimeout)) {
+                            const ev = new TranslationRecognitionEventArgs(result, 0/*offset*/, requestSession.sessionId);
 
-                        if (!!this.privTranslationRecognizer.recognized) {
-                            try {
-                                this.privTranslationRecognizer.recognized(this.privTranslationRecognizer, ev);
-                                /* tslint:disable:no-empty */
-                            } catch (error) {
-                                // Not going to let errors in the event handler
-                                // trip things up.
+                            if (!!this.privTranslationRecognizer.recognized) {
+                                try {
+                                    this.privTranslationRecognizer.recognized(this.privTranslationRecognizer, ev);
+                                    /* tslint:disable:no-empty */
+                                } catch (error) {
+                                    // Not going to let errors in the event handler
+                                    // trip things up.
+                                }
                             }
                         }
                     }
