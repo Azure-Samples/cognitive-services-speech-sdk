@@ -430,8 +430,6 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxAudioStreamSession::Reco
     // Because we are blocking here, we do this on std::async.
     auto keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
     shared_future<shared_ptr<ISpxRecognitionResult>> waitForResult(async(launch::async, [this, keepAlive]() {
-        // Make sure we are in Idle state due to end turn.
-        WaitForIdle(StopRecognitionTimeout);
 
         auto singleShotInFlight = make_shared<Operation>(RecognitionKind::SingleShot);
         auto task = CreateTask([=]() { RecognizeOnceAsync(singleShotInFlight); });
@@ -447,7 +445,11 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxAudioStreamSession::Reco
             // async is still in flight.
             SPX_THROW_HR(SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
         }
-        return singleShotInFlight->m_future.get();
+
+        auto result = singleShotInFlight->m_future.get();
+        // Make sure we are in Idle state due to end turn.
+        WaitForIdle(StopRecognitionTimeout);
+        return result;
     }));
 
     return CSpxAsyncOp<shared_ptr<ISpxRecognitionResult>>(waitForResult, AOS_Started);
@@ -512,7 +514,6 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StartRecognitionAsync(RecognitionKind 
     shared_future<void> started(async(launch::async, [=]() {
         SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::StartRecognitionAsync kicked-off THREAD started ***", "*** CSpxAudioStreamSession::StartRecognitionAsync kicked-off THREAD stopped ***");
 
-        WaitForIdle(StopRecognitionTimeout);
         auto task = CreateTask([=]() { StartRecognizing(startKind, model); }, false);
 
         shared_future<void> taskFuture(task.get_future());
@@ -551,6 +552,8 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StopRecognitionAsync(RecognitionKind s
         {
             taskFuture.get();
         }
+
+        WaitForIdle(StopRecognitionTimeout);
     }));
 
     return CSpxAsyncOp<void>(waitForIdle, AOS_Started);
