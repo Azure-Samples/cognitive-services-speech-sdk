@@ -6,7 +6,6 @@ export class Settings {
     // subscription
     public static SpeechSubscriptionKey: string = "<<YOUR_SUBSCRIPTION_KEY>>";
     public static SpeechRegion: string = "<<YOUR_REGION>>";
-    public static SpeechAuthorizationToken: string = "<<YOUR_AUTH_TOKEN>>";
     public static SpeechEndpoint: string;
 
     public static SpeechTestEndpointId: string = "<<YOUR_TEST_ENDPOINT_ID>>";
@@ -23,7 +22,7 @@ export class Settings {
     public static LuisRegion: string = "<<YOUR_LUIS_REGION>>";
     public static LuisAppEndPointHref: string = "<<YOUR_LUIS_APP_URL>>";
 
-    public static InputDir: string = "../../../tests/input/audio/";
+    public static InputDir: string = "tests/input/audio/";
 
     /*
      * The intent behing this setting is that at test execution time the WaveFile below will contain speech
@@ -49,11 +48,6 @@ export class Settings {
     public static WaveFileDuration: number = 12900000;
     public static WaveFileOffset: number = 1000000;
     public static WaveFileText: string = "What's the weather like?";
-
-    public static LongFile: string = "../../../../../tests/input/audio/batman.wav";
-
-    public static Keyword: string = "Computer";
-    public static KeywordModel: string = "/data/keyword/kws.table";
 
     private static IsSettingsInitialized: boolean = false;
     public static SettingsClassLock: Settings;

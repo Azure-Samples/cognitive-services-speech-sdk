@@ -52,6 +52,6 @@ echo Writes any ^<ParamName^>:^<Value^> pair to the test settings file for JavaS
 echo.
 echo The file will be erased before new values are added.
 echo.
-echo Current settings available are: [SpeechSubscriptionKey:^<key^>] [SpeechAuthorizationToken:^<SpeechAuthorizationToken^>] [SpeechRegion:^<region^>] [LuisSubscriptionKey:^<LuisKey^>]  [LuisRegion:^<region^>] [LuidAppId:^<LuisAppId^>]
+echo Current settings available are: [SpeechSubscriptionKey:^<key^>] [SpeechRegion:^<region^>] [LuisSubscriptionKey:^<LuisKey^>]  [LuisRegion:^<region^>] [LuidAppId:^<LuisAppId^>]
 echo.
 exit /b 1

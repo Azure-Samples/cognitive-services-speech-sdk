@@ -47,7 +47,7 @@ echo The file will be erased before new values are added.
 echo.
 echo If no values are specified, the existing file will not be modified.
 echo.
-echo Current settings available are: [SpeechSubscriptionKey:^<key^>] [SpeechAuthorizationToken:^<SpeechAuthorizationToken^>] [SpeechRegion:^<region^>] [LuisSubscriptionKey:^<LuisKey^>]  [LuisRegion:^<region^>] [LuidAppId:^<LuisAppId^>]
+echo Current settings available are: [SpeechSubscriptionKey:^<key^>] [SpeechRegion:^<region^>] [LuisSubscriptionKey:^<LuisKey^>]  [LuisRegion:^<region^>] [LuidAppId:^<LuisAppId^>]
 echo.
 echo Once settings are written, executes the JS unit tests and if the settings file was created, it will be deleted.
 exit /b 1
