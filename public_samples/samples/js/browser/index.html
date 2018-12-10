@@ -268,7 +268,7 @@
             inputSource = document.getElementById("inputSource");
             filePicker = document.getElementById('filePicker');
 
-            // Starts continuous voice recognition. Recognition will continue until there is ~20 seconds of silence or ~10 minutes of speech.
+            // Starts continuous speech recognition.
             sdkStartContinousRecognitionBtn.addEventListener("click", function () {
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
@@ -326,8 +326,8 @@
                 // This can happen for two broad classes of reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
-                // 2. Speech was detected to have ended.
-                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                // 2. No additional audio is available.
+                //    Caused by the input stream being closed or reaching the end of an audio file.
                 reco.canceled = function (s, e) {
                     window.console.log(e);
 
@@ -387,7 +387,7 @@
                 sdkStopContinousRecognitionBtn.disabled = true;
             });
 
-            // Starts continuous voice translation. Recognition will continue until there is ~20 seconds of silence or ~10 minutes of speech.
+            // Starts continuous speech translation.
             sdkStartContinousTranslationBtn.addEventListener("click", function () {
                 var lastRecognized = "";
                 phraseDiv.innerHTML = "";
@@ -463,8 +463,8 @@
                 // This can happen for two broad classes of reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
-                // 2. Speech was detected to have ended.
-                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                // 2. No additional audio is available.
+                //    Caused by the input stream being closed or reaching the end of an audio file.
                 reco.canceled = function (s, e) {
                     window.console.log(e);
 
@@ -583,8 +583,8 @@
                 // This can happen for two broad classes or reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
-                // 2. Speech was detected to have ended.
-                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                // 2. No additional audio is available.
+                //    Caused by the input stream being closed or reaching the end of an audio file.
                 reco.canceled = function (s, e) {
                     window.console.log(e);
 
@@ -735,8 +735,8 @@
                 // This can happen for two broad classes or reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
-                // 2. Speech was detected to have ended.
-                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                // 2. No additional audio is available.
+                //    Caused by the input stream being closed or reaching the end of an audio file.
                 reco.canceled = function (s, e) {
                     window.console.log(e);
 
