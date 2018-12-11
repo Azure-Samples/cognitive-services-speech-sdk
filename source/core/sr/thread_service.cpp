@@ -5,6 +5,7 @@
 
 #include "stdafx.h"
 #include "thread_service.h"
+#include "try_catch_helpers.h"
 
 namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace Impl {
 
@@ -23,6 +24,16 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
 
         for (auto& t : m_threads)
             t.second->Start();
+    }
+
+    CSpxThreadService::~CSpxThreadService()
+    {
+        string error;
+        SPXAPI_TRY()
+        {
+            Term();
+        }
+        SPXAPI_CATCH_ONLY()
     }
 
     void CSpxThreadService::Term()
@@ -115,13 +126,24 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
             m_state = State::Finished;
             m_executed.set_value(true);
         }
-        catch (exception& e)
+        catch (const exception& e)
         {
             UNUSED(e);
             m_state = State::Failed;
             SPX_DBG_TRACE_ERROR("Exception happened during task execution: %s", e.what());
             m_executed.set_exception(current_exception());
         }
+#ifdef SHOULD_HANDLE_FORCED_UNWIND
+        // Currently Python forcibly kills the thread by throwing __forced_unwind,
+        // taking care we propagate this exception further.
+        catch (abi::__forced_unwind&)
+        {
+            m_state = State::Failed;
+            SPX_DBG_TRACE_ERROR("Caught forced unwind in a thread service task, rethrowing");
+            m_executed.set_exception(make_exception_ptr(runtime_error("Forced unwind")));
+            throw;
+        }
+#endif
         catch (...)
         {
             m_state = State::Failed;
@@ -336,13 +358,23 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
             SPX_DBG_TRACE_ERROR("Exception caused termination of the thread service: %s", e.what());
             self->MarkFailed(current_exception());
         }
+#ifdef SHOULD_HANDLE_FORCED_UNWIND
+        // Currently Python forcibly kills the thread by throwing __forced_unwind,
+        // taking care we propagate this exception further.
+        catch (abi::__forced_unwind&)
+        {
+            SPX_DBG_TRACE_ERROR("Caught forced unwind in a thread service thread, rethrowing");
+            self->MarkFailed(make_exception_ptr(runtime_error("Forced unwind")));
+            self->CancelAllTasks();
+            throw;
+        }
+#endif
         catch (...)
         {
             SPX_DBG_TRACE_ERROR("Unknown exception happened during task execution");
             self->MarkFailed(current_exception());
         }
 
-        self->m_shouldStop = true;
         self->CancelAllTasks();
     }
 

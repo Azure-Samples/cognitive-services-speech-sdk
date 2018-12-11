@@ -29,6 +29,7 @@ public:
 
     void Init() override;
     void Term() override;
+    ~CSpxThreadService();
 
     TaskId ExecuteAsync(std::packaged_task<void()>&& task,
         Affinity affinity = Affinity::Background,

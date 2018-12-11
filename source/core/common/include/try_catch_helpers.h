@@ -7,8 +7,24 @@
 //
 
 #pragma once
+
 #include <speechapi_c_common.h>
 #include <exception.h>
+
+#if defined(__GNUG__) && defined(__linux__) && !defined(ANDROID) && !defined(__ANDROID__)
+#include <cxxabi.h>
+#define SHOULD_HANDLE_FORCED_UNWIND 1
+
+#define SPXAPI_FORCED_UNWIND_CATCH                          \
+    catch (abi::__forced_unwind&)                           \
+    {                                                       \
+        SPX_REPORT_ON_FAIL(SPXERR_ABORT);                   \
+        throw;                                              \
+    }
+
+#else
+#define SPXAPI_FORCED_UNWIND_CATCH
+#endif
 
 using Microsoft::CognitiveServices::Speech::Impl::StoreException;
 
@@ -35,6 +51,7 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
     {                                                       \
        x = StoreException(ex);                              \
     }                                                       \
+    SPXAPI_FORCED_UNWIND_CATCH                              \
     catch (...)                                             \
     {                                                       \
         SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);     \
@@ -60,6 +77,7 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
         error = e.what();                                   \
         SPX_TRACE_ERROR(error.c_str());                     \
     }                                                       \
+    SPXAPI_FORCED_UNWIND_CATCH                              \
     catch (...)                                             \
     {                                                       \
         SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);     \
