@@ -100,9 +100,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var errorDetails = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonErrorDetails, "");
             Console.WriteLine($"Result: {result.ToString()}, Error details: ErrorDetails: {errorDetails}");
             Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, "Unexpected result reason.");
-            Assert.AreEqual(TestData.English.Weather.Utterance, result.Text, "Unmatched recognized text.");
+            AssertMatching(TestData.English.Weather.Utterance, result.Text);
             Assert.AreEqual(0, result.Translations.Count, "Unmatched translation results.");
-            Assert.AreEqual(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails, "Unmatched error details.");
+            AssertMatching(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails);
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning)]
@@ -133,11 +133,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 bool receivedSynthesizingEvent = false;
                 CancellationErrorCode errorCode = CancellationErrorCode.NoError;
                 string errorDetails = string.Empty;
+                TranslationRecognitionResult result = null;
 
                 recognizer.Canceled += (s, e) =>
                 {
                     if (e.Reason == CancellationReason.Error)
                     {
+                        Console.WriteLine($"Canceled event. ErrorCode:{e.ErrorCode}, ErrorDetails:{e.ErrorDetails}");
                         errorCode = CancellationErrorCode.ServiceError;
                         errorDetails = e.ErrorDetails;
                     }
@@ -145,9 +147,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 recognizer.Recognized += (s, e) =>
                 {
-                    Assert.AreEqual(ResultReason.TranslatedSpeech, e.Result.Reason, "Unmatched result reason.");
-                    Assert.AreEqual(TestData.English.Weather.Utterance, e.Result.Text, "Unmatched recognized text.");
-                    Assert.AreEqual(TestData.French.Weather.Utterance, e.Result.Translations[toLanguages[0]], "Unmatched translation result.");
+                    Console.WriteLine($"Recognized: Reason: {e.Result.Reason}, Text: {e.Result.Text}, Translation: {e.Result.Translations[toLanguages[0]]}.");
+                    result = e.Result;
                 };
 
                 recognizer.Synthesizing += (s, e) =>
@@ -165,9 +166,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(30)));
                 await recognizer.StopContinuousRecognitionAsync();
 
+                Assert.IsTrue(result != null, "No result received.");
                 Assert.AreEqual(CancellationErrorCode.ServiceError, errorCode, "Unmatched error code.");
-                Assert.AreEqual(TestData.ExpectedErrorDetails.InvalidVoiceNameErrorMessage, errorDetails, "Unmatched error message.");
+                AssertMatching(TestData.ExpectedErrorDetails.InvalidVoiceNameErrorMessage, errorDetails);
                 Assert.IsFalse(receivedSynthesizingEvent, "Received unexpected synthesizing event.");
+                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason, "Unmatched result reason.");
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                AssertMatching(TestData.French.Weather.Utterance, result.Translations[toLanguages[0]]);
             }
         }
 
@@ -201,9 +206,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
             Console.WriteLine($"Reason: {result.Reason}, ErrorDetails: {errorDetails}");
 
-            Assert.AreEqual(TestData.English.Weather.Utterance, result.Text);
-            Assert.AreEqual(TestData.French.Weather.Utterance, result.Translations[Language.FR]);
-            Assert.AreEqual(TestData.Spanish.Weather.Utterance, result.Translations[Language.ES]);
+            AssertMatching(TestData.English.Weather.Utterance, result.Text);
+            AssertMatching(TestData.French.Weather.Utterance, result.Translations[Language.FR]);
+            AssertMatching(TestData.Spanish.Weather.Utterance, result.Translations[Language.ES]);
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning)]
@@ -234,10 +239,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.IsNotNull(actualTranslationRecognition);
 
             Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
-            Assert.AreEqual(TestData.German.FirstOne.Utterance, actualTranslationRecognition.Result.Text);
+            AssertMatching(TestData.German.FirstOne.Utterance, actualTranslationRecognition.Result.Text);
 
-            Assert.AreEqual(TestData.French.FirstOne.Utterance, actualTranslationRecognition.Result.Translations[Language.FR]);
-            Assert.AreEqual(TestData.Spanish.FirstOne.Utterance, actualTranslationRecognition.Result.Translations[Language.ES]);
+            AssertMatching(TestData.French.FirstOne.Utterance, actualTranslationRecognition.Result.Translations[Language.FR]);
+            AssertMatching(TestData.Spanish.FirstOne.Utterance, actualTranslationRecognition.Result.Translations[Language.ES]);
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning)]
@@ -276,7 +281,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual(1, actualTranslations[ResultType.Synthesis].Count);
 
             var actualSynthesisByteResult = (TranslationSynthesisEventArgs)actualTranslations[ResultType.Synthesis].Single();
-            const int MinSize = 50000;
+            const int MinSize = 49000;
             Assert.IsTrue(actualSynthesisByteResult.Result.GetAudio().Length > MinSize,
                 $"Received response for speech synthesis is less than {MinSize}: {actualSynthesisByteResult.Result.GetAudio().Length}.");
         }

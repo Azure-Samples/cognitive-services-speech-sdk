@@ -149,7 +149,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             public static class Weather
             {
-                public static readonly string Utterance = "Quel temps fait-il?";
+                public static readonly string Utterance = "Quel est le temps?";
             }
         }
 
@@ -165,12 +165,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             public static class FirstOne
             {
-                public static readonly string Utterance = "Llama al primero.";
+                public static readonly string Utterance = "Llama a la primera.";
             }
 
             public static class Weather
             {
-                public static readonly string Utterance = "¿Cómo es el clima?";
+                public static readonly string Utterance = "¿Cómo es el tiempo?";
             }
         }
 

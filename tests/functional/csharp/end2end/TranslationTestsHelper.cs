@@ -75,6 +75,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var receivedRecognizedEvents = new Dictionary<ResultType, List<EventArgs>>(); ;
                 var textResultEvents = new List<EventArgs>();
                 var synthesisResultEvents = new List<EventArgs>();
+                bool synthesisFailed = false;
 
                 string canceled = string.Empty;
                 recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
@@ -94,9 +95,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         synthesisResultEvents.Add(e);
                     }
-                    if (e.Result.GetAudio().Length == 0 && e.Result.Reason != ResultReason.SynthesizingAudioCompleted)
+                    else if (e.Result.GetAudio().Length == 0 && e.Result.Reason != ResultReason.SynthesizingAudioCompleted)
                     {
-                        Assert.Fail($"Synthesizing event failure: Reason:{0} Audio.Length={1}", e.Result.Reason, e.Result.GetAudio().Length);
+                        Console.WriteLine($"Synthesizing event failure: Reason:{0} Audio.Length={1}", e.Result.Reason, e.Result.GetAudio().Length);
+                        synthesisFailed = true;
                     }
                 };
 
@@ -118,6 +120,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 if (!string.IsNullOrEmpty(canceled))
                 {
                     Assert.Fail($"Recognition Canceled: {canceled}");
+                }
+
+                if (synthesisFailed)
+                {
+                    Assert.Fail($"Synthesis failed.");
                 }
 
                 receivedRecognizedEvents.Add(ResultType.RecognizedText, textResultEvents);
