@@ -7,6 +7,7 @@ import {
     CancellationReason,
     PropertyCollection,
     ResultReason,
+    SpeechRecognitionResult,
     TranslationRecognitionCanceledEventArgs,
     TranslationRecognitionEventArgs,
     TranslationRecognitionResult,
@@ -233,7 +234,8 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
         requestId: string,
         cancellationReason: CancellationReason,
         errorCode: CancellationErrorCode,
-        error: string): void {
+        error: string,
+        cancelRecoCallback: (e: SpeechRecognitionResult) => void): void {
         if (!!this.privTranslationRecognizer.canceled) {
             const properties: PropertyCollection = new PropertyCollection();
             properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[errorCode]);
@@ -249,6 +251,23 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                 this.privTranslationRecognizer.canceled(this.privTranslationRecognizer, cancelEvent);
                 /* tslint:disable:no-empty */
             } catch { }
+
+            if (!!cancelRecoCallback) {
+                const result: TranslationRecognitionResult = new TranslationRecognitionResult(
+                    undefined, // Translations
+                    requestId,
+                    ResultReason.Canceled,
+                    undefined, // Text
+                    undefined, // Druation
+                    undefined, // Offset
+                    error,
+                    undefined, // Json
+                    properties);
+                try {
+                    cancelRecoCallback(result);
+                    /* tslint:disable:no-empty */
+                } catch { }
+            }
         }
     }
 

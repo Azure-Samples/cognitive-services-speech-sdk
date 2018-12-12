@@ -12,6 +12,7 @@ import {
     PropertyCollection,
     PropertyId,
     ResultReason,
+    SpeechRecognitionResult,
 } from "../sdk/Exports";
 import {
     AddedLmIntent,
@@ -161,12 +162,18 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
                 ev = this.privPendingIntentArgs;
                 this.privPendingIntentArgs = undefined;
 
-                const intentResponse: IntentResponse = IntentResponse.fromJSON(connectionMessage.textBody);
-
                 if (undefined === ev) {
+                    if ("" === connectionMessage.textBody) {
+                        // This condition happens if there is nothing but silence in the
+                        // audio sent to the service.
+                        return;
+                    }
+
                     // Odd... Not sure this can happen
                     ev = new IntentRecognitionEventArgs(new IntentRecognitionResult(), 0 /*TODO*/, requestSession.sessionId);
                 }
+
+                const intentResponse: IntentResponse = IntentResponse.fromJSON(connectionMessage.textBody);
 
                 // If LUIS didn't return anything, send the existing event, else
                 // modify it to show the match.
@@ -243,7 +250,9 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
         requestId: string,
         cancellationReason: CancellationReason,
         errorCode: CancellationErrorCode,
-        error: string): void {
+        error: string,
+        cancelRecoCallback: (e: SpeechRecognitionResult) => void): void {
+
         if (!!this.privIntentRecognizer.canceled) {
             const properties: PropertyCollection = new PropertyCollection();
             properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[errorCode]);
@@ -259,6 +268,23 @@ export class IntentServiceRecognizer extends ServiceRecognizerBase {
                 this.privIntentRecognizer.canceled(this.privIntentRecognizer, cancelEvent);
                 /* tslint:disable:no-empty */
             } catch { }
+
+            if (!!cancelRecoCallback) {
+                const result: IntentRecognitionResult = new IntentRecognitionResult(
+                    undefined, // Intent Id
+                    requestId,
+                    ResultReason.Canceled,
+                    undefined, // Text
+                    undefined, // Druation
+                    undefined, // Offset
+                    error,
+                    undefined, // Json
+                    properties);
+                try {
+                    cancelRecoCallback(result);
+                    /* tslint:disable:no-empty */
+                } catch { }
+            }
         }
     }
 }

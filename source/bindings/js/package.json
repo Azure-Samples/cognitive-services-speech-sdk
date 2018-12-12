@@ -44,6 +44,9 @@
     "jest": "jest",
     "lint": "tslint -p tsconfig.json"
   },
+  "jest": {
+    "testEnvironment": "node"
+  },
   "jest-junit": {
     "suiteName": "jest tests",
     "output": "./test-javascript-junit.xml",

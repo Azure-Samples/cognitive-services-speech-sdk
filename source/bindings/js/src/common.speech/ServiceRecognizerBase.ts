@@ -117,7 +117,7 @@ export abstract class ServiceRecognizerBase implements IDisposable {
                 let audioNode: ReplayableAudioNode;
 
                 if (result.isError) {
-                    this.cancelRecognitionLocal(requestSession, CancellationReason.Error, CancellationErrorCode.ConnectionFailure, result.error);
+                    this.cancelRecognitionLocal(requestSession, CancellationReason.Error, CancellationErrorCode.ConnectionFailure, result.error, successCallback);
                     return PromiseHelper.fromError<boolean>(result.error);
                 } else {
                     audioNode = new ReplayableAudioNode(result.result, this.audioSource.format as AudioStreamFormatImpl);
@@ -136,6 +136,11 @@ export abstract class ServiceRecognizerBase implements IDisposable {
                         const messageRetrievalPromise = this.receiveMessage(requestSession, successCallback, errorCallBack);
                         const audioSendPromise = this.sendAudio(audioNode, requestSession);
 
+                        /* tslint:disable:no-empty */
+                        audioSendPromise.on((_: boolean) => { }, (error: string) => {
+                            this.cancelRecognitionLocal(requestSession, CancellationReason.Error, CancellationErrorCode.RuntimeError, error, successCallback);
+                        });
+
                         const completionPromise = PromiseHelper.whenAll([messageRetrievalPromise, audioSendPromise]);
 
                         return completionPromise.on((r: boolean) => {
@@ -144,15 +149,15 @@ export abstract class ServiceRecognizerBase implements IDisposable {
                         }, (error: string) => {
                             requestSession.dispose(error);
                             this.sendTelemetryData(requestSession, requestSession.getTelemetry());
-                            this.cancelRecognitionLocal(requestSession, CancellationReason.Error, CancellationErrorCode.RuntimeError, error);
+                            this.cancelRecognitionLocal(requestSession, CancellationReason.Error, CancellationErrorCode.RuntimeError, error, successCallback);
                         });
 
                     }, (error: string) => {
-                        this.cancelRecognitionLocal(requestSession, CancellationReason.Error, CancellationErrorCode.ConnectionFailure, error);
+                        this.cancelRecognitionLocal(requestSession, CancellationReason.Error, CancellationErrorCode.ConnectionFailure, error, successCallback);
                     }).on(() => {
                         return requestSession.completionPromise;
                     }, (error: string) => {
-                        this.cancelRecognitionLocal(requestSession, CancellationReason.Error, CancellationErrorCode.RuntimeError, error);
+                        this.cancelRecognitionLocal(requestSession, CancellationReason.Error, CancellationErrorCode.RuntimeError, error, successCallback);
                     }).onSuccessContinueWithPromise((_: IConnection): Promise<boolean> => {
                         return PromiseHelper.fromResult(true);
                     });
@@ -172,7 +177,8 @@ export abstract class ServiceRecognizerBase implements IDisposable {
         errorCallBack?: (e: string) => void): void;
 
     protected sendTelemetryData = (requestSession: RequestSession, telemetryData: string) => {
-        if (ServiceRecognizerBase.telemetryDataEnabled !== true) {
+        if (ServiceRecognizerBase.telemetryDataEnabled !== true ||
+            this.privIsDisposed) {
             return PromiseHelper.fromResult(true);
         }
 
@@ -199,14 +205,16 @@ export abstract class ServiceRecognizerBase implements IDisposable {
         requestId: string,
         cancellationReason: CancellationReason,
         errorCode: CancellationErrorCode,
-        error: string): void;
+        error: string,
+        cancelRecoCallback: (r: SpeechRecognitionResult) => void): void;
 
     // Cancels recognition.
     protected cancelRecognitionLocal(
         requestSession: RequestSession,
         cancellationReason: CancellationReason,
         errorCode: CancellationErrorCode,
-        error: string): void {
+        error: string,
+        cancelRecoCallback: (r: SpeechRecognitionResult) => void): void {
 
         if (!requestSession.isCanceled) {
             requestSession.onCancelled();
@@ -216,7 +224,8 @@ export abstract class ServiceRecognizerBase implements IDisposable {
                 requestSession.requestId,
                 cancellationReason,
                 errorCode,
-                error);
+                error,
+                cancelRecoCallback);
         }
     }
 
@@ -290,7 +299,6 @@ export abstract class ServiceRecognizerBase implements IDisposable {
         return this.fetchConnection(requestSession).onSuccessContinueWithPromise((connection: IConnection): Promise<boolean> => {
             return connection.read()
                 .onSuccessContinueWithPromise((message: ConnectionMessage) => {
-
                     if (this.privIsDisposed) {
                         // We're done.
                         return PromiseHelper.fromResult(true);
@@ -343,14 +351,12 @@ export abstract class ServiceRecognizerBase implements IDisposable {
                                 }
 
                                 if (requestSession.isSpeechEnded && this.privRecognizerConfig.isContinuousRecognition) {
-                                    this.cancelRecognitionLocal(requestSession, CancellationReason.EndOfStream, CancellationErrorCode.NoError, undefined);
+                                    this.cancelRecognitionLocal(requestSession, CancellationReason.EndOfStream, CancellationErrorCode.NoError, undefined, successCallback);
                                 }
                                 break;
                             case "turn.end":
                                 const sessionStopEventArgs: SessionEventArgs = new SessionEventArgs(requestSession.sessionId);
-
                                 requestSession.onServiceTurnEndResponse(this.privRecognizerConfig.isContinuousRecognition);
-
                                 if (!this.privRecognizerConfig.isContinuousRecognition || requestSession.isSpeechEnded) {
                                     if (!!this.privRecognizer.sessionStopped) {
                                         this.privRecognizer.sessionStopped(this.privRecognizer, sessionStopEventArgs);

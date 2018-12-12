@@ -181,12 +181,13 @@ export class SpeechServiceRecognizer extends ServiceRecognizerBase {
         requestId: string,
         cancellationReason: CancellationReason,
         errorCode: CancellationErrorCode,
-        error: string): void {
+        error: string,
+        cancelRecoCallback: (e: SpeechRecognitionResult) => void): void {
+
+        const properties: PropertyCollection = new PropertyCollection();
+        properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[errorCode]);
 
         if (!!this.privSpeechRecognizer.canceled) {
-            const properties: PropertyCollection = new PropertyCollection();
-            properties.setProperty(CancellationErrorCodePropertyName, CancellationErrorCode[errorCode]);
-
             const cancelEvent: SpeechRecognitionCanceledEventArgs = new SpeechRecognitionCanceledEventArgs(
                 cancellationReason,
                 error,
@@ -195,6 +196,22 @@ export class SpeechServiceRecognizer extends ServiceRecognizerBase {
                 sessionId);
             try {
                 this.privSpeechRecognizer.canceled(this.privSpeechRecognizer, cancelEvent);
+                /* tslint:disable:no-empty */
+            } catch { }
+        }
+
+        if (!!cancelRecoCallback) {
+            const result: SpeechRecognitionResult = new SpeechRecognitionResult(
+                requestId,
+                ResultReason.Canceled,
+                undefined, // Text
+                undefined, // Druation
+                undefined, // Offset
+                error,
+                undefined, // Json
+                properties);
+            try {
+                cancelRecoCallback(result);
                 /* tslint:disable:no-empty */
             } catch { }
         }

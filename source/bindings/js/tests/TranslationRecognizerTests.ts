@@ -10,6 +10,8 @@ import { Settings } from "./Settings";
 import { default as WaitForCondition } from "./Utilities";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 
+import * as fs from "fs";
+
 let objsToClose: any[];
 
 beforeAll(() => {
@@ -938,8 +940,6 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
         r.recognizeOnceAsync(
             (res: sdk.TranslationRecognitionResult) => {
                 expect(res).not.toBeUndefined();
-                // tslint:disable-next-line:no-console
-                console.warn(res.errorDetails + " " + new Error().stack);
                 expect(res.errorDetails).toContain("400036");
                 expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
                 expect(res.translations).toBeUndefined();
@@ -1031,18 +1031,19 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
         };
 
         r.recognizeOnceAsync((result: sdk.TranslationRecognitionResult) => {
-            done.fail("RecognizeOnceAsync did not fail");
-        }, (error: string) => {
             try {
-                expect(error).toContain("1006");
+                const e: sdk.CancellationDetails = sdk.CancellationDetails.fromResult(result);
+                expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
+                expect(sdk.CancellationErrorCode[e.ErrorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.ConnectionFailure]);
+                expect(e.errorDetails).toContain("1006");
+                doneCount++;
             } catch (error) {
                 done.fail(error);
             }
-            doneCount++;
+
+            WaitForCondition(() => (doneCount === 2), done);
+
         });
-
-        WaitForCondition(() => (doneCount === 2), done);
-
     });
 
     test("RecognizeOnce Bad Language", (done: jest.DoneCallback) => {
@@ -1067,14 +1068,15 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
         };
 
         r.recognizeOnceAsync((result: sdk.TranslationRecognitionResult) => {
-            done.fail("RecognizeOnceAsync did not fail");
-        }, (error: string) => {
             try {
-                expect(error).toContain("1006");
+                const e: sdk.CancellationDetails = sdk.CancellationDetails.fromResult(result);
+                expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
+                expect(sdk.CancellationErrorCode[e.ErrorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.ConnectionFailure]);
+                expect(e.errorDetails).toContain("1006");
+                doneCount++;
             } catch (error) {
                 done.fail(error);
             }
-            doneCount++;
         });
 
         WaitForCondition(() => (doneCount === 2), done);
@@ -1117,15 +1119,22 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
             }
         };
 
-        let pass: boolean = false;
+        let canceled: boolean = false;
+        let inTurn: boolean = false;
+
+        r.sessionStarted = ((s: sdk.Recognizer, e: sdk.SessionEventArgs): void => {
+            inTurn = true;
+        });
+
+        r.sessionStopped = ((s: sdk.Recognizer, e: sdk.SessionEventArgs): void => {
+            inTurn = false;
+        });
 
         r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs): void => {
             try {
                 expect(e.errorDetails).toBeUndefined();
                 expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
-                expect(speechEnded).toEqual(noMatchCount + 1);
-                expect(noMatchCount).toEqual(1);
-                pass = true;
+                canceled = true;
             } catch (error) {
                 done.fail(error);
             }
@@ -1135,7 +1144,21 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
             speechEnded++;
         };
 
-        r.startContinuousRecognitionAsync(() => WaitForCondition(() => pass, () => r.stopContinuousRecognitionAsync(() => done(), (error: string) => done.fail(error))),
+        r.startContinuousRecognitionAsync(() => {
+            WaitForCondition(() => (canceled && !inTurn), () => {
+                r.stopContinuousRecognitionAsync(() => {
+                    try {
+                        expect(speechEnded).toEqual(noMatchCount);
+                        expect(noMatchCount).toEqual(2);
+                        done();
+                    } catch (error) {
+                        done.fail(error);
+                    }
+                }, (error: string) => {
+                    done.fail(error);
+                });
+            });
+        },
             (err: string) => {
                 done.fail(err);
             });
@@ -1202,4 +1225,55 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
                 done.fail(err);
             });
     }, 30000);
+});
+
+test("Bad DataType for PushStreams results in error", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechTranslationConfig = BuildSpeechConfig();
+    objsToClose.push(s);
+
+    s.addTargetLanguage("en-US");
+    s.speechRecognitionLanguage = "en-US";
+
+    const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+
+    // Wrong data type for ReadStreams
+    fs.createReadStream(Settings.WaveFile).on("data", (buffer: ArrayBuffer) => {
+        p.write(buffer);
+    }).on("end", () => {
+        p.close();
+    });
+
+    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
+    objsToClose.push(r);
+
+    expect(r).not.toBeUndefined();
+    expect(r instanceof sdk.Recognizer);
+
+    r.canceled = (r: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
+        try {
+            expect(e.errorDetails).not.toBeUndefined();
+            expect(e.errorDetails).toContain("ArrayBuffer");
+            expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.Error]);
+            expect(sdk.CancellationErrorCode[e.errorCode]).toEqual(sdk.CancellationErrorCode[sdk.CancellationErrorCode.RuntimeError]);
+        } catch (error) {
+            done.fail(error);
+        }
+    };
+
+    r.recognizeOnceAsync(
+        (p2: sdk.TranslationRecognitionResult) => {
+            const res: sdk.TranslationRecognitionResult = p2;
+            try {
+                expect(res).not.toBeUndefined();
+                expect(res.errorDetails).not.toBeUndefined();
+                expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.Canceled]);
+                done();
+            } catch (error) {
+                done.fail(error);
+            }
+        },
+        (error: string) => {
+            done.fail(error);
+        });
 });
