@@ -93,6 +93,7 @@ void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrit
 
 Connection::Impl::Impl(const Client& config)
     : m_config(config),
+    m_valid(false),
     m_connected(false),
     m_audioOffset(0),
     m_creationTime(telemetry_gettime())
@@ -137,7 +138,7 @@ uint64_t Connection::Impl::getTimestamp()
 
 void Connection::Impl::Invoke(std::function<void()> callback)
 {
-    if (!m_connected)
+    if (!m_valid)
     {
         return;
     }
@@ -158,7 +159,7 @@ void Connection::Impl::WorkLoop(shared_ptr<Connection::Impl> ptr)
 {
     std::packaged_task<void()> task([ptr]()
     {
-        if (!ptr->m_connected)
+        if (!ptr->m_valid)
             return;
 
         DoWork(ptr);
@@ -180,7 +181,7 @@ void Connection::Impl::DoWork(weak_ptr<Connection::Impl> ptr)
             return;
         }
 
-        if (!connection->m_connected)
+        if (!connection->m_valid)
         {
             return;
         }
@@ -214,7 +215,7 @@ void Connection::Impl::DoWork(weak_ptr<Connection::Impl> ptr)
 void Connection::Impl::Shutdown()
 {
     m_config.m_callbacks = nullptr;
-    m_connected = false;
+    m_valid = false;
 }
 
 void Connection::Impl::Validate()
@@ -352,7 +353,7 @@ string Connection::Impl::ConstructConnectionUrl() const
 
 void Connection::Impl::Connect()
 {
-    if (m_transport != nullptr || m_connected)
+    if (m_transport != nullptr || m_valid)
     {
         ThrowLogicError("USP connection already created.");
     }
@@ -440,9 +441,9 @@ void Connection::Impl::Connect()
 #endif
 
     TransportSetDnsCache(m_transport.get(), m_dnsCache.get());
-    TransportSetCallbacks(m_transport.get(), OnTransportError, OnTransportData);
+    TransportSetCallbacks(m_transport.get(), OnTransportError, OnTransportData, OnTransportOpened, OnTransportClosed);
 
-    m_connected = true;
+    m_valid = true;
     WorkLoop(shared_from_this());
 }
 
@@ -467,7 +468,7 @@ void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, siz
         ThrowInvalidArgumentException("The path is null or empty.");
     }
 
-    if (m_connected)
+    if (m_valid)
     {
         // If the service receives multiple context messages for a single turn,
         // the service will close the WebSocket connection with an error.
@@ -502,7 +503,7 @@ void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
 
     throw_if_null(data, "data");
 
-    if (!m_connected)
+    if (!m_valid)
     {
         return;
     }
@@ -541,7 +542,7 @@ void Connection::Impl::QueueAudioEnd()
 {
     LogInfo("TS:%" PRIu64 ", Flush audio buffer.", getTimestamp());
 
-    if (!m_connected || m_audioOffset == 0)
+    if (!m_valid || m_audioOffset == 0)
     {
         return;
     }
@@ -559,10 +560,49 @@ void Connection::Impl::QueueAudioEnd()
     ScheduleWork();
 }
 
-// Callback for transport errors
-void Connection::Impl::OnTransportError(TransportHandle transportHandle, TransportErrorInfo* errorInfo, void* context)
+// Callback for transport opened
+void Connection::Impl::OnTransportOpened(void* context)
 {
-    (void)transportHandle;
+    Connection::Impl *connection = static_cast<Connection::Impl*>(context);
+    if (connection == nullptr)
+    {
+        ThrowRuntimeError("Invalid USP connection.");
+    }
+    if (connection->m_connected)
+    {
+        LogError("TS:%" PRIu64 ", connection:0x%x is already connected!!!", connection->getTimestamp(), connection);
+    }
+    assert(connection->m_connected == false);
+    connection->m_connected = true;
+    LogInfo("TS:%" PRIu64 ", OnConnected: connection:0x%x", connection->getTimestamp(), connection);
+    auto callbacks = connection->m_config.m_callbacks;
+    connection->Invoke([&] {
+            callbacks->OnConnected();
+    });
+}
+
+// Callback for transport closed
+void Connection::Impl::OnTransportClosed(void* context)
+{
+    Connection::Impl *connection = static_cast<Connection::Impl*>(context);
+    if (connection == nullptr)
+    {
+        ThrowRuntimeError("Invalid USP connection.");
+    }
+    if (connection->m_connected)
+    {
+        connection->m_connected = false;
+        LogInfo("TS:%" PRIu64 ", OnDisconnected: connection:0x%x", connection->getTimestamp(), connection);
+        auto callbacks = connection->m_config.m_callbacks;
+        connection->Invoke([&] {
+            callbacks->OnDisconnected();
+        });
+    }
+}
+
+// Callback for transport errors
+void Connection::Impl::OnTransportError(TransportErrorInfo* errorInfo, void* context)
+{
     throw_if_null(context, "context");
 
     Connection::Impl *connection = static_cast<Connection::Impl*>(context);
@@ -572,77 +612,87 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
         connection->getTimestamp(), connection, errorInfo->reason, errorInfo->errorCode, errorInfo->errorCode, errorStr);
 
     auto callbacks = connection->m_config.m_callbacks;
+    USP::ErrorCode uspErrorCode = ErrorCode::ConnectionError;
+    string errorMessage;
+    auto errorCodeInString = to_string(errorInfo->errorCode);
 
     switch (errorInfo->reason)
     {
     case TRANSPORT_ERROR_REMOTE_CLOSED:
-        connection->Invoke([&] {
-            callbacks->OnError(true, ErrorCode::ConnectionError, "Connection was closed by the remote host. Error code: " + to_string(errorInfo->errorCode) + ". Error details: " + errorStr);
-        });
+        uspErrorCode = ErrorCode::ConnectionError;
+        errorMessage = "Connection was closed by the remote host. Error code: " + errorCodeInString + ". Error details: " + errorStr;
         break;
 
     case TRANSPORT_ERROR_CONNECTION_FAILURE:
-        connection->Invoke([&] {
-            callbacks->OnError(true, ErrorCode::ConnectionError,
-                std::string("Connection failed (no connection to the remote host). Internal error: ") +
-                std::to_string(errorInfo->errorCode) + ". Error details: " + errorStr +
-                std::string(". Please check network connection, firewall setting, and the region name used to create speech factory.")); });
+        uspErrorCode = ErrorCode::ConnectionError;
+        errorMessage = "Connection failed (no connection to the remote host). Internal error: " + errorCodeInString
+            + ". Error details: " + errorStr
+            + ". Please check network connection, firewall setting, and the region name used to create speech factory.";
         break;
 
     case TRANSPORT_ERROR_WEBSOCKET_UPGRADE:
         switch (errorInfo->errorCode)
         {
         case HTTP_BADREQUEST:
-            connection->Invoke([&] { callbacks->OnError(true, ErrorCode::BadRequest,
-                "WebSocket Upgrade failed with a bad request (400). Please check the language name and endpoint id (if used) are correctly associated with the provided subscription key."); });
+            uspErrorCode = ErrorCode::BadRequest;
+            errorMessage = "WebSocket Upgrade failed with a bad request (400). Please check the language name and endpoint id (if used) are correctly associated with the provided subscription key.";
             break;
         case HTTP_UNAUTHORIZED:
-            connection->Invoke([&] { callbacks->OnError(true, ErrorCode::AuthenticationError,
-                "WebSocket Upgrade failed with an authentication error (401). Please check for correct subscription key (or authorization token) and region name."); });
+            uspErrorCode = ErrorCode::AuthenticationError;
+            errorMessage = "WebSocket Upgrade failed with an authentication error (401). Please check for correct subscription key (or authorization token) and region name.";
             break;
         case HTTP_FORBIDDEN:
-            connection->Invoke([&] { callbacks->OnError(true, ErrorCode::AuthenticationError,
-                "WebSocket Upgrade failed with an authentication error (403). Please check for correct subscription key (or authorization token) and region name."); });
+            uspErrorCode = ErrorCode::AuthenticationError;
+            errorMessage = "WebSocket Upgrade failed with an authentication error (403). Please check for correct subscription key (or authorization token) and region name.";
             break;
         case HTTP_TOO_MANY_REQUESTS:
-            connection->Invoke([&] { callbacks->OnError(true, ErrorCode::TooManyRequests,
-                "WebSocket Upgrade failed with too many requests error (429). Please check for correct subscription key (or authorization token) and region name."); });
+            uspErrorCode = ErrorCode::TooManyRequests;
+            errorMessage = "WebSocket Upgrade failed with too many requests error (429). Please check for correct subscription key (or authorization token) and region name.";
             break;
         default:
-            connection->Invoke([&] { callbacks->OnError(true, ErrorCode::ConnectionError,
-                "WebSocket Upgrade failed with HTTP status code: " + std::to_string(errorInfo->errorCode)); });
+            uspErrorCode = ErrorCode::ConnectionError;
+            errorMessage = "WebSocket Upgrade failed with HTTP status code: " + errorCodeInString;
             break;
         }
         break;
 
     case TRANSPORT_ERROR_WEBSOCKET_SEND_FRAME:
-        connection->Invoke([&] {
-            callbacks->OnError(true, ErrorCode::ConnectionError,
-                std::string("Failure while sending a frame over the WebSocket connection. Internal error: ") +
-                std::to_string(errorInfo->errorCode) + ". Error details: " + errorStr);
-        });
+        uspErrorCode = ErrorCode::ConnectionError;
+        errorMessage = "Failure while sending a frame over the WebSocket connection. Internal error: " + errorCodeInString
+            + ". Error details: " + errorStr;
         break;
 
     case TRANSPORT_ERROR_WEBSOCKET_ERROR:
-        connection->Invoke([&] { callbacks->OnError(true, ErrorCode::ConnectionError,
-            std::string("WebSocket operation failed. Internal error: ") +
-            std::to_string(errorInfo->errorCode) + ". Error details: " + errorStr);
-        });
+        uspErrorCode = ErrorCode::ConnectionError;
+        errorMessage = "WebSocket operation failed. Internal error: " + errorCodeInString
+            + ". Error details: " + errorStr;
         break;
 
     case TRANSPORT_ERROR_DNS_FAILURE:
-        connection->Invoke([&] { callbacks->OnError(true, ErrorCode::ConnectionError,
-            std::string("DNS connection failed (the remote host did not respond). Internal error: ") + std::to_string(errorInfo->errorCode));
-        });
+        uspErrorCode = ErrorCode::ConnectionError;
+        errorMessage = "DNS connection failed (the remote host did not respond). Internal error: " + errorCodeInString;
         break;
 
     default:
     case TRANSPORT_ERROR_UNKNOWN:
-        connection->Invoke([&] { callbacks->OnError(true, ErrorCode::ConnectionError, "Unknown transport error."); });
+        uspErrorCode = ErrorCode::ConnectionError;
+        errorMessage = "Unknown transport error.";
         break;
     }
 
-    connection->m_connected = false;
+    if (connection->m_connected)
+    {
+        connection->m_connected = false;
+        LogInfo("TS:%" PRIu64 ", OnDisconnected: connection:0x%x", connection->getTimestamp(), connection);
+        connection->Invoke([&] {
+            callbacks->OnDisconnected();
+        });
+    }
+
+    assert(!errorMessage.empty());
+    connection->Invoke([&] { callbacks->OnError(true, uspErrorCode, errorMessage); });
+
+    connection->m_valid = false;
 }
 
 static RecognitionStatus ToRecognitionStatus(const string& str)
@@ -739,9 +789,8 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
 }
 
 // Callback for data available on tranport
-void Connection::Impl::OnTransportData(TransportHandle transportHandle, TransportResponse *response, void *context)
+void Connection::Impl::OnTransportData(TransportResponse *response, void *context)
 {
-    (void)transportHandle;
     throw_if_null(context, "context");
 
     Connection::Impl *connection = static_cast<Connection::Impl *>(context);

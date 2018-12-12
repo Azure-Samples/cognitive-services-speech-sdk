@@ -28,6 +28,7 @@ import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
+import com.microsoft.cognitiveservices.speech.Connection;
 
 import tests.Settings;
 
@@ -208,17 +209,31 @@ public class IntentRecognizerTests {
         assertNotNull(s);
 
         IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
 
+        final AtomicInteger connectedEventCount = new AtomicInteger(0);;
+        final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+        });
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            disconnectedEventCount.getAndIncrement();
+        });
+
         r.recognized.addEventListener((o, e) -> {
+            assertTrue(connectedEventCount.get() > 0);
+            assertTrue(connectedEventCount.get() > disconnectedEventCount.get());
             eventsMap.put("recognized", eventIdentifier.getAndIncrement());
         });
 
         r.recognizing.addEventListener((o, e) -> {
+            assertTrue(connectedEventCount.get() > 0);
+            assertTrue(connectedEventCount.get() > disconnectedEventCount.get());
             int now = eventIdentifier.getAndIncrement();
             eventsMap.put("recognizing-" + System.currentTimeMillis(), now);
             eventsMap.put("recognizing" , now);
@@ -258,6 +273,9 @@ public class IntentRecognizerTests {
         assertNotNull(res);
         assertTrue(res.getReason() != ResultReason.Canceled);
         assertEquals("What's the weather like?", res.getText());
+
+        assertTrue(connectedEventCount.get() > 0);
+        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
 
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
@@ -353,11 +371,21 @@ public class IntentRecognizerTests {
         assertNotNull(s);
 
         IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
 
         final ArrayList<String> rEvents = new ArrayList<>();
+
+        final AtomicInteger connectedEventCount = new AtomicInteger(0);;
+        final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+        });
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            disconnectedEventCount.getAndIncrement();
+        });
 
         r.recognized.addEventListener((o, e) -> {
             rEvents.add("Result@" + System.currentTimeMillis());
@@ -391,6 +419,9 @@ public class IntentRecognizerTests {
 
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
+
+        assertTrue(connectedEventCount.get() > 0);
+        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
 
         r.close();
         s.close();

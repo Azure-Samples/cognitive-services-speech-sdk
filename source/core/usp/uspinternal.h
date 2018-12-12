@@ -125,6 +125,7 @@ private:
 
     Client m_config;
 
+    bool m_valid;
     bool m_connected;
 
     size_t m_audioOffset;
@@ -136,8 +137,10 @@ private:
     const uint64_t m_creationTime;
 
     static void OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId);
-    static void OnTransportError(TransportHandle transportHandle, TransportErrorInfo* errorInfo, void* context);
-    static void OnTransportData(TransportHandle transportHandle, TransportResponse* response, void* context);
+    static void OnTransportOpened(void* context);
+    static void OnTransportClosed(void* context);
+    static void OnTransportError(TransportErrorInfo* errorInfo, void* context);
+    static void OnTransportData(TransportResponse* response, void* context);
 
     void InvokeRecognitionErrorCallback(RecognitionStatus status, const std::string& response);
 

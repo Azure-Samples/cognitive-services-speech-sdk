@@ -19,6 +19,7 @@
     @property (nonatomic, assign) NSString * speechKey;
     @property (nonatomic, assign) NSString * serviceRegion;
     @property (nonatomic, retain) SPXSpeechRecognizer* speechRecognizer;
+    @property (nonatomic, retain) SPXConnection* connection;
 @end
 
 @implementation SPXSpeechRecognitionTest
@@ -33,6 +34,8 @@
     self.serviceRegion = [[[NSProcessInfo processInfo] environment] objectForKey:@"serviceRegion"];
 
     result = [NSMutableDictionary new];
+    [result setObject:@0 forKey:@"connectedCount"];
+    [result setObject:@0 forKey:@"disconnectedCount"];
     [result setObject:@0 forKey:@"finalResultCount"];
     [result setObject:@0 forKey:@"sessionStoppedCount"];
     [result setObject:@"" forKey:@"finalText"];
@@ -42,8 +45,19 @@
     SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
     self.speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+    self.connection = [[SPXConnection alloc] initFromRecognizer:self.speechRecognizer];
 
     __unsafe_unretained typeof(self) weakSelf = self;
+
+    [self.connection addConnectedEventHandler: ^ (SPXConnection *connection, SPXConnectionEventArgs *eventArgs) {
+        NSLog(@"Received connected event. SessionId: %@", eventArgs.sessionId);
+        [weakSelf->result setObject:[NSNumber numberWithLong:[[weakSelf->result objectForKey:@"connectedCount"] integerValue] + 1] forKey:@"connectedCount"];
+    }];
+    
+    [self.connection addDisconnectedEventHandler: ^ (SPXConnection *connection, SPXConnectionEventArgs *eventArgs) {
+        NSLog(@"Received disconnected event. SessionId: %@", eventArgs.sessionId);
+        [weakSelf->result setObject:[NSNumber numberWithLong:[[weakSelf->result objectForKey:@"disconnectedCount"] integerValue] + 1] forKey:@"disconnected"];
+    }];
 
     [self.speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
         NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.offset, eventArgs.result.duration, eventArgs.result.resultId);
@@ -77,6 +91,11 @@
 
     XCTAssertTrue([[self->result valueForKey:@"finalText"] isEqualToString: self->weatherTextEnglish]);
     XCTAssertTrue([[self->result valueForKey:@"finalResultCount"] isEqualToNumber:@1]);
+    long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
+    long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
+    XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%ld", connectedEventCount);
+    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1,
+        @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
     [self.speechRecognizer stopContinuousRecognition];
 }
 
@@ -90,6 +109,11 @@
 
     XCTAssertTrue([[self->result valueForKey:@"finalText"] isEqualToString: self->weatherTextEnglish]);
     XCTAssertTrue([[self->result valueForKey:@"finalResultCount"] isEqualToNumber:@1]);
+    long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
+    long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
+    XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%ld", connectedEventCount);
+    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1,
+        @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
 }
 
 - (void)testRecognizeOnce {

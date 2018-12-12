@@ -19,8 +19,9 @@
 #include "recognition_result.h"
 #include "recognizer.h"
 #include "session_event_args.h"
+#include "connection_event_args.h"
 #include "usp_reco_engine_adapter.h"
-
+#include "connection.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -44,6 +45,8 @@ SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* i
     SPX_FACTORY_MAP_ENTRY(CSpxUspRecoEngineAdapter, ISpxRecoEngineAdapter);
     SPX_FACTORY_MAP_ENTRY(CSpxUspCallbackWrapper, ISpxUspCallbacks);
     SPX_FACTORY_MAP_ENTRY(CSpxLuisDirectEngineAdapter, ISpxLuEngineAdapter);
+    SPX_FACTORY_MAP_ENTRY(CSpxConnectionEventArgs, ISpxConnectionEventArgs);
+    SPX_FACTORY_MAP_ENTRY(CSpxConnection, ISpxConnection);
     SPX_FACTORY_MAP_END();
 }
 

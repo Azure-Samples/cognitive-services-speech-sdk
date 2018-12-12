@@ -124,6 +124,7 @@ public:
 
     // -- ISpxEventArgsFactory
     std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId) override;
+    std::shared_ptr<ISpxConnectionEventArgs> CreateConnectionEventArgs(const std::wstring& sessionId) override;
     std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, uint64_t offset) override;
     std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
@@ -135,6 +136,8 @@ public:
     void FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
     void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
     void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result) override;
+    void FireConnectedEvent() override;
+    void FireDisconnectedEvent() override;
 
     void AdapterCompletedSetFormatStop(ISpxRecoEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Speech); }
     void AdapterRequestingAudioMute(ISpxRecoEngineAdapter* adapter, bool muteAudio) override;
@@ -193,7 +196,7 @@ private:
     void EnsureFireResultEvent();
     void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result);
 
-    enum EventType { SessionStart, SessionStop, SpeechStart, SpeechEnd, RecoResultEvent };
+    enum EventType { SessionStart, SessionStop, SpeechStart, SpeechEnd, RecoResultEvent, Connected, Disconnected };
     void FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, wchar_t* sessionId = nullptr, uint64_t offset = 0);
 
 private:

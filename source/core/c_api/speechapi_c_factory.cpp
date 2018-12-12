@@ -143,5 +143,5 @@ SPXAPI recognizer_create_intent_recognizer_from_config(SPXRECOHANDLE* phreco, SP
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);    
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

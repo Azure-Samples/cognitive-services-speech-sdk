@@ -34,8 +34,9 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public event EventHandler<RecognitionEventArgs> SpeechEndDetected;
 
-        internal Recognizer()
+        internal Recognizer(Internal.Recognizer recoImpl)
         {
+            this.recoImpl = recoImpl;
             sessionStartedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStartedEvent);
             sessionStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
             speechStartDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechStartDetectedEvent);
@@ -83,6 +84,7 @@ namespace Microsoft.CognitiveServices.Speech
             disposed = true;
         }
 
+        internal readonly Internal.Recognizer recoImpl;
         internal SessionEventHandlerImpl sessionStartedHandler;
         internal SessionEventHandlerImpl sessionStoppedHandler;
         internal RecognitionEventHandlerImpl speechStartDetectedHandler;
@@ -92,7 +94,7 @@ namespace Microsoft.CognitiveServices.Speech
         private int activeAsyncRecognitionCounter = 0;
 
         /// <summary>
-        /// Define an internal class which raise a C# event when a corresponding callback is invoked from the native layer.
+        /// Define a private class which raise a C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
         internal class SessionEventHandlerImpl : Internal.SessionEventListener
         {
@@ -126,7 +128,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Define an internal class which raises a C# event when a corresponding callback is invoked from the native layer.
+        /// Define a private class which raises a C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
         internal class RecognitionEventHandlerImpl : Internal.RecognitionEventListener
         {

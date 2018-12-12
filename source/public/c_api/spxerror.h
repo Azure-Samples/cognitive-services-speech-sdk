@@ -212,3 +212,13 @@ typedef uintptr_t SPXHR;
 /// Switch between single shot and continuous recognition is not supported.
 /// </summary>
 #define SPXERR_SWITCH_MODE_NOT_ALLOWED  __SPX_ERRCODE_FAILED(0x01E)
+
+/// <summary>
+/// Connection is not supported by the specified recognizer.
+/// </summary>
+#define SPXERR_CONNECTION_NOT_SUPPORTED  __SPX_ERRCODE_FAILED(0x01F)
+
+/// <summary>
+/// The handle is invalid.
+/// </summary>
+#define SPXERR_INVALID_HANDLE  __SPX_ERRCODE_FAILED(0x020)

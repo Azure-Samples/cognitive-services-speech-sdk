@@ -28,6 +28,7 @@ import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognitionResult;
+import com.microsoft.cognitiveservices.speech.Connection;
 
 import tests.Settings;
 
@@ -226,9 +227,20 @@ public class TranslationRecognizerTests {
         s.addTargetLanguage(language);
 
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
+        
+        final AtomicInteger connectedEventCount = new AtomicInteger(0);;
+        final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+        });
+
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            disconnectedEventCount.getAndIncrement();
+        });
 
         Future<TranslationRecognitionResult> future = r.recognizeOnceAsync();
         assertNotNull(future);
@@ -250,6 +262,9 @@ public class TranslationRecognizerTests {
         assertEquals(1, res.getTranslations().size());
         assertEquals("What's the weather like?", res.getTranslations().get("en-US")); // translated text
 
+        assertTrue(connectedEventCount.get() > 0);
+        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
+
         r.close();
         s.close();
     }
@@ -265,11 +280,22 @@ public class TranslationRecognizerTests {
         s.addTargetLanguage(language);
 
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
+
+        final AtomicInteger connectedEventCount = new AtomicInteger(0);;
+        final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+        });
+
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            disconnectedEventCount.getAndIncrement();
+        });
 
         r.recognized.addEventListener((o, e) -> {
             eventsMap.put("recognized", eventIdentifier.getAndIncrement());
@@ -317,6 +343,9 @@ public class TranslationRecognizerTests {
         assertNotNull(res);
         assertTrue(res.getReason() != ResultReason.Canceled);
         assertEquals("What's the weather like?", res.getText());
+
+        assertTrue(connectedEventCount.get() > 0);
+        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
 
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
@@ -428,11 +457,22 @@ public class TranslationRecognizerTests {
         s.addTargetLanguage(language);
 
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
 
         final ArrayList<String> rEvents = new ArrayList<>();
+
+        final AtomicInteger connectedEventCount = new AtomicInteger(0);;
+        final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+        });
+
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            disconnectedEventCount.getAndIncrement();
+        });
 
         r.recognized.addEventListener((o, e) -> {
             rEvents.add("Result@" + System.currentTimeMillis());
@@ -466,6 +506,9 @@ public class TranslationRecognizerTests {
 
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
+
+        assertTrue(connectedEventCount.get() > 0);
+        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
 
         r.close();
         s.close();

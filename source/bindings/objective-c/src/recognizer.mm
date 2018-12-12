@@ -7,6 +7,7 @@
 
 @implementation SPXRecognizer
 {
+    RecognizerSharedPtr recoHandle;
     dispatch_queue_t dispatchQueue;
     NSMutableArray *sessionStartedEventHandlerList;
     NSMutableArray *sessionStoppedEventHandlerList;
@@ -14,25 +15,37 @@
     NSMutableArray *speechStartDetectedEventHandlerList;
     NSMutableArray *speechEndDetectedEventHandlerList;
     NSLock *speechDetectionEventArrayLock;
+
 }
 
-- (instancetype)initFrom:(RecognizerSharedPtr)recoHandle withParameters:(SpeechImpl::PropertyCollection *)propertiesHandle
+- (instancetype)initWith:(RecognizerSharedPtr)recoImpl withParameters:(SpeechImpl::PropertyCollection *)propertiesHandle
 {
     self = [super init];
-    _properties = [[RecognizerPropertyCollection alloc] initWithPropertyCollection:propertiesHandle from:recoHandle];
+    recoHandle = recoImpl;
+    _properties = [[RecognizerPropertyCollection alloc] initWithPropertyCollection:propertiesHandle from:recoImpl];
     sessionStartedEventHandlerList = [NSMutableArray array];
     sessionStoppedEventHandlerList = [NSMutableArray array];
     sessionEventArrayLock = [[NSLock alloc] init];
     speechStartDetectedEventHandlerList = [NSMutableArray array];
     speechEndDetectedEventHandlerList = [NSMutableArray array];
     speechDetectionEventArrayLock = [[NSLock alloc] init];
-    
+
     return self;
+}
+
+- (RecognizerSharedPtr)getHandle
+{
+    return recoHandle;
 }
 
 - (void)setDispatchQueue: (dispatch_queue_t)queue
 {
     dispatchQueue = queue;
+}
+
+- (dispatch_queue_t)getDispatchQueue
+{
+    return dispatchQueue;
 }
 
 - (void)onSessionStartedEvent:(SPXSessionEventArgs *)eventArgs

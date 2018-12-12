@@ -45,3 +45,6 @@
 #include <speechapi_cxx_translation_recognizer.h>
 
 #include <speechapi_cxx_session.h>
+
+#include <speechapi_cxx_connection.h>
+#include <speechapi_cxx_connection_eventargs.h>

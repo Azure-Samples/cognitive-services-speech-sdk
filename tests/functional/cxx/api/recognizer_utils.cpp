@@ -148,7 +148,7 @@ void ConnectCallbacks(SpeechRecognizer* recognizer, promise<string>& result)
     });
 }
 
-string  WaitForResult(future<string>&& f, MilliSeconds duration)
+string WaitForResult(future<string>&& f, MilliSeconds duration)
 {
     auto status = f.wait_for(duration);
     CAPTURE(duration);

@@ -128,6 +128,33 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task IntentRecognizerConnectedEvent()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
+            int connectedEventCount = 0;
+            int disconnectedEventCount = 0;
+            using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
+            using (var connection = Connection.FromRecognizer(recognizer))
+            {
+                var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
+                recognizer.AddIntent(model, "HomeAutomation.TurnOn", "my-custom-intent-id-string");
+
+                connection.Connected += (s, e) =>
+                {
+                    connectedEventCount++;
+                };
+                connection.Disconnected += (s, e) =>
+                {
+                    disconnectedEventCount++;
+                };
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.IsTrue(connectedEventCount > 0, AssertOutput.ConnectedEventCountMustNotBeZero);
+                Assert.IsTrue(connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
+                Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
+            }
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public async Task AsyncRecognitionAfterDisposingIntentRecognizer()
         {

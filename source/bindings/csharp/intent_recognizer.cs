@@ -52,8 +52,13 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         }
 
         internal IntentRecognizer(Internal.SpeechConfig config, Internal.AudioConfig audioConfig)
+            : this(Internal.IntentRecognizer.FromConfig(config, audioConfig))
         {
-            this.recoImpl = Internal.IntentRecognizer.FromConfig(config, audioConfig);
+        }
+
+        internal IntentRecognizer(Internal.IntentRecognizer recoImpl) : base(recoImpl)
+        {
+            this.recoImpl = recoImpl;
 
             recognizingHandler = new IntentHandlerImpl(this, isRecognizedHandler: false);
             recoImpl.Recognizing.Connect(recognizingHandler);
@@ -266,13 +271,13 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         }
 
         private bool disposed = false;
-        internal readonly Internal.IntentRecognizer recoImpl;
+        private new readonly Internal.IntentRecognizer recoImpl;
         private readonly IntentHandlerImpl recognizingHandler;
         private readonly IntentHandlerImpl recognizedHandler;
         private readonly CanceledHandlerImpl canceledHandler;
         private readonly Audio.AudioConfig audioConfig;
 
-        // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
+        // Defines a private class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class IntentHandlerImpl : Internal.IntentEventListener
         {
             public IntentHandlerImpl(IntentRecognizer recognizer, bool isRecognizedHandler)
@@ -295,7 +300,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             private bool isRecognizedHandler;
         }
 
-        // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
+        // Defines a private class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
         private class CanceledHandlerImpl : Internal.IntentCanceledEventListener
         {
             public CanceledHandlerImpl(IntentRecognizer recognizer)

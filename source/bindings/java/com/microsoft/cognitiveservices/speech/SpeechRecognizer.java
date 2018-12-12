@@ -61,7 +61,6 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         } else {
             this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), audioConfig.getConfigImpl());
         }
-
         initialize();
     }
 
@@ -244,6 +243,8 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     private void initialize() {
+        super.internalRecognizerImpl = this.recoImpl;
+
         recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
         recoImpl.getRecognizing().AddEventListener(recognizingHandler);
 
@@ -273,7 +274,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         }
     }
 
-    // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
+    // Defines a private class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class ResultHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventListener {
 
         ResultHandlerImpl(SpeechRecognizer recognizer, boolean isRecognizedHandler) {
@@ -302,7 +303,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         private boolean isRecognizedHandler;
     }
 
-    // Defines an internal class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
+    // Defines a private class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
     private class CanceledHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventListener {
 
         CanceledHandlerImpl(SpeechRecognizer recognizer) {

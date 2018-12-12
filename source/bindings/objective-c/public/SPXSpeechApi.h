@@ -6,6 +6,8 @@
 #import "SPXAudioConfiguration.h"
 #import "SPXAudioStream.h"
 #import "SPXAudioStreamFormat.h"
+#import "SPXConnection.h"
+#import "SPXConnectionEventArgs.h"
 #import "SPXIntentRecognitionEventArgs.h"
 #import "SPXIntentRecognitionResult.h"
 #import "SPXIntentRecognizer.h"

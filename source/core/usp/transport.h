@@ -44,16 +44,6 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
 void TransportRequestDestroy(TransportHandle transportHandle);
 
 /**
- * Executes a transport request.
- * @param transportHandle The request to execute.
- * @param path The path to request.
- * @param buffer The buffer to send to the transport service.
- * @param length The length of pBuffer.
- * @return A return code or zero if successful.
- */
-int TransportRequestExecute(TransportHandle transportHandle, const char* path, uint8_t* buffer, size_t length);
-
-/**
  * Prepares the start of a new transport request.
  * @param transportHandle The request to prepare.
  * @return A return code or zero if successful.
@@ -103,6 +93,20 @@ int TransportStreamFlush(TransportHandle transportHandle, const char* requestId)
  * @param transportHandle The request to process.
  */
 void TransportDoWork(TransportHandle transportHandle);
+
+/**
+ * The TransportOpenedCallback type represents an application-defined
+ * status callback function used for signaling when the transport has been opened.
+ * @param context A pointer to the application-defined callback context.
+ */
+typedef void(*TransportOpenedCallback)(void* context);
+
+/**
+ * The TransportClosedCallback type represents an application-defined
+ * status callback function used for signaling when the transport has been closed.
+ * @param context A pointer to the application-defined callback context.
+ */
+typedef void(*TransportClosedCallback)(void* context);
 
 typedef enum _TransportError
 {
@@ -158,11 +162,10 @@ typedef struct _TransportErrorInfo
 /**
  * The TransportErrorCallback type represents an application-defined
  * status callback function used for signaling when the transport has failed.
- * @param transportHandle The transport handle.
  * @param errorInfo Pointer to struct containing transport error information (or NULL).
  * @param context A pointer to the application-defined callback context.
  */
-typedef void(*TransportErrorCallback)(TransportHandle transportHandle, TransportErrorInfo* errorInfo, void* context);
+typedef void(*TransportErrorCallback)(TransportErrorInfo* errorInfo, void* context);
 
 typedef enum _ResponseFrameType
 {
@@ -182,20 +185,25 @@ typedef struct _TransportResponse
 /**
  * The TransportReponseCallback type represents an application-defined
  * status callback function used for signaling when data has been received.
- * @param transportHandle The transport handle.
  * @param response Pointer to struct containing response information.
  * @param context A pointer to the application-defined callback context.
  */
-typedef void(*TransportResponseCallback)(TransportHandle transportHandle, TransportResponse* response, void* context); 
+typedef void(*TransportResponseCallback)(TransportResponse* response, void* context); 
 
 /**
  * Registers for events from the transport.
  * @param transportHandle The request to prepare.
  * @param errorCallback The error callback.
  * @param recvCallback The response callback.
+ * @param openedCallback The callback indicating that the transport has been opened.
+ * @param closedCallback The callback indicating that the transport has been closed.
  * @return A return code or zero if successful.
  */
-int TransportSetCallbacks(TransportHandle transportHandle, TransportErrorCallback errorCallback, TransportResponseCallback recvCallback);
+int TransportSetCallbacks(TransportHandle transportHandle,
+    TransportErrorCallback errorCallback,
+    TransportResponseCallback recvCallback,
+    TransportOpenedCallback openedCallback,
+    TransportClosedCallback closedCallback);
 
 /**
  * Enables authorization header on transport.

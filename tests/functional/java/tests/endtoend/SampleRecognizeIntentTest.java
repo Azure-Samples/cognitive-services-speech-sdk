@@ -29,12 +29,13 @@ public class SampleRecognizeIntentTest {
     @Test
     public void test() {
         test = new SampleRecognizeIntent();
-        
+
         test.run();
-       
+        assertTrue(test.getConnectedEventCount() > 0);
+        assertTrue(test.getConnectedEventCount() == test.getDisconnectedEventCount() + 1);
         assertNotNull(test.getResult()); // we got the final result
         assertEquals("What's the weather like?", test.getResult().getText());
-        
+
         String s = test.getResult().getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
         assertNotNull(s);
         assertTrue(s.length() > 0);

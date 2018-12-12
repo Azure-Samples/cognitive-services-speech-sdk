@@ -19,6 +19,7 @@ namespace CognitiveServices {
 namespace Speech {
 
 // Forward declaration for friends.
+class Connection;
 namespace Translation { class TranslationRecognizer; }
 
 /*! \cond PRIVATE */
@@ -205,6 +206,7 @@ public:
 private:
     friend class ::Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer;
     friend class ::Microsoft::CognitiveServices::Speech::Impl::ISpxRecognizerEvents;
+    friend class ::Microsoft::CognitiveServices::Speech::Connection;
     template <class, class, class> friend class AsyncRecognizer;
 
     /// <summary>

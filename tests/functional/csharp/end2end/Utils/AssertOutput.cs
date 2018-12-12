@@ -6,11 +6,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     public static class AssertOutput
     {
-       public const string WrongErrorCount = "Wrong number of Error Events";
-       public const string WrongFinalResultCount = "Wrong number of Recognized Events";
-       public const string WrongSessionStartedCount = "Wrong number of Session Started Events";
-       public const string WrongSessionStoppedCount = "Wrong number of Session Stopped Events";
-       public const string WrongSpeechEndedCount = "Wrong number of Speech Ended Events";
-       public const string WrongSpeechStartedCount = "Wrong number of Speech Started Events";
+        public const string WrongErrorCount = "Wrong number of Error Events";
+        public const string WrongFinalResultCount = "Wrong number of Recognized Events";
+        public const string WrongSessionStartedCount = "Wrong number of Session Started Events";
+        public const string WrongSessionStoppedCount = "Wrong number of Session Stopped Events";
+        public const string WrongSpeechEndedCount = "Wrong number of Speech Ended Events";
+        public const string WrongSpeechStartedCount = "Wrong number of Speech Started Events";
+        public const string WrongConnectedEventCount = "Wrong number of Connected Events";
+        public const string WrongDisconnectedEventCount = "Wrong number of Disconnected Events";
+        public const string ConnectedEventCountMustNotBeZero = "The number of Connected events must be greater than 0.";
+        public const string ConnectedDisconnectedEventUnmatch = "Connected events do not match Disconnected events";
     }
 }

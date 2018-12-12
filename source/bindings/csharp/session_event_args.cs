@@ -13,7 +13,6 @@ namespace Microsoft.CognitiveServices.Speech
     {
         internal SessionEventArgs(Internal.SessionEventArgs arg)
         {
-            eventArgImpl = arg;
             SessionId = arg.SessionId;
         }
 
@@ -30,8 +29,5 @@ namespace Microsoft.CognitiveServices.Speech
         {
             return string.Format(CultureInfo.InvariantCulture, "SessionId: {0}.", SessionId);
         }
-
-        // Hold the reference
-        Internal.SessionEventArgs eventArgImpl;
     }
 }

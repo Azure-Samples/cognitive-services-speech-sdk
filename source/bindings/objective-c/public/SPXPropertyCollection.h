@@ -4,6 +4,7 @@
 //
 
 #import "SPXFoundation.h"
+#import "SPXSpeechEnums.h"
 
 /**
   * Represents a collection of properties and their values.

@@ -19,10 +19,8 @@
 #include "shared_ptr_helpers.h"
 #include "spxdebug.h"
 
-
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Translation;
-
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -40,7 +38,6 @@ public:
     {
         return QueryInterfaceInternal<I>();
     }
-
 
 protected:
 
@@ -68,7 +65,6 @@ protected:
         return base_type::shared_from_this();
     }
 };
-
 
 template <class I>
 std::shared_ptr<I> SpxQueryInterface(std::shared_ptr<ISpxInterfaceBase> from)
@@ -99,7 +95,6 @@ template<typename T>
 struct ISpxInterfaceBaseFor : virtual public ISpxInterfaceBase
 {
 public:
-
     virtual ~ISpxInterfaceBaseFor() = default;
 
     std::shared_ptr<T> shared_from_this()
@@ -110,34 +105,27 @@ public:
 
 
 private:
-
     typedef ISpxInterfaceBase base_type;
 
     ISpxInterfaceBaseFor&& operator =(const ISpxInterfaceBaseFor&&) = delete;
 };
 
-
 class ISpxObjectInit : public ISpxInterfaceBaseFor<ISpxObjectInit>
 {
 public:
-
     virtual void Init() = 0;
     virtual void Term() = 0;
 };
-
 
 class ISpxGenericSite : public ISpxInterfaceBaseFor<ISpxGenericSite>
 {
 };
 
-
 class ISpxObjectWithSite : public ISpxInterfaceBaseFor<ISpxObjectWithSite>
 {
 public:
-
     virtual void SetSite(std::weak_ptr<ISpxGenericSite> site) = 0;
 };
-
 
 template <class T, class I, class... Types>
 inline std::shared_ptr<I> SpxCreateObjectInternal(Types&&... Args)
@@ -152,7 +140,6 @@ inline std::shared_ptr<I> SpxCreateObjectInternal(Types&&... Args)
 class ISpxObjectFactory : public ISpxInterfaceBaseFor<ISpxObjectFactory>
 {
 public:
-
     template <class I>
     std::shared_ptr<I> CreateObject(const char* className)
     {
@@ -184,14 +171,11 @@ public:
     virtual void* CreateObject(const char* className, const char* interfaceName) = 0;
 };
 
-
 template <class T>
 class ISpxObjectWithSiteInitImpl : public ISpxObjectWithSite, public ISpxObjectInit
 {
 public:
-
     // --- ISpxObjectWithSite
-
     void SetSite(std::weak_ptr<ISpxGenericSite> site) override
     {
         auto shared = site.lock();
@@ -215,7 +199,6 @@ public:
     }
 
     // --- ISpxObjectInit
-
     void Init() override
     {
     }
@@ -224,9 +207,7 @@ public:
     {
     }
 
-
 protected:
-
     ISpxObjectWithSiteInitImpl() : m_hasSite(false) {}
 
     std::shared_ptr<T> GetSite() const
@@ -246,7 +227,6 @@ protected:
 
 
 private:
-
     bool m_hasSite;
     mutable std::weak_ptr<T> m_site;
 };
@@ -254,7 +234,6 @@ private:
 class ISpxServiceProvider : public ISpxInterfaceBaseFor<ISpxServiceProvider>
 {
 public:
-
     virtual std::shared_ptr<ISpxInterfaceBase> QueryService(const char* serviceName) = 0;
 };
 
@@ -262,7 +241,6 @@ public:
 class ISpxAddServiceProvider : public ISpxInterfaceBaseFor<ISpxAddServiceProvider>
 {
 public:
-
     template <class T>
     void AddService(std::shared_ptr<T> service)
     {
@@ -296,8 +274,6 @@ struct SPXWAVEFORMATEX
 };
 #pragma pack (pop)
 
-
-
 using SpxWAVEFORMATEX_Type = std::shared_ptr<SPXWAVEFORMATEX>;
 inline SpxWAVEFORMATEX_Type SpxAllocWAVEFORMATEX(size_t sizeInBytes)
 {
@@ -310,32 +286,27 @@ inline SpxSharedAudioBuffer_Type SpxAllocSharedAudioBuffer(size_t sizeInBytes)
     return SpxAllocSharedUint8Buffer(sizeInBytes);
 }
 
-
 class ISpxAudioStream : public ISpxInterfaceBaseFor<ISpxAudioStream>
 {
 public:
-
     virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
 };
 
 class ISpxAudioStreamInitFormat : public ISpxInterfaceBaseFor<ISpxAudioStreamInitFormat>
 {
 public:
-
     virtual void SetFormat(SPXWAVEFORMATEX* format) = 0;
 };
 
 class ISpxAudioStreamInitRealTime : public ISpxInterfaceBaseFor<ISpxAudioStreamInitRealTime>
 {
 public:
-
     virtual void SetRealTimePercentage(uint8_t percentage) = 0;
 };
 
 class ISpxAudioStreamReaderInitCallbacks : public ISpxInterfaceBaseFor<ISpxAudioStreamReaderInitCallbacks>
 {
 public:
-
     using ReadCallbackFunction_Type = std::function<int(uint8_t*, uint32_t)>;
     using CloseCallbackFunction_Type = std::function<void()>;
 
@@ -345,7 +316,6 @@ public:
 class ISpxAudioStreamReader : public ISpxInterfaceBaseFor<ISpxAudioStreamReader>
 {
 public:
-
     virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
     virtual uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer) = 0;
     virtual void Close() = 0;
@@ -354,15 +324,12 @@ public:
 class ISpxAudioStreamWriter : public ISpxInterfaceBaseFor<ISpxAudioStreamWriter>
 {
 public:
-
     virtual void Write(uint8_t* buffer, uint32_t size) = 0;
 };
-
 
 class ISpxAudioFile : public ISpxInterfaceBaseFor<ISpxAudioFile>
 {
 public:
-
     virtual void Open(const wchar_t* pszFileName) = 0;
     virtual void Close() = 0;
 
@@ -375,7 +342,6 @@ public:
 class ISpxAudioConfig : public ISpxInterfaceBaseFor<ISpxAudioConfig>
 {
 public:
-
     virtual void InitFromDefaultDevice() = 0;
     virtual void InitFromFile(const wchar_t* pszFileName) = 0;
     virtual void InitFromStream(std::shared_ptr<ISpxAudioStream> stream) = 0;
@@ -387,18 +353,15 @@ public:
 class ISpxAudioProcessor : public ISpxInterfaceBaseFor<ISpxAudioProcessor>
 {
 public:
-
     using AudioData_Type = SpxSharedAudioBuffer_Type;
 
     virtual void SetFormat(const SPXWAVEFORMATEX* pformat) = 0;
     virtual void ProcessAudio(AudioData_Type data, uint32_t cbData) = 0;
 };
 
-
 class ISpxAudioPump : public ISpxInterfaceBaseFor<ISpxAudioPump>
 {
 public:
-
     virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
     virtual void SetFormat(const SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
 
@@ -410,23 +373,18 @@ public:
     virtual State GetState() = 0;
 };
 
-
 class ISpxAudioPumpInit : public ISpxInterfaceBaseFor<ISpxAudioPumpInit>
 {
 public:
-
     virtual void SetReader(std::shared_ptr<ISpxAudioStreamReader> reader) = 0;
 };
-
 
 class ISpxKwsModel : public ISpxInterfaceBaseFor<ISpxKwsModel>
 {
 public:
-
     virtual void InitFromFile(const wchar_t* fileName) = 0;
     virtual std::wstring GetFileName() const = 0;
 };
-
 
 #define REASON_CANCELED_NONE static_cast<CancellationReason>(0)
 #define NO_MATCH_REASON_NONE static_cast<NoMatchReason>(0)
@@ -434,7 +392,6 @@ public:
 class ISpxRecognitionResult : public ISpxInterfaceBaseFor<ISpxRecognitionResult>
 {
 public:
-
     virtual std::wstring GetResultId() = 0;
     virtual std::wstring GetText() = 0;
 
@@ -448,7 +405,6 @@ public:
     virtual uint64_t GetDuration() const = 0;
 };
 
-
 class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionResultInit>
 {
 public:
@@ -457,11 +413,9 @@ public:
     virtual void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
 };
 
-
 class ISpxRecognizer : public ISpxInterfaceBaseFor<ISpxRecognizer>
 {
 public:
-
     virtual bool IsEnabled() = 0;
     virtual void Enable() = 0;
     virtual void Disable() = 0;
@@ -474,38 +428,61 @@ public:
     virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
 };
 
+class ISpxConnection : public ISpxInterfaceBaseFor<ISpxConnection>
+{
+public:
+    virtual void Open() = 0;
+    virtual std::shared_ptr<ISpxRecognizer> GetRecognizer() = 0;
+};
+
+class ISpxConnectionFromRecognizer : public ISpxInterfaceBaseFor<ISpxConnectionFromRecognizer>
+{
+public:
+    virtual std::shared_ptr<ISpxConnection> GetConnection() = 0;
+};
+
+class ISpxConnectionSite : public ISpxInterfaceBaseFor<ISpxConnectionSite>
+{
+public:
+        virtual std::shared_ptr<ISpxRecognizer> GetRecognizer() = 0;
+};
 
 class ISpxSessionEventArgs : public ISpxInterfaceBaseFor<ISpxSessionEventArgs>
 {
 public:
-
     virtual const std::wstring& GetSessionId() = 0;
 };
-
 
 class ISpxSessionEventArgsInit : public ISpxInterfaceBaseFor<ISpxSessionEventArgsInit>
 {
 public:
-
     virtual void Init(const std::wstring& sessionId) = 0;
 };
 
+class ISpxConnectionEventArgs :
+    public ISpxSessionEventArgs,
+    public ISpxInterfaceBaseFor<ISpxConnectionEventArgs>
+{
+};
+
+class ISpxConnectionEventArgsInit : public ISpxInterfaceBaseFor<ISpxConnectionEventArgsInit>
+{
+public:
+    virtual void Init(const std::wstring& sessionId) = 0;
+};
 
 class ISpxRecognitionEventArgs :
     public ISpxSessionEventArgs,
     public ISpxInterfaceBaseFor<ISpxRecognitionEventArgs>
 {
 public:
-
     virtual const uint64_t& GetOffset() = 0;
     virtual std::shared_ptr<ISpxRecognitionResult> GetResult() = 0;
 };
 
-
 class ISpxRecognitionEventArgsInit : public ISpxInterfaceBaseFor<ISpxRecognitionEventArgsInit>
 {
 public:
-
     virtual void Init(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
     virtual void Init(const std::wstring& sessionId, uint64_t offset) = 0;
 };
@@ -514,12 +491,15 @@ public:
 class ISpxRecognizerEvents : public ISpxInterfaceBaseFor<ISpxRecognizerEvents>
 {
 public:
-
     using RecoEvent_Type = EventSignal<std::shared_ptr<ISpxRecognitionEventArgs>>;
     using SessionEvent_Type = EventSignal<std::shared_ptr<ISpxSessionEventArgs>>;
+    using ConnectionEvent_Type = EventSignal<std::shared_ptr<ISpxConnectionEventArgs>>;
 
     virtual void FireSessionStarted(const std::wstring& sessionId) = 0;
     virtual void FireSessionStopped(const std::wstring& sessionId) = 0;
+
+    virtual void FireConnected(const std::wstring& sessionId) = 0;
+    virtual void FireDisconnected(const std::wstring& sessionId) = 0;
 
     virtual void FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset) = 0;
     virtual void FireSpeechEndDetected(const std::wstring& sessionId, uint64_t offset) = 0;
@@ -528,6 +508,9 @@ public:
 
     SessionEvent_Type SessionStarted;
     SessionEvent_Type SessionStopped;
+
+    ConnectionEvent_Type Connected;
+    ConnectionEvent_Type Disconnected;
 
     RecoEvent_Type SpeechStartDetected;
     RecoEvent_Type SpeechEndDetected;
@@ -538,26 +521,27 @@ public:
     RecoEvent_Type TranslationSynthesisResult;
 
 protected:
-
     ISpxRecognizerEvents(RecoEvent_Type::NotifyCallback_Type connectedCallback, RecoEvent_Type::NotifyCallback_Type disconnectedCallback) :
+        SessionStarted(nullptr, nullptr, true),
+        SessionStopped(nullptr, nullptr, true),
+        Connected(nullptr, nullptr, true),
+        Disconnected(nullptr, nullptr, true),
         SpeechStartDetected(connectedCallback, disconnectedCallback, true),
         SpeechEndDetected(connectedCallback, disconnectedCallback, true),
         IntermediateResult(connectedCallback, disconnectedCallback, true),
         FinalResult(connectedCallback, disconnectedCallback, true),
-        Canceled(connectedCallback, disconnectedCallback, true)
+        Canceled(connectedCallback, disconnectedCallback, true),
+        TranslationSynthesisResult(connectedCallback, disconnectedCallback, true)
     {
     }
 
 private:
-
     ISpxRecognizerEvents() = delete;
 };
-
 
 class ISpxSession : public ISpxInterfaceBaseFor<ISpxSession>
 {
 public:
-
     virtual const std::wstring& GetSessionId() const = 0;
 
     virtual void AddRecognizer(std::shared_ptr<ISpxRecognizer> recognizer) = 0;
@@ -571,31 +555,25 @@ public:
     virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
 };
 
-
 class ISpxAudioStreamSessionInit : public ISpxInterfaceBaseFor<ISpxAudioStreamSessionInit>
 {
 public:
-
     virtual void InitFromFile(const wchar_t* pszFileName) = 0;
     virtual void InitFromMicrophone() = 0;
     virtual void InitFromStream(std::shared_ptr<ISpxAudioStream> stream) = 0;
 };
 
-
 class ISpxSessionFromRecognizer : public ISpxInterfaceBaseFor<ISpxSessionFromRecognizer>
 {
 public:
-
     virtual std::shared_ptr<ISpxSession> GetDefaultSession() = 0;
 };
-
 
 class ISpxRecoEngineAdapter :
     public ISpxAudioProcessor,
     public ISpxInterfaceBaseFor<ISpxRecoEngineAdapter>
 {
 public:
-
     virtual void SetAdapterMode(bool singleShot) = 0;
 };
 
@@ -607,7 +585,6 @@ class SpxRecoEngineAdapterError
     std::string m_info;
 
 public:
-
     SpxRecoEngineAdapterError(bool isTransportError, CancellationReason reason, CancellationErrorCode errorCode, const std::string& info)
         : m_isTransportError{ isTransportError }, m_reason{ reason }, m_errorCode{ errorCode }, m_info{ info }
     {}
@@ -631,13 +608,11 @@ public:
     {
         return m_errorCode;
     }
-
 };
 
 class ISpxRecoEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxRecoEngineAdapterSite>
 {
 public:
-
     using ResultPayload_Type = std::shared_ptr<ISpxRecognitionResult>;
     using AdditionalMessagePayload_Type = void*;
     using ErrorPayload_Type = std::shared_ptr<SpxRecoEngineAdapterError>;
@@ -661,6 +636,8 @@ public:
     virtual void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
     virtual void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, ResultPayload_Type payload) = 0;
     virtual void AdapterEndOfDictation(ISpxRecoEngineAdapter* adapter, uint64_t offset, uint64_t duration) = 0;
+    virtual void FireConnectedEvent() = 0;
+    virtual void FireDisconnectedEvent() = 0;
 
     virtual void AdapterRequestingAudioMute(ISpxRecoEngineAdapter* adapter, bool mute) = 0;
     virtual void AdapterCompletedSetFormatStop(ISpxRecoEngineAdapter* adapter) = 0;
@@ -682,75 +659,61 @@ class ISpxKwsEngineAdapter :
 {
 };
 
-
 class ISpxKwsEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxKwsEngineAdapterSite>
 {
 public:
-
     virtual void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t startOffset, uint32_t size, SpxSharedAudioBuffer_Type audioBuffer) = 0;
     virtual void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* adapter) = 0;
 };
 
-
 class ISpxRecoResultFactory : public ISpxInterfaceBaseFor<ISpxRecoResultFactory>
 {
 public:
-
     virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
     virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
 };
 
-
 class ISpxEventArgsFactory : public ISpxInterfaceBaseFor<ISpxEventArgsFactory>
 {
 public:
-
     virtual std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId) = 0;
+    virtual std::shared_ptr<ISpxConnectionEventArgs> CreateConnectionEventArgs(const std::wstring& sessionId) = 0;
     virtual std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, uint64_t offset) = 0;
     virtual std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
 };
 
-
 class ISpxRecognizerSite : public ISpxInterfaceBaseFor<ISpxRecognizerSite>
 {
 public:
-
     virtual std::shared_ptr<ISpxSession> GetDefaultSession() = 0;
 };
 
 class ISpxSpeechApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechApiFactory>
 {
 public:
-
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfig(const std::string& sourcelanguage, const std::vector<std::string>& targetLanguages, const std::string& voice, std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
 };
 
-
 class ISpxNamedProperties : public ISpxInterfaceBaseFor<ISpxNamedProperties>
 {
 public:
-
     virtual std::string GetStringValue(const char* name, const char* defaultValue = "") const = 0;
     virtual void SetStringValue(const char* name, const char* value) = 0;
     virtual bool HasStringValue(const char* name) const = 0;
     virtual void Copy(ISpxNamedProperties* from) = 0;
 };
 
-
 class ISpxIntentRecognitionResult : public ISpxInterfaceBaseFor<ISpxIntentRecognitionResult>
 {
 public:
-
     virtual std::wstring GetIntentId() = 0;
 };
-
 
 class ISpxIntentRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxIntentRecognitionResultInit>
 {
 public:
-
     virtual void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) = 0;
 };
 
@@ -771,7 +734,6 @@ public:
 class ISpxTranslationSynthesisResult : public ISpxInterfaceBaseFor<ISpxTranslationSynthesisResult>
 {
 public:
-
     virtual const uint8_t* GetAudio() const = 0;
     virtual size_t GetLength() const = 0;
 };
@@ -779,14 +741,12 @@ public:
 class ISpxTranslationSynthesisResultInit : public ISpxInterfaceBaseFor<ISpxTranslationSynthesisResultInit>
 {
 public:
-
     virtual void InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength) = 0;
 };
 
 class ISpxLanguageUnderstandingModel : public ISpxInterfaceBaseFor<ISpxLanguageUnderstandingModel>
 {
 public:
-
     virtual void InitAppId(const wchar_t* appId) = 0;
     virtual void InitEndpoint(const wchar_t* uri) = 0;
     virtual void InitSubscription(const wchar_t* subscriptionKey, const wchar_t* appId, const wchar_t* region) = 0;
@@ -801,11 +761,9 @@ public:
     virtual std::wstring GetRegion() const = 0;
 };
 
-
 class ISpxTrigger : public ISpxInterfaceBaseFor<ISpxTrigger>
 {
 public:
-
     virtual void InitPhraseTrigger(const wchar_t* phrase) = 0;
     virtual void InitLanguageUnderstandingModelTrigger(std::shared_ptr<ISpxLanguageUnderstandingModel> model, const wchar_t* intentName) = 0;
 
@@ -815,22 +773,18 @@ public:
     virtual std::wstring GetModelIntentName() const = 0;
 };
 
-
 class ISpxIntentTriggerService : public ISpxInterfaceBaseFor<ISpxIntentTriggerService>
 {
 public:
-
     virtual void AddIntentTrigger(const wchar_t* id, std::shared_ptr<ISpxTrigger> trigger) = 0;
 
     virtual std::list<std::string> GetListenForList() = 0;
     virtual void GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region) = 0;
 };
 
-
 class ISpxIntentRecognizer : public ISpxInterfaceBaseFor<ISpxIntentRecognizer>
 {
 public:
-
     virtual void AddIntentTrigger(const wchar_t* intentId, std::shared_ptr<ISpxTrigger> trigger) = 0;
 
     // TODO: RobCh: Add additional methods required...
@@ -838,17 +792,13 @@ public:
 
 class ISpxTranslationRecognizer : public ISpxInterfaceBaseFor<ISpxTranslationRecognizer>
 {
-
 };
-
 
 class ISpxRecognitionResultProcessor : public ISpxInterfaceBaseFor<ISpxRecognitionResultProcessor>
 {
 public:
-
     virtual void ProcessResult(std::shared_ptr<ISpxRecognitionResult> result) = 0;
 };
-
 
 class ISpxLuEngineAdapter :
     public ISpxRecognitionResultProcessor,
@@ -856,11 +806,9 @@ class ISpxLuEngineAdapter :
 {
 };
 
-
 class ISpxLuEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxLuEngineAdapterSite>
 {
 };
-
 
 class ISpxSpeechConfig : public ISpxInterfaceBaseFor<ISpxSpeechConfig>
 {

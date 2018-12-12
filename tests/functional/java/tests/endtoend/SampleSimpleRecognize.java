@@ -10,6 +10,7 @@ import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
+import com.microsoft.cognitiveservices.speech.Connection;
 
 import tests.Settings;
 
@@ -20,7 +21,17 @@ public class SampleSimpleRecognize implements Runnable {
     {
         return recognitionResult;
     }
-    
+
+    private int connectedEventCount;
+    public int getConnectedEventCount() {
+        return connectedEventCount;
+    }
+
+    private int disconnectedEventCount;
+    public int getDisconnectedEventCount() {
+        return disconnectedEventCount;
+    }
+
     ///////////////////////////////////////////////////
     // recognize
     ///////////////////////////////////////////////////
@@ -35,6 +46,18 @@ public class SampleSimpleRecognize implements Runnable {
             // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
             AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.WavFile);
             SpeechRecognizer reco = new SpeechRecognizer(config, audioInput);
+            Connection connection = Connection.fromRecognizer(reco);
+
+            this.connectedEventCount = 0;
+            this.disconnectedEventCount = 0;
+            connection.connected.addEventListener((o, connectionEventArgs) -> {
+                System.out.println("Connected event received.");
+                this.connectedEventCount++;
+            });
+            connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+                System.out.println("Disconnected event received.");
+                this.disconnectedEventCount++;
+            });
 
             Future<SpeechRecognitionResult> task = reco.recognizeOnceAsync();
 

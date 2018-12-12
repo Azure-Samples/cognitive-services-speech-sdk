@@ -80,6 +80,15 @@ public class Recognizer implements Closeable
         }
     }
 
+    /**
+     * Returns the internal recognizer instance
+     * @return The internal recognizer instance
+     */
+    public com.microsoft.cognitiveservices.speech.internal.Recognizer getRecognizerImpl()
+    {
+        return internalRecognizerImpl;
+    }
+
     /*! \cond PROTECTED */
 
     /**
@@ -99,10 +108,13 @@ public class Recognizer implements Closeable
             sessionStoppedHandler.delete();
             speechStartDetectedHandler.delete();
             speechEndDetectedHandler.delete();
+            internalRecognizerImpl.delete();
         }
 
         disposed = true;
     }
+
+    protected com.microsoft.cognitiveservices.speech.internal.Recognizer internalRecognizerImpl;
 
     protected SessionEventHandlerImpl sessionStartedHandler;
     protected SessionEventHandlerImpl sessionStoppedHandler;
@@ -116,7 +128,7 @@ public class Recognizer implements Closeable
     private int activeAsyncRecognitionCounter = 0;
 
     /**
-     * Define an internal class which raise an event when a corresponding callback is invoked from the native layer.
+     * Define a private class which raises an event when a corresponding callback is invoked from the native layer.
      */
     class SessionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SessionEventListener {
 
@@ -150,7 +162,7 @@ public class Recognizer implements Closeable
     }
 
     /**
-     * Define an internal class which raise an event when a corresponding callback is invoked from the native layer.
+     * Define a private class which raises an event when a corresponding callback is invoked from the native layer.
      */
     class RecognitionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.RecognitionEventListener
     {

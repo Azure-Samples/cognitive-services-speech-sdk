@@ -6,6 +6,7 @@
 #import "SPXFoundation.h"
 #import "SPXSessionEventArgs.h"
 #import "SPXRecognitionEventArgs.h"
+#import "SPXPropertyCollection.h"
 
 /**
  * Defines the base class SPXRecognizer which mainly contains common event handlers.

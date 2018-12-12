@@ -31,6 +31,7 @@ import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.OutputFormat;
+import com.microsoft.cognitiveservices.speech.Connection;
 
 import tests.Settings;
 
@@ -306,9 +307,20 @@ public class SpeechRecognizerTests {
         assertNotNull(s);
 
         SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
+
+        final AtomicInteger connectedEventCount = new AtomicInteger(0);;
+        final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+        });
+
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            disconnectedEventCount.getAndIncrement();
+        });
 
         Future<SpeechRecognitionResult> future = r.recognizeOnceAsync();
         assertNotNull(future);
@@ -323,6 +335,9 @@ public class SpeechRecognizerTests {
         assertNotNull(res);
         assertEquals(ResultReason.RecognizedSpeech, res.getReason());
         assertEquals("What's the weather like?", res.getText());
+
+        assertTrue(connectedEventCount.get() > 0);
+        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
 
         r.close();
         s.close();
@@ -390,11 +405,22 @@ public class SpeechRecognizerTests {
         assertNotNull(s);
 
         SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
+
+        AtomicInteger connectedEventCount = new AtomicInteger(0);
+        AtomicInteger disconnectedEventCount = new AtomicInteger(0);
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+        });
+
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            disconnectedEventCount.getAndIncrement();
+        });
 
         r.recognized.addEventListener((o, e) -> {
             eventsMap.put("recognized", eventIdentifier.getAndIncrement());
@@ -442,6 +468,9 @@ public class SpeechRecognizerTests {
         assertNotNull(res);
         assertEquals(ResultReason.RecognizedSpeech, res.getReason());
         assertEquals("What's the weather like?", res.getText());
+
+        assertTrue(connectedEventCount.get() > 0);
+        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
 
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
@@ -547,11 +576,21 @@ public class SpeechRecognizerTests {
         assertNotNull(s);
 
         SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(r);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
 
         final ArrayList<String> rEvents = new ArrayList<>();
+
+        AtomicInteger connectedEventCount = new AtomicInteger(0);;
+        AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+        });
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            disconnectedEventCount.getAndIncrement();
+        });
 
         r.recognized.addEventListener((o, e) -> {
             rEvents.add("Result@" + System.currentTimeMillis());
@@ -585,6 +624,9 @@ public class SpeechRecognizerTests {
 
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
+
+        assertTrue(connectedEventCount.get() > 0);
+        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
 
         r.close();
         s.close();

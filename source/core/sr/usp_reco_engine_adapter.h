@@ -60,6 +60,8 @@ public:
     void OnTranslationPhrase(const USP::TranslationPhraseMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationPhrase(m); }); }
     void OnAudioOutputChunk(const USP::AudioOutputChunkMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnAudioOutputChunk(m); }); }
     void OnUserMessage(const USP::UserMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnUserMessage(m); }); }
+    void OnConnected() override { InvokeOnSite([](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnConnected(); }); }
+    void OnDisconnected() override { InvokeOnSite([](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnDisconnected(); }); }
 
 
 private:
@@ -153,6 +155,8 @@ private:
     void OnTurnEnd(const USP::TurnEndMsg&) override;
     void OnError(bool transport, USP::ErrorCode, const std::string& error) override;
     void OnUserMessage(const USP::UserMsg&) override;
+    void OnConnected() override;
+    void OnDisconnected() override;
 
     void OnTranslationHypothesis(const USP::TranslationHypothesisMsg&) override;
     void OnTranslationPhrase(const USP::TranslationPhraseMsg&) override;

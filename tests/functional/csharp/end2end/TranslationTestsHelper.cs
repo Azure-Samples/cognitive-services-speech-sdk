@@ -5,6 +5,7 @@
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MicrosoftSpeechSDKSamples;
 using System;
 using System.Collections.Generic; 
 using System.Threading;
@@ -60,9 +61,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task<TranslationRecognitionResult> GetTranslationFinalResult(string path, string fromLanguage, List<string> toLanguages)
         {
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
+            using (var connection = Connection.FromRecognizer(recognizer))
             {
+                int connectedEventCount = 0;
+                int disconnectedEventCount = 0;
+                connection.Connected += (s, e) =>
+                {
+                    connectedEventCount++;
+                };
+                connection.Disconnected += (s, e) =>
+                {
+                    disconnectedEventCount++;
+                };
                 TranslationRecognitionResult result = null;
                 await Task.WhenAny(recognizer.RecognizeOnceAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
+                Console.WriteLine($"ConnectedEventCount: {connectedEventCount}, DisconnectedEventCount: {disconnectedEventCount}");
+                Assert.IsTrue(connectedEventCount > 0, AssertOutput.ConnectedEventCountMustNotBeZero);
+                Assert.IsTrue(connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
+
                 return result;
             }
         }
@@ -70,6 +86,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task<Dictionary<ResultType, List<EventArgs>>> GetTranslationRecognizedContinuous(string path, string fromLanguage, List<string> toLanguages, string voice=null, bool requireTranslatedSpeech = true)
         {
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages, voice)))
+            using (var connection = Connection.FromRecognizer(recognizer))
             {
                 var tcs = new TaskCompletionSource<bool>();
                 var receivedRecognizedEvents = new Dictionary<ResultType, List<EventArgs>>(); ;
@@ -77,6 +94,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var synthesisResultEvents = new List<EventArgs>();
                 bool synthesisFailed = false;
 
+                int connectedEventCount = 0;
+                int disconnectedEventCount = 0;
+                connection.Connected += (s, e) =>
+                {
+                    connectedEventCount++;
+                };
+                connection.Disconnected += (s, e) =>
+                {
+                    disconnectedEventCount++;
+                };
                 string canceled = string.Empty;
                 recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
                 recognizer.Recognized += (s, e) =>
@@ -116,6 +143,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
+                Console.WriteLine($"ConnectedEventCount: {connectedEventCount}, DisconnectedEventCount: {disconnectedEventCount}");
+                Assert.IsTrue(connectedEventCount > 0, AssertOutput.ConnectedEventCountMustNotBeZero);
+                Assert.IsTrue(connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
 
                 if (!string.IsNullOrEmpty(canceled))
                 {

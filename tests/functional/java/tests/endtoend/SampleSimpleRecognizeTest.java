@@ -27,10 +27,12 @@ public class SampleSimpleRecognizeTest {
     @Test
     public void test() {
         test = new SampleSimpleRecognize();
-        
+
         test.run();
-        
+
         assertEquals("What's the weather like?", test.getResult());
+        assertTrue(test.getConnectedEventCount() > 0);
+        assertTrue(test.getConnectedEventCount() == test.getDisconnectedEventCount() + 1);
     }
 
 }

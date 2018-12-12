@@ -122,6 +122,10 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SessionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventSignal.java
+    ${CMAKE_SWIG_OUTDIR}/Connection.java
+    ${CMAKE_SWIG_OUTDIR}/ConnectionEventArgs.java
+    ${CMAKE_SWIG_OUTDIR}/ConnectionEventListener.java
+    ${CMAKE_SWIG_OUTDIR}/ConnectionEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/SpeechConfig.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionCanceledEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionCanceledEventListener.java
@@ -159,6 +163,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXRESULTHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXSESSIONHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXTRIGGERHANDLE.java
+    ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXCONNECTIONHANDLE.java
 
     ${CMAKE_SWIG_OUTDIR}/VoidFuture.java
     ${CMAKE_SWIG_OUTDIR}/StringVector.java
@@ -185,8 +190,10 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/CancellationErrorCode.java
     ${PACKAGE_DIR}/NoMatchDetails.java
     ${PACKAGE_DIR}/NoMatchReason.java
+    ${PACKAGE_DIR}/Connection.java
     ${PACKAGE_DIR}/Recognizer.java
     ${PACKAGE_DIR}/SessionEventArgs.java
+    ${PACKAGE_DIR}/ConnectionEventArgs.java
     ${PACKAGE_DIR}/SpeechConfig.java
     ${PACKAGE_DIR}/SpeechRecognitionResult.java
     ${PACKAGE_DIR}/SpeechRecognitionEventArgs.java

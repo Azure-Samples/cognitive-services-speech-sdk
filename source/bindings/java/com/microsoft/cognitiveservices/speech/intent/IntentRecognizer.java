@@ -300,6 +300,8 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     /*! \endcond */
 
     private void initialize() {
+        super.internalRecognizerImpl = this.recoImpl;
+
         recognizingHandler = new IntentHandlerImpl(this, /*isRecognizedHandler:*/ false);
         recoImpl.getRecognizing().AddEventListener(recognizingHandler);
 
@@ -329,7 +331,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         }
     }
 
-    // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
+    // Defines a private class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class IntentHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.IntentEventListener {
 
         public IntentHandlerImpl(IntentRecognizer recognizer, boolean isRecognizedHandler) {
@@ -355,7 +357,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         private boolean isRecognizedHandler;
     }
 
-    // Defines an internal class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
+    // Defines a private class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
     private class CanceledHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.IntentCanceledEventListener {
 
         public CanceledHandlerImpl(IntentRecognizer recognizer) {

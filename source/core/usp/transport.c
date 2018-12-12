@@ -97,6 +97,8 @@ typedef struct _TransportRequest
     const char*                  path;
     TransportResponseCallback    onRecvResponse;
     TransportErrorCallback       onTransportError;
+    TransportOpenedCallback      onOpenedCallback;
+    TransportClosedCallback      onClosedCallback;
     HTTP_HEADERS_HANDLE          headersHandle;
     bool                         isOpen;
     char*                        url;
@@ -286,7 +288,7 @@ static char* ConstructHeadersString(HTTP_HEADERS_HANDLE httpHeadersHandle)
     return result;
 }
 
-static void OnTransportClosed(TransportRequest* request)
+static void SetTransportToClosed(TransportRequest* request)
 {
     request->isOpen = false;
     request->state = TRANSPORT_STATE_CLOSED;
@@ -303,9 +305,10 @@ static void OnTransportError(TransportRequest* request, TransportErrorInfo* erro
         return;
     }
 
-    OnTransportClosed(request);
-    if (request->onTransportError != NULL) {
-        request->onTransportError(request, errorInfo, request->context);
+    SetTransportToClosed(request);
+    TransportErrorCallback callback = request->onTransportError;
+    if (callback != NULL) {
+        callback(errorInfo, request->context);
     }
 }
 
@@ -350,7 +353,7 @@ static void OnWSPeerClosed(void* context, uint16_t* closeCode, const unsigned ch
     }
 }
 
-static void OnWSClose(void* context)
+static void OnWSClosed(void* context)
 {
     TransportRequest* request = (TransportRequest*)context;
     if (request)
@@ -364,7 +367,12 @@ static void OnWSClose(void* context)
         else
         {
             metrics_transport_closed();
-            OnTransportClosed(request);
+            SetTransportToClosed(request);
+            TransportClosedCallback callback = request->onClosedCallback;
+            if (callback != NULL)
+            {
+                callback(request->context);
+            }
         }
     }
 }
@@ -384,6 +392,11 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detail
         request->connectionTime = telemetry_gettime();
         LogInfo("Opening websocket completed. TransportRequest: 0x%x, wsio handle: 0x%x", request, request->ws.WSHandle);
         metrics_transport_connected(request->telemetry, request->connectionId);
+        TransportOpenedCallback callback = request->onOpenedCallback;
+        if (callback != NULL)
+        {
+            callback(request->context);
+        }
     }
     else
     {
@@ -399,7 +412,8 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detail
             open_result_detailed.code,
             open_result_detailed.code);
 
-        if (request->onTransportError)
+        TransportErrorCallback callback = request->onTransportError;
+        if (callback)
         {
             TransportErrorInfo errorInfo;
             if (open_result == WS_OPEN_ERROR_BAD_RESPONSE_STATUS)
@@ -416,7 +430,7 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detail
                 (void)snprintf(errorString, COUNT_OF(errorString) - 1, "%d",
                     open_result_detailed.code);
             }
-            request->onTransportError((TransportHandle)request, &errorInfo, request->context);
+            callback(&errorInfo, request->context);
         }
     }
 }
@@ -504,7 +518,7 @@ static void OnWSFrameReceived(void* context, unsigned char frame_type, const uns
         response.buffer = buffer + offset;
         response.bufferSize = size - offset;
 
-        request->onRecvResponse((TransportHandle)request, &response, request->context);
+        request->onRecvResponse(&response, request->context);
 
     Exit:
         HTTPHeaders_Free(responseHeadersHandle);
@@ -863,7 +877,7 @@ void TransportRequestDestroy(TransportHandle transportHandle)
     {
         if (request->isOpen)
         {
-            (void)uws_client_close_async(request->ws.WSHandle, OnWSClose, request);
+            (void)uws_client_close_async(request->ws.WSHandle, OnWSClosed, request);
             // TODO ok to ignore return code?
             while (request->isOpen)
             {
@@ -901,44 +915,6 @@ void TransportRequestDestroy(TransportHandle transportHandle)
     }
 
     free(request);
-}
-
-int
-TransportRequestExecute(TransportHandle transportHandle, const char* path, uint8_t* buffer, size_t length)
-{
-    TransportRequest *request = (TransportRequest*)transportHandle;
-    TransportPacket  *packet = NULL;
-    if (!request)
-    {
-        return -1;
-    }
-
-    if (0 != length)
-    {
-        packet = (TransportPacket*)malloc(sizeof(TransportPacket) + length);
-        if (NULL == packet)
-        {
-            return -1;
-        }
-
-        packet->length = length;
-        memcpy(packet->buffer, buffer, length);
-    }
-
-    if (TransportRequestPrepare(request))
-    {
-        if (NULL != packet) free(packet);
-        return -1;
-    }
-
-    request->path = path;
-
-    if (NULL != packet)
-    {
-        WsioQueue(request, packet);
-    }
-
-    return 0;
 }
 
 static int TransportOpen(TransportRequest* request)
@@ -1044,7 +1020,7 @@ int TransportRequestPrepare(TransportHandle transportHandle)
             metrics_transport_reset();
 
             const int closeResult =
-                uws_client_close_async(request->ws.WSHandle, OnWSClose, request);
+                uws_client_close_async(request->ws.WSHandle, OnWSClosed, request);
             if (closeResult)
             {
                 // we failed to close the ws connection. Destroy it instead.
@@ -1151,11 +1127,6 @@ int TransportStreamPrepare(TransportHandle transportHandle, const char* path)
     }
 
     ret = TransportRequestPrepare(request);
-    if (ret)
-    {
-        return ret;
-    }
-
     return ret;
 }
 
@@ -1348,7 +1319,11 @@ void TransportDoWork(TransportHandle transportHandle)
     uws_client_dowork(request->ws.WSHandle);
 }
 
-int TransportSetCallbacks(TransportHandle transportHandle, TransportErrorCallback errorCallback, TransportResponseCallback recvCallback)
+int TransportSetCallbacks(TransportHandle transportHandle,
+    TransportErrorCallback errorCallback,
+    TransportResponseCallback recvCallback,
+    TransportOpenedCallback openedCallback,
+    TransportClosedCallback closedCallback)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     if (NULL == request)
@@ -1358,6 +1333,8 @@ int TransportSetCallbacks(TransportHandle transportHandle, TransportErrorCallbac
 
     request->onTransportError = errorCallback;
     request->onRecvResponse = recvCallback;
+    request->onOpenedCallback = openedCallback;
+    request->onClosedCallback = closedCallback;
     return 0;
 }
 

@@ -88,6 +88,16 @@ struct Callbacks
     * A callback function that will be invoked when a message having a path defined by user is received from service.
     */
     virtual void OnUserMessage(const UserMsg&) {}
+
+    /**
+     * A callback function that will be invoked when the connection to service is established.
+    */
+    virtual void OnConnected() {}
+
+    /**
+    * A callback function that will be invoked when the connection to service is lost.
+    */
+    virtual void OnDisconnected() {}
 };
 
 using CallbacksPtr = std::shared_ptr<Callbacks>;

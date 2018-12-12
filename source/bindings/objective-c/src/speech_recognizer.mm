@@ -134,7 +134,7 @@ struct SpeechEventHandlerHelper
 
 - (instancetype)initWithImpl:(SpeechRecoSharedPtr)recoHandle
 {
-    self = [super initFrom:recoHandle withParameters:&recoHandle->Properties];
+    self = [super initWith:recoHandle withParameters:&recoHandle->Properties];
     self->speechRecoImpl = recoHandle;
     if (!self || speechRecoImpl == nullptr) {
         return nil;

@@ -49,14 +49,24 @@ SPXAPI recognizer_result_handle_release(SPXRESULTHANDLE hresult)
 SPXAPI_(bool) recognizer_event_handle_is_valid(SPXEVENTHANDLE hevent)
 {
     return Handle_IsValid<SPXEVENTHANDLE, ISpxRecognitionEventArgs>(hevent) ||
-           Handle_IsValid<SPXEVENTHANDLE, ISpxSessionEventArgs>(hevent);
+           Handle_IsValid<SPXEVENTHANDLE, ISpxSessionEventArgs>(hevent) ||
+           Handle_IsValid<SPXEVENTHANDLE, ISpxConnectionEventArgs>(hevent);
 }
 
 SPXAPI recognizer_event_handle_release(SPXEVENTHANDLE hevent)
 {
-    return Handle_IsValid<SPXEVENTHANDLE, ISpxSessionEventArgs>(hevent)
-        ? Handle_Close<SPXEVENTHANDLE, ISpxSessionEventArgs>(hevent)
-        : Handle_Close<SPXEVENTHANDLE, ISpxRecognitionEventArgs>(hevent);
+    if (Handle_IsValid<SPXEVENTHANDLE, ISpxSessionEventArgs>(hevent))
+    {
+        return Handle_Close<SPXEVENTHANDLE, ISpxSessionEventArgs>(hevent);
+    }
+    else if (Handle_IsValid<SPXEVENTHANDLE, ISpxConnectionEventArgs>(hevent))
+    {
+        return Handle_Close<SPXEVENTHANDLE, ISpxConnectionEventArgs>(hevent);
+    }
+    else
+    {
+        return Handle_Close<SPXEVENTHANDLE, ISpxRecognitionEventArgs>(hevent);
+    }
 }
 
 SPXAPI recognizer_enable(SPXRECOHANDLE hreco)
@@ -454,10 +464,22 @@ SPXAPI recognizer_session_event_get_session_id(SPXEVENTHANDLE hevent, char* pszS
     {
         auto recoHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
         auto sessionHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
-        auto recoEvent = recoHandleTable->IsTracked(hevent)
-            ? (*recoHandleTable)[hevent]
-            : (*sessionHandleTable)[hevent];
+        auto connectionHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnectionEventArgs, SPXEVENTHANDLE>();
+        std::shared_ptr<ISpxSessionEventArgs> recoEvent;
+        if (recoHandleTable->IsTracked(hevent))
+        {
+            recoEvent = (*recoHandleTable)[hevent];
+        }
+        else if (connectionHandleTable->IsTracked(hevent))
+        {
+            recoEvent = (*connectionHandleTable)[hevent];
+        }
+        else
+        {
+            recoEvent = (*sessionHandleTable)[hevent];
+        }
 
+        SPX_IFTRUE_THROW_HR(recoEvent == nullptr, SPXERR_INVALID_HANDLE);
         auto sessionId = PAL::ToString(recoEvent->GetSessionId());
         PAL::strcpy(pszSessionId, cchSessionId, sessionId.c_str(), sessionId.size(), true);
     }

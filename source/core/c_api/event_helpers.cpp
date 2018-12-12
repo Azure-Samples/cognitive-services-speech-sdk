@@ -54,5 +54,32 @@ SPXAPI_PRIVATE recognizer_recognition_set_event_callback(ISpxRecognizerEvents::R
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI_PRIVATE connection_set_event_callback(ISpxRecognizerEvents::ConnectionEvent_Type ISpxRecognizerEvents::*connectionEvent, SPXCONNECTIONHANDLE connectionHandle, CONNECTION_CALLBACK_FUNC callback, void* context)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SPX_IFTRUE_THROW_HR(connectionEvent == nullptr, SPXERR_INVALID_ARG);
+        auto connectionHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnection, SPXCONNECTIONHANDLE>();
+        auto connection = (*connectionHandleTable)[connectionHandle];
+
+        auto pfn = [=](std::shared_ptr<ISpxConnectionEventArgs> e) {
+            auto connectionEventHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnectionEventArgs, SPXEVENTHANDLE>();
+            auto eventHandle = connectionEventHandleTable->TrackHandle(e);
+            (*callback)(eventHandle, context);
+        };
+
+        auto recognizer = connection->GetRecognizer();
+        SPX_IFTRUE_THROW_HR(recognizer == nullptr, SPXERR_RUNTIME_ERROR);
+        auto pISpxRecognizerEvents = SpxQueryInterface<ISpxRecognizerEvents>(recognizer).get();
+        SPX_IFTRUE_THROW_HR(pISpxRecognizerEvents == nullptr, SPXERR_RUNTIME_ERROR);
+        (pISpxRecognizerEvents->*connectionEvent).Disconnect(pfn);
+
+        if (callback != nullptr)
+        {
+            (pISpxRecognizerEvents->*connectionEvent).Connect(pfn);
+        }
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

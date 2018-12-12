@@ -20,70 +20,70 @@ struct IntentEventHandlerHelper
     {
         LogDebug(@"Add RecognizedEventHandler");
         recoImpl->Recognized.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
-                                     {
-                                         SPXIntentRecognitionEventArgs *eventArgs = [[SPXIntentRecognitionEventArgs alloc] init: e];
-                                         [recognizer onRecognizedEvent: eventArgs];
-                                     });
+            {
+                SPXIntentRecognitionEventArgs *eventArgs = [[SPXIntentRecognitionEventArgs alloc] init: e];
+                [recognizer onRecognizedEvent: eventArgs];
+            });
     }
     
     void addRecognizingEventHandler()
     {
         LogDebug(@"Add RecognizingEventHandler");
         recoImpl->Recognizing.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
-                                      {
-                                          SPXIntentRecognitionEventArgs *eventArgs = [[SPXIntentRecognitionEventArgs alloc] init: e];
-                                          [recognizer onRecognizingEvent: eventArgs];
-                                      });
+            {
+                SPXIntentRecognitionEventArgs *eventArgs = [[SPXIntentRecognitionEventArgs alloc] init: e];
+                [recognizer onRecognizingEvent: eventArgs];
+            });
     }
     
     void addCanceledEventHandler()
     {
         LogDebug(@"Add CanceledEventHandler");
         recoImpl->Canceled.Connect([this] (const IntentImpl::IntentRecognitionCanceledEventArgs& e)
-                                   {
-                                       SPXIntentRecognitionCanceledEventArgs *eventArgs = [[SPXIntentRecognitionCanceledEventArgs alloc] init:e];
-                                       [recognizer onCanceledEvent: eventArgs];
-                                   });
+            {
+                SPXIntentRecognitionCanceledEventArgs *eventArgs = [[SPXIntentRecognitionCanceledEventArgs alloc] init:e];
+                [recognizer onCanceledEvent: eventArgs];
+            });
     }
     
     void addSessionStartedEventHandler()
     {
         LogDebug(@"Add SessionStartedEventHandler");
         recoImpl->SessionStarted.Connect([this] (const SpeechImpl::SessionEventArgs& e)
-                                         {
-                                             SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
-                                             [recognizer onSessionStartedEvent: eventArgs];
-                                         });
+            {
+                SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
+                [recognizer onSessionStartedEvent: eventArgs];
+            });
     }
     
     void addSessionStoppedEventHandler()
     {
         LogDebug(@"Add SessionStoppedEventHandler");
         recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
-                                         {
-                                             SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
-                                             [recognizer onSessionStoppedEvent: eventArgs];
-                                         });
+            {
+                SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
+                [recognizer onSessionStoppedEvent: eventArgs];
+            });
     }
     
     void addSpeechStartDetectedEventHandler()
     {
         LogDebug(@"Add SpeechStartDetectedEventHandler");
         recoImpl->SpeechStartDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
-                                              {
-                                                  SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
-                                                  [recognizer onSpeechStartDetectedEvent: eventArgs];
-                                              });
+            {
+                SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
+                [recognizer onSpeechStartDetectedEvent: eventArgs];
+            });
     }
     
     void addSpeechEndDetectedEventHandler()
     {
         LogDebug(@"Add SpeechStopDetectedEventHandler");
         recoImpl->SpeechEndDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
-                                            {
-                                                SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
-                                                [recognizer onSpeechEndDetectedEvent: eventArgs];
-                                            });
+            {
+                SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
+                [recognizer onSpeechEndDetectedEvent: eventArgs];
+            });
     }
 };
 
@@ -134,7 +134,7 @@ struct IntentEventHandlerHelper
 
 - (instancetype)initWithImpl:(IntentRecoSharedPtr)recoHandle
 {
-    self = [super initFrom:recoHandle withParameters:&recoHandle->Properties];
+    self = [super initWith:recoHandle withParameters:&recoHandle->Properties];
     self->intentRecoImpl = recoHandle;
     if (!self || intentRecoImpl == nullptr) {
         return nil;
@@ -160,7 +160,7 @@ struct IntentEventHandlerHelper
         eventImpl->addSessionStoppedEventHandler();
         eventImpl->addSpeechStartDetectedEventHandler();
         eventImpl->addSpeechEndDetectedEventHandler();
-        
+
         return self;
     }
 }

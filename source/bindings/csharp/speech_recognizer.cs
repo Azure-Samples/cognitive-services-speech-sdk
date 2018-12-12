@@ -102,8 +102,13 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         internal SpeechRecognizer(Internal.SpeechConfig config, Internal.AudioConfig audioConfig)
+            : this(Internal.SpeechRecognizer.FromConfig(config, audioConfig))
         {
-            this.recoImpl = Internal.SpeechRecognizer.FromConfig(config, audioConfig);
+        }
+
+        internal SpeechRecognizer(Internal.SpeechRecognizer recoImpl) : base(recoImpl)
+        {
+            this.recoImpl = recoImpl;
 
             recognizingHandler = new ResultHandlerImpl(this, isRecognizedHandler: false);
             recoImpl.Recognizing.Connect(recognizingHandler);
@@ -322,14 +327,14 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        internal readonly Internal.SpeechRecognizer recoImpl;
+        private readonly new Internal.SpeechRecognizer recoImpl;
         private readonly ResultHandlerImpl recognizingHandler;
         private readonly ResultHandlerImpl recognizedHandler;
         private readonly CanceledHandlerImpl canceledHandler;
         private bool disposed = false;
         private readonly Audio.AudioConfig audioConfig;
 
-        // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
+        // Defines a private class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class ResultHandlerImpl : Internal.SpeechRecognitionEventListener
         {
             public ResultHandlerImpl(SpeechRecognizer recognizer, bool isRecognizedHandler)
@@ -357,7 +362,7 @@ namespace Microsoft.CognitiveServices.Speech
             private bool isRecognizedHandler;
         }
 
-        // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
+        // Defines a private class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
         private class CanceledHandlerImpl : Internal.SpeechRecognitionCanceledEventListener
         {
             public CanceledHandlerImpl(SpeechRecognizer recognizer)

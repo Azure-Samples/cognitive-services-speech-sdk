@@ -27,7 +27,7 @@ namespace Speech {
 class Session;
 
 /// <summary>
-/// Base class for speech recognizers, which mainly contains common event handlers.
+/// Class for speech recognizers.
 /// </summary>
 class SpeechRecognizer final : public AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>
 {
@@ -40,7 +40,7 @@ public:
     /// </summary>
     /// <param name="speechconfig">Speech configuration.</param>
     /// <param name="audioInput">Audio configuration.</param>
-    /// <returns> smart pointer wrapped speech recognizer pointer.</returns>
+    /// <returns>A smart pointer wrapped speech recognizer pointer.</returns>
     static std::shared_ptr<SpeechRecognizer> FromConfig(std::shared_ptr<SpeechConfig> speechconfig, std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
     {
         SPXRECOHANDLE hreco;

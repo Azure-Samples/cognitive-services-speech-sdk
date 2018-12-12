@@ -189,12 +189,12 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         {
             recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
             recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
+            recoImpl.getSynthesizing().RemoveEventListener(synthesisResultHandler);
             recoImpl.getCanceled().RemoveEventListener(errorHandler);
             recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
             recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
             recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
             recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
-            recoImpl.getSynthesizing().RemoveEventListener(synthesisResultHandler);
 
             recognizingHandler.delete();
             recognizedHandler.delete();
@@ -218,6 +218,8 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     /*! \endcond */
 
     private void initialize() {
+        super.internalRecognizerImpl = this.recoImpl;
+
         recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
         recoImpl.getRecognizing().AddEventListener(recognizingHandler);
 
@@ -251,7 +253,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         }
     }
 
-    // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
+    // Defines a private class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class ResultHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationTexEventListener
     {
         public ResultHandlerImpl(TranslationRecognizer recognizer, boolean isRecognizedHandler)
@@ -284,8 +286,8 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         private boolean isRecognizedHandler;
     }
 
-    // Defines an internal class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
-    class CanceledHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationTexCanceledEventListener {
+    // Defines a private class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
+    private class CanceledHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationTexCanceledEventListener {
         public CanceledHandlerImpl(TranslationRecognizer recognizer) {
             Contracts.throwIfNull(recognizer, "recognizer");
             this.recognizer = recognizer;
@@ -309,7 +311,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         private TranslationRecognizer recognizer;
     }
 
-    // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
+    // Defines a private class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class SynthesisHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisEventListener
     {
         public SynthesisHandlerImpl(TranslationRecognizer recognizer)

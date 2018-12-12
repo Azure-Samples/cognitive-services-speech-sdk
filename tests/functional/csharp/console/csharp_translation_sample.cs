@@ -67,6 +67,19 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
             }
         }
+        private static void MyConnectedEventHandler(object sender, ConnectionEventArgs e)
+        {
+            Console.WriteLine($"Connected event: {e.ToString()}.");
+        }
+        private static void MyDisconnectedEventHandler(object sender, ConnectionEventArgs e)
+        {
+            Console.WriteLine($"Disconnected event: {e.ToString()}.");
+        }
+
+        private static void MySessionStoppedEventHandler(object sender, SessionEventArgs e)
+        {
+            Console.WriteLine($"Session stopped event: {e.ToString()}.");
+        }
 
         public static async Task TranslationBaseModelAsync(string keyTranslation, string region, string fileName, bool useStream, bool useContinuousRecognition)
         {
@@ -225,49 +238,59 @@ namespace MicrosoftSpeechSDKSamples
         {
             Console.WriteLine("Single-shot translation.");
 
-            // Subscribes to events.
-            reco.Recognizing += MyRecognizingEventHandler;
-            reco.Recognized += MyRecognizedEventHandler;
-            reco.Canceled += MyCanceledEventHandler;
-            reco.SessionStopped += (s, e) =>
+            using (var connection = Connection.FromRecognizer(reco))
             {
-                Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: Session stopped event: {0}.", e.ToString()));
-            };
+                // Subscribes to events.
+                connection.Connected += MyConnectedEventHandler;
+                connection.Disconnected += MyDisconnectedEventHandler;
+                reco.Recognizing += MyRecognizingEventHandler;
+                reco.Recognized += MyRecognizedEventHandler;
+                reco.Canceled += MyCanceledEventHandler;
+                reco.SessionStopped += MySessionStoppedEventHandler;
 
-            // Starts recognition.
-            var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
+                // Starts recognition.
+                var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
 
-            Console.WriteLine("Translation result: " + result);
+                Console.WriteLine("Translation result: " + result);
 
-            // Unsubscribe to events.
-            reco.Recognizing -= MyRecognizingEventHandler;
-            reco.Recognized -= MyRecognizedEventHandler;
-            reco.Canceled -= MyCanceledEventHandler;
+                // Unsubscribe to events.
+                connection.Connected -= MyConnectedEventHandler;
+                connection.Disconnected -= MyDisconnectedEventHandler;
+                reco.Recognizing -= MyRecognizingEventHandler;
+                reco.Recognized -= MyRecognizedEventHandler;
+                reco.Canceled -= MyCanceledEventHandler;
+                reco.SessionStopped -= MySessionStoppedEventHandler;
+            }
         }
 
         private static async Task ContinuousTranslationAsync(TranslationRecognizer reco)
         {
-            // Subscribes to events.
-            reco.Recognizing += MyRecognizingEventHandler;
-            reco.Recognized += MyRecognizedEventHandler;
-            reco.Synthesizing += MySynthesizingEventHandler;
-            reco.Canceled += MyCanceledEventHandler;
-            reco.SessionStopped += (s, e) =>
+            using (var connection = Connection.FromRecognizer(reco))
             {
-                Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: Session stopped event: {0}.", e.ToString()));
-                translationEndTaskCompletionSource.TrySetResult(0);
-            };
+                // Subscribes to events.
+                connection.Connected += MyConnectedEventHandler;
+                connection.Disconnected += MyDisconnectedEventHandler;
+                reco.Recognizing += MyRecognizingEventHandler;
+                reco.Recognized += MyRecognizedEventHandler;
+                reco.Synthesizing += MySynthesizingEventHandler;
+                reco.Canceled += MyCanceledEventHandler;
+                reco.SessionStopped += (s, e) =>
+                {
+                    MySessionStoppedEventHandler(s, e);
+                    translationEndTaskCompletionSource.TrySetResult(0);
+                };
 
-            translationEndTaskCompletionSource = new TaskCompletionSource<int>();
+                translationEndTaskCompletionSource = new TaskCompletionSource<int>();
 
-            // Starts translation.
-            await reco.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                // Starts translation.
+                await reco.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-            // Waits for completion.
-            await translationEndTaskCompletionSource.Task.ConfigureAwait(false);
+                // Waits for completion.
+                await translationEndTaskCompletionSource.Task.ConfigureAwait(false);
 
-            // Stops translation.
-            await reco.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                // Stops translation.
+                await reco.StopContinuousRecognitionAsync().ConfigureAwait(false);
+            }
         }
 
         private static TaskCompletionSource<int> translationEndTaskCompletionSource;

@@ -34,6 +34,7 @@
     catch (...) { SWIG_exception(SWIG_UnknownError,"Runtime exception"); }
 }
 
+%shared_ptr(Microsoft::CognitiveServices::Speech::Connection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::RecognitionResult, Microsoft::CognitiveServices::Speech::RecognitionEventArgs, Microsoft::CognitiveServices::Speech::RecognitionEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::RecognitionResult, Microsoft::CognitiveServices::Speech::RecognitionEventArgs, Microsoft::CognitiveServices::Speech::RecognitionEventArgs>::PrivatePropertyCollection)
@@ -59,7 +60,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::RecognitionResult,Microsoft::CognitiveServices::Speech::RecognitionEventArgs,Microsoft::CognitiveServices::Speech::RecognitionEventArgs >::PrivatePropertyCollection)
-%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer< Microsoft::CognitiveServices::Speech::SpeechRecognitionResult,Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs,Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs >::PrivatePropertyCollection)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult,Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs,Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs >::PrivatePropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult,Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs,Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionCanceledEventArgs >::PrivatePropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult,Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs,Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs >::PrivatePropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechConfig)
@@ -349,8 +350,6 @@
 %ignore StartKeywordRecognitionAsync;
 %ignore StopKeywordRecognitionAsync;
 
-
-
 %immutable Microsoft::CognitiveServices::Speech::SpeechRecognizer::Properties;
 %immutable Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::Properties;
 %immutable Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::Properties;
@@ -363,13 +362,13 @@
 %include <speechapi_cxx_audio_stream.h>
 %include <speechapi_cxx_audio_config.h>
 
-
 %include <speechapi_cxx_keyword_recognition_model.h>
 
 %include <speechapi_cxx_eventargs.h>
 %include <speechapi_cxx_eventsignal.h>
 
 %include <speechapi_cxx_session_eventargs.h>
+%include <speechapi_cxx_connection_eventargs.h>
 
 %immutable Microsoft::CognitiveServices::Speech::RecognitionResult::Properties;
 %include <speechapi_cxx_recognition_result.h>
@@ -379,14 +378,16 @@
 #elif defined(SWIGJAVA)
 %template(SessionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SessionEventArgs&>;
 %template(RecognitionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::RecognitionEventArgs&>;
+%template(ConnectionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::ConnectionEventArgs&>;
 #else
 %template(SessionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SessionEventArgs&>;
 %template(RecognitionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::RecognitionEventArgs&>;
+%template(ConnectionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::ConnectionEventArgs&>;
 #endif
 
 %template(SessionEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::SessionEventArgs&>;
 %template(RecognitionEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::RecognitionEventArgs&>;
-
+%template(ConnectionEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::ConnectionEventArgs&>;
 
 %include <speechapi_cxx_recognizer.h>
 %include <speechapi_cxx_recognition_async_recognizer.h>
@@ -453,4 +454,6 @@
 %include <speechapi_cxx_translation_recognizer.h>
 
 %include <speechapi_cxx_session.h>
+
+%include <speechapi_cxx_connection.h>
 

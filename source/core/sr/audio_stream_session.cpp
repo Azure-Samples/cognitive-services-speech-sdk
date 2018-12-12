@@ -745,6 +745,20 @@ void CSpxAudioStreamSession::FireSessionStoppedEvent()
     FireEvent(EventType::SessionStop);
 }
 
+void CSpxAudioStreamSession::FireConnectedEvent()
+{
+    SPX_DBG_TRACE_FUNCTION();
+
+    FireEvent(EventType::Connected);
+}
+
+void CSpxAudioStreamSession::FireDisconnectedEvent()
+{
+    SPX_DBG_TRACE_FUNCTION();
+
+    FireEvent(EventType::Disconnected);
+}
+
 void CSpxAudioStreamSession::FireSpeechStartDetectedEvent(uint64_t offset)
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -820,6 +834,14 @@ void CSpxAudioStreamSession::DispatchEvent(const list<weak_ptr<ISpxRecognizer>>&
 
             case EventType::RecoResultEvent:
                 ptr->FireResultEvent(sessionId, result);
+                break;
+
+            case EventType::Connected:
+                ptr->FireConnected(sessionId);
+                break;
+
+            case EventType::Disconnected:
+                ptr->FireDisconnected(sessionId);
                 break;
 
             default:
@@ -1035,6 +1057,16 @@ std::shared_ptr<ISpxSessionEventArgs> CSpxAudioStreamSession::CreateSessionEvent
     argsInit->Init(sessionId);
 
     return sessionEvent;
+}
+
+std::shared_ptr<ISpxConnectionEventArgs> CSpxAudioStreamSession::CreateConnectionEventArgs(const std::wstring& sessionId)
+{
+    auto connectionEvent = SpxCreateObjectWithSite<ISpxConnectionEventArgs>("CSpxConnectionEventArgs", this);
+
+    auto argsInit = SpxQueryInterface<ISpxConnectionEventArgsInit>(connectionEvent);
+    argsInit->Init(sessionId);
+
+    return connectionEvent;
 }
 
 std::shared_ptr<ISpxRecognitionEventArgs> CSpxAudioStreamSession::CreateRecognitionEventArgs(const std::wstring& sessionId, uint64_t offset)

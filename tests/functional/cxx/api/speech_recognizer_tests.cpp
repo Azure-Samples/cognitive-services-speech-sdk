@@ -951,3 +951,132 @@ TEST_CASE("Speech Recognizer SpeechConfig validations", "[api][cxx]")
         CHECK_NOTHROW(SpeechConfig::FromAuthorizationToken("illegal-token", "illegal-region"));
     }
 }
+
+static void ConnectionEventTests(bool usingContinuousRecognition)
+{
+    auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+    auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
+    auto connection = Connection::FromRecognizer(recognizer);
+
+    promise<bool> recoEnd;
+    auto connectedCount = 0;
+    auto disconnectedCount = 0;
+    auto recognizingCount = 0;
+    auto recognizedCount = 0;
+    auto sessionStoppedCount = 0;
+    auto canceledCount = 0;
+    bool connectedAfterRecognizing = false;
+    bool connectedDisconnectedUnmatch = false;
+
+    connection->Connected.Connect([&](const ConnectionEventArgs& e) {
+        connectedCount++;
+        CAPTURE(e.SessionId);
+        CAPTURE(connectedCount);
+        if (connectedCount == 1)
+        {
+            if (recognizedCount != 0 || recognizingCount != 0)
+            {
+                CAPTURE(recognizedCount);
+                CAPTURE(recognizingCount);
+                connectedAfterRecognizing = true;
+            }
+        }
+        if (connectedCount != disconnectedCount + 1)
+        {
+            CAPTURE(disconnectedCount);
+            connectedDisconnectedUnmatch = true;
+        }
+    });
+
+    connection->Disconnected.Connect([&](const ConnectionEventArgs& e) {
+        disconnectedCount++;
+        CAPTURE(e.SessionId);
+        CAPTURE(disconnectedCount);
+        if (connectedCount != disconnectedCount)
+        {
+            CAPTURE(connectedCount);
+            connectedDisconnectedUnmatch = true;
+        }
+    });
+
+    recognizer->Recognizing.Connect([&](const SpeechRecognitionEventArgs&) {
+        if (connectedCount != disconnectedCount + 1)
+        {
+            CAPTURE(connectedCount);
+            CAPTURE(disconnectedCount);
+            connectedDisconnectedUnmatch = true;
+        }
+        recognizingCount++;
+    });
+
+    recognizer->Recognized.Connect([&](const SpeechRecognitionEventArgs&) {
+        if (connectedCount != disconnectedCount + 1)
+        {
+            CAPTURE(connectedCount);
+            CAPTURE(disconnectedCount);
+            connectedDisconnectedUnmatch = true;
+        }
+        recognizedCount++;
+    });
+
+    recognizer->SessionStopped.Connect([&](const SessionEventArgs&) {
+        ++sessionStoppedCount;
+        recoEnd.set_value(true);
+    });
+
+    recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& e) {
+        if (e.Reason == CancellationReason::Error)
+        {
+            CAPTURE(e.ErrorCode);
+            canceledCount++;
+        }
+    });
+
+    if (usingContinuousRecognition)
+    {
+        recognizer->StartContinuousRecognitionAsync().get();
+    }
+    else
+    {
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+    }
+
+    auto status = recoEnd.get_future().wait_for(WAIT_FOR_RECO_RESULT_TIME);
+    SPXTEST_REQUIRE(status == future_status::ready);
+
+    if (usingContinuousRecognition)
+    {
+        recognizer->StopContinuousRecognitionAsync().get();
+    }
+
+    SPXTEST_REQUIRE(sessionStoppedCount == 1);
+    SPXTEST_REQUIRE(connectedCount > 0);
+    SPXTEST_REQUIRE(connectedCount - disconnectedCount == 1);
+    SPXTEST_REQUIRE(recognizedCount == 1);
+    SPXTEST_REQUIRE(sessionStoppedCount == 1);
+    SPXTEST_REQUIRE(connectedAfterRecognizing == false);
+    SPXTEST_REQUIRE(connectedDisconnectedUnmatch == false);
+    SPXTEST_REQUIRE(canceledCount == 0);
+}
+
+TEST_CASE("ConnectionEventsTest", "[api][cxx]")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    weather.UpdateFullFilename(Config::InputDir);
+
+    SPXTEST_SECTION("Conncted Disconnected Events with RecognizeOnceAsnyc")
+    {
+        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        ConnectionEventTests(false);
+    }
+
+    SPXTEST_SECTION("Conncted Disconnected Events with ContinuousRecognition")
+    {
+        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        ConnectionEventTests(true);
+    }
+}

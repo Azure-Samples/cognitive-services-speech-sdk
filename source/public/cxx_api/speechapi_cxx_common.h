@@ -64,3 +64,8 @@ inline void __spx_rethrow(SPXHR hr)
 #ifndef __SPX_THROW_HR_IMPL
 #define __SPX_THROW_HR_IMPL(hr) __spx_rethrow(hr)
 #endif
+
+#if defined(__GNUG__) && defined(__linux__) && !defined(ANDROID) && !defined(__ANDROID__)
+#include <cxxabi.h>
+#define SHOULD_HANDLE_FORCED_UNWIND 1
+#endif

@@ -31,8 +31,6 @@ public:
         Offset(m_offset),
         m_offset(GetOffset(hevent))
     {
-        if (hevent == nullptr)
-            hevent = SPXHANDLE_INVALID;
     };
 
     /// <inheritdoc/>

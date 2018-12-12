@@ -2,6 +2,7 @@
 #include "recognizer.h"
 #include <future>
 #include "handle_table.h"
+#include "site_helpers.h"
 #include "service_helpers.h"
 #include "create_object_helpers.h"
 #include "property_id_2_name_map.h"
@@ -121,20 +122,46 @@ std::shared_ptr<ISpxSession> CSpxRecognizer::GetDefaultSession()
     return m_defaultSession;
 }
 
-void CSpxRecognizer::FireSessionStarted(const std::wstring& sessionId)
+std::shared_ptr<ISpxEventArgsFactory> CSpxRecognizer::GetEventArgsFactory()
 {
     SPX_DBG_ASSERT(GetSite());
-    auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
-    auto sessionEvent = factory->CreateSessionEventArgs(sessionId);
+    return SpxQueryService<ISpxEventArgsFactory>(GetSite());
+}
+
+std::shared_ptr<ISpxSessionEventArgs> CSpxRecognizer::CreateSessionEventArgs(const std::wstring& sessionId)
+{
+    auto factory = GetEventArgsFactory();
+    return factory->CreateSessionEventArgs(sessionId);
+}
+
+std::shared_ptr<ISpxConnectionEventArgs> CSpxRecognizer::CreateConnectionEventArgs(const std::wstring& sessionId)
+{
+    auto factory = GetEventArgsFactory();
+    return factory->CreateConnectionEventArgs(sessionId);
+}
+
+void CSpxRecognizer::FireSessionStarted(const std::wstring& sessionId)
+{
+    auto sessionEvent = CreateSessionEventArgs(sessionId);
     SessionStarted.Signal(sessionEvent);
 }
 
 void CSpxRecognizer::FireSessionStopped(const std::wstring& sessionId)
 {
-    SPX_DBG_ASSERT(GetSite());
-    auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
-    auto sessionEvent = factory->CreateSessionEventArgs(sessionId);
+    auto sessionEvent = CreateSessionEventArgs(sessionId);
     SessionStopped.Signal(sessionEvent);
+}
+
+void CSpxRecognizer::FireConnected(const std::wstring& sessionId)
+{
+    auto connectionEvent = CreateConnectionEventArgs(sessionId);
+    Connected.Signal(connectionEvent);
+}
+
+void CSpxRecognizer::FireDisconnected(const std::wstring& sessionId)
+{
+    auto connectionEvent = CreateConnectionEventArgs(sessionId);
+    Disconnected.Signal(connectionEvent);
 }
 
 void CSpxRecognizer::FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset)
@@ -192,8 +219,7 @@ void CSpxRecognizer::FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* pevent,
 {
     if (pevent != nullptr && pevent->IsConnected())
     {
-        SPX_DBG_ASSERT(GetSite());
-        auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
+        auto factory = GetEventArgsFactory();
         auto recoEvent = (result != nullptr) 
             ? factory->CreateRecognitionEventArgs(sessionId, result) 
             : factory->CreateRecognitionEventArgs(sessionId, offset);
@@ -250,6 +276,19 @@ void CSpxRecognizer::OnIsEnabledChanged()
 std::shared_ptr<ISpxNamedProperties> CSpxRecognizer::GetParentProperties() const
 {
     return SpxQueryService<ISpxNamedProperties>(GetSite());
+}
+
+std::shared_ptr<ISpxConnection> CSpxRecognizer::GetConnection()
+{
+    auto recognizerAsSite = SpxSiteFromThis(this);
+    auto connection = SpxCreateObjectWithSite<ISpxConnection>("CSpxConnection", recognizerAsSite);
+
+    return connection;
+}
+
+std::shared_ptr<ISpxRecognizer> CSpxRecognizer::GetRecognizer()
+{
+    return SpxSharedPtrFromThis<ISpxRecognizer>(this);
 }
 
 

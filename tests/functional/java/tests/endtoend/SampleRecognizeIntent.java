@@ -16,6 +16,7 @@ import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionEventArgs;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
+import com.microsoft.cognitiveservices.speech.Connection;
 
 import tests.Settings;
 
@@ -30,7 +31,17 @@ public class SampleRecognizeIntent implements Runnable {
     public IntentRecognitionEventArgs getRecognizing() {
         return intentRecognitionResultEventArgs2;
     }
-    
+
+    private int connectedEventCount;
+    public int getConnectedEventCount() {
+        return connectedEventCount;
+    }
+
+    private int disconnectedEventCount;
+    public int getDisconnectedEventCount() {
+        return disconnectedEventCount;
+    }
+
     ///////////////////////////////////////////////////
     // recognize intent
     ///////////////////////////////////////////////////
@@ -46,6 +57,7 @@ public class SampleRecognizeIntent implements Runnable {
             // TODO: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
             AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.WavFile);
             IntentRecognizer reco = new IntentRecognizer(config, audioInput);
+            Connection connection = Connection.fromRecognizer(reco);
 
             HashMap<String, String> intentIdMap = new HashMap<>();
             intentIdMap.put("1", "play music");
@@ -57,6 +69,17 @@ public class SampleRecognizeIntent implements Runnable {
             for (Map.Entry<String, String> entry : intentIdMap.entrySet()) {
                 reco.addIntent(intentModel, entry.getValue(), entry.getKey());
             }
+
+            this.connectedEventCount = 0;
+            this.disconnectedEventCount = 0;
+            connection.connected.addEventListener((o, connectionEventArgs) -> {
+                System.out.println("Connected event received.");
+                this.connectedEventCount++;
+            });
+            connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+                System.out.println("Disconnected event received.");
+                this.disconnectedEventCount++;
+            });
 
             reco.recognizing.addEventListener((o, intentRecognitionResultEventArgs) -> {
                 intentRecognitionResultEventArgs2 = intentRecognitionResultEventArgs;
@@ -70,7 +93,7 @@ public class SampleRecognizeIntent implements Runnable {
 
             Future<IntentRecognitionResult> task = reco.recognizeOnceAsync();
             recognitionResult = task.get();
-            
+
             System.out.println("Continuous recognition stopped.");
             String s = recognitionResult.getText();
             String intentId = recognitionResult.getIntentId();

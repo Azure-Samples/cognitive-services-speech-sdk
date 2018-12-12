@@ -60,40 +60,40 @@ struct TranslationEventHandlerHelper
     {
         LogDebug(@"Add SessionStartedEventHandler");
         recoImpl->SessionStarted.Connect([this] (const SpeechImpl::SessionEventArgs& e)
-                                         {
-                                             SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
-                                             [recognizer onSessionStartedEvent: eventArgs];
-                                         });
+            {
+                SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
+                [recognizer onSessionStartedEvent: eventArgs];
+            });
     }
     
     void addSessionStoppedEventHandler()
     {
         LogDebug(@"Add SessionStoppedEventHandler");
         recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
-                                         {
-                                             SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
-                                             [recognizer onSessionStoppedEvent: eventArgs];
-                                         });
+            {
+                SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
+                [recognizer onSessionStoppedEvent: eventArgs];
+            });
     }
     
     void addSpeechStartDetectedEventHandler()
     {
         LogDebug(@"Add SpeechStartDetectedEventHandler");
         recoImpl->SpeechStartDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
-                                              {
-                                                  SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
-                                                  [recognizer onSpeechStartDetectedEvent: eventArgs];
-                                              });
+            {
+                SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
+                [recognizer onSpeechStartDetectedEvent: eventArgs];
+            });
     }
     
     void addSpeechEndDetectedEventHandler()
     {
         LogDebug(@"Add SpeechStopDetectedEventHandler");
         recoImpl->SpeechEndDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
-                                            {
-                                                SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
-                                                [recognizer onSpeechEndDetectedEvent: eventArgs];
-                                            });
+            {
+                SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
+                [recognizer onSpeechEndDetectedEvent: eventArgs];
+            });
     }
 };
 
@@ -147,7 +147,7 @@ struct TranslationEventHandlerHelper
 
 - (instancetype)initWithImpl:(TranslationRecoSharedPtr)recoHandle
 {
-    self = [super initFrom:recoHandle withParameters:&recoHandle->Properties];
+    self = [super initWith:recoHandle withParameters:&recoHandle->Properties];
     self->translationRecoImpl = recoHandle;
     if (!self || translationRecoImpl == nullptr) {
         return nil;
@@ -175,7 +175,7 @@ struct TranslationEventHandlerHelper
         eventImpl->addSessionStoppedEventHandler();
         eventImpl->addSpeechStartDetectedEventHandler();
         eventImpl->addSpeechEndDetectedEventHandler();
-        
+
         return self;
     }
 }

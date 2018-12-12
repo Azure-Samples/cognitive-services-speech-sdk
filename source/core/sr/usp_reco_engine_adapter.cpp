@@ -1145,6 +1145,17 @@ void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
     }
 }
 
+void CSpxUspRecoEngineAdapter::OnConnected()
+{
+    InvokeOnSite([](const SitePtr& p) { p->FireConnectedEvent(); });
+}
+
+
+void CSpxUspRecoEngineAdapter::OnDisconnected()
+{
+    InvokeOnSite([](const SitePtr& p) { p->FireDisconnectedEvent(); });
+}
+
 uint8_t* CSpxUspRecoEngineAdapter::FormatBufferWriteBytes(uint8_t* buffer, const uint8_t* source, size_t bytes)
 {
     std::memcpy(buffer, source, bytes);

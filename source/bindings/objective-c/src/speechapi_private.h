@@ -29,6 +29,7 @@
 #import "translation_synthesis_result_private.h"
 
 #import "session_event_args_private.h"
+#import "connection_event_args_private.h"
 #import "recognition_event_args_private.h"
 #import "speech_recognition_event_args_private.h"
 #import "intent_recognition_event_args_private.h"
@@ -40,5 +41,6 @@
 #import "speech_recognizer_private.h"
 #import "intent_recognizer_private.h"
 #import "translation_recognizer_private.h"
+#import "connection_private.h"
 
 

@@ -8,7 +8,7 @@ import java.math.*;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
- * Defines payload for session events like Speech Start/End Detected
+ * Defines payload for recognition events like Speech Start/End Detected
  */
 public class RecognitionEventArgs extends SessionEventArgs
 {
@@ -34,8 +34,8 @@ public class RecognitionEventArgs extends SessionEventArgs
     public final BigInteger offset;
 
     /**
-     * Returns a String that represents the session event.
-     * @return A String that represents the session event.
+     * Returns a String that represents the recognition event payload.
+     * @return A String that represents the recognition event payload.
      */
     @Override
     public String toString() {

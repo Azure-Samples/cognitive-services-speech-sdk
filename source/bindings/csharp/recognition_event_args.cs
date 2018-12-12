@@ -7,7 +7,7 @@ using System.Globalization;
 namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
-    /// Defines payload for recognition events like Speech Start / End Detected
+    /// Defines payload for recognition events like Speech Start/End Detected
     /// </summary>
     public class RecognitionEventArgs : SessionEventArgs
     {
@@ -19,14 +19,14 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Represents the message offset
+        /// Represents the message offset in tick (100 nanoseconds)
         /// </summary>
         public ulong Offset { get; }
 
         /// <summary>
-        /// Returns a string that represents the session event.
+        /// Returns a string that represents the recognition event payload.
         /// </summary>
-        /// <returns>A string that represents the session event.</returns>
+        /// <returns>A string that represents the recognition event payload.</returns>
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture, "SessionId: {0} Offset: {1}", SessionId, Offset);

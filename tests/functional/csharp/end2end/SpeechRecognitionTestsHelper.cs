@@ -25,6 +25,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public int SpeechStartedEventCount { get; set; }
 
+        public int ConnectedEventCount { get; set; }
+
+        public int DisconnectedEventCount { get; set; }
+
         private TaskCompletionSource<int> taskCompletionSource;
         private TimeSpan timeout = TimeSpan.FromMinutes(6);
 
@@ -36,6 +40,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SessionStoppedEventCount = 0;
             SpeechEndedEventCount = 0;
             SpeechStartedEventCount = 0;
+            ConnectedEventCount = 0;
+            DisconnectedEventCount = 0;
             taskCompletionSource = new TaskCompletionSource<int>();
         }
 
@@ -110,6 +116,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SpeechEndedEventCount++;
         }
 
+        private void ConnectedEventCounter(object sender, ConnectionEventArgs e)
+        {
+            Console.WriteLine($"Connected: SessionId: {e.SessionId}");
+            ConnectedEventCount++;
+        }
+
+        private void DisconnectedEventCounter(object sender, ConnectionEventArgs e)
+        {
+            Console.WriteLine($"Disconnected: SessionId: {e.SessionId}");
+            DisconnectedEventCount++;
+        }
+
         public static SpeechRecognizer TrackSessionId(SpeechRecognizer recognizer)
         {
             recognizer.SessionStarted += (s, e) =>
@@ -119,7 +137,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return recognizer;
         }
 
-        public void SubscribeToCounterEventHandlers(SpeechRecognizer recognizer)
+        public void SubscribeToCounterEventHandlers(SpeechRecognizer recognizer, Connection connection = null)
         {
             recognizer.Recognized += RecognizedEventCounter;
             recognizer.Canceled += CanceledEventCounter;
@@ -127,9 +145,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             recognizer.SessionStopped += SessionStoppedEventCounter;
             recognizer.SpeechStartDetected += SpeechStartEventCounter;
             recognizer.SpeechEndDetected += SpeechEndEventCounter;
+            if (connection != null)
+            {
+                connection.Connected += ConnectedEventCounter;
+                connection.Disconnected += DisconnectedEventCounter;
+            }
         }
 
-        public void UnsubscribeFromCounterEventHandlers(SpeechRecognizer recognizer)
+        public void UnsubscribeFromCounterEventHandlers(SpeechRecognizer recognizer, Connection connection = null)
         {
             recognizer.Recognized -= RecognizedEventCounter;
             recognizer.Canceled -= CanceledEventCounter;
@@ -137,6 +160,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             recognizer.SessionStopped -= SessionStoppedEventCounter;
             recognizer.SpeechStartDetected -= SpeechStartEventCounter;
             recognizer.SpeechEndDetected -= SpeechEndEventCounter;
+            if (connection != null)
+            {
+                connection.Connected -= ConnectedEventCounter;
+                connection.Disconnected -= DisconnectedEventCounter;
+            }
+        }
+
+        public static void AssertEqual(int expected, int actual, string errorMessage = "")
+        {
+            if (expected != actual)
+            {
+                Assert.Fail($"Actual value {actual} does not match the expected value {expected}. {errorMessage}");
+            }
         }
 
         public static void AssertMatching(string expectedText, string actualText)

@@ -138,8 +138,14 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         }
 
         internal TranslationRecognizer(Internal.SpeechTranslationConfig config, Internal.AudioConfig audioConfig)
+            : this(Internal.TranslationRecognizer.FromConfig(config, audioConfig))
         {
-            this.recoImpl = Internal.TranslationRecognizer.FromConfig(config, audioConfig);
+        }
+
+        internal TranslationRecognizer(Internal.TranslationRecognizer recoImpl) : base(recoImpl)
+
+        {
+            this.recoImpl = recoImpl;
 
             recognizingHandler = new ResultHandlerImpl(this, isRecognizedHandler: false);
             recoImpl.Recognizing.Connect(recognizingHandler);
@@ -344,19 +350,17 @@ namespace Microsoft.CognitiveServices.Speech.Translation
                 recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
                 recoImpl.SpeechEndDetected.Disconnect(speechEndDetectedHandler);
 
-                recoImpl?.Dispose();
-
                 synthesisResultHandler?.Dispose();
                 recognizingHandler?.Dispose();
                 recognizedHandler?.Dispose();
                 canceledHandler?.Dispose();
-
+                recoImpl?.Dispose();
                 disposed = true;
                 base.Dispose(disposing);
             }
         }
 
-        internal readonly Internal.TranslationRecognizer recoImpl;
+        private new readonly Internal.TranslationRecognizer recoImpl;
         private readonly ResultHandlerImpl recognizingHandler;
         private readonly ResultHandlerImpl recognizedHandler;
         private readonly SynthesisHandlerImpl synthesisResultHandler;
@@ -364,7 +368,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         private bool disposed = false;
         private readonly Audio.AudioConfig audioConfig;
 
-        // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
+        // Defines a private class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class ResultHandlerImpl : Internal.TranslationTextEventListener
         {
             public ResultHandlerImpl(TranslationRecognizer recognizer, bool isRecognizedHandler)
@@ -392,7 +396,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             private bool isRecognizedHandler;
         }
 
-        // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
+        // Defines a private class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
         private class CanceledHandlerImpl : Internal.TranslationTextCanceledEventListener
         {
             public CanceledHandlerImpl(TranslationRecognizer recognizer)
@@ -419,7 +423,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             private TranslationRecognizer recognizer;
         }
 
-        // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
+        // Defines a private class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class SynthesisHandlerImpl : Internal.TranslationSynthesisEventListener
         {
             public SynthesisHandlerImpl(TranslationRecognizer recognizer)
