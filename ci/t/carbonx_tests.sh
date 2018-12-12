@@ -64,6 +64,10 @@ startSuite TESTRUNNER "$T"
 TIMEOUT_SECONDS=30
 
 for action in $Actions; do
+  # Intent disabled due to service issues.
+  # https://msasg.visualstudio.com/Skyman/_workitems/edit/1550174
+  [[ $action != intent ]] || continue
+
   for ((modeIndex = 0; modeIndex < ${#modes[@]}; modeIndex += 2)); do
     mode="${modes[$modeIndex]}"
     modeArg="${modes[$modeIndex + 1]}"

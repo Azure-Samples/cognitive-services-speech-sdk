@@ -22,6 +22,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     using static SpeechRecognitionTestsHelper;
 
     [TestClass]
+    // Intent disabled due to service issues.
+    // https://msasg.visualstudio.com/Skyman/_workitems/edit/1550174
+    [Ignore]
     public class IntentRecognitionTests
     {
         private static string languageUnderstandingSubscriptionKey;

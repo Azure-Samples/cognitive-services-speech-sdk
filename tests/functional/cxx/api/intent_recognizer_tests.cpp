@@ -29,7 +29,9 @@ std::shared_ptr<SpeechConfig> SpeechConfigForIntentTests()
     return config;
 }
 
-TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
+// Intent disabled due to service issues.
+// https://msasg.visualstudio.com/Skyman/_workitems/edit/1550174
+TEST_CASE("Intent Recognizer basics", "[api][cxx][intent][!hide]")
 {
     SECTION("Intent Recognition works")
     {
