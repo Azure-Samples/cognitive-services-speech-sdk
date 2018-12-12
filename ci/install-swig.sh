@@ -3,7 +3,7 @@
 
 SWIG_VERSION=3.0.12
 
-curl -L https://github.com/swig/swig/archive/rel-$SWIG_VERSION.tar.gz | tar xvfz - && \
+curl -L https://github.com/swig/swig/archive/rel-$SWIG_VERSION.tar.gz | tar xfz - && \
 cd swig-rel-$SWIG_VERSION && \
 ./autogen.sh && \
 ./configure && \

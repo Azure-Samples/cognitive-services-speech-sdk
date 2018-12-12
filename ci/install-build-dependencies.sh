@@ -4,8 +4,6 @@ set -x -e -o pipefail
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-# TODO pip: chose specific version
-
 # TODO also look at target platform
 
 case $SPEECHSDK_BUILD_AGENT_PLATFORM in
@@ -37,20 +35,12 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
     # Remove it first, and install the Xenial default one (1.0*)
     sudo apt-get remove --yes libssl-dev
     sudo apt-get install --yes --target-release xenial-updates libssl-dev
-    sudo apt-get install --yes pkg-config zlib1g-dev libcurl4-openssl-dev libasound2-dev uuid-dev python-dev python-setuptools default-jdk libpcre++-dev bison automake
+    sudo apt-get install --yes pkg-config zlib1g-dev libcurl4-openssl-dev libasound2-dev uuid-dev default-jdk libpcre++-dev bison automake
     sudo "$SCRIPT_DIR/install-swig.sh"
-    pip install -U pytest
     ;;
   Windows-x64)
-    pip install -U pytest
     ;;
   OSX-x64)
-    brew install swig pkg-config coreutils bash
-
-    sudo easy_install pip
-
-    # ignore install six, otherwise pip install pytest will complain about six installed by distutils
-    sudo -H pip install --ignore-installed six
-    sudo -H pip install pytest
+    brew install swig pkg-config coreutils bash ninja
     ;;
 esac

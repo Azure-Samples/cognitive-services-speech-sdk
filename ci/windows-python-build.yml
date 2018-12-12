@@ -1,0 +1,69 @@
+jobs:
+- job: WindowsPythonBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsPythonBuild '))
+  pool:
+    name: Hosted VS2017
+  timeoutInMinutes: 60
+  strategy:
+    maxParallel: 6
+    matrix:
+      Python3.7_x64:
+        BuildPlatform: x64
+        pythonVersion: 3.7
+        pythonIncludePathSuffix: python3.7m
+      Python3.6_x64:
+        BuildPlatform: x64
+        pythonVersion: 3.6
+        pythonIncludePathSuffix: python3.6m
+      Python3.5_x64:
+        BuildPlatform: x64
+        pythonVersion: 3.5
+        pythonIncludePathSuffix: python3.5m
+      Python3.7_Win32:
+        BuildPlatform: Win32
+        pythonVersion: 3.7
+        pythonIncludePathSuffix: python3.7m
+      Python3.6_Win32:
+        BuildPlatform: Win32
+        pythonVersion: 3.6
+        pythonIncludePathSuffix: python3.6m
+      Python3.5_Win32:
+        BuildPlatform: Win32
+        pythonVersion: 3.5
+        pythonIncludePathSuffix: python3.5m
+  variables:
+    BuildConfiguration: Release
+    OutputDirectory: "$(Build.ArtifactStagingDirectory)/wheelhouse"
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set Windows target platform (Windows-x86 or Windows-x64)
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        if [[ "$(BuildPlatform)" == Win32 ]]; then
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x86"
+          vsts_setvar SPEECHSDK_PYTHON_PLATFORM "x86"
+          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
+        else
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x64"
+          vsts_setvar SPEECHSDK_PYTHON_PLATFORM "x64"
+          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15 Win64"
+        fi
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - bash: ./ci/install-build-dependencies.sh
+    displayName: Install build dependencies
+  # TODO detect installation failures, export diagnostics. For now, we'll fail in msbuild a little bit down.
+  - powershell: |
+      Invoke-WebRequest -OutFile vs_enterprise.exe https://aka.ms/vs/15/release/vs_enterprise.exe
+      Start-Process -Wait cmd -Verb runas -ArgumentList /c, cd, (Get-Location), '&&', start, /wait, .\vs_enterprise.exe, modify, --installPath, '"%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise"', --add, Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre, --quiet, --norestart, --wait, '&&', echo, '%ERRORLEVEL%', '>', result.txt
+    displayName: Install Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre VS component
+    condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
+  - template: build-python-wheel.yml
+    parameters:
+      pythonVersion: $(PythonVersion)
+      buildParams: "-DCMAKE_CXX_COMPILER=cl.exe -DCMAKE_C_COMPILER=cl.exe -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION)"
+

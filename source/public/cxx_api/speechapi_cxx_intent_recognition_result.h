@@ -9,6 +9,7 @@
 #include <string>
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_string_helpers.h>
+#include <speechapi_cxx_recognition_result.h>
 #include <speechapi_c.h>
 
 

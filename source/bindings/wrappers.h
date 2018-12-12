@@ -6,7 +6,8 @@
 
 
 template<class T>
-class FutureWrapper {
+class FutureWrapper
+{
 public:
     FutureWrapper() = default;
     FutureWrapper(const FutureWrapper&) = default;
@@ -17,7 +18,14 @@ public:
 
     ~FutureWrapper() = default;
 
-    T Get() { return m_future->get(); }
+    T Get()
+    {
+        if (m_future->valid())
+        {
+            return m_future->get(); 
+        }
+        throw std::future_error(std::future_errc::no_state);
+    }
 private:
     std::shared_ptr<std::future<T>> m_future;
 };

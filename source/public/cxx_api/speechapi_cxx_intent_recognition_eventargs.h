@@ -10,6 +10,7 @@
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_string_helpers.h>
 #include <speechapi_cxx_recognition_eventargs.h>
+#include <speechapi_cxx_intent_recognition_result.h>
 #include <spxdebug.h>
 
 namespace Microsoft {

@@ -34,8 +34,10 @@ class AudioInputStream
 {
 public:
 
+#if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     using ReadCallbackFunction_Type = ::std::function<int(uint8_t*, uint32_t)>;
     using CloseCallbackFunction_Type = ::std::function<void()>;
+#endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
     /// Internal operator used to get underlying handle value.
@@ -369,6 +371,7 @@ protected:
     /// </summary>
     explicit PullAudioInputStream(SPXAUDIOSTREAMHANDLE haudioStream) : AudioInputStream(haudioStream) { }
 
+#if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     class FunctionCallbackWrapper : public PullAudioInputStreamCallback
     {
     public:
@@ -389,6 +392,7 @@ protected:
         ReadCallbackFunction_Type m_readCallback;
         CloseCallbackFunction_Type m_closeCallback;
     };
+#endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /*! \endcond */
 

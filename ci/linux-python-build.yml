@@ -1,0 +1,43 @@
+jobs:
+- job: LinuxPythonBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxPythonBuild '))
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 60
+  strategy:
+    maxParallel: 3
+    matrix:
+      Python3.7:
+        pythonVersion: 3.7
+        pythonIncludePathSuffix: python3.7m
+      Python3.6:
+        pythonVersion: 3.6
+        pythonIncludePathSuffix: python3.6m
+      Python3.5:
+        pythonVersion: 3.5
+        pythonIncludePathSuffix: python3.5m
+  variables:
+    BuildConfiguration: Release
+    BuildPlatform: x64
+    OutputDirectory: "$(Build.ArtifactStagingDirectory)/wheelhouse"
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set Linux-x64 target platform
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x64
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+        vsts_setvar SPEECHSDK_PYTHON_PLATFORM "$(BuildPlatform)"
+        vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Unix Makefiles"
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - bash: ./ci/install-build-dependencies.sh
+    displayName: Install build dependencies
+  - template: build-python-wheel.yml
+    parameters:
+      pythonVersion: $(PythonVersion)
+      pythonIncludePathSuffix: $(PythonIncludePathSuffix)
+

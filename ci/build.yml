@@ -1154,6 +1154,12 @@ jobs:
 
 - template: linux-docker-build.yml
 
+- template: linux-python-build.yml
+
+- template: windows-python-build.yml
+
+- template: osx-python-build.yml
+
 - job: LinuxDrop
   dependsOn: [Pre, LinuxBuild, LinuxDockerBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDrop '))

@@ -38,3 +38,4 @@ set_target_properties (factory PROPERTIES
 )
 
 target_link_libraries(factory sr audio usp ${CMAKE_DL_LIBS})
+

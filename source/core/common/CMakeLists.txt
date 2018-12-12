@@ -98,7 +98,8 @@ endif()
 set_target_properties(common PROPERTIES
     FOLDER core
 )
-target_link_libraries(common ${AZURE_SHARED_LIB})
+
+target_link_libraries(common factory ${AZURE_SHARED_LIB})
 
 if(WIN32)
     target_link_libraries(common Dbghelp.lib)

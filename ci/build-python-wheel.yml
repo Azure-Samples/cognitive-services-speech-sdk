@@ -1,0 +1,41 @@
+parameters:
+  pythonVersion: ""
+  buildParams: ""
+  wheelParams: ""
+  pythonIncludePathSuffix: ""
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: ${{ parameters.pythonVersion }}
+    addToPath: true
+    architecture: $(SPEECHSDK_PYTHON_PLATFORM)
+- bash: |
+    mkdir -p build &&
+    python -m pip install --upgrade pip &&
+    pip install virtualenv==16.1.0 scikit-build==0.8.1 &&
+    python_executable_path=$(which python) &&
+    python_include_path=$(dirname $python_executable_path)/include/${{ parameters.pythonIncludePathSuffix }} &&
+    python setup.py bdist_wheel -G "$(SPEECHSDK_CMAKE_GENERATOR)" ${{ parameters.wheelParams }} -- \
+        -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) \
+        -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) \
+        -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) \
+        -DPYTHON_INCLUDE_DIR=$python_include_path ${{ parameters.buildParams }} &&
+    cp -R dist build/
+  displayName: Build Python ${{ parameters.pythonVersion }} wheel
+- template: test-during-build.yml
+  parameters:
+    testsToRun: python_unittests
+    runTestArgs: ""
+- bash: |
+    mkdir -p "$(OutputDirectory)" &&
+    cp -R dist/*.whl "$(OutputDirectory)"
+  displayName: Drop Python wheel
+  condition: succeededOrFailed()
+- task: PublishBuildArtifacts@1
+  displayName: Publish drop
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: PythonBuild
+    publishLocation: Container
+  condition: succeededOrFailed()
+

@@ -130,9 +130,10 @@ else()
   message(FATAL_ERROR "internal error")
 endif()
 
-message("BUILD_PYTHON=${BUILD_PYTHON}")
-message("BUILD_CSHARP=${BUILD_CSHARP}")
-message("BUILD_JAVA=${BUILD_JAVA}")
+message(STATUS "CMake version info: ${CMAKE_VERSION}")
+message(STATUS "BUILD_PYTHON=${BUILD_PYTHON}")
+message(STATUS "BUILD_CSHARP=${BUILD_CSHARP}")
+message(STATUS "BUILD_JAVA=${BUILD_JAVA}")
 
 # Configure CCache if available
 find_program(CCACHE_FOUND ccache)
@@ -197,17 +198,18 @@ if(MSVC)
   endif()
 
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic")
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic -fPIC")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON) # -fPIC -fPIE
 
   # Include debug information in release builds
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g")
 elseif(ANDROID)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic -fPIC -Wno-gnu-zero-variadic-macro-arguments -Wno-attributes")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic -Wno-gnu-zero-variadic-macro-arguments -Wno-attributes")
+
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON) # -fPIC -fPIE
 
   # Include debug information in release builds
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
@@ -220,7 +222,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g")
 
-  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON) # -fPIC -fPIE
 
   # visibility
   cmake_policy(SET CMP0063 NEW)
@@ -292,19 +294,27 @@ add_subdirectory(${USP})
 
 add_subdirectory(${C_API})
 add_subdirectory(${SR})
-add_subdirectory(${MOCK})
+
+if(NOT DEFINED SKBUILD)
+  # don't build mocks with scikit-build based python wheel build
+  add_subdirectory(${MOCK})
+endif()
+
 if(NOT DEFINED APPLE)
   add_subdirectory(${LIBCARBON})
 endif()
-
-add_subdirectory(${CARBON_BINDINGS})
-add_subdirectory(${TESTS})
 
 if(CMAKE_CL_64)
   add_subdirectory(${UNIDEC})
 endif()
 
-add_subdirectory(${CARBONX})
+add_subdirectory(${CARBON_BINDINGS})
+
+if(NOT DEFINED SKBUILD)
+  # don't build c++ tests and carbonx with scikit-build based python wheel build
+  add_subdirectory(${TESTS})
+  add_subdirectory(${CARBONX})
+endif()
 
 if(BUILD_JAVA)
   add_subdirectory(${JAVA_SAMPLES})

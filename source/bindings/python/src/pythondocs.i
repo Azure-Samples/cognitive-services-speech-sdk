@@ -1,0 +1,247 @@
+// Copyright (c) Microsoft. All rights reserved.
+// See https://aka.ms/csspeech/license201809 for the full license information.
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::CancellationDetails "
+Contains detailed information about why a result was canceled.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::CancellationDetails::Reason "
+The reason the result was canceled.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::CancellationDetails::ErrorCode "
+The error code in case of an unsuccessful recognition (Reason is set to Error). If Reason is not Error, ErrorCode is set to NoError.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::CancellationDetails::ErrorDetails "
+The error message in case of an unsuccessful recognition (Reason is set to Error).
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::CancellationDetails::FromResult "
+Creates an instance of CancellationDetails object for the canceled
+RecognitionResult.
+
+:param result: The result that was canceled.
+:return: A CancellationDetails instance.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::EventArgs "
+Base class for event arguments.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::EventSignal "
+Clients can connect to the event signal to receive events, or disconnect from
+the event signal to stop receiving events.
+
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::EventSignal::EventSignal "
+Constructs an event signal.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::EventSignal::Connect "
+Connects given callback function to the event signal, to be invoked when the
+event is signalled.
+
+:param callback: Callback to connect.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::EventSignal::Disconnect "
+Disconnects given callback.
+
+When the number of connected clients changes from one to zero, the disconnect
+callback will be called, if provided.
+
+:param callback: Callback function.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::EventSignal::DisconnectAll "
+Disconnects all registered callbacks.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::EventSignal::Signal "
+Signals the event with given arguments *t* to all connected callbacks.
+
+:param t: Event arguments to signal.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::EventSignal::IsConnected "
+Checks if a callback is connected.
+
+:return: True if a callback is connected
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionCanceledEventArgs "
+Class for intent recognition canceled event arguments.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionCanceledEventArgs::Reason "
+`CancellationReason`: The reason the result was canceled.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionCanceledEventArgs::ErrorCode "
+`CancellationErrorCode`: The error code in case of an unsuccessful recognition (Reason is set to
+    Error). If Reason is not Error, ErrorCode is set to NoError.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionCanceledEventArgs::ErrorDetails "
+`str` : The error message in case of an unsuccessful recognition (Reason is set to Error).
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs "
+Class for intent recognition event arguments.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs "
+`IntentRecognitionResult`: Intent recognition event result.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult "
+Represents the result of an intent recognition.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult::IntentId "
+Unique intent id.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::PropertyCollection "
+Class to retrieve or set a property value from a property collection.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::RecognitionEventArgs "
+Provides data for the RecognitionEvent.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::RecognitionEventArgs::Offset "
+`int`: The offset of recognition event
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::RecognitionResult "
+Contains detailed information about the result of a recognition operation.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::RecognitionResult::ResultId "
+`str`: Unique result id.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::RecognitionResult::Reason "
+`ResultReason`: Recognition reason.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::RecognitionResult::Text "
+`str`: Normalized text generated by a speech recognition engine from recognized input.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::RecognitionResult::Properties "
+`PropertyCollection`: Collection of additional RecognitionResult properties.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::RecognitionResult::Duration "
+
+Duration of recognized speech in ticks. A single tick represents one hundred
+nanoseconds or one ten-millionth of a second.
+
+:return: Duration of recognized speech in ticks.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::RecognitionResult::Offset "
+
+Offset of the recognized speech in ticks. A single tick represents one hundred
+nanoseconds or one ten-millionth of a second.
+
+:return: Offset of the recognized speech in ticks.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::SessionEventArgs "
+Base class for session event arguments.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::SessionEventArgs::SessionId "
+`str`: Session identifier (a GUID in string format).
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs "
+Class for speech recognition canceled event arguments.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs::Reason "
+`CancellationReason`: The reason the result was canceled.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs::ErrorCode "
+`CancellationErrorCode`: The error code in case of an unsuccessful recognition (Reason is set to
+Error). If Reason is not Error, ErrorCode is set to NoError.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs::ErrorDetails "
+`str`: The error message in case of an unsuccessful recognition (Reason is set to Error).
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs "
+Class for speech recognition event arguments.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs::Result "
+`SpeechRecognitionResult` Speech recognition event result.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::SpeechRecognitionResult "
+Base class for speech recognition results.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs "
+Class for translation recognition canceled event arguments.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs::Reason "
+`CancellationReason` : The reason the result was canceled.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs::error_code "
+`CancellationErrorCode` : The error code in case of an unsuccessful recognition
+(Reason is set to Error). If Reason is not Error, ErrorCode is set to NoError.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs::error_details "
+`str` : The error message in case of an unsuccessful recognition (Reason is set
+to Error).
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs "
+Defines payload that is sent with the event Recognizing or Recognized.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs::Result "
+`TranslationRecognitionResult`: Contains the translation recognition result.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult "
+Defines the translation text result.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult::Translations "
+`Dict[str, str]`: Presents the translation results. Each item in the map is a
+key value pair, where key is the language tag of the translated text, and value
+is the translation text in that language.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisEventArgs "
+Defines payload that is sent with the event :py:attr:`TranslationRecognizer.synthesizing`.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisEventArgs::Result "
+`TranslationSynthesisResult`: Contains the translation synthesis result.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult "
+Defines the translation synthesis result, i.e. the voice output of the translated text in the target language.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult::Reason "
+`ResultReason`: Recognition reason.
+";
+
+%feature("docstring") Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult::Audio "
+`bytes`: The voice output of the translated text in the target language.
+";
+

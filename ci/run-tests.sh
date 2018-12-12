@@ -11,6 +11,9 @@ options[timeout]="1200s"
 # Defines we collect separately in an array
 defines=()
 
+# tests files (full path) that are to be skipped
+skips=()
+
 while [[ $# > 0 ]]
 do
   key="$1"
@@ -56,6 +59,13 @@ do
     --verbose|-v)
       options[verbose]=1
       ;;
+    --skip|-s)
+      # test names (basename without extension) that are to be skipped
+      [[ -n $2 ]] ||
+        exitWithError "Error: expected argument for %s option\n" "$key"
+      skips+=("$SCRIPT_DIR/t/$2.sh")
+      shift
+      ;;
     --)
       # Stop processing options, remaining arguments are test files.
       shift
@@ -86,6 +96,12 @@ else
   done
 fi
 
+# skip tests as specified
+testsToRun=()
+for t in "${tests[@]}"; do
+  isOneOf "$t" "${skips[@]}" || testsToRun+=("$t")
+done
+
 # Check for required options
 for k in test-configuration build-dir platform; do
   [[ -n ${options[$k]} ]] || {
@@ -113,7 +129,7 @@ fi
 
 pass=0
 total=0
-for testfile in "${tests[@]}"; do
+for testfile in "${testsToRun[@]}"; do
   T="$(basename "$testfile" .sh)"
   echo Starting $T with timeout ${options[timeout]}
   ${coreutilsPrefix}timeout -k 5s "${options[timeout]}" ${coreutilsPrefix}stdbuf -o0 -e0 \

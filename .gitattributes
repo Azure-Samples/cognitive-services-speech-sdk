@@ -7,11 +7,12 @@
 .npmignore text
 .project text
 Dockerfile text
+gradlew text
 LICENSE text
 Makefile text
-gradlew text
 Podfile text
 proguard-rules.pro text
+setup.cfg text
 
 *.appxmanifest text
 *.bat text
@@ -49,9 +50,11 @@ proguard-rules.pro text
 *.props text
 *.ps1 text
 *.py text
+*.rst text
 *.runsettings text
 *.sln text
 *.storyboard text
+*.swg text
 *.targets text
 *.template text
 *.ts text
