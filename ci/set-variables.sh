@@ -247,6 +247,13 @@ fi
 SPEECHSDK_SEMVER2NOMETA="$VERSION$PRERELEASE_VERSION"
 SPEECHSDK_SEMVER2="$SPEECHSDK_SEMVER2NOMETA$META"
 
+# Override suffix
+if [[ $BUILD_REASON == PullRequest ]]; then
+  _OVERRIDE_SUFFIX=_PR$SYSTEM_PULLREQUEST_PULLREQUESTID
+else
+  _OVERRIDE_SUFFIX=
+fi
+
 set +x
 
 # Note: VSTS package management does not (yet?) support build meta, so upstream
@@ -267,7 +274,7 @@ for var in \
   SPEECHSDK_VSTS_FEED \
   ; \
 do
-  overrideVar=OVERRIDE_$var
+  overrideVar=OVERRIDE_${var}${_OVERRIDE_SUFFIX}
   overrideValue="${!overrideVar}"
 
   [[ -n $overrideValue ]] && echo Picking override: $overrideVar=$overrideValue
@@ -280,7 +287,7 @@ for var in \
   SPEECHSDK_BUILD_PHASES \
   ; \
 do
-  overrideVar=OVERRIDE_$var
+  overrideVar=OVERRIDE_${var}${_OVERRIDE_SUFFIX}
   overrideValue="${!overrideVar}"
 
   [[ -n $overrideValue ]] && echo Picking override: $overrideVar=$overrideValue
