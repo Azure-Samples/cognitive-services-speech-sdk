@@ -46,7 +46,11 @@ public:
     /// <summary>
     /// Destructs the instance.
     /// </summary>
-    virtual ~TranslationRecognitionEventArgs() { };
+    virtual ~TranslationRecognitionEventArgs()
+    {
+        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
+        recognizer_event_handle_release(m_hevent);
+    };
 
 #if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 private:
@@ -192,7 +196,11 @@ public:
     /// <summary>
     /// Destructs the instance.
     /// </summary>
-    virtual ~TranslationSynthesisEventArgs() { };
+    virtual ~TranslationSynthesisEventArgs()
+    {
+        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
+        recognizer_event_handle_release(m_hevent);
+    };
 
 #if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 private:
