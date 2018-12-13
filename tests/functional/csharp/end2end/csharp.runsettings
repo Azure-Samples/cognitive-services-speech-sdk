@@ -2,7 +2,7 @@
     <MSTestV2>
         <TestTimeout>450000</TestTimeout>
         <Parallelize>
-            <Workers>2</Workers>
+            <Workers>1</Workers>
             <Scope>MethodLevel</Scope>
         </Parallelize>
     </MSTestV2>
