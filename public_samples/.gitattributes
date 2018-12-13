@@ -17,6 +17,7 @@ proguard-rules.pro text
 *.h text
 *.html text
 *.java text
+*.js text
 *.json text
 *.m text
 *.md text

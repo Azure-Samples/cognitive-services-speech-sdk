@@ -12,7 +12,7 @@ BEGIN {
   chdir $dir or die "?Cannot change directory\n";
 
   find(sub {
-    m(^(?:.*\.(?:java|cpp|cs|m|html|xaml)|pom\.xml|)$) &&
+    m(^(?:.*\.(?:java|js|cpp|cs|m|html|xaml)|pom\.xml)$) &&
     push @ARGV, substr($File::Find::name, 2);
   }, '.');
 
@@ -56,6 +56,7 @@ BEGIN {
       quickstart/js-browser/index.html#quickstartcode
       quickstart/js-browser/index.html#speechsdkref
       quickstart/js-browser/index.html#uidiv
+      quickstart/js-node/index.js#code
       quickstart/objectivec-ios/helloworld/helloworld/ViewController.m#code
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentContinuousRecognitionWithFile
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentRecognitionWithLanguage

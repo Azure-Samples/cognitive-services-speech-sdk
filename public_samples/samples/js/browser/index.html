@@ -200,7 +200,7 @@
                 a.send("");
                 a.onload = function () {
                     var token = JSON.parse(atob(this.responseText.split(".")[1]));
-                    regionKey.value = token.region;
+                    serviceRegion.value = token.region;
                     authorizationToken = this.responseText;
                     subscriptionKey.disabled = true;
                     subscriptionKey.value = "using authorization token (hit F5 to refresh)";

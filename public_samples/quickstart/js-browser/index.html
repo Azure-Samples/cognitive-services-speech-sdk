@@ -22,7 +22,7 @@
       </tr>
       <tr>
         <td align="right">Region</td>
-        <td><input id="regionKey" type="text" size="40" value="YourSubscriptionServiceRegion"></td>
+        <td><input id="serviceRegion" type="text" size="40" value="YourSubscriptionServiceRegion"></td>
       </tr>
       <tr>
         <td></td>
@@ -56,7 +56,7 @@
       a.send("");
       a.onload = function() {
           var token = JSON.parse(atob(this.responseText.split(".")[1]));
-          regionKey.value = token.region;
+          serviceRegion.value = token.region;
           authorizationToken = this.responseText;
           subscriptionKey.disabled = true;
           subscriptionKey.value = "using authorization token (hit F5 to refresh)";
@@ -74,8 +74,8 @@
     var phraseDiv;
     var startRecognizeOnceAsyncButton;
 
-    // subscription key and region key for speech services.
-    var subscriptionKey, regionKey;
+    // subscription key and region for speech services.
+    var subscriptionKey, serviceRegion;
     var authorizationToken;
     var SpeechSDK;
     var recognizer;
@@ -83,7 +83,7 @@
     document.addEventListener("DOMContentLoaded", function () {
       startRecognizeOnceAsyncButton = document.getElementById("startRecognizeOnceAsyncButton");
       subscriptionKey = document.getElementById("subscriptionKey");
-      regionKey = document.getElementById("regionKey");
+      serviceRegion = document.getElementById("serviceRegion");
       phraseDiv = document.getElementById("phraseDiv");
 
       startRecognizeOnceAsyncButton.addEventListener("click", function () {
@@ -93,13 +93,13 @@
         // if we got an authorization token, use the token. Otherwise use the provided subscription key
         var speechConfig;
         if (authorizationToken) {
-          speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionKey.value);
+          speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, serviceRegion.value);
         } else {
           if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
             alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
             return;
           }
-          speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, regionKey.value);
+          speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
         }
 
         speechConfig.speechRecognitionLanguage = "en-US";

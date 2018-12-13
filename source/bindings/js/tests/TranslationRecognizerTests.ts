@@ -1250,15 +1250,47 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
         let noMatchCount: number = 0;
         let speechEnded: number = 0;
 
+        let canceled: boolean = false;
+        let inTurn: boolean = false;
+
+        r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs): void => {
+            try {
+                switch (e.reason) {
+                    case sdk.CancellationReason.Error:
+                        done.fail(e.errorDetails);
+                        break;
+                    case sdk.CancellationReason.EndOfStream:
+                        canceled = true;
+                        break;
+                }
+            } catch (error) {
+                done.fail(error);
+            }
+        };
+
+        r.sessionStarted = ((s: sdk.Recognizer, e: sdk.SessionEventArgs): void => {
+            inTurn = true;
+        });
+
+        r.sessionStopped = ((s: sdk.Recognizer, e: sdk.SessionEventArgs): void => {
+            inTurn = false;
+        });
+
+        r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
+            speechEnded++;
+        };
+
         r.recognized = (o: sdk.Recognizer, e: sdk.TranslationRecognitionEventArgs) => {
             try {
-                if (e.result.reason === sdk.ResultReason.TranslatedSpeech) {
+                const res: sdk.TranslationRecognitionResult = e.result;
+                expect(res).not.toBeUndefined();
+                if (res.reason === sdk.ResultReason.TranslatedSpeech) {
                     expect(speechRecognized).toEqual(false);
                     expect(noMatchCount).toBeGreaterThanOrEqual(1);
                     speechRecognized = true;
-                    expect(sdk.ResultReason[e.result.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.TranslatedSpeech]);
-                    expect(e.result.text).toEqual("What's the weather like?");
-                } else if (e.result.reason === sdk.ResultReason.NoMatch) {
+                    expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.TranslatedSpeech]);
+                    expect(res.text).toEqual("What's the weather like?");
+                } else if (res.reason === sdk.ResultReason.NoMatch) {
                     expect(speechRecognized).toEqual(false);
                     noMatchCount++;
                 }
@@ -1267,26 +1299,22 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
             }
         };
 
-        let pass: boolean = false;
-
-        r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs): void => {
-            try {
-                expect(e.errorDetails).toBeUndefined();
-                expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
-                expect(speechEnded).toEqual(noMatchCount + 1);
-                expect(noMatchCount).toBeGreaterThanOrEqual(1); // one or two
-                expect(noMatchCount).toBeLessThanOrEqual(2); // one or two
-                pass = true;
-            } catch (error) {
-                done.fail(error);
-            }
-        };
-
-        r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
-            speechEnded++;
-        };
-
-        r.startContinuousRecognitionAsync(() => WaitForCondition(() => pass, () => r.stopContinuousRecognitionAsync(() => done(), (error: string) => done.fail(error))),
+        r.startContinuousRecognitionAsync(
+            () => {
+                WaitForCondition(
+                    () => {
+                        return canceled && !inTurn;
+                    },
+                    () => {
+                        r.stopContinuousRecognitionAsync(
+                            () => {
+                                done();
+                            },
+                            (error: string) => {
+                                done.fail(error);
+                            });
+                    });
+            },
             (err: string) => {
                 done.fail(err);
             });

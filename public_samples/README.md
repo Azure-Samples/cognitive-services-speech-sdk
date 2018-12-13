@@ -49,6 +49,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart for Android](./quickstart/java-android/)                                                        | Android  | Demonstrates one-shot speech recognition from microphone             |
 | [Quickstart Java JRE](./quickstart/java-jre/)                                                               | Windows, Linux | Demonstrates one-shot speech recognition from microphone       |
 | [Quickstart JavaScript](./quickstart/js-browser/)                                                           | Web | Demonstrates one-shot speech recognition from microphone                  |
+| [Quickstart Node.js](./quickstart/js-node/)                                                                 | Node.js | Demonstrates one-shot speech recognition from a file                  |
 | [Quickstart Objective-C](./quickstart/objectivec-ios/)                                                      | iOS | Demonstrates one-shot speech recognition from a file with recorded speech |
 
 The following samples demonstrate additional capabilities of the Speech SDK, such additional modes of speech recognition as well as intent recognition and translation:
@@ -64,6 +65,7 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Speech-to-text UWP sample](./samples/csharp/uwp/speechtotext-uwp)                                          | Windows  | Demonstrates speech recognition |
 | [Speech recognition sample for Android](./samples/java/android/sdkdemo)                                     | Android  | Demonstrates speech and intent recognition |
 | [Speech recognition and translation sample for the browser, using JavaScript](./samples/js/browser)         | Web  | Demonstrates speech recognition, intent recognition, and translation |
+| [Speech recognition and translation sample using JavaScript and Node.js](./samples/js/node)                 | Node.js  | Demonstrates speech recognition, intent recognition, and translation |
 
 ## Resources
 

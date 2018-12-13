@@ -34,7 +34,7 @@ BEGIN {
 
   @ARGV = ();
   find(sub {
-    m(\.(?:cpp|cs|html|java|m|php|md)$) &&
+    m(\.(?:cpp|js|cs|html|java|m|php|md)$) &&
     push @ARGV, $File::Find::name
   }, $samplesDir);
 }
