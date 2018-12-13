@@ -77,7 +77,8 @@ const BuildSpeechConfig: () => sdk.SpeechConfig = (): sdk.SpeechConfig => {
     return s;
 };
 
-describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean) => {
+// TODO: disabling intent tests for now due to flaky service.
+describe.skip.each([true, false])("Service based tests", (forceNodeWebSocket: boolean) => {
 
     beforeEach(() => {
         // tslint:disable-next-line:no-console
@@ -846,7 +847,8 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
     }, 30000);
 });
 
-test("Bad DataType for PushStreams results in error", (done: jest.DoneCallback) => {
+// TODO: disabling intent tests for now due to flaky service.
+test.skip("Bad DataType for PushStreams results in error", (done: jest.DoneCallback) => {
     // tslint:disable-next-line:no-console
     console.info("Name: Bad DataType for PushStreams results in error");
 

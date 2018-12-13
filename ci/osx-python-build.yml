@@ -6,7 +6,7 @@ jobs:
     name: Hosted macOS Preview
   timeoutInMinutes: 60
   strategy:
-    maxParallel: 3
+    maxParallel: 1
     matrix:
       Python3.7:
         pythonVersion: 3.7

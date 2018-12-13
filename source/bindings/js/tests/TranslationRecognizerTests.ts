@@ -1274,7 +1274,8 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
                 expect(e.errorDetails).toBeUndefined();
                 expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
                 expect(speechEnded).toEqual(noMatchCount + 1);
-                expect(noMatchCount).toEqual(2);
+                expect(noMatchCount).toBeGreaterThanOrEqual(1); // one or two
+                expect(noMatchCount).toBeLessThanOrEqual(2); // one or two
                 pass = true;
             } catch (error) {
                 done.fail(error);
