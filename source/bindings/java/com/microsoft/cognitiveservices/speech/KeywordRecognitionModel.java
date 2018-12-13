@@ -76,6 +76,7 @@ public class KeywordRecognitionModel implements Closeable
 
     /**
      * Creates a keyword recognition model using the specified input stream.
+     * Note: keyword spotting functionality is only available in the Cognitive Services Speech Devices SDK.
      * @param inputStream A stream that represents data for the keyword recognition model.
      *                 Note, the file can be a zip file in which case the model will be extracted from the zip.
      * @param name The name of the keyword. Note: The name needs to be unique for different keywords as it will be
