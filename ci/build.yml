@@ -1545,13 +1545,12 @@ jobs:
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: |
-      set -e -o pipefail
-      cat "$0"
+      set -u -x -e -o pipefail
       ASTOUT="$(ArtifactOut)/objc/ast"
       MDOUT="$(ArtifactOut)/objc/md"
       mkdir -p "$ASTOUT" "$MDOUT"
       clang -fsyntax-only -x objective-c -Xclang -ast-dump source/bindings/objective-c/public/SPXSpeechApi.h \
-        1> "$ASTOUT/stdout.txt" 2> "$ASTOUT/stderr.txt"
+        2>&1 1> "$ASTOUT/stdout.txt" | tee "$ASTOUT/stderr.txt"
       cd "$MDOUT"
       perl "$(Build.Repository.LocalPath)/ci/objc-docs-ast-to-md.pl" "$ASTOUT/stdout.txt"
     displayName: Create Objective-C reference docs
