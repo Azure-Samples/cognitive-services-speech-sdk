@@ -50,6 +50,8 @@ else
     extra_args=
 fi
 
+# Intent disabled due to service issues.
+# https://msasg.visualstudio.com/Skyman/_workitems/edit/1550174
 ${VIRTUALENV_PYTHON} -m pytest -v ${SCRIPT_DIR}/../../source/bindings/python/test \
     --inputdir $SPEECHSDK_INPUTDIR/audio \
     --subscription $SPEECHSDK_SPEECH_KEY \
@@ -57,6 +59,7 @@ ${VIRTUALENV_PYTHON} -m pytest -v ${SCRIPT_DIR}/../../source/bindings/python/tes
     --luis-subscription $SPEECHSDK_LUIS_KEY \
     --luis-region $SPEECHSDK_LUIS_REGION \
     --language-understanding-app-id $SPEECHSDK_LUIS_HOMEAUTOMATION_APPID \
+    -k "not test_intent_recognition_" \
     $extra_args
 
 # TODO: run samples as part of unit test
