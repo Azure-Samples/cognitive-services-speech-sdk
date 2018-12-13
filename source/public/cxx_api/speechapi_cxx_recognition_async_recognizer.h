@@ -182,7 +182,8 @@ protected:
             SPX_EXITFN_ON_FAIL(hr = recognizer_start_continuous_recognition_async_wait_for(m_hasyncStartContinuous, UINT32_MAX));
 
             SPX_EXITFN_CLEANUP:
-            SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(m_hasyncStartContinuous)); // don't overwrite HR on cleanup
+            auto releaseHr = recognizer_async_handle_release(m_hasyncStartContinuous);
+            SPX_REPORT_ON_FAIL(releaseHr);
             m_hasyncStartContinuous = SPXHANDLE_INVALID;
 
             SPX_THROW_ON_FAIL(hr);
@@ -202,7 +203,8 @@ protected:
             SPX_EXITFN_ON_FAIL(hr = recognizer_stop_continuous_recognition_async_wait_for(m_hasyncStopContinuous, UINT32_MAX));
 
             SPX_EXITFN_CLEANUP:
-            SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(m_hasyncStopContinuous)); // don't overwrite HR on cleanup
+            auto releaseHr = recognizer_async_handle_release(m_hasyncStopContinuous);
+            SPX_REPORT_ON_FAIL(releaseHr);
             m_hasyncStartContinuous = SPXHANDLE_INVALID;
 
             SPX_THROW_ON_FAIL(hr);
@@ -223,7 +225,8 @@ protected:
             SPX_EXITFN_ON_FAIL(hr = recognizer_start_keyword_recognition_async_wait_for(m_hasyncStartKeyword, UINT32_MAX));
 
             SPX_EXITFN_CLEANUP:
-            SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(m_hasyncStartKeyword)); // don't overwrite HR on cleanup
+            auto releaseHr = recognizer_async_handle_release(m_hasyncStartKeyword);
+            SPX_REPORT_ON_FAIL(releaseHr);
             m_hasyncStartKeyword = SPXHANDLE_INVALID;
 
             SPX_THROW_ON_FAIL(hr);
@@ -243,7 +246,8 @@ protected:
             SPX_EXITFN_ON_FAIL(hr = recognizer_stop_keyword_recognition_async_wait_for(m_hasyncStopKeyword, UINT32_MAX));
 
             SPX_EXITFN_CLEANUP:
-            SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(m_hasyncStopKeyword)); // don't overwrite HR on cleanup
+            auto releaseHr = recognizer_async_handle_release(m_hasyncStopKeyword);
+            SPX_REPORT_ON_FAIL(releaseHr);
             m_hasyncStartKeyword = SPXHANDLE_INVALID;
 
             SPX_THROW_ON_FAIL(hr);

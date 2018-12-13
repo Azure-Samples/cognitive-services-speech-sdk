@@ -318,6 +318,7 @@ private:
 
     bool m_isReliableDelivery;
     uint64_t m_lastErrorGlobalOffset;
+    uint64_t m_currentTurnGlobalOffset;
 
     std::shared_ptr<CSpxThreadService> m_threadService;
 

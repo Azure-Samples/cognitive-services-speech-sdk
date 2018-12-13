@@ -110,18 +110,21 @@ SPXAPI recognizer_recognize_once(SPXRECOHANDLE hreco, SPXRESULTHANDLE* phresult)
     SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
     if (SPX_SUCCEEDED(hr))
     {
-        SPX_REPORT_ON_FAIL(hr = recognizer_recognize_once_async(hreco, &hasync));
+        hr = recognizer_recognize_once_async(hreco, &hasync);
+        SPX_REPORT_ON_FAIL(hr);
     }
 
     if (SPX_SUCCEEDED(hr))
     {
-        SPX_REPORT_ON_FAIL(hr = recognizer_recognize_once_async_wait_for(hasync, UINT32_MAX, phresult));
+        hr = recognizer_recognize_once_async_wait_for(hasync, UINT32_MAX, phresult);
+        SPX_REPORT_ON_FAIL(hr);
     }
 
     if (hasync != SPXHANDLE_INVALID)
     {
-        // Don't overwrite error code from earlier function calls when cleaning up async handles
-        SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(hasync));
+        auto releaseHr = recognizer_async_handle_release(hasync);
+        UNUSED(releaseHr);
+        SPX_REPORT_ON_FAIL(releaseHr);
         hasync = SPXHANDLE_INVALID;
     }
 
@@ -183,18 +186,21 @@ SPXAPI recognizer_start_continuous_recognition(SPXRECOHANDLE hreco)
     SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
     if (SPX_SUCCEEDED(hr))
     {
-        SPX_REPORT_ON_FAIL(hr = recognizer_start_continuous_recognition_async(hreco, &hasync));
+        hr = recognizer_start_continuous_recognition_async(hreco, &hasync);
+        SPX_REPORT_ON_FAIL(hr);
     }
 
     if (SPX_SUCCEEDED(hr))
     {
-        SPX_REPORT_ON_FAIL(hr = recognizer_start_continuous_recognition_async_wait_for(hasync, UINT32_MAX));
+        hr = recognizer_start_continuous_recognition_async_wait_for(hasync, UINT32_MAX);
+        SPX_REPORT_ON_FAIL(hr);
     }
 
     if (hasync != SPXHANDLE_INVALID)
     {
         // Don't overwrite error code from earlier function calls when cleaning up async handles
-        SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(hasync));
+        auto releaseHr = recognizer_async_handle_release(hasync);
+        SPX_REPORT_ON_FAIL(releaseHr);
         hasync = SPXHANDLE_INVALID;
     }
 
@@ -244,18 +250,21 @@ SPXAPI recognizer_stop_continuous_recognition(SPXRECOHANDLE hreco)
     SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
     if (SPX_SUCCEEDED(hr))
     {
-        SPX_REPORT_ON_FAIL(hr = recognizer_stop_continuous_recognition_async(hreco, &hasync));
+        hr = recognizer_stop_continuous_recognition_async(hreco, &hasync);
+        SPX_REPORT_ON_FAIL(hr);
     }
 
     if (SPX_SUCCEEDED(hr))
     {
-        SPX_REPORT_ON_FAIL(hr = recognizer_stop_continuous_recognition_async_wait_for(hasync, UINT32_MAX));
+        hr = recognizer_stop_continuous_recognition_async_wait_for(hasync, UINT32_MAX);
+        SPX_REPORT_ON_FAIL(hr);
     }
 
     if (hasync != SPXHANDLE_INVALID)
     {
         // Don't overwrite error code from earlier function calls when cleaning up async handles
-        SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(hasync));
+        auto releaseHr = recognizer_async_handle_release(hasync);
+        SPX_REPORT_ON_FAIL(releaseHr);
         hasync = SPXHANDLE_INVALID;
     }
 
@@ -305,18 +314,21 @@ SPXAPI recognizer_start_keyword_recognition(SPXRECOHANDLE hreco, SPXKEYWORDHANDL
     SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
     if (SPX_SUCCEEDED(hr))
     {
-        SPX_REPORT_ON_FAIL(hr = recognizer_start_keyword_recognition_async(hreco, hkeyword, &hasync));
+        hr = recognizer_start_keyword_recognition_async(hreco, hkeyword, &hasync);
+        SPX_REPORT_ON_FAIL(hr);
     }
 
     if (SPX_SUCCEEDED(hr))
     {
-        SPX_REPORT_ON_FAIL(hr = recognizer_start_keyword_recognition_async_wait_for(hasync, UINT32_MAX));
+        hr = recognizer_start_keyword_recognition_async_wait_for(hasync, UINT32_MAX);
+        SPX_REPORT_ON_FAIL(hr);
     }
 
     if (hasync != SPXHANDLE_INVALID)
     {
         // Don't overwrite error code from earlier function calls when cleaning up async handles
-        SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(hasync));
+        auto releaseHr = recognizer_async_handle_release(hasync);
+        SPX_REPORT_ON_FAIL(releaseHr);
         hasync = SPXHANDLE_INVALID;
     }
 
@@ -369,18 +381,21 @@ SPXAPI recognizer_stop_keyword_recognition(SPXRECOHANDLE hreco)
     SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
     if (SPX_SUCCEEDED(hr))
     {
-        SPX_REPORT_ON_FAIL(hr = recognizer_stop_keyword_recognition_async(hreco, &hasync));
+        hr = recognizer_stop_keyword_recognition_async(hreco, &hasync);
+        SPX_REPORT_ON_FAIL(hr);
     }
 
     if (SPX_SUCCEEDED(hr))
     {
-        SPX_REPORT_ON_FAIL(hr = recognizer_stop_keyword_recognition_async_wait_for(hasync, UINT32_MAX));
+        hr = recognizer_stop_keyword_recognition_async_wait_for(hasync, UINT32_MAX);
+        SPX_REPORT_ON_FAIL(hr);
     }
 
     if (hasync != SPXHANDLE_INVALID)
     {
         // Don't overwrite error code from earlier function calls when cleaning up async handles
-        SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(hasync));
+        auto releaseHr = recognizer_async_handle_release(hasync);
+        SPX_REPORT_ON_FAIL(releaseHr);
         hasync = SPXHANDLE_INVALID;
     }
 

@@ -373,8 +373,11 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
                 __SPX_TRACE_HR("SPX_REPORT_ON_FAIL: ", hr, x);  \
     } } } while (0)
 #else
-#define SPX_REPORT_ON_FAIL(...)
-#define SPX_REPORT_ON_FAIL_IFNOT(...)
+#define SPX_REPORT_ON_FAIL(hr)                                  \
+    UNUSED(hr);
+#define SPX_REPORT_ON_FAIL_IFNOT(hr, hrNot)                     \
+    UNUSED(hr);                                                 \
+    UNUSED(hrNot);
 #endif
 
 #if defined(SPX_CONFIG_TRACE_RETURN_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)

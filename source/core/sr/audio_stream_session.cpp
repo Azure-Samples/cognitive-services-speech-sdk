@@ -51,7 +51,8 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_turnEndStopKind(RecognitionKind::Idle),
     m_isKwsProcessor{ false },
     m_isReliableDelivery{ false },
-    m_lastErrorGlobalOffset{ 0 }
+    m_lastErrorGlobalOffset{ 0 },
+    m_currentTurnGlobalOffset{ 0 }
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 }
@@ -952,9 +953,11 @@ void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapte
     m_expectAdapterStoppedTurn = false;
 
     uint64_t bufferedBytes = 0;
+    uint64_t previousTurnGlobalOffset = m_currentTurnGlobalOffset;
     if (m_audioBuffer)
     {
         m_audioBuffer->NewTurn();
+        m_currentTurnGlobalOffset = m_audioBuffer->GetAbsoluteOffset();
         bufferedBytes = m_audioBuffer->StashedSizeInBytes();
     }
 
@@ -971,8 +974,12 @@ void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapte
         }
         else // In continuous mode we have to make sure we resend all leftovers.
         {
-            if (!bufferedBytes)
+            // Currently the last portion of data (silence) can be non acknowledged by the Bing service,
+            // in order to avoid the live lock, we stop if there was no progress during the last
+            // turn.
+            if (!bufferedBytes || m_currentTurnGlobalOffset == previousTurnGlobalOffset)
             {
+                SPX_DBG_TRACE_WARNING_IF(m_currentTurnGlobalOffset == previousTurnGlobalOffset, "%s: Dropping %d bytes due to no progress in the last turn", __FUNCTION__, (int)bufferedBytes);
                 ChangeState(SessionState::ProcessingAudioLeftovers, SessionState::WaitForAdapterCompletedSetFormatStop);
                 EncounteredEndOfStream();
             }
@@ -1586,6 +1593,7 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
         m_audioBuffer = std::make_shared<PcmAudioBuffer>(*waveformat);
     }
     m_audioBuffer->NewTurn();
+    m_currentTurnGlobalOffset = m_audioBuffer->GetAbsoluteOffset();
 
     // Depending on the startKind, we'll either switch to the Kws Engine Adapter or the Reco Engine Adapter
     m_audioProcessor = startKind == RecognitionKind::Keyword
@@ -1655,7 +1663,10 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
     m_adapterAudioMuted = false;
 
     if (m_audioBuffer)
+    {
         m_audioBuffer->NewTurn();
+        m_currentTurnGlobalOffset = m_audioBuffer->GetAbsoluteOffset();
+    }
 
     // Inform the Audio Processor that we're starting...
     InformAdapterSetFormatStarting(waveformat.get());
