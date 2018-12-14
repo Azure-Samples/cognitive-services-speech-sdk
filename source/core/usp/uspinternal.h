@@ -99,9 +99,13 @@ public:
     /**
     * Requests the connection to service to be shut down.
     * @param uspContext A pointer to the UspContext.
-    * @return A UspResult indicating success or error.
     */
     void Shutdown();
+
+    /**
+    * Returns true if the status is connected.
+    */
+    bool IsConnected();
 
 private:
     void Invoke(std::function<void()> callback);

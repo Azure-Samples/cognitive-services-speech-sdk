@@ -31,6 +31,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognition
 import com.microsoft.cognitiveservices.speech.Connection;
 
 import tests.Settings;
+import tests.TestHelper;
 
 public class TranslationRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
@@ -262,8 +263,7 @@ public class TranslationRecognizerTests {
         assertEquals(1, res.getTranslations().size());
         assertEquals("What's the weather like?", res.getTranslations().get("en-US")); // translated text
 
-        assertTrue(connectedEventCount.get() > 0);
-        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
+        TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         r.close();
         s.close();
@@ -344,8 +344,7 @@ public class TranslationRecognizerTests {
         assertTrue(res.getReason() != ResultReason.Canceled);
         assertEquals("What's the weather like?", res.getText());
 
-        assertTrue(connectedEventCount.get() > 0);
-        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
+        TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
@@ -507,8 +506,7 @@ public class TranslationRecognizerTests {
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
 
-        assertTrue(connectedEventCount.get() > 0);
-        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
+        TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         r.close();
         s.close();

@@ -238,59 +238,62 @@ namespace MicrosoftSpeechSDKSamples
         {
             Console.WriteLine("Single-shot translation.");
 
-            using (var connection = Connection.FromRecognizer(reco))
-            {
-                // Subscribes to events.
-                connection.Connected += MyConnectedEventHandler;
-                connection.Disconnected += MyDisconnectedEventHandler;
-                reco.Recognizing += MyRecognizingEventHandler;
-                reco.Recognized += MyRecognizedEventHandler;
-                reco.Canceled += MyCanceledEventHandler;
-                reco.SessionStopped += MySessionStoppedEventHandler;
+            var connection = Connection.FromRecognizer(reco);
+            // Subscribes to events.
+            connection.Connected += MyConnectedEventHandler;
+            connection.Disconnected += MyDisconnectedEventHandler;
+            reco.Recognizing += MyRecognizingEventHandler;
+            reco.Recognized += MyRecognizedEventHandler;
+            reco.Canceled += MyCanceledEventHandler;
+            reco.SessionStopped += MySessionStoppedEventHandler;
 
-                // Starts recognition.
-                var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
+            // Starts recognition.
+            var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
 
-                Console.WriteLine("Translation result: " + result);
+            Console.WriteLine("Translation result: " + result);
 
-                // Unsubscribe to events.
-                connection.Connected -= MyConnectedEventHandler;
-                connection.Disconnected -= MyDisconnectedEventHandler;
-                reco.Recognizing -= MyRecognizingEventHandler;
-                reco.Recognized -= MyRecognizedEventHandler;
-                reco.Canceled -= MyCanceledEventHandler;
-                reco.SessionStopped -= MySessionStoppedEventHandler;
-            }
+            // Unsubscribe to events.
+            connection.Connected -= MyConnectedEventHandler;
+            connection.Disconnected -= MyDisconnectedEventHandler;
+            reco.Recognizing -= MyRecognizingEventHandler;
+            reco.Recognized -= MyRecognizedEventHandler;
+            reco.Canceled -= MyCanceledEventHandler;
+            reco.SessionStopped -= MySessionStoppedEventHandler;
         }
 
         private static async Task ContinuousTranslationAsync(TranslationRecognizer reco)
         {
-            using (var connection = Connection.FromRecognizer(reco))
+            var connection = Connection.FromRecognizer(reco);
+            // Subscribes to events.
+            connection.Connected += MyConnectedEventHandler;
+            connection.Disconnected += MyDisconnectedEventHandler;
+            reco.Recognizing += MyRecognizingEventHandler;
+            reco.Recognized += MyRecognizedEventHandler;
+            reco.Synthesizing += MySynthesizingEventHandler;
+            reco.Canceled += MyCanceledEventHandler;
+            reco.SessionStopped += (s, e) =>
             {
-                // Subscribes to events.
-                connection.Connected += MyConnectedEventHandler;
-                connection.Disconnected += MyDisconnectedEventHandler;
-                reco.Recognizing += MyRecognizingEventHandler;
-                reco.Recognized += MyRecognizedEventHandler;
-                reco.Synthesizing += MySynthesizingEventHandler;
-                reco.Canceled += MyCanceledEventHandler;
-                reco.SessionStopped += (s, e) =>
-                {
-                    MySessionStoppedEventHandler(s, e);
-                    translationEndTaskCompletionSource.TrySetResult(0);
-                };
+                MySessionStoppedEventHandler(s, e);
+                translationEndTaskCompletionSource.TrySetResult(0);
+            };
 
-                translationEndTaskCompletionSource = new TaskCompletionSource<int>();
+            translationEndTaskCompletionSource = new TaskCompletionSource<int>();
 
-                // Starts translation.
-                await reco.StartContinuousRecognitionAsync().ConfigureAwait(false);
+            // Starts translation.
+            await reco.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                // Waits for completion.
-                await translationEndTaskCompletionSource.Task.ConfigureAwait(false);
+            // Waits for completion.
+            await translationEndTaskCompletionSource.Task.ConfigureAwait(false);
 
-                // Stops translation.
-                await reco.StopContinuousRecognitionAsync().ConfigureAwait(false);
-            }
+            // Stops translation.
+            await reco.StopContinuousRecognitionAsync().ConfigureAwait(false);
+
+            // Unsubscribe to events.
+            connection.Connected -= MyConnectedEventHandler;
+            connection.Disconnected -= MyDisconnectedEventHandler;
+            reco.Recognizing -= MyRecognizingEventHandler;
+            reco.Recognized -= MyRecognizedEventHandler;
+            reco.Canceled -= MyCanceledEventHandler;
         }
 
         private static TaskCompletionSource<int> translationEndTaskCompletionSource;

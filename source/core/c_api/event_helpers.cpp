@@ -69,7 +69,7 @@ SPXAPI_PRIVATE connection_set_event_callback(ISpxRecognizerEvents::ConnectionEve
         };
 
         auto recognizer = connection->GetRecognizer();
-        SPX_IFTRUE_THROW_HR(recognizer == nullptr, SPXERR_RUNTIME_ERROR);
+        SPX_IFTRUE_THROW_HR(recognizer == nullptr, SPXERR_INVALID_RECOGNIZER);
         auto pISpxRecognizerEvents = SpxQueryInterface<ISpxRecognizerEvents>(recognizer).get();
         SPX_IFTRUE_THROW_HR(pISpxRecognizerEvents == nullptr, SPXERR_RUNTIME_ERROR);
         (pISpxRecognizerEvents->*connectionEvent).Disconnect(pfn);

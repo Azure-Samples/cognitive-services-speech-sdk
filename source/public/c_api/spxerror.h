@@ -214,11 +214,21 @@ typedef uintptr_t SPXHR;
 #define SPXERR_SWITCH_MODE_NOT_ALLOWED  __SPX_ERRCODE_FAILED(0x01E)
 
 /// <summary>
-/// Connection is not supported by the specified recognizer.
+/// Changing connection status is not supported in the current recognitzion state.
 /// </summary>
-#define SPXERR_CONNECTION_NOT_SUPPORTED  __SPX_ERRCODE_FAILED(0x01F)
+#define SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED __SPX_ERRCODE_FAILED(0x01F)
+
+/// <summary>
+/// Explicit connection management is not supported by the specified recognizer.
+/// </summary>
+#define SPXERR_EXPLICIT_CONNECTION_NOT_SUPPORTED_BY_RECOGNIZER  __SPX_ERRCODE_FAILED(0x020)
 
 /// <summary>
 /// The handle is invalid.
 /// </summary>
-#define SPXERR_INVALID_HANDLE  __SPX_ERRCODE_FAILED(0x020)
+#define SPXERR_INVALID_HANDLE  __SPX_ERRCODE_FAILED(0x021)
+
+/// <summary>
+/// The recognizer is invalid.
+/// </summary>
+#define SPXERR_INVALID_RECOGNIZER  __SPX_ERRCODE_FAILED(0x022)

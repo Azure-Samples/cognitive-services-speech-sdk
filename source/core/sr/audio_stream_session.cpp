@@ -178,7 +178,6 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
     realTime->SetRealTimePercentage(SimulateRealtimePercentage);
 
     m_isReliableDelivery = true;
-    // Defer calling InitRecoEngineAdapter() or InitKwsEngineAdapter() until later ...
 }
 
 void CSpxAudioStreamSession::InitFromMicrophone()
@@ -189,7 +188,6 @@ void CSpxAudioStreamSession::InitFromMicrophone()
 
     // Create the microphone pump
     m_audioPump = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxInteractiveMicrophone", this);
-    // Defer calling InitRecoEngineAdapter() or InitKwsEngineAdapter() until later ...
 }
 
 void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> stream)
@@ -211,7 +209,6 @@ void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> str
     realTime->SetRealTimePercentage(50);
 
     m_isReliableDelivery = true;
-    // Defer calling InitRecoEngineAdapter() until later ... (see ::EnsureInitRecoEngineAdapter())
 }
 
 void CSpxAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
@@ -410,6 +407,41 @@ void CSpxAudioStreamSession::RemoveRecognizer(ISpxRecognizer* recognizer)
     {
         return item.lock().get() == recognizer;
     });
+}
+
+void CSpxAudioStreamSession::OpenConnection(bool forContinuousRecognition)
+{
+    auto task = CreateTask([=]() {
+        SPX_IFTRUE_THROW_HR(!IsState(SessionState::Idle), SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
+        EnsureInitRecoEngineAdapter();
+        m_recoAdapter->OpenConnection(forContinuousRecognition ? false : true);
+    }, false);
+
+    shared_future<void> taskFuture(task.get_future());
+    promise<bool> executed;
+    shared_future<bool> executedFuture(executed.get_future());
+    m_threadService->ExecuteAsync(move(task), ISpxThreadService::Affinity::Background, move(executed));
+    if (executedFuture.get())
+    {
+        taskFuture.get();
+    }
+}
+
+void CSpxAudioStreamSession::CloseConnection()
+{
+    auto task = CreateTask([=]() {
+        SPX_IFTRUE_THROW_HR(!IsState(SessionState::Idle), SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
+        m_recoAdapter->CloseConnection();
+    }, false);
+
+    shared_future<void> taskFuture(task.get_future());
+    promise<bool> executed;
+    shared_future<bool> executedFuture(executed.get_future());
+    m_threadService->ExecuteAsync(move(task), ISpxThreadService::Affinity::Background, move(executed));
+    if (executedFuture.get())
+    {
+        taskFuture.get();
+    }
 }
 
 // Thread safe method used on the boundary of the API, gets called by incoming threads.

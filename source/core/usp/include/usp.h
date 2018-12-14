@@ -148,6 +148,11 @@ public:
     void SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType);
 
     /**
+     * Returns true if the status is connected.
+     */
+    bool IsConnected();
+
+    /**
     * Closes the USP connection.
     */
     ~Connection();

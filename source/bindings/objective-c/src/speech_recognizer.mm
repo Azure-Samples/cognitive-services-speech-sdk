@@ -163,6 +163,25 @@ struct SpeechEventHandlerHelper
     }
 }
 
+- (void)dealloc {
+    NSLog(@"Speech recognizer object deallocated.");
+    try 
+    {
+        self->speechRecoImpl->SessionStarted.DisconnectAll();
+        self->speechRecoImpl->SessionStopped.DisconnectAll();
+        self->speechRecoImpl->SpeechStartDetected.DisconnectAll();
+        self->speechRecoImpl->SpeechEndDetected.DisconnectAll();
+        self->speechRecoImpl->Recognizing.DisconnectAll();
+        self->speechRecoImpl->Recognized.DisconnectAll();
+        self->speechRecoImpl->Canceled.DisconnectAll();
+        self->speechRecoImpl.reset();
+    }
+    catch (...)
+    {
+        NSLog(@"Exception caught in speech recognizer destructor");
+    }
+}
+
 - (void)setAuthorizationToken: (NSString *)token
 {
     speechRecoImpl->SetAuthorizationToken([token string]);

@@ -13,16 +13,26 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 
 /**
- * Defines the Connection class which manages connection of a recognizer.
+ * Connection is a proxy class for managing connection to the speech service of the specified Recognizer.
+ * By default, a Recognizer autonomously manages connection to service when needed. 
+ * The Connection class provides additional methods for users to explicitly open or close a connection and 
+ * to subscribe to connection status changes.
+ * The use of Connection is optional, and mainly for scenarios where fine tuning of application
+ * behavior based on connection status is needed. Users can optionally call Open() to manually set up a connection 
+ * in advance before starting recognition on the Recognizer associated with this Connection. After starting recognition,
+ * calling Open() or Close() might fail, depending on the process state of the Recognizer. But this does not affect 
+ * the state of the associated Recognizer. And if the Recognizer needs to connect or disconnect to service, it will 
+ * setup or shutdown the connection independently. In this case the Connection will be notified by change of connection 
+ * status via Connected/Disconnected events.
  * Added in version 1.2.0.
  */
-public final class Connection
+public final class Connection implements Closeable
 {
-     /**
-      * Creates an instance of Connection object from the specified recognizer.
-      * @param recognizer The recognizer associated with the connection.
-      * @return The Connection object being created.
-      */
+    /**
+     * Gets the Connection instance from the specified recognizer.
+     * @param recognizer The recognizer associated with the connection.
+     * @return The Connection instance of the recognizer.
+     */
     public static Connection fromRecognizer(Recognizer recognizer)
     {
         com.microsoft.cognitiveservices.speech.internal.Connection connectionImpl = com.microsoft.cognitiveservices.speech.internal.Connection.FromRecognizer(recognizer.getRecognizerImpl());
@@ -30,14 +40,47 @@ public final class Connection
     }
 
     /**
-     * Defines event handler for connected event.
+     * Starts to set up connection to the service.
+     * Users can optionally call Open() to manually set up a connection in advance before starting recognition on the 
+     * Recognizer associated with this Connection. After starting recognition, calling Open() might fail, depending on 
+     * the process state of the Recognizer. But the failure does not affect the state of the associated Recognizer.
+     * Note: On return, the connection might not be ready yet. Please subscribe to the Connected event to
+     * be notfied when the connection is established.
+     * @param forContinuousRecognition indicates whether the connection is used for continuous recognition or single-shot recognition.
+     */
+    public void openConnection(boolean forContinuousRecognition)
+    {
+        connectionImpl.Open(forContinuousRecognition);
+    }
+
+    /**
+     * Closes the connection the service.
+     * Users can optionally call Close() to manually shutdown the connection of the associated Recognizer. The call
+     * might fail, depending on the process state of the Recognizer. But the failure does not affect the state of the 
+     * associated Recognizer.
+     */
+    public void closeConnection()
+    {
+        connectionImpl.Close();
+    }
+
+    /**
+     * The Connected event to indicate that the recognizer is connected to service.
      */
     public final EventHandlerImpl<ConnectionEventArgs> connected = new EventHandlerImpl<ConnectionEventArgs>();
 
     /**
-     * Defines event handler for disconnected event.
+     * The Diconnected event to indicate that the recognizer is disconnected from service.
      */
     public final EventHandlerImpl<ConnectionEventArgs> disconnected = new EventHandlerImpl<ConnectionEventArgs>();
+
+    /**
+     * Dispose of associated resources.
+     */
+    @Override
+    public void close() {
+        dispose(true);
+    }
 
     /*! \cond PROTECTED */
 

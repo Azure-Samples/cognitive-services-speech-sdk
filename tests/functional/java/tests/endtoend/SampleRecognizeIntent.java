@@ -19,6 +19,7 @@ import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
 import com.microsoft.cognitiveservices.speech.Connection;
 
 import tests.Settings;
+import tests.TestHelper;
 
 public class SampleRecognizeIntent implements Runnable {
     private IntentRecognitionResult recognitionResult;

@@ -9,16 +9,26 @@ using System.Globalization;
 namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
-    /// Defines the Connection class which manages connection of a recognizer.
+    /// Connection is a proxy class for managing connection to the speech service of the specified Recognizer.
+    /// By default, a Recognizer autonomously manages connection to service when needed. 
+    /// The Connection class provides additional methods for users to explicitly open or close a connection and 
+    /// to subscribe to connection status changes.
+    /// The use of Connection is optional, and mainly for scenarios where fine tuning of application
+    /// behavior based on connection status is needed. Users can optionally call Open() to manually set up a connection 
+    /// in advance before starting recognition on the Recognizer associated with this Connection. After starting recognition,
+    /// calling Open() or Close() might fail, depending on the process state of the Recognizer. But this does not affect 
+    /// the state of the associated Recognizer. And if the Recognizer needs to connect or disconnect to service, it will 
+    /// setup or shutdown the connection independently. In this case the Connection will be notified by change of connection 
+    /// status via Connected/Disconnected events.
     /// Added in version 1.2.0.
     /// </summary>
-    public sealed class Connection : IDisposable
+    public sealed class Connection
     {
         /// <summary>
-        /// Gets an instance of Connection object for the specified recognizer.
+        /// Gets the Connection instance from the specified recognizer. 
         /// </summary>
         /// <param name="recognizer">The recognizer associated with the connection.</param>
-        /// <returns>The Connection object being created.</returns>
+        /// <returns>The Connection instance of the recognizer.</returns>
         public static Connection FromRecognizer(Recognizer recognizer)
         {
             var connectionImpl = Internal.Connection.FromRecognizer(recognizer.recoImpl);
@@ -39,57 +49,49 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Defines event handler for connected event.
+        /// Starts to set up connection to the service.
+        /// Users can optionally call Open() to manually set up a connection in advance before starting recognition on the 
+        /// Recognizer associated with this Connection. After starting recognition, calling Open() might fail, depending on 
+        /// the process state of the Recognizer. But the failure does not affect the state of the associated Recognizer.
+        /// Note: On return, the connection might not be ready yet. Please subscribe to the Connected event to
+        /// be notfied when the connection is established.
+        /// </summary>
+        /// <param name="forContinuousRecognition">Indicates whether the connection is used for continuous recognition or single-shot recognition.</param>
+        public void Open(bool forContinuousRecognition)
+        {
+            this.connectionImpl.Open(forContinuousRecognition);
+        }
+
+        /// <summary>
+        /// Closes the connection the service.
+        /// Users can optionally call Close() to manually shutdown the connection of the associated Recognizer. The call
+        /// might fail, depending on the process state of the Recognizer. But the failure does not affect the state of the 
+        /// associated Recognizer.
+        /// </summary>
+        public void Close()
+        {
+            this.connectionImpl.Close();
+        }
+
+        /// <summary>
+        /// The Connected event to indicate that the recognizer is connected to service.
         /// </summary>
         public event EventHandler<ConnectionEventArgs> Connected;
 
         /// <summary>
-        /// Defines event handler for disconnected event.
+        /// The Diconnected event to indicate that the recognizer is disconnected from service.
         /// </summary>
         public event EventHandler<ConnectionEventArgs> Disconnected;
 
-        /// <summary>
-        /// Dispose of associated resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
-        /// <summary>
-        /// This method performs cleanup of resources.
-        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
-        /// </summary>
-        /// <param name="disposing">Flag to request disposal.</param>
-        private void Dispose(bool disposing)
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            if (disposing)
-            {
-                this.connectionImpl.Connected.DisconnectAll();
-                this.connectionImpl.Disconnected.DisconnectAll();
-                connectedHandler?.Dispose();
-                disconnectedHandler?.Dispose();
-                this.connectionImpl?.Dispose();
-            }
-
-            disposed = true;
-        }
-
-        private bool disposed = false;
         private readonly Internal.Connection connectionImpl;
 
-        internal ConnectionEventHandlerImpl connectedHandler;
-        internal ConnectionEventHandlerImpl disconnectedHandler;
+        private ConnectionEventHandlerImpl connectedHandler;
+        private ConnectionEventHandlerImpl disconnectedHandler;
 
         /// <summary>
-        /// Define a private class which raise a C# event when a corresponding callback is invoked from the native layer.
+        /// Defines a private class which raise a C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
-        internal class ConnectionEventHandlerImpl : Internal.ConnectionEventListener
+        private class ConnectionEventHandlerImpl : Internal.ConnectionEventListener
         {
             public ConnectionEventHandlerImpl(Connection connection, ConnectionEventType eventType)
             {
@@ -99,11 +101,6 @@ namespace Microsoft.CognitiveServices.Speech
 
             public override void Execute(Internal.ConnectionEventArgs eventArgs)
             {
-                if (this.connection.disposed)
-                {
-                    return;
-                }
-
                 var arg = new ConnectionEventArgs(eventArgs);
 
                 var handler = eventType == ConnectionEventType.ConnectedEvent

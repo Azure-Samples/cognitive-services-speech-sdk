@@ -29,6 +29,11 @@ Connection::Connection(const Client& config) :
     m_impl->Connect();
 }
 
+bool Connection::IsConnected()
+{
+    return m_impl->IsConnected();
+}
+
 void Connection::WriteAudio(const uint8_t* buffer, size_t size)
 {
     m_impl->QueueAudioSegment(buffer, size);

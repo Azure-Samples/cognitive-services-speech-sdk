@@ -64,6 +64,16 @@ void CSpxRecognizer::Disable()
     }
 }
 
+void CSpxRecognizer::OpenConnection(bool forContinuousRecognition)
+{
+    m_defaultSession->OpenConnection(forContinuousRecognition);
+}
+
+void CSpxRecognizer::CloseConnection()
+{
+    m_defaultSession->CloseConnection();
+}
+
 CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsync()
 {
     const char* reco_mode = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
@@ -89,14 +99,17 @@ CSpxAsyncOp<void> CSpxRecognizer::StartContinuousRecognitionAsync()
 {
     const char* reco_mode = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
     auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
+    auto recoModeToSet = dynamic_cast<ISpxIntentRecognizer *>(this) != nullptr
+        ? g_recoModeInteractive
+        : g_recoModeConversation;
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), g_recoModeConversation);
+        SetStringValueInProperties(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), recoModeToSet);
     }
     else
     {
         // Since the mode is set during connection setup, no mode switch is allowed.
-        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(g_recoModeConversation) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(recoModeToSet) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);;
     }
     return m_defaultSession->StartContinuousRecognitionAsync();
 }
@@ -283,13 +296,10 @@ std::shared_ptr<ISpxConnection> CSpxRecognizer::GetConnection()
     auto recognizerAsSite = SpxSiteFromThis(this);
     auto connection = SpxCreateObjectWithSite<ISpxConnection>("CSpxConnection", recognizerAsSite);
 
+    auto initConnection = SpxQueryInterface<ISpxConnectionInit>(connection);
+    initConnection->Init(SpxSharedPtrFromThis<ISpxRecognizer>(this));
+
     return connection;
 }
-
-std::shared_ptr<ISpxRecognizer> CSpxRecognizer::GetRecognizer()
-{
-    return SpxSharedPtrFromThis<ISpxRecognizer>(this);
-}
-
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

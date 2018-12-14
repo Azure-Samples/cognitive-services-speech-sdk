@@ -215,7 +215,13 @@ void Connection::Impl::DoWork(weak_ptr<Connection::Impl> ptr)
 void Connection::Impl::Shutdown()
 {
     m_config.m_callbacks = nullptr;
+    m_connected = false;
     m_valid = false;
+}
+
+bool Connection::Impl::IsConnected()
+{
+    return m_connected;
 }
 
 void Connection::Impl::Validate()
@@ -264,11 +270,15 @@ string Connection::Impl::ConstructConnectionUrl() const
                 << endpoint::translation::path;
             break;
         case EndpointType::Intent:
+            if (m_config.m_recoMode != USP::RecognitionMode::Interactive)
+            {
+                ThrowInvalidArgumentException("Invalid reco mode for intent recognition.");
+            }
             oss << endpoint::luis::hostname
                 << endpoint::luis::pathPrefix1
                 << m_config.m_intentRegion
                 << endpoint::luis::pathPrefix2
-                << g_recoModeStrings[(int)RecognitionMode::Interactive]
+                << g_recoModeStrings[recoMode]
                 << endpoint::luis::pathSuffix;
             break;
         case EndpointType::CDSDK:
@@ -1085,32 +1095,33 @@ void Connection::Impl::InvokeRecognitionErrorCallback(RecognitionStatus status, 
 {
     auto callbacks = m_config.m_callbacks;
     string msg;
+    ErrorCode error = ErrorCode::ServiceError;
 
     switch (status)
     {
     case RecognitionStatus::Error:
         msg = "The speech recognition service encountered an internal error and could not continue. Response text:" + response;
-        this->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, msg); });
+        error = ErrorCode::ServiceError;
         break;
     case RecognitionStatus::TooManyRequests:
         msg = "The number of parallel requests exceeded the number of allowed concurrent transcriptions. Response text:" + response;
-        this->Invoke([&] { callbacks->OnError(false, ErrorCode::TooManyRequests, msg); });
+        error = ErrorCode::TooManyRequests;
         break;
     case RecognitionStatus::BadRequest:
         msg = "Invalid parameter or unsupported audio format in the request. Response text:" + response;
-        this->Invoke([&] { callbacks->OnError(false, ErrorCode::BadRequest, msg.c_str()); });
+        error = ErrorCode::BadRequest;
         break;
     case RecognitionStatus::Forbidden:
         msg = "The recognizer is using a free subscription that ran out of quota. Response text:" + response;
-        this->Invoke([&] { callbacks->OnError(false, ErrorCode::Forbidden, msg.c_str()); });
+        error = ErrorCode::Forbidden;
         break;
     case RecognitionStatus::ServiceUnavailable:
         msg = "The service is currently unavailable. Response text:" + response;
-        this->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceUnavailable, msg.c_str()); });
+        error = ErrorCode::ServiceUnavailable;
         break;
     case RecognitionStatus::InvalidMessage:
         msg = "Invalid response. Response text:" + response;
-        this->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, msg.c_str()); });
+        error = ErrorCode::ServiceError;
         break;
     case RecognitionStatus::Success:
     case RecognitionStatus::EndOfDictation:
@@ -1118,13 +1129,15 @@ void Connection::Impl::InvokeRecognitionErrorCallback(RecognitionStatus status, 
     case RecognitionStatus::InitialBabbleTimeout:
     case RecognitionStatus::NoMatch:
         msg = "Runtime Error: invoke error callback for non-error recognition status. Response text:" + response;
-        this->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, msg.c_str()); });
+        error = ErrorCode::RuntimeError;
         break;
     default:
         msg = "Runtime Error: invalid recognition status. Response text:" + response;
-        this->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, msg.c_str()); });
+        error = ErrorCode::RuntimeError;
         break;
     }
+
+    this->Invoke([&] { callbacks->OnError(false, error, msg.c_str()); });
 }
 
 }}}}

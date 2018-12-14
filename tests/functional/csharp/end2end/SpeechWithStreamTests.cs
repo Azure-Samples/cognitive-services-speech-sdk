@@ -110,14 +110,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.IsFalse(string.IsNullOrEmpty(firstUtteranceText), $"Utterance is unexpectedly empty {firstUtteranceText}");
         }
 
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         [TestMethod]
-        public async Task InteractiveCheckFileOffsets()
+        public async Task InteractiveCheckFileOffsets(bool usingPreConnection)
         {
             this.config.SpeechRecognitionLanguage = Language.EN;
             var audioInput = Util.OpenWavFile(TestData.English.Batman.AudioFile);
             var results = new List<SpeechRecognitionResult>();
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            {
+            { 
+                var connection = Connection.FromRecognizer(recognizer);
+                if (usingPreConnection)
+                {
+                    connection.Open(false);
+                }
                 while (true)
                 {
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
@@ -138,8 +146,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         [TestMethod]
-        public async Task ContinuousCheckFileOffsets()
+        public async Task ContinuousCheckFileOffsets(bool usingPreConnection)
         {
             const int Times = 2;
             var audioInput = Util.OpenWavFile(TestData.English.Batman.AudioFile, Times);
@@ -147,7 +158,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var taskSource = new TaskCompletionSource<bool>();
             this.config.SpeechRecognitionLanguage = Language.EN;
             using (var recognizer = new SpeechRecognizer(this.config, audioInput))
-            {
+            { 
+                var connection = Connection.FromRecognizer(recognizer);
+                if (usingPreConnection)
+                {
+                    connection.Open(true);
+                }
                 recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Result recognized {e.ToString()}");
@@ -157,7 +173,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     if (e.Result.Reason == ResultReason.RecognizedSpeech)
                     {
                         results.Add(e.Result);
-                    
+
                     }
                 };
 
@@ -187,7 +203,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var texts = results.Select(r => r.Text).Where(t => !string.IsNullOrEmpty(t)).ToList();
                 var expected = string.Join(" ", TestData.English.Batman.Utterances);
                 expected += " ";
-                expected += string.Join(" ", TestData.English.Batman.Utterances2);                
+                expected += string.Join(" ", TestData.English.Batman.Utterances2);
 
                 var actual = string.Join(" ", texts.ToArray());
                 Assert.AreEqual(TestData.English.Batman.Utterances.Length * Times, results.Count);

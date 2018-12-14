@@ -34,6 +34,7 @@ import com.microsoft.cognitiveservices.speech.OutputFormat;
 import com.microsoft.cognitiveservices.speech.Connection;
 
 import tests.Settings;
+import tests.TestHelper;
 
 public class SpeechRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
@@ -302,7 +303,16 @@ public class SpeechRecognizerTests {
     // -----------------------------------------------------------------------
 
     @Test
-    public void testRecognizeOnceAsync1() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testRecognizeOnceAsyncWithPreConnection() throws InterruptedException, ExecutionException, TimeoutException {
+        testRecognizeOnceAsync1(true);
+    }
+
+    @Test
+    public void testRecognizeAsyncWithoutPreConnection() throws InterruptedException, ExecutionException, TimeoutException {
+        testRecognizeOnceAsync1(false);
+    }
+
+    public void testRecognizeOnceAsync1(boolean usingPreConnection) throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
@@ -312,6 +322,10 @@ public class SpeechRecognizerTests {
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
 
+        if (usingPreConnection)
+        {
+            connection.openConnection(false);
+        }
         final AtomicInteger connectedEventCount = new AtomicInteger(0);;
         final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
         connection.connected.addEventListener((o, connectionEventArgs) -> {
@@ -336,8 +350,7 @@ public class SpeechRecognizerTests {
         assertEquals(ResultReason.RecognizedSpeech, res.getReason());
         assertEquals("What's the weather like?", res.getText());
 
-        assertTrue(connectedEventCount.get() > 0);
-        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
+        TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         r.close();
         s.close();
@@ -469,8 +482,7 @@ public class SpeechRecognizerTests {
         assertEquals(ResultReason.RecognizedSpeech, res.getReason());
         assertEquals("What's the weather like?", res.getText());
 
-        assertTrue(connectedEventCount.get() > 0);
-        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
+        TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
@@ -536,7 +548,15 @@ public class SpeechRecognizerTests {
     }
 
     @Test
-    public void testStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testStopContinuousRecognitionAsyncWithPreConnection() throws InterruptedException, ExecutionException, TimeoutException {
+        testStopContinuousRecognitionAsync(true);
+    }
+
+    public void testStopContinuousRecognitionAsyncWithoutPreConnection() throws InterruptedException, ExecutionException, TimeoutException {
+        testStopContinuousRecognitionAsync(false);
+    }
+
+    public void testStopContinuousRecognitionAsync(boolean usingPreConnection) throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
@@ -544,6 +564,11 @@ public class SpeechRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
+        Connection connection = Connection.fromRecognizer(r);
+        if (usingPreConnection)
+        {
+            //connection.startConnection(true);
+        }
 
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
@@ -625,8 +650,7 @@ public class SpeechRecognizerTests {
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
 
-        assertTrue(connectedEventCount.get() > 0);
-        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
+        TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         r.close();
         s.close();

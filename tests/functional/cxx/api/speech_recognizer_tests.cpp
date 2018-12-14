@@ -952,7 +952,7 @@ TEST_CASE("Speech Recognizer SpeechConfig validations", "[api][cxx]")
     }
 }
 
-static void ConnectionEventTests(bool usingContinuousRecognition)
+static void ConnectionEventTests(bool forContinuousRecognition)
 {
     auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
     auto audioConfig = AudioConfig::FromWavFileInput(weather.m_audioFilename);
@@ -1001,7 +1001,7 @@ static void ConnectionEventTests(bool usingContinuousRecognition)
     });
 
     recognizer->Recognizing.Connect([&](const SpeechRecognitionEventArgs&) {
-        if (connectedCount != disconnectedCount + 1)
+        if (connectedCount != disconnectedCount && connectedCount != disconnectedCount + 1)
         {
             CAPTURE(connectedCount);
             CAPTURE(disconnectedCount);
@@ -1011,7 +1011,7 @@ static void ConnectionEventTests(bool usingContinuousRecognition)
     });
 
     recognizer->Recognized.Connect([&](const SpeechRecognitionEventArgs&) {
-        if (connectedCount != disconnectedCount + 1)
+        if (connectedCount != disconnectedCount && connectedCount != disconnectedCount + 1)
         {
             CAPTURE(connectedCount);
             CAPTURE(disconnectedCount);
@@ -1033,7 +1033,7 @@ static void ConnectionEventTests(bool usingContinuousRecognition)
         }
     });
 
-    if (usingContinuousRecognition)
+    if (forContinuousRecognition)
     {
         recognizer->StartContinuousRecognitionAsync().get();
     }
@@ -1047,14 +1047,14 @@ static void ConnectionEventTests(bool usingContinuousRecognition)
     auto status = recoEnd.get_future().wait_for(WAIT_FOR_RECO_RESULT_TIME);
     SPXTEST_REQUIRE(status == future_status::ready);
 
-    if (usingContinuousRecognition)
+    if (forContinuousRecognition)
     {
         recognizer->StopContinuousRecognitionAsync().get();
     }
 
     SPXTEST_REQUIRE(sessionStoppedCount == 1);
     SPXTEST_REQUIRE(connectedCount > 0);
-    SPXTEST_REQUIRE(connectedCount - disconnectedCount == 1);
+    SPXTEST_REQUIRE((connectedCount == disconnectedCount || connectedCount == disconnectedCount + 1));
     SPXTEST_REQUIRE(recognizedCount == 1);
     SPXTEST_REQUIRE(sessionStoppedCount == 1);
     SPXTEST_REQUIRE(connectedAfterRecognizing == false);

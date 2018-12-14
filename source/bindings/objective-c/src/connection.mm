@@ -88,6 +88,30 @@ struct ConnectionEventHandlerHelper
     }
 }
 
+- (void)dealloc {
+    NSLog(@"connection object deallocated.");
+    try 
+    {
+        connectionHandle->Connected.DisconnectAll();
+        connectionHandle->Disconnected.DisconnectAll();
+        connectionHandle.reset();
+    }
+    catch (...)
+    {
+        NSLog(@"Exception caught in speech recognizer destructor");
+    }
+}
+
+- (void)open:(BOOL)forContinuousRecognition
+{
+    connectionHandle->Open(forContinuousRecognition);
+}
+
+- (void)close
+{
+    connectionHandle->Close();
+}
+
 - (void)onConnectedEvent:(SPXConnectionEventArgs *)eventArgs
 {
     LogDebug(@"OBJC OnConnectedEvent");

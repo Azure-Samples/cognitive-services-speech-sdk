@@ -11,7 +11,7 @@ namespace Impl {
 
 class CSpxConnection :
     public ISpxConnection,
-    public ISpxObjectWithSiteInitImpl<ISpxConnectionSite>
+    public ISpxConnectionInit
 {
 public:
 
@@ -19,18 +19,17 @@ public:
     virtual ~CSpxConnection();
 
     SPX_INTERFACE_MAP_BEGIN()
-        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
-        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxConnection)
+        SPX_INTERFACE_MAP_ENTRY(ISpxConnectionInit)
     SPX_INTERFACE_MAP_END()
 
-    // --- ISpxObjectWithSiteInit
-    void Init() override;
-    void Term() override;
-
     // --- ISpxConnection
-    void Open() override;
+    void Open(bool forContinuousRecognition) override;
+    void Close() override;
     std::shared_ptr<ISpxRecognizer> GetRecognizer() override;
+
+    // -- ISpxConnectionInit
+    void Init(std::weak_ptr<ISpxRecognizer> recognizer) override;
 
 private:
 
@@ -39,7 +38,7 @@ private:
 
     CSpxConnection& operator=(const CSpxConnection&) = delete;
 
-    std::shared_ptr<ISpxRecognizer> m_recognizer;
+    std::weak_ptr<ISpxRecognizer> m_recognizer;
 };
 
 

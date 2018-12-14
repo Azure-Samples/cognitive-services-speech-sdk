@@ -103,6 +103,9 @@ public:
     CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) override;
     CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
 
+    void OpenConnection(bool forContinuousRecognition) override;
+    void CloseConnection() override;
+
     // --- ISpxKwsEngineAdapterSite
     void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint32_t size, AudioData_Type audioData) override;
     void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Keyword); }
@@ -153,7 +156,6 @@ public:
 
     // --- ISpxNamedProperties (overrides)
     std::string GetStringValue(const char* name, const char* defaultValue) const override;
-
 
 private:
     std::shared_ptr<ISpxThreadService> InternalQueryService(const char* serviceName);

@@ -46,7 +46,6 @@ public:
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
-
 private:
     using SitePtr = std::shared_ptr<ISpxRecoEngineAdapterSite>;
 

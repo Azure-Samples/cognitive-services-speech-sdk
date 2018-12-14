@@ -183,5 +183,5 @@ namespace Microsoft.CognitiveServices.Speech
         {
             return this.configImpl.GetProperty(name);
         }
-    }
+   }
 }

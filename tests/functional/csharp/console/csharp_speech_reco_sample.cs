@@ -17,6 +17,7 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class SpeechRecognitionSamples
     {
+        private static long lastRecognitionTicks;
         private static void MyRecognizingEventHandler(object sender, SpeechRecognitionEventArgs e)
         {
             Console.WriteLine($"Speech recognition: intermediate result: {e.ToString()}, Offset: {e.Result.OffsetInTicks}, Duration: {e.Result.Duration}.");
@@ -24,18 +25,20 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MyRecognizedEventHandler(object sender, SpeechRecognitionEventArgs e)
         {
+            var t = DateTime.Now.Ticks;
             if (e.Result.Reason == ResultReason.RecognizedSpeech)
             {
-                Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+                Console.WriteLine($"RECOGNIZED (elapsedTicks={t-lastRecognitionTicks}): Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
             }
             else if (e.Result.Reason == ResultReason.NoMatch)
             {
-                Console.WriteLine($"NOMATCH: Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+                Console.WriteLine($"NOMATCH (elapsedTicks={t - lastRecognitionTicks}): Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
             }
             else
             {
-                Console.WriteLine($"Unexpected result. Reason={e.Result.Reason}, result={e.Result}");
+                Console.WriteLine($"Unexpected result(elapsedTicks={t - lastRecognitionTicks}). Reason={e.Result.Reason}, result={e.Result}");
             }
+            lastRecognitionTicks = t;
         }
 
         private static void MyCanceledEventHandler(object sender, SpeechRecognitionCanceledEventArgs e)
@@ -133,8 +136,11 @@ namespace MicrosoftSpeechSDKSamples
         {
             if (string.IsNullOrEmpty(fileName) || String.Compare(fileName, "mic", true) == 0)
             {
+                var stopWatchCreation = Stopwatch.StartNew();
                 using (var reco = new SpeechRecognizer(config))
                 {
+                    stopWatchCreation.Stop();
+                    Console.WriteLine("Time for creating speech recognizer: " + stopWatchCreation.ElapsedMilliseconds);
                     await LaunchRecognizerAsync(reco, useContinuousRecognition);
                 }
             }
@@ -144,15 +150,21 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     Console.WriteLine("Using stream input.");
                     var audioInput = Util.OpenWavFile(fileName);
+                    var stopWatchCreation = Stopwatch.StartNew();
                     using (var reco = new SpeechRecognizer(config, audioInput))
                     {
+                        stopWatchCreation.Stop();
+                        Console.WriteLine("Time for creating speech recognizer: " + stopWatchCreation.ElapsedMilliseconds);
                         await LaunchRecognizerAsync(reco, useContinuousRecognition);
                     }
                 }
                 else
                 {
+                    var stopWatchCreation = Stopwatch.StartNew();
                     using (var reco = new SpeechRecognizer(config, AudioConfig.FromWavFileInput(fileName)))
                     {
+                        stopWatchCreation.Stop();
+                        Console.WriteLine("Time for creating speech recognizer: " + stopWatchCreation.ElapsedMilliseconds);
                         await LaunchRecognizerAsync(reco, useContinuousRecognition);
                     }
                 }
@@ -174,67 +186,75 @@ namespace MicrosoftSpeechSDKSamples
         private static async Task SingleShotRecognitionAsync(SpeechRecognizer reco)
         {
             Console.WriteLine("Single-shot recognition.");
-            using (var connection = Connection.FromRecognizer(reco))
-            {
-                // Subscribes to events.
-                connection.Connected += MyConnectedEventHandler;
-                connection.Disconnected += MyDisconnectedEventHandler;
-                reco.Recognizing += MyRecognizingEventHandler;
-                reco.Recognized += MyRecognizedEventHandler;
-                reco.Canceled += MyCanceledEventHandler;
-                reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
-                reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
-                reco.SessionStarted += MySessionStartedEventHandler;
-                reco.SessionStopped += MySessionStoppedEventHandler;
+            var connection = Connection.FromRecognizer(reco);
 
-                // Starts recognition.
-                var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
+            // Subscribes to events.
+            connection.Connected += MyConnectedEventHandler;
+            connection.Disconnected += MyDisconnectedEventHandler;
+            reco.Recognizing += MyRecognizingEventHandler;
+            reco.Recognized += MyRecognizedEventHandler;
+            reco.Canceled += MyCanceledEventHandler;
+            reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
+            reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
+            reco.SessionStarted += MySessionStartedEventHandler;
+            reco.SessionStopped += MySessionStoppedEventHandler;
 
-                Console.WriteLine("Speech Recognition: Recognition result: " + result);
+            // Starts recognition.
+            lastRecognitionTicks = DateTime.Now.Ticks;
+            var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
 
-                // Unsubscribe to events.
-                connection.Connected -= MyConnectedEventHandler;
-                connection.Disconnected -= MyDisconnectedEventHandler;
-                reco.Recognizing -= MyRecognizingEventHandler;
-                reco.Recognized -= MyRecognizedEventHandler;
-                reco.Canceled -= MyCanceledEventHandler;
-                reco.SpeechStartDetected -= MySpeechStartDetectedEventHandler;
-                reco.SpeechEndDetected -= MySpeechEndDetectedEventHandler;
-                reco.SessionStarted -= MySessionStartedEventHandler;
-                reco.SessionStopped -= MySessionStoppedEventHandler;
-            }
+            Console.WriteLine("Speech Recognition: Recognition result: " + result);
+
+            // Unsubscribe to events.
+            connection.Connected -= MyConnectedEventHandler;
+            connection.Disconnected -= MyDisconnectedEventHandler;
+            reco.Recognizing -= MyRecognizingEventHandler;
+            reco.Recognized -= MyRecognizedEventHandler;
+            reco.Canceled -= MyCanceledEventHandler;
+            reco.SpeechStartDetected -= MySpeechStartDetectedEventHandler;
+            reco.SpeechEndDetected -= MySpeechEndDetectedEventHandler;
+            reco.SessionStarted -= MySessionStartedEventHandler;
+            reco.SessionStopped -= MySessionStoppedEventHandler;
         }
 
         private static async Task ContinuousRecognitionAsync(SpeechRecognizer reco)
         {
             Console.WriteLine("Continuous recognition.");
             var tcsLocal = new TaskCompletionSource<int>();
-            using (var connection = Connection.FromRecognizer(reco))
+            var connection = Connection.FromRecognizer(reco);
+            connection.Connected += MyConnectedEventHandler;
+            connection.Disconnected += MyDisconnectedEventHandler;
+            reco.Recognized += MyRecognizedEventHandler;
+            reco.Canceled += MyCanceledEventHandler;
+            reco.SessionStarted += MySessionStartedEventHandler;
+            reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
+            reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
+            reco.SessionStopped += (s, e) =>
             {
-                connection.Connected += MyConnectedEventHandler;
-                connection.Disconnected += MyDisconnectedEventHandler;
-                reco.Recognized += MyRecognizedEventHandler;
-                reco.Canceled += MyCanceledEventHandler;
-                reco.SessionStarted += MySessionStartedEventHandler;
-                reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
-                reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
-                reco.SessionStopped += (s, e) =>
-                {
-                    MySessionStoppedEventHandler(s, e);
-                    Console.WriteLine($"Session Stop detected. Stop the recognition.");
-                    tcsLocal.TrySetResult(0);
-                };
+                MySessionStoppedEventHandler(s, e);
+                Console.WriteLine($"Session Stop detected. Stop the recognition.");
+                tcsLocal.TrySetResult(0);
+            };
 
-                // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-                await reco.StartContinuousRecognitionAsync().ConfigureAwait(false);
+            // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+            lastRecognitionTicks = DateTime.Now.Ticks;
+            await reco.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                // Waits for completion.
-                // Use Task.WaitAny to make sure that the task is rooted.
-                Task.WaitAny(new[] { tcsLocal.Task });
+            // Waits for completion.
+            // Use Task.WaitAny to make sure that the task is rooted.
+            Task.WaitAny(new[] { tcsLocal.Task });
 
-                // Stops translation.
-                await reco.StopContinuousRecognitionAsync().ConfigureAwait(false);
-            }
+            // Stops translation.
+            await reco.StopContinuousRecognitionAsync().ConfigureAwait(false);
+
+            connection.Connected -= MyConnectedEventHandler;
+            connection.Disconnected -= MyDisconnectedEventHandler;
+            reco.Recognizing -= MyRecognizingEventHandler;
+            reco.Recognized -= MyRecognizedEventHandler;
+            reco.Canceled -= MyCanceledEventHandler;
+            reco.SpeechStartDetected -= MySpeechStartDetectedEventHandler;
+            reco.SpeechEndDetected -= MySpeechEndDetectedEventHandler;
+            reco.SessionStarted -= MySessionStartedEventHandler;
         }
     }
 }

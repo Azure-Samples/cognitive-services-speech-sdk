@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.Ignore;
 
 import tests.Settings;
+import tests.TestHelper;
 import tests.endtoend.SampleSimpleRecognize;
 
 public class SampleSimpleRecognizeTest {
@@ -31,8 +32,7 @@ public class SampleSimpleRecognizeTest {
         test.run();
 
         assertEquals("What's the weather like?", test.getResult());
-        assertTrue(test.getConnectedEventCount() > 0);
-        assertTrue(test.getConnectedEventCount() == test.getDisconnectedEventCount() + 1);
+        TestHelper.AssertConnectionCountMatching(test.getConnectedEventCount(), test.getDisconnectedEventCount());
     }
 
 }

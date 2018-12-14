@@ -21,8 +21,7 @@ class CSpxRecognizer :
     public ISpxObjectWithSiteInitImpl<ISpxRecognizerSite>,
     public ISpxPropertyBagImpl,
     public ISpxConnectionFromRecognizer,
-    public ISpxGenericSite,
-    public ISpxConnectionSite
+    public ISpxGenericSite
 {
 public:
 
@@ -37,7 +36,6 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerEvents)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
-        SPX_INTERFACE_MAP_ENTRY(ISpxConnectionSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxConnectionFromRecognizer)
     SPX_INTERFACE_MAP_END()
 
@@ -59,6 +57,9 @@ public:
 
     CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) override;
     CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
+
+    void OpenConnection(bool forContinuousRecognition) override;
+    void CloseConnection() override;
 
     // --- ISpxSessionFromRecognizer
     std::shared_ptr<ISpxSession> GetDefaultSession() override;
@@ -83,9 +84,6 @@ public:
 
     // --- ISpxConnectionFromRecognizer
     std::shared_ptr<ISpxConnection> GetConnection() override;
-
-    // --- ISpxConnectionSite
-    std::shared_ptr<ISpxRecognizer> GetRecognizer() override;
 
 protected:
     void EnsureDefaultSession();

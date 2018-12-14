@@ -15,6 +15,7 @@ using System.Linq;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using static TranslationTestsHelper;
+    using static AssertHelpers;
     using static SpeechRecognitionTestsHelper;
 
     [TestClass]
@@ -250,7 +251,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.DE };
 
-            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Batman.AudioFile, Language.EN, toLanguages, Voice.DE);
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Batman.AudioFile, Language.EN, toLanguages, voice:Voice.DE);
             Assert.AreNotEqual(actualTranslations[ResultType.Synthesis].Count, 0);
             var actualSynthesisByteResults = actualTranslations[ResultType.Synthesis].Cast<TranslationSynthesisEventArgs>().ToList();
             const int MinSize = 20000;
@@ -277,7 +278,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.FR };
 
-            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, voice);
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, voice:voice);
             Assert.AreEqual(1, actualTranslations[ResultType.Synthesis].Count);
 
             var actualSynthesisByteResult = (TranslationSynthesisEventArgs)actualTranslations[ResultType.Synthesis].Single();

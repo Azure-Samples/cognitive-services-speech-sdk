@@ -426,25 +426,29 @@ public:
 
     virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
     virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
+
+    virtual void OpenConnection(bool forContinuousRecognition) = 0;
+    virtual void CloseConnection() = 0;
 };
 
 class ISpxConnection : public ISpxInterfaceBaseFor<ISpxConnection>
 {
 public:
-    virtual void Open() = 0;
+    virtual void Open(bool forContinuousRecognition) = 0;
+    virtual void Close() = 0;
     virtual std::shared_ptr<ISpxRecognizer> GetRecognizer() = 0;
+};
+
+class ISpxConnectionInit : public ISpxInterfaceBaseFor<ISpxConnectionInit>
+{
+public:
+    virtual void Init(std::weak_ptr<ISpxRecognizer> recognizer) = 0;
 };
 
 class ISpxConnectionFromRecognizer : public ISpxInterfaceBaseFor<ISpxConnectionFromRecognizer>
 {
 public:
     virtual std::shared_ptr<ISpxConnection> GetConnection() = 0;
-};
-
-class ISpxConnectionSite : public ISpxInterfaceBaseFor<ISpxConnectionSite>
-{
-public:
-        virtual std::shared_ptr<ISpxRecognizer> GetRecognizer() = 0;
 };
 
 class ISpxSessionEventArgs : public ISpxInterfaceBaseFor<ISpxSessionEventArgs>
@@ -553,6 +557,9 @@ public:
 
     virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
     virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
+
+    virtual void OpenConnection(bool forContinuousRecognition) = 0;
+    virtual void CloseConnection() = 0;
 };
 
 class ISpxAudioStreamSessionInit : public ISpxInterfaceBaseFor<ISpxAudioStreamSessionInit>
@@ -575,6 +582,8 @@ class ISpxRecoEngineAdapter :
 {
 public:
     virtual void SetAdapterMode(bool singleShot) = 0;
+    virtual void OpenConnection(bool) {};
+    virtual void CloseConnection() {};
 };
 
 class SpxRecoEngineAdapterError

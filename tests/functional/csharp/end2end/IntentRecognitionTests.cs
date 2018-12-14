@@ -134,8 +134,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             int connectedEventCount = 0;
             int disconnectedEventCount = 0;
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
-            using (var connection = Connection.FromRecognizer(recognizer))
             {
+                var connection = Connection.FromRecognizer(recognizer);
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
                 recognizer.AddIntent(model, "HomeAutomation.TurnOn", "my-custom-intent-id-string");
 

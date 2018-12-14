@@ -79,6 +79,79 @@ void CSpxUspRecoEngineAdapter::SetAdapterMode(bool singleShot)
     m_singleShot = singleShot;
 }
 
+void CSpxUspRecoEngineAdapter::OpenConnection(bool singleShot)
+{
+    SPX_DBG_TRACE_VERBOSE("%s: Open connection.", __FUNCTION__);
+
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+    std::string currentRecoMode = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode));
+    std::string recoModeToSet;
+
+    // Get recognizer type
+    uint16_t countSpeech, countIntent, countTranslation;
+    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation);
+    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation == 1); // currently only support one recognizer
+
+    if (countIntent == 1)
+    {
+        // The connection to service for IntentRecognizer is depending on the Intent model being used,
+        // so it is not possbile to set up the connection now.
+        SPX_DBG_TRACE_INFO("%s: Skip setting up connection in advance for intent recognizer.", __FUNCTION__);
+        SPX_THROW_HR(SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
+        return;
+    }
+    else if (countSpeech == 1)
+    {
+        recoModeToSet = singleShot ? g_recoModeInteractive : g_recoModeConversation;
+    }
+    else if (countTranslation == 1)
+    {
+        // Always use conversation mode for translation recognizer
+        recoModeToSet = g_recoModeConversation;
+    }
+    // Set reco mode.
+    if (currentRecoMode.empty())
+    {
+        properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), recoModeToSet.c_str());
+    }
+    else
+    {
+        SPX_IFTRUE_THROW_HR(currentRecoMode != recoModeToSet, SPXERR_SWITCH_MODE_NOT_ALLOWED);
+    }
+
+    // Establish the connection to service.
+    EnsureUspInit();
+}
+
+
+void CSpxUspRecoEngineAdapter::CloseConnection()
+{
+    SPX_DBG_TRACE_VERBOSE("%s: Close connection.", __FUNCTION__);
+
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+    std::string currentRecoMode = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode));
+    std::string recoModeToSet;
+
+    // Get recognizer type
+    uint16_t countSpeech, countIntent, countTranslation;
+    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation);
+    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation == 1); // currently only support one recognizer
+
+    if (countIntent == 1)
+    {
+        // The connection to service for IntentRecognizer is depending on the Intent model being used,
+        // so it is not possbile to set up the connection now.
+        SPX_DBG_TRACE_INFO("%s: Skip setting up connection in advance for intent recognizer.", __FUNCTION__);
+        SPX_THROW_HR(SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
+        return;
+    }
+
+    // Terminate the connection to service.
+    UspTerminate();
+}
+
 void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -197,10 +270,8 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
 
     // Set up the connection properties, and create the connection
     SetUspEndpoint(properties, client);
-    SetUspRecoMode(properties, client);
     SetUspAuthentication(properties, client);
     SetUspProxyInfo(properties, client);
-    client.SetOutputFormat(GetOutputFormat(*properties));
 
     // Construct speech.config payload
     SetSpeechConfig(properties);
@@ -239,6 +310,12 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
 
 void CSpxUspRecoEngineAdapter::UspTerminate()
 {
+    // Inform upper layer about disconnection.
+    if ((m_uspConnection != nullptr) && m_uspConnection->IsConnected())
+    {
+        OnDisconnected();
+    }
+
     // Term the callbacks first and then reset/release the connection
     SpxTermAndClear(m_uspCallbacks); // After this ... we won't be called back on ISpxUspCallbacks ever again...
 
@@ -260,24 +337,67 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedP
 
     // now based on the endpoint, which types of recognizers, and/or the custom model id ... set up the endpoint
     auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
-    if (0 == PAL::stricmp(endpoint.c_str(), "CORTANA"))
+    if (!endpoint.empty())
     {
-        return SetUspEndpoint_Cortana(properties, client);
-    }
-    else if (!endpoint.empty())
-    {
-        return SetUspEndpoint_Custom(properties, client);
+        m_customEndpoint = true;
+        if (0 == PAL::stricmp(endpoint.c_str(), "CORTANA"))
+        {
+            SetUspEndpoint_Cortana(properties, client);
+        }
+        else
+        {
+            SetUspEndpoint_Custom(properties, client);
+        }
     }
     else if (countIntent == 1)
     {
-        return SetUspEndpoint_Intent(properties, client);
+        SetUspEndpoint_Intent(properties, client);
     }
     else if (countTranslation == 1)
     {
-        return SetUspEndpoint_Translation(properties, client);
+        SetUspEndpoint_Translation(properties, client);
+    }
+    else
+    {
+        SetUspEndpoint_DefaultSpeechService(properties, client);
     }
 
-    return SetUspEndpoint_DefaultSpeechService(properties, client);
+    // set reco mode based on recognizer type
+    USP::RecognitionMode mode = USP::RecognitionMode::Interactive;
+    SPXHR checkHr = SPX_NOERROR;
+
+    // The reco mode in custom endpoint takes precedence.
+    if (m_customEndpoint)
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: Get reco mode string in the custom endpoint URL.", __FUNCTION__);
+
+        checkHr = GetRecoModeFromEndpoint(PAL::ToWString(endpoint), mode);
+        if (checkHr == SPXERR_NOT_FOUND)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: No reco mode string in the custom endpoint URL.", __FUNCTION__);
+            checkHr = GetRecoModeFromProperties(properties, mode);
+            if (checkHr == SPXERR_NOT_FOUND)
+            {
+                SPX_DBG_TRACE_VERBOSE("%s: No reco mode string set in property collection when using custom endpoint.", __FUNCTION__);
+            }
+        }
+    }
+    else
+    {
+        checkHr = GetRecoModeFromProperties(properties, mode);
+        // For non-custom endpoint, the reco mode must be set.
+        SPX_THROW_HR_IF(checkHr, SPX_FAILED(checkHr));
+    }
+
+    if (checkHr == SPX_NOERROR)
+    {
+        m_recoMode = mode;
+        client.SetRecognitionMode(m_recoMode);
+    }
+
+    client.SetOutputFormat(GetOutputFormat(properties));
+
+    return client;
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Cortana(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
@@ -285,8 +405,6 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Cortana(std::shared_ptr<IS
     UNUSED(properties);
 
     SPX_DBG_TRACE_VERBOSE("%s: Using Cortana endpoint...", __FUNCTION__);
-    m_customEndpoint = true;
-
     return client.SetEndpointType(USP::EndpointType::CDSDK);
 }
 
@@ -295,8 +413,6 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Custom(std::shared_ptr<ISp
     UNUSED(properties);
 
     auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
-    m_customEndpoint = true;
-
     SPX_DBG_TRACE_VERBOSE("%s: Using Custom URL/endpoint: %s", __FUNCTION__, endpoint.c_str());
     return client.SetEndpointUrl(endpoint);
 }
@@ -369,29 +485,6 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_DefaultSpeechService(std::
     return client;
 }
 
-USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
-{
-    USP::RecognitionMode mode = USP::RecognitionMode::Interactive;
-
-    // Check mode in the property collection first.
-    auto checkHr = GetRecoModeFromProperties(properties, mode);
-    SPX_THROW_HR_IF(checkHr, SPX_FAILED(checkHr) && (checkHr != SPXERR_NOT_FOUND));
-
-    // Check mode string in the custom URL if needed.
-    if ((checkHr == SPXERR_NOT_FOUND) && m_customEndpoint)
-    {
-        SPX_DBG_TRACE_VERBOSE("%s: Check mode string in the Custom URL.", __FUNCTION__);
-
-        auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
-        SPX_THROW_HR_IF(SPXERR_RUNTIME_ERROR, endpoint.empty());
-
-        checkHr = GetRecoModeFromEndpoint(PAL::ToWString(endpoint), mode);
-        SPX_THROW_HR_IF(checkHr, SPX_FAILED(checkHr) && (checkHr != SPXERR_NOT_FOUND));
-    }
-
-    m_recoMode = mode;
-    return client.SetRecognitionMode(m_recoMode);
-}
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
@@ -472,12 +565,12 @@ SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromProperties(const std::shared_ptr<
     return hr;
 }
 
-USP::OutputFormat CSpxUspRecoEngineAdapter::GetOutputFormat(const ISpxNamedProperties& properties) const
+USP::OutputFormat CSpxUspRecoEngineAdapter::GetOutputFormat(const std::shared_ptr<ISpxNamedProperties>& properties) const
 {
-    if (!properties.HasStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse)))
+    if (!properties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse)))
         return USP::OutputFormat::Simple;
 
-    auto value = properties.GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
+    auto value = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
     if (value.empty() || PAL::stricmp(value.c_str(), PAL::BoolToString(false).c_str()) == 0)
     {
         return USP::OutputFormat::Simple;

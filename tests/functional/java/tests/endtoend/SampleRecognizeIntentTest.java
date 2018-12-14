@@ -14,6 +14,7 @@ import com.microsoft.cognitiveservices.speech.PropertyId;
 import org.junit.Ignore;
 
 import tests.Settings;
+import tests.TestHelper;
 import tests.endtoend.SampleRecognizeIntent;
 
 public class SampleRecognizeIntentTest {
@@ -31,8 +32,7 @@ public class SampleRecognizeIntentTest {
         test = new SampleRecognizeIntent();
 
         test.run();
-        assertTrue(test.getConnectedEventCount() > 0);
-        assertTrue(test.getConnectedEventCount() == test.getDisconnectedEventCount() + 1);
+        TestHelper.AssertConnectionCountMatching(test.getConnectedEventCount(), test.getDisconnectedEventCount());
         assertNotNull(test.getResult()); // we got the final result
         assertEquals("What's the weather like?", test.getResult().getText());
 

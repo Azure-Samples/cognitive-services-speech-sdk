@@ -99,6 +99,8 @@ public:
 
     // --- ISpxRecoEngineAdapter
     void SetAdapterMode(bool singleShot) override;
+    void OpenConnection(bool singleShot) override;
+    void CloseConnection() override;
 
     // --- ISpxAudioProcessor
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;
@@ -108,7 +110,6 @@ public:
     SPX_SERVICE_MAP_BEGIN()
     SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
     SPX_SERVICE_MAP_END()
-
 
 private:
     using SitePtr = std::shared_ptr<ISpxRecoEngineAdapterSite>;
@@ -133,7 +134,7 @@ private:
 
     SPXHR GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& mode);
     SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;
-    USP::OutputFormat GetOutputFormat(const ISpxNamedProperties& properties) const;
+    USP::OutputFormat GetOutputFormat(const std::shared_ptr<ISpxNamedProperties>& properties) const;
 
     void SetSpeechConfig(std::shared_ptr<ISpxNamedProperties>& properties);
 

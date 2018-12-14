@@ -103,7 +103,7 @@
     XCTAssertTrue([germanTranslation isEqualToString:weatherTextGerman], "German translation does not match");
     XCTAssertTrue([chineseTranslation isEqualToString:weatherTextChinese], "Chinese translation does not match");
     XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%d", connectedEventCount);
-    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1, @"The connected event count (%d) does not match the disconnected event count (%d)", connectedEventCount, disconnectedEventCount);
+    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount, @"The connected event count (%d) does not match the disconnected event count (%d)", connectedEventCount, disconnectedEventCount);
 }
 
 - (void) testContinuousTranslation {
@@ -139,7 +139,7 @@
     XCTAssertTrue([germanTranslation isEqualToString:weatherTextGerman], "German translation does not match");
     XCTAssertTrue([chineseTranslation isEqualToString:weatherTextChinese], "Chinese translation does not match");
     XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%d", connectedEventCount);
-    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1, @"The connected event count (%d) does not match the disconnected event count (%d)", connectedEventCount, disconnectedEventCount);
+    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount, @"The connected event count (%d) does not match the disconnected event count (%d)", connectedEventCount, disconnectedEventCount);
 }
 
 - (void)testTranslateAsync {
@@ -161,7 +161,7 @@
         id chineseTranslation = [translationDictionary valueForKey:@"zh-Hans"];
 
         XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%d", connectedEventCount);
-        XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1, @"The connected event count (%d) does not match the disconnected event count (%d)", connectedEventCount, disconnectedEventCount);
+        XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount, @"The connected event count (%d) does not match the disconnected event count (%d)", connectedEventCount, disconnectedEventCount);
         XCTAssertTrue([germanTranslation isEqualToString:self->weatherTextGerman], "German translation does not match");
         XCTAssertTrue([chineseTranslation isEqualToString:self->weatherTextChinese], "Chinese translation does not match");
      }];

@@ -211,5 +211,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             str = str.ToLower();
             return Regex.Replace(str, "[^a-z0-9' ]+", "", RegexOptions.Compiled);
         }
+
+        public static void AssertConnectionCountMatching(int connectedEventCount, int disconnectedEventCount)
+        {
+            Console.WriteLine($"ConnectedEventCount: {connectedEventCount}, DisconnectedEventCount: {disconnectedEventCount}");
+            Assert.IsTrue(connectedEventCount > 0, AssertOutput.ConnectedEventCountMustNotBeZero);
+            Assert.IsTrue(connectedEventCount == disconnectedEventCount || connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
+        }
     }
 }

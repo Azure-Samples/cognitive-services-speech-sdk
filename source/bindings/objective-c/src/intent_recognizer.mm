@@ -165,6 +165,25 @@ struct IntentEventHandlerHelper
     }
 }
 
+- (void)dealloc {
+    NSLog(@"Intent recognizer object deallocated.");
+    try 
+    {
+        self->intentRecoImpl->SessionStarted.DisconnectAll();
+        self->intentRecoImpl->SessionStopped.DisconnectAll();
+        self->intentRecoImpl->SpeechStartDetected.DisconnectAll();
+        self->intentRecoImpl->SpeechEndDetected.DisconnectAll();
+        self->intentRecoImpl->Recognizing.DisconnectAll();
+        self->intentRecoImpl->Recognized.DisconnectAll();
+        self->intentRecoImpl->Canceled.DisconnectAll();
+        self->intentRecoImpl.reset();
+    }
+    catch (...)
+    {
+        NSLog(@"Exception caught in intent recognizer destructor");
+    }
+}
+
 - (void)setAuthorizationToken: (NSString *)token
 {
     intentRecoImpl->SetAuthorizationToken([token string]);

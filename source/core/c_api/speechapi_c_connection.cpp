@@ -23,7 +23,7 @@ SPXAPI connection_from_recognizer(SPXRECOHANDLE recognizerHandle, SPXCONNECTIONH
         SPX_IFTRUE_THROW_HR(recognizer == nullptr, SPXERR_INVALID_HANDLE);
 
         auto recoForConnection = SpxQueryInterface<ISpxConnectionFromRecognizer>(recognizer);
-        SPX_IFTRUE_THROW_HR(recoForConnection == nullptr, SPXERR_CONNECTION_NOT_SUPPORTED);
+        SPX_IFTRUE_THROW_HR(recoForConnection == nullptr, SPXERR_EXPLICIT_CONNECTION_NOT_SUPPORTED_BY_RECOGNIZER);
         auto connection = recoForConnection->GetConnection();
 
         auto connectionHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnection, SPXCONNECTIONHANDLE>();
@@ -53,7 +53,7 @@ SPXAPI connection_disconnected_set_callback(SPXCONNECTIONHANDLE connection, CONN
     return connection_set_event_callback(&ISpxRecognizerEvents::Disconnected, connection, callback, context);
 }
 
-SPXAPI connection_open(SPXCONNECTIONHANDLE handle)
+SPXAPI connection_open(SPXCONNECTIONHANDLE handle, bool forContinuousRecognition)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, !connection_handle_is_valid(handle));
 
@@ -62,7 +62,21 @@ SPXAPI connection_open(SPXCONNECTIONHANDLE handle)
         auto handleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnection, SPXCONNECTIONHANDLE>();
         auto connection = (*handleTable)[handle];
         SPX_IFTRUE_THROW_HR(connection == nullptr, SPXERR_INVALID_HANDLE);
-        connection->Open();
+        connection->Open(forContinuousRecognition);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI connection_close(SPXCONNECTIONHANDLE handle)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !connection_handle_is_valid(handle));
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto handleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnection, SPXCONNECTIONHANDLE>();
+        auto connection = (*handleTable)[handle];
+        SPX_IFTRUE_THROW_HR(connection == nullptr, SPXERR_INVALID_HANDLE);
+        connection->Close();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

@@ -31,6 +31,7 @@ import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
 import com.microsoft.cognitiveservices.speech.Connection;
 
 import tests.Settings;
+import tests.TestHelper;
 
 public class IntentRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
@@ -226,14 +227,12 @@ public class IntentRecognizerTests {
         });
 
         r.recognized.addEventListener((o, e) -> {
-            assertTrue(connectedEventCount.get() > 0);
-            assertTrue(connectedEventCount.get() > disconnectedEventCount.get());
+            TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
             eventsMap.put("recognized", eventIdentifier.getAndIncrement());
         });
 
         r.recognizing.addEventListener((o, e) -> {
-            assertTrue(connectedEventCount.get() > 0);
-            assertTrue(connectedEventCount.get() > disconnectedEventCount.get());
+            TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
             int now = eventIdentifier.getAndIncrement();
             eventsMap.put("recognizing-" + System.currentTimeMillis(), now);
             eventsMap.put("recognizing" , now);
@@ -274,8 +273,7 @@ public class IntentRecognizerTests {
         assertTrue(res.getReason() != ResultReason.Canceled);
         assertEquals("What's the weather like?", res.getText());
 
-        assertTrue(connectedEventCount.get() > 0);
-        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
+        TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
@@ -420,8 +418,7 @@ public class IntentRecognizerTests {
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
 
-        assertTrue(connectedEventCount.get() > 0);
-        assertTrue(connectedEventCount.get() == disconnectedEventCount.get() + 1);
+        TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         r.close();
         s.close();

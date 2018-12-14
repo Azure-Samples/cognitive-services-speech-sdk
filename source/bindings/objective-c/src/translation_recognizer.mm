@@ -180,6 +180,26 @@ struct TranslationEventHandlerHelper
     }
 }
 
+- (void)dealloc {
+    NSLog(@"translation recognizer object deallocated.");
+    try 
+    {
+        self->translationRecoImpl->SessionStarted.DisconnectAll();
+        self->translationRecoImpl->SessionStopped.DisconnectAll();
+        self->translationRecoImpl->SpeechStartDetected.DisconnectAll();
+        self->translationRecoImpl->SpeechEndDetected.DisconnectAll();
+        self->translationRecoImpl->Recognizing.DisconnectAll();
+        self->translationRecoImpl->Recognized.DisconnectAll();
+        self->translationRecoImpl->Canceled.DisconnectAll();
+        self->translationRecoImpl->Synthesizing.DisconnectAll();
+        self->translationRecoImpl.reset();
+    }
+    catch (...)
+    {
+        NSLog(@"Exception caught in translation recognizer destructor");
+    }
+}
+
 - (void)setAuthorizationToken: (NSString *)token
 {
     translationRecoImpl->SetAuthorizationToken([token string]);

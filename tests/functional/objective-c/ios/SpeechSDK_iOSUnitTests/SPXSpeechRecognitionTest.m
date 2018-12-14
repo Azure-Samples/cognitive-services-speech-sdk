@@ -94,7 +94,7 @@
     long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
     long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
     XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%ld", connectedEventCount);
-    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1,
+    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
         @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
     [self.speechRecognizer stopContinuousRecognition];
 }
@@ -112,7 +112,7 @@
     long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
     long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
     XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%ld", connectedEventCount);
-    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1,
+    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
         @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
 }
 
@@ -151,6 +151,53 @@
 
     XCTAssertTrue([[self->result valueForKey:@"finalText"] isEqualToString: self->weatherTextEnglish]);
     XCTAssertTrue([[self->result valueForKey:@"finalResultCount"] isEqualToNumber:@1]);
+}
+
+- (void)testContinuousRecognitionWithPreConnection {
+    __block bool end = false;
+    __block int finalResultCount = 0;
+    __block NSString* finalText = @"";
+
+    SPXConnection *connection = [[SPXConnection alloc] initFromRecognizer:self.speechRecognizer];
+    // [connection startConnection(true)];
+    [self.speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
+        NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.offset, eventArgs.result.duration, eventArgs.result.resultId);
+        NSLog(@"Received JSON: %@", [eventArgs.result.properties getPropertyById:SPXSpeechServiceResponseJsonResult]);
+        finalText = eventArgs.result.text;
+        finalResultCount++;
+        end = true;
+    }];
+    
+    [self.speechRecognizer startContinuousRecognition];
+    while (end == false)
+        [NSThread sleepForTimeInterval:1.0f];
+    [self.speechRecognizer stopContinuousRecognition];
+    
+    XCTAssertEqual(finalResultCount, 1,  "no Final Result Event received");
+    XCTAssertTrue([finalText isEqualToString:weatherTextEnglish], "Final Result Text does not match");
+}
+
+- (void)testRecognizeAsyncWithPreConnection {
+    __block int finalResultCount = 0;
+    __block NSString* finalText = @"";
+    __block bool end = false;
+
+    SPXConnection *connection = [[SPXConnection alloc] initFromRecognizer:self.speechRecognizer];
+    // [connection startConnection(true)];
+    
+    [self.speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
+        finalResultCount++;
+    }];
+    
+    end = false;
+    [self.speechRecognizer recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *result){
+        finalText = result.text;
+        XCTAssertEqual(finalResultCount, 1,  "wrong count of final events");
+        XCTAssertTrue([finalText isEqualToString:weatherTextEnglish], "Final Result Text does not match");
+        end = true;
+    }];
+    while (end == false)
+        [NSThread sleepForTimeInterval:1.0f];
 }
 
 @end
