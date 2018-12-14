@@ -2,6 +2,7 @@ import pytest
 import azure.cognitiveservices.speech as msspeech
 
 from .conftest import SpeechInput
+from .utils import _check_translation_result
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_translation_simple(subscription: str, speech_input: SpeechInput, endpoint: str,
@@ -17,11 +18,7 @@ def test_translation_simple(subscription: str, speech_input: SpeechInput, endpoi
     recognizer = msspeech.TranslationRecognizer(translation_config, audio_config)
 
     result = recognizer.recognize_once()
-
-    assert msspeech.ResultReason.TranslatedSpeech == result.reason
-    assert speech_input.transcription[0] == result.text
-    for language, desired in speech_input.translations.items():
-        assert desired == result.translations[language]
+    _check_translation_result(result, speech_input, 0, speech_input.translations.keys())
 
 
 def test_translation_config_constructor():
@@ -74,5 +71,4 @@ def test_speech_translation_config():
     assert "myvoice" == speech_config.voice_name
     speech_config.voice_name = "myothervoice"
     assert "myothervoice" == speech_config.voice_name
-
 

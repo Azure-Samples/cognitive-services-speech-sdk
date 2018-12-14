@@ -1,5 +1,4 @@
 parameters:
-  pythonVersion: ""
   buildParams: ""
   wheelParams: ""
   pythonIncludePathSuffix: ""
@@ -7,12 +6,12 @@ parameters:
 steps:
 - task: UsePythonVersion@0
   inputs:
-    versionSpec: ${{ parameters.pythonVersion }}
+    versionSpec: $(PythonVersion)
     addToPath: true
     architecture: $(SPEECHSDK_PYTHON_PLATFORM)
 - bash: |
     python -m pip install --upgrade pip &&
-    pip install virtualenv==16.1.0 scikit-build==0.8.1 &&
+    pip install virtualenv==16.1.0 scikit-build==0.8.1 strip-hints==0.1.1 &&
     python_executable_path=$(which python) &&
     python_include_path=$(dirname $python_executable_path)/include/${{ parameters.pythonIncludePathSuffix }} &&
     python setup.py bdist_wheel -G "$(SPEECHSDK_CMAKE_GENERATOR)" ${{ parameters.wheelParams }} -- \
@@ -21,7 +20,7 @@ steps:
         -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) \
         -DPYTHON_INCLUDE_DIR=$python_include_path ${{ parameters.buildParams }} &&
     mv dist build
-  displayName: Build Python ${{ parameters.pythonVersion }} wheel
+  displayName: Build Python $(PythonVersion) wheel
 - ${{ parameters.postbuildsteps }}
 - template: test-during-build.yml
   parameters:

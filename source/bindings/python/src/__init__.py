@@ -4,6 +4,7 @@
 """
 Microsoft Speech SDK
 """
+
 from .speech import *
 from .translation import *
 from .intent import *
@@ -17,36 +18,31 @@ except ImportError:
 from .speech_py_impl import (
     CancellationDetails,
     CancellationReason,
-    IntentRecognitionCanceledEventArgs,
-    IntentRecognitionEventArgs,
-    IntentRecognitionResult,
     NoMatchDetails,
     NoMatchReason,
     OutputFormat,
     PropertyCollection,
     PropertyId,
-    RecognitionEventArgs,
-    RecognitionResult,
     ResultReason,
-    SessionEventArgs,
-    SpeechRecognitionCanceledEventArgs,
-    SpeechRecognitionEventArgs,
-    SpeechRecognitionResult,
-    TranslationRecognitionCanceledEventArgs,
-    TranslationRecognitionEventArgs,
-    TranslationRecognitionResult,
-    TranslationSynthesisEventArgs,
-    TranslationSynthesisResult,
-    SessionEventSignal,
-    RecognitionEventSignal,
-    SpeechRecognitionEventSignal,
-    TranslationTextEventSignal,
-    IntentEventSignal,
-    SpeechRecognitionCanceledEventSignal,
-    TranslationTextCanceledEventSignal,
-    IntentCanceledEventSignal,
-    TranslationSynthesisEventSignal,
 )
+
+# override __module__ for correct docs generation
+for cls in (
+    CancellationReason,
+    NoMatchReason,
+    OutputFormat,
+    PropertyCollection,
+    PropertyId,
+    ResultReason,
+):
+    cls.__module__ = __name__
+
+for cls in (
+    CancellationDetails,
+    NoMatchDetails,
+):
+    cls.__module__ = __name__ + '.speech'
+
 
 __all__ = [
     'AudioConfig',
@@ -54,6 +50,7 @@ __all__ = [
     'AudioStreamFormat',
     'CancellationDetails',
     'CancellationReason',
+    'EventSignal',
     'IntentRecognitionCanceledEventArgs',
     'IntentRecognitionEventArgs',
     'IntentRecognitionResult',
@@ -83,15 +80,6 @@ __all__ = [
     'TranslationRecognizer',
     'TranslationSynthesisEventArgs',
     'TranslationSynthesisResult',
-    'SessionEventSignal',
-    'RecognitionEventSignal',
     'Recognizer',
-    'SpeechRecognitionEventSignal',
-    'TranslationTextEventSignal',
-    'IntentEventSignal',
-    'SpeechRecognitionCanceledEventSignal',
-    'TranslationTextCanceledEventSignal',
-    'IntentCanceledEventSignal',
-    'IntentEventSignal',
-    'TranslationSynthesisEventSignal',
 ]
+

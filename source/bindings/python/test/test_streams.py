@@ -4,7 +4,7 @@ import wave
 import azure.cognitiveservices.speech as msspeech
 
 from .conftest import SpeechInput
-from .utils import (_connect_all_callbacks, _setup_callbacks, _check_callbacks)
+from .utils import (_connect_all_callbacks, _setup_callbacks, _check_callbacks, _check_sr_result)
 
 
 class WavFileReaderCallback(msspeech.PullAudioInputStreamCallback):
@@ -71,7 +71,7 @@ def setup_callbacks(reco, do_stop=True):
 
 
 @pytest.mark.parametrize("use_default_wave_format", (False, True))
-@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+@pytest.mark.parametrize('speech_input,', ['weather', 'lamp'], indirect=True)
 def test_pull_audio_input_stream_callback(speech_input: SpeechInput, subscription: str,
         speech_region: str, use_default_wave_format: bool):
     callback = WavFileReaderCallback(speech_input.path)
@@ -94,14 +94,18 @@ def test_pull_audio_input_stream_callback(speech_input: SpeechInput, subscriptio
 
     reco.start_continuous_recognition()
 
-    _check_callbacks(callbacks)
+    # TODO: expected number of callback calls should be a property of the input
+    _check_callbacks(callbacks, check_num_recognized=False)
 
-    # TODO: This segfaults when accessing the stored events
-    # _check_sr_result(callbacks['recognized'].events[-1][0].result, speech_input, 0)
+    valid_events = [evt for (evt, _) in callbacks['recognized'].events
+            if evt.result.reason == msspeech.ResultReason.RecognizedSpeech]
+
+    assert 1 == len(valid_events)
+    _check_sr_result(valid_events[-1].result, speech_input, 0)
 
 
 @pytest.mark.parametrize("use_default_wave_format", (False, True))
-@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+@pytest.mark.parametrize('speech_input,', ['weather', 'lamp'], indirect=True)
 def test_push_audio_input_stream(speech_input: SpeechInput, subscription: str, speech_region: str,
         use_default_wave_format: bool):
     speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
@@ -144,6 +148,6 @@ def test_push_audio_input_stream(speech_input: SpeechInput, subscription: str, s
 
     _check_callbacks(callbacks)
 
-    # TODO: This segfaults when accessing the stored events
+    # TODO: investigate different offsets between stream methods (VSTS1550242).
     # _check_sr_result(callbacks['recognized'].events[-1][0].result, speech_input, 0)
 

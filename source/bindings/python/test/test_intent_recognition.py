@@ -2,6 +2,7 @@ import pytest
 import azure.cognitiveservices.speech as msspeech
 
 from .conftest import IntentInput
+from .utils import _check_intent_result
 
 
 @pytest.mark.parametrize('intent_input,', ['lamp'], indirect=True)
@@ -13,10 +14,8 @@ def test_intent_recognition_simple(intent_input: IntentInput, luis_subscription:
     intent_recognizer = msspeech.IntentRecognizer(intent_config, audio_config)
 
     model = msspeech.LanguageUnderstandingModel(app_id=language_understanding_app_id)
-    intent_recognizer.add_intent(model, "TV.ChangeChannel")
-    intent_recognizer.add_intent(model, "TV.WatchTV")
-    intent_recognizer.add_intent(model, "TV.ShowGuide")
     intent_recognizer.add_intent(model, "HomeAutomation.TurnOn")
+    intent_recognizer.add_intent(model, "HomeAutomation.TurnOff")
 
     intent_recognizer.add_intent("This is a test.", "test")
     intent_recognizer.add_intent("Switch the to channel 34.", "34")
@@ -24,9 +23,7 @@ def test_intent_recognition_simple(intent_input: IntentInput, luis_subscription:
 
     result = intent_recognizer.recognize_once()
 
-    assert intent_input.transcription == result.text
-    assert intent_input.intent_id == result.intent_id
-    assert result.json
+    _check_intent_result(result, intent_input, 0)
 
 
 def test_language_understanding_model_constructor():

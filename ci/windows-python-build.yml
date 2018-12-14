@@ -10,27 +10,27 @@ jobs:
     matrix:
       Python3.7_x64:
         BuildPlatform: x64
-        pythonVersion: 3.7
+        PythonVersion: 3.7
         pythonIncludePathSuffix: python3.7m
       Python3.6_x64:
         BuildPlatform: x64
-        pythonVersion: 3.6
+        PythonVersion: 3.6
         pythonIncludePathSuffix: python3.6m
       Python3.5_x64:
         BuildPlatform: x64
-        pythonVersion: 3.5
+        PythonVersion: 3.5
         pythonIncludePathSuffix: python3.5m
       Python3.7_Win32:
         BuildPlatform: Win32
-        pythonVersion: 3.7
+        PythonVersion: 3.7
         pythonIncludePathSuffix: python3.7m
       Python3.6_Win32:
         BuildPlatform: Win32
-        pythonVersion: 3.6
+        PythonVersion: 3.6
         pythonIncludePathSuffix: python3.6m
       Python3.5_Win32:
         BuildPlatform: Win32
-        pythonVersion: 3.5
+        PythonVersion: 3.5
         pythonIncludePathSuffix: python3.5m
   variables:
     BuildConfiguration: Release
@@ -64,7 +64,6 @@ jobs:
     condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
   - template: build-python-wheel.yml
     parameters:
-      pythonVersion: $(PythonVersion)
       buildParams: "-DCMAKE_CXX_COMPILER=cl.exe -DCMAKE_C_COMPILER=cl.exe -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION)"
       postbuildsteps:
         - powershell: |

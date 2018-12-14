@@ -227,53 +227,115 @@ template <class T>
 class PyCallback
 {
     private:
-        PyObject* func;
-        swig_type_info *wrapped_type;
+        PyObject* m_func;
+        swig_type_info *m_wrapped_type;
+        PyObject* m_event_args_pytype;
     public:
         PyCallback<T>& operator=(const PyCallback<T>&) = delete;
         PyCallback<T>& operator=(const PyCallback<T>&&) = delete;
 
         PyCallback<T>() = delete;
 
-        PyCallback<T>(const PyCallback<T>& other) : func{other.func}, wrapped_type{other.wrapped_type} {
-            SWIG_Python_Thread_Block lock;
-            Py_XINCREF(func);
+        PyCallback<T>(const PyCallback<T>& other) :
+                m_func{other.m_func},
+                m_wrapped_type{other.m_wrapped_type},
+                m_event_args_pytype{other.m_event_args_pytype}
+        {
+            if (!Py_IsInitialized())
+            {
+                // Interpreter is dead, don't use the Python API to avoid throwing
+                throw std::runtime_error("Cannot aquire python interpreter to copy callback");
+            }
+            PyGILState_STATE state = PyGILState_Ensure();
+            Py_XINCREF(m_func);
+            Py_XINCREF(m_event_args_pytype);
+            PyGILState_Release(state);
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="ob">A Python callable object</param>
-        /// <param name="wrapped_type">The SWIG type information for the wrapper of the EventArgs-derived
-        /// type T that the callback is passed as argument.</param>
-        PyCallback<T>(PyObject *obj, swig_type_info* ty) : func{obj}, wrapped_type{ty} {
-            SWIG_Python_Thread_Block lock;
-            Py_XINCREF(func);
-            assert(PyCallable_Check(func));
+        /// <param name="obj">A Python callable object</param>
+        /// <param name="ty">The SWIG type information for the wrapper of the EventArgs-derived
+        /// <param name="event_args_pytype">The Python type that wraps the argument of the callback</param>
+        PyCallback<T>(PyObject *obj, swig_type_info* ty, PyObject *event_args_pytype) :
+                m_func{obj},
+                m_wrapped_type{ty},
+                m_event_args_pytype{event_args_pytype}
+        {
+            if (!Py_IsInitialized())
+            {
+                // Interpreter is dead, don't use the Python API to avoid throwing
+                throw std::runtime_error("Cannot aquire python interpreter to create callback");
+            }
+            PyGILState_STATE state = PyGILState_Ensure();
+            Py_XINCREF(m_func);
+            Py_XINCREF(m_event_args_pytype);
+            assert(PyCallable_Check(m_func));
+            PyGILState_Release(state);
         }
 
         ~PyCallback<T>() {
-            SWIG_Python_Thread_Block lock;
-            Py_XDECREF(func);
+            if (!Py_IsInitialized())
+            {
+                // Interpreter is dead, don't use the Python API to avoid throwing
+                return;
+            }
+            PyGILState_STATE state = PyGILState_Ensure();
+            Py_XDECREF(m_func);
+            Py_XDECREF(m_event_args_pytype);
+            PyGILState_Release(state);
         }
 
         /// <summary>
-        /// Converts the arguments of the function call from the SWIG wrappr type to the corresponding
+        /// Converts the arguments of the function call from the SWIG wrapper type to the corresponding
         /// python object and calls the callback with it.
         /// </summary>
         void operator()(const T& evt) {
-            SWIG_Python_Thread_Block lock;
-            if (!func || Py_None == func || !PyCallable_Check(func)) {
+            if (!Py_IsInitialized())
+            {
+                // Interpreter is dead, don't use the Python API to avoid throwing
+                throw std::runtime_error("Cannot aquire python interpreter to call callback");
+            }
+            PyGILState_STATE state = PyGILState_Ensure();
+
+            if (!m_func || Py_None == m_func || !PyCallable_Check(m_func)) {
+                PyGILState_Release(state);
                 return;
             }
 
-            swig::SwigVar_PyObject obj0 = SWIG_NewPointerObj(SWIG_as_voidptr(&evt), wrapped_type, 0);
+            PyObject* obj0 = SWIG_NewPointerObj(SWIG_as_voidptr(&evt), m_wrapped_type, 0);
 
-            PyObject *args = PyTuple_Pack(1, (PyObject *)obj0);
-            PyObject *result = PyObject_CallObject(func, args);
+            // create a new python object of type event_args_pytype wrapping the original eventargs objects
+            // obj0
+            int typecheck = PyType_Check(m_event_args_pytype);
+            if (!typecheck)
+            {
+                Py_XDECREF(obj0);
+                PyGILState_Release(state);
+                throw std::runtime_error("Error converting event signal: wrapped type needs to be a type.");
+            }
 
-            Py_DECREF(args);
+            PyObject* wrap_args = PyTuple_Pack(1, (PyObject *)obj0);
+            Py_XDECREF(obj0);
+            PyObject* wrap_result = PyObject_CallObject(m_event_args_pytype, (PyObject *)wrap_args);
+            Py_XDECREF(wrap_args);
+
+            int result_typecheck = PyObject_TypeCheck((PyObject *)wrap_result, (PyTypeObject *)m_event_args_pytype);
+            if (!result_typecheck)
+            {
+                Py_XDECREF(wrap_result);
+                PyGILState_Release(state);
+                throw std::runtime_error("Error converting event signal: wrapped object has unexpected type.");
+            }
+
+            PyObject* args = PyTuple_Pack(1, (PyObject *)wrap_result);
+            Py_XDECREF(wrap_result);
+
+            PyObject* result = PyObject_CallObject(m_func, (PyObject *)args);
             Py_XDECREF(result);
+            Py_XDECREF(args);
+            PyGILState_Release(state);
         }
 };
 } } } // namespace
@@ -286,30 +348,30 @@ class PyCallback
 
 %define %py_wrap_callback_connect(T)
 %extend Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::T&> {
-    void Connect(PyObject* func) {
+    void Connect(PyObject* func, PyObject* wrapped_type) {
         $self->Connect(std::function<void(const Microsoft::CognitiveServices::Speech::T&)>
             {Microsoft::CognitiveServices::Speech::PyCallback<Microsoft::CognitiveServices::Speech::T>(
-                func, SWIGTYPE_p_Microsoft__CognitiveServices__Speech__ ## T) } );
+                func, SWIGTYPE_p_Microsoft__CognitiveServices__Speech__ ## T, wrapped_type)});
     }
 }
 %enddef
 
 %define %py_wrap_translation_callback_connect(T)
 %extend Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::T&> {
-    void Connect(PyObject* func) {
+    void Connect(PyObject* func, PyObject* wrapped_type) {
         $self->Connect(std::function<void(const Microsoft::CognitiveServices::Speech::Translation::T&)>
             {Microsoft::CognitiveServices::Speech::PyCallback<Microsoft::CognitiveServices::Speech::Translation::T>(
-                func, SWIGTYPE_p_Microsoft__CognitiveServices__Speech__Translation__ ## T)} );
+                func, SWIGTYPE_p_Microsoft__CognitiveServices__Speech__Translation__ ## T, wrapped_type)});
     }
 }
 %enddef
 
 %define %py_wrap_intent_callback_connect(T)
 %extend Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Intent::T&> {
-    void Connect(PyObject* func) {
-        $self->Connect(std::function<void(const Microsoft::CognitiveServices::Speech::Intent::T &)>
+    void Connect(PyObject* func, PyObject* wrapped_type) {
+        $self->Connect(std::function<void(const Microsoft::CognitiveServices::Speech::Intent::T&)>
             {Microsoft::CognitiveServices::Speech::PyCallback<Microsoft::CognitiveServices::Speech::Intent::T>(
-                func, SWIGTYPE_p_Microsoft__CognitiveServices__Speech__Intent__ ## T)} );
+                func, SWIGTYPE_p_Microsoft__CognitiveServices__Speech__Intent__ ## T, wrapped_type)});
     }
 }
 %enddef
@@ -405,7 +467,14 @@ class PyCallback
 
         Returns `None` if there was no cancellation."""
         if ResultReason.Canceled == self.reason:
-            return CancellationDetails._from_result(self) %}
+            return CancellationDetails._from_result(self)
+    @property
+    def no_match_details(self) -> "NoMatchDetails":
+        """Detailed information for NoMatch recognition results.
+
+        Returns `None` if there was a match found."""
+        if ResultReason.NoMatch == self.reason:
+            return NoMatchDetails._from_result(self) %}
 }
 
 
@@ -438,7 +507,7 @@ inject_enum('PropertyId')
 inject_enum('ResultReason')
 
 # clean up the exported names
-del inject_enum  
+del inject_enum
 del Enum
 %}
 

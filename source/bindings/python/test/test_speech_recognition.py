@@ -11,8 +11,8 @@ recognizer_types = (msspeech.SpeechRecognizer, msspeech.TranslationRecognizer,
                     msspeech.IntentRecognizer)
 
 
-@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
-def test_recognize(subscription, speech_input, endpoint, speech_region):
+@pytest.mark.parametrize('speech_input,', ['weather', 'lamp'], indirect=True)
+def test_recognize_once(subscription, speech_input, endpoint, speech_region):
     audio_config = msspeech.AudioConfig(filename=speech_input.path)
     speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
 
@@ -47,7 +47,7 @@ def test_recognize_async(subscription, speech_input, endpoint, speech_region):
         assert "no state" == excinfo.value
 
 
-@pytest.mark.xfail(reason='flaky on Windows and Linux')
+@pytest.mark.xfail(reason='flaky')
 @pytest.mark.parametrize('speech_input,', ['batman'], indirect=True)
 def test_recognize_once_multiple(subscription, speech_input, endpoint, speech_region):
     audio_config = msspeech.AudioConfig(filename=speech_input.path)
@@ -184,7 +184,7 @@ def test_no_match_result(subscription, speech_input, speech_region):
 
     assert msspeech.ResultReason.NoMatch == result.reason
     assert result.cancellation_details is None
-    details = msspeech.NoMatchDetails._from_result(result)
+    details = result.no_match_details
     assert msspeech.NoMatchReason.InitialSilenceTimeout == details.reason
 
 

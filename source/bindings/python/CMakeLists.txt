@@ -58,11 +58,9 @@ set(SOURCES
 # ${SWIG_INTERFACE} and ${SWIG_WRAPPERS} point to common interface / header files
 set(SWIG_MODULE_${PROJECT_NAME}_EXTRA_DEPS ${SWIG_INTERFACE} ${SWIG_WRAPPERS})
 
-if("${CMAKE_VERSION}" VERSION_LESS 3.12)
-    # UseSwig supports INCLUDE_DIRECTORIES and OUTPUT_DIR properties on source files only since CMake 3.12
-    include_directories("${swig_include_dirs}")
-    set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_PACKAGE_NAME})
-endif()
+# UseSwig supports INCLUDE_DIRECTORIES and OUTPUT_DIR properties on source files only since CMake 3.12
+include_directories("${swig_include_dirs}")
+set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_PACKAGE_NAME})
 
 if("${CMAKE_VERSION}" VERSION_GREATER 3.8)
     swig_add_library(${PROJECT_NAME}
@@ -121,14 +119,12 @@ if(DEFINED SKBUILD)
 
   install(TARGETS ${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} DESTINATION ${module_dir})
 
-  if("${CMAKE_VERSION}" VERSION_LESS_EQUAL 3.11)
-    install(FILES ${CMAKE_SWIG_OUTDIR}/speech_py_impl.py DESTINATION ${module_dir})
-  else()
-    get_property(support_files TARGET ${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTY SWIG_SUPPORT_FILES)
-    message(STATUS "support files are ${support_files}")
+  # strip swig-generated type hints. This only works on bash and fails silently otherwise, e.g. when the
+  # build is run from powershell etc.
+  install(CODE "execute_process(COMMAND bash stripscript.sh ${CMAKE_SWIG_OUTDIR}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})")
 
-    install(FILES ${support_files} DESTINATION ${module_dir} )
-  endif()
+  install(FILES ${CMAKE_SWIG_OUTDIR}/speech_py_impl.py DESTINATION ${module_dir} )
 endif()
 
 set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES

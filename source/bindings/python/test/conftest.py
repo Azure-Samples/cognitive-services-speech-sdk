@@ -49,8 +49,8 @@ SpeechInput = namedtuple('SpeechInputData',
                          ('path', 'transcription', 'offset', 'duration', 'input_language', 'translations'))
 
 batman_offsets, batman_durations = zip(*[
-    (5400000, 200000000),
-    (213400000, 6100000),
+    (5500000, 145300000),
+    (156400000, 144400000),
     (229200000, 200000000),
     (440500000, 200000000),
     (648500000, 41900000),
@@ -72,6 +72,8 @@ speech_input_data_raw = {'weather':
                           {'fr': "Quel est le temps?",
                            'de': "Wie ist das Wetter?"}
                           ),
+                         'lamp': ('TurnOnTheLamp.wav', ["Turn on the lamp."], (3400000, ),
+                             (15600000, ), 'en-US', dict()),
                          'silence': ('silenceshort.wav', [''], None, None, 'en-US', dict()),
                          'batman': ('batman.wav', [
                              "Skills and abilities Batman has no inherent super powers, he relies on his own scientific knowledge detective skills and athletic prowess in the stories. Batman is regarded as one of the world's greatest detective.",
@@ -97,7 +99,7 @@ def speech_input(request):
 IntentInput = namedtuple('IntentInputData',
                          ('path', 'transcription', 'offset', 'duration', 'intent_id'))
 intent_input_data_raw = {
-    'lamp': ('TurnOnTheLamp.wav', "Turn on the lamp.", 0, 0, 'HomeAutomation.TurnOn')}
+    'lamp': ('TurnOnTheLamp.wav', ["Turn on the lamp."], (4000000, ), (11000000, ), 'HomeAutomation.TurnOn')}
 
 
 @pytest.fixture
@@ -107,3 +109,4 @@ def intent_input(request):
     filename, *args = intent_input_data_raw[request.param]
     path = os.path.join(inputdir, filename)
     return IntentInput(path, *args)
+

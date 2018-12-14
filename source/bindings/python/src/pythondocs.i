@@ -92,7 +92,7 @@ Class for intent recognition canceled event arguments.
 Class for intent recognition event arguments.
 ";
 
-%feature("docstring") Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs "
+%feature("docstring") Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs::Result "
 `IntentRecognitionResult`: Intent recognition event result.
 ";
 
@@ -245,3 +245,6 @@ Defines the translation synthesis result, i.e. the voice output of the translate
 `bytes`: The voice output of the translated text in the target language.
 ";
 
+%feature("docstring") Microsoft::CognitiveServices::Speech::NoMatchDetails "
+Detailed information for NoMatch recognition results.
+";

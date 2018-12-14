@@ -9,13 +9,13 @@ jobs:
     maxParallel: 1
     matrix:
       Python3.7:
-        pythonVersion: 3.7
+        PythonVersion: 3.7
         pythonIncludePathSuffix: python3.7m
       Python3.6:
-        pythonVersion: 3.6
+        PythonVersion: 3.6
         pythonIncludePathSuffix: python3.6m
       Python3.5:
-        pythonVersion: 3.5
+        PythonVersion: 3.5
         pythonIncludePathSuffix: python3.5m
   variables:
     BuildConfiguration: Release
@@ -39,7 +39,6 @@ jobs:
     displayName: Install build dependencies
   - template: build-python-wheel.yml
     parameters:
-      pythonVersion: $(PythonVersion)
       pythonIncludePathSuffix: $(PythonIncludePathSuffix)
       wheelParams: $(WheelParams)
 

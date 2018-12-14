@@ -5,7 +5,7 @@ from typing import Union
 
 import azure.cognitiveservices.speech as msspeech
 
-from .utils import _TestCallback
+from .utils import _TestCallback, _check_sr_result, _check_translation_result, _check_intent_result
 from .conftest import SpeechInput
 
 
@@ -124,7 +124,7 @@ def test_speech_recognition_events(speech_input: SpeechInput, subscription: str,
 
     callbacks = _setup_callbacks(reco)
 
-    bad_callback = _TestCallback("bad", bad_callback_check)
+    bad_callback = _TestCallback(None, bad_callback_check, quiet=True)
     reco.recognizing.connect(bad_callback)
 
     reco.start_continuous_recognition()
@@ -140,20 +140,25 @@ def test_speech_recognition_events(speech_input: SpeechInput, subscription: str,
         with pytest.raises(AssertionError):
             raise exc_info[0].with_traceback(exc_info[1], exc_info[2])
 
+    recognized_events = [evt for (evt, _) in callbacks['recognized'].events]
+    assert 1 == len(recognized_events)
+    recognized_result = recognized_events[-1].result
 
-@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
-def test_intent_recognition_events(speech_input: SpeechInput, luis_subscription: str,
+    _check_sr_result(recognized_result, speech_input, 0)
+
+
+@pytest.mark.parametrize('intent_input,', ['lamp'], indirect=True)
+def test_intent_recognition_events(intent_input: SpeechInput, luis_subscription: str,
         luis_region: str, language_understanding_app_id: str):
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.AudioConfig(filename=intent_input.path)
     intent_config = msspeech.SpeechConfig(subscription=luis_subscription,
             region=luis_region)
 
     intent_recognizer = msspeech.IntentRecognizer(intent_config, audio_config)
 
     model = msspeech.LanguageUnderstandingModel(app_id=language_understanding_app_id)
-    intent_recognizer.add_intent(model, "TV.ChangeChannel")
-    intent_recognizer.add_intent(model, "TV.WatchTV")
-    intent_recognizer.add_intent(model, "TV.ShowGuide")
+    intent_recognizer.add_intent(model, "HomeAutomation.TurnOn")
+    intent_recognizer.add_intent(model, "HomeAutomation.TurnOff")
 
     intent_recognizer.add_intent("This is a test.", "test")
     intent_recognizer.add_intent("Switch the to channel 34.", "34")
@@ -161,7 +166,7 @@ def test_intent_recognition_events(speech_input: SpeechInput, luis_subscription:
 
     callbacks = _setup_callbacks(intent_recognizer)
 
-    bad_callback = _TestCallback("bad", bad_callback_check)
+    bad_callback = _TestCallback(None, bad_callback_check, quiet=True)
     intent_recognizer.recognizing.connect(bad_callback)
 
     intent_recognizer.start_continuous_recognition()
@@ -176,6 +181,16 @@ def test_intent_recognition_events(speech_input: SpeechInput, luis_subscription:
         assert exc_info
         with pytest.raises(AssertionError):
             raise exc_info[0].with_traceback(exc_info[1], exc_info[2])
+
+    # TODO remove workaround once intent is fixed and delivers only a single valid result
+    # recognized_events = [evt for (evt, _) in callbacks['recognized'].events]
+    recognized_events = [evt for (evt, _) in callbacks['recognized'].events if
+            evt.result.reason == msspeech.ResultReason.RecognizedIntent]
+
+    assert 1 == len(recognized_events)
+    recognized_result = recognized_events[-1].result
+
+    _check_intent_result(recognized_result, intent_input, 0)
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
@@ -193,7 +208,7 @@ def test_translation_recognition_events(speech_input: SpeechInput, subscription:
 
     callbacks = _setup_callbacks(translation_recognizer)
 
-    bad_callback = _TestCallback("bad", bad_callback_check)
+    bad_callback = _TestCallback(None, bad_callback_check, quiet=True)
     translation_recognizer.recognizing.connect(bad_callback)
 
     translation_recognizer.start_continuous_recognition()
@@ -208,4 +223,10 @@ def test_translation_recognition_events(speech_input: SpeechInput, subscription:
         assert exc_info
         with pytest.raises(AssertionError):
             raise exc_info[0].with_traceback(exc_info[1], exc_info[2])
+
+    recognized_events = [evt for (evt, _) in callbacks['recognized'].events]
+    assert 1 == len(recognized_events)
+    recognized_result = recognized_events[-1].result
+
+    _check_translation_result(recognized_result, speech_input, 0, ['de', 'fr'])
 

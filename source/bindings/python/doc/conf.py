@@ -75,6 +75,8 @@ exclude_patterns = []
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
+nitpick_ignore = [('py:class', 'object'),
+        ('py:class', 'azure.cognitiveservices.speech.speech_py_impl.PullAudioInputStreamCallback')]
 
 # -- Options for HTML output -------------------------------------------------
 

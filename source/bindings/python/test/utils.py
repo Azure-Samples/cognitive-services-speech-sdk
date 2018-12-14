@@ -11,24 +11,26 @@ class _TestCallback(object):
     """helper class that keeps track of how often the callback has been called, and performs checks
     on the callback arguments"""
 
-    def __init__(self, msg, event_checks=None, fn=None):
+    def __init__(self, msg, event_checks=None, fn=None, quiet=False):
         self._msg = msg
         self.num_calls = 0
         self._events = []
         self._event_checks = event_checks or (lambda x: None)
         self._fn = fn
+        self._quiet = quiet
 
     def __call__(self, evt):
         self.num_calls += 1
-        try:
-            print(self._msg.format(evt=evt))
-        except Exception:
+        if self._msg:
             try:
-                exc_info = sys.exc_info()
-                excstring = traceback.format_exception(*exc_info)
-                print('Generic Error with {}: {}'.format(evt, excstring))
+                print(self._msg.format(evt=evt))
             except Exception:
-                print('error formatting exception')
+                try:
+                    exc_info = sys.exc_info()
+                    excstring = traceback.format_exception(*exc_info)
+                    print('Generic Error with {}: {}'.format(evt, excstring))
+                except Exception:
+                    print('error formatting exception')
 
         if self._fn:
             self._fn()
@@ -40,7 +42,8 @@ class _TestCallback(object):
             try:
                 exc_info = sys.exc_info()
                 excstring = traceback.format_exception(*exc_info)
-                print('Assertion Error with {}: {}'.format(evt, excstring))
+                if not self._quiet:
+                    print('Assertion Error with {}: {}'.format(evt, excstring))
             except Exception:
                 print('error formatting exception')
         except Exception:
@@ -76,7 +79,7 @@ def _setup_callbacks():
     return callbacks
 
 
-def _check_callbacks(callbacks):
+def _check_callbacks(callbacks, check_num_recognized=True):
     start = time.time()
     while callbacks['session_stopped'].num_calls == 0:
         if time.time() - start > _TIMEOUT_IN_SECONDS:
@@ -87,19 +90,48 @@ def _check_callbacks(callbacks):
     assert callbacks['session_started'].num_calls == 1
     assert callbacks['session_stopped'].num_calls == 1
     assert callbacks['recognizing'].num_calls >= 1
-    assert callbacks['recognized'].num_calls == 1
+    if check_num_recognized:
+        assert callbacks['recognized'].num_calls == 1, callbacks['recognized'].num_calls
+
+
+def _check_result_common(result, speech_input, utterance_index):
+    assert speech_input.transcription[utterance_index] == result.text
+    assert speech_input.duration[utterance_index] == result.duration, \
+            'desired: {}, actual: {}'.format(speech_input.duration[utterance_index], result.duration)
+    assert speech_input.offset[utterance_index] == result.offset, \
+            'desired: {}, actual: {}'.format(speech_input.offset[utterance_index], result.offset)
+    assert isinstance(result.result_id, str)
+    assert result.result_id
+    assert result.cancellation_details is None
+    assert result.no_match_details is None
+    assert result.json
+    assert '' == result.error_json
 
 
 def _check_sr_result(result, speech_input, utterance_index):
     assert isinstance(result, msspeech.SpeechRecognitionResult)
-    assert speech_input.transcription[utterance_index] == result.text
     assert msspeech.ResultReason.RecognizedSpeech == result.reason
-    assert speech_input.duration[utterance_index] == result.duration
-    assert speech_input.offset[utterance_index] == result.offset
-    assert isinstance(result.properties, msspeech.PropertyCollection)
-    assert isinstance(result.result_id, str)
-    assert result.result_id
-    assert result.cancellation_details is None
+
+    _check_result_common(result, speech_input, utterance_index)
+
+def _check_translation_result(result, speech_input, utterance_index, target_languages):
+    assert isinstance(result, msspeech.TranslationRecognitionResult)
+    assert msspeech.ResultReason.TranslatedSpeech == result.reason
+
+    assert set(result.translations.keys()) == set(target_languages)
+    for language in target_languages:
+        assert speech_input.translations[language] == result.translations[language]
+
+    _check_result_common(result, speech_input, utterance_index)
+
+
+def _check_intent_result(result, intent_input, utterance_index):
+    assert isinstance(result, msspeech.IntentRecognitionResult)
+    assert intent_input.intent_id == result.intent_id
+    assert isinstance(result.intent_json, str)
+    assert result.intent_json
+
+    _check_result_common(result, intent_input, utterance_index)
 
 
 def _connect_all_callbacks(reco, callbacks):

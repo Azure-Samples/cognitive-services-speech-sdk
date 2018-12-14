@@ -19,7 +19,58 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. automodule:: azure.cognitiveservices.speech
+Speech
+------
+
+.. automodule:: azure.cognitiveservices.speech.speech
    :members:
    :undoc-members:
    :show-inheritance:
+
+Audio
+------
+
+.. automodule:: azure.cognitiveservices.speech.audio
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Translation
+-----------
+
+.. automodule:: azure.cognitiveservices.speech.translation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Intent
+------
+
+.. automodule:: azure.cognitiveservices.speech.intent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Enumerations
+------------
+
+.. autoclass:: azure.cognitiveservices.speech.PropertyId
+   :members:
+   :undoc-members:
+
+.. autoclass:: azure.cognitiveservices.speech.NoMatchReason
+   :members:
+   :undoc-members:
+
+.. autoclass:: azure.cognitiveservices.speech.CancellationReason
+   :members:
+   :undoc-members:
+
+.. autoclass:: azure.cognitiveservices.speech.OutputFormat
+   :members:
+   :undoc-members:
+
+.. autoclass:: azure.cognitiveservices.speech.ResultReason
+   :members:
+   :undoc-members:
+
