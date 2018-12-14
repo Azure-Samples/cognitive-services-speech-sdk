@@ -834,7 +834,7 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
         const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
 
         testInitialSilienceTimeout(config, done, () => expect(bytesSent).toBeLessThan(expectedBytesSent));
-    });
+    }, 15000);
 
     test("InitialSilenceTimeout (push)", (done: jest.DoneCallback) => {
         // tslint:disable-next-line:no-console
@@ -847,7 +847,7 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
         p.close();
 
         testInitialSilienceTimeout(config, done);
-    });
+    }, 15000);
 
     test("InitialSilenceTimeout (File)", (done: jest.DoneCallback) => {
         // tslint:disable-next-line:no-console
@@ -859,7 +859,7 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
         const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(bigFile);
 
         testInitialSilienceTimeout(config, done);
-    });
+    }, 15000);
 
     const testInitialSilienceTimeout = (config: sdk.AudioConfig, done: jest.DoneCallback, addedChecks?: () => void): void => {
         const s: sdk.SpeechConfig = BuildSpeechConfig();
@@ -1172,6 +1172,8 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
         expect(r instanceof sdk.Recognizer);
 
         r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
+            // Since the pull stream above will always return an empty array, there should be
+            // no other reason besides an error for cancel to hit.
             done.fail(e.errorDetails);
         };
 
@@ -1462,6 +1464,8 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
         let speechRecognized: boolean = false;
         let noMatchCount: number = 0;
         let speechEnded: number = 0;
+        let canceled: boolean = false;
+        let inTurn: boolean = false;
 
         r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
             try {
@@ -1483,19 +1487,39 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
             try {
                 expect(e.errorDetails).toBeUndefined();
                 expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
-                expect(speechEnded).toEqual(noMatchCount + 1);
-                expect(noMatchCount).toEqual(1);
-                done();
+                canceled = true;
             } catch (error) {
                 done.fail(error);
             }
         };
 
+        r.sessionStarted = ((s: sdk.Recognizer, e: sdk.SessionEventArgs): void => {
+            inTurn = true;
+        });
+
+        r.sessionStopped = ((s: sdk.Recognizer, e: sdk.SessionEventArgs): void => {
+            inTurn = false;
+        });
+
         r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
             speechEnded++;
         };
 
-        r.startContinuousRecognitionAsync(() => { },
+        r.startContinuousRecognitionAsync(() => {
+            WaitForCondition(() => (canceled && !inTurn), () => {
+                r.stopContinuousRecognitionAsync(() => {
+                    try {
+                        expect(speechEnded).toEqual(noMatchCount);
+                        expect(noMatchCount).toEqual(2);
+                        done();
+                    } catch (error) {
+                        done.fail(error);
+                    }
+                }, (error: string) => {
+                    done.fail(error);
+                });
+            });
+        },
             (err: string) => {
                 done.fail(err);
             });
@@ -1521,6 +1545,8 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
         let speechRecognized: boolean = false;
         let noMatchCount: number = 0;
         let speechEnded: number = 0;
+        let canceled: boolean = false;
+        let inTurn: boolean = false;
 
         r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
             try {
@@ -1543,23 +1569,43 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
             try {
                 expect(e.errorDetails).toBeUndefined();
                 expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
-                expect(speechEnded).toEqual(noMatchCount + 1);
-                expect(noMatchCount).toEqual(2);
-                done();
+                canceled = true;
             } catch (error) {
                 done.fail(error);
             }
         };
 
+        r.sessionStarted = ((s: sdk.Recognizer, e: sdk.SessionEventArgs): void => {
+            inTurn = true;
+        });
+
+        r.sessionStopped = ((s: sdk.Recognizer, e: sdk.SessionEventArgs): void => {
+            inTurn = false;
+        });
+
         r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
             speechEnded++;
         };
 
-        r.startContinuousRecognitionAsync(() => { },
+        r.startContinuousRecognitionAsync(() => {
+            WaitForCondition(() => (canceled && !inTurn), () => {
+                r.stopContinuousRecognitionAsync(() => {
+                    try {
+                        expect(speechEnded).toEqual(noMatchCount + 1);
+                        expect(noMatchCount).toEqual(2);
+                        done();
+                    } catch (error) {
+                        done.fail(error);
+                    }
+                }, (error: string) => {
+                    done.fail(error);
+                });
+            });
+        },
             (err: string) => {
                 done.fail(err);
             });
-    }, 30000);
+    }, 35000);
 
     // Tests client reconnect after speech timeouts.
     test.skip("Reconnect After timeout", (done: jest.DoneCallback) => {
@@ -1622,12 +1668,9 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
 
         let speechEnded: number = 0;
         let lastOffset: number = 0;
-        let hypoCount: number = 0;
         let recogCount: number = 0;
-
-        r.recognizing = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
-            hypoCount++;
-        };
+        let canceled: boolean = false;
+        let inTurn: boolean = false;
 
         r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
             try {
@@ -1640,7 +1683,6 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
                 if ("" !== e.result.text) {
                     expect(e.result.text).toEqual(Settings.WaveFileText);
                 }
-                hypoCount = 0;
                 if (recogCount++ > targetLoops) {
                     p.close();
                 }
@@ -1654,22 +1696,42 @@ describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean
             try {
                 expect(e.errorDetails).toBeUndefined();
                 expect(sdk.CancellationReason[e.reason]).toEqual(sdk.CancellationReason[sdk.CancellationReason.EndOfStream]);
-                expect(speechEnded).toEqual(1);
-                done();
+                canceled = true;
             } catch (error) {
                 done.fail(error);
             }
         };
 
+        r.sessionStarted = ((s: sdk.Recognizer, e: sdk.SessionEventArgs): void => {
+            inTurn = true;
+        });
+
+        r.sessionStopped = ((s: sdk.Recognizer, e: sdk.SessionEventArgs): void => {
+            inTurn = false;
+        });
+
         r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
             speechEnded++;
         };
 
-        r.startContinuousRecognitionAsync(() => { },
+        r.startContinuousRecognitionAsync(() => {
+            WaitForCondition(() => (canceled && !inTurn), () => {
+                r.stopContinuousRecognitionAsync(() => {
+                    try {
+                        expect(speechEnded).toEqual(1);
+                        done();
+                    } catch (error) {
+                        done.fail(error);
+                    }
+                }, (error: string) => {
+                    done.fail(error);
+                });
+            });
+        },
             (err: string) => {
                 done.fail(err);
             });
-    }, 1000 * 60 * 15);
+    }, 35000);
 });
 
 test("Push Stream Async", (done: jest.DoneCallback) => {
@@ -1713,7 +1775,7 @@ test("Push Stream Async", (done: jest.DoneCallback) => {
 });
 
 test("Bad DataType for PushStreams results in error", (done: jest.DoneCallback) => {
- // tslint:disable-next-line:no-console
+    // tslint:disable-next-line:no-console
     console.info("Name: Bad DataType for PushStreams results in error");
 
     const s: sdk.SpeechConfig = BuildSpeechConfig();

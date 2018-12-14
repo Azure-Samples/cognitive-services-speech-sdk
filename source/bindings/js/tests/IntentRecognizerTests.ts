@@ -77,8 +77,7 @@ const BuildSpeechConfig: () => sdk.SpeechConfig = (): sdk.SpeechConfig => {
     return s;
 };
 
-// TODO: disabling intent tests for now due to flaky service.
-describe.skip.each([true, false])("Service based tests", (forceNodeWebSocket: boolean) => {
+describe.each([true, false])("Service based tests", (forceNodeWebSocket: boolean) => {
 
     beforeEach(() => {
         // tslint:disable-next-line:no-console
@@ -646,7 +645,7 @@ describe.skip.each([true, false])("Service based tests", (forceNodeWebSocket: bo
         });
     });
 
-    // Truman does not behave the same as SkyMan for a bad language. It closes the connection far more gracefully.
+    // Bing Speech does not behave the same as Unified Speech for a bad language. It closes the connection far more gracefully.
     test.skip("RecognizeOnce Bad Language", (done: jest.DoneCallback) => {
         // tslint:disable-next-line:no-console
         console.info("Name: RecognizeOnce Bad Language");
@@ -773,7 +772,7 @@ describe.skip.each([true, false])("Service based tests", (forceNodeWebSocket: bo
             });
         });
 
-    }, 30000);
+    }, 35000);
 
     test("Silence Then Speech", (done: jest.DoneCallback) => {
         // tslint:disable-next-line:no-console
@@ -796,7 +795,8 @@ describe.skip.each([true, false])("Service based tests", (forceNodeWebSocket: bo
         let speechRecognized: boolean = false;
         let noMatchCount: number = 0;
         let speechEnded: number = 0;
-        let passed = false;
+        let canceled: boolean = false;
+        let inTurn: boolean = false;
 
         r.recognized = (o: sdk.Recognizer, e: sdk.IntentRecognitionEventArgs) => {
             try {
@@ -819,13 +819,19 @@ describe.skip.each([true, false])("Service based tests", (forceNodeWebSocket: bo
             try {
                 expect(e.errorDetails).toBeUndefined();
                 expect(e.reason).toEqual(sdk.CancellationReason.EndOfStream);
-                expect(speechEnded).toEqual(noMatchCount + 1);
-                expect(noMatchCount).toEqual(6); // 5 seconds for intent based reco.
-                passed = true;
+                canceled = true;
             } catch (error) {
                 done.fail(error);
             }
         };
+
+        r.sessionStarted = ((s: sdk.Recognizer, e: sdk.SessionEventArgs): void => {
+            inTurn = true;
+        });
+
+        r.sessionStopped = ((s: sdk.Recognizer, e: sdk.SessionEventArgs): void => {
+            inTurn = false;
+        });
 
         r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs): void => {
             speechEnded++;
@@ -836,7 +842,14 @@ describe.skip.each([true, false])("Service based tests", (forceNodeWebSocket: bo
                 done.fail(err);
             });
 
-        WaitForCondition(() => passed, () => {
+        WaitForCondition(() => (canceled && !inTurn), () => {
+            try {
+                expect(speechEnded).toEqual(noMatchCount + 1);
+                expect(noMatchCount).toEqual(6); // 5 seconds for intent based reco.
+            } catch (error) {
+                done.fail(error);
+            }
+
             r.stopContinuousRecognitionAsync(() => {
                 done();
             }, (error: string) => {
@@ -844,11 +857,10 @@ describe.skip.each([true, false])("Service based tests", (forceNodeWebSocket: bo
             });
         });
 
-    }, 30000);
+    }, 35000);
 });
 
-// TODO: disabling intent tests for now due to flaky service.
-test.skip("Bad DataType for PushStreams results in error", (done: jest.DoneCallback) => {
+test("Bad DataType for PushStreams results in error", (done: jest.DoneCallback) => {
     // tslint:disable-next-line:no-console
     console.info("Name: Bad DataType for PushStreams results in error");
 
