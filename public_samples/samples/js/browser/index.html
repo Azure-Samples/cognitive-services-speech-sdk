@@ -200,10 +200,10 @@
                 a.send("");
                 a.onload = function () {
                     var token = JSON.parse(atob(this.responseText.split(".")[1]));
-                    serviceRegion.value = token.region;
+                    regionOptions.value = token.region;
                     authorizationToken = this.responseText;
-                    subscriptionKey.disabled = true;
-                    subscriptionKey.value = "using authorization token (hit F5 to refresh)";
+                    key.disabled = true;
+                    key.value = "using authorization token (hit F5 to refresh)";
                     console.log("Got an authorization token: " + token);
                 }
             }
