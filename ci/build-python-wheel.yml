@@ -11,7 +11,7 @@ steps:
     architecture: $(SPEECHSDK_PYTHON_PLATFORM)
 - bash: |
     python -m pip install --upgrade pip &&
-    pip install virtualenv==16.1.0 scikit-build==0.8.1 strip-hints==0.1.1 &&
+    pip install virtualenv==16.1.0 scikit-build==0.8.1 wheel==0.32.3 strip-hints==0.1.1 &&
     python_executable_path=$(which python) &&
     python_include_path=$(dirname $python_executable_path)/include/${{ parameters.pythonIncludePathSuffix }} &&
     python setup.py bdist_wheel -G "$(SPEECHSDK_CMAKE_GENERATOR)" ${{ parameters.wheelParams }} -- \

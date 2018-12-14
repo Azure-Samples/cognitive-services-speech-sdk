@@ -41,4 +41,19 @@ jobs:
     parameters:
       pythonIncludePathSuffix: $(PythonIncludePathSuffix)
       wheelParams: $(WheelParams)
+      postbuildsteps:
+        - bash: |
+            set -u -x -e -o pipefail
+            unstrippedLib="$(OutputDirectory)/libunstripped-$(SPEECHSDK_TARGET_PLATFORM)-$(BuildConfiguration)-py$(PythonVersion)"
+            mkdir -p "$unstrippedLib"
+            wheel=(build/*.whl)
+            [[ ${#wheel[@]} = 1 ]]
+            unzip -d repack "${wheel[0]}"
+            pythonExtension=(repack/azure_cognitiveservices_speech-*/data/lib/python*/site-packages/azure/cognitiveservices/speech/_speech_py_impl.so)
+            [[ ${#pythonExtension[@]} = 1 ]]
+            cp -p "${pythonExtension[0]}" "$unstrippedLib"
+            strip -x "${pythonExtension[0]}"
+            cd repack
+            python -m wheel pack --dest-dir ../build .
+          displayName: Repack .whl with unstripped library, keep original
 
