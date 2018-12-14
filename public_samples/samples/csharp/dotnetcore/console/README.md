@@ -1,25 +1,25 @@
 # C# Console app for .NET Core (Windows or Linux)
 
 This sample demonstrates various forms of speech recognition, intent recognition, and translation using the Speech SDK for C#.
-It runs under .NET Core 2.0 on Windows or Linux (Ubuntu 16.04 x64 only).
+It runs under .NET Core 2.0 on Windows or Linux (Ubuntu 16.04 or 18.04 x64 only).
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows x64, Ubuntu 16.04 x64); some sample scenarios require a working microphone.
+* A PC (Windows x64, Ubuntu 16.04 or 18.04 x64); some sample scenarios require a working microphone.
 * Either one of the following:
   * On Windows:
     * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
     * The **.NET Core cross-platform development** workload in Visual Studio.
       You can enable it in **Tools** \> **Get Tools and Features**.
-  * On Windows or Linux (Ubuntu 16.04):
+  * On Windows or Linux (Ubuntu 16.04 or 18.04):
     * [.NET Core 2.0](https://www.microsoft.com/net/download/dotnet-core/2.0)
     * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
-* On Ubuntu 16.04, run the following commands for the installation of required packages:
+* On Ubuntu 16.04 or 18.04, run the following commands for the installation of required packages:
 
   ```sh
   sudo apt-get update
-  sudo apt-get install build-essential libssl1.0.0 libcurl3 libasound2 wget
+  sudo apt-get install libssl1.0.0 libcurl3 libasound2 wget
   ```
 
 ## Build the sample
