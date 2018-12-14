@@ -3,6 +3,7 @@ parameters:
   buildParams: ""
   wheelParams: ""
   pythonIncludePathSuffix: ""
+  postbuildsteps: []
 steps:
 - task: UsePythonVersion@0
   inputs:
@@ -10,7 +11,6 @@ steps:
     addToPath: true
     architecture: $(SPEECHSDK_PYTHON_PLATFORM)
 - bash: |
-    mkdir -p build &&
     python -m pip install --upgrade pip &&
     pip install virtualenv==16.1.0 scikit-build==0.8.1 &&
     python_executable_path=$(which python) &&
@@ -20,15 +20,16 @@ steps:
         -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) \
         -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) \
         -DPYTHON_INCLUDE_DIR=$python_include_path ${{ parameters.buildParams }} &&
-    cp -R dist build/
+    mv dist build
   displayName: Build Python ${{ parameters.pythonVersion }} wheel
+- ${{ parameters.postbuildsteps }}
 - template: test-during-build.yml
   parameters:
     testsToRun: python_unittests
     runTestArgs: ""
 - bash: |
     mkdir -p "$(OutputDirectory)" &&
-    cp -R dist/*.whl "$(OutputDirectory)"
+    cp -v build/*.whl "$(OutputDirectory)"
   displayName: Drop Python wheel
   condition: succeededOrFailed()
 - task: PublishBuildArtifacts@1
@@ -38,4 +39,3 @@ steps:
     ArtifactName: PythonBuild
     publishLocation: Container
   condition: succeededOrFailed()
-

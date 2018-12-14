@@ -49,7 +49,7 @@ function CheckSigntool
 {
     $filename = "signtool.exe"
     if ((Get-Command "$filename" -ErrorAction SilentlyContinue) -eq $null) {
-        $vswhere = "c:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe";
+        $vswhere = "c:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
         $installationPath = & $vswhere -prerelease -latest -property installationPath   # requires Windows SDK
         $WindowsSdkVerBinPath = $null
 
@@ -116,7 +116,7 @@ function ExpandIntoDirectory (
     New-Item $workDirectory -Type Directory -Force -ErrorAction SilentlyContinue | Out-Null
     Copy-Item $filename $workZip -Force -ErrorAction Stop | Out-Null
 
-    Expand-Archive $workZip -DestinationPath $workDirectory -Force | Out-Null
+    Microsoft.PowerShell.Archive\Expand-Archive $workZip -DestinationPath $workDirectory -Force | Out-Null
 }
 
 function Check_ar(
@@ -181,12 +181,40 @@ function CheckWindowsNuget(
     }
 }
 
+function CheckWindowsWheel(
+    [string][parameter(Mandatory=$true)] $directory)
+{
+    CheckDirectory -directory $directory
+
+    $files = Get-ChildItem $directory -file -recurse -filter *-win_*.whl
+    foreach($entry in $files) {
+        $filename = $entry.Fullname
+
+        $whiteList | foreach {
+            if ($filename -match $_) {
+                Write-Host "Skipping  $filename"
+                continue
+            }
+        }
+
+        $workDirectory = Join-Path $directory "tmpdir"
+        $workZip = Join-Path $directory "temp.zip"
+
+        ExpandIntoDirectory -workDirectory $workDirectory -workZip $workZip -filename $filename
+
+        CheckWindowsDlls -directory $workDirectory
+
+        Remove-Item $workDirectory -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+        Remove-Item $workZip -Force -ErrorAction SilentlyContinue | Out-Null
+    }
+}
+
 function CheckWindowsDlls(
     [string][parameter(Mandatory=$true)] $directory)
 {
     CheckDirectory -directory $directory
 
-    $files = Get-ChildItem $directory -recurse -file -filter *.dll
+    $files = Get-ChildItem $directory -Recurse -File -Include *.dll, *.pyd
     foreach($entry in $files) {
         $filename = $entry.FullName
 
@@ -212,6 +240,11 @@ Function main
 
         Write-Host *** Checking NUPKG files in $directory ***
         CheckWindowsNuget -directory $directory
+
+        $directory = Join-Path $RootDirectory "PythonBuild"
+
+        Write-Host *** Checking WHL files in $directory ***
+        CheckWindowsWheel -directory $directory
 
         $directory = Join-Path $RootDirectory "Android"
 

@@ -66,4 +66,29 @@ jobs:
     parameters:
       pythonVersion: $(PythonVersion)
       buildParams: "-DCMAKE_CXX_COMPILER=cl.exe -DCMAKE_C_COMPILER=cl.exe -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION)"
+      postbuildsteps:
+        - powershell: |
+            $dir = New-Item -ItemType Directory -Path "$(OutputDirectory)/pdb-$(BuildPlatform)-$(BuildConfiguration)-py$(PythonVersion)"
+            Copy-Item _skbuild\win-*\cmake-build\lib/Release\_speech_py_impl.pdb $dir
+          displayName: copy .PDB
 
+        # Remove *.dist-info/RECORD, otherwise "wheel pack" seem to pack it
+        # twice on Windows (zipfile.py warns: UserWarning: Duplicate name:
+        # 'azure_cognitiveservices_speech-.../RECORD)
+        - bash: unzip -d repack build/*.whl && rm repack/*.dist-info/RECORD
+          displayName: Unzip .whl for signing
+          condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+        - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+          displayName: Sign .pyd
+          inputs:
+            ConnectedServiceName: Speech SDK ESRP Signing
+            FolderPath: repack
+            Pattern: '*.pyd'
+            signConfigType: inlineSignParams
+            inlineOperation: $(SIGN_PARAMS_DLL)
+          condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+        - bash: |
+            mv repack/CodeSignSummary-*.md .
+            wheel pack --dest-dir build repack && rm -rf repack
+          displayName: Repack .whl
+          condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))

@@ -36,12 +36,12 @@ fi
 # install dependencies inside the virtualenv
 ${VIRTUALENV_PYTHON} -m pip install pytest==4.0.0
 
-if !existsExactlyOneFile ${BUILD_DIR}/dist/*.whl; then
+if ! existsExactlyOneFile ${BUILD_DIR}/*.whl; then
     exitWithError "there is more than one wheel built, don't know which one to choose"
 fi
 
 # try installing the azure-cognitiveservices-speech wheel
-${VIRTUALENV_PYTHON} -m pip install ${BUILD_DIR}/dist/*.whl
+${VIRTUALENV_PYTHON} -m pip install ${BUILD_DIR}/*.whl
 
 # run pytest on test files in the source tree
 if [[ $SPEECHSDK_BUILD_AGENT_PLATFORM == Windows* ]]; then

@@ -108,8 +108,11 @@ endif()
 # Copied from https://www.vlam3d.com/2016/09/14/swig-monologues-part-1-getting-started-with-cmake/?lang=en,
 # TODO: check to make sure this is really needed.
 # also, SWIG generates an unused variable.
+# Also, ensure we build with debug information (TODO global setting does not apply?).
 if(MSVC)
-   set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES COMPILE_FLAGS "/bigobj /wd4101")
+   set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES
+     COMPILE_FLAGS "/bigobj /wd4101"
+     LINK_FLAGS "/DEBUG /OPT:REF /OPT:ICF")
 endif()
 
 if(DEFINED SKBUILD)
@@ -119,7 +122,7 @@ if(DEFINED SKBUILD)
   install(TARGETS ${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} DESTINATION ${module_dir})
 
   if("${CMAKE_VERSION}" VERSION_LESS_EQUAL 3.11)
-    install(FILES ${CMAKE_SWIG_OUTDIR}/speech_py_impl.py DESTINATION ${module_dir} )
+    install(FILES ${CMAKE_SWIG_OUTDIR}/speech_py_impl.py DESTINATION ${module_dir})
   else()
     get_property(support_files TARGET ${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTY SWIG_SUPPORT_FILES)
     message(STATUS "support files are ${support_files}")
