@@ -9,68 +9,91 @@
   */
 typedef NS_ENUM(NSUInteger, SPXPropertyId)
 {
+
     /**
-      * Subscription key.
+      * The Cognitive Services Speech Service Subscription Key. If you are using an intent recognizer, you need
+     * to specify the LUIS endpoint key for your particular LUIS app. Under normal circumstances, you shouldn't
+     * have to use this property directly.
+     * Instead, use SPXSpeechConfiguration.initWithSubscription"/>.
       */
     SPXSpeechServiceConnectionKey = 1000,
 
     /**
-      * Endpoint.
+      * The Cognitive Services Speech Service Endpoint (url). Under normal circumstances, you shouldn't
+      * have to use this property directly.
+      * Instead, use SPXSpeechConfiguration.initWithEndpoint.
+      * NOTE: This Endpoint is not the same as the Endpoint used to obtain an access token.
       */
     SPXSpeechServiceConnectionEndpoint = 1001,
 
     /**
-      * Region.
+      * The Cognitive Services Speech Service Region. Under normal circumstances, you shouldn't have to
+      * use this property directly. Instead, use SPXSpeechConfiguration.initWithEndpoint or
+      * SpeechConfig.FromAuthorizationToken.
       */
     SPXSpeechServiceConnectionRegion = 1002,
 
     /**
-      * Authorization token.
+      * The Cognitive Services Speech Service Authorization token (aka access token). Under normal circumstances,
+      * you shouldn't have to use this property directly.
+      * Instead, use SPXSpeechConfiguration.initWithAuthorizationToken,
+      * SPXSpeechRecognizer.setAuthorizationToken, SPXIntentRecognizer.setAuthorizationToken,
+      * SPXTranslationRecognizer.setAuthorizationToken.
       */
     SPXSpeechServiceAuthorizationToken = 1003,
 
     /**
-      * Authorization type.
+      * The Speech Service Authorization type. Currently unused.
       */
     SPXSpeechServiceAuthorizationType = 1004,
 
     /**
-      * Endpoint ID.
+      * The Cognitive Services Custom Speech Service Endpoint Id. Under normal circumstances, you shouldn't
+      * have to use this property directly.
+      * Instead use SPXSpeechConfiguration.setEndpointId.
+      * NOTE: The Endpoint Id is available in the Custom Speech Portal, listed under Endpoint Details.
       */
     SPXSpeechServiceConnectionEndpointId = 1005,
 
     /**
-     * The host name of the proxy server.
-     * Added in version 1.1.0.
+     * The host name of the proxy server. Not implemented yet.
+     * NOTE: This property was added in version 1.1.0.
      */
     SPXSpeechServiceConnectionProxyHostName = 1100,
 
     /**
-     * The port of the proxy server.
-     * Added in version 1.1.0.
+     * The port of the proxy server. Not implemented yet.
+     * NOTE: This property was added in version 1.1.0.
      */
     SPXSpeechServiceConnectionProxyPort = 1101,
 
     /**
-     * The user name of the proxy server.
-     * Added in version 1.1.0.
+     * The user name of the proxy server. Not implemented yet.
+     * NOTE: This property was added in version 1.1.0.
      */
     SPXSpeechServiceConnectionProxyUserName = 1102,
 
     /**
-     * The password of the proxy server.
-     * Added in version 1.1.0.
+     * The password of the proxy server. Not implemented yet.
+     * NOTE: This property was added in version 1.1.0.
      */
     SPXSpeechServiceConnectionProxyPassword = 1103,
 
     /**
-      * Translation to languages.
-      */
+     * The list of comma separated languages (BCP-47 format) used as target translation languages. Under normal circumstances,
+     * you shouldn't have to use this property directly.
+     * Instead use SPXSpeechTranslationConfiguration.addTargetLanguage
+     * and the read-only SPXSpeechTranslationConfiguration.targetLanguages and SPXTranslationRecognizer.targetLangauges
+     * collections.
+     */
     SPXSpeechServiceConnectionTranslationToLanguages = 2000,
 
     /**
-      * Translation output voice.
-      */
+     * The name of the Cognitive Service Text to Speech Service Voice. Under normal circumstances, you shouldn't have to use this
+     * property directly.
+     * Instead use SPXSpeechTranslationConfiguration.setVoiceName.
+     * NOTE: Valid Voice Names can be found <a href="https://aka.ms/csspeech/voicenames">here</a>.
+     */
     SPXSpeechServiceConnectionTranslationVoice = 2001,
 
     /**
@@ -79,62 +102,74 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     SPXSpeechServiceConnectionTranslationFeatures = 2002,
 
     /**
-      * Intent region.
+      * The Language Understanding Service Region. Under normal circumstances, you shouldn't have to use this property directly.
+      * Instead use SPXLanguageUnderstandingModel.
       */
     SPXSpeechServiceConnectionIntentRegion = 2003,
 
     /**
-      * Recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
+      * The Cognitive Services Speech Service Recognition Mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
+      * This property is intended to be read-only. The SDK is using it internally.
+      * user specified values.
       */
     SPXSpeechServiceConnectionRecognitionMode = 3000,
 
     /**
-      * Recognition language.
+      * The spoken language to be recognized (in BCP-47 format). Under normal circumstances, you shouldn't have to use this property
+      * directly.
+      * Instead, use SPXSpeechConfiguration.setSpeechRecognitionLanguage.
       */
     SPXSpeechServiceConnectionRecognitionLanguage = 3001,
 
     /**
-      * Session ID.
+      * The Session ID. This ID is a universally unique identifier (aka UUID) representing a specific binding of an audio input stream
+      * and the underlying speech recognition instance to which it is bound. Under normal circumstances, you shouldn't have to use this
+      * property directly.
+      * Instead, use SPXSessionEventArgs.sessionId.
       */
     SPXSpeechSessionId = 3002,
 
     /**
-      * Detailed result required.
+      * The requested Cognitive Services Speech Service response output format (simple or detailed). Under normal circumstances, you shouldn't have
+      * to use this property directly.
+      * Instead, use SPXSpeechConfiguration.setOutputFormat.
       */
     SPXSpeechServiceResponseRequestDetailedResultTrueFalse = 4000,
 
     /**
-      * Profanity filtering required.
+      * The requested Cognitive Services Speech Service response output profanity level. Currently unused.
       */
     SPXSpeechServiceResponseRequestProfanityFilterTrueFalse = 4001,
 
     /**
-      * JSON result of speech recognition service.
+      * The Cognitive Services Speech Service response output (in JSON format). This property is available on recognition result objects only.
       */
     SPXSpeechServiceResponseJsonResult = 5000,
 
     /**
-      * Error details.
+      * The Cognitive Services Speech Service Error details (in JSON format). Under normal circumstances, you shouldn't have to
+      * use this property directly.
+      * Instead, use SPXCancellationDetails.errorDetails.
       */
     SPXSpeechServiceResponseJsonErrorDetails = 5001,
 
     /**
-      * Cancellation reason.
+      * The Cancellation reason. Currently unused.
       */
     SPXCancellationDetailsReason = 6000,
 
     /**
-      * Cancellation text.
+      * The Cancellation text. Currently unused.
       */
     SPXCancellationDetailsReasonText = 6001,
 
     /**
-      * Cancellation detailed text.
+      * The Cancellation detailed text. Currently unused.
       */
     SPXCancellationDetailsReasonDetailedText = 6002,
 
     /**
-      * JSON result of language understanding service.
+      * The Language Understanding Service response output (in JSON format). Available via IntentRecognitionResult.Properties.
       */
     SPXLanguageUnderstandingServiceResponseJsonResult = 7000
 };
@@ -193,7 +228,7 @@ typedef NS_ENUM(NSUInteger, SPXResultReason)
     SPXResultReason_RecognizedIntent = 5,
 
     /**
-      * Indicates the translation result contains hypothesis text and its translation(s) as an intermediate result.
+      * Indicates the translation result contains hypothesis text and translation(s) as an intermediate result.
       */
     SPXResultReason_TranslatingSpeech = 6,
 

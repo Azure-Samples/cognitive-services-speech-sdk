@@ -12,131 +12,169 @@ namespace Microsoft.CognitiveServices.Speech
     public enum PropertyId
     {
         /// <summary>
-        /// Subscription key.
+        /// The Cognitive Services Speech Service Subscription Key. If you are using an intent recognizer, you need
+        /// to specify the LUIS endpoint key for your particular LUIS app. Under normal circumstances, you shouldn't
+        /// have to use this property directly.
+        /// Instead, use <see cref="SpeechConfig.FromSubscription"/>.
         /// </summary>
         SpeechServiceConnection_Key = Internal.PropertyId.SpeechServiceConnection_Key,
 
         /// <summary>
-        /// Endpoint.
+        /// The Cognitive Services Speech Service Endpoint (url). Under normal circumstances, you shouldn't
+        /// have to use this property directly.
+        /// Instead, use <see cref="SpeechConfig.FromEndpoint"/>.
+        /// NOTE: This Endpoint is not the same as the Endpoint used to obtain an access token.
         /// </summary>
         SpeechServiceConnection_Endpoint = Internal.PropertyId.SpeechServiceConnection_Endpoint,
 
         /// <summary>
-        /// Region.
+        /// The Cognitive Services Speech Service Region. Under normal circumstances, you shouldn't have to
+        /// use this property directly.
+        /// Instead, use <see cref="SpeechConfig.FromSubscription"/>, <see cref="SpeechConfig.FromEndpoint"/>,
+        /// <see cref="SpeechConfig.FromAuthorizationToken"/>.
         /// </summary>
         SpeechServiceConnection_Region = Internal.PropertyId.SpeechServiceConnection_Region,
 
         /// <summary>
-        /// Authorization token.
+        /// The Cognitive Services Speech Service Authorization token (aka access token). Under normal circumstances,
+        /// you shouldn't have to use this property directly.
+        /// Instead, use <see cref="SpeechConfig.FromAuthorizationToken"/>,
+        /// <see cref="SpeechRecognizer.AuthorizationToken"/>, <see cref="Intent.IntentRecognizer.AuthorizationToken"/>, <see cref="Translation.TranslationRecognizer.AuthorizationToken"/>.
         /// </summary>
         SpeechServiceAuthorization_Token = Internal.PropertyId.SpeechServiceAuthorization_Token,
 
         /// <summary>
-        /// Authorization type.
+        /// The Speech Service Authorization Type. Currently unused.
         /// </summary>
         SpeechServiceAuthorization_Type = Internal.PropertyId.SpeechServiceAuthorization_Type,
 
         /// <summary>
-        /// Endpoint ID.
+        /// The Cognitive Services Custom Speech Service Endpoint Id. Under normal circumstances, you shouldn't
+        /// have to use this property directly.
+        /// Instead use <see cref="SpeechConfig.FromEndpoint"/>.
+        /// NOTE: The Endpoint Id is available in the Custom Speech Portal, listed under Endpoint Details.
         /// </summary>
         SpeechServiceConnection_EndpointId = Internal.PropertyId.SpeechServiceConnection_EndpointId,
 
         /// <summary>
-        /// The host name of the proxy server.
-        /// Added in version 1.1.0
+        /// The host name of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,
+        /// you shouldn't have to use this property directly.
+        /// Instead use <see cref="SpeechConfig.SetProxy"/>.
+        /// NOTE: This property id was added in version 1.1.0.
         /// </summary>
         SpeechServiceConnection_ProxyHostName = Internal.PropertyId.SpeechServiceConnection_ProxyHostName,
 
         /// <summary>
-        /// The port of the proxy server.
-        /// Added in version 1.1.0
+        /// The port of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,
+        /// you shouldn't have to use this property directly.
+        /// Instead use <see cref="SpeechConfig.SetProxy"/>.
+        /// NOTE: This property id was added in version 1.1.0.
         /// </summary>
         SpeechServiceConnection_ProxyPort  = Internal.PropertyId.SpeechServiceConnection_ProxyPort,
 
         /// <summary>
-        /// The user name of the proxy server.
-        /// Added in version 1.1.0
+        /// The user name of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,
+        /// you shouldn't have to use this property directly.
+        /// Instead use <see cref="SpeechConfig.SetProxy"/>.
+        /// NOTE: This property id was added in version 1.1.0.
         /// </summary>
         SpeechServiceConnection_ProxyUserName  = Internal.PropertyId.SpeechServiceConnection_ProxyUserName,
 
         /// <summary>
-        /// The password of the proxy server.
-        /// Added in version 1.1.0
+        /// The password of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,
+        /// you shouldn't have to use this property directly.
+        /// Instead use <see cref="SpeechConfig.SetProxy"/>.
+        /// NOTE: This property id was added in version 1.1.0.
         /// </summary>
         SpeechServiceConnection_ProxyPassword = Internal.PropertyId.SpeechServiceConnection_ProxyPassword,
 
         /// <summary>
-        /// Translation to languages.
+        /// The list of comma separated languages (in BCP-47 format) used as target translation languages. Under normal circumstances,
+        /// you shouldn't have to use this property directly.
+        /// Instead, use <see cref="SpeechTranslationConfig.AddTargetLanguage"/> and the read-only <see cref="SpeechTranslationConfig.TargetLanguages"/> collection.
         /// </summary>
         SpeechServiceConnection_TranslationToLanguages = Internal.PropertyId.SpeechServiceConnection_TranslationToLanguages,
 
         /// <summary>
-        /// Translation output voice.
+        /// The name of the Cognitive Service Text to Speech Service Voice. Under normal circumstances, you shouldn't have to use this
+        /// property directly. Instead use <see cref="SpeechTranslationConfig.VoiceName"/>.
+        /// NOTE: Valid Voice Names can be found <a href="https://aka.ms/csspeech/voicenames">here</a>.
         /// </summary>
         SpeechServiceConnection_TranslationVoice = Internal.PropertyId.SpeechServiceConnection_TranslationVoice,
 
         /// <summary>
-        /// Translation features.
+        /// Translation features. For internal use.
         /// </summary>
         SpeechServiceConnection_TranslationFeatures = Internal.PropertyId.SpeechServiceConnection_TranslationFeatures,
 
         /// <summary>
-        /// Intent region.
+        /// The Language Understanding Service Region. Under normal circumstances, you shouldn't have to use this property directly.
+        /// Instead use <see cref="Intent.LanguageUnderstandingModel"/>.
         /// </summary>
         SpeechServiceConnection_IntentRegion = Internal.PropertyId.SpeechServiceConnection_IntentRegion,
 
         /// <summary>
-        /// Recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
+        /// The Cognitive Services Speech Service Recognition Mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
+        /// This property is intended to be read-only. The SDK is using it internally.
         /// </summary>
         SpeechServiceConnection_RecoMode = Internal.PropertyId.SpeechServiceConnection_RecoMode,
 
         /// <summary>
-        /// Recognition language.
+        /// The spoken language to be recognized (in BCP-47 format). Under normal circumstances, you shouldn't have to use this property
+        /// directly.
+        /// Instead, use <see cref="SpeechConfig.SpeechRecognitionLanguage"/>.
         /// </summary>
         SpeechServiceConnection_RecoLanguage = Internal.PropertyId.SpeechServiceConnection_RecoLanguage,
 
         /// <summary>
-        /// Session ID.
+        /// The Session ID. This ID is a universally unique identifier (aka UUID) representing a specific binding of an audio input stream
+        /// and the underlying speech recognition instance to which it is bound. Under normal circumstances,
+        /// you shouldn't have to use this property directly.
+        /// Instead use <see cref="SessionEventArgs.SessionId"/>.
         /// </summary>
         Speech_SessionId = Internal.PropertyId.Speech_SessionId,
 
         /// <summary>
-        /// Detailed result required.
+        /// The requested Cognitive Services Speech Service response output format (simple or detailed). Under normal circumstances, you shouldn't have
+        /// to use this property directly.
+        /// Instead, use <see cref="SpeechConfig.OutputFormat"/>.
         /// </summary>
         SpeechServiceResponse_RequestDetailedResultTrueFalse = Internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse,
 
         /// <summary>
-        /// Profanity filtering required.
+        /// The requested Cognitive Services Speech Service response output profanity level. Currently unused.
         /// </summary>
         SpeechServiceResponse_RequestProfanityFilterTrueFalse = Internal.PropertyId.SpeechServiceResponse_RequestProfanityFilterTrueFalse,
 
         /// <summary>
-        /// JSON result of speech recognition service.
+        /// The Cognitive Services Speech Service response output (in JSON format). This property is available on
+        /// recognition result objects only.
         /// </summary>
         SpeechServiceResponse_JsonResult = Internal.PropertyId.SpeechServiceResponse_JsonResult,
 
         /// <summary>
-        /// Error details.
+        /// The Cognitive Services Speech Service Error details (in JSON format). Under normal circumstances, you shouldn't have to
+        /// use this property directly. Instead use <see cref="CancellationDetails.ErrorDetails"/>.
         /// </summary>
         SpeechServiceResponse_JsonErrorDetails = Internal.PropertyId.SpeechServiceResponse_JsonErrorDetails,
 
         /// <summary>
-        /// Cancellation reason.
+        /// The Cancellation reason. Currently unused.
         /// </summary>
         CancellationDetails_Reason = Internal.PropertyId.CancellationDetails_Reason,
 
         /// <summary>
-        /// Cancellation text.
+        /// The Cancellation text. Currently unused.
         /// </summary>
         CancellationDetails_ReasonText = Internal.PropertyId.CancellationDetails_ReasonText,
 
         /// <summary>
-        /// Cancellation detailed text.
+        /// The Cancellation detailed text. Currently unused.
         /// </summary>
         CancellationDetails_ReasonDetailedText = Internal.PropertyId.CancellationDetails_ReasonDetailedText,
 
         /// <summary>
-        /// JSON result of language understanding service.
+        /// The Language Understanding Service response output (in JSON format). Available via <see cref="RecognitionResult.Properties"/>.
         /// </summary>
         LanguageUnderstandingServiceResponse_JsonResult = Internal.PropertyId.LanguageUnderstandingServiceResponse_JsonResult,
     }
