@@ -16,6 +16,7 @@ proguard-rules.pro text
 *.gradle text
 *.h text
 *.html text
+*.ipynb text
 *.java text
 *.js text
 *.json text

@@ -12,7 +12,7 @@ BEGIN {
   chdir $dir or die "?Cannot change directory\n";
 
   find(sub {
-    m(^(?:.*\.(?:java|js|cpp|cs|m|html|xaml)|pom\.xml)$) &&
+    m(^(?:.*\.(?:java|js|cpp|cs|m|html|xaml|py)|pom\.xml)$) &&
     push @ARGV, substr($File::Find::name, 2);
   }, '.');
 
@@ -20,6 +20,8 @@ BEGIN {
   our $c_e = qr(^\s*// </(\w+)>);
   our $xml_s = qr(^\s*<!-- <(\w+)> -->);
   our $xml_e = qr(^\s*<!-- </(\w+)> -->);
+  our $py_s = qr(^\s*# <(\w+)>);
+  our $py_e = qr(^\s*# </(\w+)>);
   our $err = 0;
 
   our @expectedFiles;
@@ -58,6 +60,7 @@ BEGIN {
       quickstart/js-browser/index.html#uidiv
       quickstart/js-node/index.js#code
       quickstart/objectivec-ios/helloworld/helloworld/ViewController.m#code
+      quickstart/python/quickstart.py#code
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentContinuousRecognitionWithFile
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentRecognitionWithLanguage
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentRecognitionWithMicrophone
@@ -109,6 +112,9 @@ if ($ARGV ne $oldargv) {
   if ($ARGV =~ /\.xa?ml$|\.html$/) {
     $s = $xml_s;
     $e = $xml_e;
+  } elsif ($ARGV =~ /\.py$/) {
+    $s = $py_s;
+    $e = $py_e;
   } else {
     $s = $c_s;
     $e = $c_e;
