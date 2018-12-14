@@ -1347,7 +1347,7 @@ jobs:
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
     displayName: Package signed framework
   - bash: . ci/functions.sh && vsts_setvar SPEECHSDK_RUN_TESTS false
-    condition: failed()
+    condition: or(failed(), canceled())
     displayName: Skip tests on build failure.
   - bash: |
       set -e -o pipefail -x
