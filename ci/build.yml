@@ -87,7 +87,6 @@ variables:
   AZURE_CONTAINER_REGISTRY_NAME: csspeechsdkacr201809
   AZURE_CONTAINER_REGISTRY: $(AZURE_CONTAINER_REGISTRY_NAME).azurecr.io
   AZURE_SUBSCRIPTION_ENDPOINT: 'Custom Speech Development (3a96ef56-41a9-40a0-b0f3-fb125c2b8798) - RG csspeechsdk-carbon'
-  SPEECHSDK_JS_ROOT: source/bindings/js
 
 jobs:
 
@@ -230,12 +229,9 @@ jobs:
     inputs:
       ApplyRules: All
       ExternalRelease: true
+  # Currently we do not have TypeScript source in this repository. Keeping the task here with default options.
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-tslint.TSLint@1
     displayName: 'Run TSLint'
-    inputs:
-      Ruleset: custom
-      RulesetFile: source/bindings/js/tslint.json
-      Files: source/**/*.ts
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@2
     displayName: 'Run the PREfast SDL Native Rules for MSBuild'
   # Checks END
@@ -1462,11 +1458,6 @@ jobs:
       ArtifactName: macOS
       publishLocation: Container
       # condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
-
-- template: ../source/bindings/js/ci/jsbuild.yml
-  parameters:
-    dependsOn: Pre
-    condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JsBuild '))
 
 - job: Doxygen
   dependsOn: Pre
