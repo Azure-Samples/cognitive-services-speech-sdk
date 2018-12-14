@@ -53,7 +53,7 @@ jobs:
       mkdir -p "$PACKAGE_OUT" "$ZIP_OUT"
       cp --preserve "$PACKAGE_IN" "$PACKAGE_OUT"
       echo SRI hash for microsoft.cognitiveservices.speech.sdk.bundle.js: sha512-"$(openssl dgst -sha512 -binary $(SPEECHSDK_JS_ROOT)/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle.js | openssl base64 -A)"
-      cp --preserve $(SPEECHSDK_JS_ROOT)/LICENSE $(SPEECHSDK_JS_ROOT)/REDIST.txt $(SPEECHSDK_JS_ROOT)/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle.* "$ZIP_OUT"
+      cp --preserve $(SPEECHSDK_JS_ROOT)/LICENSE $(SPEECHSDK_JS_ROOT)/REDIST.txt $(SPEECHSDK_JS_ROOT)/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle.* $(SPEECHSDK_JS_ROOT)/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.* "$ZIP_OUT"
     displayName: Create drop
   - task: ArchiveFiles@2
     inputs:

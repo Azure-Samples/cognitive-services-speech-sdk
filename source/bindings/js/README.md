@@ -36,6 +36,12 @@ or
 npx gulp bundle
 ```
 
+or
+
+```
+npx gulp compress
+```
+
 > Note: `npx` is packaged with NPM 5.2 or above. Update NPM / Node if you
 > don't have it or install it globally with `npm install -g npx` (less
 > preferable).
