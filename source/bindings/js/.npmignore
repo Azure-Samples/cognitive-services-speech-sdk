@@ -1,5 +1,4 @@
 /.vscode/*
-/samples/*
 /node_modules/*
 /.gitattributes
 /.gitignore

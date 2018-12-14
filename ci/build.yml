@@ -87,6 +87,7 @@ variables:
   AZURE_CONTAINER_REGISTRY_NAME: csspeechsdkacr201809
   AZURE_CONTAINER_REGISTRY: $(AZURE_CONTAINER_REGISTRY_NAME).azurecr.io
   AZURE_SUBSCRIPTION_ENDPOINT: 'Custom Speech Development (3a96ef56-41a9-40a0-b0f3-fb125c2b8798) - RG csspeechsdk-carbon'
+  SPEECHSDK_JS_ROOT: source/bindings/js
 
 jobs:
 
@@ -1462,76 +1463,10 @@ jobs:
       publishLocation: Container
       # condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
 
-- job: JsBuild
-  dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JsBuild '))
-  pool:
-    name: Hosted VS2017
-    demands: npm
-  variables:
-    NPM_REGISTRY: https://csspeechstorage.blob.core.windows.net/npm/de13462a
-  steps:
-  - bash: ./ci/set-variables.sh
-    displayName: Set variables
-  - bash: |
-      F=source/bindings/js/src/common.speech/RecognizerConfig.ts
-      perl -i.bak -p -e 'BEGIN { $c = 0 } $c += s/(?<=const SPEECHSDK_CLIENTSDK_VERSION = ")[^"]*/$(SPEECHSDK_SEMVER2NOMETA)/g; END { die "Patched SPEECHSDK_CLIENTSDK_VERSION $c time(s), expected 1.\n" if $c != 1 }' "$F"
-      E=$?
-      rm -f "$F.bak"
-      git diff
-      exit $E
-    displayName: Stamp SPEECHSDK_CLIENTSDK_VERSION
-  - bash: |
-      cd source/bindings/js &&
-      npm version $(SPEECHSDK_SEMVER2NOMETA) &&
-      npm ci &&
-      npm run prepare &&
-      npm pack
-    displayName: Build and pack SDK
-  - bash: |
-      perl ci/evaluate-test-config.pl --verbose --format azuredevops-variable --input ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman)
-    displayName: Set test variables
-  - script: RunTests.cmd SpeechSubscriptionKey:$(SPEECHSDK_SPEECH_KEY) SpeechRegion:$(SPEECHSDK_SPEECH_REGION) LuisSubscriptionKey:$(SPEECHSDK_LUIS_KEY) LuisRegion:$(SPEECHSDK_LUIS_REGION) SpeechTestEndpointId:$(SPEECHSDK_SPEECH_ENDPOINTID_ENUS)
-    displayName: 'Run tests'
-    workingDirectory: source/bindings/js
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-  - task: PublishTestResults@2
-    displayName: 'Publish Test Results **/TEST-*.xml'
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-tslint.TSLint@1
-    displayName: 'Run TSLint'
-    enabled: false
-  - bash: |
-      set -e -o pipefail -x
-      PACKAGE_BASE=microsoft-cognitiveservices-speech-sdk
-      PACKAGE_NAME=$PACKAGE_BASE-$SPEECHSDK_SEMVER2NOMETA.tgz
-      PACKAGE_IN=source/bindings/js/$PACKAGE_NAME
-      PACKAGE_OUT="$(Build.ArtifactStagingDirectory)/Out/JavaScript/npm"
-      QUICKSTART_OUT="$(Build.ArtifactStagingDirectory)/Out/JavaScript/js-browser"
-      ZIP_OUT="$(Build.ArtifactStagingDirectory)/Out/JavaScript/SpeechSDK-JavaScript-$SPEECHSDK_SEMVER2NOMETA"
-      mkdir -p "$PACKAGE_OUT" "$ZIP_OUT"
-      ./ci/generate-npm-index-json.sh "$PACKAGE_IN" "$SPEECHSDK_SEMVER2NOMETA" "$(NPM_REGISTRY)" > "$PACKAGE_OUT/$PACKAGE_BASE"
-      cp --preserve "$PACKAGE_IN" "$PACKAGE_OUT"
-      cp --preserve --recursive public_samples/quickstart/js-browser "$QUICKSTART_OUT"
-      cp --preserve source/bindings/js/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle.* "$QUICKSTART_OUT"
-      echo SRI hash for microsoft.cognitiveservices.speech.sdk.bundle.js: sha512-"$(openssl dgst -sha512 -binary source/bindings/js/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle.js | openssl base64 -A)"
-      cp --preserve license.md REDIST.txt source/bindings/js/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle.* "$ZIP_OUT"
-  - task: ArchiveFiles@2
-    inputs:
-      rootFolderOrFile: $(Build.ArtifactStagingDirectory)/Out/JavaScript/SpeechSDK-JavaScript-$(SPEECHSDK_SEMVER2NOMETA)
-      includeRootFolder: true
-      archiveType: zip
-      archiveFile: $(Build.ArtifactStagingDirectory)/Out/JavaScript/SpeechSDK-JavaScript-$(SPEECHSDK_SEMVER2NOMETA).zip
-    displayName: 'Create .zip'
-  - bash: rm -rf "$(Build.ArtifactStagingDirectory)/Out/JavaScript/SpeechSDK-JavaScript-$(SPEECHSDK_SEMVER2NOMETA)"
-  - task: PublishBuildArtifacts@1
-    displayName: Publish drop
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Out/JavaScript'
-      ArtifactName: JavaScript
-      publishLocation: Container
+- template: ../source/bindings/js/ci/jsbuild.yml
+  parameters:
+    dependsOn: Pre
+    condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JsBuild '))
 
 - job: Doxygen
   dependsOn: Pre

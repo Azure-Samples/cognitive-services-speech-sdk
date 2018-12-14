@@ -1,0 +1,32 @@
+#
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+#
+
+trigger:
+- master
+
+pr:
+- master
+
+resources:
+- repo: self
+  clean: true
+
+variables:
+  SPEECHSDK_JS_ROOT: .
+
+jobs:
+
+- job: Pre
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 30
+  steps:
+  - bash: ./ci/check-git-head.sh
+    displayName: Repository checks
+
+- template: jsbuild.yml
+  parameters:
+    dependsOn: Pre
+    condition: true

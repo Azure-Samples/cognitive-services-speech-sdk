@@ -10,6 +10,5 @@ MicrosoftCognitiveServicesSpeech.framework/MicrosoftCognitiveServicesSpeech
 client-sdk-<VERSION>.aar (or content derived from it)
 client-sdk-<VERSION>.jar
 libMicrosoft.CognitiveServices.Speech.core.so
-microsoft.cognitiveservices.speech.sdk.bundle.js
 
 Depending on your usage, you only need to redistribute a subset of the above.
