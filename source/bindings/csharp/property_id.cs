@@ -12,7 +12,7 @@ namespace Microsoft.CognitiveServices.Speech
     public enum PropertyId
     {
         /// <summary>
-        /// The Cognitive Services Speech Service Subscription Key. If you are using an intent recognizer, you need
+        /// The Cognitive Services Speech Service subscription key. If you are using an intent recognizer, you need
         /// to specify the LUIS endpoint key for your particular LUIS app. Under normal circumstances, you shouldn't
         /// have to use this property directly.
         /// Instead, use <see cref="SpeechConfig.FromSubscription"/>.
@@ -20,15 +20,15 @@ namespace Microsoft.CognitiveServices.Speech
         SpeechServiceConnection_Key = Internal.PropertyId.SpeechServiceConnection_Key,
 
         /// <summary>
-        /// The Cognitive Services Speech Service Endpoint (url). Under normal circumstances, you shouldn't
+        /// The Cognitive Services Speech Service endpoint (url). Under normal circumstances, you shouldn't
         /// have to use this property directly.
         /// Instead, use <see cref="SpeechConfig.FromEndpoint"/>.
-        /// NOTE: This Endpoint is not the same as the Endpoint used to obtain an access token.
+        /// NOTE: This endpoint is not the same as the endpoint used to obtain an access token.
         /// </summary>
         SpeechServiceConnection_Endpoint = Internal.PropertyId.SpeechServiceConnection_Endpoint,
 
         /// <summary>
-        /// The Cognitive Services Speech Service Region. Under normal circumstances, you shouldn't have to
+        /// The Cognitive Services Speech Service region. Under normal circumstances, you shouldn't have to
         /// use this property directly.
         /// Instead, use <see cref="SpeechConfig.FromSubscription"/>, <see cref="SpeechConfig.FromEndpoint"/>,
         /// <see cref="SpeechConfig.FromAuthorizationToken"/>.
@@ -36,7 +36,7 @@ namespace Microsoft.CognitiveServices.Speech
         SpeechServiceConnection_Region = Internal.PropertyId.SpeechServiceConnection_Region,
 
         /// <summary>
-        /// The Cognitive Services Speech Service Authorization token (aka access token). Under normal circumstances,
+        /// The Cognitive Services Speech Service authorization token (aka access token). Under normal circumstances,
         /// you shouldn't have to use this property directly.
         /// Instead, use <see cref="SpeechConfig.FromAuthorizationToken"/>,
         /// <see cref="SpeechRecognizer.AuthorizationToken"/>, <see cref="Intent.IntentRecognizer.AuthorizationToken"/>, <see cref="Translation.TranslationRecognizer.AuthorizationToken"/>.
@@ -44,15 +44,15 @@ namespace Microsoft.CognitiveServices.Speech
         SpeechServiceAuthorization_Token = Internal.PropertyId.SpeechServiceAuthorization_Token,
 
         /// <summary>
-        /// The Speech Service Authorization Type. Currently unused.
+        /// The Cognitive Services Speech Service authorization type. Currently unused.
         /// </summary>
         SpeechServiceAuthorization_Type = Internal.PropertyId.SpeechServiceAuthorization_Type,
 
         /// <summary>
-        /// The Cognitive Services Custom Speech Service Endpoint Id. Under normal circumstances, you shouldn't
+        /// The Cognitive Services Custom Speech Service endpoint id. Under normal circumstances, you shouldn't
         /// have to use this property directly.
         /// Instead use <see cref="SpeechConfig.FromEndpoint"/>.
-        /// NOTE: The Endpoint Id is available in the Custom Speech Portal, listed under Endpoint Details.
+        /// NOTE: The endpoint id is available in the Custom Speech Portal, listed under Endpoint Details.
         /// </summary>
         SpeechServiceConnection_EndpointId = Internal.PropertyId.SpeechServiceConnection_EndpointId,
 
@@ -96,9 +96,9 @@ namespace Microsoft.CognitiveServices.Speech
         SpeechServiceConnection_TranslationToLanguages = Internal.PropertyId.SpeechServiceConnection_TranslationToLanguages,
 
         /// <summary>
-        /// The name of the Cognitive Service Text to Speech Service Voice. Under normal circumstances, you shouldn't have to use this
+        /// The name of the Cognitive Service Text to Speech Service voice. Under normal circumstances, you shouldn't have to use this
         /// property directly. Instead use <see cref="SpeechTranslationConfig.VoiceName"/>.
-        /// NOTE: Valid Voice Names can be found <a href="https://aka.ms/csspeech/voicenames">here</a>.
+        /// NOTE: Valid voice names can be found <a href="https://aka.ms/csspeech/voicenames">here</a>.
         /// </summary>
         SpeechServiceConnection_TranslationVoice = Internal.PropertyId.SpeechServiceConnection_TranslationVoice,
 
@@ -114,20 +114,19 @@ namespace Microsoft.CognitiveServices.Speech
         SpeechServiceConnection_IntentRegion = Internal.PropertyId.SpeechServiceConnection_IntentRegion,
 
         /// <summary>
-        /// The Cognitive Services Speech Service Recognition Mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
+        /// The Cognitive Services Speech Service recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
         /// This property is intended to be read-only. The SDK is using it internally.
         /// </summary>
         SpeechServiceConnection_RecoMode = Internal.PropertyId.SpeechServiceConnection_RecoMode,
 
         /// <summary>
-        /// The spoken language to be recognized (in BCP-47 format). Under normal circumstances, you shouldn't have to use this property
-        /// directly.
+        /// The spoken language to be recognized (in BCP-47 format). Under normal circumstances, you shouldn't have to use this property directly.
         /// Instead, use <see cref="SpeechConfig.SpeechRecognitionLanguage"/>.
         /// </summary>
         SpeechServiceConnection_RecoLanguage = Internal.PropertyId.SpeechServiceConnection_RecoLanguage,
 
         /// <summary>
-        /// The Session ID. This ID is a universally unique identifier (aka UUID) representing a specific binding of an audio input stream
+        /// The session id. This id is a universally unique identifier (aka UUID) representing a specific binding of an audio input stream
         /// and the underlying speech recognition instance to which it is bound. Under normal circumstances,
         /// you shouldn't have to use this property directly.
         /// Instead use <see cref="SessionEventArgs.SessionId"/>.
@@ -153,23 +152,23 @@ namespace Microsoft.CognitiveServices.Speech
         SpeechServiceResponse_JsonResult = Internal.PropertyId.SpeechServiceResponse_JsonResult,
 
         /// <summary>
-        /// The Cognitive Services Speech Service Error details (in JSON format). Under normal circumstances, you shouldn't have to
+        /// The Cognitive Services Speech Service error details (in JSON format). Under normal circumstances, you shouldn't have to
         /// use this property directly. Instead use <see cref="CancellationDetails.ErrorDetails"/>.
         /// </summary>
         SpeechServiceResponse_JsonErrorDetails = Internal.PropertyId.SpeechServiceResponse_JsonErrorDetails,
 
         /// <summary>
-        /// The Cancellation reason. Currently unused.
+        /// The cancellation reason. Currently unused.
         /// </summary>
         CancellationDetails_Reason = Internal.PropertyId.CancellationDetails_Reason,
 
         /// <summary>
-        /// The Cancellation text. Currently unused.
+        /// The cancellation text. Currently unused.
         /// </summary>
         CancellationDetails_ReasonText = Internal.PropertyId.CancellationDetails_ReasonText,
 
         /// <summary>
-        /// The Cancellation detailed text. Currently unused.
+        /// The cancellation detailed text. Currently unused.
         /// </summary>
         CancellationDetails_ReasonDetailedText = Internal.PropertyId.CancellationDetails_ReasonDetailedText,
 

@@ -21,7 +21,7 @@ namespace Speech {
 enum class PropertyId
 {
     /// <summary>
-    /// The Cognitive Services Speech Service Subscription Key. If you are using an intent recognizer, you need
+    /// The Cognitive Services Speech Service subscription key. If you are using an intent recognizer, you need
     /// to specify the LUIS endpoint key for your particular LUIS app. Under normal circumstances, you shouldn't
     /// have to use this property directly.
     /// Instead, use <see cref="SpeechConfig::FromSubscription"/>.
@@ -29,15 +29,15 @@ enum class PropertyId
     SpeechServiceConnection_Key = 1000,
 
     /// <summary>
-    /// The Cognitive Services Speech Service Endpoint (url). Under normal circumstances, you shouldn't
+    /// The Cognitive Services Speech Service endpoint (url). Under normal circumstances, you shouldn't
     /// have to use this property directly.
     /// Instead, use <see cref="SpeechConfig::FromEndpoint"/>.
-    /// NOTE: This Endpoint is not the same as the Endpoint used to obtain an access token.
+    /// NOTE: This endpoint is not the same as the endpoint used to obtain an access token.
     /// </summary>
     SpeechServiceConnection_Endpoint = 1001,
 
     /// <summary>
-    /// The Cognitive Services Speech Service Region. Under normal circumstances, you shouldn't have to
+    /// The Cognitive Services Speech Service region. Under normal circumstances, you shouldn't have to
     /// use this property directly.
     /// Instead, use <see cref="SpeechConfig::FromSubscription"/>, <see cref="SpeechConfig::FromEndpoint"/>,
     /// <see cref="SpeechConfig::FromAuthorizationToken"/>.
@@ -45,7 +45,7 @@ enum class PropertyId
     SpeechServiceConnection_Region = 1002,
 
     /// <summary>
-    /// The Cognitive Services Speech Service Authorization token (aka access token). Under normal circumstances,
+    /// The Cognitive Services Speech Service authorization token (aka access token). Under normal circumstances,
     /// you shouldn't have to use this property directly.
     /// Instead, use <see cref="SpeechConfig::FromAuthorizationToken"/>,
     /// <see cref="SpeechRecognizer::SetAuthorizationToken"/>, <see cref="IntentRecognizer::SetAuthorizationToken"/>,
@@ -54,15 +54,15 @@ enum class PropertyId
     SpeechServiceAuthorization_Token = 1003,
 
     /// <summary>
-    /// The Speech Service Authorization Type. Currently unused.
+    /// The Cognitive Services Speech Service authorization type. Currently unused.
     /// </summary>
     SpeechServiceAuthorization_Type = 1004,
 
     /// <summary>
-    /// The Cognitive Services Custom Speech Service Endpoint Id. Under normal circumstances, you shouldn't
+    /// The Cognitive Services Custom Speech Service endpoint id. Under normal circumstances, you shouldn't
     /// have to use this property directly.
     /// Instead use <see cref="SpeechConfig::SetEndpointId"/>.
-    /// NOTE: The Endpoint Id is available in the Custom Speech Portal, listed under Endpoint Details.
+    /// NOTE: The endpoint id is available in the Custom Speech Portal, listed under Endpoint Details.
     /// </summary>
     SpeechServiceConnection_EndpointId = 1005,
 
@@ -106,9 +106,9 @@ enum class PropertyId
     SpeechServiceConnection_TranslationToLanguages = 2000,
 
     /// <summary>
-    /// The name of the Cognitive Service Text to Speech Service Voice. Under normal circumstances, you shouldn't have to use this
+    /// The name of the Cognitive Service Text to Speech Service voice. Under normal circumstances, you shouldn't have to use this
     /// property directly. Instead use <see cref="SpeechTranslationConfig::SetVoiceName"/>.
-    /// NOTE: Valid Voice Names can be found <a href="https://aka.ms/csspeech/voicenames">here</a>.
+    /// NOTE: Valid voice names can be found <a href="https://aka.ms/csspeech/voicenames">here</a>.
     /// </summary>
     SpeechServiceConnection_TranslationVoice = 2001,
 
@@ -118,13 +118,13 @@ enum class PropertyId
     SpeechServiceConnection_TranslationFeatures = 2002,
 
     /// <summary>
-    /// The Language Understanding Service Region. Under normal circumstances, you shouldn't have to use this property directly.
+    /// The Language Understanding Service region. Under normal circumstances, you shouldn't have to use this property directly.
     /// Instead use <see cref="LanguageUnderstandingModel"/>.
     /// </summary>
     SpeechServiceConnection_IntentRegion = 2003,
 
     /// <summary>
-    /// The Cognitive Services Speech Service Recognition Mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
+    /// The Cognitive Services Speech Service recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
     /// This property is intended to be read-only. The SDK is using it internally.
     /// </summary>
     SpeechServiceConnection_RecoMode = 3000,
@@ -137,7 +137,7 @@ enum class PropertyId
     SpeechServiceConnection_RecoLanguage = 3001,
 
     /// <summary>
-    /// The Session ID. This ID is a universally unique identifier (aka UUID) representing a specific binding of an audio input stream
+    /// The session id. This id is a universally unique identifier (aka UUID) representing a specific binding of an audio input stream
     /// and the underlying speech recognition instance to which it is bound. Under normal circumstances, you shouldn't have to use this
     /// property directly.
     /// Instead use <see cref="SessionEventArgs::SessionId"/>.
@@ -162,24 +162,24 @@ enum class PropertyId
     SpeechServiceResponse_JsonResult = 5000,
 
     /// <summary>
-    /// The Cognitive Services Speech Service Error details (in JSON format). Under normal circumstances, you shouldn't have to
+    /// The Cognitive Services Speech Service error details (in JSON format). Under normal circumstances, you shouldn't have to
     /// use this property directly.
     /// Instead, use <see cref="CancellationDetails::ErrorDetails"/>.
     /// </summary>
     SpeechServiceResponse_JsonErrorDetails = 5001,
 
     /// <summary>
-    /// The Cancellation reason. Currently unused.
+    /// The cancellation reason. Currently unused.
     /// </summary>
     CancellationDetails_Reason = 6000,
 
     /// <summary>
-    /// The Cancellation text. Currently unused.
+    /// The cancellation text. Currently unused.
     /// </summary>
     CancellationDetails_ReasonText = 6001,
 
     /// <summary>
-    /// The Cancellation detailed text. Currently unused.
+    /// The cancellation detailed text. Currently unused.
     /// </summary>
     CancellationDetails_ReasonDetailedText = 6002,
 

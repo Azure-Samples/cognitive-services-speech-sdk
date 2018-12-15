@@ -11,47 +11,47 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
 {
 
     /**
-      * The Cognitive Services Speech Service Subscription Key. If you are using an intent recognizer, you need
+      * The Cognitive Services Speech Service subscription key. If you are using an intent recognizer, you need
      * to specify the LUIS endpoint key for your particular LUIS app. Under normal circumstances, you shouldn't
      * have to use this property directly.
-     * Instead, use SPXSpeechConfiguration.initWithSubscription"/>.
+     * Instead, use SPXSpeechConfiguration.initWithSubscription.
       */
     SPXSpeechServiceConnectionKey = 1000,
 
     /**
-      * The Cognitive Services Speech Service Endpoint (url). Under normal circumstances, you shouldn't
+      * The Cognitive Services Speech Service endpoint (url). Under normal circumstances, you shouldn't
       * have to use this property directly.
       * Instead, use SPXSpeechConfiguration.initWithEndpoint.
-      * NOTE: This Endpoint is not the same as the Endpoint used to obtain an access token.
+      * NOTE: This endpoint is not the same as the endpoint used to obtain an access token.
       */
     SPXSpeechServiceConnectionEndpoint = 1001,
 
     /**
-      * The Cognitive Services Speech Service Region. Under normal circumstances, you shouldn't have to
-      * use this property directly. Instead, use SPXSpeechConfiguration.initWithEndpoint or
-      * SpeechConfig.FromAuthorizationToken.
+      * The Cognitive Services Speech Service region. Under normal circumstances, you shouldn't have to
+      * use this property directly. 
+      * Instead, use SPXSpeechConfiguration.initWithEndpoint or SpeechConfiguration.initWithAuthorizationToken.
       */
     SPXSpeechServiceConnectionRegion = 1002,
 
     /**
-      * The Cognitive Services Speech Service Authorization token (aka access token). Under normal circumstances,
+      * The Cognitive Services Speech Service authorization token (aka access token). Under normal circumstances,
       * you shouldn't have to use this property directly.
       * Instead, use SPXSpeechConfiguration.initWithAuthorizationToken,
-      * SPXSpeechRecognizer.setAuthorizationToken, SPXIntentRecognizer.setAuthorizationToken,
-      * SPXTranslationRecognizer.setAuthorizationToken.
+      * SPXSpeechRecognizer.authorizationToken, SPXIntentRecognizer.authorizationToken,
+      * SPXTranslationRecognizer.authorizationToken.
       */
     SPXSpeechServiceAuthorizationToken = 1003,
 
     /**
-      * The Speech Service Authorization type. Currently unused.
+      * The Cognitive Services Speech Service authorization type. Currently unused.
       */
     SPXSpeechServiceAuthorizationType = 1004,
 
     /**
-      * The Cognitive Services Custom Speech Service Endpoint Id. Under normal circumstances, you shouldn't
+      * The Cognitive Services Custom Speech Service endpoint id. Under normal circumstances, you shouldn't
       * have to use this property directly.
-      * Instead use SPXSpeechConfiguration.setEndpointId.
-      * NOTE: The Endpoint Id is available in the Custom Speech Portal, listed under Endpoint Details.
+      * Instead use SPXSpeechConfiguration.endpointId.
+      * NOTE: The endpoint id is available in the Custom Speech Portal, listed under Endpoint Details.
       */
     SPXSpeechServiceConnectionEndpointId = 1005,
 
@@ -89,40 +89,38 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     SPXSpeechServiceConnectionTranslationToLanguages = 2000,
 
     /**
-     * The name of the Cognitive Service Text to Speech Service Voice. Under normal circumstances, you shouldn't have to use this
+     * The name of the Cognitive Service Text to Speech Service voice. Under normal circumstances, you shouldn't have to use this
      * property directly.
-     * Instead use SPXSpeechTranslationConfiguration.setVoiceName.
-     * NOTE: Valid Voice Names can be found <a href="https://aka.ms/csspeech/voicenames">here</a>.
+     * Instead use SPXSpeechTranslationConfiguration.voiceName.
+     * NOTE: Valid voice names can be found <a href="https://aka.ms/csspeech/voicenames">here</a>.
      */
     SPXSpeechServiceConnectionTranslationVoice = 2001,
 
     /**
-      * Translation features.
+      * Translation features. For internal use.
       */
     SPXSpeechServiceConnectionTranslationFeatures = 2002,
 
     /**
-      * The Language Understanding Service Region. Under normal circumstances, you shouldn't have to use this property directly.
+      * The Language Understanding Service region. Under normal circumstances, you shouldn't have to use this property directly.
       * Instead use SPXLanguageUnderstandingModel.
       */
     SPXSpeechServiceConnectionIntentRegion = 2003,
 
     /**
-      * The Cognitive Services Speech Service Recognition Mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
+      * The Cognitive Services Speech Service recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
       * This property is intended to be read-only. The SDK is using it internally.
-      * user specified values.
       */
     SPXSpeechServiceConnectionRecognitionMode = 3000,
 
     /**
-      * The spoken language to be recognized (in BCP-47 format). Under normal circumstances, you shouldn't have to use this property
-      * directly.
-      * Instead, use SPXSpeechConfiguration.setSpeechRecognitionLanguage.
+      * The spoken language to be recognized (in BCP-47 format). Under normal circumstances, you shouldn't have to use this property directly.
+      * Instead, use SPXSpeechConfiguration.speechRecognitionLanguage.
       */
     SPXSpeechServiceConnectionRecognitionLanguage = 3001,
 
     /**
-      * The Session ID. This ID is a universally unique identifier (aka UUID) representing a specific binding of an audio input stream
+      * The session id. This id is a universally unique identifier (aka UUID) representing a specific binding of an audio input stream
       * and the underlying speech recognition instance to which it is bound. Under normal circumstances, you shouldn't have to use this
       * property directly.
       * Instead, use SPXSessionEventArgs.sessionId.
@@ -130,9 +128,7 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     SPXSpeechSessionId = 3002,
 
     /**
-      * The requested Cognitive Services Speech Service response output format (simple or detailed). Under normal circumstances, you shouldn't have
-      * to use this property directly.
-      * Instead, use SPXSpeechConfiguration.setOutputFormat.
+      * The requested Cognitive Services Speech Service response output format (simple or detailed). Not implemented yet.
       */
     SPXSpeechServiceResponseRequestDetailedResultTrueFalse = 4000,
 
@@ -147,24 +143,24 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     SPXSpeechServiceResponseJsonResult = 5000,
 
     /**
-      * The Cognitive Services Speech Service Error details (in JSON format). Under normal circumstances, you shouldn't have to
+      * The Cognitive Services Speech Service error details (in JSON format). Under normal circumstances, you shouldn't have to
       * use this property directly.
       * Instead, use SPXCancellationDetails.errorDetails.
       */
     SPXSpeechServiceResponseJsonErrorDetails = 5001,
 
     /**
-      * The Cancellation reason. Currently unused.
+      * The cancellation reason. Currently unused.
       */
     SPXCancellationDetailsReason = 6000,
 
     /**
-      * The Cancellation text. Currently unused.
+      * The cancellation text. Currently unused.
       */
     SPXCancellationDetailsReasonText = 6001,
 
     /**
-      * The Cancellation detailed text. Currently unused.
+      * The cancellation detailed text. Currently unused.
       */
     SPXCancellationDetailsReasonDetailedText = 6002,
 

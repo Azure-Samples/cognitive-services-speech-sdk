@@ -11,7 +11,7 @@ package com.microsoft.cognitiveservices.speech;
 public enum PropertyId {
 
     /**
-     * The Cognitive Services Speech Service Subscription Key. If you are using an intent recognizer, you need
+     * The Cognitive Services Speech Service subscription key. If you are using an intent recognizer, you need
      * to specify the LUIS endpoint key for your particular LUIS app. Under normal circumstances, you shouldn't
      * have to use this property directly.
      * Instead, use <see cref="SpeechConfig.fromSubscription"/>.
@@ -19,15 +19,15 @@ public enum PropertyId {
     SpeechServiceConnection_Key (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_Key),
 
     /**
-     * The Cognitive Services Speech Service Endpoint (url). Under normal circumstances, you shouldn't
+     * The Cognitive Services Speech Service endpoint (url). Under normal circumstances, you shouldn't
      * have to use this property directly.
      * Instead, use <see cref="SpeechConfig.fromEndpoint"/>.
-     * NOTE: This Endpoint is not the same as the Endpoint used to obtain an access token.
+     * NOTE: This endpoint is not the same as the endpoint used to obtain an access token.
      */
     SpeechServiceConnection_Endpoint (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_Endpoint),
 
     /**
-     * The Cognitive Services Speech Service Region. Under normal circumstances, you shouldn't have to
+     * The Cognitive Services Speech Service region. Under normal circumstances, you shouldn't have to
      * use this property directly.
      * Instead, use <see cref="SpeechConfig.fromSubscription"/>, <see cref="SpeechConfig.fromEndpoint"/>,
      * <see cref="SpeechConfig.fromAuthorizationToken"/>.
@@ -35,7 +35,7 @@ public enum PropertyId {
     SpeechServiceConnection_Region (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_Region),
 
     /**
-     * The Cognitive Services Speech Service Authorization token (aka access token). Under normal circumstances,
+     * The Cognitive Services Speech Service authorization token (aka access token). Under normal circumstances,
      * you shouldn't have to use this property directly.
      * Instead, use <see cref="SpeechConfig.fromAuthorizationToken"/>,
      * <see cref="SpeechRecognizer.setAuthorizationToken"/>, <see cref="IntentRecognizer.setAuthorizationToken"/>,
@@ -44,15 +44,15 @@ public enum PropertyId {
     SpeechServiceAuthorization_Token (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceAuthorization_Token),
 
     /**
-     * The Speech Service Authorization Type. Currently unused.
+     * The Cognitive Services Speech Service authorization type. Currently unused.
      */
     SpeechServiceAuthorization_Type (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceAuthorization_Type),
 
     /**
-     * The Cognitive Services Custom Speech Service Endpoint Id. Under normal circumstances, you shouldn't
+     * The Cognitive Services Custom Speech Service endpoint id. Under normal circumstances, you shouldn't
      * have to use this property directly.
      * Instead use <see cref="SpeechConfig.setEndpointId"/>.
-     * NOTE: The Endpoint Id is available in the Custom Speech Portal, listed under Endpoint Details.
+     * NOTE: The endpoint id is available in the Custom Speech Portal, listed under Endpoint Details.
      */
     SpeechServiceConnection_EndpointId (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_EndpointId),
 
@@ -97,9 +97,9 @@ public enum PropertyId {
     SpeechServiceConnection_TranslationToLanguages (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_TranslationToLanguages),
 
     /**
-     * The name of the Cognitive Service Text to Speech Service Voice. Under normal circumstances, you shouldn't have to use this
+     * The name of the Cognitive Service Text to Speech Service voice. Under normal circumstances, you shouldn't have to use this
      * property directly. Instead use <see cref="SpeechTranslationConfig.setVoiceName"/>.
-     * NOTE: Valid Voice Names can be found <a href="https://aka.ms/csspeech/voicenames">here</a>.
+     * NOTE: Valid voice names can be found <a href="https://aka.ms/csspeech/voicenames">here</a>.
      */
     SpeechServiceConnection_TranslationVoice (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_TranslationVoice),
 
@@ -109,26 +109,25 @@ public enum PropertyId {
     SpeechServiceConnection_TranslationFeatures (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_TranslationFeatures),
 
     /**
-     * The Language Understanding Service Region. Under normal circumstances, you shouldn't have to use this property directly.
+     * The Language Understanding Service region. Under normal circumstances, you shouldn't have to use this property directly.
      * Instead, use <see cref="LanguageUnderstandingModel"/>.
      */
     SpeechServiceConnection_IntentRegion (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_IntentRegion),
 
     /**
-     * The Cognitive Services Speech Service Recognition Mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
+     * The Cognitive Services Speech Service recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
      * This property is intended to be read-only. The SDK is using it internally.
      */
     SpeechServiceConnection_RecoMode (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_RecoMode),
 
     /**
-     * The spoken language to be recognized (in BCP-47 format). Under normal circumstances, you shouldn't have to use this property
-     * directly.
+     * The spoken language to be recognized (in BCP-47 format). Under normal circumstances, you shouldn't have to use this property directly.
      * Instead, use <see cref="SpeechConfig.setSpeechRecognitionLanguage"/>.
      */
     SpeechServiceConnection_RecoLanguage ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_RecoLanguage),
 
     /**
-     * The Session ID. This ID is a universally unique identifier (aka UUID) representing a specific binding of an audio input stream
+     * The session id. This id is a universally unique identifier (aka UUID) representing a specific binding of an audio input stream
      * and the underlying speech recognition instance to which its bound. Under normal circumstances, you shouldn't have to use this
      * property directly.
      * Instead use <see cref="SessionEventArgs.getSessionId"/>.
@@ -153,24 +152,24 @@ public enum PropertyId {
     SpeechServiceResponse_JsonResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_JsonResult),
 
     /**
-     * The Cognitive Services Speech Service Error details (in JSON format). Under normal circumstances, you shouldn't have to
+     * The Cognitive Services Speech Service error details (in JSON format). Under normal circumstances, you shouldn't have to
      * use this property directly.
      * Instead, use <see cref="CancellationDetails.getErrorDetails"/>.
      */
     SpeechServiceResponse_JsonErrorDetails ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_JsonErrorDetails),
 
     /**
-     * The Cancellation reason. Currently unused.
+     * The cancellation reason. Currently unused.
      */
     CancellationDetails_Reason ( com.microsoft.cognitiveservices.speech.internal.PropertyId.CancellationDetails_Reason),
 
     /**
-     * The Cancellation text. Currently unused.
+     * The cancellation text. Currently unused.
      */
     CancellationDetails_ReasonText ( com.microsoft.cognitiveservices.speech.internal.PropertyId.CancellationDetails_ReasonText),
 
     /**
-     * The Cancellation detailed text. Currently unused.
+     * The cancellation detailed text. Currently unused.
      */
     CancellationDetails_ReasonDetailedText ( com.microsoft.cognitiveservices.speech.internal.PropertyId.CancellationDetails_ReasonDetailedText),
 
