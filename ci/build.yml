@@ -819,7 +819,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetLinuxTest '))
   pool:
     name: Hosted Ubuntu 1604
-  timeoutInMinutes: 30
+  timeoutInMinutes: 130
   steps:
   - bash: |
       set -x -e -o pipefail
