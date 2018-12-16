@@ -69,14 +69,18 @@ SPXAPI_PRIVATE connection_set_event_callback(ISpxRecognizerEvents::ConnectionEve
         };
 
         auto recognizer = connection->GetRecognizer();
-        SPX_IFTRUE_THROW_HR(recognizer == nullptr, SPXERR_INVALID_RECOGNIZER);
-        auto pISpxRecognizerEvents = SpxQueryInterface<ISpxRecognizerEvents>(recognizer).get();
-        SPX_IFTRUE_THROW_HR(pISpxRecognizerEvents == nullptr, SPXERR_RUNTIME_ERROR);
-        (pISpxRecognizerEvents->*connectionEvent).Disconnect(pfn);
-
-        if (callback != nullptr)
+        // for Disconnect() call, if the recognizer is not valid, we just return.
+        SPX_IFTRUE_THROW_HR(recognizer == nullptr && callback != nullptr, SPXERR_INVALID_RECOGNIZER);
+        if (recognizer != nullptr)
         {
-            (pISpxRecognizerEvents->*connectionEvent).Connect(pfn);
+            auto pISpxRecognizerEvents = SpxQueryInterface<ISpxRecognizerEvents>(recognizer).get();
+            SPX_IFTRUE_THROW_HR(pISpxRecognizerEvents == nullptr, SPXERR_RUNTIME_ERROR);
+            (pISpxRecognizerEvents->*connectionEvent).Disconnect(pfn);
+
+            if (callback != nullptr)
+            {
+                (pISpxRecognizerEvents->*connectionEvent).Connect(pfn);
+            }
         }
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
