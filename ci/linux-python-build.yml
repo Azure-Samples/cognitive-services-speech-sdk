@@ -56,5 +56,9 @@ jobs:
             cp --preserve "${pythonExtension[0]}" "$unstrippedLib"
             strip "${pythonExtension[0]}"
             cd repack
+            wheelDirName=(azure_cognitiveservices_speech-*.data/)
+            [[ ${#wheelDirName[@]} = 1 ]]
+            mv ${wheelDirName}/data/lib/python*/site-packages ${wheelDirName}/platlib
+            rm -rf ${wheelDirName}/data
             wheel pack --dest-dir ../build .
           displayName: Repack .whl with unstripped library, keep original
