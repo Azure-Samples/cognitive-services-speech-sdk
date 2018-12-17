@@ -114,15 +114,6 @@ public:
             SPX_DBG_TRACE_ERROR("Exception caught in ~Connection(): %s", ex.what());
             (void)ex;
         }
-#ifdef SHOULD_HANDLE_FORCED_UNWIND
-        // Currently Python forcibly kills the thread by throwing __forced_unwind,
-        // taking care we propagate this exception further.
-        catch (abi::__forced_unwind&)
-        {
-            SPX_DBG_TRACE_ERROR("__forced_unwind exception caught");
-            throw;
-        }
-#endif
         catch (...)
         {
             SPX_DBG_TRACE_ERROR("Unknown exception happened during ~Connection().");
