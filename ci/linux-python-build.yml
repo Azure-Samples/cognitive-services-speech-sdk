@@ -11,12 +11,15 @@ jobs:
       Python3.7:
         PythonVersion: 3.7
         pythonIncludePathSuffix: python3.7m
+        WheelPythonTag: cp37
       Python3.6:
         PythonVersion: 3.6
         pythonIncludePathSuffix: python3.6m
+        WheelPythonTag: cp36
       Python3.5:
         PythonVersion: 3.5
         pythonIncludePathSuffix: python3.5m
+        WheelPythonTag: cp35
   variables:
     BuildConfiguration: Release
     BuildPlatform: x64
@@ -39,6 +42,7 @@ jobs:
   - template: build-python-wheel.yml
     parameters:
       pythonIncludePathSuffix: $(PythonIncludePathSuffix)
+      wheelParams: "--plat-name=manylinux1_x86_64 --python-tag=$(WheelPythonTag)"
       postbuildsteps:
         - bash: |
             set -u -x -e -o pipefail
