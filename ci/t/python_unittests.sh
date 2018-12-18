@@ -60,6 +60,7 @@ ${VIRTUALENV_PYTHON} -m pytest -v ${SCRIPT_DIR}/../../source/bindings/python/tes
     --luis-region $SPEECHSDK_LUIS_REGION \
     --language-understanding-app-id $SPEECHSDK_LUIS_HOMEAUTOMATION_APPID \
     -k "not test_intent_recognition_" \
+    --junitxml=test-$T-$PLATFORM.xml \
     $extra_args
 
 # TODO: run samples as part of unit test
