@@ -22,7 +22,7 @@ Indices and tables
 Speech
 ------
 
-.. automodule:: azure.cognitiveservices.speech.speech
+.. automodule:: azure.cognitiveservices.speech
    :members:
    :undoc-members:
    :show-inheritance:

@@ -6,14 +6,14 @@ from .utils import (_TestCallback, _connect_all_callbacks, _setup_callbacks, _ch
                     _check_sr_result)
 
 
-speech_config_types = (msspeech.SpeechConfig, msspeech.SpeechTranslationConfig)
-recognizer_types = (msspeech.SpeechRecognizer, msspeech.TranslationRecognizer,
-                    msspeech.IntentRecognizer)
+speech_config_types = (msspeech.SpeechConfig, msspeech.translation.SpeechTranslationConfig)
+recognizer_types = (msspeech.SpeechRecognizer, msspeech.translation.TranslationRecognizer,
+                    msspeech.intent.IntentRecognizer)
 
 
 @pytest.mark.parametrize('speech_input,', ['weather', 'lamp'], indirect=True)
 def test_recognize_once(subscription, speech_input, endpoint, speech_region):
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
     speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
@@ -27,7 +27,7 @@ def test_recognize_once(subscription, speech_input, endpoint, speech_region):
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_recognize_async(subscription, speech_input, endpoint, speech_region):
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
     speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
@@ -50,7 +50,7 @@ def test_recognize_async(subscription, speech_input, endpoint, speech_region):
 @pytest.mark.xfail(reason='flaky')
 @pytest.mark.parametrize('speech_input,', ['batman'], indirect=True)
 def test_recognize_once_multiple(subscription, speech_input, endpoint, speech_region):
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
     speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
@@ -62,7 +62,7 @@ def test_recognize_once_multiple(subscription, speech_input, endpoint, speech_re
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_multiple_callbacks(subscription, speech_input, endpoint, speech_region):
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
 
     speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
@@ -142,7 +142,7 @@ def test_speech_config_default_constructor(config_type):
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_canceled_result(speech_input):
     invalid_cfg = msspeech.SpeechConfig(endpoint="invalid", subscription="invalid")
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
 
     reco = msspeech.SpeechRecognizer(invalid_cfg, audio_config)
 
@@ -160,7 +160,7 @@ def test_bad_language_config(subscription, speech_input, speech_region):
     bad_lang_cfg = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
     bad_lang_cfg.speech_recognition_language = "bad language"
     assert "bad language" == bad_lang_cfg.speech_recognition_language
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
 
     reco = msspeech.SpeechRecognizer(bad_lang_cfg, audio_config)
 
@@ -176,7 +176,7 @@ def test_bad_language_config(subscription, speech_input, speech_region):
 @pytest.mark.parametrize('speech_input,', ['silence'], indirect=True)
 def test_no_match_result(subscription, speech_input, speech_region):
     speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
 
@@ -205,7 +205,7 @@ def test_speech_config_properties(subscription, speech_region):
 def test_speech_recognizer_default_constructor(speech_input):
     """test that the default argument for AudioConfig is correct"""
     speech_config = msspeech.SpeechConfig(subscription="subscription", region="some_region")
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
     assert isinstance(reco, msspeech.SpeechRecognizer)
@@ -214,14 +214,14 @@ def test_speech_recognizer_default_constructor(speech_input):
 @pytest.mark.parametrize('speech_input,', ['silence'], indirect=True)
 def test_translation_recognizer_default_constructor(speech_input):
     """test that the default argument for AudioConfig is correct"""
-    speech_config = msspeech.SpeechTranslationConfig(subscription="subscription", region="some_region")
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    speech_config = msspeech.translation.SpeechTranslationConfig(subscription="subscription", region="some_region")
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
 
     speech_config.speech_recognition_language = "en-US"
     speech_config.add_target_language('de')
 
-    reco = msspeech.TranslationRecognizer(speech_config, audio_config)
-    assert isinstance(reco, msspeech.TranslationRecognizer)
+    reco = msspeech.translation.TranslationRecognizer(speech_config, audio_config)
+    assert isinstance(reco, msspeech.translation.TranslationRecognizer)
 
     assert "" == reco.authorization_token
     reco.authorization_token = "mytoken"
@@ -233,7 +233,7 @@ def test_translation_recognizer_default_constructor(speech_input):
 @pytest.mark.parametrize('speech_input,', ['silence'], indirect=True)
 def test_speech_recognizer_properties(speech_input):
     speech_config = msspeech.SpeechConfig(endpoint="myendpoint", subscription="mysubscription")
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
 
     assert "mysubscription" == speech_config.subscription_key
     assert "myendpoint" == speech_config.get_property(msspeech.PropertyId.SpeechServiceConnection_Endpoint)
@@ -334,14 +334,14 @@ def test_keyword_recognition_model_constructor():
 @pytest.mark.parametrize('speech_input,', ['silence'], indirect=True)
 @pytest.mark.parametrize("recognizer_type", recognizer_types)
 def test_speech_recognizer_constructor(speech_input, recognizer_type):
-    if recognizer_type is msspeech.TranslationRecognizer:
-        speech_config = msspeech.SpeechTranslationConfig(subscription='somesubscription', region='someregion')
+    if recognizer_type is msspeech.translation.TranslationRecognizer:
+        speech_config = msspeech.translation.SpeechTranslationConfig(subscription='somesubscription', region='someregion')
         speech_config.speech_recognition_language = 'en-US'
         speech_config.add_target_language('de')
     else:
         speech_config = msspeech.SpeechConfig('somesubscription', 'someregion')
 
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
 
     with pytest.raises(TypeError) as excinfo:
         reco = recognizer_type()
@@ -360,8 +360,8 @@ def test_speech_recognizer_constructor(speech_input, recognizer_type):
                     reason="requires default microphone")
 @pytest.mark.parametrize("recognizer_type", recognizer_types)
 def test_speech_recognizer_constructor_default_microphone(recognizer_type):
-    if recognizer_type is msspeech.TranslationRecognizer:
-        speech_config = msspeech.SpeechTranslationConfig(subscription='somesubscription', region='someregion')
+    if recognizer_type is msspeech.translation.TranslationRecognizer:
+        speech_config = msspeech.translation.SpeechTranslationConfig(subscription='somesubscription', region='someregion')
         speech_config.speech_recognition_language = 'en-US'
         speech_config.add_target_language('de')
     else:

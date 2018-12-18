@@ -7,7 +7,7 @@ from .conftest import SpeechInput
 from .utils import (_connect_all_callbacks, _setup_callbacks, _check_callbacks, _check_sr_result)
 
 
-class WavFileReaderCallback(msspeech.PullAudioInputStreamCallback):
+class WavFileReaderCallback(msspeech.audio.PullAudioInputStreamCallback):
     def __init__(self, filename: str):
         super().__init__()
         self._file_h = wave.open(filename, mode=None)
@@ -76,14 +76,14 @@ def test_pull_audio_input_stream_callback(speech_input: SpeechInput, subscriptio
         speech_region: str, use_default_wave_format: bool):
     callback = WavFileReaderCallback(speech_input.path)
     if use_default_wave_format:
-        stream = msspeech.PullAudioInputStream(pull_stream_callback=callback)
+        stream = msspeech.audio.PullAudioInputStream(pull_stream_callback=callback)
     else:
         channels = 1
         bits_per_sample = 16
         samples_per_second = 16000
 
-        wave_format = msspeech.AudioStreamFormat(samples_per_second, bits_per_sample, channels)
-        stream = msspeech.PullAudioInputStream(stream_format=wave_format, pull_stream_callback=callback)
+        wave_format = msspeech.audio.AudioStreamFormat(samples_per_second, bits_per_sample, channels)
+        stream = msspeech.audio.PullAudioInputStream(stream_format=wave_format, pull_stream_callback=callback)
 
     speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
     audio_config = msspeech.AudioConfig(stream=stream)
@@ -111,16 +111,16 @@ def test_push_audio_input_stream(speech_input: SpeechInput, subscription: str, s
     speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
 
     if use_default_wave_format:
-        stream = msspeech.PushAudioInputStream()
+        stream = msspeech.audio.PushAudioInputStream()
     else:
         channels = 1
         bits_per_sample = 16
         samples_per_second = 16000
 
-        wave_format = msspeech.AudioStreamFormat(samples_per_second, bits_per_sample, channels)
-        stream = msspeech.PushAudioInputStream(stream_format=wave_format)
+        wave_format = msspeech.audio.AudioStreamFormat(samples_per_second, bits_per_sample, channels)
+        stream = msspeech.audio.PushAudioInputStream(stream_format=wave_format)
 
-    audio_cfg = msspeech.AudioConfig(stream=stream)
+    audio_cfg = msspeech.audio.AudioConfig(stream=stream)
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_cfg)
 

@@ -7,28 +7,28 @@ from .utils import _check_translation_result
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_translation_simple(subscription: str, speech_input: SpeechInput, endpoint: str,
         speech_region: str):
-    translation_config = msspeech.SpeechTranslationConfig(subscription=subscription,
+    translation_config = msspeech.translation.SpeechTranslationConfig(subscription=subscription,
             region=speech_region)
     translation_config.speech_recognition_language = speech_input.input_language
     for language in speech_input.translations:
         translation_config.add_target_language(language)
 
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
 
-    recognizer = msspeech.TranslationRecognizer(translation_config, audio_config)
+    recognizer = msspeech.translation.TranslationRecognizer(translation_config, audio_config)
 
     result = recognizer.recognize_once()
     _check_translation_result(result, speech_input, 0, speech_input.translations.keys())
 
 
 def test_translation_config_constructor():
-    translation_config = msspeech.SpeechTranslationConfig('somesubscription', 'someregion',
+    translation_config = msspeech.translation.SpeechTranslationConfig('somesubscription', 'someregion',
             target_languages=['en', 'de', 'fr'], voice_name='de-DE-Hedda')
 
     assert set(translation_config.target_languages) == set(['en', 'de', 'fr'])
     assert translation_config.voice_name == 'de-DE-Hedda'
 
-    translation_config = msspeech.SpeechTranslationConfig('somesubscription', 'someregion',
+    translation_config = msspeech.translation.SpeechTranslationConfig('somesubscription', 'someregion',
             speech_recognition_language='nb-NO')
 
     assert set(translation_config.target_languages) == set()
@@ -43,7 +43,7 @@ def test_translation_synthesis_result():
 
 
 def test_speech_translation_config():
-    speech_config = msspeech.SpeechTranslationConfig(subscription="subscription", region="some_region")
+    speech_config = msspeech.translation.SpeechTranslationConfig(subscription="subscription", region="some_region")
 
     speech_config.set_property(msspeech.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse, 'mytext')
     assert "mytext" == speech_config.get_property(msspeech.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse)

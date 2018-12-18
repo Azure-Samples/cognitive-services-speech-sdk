@@ -6,9 +6,9 @@ Microsoft Speech SDK
 """
 
 from .speech import *
-from .translation import *
-from .intent import *
-from .audio import *
+from . import audio
+from . import intent
+from . import translation
 
 try:
     from .version import __version__
@@ -34,36 +34,39 @@ for cls in (
     PropertyCollection,
     PropertyId,
     ResultReason,
-):
-    cls.__module__ = __name__
-
-for cls in (
+    AudioConfig,
+    CancellationDetails,
+    EventSignal,
+    NoMatchDetails,
+    OutputFormat,
+    PropertyCollection,
+    PropertyId,
+    RecognitionEventArgs,
+    RecognitionResult,
+    Recognizer,
+    ResultFuture,
+    ResultReason,
+    SessionEventArgs,
+    SpeechConfig,
+    SpeechRecognitionCanceledEventArgs,
+    SpeechRecognitionEventArgs,
+    SpeechRecognitionResult,
+    SpeechRecognizer,
     CancellationDetails,
     NoMatchDetails,
 ):
-    cls.__module__ = __name__ + '.speech'
+    cls.__module__ = __name__
 
 
 __all__ = [
-    'AudioConfig',
-    'AudioInputStream',
-    'AudioStreamFormat',
     'CancellationDetails',
     'CancellationReason',
     'EventSignal',
-    'IntentRecognitionCanceledEventArgs',
-    'IntentRecognitionEventArgs',
-    'IntentRecognitionResult',
-    'IntentRecognizer',
-    'LanguageUnderstandingModel',
     'NoMatchDetails',
     'NoMatchReason',
     'OutputFormat',
     'PropertyCollection',
     'PropertyId',
-    'PullAudioInputStream',
-    'PullAudioInputStreamCallback',
-    'PushAudioInputStream',
     'RecognitionEventArgs',
     'RecognitionResult',
     'ResultReason',
@@ -73,13 +76,6 @@ __all__ = [
     'SpeechRecognitionEventArgs',
     'SpeechRecognitionResult',
     'SpeechRecognizer',
-    'SpeechTranslationConfig',
-    'TranslationRecognitionCanceledEventArgs',
-    'TranslationRecognitionEventArgs',
-    'TranslationRecognitionResult',
-    'TranslationRecognizer',
-    'TranslationSynthesisEventArgs',
-    'TranslationSynthesisResult',
     'Recognizer',
 ]
 

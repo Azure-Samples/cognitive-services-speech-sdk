@@ -34,29 +34,29 @@ def speech_recognition_canceled_checks(evt: msspeech.SpeechRecognitionCanceledEv
     assert isinstance(evt.cancellation_details, msspeech.CancellationDetails)
 
 
-def intent_recognition_checks(evt: msspeech.IntentRecognitionEventArgs):
+def intent_recognition_checks(evt: msspeech.intent.IntentRecognitionEventArgs):
     recognition_checks(evt)
-    assert isinstance(evt, msspeech.IntentRecognitionEventArgs)
+    assert isinstance(evt, msspeech.intent.IntentRecognitionEventArgs)
     assert evt.result
 
 
-def intent_recognition_canceled_checks(evt: msspeech.IntentRecognitionCanceledEventArgs):
+def intent_recognition_canceled_checks(evt: msspeech.intent.IntentRecognitionCanceledEventArgs):
     intent_recognition_checks(evt)
-    assert isinstance(evt, msspeech.IntentRecognitionCanceledEventArgs)
+    assert isinstance(evt, msspeech.intent.IntentRecognitionCanceledEventArgs)
     assert evt.cancellation_details
 
 
-def translation_recognition_checks(evt: msspeech.TranslationRecognitionEventArgs):
+def translation_recognition_checks(evt: msspeech.translation.TranslationRecognitionEventArgs):
     recognition_checks(evt)
-    assert isinstance(evt, msspeech.TranslationRecognitionEventArgs)
+    assert isinstance(evt, msspeech.translation.TranslationRecognitionEventArgs)
     assert evt.result
 
 
-def translation_synthesis_checks(evt: msspeech.TranslationSynthesisEventArgs):
+def translation_synthesis_checks(evt: msspeech.translation.TranslationSynthesisEventArgs):
     session_checks(evt)
-    assert isinstance(evt, msspeech.TranslationSynthesisEventArgs)
+    assert isinstance(evt, msspeech.translation.TranslationSynthesisEventArgs)
     assert evt.result
-    assert isinstance(evt.result, msspeech.TranslationSynthesisResult)
+    assert isinstance(evt.result, msspeech.translation.TranslationSynthesisResult)
     if evt.result.reason == msspeech.ResultReason.SynthesizingAudio:
         assert evt.result.audio
         assert isinstance(evt.result.audio, bytes)
@@ -66,9 +66,9 @@ def translation_synthesis_checks(evt: msspeech.TranslationSynthesisEventArgs):
         raise ValueError('unexpected reason: {}'.format(evt.result.reason))
 
 
-def translation_recognition_canceled_checks(evt: msspeech.TranslationRecognitionCanceledEventArgs):
+def translation_recognition_canceled_checks(evt: msspeech.translation.TranslationRecognitionCanceledEventArgs):
     recognition_checks(evt)
-    assert isinstance(evt, msspeech.TranslationRecognitionCanceledEventArgs)
+    assert isinstance(evt, msspeech.translation.TranslationRecognitionCanceledEventArgs)
     assert evt.cancellation_details
 
 
@@ -77,19 +77,19 @@ def bad_callback_check(_):
     assert False
 
 
-def _setup_callbacks(reco: Union[msspeech.SpeechRecognizer, msspeech.TranslationRecognizer,
-        msspeech.IntentRecognizer]):
+def _setup_callbacks(reco: Union[msspeech.SpeechRecognizer, msspeech.translation.TranslationRecognizer,
+        msspeech.intent.IntentRecognizer]):
     callbacks = {}
     callbacks['session_started'] = _TestCallback("session started: {evt}", session_checks)
     callbacks['session_stopped'] = _TestCallback("session stopped: {evt}", session_checks)
     callbacks['speech_start_detected'] = _TestCallback("speech start detected: {evt}", recognition_checks)
     callbacks['speech_end_detected'] = _TestCallback("speech end detected: {evt}", recognition_checks)
 
-    if isinstance(reco, msspeech.IntentRecognizer):
+    if isinstance(reco, msspeech.intent.IntentRecognizer):
         callbacks['recognized'] = _TestCallback("recognized: {evt}", intent_recognition_checks)
         callbacks['recognizing'] = _TestCallback("recognizing: {evt}", intent_recognition_checks)
         callbacks['canceled'] = _TestCallback("canceled: {evt}", intent_recognition_canceled_checks)
-    elif isinstance(reco, msspeech.TranslationRecognizer):
+    elif isinstance(reco, msspeech.translation.TranslationRecognizer):
         callbacks['recognized'] = _TestCallback("recognized: {evt}", translation_recognition_checks)
         callbacks['recognizing'] = _TestCallback("recognizing: {evt}", translation_recognition_checks)
         callbacks['canceled'] = _TestCallback("canceled: {evt}", translation_recognition_canceled_checks)
@@ -118,7 +118,7 @@ def _check_callbacks(callbacks):
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_speech_recognition_events(speech_input: SpeechInput, subscription: str, speech_region: str):
-    audio_cfg = msspeech.AudioConfig(filename=speech_input.path)
+    audio_cfg = msspeech.audio.AudioConfig(filename=speech_input.path)
     cfg = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
     reco = msspeech.SpeechRecognizer(cfg, audio_cfg)
 
@@ -150,13 +150,13 @@ def test_speech_recognition_events(speech_input: SpeechInput, subscription: str,
 @pytest.mark.parametrize('intent_input,', ['lamp'], indirect=True)
 def test_intent_recognition_events(intent_input: SpeechInput, luis_subscription: str,
         luis_region: str, language_understanding_app_id: str):
-    audio_config = msspeech.AudioConfig(filename=intent_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=intent_input.path)
     intent_config = msspeech.SpeechConfig(subscription=luis_subscription,
             region=luis_region)
 
-    intent_recognizer = msspeech.IntentRecognizer(intent_config, audio_config)
+    intent_recognizer = msspeech.intent.IntentRecognizer(intent_config, audio_config)
 
-    model = msspeech.LanguageUnderstandingModel(app_id=language_understanding_app_id)
+    model = msspeech.intent.LanguageUnderstandingModel(app_id=language_understanding_app_id)
     intent_recognizer.add_intent(model, "HomeAutomation.TurnOn")
     intent_recognizer.add_intent(model, "HomeAutomation.TurnOff")
 
@@ -196,15 +196,15 @@ def test_intent_recognition_events(intent_input: SpeechInput, luis_subscription:
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_translation_recognition_events(speech_input: SpeechInput, subscription: str,
         speech_region: str):
-    translation_config = msspeech.SpeechTranslationConfig(subscription=subscription,
+    translation_config = msspeech.translation.SpeechTranslationConfig(subscription=subscription,
             region=speech_region)
     translation_config.speech_recognition_language = 'en-US'
     translation_config.add_target_language('de')
     translation_config.voice_name = "de-DE-Hedda"
     translation_config.add_target_language('fr')
-    audio_config = msspeech.AudioConfig(filename=speech_input.path)
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
 
-    translation_recognizer = msspeech.TranslationRecognizer(translation_config, audio_config)
+    translation_recognizer = msspeech.translation.TranslationRecognizer(translation_config, audio_config)
 
     callbacks = _setup_callbacks(translation_recognizer)
 

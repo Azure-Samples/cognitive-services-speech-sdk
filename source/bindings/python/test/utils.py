@@ -115,7 +115,7 @@ def _check_sr_result(result, speech_input, utterance_index):
     _check_result_common(result, speech_input, utterance_index)
 
 def _check_translation_result(result, speech_input, utterance_index, target_languages):
-    assert isinstance(result, msspeech.TranslationRecognitionResult)
+    assert isinstance(result, msspeech.translation.TranslationRecognitionResult)
     assert msspeech.ResultReason.TranslatedSpeech == result.reason
 
     assert set(result.translations.keys()) == set(target_languages)
@@ -126,7 +126,7 @@ def _check_translation_result(result, speech_input, utterance_index, target_lang
 
 
 def _check_intent_result(result, intent_input, utterance_index):
-    assert isinstance(result, msspeech.IntentRecognitionResult)
+    assert isinstance(result, msspeech.intent.IntentRecognitionResult)
     assert intent_input.intent_id == result.intent_id
     assert isinstance(result.intent_json, str)
     assert result.intent_json
