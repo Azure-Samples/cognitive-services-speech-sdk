@@ -1,21 +1,21 @@
-# Java Console app for the Java Run-Time Environment (JRE) on Windows or Linux (Ubuntu 16.04)
+# Java Console app for the Java Run-Time Environment (JRE) on Windows or Linux (Ubuntu 16.04 or 18.04)
 
 This sample demonstrates various forms of speech recognition, intent recognition, and translation using the Speech SDK for Java on Windows or Linux.
 
 > **Note:**
-> the Speech SDK for the JRE currently supports only the Windows x64 platform and Linux (Ubuntu 16.04) x64 distribution.
+> the Speech SDK for the JRE currently supports only the Windows x64 platform and Linux (Ubuntu 16.04 or 18.04) x64 distribution.
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows x64, Ubuntu 16.04 x64) capable to run Eclipse, some sample scenarios require a working microphone.
+* A PC (Windows x64, Ubuntu 16.04 or 18.04 x64) capable to run Eclipse, some sample scenarios require a working microphone.
 * 64-bit JRE/JDK for Java 8.
 * Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.
-* On Ubuntu 16.04, run the following commands for the installation of required packages:
+* On Ubuntu 16.04 or 18.04, run the following commands for the installation of required packages:
 
   ```sh
   sudo apt-get update
-  sudo apt-get install build-essential libssl1.0.0 libcurl3 libasound2 wget
+  sudo apt-get install libssl1.0.0 libcurl3 libasound2 wget
   ```
 
 ## Build the sample

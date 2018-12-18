@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech in C++ for Linux (Ubuntu 16.04)
+# Quickstart: Recognize speech in C++ for Linux (Ubuntu 16.04 or 18.04)
 
 This sample demonstrates how to recognize speech with C++ using the Speech SDK for Linux.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-linux) on the SDK documentation page for step-by-step instructions.
@@ -6,7 +6,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* An Ubuntu 16.04 PC with a working microphone.
+* An Ubuntu 16.04 or 18.04 PC with a working microphone.
 * Required packages to build and run this sample:
 
   ```sh

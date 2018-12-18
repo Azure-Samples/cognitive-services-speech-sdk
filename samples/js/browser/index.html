@@ -118,36 +118,36 @@
                     <button id="speechsdkStartContinuousTranslation">startContinuousTranslation()</button>
                     <button id="speechsdkStopContinuousTranslation" disabled="disabled">STOP stopContinuousTranslation()</button>
 
-                    <!-- For a full list of supported languages see: https://docs.microsoft.com/azure/cognitive-services/speech-service/supported-languages-->
+                    <!-- For a full list of supported languages see: https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech-->
                     <select id="languageTargetOptions">
-                        <option value="ar-EG:Hoda">Arabic - EG</option>
-                        <option value="ca-ES:Herena">Catalan - ES</option>
-                        <option value="da-DK:Helle">Danish - DK</option>
-                        <option value="de-DE-Hedda" selected="selected">German - DE</option>
-                        <option value="en-AU:Catherine">English - AU</option>
-                        <option value="en-CA:Linda">English - CA</option>
-                        <option value="en-GB:Susan">English - GB</option>
-                        <option value="en-IN:Heera">English - IN</option>
-                        <option value="en-US:Zira">English - US</option>
-                        <option value="es-ES:Laura">Spanish - ES</option>
-                        <option value="es-MX:Sabina">Spanish - MX</option>
-                        <option value="fi-FI:Heidi">Finnish - FI</option>
-                        <option value="fr-CA:Caroline">French - CA</option>
-                        <option value="fr-FR:Julie">French - FR</option>
-                        <option value="hi-IN:Hemant">Hindi - IN</option>
-                        <option value="it-IT:Elsa">Italian - IT</option>
-                        <option value="ja-JP:Ayumi">Japanese - JP</option>
-                        <option value="ko-KR:Minjoon">Korean - KR</option>
-                        <option value="nb-NO:Jon">Norwegian - NO</option>
-                        <option value="nl-NL:Marijke">Dutch - NL</option>
-                        <option value="pl-PL:Paulina">Polish - PL</option>
-                        <option value="pt-BR:Maria">Portuguese - BR</option>
-                        <option value="pt-PT:Helia">Portuguese - PT</option>
-                        <option value="ru-RU:Irina">Russian - RU</option>
-                        <option value="sv-SE:Karin">Swedish - SE</option>
-                        <option value="zh-CN:Kangkang">Chinese - CN</option>
-                        <option value="zh-HK:Tracy">Chinese - HK</option>
-                        <option value="zh-TW:Yating">Chinese - TW</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)">Arabic - EG</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (ca-ES, HerenaRUS)">Catalan - ES</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (da-DK, HelleRUS)">Danish - DK</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)" selected="selected">German - DE</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (en-AU, Catherine)">English - AU</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (en-CA, Linda)">English - CA</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (en-GB, Susan, Apollo)">English - GB</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (en-IN, Heera, Apollo)">English - IN</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)">English - US</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (es-ES, Laura, Apollo)">Spanish - ES</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (es-MX, HildaRUS)">Spanish - MX</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (fi-FI, HeidiRUS)">Finnish - FI</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (fr-CA, Caroline)">French - CA</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (fr-FR, Julie, Apollo)">French - FR</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (hi-IN, Hemant)">Hindi - IN</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (it-IT, LuciaRUS)">Italian - IT</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)">Japanese - JP</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (ko-KR, HeamiRUS)">Korean - KR</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (nb-NO, HuldaRUS)">Norwegian - NO</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (nl-NL, HannaRUS)">Dutch - NL</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (pl-PL, PaulinaRUS)">Polish - PL</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (pt-BR, HeloisaRUS)">Portuguese - BR</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (pt-PT, HeliaRUS)">Portuguese - PT</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (ru-RU, Irina, Apollo)">Russian - RU</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (sv-SE, HedvigRUS)">Swedish - SE</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (zh-CN, Kangkang, Apollo)">Chinese - CN</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (zh-HK, Tracy, Apollo)">Chinese - HK</option>
+                        <option value="Microsoft Server Speech Text to Speech Voice (zh-TW, Yating, Apollo)">Chinese - TW</option>
                     </select>
                     <input id="voiceOutput" type="checkbox" checked>
                     <label for="voiceOutput">voice output</label>
@@ -198,12 +198,12 @@
                 a.open("GET", authorizationEndpoint);
                 a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 a.send("");
-                a.onload = function() {
+                a.onload = function () {
                     var token = JSON.parse(atob(this.responseText.split(".")[1]));
-                    regionKey.value = token.region;
+                    regionOptions.value = token.region;
                     authorizationToken = this.responseText;
-                    subscriptionKey.disabled = true;
-                    subscriptionKey.value = "using authorization token (hit F5 to refresh)";
+                    key.disabled = true;
+                    key.value = "using authorization token (hit F5 to refresh)";
                     console.log("Got an authorization token: " + token);
                 }
             }
@@ -268,7 +268,7 @@
             inputSource = document.getElementById("inputSource");
             filePicker = document.getElementById('filePicker');
 
-            // Starts continuous voice recognition. Recognition will continue until there is ~20 seconds of silence or ~10 minutes of speech.
+            // Starts continuous speech recognition.
             sdkStartContinousRecognitionBtn.addEventListener("click", function () {
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
@@ -326,8 +326,8 @@
                 // This can happen for two broad classes of reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
-                // 2. Speech was detected to have ended.
-                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                // 2. No additional audio is available.
+                //    Caused by the input stream being closed or reaching the end of an audio file.
                 reco.canceled = function (s, e) {
                     window.console.log(e);
 
@@ -387,7 +387,7 @@
                 sdkStopContinousRecognitionBtn.disabled = true;
             });
 
-            // Starts continuous voice translation. Recognition will continue until there is ~20 seconds of silence or ~10 minutes of speech.
+            // Starts continuous speech translation.
             sdkStartContinousTranslationBtn.addEventListener("click", function () {
                 var lastRecognized = "";
                 phraseDiv.innerHTML = "";
@@ -413,12 +413,12 @@
 
                 // Defines the language(s) that speech should be translated to.
                 // Multiple languages can be specified for text translation and will be returned in a map.
-                speechConfig.addTargetLanguage(languageTargetOptions.value.split(":")[0]);
+                speechConfig.addTargetLanguage(languageTargetOptions.value.split("(")[1].substring(0, 5));
 
                 // If voice output is requested, set the target voice.
                 // If multiple text translations were requested, only the first one added will have audio synthesised for it.
                 if (voiceOutput.checked) {
-                    speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, languageTargetOptions.value.replace(":", "-"));
+                    speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, languageTargetOptions.value);
                 }
 
                 reco = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
@@ -433,7 +433,7 @@
                     window.console.log(e);
                     statusDiv.innerHTML += "(recognizing) Reason: " + SpeechSDK.ResultReason[e.result.reason] + " Text: " + e.result.text + " Translations:";
 
-                    var language = languageTargetOptions.value.split("-")[0];
+                    var language = languageTargetOptions.value.split("(")[1].substring(0, 2);
 
                     statusDiv.innerHTML += " [" + language + "] " + e.result.translations.get(language);
                     statusDiv.innerHTML += "\r\n";
@@ -449,7 +449,7 @@
                     window.console.log(e);
                     statusDiv.innerHTML += "(recognized)  Reason: " + SpeechSDK.ResultReason[e.result.reason] + " Text: " + e.result.text + " Translations:";
 
-                    var language = languageTargetOptions.value.split("-")[0];
+                    var language = languageTargetOptions.value.split("(")[1].substring(0, 2);
 
                     statusDiv.innerHTML += " [" + language + "] " + e.result.translations.get(language);
                     statusDiv.innerHTML += "\r\n";
@@ -463,8 +463,8 @@
                 // This can happen for two broad classes of reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
-                // 2. Speech was detected to have ended.
-                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                // 2. No additional audio is available.
+                //    Caused by the input stream being closed or reaching the end of an audio file.
                 reco.canceled = function (s, e) {
                     window.console.log(e);
 
@@ -583,8 +583,8 @@
                 // This can happen for two broad classes or reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
-                // 2. Speech was detected to have ended.
-                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                // 2. No additional audio is available.
+                //    Caused by the input stream being closed or reaching the end of an audio file.
                 reco.canceled = function (s, e) {
                     window.console.log(e);
 
@@ -735,8 +735,8 @@
                 // This can happen for two broad classes or reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
-                // 2. Speech was detected to have ended.
-                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                // 2. No additional audio is available.
+                //    Caused by the input stream being closed or reaching the end of an audio file.
                 reco.canceled = function (s, e) {
                     window.console.log(e);
 
