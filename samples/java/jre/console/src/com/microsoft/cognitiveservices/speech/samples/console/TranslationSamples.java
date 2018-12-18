@@ -10,6 +10,16 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
@@ -71,7 +81,29 @@ public class TranslationSamples {
             });
 
             recognizer.synthesizing.addEventListener((s, e) -> {
-                System.out.println("Synthesis result received. Size of audio data: " + e.getResult().getAudio().length);
+                byte[] data = e.getResult().getAudio();
+
+                System.out.println("Synthesis result received. Size of audio data: " + data.length);
+
+                // Play the TTS data of we got more than the wav header.
+                if (data != null && data.length > 44) {
+                    try {
+                        ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(data);
+                        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(arrayInputStream);
+                        AudioFormat audioFormat = audioInputStream.getFormat();
+                        DataLine.Info info = new DataLine.Info(Clip.class, audioFormat);
+                        Clip clip = (Clip) AudioSystem.getLine(info);
+
+                        clip.open(audioInputStream);
+                        clip.start();
+                    } catch (LineUnavailableException e1) {
+                        e1.printStackTrace();
+                    } catch (UnsupportedAudioFileException e1) {
+                        e1.printStackTrace();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
             });
 
             recognizer.canceled.addEventListener((s, e) -> {
