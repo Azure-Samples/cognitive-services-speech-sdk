@@ -8,15 +8,17 @@ jobs:
   strategy:
     maxParallel: 1
     matrix:
-      Python3.7:
-        PythonVersion: 3.7
-        pythonIncludePathSuffix: python3.7m
-      Python3.6:
-        PythonVersion: 3.6
-        pythonIncludePathSuffix: python3.6m
       Python3.5:
         PythonVersion: 3.5
         pythonIncludePathSuffix: python3.5m
+      # More configurations in 'int' and 'prod' builds (cf. set-variables.sh):
+      ${{ if and(eq(variables['System.CollectionId'], '19422243-19b9-4d85-9ca6-bc961861d287'), eq(variables['System.DefinitionId'], '4833'), or(and(or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')), eq(variables['Build.SourceBranch'], 'refs/heads/master')), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))) }}:
+        Python3.7:
+          PythonVersion: 3.7
+          pythonIncludePathSuffix: python3.7m
+        Python3.6:
+          PythonVersion: 3.6
+          pythonIncludePathSuffix: python3.6m
   variables:
     BuildConfiguration: Release
     BuildPlatform: x64

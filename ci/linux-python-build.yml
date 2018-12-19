@@ -8,18 +8,21 @@ jobs:
   strategy:
     maxParallel: 1
     matrix:
-      Python3.7:
-        PythonVersion: 3.7
-        pythonIncludePathSuffix: python3.7m
-        WheelPythonTag: cp37
-      Python3.6:
-        PythonVersion: 3.6
-        pythonIncludePathSuffix: python3.6m
-        WheelPythonTag: cp36
       Python3.5:
         PythonVersion: 3.5
         pythonIncludePathSuffix: python3.5m
         WheelPythonTag: cp35
+      Python3.6:
+        PythonVersion: 3.6
+        pythonIncludePathSuffix: python3.6m
+        WheelPythonTag: cp36
+      # Python 3.5 and 3.6 we need for end-to-end test on Ubuntu 16.04 and 18.04, respectively.
+      # 'int' and 'prod' builds have Python 3.7 in addition:
+      ${{ if and(eq(variables['System.CollectionId'], '19422243-19b9-4d85-9ca6-bc961861d287'), eq(variables['System.DefinitionId'], '4833'), or(and(or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')), eq(variables['Build.SourceBranch'], 'refs/heads/master')), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))) }}:
+        Python3.7:
+          PythonVersion: 3.7
+          pythonIncludePathSuffix: python3.7m
+          WheelPythonTag: cp37
   variables:
     BuildConfiguration: Release
     BuildPlatform: x64
