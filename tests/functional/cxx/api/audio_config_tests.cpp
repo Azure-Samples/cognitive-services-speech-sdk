@@ -46,18 +46,24 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
         CAPTURE(sessionId);
         REQUIRE(result != nullptr);
 
+        std::ostringstream details;
+
         if (result->Reason == ResultReason::Canceled)
         {
             auto cancellation = CancellationDetails::FromResult(result);
-            CAPTURE(cancellation->Reason);
-            CAPTURE(cancellation->ErrorDetails);
-            CAPTURE(cancellation->ErrorCode);
+            details
+                << "Canceled:"
+                << " Reason: " << int(cancellation->Reason)
+                << " Details: " << cancellation->ErrorDetails;
         }
         else if (result->Reason == ResultReason::NoMatch)
         {
             auto nomatch = NoMatchDetails::FromResult(result);
-            CAPTURE(nomatch->Reason);
+            details
+                << "NoMatch:"
+                << " Reason: " << int(nomatch->Reason);
         }
+        CAPTURE(details.str());
         REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
         REQUIRE(!result->Text.empty());
     };

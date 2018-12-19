@@ -7,7 +7,7 @@
 #include "file_utils.h"
 #include "recognizer_utils.h"
 
-template< typename RecogType>
+template<typename RecogType>
 static std::shared_ptr<RecogType> CreateRecognizers(const string& filename)
 {
     auto audioInput = AudioConfig::FromWavFileInput(filename);
@@ -727,13 +727,13 @@ TEST_CASE("KWS basics", "[api][cxx]")
             SPXTEST_REQUIRE(recognizer != nullptr);
             SPXTEST_REQUIRE(IsUsingMocks(true));
 
-            recognizer->Recognized += [&](const SpeechRecognitionEventArgs& /* e */) {
+            recognizer->Recognized += [&](const SpeechRecognitionEventArgs&) {
                 std::unique_lock<std::mutex> lock(mtx);
                 gotFinalResult++;
                 SPX_TRACE_VERBOSE("gotFinalResult=%d", gotFinalResult);
             };
 
-            recognizer->SessionStopped += [&](const SessionEventArgs& /* e */) {
+            recognizer->SessionStopped += [&](const SessionEventArgs&) {
                 std::unique_lock<std::mutex> lock(mtx);
                 gotSessionStopped++;
                 SPX_TRACE_VERBOSE("gotSessionStopped=%d", gotSessionStopped);
@@ -969,33 +969,25 @@ static void ConnectionEventTests(bool forContinuousRecognition)
     bool connectedAfterRecognizing = false;
     bool connectedDisconnectedUnmatch = false;
 
-    connection->Connected.Connect([&](const ConnectionEventArgs& e) {
+    connection->Connected.Connect([&](const ConnectionEventArgs&) {
         connectedCount++;
-        CAPTURE(e.SessionId);
-        CAPTURE(connectedCount);
         if (connectedCount == 1)
         {
             if (recognizedCount != 0 || recognizingCount != 0)
             {
-                CAPTURE(recognizedCount);
-                CAPTURE(recognizingCount);
                 connectedAfterRecognizing = true;
             }
         }
         if (connectedCount != disconnectedCount + 1)
         {
-            CAPTURE(disconnectedCount);
             connectedDisconnectedUnmatch = true;
         }
     });
 
-    connection->Disconnected.Connect([&](const ConnectionEventArgs& e) {
+    connection->Disconnected.Connect([&](const ConnectionEventArgs&) {
         disconnectedCount++;
-        CAPTURE(e.SessionId);
-        CAPTURE(disconnectedCount);
         if (connectedCount != disconnectedCount)
         {
-            CAPTURE(connectedCount);
             connectedDisconnectedUnmatch = true;
         }
     });
@@ -1003,8 +995,6 @@ static void ConnectionEventTests(bool forContinuousRecognition)
     recognizer->Recognizing.Connect([&](const SpeechRecognitionEventArgs&) {
         if (connectedCount != disconnectedCount && connectedCount != disconnectedCount + 1)
         {
-            CAPTURE(connectedCount);
-            CAPTURE(disconnectedCount);
             connectedDisconnectedUnmatch = true;
         }
         recognizingCount++;
@@ -1013,8 +1003,6 @@ static void ConnectionEventTests(bool forContinuousRecognition)
     recognizer->Recognized.Connect([&](const SpeechRecognitionEventArgs&) {
         if (connectedCount != disconnectedCount && connectedCount != disconnectedCount + 1)
         {
-            CAPTURE(connectedCount);
-            CAPTURE(disconnectedCount);
             connectedDisconnectedUnmatch = true;
         }
         recognizedCount++;
@@ -1028,7 +1016,6 @@ static void ConnectionEventTests(bool forContinuousRecognition)
     recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& e) {
         if (e.Reason == CancellationReason::Error)
         {
-            CAPTURE(e.ErrorCode);
             canceledCount++;
         }
     });
@@ -1067,16 +1054,15 @@ TEST_CASE("ConnectionEventsTest", "[api][cxx]")
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     weather.UpdateFullFilename(Config::InputDir);
+    REQUIRE(exists(weather.m_audioFilename));
 
-    SPXTEST_SECTION("Conncted Disconnected Events with RecognizeOnceAsnyc")
+    SPXTEST_SECTION("Connected Disconnected Events with RecognizeOnceAsnyc")
     {
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
         ConnectionEventTests(false);
     }
 
-    SPXTEST_SECTION("Conncted Disconnected Events with ContinuousRecognition")
+    SPXTEST_SECTION("Connected Disconnected Events with ContinuousRecognition")
     {
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
         ConnectionEventTests(true);
     }
 }

@@ -63,18 +63,25 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent][!hide]")
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
+
+            std::ostringstream details;
+
             if (result->Reason == ResultReason::Canceled)
             {
                 auto cancellation = CancellationDetails::FromResult(result);
-                CAPTURE(cancellation->Reason);
-                CAPTURE(cancellation->ErrorDetails);
-                CAPTURE(cancellation->ErrorCode);
+                details
+                    << "Canceled:"
+                    << " Reason: " << int(cancellation->Reason)
+                    << " Details: " << cancellation->ErrorDetails;
             }
             else if (result->Reason == ResultReason::NoMatch)
             {
                 auto nomatch = NoMatchDetails::FromResult(result);
-                CAPTURE(nomatch->Reason);
+                details
+                    << "NoMatch:"
+                    << " Reason: " << int(nomatch->Reason);
             }
+            CAPTURE(details.str());
             CHECK(result->Reason == expectedReason);
             CHECK(!result->Text.empty());
 #ifdef _MSC_VER
