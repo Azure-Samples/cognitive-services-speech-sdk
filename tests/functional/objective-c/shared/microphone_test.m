@@ -9,7 +9,6 @@
     
 
 extern NSString *speechKey;
-extern NSString *intentKey;
 extern NSString *serviceRegion;
 
 + (void) runAsync

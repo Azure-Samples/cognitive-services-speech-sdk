@@ -9,6 +9,7 @@
 
 extern NSString *speechKey;
 extern NSString *intentKey;
+extern NSString *intentRegion;
 extern NSString *serviceRegion;
     
 + (void)runTest
@@ -178,7 +179,7 @@ extern NSString *serviceRegion;
     [translationRecognizer stopContinuousRecognition];
     
     // Test: Intent
-    SPXSpeechConfiguration *intentConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:intentKey region:serviceRegion];
+    SPXSpeechConfiguration *intentConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:intentKey region:intentRegion];
     SPXIntentRecognizer *intentRecognizer;
     SPXLanguageUnderstandingModel *model = [[SPXLanguageUnderstandingModel alloc] initWithAppId:@"b687b851-56c5-4d31-816f-35a741a3f0be"];
     
@@ -240,7 +241,7 @@ extern NSString *serviceRegion;
         NSLog(@"Received LUIS JSON: %@", [eventArgs.result.properties getPropertyByName:@"RESULT-LanguageUnderstandingJson"]);
     }];
     [intentRecognizer addRecognizingEventHandler: ^ (SPXIntentRecognizer * recognizer, SPXIntentRecognitionEventArgs *eventArgs) {
-        NSLog(@"Received intermediate result event. SessionId: %@, status: %ld. intermediate result:%@. IntentId %@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.intentId);
+        NSLog(@"Received intermediate result event. SessionId: %@, intermediate result:%@. reason: %ld. IntentId %@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.intentId);
     }];
     [intentRecognizer addCanceledEventHandler: ^ (SPXIntentRecognizer *recognizer, SPXIntentRecognitionCanceledEventArgs *eventArgs) {
         NSLog(@"Received canceled event. SessionId: %@, reason:%lu errorDetails:%@.", eventArgs.sessionId, (unsigned long)eventArgs.reason, eventArgs.errorDetails);

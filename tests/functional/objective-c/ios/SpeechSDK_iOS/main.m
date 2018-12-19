@@ -9,8 +9,10 @@
 
 
 NSString *speechKey = @"";
-NSString *intentKey = @"";
 NSString *serviceRegion = @"";
+NSString *intentKey = @"";
+NSString *intentRegion = @"";
+
 
 int main(int argc, char * argv[]) {
     @autoreleasepool {
