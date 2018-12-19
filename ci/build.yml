@@ -13,7 +13,7 @@ resources:
 phases:
 - phase: Pre
   queue:
-    name: Hosted Linux Preview
+    name: Hosted Ubuntu 1604
   steps:
   - task: Bash@3
     inputs:
