@@ -121,6 +121,14 @@ CSpxAsyncOp<void> CSpxRecognizer::StopContinuousRecognitionAsync()
 
 CSpxAsyncOp<void> CSpxRecognizer::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)
 {
+    const char* reco_mode = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
+    auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
+
+    // currently, kws uses recoModeInteractive as default, but takes the passed mode, if configured
+    if (currentRecoMode.empty())
+    {
+        SetStringValueInProperties(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), g_recoModeInteractive);
+    }
     return m_defaultSession->StartKeywordRecognitionAsync(model);
 }
 

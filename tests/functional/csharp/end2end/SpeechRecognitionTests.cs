@@ -634,6 +634,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual("", properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token));
         }
 
+        [Ignore] // TODO: enable, mock dll is not installed during tests.
+        [TestMethod]
+        public async Task TestKeywordspotterStartStop()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            {
+                // TODO: use some explicit model file, not re-use the wave here
+                recognizer.Properties.SetProperty("CARBON-INTERNAL-UseKwsEngine-Mock", "true");
+                var model = KeywordRecognitionModel.FromFile(TestData.English.Weather.AudioFile);
+
+                recognizer.Canceled += (s, e) => { Console.WriteLine($"Recognition Canceled: {e.ToString()}"); };
+                await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
+                await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
+            }
+        }
+
+
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task TestContinuous44KHz()
         {
