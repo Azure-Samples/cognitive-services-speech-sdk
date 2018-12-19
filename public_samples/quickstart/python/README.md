@@ -22,7 +22,7 @@ Before you get started, here's a list of prerequisites:
 
 **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 
-The Cognitive Services Speech SDK Python package can be installed from [pyPI](https://pypi.org/project/azure-cognitiveservices-speech/) using this command:
+The Cognitive Services Speech SDK Python package can be installed from [pyPI](https://pypi.org/) using this command:
 
 ```sh
 pip install azure-cognitiveservices-speech
