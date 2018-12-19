@@ -131,6 +131,14 @@ my %images = (
     version => 1,
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps test_deps_ubuntu1804/), 'oobedevdnc21_ubuntu1804_x64_deps', 'builduser'],
   },
+  oobedevpy35_ubuntu1604_x64 => {
+    version => 1,
+    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobepython_ubuntu_deps test_deps/), 'builduser'],
+  },
+  oobedevpy36_ubuntu1804_x64 => {
+    version => 1,
+    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobepython_ubuntu_deps test_deps_ubuntu1804/), 'builduser'],
+  },
 );
 
 sub imagetag {

@@ -74,12 +74,13 @@ steps:
       # First do all the pulls in parallel, for up to 2 times.
       maxAttempts=2
       attempt=0
-      while ((++attempt <= maxAttempts)); do
-        printf "%s\0" "${forPull[@]}" |
-          xargs --verbose --no-run-if-empty --max-args=1 --null --max-procs=4 \
-            perl ci/docker/dockertool.pl pull --registry $(AZURE_CONTAINER_REGISTRY) &&
-              break ||
-                continue # needed because of "set -e"
+      [[ ${#forPull[@]} = 0 ]] ||
+        while ((++attempt <= maxAttempts)); do
+          printf "%s\0" "${forPull[@]}" |
+            xargs --verbose --no-run-if-empty --max-args=1 --null --max-procs=4 \
+              perl ci/docker/dockertool.pl pull --registry $(AZURE_CONTAINER_REGISTRY) &&
+                break ||
+                  continue # needed because of "set -e"
       done
       ((attempt <= maxAttempts)) || exitWithError "Could not pull all images"
 

@@ -1153,6 +1153,60 @@ jobs:
 
 - template: linux-python-build.yml
 
+- job: LinuxPythonOobeTest
+  dependsOn: [Pre, LinuxPythonBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxPythonOobeTest '))
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 30
+  steps:
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Downloading PythonBuild artifacts
+    inputs:
+      artifactName: PythonBuild
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: '**/*linux*_x86_64.whl'
+  - template: get-docker-image.yml
+    parameters:
+      imageBase: oobedevpy35_ubuntu1604_x64 oobedevpy36_ubuntu1804_x64
+      outvarImage: DOCKER_IMAGES
+  - bash: |
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      cp --recursive --verbose $(System.ArtifactsDirectory)/In/PythonBuild/wheelhouse wheelhouse
+      patchSamplesFromTestConfig public_samples/quickstart/python \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman)
+      ERRORS=0
+      for i in $(DOCKER_IMAGES); do
+        docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$i" bash - <<"SCRIPT" || \
+        { ((++ERRORS)); vsts_logissue error "Running public_samples/quickstart/python for image $i failed."; }
+          set -e -x -o pipefail
+          MAJORMINOR=$(python3 -c "import sys; print('%s%s' % (sys.version_info[0:2]))")
+          pip3 install /test/wheelhouse/azure_cognitiveservices_speech-*-cp$MAJORMINOR-*linux*_x86_64.whl
+          # Alternative when running into issues with Ubuntu's default python3/pip3:
+          # pip3 install --user --upgrade pip
+          # $HOME/.local/bin/pip install --user /test/wheelhouse/azure_cognitiveservices_speech-*-cp$MAJORMINOR-*linux*_x86_64.whl
+          PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
+          pulseaudio -D --exit-idle-time=-1
+          sleep 1.5
+          pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
+          pacmd load-module module-virtual-source source_name=VirtualMic
+          trap 'pulseaudio --kill' EXIT
+          /test/ci/quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" 1 \
+            python3 ./public_samples/quickstart/python/quickstart.py
+      SCRIPT
+      done
+      [[ $ERRORS == 0 ]] || exitWithError "Not all quickstarts ran successfully."
+    displayName: Test quickstart-jre
+
+
 - template: windows-python-build.yml
 
 - template: osx-python-build.yml
