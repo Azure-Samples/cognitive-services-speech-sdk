@@ -29,6 +29,7 @@ proguard-rules.pro text
 *.prefs text
 *.pro text
 *.properties text
+*.py text
 *.sln text
 *.storyboard text
 *.vcxproj text

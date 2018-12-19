@@ -14,8 +14,11 @@ SOURCE_DIR = 'source/bindings/python/src'
 version = None
 try:
     version = os.environ['SPEECHSDK_SEMVER2NOMETA']
-    version = re.sub(r'-alpha\.(\d+).', r'a\1.dev', version)
-    version = re.sub(r'-beta\.(\d+).', r'b\1.dev', version)
+    version = re.sub(r'-alpha\.(\d+)\.', r'a\1.dev', version)
+    version = re.sub(r'-beta\.(\d+)\.', r'b\1.dev', version)
+    version = re.sub(r'-alpha\.(\d+)$', r'a\1', version)
+    version = re.sub(r'-beta\.(\d+)$', r'b\1', version)
+    version = re.sub(r'-rc\.(\d+)$', r'rc\1', version)
 except KeyError:
     if os.path.isfile('version.txt'):
         with open('version.txt') as f:

@@ -4,6 +4,10 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 
 ## News
 
+* Speech SDK Release 1.2.0
+
+  Mid of December we released version 1.2.0 of the Speech SDK.
+
 * Speech SDK Release 1.1.0
 
   Beginning of November we released version 1.1.0 of the Speech SDK. The release notes can be found [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/releasenotes#speech-service-sdk-110).
@@ -13,7 +17,7 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK (1.1.0) on Windows 10, Ubuntu 16.04 and 18.04 x64, Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
+We tested the samples with the latest released version of the SDK (1.2.0) on Windows 10, Ubuntu 16.04 and 18.04 x64, Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
 
 ## Getting Started
 
@@ -50,6 +54,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart Java JRE](./quickstart/java-jre/)                                                               | Windows, Linux | Demonstrates one-shot speech recognition from microphone       |
 | [Quickstart JavaScript](./quickstart/js-browser/)                                                           | Web | Demonstrates one-shot speech recognition from microphone                  |
 | [Quickstart Node.js](./quickstart/js-node/)                                                                 | Node.js | Demonstrates one-shot speech recognition from a file                  |
+| [Quickstart Python](./quickstart/python/)                                                                   | Windows, Linux, macOS | Demonstrates one-shot speech recognition from microphone |
 | [Quickstart Objective-C](./quickstart/objectivec-ios/)                                                      | iOS | Demonstrates one-shot speech recognition from a file with recorded speech |
 
 The following samples demonstrate additional capabilities of the Speech SDK, such additional modes of speech recognition as well as intent recognition and translation:
