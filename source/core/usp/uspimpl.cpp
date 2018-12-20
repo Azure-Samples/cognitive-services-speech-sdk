@@ -123,7 +123,7 @@ Connection::Impl::Impl(const Client& config)
                 }
                 userNameAndPassword = proxy->username + string(":") + proxy->password;
             }
-            platform_set_http_proxy(hostAndPort.c_str(), userNameAndPassword.c_str());
+            platform_set_http_proxy(hostAndPort.c_str(), userNameAndPassword.empty() ? nullptr : userNameAndPassword.c_str());
         }
     });
 

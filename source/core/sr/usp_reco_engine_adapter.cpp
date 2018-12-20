@@ -515,21 +515,45 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISpx
 USP::Client& CSpxUspRecoEngineAdapter::SetUspProxyInfo(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
     // Get proxy related properties.
-    auto proxyHostName = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyHostName));
-
-    if (!proxyHostName.empty())
+    if (!properties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyHostName)))
     {
-        auto proxyPort = std::stoi(properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPort)));
-        if (proxyPort <= 0)
-        {
-            ThrowInvalidArgumentException("Invalid proxy port: %d", proxyPort);
-        }
-        auto proxyUserName = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName));
-        auto proxyPassword = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword));
-
-        return client.SetProxyServerInfo(proxyHostName, proxyPort, proxyUserName, proxyPassword);
+        return client;
     }
-    return client;
+
+    auto proxyHostName = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyHostName));
+    if (proxyHostName.empty())
+    {
+        ThrowInvalidArgumentException("Proxy hostname is empty.");
+    }
+
+    if (!properties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPort)))
+    {
+        ThrowInvalidArgumentException("No proxy port is specified.");
+    }
+    auto proxyPort = std::stoi(properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPort)));
+    if (proxyPort <= 0)
+    {
+        ThrowInvalidArgumentException("Invalid proxy port: %d", proxyPort);
+    }
+
+    bool hasUserName = properties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName));
+    bool hasPassword = properties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword));
+    std::string userName;
+    std::string password;
+
+    if (hasUserName)
+    {
+        userName = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName));
+    }
+    if (hasPassword)
+    {
+        password = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword));
+    }
+    if (hasUserName != hasPassword)
+    {
+        ThrowInvalidArgumentException("Either proxy user name or password is empty.");
+    }
+    return client.SetProxyServerInfo(proxyHostName.c_str(), proxyPort, hasUserName ? userName.c_str() : nullptr, hasPassword ? password.c_str() : nullptr);
 }
 
 SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const

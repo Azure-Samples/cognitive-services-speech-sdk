@@ -182,14 +182,23 @@ public:
     /// <param name="proxyPassword">The password of the proxy server</param>
     void SetProxy(const SPXSTRING& proxyHostName, uint32_t proxyPort, const SPXSTRING& proxyUserName = SPXSTRING(), const SPXSTRING& proxyPassword = SPXSTRING())
     {
+        SPX_IFTRUE_THROW_HR(proxyHostName.empty(), SPXERR_INVALID_ARG);
+        SPX_IFTRUE_THROW_HR(proxyPort == 0, SPXERR_INVALID_ARG);
+
         property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_ProxyHostName), nullptr,
             Utils::ToUTF8(proxyHostName).c_str());
         property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_ProxyPort), nullptr,
             std::to_string(proxyPort).c_str());
-        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_ProxyUserName), nullptr,
-            Utils::ToUTF8(proxyUserName).c_str());
-        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_ProxyPassword), nullptr,
-            Utils::ToUTF8(proxyPassword).c_str());
+        if (!proxyUserName.empty())
+        {
+            property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_ProxyUserName), nullptr,
+                Utils::ToUTF8(proxyUserName).c_str());
+        }
+        if (!proxyPassword.empty())
+        {
+            property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_ProxyPassword), nullptr,
+                Utils::ToUTF8(proxyPassword).c_str());
+        }
     }
 
     /// <summary>

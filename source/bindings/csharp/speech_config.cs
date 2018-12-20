@@ -155,12 +155,28 @@ namespace Microsoft.CognitiveServices.Speech
         /// Sets proxy configuration.
         /// Added in version 1.1.0
         /// </summary>
-        /// <param name="proxyHostName">The host name of the proxy server</param>
-        /// <param name="proxyPort">The port number of the proxy server</param>
-        /// <param name="proxyUserName">The user name of the proxy server</param>
-        /// <param name="proxyPassword">The password of the proxy server</param>
+        /// <param name="proxyHostName">The host name of the proxy server.</param>
+        /// <param name="proxyPort">The port number of the proxy server.</param>
+        /// <param name="proxyUserName">The user name of the proxy server. Use null or empty string if no user name is needed.</param>
+        /// <param name="proxyPassword">The password of the proxy server. Use null or empty string if no password is needed.</param>
         public void SetProxy(string proxyHostName, int proxyPort, string proxyUserName, string proxyPassword)
         {
+            if (string.IsNullOrWhiteSpace(proxyHostName))
+            {
+                throw new ArgumentException("Invalid proxy host name.");
+            }
+            if (proxyPort <= 0)
+            {
+                throw new ArgumentException("Invalid proxy port.");
+            }
+            if (proxyUserName == null)
+            {
+                proxyUserName = string.Empty;
+            }
+            if (proxyPassword == null)
+            {
+                proxyPassword = string.Empty;
+            }
             this.configImpl.SetProxy(proxyHostName, (uint)proxyPort, proxyUserName, proxyPassword);
         }
 

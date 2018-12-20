@@ -49,28 +49,32 @@ void Connection::SendMessage(const std::string& messagePath, const uint8_t* buff
     m_impl->QueueMessage(messagePath, buffer, size, messageType);
 }
 
-Client& Client::SetProxyServerInfo(const std::string &proxyHost, int proxyPort, const std::string &proxyUsername, const std::string &proxyPassword)
+Client& Client::SetProxyServerInfo(const char *proxyHost, int proxyPort, const char *proxyUsername, const char *proxyPassword)
 {
 #ifdef _MSC_VER
 #define strdup _strdup
 #endif
-    m_proxyServerInfo = std::shared_ptr<ProxyServerInfo>(new ProxyServerInfo{strdup(proxyHost.c_str()), proxyPort, strdup(proxyUsername.c_str()), strdup(proxyPassword.c_str())}, 
-    [=](ProxyServerInfo *info) 
-    {
-        if (info->host)
+    m_proxyServerInfo = std::shared_ptr<ProxyServerInfo>
+        (new ProxyServerInfo{ proxyHost != nullptr ? strdup(proxyHost) : nullptr,
+                              proxyPort,
+                              proxyUsername != nullptr ? strdup(proxyUsername) : nullptr,
+                              proxyPassword != nullptr ? strdup(proxyPassword) : nullptr }, 
+        [=](ProxyServerInfo *info) 
         {
-            free((void*)info->host);
-        }
-        if (info->password)
-        {
-            free((void*)info->password);
-        }
-        if (info->username)
-        {
-            free((void*)info->username);
-        }
-        delete info;
-    });
+            if (info->host)
+            {
+                free((void*)info->host);
+            }
+            if (info->password)
+            {
+                free((void*)info->password);
+            }
+            if (info->username)
+            {
+                free((void*)info->username);
+            }
+            delete info;
+        });
     return *this;
 }
 

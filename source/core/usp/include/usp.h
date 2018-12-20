@@ -226,7 +226,7 @@ public:
     /**
     * Sets the proxy server information, which is used to configure the connection to go through a proxy server.
     */
-    Client& SetProxyServerInfo(const std::string& proxyHost, int proxyPort, const std::string& proxyUsername = std::string(), const std::string& proxyPassword = std::string());
+    Client& SetProxyServerInfo(const char* proxyHost, int proxyPort, const char* proxyUsername = nullptr, const char* proxyPassword = nullptr);
 
     /**
     * Sets the speech service type.

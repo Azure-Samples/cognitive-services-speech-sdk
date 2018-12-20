@@ -115,6 +115,22 @@
 
 -(void)setProxyUsingHost:(NSString *)proxyHostName Port:(unsigned int)proxyPort UserName:(NSString *)proxyUserName Password:(NSString *)proxyPassword
 {
+    if ((proxyHostName == NULL) || ([proxyHostName length] == 0))
+    {
+        [NSException raise:@"Invalid proxy host name" format:@"proxy host name is null or empty."];
+    }
+    if (proxyPort == 0)
+    {
+        [NSException raise:@"Invalid proxy port" format:@"proxy port cannot be 0."];
+    }
+    if (proxyUserName == NULL)
+    {
+        proxyUserName = @"";
+    }
+    if (proxyPassword == NULL)
+    {
+        proxyPassword = @"";
+    }
     speechConfigImpl->SetProxy([proxyHostName string], proxyPort, [proxyUserName string], [proxyPassword string]);
 }
 
