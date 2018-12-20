@@ -18,8 +18,8 @@ public class MicrophoneAudioInputStreamTest {
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
-        // TODO name of library will depend on version and needs an update once we have semantic dll names.
-        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        // TODO trigger through Setting.class instead of loading
+        // System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
     }
 
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")

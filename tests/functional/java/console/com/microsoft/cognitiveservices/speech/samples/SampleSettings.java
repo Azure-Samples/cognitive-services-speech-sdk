@@ -66,8 +66,6 @@ public class SampleSettings {
     }
 
     static {
-        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
-       
         LoadSettings();
     };
     
