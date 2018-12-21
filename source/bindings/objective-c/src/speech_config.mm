@@ -123,13 +123,9 @@
     {
         [NSException raise:@"Invalid proxy port" format:@"proxy port cannot be 0."];
     }
-    if (proxyUserName == NULL)
+    if ((proxyUserName == NULL) || (proxyPassword == NULL))
     {
-        proxyUserName = @"";
-    }
-    if (proxyPassword == NULL)
-    {
-        proxyPassword = @"";
+        [NSException raise:@"Invalid proxy user name or password" format:@"Proxy user name or password is empty."];
     }
     speechConfigImpl->SetProxy([proxyHostName string], proxyPort, [proxyUserName string], [proxyPassword string]);
 }
