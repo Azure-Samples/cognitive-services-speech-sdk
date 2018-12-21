@@ -444,19 +444,26 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Translation(std::shared_pt
     auto region = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region));
     SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_REGION);
 
-    auto fromLang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
-    auto toLangs = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
-    SPX_IFTRUE_THROW_HR(fromLang.empty(), SPXERR_INVALID_ARG);
+    auto toLangs = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));    
     SPX_IFTRUE_THROW_HR(toLangs.empty(), SPXERR_INVALID_ARG);
 
-    auto voice = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice));
+    auto customSpeechModelId = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId));
+    if (!customSpeechModelId.empty())
+    {
+        client.SetModelId(customSpeechModelId);
+    }
+    else
+    {
+        auto fromLang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
+        SPX_IFTRUE_THROW_HR(fromLang.empty(), SPXERR_INVALID_ARG);
+        client.SetTranslationSourceLanguage(fromLang);
+    }
 
+    auto voice = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice));
     return client.SetEndpointType(USP::EndpointType::Translation)
         .SetRegion(region)
-        .SetTranslationSourceLanguage(fromLang)
         .SetTranslationTargetLanguages(toLangs)
         .SetTranslationVoice(voice);
-
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_DefaultSpeechService(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)

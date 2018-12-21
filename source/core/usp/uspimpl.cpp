@@ -326,10 +326,21 @@ string Connection::Impl::ConstructConnectionUrl() const
         }
         break;
     case EndpointType::Translation:
-        if (!customEndpoint || !contains(oss.str(), endpoint::translation::from))
+        if (!m_config.m_modelId.empty())
         {
-            oss << '&' << endpoint::translation::from << EncodeParameterString(m_config.m_translationSourceLanguage);
+            if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::deploymentIdQueryParam))
+            {
+                oss << '&' << endpoint::unifiedspeech::deploymentIdQueryParam << m_config.m_modelId;
+            }
         }
+        else if (!m_config.m_translationSourceLanguage.empty())
+        {
+            if (!customEndpoint || !contains(oss.str(), endpoint::translation::from))
+            {
+                oss << '&' << endpoint::translation::from << EncodeParameterString(m_config.m_translationSourceLanguage);
+            }
+        }
+
         if (!customEndpoint || !contains(oss.str(), endpoint::translation::to))
         {
             size_t start = 0;

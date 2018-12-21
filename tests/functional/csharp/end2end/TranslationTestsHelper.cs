@@ -26,7 +26,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             timeout = TimeSpan.FromMinutes(6);
         }
 
-        public SpeechTranslationConfig GetConfig(string path, string fromLanguage, List<string> toLanguages, string voice)
+        public SpeechTranslationConfig GetConfig(string path, string fromLanguage, List<string> toLanguages, string voice, string endpointId = null)
         {
             var config = SpeechTranslationConfig.FromSubscription(this.subscriptionKey, this.region);
             config.SpeechRecognitionLanguage = fromLanguage;
@@ -36,13 +36,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 config.VoiceName = voice;
             }
+
+            if (!string.IsNullOrEmpty(endpointId))
+            {
+                config.EndpointId = endpointId;
+            }
             return config;
         }
 
-        public TranslationRecognizer CreateTranslationRecognizer(string path, string fromLanguage, List<string> toLanguages, string voice = null)
+        public TranslationRecognizer CreateTranslationRecognizer(string path, string fromLanguage, List<string> toLanguages, string voice = null, string endpointId = null)
         {
             var audioInput = AudioConfig.FromWavFileInput(path);
-            return new TranslationRecognizer(GetConfig(path, fromLanguage, toLanguages, voice), audioInput);
+            return new TranslationRecognizer(GetConfig(path, fromLanguage, toLanguages, voice, endpointId), audioInput);
         }
 
         public async Task<EventArgs> GetTranslationRecognizedEvents(string path, string fromLanguage, List<string> toLanguages)
@@ -159,14 +164,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public async Task<Dictionary<ResultType, List<TranslationRecognitionEventArgs>>> GetTranslationRecognizingContinuous(string path, string fromLanguage, List<string> toLanguages)
+        public async Task<Dictionary<ResultType, List<TranslationRecognitionEventArgs>>> GetTranslationRecognizingContinuous(string path, string fromLanguage, List<string> toLanguages, string endpointId = null, bool allowErrors = false)
         {
-            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages, null)))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages, null, endpointId)))
             {
                 var tcs = new TaskCompletionSource<bool>();
                 var receivedEvents = new Dictionary<ResultType, List<TranslationRecognitionEventArgs>>();
                 var recognizingEvents = new List<TranslationRecognitionEventArgs>();
                 var recognizedEvents = new List<TranslationRecognitionEventArgs>();
+                var cancelledEvents = new List<TranslationRecognitionEventArgs>();
 
                 recognizer.Recognizing += (s, e) =>
                 {
@@ -181,7 +187,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
 
                 string canceled = string.Empty;
-                recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
+                recognizer.Canceled += (s, e) =>
+                {
+                    canceled = e.ErrorDetails;
+                    cancelledEvents.Add(e);
+                    tcs.TrySetResult(false);
+                };
 
                 recognizer.SessionStopped += (s, e) =>
                 {
@@ -193,13 +204,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
 
-                if (!string.IsNullOrEmpty(canceled))
+                if (!allowErrors && !string.IsNullOrEmpty(canceled))
                 {
                     Assert.Fail($"Recognition canceled: {canceled}");
                 }
 
                 receivedEvents.Add(ResultType.RecognizedText, recognizedEvents);
                 receivedEvents.Add(ResultType.RecognizingText, recognizingEvents);
+                receivedEvents.Add(ResultType.Cancelled, cancelledEvents);
                 return receivedEvents;
             }
         }
@@ -233,6 +245,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         RecognizedText,
         RecognizingText,
-        Synthesis
+        Synthesis,
+        Cancelled
     }
 }

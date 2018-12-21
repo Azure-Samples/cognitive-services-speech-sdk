@@ -23,12 +23,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         private TranslationTestsHelper translationHelper;
         private static string synthesisDir;
-        
+        private static string deploymentId;
+
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
             BaseClassInit(context);
             synthesisDir = Path.Combine(inputDir, "synthesis");
+            deploymentId = Config.GetSettingByKey<String>(context, "DeploymentId");
         }
 
         [TestInitialize]
@@ -391,7 +393,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.IsFalse(String.IsNullOrEmpty(result.Text), $"locale: {locale}, language: {lang}, result: {result.ToString()}");
             Assert.AreEqual(1, result.Translations.Count);
         }
-       
+
         [DataTestMethod, TestCategory(TestCategory.LongRunning)]
         [DynamicData(nameof(Voice.LangAndSynthesis), typeof(Voice), DynamicDataSourceType.Property)]
         public async Task TranslateFromENtoEachLangWithSynthesis(string lang, string voice)
@@ -418,6 +420,27 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual(TestData.English.Weather.Utterance, result.Text, "Failed to recognize text correctly.");
             Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason, $"Unexpected result reason. Cancellation error details: { CancellationDetails.FromResult(result).ErrorDetails }" );
             Assert.AreEqual(1, result.Translations.Count, "Unmatched translation results.");
+        }
+
+        [TestMethod]
+        public async Task ContinuousValidCustomTranslation()
+        {
+            var toLanguages = new List<string>() { Language.DE };
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizingContinuous(TestData.English.Weather.AudioFile, "", toLanguages, deploymentId);
+            Assert.AreNotEqual(actualTranslations[ResultType.RecognizedText].Count, 0, "Number of translations should not be zero.");
+            AssertMatching(TestData.German.Weather.Utterance, actualTranslations[ResultType.RecognizedText].Last().Result.Translations[Language.DE]);
+        }
+
+        [TestMethod]
+        public async Task ContinuousInvalidCustomTranslation()
+        {
+            var toLanguages = new List<string>() { Language.DE };
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizingContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, "invalidid", true);
+            Assert.AreEqual(actualTranslations[ResultType.RecognizedText].Count, 0, "Number of translations should be zero.");
+            Assert.AreEqual(actualTranslations[ResultType.RecognizingText].Count, 0, "Number of translations should be zero.");
+            Assert.AreEqual(actualTranslations[ResultType.Cancelled].Count, 1, "Number of cancelled events should not be zero.");
+            var errorDetails = actualTranslations[ResultType.Cancelled].Cast<TranslationRecognitionCanceledEventArgs>().Last().ErrorDetails;
+            Assert.IsTrue(errorDetails.Contains("bad request"));
         }
     }
 }
