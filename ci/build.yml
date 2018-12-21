@@ -329,7 +329,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsBuild '))
   pool:
     name: Hosted VS2017
-  timeoutInMinutes: 60
+  timeoutInMinutes: 120
   strategy:
     maxParallel: 4
     matrix:
@@ -399,6 +399,20 @@ jobs:
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - template: test-during-build.yml
+    parameters:
+      extraTests:
+        - bash: |
+            ./ci/run-tests.sh \
+              --test-configuration ci/test-config.json \
+              --build-dir build \
+              --platform Windows-x64-Release \
+              --timeout 120m \
+              -D luis-key=$(luis-westus-s0-201809-key1) \
+              -D speech-key=$(NorthEuropeKeySkyman) \
+              -D long-running=true \
+              -- csharp_unit_tests
+          displayName: Run LongRunning tests
+          condition: and(eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), eq(variables['SPEECHSDK_BUILD_TYPE'], 'int'), eq(variables['BuildPlatform'], 'x64'), eq(variables['BuildConfiguration'], 'Release'))
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Create drop files
     inputs:
@@ -556,7 +570,8 @@ jobs:
        set -x -e
        eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
          -D luis-key=$(luis-westus-s0-201809-key1) \
-         -D speech-key=$(NorthEuropeKeySkyman))
+         -D speech-key=$(NorthEuropeKeySkyman) \
+         -D long-running=false)
        java \
         -cp $(printf "%s;" \
            "$(MavenPackageDirWindows)/$(ArtifactBasename).jar" \
@@ -622,7 +637,8 @@ jobs:
       patchSamplesFromTestConfig public_samples/quickstart/java-jre \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman)
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false
       ./ci/run-maven.sh public_samples "$(MavenRoot)"
     displayName: Patch and build samples
   - template: get-docker-image.yml
@@ -843,7 +859,8 @@ jobs:
       perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman))
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false)
       # dotnet test does not allow to supply TestRunParameters from command-line?!
       perl -pi - \
         UnifiedSpeechSubscriptionKey "$SPEECHSDK_SPEECH_KEY" \
@@ -864,7 +881,8 @@ jobs:
       patchSamplesFromTestConfig public_samples/quickstart/csharp-dotnetcore \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman)
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false
       mkdir localnuget
       cp --verbose $(System.ArtifactsDirectory)/In/Windows/Microsoft.CognitiveServices.Speech.*.nupkg localnuget
 
@@ -1182,7 +1200,8 @@ jobs:
       patchSamplesFromTestConfig public_samples/quickstart/python \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman)
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
         docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$i" bash - <<"SCRIPT" || \
@@ -1239,7 +1258,8 @@ jobs:
       patchSamplesFromTestConfig public_samples/quickstart/cpp-linux \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman)
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false
     displayName: Patch quickstart
   - bash: |
       set -u -e -x -o pipefail
@@ -1271,7 +1291,8 @@ jobs:
             --build-dir buildfromdrop$architecture \
             --platform Linux-$architecture-Release \
             -D luis-key=$(luis-westus-s0-201809-key1) \
-            -D speech-key=$(NorthEuropeKeySkyman) -- cxx_core_tests cxx_api_tests || {
+            -D speech-key=$(NorthEuropeKeySkyman) \
+            -D long-running=false -- cxx_core_tests cxx_api_tests || {
             vsts_logissue error "Running tests for image $i failed."
             ((++ERRORS))
           }
@@ -1409,7 +1430,8 @@ jobs:
       # run the test
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman))
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false)
       xcodebuild test -project tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
           -scheme SpeechSDK_iOS \
           -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
@@ -1425,7 +1447,8 @@ jobs:
       patchSamplesFromTestConfig public_samples/quickstart/objectivec-ios/helloworld/helloworld \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman)
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false
       # run the test
       xcodebuild test -project public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
           -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \

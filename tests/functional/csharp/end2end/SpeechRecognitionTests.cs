@@ -291,7 +291,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        [TestMethod]
         public async Task ContinuousRecognitionOnLongFileInput(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
@@ -652,7 +652,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
 
-        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        [TestMethod]
         public async Task TestContinuous44KHz()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Margarita.AudioFile);

@@ -1,5 +1,6 @@
 {
   "INPUTDIR": "tests/input",
+  "LONG_RUNNING": "${long-running}",
   "SPEECH": {
     "KEY": "${speech-key}",
     "REGION": "northeurope",

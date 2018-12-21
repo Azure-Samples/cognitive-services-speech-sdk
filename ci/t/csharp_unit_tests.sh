@@ -50,11 +50,21 @@ perl -p - \
 SCRIPT
 
 set -x
+if [[ $SPEECHSDK_LONG_RUNNING = true ]]; then
+  TEST_CASE_FILTER=TestCategory=LongTest
+  LOG_FILE_NAME=LogFileName=test-$T-$PLATFORM-long-running.trx
+else
+  TEST_CASE_FILTER=TestCategory!=LongTest
+  LOG_FILE_NAME=LogFileName=test-$T-$PLATFORM.trx
+fi
+
 "$VSTEST" \
-  "$(cygpath -aw "$TEST_CODE")" \
-  /Settings:"$runSettings" \
-  /logger:"trx;LogFileName=test-$T-$PLATFORM.trx" \
-  /TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")"
+"$(cygpath -aw "$TEST_CODE")" \
+/Settings:"$runSettings" \
+/logger:"trx;$LOG_FILE_NAME" \
+/TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
+/TestCaseFilter:"$TEST_CASE_FILTER"
+
 exitCode=$?
 set +x
 rm -f "$runSettings"

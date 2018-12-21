@@ -98,7 +98,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
 
             Assert.IsNotNull(result, "Translation should not be null");
-            var errorDetails = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonErrorDetails, "");
+            var errorDetails = CancellationDetails.FromResult(result).ErrorDetails;
+            Assert.IsFalse(String.IsNullOrEmpty(errorDetails), "Error details cannot be empty when translation language is invalid.");
             Console.WriteLine($"Result: {result.ToString()}, Error details: ErrorDetails: {errorDetails}");
             Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, "Unexpected result reason.");
             AssertMatching(TestData.English.Weather.Utterance, result.Text);
@@ -106,7 +107,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertMatching(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails);
         }
 
-        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        [TestMethod]
         public async Task TestInvalidTargetLanguageWithContinuousRecognition()
         {
             var toLanguages = new List<string>() { "invalidLanguages" };
@@ -119,7 +120,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, "Unmatched result reason.");
                 AssertMatching(TestData.English.Batman.Utterances[i], result.Text);
                 Assert.AreEqual(0, result.Translations.Count, "Unmatched translation results");
-                var errorDetails = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonErrorDetails, "");
+                var errorDetails = CancellationDetails.FromResult(result).ErrorDetails;
                 Assert.AreEqual(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails, "Unmatched error details");
             }
         }
@@ -212,7 +213,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertMatching(TestData.Spanish.Weather.Utterance, result.Translations[Language.ES]);
         }
 
-        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        [TestMethod]
         public async Task TranslationBatmanEnToDeFinalTextResultContinuous()
         {
             List<string> toLanguages = new List<string>() { Language.DE };
@@ -246,7 +247,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertMatching(TestData.Spanish.FirstOne.Utterance, actualTranslationRecognition.Result.Translations[Language.ES]);
         }
 
-        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        [TestMethod]
         public async Task TranslationBatmanEnToDeHeddaRUSSynthesisResultContinuous()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -255,7 +256,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreNotEqual(actualTranslations[ResultType.Synthesis].Count, 0);
             var actualSynthesisByteResults = actualTranslations[ResultType.Synthesis].Cast<TranslationSynthesisEventArgs>().ToList();
             const int MinSize = 20000;
-            foreach (var s in actualSynthesisByteResults)
+            foreach (var s in actualSynthesisByteResults) 
             {
                 Console.WriteLine($"Audio.Length: {s.Result.GetAudio().Length}");
                 Assert.IsTrue(s.Result.GetAudio().Length > MinSize, $"Expects audio size {s.Result.GetAudio().Length} to be greater than {MinSize}");
@@ -273,7 +274,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             await TranslationWeatherEnToFrCarolineSynthesis("Microsoft Server Speech Text to Speech Voice (fr-FR, Julie, Apollo)");
         }
-
+        
         public async Task TranslationWeatherEnToFrCarolineSynthesis(string voice)
         {
             var toLanguages = new List<string>() { Language.FR };
@@ -377,6 +378,46 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 });
                 singleShot.Wait();
             }
+        }
+
+        [DataTestMethod, TestCategory(TestCategory.LongRunning)]
+        [DynamicData(nameof(Language.LocaleAndLang), typeof(Language), DynamicDataSourceType.Property)]
+        public async Task TranslateFromEachLocaletoEachTextLang(string locale, string lang)
+        {
+            var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, locale, new List<string> { lang });
+            Assert.IsNotNull(result, "Translation should not be null");
+            Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason, "Unmatched result reason.");
+            Assert.IsTrue(String.IsNullOrEmpty(CancellationDetails.FromResult(result).ErrorDetails));
+            Assert.IsFalse(String.IsNullOrEmpty(result.Text), $"locale: {locale}, language: {lang}, result: {result.ToString()}");
+            Assert.AreEqual(1, result.Translations.Count);
+        }
+       
+        [DataTestMethod, TestCategory(TestCategory.LongRunning)]
+        [DynamicData(nameof(Voice.LangAndSynthesis), typeof(Voice), DynamicDataSourceType.Property)]
+        public async Task TranslateFromENtoEachLangWithSynthesis(string lang, string voice)
+        {
+            var tuple = await this.translationHelper.GetTranslationSynthesisAndFinalResult(TestData.English.Weather.AudioFile, Language.EN, new List<string> { lang }, voice);
+            foreach (var e in tuple.Item1)
+            {
+                if (e.Result.GetAudio().Length == 0)
+                {
+                    Assert.AreEqual(e.Result.Reason, ResultReason.SynthesizingAudioCompleted, $"Synthesizing event failure: Reason:{0} Audio.Length={1}", e.Result.Reason, e.Result.GetAudio().Length);
+                }
+            }
+
+            var result = tuple.Item2;
+            Assert.IsNotNull(result, "Translation result should not be null");
+            Assert.IsFalse(String.IsNullOrEmpty(result.Text), $"locale: { Language.EN }, language: { lang }, result: { result.ToString() }");
+        }
+
+        [TestMethod]
+        public async Task TranslateFromENtoTongan()
+        {
+            var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, new List<string> { "to" });
+            Assert.IsNotNull(result, "Failed to recognize and translate From English audio file to Tongal.");
+            Assert.AreEqual(TestData.English.Weather.Utterance, result.Text, "Failed to recognize text correctly.");
+            Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason, $"Unexpected result reason. Cancellation error details: { CancellationDetails.FromResult(result).ErrorDetails }" );
+            Assert.AreEqual(1, result.Translations.Count, "Unmatched translation results.");
         }
     }
 }

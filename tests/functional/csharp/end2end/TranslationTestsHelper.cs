@@ -203,6 +203,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 return receivedEvents;
             }
         }
+        
+        public async Task<Tuple<List<TranslationSynthesisEventArgs>, TranslationRecognitionResult>> GetTranslationSynthesisAndFinalResult(string path, string fromLanguage, List<string> toLanguages, string voice)
+        {
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages, voice)))
+            {
+                var eventArgs = new List<TranslationSynthesisEventArgs>();
+                var tcs = new TaskCompletionSource<bool>();
+                recognizer.SessionStopped += (s, e) => tcs.TrySetResult(true);
+                recognizer.Synthesizing += (s, e) => eventArgs.Add(e);
+                var result = await recognizer.RecognizeOnceAsync();
+                await Task.WhenAny(tcs.Task, Task.Delay(timeout));
+
+                return Tuple.Create(eventArgs, result);
+            }
+        }
 
         public static TranslationRecognizer TrackSessionId(TranslationRecognizer recognizer)
         {

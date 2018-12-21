@@ -6,6 +6,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     public static class TestCategory
     {
-       public const string LongRunning = "Long Test";
+       public const string LongRunning = "LongTest";
     }
 }

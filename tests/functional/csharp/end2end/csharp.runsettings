@@ -1,6 +1,6 @@
 <RunSettings>
     <MSTestV2>
-        <TestTimeout>450000</TestTimeout>
+        <TestTimeout>1200000</TestTimeout>
         <Parallelize>
             <Workers>1</Workers>
             <Scope>MethodLevel</Scope>
