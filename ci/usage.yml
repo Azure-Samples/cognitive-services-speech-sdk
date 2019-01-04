@@ -40,3 +40,23 @@ steps:
       Remove-Item -Force -Recurse -LiteralPath $rawDir, $cookedDir -ErrorAction SilentlyContinue
     }
   displayName: Process Blob Logs
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: 3.7
+    addToPath: true
+# https://msasg.visualstudio.com/DefaultCollection/Skyman/_library?itemType=SecureFiles&view=SecureFileView&secureFileId=d5df29c4-75a6-4bc6-b264-687e51aa8eb7&path=pycarbon-bigq.txt
+- task: DownloadSecureFile@1
+  displayName: 'Download secure file'
+  inputs:
+    secureFile: 'd5df29c4-75a6-4bc6-b264-687e51aa8eb7'
+- script: |
+    set GOOGLE_APPLICATION_CREDENTIALS=%DOWNLOADSECUREFILE_SECUREFILEPATH%
+    where python && ^
+    python -m pip install --upgrade pip && ^
+    where pip && ^
+    pip install google-cloud-bigquery==1.8.1 && ^
+    python ./ci/usage/process_pypi_counts.py ^
+      --verbose ^
+      --cooked-dir "$(System.ArtifactsDirectory)/cookedpypi" ^
+      --download-cooked --upload-cooked ^
+      --blob-storage-key $(BlobStorageKey)
