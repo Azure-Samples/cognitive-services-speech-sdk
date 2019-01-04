@@ -391,7 +391,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         internal PullAudioInputStreamCallbackInternalAdapter Adapter { get; private set; }
 
         /// <summary>
-        /// Creates a new push audio input stream callback.
+        /// Creates a new pull audio input stream callback.
         /// </summary>
         public PullAudioInputStreamCallback()
         {
@@ -404,7 +404,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <param name="dataBuffer">The buffer to fill</param>
         /// <param name="size">The size of the buffer.</param>
         /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
-        /// If there is no data immediate available, Read() blocks until the next data becomes available.</returns>
+        /// If there is no data immediately available, Read() blocks until the next data becomes available.</returns>
         abstract public int Read(byte[] dataBuffer, uint size);
 
         /// <summary>
@@ -455,11 +455,22 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     {
         private PullAudioInputStreamCallback callback;
 
+        /// <summary>
+        /// Creates a new pull audio input stream callback adapter.
+        /// </summary>
+        /// <param name="callback">PullAudioInputStreamCallback instance.</param>
         public PullAudioInputStreamCallbackInternalAdapter(PullAudioInputStreamCallback callback)
         {
             this.callback = callback;
         }
 
+        /// <summary>
+        /// Reads binary data from the stream.
+        /// </summary>
+        /// <param name="dataBuffer">The buffer to fill</param>
+        /// <param name="size">The size of the buffer.</param>
+        /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
+        /// If there is no data immediately available, Read() blocks until the next data becomes available.</returns>
         override public int Read(byte[] dataBuffer, uint size)
         {
             if (size != dataBuffer.Length)
@@ -476,6 +487,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             return count;
         }
 
+        /// <summary>
+        /// Closes the stream.
+        /// </summary>
         override public void Close()
         {
             callback.Close();

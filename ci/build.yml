@@ -329,7 +329,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsBuild '))
   pool:
     name: Hosted VS2017
-  timeoutInMinutes: 120
+  timeoutInMinutes: 150
   strategy:
     maxParallel: 4
     matrix:
@@ -895,7 +895,7 @@ jobs:
             set -e -x -o pipefail
             cd tests/functional/csharp/end2end
             dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
-            dotnet test --framework netcoreapp2.0 --settings csharp.runsettings --logger 'trx;LogFileName=test-csharp_unit_tests-nupkg-Linux-x64-Release.trx'
+            dotnet test --filter "TestCategory!=LongTest" --framework netcoreapp2.0 --settings csharp.runsettings --logger 'trx;LogFileName=test-csharp_unit_tests-nupkg-Linux-x64-Release.trx'
       SCRIPT
 
         # Run the end-to-end for the quickstart

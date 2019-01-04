@@ -17,6 +17,9 @@ namespace Microsoft.CognitiveServices.Speech
     [DataContract]
     internal sealed class DetailedSpeechRecognitionResultCollection
     {
+        /// <summary>
+        /// Enumerable of alternative interpretations of the same speech recognition result.
+        /// </summary>
         [DataMember]
         public IEnumerable<DetailedSpeechRecognitionResult> NBest { get; set; }
     }

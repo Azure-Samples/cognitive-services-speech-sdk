@@ -237,10 +237,14 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
     /*! \endcond */
 
+    /*! \cond INTERNAL */
+
     // TODO Remove this... After tests are updated to no longer depend upon this
     public com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer getRecoImpl() {
         return recoImpl;
     }
+
+    /*! \endcond */
 
     private void initialize() {
         super.internalRecognizerImpl = this.recoImpl;
