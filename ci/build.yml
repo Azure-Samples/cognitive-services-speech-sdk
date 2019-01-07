@@ -1326,14 +1326,11 @@ jobs:
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
     JointCmakeArgs: -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
   steps:
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: |
+      . ci/functions.sh &&
+      vsts_setvar SPEECHSDK_TARGET_PLATFORM IOS &&
+      vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
     displayName: Set iOS target platform
-    inputs:
-      type: InlineScript
-      script: |
-        . ci/functions.sh
-        vsts_setvar SPEECHSDK_TARGET_PLATFORM IOS
-        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - task: CMake@1
@@ -1372,13 +1369,13 @@ jobs:
       build_dsym_bundle "build_ios_device/lib" "$(FrameworkName)"
       build_dsym_bundle "build_ios_simulator/lib" "$(FrameworkName)"
       combine_dsym_bundles "$(OutputDirectory)" "build_ios_"{device,simulator}"/lib/$(FrameworkName).framework.dSYM" "$(FrameworkName)"
-    condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
+    condition: and(succeeded(), in(variables['BuildConfiguration'], 'Debug', 'Release'))
     displayName: Create debug symbols
   - bash: |
       cd "$(OutputDirectory)"
       zip --symlinks -r "$(VersionedFrameworkName).framework.dSYM.zip" "$(FrameworkName).framework.dSYM"
       rm -rf "$(OutputDirectory)/$(FrameworkName).framework.dSYM"
-    condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
+    condition: and(succeeded(), in(variables['BuildConfiguration'], 'Debug', 'Release'))
     displayName: Archive debug symbols
   - bash: |
       strip -x "$(OutputDirectory)/$(FrameworkName).framework/$(FrameworkName)"
@@ -1422,6 +1419,7 @@ jobs:
     displayName: Skip tests on build failure.
   - bash: |
       set -e -o pipefail -x
+      mkdir -p "$(OutputDirectory)/logs"
       # set up framework in the correct position - the Xcode project expects the framework here (used for both Release and Debug configs atm)
       mkdir -p '$(Build.Repository.LocalPath)/xcode-build-output'
       pushd '$(Build.Repository.LocalPath)/xcode-build-output'
@@ -1433,9 +1431,11 @@ jobs:
         -D speech-key=$(NorthEuropeKeySkyman) \
         -D long-running=false)
       xcodebuild test -project tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
-          -scheme SpeechSDK_iOS \
-          -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
-          SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION"
+        -scheme SpeechSDK_iOS \
+        -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
+        SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION" 2>&1 |
+          tee "$(OutputDirectory)/logs/xcodebuild-ios-unittests.log" |
+          xcpretty --report junit --output test-ios-unittests.xml
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     displayName: "Run iOS unit tests"
   - bash: |
@@ -1451,10 +1451,17 @@ jobs:
         -D long-running=false
       # run the test
       xcodebuild test -project public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
-          -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
-          -scheme helloworldUITests
+        -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
+        -scheme helloworldUITests 2>&1 |
+          tee "$(OutputDirectory)/logs/xcodebuild-ios-quickstart.log" |
+          xcpretty --report junit --output test-ios-quickstart.xml
     displayName: "Run iOS quickstart UI test"
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/test-*.xml'
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+    displayName: Publish test results
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
