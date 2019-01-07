@@ -165,7 +165,7 @@ with open(overall_csv, 'w', encoding='utf-8') as csvoutput:
     csvwriter.writerow(['day', 'count'])
 
     current_date = INITIAL_RELEASE_DATE
-    while current_date <= args.end_date:
+    while current_date <= LATEST_STABLE_DATE:
         path = cooked_path(args.cooked_dir, current_date)
         if os.path.isfile(path):
             pip_row_count = 0
@@ -181,7 +181,7 @@ with open(overall_csv, 'w', encoding='utf-8') as csvoutput:
                             details = json.loads(row[5])
                             assert(details['installer']['name'] == 'pip')
                             pip_row_count += 1
-                        except (json.decoder.JSONDecodeError, KeyError, AssertionError):
+                        except (json.decoder.JSONDecodeError, KeyError, AssertionError, TypeError):
                             nonpip_row_count += 1
                 row = [current_date.strftime('%Y-%m-%d'), pip_row_count]
                 csvwriter.writerow(row)
