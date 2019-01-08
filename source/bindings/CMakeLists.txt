@@ -2,6 +2,16 @@
 
 if(BUILD_PYTHON OR BUILD_CSHARP OR BUILD_JAVA)
 
+  # CMake version 3.13 change UseSWIG default behavior. Make sure to enable the
+  # old behavior as long as we are also using CMake version before 3.12.
+  # Once we are on 3.12 or above universally, we can use the new behavior;
+  # once we are on 3.13 or above universally, we can switch CMP0078 to NEW.
+  if(CMAKE_VERSION VERSION_GREATER 3.13)
+    # cmake --help-policy CMP0078
+    cmake_policy(SET CMP0078 OLD)
+  endif()
+  set(UseSWIG_TARGET_NAME_PREFERENCE LEGACY)
+
   find_package(SWIG REQUIRED)
   include(UseSWIG)
 
