@@ -6,7 +6,7 @@ jobs:
     name: Hosted Ubuntu 1604
   timeoutInMinutes: 60
   strategy:
-    maxParallel: 1
+    maxParallel: 2
     matrix:
       Python3.5:
         PythonVersion: 3.5
@@ -17,6 +17,7 @@ jobs:
         pythonIncludePathSuffix: python3.6m
         WheelPythonTag: cp36
       # Python 3.5 and 3.6 we need for end-to-end test on Ubuntu 16.04 and 18.04, respectively.
+      # Python 3.6 is also used for docs generation (BuildPythonDocs job).
       # 'int' and 'prod' builds have Python 3.7 in addition:
       ${{ if and(eq(variables['System.CollectionId'], '19422243-19b9-4d85-9ca6-bc961861d287'), eq(variables['System.DefinitionId'], '4833'), or(and(or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')), eq(variables['Build.SourceBranch'], 'refs/heads/master')), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))) }}:
         Python3.7:

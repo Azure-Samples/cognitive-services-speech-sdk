@@ -1223,8 +1223,81 @@ jobs:
       SCRIPT
       done
       [[ $ERRORS == 0 ]] || exitWithError "Not all quickstarts ran successfully."
-    displayName: Test quickstart-jre
+    displayName: Test quickstart-python
 
+- job: BuildPythonDocs
+  dependsOn: [Pre, LinuxPythonBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' BuildPythonDocs '))
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 30
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: 3.6
+      addToPath: true
+      architecture: x64
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Downloading PythonBuild artifacts
+    inputs:
+      artifactName: PythonBuild
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: '**/*linux*_x86_64.whl'
+  - bash: |
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      cp --recursive --verbose $(System.ArtifactsDirectory)/In/PythonBuild/wheelhouse wheelhouse
+      #
+      VIRTUALENV=pythondocs
+      VIRTUALENV_BINDIR=${PWD}/${VIRTUALENV}/bin
+      python -m pip install --upgrade pip &&
+      pip install virtualenv==16.1.0 &&
+      virtualenv -p python3 ${VIRTUALENV}
+      MAJORMINOR=$("${VIRTUALENV_BINDIR}"/python -c "import sys; print('%s%s' % (sys.version_info[0:2]))")
+      "$VIRTUALENV_BINDIR/pip" install wheelhouse/azure_cognitiveservices_speech-*-cp$MAJORMINOR-*linux*_x86_64.whl
+      #
+      PACKAGE_DIR=$(echo ${PWD}/${VIRTUALENV}/lib/python3.*/site-packages)
+      cp --recursive --verbose source/bindings/python/doc "$PACKAGE_DIR"
+      #
+      "$VIRTUALENV_BINDIR"/pip install sphinx==1.8.2
+      #
+      cd "$PACKAGE_DIR"/azure
+      "$VIRTUALENV_BINDIR"/sphinx-apidoc --module-first --implicit-namespaces --separate --output-dir ../doc . \
+          "${PWD}"/cognitiveservices/speech/speech_py_impl.py \
+          "${PWD}"/cognitiveservices/speech/speech.py \
+          "${PWD}"/cognitiveservices/speech/version.py
+      #
+      cd "$PACKAGE_DIR"/doc
+      "$VIRTUALENV_BINDIR"/sphinx-build . ../build/ -n -W
+      mkdir -p $(Build.ArtifactStagingDirectory)/PythonDocs
+      cp --recursive ../doc ../build $(Build.ArtifactStagingDirectory)/PythonDocs
+      #
+      ERROR=0
+      if grep ':[a-z][a-z]*:' ../build/*.html; then
+        echo "Unrendered restructured text markup leaked into the documentation. Please check."
+        ((ERROR++))
+      fi
+      #
+      if grep -i 'todo|bugbug' ../build/*.html; then
+        echo "Unwanted markup leaked into the documentation. Please check."
+        ((ERROR++))
+      fi
+      #
+      ((ERROR == 0)) || {
+        echo Error\(s\) occurred, stopping.
+        false
+      }
+    displayName: Build python docs
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/PythonDocs
+      ArtifactName: PythonDocs
+      publishLocation: Container
 
 - template: windows-python-build.yml
 

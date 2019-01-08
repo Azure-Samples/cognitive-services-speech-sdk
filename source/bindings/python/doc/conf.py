@@ -45,7 +45,6 @@ if match:
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx_autodoc_annotation',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -76,7 +75,11 @@ exclude_patterns = []
 pygments_style = None
 
 nitpick_ignore = [('py:class', 'object'),
-        ('py:class', 'azure.cognitiveservices.speech.speech_py_impl.PullAudioInputStreamCallback')]
+        ('py:class', 'azure.cognitiveservices.speech.speech_py_impl.PullAudioInputStreamCallback'),
+        ('py:class', 'enum.Enum'),
+        ('py:class', 'typing.Iterable'),
+        ('py:class', 'typing.Dict'),
+        ]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -112,74 +115,3 @@ html_static_path = ['_static']
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'azure-cognitiveservices-speech-doc'
 
-
-# -- Options for LaTeX output ------------------------------------------------
-
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #
-    # 'papersize': 'letterpaper',
-
-    # The font size ('10pt', '11pt' or '12pt').
-    #
-    # 'pointsize': '10pt',
-
-    # Additional stuff for the LaTeX preamble.
-    #
-    # 'preamble': '',
-
-    # Latex figure (float) alignment
-    #
-    # 'figure_align': 'htbp',
-}
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, 'azure-cognitiveservices-speech.tex', 'azure-cognitiveservices-speech Documentation',
-     'Microsoft', 'manual'),
-]
-
-
-# -- Options for manual page output ------------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'azure-cognitiveservices-speech', 'azure-cognitiveservices-speech Documentation',
-     [author], 1)
-]
-
-
-# -- Options for Texinfo output ----------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-texinfo_documents = [
-    (master_doc, 'azure-cognitiveservices-speech', 'azure-cognitiveservices-speech Documentation',
-     author, 'azure-cognitiveservices-speech', 'One line description of project.',
-     'Miscellaneous'),
-]
-
-
-# -- Options for Epub output -------------------------------------------------
-
-# Bibliographic Dublin Core info.
-epub_title = project
-
-# The unique identifier of the text. This can be a ISBN number
-# or the project homepage.
-#
-# epub_identifier = ''
-
-# A unique identification for the text.
-#
-# epub_uid = ''
-
-# A list of files that should not be packed into the epub file.
-epub_exclude_files = ['search.html']
-
-
-# -- Extension configuration -------------------------------------------------
