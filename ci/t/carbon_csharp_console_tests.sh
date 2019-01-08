@@ -60,6 +60,10 @@ startSuite TESTRUNNER "$T"
 TIMEOUT_SECONDS=30
 
 for action in $Actions; do
+  # Intent disabled due to service issues.
+  # https://msasg.visualstudio.com/Skyman/_workitems/edit/1550174
+  [[ $action != intent ]] || continue
+
   for ((variantIndex = 0; variantIndex < ${#variants[@]}; variantIndex += 2)); do
     variant="${variants[$variantIndex]}"
     variantArg="${variants[$variantIndex + 1]}"
