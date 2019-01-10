@@ -487,6 +487,13 @@ class Recognizer():
         """
         raise NotImplementedError  # implemented in derived class
 
+    @property
+    def connection(self):
+        """
+        Gets the :class:`.Connection` instance of this recognizer.
+        """
+        return Connection(impl.Connection.from_recognizer(self._impl))
+
 
 class SpeechRecognizer(Recognizer):
     """
@@ -574,6 +581,21 @@ class SessionEventArgs():
         return u'{}:(session_id={})'.format(type(self), self.session_id)
 
 
+class ConnectionEventArgs(SessionEventArgs):
+    """
+    Provides data for the ConnectionEvent.
+
+    .. note::
+      Added in version 1.2.0
+    """
+
+    def __init__(self, evt_args):
+        """
+        Constructor for internal use.
+        """
+        super().__init__(evt_args)
+
+
 class RecognitionEventArgs(SessionEventArgs):
     """
     Provides data for the RecognitionEvent.
@@ -639,4 +661,72 @@ class SpeechRecognitionCanceledEventArgs(SpeechRecognitionEventArgs):
         """
         return self._cancellation_details
 
+
+class Connection():
+    """
+    Proxy class for managing the connection to the speech service of the specified :class:`.Recognizer`.
+
+    By default, a :class:`.Recognizer` autonomously manages connection to service when needed. The
+    :class:`.Connection` class provides additional methods for users to explicitly open or close a
+    connection and to subscribe to connection status changes. The use of :class:`.Connection` is
+    optional, and mainly for scenarios where fine tuning of application behavior based on
+    connection status is needed. Users can optionally call :meth:`.open()` to manually set up a
+    connection in advance before starting recognition on the :class:`.Recognizer` associated with
+    this :class:`.Connection`. After starting recognition, calling :meth:`.open()` or
+    :meth:`close()` might fail, depending on the process state of the :class:`.Recognizer`. But
+    this does not affect the state of the associated :class:`.Recognizer`. And if the
+    :class:`.Recognizer` needs to connect or disconnect to service, it will setup or shutdown the
+    connection independently. In this case the :class:`.Connection` will be notified by change of
+    connection status via the :attr:`.connected`/:attr:`.disconnected` events.
+
+    .. note::
+      Added in version 1.2.0.
+    """
+    def __init__(self, impl_connection):
+        """
+        Constructor for internal use.
+        """
+        self._impl = impl_connection
+
+    def open(self, for_continuous_recognition: bool):
+        """
+        Starts to set up connection to the service. Users can optionally call :meth:`.open()` to
+        manually set up a connection in advance before starting recognition on the
+        :class:`.Recognizer` associated with this :class:`.Connection`. After starting recognition,
+        calling :meth:`.open()`) might fail, depending on the process state of the
+        :class:`.Recognizer`. But the failure does not affect the state of the associated
+        :class:`.Recognizer`.
+
+        :param forContinuousRecognition: indicates whether the connection is used for continuous
+          recognition or single-shot recognition.
+
+        .. note:: On return, the connection might not be ready yet. Please subscribe to the
+          `connected` event to be notfied when the connection is established.
+        """
+        self._impl.open(for_continuous_recognition)
+
+    def close(self):
+        """
+        Closes the connection the service. Users can optionally call :meth:`close()` to manually
+        shutdown the connection of the associated :class:`.Recognizer`. The call might fail,
+        depending on the process state of the :class:`.Recognizer`. But the failure does not affect
+        the state of the associated :class:`.Recognizer`.
+        """
+        self._impl.close()
+
+    @property
+    def connected(self) -> EventSignal:
+        """
+        The Connected event to indicate that the recognizer is connected to service.
+
+        """
+        return EventSignal(self._impl.connected, ConnectionEventArgs)
+
+    @property
+    def disconnected(self) -> EventSignal:
+        """
+        The Disconnected event to indicate that the recognizer is disconnected from service.
+
+        """
+        return EventSignal(self._impl.disconnected, ConnectionEventArgs)
 

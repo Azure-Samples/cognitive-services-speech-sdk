@@ -81,7 +81,7 @@ public:
     EventSignal<const ConnectionEventArgs&> Connected;
 
     /// <summary>
-    /// The Diconnected event to indicate that the recognizer is disconnected from service.
+    /// The Disconnected event to indicate that the recognizer is disconnected from service.
     /// </summary>
     EventSignal<const ConnectionEventArgs&> Disconnected;
 

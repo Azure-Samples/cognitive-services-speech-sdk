@@ -2,7 +2,7 @@ import pytest
 
 import azure.cognitiveservices.speech as msspeech
 
-from .utils import (_TestCallback, _connect_all_callbacks, _setup_callbacks, _check_callbacks,
+from .utils import (_TestCallback, _setup_callbacks, _check_callbacks,
                     _check_sr_result)
 
 
@@ -17,8 +17,7 @@ def test_recognize_once(subscription, speech_input, endpoint, speech_region):
     speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
-    callbacks = _setup_callbacks()
-    _connect_all_callbacks(reco, callbacks)
+    callbacks = _setup_callbacks(reco)
 
     result = reco.recognize_once()
     _check_sr_result(result, speech_input, 0)
@@ -31,8 +30,7 @@ def test_recognize_async(subscription, speech_input, endpoint, speech_region):
     speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
-    callbacks = _setup_callbacks()
-    _connect_all_callbacks(reco, callbacks)
+    callbacks = _setup_callbacks(reco)
 
     future = reco.recognize_once_async()
     result = future.get()
@@ -67,8 +65,7 @@ def test_multiple_callbacks(subscription, speech_input, endpoint, speech_region)
     speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
 
-    callbacks = _setup_callbacks()
-    _connect_all_callbacks(reco, callbacks)
+    callbacks = _setup_callbacks(reco)
     # connect a second callback to two signals
     other_session_started_cb = _TestCallback('In OTHER session_started callback')
     other_recognized_cb = _TestCallback('In OTHER recognized callback')

@@ -44,6 +44,8 @@ for cls in (
     RecognitionEventArgs,
     RecognitionResult,
     Recognizer,
+    Connection,
+    ConnectionEventArgs,
     ResultFuture,
     ResultReason,
     SessionEventArgs,
@@ -77,5 +79,7 @@ __all__ = [
     'SpeechRecognitionResult',
     'SpeechRecognizer',
     'Recognizer',
+    'Connection',
+    'ConnectionEventArgs',
 ]
 

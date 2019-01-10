@@ -4,7 +4,7 @@ import wave
 import azure.cognitiveservices.speech as msspeech
 
 from .conftest import SpeechInput
-from .utils import (_connect_all_callbacks, _setup_callbacks, _check_callbacks, _check_sr_result)
+from .utils import (_setup_callbacks, _check_callbacks, _check_sr_result)
 
 
 class WavFileReaderCallback(msspeech.audio.PullAudioInputStreamCallback):
@@ -41,35 +41,6 @@ class WavFileReaderCallback(msspeech.audio.PullAudioInputStreamCallback):
             raise
 
 
-def setup_callbacks(reco, do_stop=True):
-    def stop(evt):
-        print('STOPPING: {}'.format(evt))
-        reco.stop_continuous_recognition()
-
-    def canceled_cb(evt):
-        try:
-            result = evt.result
-            if result.reason == msspeech.ResultReason.Canceled:
-                cancellation_details = result.cancellation_details
-                print('Speech Recognition canceled: {}'.format(cancellation_details.reason))
-                print('Error details: {}'.format(cancellation_details.error_details))
-                if cancellation_details.reason == msspeech.CancellationReason.Error:
-                    print('Error details: {}'.format(cancellation_details.error_details))
-        except Exception as e:
-            print(e)
-
-    callbacks = _setup_callbacks()
-    _connect_all_callbacks(reco, callbacks)
-
-    reco.canceled.connect(canceled_cb)
-
-    if do_stop:
-        reco.session_stopped.connect(stop)
-        reco.canceled.connect(stop)
-
-    return callbacks
-
-
 @pytest.mark.parametrize("use_default_wave_format", (False, True))
 @pytest.mark.parametrize('speech_input,', ['weather', 'lamp'], indirect=True)
 def test_pull_audio_input_stream_callback(speech_input: SpeechInput, subscription: str,
@@ -90,7 +61,7 @@ def test_pull_audio_input_stream_callback(speech_input: SpeechInput, subscriptio
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
 
-    callbacks = setup_callbacks(reco, do_stop=True)
+    callbacks = _setup_callbacks(reco, do_stop=True)
 
     reco.start_continuous_recognition()
 
@@ -124,7 +95,7 @@ def test_push_audio_input_stream(speech_input: SpeechInput, subscription: str, s
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_cfg)
 
-    callbacks = setup_callbacks(reco)
+    callbacks = _setup_callbacks(reco, do_stop=False)
 
     n_bytes = 3200
     wav_fh = wave.open(speech_input.path)

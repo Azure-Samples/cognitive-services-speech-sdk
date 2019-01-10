@@ -68,7 +68,7 @@ class _TestCallback(object):
         self._events = []
 
 
-def _setup_callbacks():
+def _setup_callbacks(reco, do_stop=False):
     callbacks = {
             'session_started': _TestCallback('SESSION_STARTED: {evt}'),
             'session_stopped': _TestCallback('SESSION_STOPPED: {evt}'),
@@ -76,6 +76,33 @@ def _setup_callbacks():
             'recognizing': _TestCallback('RECOGNIZING: {evt}'),
             'recognized': _TestCallback('RECOGNIZED: {evt}'),
     }
+
+    for cb_name, callback in callbacks.items():
+        callback.reset()
+        getattr(reco, cb_name).connect(callback)
+
+    def canceled_cb(evt):
+        try:
+            result = evt.result
+            if result.reason == msspeech.ResultReason.Canceled:
+                cancellation_details = result.cancellation_details
+                print('Speech Recognition canceled: {}'.format(cancellation_details.reason))
+                print('Error details: {}'.format(cancellation_details.error_details))
+                if cancellation_details.reason == msspeech.CancellationReason.Error:
+                    print('Error details: {}'.format(cancellation_details.error_details))
+        except Exception as e:
+            print(e)
+
+    reco.canceled.connect(canceled_cb)
+
+    def stop(evt):
+        print('STOPPING: {}'.format(evt))
+        reco.stop_continuous_recognition()
+
+    if do_stop:
+        reco.session_stopped.connect(stop)
+        reco.canceled.connect(stop)
+
     return callbacks
 
 
@@ -132,11 +159,4 @@ def _check_intent_result(result, intent_input, utterance_index):
     assert result.intent_json
 
     _check_result_common(result, intent_input, utterance_index)
-
-
-def _connect_all_callbacks(reco, callbacks):
-    for cb_name, callback in callbacks.items():
-        callback.reset()
-        getattr(reco, cb_name).connect(callback)
-
 

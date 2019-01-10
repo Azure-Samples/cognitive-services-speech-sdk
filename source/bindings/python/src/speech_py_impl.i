@@ -377,6 +377,7 @@ class PyCallback
 %enddef
 
 %py_wrap_callback_connect(SessionEventArgs)
+%py_wrap_callback_connect(ConnectionEventArgs)
 %py_wrap_callback_connect(RecognitionEventArgs)
 %py_wrap_callback_connect(SpeechRecognitionEventArgs)
 %py_wrap_callback_connect(SpeechRecognitionCanceledEventArgs)
