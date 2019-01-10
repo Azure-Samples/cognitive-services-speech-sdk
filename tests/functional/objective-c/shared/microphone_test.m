@@ -10,11 +10,10 @@
 
 extern NSString *speechKey;
 extern NSString *serviceRegion;
+extern NSString *intentRegion;
 
 + (void) runAsync
 {
-    // NSString *intentKey = @"";
-    
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
     SPXSpeechRecognizer* speechRecognizer;
     

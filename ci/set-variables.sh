@@ -214,7 +214,7 @@ case $SPEECHSDK_BUILD_TYPE in
   int)
     # TSA Upload only for Nightly, not for manually scheduled
     if [[ $BUILD_REASON == Schedule ]]; then
-      SPEECHSDK_BUILD_PHASES+="TsaUpload WindowsSDLFortifyJava WackTest "
+      SPEECHSDK_BUILD_PHASES+="TsaUpload WindowsSDLFortifyJava WackTest IosMultiPlatformTests "
     fi
     PRERELEASE_VERSION=-beta.0.$_BUILD_ID
     META=+$_BUILD_COMMIT

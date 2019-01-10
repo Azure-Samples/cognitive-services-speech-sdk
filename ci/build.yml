@@ -1407,27 +1407,31 @@ jobs:
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - task: CMake@1
-    displayName: Generate makefiles for iOS simulator
+    displayName: Generate makefiles for iOS simulator (32bit)
     inputs:
-      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x64 ..'
-      workingDirectory: 'build_ios_simulator'
+      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x86 ..'
+      workingDirectory: 'build_ios_simulator32'
   - task: CMake@1
-    displayName: CMake build for iOS simulator
+    displayName: CMake build for iOS simulator (32bit)
     inputs:
       cmakeArgs: '--build . -- -j4'
-      workingDirectory: build_ios_simulator
+      workingDirectory: build_ios_simulator32
   - task: CMake@1
-    displayName: Generate makefiles for iOS device (Release)
+    displayName: Generate makefiles for iOS simulator (64bit)
     inputs:
-      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-arm64 ..'
-      workingDirectory: build_ios_device
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x64 ..'
+      workingDirectory: 'build_ios_simulator64'
   - task: CMake@1
-    displayName: Generate makefiles for iOS device (Debug)
+    displayName: CMake build for iOS simulator (64bit)
     inputs:
-      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-arm64 ..'
+      cmakeArgs: '--build . -- -j4'
+      workingDirectory: build_ios_simulator64
+  - task: CMake@1
+    displayName: Generate makefiles for iOS device
+    inputs:
+      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-all ..'
       workingDirectory: build_ios_device
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))
+    condition: succeeded()
   - task: CMake@1
     displayName: CMake build for iOS device
     inputs:
@@ -1440,8 +1444,9 @@ jobs:
   - bash: |
       . ci/apple/apple-functions.sh
       build_dsym_bundle "build_ios_device/lib" "$(FrameworkName)"
-      build_dsym_bundle "build_ios_simulator/lib" "$(FrameworkName)"
-      combine_dsym_bundles "$(OutputDirectory)" "build_ios_"{device,simulator}"/lib/$(FrameworkName).framework.dSYM" "$(FrameworkName)"
+      build_dsym_bundle "build_ios_simulator32/lib" "$(FrameworkName)"
+      build_dsym_bundle "build_ios_simulator64/lib" "$(FrameworkName)"
+      combine_dsym_bundles "$(OutputDirectory)" "build_ios_"{device,simulator32,simulator64}"/lib/$(FrameworkName).framework.dSYM" "$(FrameworkName)"
     condition: and(succeeded(), in(variables['BuildConfiguration'], 'Debug', 'Release'))
     displayName: Create debug symbols
   - bash: |
@@ -1511,6 +1516,53 @@ jobs:
           xcpretty --report junit --output test-ios-unittests.xml
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     displayName: "Run iOS unit tests"
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)'
+      ArtifactName: "$(BuildPlatform)"
+      publishLocation: Container
+    condition: succeededOrFailed()
+
+- job: IosMultiPlatformTests
+  dependsOn: [Pre, IosBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosMultiPlatformTests '))
+  pool:
+    name: Hosted macOS Preview
+  timeoutInMinutes: 30
+  strategy:
+    maxParallel: 2
+  variables:
+    FrameworkName: MicrosoftCognitiveServicesSpeech
+    BuildPlatform: iOS
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Release
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download iOS Build Artifacts'
+    inputs:
+      artifactName: iOS
+      itemPattern: '**/*.zip'
+  - bash: |
+      set -u -e -o pipefail -x
+      . ci/functions.sh
+      mkdir xcode-build-output
+      cd xcode-build-output
+      cp -R $(System.ArtifactsDirectory)/$(BuildPlatform)/Release/*.zip .
+      for f in *.zip; do unzip $f; done
+      cd ..
+    displayName: "Unpack build artifacts"
+  - bash: |
+      set -e -o pipefail -x
+      mkdir -p "$(OutputDirectory)/logs"
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false)
+      # use a recent Xcode version
+      export DEVELOPER_DIR=/Applications/Xcode_10.1.app/Contents/Developer
+      # run the tests
+      ci/apple/xcodeunittests.sh tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj SpeechSDK_iOS SpeechSDK_iOS unittests
+    displayName: "Run iOS unit tests"
   - bash: |
       set -u -e -o pipefail -x
       . ci/functions.sh
@@ -1522,14 +1574,11 @@ jobs:
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
         -D long-running=false
-      # run the test
-      xcodebuild test -project public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
-        -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
-        -scheme helloworldUITests 2>&1 |
-          tee "$(OutputDirectory)/logs/xcodebuild-ios-quickstart.log" |
-          xcpretty --report junit --output test-ios-quickstart.xml
-    displayName: "Run iOS quickstart UI test"
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+      # use a recent Xcode version
+      export DEVELOPER_DIR=/Applications/Xcode_10.1.app/Contents/Developer
+      # run the tests
+      ci/apple/xcodeunittests.sh public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
+        helloworldUITests helloworldUITests-Runner quickstart 1
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: '**/test-*.xml'

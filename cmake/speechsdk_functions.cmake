@@ -144,6 +144,8 @@ function(PARSE_PLATFORM)
     Android-arm32
     Android-arm64
     IOSSIMULATOR-x64
+    IOSSIMULATOR-x86
+    IOS-all
     IOS-arm64)
 
   if(NOT OPT_TARGET_PLATFORM IN_LIST PLATFORMS)

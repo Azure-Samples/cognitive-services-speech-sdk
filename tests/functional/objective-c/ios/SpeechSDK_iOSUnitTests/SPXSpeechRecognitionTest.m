@@ -56,7 +56,7 @@
     
     [self.connection addDisconnectedEventHandler: ^ (SPXConnection *connection, SPXConnectionEventArgs *eventArgs) {
         NSLog(@"Received disconnected event. SessionId: %@", eventArgs.sessionId);
-        [weakSelf->result setObject:[NSNumber numberWithLong:[[weakSelf->result objectForKey:@"disconnectedCount"] integerValue] + 1] forKey:@"disconnected"];
+        [weakSelf->result setObject:[NSNumber numberWithLong:[[weakSelf->result objectForKey:@"disconnectedCount"] integerValue] + 1] forKey:@"disconnectedCount"];
     }];
 
     [self.speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
@@ -154,50 +154,83 @@
 }
 
 - (void)testContinuousRecognitionWithPreConnection {
-    __block bool end = false;
-    __block int finalResultCount = 0;
-    __block NSString* finalText = @"";
-
-    SPXConnection *connection = [[SPXConnection alloc] initFromRecognizer:self.speechRecognizer];
-    // [connection startConnection(true)];
-    [self.speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
-        NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.offset, eventArgs.result.duration, eventArgs.result.resultId);
-        NSLog(@"Received JSON: %@", [eventArgs.result.properties getPropertyById:SPXSpeechServiceResponseJsonResult]);
-        finalText = eventArgs.result.text;
-        finalResultCount++;
-        end = true;
+    // open connection
+    [self.connection open:YES];
+    
+    NSPredicate *connectedCountPred = [NSPredicate predicateWithBlock: ^BOOL (id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings){
+        return [[evaluatedObject valueForKey:@"connectedCount"] isEqualToNumber:@1];
     }];
     
+    // wait for connection
+    [self expectationForPredicate:connectedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+    
     [self.speechRecognizer startContinuousRecognition];
-    while (end == false)
-        [NSThread sleepForTimeInterval:1.0f];
+    
+    [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+
+    XCTAssertTrue([[self->result valueForKey:@"finalText"] isEqualToString: self->weatherTextEnglish]);
+    XCTAssertTrue([[self->result valueForKey:@"finalResultCount"] isEqualToNumber:@1]);
+    long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
+    long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
+    XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%ld", connectedEventCount);
+    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
+                  @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
+    
     [self.speechRecognizer stopContinuousRecognition];
     
-    XCTAssertEqual(finalResultCount, 1,  "no Final Result Event received");
-    XCTAssertTrue([finalText isEqualToString:weatherTextEnglish], "Final Result Text does not match");
+    // start disconnect
+    [self.connection close];
+    
+    NSPredicate *disconnectedCountPred = [NSPredicate predicateWithBlock: ^BOOL (id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings){
+        return [[evaluatedObject valueForKey:@"disconnectedCount"] isEqualToNumber:@1];
+    }];
+    
+    // wait for disconnect
+    [self expectationForPredicate:disconnectedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
 }
 
 - (void)testRecognizeAsyncWithPreConnection {
-    __block int finalResultCount = 0;
-    __block NSString* finalText = @"";
-    __block bool end = false;
+    [self.connection open:NO];
+    
+    NSPredicate *connectedCountPred = [NSPredicate predicateWithBlock: ^BOOL (id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings){
+        return [[evaluatedObject valueForKey:@"connectedCount"] isEqualToNumber:@1];
+    }];
 
-    SPXConnection *connection = [[SPXConnection alloc] initFromRecognizer:self.speechRecognizer];
-    // [connection startConnection(true)];
-    
-    [self.speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
-        finalResultCount++;
+    // wait for connection
+    [self expectationForPredicate:connectedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+
+    // trigger recognition
+    [self.speechRecognizer recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
+        XCTAssertTrue([srresult.text isEqualToString:self->weatherTextEnglish], "Final Result Text does not match");
     }];
     
-    end = false;
-    [self.speechRecognizer recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *result){
-        finalText = result.text;
-        XCTAssertEqual(finalResultCount, 1,  "wrong count of final events");
-        XCTAssertTrue([finalText isEqualToString:weatherTextEnglish], "Final Result Text does not match");
-        end = true;
+    // wait for session stopped event result
+    [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+    // check result
+    XCTAssertTrue([[self->result valueForKey:@"finalText"] isEqualToString: self->weatherTextEnglish]);
+    XCTAssertTrue([[self->result valueForKey:@"finalResultCount"] compare:@0] == NSOrderedDescending);
+    
+    // check event counts
+    long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
+    long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
+    XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%ld", connectedEventCount);
+    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
+                  @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
+
+    [self.connection close];
+    
+    NSPredicate *disconnectedCountPred = [NSPredicate predicateWithBlock: ^BOOL (id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings){
+        return [[evaluatedObject valueForKey:@"disconnectedCount"] compare:@0] == NSOrderedDescending;
     }];
-    while (end == false)
-        [NSThread sleepForTimeInterval:1.0f];
+    
+    // wait for disconnect
+    [self expectationForPredicate:disconnectedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
 }
 
 @end

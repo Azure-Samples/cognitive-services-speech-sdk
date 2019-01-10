@@ -451,6 +451,10 @@
 		3CA6CFA8211F471600CD2768 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					i386,
+				);
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
@@ -459,6 +463,7 @@
 				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = SpeechSDK_iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -466,7 +471,7 @@
 					"-framework",
 					MicrosoftCognitiveServicesSpeech,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitvieservices;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitiveservices;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -478,14 +483,19 @@
 		3CA6CFA9211F471600CD2768 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					i386,
+				);
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 6H88U8258Q;
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = SpeechSDK_iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -493,7 +503,7 @@
 					"-framework",
 					MicrosoftCognitiveServicesSpeech,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitvieservices;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitiveservices;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -505,9 +515,16 @@
 		F3EABACB21639F5700BA4B2C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					arm7s,
+					arm7,
+					"$(ARCHS_STANDARD)",
+					i386,
+				);
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = NK6235ZV5V;
 				INFOPLIST_FILE = SpeechSDK_iOSUnitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks $(SRCROOT)/../../../../xcode-build-output/";
 				PRODUCT_BUNDLE_IDENTIFIER = "testorg.SpeechSDK-iOSUnitTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -518,9 +535,16 @@
 		F3EABACC21639F5700BA4B2C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					arm7s,
+					arm7,
+					"$(ARCHS_STANDARD)",
+					i386,
+				);
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = NK6235ZV5V;
 				INFOPLIST_FILE = SpeechSDK_iOSUnitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks $(SRCROOT)/../../../../xcode-build-output/";
 				PRODUCT_BUNDLE_IDENTIFIER = "testorg.SpeechSDK-iOSUnitTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -11,6 +11,7 @@ extern NSString *speechKey;
 extern NSString *intentKey;
 extern NSString *intentRegion;
 extern NSString *serviceRegion;
+extern NSString *intentRegion;
     
 + (void)runTest
 {
