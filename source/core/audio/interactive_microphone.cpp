@@ -6,20 +6,34 @@
 //
 
 #include "stdafx.h"
-#include "microphone.h"
 #include "interactive_microphone.h"
-
+#include "site_helpers.h"
+#include "create_object_helpers.h"
+#include "microphone_pump.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
-
-
+    
 CSpxInteractiveMicrophone::CSpxInteractiveMicrophone() :
-    ISpxDelegateAudioPumpImpl(Microphone::Create())
+    ISpxDelegateAudioPumpImpl()
 {
 }
 
+void CSpxInteractiveMicrophone::Init()
+{
+    if (m_delegateToAudioPump == nullptr)
+    {
+        auto site = SpxSiteFromThis(this);
+        m_delegateToAudioPump = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxMicrophonePump", site);
+    }
+}
+
+// relay the property query to its site, which is CSpxAudioStreamSession
+std::shared_ptr<ISpxNamedProperties> CSpxInteractiveMicrophone::GetParentProperties() const
+{
+    return SpxQueryService<ISpxNamedProperties>(GetSite());
+}
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

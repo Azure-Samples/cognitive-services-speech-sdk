@@ -341,7 +341,7 @@ static AUDIO_RESULT write_audio_stream(
     return result;
 }
 
-AUDIO_SYS_HANDLE audio_create()
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
 {
     AUDIO_SYS_DATA      *result = nullptr;
     HRESULT hr = E_FAIL;
@@ -375,7 +375,7 @@ AUDIO_SYS_HANDLE audio_create()
     {
         IMMDevice * pDeviceRaw = nullptr;
         HRESULT hrlocal = pEnumerator->GetDefaultAudioEndpoint(eCapture, eConsole, &pDeviceRaw);
-        LogError("hrlocal is 0x%x", hrlocal);
+        LogInfo("hrlocal is 0x%x", hrlocal);
         EXIT_ON_ERROR_IF(E_FAIL, pDeviceRaw == nullptr || hrlocal != S_OK );
         pDevice.reset(pDeviceRaw, Deleter<IMMDevice>());
     }
@@ -396,12 +396,13 @@ AUDIO_SYS_HANDLE audio_create()
             pAudioClient2.reset(pAudioClient2Raw, Deleter<IAudioClient2>());
         }
     }
-    result->audioInFormat.wFormatTag = AUDIO_FORMAT_PCM;
-    result->audioInFormat.wBitsPerSample = AUDIO_BITS;
-    result->audioInFormat.nChannels = AUDIO_CHANNELS_MONO;
-    result->audioInFormat.nSamplesPerSec = AUDIO_SAMPLE_RATE;
-    result->audioInFormat.nAvgBytesPerSec = AUDIO_BYTE_RATE;
-    result->audioInFormat.nBlockAlign = AUDIO_BLOCK_ALIGN;
+
+    result->audioInFormat.wFormatTag = format.wFormatTag;
+    result->audioInFormat.wBitsPerSample = format.wBitsPerSample;
+    result->audioInFormat.nChannels = format.nChannels;
+    result->audioInFormat.nSamplesPerSec = format.nSamplesPerSec;
+    result->audioInFormat.nAvgBytesPerSec = format.nAvgBytesPerSec;
+    result->audioInFormat.nBlockAlign = format.nBlockAlign;
     result->audioInFormat.cbSize = 0;
 
     hr = result->pAudioInputClient->Initialize(
@@ -459,7 +460,7 @@ HRESULT audio_create_events(AUDIO_SYS_DATA * const audioData)
     audioData->hRenderThreadDidExit = CreateEvent(0, FALSE, TRUE, nullptr);
     EXIT_ON_ERROR_IF(E_FAIL, NULL == audioData->hRenderThreadDidExit);
 
-    hr = audioData->pAudioInputClient->SetEventHandle(audioData->hBufferReady);    
+    hr = audioData->pAudioInputClient->SetEventHandle(audioData->hBufferReady);
 
 Exit:
     if (FAILED(hr))

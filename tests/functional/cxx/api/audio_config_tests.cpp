@@ -68,6 +68,29 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
         REQUIRE(!result->Text.empty());
     };
 
+    SECTION("Audio Config Properties")
+    {
+        auto audioConfig = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+
+        // verify number of channels
+        auto channels_to_be_set = "1";
+        audioConfig->SetProperty(PropertyId::AudioConfig_NumberOfChannelsForCapture, channels_to_be_set);
+        auto channels_set = audioConfig->GetProperty(PropertyId::AudioConfig_NumberOfChannelsForCapture);
+        REQUIRE(channels_set == channels_to_be_set);
+
+        // verify device name
+        auto device_name = "default";
+        audioConfig->SetProperty(PropertyId::AudioConfig_DeviceNameForCapture, device_name);
+        auto device_name_in_audio_config = audioConfig->GetProperty(PropertyId::AudioConfig_DeviceNameForCapture);
+        REQUIRE(device_name == device_name_in_audio_config);
+
+        auto config = SpeechConfigForAudioConfigTests();
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        requireRecognizedSpeech(result);
+    }
+
     SECTION("pull stream works")
     {
         // Prepare for the stream to be "Pulled"

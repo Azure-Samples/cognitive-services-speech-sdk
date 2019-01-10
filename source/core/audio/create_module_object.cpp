@@ -15,6 +15,7 @@
 #include "factory_helpers.h"
 #include "wav_file_reader.h"
 #include "wav_file_pump.h"
+#include "microphone_pump.h"
 
 
 namespace Microsoft {
@@ -27,6 +28,7 @@ SPX_EXTERN_C void* AudioLib_CreateModuleObject(const char* className, const char
 {
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY(CSpxAudioPump, ISpxAudioPumpInit);
+    SPX_FACTORY_MAP_ENTRY(CSpxMicrophonePump, ISpxAudioPump);
     SPX_FACTORY_MAP_ENTRY(CSpxAudioConfig, ISpxAudioConfig);
     SPX_FACTORY_MAP_ENTRY(CSpxPushAudioInputStream, ISpxAudioStreamInitFormat);
     SPX_FACTORY_MAP_ENTRY(CSpxPullAudioInputStream, ISpxAudioStreamInitFormat);

@@ -45,6 +45,8 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::CancellationDetails_Reason: return "CancellationDetails_Reason";
     case PropertyId::CancellationDetails_ReasonText: return "CancellationDetails_ReasonText";
     case PropertyId::CancellationDetails_ReasonDetailedText: return "CancellationDetails_ReasonDetailedText";
+    case PropertyId::AudioConfig_DeviceNameForCapture: return "AudioConfig_DeviceNameForCapture";
+    case PropertyId::AudioConfig_NumberOfChannelsForCapture: return "AudioConfig_NumberOfChannelsForCapture";
     default:
         LogError("undefined PropertyId of %d", static_cast<int>(id));
         SPX_THROW_ON_FAIL(SPXERR_INVALID_ARG);

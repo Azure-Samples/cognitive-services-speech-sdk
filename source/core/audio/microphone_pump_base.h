@@ -9,7 +9,9 @@
 #include "spx_namespace.h"
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
+#include "service_helpers.h"
 #include "audio_sys.h"
+
 #ifdef WIN32
 #include "windows\com_init_and_uninit.h"
 #endif
@@ -19,18 +21,26 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-class MicrophonePumpBase : public ISpxAudioPump
+class CSpxMicrophonePumpBase :
+    public ISpxAudioPump,
+    public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
+    public ISpxGenericSite,
+    public ISpxServiceProvider
 {
 protected:
     using SinkType = std::shared_ptr<ISpxAudioProcessor>;
 
 public:
 
-    MicrophonePumpBase();
-    ~MicrophonePumpBase();
+    CSpxMicrophonePumpBase();
+    virtual ~CSpxMicrophonePumpBase() {};
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
     SPX_INTERFACE_MAP_END()
 
     // ISpxAudioPump interface
@@ -49,6 +59,15 @@ public:
     {
         SPX_THROW_HR(SPXERR_NOT_IMPL);
     }
+
+    // --- ISpxObjectInit
+    virtual void Init() override;
+    virtual void Term() override;
+
+    // --- IServiceProvider
+    SPX_SERVICE_MAP_BEGIN()
+        SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
+    SPX_SERVICE_MAP_END()
 
 public:
     //------------------------------------
@@ -71,10 +90,16 @@ private:
         SinkType& m_sink;
     };
 
+    // This is for query any properties needed by audio_create
+    virtual AUDIO_WAVEFORMAT SetOptionsBeforeCreateAudioHandle();
+
+    // This is for query any properties needed after m_audioHandle is created.
+    virtual void SetOptionsAfterCreateAudioHandle();
+
 protected:
-    
+
     State m_state;
-    const SPXWAVEFORMATEX m_format;
+    SPXWAVEFORMATEX m_format;
     AUDIO_SYS_HANDLE m_audioHandle;
     SinkType m_sink;
     std::mutex m_mutex;
@@ -86,21 +111,22 @@ protected:
 
     static void OnInputStateChange(void* pContext, AUDIO_STATE state)
     {
-        static_cast<MicrophonePumpBase*>(pContext)->UpdateState(state);
+        static_cast<CSpxMicrophonePumpBase*>(pContext)->UpdateState(state);
     }
 
     static int OnInputWrite(void* pContext, uint8_t* pBuffer, uint32_t size)
     {
-        return static_cast<MicrophonePumpBase*>(pContext)->Process(pBuffer, size);
+        return static_cast<CSpxMicrophonePumpBase*>(pContext)->Process(pBuffer, size);
     }
+
+    uint16_t GetChannelsFromConfig();
+    std::string GetDeviceNameFromConfig();
 
 private:
 
 #ifdef WIN32
     ComInitAndUnInit   m_com;
 #endif
-
 };
-     
-} } } } // Microsoft::CognitiveServices::Speech::Impl
 
+} } } } // Microsoft::CognitiveServices::Speech::Impl

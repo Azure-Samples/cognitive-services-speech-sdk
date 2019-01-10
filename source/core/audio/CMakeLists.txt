@@ -19,7 +19,6 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/pull_audio_input_stream.h"
     "${SRC_DIR}/push_audio_input_stream.h"
     "${SRC_DIR}/create_module_object.h"
-    "${SRC_DIR}/microphone.h"
     "${SRC_DIR}/microphone_pump_base.h"
     "${SRC_DIR}/interactive_microphone.h"
     "${SRC_DIR}/wav_file_reader.h"
@@ -47,9 +46,10 @@ if(WIN32)
             "${SRC_DIR}/windows/iunknown.h"
             "${SRC_DIR}/windows/com_init_and_uninit.h"
             "${SRC_DIR}/windows/audio_sys_win_base.h"
+            "${SRC_DIR}/windows/microphone_pump.h"
         )
     list(APPEND SOURCES
-            "${SRC_DIR}/windows/microphone.cpp"
+            "${SRC_DIR}/windows/microphone_pump.cpp"
             "${SRC_DIR}/windows/com_init_and_uninit.cpp"
             "${SRC_DIR}/windows/audio_sys_win_base.cpp"
         )
@@ -65,8 +65,10 @@ if(WIN32)
     endif()
 
 elseif(APPLE)
+    list(APPEND HEADERS_PRIVATE
+        "${SRC_DIR}/osx/microphone_pump.h"
+        )
     list(APPEND SOURCES
-        "${SRC_DIR}/osx/microphone.cpp"
         "${SRC_DIR}/osx/audio_sys.c"
     )
     FIND_LIBRARY(AUDIO_TOOLBOX AudioToolbox)
@@ -76,14 +78,20 @@ elseif(APPLE)
 list(APPEND AUDIO_LIBS ${AUDIO_TOOLBOX})
 else()
     if (NOT (CMAKE_SYSTEM_NAME STREQUAL "Android"))
+        list(APPEND HEADERS_PRIVATE
+             "${SRC_DIR}/linux/microphone_pump.h"
+             )
         list(APPEND SOURCES
-            "${SRC_DIR}/linux/microphone.cpp"
+            "${SRC_DIR}/linux/microphone_pump.cpp"
             "${SRC_DIR}/linux/audio_sys.c"
-        )
+            )
         list(APPEND AUDIO_LIBS asound)
     else()
+        list(APPEND HEADERS_PRIVATE
+             "${SRC_DIR}/android/microphone_pump.h"
+             )
         list(APPEND SOURCES
-            "${SRC_DIR}/android/microphone.cpp"
+            "${SRC_DIR}/android/microphone_pump.cpp"
             "${SRC_DIR}/android/audio_sys.cpp"
             "${SRC_DIR}/android/audio_common.cpp"
             "${SRC_DIR}/android/audio_recorder.cpp"
@@ -112,3 +120,4 @@ set_target_properties (audio PROPERTIES
 )
 
 target_link_libraries(audio PRIVATE ${AUDIO_LIBS})
+

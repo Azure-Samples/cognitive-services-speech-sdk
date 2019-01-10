@@ -63,7 +63,7 @@ public:
     SPXSTRING GetProperty(PropertyId propertyID, const SPXSTRING& defaultValue = SPXSTRING()) const
     {
         const char* propCch = property_bag_get_string(m_propbag, static_cast<int>(propertyID), nullptr, Utils::ToUTF8(defaultValue).c_str());
-        return Utils::ToSPXString(SpeechConfig::CopyAndFreePropertyString(propCch));
+        return Utils::ToSPXString(Utils::CopyAndFreePropertyString(propCch));
     }
 
     /// <summary>
@@ -76,7 +76,7 @@ public:
     SPXSTRING GetProperty(const SPXSTRING& propertyName, const SPXSTRING& defaultValue = SPXSTRING()) const
     {
         const char* propCch = property_bag_get_string(m_propbag, -1, Utils::ToUTF8(propertyName).c_str(), Utils::ToUTF8(defaultValue).c_str());
-        return Utils::ToSPXString(SpeechConfig::CopyAndFreePropertyString(propCch));
+        return Utils::ToSPXString(Utils::CopyAndFreePropertyString(propCch));
     }
 
 protected:

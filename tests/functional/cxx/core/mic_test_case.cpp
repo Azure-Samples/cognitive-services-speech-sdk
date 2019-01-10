@@ -4,11 +4,14 @@
 //
 
 #include "test_utils.h"
-#include "microphone.h"
+#include "microphone_pump.h"
 #include <atomic>
 #include <cstring>
 #include <numeric>
 #include <functional>
+
+#include "site_helpers.h"
+#include "create_object_helpers.h"
 
 #include "exception.h"
 #define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
@@ -216,7 +219,7 @@ void CheckThatSinkReceivedAudioData(const shared_ptr<AudioTestSink>& sink)
 TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
 {
 
-    const auto& mic = Microphone::Create();
+    const auto& mic = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxMicrophonePump", SpxGetRootSite());
 
     SECTION("freshly created mic is properly initialized")
     {
@@ -327,7 +330,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         chrono::seconds timeout(10);
 
         auto run = [&]() {
-            const auto& threadLocalMic = Microphone::Create();
+            const auto& threadLocalMic = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxMicrophonePump", SpxGetRootSite());
             const auto& sink = make_shared<AudioTestSink>();
 
                 {
@@ -391,7 +394,7 @@ TEST_CASE("Mic is properly functioning", "[!hide][audio][mic]")
         };
 
         auto run = [&]() {
-            const auto& threadLocalMic = Microphone::Create();
+            const auto& threadLocalMic = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxMicrophonePump", SpxGetRootSite());
             const auto& sink = make_shared<AudioTestSink>();
             {
                 {

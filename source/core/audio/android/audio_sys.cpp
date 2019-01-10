@@ -120,6 +120,12 @@ struct _ASYNCAUDIO
     THREAD_HANDLE          outputThread;
 };
 
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
+{
+    (void)(format);
+    return audio_create();
+}
+
 AUDIO_SYS_HANDLE audio_create()
 {
     AUDIO_SYS_DATA* result;

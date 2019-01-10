@@ -17,7 +17,6 @@
 #include <speechapi_cxx_audio_stream.h>
 #include <speechapi_c_audio_config.h>
 
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -50,9 +49,24 @@ public:
     }
 
     /// <summary>
+    /// Creates an AudioConfig object representing a specific microphone on the system.
+    /// Added in version 1.3.0.
+    /// </summary>
+    /// <param name="deviceName">Specifies the device name. Under Linux, run "arecord -L" to list all available devices. The maunal of arecord is <a href="https://manpages.debian.org/jessie/alsa-utils/arecord.1.en.html">here</a>  </param>
+    /// <returns>A shared pointer to the AudioConfig object</returns>
+    static std::shared_ptr<AudioConfig> FromMicrophoneInput(const SPXSTRING& deviceName)
+    {
+        SPXAUDIOCONFIGHANDLE haudioConfig = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(audio_config_create_audio_input_from_a_microphone(&haudioConfig, Utils::ToUTF8(deviceName).c_str()));
+
+        auto config = new AudioConfig(haudioConfig);
+        return std::shared_ptr<AudioConfig>(config);
+    }
+
+    /// <summary>
     /// Creates an AudioConfig object representing the specified file.
     /// </summary>
-    /// <param name="fileName">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
+    /// <param name="fileName">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples and a single cahnnel is supported.</param>
     /// <returns>A shared pointer to the AudioConfig object</returns>
     static std::shared_ptr<AudioConfig> FromWavFileInput(const SPXSTRING& fileName)
     {
@@ -79,6 +93,56 @@ public:
         return std::shared_ptr<AudioConfig>(config);
     }
 
+    /// <summary>
+    /// Sets a property value by name.
+    /// </summary>
+    /// <param name="name">The property name.</param>
+    /// <param name="value">The property value.</param>
+    void SetProperty(const SPXSTRING& name, const SPXSTRING& value)
+    {
+        property_bag_set_string(m_propertybag, -1, Utils::ToUTF8(name).c_str(), Utils::ToUTF8(value).c_str());
+    }
+
+    /// <summary>
+    /// Sets a property value by ID.
+    /// </summary>
+    /// <param name="id">The property id.</param>
+    /// <param name="value">The property value.</param>
+    void SetProperty(PropertyId id, const SPXSTRING& value)
+    {
+        property_bag_set_string(m_propertybag, static_cast<int>(id), nullptr, Utils::ToUTF8(value).c_str());
+    }
+
+    /// <summary>
+    /// Gets a property value by name.
+    /// </summary>
+    /// <param name="name">The parameter name.</param>
+    /// <returns>The property value.</returns>
+    SPXSTRING GetProperty(const SPXSTRING& name) const
+    {
+        const char* value = property_bag_get_string(m_propertybag, -1, Utils::ToUTF8(name).c_str(), "");
+        return Utils::ToSPXString(Utils::CopyAndFreePropertyString(value));
+    }
+
+    /// <summary>
+    /// Gets a property value by ID.
+    /// </summary>
+    /// <param name="id">The parameter id.</param>
+    /// <returns>The property value.</returns>
+    SPXSTRING GetProperty(PropertyId id) const
+    {
+        const char* value = property_bag_get_string(m_propertybag, static_cast<int>(id), nullptr, "");
+        return Utils::ToSPXString(Utils::CopyAndFreePropertyString(value));
+    }
+
+    /// <summary>
+    /// Destructs the object.
+    /// </summary>
+    virtual ~AudioConfig()
+    {
+        property_bag_release(m_propertybag);
+    }
+
 protected:
 
     /*! \cond PROTECTED */
@@ -86,7 +150,11 @@ protected:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    explicit AudioConfig(SPXAUDIOCONFIGHANDLE haudioConfig) : m_haudioConfig(haudioConfig) { }
+    explicit AudioConfig(SPXAUDIOCONFIGHANDLE haudioConfig)
+        : m_haudioConfig(haudioConfig)
+    {
+        SPX_THROW_ON_FAIL(audio_config_get_property_bag(m_haudioConfig, &m_propertybag));
+    }
 
     /// <summary>
     /// Internal helper method to get the audio stream format handle.
@@ -103,6 +171,12 @@ private:
     /// Internal member variable that holds the smart handle.
     /// </summary>
     SmartHandle<SPXAUDIOCONFIGHANDLE, &audio_config_release> m_haudioConfig;
+
+    /// <summary>
+    /// Internal member variable that holds the properties of the audio config
+    /// </summary>    
+    SPXPROPERTYBAGHANDLE m_propertybag;
+
     std::shared_ptr<AudioInputStream> m_stream;
 };
 

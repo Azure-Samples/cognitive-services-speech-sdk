@@ -11,6 +11,7 @@
 #include <wchar.h>
 #include <speechapi_cxx_common.h>
 #include <speechapi_c_error.h>
+#include <speechapi_c_property_bag.h>
 
 #if defined(SWIG) && defined(SPX_UWP)
 #define SPXSTRING std::wstring
@@ -20,7 +21,10 @@
 #define SPXSTRING_EMPTY std::string()
 #endif
 
-namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace Utils {
+namespace Microsoft{
+namespace CognitiveServices {
+namespace Speech {
+namespace Utils {
 
 #if defined(SWIG) && defined(SPX_UWP)
 inline std::wstring ToSPXString(const std::string& value)
@@ -68,6 +72,13 @@ inline std::string ToUTF8(const std::string& value)
 inline const char* ToUTF8(const char* value)
 {
     return value;
+}
+
+inline static std::string CopyAndFreePropertyString(const char* value)
+{
+    std::string copy = (value == nullptr) ? "" : value;
+    property_bag_free_string(value);
+    return copy;
 }
 
 }}}}

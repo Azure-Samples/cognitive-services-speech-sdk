@@ -51,6 +51,7 @@ private:
         std::string m_strRegion;
         std::string m_strIntentAppId;
         std::string m_strIntentNames; // comma-separated
+        std::string m_strDeviceName;
 
         bool m_fRecognizeOnceAsync = false;
 
@@ -196,7 +197,7 @@ private:
     void InitCarbon(ConsoleArgs* pconsoleArgs);
     void TermCarbon();
 
-    void InitRecognizer(const std::string& recognizerType, const std::string& wavFileName);
+    void InitRecognizer(const std::string& recognizerType, const std::string& wavFileName, const std::string& deviceName);
     void InitCommandSystem();
 
     void WaitForDebugger();

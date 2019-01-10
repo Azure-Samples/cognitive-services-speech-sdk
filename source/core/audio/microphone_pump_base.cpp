@@ -5,7 +5,12 @@
 
 #include "stdafx.h"
 
+#include "create_object_helpers.h"
+#include "service_helpers.h"
 #include "microphone_pump_base.h"
+#include "speechapi_cxx_enums.h"
+#include "property_id_2_name_map.h"
+
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -14,21 +19,45 @@ namespace Impl {
 
 using namespace std;
 
-
-MicrophonePumpBase::MicrophonePumpBase():
+CSpxMicrophonePumpBase::CSpxMicrophonePumpBase():
     m_state {State::NoInput},
     m_format { WAVE_FORMAT_PCM, CHANNELS, SAMPLES_PER_SECOND, AVG_BYTES_PER_SECOND, BLOCK_ALIGN, BITS_PER_SAMPLE, 0 }
-{
-    m_audioHandle = audio_create();
-    SPX_IFTRUE_THROW_HR(m_audioHandle == nullptr, SPXERR_MIC_NOT_AVAILABLE);
+{    
 }
 
-MicrophonePumpBase::~MicrophonePumpBase()
+void CSpxMicrophonePumpBase::Init()
+{
+    auto sys_audio_format = SetOptionsBeforeCreateAudioHandle();
+
+    m_audioHandle = audio_create_with_parameters(sys_audio_format);
+
+    SPX_IFTRUE_THROW_HR(m_audioHandle == nullptr, SPXERR_MIC_NOT_AVAILABLE);
+
+    auto result = audio_setcallbacks(m_audioHandle,
+        NULL, NULL,
+        &CSpxMicrophonePumpBase::OnInputStateChange, (void*)this,
+        &CSpxMicrophonePumpBase::OnInputWrite, (void*)this,
+        NULL, NULL);
+    SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT_OK, SPXERR_MIC_ERROR);
+
+    SetOptionsAfterCreateAudioHandle();
+}
+
+void CSpxMicrophonePumpBase::Term()
 {
     audio_destroy(m_audioHandle);
 }
 
-uint16_t MicrophonePumpBase::GetFormat(SPXWAVEFORMATEX* format, uint16_t size)
+AUDIO_WAVEFORMAT CSpxMicrophonePumpBase::SetOptionsBeforeCreateAudioHandle()
+{
+    return { m_format.wFormatTag, m_format.nChannels, m_format.nSamplesPerSec, m_format.nAvgBytesPerSec, m_format.nBlockAlign, m_format.wBitsPerSample };
+}
+
+void CSpxMicrophonePumpBase::SetOptionsAfterCreateAudioHandle()
+{    
+}
+
+uint16_t CSpxMicrophonePumpBase::GetFormat(SPXWAVEFORMATEX* format, uint16_t size)
 {
     auto totalSize = uint16_t(sizeof(SPXWAVEFORMATEX) + m_format.cbSize);
     if (format != nullptr)
@@ -38,7 +67,7 @@ uint16_t MicrophonePumpBase::GetFormat(SPXWAVEFORMATEX* format, uint16_t size)
     return totalSize;
 }
 
-void MicrophonePumpBase::StartPump(SinkType processor)
+void CSpxMicrophonePumpBase::StartPump(SinkType processor)
 {
     SPX_DBG_TRACE_SCOPE("MicrophonePumpBase::StartPump() ...", "MicrophonePumpBase::StartPump ... Done!");
 
@@ -63,7 +92,7 @@ void MicrophonePumpBase::StartPump(SinkType processor)
     SPX_IFTRUE_THROW_HR(pred == false, SPXERR_TIMEOUT);
 }
 
-void MicrophonePumpBase::StopPump()
+void CSpxMicrophonePumpBase::StopPump()
 {
     ReleaseSink resetSinkWhenExit(m_sink);
 
@@ -93,7 +122,7 @@ void MicrophonePumpBase::StopPump()
     // not release the sink may result in assert in m_resetRecoAdapter == nullptr in ~CSpxAudioStreamSession
 }
 
-ISpxAudioPump::State MicrophonePumpBase::GetState()
+ISpxAudioPump::State CSpxMicrophonePumpBase::GetState()
 {
     SPX_DBG_TRACE_SCOPE("MicrophonePumpBase::GetState() ...", "MicrophonePumpBase::GetState ... Done");
     std::unique_lock<std::mutex> lock(m_mutex);
@@ -101,7 +130,7 @@ ISpxAudioPump::State MicrophonePumpBase::GetState()
 }
 
 // this is called by audioCaptureThread, state value only changes here.
-void MicrophonePumpBase::UpdateState(AUDIO_STATE state)
+void CSpxMicrophonePumpBase::UpdateState(AUDIO_STATE state)
 {
     SPX_DBG_TRACE_SCOPE("MicrophonePumpBase::UpdateState() ...", "MicrophonePumpBase::UpdateState ... Done!");
     unique_lock<mutex> lock(m_mutex);
@@ -133,7 +162,7 @@ void MicrophonePumpBase::UpdateState(AUDIO_STATE state)
 
 }
 
-int MicrophonePumpBase::Process(const uint8_t* pBuffer, uint32_t size)
+int CSpxMicrophonePumpBase::Process(const uint8_t* pBuffer, uint32_t size)
 {
     int result = 0;
     SPX_IFTRUE_THROW_HR(m_sink == nullptr, SPXERR_INVALID_ARG);
@@ -146,6 +175,25 @@ int MicrophonePumpBase::Process(const uint8_t* pBuffer, uint32_t size)
     }
 
     return result;
+}
+
+uint16_t CSpxMicrophonePumpBase::GetChannelsFromConfig()
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    auto channels = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture));
+    SPX_TRACE_INFO("The number of channels as a property is '%s' in CSpxMicrophonePump", channels.c_str());    
+    return channels.empty() ? 0 : static_cast<uint16_t>(std::stoi(channels));
+}
+
+std::string CSpxMicrophonePumpBase::GetDeviceNameFromConfig()
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_INVALID_ARG);
+
+    auto deviceName = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_DeviceNameForCapture));
+    SPX_TRACE_INFO("The device name of microphone as a property is '%s'", deviceName.c_str());
+
+    return deviceName;
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

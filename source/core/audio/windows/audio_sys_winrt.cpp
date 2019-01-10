@@ -32,7 +32,7 @@ class WASAPICapture :
     public RuntimeClass<RuntimeClassFlags<ClassicCom>, FtmBase, IActivateAudioInterfaceCompletionHandler>
 {
 public:
-    WASAPICapture();
+    WASAPICapture(WAVEFORMATEX f);
     virtual ~WASAPICapture();
 
     STDMETHOD(ActivateCompleted)(IActivateAudioInterfaceAsyncOperation *operation);
@@ -51,6 +51,7 @@ typedef struct AUDIO_SYS_DATA_TAG
     //Audio Input Context
     std::thread hCaptureThread;
     ComPtr<WASAPICapture> spCapture;
+    WAVEFORMATEX audioInFormat;
 
     //Audio Output Context
     IMMDevice * pAudioOutputDevice;
@@ -77,7 +78,8 @@ typedef struct AUDIO_SYS_DATA_TAG
 // helpers
 HRESULT audio_create_events(AUDIO_SYS_DATA * const audioData);
 
-WASAPICapture::WASAPICapture()
+WASAPICapture::WASAPICapture(const WAVEFORMATEX f) :
+    audioInFormat(f)
 {
     HRESULT hr = S_OK;
 
@@ -122,17 +124,7 @@ HRESULT WASAPICapture::ActivateCompleted(IActivateAudioInterfaceAsyncOperation *
     punkAudioInterface.CopyTo(&pAudioInputClient);
     EXIT_ON_ERROR_IF(E_FAIL, nullptr == pAudioInputClient);
 
-    audioInFormat.wFormatTag = AUDIO_FORMAT_PCM;
-    audioInFormat.wBitsPerSample = AUDIO_BITS;
-    audioInFormat.nChannels = AUDIO_CHANNELS_MONO;
-    audioInFormat.nSamplesPerSec = AUDIO_SAMPLE_RATE;
-    audioInFormat.nAvgBytesPerSec = AUDIO_BYTE_RATE;
-    audioInFormat.nBlockAlign = AUDIO_BLOCK_ALIGN;
-    audioInFormat.cbSize = 0;
-
-    // the rest of the code assume 1 frame has two bytes.
-    // see numFramesAvailable * 2
-    static_assert(AUDIO_BLOCK_ALIGN == 2, "Sure one frame has two bytes.");
+    EXIT_ON_ERROR_IF(E_FAIL, audioInFormat.cbSize != 0);
 
     hr = pAudioInputClient->Initialize(AUDCLNT_SHAREMODE_SHARED,
         AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM,
@@ -162,8 +154,9 @@ HRESULT audio_input_create(AUDIO_SYS_DATA* result)
 
     PWSTR audioCaptureGuidString;
     StringFromIID(DEVINTERFACE_AUDIO_CAPTURE, &audioCaptureGuidString);
+    
+    result->spCapture = Make<WASAPICapture>(result->audioInFormat);
 
-    result->spCapture = Make<WASAPICapture>();
     auto future = result->spCapture->m_promise.get_future();
     // This call must be made on the main UI thread.  Async operation will call back to
     // IActivateAudioInterfaceCompletionHandler::ActivateCompleted, which must be an agile interface implementation
@@ -179,7 +172,7 @@ Exit:
     return hr;
 }
 
-AUDIO_SYS_HANDLE audio_create()
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
 {
     HRESULT hr = S_OK;
     AUDIO_SYS_DATA * result = nullptr;
@@ -192,6 +185,14 @@ AUDIO_SYS_HANDLE audio_create()
     result->current_input_state = AUDIO_STATE_STOPPED;
     // set input frame to 10 ms.(16000 frames(samples) is in one second )
     result->inputFrameCnt = 160;
+
+    result->audioInFormat.wFormatTag = format.wFormatTag;
+    result->audioInFormat.wBitsPerSample = format.wBitsPerSample;
+    result->audioInFormat.nChannels = format.nChannels;
+    result->audioInFormat.nSamplesPerSec = format.nSamplesPerSec;
+    result->audioInFormat.nAvgBytesPerSec = format.nAvgBytesPerSec;
+    result->audioInFormat.nBlockAlign = format.nBlockAlign;
+    result->audioInFormat.cbSize = 0;
 
     hr = audio_input_create(result);
     EXIT_ON_ERROR(hr);

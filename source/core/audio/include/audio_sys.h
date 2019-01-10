@@ -61,6 +61,7 @@ typedef void(*AUDIOCOMPLETE_CALLBACK)(void* pContext);
 typedef void(*AUDIO_BUFFERUNDERRUN_CALLBACK)(void* pContext);
 
 extern AUDIO_SYS_HANDLE audio_create(void);
+extern AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format);
 extern void audio_destroy(AUDIO_SYS_HANDLE handle);
 AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle,
                                 ON_AUDIOOUTPUT_STATE_CALLBACK output_cb,
@@ -74,6 +75,7 @@ AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle,
 
 #define AUDIO_OPTION_DEVICENAME "devicename"
 #define AUDIO_OPTION_INPUT_FRAME_COUNT "buff_frame_count"
+#define AUDIO_OPTION_NUMBER_CHANNELS "channels"
 
 AUDIO_RESULT audio_set_options(AUDIO_SYS_HANDLE handle, const char* optionName, const void* value);
 

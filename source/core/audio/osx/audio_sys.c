@@ -164,6 +164,11 @@ static void audioQueueInputCallback(void *inUserData,
     }
 }
 
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
+{
+    UNUSED(format);
+    return audio_create();
+}
 
 AUDIO_SYS_HANDLE audio_create()
 {

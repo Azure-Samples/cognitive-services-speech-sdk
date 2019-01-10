@@ -8,10 +8,10 @@
 
 #include <string>
 
-#include "speechapi_cxx_properties.h"
+#include <speechapi_cxx_properties.h>
 #include <speechapi_cxx_string_helpers.h>
-#include "speechapi_c_common.h"
-#include "speechapi_c_speech_config.h"
+#include <speechapi_c_common.h>
+#include <speechapi_c_speech_config.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -22,7 +22,6 @@ namespace Speech {
 /// </summary>
 class SpeechConfig
 {
-friend class PropertyCollection;
 public:
     /// <summary>
     /// Internal operator used to get underlying handle value.
@@ -219,7 +218,7 @@ public:
     SPXSTRING GetProperty(const SPXSTRING& name) const
     {
         const char* value = property_bag_get_string(m_propertybag, -1, Utils::ToUTF8(name).c_str(), "");
-        return Utils::ToSPXString(CopyAndFreePropertyString(value));
+        return Utils::ToSPXString(Utils::CopyAndFreePropertyString(value));
     }
 
     /// <summary>
@@ -230,7 +229,7 @@ public:
     SPXSTRING GetProperty(PropertyId id) const
     {
         const char* value = property_bag_get_string(m_propertybag, static_cast<int>(id), nullptr, "");
-        return Utils::ToSPXString(CopyAndFreePropertyString(value));
+        return Utils::ToSPXString(Utils::CopyAndFreePropertyString(value));
     }
 
     /// <summary>
@@ -280,12 +279,6 @@ protected:
 private:
     DISABLE_COPY_AND_MOVE(SpeechConfig);
 
-    inline static std::string CopyAndFreePropertyString(const char* value)
-    {
-        std::string copy = (value == nullptr) ? "" : value;
-        property_bag_free_string(value);
-        return copy;
-    }
-};
+    };
 
 }}}

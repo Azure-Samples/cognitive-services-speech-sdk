@@ -12,6 +12,7 @@
 #include "site_helpers.h"
 #include "string_utils.h"
 #include <assert.h>
+#include "property_id_2_name_map.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
@@ -29,6 +30,21 @@ SPXAPI audio_config_create_audio_input_from_default_microphone(SPXAUDIOCONFIGHAN
 
         auto config = SpxCreateObjectWithSite<ISpxAudioConfig>("CSpxAudioConfig", SpxGetRootSite());
         config->InitFromDefaultDevice();
+
+        *haudioConfig = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxAudioConfig, SPXAUDIOCONFIGHANDLE>(config);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI audio_config_create_audio_input_from_a_microphone(SPXAUDIOCONFIGHANDLE* haudioConfig, const char* deviceName)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *haudioConfig = SPXHANDLE_INVALID;
+
+        auto config = SpxCreateObjectWithSite<ISpxAudioConfig>("CSpxAudioConfig", SpxGetRootSite());
+        auto properties = SpxQueryService<ISpxNamedProperties>(config);
+        properties->SetStringValue(GetPropertyName(PropertyId::AudioConfig_DeviceNameForCapture), deviceName);
 
         *haudioConfig = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxAudioConfig, SPXAUDIOCONFIGHANDLE>(config);
     }
@@ -93,6 +109,22 @@ SPXAPI audio_config_create_pull_audio_input_stream(SPXAUDIOCONFIGHANDLE* haudioC
 SPXAPI audio_config_release(SPXAUDIOCONFIGHANDLE haudioConfig)
 {
     return Handle_Close<SPXAUDIOCONFIGHANDLE, ISpxAudioConfig>(haudioConfig);
+}
+
+SPXAPI audio_config_get_property_bag(SPXAUDIOCONFIGHANDLE haudioConfig, SPXPROPERTYBAGHANDLE* hpropbag)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto audioconfigs = CSpxSharedPtrHandleTableManager::Get<ISpxAudioConfig, SPXAUDIOCONFIGHANDLE>();
+        auto audioconfig = (*audioconfigs)[haudioConfig];
+        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, audioconfig == nullptr);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(audioconfig);
+
+        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
+        *hpropbag = baghandle->TrackHandle(namedProperties);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 // FUTURE DEVELOPMENT: The config method group could be extended in the future to support additional scenarios, for example:

@@ -224,6 +224,12 @@ bool CarbonTestConsole::ParseConsoleArgs(const std::vector<std::string>& args, C
             pstrNextArg = NULL;
             fNextArgRequired = false;
         }
+        else if (PAL::strnicmp(pszArg, "--devicename", strlen("--devicename")) == 0)
+        {
+            fShowOptions = fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_strDeviceName;
+            fNextArgRequired = true;
+        }
         else if (pstrNextArg != NULL)
         {
             fShowOptions = pstrNextArg->length() > 0;
@@ -982,7 +988,7 @@ void CarbonTestConsole::Factory_CreateSpeechRecognizer(const char* psz)
     m_speechRecognizer = nullptr;
     m_recognizer = nullptr;
     m_session = nullptr;
-    
+
     auto sc = !m_endpointUri.empty()
         ? SpeechConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
         : SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
@@ -1619,7 +1625,7 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
 {
     try
     {
-        InitRecognizer(pconsoleArgs->m_strRecognizerType, pconsoleArgs->m_audioInput);
+        InitRecognizer(pconsoleArgs->m_strRecognizerType, pconsoleArgs->m_audioInput, pconsoleArgs->m_strDeviceName);
         InitCommandSystem();
     }
     catch (std::exception ex)
@@ -1628,7 +1634,7 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
     }
 }
 
-void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::string& wavFileName)
+void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::string& wavFileName, const std::string& deviceName)
 {
     if (recognizerType == PAL::GetTypeName<SpeechRecognizer>())
     {
@@ -1636,8 +1642,19 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
             ? SpeechConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
             : SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
 
-        m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(wavFileName));
-        
+        if (deviceName.empty())
+        {
+            m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(wavFileName));
+        }
+        else
+        {
+            ConsoleWriteLine("Carbonx: Received device name is '%s'", deviceName.c_str());
+            auto audioInput = AudioConfig::FromMicrophoneInput(deviceName);
+
+            audioInput->SetProperty("AudioConfig_NumberOfChannels", "1");
+            m_speechRecognizer = SpeechRecognizer::FromConfig(sc, audioInput);
+        }
+
         auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_RecognizedHandler, this, std::placeholders::_1);
         m_speechRecognizer->Recognized.Connect(fn1);
 
@@ -1938,7 +1955,7 @@ int SafeMain(const std::vector<std::string>& args)
     catch (SPXHR hr)
     {
         auto handle = reinterpret_cast<SPXERRORHANDLE>(hr);
-        auto error = error_get_error_code(handle);      
+        auto error = error_get_error_code(handle);
         if (error != SPX_NOERROR)
         {
             auto callstack = error_get_call_stack(handle);

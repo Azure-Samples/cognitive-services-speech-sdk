@@ -51,10 +51,19 @@ SPXAPI recognizer_create_speech_recognizer_from_config(SPXRECOHANDLE* phreco, SP
 
         //copy the properties from the speech config into the factory
         auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
-        fbag->Copy(speechconfig_propertybag.get());
+        if (speechconfig_propertybag != nullptr)
+        {
+            fbag->Copy(speechconfig_propertybag.get());
+        }
 
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
         auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
+        // copy the audio input properties into the factory, if any.
+        auto audioInput_propertybag = SpxQueryInterface<ISpxNamedProperties>(audioInput);
+        if (audioInput_propertybag != nullptr)
+        {
+            fbag->Copy(audioInput_propertybag.get());
+        }
 
         auto recoLanguage = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
         auto outputFormat = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));

@@ -545,6 +545,12 @@ static int open_wave_data(AUDIO_SYS_DATA* audioData, snd_pcm_stream_t streamType
     return result;
 }
 
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
+{
+    (void)(format);
+    return audio_create();
+}
+
 AUDIO_SYS_HANDLE audio_create()
 {
     AUDIO_SYS_DATA* result;
@@ -1285,7 +1291,7 @@ AUDIO_RESULT audio_set_options(AUDIO_SYS_HANDLE handle, const char* optionName, 
     {
         AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
 
-        if (strcmp("channels", optionName) == 0)
+        if (strcmp(AUDIO_OPTION_NUMBER_CHANNELS, optionName) == 0)
         {
             uint16_t channel = (uint16_t)*((int*)value);
             if (channel == 1 || channel == 2)

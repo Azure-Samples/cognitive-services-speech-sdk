@@ -186,8 +186,19 @@ enum class PropertyId
     /// <summary>
     /// The Language Understanding Service response output (in JSON format). Available via <see cref="IntentRecognitionResult.Properties"/>.
     /// </summary>
-    LanguageUnderstandingServiceResponse_JsonResult = 7000
+    LanguageUnderstandingServiceResponse_JsonResult = 7000,
 
+    /// <summary>
+    /// The device name for audio capture. Under normal circumstances, you shouldn't have to
+    /// use this property directly.
+    /// Instead, use <see cref="AudioConfig::FromAMicrophoneInput"/>.
+    /// </summary>
+    AudioConfig_DeviceNameForCapture = 8000,
+
+    /// <summary>
+    /// The number of channels for audio capture.
+    /// </summary>
+    AudioConfig_NumberOfChannelsForCapture = 8001
 };
 
 enum class OutputFormat

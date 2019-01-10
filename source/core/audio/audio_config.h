@@ -8,7 +8,8 @@
 #pragma once
 #include "spxcore_common.h"
 #include "interface_helpers.h"
-
+#include "service_helpers.h"
+#include "property_bag_impl.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -18,6 +19,8 @@ namespace Impl {
 
 class CSpxAudioConfig :
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
+    public ISpxServiceProvider,
+    public ISpxPropertyBagImpl,
     public ISpxAudioConfig
 {
 public:
@@ -27,6 +30,8 @@ public:
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
+        SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioConfig)
     SPX_INTERFACE_MAP_END()
 
@@ -37,6 +42,12 @@ public:
 
     std::wstring GetFileName() const override { return m_fileName; }
     std::shared_ptr<ISpxAudioStream> GetStream() override { return m_stream; }
+
+    // --- IServiceProvider
+    SPX_SERVICE_MAP_BEGIN()
+        SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
+        SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
+    SPX_SERVICE_MAP_END()
 
 private:
 

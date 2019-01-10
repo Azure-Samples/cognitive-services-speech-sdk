@@ -9,7 +9,8 @@
 #include "spxcore_common.h"
 #include "delegate_audio_pump_impl.h"
 #include "interface_helpers.h"
-
+#include "service_helpers.h"
+#include "property_bag_impl.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -18,8 +19,11 @@ namespace Impl {
 
 
 class CSpxInteractiveMicrophone :
-    public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
-    public ISpxDelegateAudioPumpImpl
+        public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
+        public ISpxServiceProvider,
+        public ISpxGenericSite,
+        public ISpxPropertyBagImpl,
+        public ISpxDelegateAudioPumpImpl
 {
 public:
 
@@ -28,8 +32,22 @@ public:
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
+        SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
     SPX_INTERFACE_MAP_END()
+
+    void Init() override;
+
+    // --- IServiceProvider
+    SPX_SERVICE_MAP_BEGIN()
+        SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
+        SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
+    SPX_SERVICE_MAP_END()
+
+private:
+    std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
 };
 
 

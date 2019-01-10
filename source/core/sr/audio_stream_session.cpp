@@ -187,7 +187,8 @@ void CSpxAudioStreamSession::InitFromMicrophone()
     SPX_DBG_TRACE_VERBOSE("%s: Now Idle ...", __FUNCTION__);
 
     // Create the microphone pump
-    m_audioPump = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxInteractiveMicrophone", this);
+    auto site = SpxSiteFromThis(this);
+    m_audioPump = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxInteractiveMicrophone", site);
 }
 
 void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> stream)
