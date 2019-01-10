@@ -35,6 +35,7 @@
 
 #include "usp.h"
 #include "transport.h"
+#include "metrics.h"
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(__a) (sizeof(__a) / sizeof(__a[0]))
@@ -111,7 +112,6 @@ private:
     void Invoke(std::function<void()> callback);
 
     using DnsCachePtr = deleted_unique_ptr<std::remove_pointer<DnsCacheHandle>::type>;
-    using TelemetryPtr = deleted_unique_ptr<std::remove_pointer<TELEMETRY_HANDLE>::type>;
     using TransportPtr = deleted_unique_ptr<std::remove_pointer<TransportHandle>::type>;
 
     void Validate();
@@ -135,7 +135,7 @@ private:
     size_t m_audioOffset;
 
     DnsCachePtr m_dnsCache;
-    TelemetryPtr m_telemetry;
+    std::unique_ptr<Telemetry> m_telemetry;
     TransportPtr m_transport;
 
     const uint64_t m_creationTime;

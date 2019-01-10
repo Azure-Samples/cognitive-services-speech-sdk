@@ -12,6 +12,7 @@
 #include "tokenstore.h"
 #include "dnscache.h"
 #include "uspcommon.h"
+#include "metrics.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,8 +21,6 @@ extern "C" {
 #define KEYWORD_PATH "Path"
 
 typedef struct _TransportRequest* TransportHandle;
-
-typedef struct TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
 
 typedef struct HTTP_HEADERS_HANDLE_DATA_TAG* HTTP_HEADERS_HANDLE;
 
@@ -35,7 +34,7 @@ typedef struct HTTP_HEADERS_HANDLE_DATA_TAG* HTTP_HEADERS_HANDLE;
  * @param connectionId An identifier of a connection, used for diagnostics of errors on the server side.
  * @return A new transport handle.
  */
-TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId, const ProxyServerInfo* proxyInfo);
+TransportHandle TransportRequestCreate(const char* host, void* context, Microsoft::CognitiveServices::Speech::USP::Telemetry* telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId, const ProxyServerInfo* proxyInfo);
 
 /**
  * Destroys a transport request.

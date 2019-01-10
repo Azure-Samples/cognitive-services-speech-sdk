@@ -99,7 +99,7 @@ Connection::Impl::Impl(const Client& config)
     m_creationTime(telemetry_gettime())
 {
     static once_flag initOnce;
-    
+
     call_once(initOnce, [this] {
         if (platform_init() != 0) {
             ThrowRuntimeError("Failed to initialize platform (azure-c-shared)");
@@ -433,7 +433,7 @@ void Connection::Impl::Connect()
     auto connectionUrl = ConstructConnectionUrl();
     LogInfo("connectionUrl=%s", connectionUrl.c_str());
 
-    m_telemetry = TelemetryPtr(telemetry_create(Connection::Impl::OnTelemetryData, this), telemetry_destroy);
+    m_telemetry = std::make_unique<Telemetry>(Connection::Impl::OnTelemetryData, this);
     if (m_telemetry == nullptr)
     {
         ThrowRuntimeError("Failed to create telemetry instance.");
@@ -442,7 +442,7 @@ void Connection::Impl::Connect()
     std::string connectionId = PAL::ToString(m_config.m_connectionId);
 
     // Log the device uuid
-    metrics_device_startup(m_telemetry.get(), connectionId.c_str(), PAL::DeviceUuid().c_str());
+    MetricsDeviceStartup(*m_telemetry, connectionId, PAL::DeviceUuid());
 
     m_transport = TransportPtr(TransportRequestCreate(connectionUrl.c_str(), this, m_telemetry.get(), headersPtr, connectionId.c_str(), m_config.m_proxyServerInfo.get()), TransportRequestDestroy);
 
@@ -473,7 +473,7 @@ string Connection::Impl::CreateRequestId()
     auto requestId = PAL::ToString(PAL::CreateGuidWithoutDashes());
 
     LogInfo("RequestId: '%s'", requestId.c_str());
-    metrics_transport_requestid(m_telemetry.get(), requestId.c_str());
+    MetricsTransportRequestId(m_telemetry.get(), requestId.c_str());
 
     m_activeRequestIds.insert(requestId);
 
@@ -529,7 +529,7 @@ void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
         return;
     }
 
-    metrics_audiostream_data(size);
+    MetricsAudioStreamData(size);
 
     int ret = 0;
 
@@ -539,8 +539,8 @@ void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
         // After receiving an audio message with a new request identifier, the service discards any queued or unsent messages
         // that are associated with any previous turn.
         m_speechRequestId = m_speechRequestId.empty() ? CreateRequestId() : m_speechRequestId;
-        metrics_audiostream_init();
-        metrics_audio_start(m_telemetry.get(), m_speechRequestId.c_str());
+        MetricsAudioStreamInit();
+        MetricsAudioStart(*m_telemetry, m_speechRequestId);
 
         ret = TransportStreamPrepare(m_transport.get(), "/audio");
         if (ret != 0)
@@ -570,8 +570,8 @@ void Connection::Impl::QueueAudioEnd()
     auto ret = TransportStreamFlush(m_transport.get(), m_speechRequestId.c_str());
 
     m_audioOffset = 0;
-    metrics_audiostream_flush();
-    metrics_audio_end(m_telemetry.get(), m_speechRequestId.c_str());
+    MetricsAudioStreamFlush();
+    MetricsAudioEnd(*m_telemetry, m_speechRequestId);
 
     if (ret != 0)
     {
@@ -839,7 +839,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
     if (requestId.empty() || !connection->m_activeRequestIds.count(requestId))
     {
         PROTOCOL_VIOLATION("Empty or unexpected request id '%s', Path: %s", requestId.c_str(), path);
-        metrics_unexpected_requestid(requestId.c_str());
+        MetricsUnexpectedRequestId(requestId);
         return;
     }
 
@@ -854,7 +854,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
         }
     }
 
-    metrics_received_message(connection->m_telemetry.get(), requestId.c_str(), path);
+    MetricsReceivedMessage(*connection->m_telemetry, requestId, path);
 
     LogInfo("TS:%" PRIu64 " Response Message: path: %s, content type: %s, size: %zu.", connection->getTimestamp(), path, contentType, response->bufferSize);
 
@@ -914,7 +914,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
 
             // flush the telemetry before invoking the onTurnEnd callback.
             // TODO: 1164154
-            telemetry_flush(connection->m_telemetry.get(), requestId.c_str());
+            connection->m_telemetry->Flush(requestId);
 
             connection->Invoke([&] { callbacks->OnTurnEnd({}); });
         }

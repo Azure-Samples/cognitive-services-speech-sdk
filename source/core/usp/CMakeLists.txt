@@ -44,6 +44,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/transport.h"
     "${SRC_DIR}/iobuffer.h"
     "${SRC_DIR}/stdafx.h"
+    "${SRC_DIR}/azure_c_shared_utility_includes.h"
     )
 
 set(SOURCES
@@ -51,7 +52,7 @@ set(SOURCES
     "${SRC_DIR}/iobuffer.c"
     "${SRC_DIR}/metrics.cpp"
     "${SRC_DIR}/propbag.c"
-    "${SRC_DIR}/transport.c"
+    "${SRC_DIR}/transport.cpp"
     "${SRC_DIR}/usp.cpp"
     "${SRC_DIR}/uspimpl.cpp"
     "${SRC_DIR}/stdafx.cpp"

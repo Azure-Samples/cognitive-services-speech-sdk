@@ -14,25 +14,10 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <thread>
+#include <chrono>
 
-#include "azure_c_shared_utility/httpapi.h"
-#include "azure_c_shared_utility/tlsio.h"
-#include "azure_c_shared_utility/platform.h"
-#include "azure_c_shared_utility/wsio.h"
-#include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/uniqueid.h"
-#include "azure_c_shared_utility/base64.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/uws_client.h"
-#include "azure_c_shared_utility/uws_frame_encoder.h"
-#include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/httpheaders.h"
-#include "azure_c_shared_utility/singlylinkedlist.h"
-#include "azure_c_shared_utility/buffer_.h"
-#include "azure_c_shared_utility/lock.h"
-#include "azure_c_shared_utility/socketio.h"
-#include "azure_c_shared_utility/shared_util_options.h"
-#include "azure_c_shared_utility_http_proxy_io_wrapper.h"
+#include "azure_c_shared_utility_includes.h"
 
 #include "metrics.h"
 #include "iobuffer.h"
@@ -60,6 +45,10 @@ static const char g_RPSDelegationHeaderName[] = "X-Search-DelegationRPSToken";
 #define WS_CONNECTION_TIME_MS   (570 * 1000) // 9.5 minutes
 
 #define ANSWER_TIMEOUT_MS   15000
+
+using namespace Microsoft::CognitiveServices::Speech::USP;
+
+using namespace std::chrono_literals;
 
 typedef struct _TransportPacket
 {
@@ -111,7 +100,7 @@ typedef struct _TransportRequest
     DnsCacheHandle               dnsCache;
     uint64_t                     connectionTime;
     TokenStore                   tokenStore;
-    TELEMETRY_HANDLE             telemetry;
+    Telemetry*                   telemetry;
 } TransportRequest;
 
 /*
@@ -312,7 +301,7 @@ static void OnTransportError(TransportRequest* request, TransportErrorInfo* erro
     }
 }
 
-DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES);
+DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES)
 
 static void OnWSError(void* context, WS_ERROR errorCode)
 {
@@ -321,7 +310,7 @@ static void OnWSError(void* context, WS_ERROR errorCode)
     TransportRequest* request = (TransportRequest*)context;
     if (request)
     {
-        metrics_transport_dropped();
+        MetricsTransportDropped();
         TransportErrorInfo errorInfo;
         errorInfo.reason = TRANSPORT_ERROR_WEBSOCKET_ERROR;
         errorInfo.errorCode = errorCode;
@@ -335,21 +324,27 @@ static void OnWSPeerClosed(void* context, uint16_t* closeCode, const unsigned ch
     TransportRequest* request = (TransportRequest*)context;
     if (request)
     {
-        metrics_transport_dropped();
+        MetricsTransportDropped();
         TransportErrorInfo errorInfo;
         errorInfo.reason = TRANSPORT_ERROR_REMOTE_CLOSED;
         // WebSocket close code, if present (cf. https://tools.ietf.org/html/rfc6455#section-7.4.1):
         errorInfo.errorCode = closeCode != NULL ? *closeCode : -1;
-        char* errorReason = NULL;
+        char* errorReason = nullptr;
         if (extraDataLength > 0)
         {
             errorReason = (char*)malloc(extraDataLength + 1);
-            strncpy(errorReason, (const char*)extraData, extraDataLength);
-            errorReason[extraDataLength] = '\0';
+            if (errorReason != nullptr)
+            {
+                strncpy(errorReason, (const char*)extraData, extraDataLength);
+                errorReason[extraDataLength] = '\0';
+            }
         }
         errorInfo.errorString = (const char*)errorReason;
         OnTransportError(request, &errorInfo); // technically, not an error.
-        free(errorReason);
+        if (errorReason != nullptr)
+        {
+            free(errorReason);
+        }
     }
 }
 
@@ -366,7 +361,7 @@ static void OnWSClosed(void* context)
         }
         else
         {
-            metrics_transport_closed();
+            MetricsTransportClosed();
             SetTransportToClosed(request);
             TransportClosedCallback callback = request->onClosedCallback;
             if (callback != NULL)
@@ -377,7 +372,7 @@ static void OnWSClosed(void* context)
     }
 }
 
-DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES);
+DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES)
 
 static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detailed)
 {
@@ -391,7 +386,7 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detail
         request->state = TRANSPORT_STATE_CONNECTED;
         request->connectionTime = telemetry_gettime();
         LogInfo("Opening websocket completed. TransportRequest: 0x%x, wsio handle: 0x%x", request, request->ws.WSHandle);
-        metrics_transport_connected(request->telemetry, request->connectionId);
+        MetricsTransportConnected(*request->telemetry, request->connectionId);
         TransportOpenedCallback callback = request->onOpenedCallback;
         if (callback != NULL)
         {
@@ -404,7 +399,7 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detail
         // connection is not open.  We must be careful with this state for the
         // reasons described in OnTransportError.
         request->state = TRANSPORT_STATE_CLOSED;
-        metrics_transport_dropped();
+        MetricsTransportDropped();
 
         LogError("WS open operation failed with result=%d(%s), code=%d[0x%08x]",
             open_result,
@@ -445,7 +440,7 @@ static void OnWSFrameSent(void* context, WS_SEND_FRAME_RESULT sendResult)
     // the first byte is the message type
     if (msg->msgtype != METRIC_MESSAGE_TYPE_INVALID)
     {
-        metrics_transport_state_end(msg->msgtype);
+        MetricsTransportStateEnd(msg->msgtype);
     }
     free(msg);
 }
@@ -491,7 +486,7 @@ static void OnWSFrameReceived(void* context, unsigned char frame_type, const uns
         case WS_FRAME_TYPE_BINARY:
             if (size < 2)
             {
-                PROTOCOL_VIOLATION("unable to read binary message length");
+                PROTOCOL_VIOLATION("unable to read binary message length%s", "");
                 goto Exit;
             }
 
@@ -507,13 +502,13 @@ static void OnWSFrameReceived(void* context, unsigned char frame_type, const uns
 
         if (offset < 0)
         {
-            PROTOCOL_VIOLATION("Unable to parse response headers");
-            metrics_transport_parsingerror();
+            PROTOCOL_VIOLATION("Unable to parse response headers%s","");
+            MetricsTransportParsingError();
             goto Exit;
         }
 
         TransportResponse response;
-        response.frameType = WSFrameEnumToResponseFrameEnum(frame_type);
+        response.frameType = WSFrameEnumToResponseFrameEnum(static_cast<WS_FRAME_TYPE>(frame_type));
         response.responseHeader = responseHeadersHandle;
         response.buffer = buffer + offset;
         response.bufferSize = size - offset;
@@ -533,7 +528,7 @@ static void DnsComplete(DnsCacheHandle handle, int error, DNS_RESULT_HANDLE resu
     (void)handle;
     (void)resultHandle;
 
-    metrics_transport_state_end(METRIC_TRANSPORT_STATE_DNS);
+    MetricsTransportStateEnd(MetricMessageType::METRIC_TRANSPORT_STATE_DNS);
 
     if (NULL != request)
     {
@@ -576,7 +571,7 @@ static int ProcessPacket(TransportRequest* request, TransportPacket* packet)
 
     err = uws_client_send_frame_async(
         request->ws.WSHandle,
-        packet->wstype == WS_FRAME_TYPE_TEXT ? WS_TEXT_FRAME : WS_BINARY_FRAME,
+        packet->wstype == WS_FRAME_TYPE_TEXT ? static_cast<uint8_t>(WS_TEXT_FRAME) : static_cast<uint8_t>(WS_BINARY_FRAME),
         packet->buffer,
         packet->length,
         true, // TODO: check this.
@@ -601,7 +596,7 @@ static void WsioQueue(TransportRequest* request, TransportPacket* packet)
     if (request->state == TRANSPORT_STATE_CLOSED)
     {
         LogError("Trying to send on a previously closed socket");
-        metrics_transport_invalidstateerror();
+        MetricsTransportInvalidStateError();
         free(packet);
         return;
     }
@@ -629,7 +624,12 @@ static void PrepareTelemetryPayload(TransportHandle request, const uint8_t* even
         eventBufferSize;
 
     TransportPacket *msg = (TransportPacket*)malloc(sizeof(TransportPacket) + payloadSize);
-    msg->msgtype = METRIC_MESSAGE_TYPE_TELEMETRY;
+    if (msg == nullptr)
+    {
+        // malloc failed, everything is lost
+        return;
+    }
+    msg->msgtype = static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_TELEMETRY);
     msg->wstype = WS_FRAME_TYPE_TEXT;
 
     char timeString[TIME_STRING_MAX_SIZE];
@@ -666,14 +666,14 @@ void TransportWriteTelemetry(TransportHandle handle, const uint8_t* buffer, size
     }
 }
 
-TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId, const ProxyServerInfo* proxyInfo)
+TransportHandle TransportRequestCreate(const char* host, void* context, Telemetry* telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId, const ProxyServerInfo* proxyInfo)
 {
     TransportRequest *request;
     int err = -1;
     const char* src;
     char* dst;
     int port = -1;
-    char* localHost = NULL;
+    const char* localHost = NULL;
 
     bool use_ssl = false;
 
@@ -691,8 +691,8 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
     // parse port number from localhost if it is specified in the url
     if ((localHost = strstr(host, "localhost:")) != NULL)
     {
-        char* front = strchr(localHost, ':');
-        char* back = strchr(front, '/');
+        const char* front = strchr(localHost, ':');
+        const char* back = strchr(front, '/');
         if (back == NULL)
         {
             back = front + strlen(front) + 1;
@@ -758,7 +758,7 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
         LogError("Failed to allocate memory for connection headers string.");
         return NULL;
     }
-    snprintf(str, len, "%s%s", proto, headers);
+    (void)snprintf(str, len, "%s%s", proto, headers);
     // HACKHACK: azure-c-shared doesn't allow to specify connection ("upgrade") headers, using this as a temporary
     // workaround until we migrate to something more decent.
     request->ws.config.protocol = str;
@@ -802,7 +802,7 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
                     return NULL;
                 }
                 void *underlying_io_parameters = &proxy_config;
-                
+
                 TLSIO_CONFIG tlsio_config;
                 if (use_ssl == true)
                 {
@@ -882,14 +882,14 @@ void TransportRequestDestroy(TransportHandle transportHandle)
             while (request->isOpen)
             {
                 uws_client_dowork(request->ws.WSHandle);
-                ThreadAPI_Sleep(100);
+                std::this_thread::sleep_for(100ms);
             }
         }
 
         uws_client_destroy(request->ws.WSHandle);
     }
 
-    metrics_transport_closed();
+    MetricsTransportClosed();
 
     if (request->url)
     {
@@ -927,7 +927,7 @@ static int TransportOpen(TransportRequest* request)
         }
         else
         {
-            metrics_transport_start(request->telemetry, request->connectionId);
+            MetricsTransportStart(*request->telemetry, request->connectionId);
             const int result = uws_client_open_async(request->ws.WSHandle,
                 OnWSOpened, request,
                 OnWSFrameReceived, request,
@@ -1017,7 +1017,7 @@ int TransportRequestPrepare(TransportHandle transportHandle)
             // Set the transport state before calling uws_client_close_async.
             request->state = TRANSPORT_STATE_RESETTING;
             LogInfo("token changed, resetting connection");
-            metrics_transport_reset();
+            MetricsTransportReset();
 
             const int closeResult =
                 uws_client_close_async(request->ws.WSHandle, OnWSClosed, request);
@@ -1066,8 +1066,13 @@ int TransportMessageWrite(TransportHandle transportHandle, const char* path, con
                          TIME_STRING_MAX_SIZE +
                          bufferSize;
     TransportPacket *msg = (TransportPacket *)malloc(sizeof(TransportPacket) + payloadSize);
+    if (msg == nullptr)
+    {
+        /* malloc failed, everything is lost */
+        return -1;
+    }
 
-    msg->msgtype = METRIC_MESSAGE_TYPE_DEVICECONTEXT;
+    msg->msgtype = static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_DEVICECONTEXT);
     msg->wstype = WS_FRAME_TYPE_TEXT;
 
     char timeString[TIME_STRING_MAX_SIZE];
@@ -1142,7 +1147,7 @@ int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer,
     uint8_t msgtype = METRIC_MESSAGE_TYPE_INVALID;
     if (bufferSize == 0)
     {
-        msgtype = METRIC_MESSAGE_TYPE_AUDIO_LAST;
+        msgtype = static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_AUDIO_LAST);
         if (!request->ws.chunksent)
         {
             return 0;
@@ -1164,7 +1169,7 @@ int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer,
         }
 
         request->ws.chunksent = true;
-        msgtype = METRIC_MESSAGE_TYPE_AUDIO_START;
+        msgtype = static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_AUDIO_START);
     }
 
     size_t headerLen;
@@ -1178,6 +1183,11 @@ int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer,
         TIME_STRING_MAX_SIZE +
         bufferSize + 2; // 2 = header length
     TransportPacket *msg = (TransportPacket*)malloc(sizeof(TransportPacket) + WS_MESSAGE_HEADER_SIZE + payloadSize);
+    if (msg == nullptr)
+    {
+        /* malloc failed, everything is lost =( */
+        return -1;
+    }
     msg->msgtype = msgtype;
     msg->wstype = WS_FRAME_TYPE_BINARY;
 
@@ -1274,7 +1284,7 @@ void TransportDoWork(TransportHandle transportHandle)
             request->state = TRANSPORT_STATE_NETWORK_CHECKING;
             const char* host = request->ws.config.hostname;
             LogInfo("Start network check %s", host);
-            metrics_transport_state_start(METRIC_TRANSPORT_STATE_DNS);
+            MetricsTransportStateStart(MetricMessageType::METRIC_TRANSPORT_STATE_DNS);
             if (DnsCacheGetAddr(request->dnsCache, host, DnsComplete, request))
             {
                 LogError("DnsCacheGetAddr failed");
@@ -1299,7 +1309,7 @@ void TransportDoWork(TransportHandle transportHandle)
             packet = (TransportPacket*)singlylinkedlist_item_get_value(list_item);
             if (packet->msgtype != METRIC_MESSAGE_TYPE_INVALID)
             {
-                metrics_transport_state_start(packet->msgtype);
+                MetricsTransportStateStart(packet->msgtype);
             }
             int res = ProcessPacket(request, packet);
             if (res != 0)
