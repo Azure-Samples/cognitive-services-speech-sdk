@@ -41,6 +41,10 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
   Windows-x64)
     ;;
   OSX-x64)
+    # TODO: Remove this workaround for https://github.com/Homebrew/brew/issues/5513 once there is a
+    # homebrew version > 1.9.0 released
+    brew update
+    brew config
     brew install swig pkg-config coreutils bash ninja
     ;;
 esac

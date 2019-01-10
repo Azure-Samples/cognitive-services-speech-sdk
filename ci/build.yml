@@ -1639,6 +1639,10 @@ jobs:
     displayName: Create Objective-C reference docs
   - bash: |
       set -e -o pipefail
+      # TODO: Remove this workaround for https://github.com/Homebrew/brew/issues/5513 once there is a
+      # homebrew version > 1.9.0 released
+      brew update
+      brew config
       brew install doxygen
       cd ci/doxygen
       mkdir -p "$(ArtifactOut)"
