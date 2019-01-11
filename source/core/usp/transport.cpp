@@ -20,7 +20,6 @@
 #include "azure_c_shared_utility_includes.h"
 
 #include "metrics.h"
-#include "iobuffer.h"
 #include "transport.h"
 
 #define COUNT_OF(a) (sizeof(a) / sizeof((a)[0]))
