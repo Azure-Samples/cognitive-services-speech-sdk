@@ -53,7 +53,9 @@ enum  PropertyId
     LanguageUnderstandingServiceResponse_JsonResult = 7000,
 
     AudioConfig_DeviceNameForCapture = 8000,
-    AudioConfig_NumberOfChannelsForCapture = 8001
+    AudioConfig_NumberOfChannelsForCapture = 8001,
+    AudioConfig_SampleRateForCapture = 8002,
+    AudioConfig_BitsPerSampleForCapture = 8003
 };
 #endif
 

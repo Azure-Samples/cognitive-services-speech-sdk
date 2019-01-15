@@ -192,13 +192,27 @@ enum class PropertyId
     /// The device name for audio capture. Under normal circumstances, you shouldn't have to
     /// use this property directly.
     /// Instead, use <see cref="AudioConfig::FromAMicrophoneInput"/>.
+    /// Added in version 1.3.0.
     /// </summary>
     AudioConfig_DeviceNameForCapture = 8000,
 
     /// <summary>
-    /// The number of channels for audio capture.
+    /// The number of channels for audio capture. Internal Use only.
+    /// Added in version 1.3.0.
     /// </summary>
-    AudioConfig_NumberOfChannelsForCapture = 8001
+    AudioConfig_NumberOfChannelsForCapture = 8001,
+
+    /// <summary>
+    /// The sample rate (in Hz)  for audio capture. Internal use only.
+    /// Added in version 1.3.0.
+    /// </summary>
+    AudioConfig_SampleRateForCapture = 8002,
+
+    /// <summary>
+    /// The number of bits of each sample for audio capture. Internal use only.
+    /// </summary>
+    AudioConfig_BitsPerSampleForCapture = 8003
+
 };
 
 enum class OutputFormat

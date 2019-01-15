@@ -70,25 +70,58 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
 
     SECTION("Audio Config Properties")
     {
-        auto audioConfig = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+        auto verifyAudioConfigInRecognizerProperties = [](std::shared_ptr< SpeechRecognizer> recognizer, std::string deviceNameExpected = "",  std::string channelsExpected = "1")
+        {
+            // verify device name in recognizer
+            auto deviceNameInRecognizer = recognizer->Properties.GetProperty(PropertyId::AudioConfig_DeviceNameForCapture);
+            REQUIRE(deviceNameExpected == deviceNameInRecognizer);
 
-        // verify number of channels
-        auto channels_to_be_set = "1";
-        audioConfig->SetProperty(PropertyId::AudioConfig_NumberOfChannelsForCapture, channels_to_be_set);
-        auto channels_set = audioConfig->GetProperty(PropertyId::AudioConfig_NumberOfChannelsForCapture);
-        REQUIRE(channels_set == channels_to_be_set);
+            // verify number of channels in recognizer
+            auto channelsInRecognizer = recognizer->Properties.GetProperty(PropertyId::AudioConfig_NumberOfChannelsForCapture);
+            REQUIRE(channelsExpected == channelsInRecognizer);
 
-        // verify device name
-        auto device_name = "default";
-        audioConfig->SetProperty(PropertyId::AudioConfig_DeviceNameForCapture, device_name);
-        auto device_name_in_audio_config = audioConfig->GetProperty(PropertyId::AudioConfig_DeviceNameForCapture);
-        REQUIRE(device_name == device_name_in_audio_config);
+            // verify sample rate in recognizer
+            auto sampleRateExpected = "16000";
+            auto sampleRateInRecognizer = recognizer->Properties.GetProperty(PropertyId::AudioConfig_SampleRateForCapture);
+            REQUIRE(sampleRateExpected == sampleRateInRecognizer);
 
-        auto config = SpeechConfigForAudioConfigTests();
-        auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
+            // verify sample rate in recognizer
+            auto bitsPerSampleExpected = "16";
+            auto bitsPerSampleInRecognizer = recognizer->Properties.GetProperty(PropertyId::AudioConfig_BitsPerSampleForCapture);
+            REQUIRE(bitsPerSampleExpected == bitsPerSampleInRecognizer);
+        };
 
-        auto result = recognizer->RecognizeOnceAsync().get();
-        requireRecognizedSpeech(result);
+        WHEN("verify audio configuration from audio file")
+        {
+            auto audioConfig = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+
+            auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+            auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
+
+            verifyAudioConfigInRecognizerProperties(recognizer);
+        }
+
+        WHEN("verify audio configuration with device name and channel count")
+        {
+            auto channelsExpected = "1";
+            auto deviceNameExpected = "default";
+            auto audioConfig = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+
+            // verify number of channels
+            audioConfig->SetProperty(PropertyId::AudioConfig_NumberOfChannelsForCapture, channelsExpected);
+            auto channelsInAudioConfig = audioConfig->GetProperty(PropertyId::AudioConfig_NumberOfChannelsForCapture);
+            REQUIRE(channelsExpected == channelsInAudioConfig);
+
+            // verify device name
+            audioConfig->SetProperty(PropertyId::AudioConfig_DeviceNameForCapture, deviceNameExpected);
+            auto deviceNameInAudioConfig = audioConfig->GetProperty(PropertyId::AudioConfig_DeviceNameForCapture);
+            REQUIRE(deviceNameExpected == deviceNameInAudioConfig);
+
+            auto config = SpeechConfigForAudioConfigTests();
+            auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
+
+            verifyAudioConfigInRecognizerProperties(recognizer, deviceNameExpected, channelsExpected);
+        }
     }
 
     SECTION("pull stream works")

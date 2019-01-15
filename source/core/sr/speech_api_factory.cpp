@@ -55,7 +55,7 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerFromConfig
         auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>(recognizerClassName, sessionAsSite);
 
         // Set the recognizer properties
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(session);
         SetRecognizerProperties(namedProperties, language, format);
 
         // Add the recognizer to the session
@@ -88,7 +88,7 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognize
         auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxTranslationRecognizer", sessionAsSite);
 
         // Set the translation properties
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(session);
         SetTranslationProperties(namedProperties, sourceLanguage, targetLanguages, voice);
 
         // Add the recognizer to the session

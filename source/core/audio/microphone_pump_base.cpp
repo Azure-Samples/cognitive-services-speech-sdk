@@ -181,8 +181,8 @@ uint16_t CSpxMicrophonePumpBase::GetChannelsFromConfig()
 {
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     auto channels = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture));
-    SPX_TRACE_INFO("The number of channels as a property is '%s' in CSpxMicrophonePump", channels.c_str());    
-    return channels.empty() ? 0 : static_cast<uint16_t>(std::stoi(channels));
+    SPX_TRACE_INFO("The number of channels as a property is '%s' in CSpxMicrophonePump", channels.c_str());
+    return channels.empty() ? 0 : static_cast<uint16_t>(stoi(channels));
 }
 
 std::string CSpxMicrophonePumpBase::GetDeviceNameFromConfig()

@@ -156,6 +156,7 @@ public:
 
     // --- ISpxNamedProperties (overrides)
     std::string GetStringValue(const char* name, const char* defaultValue) const override;
+    void SetStringValue(const char* name, const char* value) override;
 
 private:
     std::shared_ptr<ISpxThreadService> InternalQueryService(const char* serviceName);
@@ -253,6 +254,8 @@ private:
 
     struct Operation;
     void RecognizeOnceAsync(const std::shared_ptr<Operation>& singleShot);
+
+    void SetAudioConfigurationInProperties();
 
 private:
 

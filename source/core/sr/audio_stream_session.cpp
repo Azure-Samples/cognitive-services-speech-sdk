@@ -173,6 +173,8 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
     // Open the WAV file
     audioFilePump->Open(pszFileName);
 
+    SetAudioConfigurationInProperties();
+
     // Limit the maximal speed to 2 times of real-time streaming
     auto realTime = SpxQueryInterface<ISpxAudioStreamInitRealTime>(audioFilePump);
     realTime->SetRealTimePercentage(SimulateRealtimePercentage);
@@ -189,6 +191,8 @@ void CSpxAudioStreamSession::InitFromMicrophone()
     // Create the microphone pump
     auto site = SpxSiteFromThis(this);
     m_audioPump = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxInteractiveMicrophone", site);
+
+    SetAudioConfigurationInProperties();
 }
 
 void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> stream)
@@ -205,11 +209,34 @@ void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> str
     auto reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
     audioPump->SetReader(reader);
 
+    SetAudioConfigurationInProperties();
+
     // Limit the maximal speed to 2 times of real-time streaming
     auto realTime = SpxQueryInterface<ISpxAudioStreamInitRealTime>(stream);
     realTime->SetRealTimePercentage(50);
 
     m_isReliableDelivery = true;
+}
+
+void CSpxAudioStreamSession::SetAudioConfigurationInProperties()
+{
+    auto cbFormat = m_audioPump->GetFormat(nullptr, 0);
+    auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
+    m_audioPump->GetFormat(waveformat.get(), cbFormat);
+
+    // Make sure channel count is consistent if it has been set.
+    auto channelCountInProperty = GetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture), "");
+    if (channelCountInProperty.empty())
+    {
+        SetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture), to_string(waveformat->nChannels).c_str());
+    }
+    else
+    {
+        SPX_THROW_HR_IF(SPXERR_RUNTIME_ERROR, std::stoi(channelCountInProperty) != waveformat->nChannels);
+    }
+
+    SetStringValue(GetPropertyName(PropertyId::AudioConfig_SampleRateForCapture), to_string(waveformat->nSamplesPerSec).c_str());
+    SetStringValue(GetPropertyName(PropertyId::AudioConfig_BitsPerSampleForCapture), to_string(waveformat->wBitsPerSample).c_str());
 }
 
 void CSpxAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
@@ -1315,6 +1342,11 @@ std::string CSpxAudioStreamSession::GetStringValue(const char* name, const char*
     }
 
     return ISpxPropertyBagImpl::GetStringValue(name, defaultValue);
+}
+
+void CSpxAudioStreamSession::SetStringValue(const char* name, const char* value)
+{
+    return ISpxPropertyBagImpl::SetStringValue(name, value);
 }
 
 std::shared_ptr<ISpxRecoEngineAdapter> CSpxAudioStreamSession::EnsureInitRecoEngineAdapter()
