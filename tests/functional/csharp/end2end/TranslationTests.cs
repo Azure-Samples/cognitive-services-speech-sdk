@@ -120,7 +120,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = actualTranslationsTextResults[i];
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, "Unmatched result reason.");
-                AssertMatching(TestData.English.Batman.Utterances[i], result.Text);
+                AssertMatching(TestData.English.Batman.UtterancesTranslation[i], result.Text);
                 Assert.AreEqual(0, result.Translations.Count, "Unmatched translation results");
                 var errorDetails = CancellationDetails.FromResult(result).ErrorDetails;
                 Assert.AreEqual(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails, "Unmatched error details");

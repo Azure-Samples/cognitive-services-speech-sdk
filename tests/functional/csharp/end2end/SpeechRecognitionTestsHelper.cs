@@ -186,13 +186,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 Assert.IsTrue(
                     plainExpectedText.Contains(plainActualText),
-                    $"'{plainExpectedText}'\n does not contain \n'{plainActualText}' as expected");
+                    $"'{plainExpectedText}' (expected)\n does not contain \n'{plainActualText}' (actual)");
             }
             else
             {
                 Assert.IsTrue(
                     plainActualText.Contains(plainExpectedText),
-                    $"'{plainActualText}'\n does not contain \n'{plainExpectedText}' as expected");
+                    $"'{plainActualText}' (actual)\n does not contain \n'{plainExpectedText}' (expected)");
             }
         }
 
