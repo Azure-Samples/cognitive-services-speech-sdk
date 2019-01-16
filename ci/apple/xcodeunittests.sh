@@ -1,15 +1,48 @@
-set -e -x
+#!/usr/bin/env bash
+set -e -u -o pipefail
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 XCODE_CONFIGURATION_BUILD_DIR=${PWD}/iostestbuild
 
-run_test() {
-    local name=$1
-    local os=$2
-    local extraargs=$3
+USAGE="USAGE: xcodeunittests.sh <projectfile> <xcodescheme> <appname> <logdir> <testname> <device> <os> <opt:--extra-args xcode_extra_args> <opt:--usegui>"
+PROJECT="${1?$USAGE}"  # Xcode project file
+SCHEME="${2?$USAGE}"  # Xcode scheme name
+APPNAME="${3?$USAGE}"  # name of the app (without .app extension)
+LOGDIR="${4?$USAGE}"  # path to the directory to store logs in
+TESTNAME="${5?$USAGE}"  # name of the kind of test (unittest/quickstart) to use for naming the logfile
+DEVICE="${6?$USAGE}"  # device name to test on
+OS="${7?$USAGE}"  # os to test with
+XCODE_EXTRA_ARGS=
+if [[ ${8:-} == --extra-args ]]; then
+  XCODE_EXTRA_ARGS="$9"
+  shift 2
+fi
+USEGUI=
+if [[ ${8:-} == --usegui ]]; then
+  USEGUI=1
+  shift
+fi
 
-    local simname="${name}-${os}"
-    ${SCRIPT_DIR}/ios_simulator_cli.sh ${simname} create "${name}" "${os}"
+run_test() {
+    local thistestname simname uid
+
+    cleanup() {
+        local simname
+        simname=$1
+        ${SCRIPT_DIR}/ios_simulator_cli.sh ${simname} shutdown || true
+        if [[ ${USEGUI} ]]; then
+            osascript -e 'quit app "Simulator"'
+        fi
+    }
+    simname="${DEVICE}-${OS}"
+    trap "cleanup $simname" EXIT
+    thistestname="$TESTNAME-$simname"
+
+    if [[ ! -d ${LOGDIR} ]]; then
+        echo "logging directory does not exist"
+        exit
+    fi
+    ${SCRIPT_DIR}/ios_simulator_cli.sh ${simname} create "${DEVICE}" "${OS}"
     uid=$(${SCRIPT_DIR}/ios_simulator_cli.sh ${simname} getuid)
 
     if [[ -n ${USEGUI} ]]; then
@@ -20,49 +53,24 @@ run_test() {
 
     rm -rf ${XCODE_CONFIGURATION_BUILD_DIR}
 
-    xcodebuild build-for-testing -project ${PROJECT} ${extraargs}\
-        -destination "platform=iOS Simulator,id=${uid}" \
-        -scheme ${SCHEME} \
-        CONFIGURATION_BUILD_DIR=${XCODE_CONFIGURATION_BUILD_DIR} \
-        SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION"
-
-    ${SCRIPT_DIR}/ios_simulator_cli.sh ${simname} wait
-    xcrun simctl install ${uid} ${XCODE_CONFIGURATION_BUILD_DIR}/${APPNAME}.app/
-
-    xcodebuild test-without-building -project ${PROJECT} ${extraargs}\
+    xcodebuild build-for-testing -project ${PROJECT} ${XCODE_EXTRA_ARGS} \
         -destination "platform=iOS Simulator,id=${uid}" \
         -scheme ${SCHEME} \
         CONFIGURATION_BUILD_DIR=${XCODE_CONFIGURATION_BUILD_DIR} \
         SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION" 2>&1 |
-          tee "$(OutputDirectory)/logs/xcodebuild-ios-${testname}.log" |
-          xcpretty --report junit --output test-ios-${testname}.xml
+          tee "${LOGDIR}/xcodebuild-ios-build-${thistestname}.log" |
+          xcpretty --report junit --output test-ios-build-${thistestname}.xml
 
-    ${SCRIPT_DIR}/ios_simulator_cli.sh ${simname} shutdown
+    ${SCRIPT_DIR}/ios_simulator_cli.sh ${simname} wait
+    xcrun simctl install ${uid} ${XCODE_CONFIGURATION_BUILD_DIR}/${APPNAME}.app/
 
-    if [[ -n ${USEGUI} ]]; then
-        osascript -e 'quit app "Simulator"'
-    fi
+    xcodebuild test-without-building -project ${PROJECT} ${XCODE_EXTRA_ARGS} \
+        -destination "platform=iOS Simulator,id=${uid}" \
+        -scheme ${SCHEME} \
+        CONFIGURATION_BUILD_DIR=${XCODE_CONFIGURATION_BUILD_DIR} \
+        SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION" 2>&1 |
+          tee "${LOGDIR}/xcodebuild-ios-run-${thistestname}.log" |
+          xcpretty --report junit --output test-ios-run-${thistestname}.xml
 }
 
-PROJECT=$1  # Xcode project file
-SCHEME=$2  # Xcode scheme name
-APPNAME=$3  # name of the app (without .app extension)
-TEST_NAME=$4  # name of the kind of test (unittest/quickstart) to use for naming the logfile
-USEGUI=$5  # non-empty if the Xcode simulator needs to be started in GUI mode
-
-if [[ -n ${USEGUI} ]]; then
-    osascript -e 'quit app "Simulator"'
-fi
-
-run_test iPhone-X iOS-12-1
-# run_test iPhone-8 iOS-11-4  # not installed in Xcode 10.1 toolchain
-# run_test iPhone-6 iOS-10-2  # simulator times out, unrelated to test suite
-# run_test iPhone-5 iOS-10-2  # simulator times out, unrelated to test suite
-run_test iPhone-6s iOS-10-0
-run_test iPhone-6 iOS-10-0
-run_test iPhone-5 iOS-10-0
-run_test iPhone-6 iOS-9-3
-run_test iPhone-5 iOS-9-3 'ARCHS="i386" IPHONEOS_DEPLOYMENT_TARGET=9.2'
-run_test iPhone-6 iOS-9-2
-run_test iPhone-5 iOS-9-2 'ARCHS="i386" IPHONEOS_DEPLOYMENT_TARGET=9.2'
-
+run_test

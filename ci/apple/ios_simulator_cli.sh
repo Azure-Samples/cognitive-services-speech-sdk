@@ -142,10 +142,10 @@ shutdown () {
   do
     SIMULATOR_STATUS=$(get_status)
 
-    if [ $SIMULATOR_STATUS = "Shutdown" ]
+    if [ "$SIMULATOR_STATUS" = "Shutdown" ]
     then
       break
-    elif [ $SIMULATOR_STATUS = "Booted" ]
+    elif [ "$SIMULATOR_STATUS" = "Booted" ]
     then
       xcrun simctl shutdown $SIMULATOR_ID
     else

@@ -93,6 +93,7 @@ function redact {
 
 function runTest {
   local testOutput
+  testOutput=
   if [[ $1 = --output ]]; then
     testOutput="$2"
     shift 2
@@ -125,12 +126,15 @@ function runTest {
   fi
 
   START_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
-  ${COREUTILS_PREFIX}timeout -k 5s $TIMEOUT_SECONDS ${COREUTILS_PREFIX}stdbuf -o0 -e0 "$@" 2>&1 |
-    redact ${!redactStringsRef} |
+  (
+  set +o pipefail
+  ${COREUTILS_PREFIX}timeout -k 5s $TIMEOUT_SECONDS ${COREUTILS_PREFIX}stdbuf -o0 -e0 "$@" 2>&1 | redact ${!redactStringsRef} |
     if [[ -n $testOutput ]]; then tee "$testOutput"; else cat; fi \
       1>> "${!outputRef}.out"
+  exit ${PIPESTATUS[0]}
+  )
+  EXIT_CODE=$?
 
-  EXIT_CODE=${PIPESTATUS[0]}
   END_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
   TIME_SECONDS=$(perl -e "printf '%0.3f', $END_SECONDS - $START_SECONDS")
   TAIL="$(tail -20 "${!outputRef}.out")"
@@ -153,15 +157,15 @@ function runTest {
         "EXITCODE-$EXIT_CODE" \
         "$TAIL" \
         >> "${!outputRef}.xml.parts"
-      eval "(( $failuresRef++ ))"
+      eval "(( ++$failuresRef ))"
       ;;
   esac
 
   eval $timeRef=\"$(perl -e "printf '%0.3f', ${!timeRef} + $TIME_SECONDS")\"
 
-  eval "(( $testsRef++ ))"
+  eval "(( ++$testsRef ))"
 
-  [[ $EXIT_CODE == 0 ]]
+  return $EXIT_CODE
 }
 
 function addToTestOutput {

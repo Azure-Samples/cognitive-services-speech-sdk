@@ -1540,13 +1540,15 @@ jobs:
     BuildPlatform: iOS
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Release
   steps:
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
   - task: DownloadBuildArtifacts@0
     displayName: 'Download iOS Build Artifacts'
     inputs:
       artifactName: iOS
       itemPattern: '**/*.zip'
   - bash: |
-      set -u -e -o pipefail -x
+      set -u -e -o pipefail
       . ci/functions.sh
       mkdir xcode-build-output
       cd xcode-build-output
@@ -1554,6 +1556,9 @@ jobs:
       for f in *.zip; do unzip $f; done
       cd ..
     displayName: "Unpack build artifacts"
+  - bash: |
+      brew install coreutils
+    displayName: "Install coreutils for test harness"
   - bash: |
       set -e -o pipefail -x
       mkdir -p "$(OutputDirectory)/logs"
@@ -1564,14 +1569,20 @@ jobs:
       # use a recent Xcode version
       export DEVELOPER_DIR=/Applications/Xcode_10.1.app/Contents/Developer
       # run the tests
-      ci/apple/xcodeunittests.sh tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj SpeechSDK_iOS SpeechSDK_iOS unittests
+      ci/apple/multiplatformtests.sh tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
+        SpeechSDK_iOS SpeechSDK_iOS $(OutputDirectory)/logs unittests
     displayName: "Run iOS unit tests"
+    continueOnError: true
   - bash: |
       set -u -e -o pipefail -x
       . ci/functions.sh
       # set up framework in the correct position - the Xcode project expects the framework here (used for both Release and Debug configs atm)
       ln -s '$(Build.Repository.LocalPath)/xcode-build-output/$(FrameworkName).framework' public_samples/quickstart/objectivec-ios/
       # fix the keys
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false)
       patchSamplesFromTestConfig public_samples/quickstart/objectivec-ios/helloworld/helloworld \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
@@ -1580,8 +1591,10 @@ jobs:
       # use a recent Xcode version
       export DEVELOPER_DIR=/Applications/Xcode_10.1.app/Contents/Developer
       # run the tests
-      ci/apple/xcodeunittests.sh public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
-        helloworldUITests helloworldUITests-Runner quickstart 1
+      ci/apple/multiplatformtests.sh public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
+        helloworldUITests helloworldUITests-Runner $(OutputDirectory)/logs quickstart --usegui
+    continueOnError: true
+    displayName: "Run iOS UI test for quickstart"
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: '**/test-*.xml'
@@ -1691,9 +1704,7 @@ jobs:
     displayName: Create Objective-C reference docs
   - bash: |
       set -e -o pipefail
-      # TODO: Remove this workaround for https://github.com/Homebrew/brew/issues/5513 once there is a
-      # homebrew version > 1.9.0 released
-      brew update
+      # log brew-related version information
       brew config
       brew install doxygen
       cd ci/doxygen
