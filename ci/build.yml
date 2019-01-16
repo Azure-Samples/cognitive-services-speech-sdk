@@ -87,6 +87,7 @@ variables:
   AZURE_CONTAINER_REGISTRY_NAME: csspeechsdkacr201809
   AZURE_CONTAINER_REGISTRY: $(AZURE_CONTAINER_REGISTRY_NAME).azurecr.io
   AZURE_SUBSCRIPTION_ENDPOINT: 'Custom Speech Development (3a96ef56-41a9-40a0-b0f3-fb125c2b8798) - RG csspeechsdk-carbon'
+  CG_RAN: true # we do Component Governance explicitly only in the Pre job
 
 jobs:
 
@@ -94,6 +95,8 @@ jobs:
   pool:
     name: Hosted Ubuntu 1604
   timeoutInMinutes: 30
+  variables:
+    CG_RAN: false
   steps:
   - bash: ./ci/set-variables.sh
     displayName: Set variables
