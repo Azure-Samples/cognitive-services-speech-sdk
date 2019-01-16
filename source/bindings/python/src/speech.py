@@ -83,6 +83,15 @@ class SpeechConfig():
     @staticmethod
     def _get_impl(config_type, subscription, region, endpoint, auth_token,
             speech_recognition_language):
+        if region is not None and subscription is None and auth_token is None:
+            raise ValueError('either endpoint or subscription key must be given along with a region')
+
+        if endpoint is not None and region is not None:
+            raise ValueError('cannot construct SpeechConfig with both region and endpoint information')
+
+        if subscription is not None and endpoint is None and region is None:
+            raise ValueError('either endpoint or region must be given along with a subscription key')
+
         _impl = None
         if region is not None and subscription is not None:
             _impl = config_type._from_subscription(subscription, region)
@@ -94,15 +103,6 @@ class SpeechConfig():
         if _impl is not None:
             _impl.set_speech_recognition_language(speech_recognition_language)
             return _impl
-
-        if region is not None and subscription is None and auth_token is None:
-            raise ValueError('either endpoint or subscription key must be given along with a region')
-
-        if endpoint is not None and region is not None:
-            raise ValueError('cannot construct SpeechConfig with both region and endpoint information')
-
-        if subscription is not None and endpoint is None and region is None:
-            raise ValueError('either endpoint or region must be given along with a subscription keyregion')
 
         raise ValueError('cannot construct SpeechConfig with the given arguments')
 

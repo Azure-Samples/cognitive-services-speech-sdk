@@ -75,6 +75,7 @@ speech_input_data_raw = {'weather':
                          'lamp': ('TurnOnTheLamp.wav', ["Turn on the lamp."], (3400000, ),
                              (15600000, ), 'en-US', dict()),
                          'silence': ('silenceshort.wav', [''], None, None, 'en-US', dict()),
+                         'silencehello': ('silencehello.wav', ['Hello.'], None, None, 'en-US', dict()),
                          'batman': ('batman.wav', [
                              "Skills and abilities Batman has no inherent super powers, he relies on his own scientific knowledge detective skills and athletic prowess in the stories. Batman is regarded as one of the world's greatest detective.",
                              "If not the world's greatest crime solver. Batman has been repeatedly described as having genius level intellect. One of the greatest martial artists in the DC universe and having peak human physical conditioning.",

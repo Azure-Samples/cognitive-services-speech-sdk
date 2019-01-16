@@ -45,6 +45,26 @@ def test_recognize_async(subscription, speech_input, endpoint, speech_region):
         assert "no state" == excinfo.value
 
 
+@pytest.mark.parametrize('speech_input,', ['silencehello'], indirect=True)
+def test_speech_recognition_with_custom_endpoint(subscription, speech_input, endpoint, speech_region):
+    initial_silence_timeout_ms = 1 * 1e3
+    template = "wss://{}.stt.speech.microsoft.com/speech/recognition" \
+            "/conversation/cognitiveservices/v1?initialSilenceTimeoutMs={:d}"
+    speech_config = msspeech.SpeechConfig(subscription=subscription,
+            endpoint=template.format(speech_region, int(initial_silence_timeout_ms)))
+
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
+    # Creates a speech recognizer using a file as audio input.
+    # The default language is "en-us".
+    reco = msspeech.SpeechRecognizer(speech_config, audio_config)
+
+    future = reco.recognize_once_async()
+    result = future.get()
+
+    assert msspeech.ResultReason.NoMatch == result.reason
+    assert msspeech.NoMatchReason.InitialSilenceTimeout == result.no_match_details.reason
+
+
 @pytest.mark.xfail(reason='flaky')
 @pytest.mark.parametrize('speech_input,', ['batman'], indirect=True)
 def test_recognize_once_multiple(subscription, speech_input, endpoint, speech_region):
@@ -123,12 +143,28 @@ def test_speech_config_default_constructor(config_type):
     with pytest.raises(ValueError) as excinfo:
         speech_config = config_type(subscription="somesubscription")
 
-        assert '"region" needs to be provided' in str(excinfo.value)
+        assert '"region" needs to be provided' == str(excinfo.value)
+
+    with pytest.raises(ValueError) as excinfo:
+        speech_config = config_type(region="someregion")
+        assert 'either endpoint or subscription key must be given along with a region' \
+                == str(excinfo.value)
+
+    with pytest.raises(ValueError) as excinfo:
+        speech_config = config_type(subscription="somesubscription")
+        assert 'either endpoint or region must be given along with a subscription key' \
+                == str(excinfo.value)
 
     with pytest.raises(ValueError) as excinfo:
         speech_config = config_type(endpoint="someendpoint", region="someregion")
+        assert 'cannot construct SpeechConfig with both region and endpoint information' \
+                == str(excinfo.value)
 
-        assert 'cannot construct SpeechConfig with both region and endpoint information' in str(excinfo.value)
+    with pytest.raises(ValueError) as excinfo:
+        speech_config = config_type(endpoint="someendpoint", region="someregion",
+            subscription="somesubscription")
+        assert 'cannot construct SpeechConfig with both region and endpoint information' \
+                == str(excinfo.value)
 
     with pytest.raises(ValueError) as excinfo:
         speech_config = config_type()
