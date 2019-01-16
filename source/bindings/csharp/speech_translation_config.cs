@@ -43,7 +43,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public new static SpeechTranslationConfig FromAuthorizationToken(string authorizationToken, string region)
         {
-            return new SpeechTranslationConfig(Internal.SpeechTranslationConfig.FromSubscription(authorizationToken, region));
+            return new SpeechTranslationConfig(Internal.SpeechTranslationConfig.FromAuthorizationToken(authorizationToken, region));
         }
 
         /// <summary>

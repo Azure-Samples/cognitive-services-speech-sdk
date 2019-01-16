@@ -36,6 +36,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             helper = new SpeechRecognitionTestsHelper();
         }
 
+        [TestMethod]
+        public void TestSetAndGetAuthToken()
+        {
+            var config = SpeechConfig.FromAuthorizationToken("x", "westus");
+            Assert.AreEqual("x", config.AuthorizationToken);
+        }
+
+        [TestMethod]
+        public void TestSetAndGetSubKey()
+        {
+            var config = SpeechConfig.FromSubscription("x", "westus");
+            Assert.AreEqual("x", config.SubscriptionKey);
+        }
+
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]

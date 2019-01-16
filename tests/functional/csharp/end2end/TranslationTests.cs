@@ -423,6 +423,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public void TestSetAndGetAuthToken()
+        {
+            var config = SpeechTranslationConfig.FromAuthorizationToken("x", "westus");
+            Assert.AreEqual("x", config.AuthorizationToken);
+        }
+
+        [TestMethod]
+        public void TestSetAndGetSubKey()
+        {
+            var config = SpeechTranslationConfig.FromSubscription("x", "westus");
+            Assert.AreEqual("x", config.SubscriptionKey);
+        }
+
+        [TestMethod]
         public async Task ContinuousValidCustomTranslation()
         {
             var toLanguages = new List<string>() { Language.DE };
