@@ -41,7 +41,7 @@ BEGIN {
   {
     no warnings 'qw'; # suppress warnings about comment in qw() below
 
-    # Lists of files + tags that are referenced (included) from azure-docs
+    # Sorted list of files + tags that are referenced (included) from azure-docs
     # IMPORTANT - before updating this list talk to wolfma/zhouwang/mahilleb.
     @expectedTags = map { m/^([^#]+)#([^#]+)$/ or die "misconfigured $_\n"; (lc $1) . "#$2"  } qw(
       quickstart/cpp-linux/helloworld.cpp#code
@@ -92,6 +92,16 @@ BEGIN {
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/TranslationSamples.java#TranslationWithFileAsync
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/TranslationSamples.java#TranslationWithMicrophoneAsync
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/TranslationSamples.java#toplevel
+      samples/python/console/intent_sample.py#IntentContinuousRecognitionWithFile
+      samples/python/console/intent_sample.py#IntentRecognitionOnceWithFile
+      samples/python/console/intent_sample.py#IntentRecognitionOnceWithMic
+      samples/python/console/speech_sample.py#SpeechContinuousRecognitionWithFile
+      samples/python/console/speech_sample.py#SpeechRecognitionWithFile
+      samples/python/console/speech_sample.py#SpeechRecognitionUsingCustomizedModel
+      samples/python/console/speech_sample.py#SpeechRecognitionWithMicrophone
+      samples/python/console/translation_sample.py#TranslationContinuous
+      samples/python/console/translation_sample.py#TranslationOnceWithFile
+      samples/python/console/translation_sample.py#TranslationOnceWithMic
     );
   }
 

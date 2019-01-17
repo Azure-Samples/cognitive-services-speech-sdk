@@ -22,6 +22,16 @@ steps:
     mv dist build
   displayName: Build Python $(PythonVersion) wheel
 - ${{ parameters.postbuildsteps }}
+- bash: |
+    set -u -e -x -o pipefail
+    . ci/functions.sh
+    patchSamplesFromTestConfig public_samples/samples/python/console \
+      ci/test-config.json \
+      -D luis-key=$(luis-westus-s0-201809-key1) \
+      -D speech-key=$(NorthEuropeKeySkyman) \
+      -D long-running=false
+    cp tests/input/audio/*.wav public_samples/samples/python/console
+  displayName: Prepare Python samples for testing
 - template: test-during-build.yml
   parameters:
     testsToRun: python_unittests
