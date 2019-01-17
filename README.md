@@ -65,6 +65,7 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [C# Console app for .NET Framework on Windows](./samples/csharp/dotnet-windows/console)                     | Windows  | Demonstrates speech recognition, intent recognition, and translation |
 | [C# Console app for .NET Core (Windows or Linux)](./samples/csharp/dotnetcore/console)                      | Windows, Linux  | Demonstrates speech recognition, intent recognition, and translation |
 | [Java Console app for JRE](./samples/java/jre/console)                                                      | Windows, Linux | Demonstrates speech recognition, intent recognition, and translation |
+| [Python Console app](./samples/python/console)                                                              | Windows, Linux, macOS  | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech-to-text WPF sample for .NET Framework on Windows](./samples/csharp/dotnet-windows/speechtotext-wpf) | Windows  | Demonstrates speech recognition |
 | [Translation WPF sample for .NET Framework on Windows](./samples/csharp/dotnet-windows/translation-wpf)     | Windows  | Demonstrates translation |
 | [Speech-to-text UWP sample](./samples/csharp/uwp/speechtotext-uwp)                                          | Windows  | Demonstrates speech recognition |
