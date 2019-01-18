@@ -120,13 +120,13 @@ struct _ASYNCAUDIO
     THREAD_HANDLE          outputThread;
 };
 
-AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
+AUDIO_SYS_HANDLE audio_create()
 {
-    (void)(format);
-    return audio_create();
+    AUDIO_WAVEFORMAT format{ 0, AUDIO_CHANNELS_MONO, AUDIO_SAMPLE_RATE, 0, 0, AUDIO_BITS };
+    return audio_create_with_parameters(format);
 }
 
-AUDIO_SYS_HANDLE audio_create()
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
 {
     AUDIO_SYS_DATA* result;
 
@@ -134,9 +134,9 @@ AUDIO_SYS_HANDLE audio_create()
     if (result != nullptr)
     {
         memset(result, 0, sizeof(AUDIO_SYS_DATA));
-        result->channels = AUDIO_CHANNELS_MONO;
-        result->sampleRate = AUDIO_SAMPLE_RATE;
-        result->bitsPerSample = AUDIO_BITS;
+        result->channels = format.nChannels;
+        result->sampleRate = format.nSamplesPerSec;
+        result->bitsPerSample = format.wBitsPerSample;
         result->waveDataDirty = true;
         result->inputFrameCount = INPUT_FRAME_COUNT;
         result->currentOutputState = AUDIO_STATE_STOPPED;
@@ -145,6 +145,7 @@ AUDIO_SYS_HANDLE audio_create()
         result->audioBufferLock = Lock_Init();
         sem_init(&result->audioFramesAvailable, 0, 0);
     }
+
     return result;
 }
 
@@ -579,7 +580,9 @@ static bool create_audio_recorder(AUDIO_SYS_DATA *engine, audio_recorder_engine_
     sampleFormat.sampleRate_ = engine->fastPathSampleRate;
     sampleFormat.framesPerBuf_ = engine->fastPathFramesPerBuffer;
 
-    engine->pcmHandle = new AudioRecorder(&sampleFormat, engine->slEngineInterface);
+    const char *deviceName = STRING_c_str(engine->deviceName);
+
+    engine->pcmHandle = new AudioRecorder(deviceName ? deviceName  : "", &sampleFormat, engine->slEngineObject, engine->slEngineInterface);
     if (!engine->pcmHandle)
     {
         return false;

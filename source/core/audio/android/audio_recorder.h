@@ -36,7 +36,7 @@ class AudioRecorder {
     int audioBufferIndex_;
 
 public:
-    explicit AudioRecorder(SampleFormat *, SLEngineItf engineEngine);
+    explicit AudioRecorder(std::string deviceName, SampleFormat *format, SLObjectItf slEngineObject, SLEngineItf engineEngine);
     ~AudioRecorder();
     SLboolean Start(void);
     SLboolean Stop(void);
@@ -47,6 +47,10 @@ public:
     void ReadAudioBuffer();
     bool EnqueueAudioBuffer();
     SLuint32 GetRecordState() const;
+
+private:
+    SLuint32 GetDeviceID(SLObjectItf slEngineObject, const std::string& deviceName);
+
 
 #ifdef ENABLE_LOG
     AndroidLog *recLog_;

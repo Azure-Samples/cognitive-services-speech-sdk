@@ -67,7 +67,59 @@ bool AudioRecorder::EnqueueAudioBuffer() {
     return true;
 }
 
-AudioRecorder::AudioRecorder(SampleFormat *sampleFormat, SLEngineItf slEngine) : 
+SLuint32 AudioRecorder::GetDeviceID(SLObjectItf slEngineObject, const std::string& deviceName)
+{
+    // configure audio source
+    // default is the default input device
+    SLuint32 deviceID = SL_DEFAULTDEVICEID_AUDIOINPUT;
+
+    // in case we got a configured device, try to find it.
+    if (!deviceName.empty())
+    {
+        LogInfo("RequestedInput specific deviceName '%s'", deviceName.c_str());
+
+        bool foundDeviceName = false;
+        SLAudioIODeviceCapabilitiesItf audioIODeviceCapabilitiesItf;
+
+        // retrieve the audio capabilities
+        SLresult result = (*slEngineObject)->GetInterface(slEngineObject, SL_IID_AUDIOIODEVICECAPABILITIES, (void*)&audioIODeviceCapabilitiesItf);
+        SLASSERT(result);
+
+#define MAX_NUMBER_INPUT_DEVICES 16
+        SLint32 numInputs = MAX_NUMBER_INPUT_DEVICES;
+        SLuint32 inputDeviceIDs[MAX_NUMBER_INPUT_DEVICES];
+        result = (*audioIODeviceCapabilitiesItf)->GetAvailableAudioInputs(audioIODeviceCapabilitiesItf, &numInputs, inputDeviceIDs);
+        SLASSERT(result);
+
+        // find the specific device by name
+        for (int i = 0; i < numInputs; i++)
+        {
+            SLAudioInputDescriptor audioInputDescriptor;
+
+            result = (*audioIODeviceCapabilitiesItf)->QueryAudioInputCapabilities(audioIODeviceCapabilitiesItf, inputDeviceIDs[i], &audioInputDescriptor);
+            SLASSERT(result);
+
+            LogInfo("Input#%d deviceName '%s'", i, audioInputDescriptor.deviceName);
+
+            if (audioInputDescriptor.deviceName &&
+                *(audioInputDescriptor.deviceName) &&
+                strcmp(deviceName.c_str(), (const char*)audioInputDescriptor.deviceName) == 0)
+            {
+                deviceID = inputDeviceIDs[i];
+                foundDeviceName = true;
+                break;
+            }
+        }
+
+        // fail if we could not find the device
+        // note: no fallback to default mic in this case!
+        SLASSERT(foundDeviceName);
+    }
+
+    return deviceID;
+}
+
+AudioRecorder::AudioRecorder(std::string deviceName, SampleFormat *sampleFormat, SLObjectItf slEngineObject, SLEngineItf slEngine) :
     callback_(nullptr),
     audioBufferIndex_(0)
 {
@@ -77,7 +129,10 @@ AudioRecorder::AudioRecorder(SampleFormat *sampleFormat, SLEngineItf slEngine) :
     ConvertToSLSampleFormat(&format_pcm, &sampleInfo_);
 
     // configure audio source
-    SLDataLocator_IODevice loc_dev = { SL_DATALOCATOR_IODEVICE, SL_IODEVICE_AUDIOINPUT, SL_DEFAULTDEVICEID_AUDIOINPUT, NULL };
+    // default is the default input device
+    SLuint32 deviceID = GetDeviceID(slEngineObject, deviceName);
+
+    SLDataLocator_IODevice loc_dev = { SL_DATALOCATOR_IODEVICE, SL_IODEVICE_AUDIOINPUT, deviceID, NULL };
     SLDataSource audioSrc = { &loc_dev, NULL };
 
     // configure audio sink
