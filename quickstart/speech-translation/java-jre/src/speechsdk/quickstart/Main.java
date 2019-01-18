@@ -9,33 +9,32 @@ import com.microsoft.cognitiveservices.speech.translation.*;
 
 public class Main {
 
-  public static void translationWithMicrophoneAsync() throws InterruptedException, ExecutionException, IOException
-  {
-       // <TranslationWithMicrophoneAsync>
-       // Creates an instance of a speech translation config with specified
-       // subscription key and service region. Replace with your own subscription key
-       // and service region (e.g., "westus").
-       SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    public static void translationWithMicrophoneAsync() throws InterruptedException, ExecutionException, IOException
+    {
+        // Creates an instance of a speech translation config with specified
+        // subscription key and service region. Replace with your own subscription key
+        // and service region (e.g., "westus").
+        SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-       // Sets source and target language(s).
-       String fromLanguage = "en-US";
-       config.setSpeechRecognitionLanguage(fromLanguage);
-       config.addTargetLanguage("de");
+        // Sets source and target language(s).
+        String fromLanguage = "en-US";
+        config.setSpeechRecognitionLanguage(fromLanguage);
+        config.addTargetLanguage("de");
 
-       // Sets voice name of synthesis output.
-       String GermanVoice = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
-       config.setVoiceName(GermanVoice);
+        // Sets voice name of synthesis output.
+        String GermanVoice = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
+        config.setVoiceName(GermanVoice);
 
-       // Creates a translation recognizer using microphone as audio input.
-       TranslationRecognizer recognizer = new TranslationRecognizer(config);
-       {
+        // Creates a translation recognizer using microphone as audio input.
+        TranslationRecognizer recognizer = new TranslationRecognizer(config);
+        {
             // Subscribes to events.
             recognizer.recognizing.addEventListener((s, e) -> {
                 System.out.println("RECOGNIZING in '" + fromLanguage + "': Text=" + e.getResult().getText());
 
                 Map<String, String> map = e.getResult().getTranslations();
                 for(String element : map.keySet()) {
-                   System.out.println("    TRANSLATING into '" + element + "': " + map.get(element));
+                    System.out.println("    TRANSLATING into '" + element + "': " + map.get(element));
                 }
             });
 
@@ -88,16 +87,15 @@ public class Main {
 
             recognizer.stopContinuousRecognitionAsync().get();
         }
-        // </TranslationWithMicrophoneAsync>
     }
 
     public static void main(String[] args) {
-      try {
-          translationWithMicrophoneAsync();
-      } catch (Exception ex) {
-          System.out.println("Unexpected exception: " + ex.getMessage());
-          assert(false);
-          System.exit(1);
+        try {
+            translationWithMicrophoneAsync();
+        } catch (Exception ex) {
+            System.out.println("Unexpected exception: " + ex.getMessage());
+            assert(false);
+            System.exit(1);
+        }
     }
-  }
 }
