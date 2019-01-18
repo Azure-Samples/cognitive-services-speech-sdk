@@ -53,6 +53,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 Console.WriteLine("SessionId: " + e.SessionId);
             };
+
+            recognizer.Canceled += (s, e) =>
+            {
+                if (e.Reason == CancellationReason.Error)
+                {
+                    Console.WriteLine("CancellationReason.Error: ErrorCode {e.ErrorCode}, ErrorDetails {e.ErrorDetails}");
+                }
+            };
             return recognizer;
         }
 
@@ -87,6 +95,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(
+                    string.IsNullOrEmpty(expectedIntentId) ? ResultReason.RecognizedSpeech : ResultReason.RecognizedIntent,
+                    result.Reason);
                 Assert.AreEqual(expectedIntentId, result.IntentId);
                 Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);
                 var json = result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
@@ -96,32 +108,36 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task RecognizeIntentSimplePhrase()
+        [DataRow(false, false)]
+        [DataRow(false, true)]
+        [DataRow(true, false)]
+        [DataRow(true, true)]
+        public async Task RecognizeIntentSimplePhrase(bool matchingPhrase, bool singleArgument)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
 
-            foreach (bool matchingPhrase in new bool[] { false, true })
-                foreach (bool singleArgument in new bool[] { false, true })
+            var phrase = matchingPhrase ? TestData.English.HomeAutomation.TurnOn.Utterance : "do not match this";
+            using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
+            {
+                var someId = "id1";
+                var expectedId = matchingPhrase ? (singleArgument ? phrase : someId) : "";
+                if (singleArgument)
                 {
-                    var phrase = matchingPhrase ? TestData.English.HomeAutomation.TurnOn.Utterance : "do not match this";
-                    using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
-                    {
-                        var someId = "id1";
-                        var expectedId = matchingPhrase ? (singleArgument ? phrase : someId) : "";
-                        if (singleArgument)
-                        {
-                            recognizer.AddIntent(phrase);
-                        }
-                        else
-                        {
-                            recognizer.AddIntent(phrase, someId);
-                        }
-                        var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                        Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);
-                        Assert.AreEqual(expectedId, result.IntentId,
-                            $"Unexpected intent ID for singleArgument={singleArgument} matchingPhrase={matchingPhrase}: is {result.IntentId}, expected {expectedId}");
-                    }
+                    recognizer.AddIntent(phrase);
                 }
+                else
+                {
+                    recognizer.AddIntent(phrase, someId);
+                }
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                // TODO cannot enable below assertion yet, RecognizedIntent is not returned - VSO:1594523
+                //Assert.AreEqual(
+                //    string.IsNullOrEmpty(expectedId) ? ResultReason.RecognizedSpeech : ResultReason.RecognizedIntent,
+                //    result.Reason);
+                Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);
+                Assert.AreEqual(expectedId, result.IntentId,
+                    $"Unexpected intent ID for singleArgument={singleArgument} matchingPhrase={matchingPhrase}: is {result.IntentId}, expected {expectedId}");
+            }
         }
 
         [TestMethod]
