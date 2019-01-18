@@ -25,6 +25,7 @@ import org.junit.Ignore;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
+import com.microsoft.cognitiveservices.speech.SessionEventArgs;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
@@ -326,14 +327,19 @@ public class SpeechRecognizerTests {
         {
             connection.openConnection(false);
         }
-        final AtomicInteger connectedEventCount = new AtomicInteger(0);;
-        final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
+        AtomicInteger connectedEventCount = new AtomicInteger(0);
+        AtomicInteger disconnectedEventCount = new AtomicInteger(0);
+        AtomicInteger sessionStoppedCount = new AtomicInteger(0);
         connection.connected.addEventListener((o, connectionEventArgs) -> {
             connectedEventCount.getAndIncrement();
         });
 
         connection.disconnected.addEventListener((o, connectionEventArgs) -> {
             disconnectedEventCount.getAndIncrement();
+        });
+
+        r.sessionStopped.addEventListener((o, SessionEventArgs) -> {
+            sessionStoppedCount.getAndIncrement();
         });
 
         Future<SpeechRecognitionResult> future = r.recognizeOnceAsync();
@@ -349,6 +355,15 @@ public class SpeechRecognizerTests {
         assertNotNull(res);
         assertEquals(ResultReason.RecognizedSpeech, res.getReason());
         assertEquals("What's the weather like?", res.getText());
+
+        // wait until we get the SessionStopped event.
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) && (sessionStoppedCount.get() == 0)) {
+            Thread.sleep(200);
+        }
+
+        // It is not required to explictly close the connection. This is also used to keep the connection object alive.
+        connection.closeConnection();
 
         TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
@@ -427,6 +442,7 @@ public class SpeechRecognizerTests {
 
         AtomicInteger connectedEventCount = new AtomicInteger(0);
         AtomicInteger disconnectedEventCount = new AtomicInteger(0);
+        AtomicInteger sessionStoppedCount = new AtomicInteger(0);
         connection.connected.addEventListener((o, connectionEventArgs) -> {
             connectedEventCount.getAndIncrement();
         });
@@ -470,18 +486,24 @@ public class SpeechRecognizerTests {
         });
 
         r.sessionStopped.addEventListener((o, e) -> {
+            sessionStoppedCount.getAndIncrement();
             int now = eventIdentifier.getAndIncrement();
             eventsMap.put("sessionStopped-" + System.currentTimeMillis(), now);
             eventsMap.put("sessionStopped", now);
         });
 
-        // Note: TODO session stopped event not necessarily raised before async operation returns!
-        //       this makes this test flaky
         SpeechRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         assertEquals(ResultReason.RecognizedSpeech, res.getReason());
         assertEquals("What's the weather like?", res.getText());
 
+        // wait until we get the SessionStopped event.
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) && (sessionStoppedCount.get() == 0)) {
+            Thread.sleep(200);
+        }
+        // It is not required to explictly close the connection. This is also used to keep the connection object alive.
+        connection.closeConnection();
         TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         // session events are first and last event
@@ -567,7 +589,7 @@ public class SpeechRecognizerTests {
         Connection connection = Connection.fromRecognizer(r);
         if (usingPreConnection)
         {
-            //connection.startConnection(true);
+            connection.openConnection(true);
         }
 
         Future<?> future = r.startContinuousRecognitionAsync();
@@ -650,6 +672,8 @@ public class SpeechRecognizerTests {
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
 
+        // It is not required to explictly close the connection. This is also used to keep the connection object alive.
+        connection.closeConnection();
         TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         r.close();

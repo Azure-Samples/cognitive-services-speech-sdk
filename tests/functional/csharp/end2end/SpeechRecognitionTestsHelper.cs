@@ -65,6 +65,45 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        public async Task<SpeechRecognitionResult> CompleteRecognizeOnceAsync(SpeechRecognizer recognizer, Connection connection = null)
+        {
+            taskCompletionSource = new TaskCompletionSource<int>();
+            recognizer.SessionStopped += (s, e) =>
+            {
+                SessionStoppedEventCounter(s, e);
+                taskCompletionSource.TrySetResult(0);
+            };
+            string canceled = string.Empty;
+            recognizer.Canceled += (s, e) =>
+            {
+                CanceledEventCounter(s, e);
+                canceled = e.ErrorDetails;
+                taskCompletionSource.TrySetResult(0);
+            };
+            if (connection != null)
+            {
+                connection.Connected += ConnectedEventCounter;
+                connection.Disconnected += DisconnectedEventCounter;
+            }
+
+            var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+            await Task.WhenAny(taskCompletionSource.Task, Task.Delay(timeout));
+
+            if (connection != null)
+            {
+                connection.Connected -= ConnectedEventCounter;
+                connection.Disconnected -= DisconnectedEventCounter;
+            }
+
+            Assert.IsTrue(SessionStoppedEventCount == 1 || ErrorEventCount == 1);
+            if (!string.IsNullOrEmpty(canceled))
+            {
+                Assert.Fail($"Recognition Canceled: {canceled}");
+            }
+
+            return result;
+        }
+
         public async Task<string> GetFirstRecognizerResult(SpeechRecognizer speechRecognizer)
         {
             List<string> recognizedText = new List<string>();

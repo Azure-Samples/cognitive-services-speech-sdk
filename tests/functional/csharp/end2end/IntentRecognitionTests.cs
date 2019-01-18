@@ -146,23 +146,43 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
             int connectedEventCount = 0;
             int disconnectedEventCount = 0;
+            EventHandler<ConnectionEventArgs> myConnectedHandler = (s, e) =>
+            {
+                connectedEventCount++;
+            };
+            EventHandler<ConnectionEventArgs> myDisconnectedHandler = (s, e) =>
+            {
+                disconnectedEventCount++;
+            };
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
                 var connection = Connection.FromRecognizer(recognizer);
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
                 recognizer.AddIntent(model, "HomeAutomation.TurnOn", "my-custom-intent-id-string");
 
-                connection.Connected += (s, e) =>
+                var tcs = new TaskCompletionSource<int>();
+                recognizer.SessionStopped += (s, e) =>
                 {
-                    connectedEventCount++;
+                    tcs.TrySetResult(0);
                 };
-                connection.Disconnected += (s, e) =>
+                recognizer.Canceled += (s, e) =>
                 {
-                    disconnectedEventCount++;
+                    Console.WriteLine("Canceled: " + e.SessionId);
+                    tcs.TrySetResult(0);
                 };
+                connection.Connected += myConnectedHandler;
+                connection.Disconnected += myDisconnectedHandler;
+
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromMinutes(2)));
+
+                connection.Connected -= myConnectedHandler;
+                connection.Disconnected -= myDisconnectedHandler;
+
+                Console.WriteLine($"ConnectedEventCount: {connectedEventCount}, DisconnectedEventCount: {disconnectedEventCount}");
                 Assert.IsTrue(connectedEventCount > 0, AssertOutput.ConnectedEventCountMustNotBeZero);
-                Assert.IsTrue(connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
+                Assert.IsTrue(connectedEventCount == disconnectedEventCount || connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
+
                 Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
             }
         }

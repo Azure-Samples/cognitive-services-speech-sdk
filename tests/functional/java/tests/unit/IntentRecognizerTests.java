@@ -29,6 +29,8 @@ import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
 import com.microsoft.cognitiveservices.speech.Connection;
+import com.microsoft.cognitiveservices.speech.util.EventHandler;
+import com.microsoft.cognitiveservices.speech.ConnectionEventArgs;
 
 import tests.Settings;
 import tests.TestHelper;
@@ -217,14 +219,17 @@ public class IntentRecognizerTests {
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
 
-        final AtomicInteger connectedEventCount = new AtomicInteger(0);;
-        final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
-        connection.connected.addEventListener((o, connectionEventArgs) -> {
+        AtomicInteger connectedEventCount = new AtomicInteger(0);
+        AtomicInteger disconnectedEventCount = new AtomicInteger(0);
+        EventHandler<ConnectionEventArgs> myConnectedHandler = (o, connectionEventArgs) -> {
             connectedEventCount.getAndIncrement();
-        });
-        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+        };
+        EventHandler<ConnectionEventArgs> myDisconnectedHandler = (o, connectionEventArgs) -> {
             disconnectedEventCount.getAndIncrement();
-        });
+        };
+
+        connection.connected.addEventListener(myConnectedHandler);
+        connection.disconnected.addEventListener(myDisconnectedHandler);
 
         r.recognized.addEventListener((o, e) -> {
             TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
@@ -262,7 +267,9 @@ public class IntentRecognizerTests {
             eventsMap.put("sessionStarted", now);
         });
 
+        AtomicInteger sessionStoppedCount = new AtomicInteger(0);
         r.sessionStopped.addEventListener((o, e) -> {
+            sessionStoppedCount.getAndIncrement();
             int now = eventIdentifier.getAndIncrement();
             eventsMap.put("sessionStopped-" + System.currentTimeMillis(), now);
             eventsMap.put("sessionStopped", now);
@@ -273,6 +280,14 @@ public class IntentRecognizerTests {
         assertTrue(res.getReason() != ResultReason.Canceled);
         assertEquals("What's the weather like?", res.getText());
 
+        // wait until we get the SessionStopped event.
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) && (sessionStoppedCount.get() == 0)) {
+            Thread.sleep(200);
+        }
+
+        connection.connected.removeEventListener(myConnectedHandler);
+        connection.disconnected.removeEventListener(myDisconnectedHandler);
         TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         // session events are first and last event
@@ -376,14 +391,17 @@ public class IntentRecognizerTests {
 
         final ArrayList<String> rEvents = new ArrayList<>();
 
-        final AtomicInteger connectedEventCount = new AtomicInteger(0);;
-        final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
-        connection.connected.addEventListener((o, connectionEventArgs) -> {
+        AtomicInteger connectedEventCount = new AtomicInteger(0);
+        AtomicInteger disconnectedEventCount = new AtomicInteger(0);
+        EventHandler<ConnectionEventArgs> myConnectedHandler = (o, connectionEventArgs) -> {
             connectedEventCount.getAndIncrement();
-        });
-        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+        };
+        EventHandler<ConnectionEventArgs> myDisconnectedHandler = (o, connectionEventArgs) -> {
             disconnectedEventCount.getAndIncrement();
-        });
+        };
+
+        connection.connected.addEventListener(myConnectedHandler);
+        connection.disconnected.addEventListener(myDisconnectedHandler);
 
         r.recognized.addEventListener((o, e) -> {
             rEvents.add("Result@" + System.currentTimeMillis());
@@ -404,6 +422,9 @@ public class IntentRecognizerTests {
                 (rEvents.isEmpty())) {
             Thread.sleep(200);
         }
+
+        connection.connected.removeEventListener(myConnectedHandler);
+        connection.disconnected.removeEventListener(myDisconnectedHandler);
 
         // test that we got one result
         // TODO multi-phrase test with several phrases in one session

@@ -5,6 +5,7 @@ package tests.endtoend;
 //
 
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
@@ -32,6 +33,9 @@ public class SampleSimpleRecognize implements Runnable {
         return disconnectedEventCount;
     }
 
+    // This is to keep the connection alive.
+    private Connection connection;
+
     ///////////////////////////////////////////////////
     // recognize
     ///////////////////////////////////////////////////
@@ -46,7 +50,7 @@ public class SampleSimpleRecognize implements Runnable {
             // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
             AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.WavFile);
             SpeechRecognizer reco = new SpeechRecognizer(config, audioInput);
-            Connection connection = Connection.fromRecognizer(reco);
+            connection = Connection.fromRecognizer(reco);
 
             this.connectedEventCount = 0;
             this.disconnectedEventCount = 0;
@@ -59,6 +63,11 @@ public class SampleSimpleRecognize implements Runnable {
                 this.disconnectedEventCount++;
             });
 
+            AtomicInteger sessionStoppedCount = new AtomicInteger(0);
+            reco.sessionStopped.addEventListener((o, SessionEventArgs) -> {
+                sessionStoppedCount.getAndIncrement();
+            });
+
             Future<SpeechRecognitionResult> task = reco.recognizeOnceAsync();
 
             SpeechRecognitionResult result = task.get();
@@ -66,6 +75,12 @@ public class SampleSimpleRecognize implements Runnable {
 
             System.out.println("Recognizer returned: " + recognitionResult);
             
+            // wait until we get the SessionStopped event.
+            long now = System.currentTimeMillis();
+            while(((System.currentTimeMillis() - now) < 30000) && (sessionStoppedCount.get() == 0)) {
+                Thread.sleep(200);
+            }
+
             // Note: do not close the config as it is shared between tests.
             reco.close();
             audioInput.close();

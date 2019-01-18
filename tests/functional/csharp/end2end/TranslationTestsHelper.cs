@@ -66,7 +66,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task<TranslationRecognitionResult> GetTranslationFinalResult(string path, string fromLanguage, List<string> toLanguages)
         {
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages, voice:null)))
-            { 
+            {
+                var tcs = new TaskCompletionSource<int>();
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    tcs.TrySetResult(0);
+                };
+                recognizer.Canceled += (s, e) =>
+                {
+                    Console.WriteLine("Canceled: " + e.SessionId);
+                    tcs.TrySetResult(0);
+                };
                 var connection = Connection.FromRecognizer(recognizer);
                 int connectedEventCount = 0;
                 int disconnectedEventCount = 0;
@@ -78,10 +88,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     disconnectedEventCount++;
                 };
-                TranslationRecognitionResult result = null;
-                await Task.WhenAny(recognizer.RecognizeOnceAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
-                SpeechRecognitionTestsHelper.AssertConnectionCountMatching(connectedEventCount, disconnectedEventCount);
 
+                TranslationRecognitionResult result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                await Task.WhenAny(tcs.Task, Task.Delay(timeout));
+                SpeechRecognitionTestsHelper.AssertConnectionCountMatching(connectedEventCount, disconnectedEventCount);
+                // It is not required to close the conneciton explictly. But it is also used to keep the connection object alive to ensure that
+                // connected and disconencted events can be received.
+                connection.Close();
                 return result;
             }
         }
@@ -146,6 +159,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
+                // It is not required to close the conneciton explictly. But it is also used to keep the connection object alive to ensure that
+                // connected and disconencted events can be received.
+                connection.Close();
+
                 SpeechRecognitionTestsHelper.AssertConnectionCountMatching(connectedEventCount, disconnectedEventCount);
 
                 if (!string.IsNullOrEmpty(canceled))

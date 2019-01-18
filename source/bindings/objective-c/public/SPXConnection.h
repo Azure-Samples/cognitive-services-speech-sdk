@@ -54,11 +54,15 @@ typedef void (^SPXConnectionEventHandler)(SPXConnection* _Nonnull, SPXConnection
 
 /**
  * Subscribes to the Connected event which indicates that the recognizer is connected to service.
+ * In order to receive the Connected event after subscribing to it, the Connection object itself needs to be alive.
+ * If the Connection object owning this event is out of its life time, all subscribed events won't be delivered.
  */
 - (void)addConnectedEventHandler:(nonnull SPXConnectionEventHandler)eventHandler;
 
 /**
  * Subscribe to the Diconnected event which indicates that the recognizer is disconnected from service.
+ * In order to receive the Disonnected event after subscribing to it, the Connection object itself needs to be alive.
+ * If the Connection object owning this event is out of its life time, all subscribed events won't be delivered.
  */
 - (void)addDisconnectedEventHandler:(nonnull SPXConnectionEventHandler)eventHandler;
 

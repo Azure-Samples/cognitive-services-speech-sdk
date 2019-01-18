@@ -869,11 +869,15 @@ void CSpxAudioStreamSession::DispatchEvent(const list<weak_ptr<ISpxRecognizer>>&
         {
             auto recognizer = weakRecognizer.lock();
             if (!recognizer)
+            {
                 continue;
+            }
 
             auto ptr = SpxQueryInterface<ISpxRecognizerEvents>(recognizer);
             if (!ptr)
+            {
                 continue;
+            }
 
             switch (sessionType)
             {

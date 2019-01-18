@@ -75,11 +75,15 @@ namespace Microsoft.CognitiveServices.Speech
 
         /// <summary>
         /// The Connected event to indicate that the recognizer is connected to service.
+        /// In order to receive the Connected event after subscribing to it, the Connection object itself needs to be alive.
+        /// If the Connection object owning this event is out of its life time, all subscribed events won't be delivered.
         /// </summary>
         public event EventHandler<ConnectionEventArgs> Connected;
 
         /// <summary>
         /// The Diconnected event to indicate that the recognizer is disconnected from service.
+        /// In order to receive the Disconnected event after subscribing to it, the Connection object itself needs to be alive.
+        /// If the Connection object owning this event is out of its life time, all subscribed events won't be delivered.
         /// </summary>
         public event EventHandler<ConnectionEventArgs> Disconnected;
 

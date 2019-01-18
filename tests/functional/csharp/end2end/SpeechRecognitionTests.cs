@@ -63,8 +63,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     connection.Open(false);
                 }
-                helper.SubscribeToCounterEventHandlers(recognizer, connection);
-                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
                 AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
                 Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "Duration == 0");
                 Assert.AreEqual(300000, result.OffsetInTicks, "Offset not zero");
@@ -107,8 +107,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     connection.Open(false);
                 }
-                helper.SubscribeToCounterEventHandlers(recognizer, connection);
-                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
                 AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
             }
@@ -336,6 +335,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 AssertMatching(TestData.English.Batman.Utterances[0], recognizedText[0]);
                 AssertMatching(TestData.English.Batman.Utterances.Last(), recognizedText.Last());
+
+                // It is not required to close the conneciton explictly. But it is also used to keep the connection object alive to ensure that
+                // connected and disconencted events can be received.
+                connection.Close();
             }
         }
 

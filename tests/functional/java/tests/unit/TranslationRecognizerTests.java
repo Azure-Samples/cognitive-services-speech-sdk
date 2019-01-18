@@ -22,6 +22,7 @@ import org.junit.Ignore;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
+import com.microsoft.cognitiveservices.speech.SessionEventArgs;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.PropertyId;
@@ -232,15 +233,20 @@ public class TranslationRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
-        final AtomicInteger connectedEventCount = new AtomicInteger(0);;
-        final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
+
+        AtomicInteger connectedEventCount = new AtomicInteger(0);
+        AtomicInteger disconnectedEventCount = new AtomicInteger(0);
+        AtomicInteger sessionStoppedCount = new AtomicInteger(0);
         connection.connected.addEventListener((o, connectionEventArgs) -> {
             connectedEventCount.getAndIncrement();
         });
 
         connection.disconnected.addEventListener((o, connectionEventArgs) -> {
             disconnectedEventCount.getAndIncrement();
+        });
+
+        r.sessionStopped.addEventListener((o, SessionEventArgs) -> {
+            sessionStoppedCount.getAndIncrement();
         });
 
         Future<TranslationRecognitionResult> future = r.recognizeOnceAsync();
@@ -263,8 +269,15 @@ public class TranslationRecognizerTests {
         assertEquals(1, res.getTranslations().size());
         assertEquals("What's the weather like?", res.getTranslations().get("en-US")); // translated text
 
+        // wait until we get the SessionStopped event.
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) && (sessionStoppedCount.get() == 0)) {
+            Thread.sleep(200);
+        }
         TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
+        // It is not required to explictly close the connection. This is also used to keep the connection object alive.
+        connection.closeConnection();
         r.close();
         s.close();
     }
@@ -287,8 +300,9 @@ public class TranslationRecognizerTests {
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
 
-        final AtomicInteger connectedEventCount = new AtomicInteger(0);;
-        final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
+        AtomicInteger connectedEventCount = new AtomicInteger(0);
+        AtomicInteger disconnectedEventCount = new AtomicInteger(0);
+        AtomicInteger sessionStoppedCount = new AtomicInteger(0);
         connection.connected.addEventListener((o, connectionEventArgs) -> {
             connectedEventCount.getAndIncrement();
         });
@@ -332,38 +346,41 @@ public class TranslationRecognizerTests {
         });
 
         r.sessionStopped.addEventListener((o, e) -> {
+            sessionStoppedCount.getAndIncrement();
             int now = eventIdentifier.getAndIncrement();
             eventsMap.put("sessionStopped-" + System.currentTimeMillis(), now);
             eventsMap.put("sessionStopped", now);
         });
 
-        // TODO there is no guarantee that SessionStoppedEvent comes before the recognizeOnceAsync() call returns?!
-        //      this is why below SessionStoppedEvent checks are conditional
         TranslationRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         assertTrue(res.getReason() != ResultReason.Canceled);
         assertEquals("What's the weather like?", res.getText());
 
+        // wait until we get the SessionStopped event.
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) && (sessionStoppedCount.get() == 0)) {
+            Thread.sleep(200);
+        }
+        // It is not required to explictly close the connection. This is also used to keep the connection object alive.
+        connection.closeConnection();
         TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
         assertTrue(LAST_RECORDED_EVENT_ID > FIRST_EVENT_ID);
         assertEquals(FIRST_EVENT_ID, eventsMap.get("sessionStarted"));
-        if(eventsMap.containsKey("sessionStopped"))
-            assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get("sessionStopped"));
+        assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get("sessionStopped"));
 
         // end events come after start events.
-        if(eventsMap.containsKey("sessionStopped"))
-            assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("sessionStopped"));
+         assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("sessionStopped"));
         assertTrue(eventsMap.get("speechStartDetected") < eventsMap.get("speechEndDetected"));
         assertEquals((Integer)(FIRST_EVENT_ID + 1), eventsMap.get("speechStartDetected"));
         assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 1), eventsMap.get("speechEndDetected"));
 
         // recognition events come after session start but before session end events
         assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("speechStartDetected"));
-        if(eventsMap.containsKey("sessionStopped"))
-            assertTrue(eventsMap.get("speechEndDetected") < eventsMap.get("sessionStopped"));
+        assertTrue(eventsMap.get("speechEndDetected") < eventsMap.get("sessionStopped"));
 
         // there is no partial result reported after the final result
         // (and check that we have intermediate and final results recorded)
@@ -508,6 +525,8 @@ public class TranslationRecognizerTests {
 
         TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
+        // It is not required to explictly close the connection. This is also used to keep the connection object alive.
+        connection.closeConnection();
         r.close();
         s.close();
     }

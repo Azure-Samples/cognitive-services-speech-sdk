@@ -41,8 +41,8 @@ public final class Connection implements Closeable
 
     /**
      * Starts to set up connection to the service.
-     * Users can optionally call Open() to manually set up a connection in advance before starting recognition on the 
-     * Recognizer associated with this Connection. After starting recognition, calling Open() might fail, depending on 
+     * Users can optionally call openConnection() to manually set up a connection in advance before starting recognition on the 
+     * Recognizer associated with this Connection. After starting recognition, calling OpenConnection() might fail, depending on 
      * the process state of the Recognizer. But the failure does not affect the state of the associated Recognizer.
      * Note: On return, the connection might not be ready yet. Please subscribe to the Connected event to
      * be notfied when the connection is established.
@@ -55,7 +55,7 @@ public final class Connection implements Closeable
 
     /**
      * Closes the connection the service.
-     * Users can optionally call Close() to manually shutdown the connection of the associated Recognizer. The call
+     * Users can optionally call closeConnection() to manually shutdown the connection of the associated Recognizer. The call
      * might fail, depending on the process state of the Recognizer. But the failure does not affect the state of the 
      * associated Recognizer.
      */
@@ -66,11 +66,15 @@ public final class Connection implements Closeable
 
     /**
      * The Connected event to indicate that the recognizer is connected to service.
+     * In order to receive the connected event after subscribing to it, the Connection object itself needs to be alive.
+     * If the Connection object owning this event is out of its life time, all subscribed events won't be delivered.
      */
     public final EventHandlerImpl<ConnectionEventArgs> connected = new EventHandlerImpl<ConnectionEventArgs>();
 
     /**
      * The Diconnected event to indicate that the recognizer is disconnected from service.
+     * In order to receive the disconnected event after subscribing to it, the Connection object itself needs to be alive.
+     * If the Connection object owning this event is out of its life time, all subscribed events won't be delivered.
      */
     public final EventHandlerImpl<ConnectionEventArgs> disconnected = new EventHandlerImpl<ConnectionEventArgs>();
 
