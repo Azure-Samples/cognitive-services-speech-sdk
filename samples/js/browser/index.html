@@ -198,12 +198,12 @@
                 a.open("GET", authorizationEndpoint);
                 a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 a.send("");
-                a.onload = function() {
+                a.onload = function () {
                     var token = JSON.parse(atob(this.responseText.split(".")[1]));
-                    regionKey.value = token.region;
+                    regionOptions.value = token.region;
                     authorizationToken = this.responseText;
-                    subscriptionKey.disabled = true;
-                    subscriptionKey.value = "using authorization token (hit F5 to refresh)";
+                    key.disabled = true;
+                    key.value = "using authorization token (hit F5 to refresh)";
                     console.log("Got an authorization token: " + token);
                 }
             }
@@ -268,7 +268,7 @@
             inputSource = document.getElementById("inputSource");
             filePicker = document.getElementById('filePicker');
 
-            // Starts continuous voice recognition. Recognition will continue until there is ~20 seconds of silence or ~10 minutes of speech.
+            // Starts continuous speech recognition.
             sdkStartContinousRecognitionBtn.addEventListener("click", function () {
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
@@ -326,8 +326,8 @@
                 // This can happen for two broad classes of reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
-                // 2. Speech was detected to have ended.
-                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                // 2. No additional audio is available.
+                //    Caused by the input stream being closed or reaching the end of an audio file.
                 reco.canceled = function (s, e) {
                     window.console.log(e);
 
@@ -387,7 +387,7 @@
                 sdkStopContinousRecognitionBtn.disabled = true;
             });
 
-            // Starts continuous voice translation. Recognition will continue until there is ~20 seconds of silence or ~10 minutes of speech.
+            // Starts continuous speech translation.
             sdkStartContinousTranslationBtn.addEventListener("click", function () {
                 var lastRecognized = "";
                 phraseDiv.innerHTML = "";
@@ -413,12 +413,12 @@
 
                 // Defines the language(s) that speech should be translated to.
                 // Multiple languages can be specified for text translation and will be returned in a map.
-                speechConfig.addTargetLanguage(languageTargetOptions.value.split(":")[0]);
+                speechConfig.addTargetLanguage(languageTargetOptions.value.split("(")[1].substring(0, 5));
 
                 // If voice output is requested, set the target voice.
                 // If multiple text translations were requested, only the first one added will have audio synthesised for it.
                 if (voiceOutput.checked) {
-                    speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, languageTargetOptions.value.replace(":", "-"));
+                    speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, languageTargetOptions.value);
                 }
 
                 reco = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
@@ -433,7 +433,7 @@
                     window.console.log(e);
                     statusDiv.innerHTML += "(recognizing) Reason: " + SpeechSDK.ResultReason[e.result.reason] + " Text: " + e.result.text + " Translations:";
 
-                    var language = languageTargetOptions.value.split("-")[0];
+                    var language = languageTargetOptions.value.split("(")[1].substring(0, 2);
 
                     statusDiv.innerHTML += " [" + language + "] " + e.result.translations.get(language);
                     statusDiv.innerHTML += "\r\n";
@@ -449,7 +449,7 @@
                     window.console.log(e);
                     statusDiv.innerHTML += "(recognized)  Reason: " + SpeechSDK.ResultReason[e.result.reason] + " Text: " + e.result.text + " Translations:";
 
-                    var language = languageTargetOptions.value.split("-")[0];
+                    var language = languageTargetOptions.value.split("(")[1].substring(0, 2);
 
                     statusDiv.innerHTML += " [" + language + "] " + e.result.translations.get(language);
                     statusDiv.innerHTML += "\r\n";
@@ -463,8 +463,8 @@
                 // This can happen for two broad classes of reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
-                // 2. Speech was detected to have ended.
-                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                // 2. No additional audio is available.
+                //    Caused by the input stream being closed or reaching the end of an audio file.
                 reco.canceled = function (s, e) {
                     window.console.log(e);
 
@@ -583,8 +583,8 @@
                 // This can happen for two broad classes or reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
-                // 2. Speech was detected to have ended.
-                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                // 2. No additional audio is available.
+                //    Caused by the input stream being closed or reaching the end of an audio file.
                 reco.canceled = function (s, e) {
                     window.console.log(e);
 
@@ -735,8 +735,8 @@
                 // This can happen for two broad classes or reasons.
                 // 1. An error is encountered.
                 //    In this case the .errorDetails property will contain a textual representation of the error.
-                // 2. Speech was detected to have ended.
-                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                // 2. No additional audio is available.
+                //    Caused by the input stream being closed or reaching the end of an audio file.
                 reco.canceled = function (s, e) {
                     window.console.log(e);
 

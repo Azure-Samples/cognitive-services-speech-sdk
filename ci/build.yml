@@ -7,63 +7,75 @@
 #   SpeechSdkVersion - Speech SDK version to use
 #   SpeechSdkNuGetSource - where to pick up the Speech SDK from ("nuget.org" or "VstsFeed")
 #   SpeechSdkVstsFeed - VSTS feed to use if SpeechSdkNuGetSource == "VstsFeed"
+#
+
+trigger:
+- master
+
+pr:
+- master
+
 resources:
 - repo: self
   clean: true
-phases:
-- phase: Pre
-  queue:
-    name: Hosted Linux Preview
+
+variables:
+  SPEECHSDK_NUGET_VERSION: 4.6
+
+jobs:
+
+- job: Pre
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 10
   steps:
-  - task: Bash@3
-    inputs:
-      filePath: ./ci/check-git-head.sh
+  - bash: ./ci/check-git-head.sh
     displayName: Repository checks
-  - task: Bash@3
+  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+    displayName: Component Detection
+    condition: >
+      and(eq(variables['System.CollectionId'], '19422243-19b9-4d85-9ca6-bc961861d287'),
+        eq(variables['System.DefinitionId'], '5400'),
+        eq(variables['Build.SourceBranch'], 'refs/heads/master'),
+        or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
+  - bash: |
+      . ci/functions.sh || exit 1
+      set -u -e -o pipefail
+      case "$(SpeechSdkNuGetSource)" in
+        nuget.org)
+          V_VSTS_FEED=
+          V_INCLUDE_NUGET_ORG=true
+          ;;
+        VstsFeed)
+          V_VSTS_FEED="$(SpeechSdkVstsFeed)"
+          # TODO should revisit if we depend on other public NuGet packages:
+          V_INCLUDE_NUGET_ORG=false
+          ;;
+        *)
+          echo Unexpected value SpeechSdkNuGetSource=$(SpeechSdkNuGetSource)
+          exit 1
+          ;;
+      esac
+      vsts_setoutvar V_VSTS_FEED "$V_VSTS_FEED"
+      vsts_setoutvar V_INCLUDE_NUGET_ORG "$V_INCLUDE_NUGET_ORG"
     name: var
     displayName: Set variables
-    inputs:
-      targetType: inline
-      script: |
-        . ci/functions.sh
-        set -e -o pipefail
-        case "$(SpeechSdkNuGetSource)" in
-          nuget.org)
-            V_VSTS_FEED=
-            V_INCLUDE_NUGET_ORG=true
-            ;;
-          VstsFeed)
-            V_VSTS_FEED="$(SpeechSdkVstsFeed)"
-            # TODO should revisit if we depend on other public NuGet packages:
-            V_INCLUDE_NUGET_ORG=false
-            ;;
-          *)
-            echo Unexpected value SpeechSdkNuGetSource=$(SpeechSdkNuGetSource)
-            exit 1
-            ;;
-        esac
-        vsts_setoutvar V_VSTS_FEED "$V_VSTS_FEED"
-        vsts_setoutvar V_INCLUDE_NUGET_ORG "$V_INCLUDE_NUGET_ORG"
-- phase: Windows
+
+- job: Windows
   dependsOn: Pre
-  queue:
+  timeoutInMinutes: 60
+  pool:
     name: Hosted VS2017
   variables:
     V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
     V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]
   steps:
-  - task: Bash@3
-    displayName: Patch samples to version $(SpeechSdkVersion)
-    inputs:
-      targetType: inline
-      script: |
-        set -e -x -o pipefail
-        perl ci/patch-samples.pl "$(SpeechSdkVersion)" .
-        git diff
+  - bash: 'perl ci/patch-samples.pl "$(SpeechSdkVersion)" . && git diff'
+    displayName: Patch samples
   - task: NuGetToolInstaller@0
-    displayName: Use NuGet 4.6.*
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
-      versionSpec: 4.6
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
   - task: NuGetCommand@2
     inputs:
       command: restore
@@ -76,6 +88,5 @@ phases:
     displayName: 'Build samples (*.sln)'
     # Get results from all builds:
     continueOnError: true
-  - bash: |
-      ./ci/run-gradle.sh
+  - bash: ./ci/run-gradle.sh
     displayName: 'Build samples (gradle)'
