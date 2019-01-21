@@ -121,18 +121,22 @@ VARS="$(perl "$SCRIPT_DIR/"evaluate-test-config.pl $verbose_switch --format bash
 
 eval -- "$VARS"
 
-if [[ $(uname) = Darwin ]]; then
-  coreutilsPrefix=g
-else
-  coreutilsPrefix=
-fi
+cmdTimeout=
+[[ $(type -t timeout) != file ]] || cmdTimeout=timeout
+[[ $(type -t gtimeout) != file ]] || cmdTimeout=gtimeout
+[[ -n cmdTimeout ]] || exitWithFailure "coreutils timeout command not found\n"
+
+callStdbuf=()
+[[ $(type -t gstdbuf) != file ]] || callStdbuf=(gstdbuf)
+[[ $(type -t stdbuf) != file ]] || callStdbuf=(stdbuf)
+[[ -z $callStdbuf ]] || callStdbuf+=(-o0 -e0)
 
 pass=0
 total=0
 for testfile in "${testsToRun[@]}"; do
   T="$(basename "$testfile" .sh)"
   echo Starting $T with timeout ${options[timeout]}
-  ${coreutilsPrefix}timeout -k 5s "${options[timeout]}" ${coreutilsPrefix}stdbuf -o0 -e0 \
+  $cmdTimeout -k 5s "${options[timeout]}" ${callStdbuf[@]} \
   "$testfile" "${options[build-dir]}" "${options[platform]}" "$binaryDir"
   exitCode=$?
   if [[ $exitCode == 0 ]]; then

@@ -88,7 +88,7 @@ function endTests {
 
 function redact {
   # N.B. receiving stdin as first command in function.
-  $([[ $(uname) = Darwin ]] && printf 'g' ]])stdbuf -o0 -e0 perl -lpe 'BEGIN { if (@ARGV) { $re = sprintf "(?:%s)", (join "|", map { quotemeta $_ } splice @ARGV); $re = qr/$re/ } } $re and s/$re/***/gi' $@
+  perl -MIO::Handle -lpe 'BEGIN { STDOUT->autoflush(1); STDERR->autoflush(1); if (@ARGV) { $re = sprintf "(?:%s)", (join "|", map { quotemeta $_ } splice @ARGV); $re = qr/$re/ } } $re and s/$re/***/gi' $@
 }
 
 function runTest {
@@ -112,23 +112,25 @@ function runTest {
   local classnameRef=${_testStateVarPrefix}_classname
   local redactStringsRef=${_testStateVarPrefix}_redactStrings
 
+  local callStdbuf=()
+  [[ $(type -t stdbuf) != file ]] || callStdbuf=(stdbuf)
+  [[ $(type -t gstdbuf) != file ]] || callStdbuf=(gstdbuf)
+  [[ -z $callStdbuf ]] || callStdbuf+=(-o0 -e0)
+
+  local cmdTimeout=false
+  [[ $(type -t timeout) != file ]] || cmdTimeout=timeout
+  [[ $(type -t gtimeout) != file ]] || cmdTimeout=gtimeout
+
   print_vars = TEST_NAME TIMEOUT_SECONDS COMMAND - |
     redact ${!redactStringsRef} |
     tee -a "${!outputRef}.out"
 
   local START_SECONDS EXIT_CODE END_SECONDS TIME_SECONDS TAIL
 
-  local COREUTILS_PREFIX
-  if [[ $(uname) = Darwin ]]; then
-    COREUTILS_PREFIX=g
-  else
-    COREUTILS_PREFIX=
-  fi
-
   START_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
   (
   set +o pipefail
-  ${COREUTILS_PREFIX}timeout -k 5s $TIMEOUT_SECONDS ${COREUTILS_PREFIX}stdbuf -o0 -e0 "$@" 2>&1 | redact ${!redactStringsRef} |
+  $cmdTimeout -k 5s $TIMEOUT_SECONDS ${callStdbuf[@]} "$@" 2>&1 | redact ${!redactStringsRef} |
     if [[ -n $testOutput ]]; then tee "$testOutput"; else cat; fi \
       1>> "${!outputRef}.out"
   exit ${PIPESTATUS[0]}
