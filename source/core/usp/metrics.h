@@ -21,12 +21,11 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
-#include "parson.h"
 
 #include <json.h>
 
 /**
- * Returns the the current time used for telemetry events.
+ * Returns the current time used for telemetry events.
  * @return A 64-bit time value.
  */
 extern uint64_t telemetry_gettime();

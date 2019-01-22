@@ -86,7 +86,3 @@ setup.cfg text
 *.snk binary
 *.wav binary
 *.zip binary
-
-# externals are ignored
-external/curl/**/* binary
-external/openssl/**/* binary

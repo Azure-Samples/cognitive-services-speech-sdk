@@ -4,19 +4,7 @@ Do Not Translate or Localize
 
 This project is based on or incorporates material from the projects listed below (Third Party IP). The original copyright notice and the license under which Microsoft received such Third Party IP, are set forth below. Such licenses and notices are provided for informational purposes only. Where permitted, Microsoft licenses the Third Party IP to you under the licensing terms for the Microsoft product. Microsoft reserves all other rights not expressly granted under this agreement, whether by implication, estoppel or otherwise.
 
-**a. Parson - Lightweight JSON library written in C**
-
-The Cognitive Services Client Speech SDK is using Parson, obtained from https://github.com/kgabis/parson. It is licensed under the [The MIT License (MIT)](https://github.com/kgabis/parson#license):
-
-    Copyright (c) 2012 - 2017 Krzysztof Gabis
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-**b. azure-c-shared-utility - Azure C SDKs common code**
+**a. azure-c-shared-utility - Azure C SDKs common code**
 
 The Cognitive Services Client Speech SDK is using Azure C SDK Common Code, obtained from https://github.com/Azure/azure-c-shared-utility. It is licensed under the The MIT License (MIT):
 
@@ -42,7 +30,7 @@ The Cognitive Services Client Speech SDK is using Azure C SDK Common Code, obtai
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
 
-**c. Catch2**
+**b. Catch2**
 
 The Cognitive Services Client Speech SDK is using 'Catch 2- A modern, C++-native, header-only, test framework for unit-tests, TDD and BDD - using C++11, C++14, C++17 and later', obtained from https://github.com/catchorg/Catch2. It is licensed under the [Boost Software License 1.0]https://github.com/catchorg/Catch2/blob/master/LICENSE.txt):
 
@@ -54,7 +42,7 @@ The Cognitive Services Client Speech SDK is using 'Catch 2- A modern, C++-native
 
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-**d. curl**
+**c. curl**
 
 The Cognitive Services Client Speech SDK is using 'curl - A command line tool and library for transferring data with URL syntax, supporting HTTP, HTTPS, FTP, FTPS, GOPHER, TFTP, SCP, SFTP, SMB, TELNET, DICT, LDAP, LDAPS, FILE, IMAP, SMTP, POP3, RTSP and RTMP. libcurl offers a myriad of powerful features', obtained from https://github.com/curl/curl. It is licensed under the following license:
 
@@ -88,7 +76,7 @@ The Cognitive Services Client Speech SDK is using 'curl - A command line tool an
 
     Permission to use, copy, modify, and distribute this document for any purpose and without any fee is hereby granted, provided that the above copyright notice and this list of conditions appear in all copies.
 
-**e. Microsoft Computational Network Toolkit (CNTK)**
+**d. Microsoft Computational Network Toolkit (CNTK)**
 
 The Cognitive Services Client Speech SDK is re-using source code originating in 'Microsoft Computational Network Toolkit (CNTK)', obtained from https://github.com/Microsoft/CNTK.
 
@@ -100,7 +88,7 @@ The Cognitive Services Client Speech SDK is re-using source code originating in 
 
     THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 
-**f. openssl**
+**e. openssl**
 
 The Cognitive Services Client Speech SDK is using 'openssl - TLS/SSL and crypto library', obtained from https://github.com/openssl/openssl. It is licensed under the following [license](https://github.com/openssl/openssl/blob/master/LICENSE):
 
@@ -356,7 +344,7 @@ In addition, some versions of the 'openssl - TLS/SSL and crypto library' in the 
      * [including the GNU Public Licence.]
      */
 
-**g. json**
+**f. json**
 
 The Cognitive Services Client Speech SDK is using 'json - JSON for Modern C++', obtained from https://github.com/nlohmann/json. It is licensed under the [MIT License](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT):
 
@@ -396,7 +384,7 @@ The Cognitive Services Client Speech SDK is using 'json - JSON for Modern C++', 
 
     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 
-**h. Android Open Source Project**
+**g. Android Open Source Project**
 
 The Cognitive Services Client Speech SDK is using sample code from the 'Android Open Source Project', obtained from https://github.com/googlesamples/android-ndk/. It is licensed under the following [license](https://github.com/googlesamples/android-ndk/blob/master/LICENSE):
 

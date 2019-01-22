@@ -20,7 +20,6 @@
 		3C6764BF214EE22800FCB533 /* libsr.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764B8214EE22800FCB533 /* libsr.a */; };
 		3C6764C0214EE22800FCB533 /* libcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764B9214EE22800FCB533 /* libcommon.a */; };
 		3C6764C1214EE22800FCB533 /* libaudio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764BA214EE22800FCB533 /* libaudio.a */; };
-		3C6764C3214EE22800FCB533 /* libparson.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764BC214EE22800FCB533 /* libparson.a */; };
 		3C6764C4214EE22800FCB533 /* libaziotsharedutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764BD214EE22800FCB533 /* libaziotsharedutil.a */; };
 		3C6764C7214EE24200FCB533 /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764C6214EE24200FCB533 /* microphone_test.m */; };
 		3C6764C9214EE4CB00FCB533 /* libusp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764C8214EE4CB00FCB533 /* libusp.a */; };
@@ -90,7 +89,6 @@
 		3C6764B9214EE22800FCB533 /* libcommon.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcommon.a; path = ../../../../../build_ios_debug/lib/libcommon.a; sourceTree = "<group>"; };
 		3C6764BA214EE22800FCB533 /* libaudio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libaudio.a; path = ../../../../../build_ios_debug/lib/libaudio.a; sourceTree = "<group>"; };
 		3C6764BB214EE22800FCB533 /* libcarbon-mock.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libcarbon-mock.dylib"; path = "../../../../../build_ios_debug/lib/libcarbon-mock.dylib"; sourceTree = "<group>"; };
-		3C6764BC214EE22800FCB533 /* libparson.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libparson.a; path = ../../../../../build_ios_debug/lib/libparson.a; sourceTree = "<group>"; };
 		3C6764BD214EE22800FCB533 /* libaziotsharedutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libaziotsharedutil.a; path = ../../../../../build_ios_debug/lib/libaziotsharedutil.a; sourceTree = "<group>"; };
 		3C6764C5214EE24200FCB533 /* microphone_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = microphone_test.h; path = ../../../shared/microphone_test.h; sourceTree = "<group>"; };
 		3C6764C6214EE24200FCB533 /* microphone_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = microphone_test.m; path = ../../../shared/microphone_test.m; sourceTree = "<group>"; };
@@ -184,7 +182,6 @@
 				3C6764BF214EE22800FCB533 /* libsr.a in Frameworks */,
 				3C6764C0214EE22800FCB533 /* libcommon.a in Frameworks */,
 				3C6764C1214EE22800FCB533 /* libaudio.a in Frameworks */,
-				3C6764C3214EE22800FCB533 /* libparson.a in Frameworks */,
 				3C6764C4214EE22800FCB533 /* libaziotsharedutil.a in Frameworks */,
 				3C6764B6214EE1F000FCB533 /* CFNetwork.framework in Frameworks */,
 			);
@@ -315,7 +312,6 @@
 				3C6764BB214EE22800FCB533 /* libcarbon-mock.dylib */,
 				3C6764B9214EE22800FCB533 /* libcommon.a */,
 				3C6764B7214EE22800FCB533 /* libfactory.a */,
-				3C6764BC214EE22800FCB533 /* libparson.a */,
 				3C6764B8214EE22800FCB533 /* libsr.a */,
 				3C6764B5214EE1F000FCB533 /* CFNetwork.framework */,
 			);

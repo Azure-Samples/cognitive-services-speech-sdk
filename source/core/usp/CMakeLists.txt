@@ -7,25 +7,8 @@ include_directories(${INC_DIR})
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
-include_directories ("${CARBON_EXTERNAL}/parson")
 include_directories("${CARBON_EXTERNAL}/json")
 include_directories ("${COMMON}/include")
-
-add_library(parson STATIC "${CARBON_ROOT}/external/parson/parson.c")
-
-if(WIN32 AND SPECTRE_MITIGATION)
-    set_property(TARGET parson PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
-endif()
-
-if(MSVC)
-  set_target_properties (parson PROPERTIES
-      COMPILE_FLAGS "/wd4232"
-  )
-endif()
-
-set_target_properties (parson PROPERTIES
-    FOLDER external_libs
-)
 
 set(HEADERS
     "${INC_DIR}/usp.h"
@@ -64,7 +47,7 @@ if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET usp PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()
 
-set(USP_LIBS ${AZURE_SHARED_LIB} parson)
+set(USP_LIBS ${AZURE_SHARED_LIB})
 
 if(WIN32)
     list(APPEND USP_LIBS rpcrt4.lib)

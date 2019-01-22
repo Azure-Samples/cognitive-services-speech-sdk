@@ -891,7 +891,6 @@
 					"-laziotsharedutil",
 					"-lcommon",
 					"-lfactory",
-					"-lparson",
 					"-lsr",
 					"-lusp",
 				);
@@ -945,7 +944,6 @@
 					"-laziotsharedutil",
 					"-lcommon",
 					"-lfactory",
-					"-lparson",
 					"-lsr",
 					"-lusp",
 				);

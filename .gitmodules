@@ -1,6 +1,3 @@
-[submodule "external/parson"]
-    path = external/parson
-    url = https://github.com/kgabis/parson
 [submodule "external/azure-c-shared-utility"]
     path = external/azure-c-shared-utility
     url = https://github.com/fmegen/azure-c-shared-utility
