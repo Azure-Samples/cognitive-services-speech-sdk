@@ -75,7 +75,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod] //TODO: Remove Test after Bug 1269097 is fixed
         public async Task ContinuousValidBaselineRecognition(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
@@ -95,7 +94,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod]
         public async Task ValidCustomRecognition(bool usingPreConnection)
         {
             this.config.EndpointId = deploymentId;
@@ -116,7 +114,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod] //TODO: Remove Test after Bug 1269097 is fixed
         public async Task ContinuousValidCustomRecognition(bool usingPreConnection)
         {
             this.config.EndpointId = deploymentId;
@@ -264,7 +261,59 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
+        public async Task InvalidOpenOrCloseDuringRecognition(bool testingOpen)
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            {
+                var connection = Connection.FromRecognizer(recognizer);
+                var taskCompletionSource = new TaskCompletionSource<int>();
+                bool expectedExceptionCaught = false;
+                recognizer.SpeechStartDetected += (s, e) =>
+                {
+                    try
+                    {
+                        if (testingOpen)
+                        {
+                            connection.Open(true);
+                        }
+                        else
+                        {
+                            connection.Close();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex.Message.Contains("Exception with an error code: 0x1f"))
+                        {
+                            expectedExceptionCaught = true;
+                        }
+                    }
+                    taskCompletionSource.TrySetResult(0);
+                };
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                await Task.WhenAny(taskCompletionSource.Task, Task.Delay(TimeSpan.FromMinutes(1)));
+                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                Assert.IsTrue(expectedExceptionCaught, "No expected exception is caught in connection.Open().");
+            }
+        }
+
         [TestMethod]
+        public async Task TestCloseConnection()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            {
+                var connection = Connection.FromRecognizer(recognizer);
+                await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                connection.Close();
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public async Task GermanRecognition(bool usingPreConnection)
         {
             this.config.SpeechRecognitionLanguage = Language.DE_DE;
@@ -284,7 +333,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod] //TODO: Remove Test after Bug 1269097 is fixed
         public async Task ContinuousGermanRecognition(bool usingPreConnection)
         {
             this.config.SpeechRecognitionLanguage = Language.DE_DE;
@@ -301,10 +349,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [DataTestMethod]
+        [DataTestMethod, TestCategory(TestCategory.LongRunning)]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod]
         public async Task ContinuousRecognitionOnLongFileInput(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
@@ -345,7 +392,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod]
         public async Task SubscribeToManyEventHandlers(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
@@ -373,7 +419,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod]
         public async Task UnsubscribeFromEventHandlers(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
@@ -401,7 +446,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod]
         public async Task ResubscribeToEventHandlers(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
@@ -443,7 +487,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod]
         public async Task ChangeSubscriptionDuringRecognition(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
@@ -560,7 +603,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod]
         public async Task TestStartStopManyTimes(bool usingPreConnection)
         {
             const int NumberOfIterations = 100;
@@ -590,7 +632,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod]
         public async Task TestContinuousRecognitionTwice(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
@@ -618,7 +659,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        [TestMethod]
         public async Task TestInitialSilenceTimeout(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Silence.AudioFile);

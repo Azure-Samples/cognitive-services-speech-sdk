@@ -188,6 +188,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public void IntentRecognizerUsingConnectionOpen()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
+            using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
+            {
+                var connection = Connection.FromRecognizer(recognizer);
+                var ex = Assert.ThrowsException<ApplicationException>(() => connection.Open(false));
+                AssertStringContains(ex.Message, "Exception with an error code: 0x1f");
+            }
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public async Task AsyncRecognitionAfterDisposingIntentRecognizer()
         {
