@@ -9,7 +9,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows x64, Ubuntu 16.04 x64) with a working microphone.
+* A PC (Windows x64, Ubuntu 16.04/18.04 x64) with a working microphone.
 * Either one of the following:
   * On Windows:
     * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
@@ -28,7 +28,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 ## Build the sample
 
 * **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
-* [Download the sample code to your development PC.](../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](../../../README.md#get-the-samples)
 
 * If you are using Microsoft Visual Studio 2017 on Windows:
   * Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
