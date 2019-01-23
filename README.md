@@ -46,16 +46,16 @@ If you want to build them from scratch, please follow the articles in the Quicks
 
 | Quickstart | Platform | Description |
 | ---------- | -------- | ----------- |
-| [Quickstart C++ for Linux](./quickstart/cpp-linux/) | Linux | Demonstrates one-shot speech recognition from microphone |
-| [Quickstart C++ for Windows](./quickstart/cpp-windows/) | Windows  | Demonstrates one-shot speech recognition from microphone |
-| [Quickstart C# .NET for Windows](./quickstart/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech recognition from microphone |
-| [Quickstart C# .NET Core (Windows or Linux)](./quickstart/csharp-dotnetcore/) | Windows, Linux | Demonstrates one-shot speech recognition from microphone |
-| [Quickstart for Android](./quickstart/java-android/) | Android  | Demonstrates one-shot speech recognition from microphone |
-| [Quickstart Java JRE](./quickstart/java-jre/) | Windows, Linux | Demonstrates one-shot speech recognition from microphone |
-| [Quickstart JavaScript](./quickstart/js-browser/) | Web | Demonstrates one-shot speech recognition from microphone |
-| [Quickstart Node.js](./quickstart/js-node/) | Node.js | Demonstrates one-shot speech recognition from a file |
-| [Quickstart Python](./quickstart/python/) | Windows, Linux, macOS | Demonstrates one-shot speech recognition from microphone |
-| [Quickstart Objective-C](./quickstart/objectivec-ios/) | iOS | Demonstrates one-shot speech recognition from a file with recorded speech |
+| [Quickstart C++ for Linux](./quickstart/cpp-linux/) | Linux | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart C++ for Windows](./quickstart/cpp-windows/) | Windows  | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart C# .NET for Windows](./quickstart/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart C# .NET Core (Windows or Linux)](./quickstart/csharp-dotnetcore/) | Windows, Linux | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart for Android](./quickstart/java-android/) | Android  | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart Java JRE](./quickstart/java-jre/) | Windows, Linux | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart JavaScript](./quickstart/js-browser/) | Web | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart Node.js](./quickstart/js-node/) | Node.js | Demonstrates one-shot speech recognition from a file. |
+| [Quickstart Python](./quickstart/python/) | Windows, Linux, macOS | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart Objective-C](./quickstart/objectivec-ios/) | iOS | Demonstrates one-shot speech recognition from a file with recorded speech. |
 
 ### Speech translation quickstarts
 
@@ -64,11 +64,11 @@ If you want to build them from scratch, please follow the articles in the Quicks
 
 | Quickstart | Platform | Description |
 | ---------- | -------- | ----------- |
-| [Quickstart C++ for Windows](./quickstart/speech-translation/cpp-windows/) |
-| [Quickstart C# .NET Framework for Windows](./quickstart/speech-translation/csharp-dotnet-windows/) |
-| [Quickstart C# .NET Core for Windows](./quickstart/speech-translation/csharp-dotnetcore/) |
-| [Quickstart C# UWP for Windows](./quickstart/speech-translation/csharp-uwp/) |
-| [Quickstart Java JRE](./quickstart/speech-translation/java-jre/) |
+| [Quickstart C++ for Windows](./quickstart/speech-translation/cpp-windows/) | Windows | Demonstrates one-shot speech translation/transcription from a microphone. |
+| [Quickstart C# .NET Framework for Windows](./quickstart/speech-translation/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech translation/transcription from a microphone. |
+| [Quickstart C# .NET Core ](./quickstart/speech-translation/csharp-dotnetcore/) | Windows, Linux | Demonstrates one-shot speech translation/transcription from a microphone. |
+| [Quickstart C# UWP for Windows](./quickstart/speech-translation/csharp-uwp/) | Windows | Demonstrates one-shot speech translation/transcription from a microphone. |
+| [Quickstart Java JRE](./quickstart/speech-translation/java-jre/) | Windows, Linux | Demonstrates one-shot speech translation/transcription from a microphone. |
 
 ### Samples
 
