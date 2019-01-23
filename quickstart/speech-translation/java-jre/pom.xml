@@ -17,17 +17,17 @@
     </plugins>
   </build>
   <dependencies>
-	<dependency>
-	  <groupId>com.microsoft.cognitiveservices.speech</groupId>
-	  <artifactId>client-sdk</artifactId>
-	  <version>1.2.0</version>
+    <dependency>
+      <groupId>com.microsoft.cognitiveservices.speech</groupId>
+      <artifactId>client-sdk</artifactId>
+      <version>1.2.0</version>
     </dependency>
   </dependencies>
   <repositories>
-	<repository>
+    <repository>
       <id>maven-cognitiveservices-speech</id>
       <name>Microsoft Cognitive Services Speech Maven Repository</name>
-	  <url>https://csspeechstorage.blob.core.windows.net/maven/</url>
-	</repository>
+      <url>https://csspeechstorage.blob.core.windows.net/maven/</url>
+    </repository>
   </repositories>
 </project>
