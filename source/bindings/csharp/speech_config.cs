@@ -35,8 +35,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Creates an instance of the speech config with specified authorization token and region.
         /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
-        /// expires, the caller needs to refresh it by setting the property `AuthorizationToken` on the corresponding
-        /// recognizer with a new valid token.
+        /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+        /// As configuration values are copied when creating a new recognizer, the new token value will not apply to recognizers that have already been created.
+        /// For recognizers that have been created before, you need to set authorization token of the corresponding recognizer
+        /// to refresh the token. Otherwise, the recognizers will encounter errors during recognition.
         /// </summary>
         /// <param name="authorizationToken">The authorization token.</param>
         /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
@@ -85,18 +87,28 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Gets the authorization token.
-        /// If authorization token is set, the subscription key is ignored.
+        /// Gets/sets the authorization token.
         /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
-        /// expires, the caller needs to refresh it by setting the property `AuthorizationToken` on the corresponding
-        /// recognizer with a new valid token.
-        /// Refresh
+        /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+        /// As configuration values are copied when creating a new recognizer, the new token value will not apply to recognizers that have already been created.
+        /// For recognizers that have been created before, you need to set authorization token of the corresponding recognizer
+        /// to refresh the token. Otherwise, the recognizers will encounter errors during recognition.
+        /// Changed in version 1.3.0.
         /// </summary>
         public string AuthorizationToken
         {
             get
             {
                 return this.configImpl.GetAuthorizationToken();
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                this.configImpl.SetAuthorizationToken(value);
             }
         }
 

@@ -209,6 +209,9 @@ namespace Microsoft.CognitiveServices.Speech.Translation
 
         /// <summary>
         /// Gets/sets authorization token used to communicate with the service.
+        /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+        /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+        /// Otherwise, the recognizer will encounter errors during recognition.
         /// </summary>
         public string AuthorizationToken
         {

@@ -206,7 +206,11 @@ public:
         SPX_THROW_ON_FAIL(intent_recognizer_add_intent(m_hreco, Utils::ToUTF8(intentId).c_str(), (SPXTRIGGERHANDLE)(*trigger.get())));
     }
 
+    /// <summary>
     /// Sets the authorization token that will be used for connecting to the service.
+    /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+    /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+    /// Otherwise, the recognizer will encounter errors during recognition.
     /// </summary>
     /// <param name="token">A string that represents the authorization token.</param>
     void SetAuthorizationToken(const SPXSTRING& token)

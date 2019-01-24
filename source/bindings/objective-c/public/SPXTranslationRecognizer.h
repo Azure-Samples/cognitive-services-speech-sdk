@@ -23,6 +23,9 @@ typedef void (^SPXTranslationSynthesisEventHandler)(SPXTranslationRecognizer * _
 
 /**
   * Authorization token used to communicate with the translation recognition service.
+  * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token expires,
+  * the caller needs to refresh it by calling this setter with a new valid token.
+  * Otherwise, the recognizer will encounter errors during recognition.
   */
 @property (nonatomic, copy, nullable)NSString *authorizationToken;
 

@@ -39,8 +39,38 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void TestSetAndGetAuthToken()
         {
-            var config = SpeechConfig.FromAuthorizationToken("x", "westus");
-            Assert.AreEqual("x", config.AuthorizationToken);
+            var token = "x";
+            var config = SpeechConfig.FromAuthorizationToken(token, "westus");
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var speechRecognizer = new SpeechRecognizer(config, audioInput))
+            {
+                Assert.AreEqual(token, speechRecognizer.AuthorizationToken);
+
+                var newToken = "y";
+                speechRecognizer.AuthorizationToken = newToken;
+                Assert.AreEqual(token, config.AuthorizationToken);
+                Assert.AreEqual(newToken, speechRecognizer.AuthorizationToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestSetAuthorizationTokenOnSpeechRecognizer()
+        {
+            var invalidToken = "InvalidToken";
+            var configWithToken = SpeechConfig.FromAuthorizationToken(invalidToken, region);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+
+            using (var speechRecognizer = new SpeechRecognizer(configWithToken, audioInput))
+            {
+                Assert.AreEqual(invalidToken, speechRecognizer.AuthorizationToken);
+
+                var newToken = await Config.GetToken(subscriptionKey, region);
+                speechRecognizer.AuthorizationToken = newToken;
+                SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
+
+                Assert.AreEqual(newToken, speechRecognizer.AuthorizationToken);
+                AssertMatching(TestData.English.Weather.Utterance, await helper.GetFirstRecognizerResult(speechRecognizer));
+            }
         }
 
         [TestMethod]
@@ -133,48 +163,23 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task InvalidKeyHandledProperly()
         {
-            var config = SpeechConfig.FromSubscription("invalidKey", region);
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            int connectedEventCount = 0;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
-            { 
-                var connection = Connection.FromRecognizer(recognizer);
-                connection.Connected += (s, e) =>
-                {
-                    connectedEventCount++;
-                };
-                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                AssertEqual(0, connectedEventCount, AssertOutput.WrongConnectedEventCount);
-                Assert.AreEqual(ResultReason.Canceled, result.Reason);
-                var cancellation = CancellationDetails.FromResult(result);
-                Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
-                Assert.AreEqual(cancellation.ErrorCode, CancellationErrorCode.AuthenticationFailure);
-                AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with an authentication error (401)");
-            }
+            var configWithInvalidKey = SpeechConfig.FromSubscription("invalidKey", region);
+            await AssertConnectionError(configWithInvalidKey, CancellationErrorCode.AuthenticationFailure, "WebSocket Upgrade failed with an authentication error (401)");
+        }
+
+        [TestMethod]
+        public async Task InvalidTokenHandledProperly()
+        {
+            var invalidToken = "InvalidToken";
+            var configWithInvalidToken = SpeechConfig.FromAuthorizationToken(invalidToken, region);
+            await AssertConnectionError(configWithInvalidToken, CancellationErrorCode.AuthenticationFailure, "WebSocket Upgrade failed with an authentication error (401)");
         }
 
         [TestMethod]
         public async Task InvalidRegionHandledProperly()
         {
-            var config = SpeechConfig.FromSubscription(subscriptionKey, "invalidRegion");
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            int connectedEventCount = 0;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
-            {
-                var connection = Connection.FromRecognizer(recognizer);
-                connection.Connected += (s, e) =>
-                {
-                    connectedEventCount++;
-                };
-                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                AssertEqual(0, connectedEventCount, AssertOutput.WrongConnectedEventCount);
-
-                Assert.AreEqual(ResultReason.Canceled, result.Reason);
-                var cancellation = CancellationDetails.FromResult(result);
-                Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
-                Assert.AreEqual(cancellation.ErrorCode, CancellationErrorCode.ConnectionFailure);
-                AssertStringContains(cancellation.ErrorDetails, "Connection failed");
-            }
+            var configWithInvalidRegion = SpeechConfig.FromSubscription(subscriptionKey, "invalidRegion");
+            await AssertConnectionError(configWithInvalidRegion, CancellationErrorCode.ConnectionFailure, "Connection failed");
         }
 
         [TestMethod]
@@ -188,48 +193,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task InvalidDeploymentIdHandledProperly()
         {
             this.config.EndpointId = "invalidDeploymentId";
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            int connectedEventCount = 0;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
-                var connection = Connection.FromRecognizer(recognizer);
-                connection.Connected += (s, e) =>
-                {
-                    connectedEventCount++;
-                };
-                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                AssertEqual(0, connectedEventCount, AssertOutput.WrongConnectedEventCount);
-
-                Assert.AreEqual(ResultReason.Canceled, result.Reason);
-                var cancellation = CancellationDetails.FromResult(result);
-                Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
-                Assert.AreEqual(cancellation.ErrorCode, CancellationErrorCode.BadRequest);
-                AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with a bad request (400)");
-            }
+            await AssertConnectionError(this.config, CancellationErrorCode.BadRequest, "WebSocket Upgrade failed with a bad request (400)");
         }
 
         [TestMethod]
         public async Task InvalidLanguageHandledProperly()
         {
             this.config.SpeechRecognitionLanguage = "InvalidLang";
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            int connectedEventCount = 0;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
-                var connection = Connection.FromRecognizer(recognizer);
-                connection.Connected += (s, e) =>
-                {
-                    connectedEventCount++;
-                };
-                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                AssertEqual(0, connectedEventCount, AssertOutput.WrongConnectedEventCount);
-
-                Assert.AreEqual(ResultReason.Canceled, result.Reason);
-                var cancellation = CancellationDetails.FromResult(result);
-                Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
-                Assert.AreEqual(cancellation.ErrorCode, CancellationErrorCode.BadRequest);
-                AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with a bad request (400)");
-            }
+            await AssertConnectionError(this.config, CancellationErrorCode.BadRequest, "WebSocket Upgrade failed with a bad request (400)");
         }
 
         [TestMethod]

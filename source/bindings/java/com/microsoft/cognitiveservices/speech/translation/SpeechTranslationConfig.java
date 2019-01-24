@@ -53,7 +53,7 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     /**
      * Static instance of SpeechTranslationConfig returned by passing authorization token and service region.
      * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
-     * expipres, the caller needs to refresh it by setting the property `AuthorizationToken` with a new valid token.
+     * expipres, the caller needs to refresh it by calling this setter with a new valid token.
      * Otherwise, all the recognizers created by this SpeechTranslationConfig instance will encounter errors during recognition.
      * @param authorizationToken The authorization token.
      * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
@@ -86,8 +86,11 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
 
     /**
      * Sets the authorization token.
-     * If this is set, subscription key is ignored.
-     * User needs to make sure the provided authorization token is valid and not expired.
+     * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+     * expires, the caller needs to refresh it by calling this setter with a new valid token.
+     * As configuration values are copied when creating a new recognizer, the new token value will not apply to recognizers that have already been created.
+     * For recognizers that have been created before, you need to set authorization token of the corresponding recognizer
+     * to refresh the token. Otherwise, the recognizers will encounter errors during recognition.
      * @param value the authorization token.
      */
     @Override
@@ -97,9 +100,7 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     }
 
     /**
-     * Sets the authorization token.
-     * If this is set, subscription key is ignored.
-     * User needs to make sure the provided authorization token is valid and not expired.
+     * Sets the speech recognition language
      * @param value the authorization token.
      */
     @Override

@@ -98,6 +98,9 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
 
     /**
      * Sets the authorization token used to communicate with the service.
+     * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token expires,
+     * the caller needs to refresh it by calling this setter with a new valid token.
+     * Otherwise, the recognizer will encounter errors during recognition.
      * @param token Authorization token.
      */
     public void setAuthorizationToken(String token) {
@@ -106,7 +109,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     }
 
     /**
-     * Sets the authorization token used to communicate with the service.
+     * Gets the authorization token used to communicate with the service.
      * @return Authorization token.
      */
     public String getAuthorizationToken() {

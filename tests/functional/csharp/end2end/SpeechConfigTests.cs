@@ -69,29 +69,51 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var configWithToken = SpeechConfig.FromAuthorizationToken(token, region);
 
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            var speechRecognizer = new SpeechRecognizer(configWithToken, audioInput);
-            SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
+            using (var speechRecognizer = new SpeechRecognizer(configWithToken, audioInput))
+            {
+                SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
 
-            Assert.AreEqual(token, speechRecognizer.AuthorizationToken, "Set of authentication token did not work as expected");
-            AssertMatching(TestData.English.Weather.Utterance, await helper.GetFirstRecognizerResult(speechRecognizer));
+                Assert.AreEqual(token, speechRecognizer.AuthorizationToken);
+                AssertMatching(TestData.English.Weather.Utterance, await helper.GetFirstRecognizerResult(speechRecognizer));
+            }
         }
 
         [TestMethod]
         public async Task SetAuthorizationTokenOnConfig()
         {
-            var token = await Config.GetToken(subscriptionKey, region);
-            var configWithToken = SpeechConfig.FromAuthorizationToken(token, region);
-
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            var speechRecognizer = new SpeechRecognizer(this.config, audioInput);
+            var invalidToken = "InvalidToken";
+            var configWithToken = SpeechConfig.FromAuthorizationToken(invalidToken, region);
+            Assert.AreEqual(invalidToken, configWithToken.AuthorizationToken);
 
             var newToken = await Config.GetToken(subscriptionKey, region);
-            speechRecognizer.AuthorizationToken = newToken;
+            configWithToken.AuthorizationToken = newToken;
+            Assert.AreEqual(newToken, configWithToken.AuthorizationToken);
 
-            SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var speechRecognizer = new SpeechRecognizer(configWithToken, audioInput))
+            {
+                SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
+                Assert.AreEqual(newToken, speechRecognizer.AuthorizationToken);
+                AssertMatching(TestData.English.Weather.Utterance, await helper.GetFirstRecognizerResult(speechRecognizer));
+            }
+        }
 
-            Assert.AreEqual(newToken, speechRecognizer.AuthorizationToken, "Set of authentication token did not work as expected");
-            AssertMatching(TestData.English.Weather.Utterance, await helper.GetFirstRecognizerResult(speechRecognizer));
+        [TestMethod]
+        public async Task SubscriptionKeyHasPrecedenceOverAuthorizationToken()
+        {
+            var invalidToken = "InvalidToken";
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            // Create recognizer using subscription key.
+            using (var speechRecognizer = new SpeechRecognizer(this.config, audioInput))
+            {
+                speechRecognizer.AuthorizationToken = invalidToken;
+
+                SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
+
+                Assert.AreEqual(invalidToken, speechRecognizer.AuthorizationToken);
+                // The recognizer should still work since non-empty subscription key has precedence over authorization token.
+                AssertMatching(TestData.English.Weather.Utterance, await helper.GetFirstRecognizerResult(speechRecognizer));
+            }
         }
     }
 }

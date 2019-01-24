@@ -45,6 +45,11 @@ public:
 
     /// <summary>
     /// Creates an instance of the speech config with specified authorization token and region.
+    /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+    /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+    /// As configuration values are copied when creating a new recognizer, the new token value will not apply to recognizers that have already been created.
+    /// For recognizers that have been created before, you need to set authorization token of the corresponding recognizer
+    /// to refresh the token. Otherwise, the recognizers will encounter errors during recognition.
     /// </summary>
     /// <param name="authToken">The authorization token.</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
@@ -117,6 +122,11 @@ public:
 
     /// <summary>
     /// Sets the authorization token to connect to the service.
+    /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+    /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+    /// As configuration values are copied when creating a new recognizer, the new token value will not apply to recognizers that have already been created.
+    /// For recognizers that have been created before, you need to set authorization token of the corresponding recognizer
+    /// to refresh the token. Otherwise, the recognizers will encounter errors during recognition.
     /// </summary>
     /// <param name="token">The authorization token.</param>
     void SetAuthorizationToken(const SPXSTRING& token)

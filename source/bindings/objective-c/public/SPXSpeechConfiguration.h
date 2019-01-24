@@ -23,8 +23,12 @@ SPX_EXPORT
 @property (nonatomic, copy, nullable)NSString *endpointId;
 
 /**
-  * Authorization token. If this is set, the subscription key is ignored.
-  * The user needs to make sure the provided authorization token is valid and not expired.
+  * Authorization token.
+  * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+  * expires, the caller needs to refresh it by calling this setter with a new valid token.
+  * As configuration values are copied when creating a new recognizer, the new token value will not apply to recognizers that have already been created.
+  * For recognizers that have been created before, you need to set authorization token of the corresponding recognizer
+  * to refresh the token. Otherwise, the recognizers will encounter errors during recognition.
   */
 @property (nonatomic, copy, nullable)NSString *authorizationToken;
 
@@ -50,9 +54,10 @@ SPX_EXPORT
 /**
   * Initializes an instance of a speech configuration with specified authorization token and service region.
   * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
-  * expires, the caller needs to refresh it by calling setAuthorizationToken with a new valid token on the created recognizer.
-  * Otherwise, the recognizer instance will encounter errors during recognition.
-  * For long-living recognizers, the authorization token needs to be updated on the recognizer.
+  * expires, the caller needs to refresh it by calling this setter with a new valid token.
+  * As configuration values are copied when creating a new recognizer, the new token value will not apply to recognizers that have already been created.
+  * For recognizers that have been created before, you need to set authorization token of the corresponding recognizer
+  * to refresh the token. Otherwise, the recognizers will encounter errors during recognition.
   * @param authToken the authorization token.
   * @param region the region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
   * @return a speech configuration instance.

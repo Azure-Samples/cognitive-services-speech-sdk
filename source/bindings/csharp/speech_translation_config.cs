@@ -35,7 +35,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Creates an instance of the speech translation config with specified authorization token and region.
         /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
-        /// expires, the caller needs to refresh it by setting the property `AuthorizationToken` on the corresponding
+        /// expires, the caller needs to refresh it by calling this setter on the corresponding
         /// recognizer with a new valid token.
         /// </summary>
         /// <param name="authorizationToken">The authorization token.</param>

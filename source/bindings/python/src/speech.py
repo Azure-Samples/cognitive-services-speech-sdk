@@ -357,7 +357,7 @@ class Recognizer():
     @property
     def authorization_token(self) -> str:
         """
-        The authorization token that will be used for connecting the server.
+        The authorization token that will be used for connecting to the service.
         """
         return self._impl.get_authorization_token()
 

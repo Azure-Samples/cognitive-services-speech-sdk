@@ -137,7 +137,10 @@ public:
     }
 
     /// <summary>
-    /// Sets the authorization token that will be used for connecting the server.
+    /// Sets the authorization token that will be used for connecting to the service.
+    /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+    /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+    /// Otherwise, the recognizer will encounter errors during recognition.
     /// </summary>
     /// <param name="token">The authorization token.</param>
     void SetAuthorizationToken(const SPXSTRING& token)

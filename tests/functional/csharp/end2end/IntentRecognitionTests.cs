@@ -108,6 +108,45 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public void TestSetAndGetAuthTokenOnIntent()
+        {
+            var token = "x";
+            var config = SpeechConfig.FromAuthorizationToken(token, "westus");
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+
+            using (var recognizer = new IntentRecognizer(config, audioInput))
+            {
+                Assert.AreEqual(token, recognizer.AuthorizationToken);
+
+                var newToken = "y";
+                recognizer.AuthorizationToken = newToken;
+                Assert.AreEqual(token, config.AuthorizationToken);
+                Assert.AreEqual(newToken, recognizer.AuthorizationToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestSetAuthorizationTokenOnIntentRecognizer()
+        {
+            var invalidToken = "InvalidToken";
+            var configWithToken = SpeechConfig.FromAuthorizationToken(invalidToken, languageUnderstandingServiceRegion);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+
+            using (var recognizer = TrackSessionId(new IntentRecognizer(configWithToken, audioInput)))
+            {
+                Assert.AreEqual(invalidToken, recognizer.AuthorizationToken);
+
+                var newToken = await Config.GetToken(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
+                recognizer.AuthorizationToken = newToken;
+
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(newToken, recognizer.AuthorizationToken);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+            }
+        }
+
+        [TestMethod]
         [DataRow(false, false)]
         [DataRow(false, true)]
         [DataRow(true, false)]

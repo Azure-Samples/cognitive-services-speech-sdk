@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using Microsoft.CognitiveServices.Speech.Audio;
+
     sealed class SpeechRecognitionTestsHelper
     {
         public int ErrorEventCount { get; set; }
@@ -256,6 +258,27 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Console.WriteLine($"ConnectedEventCount: {connectedEventCount}, DisconnectedEventCount: {disconnectedEventCount}");
             Assert.IsTrue(connectedEventCount > 0, AssertOutput.ConnectedEventCountMustNotBeZero);
             Assert.IsTrue(connectedEventCount == disconnectedEventCount || connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
+        }
+
+        public static async Task AssertConnectionError(SpeechConfig speechConfig, CancellationErrorCode expectedErrorCode, string expectedErrorMessage)
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            int connectedEventCount = 0;
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(speechConfig, audioInput)))
+            {
+                var connection = Connection.FromRecognizer(recognizer);
+                connection.Connected += (s, e) =>
+                {
+                    connectedEventCount++;
+                };
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                AssertEqual(0, connectedEventCount, AssertOutput.WrongConnectedEventCount);
+                Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                var cancellation = CancellationDetails.FromResult(result);
+                Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
+                Assert.AreEqual(cancellation.ErrorCode, expectedErrorCode);
+                AssertHelpers.AssertStringContains(cancellation.ErrorDetails, expectedErrorMessage);
+            }
         }
     }
 }

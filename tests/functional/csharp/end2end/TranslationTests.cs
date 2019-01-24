@@ -425,8 +425,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void TestSetAndGetAuthToken()
         {
-            var config = SpeechTranslationConfig.FromAuthorizationToken("x", "westus");
-            Assert.AreEqual("x", config.AuthorizationToken);
+            var token = "x";
+            var config = SpeechTranslationConfig.FromAuthorizationToken(token, "westus");
+            config.SpeechRecognitionLanguage = Language.EN;
+            config.AddTargetLanguage(Language.DE);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var recognizer = new TranslationRecognizer(config, audioInput);
+            Assert.AreEqual(token, recognizer.AuthorizationToken);
+
+            var newToken = "y";
+            recognizer.AuthorizationToken = newToken;
+            Assert.AreEqual(token, config.AuthorizationToken);
+            Assert.AreEqual(newToken, recognizer.AuthorizationToken);
         }
 
         [TestMethod]
