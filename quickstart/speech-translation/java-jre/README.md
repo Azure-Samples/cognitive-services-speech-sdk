@@ -21,7 +21,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Build the sample
 
-> Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/quickstart-translate-speech-java-jre).
+> Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-java-jre).
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
 * [Download the sample code to your development PC.](../../../README.md#get-the-samples)
@@ -38,5 +38,5 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-jre)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-java-jre)
 * [Speech SDK API reference for Java](https://aka.ms/csspeech/javaref)
