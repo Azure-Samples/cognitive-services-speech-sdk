@@ -172,12 +172,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             public static class FirstOne
             {
-                public static readonly string Utterance = "Appelle le premier.";
+                public static readonly string Utterance = "Appelez le premier.";
             }
 
             public static class Weather
             {
-                public static readonly string Utterance = "Quel est le temps?";
+                public static readonly string Utterance = "Quel temps fait-il?";
             }
         }
 

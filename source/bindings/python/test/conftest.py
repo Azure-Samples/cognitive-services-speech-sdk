@@ -69,7 +69,7 @@ batman_offsets, batman_durations = zip(*[
 speech_input_data_raw = {'weather':
                          ('whatstheweatherlike.wav', ["What's the weather like?"], (300000, ),
                           (15900000, ), 'en-US',
-                          {'fr': "Quel est le temps?",
+                          {'fr': "Quel temps fait-il?",
                            'de': "Wie ist das Wetter?"}
                           ),
                          'lamp': ('TurnOnTheLamp.wav', ["Turn on the lamp."], (3400000, ),
