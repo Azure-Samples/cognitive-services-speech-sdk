@@ -15,6 +15,7 @@ proguard-rules.pro text
 setup.cfg text
 
 *.appxmanifest text
+*.asset text
 *.bat text
 *.bats text
 *.c text
@@ -60,6 +61,7 @@ setup.cfg text
 *.ts text
 *.tsx text
 *.txt text
+*.unity text
 *.vcxproj text
 *.vcxproj.filters text
 *.vcxproj.user text

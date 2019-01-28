@@ -397,7 +397,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing'
       FolderPath: 'build/bin'
-      Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.bindings.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll'
+      Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
@@ -489,7 +489,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing'
       FolderPath: 'build/bin/$(BuildConfiguration)'
-      Pattern: 'Microsoft.CognitiveServices.Speech.core.uwp.dll,Microsoft.CognitiveServices.Speech.csharp.bindings.uwp.dll,Microsoft.CognitiveServices.Speech.csharp.dll'
+      Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))

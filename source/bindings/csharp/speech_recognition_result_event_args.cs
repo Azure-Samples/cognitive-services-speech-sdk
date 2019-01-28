@@ -14,7 +14,7 @@ namespace Microsoft.CognitiveServices.Speech
             : base(e)
         {
             eventArgImpl = e;
-            Result = new SpeechRecognitionResult(e.GetResult());
+            Result = new SpeechRecognitionResult(e.Result);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Microsoft.CognitiveServices.Speech
             : base(e)
         {
             eventArgImpl = e;
-            var cancellation = e.GetCancellationDetails();
+            var cancellation = e.CancellationDetails;
             Reason = (CancellationReason)cancellation.Reason;
             ErrorCode = (CancellationErrorCode)cancellation.ErrorCode;
             ErrorDetails = cancellation.ErrorDetails;

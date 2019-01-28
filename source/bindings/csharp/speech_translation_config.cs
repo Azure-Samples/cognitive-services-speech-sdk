@@ -71,7 +71,7 @@ namespace Microsoft.CognitiveServices.Speech
             {
                 var result = new List<string>();
                 var v  = this.impl.GetTargetLanguages();
-                for (int i = 0; i < v.Count; ++i)
+                for (int i = 0; i < v.Length; ++i)
                 {
                     result.Add(v[i]);
                 }
@@ -98,11 +98,11 @@ namespace Microsoft.CognitiveServices.Speech
         {
             set
             {
-                this.impl.SetVoiceName(value);
+                this.impl.VoiceName = value;
             }
             get
             {
-                return this.impl.GetVoiceName();
+                return this.impl.VoiceName;
             }
         }
     }

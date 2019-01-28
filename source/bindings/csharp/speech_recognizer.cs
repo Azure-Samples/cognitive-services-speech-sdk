@@ -5,6 +5,7 @@
 
 using System;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -80,6 +81,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public event EventHandler<SpeechRecognitionCanceledEventArgs> Canceled;
 
+        private Internal.CallbackFunctionDelegate recognizingCallbackDelegate;
+        private Internal.CallbackFunctionDelegate recognizedCallbackDelegate;
+        private Internal.CallbackFunctionDelegate canceledCallbackDelegate;
+
         /// <summary>
         /// Creates a new instance of SpeechRecognizer.
         /// </summary>
@@ -110,19 +115,13 @@ namespace Microsoft.CognitiveServices.Speech
         {
             this.recoImpl = recoImpl;
 
-            recognizingHandler = new ResultHandlerImpl(this, isRecognizedHandler: false);
-            recoImpl.Recognizing.Connect(recognizingHandler);
+            recognizingCallbackDelegate = FireEvent_Recognizing;
+            recognizedCallbackDelegate = FireEvent_Recognized;
+            canceledCallbackDelegate = FireEvent_Canceled;
 
-            recognizedHandler = new ResultHandlerImpl(this, isRecognizedHandler: true);
-            recoImpl.Recognized.Connect(recognizedHandler);
-
-            canceledHandler = new CanceledHandlerImpl(this);
-            recoImpl.Canceled.Connect(canceledHandler);
-
-            recoImpl.SessionStarted.Connect(sessionStartedHandler);
-            recoImpl.SessionStopped.Connect(sessionStoppedHandler);
-            recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
-            recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
+            recoImpl.SetRecognizingCallback(recognizingCallbackDelegate, GCHandle.ToIntPtr(gch));
+            recoImpl.SetRecognizedCallback(recognizedCallbackDelegate, GCHandle.ToIntPtr(gch));
+            recoImpl.SetCanceledCallback(canceledCallbackDelegate, GCHandle.ToIntPtr(gch));
 
             Properties = new PropertyCollection(recoImpl.Properties);
         }
@@ -135,7 +134,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.recoImpl.GetEndpointId();
+                return this.recoImpl.EndpointId;
             }
         }
 
@@ -149,7 +148,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.recoImpl.GetAuthorizationToken();
+                return this.recoImpl.AuthorizationToken;
             }
 
             set
@@ -159,7 +158,7 @@ namespace Microsoft.CognitiveServices.Speech
                     throw new ArgumentNullException(nameof(value));
                 }
 
-                this.recoImpl.SetAuthorizationToken(value);
+                this.recoImpl.AuthorizationToken = value;
             }
         }
 
@@ -246,7 +245,7 @@ namespace Microsoft.CognitiveServices.Speech
             return Task.Run(() =>
             {
                 SpeechRecognitionResult result = null;
-                base.DoAsyncRecognitionAction(() => result = new SpeechRecognitionResult(this.recoImpl.Recognize()));
+                base.DoAsyncRecognitionAction(() => result = new SpeechRecognitionResult(this.recoImpl.RecognizeOnce()));
                 return result;
             });
         }
@@ -313,83 +312,100 @@ namespace Microsoft.CognitiveServices.Speech
 
             if (disposing)
             {
-                recoImpl.Recognizing.Disconnect(recognizingHandler);
-                recoImpl.Recognized.Disconnect(recognizedHandler);
-                recoImpl.Canceled.Disconnect(canceledHandler);
-                recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
-                recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
-                recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
-                recoImpl.SpeechEndDetected.Disconnect(speechEndDetectedHandler);
+                try
+                {
+                    recoImpl.SetRecognizingCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetRecognizedCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetCanceledCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetSessionStartedCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetSessionStoppedCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetSpeechStartDetectedCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetSpeechEndDetectedCallback(null, GCHandle.ToIntPtr(gch));
+                }
+                catch (ApplicationException e)
+                {
+                    Internal.SpxExceptionThrower.LogError(e.Message);
+                }
 
-                recognizingHandler?.Dispose();
-                recognizedHandler?.Dispose();
-                canceledHandler?.Dispose();
                 recoImpl?.Dispose();
-                disposed = true;
+
+                recognizingCallbackDelegate = null;
+                recognizedCallbackDelegate = null;
+                canceledCallbackDelegate = null;
+
                 base.Dispose(disposing);
             }
         }
 
         private readonly new Internal.SpeechRecognizer recoImpl;
-        private readonly ResultHandlerImpl recognizingHandler;
-        private readonly ResultHandlerImpl recognizedHandler;
-        private readonly CanceledHandlerImpl canceledHandler;
-        private bool disposed = false;
         private readonly Audio.AudioConfig audioConfig;
 
-        // Defines a private class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
-        private class ResultHandlerImpl : Internal.SpeechRecognitionEventListener
+        // Defines a private methods to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
+
+        [Internal.MonoPInvokeCallback]
+        private static void FireEvent_Recognizing(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
-            public ResultHandlerImpl(SpeechRecognizer recognizer, bool isRecognizedHandler)
+            try
             {
-                this.recognizer = recognizer;
-                this.isRecognizedHandler = isRecognizedHandler;
-            }
-
-            public override void Execute(Internal.SpeechRecognitionEventArgs eventArgs)
-            {
-                if (recognizer.disposed)
+                EventHandler<SpeechRecognitionEventArgs> eventHandle;
+                SpeechRecognizer recognizer = (SpeechRecognizer)GCHandle.FromIntPtr(pvContext).Target;
+                lock (recognizer.recognizerLock)
                 {
-                    return;
+                    if (recognizer.isDisposing) return;
+                    eventHandle = recognizer.Recognizing;
                 }
-
+                var eventArgs = new Internal.SpeechRecognitionEventArgs(hevent);
                 var resultEventArg = new SpeechRecognitionEventArgs(eventArgs);
-                var handler = isRecognizedHandler ? recognizer.Recognized : recognizer.Recognizing;
-                if (handler != null)
-                {
-                    handler(this.recognizer, resultEventArg);
-                }
+                eventHandle?.Invoke(recognizer, resultEventArg);
             }
-
-            private SpeechRecognizer recognizer;
-            private bool isRecognizedHandler;
+            catch (InvalidOperationException)
+            {
+                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+            }
         }
 
-        // Defines a private class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
-        private class CanceledHandlerImpl : Internal.SpeechRecognitionCanceledEventListener
+        [Internal.MonoPInvokeCallback]
+        private static void FireEvent_Recognized(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
-            public CanceledHandlerImpl(SpeechRecognizer recognizer)
+            try
             {
-                this.recognizer = recognizer;
+                EventHandler<SpeechRecognitionEventArgs> eventHandle;
+                SpeechRecognizer recognizer = (SpeechRecognizer)GCHandle.FromIntPtr(pvContext).Target;
+                lock (recognizer.recognizerLock)
+                {
+                    if (recognizer.isDisposing) return;
+                    eventHandle = recognizer.Recognized;
+                }
+                var eventArgs = new Internal.SpeechRecognitionEventArgs(hevent);
+                var resultEventArg = new SpeechRecognitionEventArgs(eventArgs);
+                eventHandle?.Invoke(recognizer, resultEventArg);
             }
-
-            public override void Execute(Microsoft.CognitiveServices.Speech.Internal.SpeechRecognitionCanceledEventArgs eventArgs)
+            catch (InvalidOperationException)
             {
-                if (recognizer.disposed)
-                {
-                    return;
-                }
-
-                var canceledEventArgs = new SpeechRecognitionCanceledEventArgs(eventArgs);
-                var handler = this.recognizer.Canceled;
-
-                if (handler != null)
-                {
-                    handler(this.recognizer, canceledEventArgs);
-                }
+                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
             }
+        }
 
-            private SpeechRecognizer recognizer;
+        [Internal.MonoPInvokeCallback]
+        private static void FireEvent_Canceled(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        {
+            try
+            {
+                EventHandler<SpeechRecognitionCanceledEventArgs> eventHandle;
+                SpeechRecognizer recognizer = (SpeechRecognizer)GCHandle.FromIntPtr(pvContext).Target;
+                lock (recognizer.recognizerLock)
+                {
+                    if (recognizer.isDisposing) return;
+                    eventHandle = recognizer.Canceled;
+                }
+                var eventArgs = new Internal.SpeechRecognitionCanceledEventArgs(hevent);
+                var resultEventArg = new SpeechRecognitionCanceledEventArgs(eventArgs);
+                eventHandle?.Invoke(recognizer, resultEventArg);
+            }
+            catch (InvalidOperationException)
+            {
+                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+            }
         }
     }
 }

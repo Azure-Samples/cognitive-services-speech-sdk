@@ -14,7 +14,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             : base(e)
         {
             eventArgImpl = e;
-            Result = new IntentRecognitionResult(e.GetResult());
+            Result = new IntentRecognitionResult(e.Result);
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             eventArgImpl = e;
 
-            var cancellation = e.GetCancellationDetails();
+            var cancellation = e.CancellationDetails;
             Reason = (CancellationReason)cancellation.Reason;
             ErrorCode = (CancellationErrorCode)cancellation.ErrorCode;
             ErrorDetails = cancellation.ErrorDetails;

@@ -20,12 +20,10 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             resultImpl = result;
 
-            Trace.Assert((int)ResultReason.SynthesizingAudio == (int)Internal.ResultReason.SynthesizingAudio);
-            Trace.Assert((int)ResultReason.SynthesizingAudioCompleted == (int)Internal.ResultReason.SynthesizingAudioCompleted);
             Reason = (ResultReason)((int)result.Reason);
 
-            audio = new byte[result.Audio.Count];
-            result.Audio.CopyTo(audio);
+            audio = new byte[result.Audio.Length];
+            result.Audio.CopyTo(audio, 0);
         }
 
         /// <summary>

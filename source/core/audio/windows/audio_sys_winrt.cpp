@@ -107,7 +107,9 @@ WASAPICapture::~WASAPICapture()
     {
         SAFE_CLOSE_HANDLE(hCaptureThreadShouldExit);
     }
+    pAudioInputClient->Release();
 }
+
 HRESULT WASAPICapture::ActivateCompleted(IActivateAudioInterfaceAsyncOperation *operation)
 {
     HRESULT hrActivateResult = S_OK;
@@ -156,7 +158,7 @@ HRESULT audio_input_create(AUDIO_SYS_DATA* result)
     StringFromIID(DEVINTERFACE_AUDIO_CAPTURE, &audioCaptureGuidString);
     
     result->spCapture = Make<WASAPICapture>(result->audioInFormat);
-
+    result->spCapture.Get()->AddRef();
     auto future = result->spCapture->m_promise.get_future();
     // This call must be made on the main UI thread.  Async operation will call back to
     // IActivateAudioInterfaceCompletionHandler::ActivateCompleted, which must be an agile interface implementation
@@ -249,7 +251,6 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
     {
         AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
 
-        audioData->spCapture->pAudioInputClient->Release();
         if (audioData->hRenderThreadShouldExit != NULL  &&
             audioData->hRenderThreadDidExit != NULL)
         {

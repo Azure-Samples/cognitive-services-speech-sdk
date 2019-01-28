@@ -18,7 +18,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             : base(e)
         {
             eventArgImpl = e;
-            Result = new TranslationRecognitionResult(e.GetResult());
+            Result = new TranslationRecognitionResult(e.Result);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             : base(e)
         {
             eventArgImpl = e;
-            var cancellation = e.GetCancellationDetails();
+            var cancellation = e.CancellationDetails;
             Reason = (CancellationReason)cancellation.Reason;
             ErrorCode = (CancellationErrorCode)cancellation.ErrorCode;
             ErrorDetails = cancellation.ErrorDetails;

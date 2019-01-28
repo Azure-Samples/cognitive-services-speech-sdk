@@ -6,6 +6,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.CognitiveServices.Speech.Translation
 {
@@ -147,22 +148,15 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             this.recoImpl = recoImpl;
 
-            recognizingHandler = new ResultHandlerImpl(this, isRecognizedHandler: false);
-            recoImpl.Recognizing.Connect(recognizingHandler);
+            recognizingCallbackDelegate = FireEvent_Recognizing;
+            recognizedCallbackDelegate = FireEvent_Recognized;
+            canceledCallbackDelegate = FireEvent_Canceled;
+            translationSynthesisCallbackDelegate = FireEvent_SynthesisResult;
 
-            recognizedHandler = new ResultHandlerImpl(this, isRecognizedHandler: true);
-            recoImpl.Recognized.Connect(recognizedHandler);
-
-            synthesisResultHandler = new SynthesisHandlerImpl(this);
-            recoImpl.Synthesizing.Connect(synthesisResultHandler);
-
-            canceledHandler = new CanceledHandlerImpl(this);
-            recoImpl.Canceled.Connect(canceledHandler);
-
-            recoImpl.SessionStarted.Connect(sessionStartedHandler);
-            recoImpl.SessionStopped.Connect(sessionStoppedHandler);
-            recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
-            recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
+            recoImpl.SetRecognizingCallback(recognizingCallbackDelegate, GCHandle.ToIntPtr(gch));
+            recoImpl.SetRecognizedCallback(recognizedCallbackDelegate, GCHandle.ToIntPtr(gch));
+            recoImpl.SetCanceledCallback(canceledCallbackDelegate, GCHandle.ToIntPtr(gch));
+            recoImpl.SetSynthesizingAudioCallback(translationSynthesisCallbackDelegate, GCHandle.ToIntPtr(gch));
 
             Properties = new PropertyCollection(recoImpl.Properties);
         }
@@ -217,7 +211,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             get
             {
-                return this.recoImpl.GetAuthorizationToken();
+                return this.recoImpl.AuthorizationToken;
             }
 
             set
@@ -227,7 +221,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
                     throw new ArgumentNullException(nameof(value));
                 }
 
-                this.recoImpl.SetAuthorizationToken(value);
+                this.recoImpl.AuthorizationToken = value;
             }
         }
 
@@ -277,7 +271,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             return Task.Run(() =>
             {
                 TranslationRecognitionResult result = null;
-                base.DoAsyncRecognitionAction(() => result = new TranslationRecognitionResult(this.recoImpl.Recognize()));
+                base.DoAsyncRecognitionAction(() => result = new TranslationRecognitionResult(this.recoImpl.RecognizeOnce()));
                 return result;
             });
         }
@@ -344,113 +338,129 @@ namespace Microsoft.CognitiveServices.Speech.Translation
 
             if (disposing)
             {
-                recoImpl.Recognizing.Disconnect(recognizingHandler);
-                recoImpl.Recognized.Disconnect(recognizedHandler);
-                recoImpl.Synthesizing.Disconnect(synthesisResultHandler);
-                recoImpl.Canceled.Disconnect(canceledHandler);
-                recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
-                recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
-                recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
-                recoImpl.SpeechEndDetected.Disconnect(speechEndDetectedHandler);
+                try
+                {
+                    recoImpl.SetRecognizingCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetRecognizedCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetSynthesizingAudioCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetCanceledCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetSessionStartedCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetSessionStoppedCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetSpeechStartDetectedCallback(null, GCHandle.ToIntPtr(gch));
+                    recoImpl.SetSpeechEndDetectedCallback(null, GCHandle.ToIntPtr(gch));
+                }
+                catch (ApplicationException e)
+                {
+                    Internal.SpxExceptionThrower.LogError(e.Message);
+                }
 
-                synthesisResultHandler?.Dispose();
-                recognizingHandler?.Dispose();
-                recognizedHandler?.Dispose();
-                canceledHandler?.Dispose();
                 recoImpl?.Dispose();
-                disposed = true;
+
+                recognizingCallbackDelegate = null;
+                recognizedCallbackDelegate = null;
+                canceledCallbackDelegate = null;
+                translationSynthesisCallbackDelegate = null;
+
                 base.Dispose(disposing);
             }
         }
 
         private new readonly Internal.TranslationRecognizer recoImpl;
-        private readonly ResultHandlerImpl recognizingHandler;
-        private readonly ResultHandlerImpl recognizedHandler;
-        private readonly SynthesisHandlerImpl synthesisResultHandler;
-        private readonly CanceledHandlerImpl canceledHandler;
-        private bool disposed = false;
+        private Internal.CallbackFunctionDelegate recognizingCallbackDelegate;
+        private Internal.CallbackFunctionDelegate recognizedCallbackDelegate;
+        private Internal.CallbackFunctionDelegate canceledCallbackDelegate;
+        private Internal.CallbackFunctionDelegate translationSynthesisCallbackDelegate;
+
         private readonly Audio.AudioConfig audioConfig;
 
-        // Defines a private class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
-        private class ResultHandlerImpl : Internal.TranslationTextEventListener
+        // Defines a private methods to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
+
+        [Internal.MonoPInvokeCallback]
+        private static void FireEvent_Recognizing(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
-            public ResultHandlerImpl(TranslationRecognizer recognizer, bool isRecognizedHandler)
+            try
             {
-                this.recognizer = recognizer;
-                this.isRecognizedHandler = isRecognizedHandler;
+                EventHandler<TranslationRecognitionEventArgs> eventHandle;
+                TranslationRecognizer recognizer = (TranslationRecognizer)GCHandle.FromIntPtr(pvContext).Target;
+                lock (recognizer.recognizerLock)
+                {
+                    if (recognizer.isDisposing) return;
+                    eventHandle = recognizer.Recognizing;
+                }
+                var eventArgs = new Internal.TranslationRecognitionEventArgs(hevent);
+                var resultEventArg = new TranslationRecognitionEventArgs(eventArgs);
+                eventHandle?.Invoke(recognizer, resultEventArg);
             }
-
-            public override void Execute(Internal.TranslationRecognitionEventArgs eventArgs)
+            catch (InvalidOperationException)
             {
-                if (recognizer.disposed)
-                {
-                    return;
-                }
-
-                TranslationRecognitionEventArgs resultEventArg = new TranslationRecognitionEventArgs(eventArgs);
-                var handler = isRecognizedHandler ? recognizer.Recognized : recognizer.Recognizing;
-                if (handler != null)
-                {
-                    handler(this.recognizer, resultEventArg);
-                }
+                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
             }
-
-            private TranslationRecognizer recognizer;
-            private bool isRecognizedHandler;
         }
 
-        // Defines a private class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
-        private class CanceledHandlerImpl : Internal.TranslationTextCanceledEventListener
+        [Internal.MonoPInvokeCallback]
+        private static void FireEvent_Recognized(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
-            public CanceledHandlerImpl(TranslationRecognizer recognizer)
+            try
             {
-                this.recognizer = recognizer;
+                EventHandler<TranslationRecognitionEventArgs> eventHandle;
+                TranslationRecognizer recognizer = (TranslationRecognizer)GCHandle.FromIntPtr(pvContext).Target;
+                lock (recognizer.recognizerLock)
+                {
+                    if (recognizer.isDisposing) return;
+                    eventHandle = recognizer.Recognized;
+                }
+                var eventArgs = new Internal.TranslationRecognitionEventArgs(hevent);
+                var resultEventArg = new TranslationRecognitionEventArgs(eventArgs);
+                eventHandle?.Invoke(recognizer, resultEventArg);
             }
-
-            public override void Execute(Microsoft.CognitiveServices.Speech.Internal.TranslationRecognitionCanceledEventArgs eventArgs)
+            catch (InvalidOperationException)
             {
-                if (recognizer.disposed)
-                {
-                    return;
-                }
-
-                var canceledEventArgs = new TranslationRecognitionCanceledEventArgs(eventArgs);
-                var handler = this.recognizer.Canceled;
-
-                if (handler != null)
-                {
-                    handler(this.recognizer, canceledEventArgs);
-                }
+                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
             }
-
-            private TranslationRecognizer recognizer;
         }
 
-        // Defines a private class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
-        private class SynthesisHandlerImpl : Internal.TranslationSynthesisEventListener
+        [Internal.MonoPInvokeCallback]
+        private static void FireEvent_Canceled(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
-            public SynthesisHandlerImpl(TranslationRecognizer recognizer)
+            try
             {
-                this.recognizer = recognizer;
-            }
-
-            public override void Execute(Internal.TranslationSynthesisEventArgs eventArgs)
-            {
-                if (recognizer.disposed)
+                EventHandler<TranslationRecognitionCanceledEventArgs> eventHandle;
+                TranslationRecognizer recognizer = (TranslationRecognizer)GCHandle.FromIntPtr(pvContext).Target;
+                lock (recognizer.recognizerLock)
                 {
-                    return;
+                    if (recognizer.isDisposing) return;
+                    eventHandle = recognizer.Canceled;
                 }
+                var eventArgs = new Internal.TranslationRecognitionCanceledEventArgs(hevent);
+                var resultEventArg = new TranslationRecognitionCanceledEventArgs(eventArgs);
+                eventHandle?.Invoke(recognizer, resultEventArg);
+            }
+            catch (InvalidOperationException)
+            {
+                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+            }
+        }
 
+        [Internal.MonoPInvokeCallback]
+        private static void FireEvent_SynthesisResult(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        {
+            try
+            {
+                EventHandler<TranslationSynthesisEventArgs> eventHandle;
+                TranslationRecognizer recognizer = (TranslationRecognizer)GCHandle.FromIntPtr(pvContext).Target;
+                lock (recognizer.recognizerLock)
+                {
+                    if (recognizer.isDisposing) return;
+                    eventHandle = recognizer.Synthesizing;
+                }
+                var eventArgs = new Internal.TranslationSynthesisEventArgs(hevent);
                 var resultEventArg = new TranslationSynthesisEventArgs(eventArgs);
-                var handler = recognizer.Synthesizing;
-                if (handler != null)
-                {
-                    handler(this.recognizer, resultEventArg);
-                }
+                eventHandle?.Invoke(recognizer, resultEventArg);
             }
-
-            private TranslationRecognizer recognizer;
+            catch (InvalidOperationException)
+            {
+                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+            }
         }
     }
-
 }

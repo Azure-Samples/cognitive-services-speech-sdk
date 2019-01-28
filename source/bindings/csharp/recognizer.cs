@@ -6,6 +6,7 @@
 using System;
 using System.Globalization;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -37,10 +38,16 @@ namespace Microsoft.CognitiveServices.Speech
         internal Recognizer(Internal.Recognizer recoImpl)
         {
             this.recoImpl = recoImpl;
-            sessionStartedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStartedEvent);
-            sessionStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
-            speechStartDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechStartDetectedEvent);
-            speechEndDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechEndDetectedEvent);
+            gch = GCHandle.Alloc(this, GCHandleType.Normal);
+            speechStartDetectedCallbackDelegate = FireEvent_SpeechStartDetected;
+            speechEndDetectedCallbackDelegate = FireEvent_SpeechEndDetected;
+            sessionStartedCallbackDelegate = FireEvent_SetSessionStarted;
+            sessionStoppedCallbackDelegate = FireEvent_SetSessionStopped;
+
+            recoImpl.SetSpeechStartDetectedCallback(speechStartDetectedCallbackDelegate, GCHandle.ToIntPtr(gch));
+            recoImpl.SetSpeechEndDetectedCallback(speechEndDetectedCallbackDelegate, GCHandle.ToIntPtr(gch));
+            recoImpl.SetSessionStartedCallback(sessionStartedCallbackDelegate, GCHandle.ToIntPtr(gch));
+            recoImpl.SetSessionStoppedCallback(sessionStoppedCallbackDelegate, GCHandle.ToIntPtr(gch));
         }
 
         /// <summary>
@@ -48,12 +55,19 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public void Dispose()
         {
-            lock (recognizerLock)
+            try
             {
-                if (activeAsyncRecognitionCounter != 0)
+                lock (recognizerLock)
                 {
-                    throw new InvalidOperationException("Cannot dispose a recognizer while async recognition is running. Await async recognitions to avoid unexpected disposals.");
+                    isDisposing = true;
+                    if (activeAsyncRecognitionCounter != 0)
+                    {
+                        throw new InvalidOperationException("Cannot dispose a recognizer while async recognition is running. Await async recognitions to avoid unexpected disposals.");
+                    }
                 }
+            }
+            finally
+            {
                 Dispose(true);
                 GC.SuppressFinalize(this);
             }
@@ -74,90 +88,147 @@ namespace Microsoft.CognitiveServices.Speech
 
             if (disposing)
             {
-                // disconnect
-                sessionStartedHandler?.Dispose();
-                sessionStoppedHandler?.Dispose();
-                speechStartDetectedHandler?.Dispose();
-                speechEndDetectedHandler?.Dispose();
             }
 
-            disposed = true;
+            if (gch.IsAllocated)
+            {
+                gch.Free();
+            }
+
+            speechStartDetectedCallbackDelegate = null;
+            speechEndDetectedCallbackDelegate = null;
+            sessionStartedCallbackDelegate = null;
+            sessionStoppedCallbackDelegate = null;
+
+            lock (recognizerLock)
+            {
+                disposed = true;
+            }
         }
 
         internal readonly Internal.Recognizer recoImpl;
-        internal SessionEventHandlerImpl sessionStartedHandler;
-        internal SessionEventHandlerImpl sessionStoppedHandler;
-        internal RecognitionEventHandlerImpl speechStartDetectedHandler;
-        internal RecognitionEventHandlerImpl speechEndDetectedHandler;
-        private bool disposed = false;
-        private readonly object recognizerLock = new object();
+        private Internal.CallbackFunctionDelegate speechStartDetectedCallbackDelegate;
+        private Internal.CallbackFunctionDelegate speechEndDetectedCallbackDelegate;
+        private Internal.CallbackFunctionDelegate sessionStartedCallbackDelegate;
+        private Internal.CallbackFunctionDelegate sessionStoppedCallbackDelegate;
+
+        /// <summary>
+        /// GC handle for callbacks for context.
+        /// </summary>
+        protected GCHandle gch;
+        /// <summary>
+        /// disposed is a flag used to indicate if object is disposed.
+        /// </summary>
+        protected volatile bool disposed = false;
+        /// <summary>
+        /// isDisposing is a flag used to indicate if object is being disposed.
+        /// </summary>
+        protected volatile bool isDisposing = false;
+        /// <summary>
+        /// recognizerLock is used to synchronize access to objects member variables from multiple threads
+        /// </summary>
+        protected readonly object recognizerLock = new object();
         private int activeAsyncRecognitionCounter = 0;
 
         /// <summary>
-        /// Define a private class which raise a C# event when a corresponding callback is invoked from the native layer.
+        /// Define a private methods which raise a C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
-        internal class SessionEventHandlerImpl : Internal.SessionEventListener
+        ///
+
+        [Internal.MonoPInvokeCallback]
+        private static void FireEvent_SetSessionStarted(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
-            public SessionEventHandlerImpl(Recognizer recognizer, SessionEventType eventType)
+            try
             {
-                this.recognizer = recognizer;
-                this.eventType = eventType;
+                EventHandler<SessionEventArgs> eventHandle;
+                Recognizer recognizer = (Recognizer)GCHandle.FromIntPtr(pvContext).Target;
+                lock (recognizer.recognizerLock)
+                {
+                    if (recognizer.isDisposing) return;
+                    eventHandle = recognizer.SessionStarted;
+                }
+                var eventArgs = new Internal.SessionEventArgs(hevent);
+                var resultEventArg = new SessionEventArgs(eventArgs);
+                eventHandle?.Invoke(recognizer, resultEventArg);
+                // event do not need to be hold for SessionEventArgs
+                eventArgs.Dispose();
             }
-
-            public override void Execute(Internal.SessionEventArgs eventArgs)
+            catch (InvalidOperationException)
             {
-                if (recognizer.disposed)
-                {
-                    return;
-                }
-
-                var arg = new SessionEventArgs(eventArgs);
-
-                var handler = eventType == SessionEventType.SessionStartedEvent
-                    ? this.recognizer.SessionStarted
-                    : this.recognizer.SessionStopped;
-
-                if (handler != null)
-                {
-                    handler(this.recognizer, arg);
-                }
+                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
             }
-
-            private Recognizer recognizer;
-            private SessionEventType eventType;
         }
 
-        /// <summary>
-        /// Define a private class which raises a C# event when a corresponding callback is invoked from the native layer.
-        /// </summary>
-        internal class RecognitionEventHandlerImpl : Internal.RecognitionEventListener
+        [Internal.MonoPInvokeCallback]
+        private static void FireEvent_SetSessionStopped(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
-            public RecognitionEventHandlerImpl(Recognizer recognizer, RecognitionEventType eventType)
+            try
             {
-                this.recognizer = recognizer;
-                this.eventType = eventType;
+                EventHandler<SessionEventArgs> eventHandle;
+                Recognizer recognizer = (Recognizer)GCHandle.FromIntPtr(pvContext).Target;
+                lock (recognizer.recognizerLock)
+                {
+                    if (recognizer.isDisposing) return;
+                    eventHandle = recognizer.SessionStopped;
+                }
+                var eventArgs = new Internal.SessionEventArgs(hevent);
+                var resultEventArg = new SessionEventArgs(eventArgs);
+                eventHandle?.Invoke(recognizer, resultEventArg);
+                // event do not need to be hold for SessionEventArgs
+                eventArgs.Dispose();
             }
-
-            public override void Execute(Internal.RecognitionEventArgs eventArgs)
+            catch (InvalidOperationException)
             {
-                if (recognizer.disposed)
-                {
-                    return;
-                }
-
-                var arg = new RecognitionEventArgs(eventArgs);
-                var handler = eventType == RecognitionEventType.SpeechStartDetectedEvent
-                    ? this.recognizer.SpeechStartDetected
-                    : this.recognizer.SpeechEndDetected;
-
-                if (handler != null)
-                {
-                    handler(this.recognizer, arg);
-                }
+                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
             }
+        }
 
-            private Recognizer recognizer;
-            private RecognitionEventType eventType;
+        [Internal.MonoPInvokeCallback]
+        private static void FireEvent_SpeechStartDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        {
+            try
+            {
+                EventHandler<RecognitionEventArgs> eventHandle;
+                Recognizer recognizer = (Recognizer)GCHandle.FromIntPtr(pvContext).Target;
+                lock (recognizer.recognizerLock)
+                {
+                    if (recognizer.isDisposing) return;
+                    eventHandle = recognizer.SpeechStartDetected;
+                }
+                var eventArgs = new Internal.RecognitionEventArgs(hevent);
+                var resultEventArg = new RecognitionEventArgs(eventArgs);
+                eventHandle?.Invoke(recognizer, resultEventArg);
+                // event do not need to be hold for RecognitionEventArgs
+                eventArgs.Dispose();
+            }
+            catch (InvalidOperationException)
+            {
+                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+            }
+        }
+
+        [Internal.MonoPInvokeCallback]
+        private static void FireEvent_SpeechEndDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        {
+            try
+            {
+                EventHandler<RecognitionEventArgs> eventHandle;
+                Recognizer recognizer = (Recognizer)GCHandle.FromIntPtr(pvContext).Target;
+                lock (recognizer.recognizerLock)
+                {
+                    if (recognizer.isDisposing) return;
+                    eventHandle = recognizer.SpeechEndDetected;
+                }
+                var eventArgs = new Internal.RecognitionEventArgs(hevent);
+                var resultEventArg = new RecognitionEventArgs(eventArgs);
+                eventHandle?.Invoke(recognizer, resultEventArg);
+                // event do not need to be hold for RecognitionEventArgs
+                eventArgs.Dispose();
+            }
+            catch (InvalidOperationException)
+            {
+                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+            }
         }
 
         /// <summary>
@@ -174,7 +245,7 @@ namespace Microsoft.CognitiveServices.Speech
             {
                 activeAsyncRecognitionCounter++;
             }
-            if (disposed)
+            if (disposed || isDisposing)
             {
                 throw new ObjectDisposedException(this.GetType().Name);
             }

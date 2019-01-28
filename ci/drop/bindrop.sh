@@ -32,10 +32,7 @@ CSHARPSUPPORTED=false
 JAVASUPPORTED=true
 
 if [[ $TARGET == UWP ]]; then
-  CSHARPBINDINGSNAME=Microsoft.CognitiveServices.Speech.csharp.bindings.uwp
   JAVASUPPORTED=false
-else
-  CSHARPBINDINGSNAME=Microsoft.CognitiveServices.Speech.csharp.bindings
 fi
 
 if [[ $OS = "Windows_NT" ]]; then
@@ -50,7 +47,6 @@ if [[ $OS = "Windows_NT" ]]; then
 
              SRCJAVABINDINGS="$SRCBIN/Microsoft.CognitiveServices.Speech.java.bindings.dll"
              CSHARPSUPPORTED=true
-             SRCCSHARPBINDINGS="$SRCBIN/$CSHARPBINDINGSNAME.dll"
              ;;
     Android-*) LIBPREFIX=libMicrosoft.CognitiveServices.Speech.
              DYNLIBSUFFIX=.so
@@ -87,7 +83,6 @@ else
     CSHARPSUPPORTED=false
   else
     CSHARPSUPPORTED=true
-    SRCCSHARPBINDINGS="$SRCBIN/$CSHARPBINDINGSNAME.so"
   fi
 
   if [[ $TARGET == IOS ]]; then
@@ -104,7 +99,7 @@ SRCPRIVTESTJAR="$BUILD_ROOT/bin/com.microsoft.cognitiveservices.speech.tests.jar
 DESTPUBLIB="$DEST/public/lib"
 DESTPUBLIBNET461="$DEST/public/lib/net461"
 DESTPUBLIBNETSTANDARD20="$DEST/public/lib/netstandard2.0"
-DESTPUBLIBUTF8NETSTANDARD20="$DEST/public/lib/utf8/netstandard2.0"
+DESTPUBLIBUNIXOSNETSTANDARD20="$DEST/public/lib/UnixOS/netstandard2.0"
 DESTPUBINC="$DEST/public/include"
 DESTPRIVLIB="$DEST/private/lib"
 DESTPRIVLIBUNSTRIPPED="$DEST/private/libunstripped"
@@ -112,12 +107,11 @@ DESTPRIVBIN="$DEST/private/bin"
 DESTPRIVINC="$DEST/private/include"
 DESTPRIVINC2="$DEST/private/include.common"
 
-DESTCSHARPBINDINGS="$DESTPUBLIB/$CSHARPBINDINGSNAME.dll"
 
 printf "\nCopying files to drop location\n"
 
 # N.B. no long option for -p (parents) on OSX.
-mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBLIBUTF8NETSTANDARD20" "$DESTPUBINC" "$DESTPRIVLIB" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
+mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBLIBUNIXOSNETSTANDARD20" "$DESTPUBINC" "$DESTPRIVLIB" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
 
 # N.B. no long option for -v (verbose) and -p (preserve) on OSX.
 CPOPT="-v -p"
@@ -131,7 +125,7 @@ if [[ $OS = "Windows_NT" ]]; then
 
     cp $CPOPT "$SRCDYNLIB"/net461/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNET461"
     cp $CPOPT "$SRCDYNLIB"/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNETSTANDARD20"
-    cp $CPOPT "$SRCDYNLIB"Utf8/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBUTF8NETSTANDARD20"
+    cp $CPOPT "$SRCDYNLIB"UnixOS/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBUNIXOSNETSTANDARD20"
   fi
 fi
 
@@ -145,9 +139,6 @@ if [[ $JAVASUPPORTED == true ]]; then
   cp $CPOPT "$SRCPRIVTESTJAR" "$DESTPRIVBIN"
 fi
 
-if [[ $CSHARPSUPPORTED == true ]]; then
-  cp $CPOPT "$SRCCSHARPBINDINGS" "$DESTCSHARPBINDINGS"
-fi
 
 # Linux: strip shipping binaries, but keep the unstripped version around.
 # N.B. there's an .so in disguise with the .dll extension

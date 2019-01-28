@@ -71,7 +71,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.configImpl.GetSubscriptionKey();
+                return this.configImpl.SubscriptionKey;
             }
         }
 
@@ -82,7 +82,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.configImpl.GetRegion();
+                return this.configImpl.Region;
             }
         }
 
@@ -99,7 +99,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.configImpl.GetAuthorizationToken();
+                return this.configImpl.AuthorizationToken;
             }
 
             set
@@ -108,7 +108,7 @@ namespace Microsoft.CognitiveServices.Speech
                 {
                     throw new ArgumentNullException(nameof(value));
                 }
-                this.configImpl.SetAuthorizationToken(value);
+                this.configImpl.AuthorizationToken = value;
             }
         }
 
@@ -119,12 +119,12 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.configImpl.GetSpeechRecognitionLanguage();
+                return this.configImpl.SpeechRecognitionLanguage;
             }
 
             set
             {
-                this.configImpl.SetSpeechRecognitionLanguage(value);
+                this.configImpl.SpeechRecognitionLanguage = value;
             }
         }
 
@@ -154,12 +154,12 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.configImpl.GetEndpointId();
+                return this.configImpl.EndpointId;
             }
 
             set
             {
-                this.configImpl.SetEndpointId(value);
+                this.configImpl.EndpointId = value;
             }
         }
 

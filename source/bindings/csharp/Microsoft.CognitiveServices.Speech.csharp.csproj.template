@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{5BDDBE11-B03D-3784-9970-94A9784428A5}</ProjectGuid>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <ProjectName>Microsoft.CognitiveServices.Speech.csharp</ProjectName>
     <AssemblyName>Microsoft.CognitiveServices.Speech.csharp</AssemblyName>
     <OutputType>Library</OutputType>
@@ -11,7 +11,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <Configurations>Debug;Release;DebugUtf8;ReleaseUtf8</Configurations>
+    <Configurations>Debug;Release;DebugUnixOS;ReleaseUnixOS</Configurations>
     <NoWarn>1701;1702;1705;1591</NoWarn>
     <Version>0.0.0</Version>
     <DebugSymbols>true</DebugSymbols>
@@ -32,9 +32,9 @@
   <PropertyGroup Condition="$(Configuration.Contains('Release'))">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.Contains('Utf8'))">
-    <DefineConstants>USE_UTF8</DefineConstants>
-    <TargetFramework>netstandard2.0</TargetFramework>
+  <PropertyGroup Condition="$(Configuration.Contains('UnixOS'))">
+    <DefineConstants>UNIX</DefineConstants>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="$(FxCopAnalyzerVersion)" PrivateAssets="all" />
@@ -45,7 +45,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="${CMAKE_CURRENT_BINARY_DIR}\swig-generated\*.cs" />
+    <Compile Include="${SRC_DIR}\interop\*.cs"/>
     <Compile Include="${SRC_DIR}\*.cs"/>
   </ItemGroup>
 </Project>

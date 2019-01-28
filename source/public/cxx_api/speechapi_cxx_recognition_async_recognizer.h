@@ -205,7 +205,7 @@ protected:
             SPX_EXITFN_CLEANUP:
             auto releaseHr = recognizer_async_handle_release(m_hasyncStopContinuous);
             SPX_REPORT_ON_FAIL(releaseHr);
-            m_hasyncStartContinuous = SPXHANDLE_INVALID;
+            m_hasyncStopContinuous = SPXHANDLE_INVALID;
 
             SPX_THROW_ON_FAIL(hr);
         });

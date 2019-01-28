@@ -16,16 +16,6 @@ namespace Microsoft.CognitiveServices.Speech
     {
         internal RecognitionResult(Internal.RecognitionResult result)
         {
-            Contract.Requires((int)ResultReason.NoMatch == (int)Internal.ResultReason.NoMatch);
-            Contract.Requires((int)ResultReason.Canceled == (int)Internal.ResultReason.Canceled);
-            Contract.Requires((int)ResultReason.RecognizingSpeech == (int)Internal.ResultReason.RecognizingSpeech);
-            Contract.Requires((int)ResultReason.RecognizedSpeech == (int)Internal.ResultReason.RecognizedSpeech);
-            Contract.Requires((int)ResultReason.RecognizingIntent == (int)Internal.ResultReason.RecognizingIntent);
-            Contract.Requires((int)ResultReason.RecognizedIntent == (int)Internal.ResultReason.RecognizedIntent);
-            Contract.Requires((int)ResultReason.TranslatingSpeech == (int)Internal.ResultReason.TranslatingSpeech);
-            Contract.Requires((int)ResultReason.TranslatedSpeech == (int)Internal.ResultReason.TranslatedSpeech);
-            Contract.Requires((int)ResultReason.SynthesizingAudio == (int)Internal.ResultReason.SynthesizingAudio);
-            Contract.Requires((int)ResultReason.SynthesizingAudioCompleted == (int)Internal.ResultReason.SynthesizingAudioCompleted);
 
             resultImpl = result;
             this.ResultId = result.ResultId;
@@ -52,12 +42,12 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Duration of the recognized speech.
         /// </summary>
-        public TimeSpan Duration => TimeSpan.FromTicks((long)this.resultImpl.Duration());
+        public TimeSpan Duration => TimeSpan.FromTicks((long)this.resultImpl.Duration);
 
         /// <summary>
         /// Offset of the recognized speech in ticks. A single tick represents one hundred nanoseconds or one ten-millionth of a second.
         /// </summary>
-        public long OffsetInTicks => (long)this.resultImpl.Offset();
+        public long OffsetInTicks => (long)this.resultImpl.Offset;
 
         /// <summary>
         /// Contains properties of the results.
@@ -96,19 +86,6 @@ namespace Microsoft.CognitiveServices.Speech
 
         internal CancellationDetails(Internal.CancellationDetails cancellation)
         {
-            Contract.Requires((int)CancellationReason.Error == (int)Internal.CancellationReason.Error);
-            Contract.Requires((int)CancellationReason.EndOfStream == (int)Internal.CancellationReason.EndOfStream);
-
-            Contract.Requires((int)CancellationErrorCode.NoError == (int)Internal.CancellationErrorCode.NoError);
-            Contract.Requires((int)CancellationErrorCode.AuthenticationFailure == (int)Internal.CancellationErrorCode.AuthenticationFailure);
-            Contract.Requires((int)CancellationErrorCode.BadRequest== (int)Internal.CancellationErrorCode.BadRequest);
-            Contract.Requires((int)CancellationErrorCode.TooManyRequests == (int)Internal.CancellationErrorCode.TooManyRequests);
-            Contract.Requires((int)CancellationErrorCode.Forbidden == (int)Internal.CancellationErrorCode.Forbidden);
-            Contract.Requires((int)CancellationErrorCode.ConnectionFailure == (int)Internal.CancellationErrorCode.ConnectionFailure);
-            Contract.Requires((int)CancellationErrorCode.ServiceTimeout == (int)Internal.CancellationErrorCode.ServiceTimeout);
-            Contract.Requires((int)CancellationErrorCode.ServiceError == (int)Internal.CancellationErrorCode.ServiceError);
-            Contract.Requires((int)CancellationErrorCode.ServiceUnavailable == (int)Internal.CancellationErrorCode.ServiceUnavailable);
-            Contract.Requires((int)CancellationErrorCode.RuntimeError == (int)Internal.CancellationErrorCode.RuntimeError);
 
             canceledImpl = cancellation;
             this.Reason = (CancellationReason)((int)cancellation.Reason);
@@ -164,10 +141,6 @@ namespace Microsoft.CognitiveServices.Speech
 
         internal NoMatchDetails(Internal.NoMatchDetails noMatch)
         {
-            Contract.Requires((int)NoMatchReason.NotRecognized == (int)Internal.NoMatchReason.NotRecognized);
-            Contract.Requires((int)NoMatchReason.InitialSilenceTimeout == (int)Internal.NoMatchReason.InitialSilenceTimeout);
-            Contract.Requires((int)NoMatchReason.InitialBabbleTimeout == (int)Internal.NoMatchReason.InitialBabbleTimeout);
-
             noMatchImpl = noMatch;
             this.Reason = (NoMatchReason)((int)noMatch.Reason);
         }

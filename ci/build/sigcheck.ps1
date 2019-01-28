@@ -269,7 +269,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $script:errorFound = $false
 $whiteList = @("Android\\client-sdk-\d+\.\d+\.\d+-.+debug.aar",
-               "runtimes\\linux-x64\\native\\Microsoft.CognitiveServices.Speech.csharp.bindings.dll")
+               "runtimes\\linux-x64\\native\\libMicrosoft.CognitiveServices.Speech.core.so")
 main
 
 if ($script:errorFound) {

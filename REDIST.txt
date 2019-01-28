@@ -2,9 +2,6 @@ The following libraries can be redistributed if you are using the Cognitive Serv
 subject to the license (https://aka.ms/csspeech/license201809).
 
 Microsoft.CognitiveServices.Speech.core.dll
-Microsoft.CognitiveServices.Speech.core.uwp.dll
-Microsoft.CognitiveServices.Speech.csharp.bindings.dll
-Microsoft.CognitiveServices.Speech.csharp.bindings.uwp.dll
 Microsoft.CognitiveServices.Speech.csharp.dll
 MicrosoftCognitiveServicesSpeech.framework/MicrosoftCognitiveServicesSpeech
 client-sdk-<VERSION>.aar (or content derived from it)

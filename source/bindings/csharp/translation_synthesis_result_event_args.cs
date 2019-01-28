@@ -17,7 +17,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             : base(e)
         {
             eventArgImpl = e;
-            Result = new TranslationSynthesisResult(e.GetResult());
+            Result = new TranslationSynthesisResult(e.Result);
         }
 
         /// <summary>

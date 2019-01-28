@@ -21,7 +21,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio stream format being created.</returns>
         public static AudioStreamFormat GetDefaultInputFormat()
         {
-            return new AudioStreamFormat(Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat.GetDefaultInputFormat());
+            return new AudioStreamFormat(Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat.DefaultInputFormat);
         }
 
         /// <summary>
@@ -259,6 +259,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         public PushAudioInputStream(AudioStreamFormat format) :
             this(Microsoft.CognitiveServices.Speech.Internal.PushAudioInputStream.CreatePushStream(format.formatImpl))
         {
+            GC.KeepAlive(format);
         }
 
         /// <summary>
@@ -345,6 +346,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         public PullAudioInputStream(PullAudioInputStreamCallback callback, AudioStreamFormat format) :
             this(Microsoft.CognitiveServices.Speech.Internal.PullAudioInputStream.CreatePullStream(format.formatImpl, callback.Adapter), callback)
         {
+            GC.KeepAlive(format);
         }
 
         /// <summary>
@@ -471,7 +473,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <param name="size">The size of the buffer.</param>
         /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
         /// If there is no data immediately available, Read() blocks until the next data becomes available.</returns>
-        override public int Read(byte[] dataBuffer, uint size)
+        public override int Read(byte[] dataBuffer, uint size)
         {
             if (size != dataBuffer.Length)
             {
@@ -490,7 +492,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <summary>
         /// Closes the stream.
         /// </summary>
-        override public void Close()
+        public override void Close()
         {
             callback.Close();
         }
@@ -498,7 +500,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <summary>
         /// Dispose of associated resources.
         /// </summary>
-        override public void Dispose()
+        public override void Dispose()
         {
             Dispose(true);
             base.Dispose();
