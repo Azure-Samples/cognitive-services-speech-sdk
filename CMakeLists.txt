@@ -229,8 +229,8 @@ elseif(ANDROID)
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # compilation flags required by security checks
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector-strong -Wformat -Wformat-security -Werror=format-security")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-strong -Wformat -Wformat-security -Werror=format-security")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector-strong -Wformat -Wformat-security -Werror")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-strong -Wformat -Wformat-security -Werror")
 
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g")
@@ -244,11 +244,17 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
   # option to only compile embedded bitcode markers
-  if((DEFINED APPLE) AND (DEFINED IOS_PLATFORM))
-    if(ENABLE_BITCODE_MARKER)
-      set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -fembed-bitcode-marker")
+  if(DEFINED APPLE)
+    if (DEFINED IOS_PLATFORM)
+      if(ENABLE_BITCODE_MARKER)
+        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -fembed-bitcode-marker")
+      endif()
+    else()
+      # enable ARC for Objective-C on macOS. On iOS, it is enabled by default.
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fobjc-arc")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fobjc-arc")
     endif()
-  endif((DEFINED APPLE) AND (DEFINED IOS_PLATFORM))
+  endif()
 endif()
 
 set(CARBON_ROOT ${PROJECT_SOURCE_DIR})

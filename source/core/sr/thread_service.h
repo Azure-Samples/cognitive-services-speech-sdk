@@ -58,6 +58,7 @@ private:
             : m_task(std::move(task)), m_executed(std::move(executed)), m_id(id), m_state(State::New)
         {
         }
+        virtual ~Task() = default;
 
         enum class State
         {

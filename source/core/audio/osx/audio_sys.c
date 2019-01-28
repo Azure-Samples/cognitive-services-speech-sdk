@@ -123,7 +123,12 @@ static void logOSStatusError(OSStatus error, const char *operation)
     char errorString[20];
     stringifyOSStatus(error, errorString);
 
-    SPX_DBG_TRACE_ERROR("Error: %s (%s)", operation, errorString);
+    // clang complains about using SPX_DBG_TRACE_ERROR with more than one
+    // argument in C.  So, constructing the error message manually here.
+    char message[1024];
+    snprintf(message, 1024, "Error: %s (%s)", operation, errorString);
+
+    SPX_DBG_TRACE_ERROR("%s", message);
 }
 
 
