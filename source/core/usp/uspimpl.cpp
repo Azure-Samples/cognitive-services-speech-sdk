@@ -849,14 +849,17 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
         contentType = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::contentType);
         if (contentType == NULL)
         {
-            PROTOCOL_VIOLATION("response '%s' contains body with no content-type", path);
-            return;
+            LogInfo("response '%s' contains body with no content-type", path);
+        }
+        else
+        {
+            LogInfo("Response Message: content type: %s.", contentType);
         }
     }
 
     MetricsReceivedMessage(*connection->m_telemetry, requestId, path);
 
-    LogInfo("TS:%" PRIu64 " Response Message: path: %s, content type: %s, size: %zu.", connection->getTimestamp(), path, contentType, response->bufferSize);
+    LogInfo("TS:%" PRIu64 " Response Message: path: %s, size: %zu.", connection->getTimestamp(), path, response->bufferSize);
 
     string pathStr(path);
     auto callbacks = connection->m_config.m_callbacks;
