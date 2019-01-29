@@ -1401,6 +1401,7 @@ jobs:
     VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
     JointCmakeArgs: -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
+    Developer.Dir: /Applications/Xcode_10.1.app/Contents/Developer
   steps:
   - bash: |
       . ci/functions.sh &&
@@ -1513,7 +1514,7 @@ jobs:
         -D long-running=false)
       xcodebuild test -project tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
         -scheme SpeechSDK_iOS \
-        -destination 'platform=iOS Simulator,name=iPhone 8,OS=11.4' \
+        -destination 'platform=iOS Simulator,name=iPhone 8,OS=12.1' \
         SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION" 2>&1 |
           tee "$(OutputDirectory)/logs/xcodebuild-ios-unittests.log" |
           xcpretty --report junit --output test-ios-unittests.xml

@@ -38,8 +38,8 @@ function runXcodeSuite {
   testCases=(
     "iPhone-X iOS-12-1"
     "iPhone-6s iOS-10-0"
-    "iPhone-6 iOS-10-0"
-    "iPhone-5 iOS-10-0"
+    "iPhone-6 iOS-10-2"
+    "iPhone-5 iOS-10-2"
     "iPhone-6 iOS-9-3"
     "iPhone-5 iOS-9-3 --extra-args 'ARCHS=\"i386\" IPHONEOS_DEPLOYMENT_TARGET=9.2'"
     "iPhone-6 iOS-9-2"
