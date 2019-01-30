@@ -2,7 +2,7 @@
 #  See https://aka.ms/csspeech/license201809 for the full license information.
 
 """
-Microsoft Speech SDK
+Microsoft Speech SDK for Python
 """
 
 from .speech import *

@@ -11,6 +11,20 @@ DOTTED_PACKAGE_NAME = PACKAGE_NAME.replace('-', '.')
 PACKAGE_PPRINT_NAME = "Microsoft Cognitive Services Speech SDK"
 SOURCE_DIR = 'source/bindings/python/src'
 
+DESCRIPTION = """
+# Microsoft Speech SDK for Python
+
+For an introduction to this package, have a look at [the quickstart
+article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-python).
+
+For information about the speech service, please refer to [its
+website](https://docs.microsoft.com/azure/cognitive-services/speech-service/).
+
+## Documentation
+
+API documentation for this package can be found [here](https://aka.ms/csspeech/pythonref).
+"""
+
 version = None
 try:
     version = os.environ['SPEECHSDK_SEMVER2NOMETA']
@@ -51,4 +65,6 @@ setup(name=PACKAGE_NAME,
           'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
       ],
+      long_description=DESCRIPTION,
+      long_description_content_type="text/markdown"
       )
