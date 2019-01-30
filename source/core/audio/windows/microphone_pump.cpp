@@ -17,14 +17,17 @@ namespace Impl {
 
 using namespace std;
 
-AUDIO_WAVEFORMAT CSpxMicrophonePump::SetOptionsBeforeCreateAudioHandle()
+AUDIO_SETTINGS_HANDLE CSpxMicrophonePump::SetOptionsBeforeCreateAudioHandle()
 {
     auto channels = GetChannelsFromConfig();
     if (channels > 0)
     {
-        m_format.nChannels = channels;
+        SPX_TRACE_VERBOSE("Windows microphone only supports 1 or 2 channels.");
+        SPX_IFTRUE_THROW_HR(channels != 1 && channels != 2, SPXERR_MIC_ERROR);
+        SPX_TRACE_VERBOSE("The number of channel of microphone is set as %d", channels);
     }
-    return { m_format.wFormatTag, m_format.nChannels, m_format.nSamplesPerSec, m_format.nAvgBytesPerSec, m_format.nBlockAlign, m_format.wBitsPerSample };
+
+    return CSpxMicrophonePumpBase::SetOptionsBeforeCreateAudioHandle();
 }
 
 void CSpxMicrophonePump::SetOptionsAfterCreateAudioHandle()

@@ -23,6 +23,7 @@
 #include <endpointvolume.h>
 #include <spxdebug.h>
 #include <windows/audio_sys_win_base.h>
+#include <string_utils.h>
 
 using namespace Microsoft::WRL;
 
@@ -118,6 +119,7 @@ HRESULT WASAPICapture::ActivateCompleted(IActivateAudioInterfaceAsyncOperation *
 
     // Check for a successful activation result
     HRESULT hr = operation->GetActivateResult(&hrActivateResult, &punkAudioInterface);
+
     EXIT_ON_ERROR(hr);
 
     EXIT_ON_ERROR(hrActivateResult);
@@ -149,32 +151,41 @@ Exit:
     return S_OK;
 }
 
-HRESULT audio_input_create(AUDIO_SYS_DATA* result)
+HRESULT audio_input_create(AUDIO_SYS_DATA* audioData)
 {
     ComPtr<IActivateAudioInterfaceAsyncOperation> asyncOp;
     HRESULT hr = S_OK;
+    PWSTR audioCaptureGuidString = nullptr;
 
-    PWSTR audioCaptureGuidString;
-    StringFromIID(DEVINTERFACE_AUDIO_CAPTURE, &audioCaptureGuidString);
-    
-    result->spCapture = Make<WASAPICapture>(result->audioInFormat);
-    result->spCapture.Get()->AddRef();
-    auto future = result->spCapture->m_promise.get_future();
+    audioData->spCapture = Make<WASAPICapture>(audioData->audioInFormat);
+    audioData->spCapture.Get()->AddRef();
+
+    auto future = audioData->spCapture->m_promise.get_future();
+
+    std::wstring mic_name = PAL::ToWString(std::string(STRING_c_str(audioData->hDeviceName)));
+
     // This call must be made on the main UI thread.  Async operation will call back to
     // IActivateAudioInterfaceCompletionHandler::ActivateCompleted, which must be an agile interface implementation
-    hr = ActivateAudioInterfaceAsync(audioCaptureGuidString, __uuidof(IAudioClient2), nullptr, result->spCapture.Get(), &asyncOp);
+    if (L"" == mic_name)
+    {
+        StringFromIID(DEVINTERFACE_AUDIO_CAPTURE, &audioCaptureGuidString);
+        hr = ActivateAudioInterfaceAsync(audioCaptureGuidString, __uuidof(IAudioClient2), nullptr, audioData->spCapture.Get(), &asyncOp);
+    }
+    else
+    {
+        hr = ActivateAudioInterfaceAsync(mic_name.c_str(), __uuidof(IAudioClient2), nullptr, audioData->spCapture.Get(), &asyncOp);
+    }
     EXIT_ON_ERROR(hr);
 
     // wait
     future.wait();
     hr = future.get();
-
 Exit:
     CoTaskMemFree(audioCaptureGuidString);
     return hr;
 }
 
-AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 {
     HRESULT hr = S_OK;
     AUDIO_SYS_DATA * result = nullptr;
@@ -188,13 +199,15 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
     // set input frame to 10 ms.(16000 frames(samples) is in one second )
     result->inputFrameCnt = 160;
 
-    result->audioInFormat.wFormatTag = format.wFormatTag;
-    result->audioInFormat.wBitsPerSample = format.wBitsPerSample;
-    result->audioInFormat.nChannels = format.nChannels;
-    result->audioInFormat.nSamplesPerSec = format.nSamplesPerSec;
-    result->audioInFormat.nAvgBytesPerSec = format.nAvgBytesPerSec;
-    result->audioInFormat.nBlockAlign = format.nBlockAlign;
+    result->audioInFormat.wFormatTag = format->wFormatTag;
+    result->audioInFormat.wBitsPerSample = format->wBitsPerSample;
+    result->audioInFormat.nChannels = format->nChannels;
+    result->audioInFormat.nSamplesPerSec = format->nSamplesPerSec;
+    result->audioInFormat.nAvgBytesPerSec = format->nAvgBytesPerSec;
+    result->audioInFormat.nBlockAlign = format->nBlockAlign;
     result->audioInFormat.cbSize = 0;
+
+    audio_set_options(result, AUDIO_OPTION_DEVICENAME, STRING_c_str(format->hDeviceName));
 
     hr = audio_input_create(result);
     EXIT_ON_ERROR(hr);

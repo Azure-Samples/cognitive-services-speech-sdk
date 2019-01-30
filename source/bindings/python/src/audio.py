@@ -123,31 +123,36 @@ class AudioConfig():
 
     :param use_default_microphone: Specifies to use the default system microphone for audio
         input.
+    :param device_name: Specifies the name of the audio device to use. This functionality was added
+        in version 1.3.0.
     :param filename: Specifies an audio input file. Currently, only WAV / PCM with 16-bit
         samples, 16 kHz sample rate, and a single channel (Mono) is supported.
     :param stream: Creates an AudioConfig object representing the specified stream.
     """
 
     def __init__(self, use_default_microphone: bool = False, filename: OptionalStr = None,
-                 stream: Optional[AudioInputStream] = None):
+            stream: Optional[AudioInputStream] = None, device_name: OptionalStr = None):
         if not isinstance(use_default_microphone, bool):
             raise ValueError('use_default_microphone must be a bool, is "{}"'.format(
                 use_default_microphone))
-        if filename is None and stream is None:
-            if use_default_microphone:
+        if use_default_microphone:
+            if filename is None and stream is None and device_name is None:
                 self._impl = impl.AudioConfig._from_default_microphone_input()
                 return
             else:
-                raise ValueError('default microphone needs to be explicitly activated')
+                raise ValueError('default microphone can not be combined with any other options')
 
-        if filename is not None and stream is not None:
-            raise ValueError('either filename or stream must be given, but not both')
+        if sum(x is not None for x in (filename, stream, device_name)) > 1:
+            raise ValueError('only one of filename, stream, and device_name can be given')
 
         if filename is not None:
             self._impl = impl.AudioConfig._from_wav_file_input(filename)
             return
         if stream is not None:
             self._impl = impl.AudioConfig._from_stream_input(stream._impl)
+            return
+        if device_name is not None:
+            self._impl = impl.AudioConfig._from_microphone_input(device_name)
             return
 
         raise ValueError('cannot construct AudioConfig with the given arguments')

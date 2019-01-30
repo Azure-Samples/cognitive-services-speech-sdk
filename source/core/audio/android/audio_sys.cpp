@@ -103,7 +103,7 @@ static int output_async_read(void* userContext, uint8_t* pBuffer, uint32_t size)
 static int output_async(void *p);
 static int output_write_async(void *p);
 
-static AUDIO_RESULT write_audio_stream(AUDIO_SYS_DATA*audioData, const AUDIO_WAVEFORMAT*outputWaveFmt, AUDIOINPUT_WRITE readCallback, AUDIOCOMPLETE_CALLBACK completedCallback, AUDIO_BUFFERUNDERRUN_CALLBACK bufferUnderrunCallback, void* userContext);
+static AUDIO_RESULT write_audio_stream(AUDIO_SYS_DATA*audioData, const AUDIO_WAVEFORMAT* outputWaveFmt, AUDIOINPUT_WRITE readCallback, AUDIOCOMPLETE_CALLBACK completedCallback, AUDIO_BUFFERUNDERRUN_CALLBACK bufferUnderrunCallback, void* userContext);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -120,13 +120,7 @@ struct _ASYNCAUDIO
     THREAD_HANDLE          outputThread;
 };
 
-AUDIO_SYS_HANDLE audio_create()
-{
-    AUDIO_WAVEFORMAT format{ 0, AUDIO_CHANNELS_MONO, AUDIO_SAMPLE_RATE, 0, 0, AUDIO_BITS };
-    return audio_create_with_parameters(format);
-}
-
-AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 {
     AUDIO_SYS_DATA* result;
 
@@ -134,9 +128,9 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
     if (result != nullptr)
     {
         memset(result, 0, sizeof(AUDIO_SYS_DATA));
-        result->channels = format.nChannels;
-        result->sampleRate = format.nSamplesPerSec;
-        result->bitsPerSample = format.wBitsPerSample;
+        result->channels = format->nChannels;
+        result->sampleRate = format->nSamplesPerSec;
+        result->bitsPerSample = format->wBitsPerSample;
         result->waveDataDirty = true;
         result->inputFrameCount = INPUT_FRAME_COUNT;
         result->currentOutputState = AUDIO_STATE_STOPPED;
@@ -144,6 +138,8 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
         result->outputCanceledLock = Lock_Init();
         result->audioBufferLock = Lock_Init();
         sem_init(&result->audioFramesAvailable, 0, 0);
+
+        audio_set_options(result, AUDIO_OPTION_DEVICENAME, STRING_c_str(format->hDeviceName));
     }
 
     return result;

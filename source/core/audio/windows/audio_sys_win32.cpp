@@ -15,6 +15,7 @@
 #include <endpointvolume.h>
 #include <spxdebug.h>
 #include <windows/audio_sys_win_base.h>
+#include <string_utils.h>
 
 // remove this when the SDK supports it.
 #define AudioCategory_Speech (AUDIO_STREAM_CATEGORY)9
@@ -341,7 +342,7 @@ static AUDIO_RESULT write_audio_stream(
     return result;
 }
 
-AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 {
     AUDIO_SYS_DATA      *result = nullptr;
     HRESULT hr = E_FAIL;
@@ -349,6 +350,7 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
     std::shared_ptr<IMMDeviceEnumerator> pEnumerator(nullptr);
     std::shared_ptr<IMMDevice> pDevice(nullptr);
     std::shared_ptr<IAudioClient2> pAudioClient2(nullptr);
+    std::wstring mic_name {};
 
     REFERENCE_TIME      hnsRequestedDuration = REFTIMES_PER_SEC;
 
@@ -371,12 +373,24 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
         pEnumerator.reset(pEnumeratorRaw, Deleter<IMMDeviceEnumerator>());
     }
 
-    //Initialize Audio Input, throw exception when no mic.
+    mic_name = PAL::ToWString(std::string(STRING_c_str(format->hDeviceName)));
+
+    if (L"" == mic_name)
     {
+        // Initialize Audio Input from default device, throw exception when no mic.
         IMMDevice * pDeviceRaw = nullptr;
         HRESULT hrlocal = pEnumerator->GetDefaultAudioEndpoint(eCapture, eConsole, &pDeviceRaw);
-        LogInfo("hrlocal is 0x%x", hrlocal);
+        LogInfo("default microphone init: hrlocal is 0x%x", hrlocal);
         EXIT_ON_ERROR_IF(E_FAIL, pDeviceRaw == nullptr || hrlocal != S_OK );
+        pDevice.reset(pDeviceRaw, Deleter<IMMDevice>());
+    }
+    else
+    {
+        // Initialize Audio Input from specified device, throw exception when no mic.
+        IMMDevice * pDeviceRaw = nullptr;
+        HRESULT hrlocal = pEnumerator->GetDevice(mic_name.c_str(), &pDeviceRaw);
+        LogInfo("custom microphone (%ls) init: is 0x%x", mic_name.c_str(), hrlocal);
+        EXIT_ON_ERROR_IF(E_FAIL, pDeviceRaw == nullptr || hrlocal != S_OK);
         pDevice.reset(pDeviceRaw, Deleter<IMMDevice>());
     }
 
@@ -397,13 +411,15 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
         }
     }
 
-    result->audioInFormat.wFormatTag = format.wFormatTag;
-    result->audioInFormat.wBitsPerSample = format.wBitsPerSample;
-    result->audioInFormat.nChannels = format.nChannels;
-    result->audioInFormat.nSamplesPerSec = format.nSamplesPerSec;
-    result->audioInFormat.nAvgBytesPerSec = format.nAvgBytesPerSec;
-    result->audioInFormat.nBlockAlign = format.nBlockAlign;
+    result->audioInFormat.wFormatTag = format->wFormatTag;
+    result->audioInFormat.wBitsPerSample = format->wBitsPerSample;
+    result->audioInFormat.nChannels = format->nChannels;
+    result->audioInFormat.nSamplesPerSec = format->nSamplesPerSec;
+    result->audioInFormat.nAvgBytesPerSec = format->nAvgBytesPerSec;
+    result->audioInFormat.nBlockAlign = format->nBlockAlign;
     result->audioInFormat.cbSize = 0;
+
+    audio_set_options(result, AUDIO_OPTION_DEVICENAME, STRING_c_str(format->hDeviceName));
 
     hr = result->pAudioInputClient->Initialize(
         AUDCLNT_SHAREMODE_SHARED,

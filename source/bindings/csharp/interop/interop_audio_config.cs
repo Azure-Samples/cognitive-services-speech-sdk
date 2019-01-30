@@ -65,6 +65,13 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             return new AudioConfig(audioConfigHandle);
         }
 
+        public static AudioConfig FromMicrophoneInput(string deviceName)
+        {
+            SPXAUDIOCONFIGHANDLE audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(audio_config_create_audio_input_from_a_microphone(out audioConfigHandle, deviceName));
+            return new AudioConfig(audioConfigHandle);
+        }
+
         public static AudioConfig FromStreamInput(AudioInputStream stream)
         {
             ThrowIfNull(stream);
@@ -81,6 +88,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         public static extern SPXHR audio_config_create_audio_input_from_wav_file_name(out SPXAUDIOCONFIGHANDLE haudioConfig,
             [MarshalAs(UnmanagedType.LPStr)] string fileName);
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR audio_config_create_audio_input_from_a_microphone(out SPXAUDIOCONFIGHANDLE haudioConfig,
+            [MarshalAs(UnmanagedType.LPStr)] string deviceName);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR audio_config_create_audio_input_from_stream(out SPXAUDIOCONFIGHANDLE haudioConfig, SPXAUDIOSTREAMHANDLE haudioStream);        
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]

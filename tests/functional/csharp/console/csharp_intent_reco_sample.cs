@@ -67,14 +67,23 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: Session started event: {0}.", e.ToString()));
         }
 
-        public static async Task IntentRecognitionBaseModelAsync(string keySpeech, string region, string fileName, bool useContinuousRecognition)
+        public static async Task IntentRecognitionBaseModelAsync(string keySpeech, string region, string fileName, bool useContinuousRecognition, string deviceName = null)
         {
             Console.WriteLine("Intent Recognition using base speech model.");
 
             var config = SpeechConfig.FromSubscription(keySpeech, region);
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
-                using (var reco = new IntentRecognizer(config))
+                AudioConfig audioConfig;
+                if (string.IsNullOrEmpty(deviceName))
+                {
+                    audioConfig = AudioConfig.FromDefaultMicrophoneInput();
+                }
+                else
+                {
+                    audioConfig = AudioConfig.FromMicrophoneInput(deviceName);
+                }
+                using (var reco = new IntentRecognizer(config, audioConfig))
                 {
                     await DoIntentRecognitionAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                 }
@@ -89,7 +98,7 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        public static async Task IntentRecognitionByEndpointAsync(string subKey, string endpoint, string fileName, bool useContinuousRecognition)
+        public static async Task IntentRecognitionByEndpointAsync(string subKey, string endpoint, string fileName, bool useContinuousRecognition, string deviceName = null)
         {
             var config = SpeechConfig.FromEndpoint(new Uri(endpoint), subKey);
 
@@ -97,7 +106,16 @@ namespace MicrosoftSpeechSDKSamples
 
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
-                using (var reco = new IntentRecognizer(config))
+                AudioConfig audioConfig;
+                if (string.IsNullOrEmpty(deviceName))
+                {
+                    audioConfig = AudioConfig.FromDefaultMicrophoneInput();
+                }
+                else
+                {
+                    audioConfig = AudioConfig.FromMicrophoneInput(deviceName);
+                }
+                using (var reco = new IntentRecognizer(config, audioConfig))
                 {
                     await DoIntentRecognitionAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                 }

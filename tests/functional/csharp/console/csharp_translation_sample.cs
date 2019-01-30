@@ -81,7 +81,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine($"Session stopped event: {e.ToString()}.");
         }
 
-        public static async Task TranslationBaseModelAsync(string keyTranslation, string region, string fileName, bool useStream, bool useContinuousRecognition)
+        public static async Task TranslationBaseModelAsync(string keyTranslation, string region, string fileName, bool useStream, bool useContinuousRecognition, string deviceName = null)
         {
             var config = SpeechTranslationConfig.FromSubscription(keyTranslation, region);
             config.SpeechRecognitionLanguage = FromLang;
@@ -100,8 +100,17 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("Translation using base model.");
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
+                AudioConfig audioConfig;
+                if (string.IsNullOrEmpty(deviceName))
+                {
+                    audioConfig = AudioConfig.FromDefaultMicrophoneInput();
+                }
+                else
+                {
+                    audioConfig = AudioConfig.FromMicrophoneInput(deviceName);
+                }
                 Console.WriteLine($"Translation into languages: {To2Langs[0]}, and {To2Langs[1]}:");
-                using (var reco = new TranslationRecognizer(config))
+                using (var reco = new TranslationRecognizer(config, audioConfig))
                 {
                     await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                 }
@@ -146,7 +155,7 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        public static async Task TranslationByEndpointAsync(string subKey, string endpoint, string fileName, bool useStream, bool useContinuousRecognition)
+        public static async Task TranslationByEndpointAsync(string subKey, string endpoint, string fileName, bool useStream, bool useContinuousRecognition, string deviceName = null)
         {
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Translation using endpoint:{0}.", endpoint));
 
@@ -157,8 +166,17 @@ namespace MicrosoftSpeechSDKSamples
 
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
+                AudioConfig audioConfig;
+                if (string.IsNullOrEmpty(deviceName))
+                {
+                    audioConfig = AudioConfig.FromDefaultMicrophoneInput();
+                }
+                else
+                {
+                    audioConfig = AudioConfig.FromMicrophoneInput(deviceName);
+                }
                 // The language setting does not have any effect if the endpoint is specified.
-                using (var reco = new TranslationRecognizer(config))
+                using (var reco = new TranslationRecognizer(config, audioConfig))
                 {
                     await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                 }
@@ -184,7 +202,7 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        public static async Task TranslationCustomizedModelAsync(string subKey, string modelId, string region, string fileName, bool useStream, bool useContinuousRecognition)
+        public static async Task TranslationCustomizedModelAsync(string subKey, string modelId, string region, string fileName, bool useStream, bool useContinuousRecognition, string deviceName = null)
         {
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Translation using customized model: {0}.", modelId));
 
@@ -196,7 +214,16 @@ namespace MicrosoftSpeechSDKSamples
 
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
-                using (var reco = new TranslationRecognizer(config))
+                AudioConfig audioConfig;
+                if (string.IsNullOrEmpty(deviceName))
+                {
+                    audioConfig = AudioConfig.FromDefaultMicrophoneInput();
+                }
+                else
+                {
+                    audioConfig = AudioConfig.FromMicrophoneInput(deviceName);
+                }
+                using (var reco = new TranslationRecognizer(config, audioConfig))
                 {
                     await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);
                 }

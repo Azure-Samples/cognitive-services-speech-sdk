@@ -81,7 +81,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine($"Disconnected event: {e.ToString()}.");
         }
 
-        public static async Task SpeechRecognitionBaseModelAsync(string key, string region, string lang, string fileName, bool useStream, bool useToken, bool useContinuousRecognition)
+        public static async Task SpeechRecognitionBaseModelAsync(string key, string region, string lang, string fileName, bool useStream, bool useToken, bool useContinuousRecognition, string deviceName = null)
         {
             Console.WriteLine("Speech Recognition using base model.");
             SpeechConfig config = null;
@@ -94,10 +94,10 @@ namespace MicrosoftSpeechSDKSamples
                 config = SpeechConfig.FromSubscription(key, region);
             }
 
-            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
+            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition, deviceName).ConfigureAwait(false);
         }
 
-        public static async Task SpeechRecognitionCustomizedModelAsync(string key, string region, string lang, string model, string fileName, bool useStream, bool useToken, bool useContinuousRecognition)
+        public static async Task SpeechRecognitionCustomizedModelAsync(string key, string region, string lang, string model, string fileName, bool useStream, bool useToken, bool useContinuousRecognition, string deviceName = null)
         {
             Console.WriteLine("Speech Recognition using customized model.");
             SpeechConfig config = null;
@@ -111,10 +111,10 @@ namespace MicrosoftSpeechSDKSamples
             }
             config.EndpointId = model;
 
-            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
+            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition, deviceName).ConfigureAwait(false);
         }
 
-        public static async Task SpeechRecognitionByEndpointAsync(string subscriptionKey, string endpoint, string lang, string model, string fileName, bool useStream, bool useContinuousRecognition)
+        public static async Task SpeechRecognitionByEndpointAsync(string subscriptionKey, string endpoint, string lang, string model, string fileName, bool useStream, bool useContinuousRecognition, string deviceName = null)
         {
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech Recognition using endpoint:{0}.", endpoint));
 
@@ -129,15 +129,25 @@ namespace MicrosoftSpeechSDKSamples
                 config.EndpointId = model;
             }
 
-            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
+            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition, deviceName).ConfigureAwait(false);
         }
 
-        public static async Task RecognizeAsync(SpeechConfig config, string fileName, bool useStream, bool useContinuousRecognition)
+        public static async Task RecognizeAsync(SpeechConfig config, string fileName, bool useStream, bool useContinuousRecognition, string deviceName = null)
         {
             if (string.IsNullOrEmpty(fileName) || String.Compare(fileName, "mic", true) == 0)
             {
                 var stopWatchCreation = Stopwatch.StartNew();
-                using (var reco = new SpeechRecognizer(config))
+
+                AudioConfig audioConfig;
+                if (string.IsNullOrEmpty(deviceName))
+                {
+                    audioConfig = AudioConfig.FromDefaultMicrophoneInput();
+                }
+                else
+                {
+                    audioConfig = AudioConfig.FromMicrophoneInput(deviceName);
+                }
+                using (var reco = new SpeechRecognizer(config, audioConfig))
                 {
                     stopWatchCreation.Stop();
                     Console.WriteLine("Time for creating speech recognizer: " + stopWatchCreation.ElapsedMilliseconds);

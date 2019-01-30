@@ -16,13 +16,14 @@ namespace MicrosoftSpeechSDKSamples
         {
             if (args.Length < 3)
             {
-                Console.WriteLine("Usage: carbon_csharp_console mode(speech|intent|translation:cont|single) key(key|token:key) region audioinput(mic|filename|stream:file) model:modelId|lang:language|endpoint:url");
+                Console.WriteLine("Usage: carbon_csharp_console mode(speech|intent|translation:cont|single) key(key|token:key) region audioinput(mic|filename|stream:file) model:modelId|lang:language|endpoint:url|devicename:id");
                 Environment.Exit(1);
             }
 
             string subKey = null;
             string region = null;
             string fileName = null;
+            string deviceName = null;
             bool useToken = false;
             bool useBaseModel = true;
             bool useEndpoint = false;
@@ -180,9 +181,26 @@ namespace MicrosoftSpeechSDKSamples
                         throw new IndexOutOfRangeException("no endpoint is specified.");
                     }
                 }
+                else if (paraStr.ToLower().StartsWith("devicename:"))
+                {
+                    if (!string.IsNullOrEmpty(fileName) && string.Compare(fileName, "mic", true) != 0)
+                    {
+                        throw new IndexOutOfRangeException("cannot specify device name when recognizing from file.");
+                    }
+                    var index = paraStr.IndexOf(':');
+                    if (index == -1)
+                    {
+                        throw new IndexOutOfRangeException("no devicename is specified.");
+                    }
+                    deviceName = paraStr.Substring(index + 1);
+                    if (string.IsNullOrEmpty(deviceName))
+                    {
+                        throw new IndexOutOfRangeException("no devicename is specified.");
+                    }
+                }
                 else
                 {
-                    throw new InvalidOperationException("Only the following values are allowed: lang:language, model:modelId, endpoint:url.");
+                    throw new InvalidOperationException("Only the following values are allowed: lang:language, model:modelId, endpoint:url, devicename:id.");
                 }
             }
 
@@ -191,19 +209,19 @@ namespace MicrosoftSpeechSDKSamples
                 if (useEndpoint)
                 {
                     Console.WriteLine("=============== Run speech recognition samples by specifying endpoint. ===============");
-                    SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(subKey, endpoint, lang: lang, model: modelId, fileName: fileName, useStream: useStream, useContinuousRecognition: useContinuousRecognition).Wait();
+                    SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(subKey, endpoint, lang: lang, model: modelId, fileName: fileName, useStream: useStream, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName = null).Wait();
                 }
                 else
                 {
                     if (useBaseModel)
                     {
                         Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
-                        SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, region: region, lang: lang, fileName: fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition).Wait();
+                        SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, region: region, lang: lang, fileName: fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName).Wait();
                     }
                     else
                     {
                         Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
-                        SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, region, lang, modelId, fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition).Wait();
+                        SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, region, lang, modelId, fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName = null).Wait();
                     }
                 }
             }
@@ -212,14 +230,14 @@ namespace MicrosoftSpeechSDKSamples
                 if (useEndpoint)
                 {
                     Console.WriteLine("=============== Run intent recognition samples by specifying endpoint. ===============");
-                    IntentRecognitionSamples.IntentRecognitionByEndpointAsync(subKey, endpoint, fileName, useContinuousRecognition: useContinuousRecognition).Wait();
+                    IntentRecognitionSamples.IntentRecognitionByEndpointAsync(subKey, endpoint, fileName, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName = null).Wait();
                 }
                 else
                 {
                     if (useBaseModel)
                     {
                         Console.WriteLine("=============== Run intent recognition samples using base speech model. ===============");
-                        IntentRecognitionSamples.IntentRecognitionBaseModelAsync(subKey, region, fileName, useContinuousRecognition: useContinuousRecognition).Wait();
+                        IntentRecognitionSamples.IntentRecognitionBaseModelAsync(subKey, region, fileName, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName = null).Wait();
                     }
                     else
                     {
@@ -232,19 +250,19 @@ namespace MicrosoftSpeechSDKSamples
                 if (useEndpoint)
                 {
                     Console.WriteLine("=============== Run translation samples by specifying endpoint. ===============");
-                    TranslationSamples.TranslationByEndpointAsync(subKey, endpoint, fileName, useStream: useStream, useContinuousRecognition: useContinuousRecognition).Wait();
+                    TranslationSamples.TranslationByEndpointAsync(subKey, endpoint, fileName, useStream: useStream, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName = null).Wait();
                 }
                 else
                 {
                     if (useBaseModel)
                     {
                         Console.WriteLine("=============== Run translation samples using base speech model. ===============");
-                        TranslationSamples.TranslationBaseModelAsync(subKey, fileName: fileName, region: region, useStream: useStream, useContinuousRecognition: useContinuousRecognition).Wait();
+                        TranslationSamples.TranslationBaseModelAsync(subKey, fileName: fileName, region: region, useStream: useStream, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName = null).Wait();
                     }
                     else
                     {
                         Console.WriteLine("=============== Run translation samples using customized model. ===============");
-                        TranslationSamples.TranslationCustomizedModelAsync(subKey, fileName: fileName, region: region, modelId: modelId, useStream: useStream, useContinuousRecognition: useContinuousRecognition).Wait();
+                        TranslationSamples.TranslationCustomizedModelAsync(subKey, fileName: fileName, region: region, modelId: modelId, useStream: useStream, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName = null).Wait();
                     }
                 }
             }

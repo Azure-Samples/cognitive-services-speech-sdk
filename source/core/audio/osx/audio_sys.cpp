@@ -23,9 +23,6 @@
 // for checking for mac/iPhone
 #include "TargetConditionals.h"
 
-#define AUDIO_CHANNELS_MONO     1
-#define AUDIO_SAMPLE_RATE       16000
-#define AUDIO_BITS              16
 #define N_RECORD_BUFFERS 3
 
 
@@ -147,7 +144,7 @@ static void audioQueueInputCallback(void *inUserData,
         // SPX_DBG_TRACE_VERBOSE("recorded %d bytes of audio, calling callback\n", inBuffer->mAudioDataByteSize);
 
         // call the application callback
-        audioData->audio_write_cb(audioData->user_write_ctx, inBuffer->mAudioData, inBuffer->mAudioDataByteSize);
+        audioData->audio_write_cb(audioData->user_write_ctx, reinterpret_cast<uint8_t*>(inBuffer->mAudioData), inBuffer->mAudioDataByteSize);
 
         //Re-enqueue used buffer
         OSStatus result = AudioQueueEnqueueBuffer(inQueue, inBuffer, 0, NULL);
@@ -169,13 +166,7 @@ static void audioQueueInputCallback(void *inUserData,
     }
 }
 
-AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
-{
-    UNUSED(format);
-    return audio_create();
-}
-
-AUDIO_SYS_HANDLE audio_create()
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 {
     SPX_DBG_TRACE_VERBOSE("setting up AudioQueue");
     AUDIO_SYS_DATA* audioData;
@@ -186,12 +177,14 @@ AUDIO_SYS_HANDLE audio_create()
     {
         memset(audioData, 0, sizeof(AUDIO_SYS_DATA));
 
-        // TODO make these configurable
-        audioData->channels = AUDIO_CHANNELS_MONO;
-        audioData->sampleRate = AUDIO_SAMPLE_RATE;
-        audioData->bitsPerSample = AUDIO_BITS;
+        audioData->channels = format->nChannels;
+        audioData->sampleRate = format->nSamplesPerSec;
+        audioData->bitsPerSample = format->wBitsPerSample;
+
         audioData->current_output_state = AUDIO_STATE_STOPPED;
         audioData->current_input_state = AUDIO_STATE_STOPPED;
+
+        STRING_copy(format->hDeviceName, STRING_c_str(format->hDeviceName));
 
         // Set audio stream description for Linear PCM
         AudioStreamBasicDescription recordFormat = {0};
@@ -217,6 +210,27 @@ AUDIO_SYS_HANDLE audio_create()
         {
             logOSStatusError(error, "AudioQueueNewInput failed");
             setup_ok = FALSE;
+        }
+
+        if (0 != strcmp(STRING_c_str(format->hDeviceName), ""))
+        {
+            CFStringRef deviceUID = CFStringCreateWithCString(NULL, STRING_c_str(format->hDeviceName), kCFStringEncodingUTF8);
+            SPX_DBG_TRACE_INFO("Initializing microphone input from device: %s", STRING_c_str(format->hDeviceName));
+            error = AudioQueueSetProperty(audioData->audioQueue,
+                                  kAudioQueueProperty_CurrentDevice,
+                                  &deviceUID,
+                                  sizeof(CFStringRef));
+            if (noErr != error)
+            {
+                logOSStatusError(error, "AudioQueueNewInput failed");
+                setup_ok = FALSE;
+            }
+            CFRelease(deviceUID);
+            deviceUID = NULL;
+        }
+        else
+        {
+            SPX_DBG_TRACE_INFO("Initializing microphone input from default device.");
         }
 
         if (setup_ok)
@@ -384,6 +398,7 @@ AUDIO_RESULT audio_input_start(AUDIO_SYS_HANDLE handle)
                 if (noErr != error)
                 {
                     logOSStatusError(error, "AudioQueueStart failed");
+                    result = AUDIO_RESULT_ERROR;
                 }
             }
         }

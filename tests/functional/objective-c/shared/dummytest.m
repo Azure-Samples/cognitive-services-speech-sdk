@@ -28,6 +28,8 @@
     audioConfig = [[SPXAudioConfiguration alloc] initWithWavFileInput:@"testaudio.wav"];
     audioConfig =[[SPXAudioConfiguration alloc] initWithStreamInput:pullStream];
     audioConfig =[[SPXAudioConfiguration alloc] initWithStreamInput:pushStream];
+    audioConfig =[[SPXAudioConfiguration alloc] initWithMicrophone:nil];
+    audioConfig =[[SPXAudioConfiguration alloc] initWithMicrophone:@"mymicrophone"]; // this would break when starting recognition.
     
     // Test luis model
     SPXLanguageUnderstandingModel *luisModel;

@@ -23,6 +23,21 @@
     return self;
 }
 
+- (instancetype)initWithMicrophone:(NSString *)deviceName
+{
+    self = [super init];
+    if (nil == deviceName) {
+        return [self init];
+    }
+
+    self->audioImpl = AudioImpl::AudioConfig::FromMicrophoneInput([deviceName string]);
+    if (self->audioImpl == nullptr) {
+        NSLog(@"Unable to create audio config in core using specified microphone.");
+        return nil;
+    }
+    return self;
+}
+
 - (instancetype)initWithWavFileInput:(NSString *)path
 {
     self = [super init];

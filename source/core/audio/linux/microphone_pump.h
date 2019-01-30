@@ -13,7 +13,7 @@ namespace Impl {
 class CSpxMicrophonePump : public CSpxMicrophonePumpBase
 {
 private:
-   virtual void SetOptionsAfterCreateAudioHandle() override;
+    virtual AUDIO_SETTINGS_HANDLE SetOptionsBeforeCreateAudioHandle() override;
 };
 
 }}}}

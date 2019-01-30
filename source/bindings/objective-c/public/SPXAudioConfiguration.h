@@ -19,6 +19,16 @@ SPX_EXPORT
 - (nullable instancetype)init;
 
 /**
+ * Initializes an SPXAudioConfiguration object using the specified audio input of the system.
+ * NOTE: This functionality was added in version 1.3.0.
+ * @param deviceName the unique ID of the input device to be used. If this is nil, the default is used.
+ * @note Specifying a non-default device name is not supported in iOS.
+ * @note If the specified device is not available, a failure will occur when starting recognition using this SPXAudioConfiguration object.
+ * @return an instance of audio input configuration.
+ */
+- (nullable instancetype)initWithMicrophone:(nullable NSString *)deviceName;
+
+/**
   * Initializes an SPXAudioConfiguration object using the specified file as input.
   * @param path path of the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
   * @return an instance of audio input configuration.

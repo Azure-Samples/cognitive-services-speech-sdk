@@ -4,6 +4,8 @@
 #ifndef AUDIO_SYS_H
 #define AUDIO_SYS_H
 
+#include <stdint.h>
+
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility_strings_wrapper.h"
 
@@ -43,7 +45,7 @@ typedef struct AUDIO_SYS_DATA_TAG* AUDIO_SYS_HANDLE;
 
 typedef void* AUDIO_BUFFER;
 
-typedef struct _AUDIO_WAVEFORMAT
+typedef struct _AUDIO_SETTINGS
 {
     uint16_t  wFormatTag;
     uint16_t  nChannels;
@@ -51,7 +53,20 @@ typedef struct _AUDIO_WAVEFORMAT
     uint32_t  nAvgBytesPerSec;
     uint16_t  nBlockAlign;
     uint16_t  wBitsPerSample;
+    STRING_HANDLE hDeviceName;
+} AUDIO_SETTINGS;
+
+typedef struct _AUDIO_WAVEFORMAT
+{
+    uint16_t wFormatTag;        /* format type */
+    uint16_t nChannels;         /* number of channels (i.e. mono, stereo...) */
+    uint32_t nSamplesPerSec;    /* sample rate */
+    uint32_t nAvgBytesPerSec;   /* for buffer estimation */
+    uint16_t nBlockAlign;       /* block size of data */
+    uint16_t wBitsPerSample;    /* Number of bits per sample of mono data */
 } AUDIO_WAVEFORMAT;
+
+typedef AUDIO_SETTINGS* AUDIO_SETTINGS_HANDLE;
 
 typedef void(*ON_AUDIOERROR_CALLBACK)(void* pContext, AUDIO_ERROR error);
 typedef void(*ON_AUDIOOUTPUT_STATE_CALLBACK)(void* pContext, AUDIO_STATE state);
@@ -60,8 +75,12 @@ typedef int(*AUDIOINPUT_WRITE)(void* pContext, uint8_t* pBuffer, uint32_t size);
 typedef void(*AUDIOCOMPLETE_CALLBACK)(void* pContext);
 typedef void(*AUDIO_BUFFERUNDERRUN_CALLBACK)(void* pContext);
 
-extern AUDIO_SYS_HANDLE audio_create(void);
-extern AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format);
+// create a new AUDIO_SETTINGS instance
+AUDIO_SETTINGS_HANDLE audio_format_create();
+// destroy a AUDIO_SETTINGS instance
+void audio_format_destroy(AUDIO_SETTINGS_HANDLE handle);
+
+extern AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format);
 extern void audio_destroy(AUDIO_SYS_HANDLE handle);
 AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle,
                                 ON_AUDIOOUTPUT_STATE_CALLBACK output_cb,

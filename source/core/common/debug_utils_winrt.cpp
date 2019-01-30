@@ -13,7 +13,7 @@ namespace Debug {
     {
         UNUSED(skipLevels);
 
-        return "not implemented in WinRT\n";
+        return "GetCallStack not implemented in WinRT\n";
     }
     void HookSignalHandlers()
     {

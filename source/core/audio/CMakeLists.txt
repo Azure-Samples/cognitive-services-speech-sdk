@@ -26,15 +26,16 @@ set(HEADERS_PRIVATE
     )
 
 set(SOURCES
-    "${SRC_DIR}/audio_pump.cpp"
     "${SRC_DIR}/audio_config.cpp"
-    "${SRC_DIR}/pull_audio_input_stream.cpp"
-    "${SRC_DIR}/push_audio_input_stream.cpp"
+    "${SRC_DIR}/audio_pump.cpp"
+    "${SRC_DIR}/audio_sys_common.cpp"
     "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/interactive_microphone.cpp"
-    "${SRC_DIR}/wav_file_reader.cpp"
-    "${SRC_DIR}/wav_file_pump.cpp"
     "${SRC_DIR}/microphone_pump_base.cpp"
+    "${SRC_DIR}/pull_audio_input_stream.cpp"
+    "${SRC_DIR}/push_audio_input_stream.cpp"
+    "${SRC_DIR}/wav_file_pump.cpp"
+    "${SRC_DIR}/wav_file_reader.cpp"
     )
 
 set(AUDIO_LIBS common)
@@ -69,13 +70,13 @@ elseif(APPLE)
         "${SRC_DIR}/osx/microphone_pump.h"
         )
     list(APPEND SOURCES
-        "${SRC_DIR}/osx/audio_sys.c"
+        "${SRC_DIR}/osx/audio_sys.cpp"
     )
     FIND_LIBRARY(AUDIO_TOOLBOX AudioToolbox)
     if (NOT AUDIO_TOOLBOX)
         message(FATAL_ERROR "AudioToolbox not found")
     endif()
-list(APPEND AUDIO_LIBS ${AUDIO_TOOLBOX})
+    list(APPEND AUDIO_LIBS ${AUDIO_TOOLBOX})
 else()
     if (NOT (CMAKE_SYSTEM_NAME STREQUAL "Android"))
         list(APPEND HEADERS_PRIVATE

@@ -35,3 +35,12 @@ def test_audio_config():
     cfg = msspeech.audio.AudioConfig(filename='a')
     assert cfg
 
+    cfg = msspeech.audio.AudioConfig(device_name='a')
+    assert cfg
+
+    with pytest.raises(ValueError) as excinfo:
+        cfg = msspeech.audio.AudioConfig(filename='abc', device_name='dev')
+
+    with pytest.raises(ValueError) as excinfo:
+        cfg = msspeech.audio.AudioConfig(True, device_name='nondefault')
+        assert "default microphone can not be combined with any other options" in str(excinfo.value)

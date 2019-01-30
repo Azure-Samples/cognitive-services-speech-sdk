@@ -22,7 +22,7 @@ using namespace std;
 CSpxMicrophonePumpBase::CSpxMicrophonePumpBase():
     m_state {State::NoInput},
     m_format { WAVE_FORMAT_PCM, CHANNELS, SAMPLES_PER_SECOND, AVG_BYTES_PER_SECOND, BLOCK_ALIGN, BITS_PER_SAMPLE, 0 }
-{    
+{
 }
 
 void CSpxMicrophonePumpBase::Init()
@@ -30,6 +30,8 @@ void CSpxMicrophonePumpBase::Init()
     auto sys_audio_format = SetOptionsBeforeCreateAudioHandle();
 
     m_audioHandle = audio_create_with_parameters(sys_audio_format);
+    audio_format_destroy(sys_audio_format);
+    sys_audio_format = NULL;
 
     SPX_IFTRUE_THROW_HR(m_audioHandle == nullptr, SPXERR_MIC_NOT_AVAILABLE);
 
@@ -48,13 +50,31 @@ void CSpxMicrophonePumpBase::Term()
     audio_destroy(m_audioHandle);
 }
 
-AUDIO_WAVEFORMAT CSpxMicrophonePumpBase::SetOptionsBeforeCreateAudioHandle()
+AUDIO_SETTINGS_HANDLE CSpxMicrophonePumpBase::SetOptionsBeforeCreateAudioHandle()
 {
-    return { m_format.wFormatTag, m_format.nChannels, m_format.nSamplesPerSec, m_format.nAvgBytesPerSec, m_format.nBlockAlign, m_format.wBitsPerSample };
+    auto channels = GetChannelsFromConfig();
+    if (channels > 0)
+    {
+        m_format.nChannels = channels;
+    }
+
+    AUDIO_SETTINGS_HANDLE format = audio_format_create();
+
+    format->wFormatTag = m_format.wFormatTag;
+    format->nChannels = m_format.nChannels;
+    format->nSamplesPerSec = m_format.nSamplesPerSec;
+    format->nAvgBytesPerSec = m_format.nAvgBytesPerSec;
+    format->nBlockAlign = m_format.nBlockAlign;
+    format->wBitsPerSample = m_format.wBitsPerSample;
+
+    auto deviceName = GetDeviceNameFromConfig();
+    STRING_copy(format->hDeviceName, deviceName.c_str());
+
+    return format;
 }
 
 void CSpxMicrophonePumpBase::SetOptionsAfterCreateAudioHandle()
-{    
+{
 }
 
 uint16_t CSpxMicrophonePumpBase::GetFormat(SPXWAVEFORMATEX* format, uint16_t size)
@@ -181,7 +201,7 @@ uint16_t CSpxMicrophonePumpBase::GetChannelsFromConfig()
 {
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     auto channels = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture));
-    SPX_TRACE_INFO("The number of channels as a property is '%s' in CSpxMicrophonePump", channels.c_str());
+    SPX_TRACE_VERBOSE("The number of channels as a property is '%s' in CSpxMicrophonePump", channels.c_str());
     return channels.empty() ? 0 : static_cast<uint16_t>(stoi(channels));
 }
 
@@ -191,7 +211,7 @@ std::string CSpxMicrophonePumpBase::GetDeviceNameFromConfig()
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_INVALID_ARG);
 
     auto deviceName = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_DeviceNameForCapture));
-    SPX_TRACE_INFO("The device name of microphone as a property is '%s'", deviceName.c_str());
+    SPX_TRACE_VERBOSE("The device name of microphone as a property is '%s'", deviceName.c_str());
 
     return deviceName;
 }

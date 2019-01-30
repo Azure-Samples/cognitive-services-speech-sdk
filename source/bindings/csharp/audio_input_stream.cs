@@ -203,6 +203,17 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         }
 
         /// <summary>
+        /// Creates an AudioConfig object representing the designated input device.
+        /// NOTE: This method was added in version 1.3.0.
+        /// </summary>
+        /// <param name="deviceName">The identifier of the input device.</param>
+        /// <returns>The audio input configuration being created.</returns>
+        public static AudioConfig FromMicrophoneInput(string deviceName)
+        {
+            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromMicrophoneInput(deviceName));
+        }
+
+        /// <summary>
         /// Dispose of associated resources.
         /// </summary>
         public void Dispose()

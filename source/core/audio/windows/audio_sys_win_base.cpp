@@ -6,12 +6,6 @@
 
 #include <windows\audio_sys_win_base.h>
 
-AUDIO_SYS_HANDLE audio_create()
-{
-    AUDIO_WAVEFORMAT format{ WAVE_FORMAT_PCM, AUDIO_CHANNELS_MONO, AUDIO_SAMPLE_RATE, AUDIO_BYTE_RATE, AUDIO_BLOCK_ALIGN, AUDIO_BITS };
-    return audio_create_with_parameters(format);
-}
-
 HRESULT GetBufferAndCallBackClient(
     IAudioCaptureClient* pCaptureClient,
     AudioDataBuffer& audioBuff,

@@ -10,7 +10,5 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-class CSpxMicrophonePump : public CSpxMicrophonePumpBase
-{
-};
+class CSpxMicrophonePump : public CSpxMicrophonePumpBase {};
 }}}}

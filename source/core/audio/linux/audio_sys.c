@@ -24,10 +24,6 @@
 #define MAGIC_TAG_data      0x61746164
 #define MAGIC_TAG_fmt       0x20746d66
 
-#define AUDIO_CHANNELS_MONO     1
-#define AUDIO_SAMPLE_RATE       16000
-#define AUDIO_BITS              16
-
 // MAX_DEVICES is the maximum amount of PCM output instances we can have per device.
 #define MAX_DEVICES 6
 #define HISTORY_BUFFER_SIZE 32
@@ -35,7 +31,6 @@
 #define FAST_LOOP_THRESHOLD_MS     10
 #define OUTPUT_FRAME_COUNT (snd_pcm_uframes_t) 768
 #define INPUT_FRAME_COUNT (snd_pcm_uframes_t) 232
-#define CAPTURE_BUFFER_SIZE (AUDIO_SAMPLE_RATE * 5)
 
 // Some Linux platforms do not have alloca macro defined. It is referenced
 // in this file as snd_mixer_selem_id_alloca.
@@ -398,7 +393,7 @@ static int init_alsa_pcm_device(snd_pcm_t** pcmHandle, snd_pcm_stream_t streamTy
     int result = 0;
     bool deviceFound = false;
 
-    if (audioData->hDeviceName)
+    if (audioData->hDeviceName && 0 != strcmp(STRING_c_str(audioData->hDeviceName), ""))
     {
         if (0 == snd_pcm_open(pcmHandle, STRING_c_str(audioData->hDeviceName), streamType, 0))
         {
@@ -545,13 +540,7 @@ static int open_wave_data(AUDIO_SYS_DATA* audioData, snd_pcm_stream_t streamType
     return result;
 }
 
-AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_WAVEFORMAT format)
-{
-    (void)(format);
-    return audio_create();
-}
-
-AUDIO_SYS_HANDLE audio_create()
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 {
     AUDIO_SYS_DATA* result;
 
@@ -559,12 +548,13 @@ AUDIO_SYS_HANDLE audio_create()
     if (result != NULL)
     {
         memset(result, 0, sizeof(AUDIO_SYS_DATA));
-        result->channels = AUDIO_CHANNELS_MONO;
-        result->sampleRate = AUDIO_SAMPLE_RATE;
-        result->bitsPerSample = AUDIO_BITS;
+        result->channels = format->nChannels;
+        result->sampleRate = format->nSamplesPerSec;
+        result->bitsPerSample = format->wBitsPerSample;
         result->waveDataDirty = true;
         result->inputFrameCnt = INPUT_FRAME_COUNT;
-        result->bufferCapacity    = (CAPTURE_BUFFER_SIZE / result->inputFrameCnt) * result->inputFrameCnt;
+        const uint32_t capture_buffer_size = format->nSamplesPerSec * 5;
+        result->bufferCapacity    = (capture_buffer_size / result->inputFrameCnt) * result->inputFrameCnt;
         result->bufferFront       = 0;
         result->bufferTail        = 0;
         result->bufferSize        = 0;
@@ -573,18 +563,19 @@ AUDIO_SYS_HANDLE audio_create()
         result->lock = Lock_Init();
         result->audioBufferLock = Lock_Init();
         sem_init(&result->audioFrameAvailable, 0, 0);
-        result->audioSamples = (int16_t*)malloc(sizeof(int16_t) * CAPTURE_BUFFER_SIZE);
+        result->audioSamples = (int16_t*)malloc(sizeof(int16_t) * capture_buffer_size);
         if (result->audioSamples == NULL)
         {
             LogError("Cannot allocate audio processing buffer");
             return result;
         }
-        result->buffer       = (int16_t*)malloc(sizeof(int16_t) * CAPTURE_BUFFER_SIZE);
+        result->buffer       = (int16_t*)malloc(sizeof(int16_t) * capture_buffer_size);
         if (result->buffer == NULL)
         {
             LogError("Cannot allocate audio capture buffer");
             return result;
         }
+        audio_set_options(result, AUDIO_OPTION_DEVICENAME, STRING_c_str(format->hDeviceName));
     }
     return result;
 }
@@ -658,7 +649,7 @@ AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle,
     return result;
 }
 
-static int OutputAsync_Read(void* pContext, uint8_t* pBuffer, size_t size);
+static int OutputAsync_Read(void* pContext, uint8_t* pBuffer, unsigned int size);
 static int OutputAsync(void *p)
 {
     struct _ASYNCAUDIO *async = (struct _ASYNCAUDIO *)p;
@@ -742,7 +733,7 @@ static int OutputAsync(void *p)
     return 0;
 }
 
-static int OutputAsync_Read(void* pContext, uint8_t* pBuffer, size_t size)
+static int OutputAsync_Read(void* pContext, uint8_t* pBuffer, unsigned int size)
 {
     struct _ASYNCAUDIO *async = (struct _ASYNCAUDIO *)pContext;
     uint32_t magic;
@@ -1250,7 +1241,7 @@ AUDIO_RESULT audio_input_stop(AUDIO_SYS_HANDLE handle)
 static int loadmixer(AUDIO_SYS_HANDLE handle)
 {
     AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
-    if (handle != NULL && audioData->hDeviceName)
+    if (handle != NULL && audioData->hDeviceName && 0 != strcmp(STRING_c_str(audioData->hDeviceName), ""))
     {
         int cardIdx = -1;
 
@@ -1315,7 +1306,8 @@ AUDIO_RESULT audio_set_options(AUDIO_SYS_HANDLE handle, const char* optionName, 
         {
             audioData->inputFrameCnt = (uint16_t)*((int*)value);
             // cap the size of the buffer to a multiple of the frame size, to avoid wrap around of individual audio blocks in the ring buffer
-            audioData->bufferCapacity    = (CAPTURE_BUFFER_SIZE / audioData->inputFrameCnt) * audioData->inputFrameCnt;
+            const uint32_t capture_buffer_size = audioData->sampleRate * 5;
+            audioData->bufferCapacity    = (capture_buffer_size / audioData->inputFrameCnt) * audioData->inputFrameCnt;
             result = AUDIO_RESULT_OK;
         }
         else if (strcmp("sample_rate", optionName) == 0)

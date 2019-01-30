@@ -90,12 +90,6 @@ private:
         SinkType& m_sink;
     };
 
-    // This is for query any properties needed by audio_create
-    virtual AUDIO_WAVEFORMAT SetOptionsBeforeCreateAudioHandle();
-
-    // This is for query any properties needed after m_audioHandle is created.
-    virtual void SetOptionsAfterCreateAudioHandle();
-
 protected:
 
     State m_state;
@@ -121,6 +115,12 @@ protected:
 
     uint16_t GetChannelsFromConfig();
     std::string GetDeviceNameFromConfig();
+
+    // This is for querying any properties needed by audio_create, and validating the values.
+    virtual AUDIO_SETTINGS_HANDLE SetOptionsBeforeCreateAudioHandle();
+
+    // This is for querying any properties needed after m_audioHandle is created.
+    virtual void SetOptionsAfterCreateAudioHandle();
 
 private:
 

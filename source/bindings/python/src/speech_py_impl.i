@@ -141,6 +141,7 @@ from typing import Optional
 %rename ("_from_default_microphone_input") Microsoft::CognitiveServices::Speech::Audio::AudioConfig::FromDefaultMicrophoneInput;
 %rename ("_from_stream_input") Microsoft::CognitiveServices::Speech::Audio::AudioConfig::FromStreamInput;
 %rename ("_from_wav_file_input") Microsoft::CognitiveServices::Speech::Audio::AudioConfig::FromWavFileInput;
+%rename ("_from_microphone_input") Microsoft::CognitiveServices::Speech::Audio::AudioConfig::FromMicrophoneInput;
 %rename ("_from_result") Microsoft::CognitiveServices::Speech::CancellationDetails::FromResult;
 %rename ("_from_config") Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::FromConfig;
 %rename ("_from_file") Microsoft::CognitiveServices::Speech::KeywordRecognitionModel::FromFile;
