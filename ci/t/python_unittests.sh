@@ -84,15 +84,14 @@ function runPythonSampleSuite {
     "import speech_sample; speech_sample.speech_recognition_with_push_stream()"
     "import translation_sample; translation_sample.translation_once_from_file()"
     "import translation_sample; translation_sample.translation_continuous()"
+    "import intent_sample; intent_sample.recognize_intent_once_from_file()"
+    "import intent_sample; intent_sample.recognize_intent_continuous()"
   )
 
   # these samples use microphone input
   # "import intent_sample; intent_sample.recognize_intent_once_from_mic()"
   # "import translation_sample; translation_sample.translation_once_from_mic()"
   # "import speech_sample; speech_sample.speech_recognize_once_from_mic()"
-
-  "import intent_sample; intent_sample.recognize_intent_once_from_file()"
-  "import intent_sample; intent_sample.recognize_intent_continuous()"
 
   startTests "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
   startSuite "$testStateVarPrefix" "$testsuiteName"
@@ -106,18 +105,14 @@ function runPythonSampleSuite {
   endTests "$testStateVarPrefix"
 }
 
-
-SAMPLE_ERROR=false
 runPythonSampleSuite \
   TESTRUNNER \
   "pysamples-$T-$PLATFORM" \
   "$PLATFORM" \
   "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_LUIS_KEY" \
   "pysamples-$T" \
-  240 || SAMPLE_ERROR=true
-
-
-[[ $SAMPLE_ERROR == false ]] && [[ $UNITTEST_ERROR == false ]] || exitWithError "Both Python unittests and samples failed."
-[[ $SAMPLE_ERROR == false ]] || exitWithError "Not all python samples ran successfully."
+  240
+# If samples fail, script will stop here.
+# Otherwise, we'll fail the script if the unit tests failed above:
 [[ $UNITTEST_ERROR == false ]] || exitWithError "Python unit tests failed."
 

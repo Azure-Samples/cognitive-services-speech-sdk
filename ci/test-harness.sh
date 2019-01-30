@@ -115,7 +115,7 @@ function runTest {
   local callStdbuf=()
   [[ $(type -t stdbuf) != file ]] || callStdbuf=(stdbuf)
   [[ $(type -t gstdbuf) != file ]] || callStdbuf=(gstdbuf)
-  [[ -z $callStdbuf ]] || callStdbuf+=(-o0 -e0)
+  [[ -z ${callStdbuf:-} ]] || callStdbuf+=(-o0 -e0)
 
   local cmdTimeout=false
   [[ $(type -t timeout) != file ]] || cmdTimeout=timeout
