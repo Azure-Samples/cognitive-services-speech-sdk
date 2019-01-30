@@ -3,9 +3,6 @@
 This sample demonstrates how to translate speech with C# under .NET Core 2.0 (Windows or Linux) using the Speech SDK.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-dotnetcore-windows) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
 
-> **Note:**
-> on Linux, we currently only support the Ubuntu 16.04 x64 distribution.
-
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).

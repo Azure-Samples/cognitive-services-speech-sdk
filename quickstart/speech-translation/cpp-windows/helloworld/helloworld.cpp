@@ -40,9 +40,9 @@ void TranslationWithMicrophone()
   if (result->Reason == ResultReason::TranslatedSpeech)
   {
     cout << "RECOGNIZED: Text=" << result->Text << std::endl
-      << "  Language=" << fromLanguage << std::endl;
+    << "  Language=" << fromLanguage << std::endl;
 
-      for (const auto& it : result->Translations)
+    for (const auto& it : result->Translations)
     {
       cout << "TRANSLATED into '" << it.first.c_str() << "': " << it.second.c_str() << std::endl;
     }

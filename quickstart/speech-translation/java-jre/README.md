@@ -3,9 +3,6 @@
 This sample demonstrates how to translate speech with the Speech SDK for Java on Windows or Linux (Ubuntu 16.04)
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
 
-> **Note:**
-> the Speech SDK for the JRE currently supports only the Windows x64 platform and Linux (Ubuntu 16.04) x64 distribution.
-
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
