@@ -1,4 +1,4 @@
-# Quickstart: Translate speech in Java on Windows or Linux (Ubuntu 16.04)
+# Quickstart: Translate speech in Java on Windows or Linux (Ubuntu 16.04/18.04)
 
 This sample demonstrates how to translate speech with the Speech SDK for Java on Windows or Linux (Ubuntu 16.04)
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.

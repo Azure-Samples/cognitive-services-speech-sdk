@@ -1,4 +1,4 @@
-# Quickstart: Translate speech in C# for .NET Core (Windows or Linux)
+# Quickstart: Translate speech in C# for .NET Core on Windows or Linux (Ubuntu 16.04/18.04)
 
 This sample demonstrates how to translate speech with C# under .NET Core 2.0 (Windows or Linux) using the Speech SDK.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-dotnetcore-windows) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
