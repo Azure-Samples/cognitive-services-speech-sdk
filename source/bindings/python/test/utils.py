@@ -121,12 +121,17 @@ def _check_callbacks(callbacks, check_num_recognized=True):
         assert callbacks['recognized'].num_calls == 1, callbacks['recognized'].num_calls
 
 
-def _check_result_common(result, speech_input, utterance_index):
+def _check_result_common(result, speech_input, utterance_index, do_check_duration=True,
+        do_check_offset=True):
     assert speech_input.transcription[utterance_index] == result.text
-    assert speech_input.duration[utterance_index] == result.duration, \
-            'desired: {}, actual: {}'.format(speech_input.duration[utterance_index], result.duration)
-    assert speech_input.offset[utterance_index] == result.offset, \
-            'desired: {}, actual: {}'.format(speech_input.offset[utterance_index], result.offset)
+    if do_check_duration:
+        assert speech_input.duration[utterance_index] == result.duration, \
+                'desired: {}, actual: {}'.format(
+                        speech_input.duration[utterance_index], result.duration)
+    if do_check_offset:
+        assert speech_input.offset[utterance_index] == result.offset, \
+                'desired: {}, actual: {}'.format(
+                        speech_input.offset[utterance_index], result.offset)
     assert isinstance(result.result_id, str)
     assert result.result_id
     assert result.cancellation_details is None
@@ -158,5 +163,6 @@ def _check_intent_result(result, intent_input, utterance_index):
     assert isinstance(result.intent_json, str)
     assert result.intent_json
 
-    _check_result_common(result, intent_input, utterance_index)
+    _check_result_common(result, intent_input, utterance_index, do_check_duration=False,
+            do_check_offset=False)
 
