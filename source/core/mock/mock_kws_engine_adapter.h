@@ -11,6 +11,7 @@
 #include "spxcore_common.h"
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
+#include "audio_chunk.h"
 
 
 namespace Microsoft {
@@ -43,7 +44,7 @@ public:
     // --- ISpxAudioProcessor
 
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;
-    void ProcessAudio(AudioData_Type data, uint32_t size) override;
+    void ProcessAudio(const DataChunkPtr& audioChunk) override;
 
 
 private:
@@ -59,7 +60,7 @@ private:
     void TermFormat();
     void End();
 
-    void FireKeywordDetected(AudioData_Type data, uint32_t size);
+    void FireKeywordDetected(const DataChunkPtr& audioChunk);
 
 
 private:

@@ -104,7 +104,7 @@ public:
 
     // --- ISpxAudioProcessor
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;
-    void ProcessAudio(AudioData_Type data, uint32_t size) override;
+    void ProcessAudio(const DataChunkPtr& audioChunk) override;
 
     // --- IServiceProvider ---
     SPX_SERVICE_MAP_BEGIN()
@@ -138,13 +138,13 @@ private:
 
     void SetSpeechConfig(std::shared_ptr<ISpxNamedProperties>& properties);
 
-    void UspWrite(const uint8_t* buffer, size_t byteToWrite);
+    void UspWrite(const DataChunkPtr& audioChunk);
     void UspSendSpeechConfig();
     void UspSendSpeechContext();
     void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType);
     void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType);
     void UspWriteFormat(SPXWAVEFORMATEX* pformat);
-    void UspWriteActual(const uint8_t* buffer, size_t byteToWrite);
+    void UspWriteActual(const DataChunkPtr& audioChunk);
     void UspWriteFlush();
 
     void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg&) override;

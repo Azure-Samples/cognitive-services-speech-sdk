@@ -10,6 +10,7 @@
 #include "microphone_pump_base.h"
 #include "speechapi_cxx_enums.h"
 #include "property_id_2_name_map.h"
+#include "audio_chunk.h"
 
 
 namespace Microsoft {
@@ -191,7 +192,7 @@ int CSpxMicrophonePumpBase::Process(const uint8_t* pBuffer, uint32_t size)
     {
         auto sharedBuffer = SpxAllocSharedAudioBuffer(size);
         memcpy(sharedBuffer.get(), pBuffer, size);
-        m_sink->ProcessAudio(sharedBuffer, size);
+        m_sink->ProcessAudio(std::make_shared<DataChunk>(sharedBuffer, size));
     }
 
     return result;

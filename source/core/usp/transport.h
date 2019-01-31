@@ -13,6 +13,7 @@
 #include "dnscache.h"
 #include "uspcommon.h"
 #include "metrics.h"
+#include "audio_chunk.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,16 +69,14 @@ int TransportStreamPrepare(TransportHandle transportHandle, const char* path);
  */
 int TransportMessageWrite(TransportHandle transportHandle, const char* path, const uint8_t* buffer, size_t bufferSize, const char* requestId);
 
-
 /**
  * Writes to the transport stream.
  * @param transportHandle The request to prepare.
- * @param buffer The buffer to write to the stream.
- * @param bufferSize The byte size of pBuffer.
+ * @param buffer The audio chunk to be sent.
  * @param requestId The requestId for the current stream.
  * @return A return code or zero if successful.
  */
-int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer, size_t bufferSize, const char* requestId);
+int TransportStreamWrite(TransportHandle transportHandle, const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char* requestId);
 
 /**
  * Flushes any outstanding I/O on the transport stream.

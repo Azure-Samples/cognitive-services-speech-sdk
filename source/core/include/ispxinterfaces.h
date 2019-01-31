@@ -11,6 +11,7 @@
 #include <map>
 #include <chrono>
 #include "spxcore_common.h"
+#include "audio_chunk.h"
 #include "platform.h"
 #include "asyncop.h"
 #include <speechapi_cxx_common.h>
@@ -353,10 +354,9 @@ public:
 class ISpxAudioProcessor : public ISpxInterfaceBaseFor<ISpxAudioProcessor>
 {
 public:
-    using AudioData_Type = SpxSharedAudioBuffer_Type;
 
     virtual void SetFormat(const SPXWAVEFORMATEX* pformat) = 0;
-    virtual void ProcessAudio(AudioData_Type data, uint32_t cbData) = 0;
+    virtual void ProcessAudio(const DataChunkPtr& audioChunk) = 0;
 };
 
 class ISpxAudioPump : public ISpxInterfaceBaseFor<ISpxAudioPump>

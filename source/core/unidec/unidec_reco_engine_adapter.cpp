@@ -82,12 +82,12 @@ void CSpxUnidecRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
     }
 }
 
-void CSpxUnidecRecoEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
+void CSpxUnidecRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
 {
-    SPX_DBG_TRACE_VERBOSE_IF(0, "%s(..., size=%d)", __FUNCTION__, size);
+    SPX_DBG_TRACE_VERBOSE_IF(0, "%s(..., size=%d)", __FUNCTION__, audioChunk->size);
     SPX_IFTRUE_THROW_HR(!HasFormat(), SPXERR_UNINITIALIZED);
 
-    AudioBufferWrite(data, size);
+    AudioBufferWrite(audioChunk->data, audioChunk->size);
 }
 
 void CSpxUnidecRecoEngineAdapter::InitConfig()

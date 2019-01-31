@@ -11,6 +11,7 @@
 #include <list>
 #include <deque>
 #include "spxcore_common.h"
+#include "audio_chunk.h"
 #include <mutex>
 
 namespace Microsoft {
@@ -18,18 +19,21 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-    // Data chunk interface.
-    struct DataChunk
+    // Time stamp of the last dicarded audio segment. The chunkReceivedTime is the time when the last audio chunk
+    // is recevied, and the remainingAudioInTicks is the length (in ticks) of audio in the last chunk that has
+    // not been discarded. DiscardedAudioTimeStamp presents the time point when the last audio that contributes
+    // to a phrase result has been received.
+    struct DiscardedAudioTimeStamp
     {
-        DataChunk(std::shared_ptr<uint8_t> data, uint64_t dataSizeInBytes)
-            : data{ data }, size{ dataSizeInBytes }
-        {}
+        DiscardedAudioTimeStamp(std::chrono::system_clock::time_point chunkTimeStamp, uint64_t remainingInTicks)
+            : chunkReceivedTime{ chunkTimeStamp }, remainingAudioInTicks{ remainingInTicks }
+        { }
 
-        std::shared_ptr<uint8_t> data;  // Actual data.
-        uint64_t size;                  // Current size of valid data, counted from data + offset.
+        std::chrono::system_clock::time_point chunkReceivedTime;
+        uint64_t remainingAudioInTicks;
     };
 
-    using DataChunkPtr = std::shared_ptr<DataChunk>;
+    using AudioTimeStampForPhrasePtr = std::shared_ptr<DiscardedAudioTimeStamp>;
 
     class AudioBuffer;
     using AudioBufferPtr = std::shared_ptr<AudioBuffer>;
@@ -38,8 +42,8 @@ namespace Impl {
     class AudioBuffer
     {
     public:
-        // Adds a new data chunk of the given size in bytes to the buffer.
-        virtual void Add(const std::shared_ptr<uint8_t>& data, uint64_t data_size) = 0;
+        // Adds a new data chunk.
+        virtual void Add(const DataChunkPtr& audioChunk) = 0;
 
         // Gets next not-yet confirmed chunk from the buffer.
         // Returns nullptr if no more data available.
@@ -51,7 +55,8 @@ namespace Impl {
 
         // Discards all chunks till the specified offset in ticks.
         // Offset is relative to the current turn. Should be called on successful final result.
-        virtual void DiscardTill(uint64_t offsetInTicksTurnRelative /*Tick = HNS*/) = 0;
+        // It returns the timestamp of the last discarded audio.
+        virtual AudioTimeStampForPhrasePtr DiscardTill(uint64_t offsetInTicksTurnRelative /*Tick = HNS*/) = 0;
 
         // Discards "size" bytes from the beginning of unconfirmed chunks.
         // Currently used only for KWS, (in the future DiscardTill should be used instead).
@@ -87,10 +92,10 @@ namespace Impl {
     public:
         explicit PcmAudioBuffer(const SPXWAVEFORMATEX& header);
 
-        void Add(const std::shared_ptr<uint8_t>& data, uint64_t dataSize) override;
+        void Add(const DataChunkPtr& audioChunk) override;
         DataChunkPtr GetNext() override;
         void NewTurn() override;
-        void DiscardTill(uint64_t offset) override;
+        AudioTimeStampForPhrasePtr DiscardTill(uint64_t offset) override;
         void DiscardBytes(uint64_t bytes) override;
         uint64_t ToAbsolute(uint64_t offsetInTicksTurnRelative) const override;
         uint64_t StashedSizeInBytes() const override;
@@ -102,9 +107,9 @@ namespace Impl {
     private:
         DISABLE_COPY_AND_MOVE(PcmAudioBuffer);
 
-        void DiscardBytesUnlocked(uint64_t bytes);
+        AudioTimeStampForPhrasePtr DiscardBytesUnlocked(uint64_t bytes);
         DataChunkPtr GetNextUnlocked();
-        void DiscardTillUnlocked(uint64_t offsetInTicks);
+        AudioTimeStampForPhrasePtr DiscardTillUnlocked(uint64_t offsetInTicks);
 
         uint64_t DurationToBytes(uint64_t durationInTicks) const;
         uint64_t BytesToDurationInTicks(uint64_t bytes) const;

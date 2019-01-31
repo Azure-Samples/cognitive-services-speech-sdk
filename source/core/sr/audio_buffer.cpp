@@ -7,6 +7,8 @@
 #include <cmath>
 #include "audio_buffer.h"
 
+using namespace std::chrono;
+
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -28,11 +30,11 @@ namespace Impl {
         }
     }
 
-    void PcmAudioBuffer::Add(const std::shared_ptr<uint8_t>& data, uint64_t dataSize)
+    void PcmAudioBuffer::Add(const DataChunkPtr& audioChunk)
     {
         std::unique_lock<std::mutex> guard(m_lock);
-        m_audioBuffers.push_back(std::make_shared<DataChunk>(data, dataSize));
-        m_totalSizeInBytes += dataSize;
+        m_audioBuffers.push_back(audioChunk);
+        m_totalSizeInBytes += audioChunk->size;
     }
 
     DataChunkPtr PcmAudioBuffer::GetNext()
@@ -63,13 +65,23 @@ namespace Impl {
         mutable std::shared_ptr<uint8_t> data;
     };
 
-    void PcmAudioBuffer::DiscardBytesUnlocked(uint64_t bytes)
+    AudioTimeStampForPhrasePtr PcmAudioBuffer::DiscardBytesUnlocked(uint64_t bytes)
     {
+        system_clock::time_point audioTimestamp;
+        uint64_t remainingInTicks;
+        bool foundTimeStamp = false;
+
         uint64_t chunkBytes = 0;
         while (!m_audioBuffers.empty() && bytes &&
                (chunkBytes = m_audioBuffers.front()->size) <= bytes)
         {
             bytes -= chunkBytes;
+            if (bytes == 0)
+            {
+                audioTimestamp = m_audioBuffers.front()->receivedTime;
+                remainingInTicks = 0;
+                foundTimeStamp = true;
+            }
             m_audioBuffers.pop_front();
             m_currentChunk--;
             SPX_THROW_HR_IF(SPXERR_RUNTIME_ERROR, m_totalSizeInBytes < chunkBytes);
@@ -95,7 +107,12 @@ namespace Impl {
         }
         else if (bytes > 0)
         {
-            m_audioBuffers.front()->size -= bytes;
+            audioTimestamp = m_audioBuffers.front()->receivedTime;
+            remainingInTicks = BytesToDurationInTicks(m_audioBuffers.front()->size - bytes);
+            foundTimeStamp = true;
+
+            // At this point, bytes is less than the size of current chunk, so safe to cast to uint32_t.
+            m_audioBuffers.front()->size -= (uint32_t)bytes;
             m_bufferStartOffsetInBytesTurnRelative += bytes;
             m_bufferStartOffsetInBytesAbsolute += bytes;
             auto holder = PtrHolder{ m_audioBuffers.front()->data };
@@ -103,12 +120,14 @@ namespace Impl {
             SPX_THROW_HR_IF(SPXERR_RUNTIME_ERROR, m_totalSizeInBytes < bytes);
             m_totalSizeInBytes -= bytes;
         }
+
+        return foundTimeStamp ? std::make_shared<DiscardedAudioTimeStamp>(audioTimestamp, remainingInTicks) : nullptr;
     }
 
-    void PcmAudioBuffer::DiscardTill(uint64_t offsetInTicks)
+    AudioTimeStampForPhrasePtr PcmAudioBuffer::DiscardTill(uint64_t offsetInTicks)
     {
         std::unique_lock<std::mutex> guard(m_lock);
-        DiscardTillUnlocked(offsetInTicks);
+        return DiscardTillUnlocked(offsetInTicks);
     }
 
     uint64_t PcmAudioBuffer::DurationToBytes(uint64_t durationInTicks) const
@@ -199,7 +218,7 @@ namespace Impl {
 
         std::unique_lock<std::mutex> guard(m_lock);
         for (const auto& c : this->m_audioBuffers)
-            buffer->Add(c->data, c->size);
+            buffer->Add(std::make_shared<DataChunk>(c->data, c->size, c->receivedTime));
     }
 
     DataChunkPtr PcmAudioBuffer::GetNextUnlocked()
@@ -215,7 +234,7 @@ namespace Impl {
         return result;
     }
 
-    void PcmAudioBuffer::DiscardTillUnlocked(uint64_t offsetInTicks)
+    AudioTimeStampForPhrasePtr PcmAudioBuffer::DiscardTillUnlocked(uint64_t offsetInTicks)
     {
         int64_t bytes = DurationToBytes(offsetInTicks) - m_bufferStartOffsetInBytesTurnRelative;
         if (bytes < 0)
@@ -223,9 +242,10 @@ namespace Impl {
             SPX_DBG_TRACE_WARNING("%s: Offset is not monothonically increasing. Current turn offset in bytes %d, discardging bytes", __FUNCTION__,
                 (int)m_bufferStartOffsetInBytesTurnRelative,
                 (int)bytes);
-            return;
+
+            return nullptr;
         }
-        DiscardBytesUnlocked(bytes);
+        return DiscardBytesUnlocked(bytes);
     }
 
     uint64_t PcmAudioBuffer::NonAcknowledgedSizeInBytes() const

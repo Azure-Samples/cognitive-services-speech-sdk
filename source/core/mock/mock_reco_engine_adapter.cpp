@@ -75,8 +75,10 @@ void CSpxMockRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
     }
 }
 
-void CSpxMockRecoEngineAdapter::ProcessAudio(AudioData_Type /* data */, uint32_t size)
+void CSpxMockRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
 {
+    auto size = audioChunk->size;
+
     SPX_DBG_TRACE_VERBOSE_IF(0, "%s(..., size=%d)", __FUNCTION__, size);
     SPX_IFTRUE_THROW_HR(!HasFormat(), SPXERR_UNINITIALIZED);
 

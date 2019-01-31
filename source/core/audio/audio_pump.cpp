@@ -183,7 +183,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
 
             // Read the buffer, and send it to the processor
             auto cbRead = m_reader->Read(data.get(), bytesPerFrame);
-            pISpxAudioProcessor->ProcessAudio(data, cbRead);
+            pISpxAudioProcessor->ProcessAudio(std::make_shared<DataChunk>(data, cbRead));
 
             // If we didn't read any data, move to the 'Idle' state
             if (cbRead == 0)

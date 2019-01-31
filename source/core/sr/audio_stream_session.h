@@ -76,7 +76,7 @@ public:
     // --- ISpxAudioProcessor
 
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;
-    void ProcessAudio(AudioData_Type data, uint32_t size) override;
+    void ProcessAudio(const DataChunkPtr& audioChunk) override;
 
     // --- IServiceProvider ---
 
@@ -107,7 +107,7 @@ public:
     void CloseConnection() override;
 
     // --- ISpxKwsEngineAdapterSite
-    void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint32_t size, AudioData_Type audioData) override;
+    void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint32_t size, std::shared_ptr<uint8_t> audioData) override;
     void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Keyword); }
 
     // --- ISpxRecoEngineAdapterSite (first part...)

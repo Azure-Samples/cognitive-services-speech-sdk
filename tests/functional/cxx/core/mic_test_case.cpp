@@ -23,7 +23,7 @@ using namespace std;
 
 class AudioTestSink final : public ISpxAudioProcessor
 {
-    using DataBuffer = pair<ISpxAudioProcessor::AudioData_Type, uint32_t>;
+    using DataBuffer = pair<std::shared_ptr<uint8_t>, uint32_t>;
 
 public:
     AudioTestSink(bool running = true)
@@ -48,14 +48,14 @@ public:
         }
     }
 
-    virtual void ProcessAudio(AudioData_Type data, uint32_t size) override
+    virtual void ProcessAudio(const DataChunkPtr& audioChunk) override
     {
         unique_lock<mutex> lock(m_mutex);
         if (!m_running)
         {
             return;
         }
-        m_data.push_back(make_pair(data, size));
+        m_data.push_back(make_pair(audioChunk->data, audioChunk->size));
         if (m_processAudioCallCounter++ == 0)
         {
             m_cv.notify_one();

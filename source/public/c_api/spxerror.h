@@ -232,3 +232,9 @@ typedef uintptr_t SPXHR;
 /// The recognizer is invalid.
 /// </summary>
 #define SPXERR_INVALID_RECOGNIZER  __SPX_ERRCODE_FAILED(0x022)
+
+/// <summary>
+/// The value is out of range.
+/// Added in version 1.3.0.
+/// </summary>
+#define SPXERR_OUT_OF_RANGE  __SPX_ERRCODE_FAILED(0x023)

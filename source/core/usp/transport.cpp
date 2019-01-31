@@ -1134,8 +1134,10 @@ int TransportStreamPrepare(TransportHandle transportHandle, const char* path)
     return ret;
 }
 
-int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer, size_t bufferSize, const char* requestId)
+int TransportStreamWrite(TransportHandle transportHandle, const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char* requestId)
 {
+    size_t bufferSize = (size_t)audioChunk->size;
+    auto buffer = audioChunk->data.get();
     TransportRequest* request = (TransportRequest*)transportHandle;
     if (NULL == request)
     {
@@ -1240,7 +1242,7 @@ int TransportStreamFlush(TransportHandle transportHandle, const char* requestId)
     // flush is called even before the WS connection is established, in
     // particular if the audio file is very short. Just append the zero-sized
     // buffer as indication of end-of-audio.
-    return TransportStreamWrite(request, NULL, 0, requestId);
+    return TransportStreamWrite(request, std::make_shared<Microsoft::CognitiveServices::Speech::Impl::DataChunk>(nullptr, 0), requestId);
 }
 
 void TransportDoWork(TransportHandle transportHandle)

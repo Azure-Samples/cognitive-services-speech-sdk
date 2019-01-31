@@ -76,10 +76,9 @@ public:
 
     /**
     * Adds an audio segment to the outgoing queue.
-    * @param data The audio data to be sent. Audio data must be aligned on the audio sample boundary.
-    * @param size The length of the audio data, in bytes.
+    * @param audioChunk the audio chunk to be queued.
     */
-    void QueueAudioSegment(const uint8_t* data, size_t size);
+    void QueueAudioSegment(const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk);
 
     /**
     * Adds an empty audio segment to the outgoing queue, which serves as a signal to the service that the audio

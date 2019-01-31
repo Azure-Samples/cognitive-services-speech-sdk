@@ -61,9 +61,13 @@ public:
     }
 
     template <class T>
-    void WriteAudio(T* buffer, size_t size)
+    void WriteAudio(T* buffer, uint32_t size)
     {
-        m_connection->WriteAudio(reinterpret_cast<const uint8_t*>(buffer), size);
+        std::shared_ptr<uint8_t> data(new uint8_t[size], [](uint8_t* p) { delete[] p; });
+        memcpy(data.get(), buffer, size);
+        auto audioChunk = std::make_shared<Microsoft::CognitiveServices::Speech::Impl::DataChunk>(data, size);
+
+        m_connection->WriteAudio(audioChunk);
     }
 
 private:
@@ -90,7 +94,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
         string dummy = "RIFF1234567890";
         auto client = std::make_shared<UspClient>();
         REQUIRE_NOTHROW(client->Init());
-        client->WriteAudio(dummy.data(), dummy.length());
+        client->WriteAudio(dummy.data(), (uint32_t)dummy.length());
         REQUIRE_NOTHROW(client->Term());
     }
 
@@ -107,7 +111,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
         while (is) {
             auto size_to_read = max(size_t(1 << 10), rnd() % buffer_size_8k);
             is.read(buffer.data(), size_to_read);
-            auto bytesRead = (size_t)is.gcount();
+            auto bytesRead = (uint32_t)is.gcount();
             client->WriteAudio(buffer.data(), bytesRead);
             std::this_thread::sleep_for(std::chrono::milliseconds(rnd() % 100));
         }
@@ -124,7 +128,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
             auto is = get_stream(input_file);
             while (is && (rnd()%i < i>>1)) {
                 is.read(buffer.data(), buffer_size_8k);
-                auto bytesRead = (size_t)is.gcount();
+                auto bytesRead = (uint32_t)is.gcount();
                 client->WriteAudio(buffer.data(), bytesRead);
                 std::this_thread::sleep_for(std::chrono::milliseconds(rnd() % 100));
             }
@@ -149,7 +153,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
 
         for (int i = 0; i < num_handles; i++)
         {
-            auto bytesRead = (size_t)is.gcount();
+            auto bytesRead = (uint32_t)is.gcount();
             clients[i]->WriteAudio(buffer.data(), bytesRead);
         }
 
@@ -157,7 +161,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
         {
             auto size_to_read = max(size_t(1 << 10), rnd() % buffer_size_8k);
             is.read(buffer.data(), size_to_read);
-            auto bytesRead = (size_t)is.gcount();
+            auto bytesRead = (uint32_t)is.gcount();
             clients[rnd() % num_handles]->WriteAudio(buffer.data(), bytesRead);
             std::this_thread::sleep_for(std::chrono::milliseconds(rnd() % 100));
         }
@@ -198,7 +202,9 @@ TEST_CASE("USP uses TLS12", "[usp]")
         .SetAuthentication(USP::AuthenticationType::SubscriptionKey, "test");
 
     auto connection = client.Connect();
-    std::vector<uint8_t> buffer = { 1, 2, 3, 4, 5, 6, 7 };
-    connection->WriteAudio(buffer.data(), buffer.size());
+    constexpr unsigned int dataSize = 7;
+    auto data = new uint8_t[dataSize]{ 1, 2, 3, 4, 5, 6, 7 };
+    std::shared_ptr<uint8_t> buffer(data, [](uint8_t* p) { delete[] p; });
+    connection->WriteAudio(std::make_shared<DataChunk>(buffer, dataSize));
     this_thread::sleep_for(5s);
 }

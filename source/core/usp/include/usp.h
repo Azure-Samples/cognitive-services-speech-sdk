@@ -13,6 +13,7 @@
 
 #include "uspmessages.h"
 #include "ispxinterfaces.h"
+#include "audio_chunk.h"
 
 struct ProxyServerInfo;
 
@@ -122,10 +123,9 @@ class Connection
 public:
     /**
     * Sends data to the USP client.
-    * @param buffer The buffer contains data to be sent.
-    * @param size The amount of data in bytes to be sent.
+    * @param audioChunk The audio chunk to be sent.
     */
-    void WriteAudio(const uint8_t* buffer, size_t size);
+    void WriteAudio(const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk);
 
     /**
     * Finalizes sending audio data to indicate the end of audio.

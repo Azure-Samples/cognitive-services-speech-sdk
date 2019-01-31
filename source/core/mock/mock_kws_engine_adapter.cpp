@@ -68,16 +68,16 @@ void CSpxMockKwsEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
     }
 }
 
-void CSpxMockKwsEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
+void CSpxMockKwsEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
 {
-    SPX_DBG_TRACE_VERBOSE_IF(0, "%s(..., size=%d)", __FUNCTION__, size);
+    SPX_DBG_TRACE_VERBOSE_IF(0, "%s(..., size=%d)", __FUNCTION__, audioChunk->size);
     SPX_IFTRUE_THROW_HR(!HasFormat(), SPXERR_UNINITIALIZED);
 
-    m_cbAudioProcessed += size;
+    m_cbAudioProcessed += audioChunk->size;
     if (m_cbAudioProcessed > m_cbFireNextKeyword)
     {
         // we'll pretend that the most recent packet of data is the keyword data...
-        FireKeywordDetected(data, size);
+        FireKeywordDetected(audioChunk);
     }
 }
 
@@ -106,7 +106,7 @@ void CSpxMockKwsEngineAdapter::End()
     GetSite()->AdapterCompletedSetFormatStop(this);
 }
 
-void CSpxMockKwsEngineAdapter::FireKeywordDetected(AudioData_Type data, uint32_t size)
+void CSpxMockKwsEngineAdapter::FireKeywordDetected(const DataChunkPtr& audioChunk)
 {
     SPX_DBG_TRACE_FUNCTION();
 
@@ -122,7 +122,7 @@ void CSpxMockKwsEngineAdapter::FireKeywordDetected(AudioData_Type data, uint32_t
         SPXAPI_TRY()
         {
             auto keepAliveCopy = keepAlive;
-            site->KeywordDetected(this, offset, size, data);
+            site->KeywordDetected(this, offset, (uint32_t)audioChunk->size, audioChunk->data);
         }
         SPXAPI_CATCH_ONLY()
     });

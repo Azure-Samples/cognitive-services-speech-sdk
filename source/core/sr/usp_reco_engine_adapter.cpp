@@ -199,8 +199,9 @@ void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
     }
 }
 
-void CSpxUspRecoEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
+void CSpxUspRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
 {
+    auto size = audioChunk->size;
     if (IsState(UspState::Zombie) && size == 0)
     {
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... size=0 ... (audioState/uspState=%d/%d) USP-ZOMBIE", __FUNCTION__, this, m_audioState, m_uspState);
@@ -214,15 +215,15 @@ void CSpxUspRecoEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
     {
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8x)->SendPreAudioMessages() ... size=%d", __FUNCTION__, this, size);
         SendPreAudioMessages();
-        UspWrite(data.get(), size);
+        UspWrite(audioChunk);
 
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartingTurn()", __FUNCTION__);
         InvokeOnSite([this](const SitePtr& p) { p->AdapterStartingTurn(this); });
     }
-    else if (size > 0 && IsState(AudioState::Sending))
+    else if (audioChunk->size > 0 && IsState(AudioState::Sending))
     {
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8x) Sending Audio ... size=%d", __FUNCTION__, this, size);
-        UspWrite(data.get(), size);
+        UspWrite(audioChunk);
     }
     else if (size == 0 && IsState(AudioState::Sending))
     {
@@ -730,7 +731,7 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(SPXWAVEFORMATEX* pformat)
     uint32_t cbRiffChunk = 0;       // NOTE: This isn't technically accurate for a RIFF/WAV file, but it's fine for Truman/Newman/Skyman
     uint32_t cbDataChunk = 0;       // NOTE: Similarly, this isn't technically correct for the 'data' chunk, but it's fine for Truman/Newman/Skyman
 
-    size_t cbHeader =
+    uint32_t cbHeader =
         cbTag + cbChunkSize +       // 'RIFF' #size_of_RIFF#
         cbChunkType +               // 'WAVE'
         cbChunkType + cbChunkSize + // 'fmt ' #size_fmt#
@@ -738,7 +739,7 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(SPXWAVEFORMATEX* pformat)
         cbChunkType + cbChunkSize;  // 'data' #size_of_data#
 
     // Allocate the buffer, and create a ptr we'll use to advance thru the buffer as we're writing stuff into it
-    std::unique_ptr<uint8_t[]> buffer(new uint8_t[cbHeader]);
+    auto buffer = SpxAllocSharedAudioBuffer(cbHeader);
     auto ptr = buffer.get();
 
     // The 'RIFF' header (consists of 'RIFF' followed by size of payload that follows)
@@ -758,25 +759,27 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(SPXWAVEFORMATEX* pformat)
     ptr = FormatBufferWriteNumber(ptr, cbDataChunk);
 
     // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWrite
-    SPX_DBG_ASSERT(cbHeader == size_t(ptr - buffer.get()));
-    UspWrite(buffer.get(), cbHeader);
+    SPX_DBG_ASSERT(cbHeader == uint32_t(ptr - buffer.get()));
+    UspWrite(std::make_shared<DataChunk>(buffer, cbHeader));
 }
 
-void CSpxUspRecoEngineAdapter::UspWrite(const uint8_t* buffer, size_t byteToWrite)
+void CSpxUspRecoEngineAdapter::UspWrite(const DataChunkPtr& audioChunk)
 {
-    SPX_DBG_TRACE_VERBOSE_IF(byteToWrite == 0, "%s(..., %d)", __FUNCTION__, byteToWrite);
-
-    m_uspAudioByteCount += byteToWrite;
-    UspWriteActual(buffer, byteToWrite);
+    m_uspAudioByteCount += audioChunk->size;
+    UspWriteActual(audioChunk);
 }
 
-void CSpxUspRecoEngineAdapter::UspWriteActual(const uint8_t* buffer, size_t byteToWrite)
+void CSpxUspRecoEngineAdapter::UspWriteActual(const DataChunkPtr& audioChunk)
 {
+    SPX_DBG_TRACE_VERBOSE("%s(..., %d)", __FUNCTION__, audioChunk->size);
     SPX_DBG_ASSERT(m_uspConnection != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
     if (!IsState(UspState::Terminating) && !IsState(UspState::Zombie) && m_uspConnection != nullptr)
     {
-        SPX_DBG_TRACE_VERBOSE("%s(..., %d)", __FUNCTION__, byteToWrite);
-        m_uspConnection->WriteAudio(buffer, byteToWrite);
+        m_uspConnection->WriteAudio(audioChunk);
+    }
+    else
+    {
+        SPX_DBG_TRACE_ERROR("%s: unexpected USP connection state:%d. Not sending audio chunk (size=%d).", __FUNCTION__, m_uspState, audioChunk->size);
     }
 }
 

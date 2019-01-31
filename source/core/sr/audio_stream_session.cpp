@@ -9,6 +9,7 @@
 #include <future>
 #include <list>
 #include <memory>
+#include <inttypes.h>
 #include "audio_stream_session.h"
 #include "spxcore_common.h"
 #include "asyncop.h"
@@ -21,6 +22,7 @@
 #include "service_helpers.h"
 #include "property_id_2_name_map.h"
 #include "try_catch_helpers.h"
+#include "time_utils.h"
 
 
 namespace Microsoft {
@@ -281,12 +283,13 @@ void CSpxAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
     m_threadService->ExecuteAsync(move(task));
 }
 
-void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
+void CSpxAudioStreamSession::ProcessAudio(const DataChunkPtr& audioChunk)
 {
     static_assert(MaxBufferedBeforeSimulateRealtime < MaxBufferedBeforeOverflow,
         "Buffer size triggering real time data consumption cannot be bigger than overflow limit");
+    SPX_DBG_TRACE_INFO("UPL: Received audio chunk: time: %s, size:%d.", PAL::GetTimeInString(audioChunk->receivedTime).c_str(), audioChunk->size);
 
-    SlowDownThreadIfNecessary(size);
+    SlowDownThreadIfNecessary(audioChunk->size);
     auto task = CreateTask([=]() {
         bool overflowHappened = false;
         {
@@ -322,7 +325,7 @@ void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
                 return;
             }
 
-            m_audioBuffer->Add(data, size);
+            m_audioBuffer->Add(audioChunk);
         }
 
         while (ProcessNextAudio())
@@ -391,7 +394,7 @@ bool CSpxAudioStreamSession::ProcessNextAudio()
                 buffer->DiscardBytes(item->size);
             }
 
-            processor->ProcessAudio(item->data, (uint32_t)item->size);
+            processor->ProcessAudio(item);
             if (item->size > 0)
             {
                 m_fireEndOfStreamAtSessionStop = false;
@@ -940,7 +943,7 @@ void CSpxAudioStreamSession::FireEvent(EventType eventType, shared_ptr<ISpxRecog
     m_threadService->ExecuteAsync(move(task), ISpxThreadService::Affinity::User);
 }
 
-void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint32_t size, AudioData_Type audioData)
+void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint32_t size, std::shared_ptr<uint8_t> audioData)
 {
     UNUSED(adapter);
     UNUSED(offset);
@@ -1204,7 +1207,22 @@ void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter
     if (buffer)
     {
         result->SetOffset(buffer->ToAbsolute(offset));
-        buffer->DiscardTill(offset + result->GetDuration());
+        auto audioTimeStamp = buffer->DiscardTill(offset + result->GetDuration());
+        // Todo: handle sub-packet latency in microphone input. Need to add property for audio source.
+        if (audioTimeStamp != nullptr)
+        {
+            auto nowTime = system_clock::now();
+            uint64_t seconds;
+            uint64_t ticks;
+            std::tie(seconds, ticks) = PAL::GetTimeInSecondsAndTicks(nowTime - audioTimeStamp->chunkReceivedTime);
+            SPX_DBG_TRACE_INFO("UPL for Result(%S): Latency %" PRIu64 ".%" PRIu64 "(s), ResultTime: %s, AudioTime: %s, remaingAudio:%d.",
+                result->GetResultId().c_str(), seconds, ticks,
+                PAL::GetTimeInString(nowTime).c_str(), PAL::GetTimeInString(audioTimeStamp->chunkReceivedTime).c_str(), audioTimeStamp->remainingAudioInTicks);
+        }
+        else
+        {
+            SPX_DBG_TRACE_ERROR("UPL: no audio timestamp for result/%S) available.", result->GetResultId().c_str());
+        }
     }
 
     // Only try and process the result with the LU Adapter if we have one (we won't have one, if nobody every added an IntentTrigger)
@@ -1715,7 +1733,7 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
             auto currentBuffer = m_audioBuffer;
             m_audioBuffer = std::make_shared<PcmAudioBuffer>(*waveformat);
             SPX_DBG_TRACE_VERBOSE_IF(1, "%s: Size of spotted keyword %d", __FUNCTION__, m_spottedKeyword->size);
-            m_audioBuffer->Add(m_spottedKeyword->data, m_spottedKeyword->size);
+            m_audioBuffer->Add(m_spottedKeyword);
             currentBuffer->CopyNonAcknowledgedDataTo(m_audioBuffer);
             m_spottedKeyword = nullptr;
         }
@@ -1725,7 +1743,7 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
     SPX_DBG_TRACE_VERBOSE_IF(1, "%s: ProcessingAudio - size=%d", __FUNCTION__, 0);
     if (oldAudioProcessor)
     {
-        oldAudioProcessor->ProcessAudio(nullptr, 0);
+        oldAudioProcessor->ProcessAudio(std::make_shared<DataChunk>(nullptr, 0));
         // Then tell it we're finally done, by sending a nullptr SPXWAVEFORMAT
         oldAudioProcessor->SetFormat(nullptr);
     }
@@ -1777,7 +1795,7 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
         if (m_audioProcessor)
         {
             SPX_DBG_TRACE_VERBOSE("%s: ProcessingAudio - Send zero size audio.", __FUNCTION__);
-            m_audioProcessor->ProcessAudio(nullptr, 0);
+            m_audioProcessor->ProcessAudio(std::make_shared<DataChunk>(nullptr, 0));
         }
     }
 

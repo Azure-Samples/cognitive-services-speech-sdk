@@ -512,8 +512,9 @@ void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, siz
     ScheduleWork();
 }
 
-void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
+void Connection::Impl::QueueAudioSegment(const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk)
 {
+    auto size = audioChunk->size;
     if (size == 0)
     {
         QueueAudioEnd();
@@ -522,7 +523,7 @@ void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
 
     LogInfo("TS:%" PRIu64 ", Write %" PRIu32 " bytes audio data.", getTimestamp(), size);
 
-    throw_if_null(data, "data");
+    throw_if_null(audioChunk->data.get(), "data");
 
     if (!m_valid)
     {
@@ -549,7 +550,7 @@ void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
         }
     }
 
-    ret = TransportStreamWrite(m_transport.get(), data, size, m_speechRequestId.c_str());
+    ret = TransportStreamWrite(m_transport.get(), audioChunk, m_speechRequestId.c_str());
     if (ret != 0)
     {
         ThrowRuntimeError("TransportStreamWrite failed. error=" + to_string(ret));

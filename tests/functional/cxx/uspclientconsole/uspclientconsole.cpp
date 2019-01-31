@@ -396,8 +396,8 @@ int main(int argc, char* argv[])
         }
     }
 
-    ifstream data(inputFile, ios::in | ((isAudioMessage) ? ios::binary : ios::in));
-    if (!data.is_open() || data.fail())
+    ifstream input(inputFile, ios::in | ((isAudioMessage) ? ios::binary : ios::in));
+    if (!input.is_open() || input.fail())
     {
         printf("Error: open file %s failed", inputFile.c_str());
         exit(1);
@@ -406,42 +406,43 @@ int main(int argc, char* argv[])
     // Connect to service
     auto connection = client.Connect();
 
+    size_t totalBytesWritten{ 0 };
+    input.seekg(0L, input.end);
+    size_t fileSize = static_cast<size_t>(input.tellg());
+    input.seekg(0L, input.beg);
+
     turnEnd = false;
-
-    // Send data to service
-    vector<char> buffer;
-    size_t totalBytesWritten {0};
-
-    data.seekg(0L, data.end);
-    size_t fileSize = static_cast<size_t>(data.tellg());
-    data.seekg(0L, data.beg);
 
     if (isAudioMessage)
     {
-        size_t chunkSize = AUDIO_BYTES_PER_SECOND * 2 / 5; // 2x real-time, 5 chunks per second.
-        buffer.resize(chunkSize);
-        while (!data.eof())
+        // Send data to service
+        constexpr uint32_t chunkSize = AUDIO_BYTES_PER_SECOND * 2 / 5; // 2x real-time, 5 chunks per second.
+        std::shared_ptr<uint8_t> buffer(new uint8_t[chunkSize], [](uint8_t* p) { delete[] p; });
+        auto audioChunk = std::make_shared<Microsoft::CognitiveServices::Speech::Impl::DataChunk>(buffer, chunkSize);
+
+        while (!input.eof())
         {
-            data.read(buffer.data(), chunkSize);
-            size_t bytesToWrite = static_cast<size_t>(data.gcount());
-            connection->WriteAudio(reinterpret_cast<uint8_t*>(buffer.data()), bytesToWrite);
+            input.read((char *)buffer.get(), chunkSize);
+            size_t bytesToWrite = static_cast<size_t>(input.gcount());
+            connection->WriteAudio(audioChunk);
             totalBytesWritten += (size_t) bytesToWrite;
             // Sleep to simulate real-time traffic
             this_thread::sleep_for(chrono::milliseconds(200));
         }
 
         // Send End of Audio to service to close the session.
-        if (data.eof())
+        if (input.eof())
         {
             connection->FlushAudio();
         }
     }
     else
     {
-        buffer.resize(fileSize);
-        data.read(buffer.data(), fileSize);
-        auto bytesToWrite = static_cast<size_t>(data.gcount());
-        connection->SendMessage(inputMessagePath.c_str(), reinterpret_cast<uint8_t*>(buffer.data()), bytesToWrite, USP::MessageType::Agent);
+        vector<char> msgBuffer;
+        msgBuffer.resize(fileSize);
+        input.read(msgBuffer.data(), fileSize);
+        auto bytesToWrite = static_cast<size_t>(input.gcount());
+        connection->SendMessage(inputMessagePath.c_str(), reinterpret_cast<uint8_t*>(msgBuffer.data()), bytesToWrite, USP::MessageType::Agent);
         totalBytesWritten += bytesToWrite;
     }
 
@@ -463,5 +464,5 @@ int main(int argc, char* argv[])
 
     connection.reset();
 
-    data.close();
+    input.close();
 }

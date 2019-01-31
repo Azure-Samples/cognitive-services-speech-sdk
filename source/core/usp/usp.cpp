@@ -7,6 +7,7 @@
 #include "usp.h"
 #include "uspinternal.h"
 #include "uspcommon.h"
+#include "audio_chunk.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -34,9 +35,9 @@ bool Connection::IsConnected()
     return m_impl->IsConnected();
 }
 
-void Connection::WriteAudio(const uint8_t* buffer, size_t size)
+void Connection::WriteAudio(const ::Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk)
 {
-    m_impl->QueueAudioSegment(buffer, size);
+    m_impl->QueueAudioSegment(audioChunk);
 }
 
 void Connection::FlushAudio()
