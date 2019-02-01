@@ -93,11 +93,14 @@ namespace MicrosoftSpeechSDKSamples
             {
                 config = SpeechConfig.FromSubscription(key, region);
             }
-
+            if (!string.IsNullOrEmpty(lang))
+            {
+                config.SpeechRecognitionLanguage = lang;
+            }
             await RecognizeAsync(config, fileName, useStream, useContinuousRecognition, deviceName).ConfigureAwait(false);
         }
 
-        public static async Task SpeechRecognitionCustomizedModelAsync(string key, string region, string lang, string model, string fileName, bool useStream, bool useToken, bool useContinuousRecognition, string deviceName = null)
+        public static async Task SpeechRecognitionCustomizedModelAsync(string key, string region, string model, string fileName, bool useStream, bool useToken, bool useContinuousRecognition, string deviceName = null)
         {
             Console.WriteLine("Speech Recognition using customized model.");
             SpeechConfig config = null;
@@ -127,6 +130,11 @@ namespace MicrosoftSpeechSDKSamples
             if (!string.IsNullOrEmpty(model))
             {
                 config.EndpointId = model;
+            }
+
+            if (!string.IsNullOrEmpty(lang))
+            {
+                config.SpeechRecognitionLanguage = lang;
             }
 
             await RecognizeAsync(config, fileName, useStream, useContinuousRecognition, deviceName).ConfigureAwait(false);

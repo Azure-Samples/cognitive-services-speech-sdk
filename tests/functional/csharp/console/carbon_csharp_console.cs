@@ -221,7 +221,7 @@ namespace MicrosoftSpeechSDKSamples
                     else
                     {
                         Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
-                        SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, region, lang, modelId, fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName = null).Wait();
+                        SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, region, modelId, fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName = null).Wait();
                     }
                 }
             }
