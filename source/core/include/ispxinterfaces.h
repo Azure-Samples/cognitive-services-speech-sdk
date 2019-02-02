@@ -403,6 +403,8 @@ public:
     virtual uint64_t GetOffset() const = 0;
     virtual void SetOffset(uint64_t) = 0;
     virtual uint64_t GetDuration() const = 0;
+
+    virtual void SetLatency(uint64_t) = 0;
 };
 
 class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionResultInit>

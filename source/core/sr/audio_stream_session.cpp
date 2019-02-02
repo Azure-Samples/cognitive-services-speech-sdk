@@ -175,6 +175,7 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
     // Open the WAV file
     audioFilePump->Open(pszFileName);
 
+    SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceFile);
     SetAudioConfigurationInProperties();
 
     // Limit the maximal speed to 2 times of real-time streaming
@@ -194,6 +195,7 @@ void CSpxAudioStreamSession::InitFromMicrophone()
     auto site = SpxSiteFromThis(this);
     m_audioPump = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxInteractiveMicrophone", site);
 
+    SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceMicrophone);
     SetAudioConfigurationInProperties();
 }
 
@@ -211,6 +213,7 @@ void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> str
     auto reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
     audioPump->SetReader(reader);
 
+    SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceStream);
     SetAudioConfigurationInProperties();
 
     // Limit the maximal speed to 2 times of real-time streaming
@@ -1117,10 +1120,10 @@ void CSpxAudioStreamSession::AdapterDetectedSoundStart(ISpxRecoEngineAdapter* ad
 
 void CSpxAudioStreamSession::AdapterDetectedSoundEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
-    UNUSED(adapter);
-    UNUSED(offset);
-    // TODO: RobCh: Next: Implement
-    // SPX_THROW_HR(SPXERR_NOT_IMPL);
+UNUSED(adapter);
+UNUSED(offset);
+// TODO: RobCh: Next: Implement
+// SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
 
 std::shared_ptr<ISpxSessionEventArgs> CSpxAudioStreamSession::CreateSessionEventArgs(const std::wstring& sessionId)
@@ -1208,15 +1211,17 @@ void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter
     {
         result->SetOffset(buffer->ToAbsolute(offset));
         auto audioTimeStamp = buffer->DiscardTill(offset + result->GetDuration());
-        // Todo: handle sub-packet latency in microphone input. Need to add property for audio source.
         if (audioTimeStamp != nullptr)
         {
             auto nowTime = system_clock::now();
-            uint64_t seconds;
-            uint64_t ticks;
-            std::tie(seconds, ticks) = PAL::GetTimeInSecondsAndTicks(nowTime - audioTimeStamp->chunkReceivedTime);
+            uint64_t ticks = PAL::GetTicks(nowTime - audioTimeStamp->chunkReceivedTime);
+            if (GetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), "").compare(g_audioSourceMicrophone) == 0)
+            {
+                ticks += audioTimeStamp->remainingAudioInTicks;
+            }
+            result->SetLatency(ticks);
             SPX_DBG_TRACE_INFO("UPL for Result(%S): Latency %" PRIu64 ".%" PRIu64 "(s), ResultTime: %s, AudioTime: %s, remaingAudio:%d.",
-                result->GetResultId().c_str(), seconds, ticks,
+                result->GetResultId().c_str(), ticks/10000000, ticks%10000000,
                 PAL::GetTimeInString(nowTime).c_str(), PAL::GetTimeInString(audioTimeStamp->chunkReceivedTime).c_str(), audioTimeStamp->remainingAudioInTicks);
         }
         else

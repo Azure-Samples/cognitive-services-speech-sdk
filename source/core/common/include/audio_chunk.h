@@ -25,7 +25,7 @@ struct DataChunk
 
     std::shared_ptr<uint8_t> data;  // Actual data.
     uint32_t size;                  // Current size of valid data in bytes
-    std::chrono::system_clock::time_point receivedTime; // The receive time of audio chunk.
+    const std::chrono::system_clock::time_point receivedTime; // The receive time of audio chunk.
 };
 
 using DataChunkPtr = std::shared_ptr<DataChunk>;

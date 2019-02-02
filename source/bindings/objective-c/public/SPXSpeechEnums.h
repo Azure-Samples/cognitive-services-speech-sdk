@@ -150,6 +150,14 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     SPXSpeechServiceResponseJsonErrorDetails = 5001,
 
     /**
+     * The recognition latency. Read-only, available on final speech/translation/intent results.
+     * This measures the latency between when an audio input is received by the SDK, and the moment the final result is received from the service.
+     * The SDK computes the time difference between the last audio fragment from the audio input that is contributing to the final result, and the time the final result is received from the speech service.
+     * Added in version 1.3.0.
+     */
+    SPXSpeechServiceResponseRecognitionLatency = 5002,
+
+    /**
       * The cancellation reason. Currently unused.
       */
     SPXCancellationDetailsReason = 6000,

@@ -34,6 +34,7 @@
     static_assert((int)SPXSpeechServiceResponseRequestDetailedResultTrueFalse == (int)SpeechImpl::PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceResponseRequestProfanityFilterTrueFalse == (int)SpeechImpl::PropertyId::SpeechServiceResponse_RequestProfanityFilterTrueFalse, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceResponseJsonResult == (int)SpeechImpl::PropertyId::SpeechServiceResponse_JsonResult, "inconsistent enum definition of property id");
+    static_assert((int)SPXSpeechServiceResponseRecognitionLatency == (int)SpeechImpl::PropertyId::SpeechServiceResponse_RecognitionLatency, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceResponseJsonErrorDetails == (int)SpeechImpl::PropertyId::SpeechServiceResponse_JsonErrorDetails, "inconsistent enum definition of property id");
     static_assert((int)SPXCancellationDetailsReason == (int)SpeechImpl::PropertyId::CancellationDetails_Reason, "inconsistent enum definition of property id");
     static_assert((int)SPXCancellationDetailsReasonText == (int)SpeechImpl::PropertyId::CancellationDetails_ReasonText, "inconsistent enum definition of property id");

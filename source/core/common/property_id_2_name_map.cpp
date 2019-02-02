@@ -42,6 +42,7 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::SpeechServiceResponse_JsonResult: return "RESULT-Json";
     case PropertyId::LanguageUnderstandingServiceResponse_JsonResult: return "RESULT-LanguageUnderstandingJson";
     case PropertyId::SpeechServiceResponse_JsonErrorDetails: return "RESULT-ErrorDetails";
+    case PropertyId::SpeechServiceResponse_RecognitionLatency: return "RESULT-RecognitionLatency";
     case PropertyId::CancellationDetails_Reason: return "CancellationDetails_Reason";
     case PropertyId::CancellationDetails_ReasonText: return "CancellationDetails_ReasonText";
     case PropertyId::CancellationDetails_ReasonDetailedText: return "CancellationDetails_ReasonDetailedText";
@@ -49,6 +50,7 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::AudioConfig_NumberOfChannelsForCapture: return "AudioConfig_NumberOfChannelsForCapture";
     case PropertyId::AudioConfig_SampleRateForCapture: return "AudioConfig_SampleRateForCapture";
     case PropertyId::AudioConfig_BitsPerSampleForCapture: return "AudioConfig_BitsPerSampleForCapture";
+    case PropertyId::AudioConfig_AudioSource: return "AudioConfig_AudioSource";
     default:
         LogError("undefined PropertyId of %d", static_cast<int>(id));
         SPX_THROW_ON_FAIL(SPXERR_INVALID_ARG);

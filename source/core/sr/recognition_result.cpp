@@ -104,6 +104,11 @@ void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, ResultReaso
     SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls reason=%d, cancellationReason=%d, text='%S'", __FUNCTION__, m_resultId.c_str(), (int)m_reason, (int)m_cancellationReason, m_text.c_str());
 }
 
+void CSpxRecognitionResult::SetLatency(uint64_t latencyInTicks)
+{
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RecognitionLatency), std::to_string(latencyInTicks).c_str());
+}
+
 wstring CSpxRecognitionResult::GetIntentId()
 {
     return m_intentId;

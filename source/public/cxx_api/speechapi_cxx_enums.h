@@ -169,6 +169,14 @@ enum class PropertyId
     SpeechServiceResponse_JsonErrorDetails = 5001,
 
     /// <summary>
+    /// The recognition latency. Read-only, available on final speech/translation/intent results.
+    /// This measures the latency between when an audio input is received by the SDK, and the moment the final result is received from the service.
+    /// The SDK computes the time difference between the last audio fragment from the audio input that is contributing to the final result, and the time the final result is received from the speech service.
+    /// Added in version 1.3.0.
+    /// </summary>
+    SpeechServiceResponse_RecognitionLatency = 5002,
+
+    /// <summary>
     /// The cancellation reason. Currently unused.
     /// </summary>
     CancellationDetails_Reason = 6000,
@@ -211,8 +219,13 @@ enum class PropertyId
     /// <summary>
     /// The number of bits of each sample for audio capture. Internal use only.
     /// </summary>
-    AudioConfig_BitsPerSampleForCapture = 8003
+    AudioConfig_BitsPerSampleForCapture = 8003,
 
+    /// <summary>
+    /// The audio source. Allowed values are "microphone", "file", and "stream".
+    /// Added in version 1.3.0.
+    /// </summary>
+    AudioConfig_AudioSource = 8004
 };
 
 enum class OutputFormat

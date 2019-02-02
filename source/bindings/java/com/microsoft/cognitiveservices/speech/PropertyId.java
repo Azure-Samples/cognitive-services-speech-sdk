@@ -159,6 +159,14 @@ public enum PropertyId {
     SpeechServiceResponse_JsonErrorDetails ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_JsonErrorDetails),
 
     /**
+     * The recognition latency. Read-only, available on final speech/translation/intent results.
+     * This measures the latency between when an audio input is received by the SDK, and the moment the final result is received from the service.
+     * The SDK computes the time difference between the last audio fragment from the audio input that is contributing to the final result, and the time the final result is received from the speech service.
+     * Added in version 1.3.0.
+     */
+    SpeechServiceResponse_RecognitionLatency ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RecognitionLatency),
+
+    /**
      * The cancellation reason. Currently unused.
      */
     CancellationDetails_Reason ( com.microsoft.cognitiveservices.speech.internal.PropertyId.CancellationDetails_Reason),

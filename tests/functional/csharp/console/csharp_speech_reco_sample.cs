@@ -17,7 +17,6 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class SpeechRecognitionSamples
     {
-        private static long lastRecognitionTicks;
         private static void MyRecognizingEventHandler(object sender, SpeechRecognitionEventArgs e)
         {
             Console.WriteLine($"Speech recognition: intermediate result: {e.ToString()}, Offset: {e.Result.OffsetInTicks}, Duration: {e.Result.Duration}.");
@@ -25,20 +24,19 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MyRecognizedEventHandler(object sender, SpeechRecognitionEventArgs e)
         {
-            var t = DateTime.Now.Ticks;
+            var resultLatency = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatency);
             if (e.Result.Reason == ResultReason.RecognizedSpeech)
             {
-                Console.WriteLine($"RECOGNIZED (elapsedTicks={t-lastRecognitionTicks}): Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+                Console.WriteLine($"RECOGNIZED (latency={resultLatency}): Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
             }
             else if (e.Result.Reason == ResultReason.NoMatch)
             {
-                Console.WriteLine($"NOMATCH (elapsedTicks={t - lastRecognitionTicks}): Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+                Console.WriteLine($"NOMATCH (latency={resultLatency}): Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
             }
             else
             {
-                Console.WriteLine($"Unexpected result(elapsedTicks={t - lastRecognitionTicks}). Reason={e.Result.Reason}, result={e.Result}");
+                Console.WriteLine($"Unexpected result.(latency={resultLatency}). Reason={e.Result.Reason}, result={e.Result}");
             }
-            lastRecognitionTicks = t;
         }
 
         private static void MyCanceledEventHandler(object sender, SpeechRecognitionCanceledEventArgs e)
@@ -218,7 +216,6 @@ namespace MicrosoftSpeechSDKSamples
             reco.SessionStopped += MySessionStoppedEventHandler;
 
             // Starts recognition.
-            lastRecognitionTicks = DateTime.Now.Ticks;
             var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
 
             Console.WriteLine("Speech Recognition: Recognition result: " + result);
@@ -255,7 +252,6 @@ namespace MicrosoftSpeechSDKSamples
             };
 
             // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-            lastRecognitionTicks = DateTime.Now.Ticks;
             await reco.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
             // Waits for completion.

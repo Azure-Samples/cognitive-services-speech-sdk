@@ -11,5 +11,5 @@
 namespace PAL
 {
     std::string GetTimeInString(const std::chrono::system_clock::time_point& t);
-    std::pair<uint64_t, uint64_t> GetTimeInSecondsAndTicks(const std::chrono::system_clock::duration& t);
+    uint64_t GetTicks(const std::chrono::system_clock::duration& t);
 }

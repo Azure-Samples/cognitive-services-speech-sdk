@@ -31,6 +31,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         SpeechServiceResponse_RequestProfanityFilterTrueFalse = 4001,
         SpeechServiceResponse_JsonResult = 5000,
         SpeechServiceResponse_JsonErrorDetails = 5001,
+        SpeechServiceResponse_RecognitionLatency = 5002,
         CancellationDetails_Reason = 6000,
         CancellationDetails_ReasonText = 6001,
         CancellationDetails_ReasonDetailedText = 6002,

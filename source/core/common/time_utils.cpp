@@ -41,12 +41,11 @@ namespace PAL
         return buffer;
     }
 
-    std::pair<uint64_t, uint64_t> GetTimeInSecondsAndTicks(const system_clock::duration& t)
+    uint64_t GetTicks(const system_clock::duration& t)
     {
-        uint64_t seconds = t.count() * system_clock::period::num / system_clock::period::den;
-        uint64_t subSecondPeriods = t.count() * system_clock::period::num % system_clock::period::den;
-        uint64_t ticks = subSecondPeriods * 10000000 * system_clock::period::num / system_clock::period::den;
-        return std::make_pair(seconds, ticks);
+        constexpr uint64_t nanosecondsInTick = 100;
+        nanoseconds durationInNanoseconds = t;
+        return durationInNanoseconds.count() / nanosecondsInTick ;
     }
 }
 

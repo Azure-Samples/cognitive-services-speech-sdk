@@ -45,6 +45,7 @@ enum  PropertyId
 
     SpeechServiceResponse_JsonResult = 5000,
     SpeechServiceResponse_JsonErrorDetails = 5001,
+    SpeechServiceResponse_RecognitionLatency = 5002,
 
     CancellationDetails_Reason = 6000,
     CancellationDetails_ReasonText = 6001,
@@ -55,7 +56,8 @@ enum  PropertyId
     AudioConfig_DeviceNameForCapture = 8000,
     AudioConfig_NumberOfChannelsForCapture = 8001,
     AudioConfig_SampleRateForCapture = 8002,
-    AudioConfig_BitsPerSampleForCapture = 8003
+    AudioConfig_BitsPerSampleForCapture = 8003,
+    AudioConfig_AudioSource = 8004
 };
 #endif
 

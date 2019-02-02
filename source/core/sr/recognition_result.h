@@ -50,6 +50,8 @@ public:
     uint64_t GetDuration() const override { return m_duration; }
     void SetOffset(uint64_t offset) override { m_offset = offset; }
 
+    void SetLatency(uint64_t latency) override;
+
     // --- ISpxRecognitionResultInit ---
     void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
     void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) override;
@@ -60,20 +62,20 @@ public:
     // --- ISpxIntentRecognitionResultInit ---
     void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) override;
 
-    // -- ISpxTranslationRecognitionResult ---
+    // --- ISpxTranslationRecognitionResult ---
     const std::map<std::wstring, std::wstring>& GetTranslationText() override;
 
-    // -- ISpxTranslationRecognitionResultInit --
+    // --- ISpxTranslationRecognitionResultInit ---
     void InitTranslationRecognitionResult(TranslationStatusCode status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) override;
 
-    // -- ISpxTranslationSynthesisResult ---
+    // --- ISpxTranslationSynthesisResult ---
     const uint8_t* GetAudio() const override;
     size_t GetLength() const override;
 
-    // ISpxTranslationSynthesisResultInit
+    // --- ISpxTranslationSynthesisResultInit ---
     void InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength) override;
 
-    // --- ISpxNamedProperties (overrides)
+    // --- ISpxNamedProperties (overrides) ---
     void SetStringValue(const char* name, const char* value) override;
 
 private:
