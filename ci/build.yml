@@ -363,11 +363,16 @@ jobs:
           vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15 Win64"
         fi
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+        vsts_setvar SPEECHSDK_ENABLE_KWS true
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: . ./ci/functions.sh && vsts_setvar SPEECHSDK_SPECTRE_MITIGATION false
     displayName: Reset SPEECHSDK_SPECTRE_MITIGATION in Debug
     condition: eq(variables['BuildConfiguration'], 'Debug')
+  - template: get-kws-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_KWS
+      os: Windows
   - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
   # TODO detect installation failures, export diagnostics. For now, we'll fail in msbuild a little bit down.
@@ -383,7 +388,14 @@ jobs:
   - task: CMake@1
     displayName: Generate solution
     inputs:
-      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
+      cmakeArgs: >-
+        -G "$(SPEECHSDK_CMAKE_GENERATOR)"
+        -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM)
+        -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE)
+        -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
+        -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION)
+        -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
+        ..
   - task: VSBuild@1
     displayName: Build solution
     inputs:
@@ -397,7 +409,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing'
       FolderPath: 'build/bin'
-      Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll'
+      Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
@@ -851,6 +863,14 @@ jobs:
       artifactName: Windows
       downloadPath: $(System.ArtifactsDirectory)/In
       itemPattern: '**/*.nupkg'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download libraries for running C# unit test'
+    inputs:
+      artifactName: Linux
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: |
+        Linux/Linux-x64/Release/private/lib/libcarbon-mock.so
+        Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
   - template: get-docker-image.yml
     parameters:
       imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64
@@ -887,13 +907,18 @@ jobs:
         -D speech-key=$(NorthEuropeKeySkyman) \
         -D long-running=false
       mkdir localnuget
-      cp --verbose $(System.ArtifactsDirectory)/In/Windows/Microsoft.CognitiveServices.Speech.*.nupkg localnuget
+      cp --verbose "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
+
+      # Supply mock and dependencies for running the test suite
+      mkdir private_lib
+      cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/private/lib/libcarbon-mock.so" private_lib
+      cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" private_lib
 
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
         # Run the unit tests (skip Ubuntu 18.04 in dev builds)
         [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
-          docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$i" bash - <<"SCRIPT" || \
+          docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --env LD_LIBRARY_PATH=/test/private_lib --workdir /test "$i" bash - <<"SCRIPT" || \
           { ((++ERRORS)); vsts_logissue error "Running tests/functional/csharp/end2end for image $i failed."; }
             set -e -x -o pipefail
             cd tests/functional/csharp/end2end
@@ -968,6 +993,12 @@ jobs:
         . ci/functions.sh
         vsts_setvar SPEECHSDK_TARGET_PLATFORM Android-$(BuildPlatform)
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+        # Note: KWS currently only for ARM32
+        if [[ $(BuildPlatform) = arm32 ]]; then
+          vsts_setvar SPEECHSDK_ENABLE_KWS true
+        else
+          vsts_setvar SPEECHSDK_ENABLE_KWS false
+        fi
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: ./ci/install-build-dependencies.sh
@@ -992,6 +1023,10 @@ jobs:
         mv "$NDK_BASE_UNIX.tmp"/* "$NDK_BASE_UNIX"
         rmdir "$NDK_BASE_UNIX.tmp"
         rm "$NDK_ZIP"
+  - template: get-kws-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_KWS
+      os: Android
   - task: BatchScript@1
     displayName: Build
     inputs:
@@ -1139,10 +1174,15 @@ jobs:
         . ci/functions.sh
         vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x64
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+        vsts_setvar SPEECHSDK_ENABLE_KWS true
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
+  - template: get-kws-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_KWS
+      os: Linux
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: C API can be parsed by GCC
     inputs:
@@ -1151,7 +1191,13 @@ jobs:
   - task: CMake@1
     displayName: Generate makefiles
     inputs:
-      cmakeArgs: '-DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) ..'
+      cmakeArgs: >-
+        -DCMAKE_BUILD_TYPE=$(BuildConfiguration)
+        -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM)
+        -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE)
+        -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
+        -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
+        ..
   - task: CMake@1
     displayName: CMake build
     inputs:

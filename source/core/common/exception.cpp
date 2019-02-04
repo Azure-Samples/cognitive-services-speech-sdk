@@ -58,6 +58,7 @@ namespace Impl {
             _MAP_ENTRY(SPXERR_INVALID_HANDLE)
             _MAP_ENTRY(SPXERR_INVALID_RECOGNIZER)
             _MAP_ENTRY(SPXERR_OUT_OF_RANGE)
+            _MAP_ENTRY(SPXERR_EXTENSION_LIBRARY_NOT_FOUND)
 #undef _MAP_ENTRY
         }
 

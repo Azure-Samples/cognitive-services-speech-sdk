@@ -415,6 +415,13 @@ public:
     virtual void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
 };
 
+class ISpxKeywordRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxKeywordRecognitionResultInit>
+{
+public:
+
+    virtual void InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, bool is_verified) = 0;
+};
+
 class ISpxRecognizer : public ISpxInterfaceBaseFor<ISpxRecognizer>
 {
 public:
@@ -673,7 +680,7 @@ class ISpxKwsEngineAdapter :
 class ISpxKwsEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxKwsEngineAdapterSite>
 {
 public:
-    virtual void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t startOffset, uint32_t size, SpxSharedAudioBuffer_Type audioBuffer) = 0;
+    virtual void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint64_t duration, double confidence, const std::string& keyword, const DataChunkPtr& audioChunk) = 0;
     virtual void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* adapter) = 0;
 };
 
@@ -682,6 +689,13 @@ class ISpxRecoResultFactory : public ISpxInterfaceBaseFor<ISpxRecoResultFactory>
 public:
     virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
     virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, bool is_verified) = 0;
+};
+
+class ISpxKeywordRecognitionResult : public ISpxInterfaceBaseFor<ISpxKeywordRecognitionResult>
+{
+public:
+    virtual double GetConfidence() = 0;
 };
 
 class ISpxEventArgsFactory : public ISpxInterfaceBaseFor<ISpxEventArgsFactory>

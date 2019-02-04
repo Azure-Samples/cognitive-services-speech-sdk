@@ -468,7 +468,7 @@ static int init_alsa_pcm_device(snd_pcm_t** pcmHandle, snd_pcm_stream_t streamTy
             LogError("Failure setting up rate hardware info: %s %d:%s - %s.", STRING_c_str(audioData->hDeviceName),paramerr, snd_strerror(paramerr), (streamType == SND_PCM_STREAM_PLAYBACK) ? "playback" : "recording");
             result = __LINE__;
         }
-        else if ((paramerr = snd_pcm_hw_params_set_period_size_near(*pcmHandle, hw_params, &frames, 0)) < 0)
+        else if ((paramerr = snd_pcm_hw_params_set_period_size_near(*pcmHandle, hw_params, &frames, 0)) < 0) // TODO bug if returns 1?
         {
             LogError("Failure setting up period hardware info: %s %d:%s - %s.", STRING_c_str(audioData->hDeviceName),paramerr, snd_strerror(paramerr), (streamType == SND_PCM_STREAM_PLAYBACK) ? "playback" : "recording");
             result = __LINE__;

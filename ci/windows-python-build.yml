@@ -64,9 +64,22 @@ jobs:
       Start-Process -Wait cmd -Verb runas -ArgumentList /c, cd, (Get-Location), '&&', start, /wait, .\vs_enterprise.exe, modify, --installPath, '"%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise"', --add, Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre, --quiet, --norestart, --wait, '&&', echo, '%ERRORLEVEL%', '>', result.txt
     displayName: Install Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre VS component
     condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
+  - bash: |
+      set -e -o pipefail -u
+      . ci/functions.sh
+      vsts_setvar SPEECHSDK_ENABLE_KWS true
+    displayName: Set KWS variables
+  - template: get-kws-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_KWS
+      os: Windows
   - template: build-python-wheel.yml
     parameters:
-      buildParams: "-DCMAKE_CXX_COMPILER=cl.exe -DCMAKE_C_COMPILER=cl.exe -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION)"
+      buildParams: >-
+        -DCMAKE_CXX_COMPILER=cl.exe
+        -DCMAKE_C_COMPILER=cl.exe
+        -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION)
+        -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
       postbuildsteps:
         - powershell: |
             $dir = New-Item -ItemType Directory -Path "$(OutputDirectory)/pdb-$(BuildPlatform)-$(BuildConfiguration)-py$(PythonVersion)"

@@ -13,7 +13,7 @@ expect {
     exec paplay [set pathToAudio]
 
     expect {
-      -re "(We r|R)ecognized: (.+)\r\n" {
+      -re "(We r|R)ecognized: (.+?)\r\n" {
         set recoText $expect_out(2,string)
         if {$recoText == $expectedRecoText} {
           puts "### Pass with the right recognition text"

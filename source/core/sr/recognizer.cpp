@@ -210,6 +210,7 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
     case ResultReason::NoMatch:
     case ResultReason::RecognizedSpeech:
     case ResultReason::RecognizedIntent:
+    case ResultReason::RecognizedKeyword:
     case ResultReason::TranslatedSpeech:
         pevent = &FinalResult;
         SPX_DBG_TRACE_VERBOSE_IF(!pevent->IsConnected(), "%s: No FinalResult event signal connected!! nobody listening...", __FUNCTION__);
@@ -217,6 +218,7 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
 
     case ResultReason::RecognizingSpeech:
     case ResultReason::RecognizingIntent:
+    case ResultReason::RecognizingKeyword:
     case ResultReason::TranslatingSpeech:
         pevent = &IntermediateResult;
         break;

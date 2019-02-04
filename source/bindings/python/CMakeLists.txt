@@ -97,6 +97,8 @@ else()
             PRIVATE common
             PRIVATE factory
         )
+    set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
+        PROPERTIES INSTALL_RPATH "$ORIGIN")
 endif()
 
 if(APPLE)
@@ -125,6 +127,13 @@ if(DEFINED SKBUILD)
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})")
 
   install(FILES ${CMAKE_SWIG_OUTDIR}/speech_py_impl.py DESTINATION ${module_dir} )
+
+  if(EXTENSION_KWS_ENABLED)
+    # TODO needs cmake 3.13 for out-of-dir targets:
+    # install(TARGETS kws_factory DESTINATION ${module_dir})
+    add_dependencies(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} kws_factory)
+    install(FILES "$<TARGET_FILE:kws_factory>" DESTINATION ${module_dir})
+  endif()
 endif()
 
 set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES

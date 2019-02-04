@@ -946,25 +946,45 @@ void CSpxAudioStreamSession::FireEvent(EventType eventType, shared_ptr<ISpxRecog
     m_threadService->ExecuteAsync(move(task), ISpxThreadService::Affinity::User);
 }
 
-void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint32_t size, std::shared_ptr<uint8_t> audioData)
+void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint64_t duration, double confidence, const std::string& keyword, const DataChunkPtr& audioChunk)
 {
     UNUSED(adapter);
-    UNUSED(offset);
 
-    SPX_DBG_TRACE_VERBOSE("Keyword detected!! Starting KwsSingleShot recognition... offset=%d; size=%d", offset, size);
-    auto task = CreateTask([this, size, audioData]()
+    SPX_DBG_TRACE_VERBOSE("Keyword detected!! Starting KwsSingleShot recognition... offset=%d; size=%d", offset, audioChunk->size);
+    SPX_ASSERT_WITH_MESSAGE(m_threadService->IsOnServiceThread(), "called on wrong thread, must be thread service managed thread.");
+
+    // Report that we have a keyword candidate
     {
-        if (ChangeState(RecognitionKind::Keyword, SessionState::ProcessingAudio, RecognitionKind::KwsSingleShot, SessionState::HotSwapPaused))
-        {
-            // We've been told a keyword was recognized... Stash the audio, and start KwsSingleShot recognition!!
-            SPX_DBG_TRACE_VERBOSE("%s: Now KwsSingleShot/Paused ...", __FUNCTION__);
+        // Create the result
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
+        auto result = factory->CreateKeywordResult(confidence, offset, duration, PAL::ToWString(keyword).c_str(), false/*not completely verified*/);
 
-            m_spottedKeyword = std::make_shared<DataChunk>(audioData, size);
-            HotSwapToKwsSingleShotWhilePaused();
-        }
-    });
+        // Fire the result as intermediate since we did not yet verify it
+        FireResultEvent(GetSessionId(), result);
 
-    m_threadService->ExecuteSync(move(task));
+    }
+
+    // TODO: perform an optional verification
+    // TODO: here some verification!
+
+    // Now we are here, so send out that we have a keyword recognized
+    {
+        // Create the result
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
+        auto result = factory->CreateKeywordResult(confidence, offset, duration, PAL::ToWString(keyword).c_str(), true/*verified*/);
+
+        // Fire the result as intermediate since we did not yet verify it
+        FireResultEvent(GetSessionId(), result);
+    }
+
+    if (ChangeState(RecognitionKind::Keyword, SessionState::ProcessingAudio, RecognitionKind::KwsSingleShot, SessionState::HotSwapPaused))
+    {
+        // We've been told a keyword was recognized... Stash the audio, and start KwsSingleShot recognition!!
+        SPX_DBG_TRACE_VERBOSE("%s: Now KwsSingleShot/Paused ...", __FUNCTION__);
+
+        m_spottedKeyword = audioChunk;
+        HotSwapToKwsSingleShotWhilePaused();
+    }
 }
 
 void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation)
@@ -1174,6 +1194,16 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediat
 
     auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
     initResult->InitIntermediateResult(resultId, text, offset, duration);
+
+    return result;
+}
+
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, bool is_verified)
+{
+    auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
+
+    auto initResult = SpxQueryInterface<ISpxKeywordRecognitionResultInit>(result);
+    initResult->InitKeywordResult(confidence, offset, duration, keyword, is_verified);
 
     return result;
 }
@@ -1599,7 +1629,7 @@ void CSpxAudioStreamSession::InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> 
     }
 
     // if we still don't have an adapter... that's an exception
-    SPX_IFTRUE_THROW_HR(m_kwsAdapter == nullptr, SPXERR_NOT_FOUND);
+    SPX_IFTRUE_THROW_HR(m_kwsAdapter == nullptr, SPXERR_EXTENSION_LIBRARY_NOT_FOUND);
 }
 
 void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused()
@@ -1819,7 +1849,7 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
 void CSpxAudioStreamSession::EncounteredEndOfStream()
 {
     m_sawEndOfStream = true;
-    if (IsKind(RecognitionKind::Continuous))
+    if (IsKind(RecognitionKind::Continuous) || IsKind(RecognitionKind::Keyword))
     {
         m_fireEndOfStreamAtSessionStop = true;
     }
@@ -1861,6 +1891,13 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
                 SPX_DBG_TRACE_VERBOSE("%s: Now WaitForPumpSetFormatStart ...", __FUNCTION__);
                 StartAudioPump(RecognitionKind::Keyword, m_kwsModel);
             }
+        }
+        else if (doneAdapter == AdapterDoneProcessingAudio::Keyword)
+        {
+            auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
+            auto result = factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::EndOfStream, CancellationErrorCode::NoError, nullptr, 0, 0);
+
+            WaitForRecognition_Complete(result);
         }
     }
     else

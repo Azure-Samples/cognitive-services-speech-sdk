@@ -60,5 +60,18 @@ public enum ResultReason
     /**
       * Indicates the synthesized audio is now complete for this phrase.
       */
-    SynthesizingAudioCompleted
+    SynthesizingAudioCompleted,
+
+    /**
+     * Indicates the speech result contains (unverified) keyword text.
+     * Added in version 1.3.0
+     */
+    RecognizingKeyword,
+
+    /**
+     * Indicates that Keyword Recognition completed recognizing the given keyword.
+     * In case keyword verification is configured, additionally indicates successful verification of the keyword.
+     * Added in version 1.3.0
+     */
+    RecognizedKeyword
 }

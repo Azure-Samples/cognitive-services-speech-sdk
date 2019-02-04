@@ -21,6 +21,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             inputDir = Config.GetSettingByKey<String>(context, "InputDir");
 
             TestData.AudioDir = Path.Combine(inputDir, "audio");
+            TestData.KwsDir = Path.Combine(inputDir, "kws");
 
             Console.WriteLine("region: " + region);
             Console.WriteLine("input directory: " + inputDir);

@@ -107,16 +107,19 @@ class NativeLibraryLoader {
                 if (operatingSystem.contains("linux")) {
                     return new String[] {
                             "libMicrosoft.CognitiveServices.Speech.core.so",
+                            "libMicrosoft.CognitiveServices.Speech.extension.kws.so",
                             "libMicrosoft.CognitiveServices.Speech.java.bindings.so"
                     };
                 }
                 else if (operatingSystem.contains("windows")) {
                     return new String[] {
                             "Microsoft.CognitiveServices.Speech.core.dll",
+                            "Microsoft.CognitiveServices.Speech.extension.kws.dll",
                             "Microsoft.CognitiveServices.Speech.java.bindings.dll"
                     };
                 }
                 else if (operatingSystem.contains("mac") || operatingSystem.contains("darwin")) {
+                    // Note: currently no KWS on macOS
                     return new String[] {
                             "libMicrosoft.CognitiveServices.Speech.core.dylib",
                             "libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"

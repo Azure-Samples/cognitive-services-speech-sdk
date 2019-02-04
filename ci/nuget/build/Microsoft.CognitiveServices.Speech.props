@@ -3,8 +3,7 @@
   <!-- N.B. SpeechNativePlatform is set by including project -->
   <PropertyGroup>
     <SpeechPackageRoot>$(MSBuildThisFileDirectory)..\</SpeechPackageRoot>
-    <SpeechNativeLibDir Condition="'$(SpeechSdkUseDebugLibs)'!='1'">$(SpeechPackageRoot)build\native\$(SpeechNativePlatform)\Release</SpeechNativeLibDir>
-    <SpeechNativeLibDir Condition="'$(SpeechSdkUseDebugLibs)'=='1'">$(SpeechPackageRoot)build\native\$(SpeechNativePlatform)\Debug</SpeechNativeLibDir>
+    <SpeechNativeLibDir>$(SpeechPackageRoot)build\native\$(SpeechNativePlatform)\Release</SpeechNativeLibDir>
   </PropertyGroup>
   <PropertyGroup>
     <BuildDependsOn>

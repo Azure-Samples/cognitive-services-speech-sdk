@@ -11,6 +11,42 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         public static string AudioDir { get; set; }
 
+        public static string KwsDir { get; set; }
+
+        public static class Kws
+        {
+            public static class Computer
+            {
+                public static readonly string ModelFile = Path.Combine(KwsDir, Path.Combine("Computer", "kws.table"));
+                public static readonly string ModelKeyword = "computer";
+
+                public static readonly string AudioFile = Path.Combine(KwsDir, "kws_whatstheweatherlike.wav");
+                public static readonly string AudioFile2x = Path.Combine(KwsDir, "kws_whatstheweatherlike_x2.wav");
+                public static readonly string Utterance= "Computer what's the weather like?";
+            }
+            public static class Computer2
+            {
+                public static readonly string ModelFile = Path.Combine(KwsDir, Path.Combine("Computer", "kws.table"));
+                public static readonly string ModelKeyword = "computer";
+
+                public static readonly string AudioFile = Path.Combine(KwsDir, "kws_whatstheweatherlike_howoldareyou.wav");
+                public static readonly string AudioFileIntent = Path.Combine(KwsDir, "kws_whatstheweatherlike_howoldareyou_intent.wav");
+                public static readonly string AudioFileTranslate = Path.Combine(KwsDir, "kws_whatstheweatherlike_howoldareyou_translate.wav");
+                public static readonly string Utterance1 = "Computer what's the weather like?";
+                public static readonly string Utterance2 = "Computer how old are you?";
+            }
+
+            public static class Secret
+            {
+                public static readonly string ModelFile = Path.Combine(KwsDir, Path.Combine("Secret", "kws.table"));
+                public static readonly string ModelKeyword = "secret";
+
+                public static readonly string AudioFile = Path.Combine(KwsDir, "kws_secret.wav");
+                public static readonly string AudioFile2x = Path.Combine(KwsDir, "kws_secret_x2.wav");
+                public static readonly string Utterance = "Secret what's the weather like?";
+            }
+        }
+
         public static class German
         {
             public static class Batman

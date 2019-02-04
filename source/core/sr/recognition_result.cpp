@@ -114,6 +114,11 @@ wstring CSpxRecognitionResult::GetIntentId()
     return m_intentId;
 }
 
+double CSpxRecognitionResult::GetConfidence()
+{
+    return m_confidence;
+}
+
 void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload)
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -137,6 +142,25 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
     }
 
     SetStringValue(GetPropertyName(PropertyId::LanguageUnderstandingServiceResponse_JsonResult), jsonPayload ? PAL::ToString(jsonPayload).c_str() : "");
+}
+
+void CSpxRecognitionResult::InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, bool is_verified)
+{
+    SPX_DBG_TRACE_FUNCTION();
+
+    m_reason = is_verified ? ResultReason::RecognizedKeyword : ResultReason::RecognizingKeyword;
+    m_cancellationReason = REASON_CANCELED_NONE;
+    m_cancellationErrorCode = CancellationErrorCode::NoError;
+    m_noMatchReason = NO_MATCH_REASON_NONE;
+
+    m_offset = offset;
+    m_duration = duration;
+    m_confidence = confidence;
+
+    m_resultId = PAL::CreateGuidWithoutDashes();
+    m_text = keyword;
+
+    SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
 const map<wstring, wstring>& CSpxRecognitionResult::GetTranslationText()

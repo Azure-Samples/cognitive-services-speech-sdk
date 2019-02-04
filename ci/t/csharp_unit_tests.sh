@@ -60,10 +60,11 @@ fi
 
 "$VSTEST" \
 "$(cygpath -aw "$TEST_CODE")" \
-/Settings:"$runSettings" \
-/logger:"trx;$LOG_FILE_NAME" \
-/TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
-/TestCaseFilter:"$TEST_CASE_FILTER"
+--Settings:"$runSettings" \
+--Logger:"trx;$LOG_FILE_NAME" \
+--Blame \
+--TestAdapterPath:"$(cygpath -aw "$SOURCE_ROOT")" \
+--TestCaseFilter:"$TEST_CASE_FILTER"
 
 exitCode=$?
 set +x

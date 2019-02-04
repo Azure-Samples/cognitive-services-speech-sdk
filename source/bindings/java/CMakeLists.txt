@@ -67,6 +67,8 @@ swig_link_libraries(${JAVA_BINDINGS} ${SPEECHSDK_CORE_LIBRARY})
 if(WIN32)
     # Ensure we build with debug information (TODO global setting does not apply?)
     set_target_properties(${JAVA_BINDINGS} PROPERTIES LINK_FLAGS "/DEBUG /OPT:REF /OPT:ICF")
+else()
+    set_target_properties(${JAVA_BINDINGS} PROPERTIES BUILD_RPATH "$ORIGIN")
 endif()
 
 set_target_properties(${SWIG_MODULE_${JAVA_BINDINGS}_REAL_NAME}

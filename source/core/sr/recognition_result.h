@@ -12,6 +12,8 @@ namespace Impl {
 class CSpxRecognitionResult :
     public ISpxRecognitionResult,
     public ISpxRecognitionResultInit,
+    public ISpxKeywordRecognitionResult,
+    public ISpxKeywordRecognitionResultInit,
     public ISpxIntentRecognitionResult,
     public ISpxIntentRecognitionResultInit,
     public ISpxTranslationRecognitionResult,
@@ -28,6 +30,8 @@ public:
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognitionResult)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognitionResultInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxKeywordRecognitionResult)
+        SPX_INTERFACE_MAP_ENTRY(ISpxKeywordRecognitionResultInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxIntentRecognitionResult)
         SPX_INTERFACE_MAP_ENTRY(ISpxIntentRecognitionResultInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxTranslationRecognitionResult)
@@ -55,6 +59,12 @@ public:
     // --- ISpxRecognitionResultInit ---
     void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
     void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) override;
+
+    // --- ISpxKeywordRecognitionResultInit ---
+    void InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, bool is_verified) override;
+
+    // --- ISpxKeywordRecognitionResult ---
+    double GetConfidence() override;
 
     // --- ISpxIntentRecognitionResult ---
     std::wstring GetIntentId() override;
@@ -93,6 +103,8 @@ private:
     CancellationReason m_cancellationReason;
     CancellationErrorCode m_cancellationErrorCode;
     NoMatchReason m_noMatchReason;
+
+    double m_confidence;
 
     std::wstring m_intentId;
 

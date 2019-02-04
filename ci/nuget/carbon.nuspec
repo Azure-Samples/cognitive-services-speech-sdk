@@ -32,16 +32,16 @@
     <!-- C header files -->
     <file src="$WindowsDropDir$\Win32\Release\public\include\c_api\*" target="build\native\include\c_api\" />
 
-    <!-- native dll and lib files -->
-    <file src="$WindowsDropDir$\Win32\Debug\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\Win32\Debug\Microsoft.CognitiveServices.Speech.core.lib" />
-    <file src="$WindowsDropDir$\Win32\Debug\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\Win32\Debug\Microsoft.CognitiveServices.Speech.core.dll" />
+    <!-- Native dll and lib files -->
     <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.core.lib" />
     <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.core.dll" />
 
-    <file src="$WindowsDropDir$\x64\Debug\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\x64\Debug\Microsoft.CognitiveServices.Speech.core.lib" />
-    <file src="$WindowsDropDir$\x64\Debug\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\x64\Debug\Microsoft.CognitiveServices.Speech.core.dll" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.core.lib" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.core.dll" />
+
+    <!-- Native dll for plug-ins (no .lib) -->
+    <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
 
     <!-- .NET dlls -->
     <file src="$WindowsDropDir$\Win32\Release\public\lib\net461\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\net461\Microsoft.CognitiveServices.Speech.csharp.dll" />
@@ -54,7 +54,9 @@
     <!-- .NET standard Windows native dlls -->
     <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.core.dll" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
     <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
     <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x64\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
 
     <!-- .NET standard dlls, built on Windows, used on Linux -->
@@ -62,6 +64,7 @@
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
 
     <!-- .NET standard Linux native dlls -->
+    <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.kws.so" target="runtimes\linux-x64\native\libMicrosoft.CognitiveServices.Speech.extension.kws.so" />
     <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="runtimes\linux-x64\native\libMicrosoft.CognitiveServices.Speech.core.so" />
 
     <!-- Redistributable notice -->

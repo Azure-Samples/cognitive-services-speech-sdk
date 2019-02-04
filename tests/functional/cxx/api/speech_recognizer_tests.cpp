@@ -24,6 +24,7 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
     auto audioInput = AudioConfig::FromStreamInput(pushStream);
     auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
     weather.UpdateFullFilename(Config::InputDir);
+    SpxSetMockParameterBool("CARBON-INTERNAL-MOCK-SdkKwsEngine", true);
 
     SPXTEST_SECTION("continuous and once")
     {

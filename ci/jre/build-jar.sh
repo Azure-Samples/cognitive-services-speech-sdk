@@ -82,6 +82,11 @@ for platformString in "${platforms[@]}"; do
   mkdir -p "$JAR_DIR/$assetDir"
   cp --verbose "$dropPrefix/${libPrefix}Microsoft.CognitiveServices.Speech"{.core$libSuffix,.java.bindings$jnilibSuffix} "$JAR_DIR/$assetDir"
 
+  # Copy KWS extension if available
+  KWS_LIB=$dropPrefix/${libPrefix}Microsoft.CognitiveServices.Speech.extension.kws$libSuffix
+  ! [[ -f $KWS_LIB ]] ||
+    cp --verbose "$KWS_LIB" "$JAR_DIR/$assetDir"
+
 done
 
 cp --verbose "$SCRIPT_DIR/../../"{REDIST.txt,license.md,ThirdPartyNotices.md} "$JAR_DIR"

@@ -23,8 +23,6 @@
     <ProjectGuid>{6F0FEB3D-1411-4961-9BE0-CA0591077863}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>helloworld</RootNamespace>
-    <!-- Uncomment the following property to link against Speech SDK debug libraries -->
-    <!--<SpeechSdkUseDebugLibs>1</SpeechSdkUseDebugLibs>-->
     <!-- Version corresponds to the latest published package. Must match what is in packages.config -->
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>

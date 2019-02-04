@@ -353,15 +353,12 @@ def test_speech_config_set_properties():
         assert 'wrong type, must be PropertyId' == str(excinfo.value)
 
 
-@pytest.mark.skip(reason="keyword recognition is not implemented")
 def test_keyword_recognition_model_constructor():
     model = msspeech.KeywordRecognitionModel(__file__)
     assert model
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="filename needs to be provided"):
         model = msspeech.KeywordRecognitionModel()
-
-        assert "filename needs to be provided" == str(excinfo.value)
 
 
 @pytest.mark.parametrize('speech_input,', ['silence'], indirect=True)

@@ -39,13 +39,19 @@ jobs:
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_PYTHON_PLATFORM "$(BuildPlatform)"
         vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Unix Makefiles"
+        vsts_setvar SPEECHSDK_ENABLE_KWS true
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
+  - template: get-kws-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_KWS
+      os: Linux
   - template: build-python-wheel.yml
     parameters:
       pythonIncludePathSuffix: $(PythonIncludePathSuffix)
+      buildParams: -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
       wheelParams: "--plat-name=manylinux1_x86_64 --python-tag=$(WheelPythonTag)"
       postbuildsteps:
         - bash: |
@@ -55,10 +61,10 @@ jobs:
             wheel=(build/*.whl)
             [[ ${#wheel[@]} = 1 ]]
             unzip -d repack "${wheel[0]}"
-            pythonExtension=(repack/azure_cognitiveservices_speech-*/data/lib/python*/site-packages/azure/cognitiveservices/speech/_speech_py_impl.so)
-            [[ ${#pythonExtension[@]} = 1 ]]
-            cp --preserve "${pythonExtension[0]}" "$unstrippedLib"
-            strip "${pythonExtension[0]}"
+            sharedLibs=(repack/azure_cognitiveservices_speech-*/data/lib/python*/site-packages/azure/cognitiveservices/speech/*.so)
+            [[ ${#sharedLibs[@]} -gt 1 ]]
+            cp --preserve "${sharedLibs[@]}" "$unstrippedLib"
+            strip "${sharedLibs[@]}"
             cd repack
             wheelDirName=(azure_cognitiveservices_speech-*.data/)
             [[ ${#wheelDirName[@]} = 1 ]]

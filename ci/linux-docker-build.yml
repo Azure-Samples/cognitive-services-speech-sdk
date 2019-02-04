@@ -33,14 +33,23 @@ jobs:
   steps:
   - bash: |
       set -x -e -o pipefail
-      # Emulation need only on non-Intel
+      # Emulation needed only on non-Intel
       [[ $SPEECHSDK_TARGET_PLATFORM =~ ^Linux-(x86|x64)$ ]] || {
         sudo apt-get update
         sudo apt-get install --yes binfmt-support qemu-user-static
       }
       . ci/functions.sh
       ./ci/set-variables.sh
+      if [[ $SPEECHSDK_TARGET_PLATFORM = Linux-x86 ]]; then
+        vsts_setvar SPEECHSDK_ENABLE_KWS true
+      else
+        vsts_setvar SPEECHSDK_ENABLE_KWS false
+      fi
     displayName: Set variables
+  - template: get-kws-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_KWS
+      os: Linux
   - template: get-docker-image.yml
     parameters:
       imageBase: $(DOCKER_BASE)
@@ -55,6 +64,7 @@ jobs:
           -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) \
           -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) \
           -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) \
+          -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS) \
           ..
         cmake --build . -- -j$(nproc)
       SCRIPT

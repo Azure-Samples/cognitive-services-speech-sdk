@@ -1,0 +1,29 @@
+# We download per OS, across multiple artifact.
+# Could do less, but at least in multi-configuration builds (Windows), all
+# flavors need to be available at CMake configuration time.
+parameters:
+  enableVariable: ""
+  os: ""
+steps:
+- bash: |
+    set -u -e -o pipefail
+    . ci/functions.sh
+    IFS=$' \t\n\r' read build_id should_be_empty < external/KWS/build_id.txt
+    # checks
+    [[ -z $should_be_empty ]]
+    printf '%d' "$build_id" > /dev/null
+    vsts_setvar __getKwsArtifactInternal_BuildId "$build_id"
+  displayName: Get VoiceActivation build ID
+  condition: and(succeeded(), eq(variables['${{ parameters.enableVariable }}'], 'true'))
+- task: DownloadBuildArtifacts@0
+  displayName: Download VoiceActivation build artifact (library)
+  inputs:
+    buildType: specific
+    project: 'e71f1362-9c7d-488b-99c7-3376db8d3302' # Skyman
+    pipeline: 5811 # VoiceActivation
+    buildVersionToDownload: specific
+    buildId: $(__getKwsArtifactInternal_BuildId)
+    downloadType: specific
+    itemPattern: ${{ parameters.os }}_*/**
+    downloadPath: external/KWS
+  condition: and(succeeded(), eq(variables['${{ parameters.enableVariable }}'], 'true'))

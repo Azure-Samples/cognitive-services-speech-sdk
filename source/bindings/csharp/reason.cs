@@ -61,6 +61,18 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Indicates the synthesized audio is now complete for this phrase.
         /// </summary>
-        SynthesizingAudioCompleted = 9
+        SynthesizingAudioCompleted = 9,
+
+        /// <summary>
+        /// Indicates the speech result contains (unverified) keyword text.
+        /// Added in version 1.3.0
+        /// </summary>
+        RecognizingKeyword = 10,
+
+        /// <summary>
+        /// Indicates that Keyword Recognition completed recognizing the given keyword.
+        /// Added in version 1.3.0
+        /// </summary>
+        RecognizedKeyword = 11
     }
 }

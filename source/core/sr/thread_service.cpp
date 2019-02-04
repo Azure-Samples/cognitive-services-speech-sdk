@@ -74,6 +74,21 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         return taskId;
     }
 
+    bool CSpxThreadService::IsOnServiceThread()
+    {
+        CheckInitialized();
+
+        // see if current thread is managed by thread pool
+        auto id = this_thread::get_id();
+
+        for (auto& t : m_threads) {
+            if (id == t.second->Id())
+                return true;
+        }
+
+        return false;
+    }
+
     void CSpxThreadService::ExecuteSync(std::packaged_task<void()>&& task, Affinity affinity)
     {
         for (const auto& t : m_threads)

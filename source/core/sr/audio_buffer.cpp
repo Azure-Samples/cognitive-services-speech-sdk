@@ -239,7 +239,7 @@ namespace Impl {
         int64_t bytes = DurationToBytes(offsetInTicks) - m_bufferStartOffsetInBytesTurnRelative;
         if (bytes < 0)
         {
-            SPX_DBG_TRACE_WARNING("%s: Offset is not monothonically increasing. Current turn offset in bytes %d, discardging bytes", __FUNCTION__,
+            SPX_DBG_TRACE_WARNING("%s: Offset is not monothonically increasing. Current turn offset in bytes %d, discarding bytes", __FUNCTION__,
                 (int)m_bufferStartOffsetInBytesTurnRelative,
                 (int)bytes);
 

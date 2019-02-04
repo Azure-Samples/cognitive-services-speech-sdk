@@ -32,6 +32,9 @@ parse_platform(TARGET_PLATFORM ${SPEECHSDK_TARGET_PLATFORM} PREFIX SPEECHSDK)
 
 option(SPECTRE_MITIGATION "Build with Spectre mitigation" OFF)
 
+# Make the compilation of KWS optional
+option(EXTENSION_KWS_ENABLED "Build the KWS extension based on the VoiceActivation component" OFF)
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING
       "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
@@ -262,6 +265,7 @@ set(CARBON_SOURCE "${CARBON_ROOT}/source")
 set(CARBON_PUBLIC "${CARBON_SOURCE}/public")
 set(CARBON_CORE "${CARBON_SOURCE}/core")
 set(CARBON_BINDINGS "${CARBON_SOURCE}/bindings")
+set(CARBON_EXTENSIONS "${CARBON_SOURCE}/extensions")
 set(CARBON_EXTERNAL "${CARBON_ROOT}/external")
 
 # include folders
@@ -325,6 +329,10 @@ endif()
 
 if(CMAKE_CL_64)
   add_subdirectory(${UNIDEC})
+endif()
+
+if(EXTENSION_KWS_ENABLED)
+  add_subdirectory("${CARBON_EXTENSIONS}/kws")
 endif()
 
 add_subdirectory(${CARBON_BINDINGS})

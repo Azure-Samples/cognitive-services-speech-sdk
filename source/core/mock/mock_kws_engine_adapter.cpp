@@ -116,20 +116,14 @@ void CSpxMockKwsEngineAdapter::FireKeywordDetected(const DataChunkPtr& audioChun
     auto offset = (uint32_t)m_cbLastKeywordFired;
     auto site = GetSite();
 
-    std::shared_ptr<ISpxAudioProcessor> keepAlive = SpxSharedPtrFromThis<ISpxAudioProcessor>(this);
-    std::packaged_task<void()> task([=](){
-        std::string error;
-        SPXAPI_TRY()
-        {
-            auto keepAliveCopy = keepAlive;
-            site->KeywordDetected(this, offset, (uint32_t)audioChunk->size, audioChunk->data);
-        }
-        SPXAPI_CATCH_ONLY()
-    });
-
-    auto taskFuture = task.get_future();
-    std::thread taskThread(std::move(task));
-    taskThread.detach();
+    // we must call on the same thread as the CSpxMockKwsEngineAdapter::ProcessAudio
+    // has been called.
+    std::string error;
+    SPXAPI_TRY()
+    {
+        site->KeywordDetected(this, offset, 5000/*500msec*/, 1.0, "keyword", audioChunk);
+    }
+    SPXAPI_CATCH_ONLY()
 }
 
 

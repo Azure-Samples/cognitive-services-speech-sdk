@@ -46,6 +46,8 @@ public:
     bool Cancel(TaskId id) override;
     void CancelAllTasks() override;
 
+    bool IsOnServiceThread();
+
 private:
     void CheckInitialized();
 

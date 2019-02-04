@@ -39,7 +39,8 @@ tar \
   -cvzf "$OUTPUT_DIR/$BASE_NAME.tar.gz" \
   "$BASE_NAME" \
   Linux-x86/Release/public/include/* \
-  Linux-x*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
+  Linux-x*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so \
+  Linux-x*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so
 
 SHA256_SUM="$(sha256sum "$OUTPUT_DIR/$BASE_NAME.tar.gz" | cut -f1 -d' ')"
 

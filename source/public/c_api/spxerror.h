@@ -238,3 +238,9 @@ typedef uintptr_t SPXHR;
 /// Added in version 1.3.0.
 /// </summary>
 #define SPXERR_OUT_OF_RANGE  __SPX_ERRCODE_FAILED(0x023)
+
+/// <summary>
+/// Keyword spotting extension library not found.
+/// Added in version 1.3.0.
+/// </summary>
+#define SPXERR_EXTENSION_LIBRARY_NOT_FOUND    __SPX_ERRCODE_FAILED(0x024)

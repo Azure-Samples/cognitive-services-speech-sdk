@@ -16,7 +16,7 @@ namespace CognitiveServices {
 namespace Speech {
 
 /// <summary>
-/// Represents keyword recognition model used w/ StartKeywordRecognitionAsync methods.
+/// Represents keyword recognition model used with StartKeywordRecognitionAsync methods.
 /// </summary>
 class KeywordRecognitionModel
 {

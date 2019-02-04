@@ -7,12 +7,12 @@ using System;
 namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
-    /// Represents keyword recognition model used w/ StartKeywordRecognitionAsync.
+    /// Represents keyword recognition model used with StartKeywordRecognitionAsync.
     /// </summary>
     public sealed class KeywordRecognitionModel : IDisposable
     { 
         /// <summary>
-        /// Creates a keyword recognition model using the specified endpoint.
+        /// Creates a keyword recognition model using the specified file.
         /// </summary>
         /// <param name="fileName">A string that represents file name for the keyword recognition model.</param>
         /// <returns>The keyword recognition model being created.</returns>
