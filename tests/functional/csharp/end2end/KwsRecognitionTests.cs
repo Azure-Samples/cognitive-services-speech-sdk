@@ -119,7 +119,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
                 catch (ApplicationException ex)
                 {
-                    Assert.IsTrue(ex.Message.Contains("0x24"), "not the expected error number: " + ex.Message);
+                    Console.WriteLine("Got Exception: " + ex.Message.ToString());
+                    Assert.IsTrue(ex.Message.Contains("EXTENSION_LIBRARY_NOT_FOUND"), "not the expected error message: " + ex.Message);
                 }
 
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);

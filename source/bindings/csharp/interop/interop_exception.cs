@@ -17,7 +17,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             if (hr != IntPtr.Zero)
             {
                 int error = (int)SpxError.GetErrorCode(hr);
-                string message = String.Format(CultureInfo.CurrentCulture, "Exception with an error code: 0x{0}", error.ToString("X", CultureInfo.CurrentCulture).ToLower(CultureInfo.CurrentCulture));
+                string message = SpxError.GetMessage(hr);
+                if (String.IsNullOrWhiteSpace(message))
+                {
+                    message = String.Format(CultureInfo.CurrentCulture, "Exception with an error code: 0x{0}", error.ToString("X", CultureInfo.CurrentCulture).ToLower(CultureInfo.CurrentCulture));
+                }
                 SpxError.Release(hr);
                 throw new ApplicationException(message);
             }
