@@ -23,6 +23,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
     For example, replace with `westus` if you are using the 30-day free trial subscription. Make sure the region in your Azure resource matches the region you put into the sample, otherwise you'll get a 401 unauthorized access error.
 * Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
   * On a 64-bit Windows installation, choose `x64` as active solution platform.
+  * On a 32-bit Windows installation, choose `x86` as active solution platform.
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 
 ## Run the sample
