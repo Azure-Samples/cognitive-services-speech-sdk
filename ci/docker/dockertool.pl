@@ -100,43 +100,43 @@ my %images = (
         'builduser'],
   },
   oobedevcpp_ubuntu1804_x64 => {
-    version => 1,
+    version => 2,
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps test_deps_ubuntu1804/), 'builduser'],
   },
   oobedevcpp_ubuntu1604_x64 => {
-    version => 2,
+    version => 3,
     spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps test_deps/), 'builduser'],
   },
   oobedevcpp_ubuntu1804_x86 => {
-    version => 1,
+    version => 2,
     spec => ['from-ubuntu1804-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps test_deps_ubuntu1804/), 'builduser'],
   },
   oobedevcpp_ubuntu1604_x86 => {
-    version => 1,
+    version => 2,
     spec => ['from-ubuntu1604-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps test_deps/), 'builduser'],
   },
   oobejre_ubuntu1604_x64 => {
-    version => 1,
+    version => 2,
     spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobejre_ubuntu1604_deps test_deps/), 'builduser'],
   },
   oobejre_ubuntu1804_x64 => {
-    version => 1,
+    version => 2,
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobejre_ubuntu1604_deps test_deps_ubuntu1804/), 'builduser'],
   },
   oobedevdnc20_ubuntu1604_x64 => {
-    version => 2,
+    version => 3,
     spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps test_deps/), 'oobedevdnc20_ubuntu1604_x64_deps', 'builduser'],
   },
   oobedevdnc21_ubuntu1804_x64 => {
-    version => 1,
+    version => 2,
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps test_deps_ubuntu1804/), 'oobedevdnc21_ubuntu1804_x64_deps', 'builduser'],
   },
   oobedevpy35_ubuntu1604_x64 => {
-    version => 1,
+    version => 2,
     spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobepython_ubuntu_deps test_deps/), 'builduser'],
   },
   oobedevpy36_ubuntu1804_x64 => {
-    version => 1,
+    version => 2,
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobepython_ubuntu_deps test_deps_ubuntu1804/), 'builduser'],
   },
 );

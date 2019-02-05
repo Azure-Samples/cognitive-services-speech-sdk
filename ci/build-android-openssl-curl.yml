@@ -1,3 +1,4 @@
+# Note: this builds both openssl and libcurl; the latter we currently do _not_ use.
 pool:
   vmImage: 'Ubuntu 16.04'
 steps:

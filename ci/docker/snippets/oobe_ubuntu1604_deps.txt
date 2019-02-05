@@ -1,4 +1,3 @@
       # Native dependencies
       libssl1.0.0 \
-      libcurl3 \
       libasound2 \

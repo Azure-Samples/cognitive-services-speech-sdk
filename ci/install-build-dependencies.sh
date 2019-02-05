@@ -35,7 +35,7 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
     # Remove it first, and install the Xenial default one (1.0*)
     sudo apt-get remove --yes libssl-dev
     sudo apt-get install --yes --target-release xenial-updates libssl-dev
-    sudo apt-get install --yes pkg-config zlib1g-dev libcurl4-openssl-dev libasound2-dev uuid-dev default-jdk libpcre++-dev bison automake
+    sudo apt-get install --yes pkg-config zlib1g-dev libasound2-dev uuid-dev default-jdk libpcre++-dev bison automake
     sudo "$SCRIPT_DIR/install-swig.sh"
     ;;
   Windows-x64)

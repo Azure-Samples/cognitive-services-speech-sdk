@@ -42,41 +42,7 @@ The Cognitive Services Client Speech SDK is using 'Catch 2- A modern, C++-native
 
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-**c. curl**
-
-The Cognitive Services Client Speech SDK is using 'curl - A command line tool and library for transferring data with URL syntax, supporting HTTP, HTTPS, FTP, FTPS, GOPHER, TFTP, SCP, SFTP, SMB, TELNET, DICT, LDAP, LDAPS, FILE, IMAP, SMTP, POP3, RTSP and RTMP. libcurl offers a myriad of powerful features', obtained from https://github.com/curl/curl. It is licensed under the following license:
-
-    COPYRIGHT AND PERMISSION NOTICE
-
-    Copyright (c) 1996 - 2018, Daniel Stenberg, <daniel@haxx.se>, and many
-    contributors, see the THANKS file.
-
-    All rights reserved.
-
-    Permission to use, copy, modify, and distribute this software for any purpose
-    with or without fee is hereby granted, provided that the above copyright
-    notice and this permission notice appear in all copies.
-
-    THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN
-    NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-    OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
-    OR OTHER DEALINGS IN THE SOFTWARE.
-
-    Except as contained in this notice, the name of a copyright holder shall not
-
-    be used in advertising or otherwise to promote the sale, use or other dealings
-    in this Software without prior written authorization of the copyright holder.
-
-    *Parts of curl come with the following license:*
-
-    Copyright (c) 2003, 2006 Eric Glass
-
-    Permission to use, copy, modify, and distribute this document for any purpose and without any fee is hereby granted, provided that the above copyright notice and this list of conditions appear in all copies.
-
-**d. Microsoft Computational Network Toolkit (CNTK)**
+**c. Microsoft Computational Network Toolkit (CNTK)**
 
 The Cognitive Services Client Speech SDK is re-using source code originating in 'Microsoft Computational Network Toolkit (CNTK)', obtained from https://github.com/Microsoft/CNTK.
 
@@ -88,7 +54,7 @@ The Cognitive Services Client Speech SDK is re-using source code originating in 
 
     THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 
-**e. openssl**
+**d. openssl**
 
 The Cognitive Services Client Speech SDK is using 'openssl - TLS/SSL and crypto library', obtained from https://github.com/openssl/openssl. It is licensed under the following [license](https://github.com/openssl/openssl/blob/master/LICENSE):
 
@@ -344,7 +310,7 @@ In addition, some versions of the 'openssl - TLS/SSL and crypto library' in the 
      * [including the GNU Public Licence.]
      */
 
-**f. json**
+**e. json**
 
 The Cognitive Services Client Speech SDK is using 'json - JSON for Modern C++', obtained from https://github.com/nlohmann/json. It is licensed under the [MIT License](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT):
 
@@ -384,7 +350,7 @@ The Cognitive Services Client Speech SDK is using 'json - JSON for Modern C++', 
 
     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 
-**g. Android Open Source Project**
+**f. Android Open Source Project**
 
 The Cognitive Services Client Speech SDK is using sample code from the 'Android Open Source Project', obtained from https://github.com/googlesamples/android-ndk/. It is licensed under the following [license](https://github.com/googlesamples/android-ndk/blob/master/LICENSE):
 
@@ -403,7 +369,7 @@ The Cognitive Services Client Speech SDK is using sample code from the 'Android 
     limitations under the License.
 
 
-**h. OpenFst - Finite State Transducer Library**
+**g. OpenFst - Finite State Transducer Library**
 
 The Cognitive Services Client Speech SDK is using the OpenFst library version 1.6.5 obtained form https://openfst.org. It is licensed under the following license:
 
@@ -422,7 +388,7 @@ The Cognitive Services Client Speech SDK is using the OpenFst library version 1.
     Copyright 2005-2015 Google, Inc.
 
 
-**i. kaldi-asr/kaldi**
+**h. kaldi-asr/kaldi**
 
 The Cognitive Services Client Speech SDK is using Kaldi (version eba50e4) obtained from https://github.com/kaldi-asr/kaldi. It is licensed under the following license:
 
