@@ -61,6 +61,11 @@ BEGIN {
       quickstart/js-node/index.js#code
       quickstart/objectivec-ios/helloworld/helloworld/ViewController.m#code
       quickstart/python/quickstart.py#code
+      quickstart/speech-translation/cpp-windows/helloworld/helloworld.cpp#code
+      quickstart/speech-translation/csharp-dotnet-windows/helloworld/Program.cs#code
+      quickstart/speech-translation/csharp-dotnetcore/helloworld/Program.cs#code
+      quickstart/speech-translation/csharp-uwp/helloworld/MainPage.xaml.cs#code
+      quickstart/speech-translation/java-jre/src/speechsdk/quickstart/Main.java#code
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentContinuousRecognitionWithFile
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentRecognitionWithLanguage
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentRecognitionWithMicrophone
@@ -96,8 +101,8 @@ BEGIN {
       samples/python/console/intent_sample.py#IntentRecognitionOnceWithFile
       samples/python/console/intent_sample.py#IntentRecognitionOnceWithMic
       samples/python/console/speech_sample.py#SpeechContinuousRecognitionWithFile
-      samples/python/console/speech_sample.py#SpeechRecognitionWithFile
       samples/python/console/speech_sample.py#SpeechRecognitionUsingCustomizedModel
+      samples/python/console/speech_sample.py#SpeechRecognitionWithFile
       samples/python/console/speech_sample.py#SpeechRecognitionWithMicrophone
       samples/python/console/translation_sample.py#TranslationContinuous
       samples/python/console/translation_sample.py#TranslationOnceWithFile
