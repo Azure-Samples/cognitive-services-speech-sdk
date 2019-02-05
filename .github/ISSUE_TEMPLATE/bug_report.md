@@ -18,10 +18,11 @@ A clear and concise description of what you expected to happen.
 **Version of the Cognitive Services Speech SDK**
 Which version of the SDK are you using.
 
-**Platform, Operationg System, and Programming Language**
+**Platform, Operating System, and Programming Language**
  - OS: [e.g. Windows, Linux, Android, iOS, ...] - please be specific
  - Hardware - x64, x86, ARM, ...
- - Browser  [e.g. chrome, safari] (if applicable)- please be specific
+ - Programming language: C#, C++, Java, JavaScript, Objective-C, Python
+ - Browser [e.g. Chrome, Safari] (if applicable) - please be specific
 
 **Additional context**
  - Error messages, log information, stack trace, ...
