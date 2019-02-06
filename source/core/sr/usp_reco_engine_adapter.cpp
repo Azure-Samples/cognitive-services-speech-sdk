@@ -793,6 +793,19 @@ void CSpxUspRecoEngineAdapter::UspWriteFlush()
     }
 }
 
+void CSpxUspRecoEngineAdapter::WriteTelemetryLatency(uint64_t latencyInTicks)
+{
+    SPX_DBG_ASSERT(m_uspConnection != nullptr);
+    if (m_uspConnection == nullptr)
+    {
+        SPX_TRACE_ERROR("%s: m_uspConnection is null.", __FUNCTION__);
+    }
+    else
+    {
+        m_uspConnection->WriteTelemetryLatency(latencyInTicks);
+    }
+}
+
 void CSpxUspRecoEngineAdapter::OnSpeechStartDetected(const USP::SpeechStartDetectedMsg& message)
 {
     // The USP message for SpeechStartDetected isn't what it might sound like in all "reco modes" ...

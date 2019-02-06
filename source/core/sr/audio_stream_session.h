@@ -105,6 +105,7 @@ public:
 
     void OpenConnection(bool forContinuousRecognition) override;
     void CloseConnection() override;
+    void WriteTelemetryLatency(uint64_t latencyInTicks) override;
 
     // --- ISpxKwsEngineAdapterSite
     void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint64_t duration, double confidence, const std::string& keyword, const DataChunkPtr& audioChunk) override;

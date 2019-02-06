@@ -148,6 +148,12 @@ public:
     void SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType);
 
     /**
+    * Writes the latency value into telemetry data.
+    * @param latencyInTicks The latency value.
+    */
+    void WriteTelemetryLatency(uint64_t latencyInTicks);
+
+    /**
      * Returns true if the status is connected.
      */
     bool IsConnected();

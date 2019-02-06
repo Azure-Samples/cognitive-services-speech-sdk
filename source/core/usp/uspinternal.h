@@ -97,6 +97,12 @@ public:
     void QueueMessage(const std::string& path, const uint8_t* data, size_t size, MessageType messageType);
 
     /**
+    * Writes latency value into telemetry data.
+    * @param latencyInTicks The latency value in ticks.
+    */
+    void WriteTelemetryLatency(uint64_t latencyInTicks);
+
+    /**
     * Requests the connection to service to be shut down.
     * @param uspContext A pointer to the UspContext.
     */

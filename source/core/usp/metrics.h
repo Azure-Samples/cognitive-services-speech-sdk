@@ -92,6 +92,7 @@ struct TELEMETRY_DATA
     nlohmann::json listeningTriggerJson{};
     nlohmann::json ttsJson{};
     nlohmann::json deviceJson{};
+    nlohmann::json phraseLatencyJson{};
 };
 
 /**
@@ -101,15 +102,6 @@ struct TELEMETRY_DATA
 * @return 0 in case of success and -1 in case of failure
 */
 int GetISO8601Time(char *buffer, unsigned int bufferLength);
-
-/**
-* Returns the the current time in ISO8601 format after adjusting for the offset
-* @param buffer char buffer to hold the ISO8601 time string
-* @param bufferLength the length of the buffer to be used to store the string
-* @param offset    the time value to be offset from current time in milliseconds. If time needs to be added a negative value needs to be provided
-* @return 0 in case of success and -1 in case of failure
-*/
-int GetISO8601TimeOffset(char *buffer, unsigned int bufferLength, int offset);
 
 struct Telemetry
 {
@@ -163,6 +155,13 @@ struct Telemetry
      * @param receivedMsg The name of the received event from service.
      */
     void RecordReceivedMsg(const std::string& requestId, const std::string&receivedMsg);
+
+    /**
+     * Phrase latency population function.
+     * @param requestId The requestId associated with the received message.
+     * @param latencyInTicks The latency value in ticks.
+     */
+    void RecordPhraseLatency(const std::string& requestId, uint64_t latencyInTicks);
 
     /**
      * Handles the necessary changes for a requestId change event.
@@ -235,15 +234,15 @@ namespace event
         static const std::string Device = "device";
         static const std::string Notification = "notification";
         static const std::string SDK = "sdk";
-
+        static const std::string PhraseLatency = "PhraseLatency";
     }
 }
 
 
 // Received the specified message from the service.
-inline void MetricsReceivedMessage(Telemetry& telemetry, const std::string& requestId, const std::string& x)
+inline void MetricsReceivedMessage(Telemetry& telemetry, const std::string& requestId, const std::string& messagePath)
 {
-    telemetry.RecordReceivedMsg(requestId, x);
+    telemetry.RecordReceivedMsg(requestId, messagePath);
 }
 
 // Metric Events defined in telemetry spec
@@ -255,6 +254,11 @@ inline void MetricsAudioStart(Telemetry& telemetry, const std::string& requestId
 inline void MetricsAudioEnd(Telemetry& telemetry, const std::string& requestId)
 {
     telemetry.InbandEventTimestampPopulate(requestId, event::name::Microphone, std::string{}, event::keys::End);
+}
+
+inline void MetricsPhraseLatency(Telemetry& telemetry, const std::string& requestId, uint64_t latencyInTicks)
+{
+    telemetry.RecordPhraseLatency(requestId, latencyInTicks);
 }
 
 inline void MetricsTransportStart(Telemetry& telemetry, const std::string& connectionId)

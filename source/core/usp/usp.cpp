@@ -50,6 +50,11 @@ void Connection::SendMessage(const std::string& messagePath, const uint8_t* buff
     m_impl->QueueMessage(messagePath, buffer, size, messageType);
 }
 
+void Connection::WriteTelemetryLatency(uint64_t latencyInTicks)
+{
+    m_impl->WriteTelemetryLatency(latencyInTicks);
+}
+
 Client& Client::SetProxyServerInfo(const char *proxyHost, int proxyPort, const char *proxyUsername, const char *proxyPassword)
 {
 #ifdef _MSC_VER

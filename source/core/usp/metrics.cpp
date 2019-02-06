@@ -105,81 +105,6 @@ static void populate_metric_object(nlohmann::json& object, const std::string& ev
     }
 }
 
-int GetISO8601TimeOffset(char *buffer, unsigned int length, int offset)
-{
-    if (length < TIME_STRING_MAX_SIZE)
-    {
-        return -1;
-    }
-
-// TODO: get rid of WIN32 branch, else branch should work for
-// all platforms.
-#if defined(WIN32)
-    struct tm timeinfo;
-    SYSTEMTIME stCurrentTime = { 0 };
-    FILETIME ftCurrentTime = { 0 };
-
-    // Get current time and store it in a ULARGE_INTEGER
-    GetSystemTime(&stCurrentTime);
-    SystemTimeToFileTime(&stCurrentTime, &ftCurrentTime);
-    ULARGE_INTEGER uCurrentTime = { 0 };
-    memcpy(&uCurrentTime, &ftCurrentTime, sizeof(uCurrentTime));
-
-    // Adjust current time with the computed offset
-    uCurrentTime.QuadPart -= (offset * 10000);
-
-    // Convert adjusted Time to SYSTEMTIME
-    memcpy(&ftCurrentTime, &uCurrentTime, sizeof(ftCurrentTime));
-    SYSTEMTIME stCurrentTimeAfterOffset = { 0 };
-    FileTimeToSystemTime(&ftCurrentTime, &stCurrentTimeAfterOffset);
-
-    memset(&timeinfo, 0, sizeof(struct tm));
-
-    timeinfo.tm_mday = stCurrentTimeAfterOffset.wDay;
-    timeinfo.tm_mon = stCurrentTimeAfterOffset.wMonth - 1;
-    timeinfo.tm_year = stCurrentTimeAfterOffset.wYear - 1900;
-
-    timeinfo.tm_sec = stCurrentTimeAfterOffset.wSecond;
-    timeinfo.tm_min = stCurrentTimeAfterOffset.wMinute;
-    timeinfo.tm_hour = stCurrentTimeAfterOffset.wHour;
-#else
-    TICK_COUNTER_HANDLE tickHandle = tickcounter_create();
-
-    int result;
-    tickcounter_ms_t current_ms;
-    result = tickcounter_get_current_ms(tickHandle, &current_ms);
-
-    tickcounter_destroy(tickHandle);
-
-    if (result != 0)
-    {
-        LogError("Unable to determine current system Time");
-        return -1;
-    }
-
-    current_ms -= offset;
-
-    time_t adjusted_seconds = (time_t)(current_ms / 1000);
-    int adjusted_ms = current_ms % 1000;
-
-    struct tm* timeinfo = get_gmtime(&(adjusted_seconds));
-
-    if (timeinfo == NULL)
-    {
-        return -1;
-    }
-#endif
-
-#if defined(WIN32)
-    strftime(buffer, length, "%FT%T.", &timeinfo);
-    (void) snprintf(buffer + 20, 5, "%03uZ", stCurrentTimeAfterOffset.wMilliseconds);
-#else
-    strftime(buffer, length, "%FT%T.", timeinfo);
-    (void) snprintf(buffer + 20, 5, "%03dZ", adjusted_ms);
-#endif
-    return 0;
-}
-
 int GetISO8601Time(char *buffer, unsigned int length)
 {
     // TODO: refactor using azure-c-shared functions.
@@ -241,12 +166,12 @@ bool populate_event_key_value(nlohmann::json& pBag, const std::string& eventName
 {
     if (eventName.empty())
     {
-        LogError("Telemetry: event name is empty.\r\n");
+        LogError("Telemetry: event name is empty.");
         return false;
     }
     if (key.empty())
     {
-        LogError("Telemetry: key name is empty\r\n");
+        LogError("Telemetry: key name is empty.");
         return false;
     }
 
@@ -290,6 +215,11 @@ static nlohmann::json telemetry_add_metricevents(const TELEMETRY_DATA& telemetry
     push_if_not_null(json_array, telemetry_object.microphoneJson);
     push_if_not_null(json_array, telemetry_object.listeningTriggerJson);
     push_if_not_null(json_array, telemetry_object.ttsJson);
+    if (telemetry_object.phraseLatencyJson != nullptr)
+    {
+        auto recvObj = PropertybagInitializeWithKeyValue(event::name::PhraseLatency, telemetry_object.phraseLatencyJson);
+        json_array.push_back(recvObj);
+    }
 
     return json_array;
 }
@@ -304,7 +234,7 @@ static nlohmann::json* getJsonForEvent(TELEMETRY_DATA* telemetryObject, const st
     if (eventName == event::name::AudioPlayback)
         return &telemetryObject->ttsJson;
 
-    LogError("Telemetry: invalid event name (%s)\r\n", eventName.c_str());
+    LogError("Telemetry: invalid event name (%s)", eventName.c_str());
     return nullptr;
 }
 
@@ -312,7 +242,7 @@ void Telemetry::RegisterNewRequestId(const std::string& requestId)
 {
     if (requestId.empty())
     {
-        LogError("Telemetry: empty request id\r\n");
+        LogError("Telemetry: empty request id");
         return;
     }
 
@@ -326,7 +256,7 @@ void Telemetry::RegisterNewRequestId(const std::string& requestId)
     }
     else
     {
-        LogError("Telemetry: Attempting to register an already registered requestId: %s\r\n", requestId.c_str());
+        LogError("Telemetry: Attempting to register an already registered requestId: %s", requestId.c_str());
     }
 }
 
@@ -345,7 +275,7 @@ void Telemetry::InbandEventKeyValuePopulate(const std::string& requestId, const 
     }
     else
     {
-        LogError("Telemetry: received unexpected requestId: (%s).\r\n", requestId.c_str());
+        LogError("Telemetry: received unexpected requestId: (%s).", requestId.c_str());
     }
 }
 
@@ -394,7 +324,7 @@ void Telemetry::InbandEventTimestampPopulate(const std::string& requestId, const
     }
     else
     {
-        LogError("Telemetry: received unexpected requestId: (%s).\r\n", requestId.c_str());
+        LogError("Telemetry: received unexpected requestId: (%s).", requestId.c_str());
     }
 }
 
@@ -457,7 +387,7 @@ void Telemetry::Flush(const std::string& requestId)
     }
     else
     {
-        LogError("Telemetry: received unexpected requestId: (%s).\r\n", requestId.c_str());
+        LogError("Telemetry: received unexpected requestId: (%s).", requestId.c_str());
     }
 }
 
@@ -484,16 +414,17 @@ void Telemetry::SendSerializedTelemetry(const std::string& serialized, const std
         // Serialize the received messages events and metric events.
         if (m_callback)
         {
+            LogInfo("%s: Send telemetry (requestId:%s): %s", __FUNCTION__, requestId.c_str(), serialized.c_str());
             m_callback(reinterpret_cast<const uint8_t*>(serialized.c_str()), serialized.size(), m_context, requestId.c_str());
         }
     }
 }
 
-void Telemetry::RecordReceivedMsg(const std::string& requestId, const std::string& receivedMsg)
+void Telemetry::RecordReceivedMsg(const std::string& requestId, const std::string& messagePath)
 {
-    if (receivedMsg.empty())
+    if (messagePath.empty())
     {
-        LogError("Telemetry: received an empty message.\r\n");
+        LogError("Telemetry: received an empty message.");
         return;
     }
 
@@ -503,11 +434,11 @@ void Telemetry::RecordReceivedMsg(const std::string& requestId, const std::strin
         return;
     }
 
-    IncomingMsgType msgType = message_from_name(receivedMsg);
+    IncomingMsgType msgType = message_from_name(messagePath);
 
     if (msgType == countOfMsgTypes)
     {
-        LogError("Telemetry: received unexpected msg: (%s).\r\n", receivedMsg.c_str());
+        LogError("Telemetry: received unexpected msg: (%s).", messagePath.c_str());
         return;
     }
 
@@ -517,7 +448,7 @@ void Telemetry::RecordReceivedMsg(const std::string& requestId, const std::strin
     {
         auto& telemetry_data = m_telemetry_object_map[requestId];
         auto& evArray = initialize_jsonArray(telemetry_data->receivedMsgs[static_cast<size_t>(msgType)]);
-        /* If we reach the max number of messages, drop it */
+        // If we reach the max number of messages, drop it.
         if (evArray.size() < MaxMessagesToRecord)
         {
             evArray.push_back(timeString);
@@ -525,7 +456,29 @@ void Telemetry::RecordReceivedMsg(const std::string& requestId, const std::strin
     }
     else
     {
-        LogError("Telemetry: received unexpected requestId: (%s).\r\n", requestId.c_str());
+        LogError("Telemetry: received unexpected requestId: (%s).", requestId.c_str());
+    }
+}
+
+void Telemetry::RecordPhraseLatency(const std::string& requestId, uint64_t latencyInTicks)
+{
+    std::lock_guard<std::mutex> lk{ m_lock };
+    auto telemetry_object = GetTelemetryForRequestId(requestId);
+    if (telemetry_object != nullptr)
+    {
+        auto& telemetry_data = m_telemetry_object_map[requestId];
+        assert(telemetry_object == telemetry_data.get());
+        auto& phraseJson = telemetry_data->phraseLatencyJson;
+        auto& evArray = initialize_jsonArray(phraseJson);
+        /* If we reach the max number of messages, drop it */
+        if (evArray.size() < MaxMessagesToRecord)
+        {
+            evArray.push_back(latencyInTicks);
+        }
+    }
+    else
+    {
+        LogError("Telemetry: received unexpected requestId: (%s).", requestId.c_str());
     }
 }
 

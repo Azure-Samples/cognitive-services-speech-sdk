@@ -569,6 +569,8 @@ public:
 
     virtual void OpenConnection(bool forContinuousRecognition) = 0;
     virtual void CloseConnection() = 0;
+
+    virtual void WriteTelemetryLatency(uint64_t latencyInTicks) = 0;
 };
 
 class ISpxAudioStreamSessionInit : public ISpxInterfaceBaseFor<ISpxAudioStreamSessionInit>
@@ -593,6 +595,8 @@ public:
     virtual void SetAdapterMode(bool singleShot) = 0;
     virtual void OpenConnection(bool) {};
     virtual void CloseConnection() {};
+
+    virtual void WriteTelemetryLatency(uint64_t) {};
 };
 
 class SpxRecoEngineAdapterError

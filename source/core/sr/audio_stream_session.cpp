@@ -290,7 +290,7 @@ void CSpxAudioStreamSession::ProcessAudio(const DataChunkPtr& audioChunk)
 {
     static_assert(MaxBufferedBeforeSimulateRealtime < MaxBufferedBeforeOverflow,
         "Buffer size triggering real time data consumption cannot be bigger than overflow limit");
-    SPX_DBG_TRACE_INFO("UPL: Received audio chunk: time: %s, size:%d.", PAL::GetTimeInString(audioChunk->receivedTime).c_str(), audioChunk->size);
+    SPX_DBG_TRACE_INFO("PhraseLatency: Received audio chunk: time: %s, size:%d.", PAL::GetTimeInString(audioChunk->receivedTime).c_str(), audioChunk->size);
 
     SlowDownThreadIfNecessary(audioChunk->size);
     auto task = CreateTask([=]() {
@@ -1250,13 +1250,16 @@ void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter
                 ticks += audioTimeStamp->remainingAudioInTicks;
             }
             result->SetLatency(ticks);
-            SPX_DBG_TRACE_INFO("UPL for Result(%S): Latency %" PRIu64 ".%" PRIu64 "(s), ResultTime: %s, AudioTime: %s, remaingAudio:%d.",
+            WriteTelemetryLatency(ticks);
+            SPX_DBG_TRACE_INFO("PhraseLatency:(%S): Latency %" PRIu64 ".%" PRIu64 "(s), ResultTime: %s, AudioTime: %s, remaingAudio:%d.",
                 result->GetResultId().c_str(), ticks/10000000, ticks%10000000,
                 PAL::GetTimeInString(nowTime).c_str(), PAL::GetTimeInString(audioTimeStamp->chunkReceivedTime).c_str(), audioTimeStamp->remainingAudioInTicks);
         }
         else
         {
-            SPX_DBG_TRACE_ERROR("UPL: no audio timestamp for result/%S) available.", result->GetResultId().c_str());
+            // Make sure that each final result has a latency entry in telemetry.
+            WriteTelemetryLatency(0);
+            SPX_DBG_TRACE_ERROR("PhraseLatency:(%S): no audio timestamp available.", result->GetResultId().c_str());
         }
     }
 
@@ -2021,6 +2024,18 @@ std::shared_ptr<ISpxThreadService> CSpxAudioStreamSession::InternalQueryService(
     }
 
     return nullptr;
+}
+
+void CSpxAudioStreamSession::WriteTelemetryLatency(uint64_t latencyInTicks)
+{
+    if (m_recoAdapter != nullptr)
+    {
+        m_recoAdapter->WriteTelemetryLatency(latencyInTicks);
+    }
+    else
+    {
+        SPX_TRACE_ERROR("%s: m_recoAdapter is null.", __FUNCTION__);
+    }
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -582,6 +582,18 @@ void Connection::Impl::QueueAudioEnd()
     ScheduleWork();
 }
 
+void Connection::Impl::WriteTelemetryLatency(uint64_t latencyInTicks)
+{
+    if (m_valid)
+    {
+        MetricsPhraseLatency(*m_telemetry, m_speechRequestId, latencyInTicks);
+    }
+    else
+    {
+        SPX_TRACE_ERROR("%s: m_valid is false.", __FUNCTION__);
+    }
+}
+
 // Callback for transport opened
 void Connection::Impl::OnTransportOpened(void* context)
 {
