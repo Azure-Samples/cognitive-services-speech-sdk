@@ -642,6 +642,11 @@ jobs:
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
         -D long-running=false
+      patchSamplesFromTestConfig public_samples/samples/java/jre/console \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false
       ./ci/run-maven.sh public_samples "$(MavenRoot)"
     displayName: Patch and build samples
   - template: get-docker-image.yml
@@ -655,22 +660,17 @@ jobs:
 
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
-        docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$i" bash - <<"SCRIPT" || \
-        { ((++ERRORS)); vsts_logissue error "Running public_samples/quickstart/java-jre for image $i failed."; }
-          set -e -x -o pipefail
-          PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
-          pulseaudio -D --exit-idle-time=-1
-          sleep 1.5
-          pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
-          pacmd load-module module-virtual-source source_name=VirtualMic
-          trap 'pulseaudio --kill' EXIT
-          # Note: don't wait for keypress. Ignore crashes after successful reco.
-          /test/ci/quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" 1 \
-            java -cp ./public_samples/quickstart/java-jre/target/quickstart-eclipse-1.0.0-SNAPSHOT.jar:/test/"$(JarName)" speechsdk.quickstart.Main
-      SCRIPT
+        ./ci/samples/test-quickstart-java-jre.sh "$i" "$(JarName)" ||
+          { ((++ERRORS)); vsts_logissue error "Running quickstart/java-jre for image $i failed."; }
+
+        # Skip other samples on Ubuntu 18.04 in dev builds
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
+          ./ci/samples/test-samples-java-jre-console.sh "$i" "$(JarName)" ||
+            { ((++ERRORS)); vsts_logissue error "Running samples/java/jre/console for image $i failed."; }
       done
-      [[ $ERRORS == 0 ]] || exitWithError "Not all quickstarts ran successfully."
-    displayName: Test quickstart-jre
+
+      [[ $ERRORS == 0 ]] || exitWithError "Not all samples ran successfully."
+    displayName: Test samples
 
 - job: NuGet
   # Note: NuGet currently does not depend on LinuxDockerBuild (only needs x64 binaries)
@@ -894,6 +894,11 @@ jobs:
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
         -D long-running=false
+      patchSamplesFromTestConfig public_samples/samples/csharp/sharedcontent/console \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false
       mkdir localnuget
       cp --verbose "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
 
@@ -914,24 +919,16 @@ jobs:
             dotnet test --filter "TestCategory!=LongTest" --framework netcoreapp2.0 --settings csharp.runsettings --logger 'trx;LogFileName=test-csharp_unit_tests-nupkg-Linux-x64-Release.trx'
       SCRIPT
 
-        # Run the end-to-end for the quickstart
-        docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$i" bash - <<"SCRIPT" || \
-        { ((++ERRORS)); vsts_logissue error "Running quickstart/csharp-dotnetcore for image $i failed."; }
-          set -e -x -o pipefail
-          PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
-          cd public_samples/quickstart/csharp-dotnetcore
-          dotnet restore --no-cache --source /test/localnuget helloworld/helloworld.csproj
-          dotnet build helloworld/helloworld.csproj
-          pulseaudio -D --exit-idle-time=-1
-          sleep 1.5
-          pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
-          pacmd load-module module-virtual-source source_name=VirtualMic
-          trap 'pulseaudio --kill' EXIT
-          /test/ci/quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" 0 dotnet helloworld/bin/Debug/netcoreapp2.0/helloworld.dll
-      SCRIPT
+        ./ci/samples/test-quickstart-csharp-dotnetcore.sh "$i" localnuget ||
+          { ((++ERRORS)); vsts_logissue error "Running quickstart/csharp-dotnetcore for image $i failed."; }
+
+        # Skip other samples on Ubuntu 18.04 in dev builds
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
+          ./ci/samples/test-samples-csharp-dotnetcore-console.sh "$i" localnuget ||
+            { ((++ERRORS)); vsts_logissue error "Running samples/csharp/dotnetcore/console for image $i failed."; }
       done
-      [[ $ERRORS == 0 ]] || exitWithError "Not all tests ran successfully."
-    displayName: Test
+      [[ $ERRORS == 0 ]] || exitWithError "Not all samples/tests ran successfully."
+    displayName: Test and samples
   - task: PublishTestResults@2
     inputs:
       testRunner: VSTest
@@ -1239,28 +1236,22 @@ jobs:
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
         -D long-running=false
+      patchSamplesFromTestConfig public_samples/samples/python/console \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
-        docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$i" bash - <<"SCRIPT" || \
-        { ((++ERRORS)); vsts_logissue error "Running public_samples/quickstart/python for image $i failed."; }
-          set -e -x -o pipefail
-          MAJORMINOR=$(python3 -c "import sys; print('%s%s' % (sys.version_info[0:2]))")
-          pip3 install /test/wheelhouse/azure_cognitiveservices_speech-*-cp$MAJORMINOR-*linux*_x86_64.whl
-          # Alternative when running into issues with Ubuntu's default python3/pip3:
-          # pip3 install --user --upgrade pip
-          # $HOME/.local/bin/pip install --user /test/wheelhouse/azure_cognitiveservices_speech-*-cp$MAJORMINOR-*linux*_x86_64.whl
-          PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
-          pulseaudio -D --exit-idle-time=-1
-          sleep 1.5
-          pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
-          pacmd load-module module-virtual-source source_name=VirtualMic
-          trap 'pulseaudio --kill' EXIT
-          /test/ci/quickstart-e2e.expect $PATH_TO_AUDIO "What's the weather like?" 1 \
-            python3 ./public_samples/quickstart/python/quickstart.py
-      SCRIPT
+        ./ci/samples/test-quickstart-python.sh "$i" wheelhouse ||
+          { ((++ERRORS)); vsts_logissue error "Running quickstart/python for image $i failed."; }
+        # Skip other samples on Ubuntu 18.04 in dev builds
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
+          ./ci/samples/test-samples-python-console.sh "$i" wheelhouse ||
+            { ((++ERRORS)); vsts_logissue error "Running samples/python/console for image $i failed."; }
       done
-      [[ $ERRORS == 0 ]] || exitWithError "Not all quickstarts ran successfully."
-    displayName: Test quickstart-python
+      [[ $ERRORS == 0 ]] || exitWithError "Not all samples ran successfully."
+    displayName: Test samples
 
 - job: BuildPythonDocs
   dependsOn: [Pre, LinuxPythonBuild]
@@ -1369,6 +1360,11 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false &&
+      patchSamplesFromTestConfig public_samples/samples/cpp/windows/console \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
         -D long-running=false
     displayName: Patch quickstart
   - bash: |
@@ -1384,15 +1380,25 @@ jobs:
         chmod 755 $bindir/*
       done
 
+      mkdir speechsdk # will fail if existing
+      tar -xzf "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz" --strip-components=1 -C speechsdk
+
       for i in $(DOCKER_IMAGES); do
         [[ $i =~ _([^_]*): ]] || exitWithError "Cannot parse out architecture from %s" "$i"
         architecture="${BASH_REMATCH[1]}"
 
-        # Run quickstart
-        ./ci/drop/test-quickstart-linux.sh "$i" "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz" "$architecture" || {
-          vsts_logissue error "Running quickstart-linux for image $i failed."
+        # Run samples
+        ./ci/samples/test-quickstart-cpp-linux.sh "$i" speechsdk "$architecture" || {
+          vsts_logissue error "Running quickstart/cpp-linux for image $i failed."
           ((++ERRORS))
         }
+
+        # Skip other samples on Ubuntu 18.04 in dev builds
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
+          ./ci/samples/test-samples-cpp-console.sh "$i" speechsdk "$architecture" || {
+            vsts_logissue error "Running samples/cpp/windows/console sample for image $i failed."
+            ((++ERRORS))
+          }
 
         # Run unit tests (skip Ubuntu 18.04 in dev builds)
         [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
@@ -1407,7 +1413,7 @@ jobs:
             ((++ERRORS))
           }
       done
-      [[ $ERRORS == 0 ]] || exitWithError "Not all tests ran successfully."
+      [[ $ERRORS == 0 ]] || exitWithError "Not all tests/samples ran successfully."
     displayName: Build and test quickstarts
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Linux Release Drop'
@@ -1415,6 +1421,7 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/Linux'
       ArtifactName: Linux
       publishLocation: Container
+    condition: succeededOrFailed()
 
 - job: IosBuild
   dependsOn: Pre

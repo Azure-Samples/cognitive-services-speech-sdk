@@ -1,0 +1,92 @@
+#!/usr/bin/expect
+#
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+#
+# This test script is used for testing various console-based quickstarts, which allow
+# user to speak a phrase that the Speech SDK / Speech service will recognize.
+
+if {[llength $argv] < 3} {
+  send_user "Usage: [file tail [info script]] pathToAudio expectedRecoText cmd-relative-to-root...\n"
+  exit 1
+}
+
+set pathToAudio [lindex $argv 0]
+set expectedRecoText [lindex $argv 1]
+set cmd [lrange $argv 2 end]
+
+set timeout 15
+
+spawn {*}$cmd
+
+# Wait for the prompt to happen
+
+expect {
+  default {
+    send_user "### Timeout or EOF waiting for prompt\n"
+    exit 1
+  }
+  "Say something..."
+}
+
+# Speak and check result
+
+send_user "### Running paplay $pathToAudio\n"
+after 500
+exec paplay $pathToAudio
+
+set failureCount 0
+
+expect {
+  -re "(We r|R)ecognized: (\[^\r]*)\r\n" {
+    set recoText $expect_out(2,string)
+    if {$recoText eq $expectedRecoText} {
+      send_user "### Pass with the right recognition text\n"
+    } else {
+      send_user "### BAD RECO TEXT: actual != expected: [set recoText] != [set expectedRecoText]\n"
+      incr failureCount
+    }
+  }
+  default {
+    send_user "### Timeout or EOF waiting for prompt\n"
+    exit 1
+  }
+}
+
+# Exit
+
+expect {
+  "Please press a key to continue." {
+    send "a\r"
+    expect {
+      timeout {
+        send_user "### TIMEOUT waiting for EOF after hitting a key\n"
+        exit 1
+      }
+      eof
+    }
+  }
+  eof {
+    # no prompt is fine, too.
+  }
+  timeout {
+    send_user "### TIMEOUT waiting for key prompt or EOF\n"
+    exit 1
+  }
+}
+
+# Pick up error on program exit
+lassign [wait] pid spawnid os_error_flag value
+if {$os_error_flag == 0} {
+  send_user "### sample exit status: $value\n"
+  if {$value != 0} {
+    send_user "### non-zero exit status\n"
+    exit 1
+  }
+} else {
+  send_user "### non-zero errno: $os_error_flag\n"
+  exit 1
+}
+
+# If we've come so far, return the test failure count.
+exit [set failureCount]

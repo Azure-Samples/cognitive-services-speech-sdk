@@ -14,21 +14,24 @@ namespace MicrosoftSpeechSDKSamples
         static void Main(string[] args)
         {
 
+            var prompt = "Your choice (0: Stop): ";
+
             Console.WriteLine("1. Speech recognition with microphone input.");
             Console.WriteLine("2. Speech recognition in the specified language and using detailed output format.");
             Console.WriteLine("3. Speech continuous recognition with file input.");
             Console.WriteLine("4. Speech recognition using customized model.");
             Console.WriteLine("5. Speech recognition with pull audio stream.");
             Console.WriteLine("6. Speech recognition with push audio stream.");
-            Console.WriteLine("7. Translation with microphone input.");
-            Console.WriteLine("8. Translation with file input.");
-            Console.WriteLine("9. Translation with audio stream.");
-            Console.WriteLine("A. Speech continuous recognition using authorization token.");
-            Console.WriteLine("B. Intent recognition with microphone input.");
-            Console.WriteLine("C. Intent continuous recognition with file input.");
-            Console.WriteLine("D. Intent recognition in the specified language with microphone input.");
+            Console.WriteLine("7. Speech recognition with keyword spotting.");
+            Console.WriteLine("8. Translation with microphone input.");
+            Console.WriteLine("9. Translation with file input.");
+            Console.WriteLine("A. Translation with audio stream.");
+            Console.WriteLine("B. Speech continuous recognition using authorization token.");
+            Console.WriteLine("C. Intent recognition with microphone input.");
+            Console.WriteLine("D. Intent continuous recognition with file input.");
+            Console.WriteLine("E. Intent recognition in the specified language with microphone input.");
 
-            Console.Write("Your choice (0: Stop.): ");
+            Console.Write(prompt);
 
             ConsoleKeyInfo x;
             do
@@ -56,24 +59,27 @@ namespace MicrosoftSpeechSDKSamples
                         SpeechRecognitionSamples.RecognitionWithPushAudioStreamAsync().Wait();
                         break;
                     case ConsoleKey.D7:
-                        TranslationSamples.TranslationWithMicrophoneAsync().Wait();
+                        SpeechRecognitionSamples.ContinuousRecognitionWithKeywordSpottingAsync().Wait();
                         break;
                     case ConsoleKey.D8:
-                        TranslationSamples.TranslationWithFileAsync().Wait();
+                        TranslationSamples.TranslationWithMicrophoneAsync().Wait();
                         break;
                     case ConsoleKey.D9:
-                        TranslationSamples.TranslationWithAudioStreamAsync().Wait();
+                        TranslationSamples.TranslationWithFileAsync().Wait();
                         break;
                     case ConsoleKey.A:
-                        SpeechRecognitionWithTokenSample.ContinuousRecognitionWithAuthorizationTokenAsync().Wait();
+                        TranslationSamples.TranslationWithAudioStreamAsync().Wait();
                         break;
                     case ConsoleKey.B:
-                        IntentRecognitionSamples.RecognitionWithMicrophoneAsync().Wait();
+                        SpeechRecognitionWithTokenSample.ContinuousRecognitionWithAuthorizationTokenAsync().Wait();
                         break;
                     case ConsoleKey.C:
-                        IntentRecognitionSamples.ContinuousRecognitionWithFileAsync().Wait();
+                        IntentRecognitionSamples.RecognitionWithMicrophoneAsync().Wait();
                         break;
                     case ConsoleKey.D:
+                        IntentRecognitionSamples.ContinuousRecognitionWithFileAsync().Wait();
+                        break;
+                    case ConsoleKey.E:
                         IntentRecognitionSamples.RecognitionWithMicrophoneUsingLanguageAsync().Wait();
                         break;
                     case ConsoleKey.D0:
@@ -83,7 +89,7 @@ namespace MicrosoftSpeechSDKSamples
                         Console.WriteLine("Invalid input.");
                         break;
                 }
-                Console.WriteLine("\nRecognition done. Your Choice (0: Stop): ");
+                Console.WriteLine("\nRecognition done. " + prompt);
             } while (x.Key != ConsoleKey.D0);
         }
     }

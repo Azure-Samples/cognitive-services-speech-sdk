@@ -1,0 +1,36 @@
+#!/bin/echo Note: this script is to be sourced from other Expect scripts
+# vim:set filetype=expect:
+#
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+#
+
+set weatherWav [file join $inputDir "audio/whatstheweatherlike.wav"]
+set weatherText "What's the weather like?"
+
+set kwsWeatherWav [file join $inputDir "kws/kws_whatstheweatherlike.wav"]
+set kwsWeatherText "Computer what's the weather like?"
+
+set germanWav [file join $inputDir "audio/RemindMeToPickupDryKitOnFriday.wav"]
+set germanText "Erinner mich am Freitag um 04:40 Uhr die Reinigung abzuholen."
+
+set turnOnTheLampWav [file join $inputDir "audio/TurnOnTheLamp.wav"]
+set turnOnTheLampText "Turn on the lamp."
+set turnOnTheLampIntent "HomeAutomation.TurnOn"
+set turnOnTheMappedLampIntent "id1"
+
+proc paplay {wavFile {sleepMs 1000}} {
+  send_user "### Running paplay $wavFile\n"
+  after $sleepMs
+  exec paplay $wavFile
+}
+
+proc assertTextEqual {failureCounterRef description expectedText actualText} {
+  upvar $failureCounterRef failureCounter
+  if {$expectedText eq $actualText} {
+    send_user "### Pass: $description matches\n"
+  } else {
+    send_user "### BAD TEXT: actual != expected: '$actualText' != '$expectedText'\n"
+    incr failureCounter
+  }
+}

@@ -286,3 +286,7 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+
+# Linux executables
+quickstart/cpp-linux/helloworld
+samples/cpp/windows/console/samples/sample

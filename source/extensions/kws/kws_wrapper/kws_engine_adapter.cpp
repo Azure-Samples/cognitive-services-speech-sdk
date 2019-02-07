@@ -254,7 +254,7 @@ void CSpxSdkKwsEngineAdapter::FireKeywordDetectedEvent(const DataChunkPtr& audio
     auto confidence = p_impl->m_lastConfidence;
     std::string keyword = p_impl->m_lastKeyword ? p_impl->m_lastKeyword : "";
 
-    auto ticksPerSecond = 1000 * 10; // 1000 == to_msec, 10 == to_100nsec
+    auto ticksPerSecond = 1000 * 1000 * 10; // 1000 == to_msec, 1000 == to_usec, 10 == to_100nsec
 
     auto offset = (p_impl->m_cbAudioProcessed + p_impl->m_startSampleOffsetInBytes);
     offset = (ticksPerSecond * offset) / p_impl->m_format->nAvgBytesPerSec;

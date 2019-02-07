@@ -201,7 +201,9 @@ function patchSamplesFromTestConfig() (
     $SPEECHSDK_LUIS_HOMEAUTOMATION_APPID \
     HomeAutomation.TurnOn \
     another-intent \
-    yet-another-intent
+    yet-another-intent \
+    "$SPEECHSDK_INPUTDIR/kws/Computer/kws.table" \
+    Computer
 )
 
 function retry() {

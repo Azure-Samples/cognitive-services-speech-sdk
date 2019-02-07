@@ -11,26 +11,35 @@ BEGIN {
   use warnings;
   use strict;
 
-  @ARGV == 11 or die "Expecting exactly 11 arguments.\n";
+  @ARGV == 13 or die "Expecting exactly 13 arguments.\n";
 
-  our ($samplesDir, $audioFile, $speechKey, $speechRegion, $speechEndpointId, $luisKey, $luisRegion, $luisAppId, $luisIntent1, $luisIntent2, $luisIntent3) = splice @ARGV;
+  our ($samplesDir, $audioFile, $speechKey, $speechRegion, $speechEndpointId, $luisKey, $luisRegion, $luisAppId, $luisIntent1, $luisIntent2, $luisIntent3, $keywordRecognitionModelFile, $keyword) = splice @ARGV;
 
   -d $samplesDir or die "Cannot find $samplesDir\n";
-  # The next is a warning only for scenarios in which patching is done on the
-  # host, but test may run in a virtual environment (e.g., container) under a
-  # different path.
-  -f $audioFile or warn "Cannot find $audioFile\n";
 
-  # Translate to full Windows path, with escaping for use in
-  # strings of C-like languages and Perl substitute replacement.
-  my $nativePath;
-  if (exists $ENV{OS} and $ENV{OS} eq 'Windows_NT') {
-    $nativePath = `cygpath -aw "$audioFile"`;
-    chomp $nativePath;
-  } else {
-    $nativePath = $audioFile;
+  # Translate to full native path (i.e., Windows path on Cygwin / Git Bash),
+  # with escaping for use in strings of C-like languages and Perl substitute
+  # replacement.
+  sub getNativeEscapedPath {
+      my $path = shift;
+      my $nativePath;
+
+      # The next one is a warning only for scenarios in which patching is done on the
+      # host, but test may run in a virtual environment (e.g., container) under a
+      # different path.
+      -f $path or warn "Cannot find $path\n";
+
+      if (exists $ENV{OS} and $ENV{OS} eq 'Windows_NT') {
+        $nativePath = `cygpath -aw "$path"`;
+        chomp $nativePath;
+      } else {
+        $nativePath = $path;
+      }
+      return $nativePath =~ s/\\/\\\\\\\\/gr;
   }
-  our $escapedAudioFile = $nativePath =~ s/\\/\\\\\\\\/gr;
+
+  our $escapedAudioFile = getNativeEscapedPath($audioFile);
+  our $escapedKeywordRecognitionModelFile = getNativeEscapedPath($keywordRecognitionModelFile);
 
   @ARGV = ();
   find(sub {
@@ -50,6 +59,8 @@ if ($ARGV =~ m(\.md$)) {
   s(\b(?:
     YourAudioFile |
     YourEndpointId |
+    YourKeyword |
+    YourKeywordRecognitionModelFile |
     YourLanguageUnderstandingAppId |
     YourLanguageUnderstandingIntentName1 |
     YourLanguageUnderstandingIntentName2 |
@@ -57,13 +68,12 @@ if ($ARGV =~ m(\.md$)) {
     YourLanguageUnderstandingServiceRegion |
     YourLanguageUnderstandingSubscriptionKey |
     YourServiceRegion |
-    YourSubscriptionKey |
-    YourSubscriptionServiceRegion
+    YourSubscriptionKey
   ))(SOMETHING)gx;
 } else {
   s("YourAudioFile\.wav")("$escapedAudioFile");
   s((["'])YourSubscriptionKey\1)(\1$speechKey\1)g;
-  s((["'])Your(?:Subscription)?ServiceRegion\1)(\1$speechRegion\1)g;
+  s((["'])YourServiceRegion\1)(\1$speechRegion\1)g;
   s("YourEndpointId")("$speechEndpointId")g;
   s("YourLanguageUnderstandingAppId")("$luisAppId")g;
   s("YourLanguageUnderstandingSubscriptionKey")("$luisKey")g;
@@ -71,4 +81,6 @@ if ($ARGV =~ m(\.md$)) {
   s("YourLanguageUnderstandingIntentName1")("$luisIntent1")g;
   s("YourLanguageUnderstandingIntentName2")("$luisIntent2")g;
   s("YourLanguageUnderstandingIntentName3")("$luisIntent3")g;
+  s("YourKeywordRecognitionModelFile\.table")("$escapedKeywordRecognitionModelFile")g;
+  s("YourKeyword")("$keyword")g;
 }

@@ -16,7 +16,7 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 isOneOf "$PLATFORM" {{Windows,Linux,OSX}-x64,Windows-x86}-{Debug,Release} ||
   exitWithSuccess "Test %s: skip on this platform\n" "$T"
 
-VIRTUALENV_NAME=carbontest$$
+VIRTUALENV_NAME=speechsdktest$$
 
 if [[ $PLATFORM == Windows* ]]; then
     PYTHON=python
@@ -26,7 +26,7 @@ fi
 
 virtualenv -p ${PYTHON} ${VIRTUALENV_NAME}
 
-if [[ $SPEECHSDK_BUILD_AGENT_PLATFORM == Windows* ]]; then
+if [[ $PLATFORM == Windows-* ]]; then
     VIRTUALENV_PYTHON=${PWD}/${VIRTUALENV_NAME}/Scripts/python.exe
 else
     VIRTUALENV_PYTHON=${PWD}/${VIRTUALENV_NAME}/bin/python
@@ -36,14 +36,14 @@ fi
 ${VIRTUALENV_PYTHON} -m pip install pytest==4.0.0
 
 if ! existsExactlyOneFile ${BUILD_DIR}/*.whl; then
-    exitWithError "there is more than one wheel built, don't know which one to choose"
+    exitWithError "there is more than one wheel built, don't know which one to choose\n"
 fi
 
 # try installing the azure-cognitiveservices-speech wheel
 ${VIRTUALENV_PYTHON} -m pip install ${BUILD_DIR}/*.whl
 
 # run pytest on test files in the source tree
-if [[ $SPEECHSDK_BUILD_AGENT_PLATFORM == Windows* ]]; then
+if [[ $PLATFORM == Windows-* ]]; then
     extra_args=--no-use-default-microphone
 else
     extra_args=
@@ -92,6 +92,7 @@ function runPythonSampleSuite {
   # "import intent_sample; intent_sample.recognize_intent_once_from_mic()"
   # "import translation_sample; translation_sample.translation_once_from_mic()"
   # "import speech_sample; speech_sample.speech_recognize_once_from_mic()"
+  # "import speech_sample; speech_recognize_keyword_from_microphone()"
 
   startTests "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
   startSuite "$testStateVarPrefix" "$testsuiteName"
@@ -114,5 +115,5 @@ runPythonSampleSuite \
   240
 # If samples fail, script will stop here.
 # Otherwise, we'll fail the script if the unit tests failed above:
-[[ $UNITTEST_ERROR == false ]] || exitWithError "Python unit tests failed."
+[[ $UNITTEST_ERROR == false ]] || exitWithError "Python unit tests failed.\n"
 

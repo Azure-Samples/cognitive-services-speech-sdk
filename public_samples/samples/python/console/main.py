@@ -14,8 +14,8 @@ import platform
 eofkey = 'Ctrl-Z' if "Windows" == platform.system() else 'Ctrl-D'
 print('system: {}, eofkey: {}'.format(platform.system(), eofkey))
 
-samples = OrderedDict({
-    speech_sample: [
+samples = OrderedDict([
+    (speech_sample, [
         speech_sample.speech_recognize_once_from_mic,
         speech_sample.speech_recognize_once_from_file,
         speech_sample.speech_recognize_once_from_file_with_customized_model,
@@ -24,16 +24,17 @@ samples = OrderedDict({
         speech_sample.speech_recognize_continuous_from_file,
         speech_sample.speech_recognition_with_pull_stream,
         speech_sample.speech_recognition_with_push_stream,
-    ], intent_sample: [
+        speech_sample.speech_recognize_keyword_from_microphone,
+    ]), (intent_sample, [
         intent_sample.recognize_intent_once_from_mic,
         intent_sample.recognize_intent_once_from_file,
         intent_sample.recognize_intent_continuous,
-    ], translation_sample: [
+    ]), (translation_sample, [
         translation_sample.translation_once_from_mic,
         translation_sample.translation_once_from_file,
         translation_sample.translation_continuous,
-    ]
-})
+    ])
+])
 
 
 def select():

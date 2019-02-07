@@ -142,12 +142,12 @@ void TranslationContinuousRecognition()
     cout << "Say something...\n";
 
     // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-    recognizer->StartContinuousRecognitionAsync().wait();
+    recognizer->StartContinuousRecognitionAsync().get();
 
     cout << "Press any key to stop\n";
     string s;
     getline(cin, s);
 
     // Stops recognition.
-    recognizer->StopContinuousRecognitionAsync().wait();
+    recognizer->StopContinuousRecognitionAsync().get();
 }

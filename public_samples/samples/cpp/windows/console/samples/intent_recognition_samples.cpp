@@ -207,12 +207,12 @@ void IntentContinuousRecognitionWithFile()
     });
 
     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-    recognizer->StartContinuousRecognitionAsync().wait();
+    recognizer->StartContinuousRecognitionAsync().get();
 
     // Waits for recognition end.
-    recognitionEnd.get_future().wait();
+    recognitionEnd.get_future().get();
 
     // Stops recognition.
-    recognizer->StopContinuousRecognitionAsync().wait();
+    recognizer->StopContinuousRecognitionAsync().get();
     // </IntentContinuousRecognitionWithFile>
 }
