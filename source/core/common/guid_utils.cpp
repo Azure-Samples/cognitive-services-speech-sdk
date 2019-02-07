@@ -76,4 +76,6 @@ namespace PAL
 
         return uuidStr;
     }
+
+    static GuidGeneratorInitializer guidInitializer;
 } // PAL

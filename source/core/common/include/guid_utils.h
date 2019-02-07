@@ -14,4 +14,9 @@ std::wstring CreateGuidWithoutDashes();
 
 std::string DeviceUuid();
 
+// initializes the random seed for azure-c-shared-utility
+struct GuidGeneratorInitializer {
+    GuidGeneratorInitializer() { srand((int)time(NULL)); };
+};
+
 } // PAL
