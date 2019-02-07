@@ -36,12 +36,6 @@ def test_translation_config_constructor():
     assert translation_config.speech_recognition_language == 'nb-NO'
 
 
-@pytest.mark.skip('not implemented')
-def test_translation_synthesis_result():
-    # test the conversion to msspeech.TranslationSynthesisResult
-    pass
-
-
 def test_speech_translation_config():
     speech_config = msspeech.translation.SpeechTranslationConfig(subscription="subscription", region="some_region")
 
@@ -51,15 +45,11 @@ def test_speech_translation_config():
     speech_config.set_property(msspeech.PropertyId.SpeechServiceConnection_Endpoint, 'mytext')
     assert "mytext" == speech_config.get_property(msspeech.PropertyId.SpeechServiceConnection_Endpoint)
 
-    with pytest.raises(TypeError) as excinfo:
+    with pytest.raises(TypeError, match='property_id value must be PropertyId instance'):
         speech_config.set_property(1000, "bad_value")
 
-        assert 'wrong type, must be PropertyId' == str(excinfo.value)
-
-    with pytest.raises(TypeError) as excinfo:
+    with pytest.raises(TypeError, match='property_id value must be PropertyId instance'):
         speech_config.get_property(1000)
-
-        assert 'wrong type, must be PropertyId' == str(excinfo.value)
 
     speech_config.add_target_language('de-de')
     assert ('de-de', ) == speech_config.target_languages

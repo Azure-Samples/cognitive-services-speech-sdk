@@ -54,7 +54,7 @@ class SpeechConfig():
         :return: The value of the property.
         """
         if not isinstance(property_id, PropertyId):
-            raise TypeError('wrong type, must be PropertyId')
+            raise TypeError('property_id value must be PropertyId instance')
         return impl._speech_py_impl.SpeechConfig_get_property(self._impl, property_id.value)
 
     def set_property(self, property_id: PropertyId, value: str):
@@ -65,7 +65,7 @@ class SpeechConfig():
         :param value: The value to be set for the property.
         """
         if not isinstance(property_id, PropertyId):
-            raise TypeError('wrong type, must be PropertyId')
+            raise TypeError('property_id value must be PropertyId instance')
         return impl._speech_py_impl.SpeechConfig_set_property(self._impl, property_id.value, value)
 
     def set_properties(self, properties: Dict[PropertyId, str]):
@@ -76,35 +76,45 @@ class SpeechConfig():
         """
         for property_id, value in properties.items():
             if not isinstance(property_id, PropertyId):
-                raise TypeError('wrong type, must be PropertyId')
+                raise TypeError('property_id value must be PropertyId instance')
 
             impl._speech_py_impl.SpeechConfig_set_property(self._impl, property_id.value, value)
 
     @staticmethod
     def _get_impl(config_type, subscription, region, endpoint, auth_token,
             speech_recognition_language):
-        if region is not None and subscription is None and auth_token is None:
-            raise ValueError('either endpoint or subscription key must be given along with a region')
+        if endpoint is not None:
+            if region is not None:
+                raise ValueError('cannot construct SpeechConfig with both region and endpoint information')
+            if subscription is None:
+                raise ValueError('subscription key must be specified along with an endpoint')
 
-        if endpoint is not None and region is not None:
-            raise ValueError('cannot construct SpeechConfig with both region and endpoint information')
+        if region is not None and subscription is None and auth_token is None:
+            raise ValueError('either subscription key or authorization token must be given along with a region')
 
         if subscription is not None and endpoint is None and region is None:
             raise ValueError('either endpoint or region must be given along with a subscription key')
 
+        generic_error_message = 'cannot construct SpeechConfig with the given arguments'
         _impl = None
         if region is not None and subscription is not None:
+            if endpoint is not None or auth_token is not None:
+                raise ValueError(generic_error_message)
             _impl = config_type._from_subscription(subscription, region)
         elif region is not None and auth_token is not None:
+            if endpoint is not None or subscription is not None:
+                raise ValueError(generic_error_message)
             _impl = config_type._from_authorization_token(auth_token, region)
         elif endpoint is not None and subscription is not None:
+            if region is not None or auth_token is not None:
+                raise ValueError(generic_error_message)
             _impl = config_type._from_endpoint(endpoint, subscription)
 
         if _impl is not None:
             _impl.set_speech_recognition_language(speech_recognition_language)
             return _impl
 
-        raise ValueError('cannot construct SpeechConfig with the given arguments')
+        raise ValueError(generic_error_message)
 
     @property
     def output_format(self) -> OutputFormat:

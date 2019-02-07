@@ -2,22 +2,15 @@ import pytest
 
 import azure.cognitiveservices.speech as msspeech
 
-from .utils import (_TestCallback, _setup_callbacks, _check_callbacks,
-                    _check_sr_result)
-
+from .utils import (_TestCallback, _check_callbacks, _check_sr_result)
 
 speech_config_types = (msspeech.SpeechConfig, msspeech.translation.SpeechTranslationConfig)
 recognizer_types = (msspeech.SpeechRecognizer, msspeech.translation.TranslationRecognizer,
                     msspeech.intent.IntentRecognizer)
 
-
 @pytest.mark.parametrize('speech_input,', ['weather', 'lamp'], indirect=True)
-def test_recognize_once(subscription, speech_input, endpoint, speech_region):
-    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
-    speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
-
-    reco = msspeech.SpeechRecognizer(speech_config, audio_config)
-    callbacks = _setup_callbacks(reco)
+def test_recognize_once(from_file_speech_reco_with_callbacks, speech_input):
+    reco, callbacks = from_file_speech_reco_with_callbacks()
 
     result = reco.recognize_once()
     _check_sr_result(result, speech_input, 0)
@@ -25,12 +18,8 @@ def test_recognize_once(subscription, speech_input, endpoint, speech_region):
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
-def test_recognize_async(subscription, speech_input, endpoint, speech_region):
-    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
-    speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
-
-    reco = msspeech.SpeechRecognizer(speech_config, audio_config)
-    callbacks = _setup_callbacks(reco)
+def test_recognize_async(from_file_speech_reco_with_callbacks, speech_input):
+    reco, callbacks = from_file_speech_reco_with_callbacks()
 
     future = reco.recognize_once_async()
     result = future.get()
@@ -39,14 +28,14 @@ def test_recognize_async(subscription, speech_input, endpoint, speech_region):
     _check_callbacks(callbacks)
 
     # verify that the second call to get from future fails orderly
-    with pytest.raises(RuntimeError) as excinfo:
+    # error message is platform-dependent
+    with pytest.raises(RuntimeError, match="Operation not permitted on an object without an "
+            "associated state|std::future_error: No associated state|no state"):
         future.get()
-
-        assert "no state" == excinfo.value
 
 
 @pytest.mark.parametrize('speech_input,', ['silencehello'], indirect=True)
-def test_speech_recognition_with_custom_endpoint(subscription, speech_input, endpoint, speech_region):
+def test_speech_recognition_with_custom_endpoint(subscription, speech_input, speech_region):
     initial_silence_timeout_ms = 1 * 1e3
     template = "wss://{}.stt.speech.microsoft.com/speech/recognition" \
             "/conversation/cognitiveservices/v1?initialSilenceTimeoutMs={:d}"
@@ -67,11 +56,8 @@ def test_speech_recognition_with_custom_endpoint(subscription, speech_input, end
 
 @pytest.mark.xfail(reason='flaky')
 @pytest.mark.parametrize('speech_input,', ['batman'], indirect=True)
-def test_recognize_once_multiple(subscription, speech_input, endpoint, speech_region):
-    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
-    speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
-
-    reco = msspeech.SpeechRecognizer(speech_config, audio_config)
+def test_recognize_once_multiple(from_file_speech_reco_with_callbacks, speech_input):
+    reco, callbacks = from_file_speech_reco_with_callbacks()
 
     for utterance_index in range(2):
         result = reco.recognize_once()
@@ -79,13 +65,9 @@ def test_recognize_once_multiple(subscription, speech_input, endpoint, speech_re
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
-def test_multiple_callbacks(subscription, speech_input, endpoint, speech_region):
-    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
+def test_multiple_callbacks(from_file_speech_reco_with_callbacks, speech_input):
+    reco, callbacks = from_file_speech_reco_with_callbacks()
 
-    speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
-    reco = msspeech.SpeechRecognizer(speech_config, audio_config)
-
-    callbacks = _setup_callbacks(reco)
     # connect a second callback to two signals
     other_session_started_cb = _TestCallback('In OTHER session_started callback')
     other_recognized_cb = _TestCallback('In OTHER recognized callback')
@@ -140,36 +122,55 @@ def test_speech_config_default_constructor(config_type):
     assert "someregion" == speech_config.region
     assert "zh-CN" == speech_config.speech_recognition_language
 
-    with pytest.raises(ValueError) as excinfo:
+    # check correct error messages
+    with pytest.raises(ValueError,
+            match='either endpoint or region must be given along with a subscription key'):
         speech_config = config_type(subscription="somesubscription")
 
-        assert '"region" needs to be provided' == str(excinfo.value)
-
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError,
+            match='either subscription key or authorization token must be given along with a region'):
         speech_config = config_type(region="someregion")
-        assert 'either endpoint or subscription key must be given along with a region' \
-                == str(excinfo.value)
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError,
+            match='either endpoint or region must be given along with a subscription key'):
         speech_config = config_type(subscription="somesubscription")
-        assert 'either endpoint or region must be given along with a subscription key' \
-                == str(excinfo.value)
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError,
+            match='cannot construct SpeechConfig with both region and endpoint information'):
         speech_config = config_type(endpoint="someendpoint", region="someregion")
-        assert 'cannot construct SpeechConfig with both region and endpoint information' \
-                == str(excinfo.value)
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError,
+            match='cannot construct SpeechConfig with both region and endpoint information'):
         speech_config = config_type(endpoint="someendpoint", region="someregion",
             subscription="somesubscription")
-        assert 'cannot construct SpeechConfig with both region and endpoint information' \
-                == str(excinfo.value)
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match='cannot construct SpeechConfig with the given arguments'):
         speech_config = config_type()
 
-        assert 'insufficient information' in str(excinfo.value)
+    with pytest.raises(ValueError, match='subscription key must be specified along with an endpoint'):
+        speech_config = config_type(endpoint='someendpoint')
+
+    # check that all nonsupported construction methods raise
+    from itertools import product
+    for subscription, region, endpoint, auth_token in product((None, "somekey"),
+            (None, "someregion"),
+            (None, "someendpoint"),
+            (None, "sometoken")):
+        if ((subscription and region and not endpoint and not auth_token) or
+                (subscription and not region and endpoint and not auth_token) or
+                (not subscription and region and not endpoint and auth_token)):
+
+            speech_config = config_type(subscription=subscription,
+                    region=region,
+                    endpoint=endpoint,
+                    auth_token=auth_token)
+            assert speech_config
+        else:
+            with pytest.raises(ValueError):
+                speech_config = config_type(subscription=subscription,
+                        region=region,
+                        endpoint=endpoint,
+                        auth_token=auth_token)
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
@@ -207,11 +208,8 @@ def test_bad_language_config(subscription, speech_input, speech_region):
 
 
 @pytest.mark.parametrize('speech_input,', ['silence'], indirect=True)
-def test_no_match_result(subscription, speech_input, speech_region):
-    speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
-    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
-
-    reco = msspeech.SpeechRecognizer(speech_config, audio_config)
+def test_no_match_result(from_file_speech_reco_with_callbacks, speech_input):
+    reco, callbacks = from_file_speech_reco_with_callbacks()
 
     result = reco.recognize_once_async().get()
 
@@ -294,10 +292,8 @@ def test_speech_config_properties_setters():
     speech_config.authorization_token = "x"
     assert "x" == speech_config.authorization_token
 
-    with pytest.raises(AttributeError) as excinfo:
+    with pytest.raises(AttributeError, match='can\'t set attribute'):
         speech_config.region = "newregion"
-
-        assert 'can\'t set attribute ' in str(excinfo.value)
 
 
 def test_speech_config_properties_output_format_setters():
@@ -309,10 +305,8 @@ def test_speech_config_properties_output_format_setters():
     speech_config.output_format = msspeech.OutputFormat.Detailed
     assert msspeech.OutputFormat.Detailed == speech_config.output_format
 
-    with pytest.raises(TypeError) as excinfo:
+    with pytest.raises(TypeError, match='wrong type, must be OutputFormat'):
         speech_config.output_format = 0
-
-        assert 'wrong type, must be OutputFormat' == str(excinfo.value)
 
 
 def test_speech_config_property_ids():
@@ -324,15 +318,12 @@ def test_speech_config_property_ids():
     speech_config.set_property(msspeech.PropertyId.SpeechServiceConnection_Endpoint, 'mytext')
     assert "mytext" == speech_config.get_property(msspeech.PropertyId.SpeechServiceConnection_Endpoint)
 
-    with pytest.raises(TypeError) as excinfo:
+    error_message = 'property_id value must be PropertyId instance'
+    with pytest.raises(TypeError, match=error_message):
         speech_config.set_property(1000, "bad_value")
 
-        assert 'wrong type, must be PropertyId' == str(excinfo.value)
-
-    with pytest.raises(TypeError) as excinfo:
+    with pytest.raises(TypeError, match=error_message):
         speech_config.get_property(1000)
-
-        assert 'wrong type, must be PropertyId' == str(excinfo.value)
 
 
 def test_speech_config_set_properties():
@@ -347,10 +338,8 @@ def test_speech_config_set_properties():
     assert "true" == speech_config.get_property(msspeech.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse)
     assert "myendpoint" == speech_config.get_property(msspeech.PropertyId.SpeechServiceConnection_Endpoint)
 
-    with pytest.raises(TypeError) as excinfo:
+    with pytest.raises(TypeError, match='property_id value must be PropertyId instance'):
         speech_config.set_properties({1000: "bad_value"})
-
-        assert 'wrong type, must be PropertyId' == str(excinfo.value)
 
 
 def test_keyword_recognition_model_constructor():
@@ -373,21 +362,19 @@ def test_speech_recognizer_constructor(speech_input, recognizer_type):
 
     audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
 
-    with pytest.raises(TypeError) as excinfo:
+    with pytest.raises(TypeError,
+            match=r"__init__\(\) missing 1 required positional argument: '(translation|speech)_config'"):
         reco = recognizer_type()
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="must be a Speech(Translation)?Config instance"):
         reco = recognizer_type(None)
-
-        assert "must be a {} instance".format(type(recognizer_type)) in str(excinfo.value)
 
     reco = recognizer_type(speech_config, audio_config)
     assert "somesubscription" == reco.properties.get_property(msspeech.PropertyId.SpeechServiceConnection_Key)
     assert "someregion" == reco.properties.get_property(msspeech.PropertyId.SpeechServiceConnection_Region)
 
 
-@pytest.mark.skipif(pytest.config.option.no_use_default_microphone,
-                    reason="requires default microphone")
+@pytest.mark.usefixtures('skip_default_microphone')
 @pytest.mark.parametrize("recognizer_type", recognizer_types)
 def test_speech_recognizer_constructor_default_microphone(recognizer_type):
     if recognizer_type is msspeech.translation.TranslationRecognizer:

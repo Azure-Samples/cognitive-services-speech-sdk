@@ -27,33 +27,30 @@ def test_intent_recognition_simple(intent_input: IntentInput, luis_subscription:
 
 
 def test_language_understanding_model_constructor():
-    with pytest.raises(ValueError) as excinfo:
+    bad_params_error_message = "bad arguments: either pass just an endpoint id, or pass an app " \
+            r"id \(with optional subscription and region\)"
+    with pytest.raises(ValueError, match=bad_params_error_message):
         lm = msspeech.intent.LanguageUnderstandingModel()
-        assert "bad parameters: either an endpoint or an app id, with optional subscription key & region, must be given" == str(excinfo.value)
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match=bad_params_error_message):
         lm = msspeech.intent.LanguageUnderstandingModel(endpoint='a', app_id='b')
-        assert "bad parameters: either an endpoint or an app id, with optional subscription key & region, must be given" == str(excinfo.value)
 
-    with pytest.raises(ValueError) as excinfo:
+    from_subscription_error_message = "all of subscription key, api id and region must be given " \
+            "to initialize from subscription"
+    with pytest.raises(ValueError, match=from_subscription_error_message):
         lm = msspeech.intent.LanguageUnderstandingModel(subscription='a')
-        assert "all of subscription key, api id and region must be given to initialize from subscription" == str(excinfo.value)
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match=from_subscription_error_message):
         lm = msspeech.intent.LanguageUnderstandingModel(region='a')
-        assert "all of subscription key, api id and region must be given to initialize from subscription" == str(excinfo.value)
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match=from_subscription_error_message):
         lm = msspeech.intent.LanguageUnderstandingModel(region='a', app_id='b')
-        assert "all of subscription key, api id and region must be given to initialize from subscription" == str(excinfo.value)
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match=from_subscription_error_message):
         lm = msspeech.intent.LanguageUnderstandingModel(subscription='a', app_id='b')
-        assert "all of subscription key, api id and region must be given to initialize from subscription" == str(excinfo.value)
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match=from_subscription_error_message):
         lm = msspeech.intent.LanguageUnderstandingModel('a', 'b')
-        assert "all of subscription key, api id and region must be given to initialize from subscription" == str(excinfo.value)
 
     lm = msspeech.intent.LanguageUnderstandingModel('a', 'b', 'c')
     assert lm

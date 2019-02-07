@@ -30,16 +30,18 @@ class LanguageUnderstandingModel():
 
     def __init__(self, subscription: OptionalStr = None, region: OptionalStr = None,
                  app_id: OptionalStr = None, endpoint: OptionalStr = None):
+        bad_params_error_message = "bad arguments: either pass just an endpoint id, or pass an app " \
+                "id (with optional subscription and region)"
         if subscription is None and region is None and app_id is None and endpoint is None:
-            raise ValueError(
-                'bad arguments: either an endpoint or an app id, with optional subscription key & region, must be given')
+            raise ValueError(bad_params_error_message)
 
         if (sum(val is not None for val in (subscription, region)) == 1 or (
                 app_id is None and subscription is not None and region is not None)):
-            raise ValueError('all of subscription key, api id and region must be given to initialize from subscription')
+            raise ValueError("all of subscription key, api id and region must be given to "
+                    "initialize from subscription")
 
         if app_id is not None and endpoint is not None:
-            raise ValueError('bad arguments: either an endpoint or an app id, with optional subscription key & region, must be given')
+            raise ValueError(bad_params_error_message)
 
         if app_id is not None:
             self._impl = impl.LanguageUnderstandingModel._from_app_id(app_id)

@@ -2,15 +2,11 @@ import pytest
 import azure.cognitiveservices.speech as msspeech
 
 def test_audio_config():
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="cannot construct AudioConfig with the given arguments"):
         cfg = msspeech.audio.AudioConfig()
 
-        assert "no valid audio source" == str(excinfo.value)
-
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="use_default_microphone must be a bool, is \"abc\""):
         cfg = msspeech.audio.AudioConfig('abc')
-
-        assert "use_default_microphone must be a bool, is \"abc\"" in str(excinfo.value)
 
     cfg = msspeech.audio.AudioConfig(use_default_microphone=True)
     assert cfg
@@ -38,9 +34,9 @@ def test_audio_config():
     cfg = msspeech.audio.AudioConfig(device_name='a')
     assert cfg
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError):
         cfg = msspeech.audio.AudioConfig(filename='abc', device_name='dev')
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="default microphone can not be combined with any other options"):
         cfg = msspeech.audio.AudioConfig(True, device_name='nondefault')
-        assert "default microphone can not be combined with any other options" in str(excinfo.value)
+

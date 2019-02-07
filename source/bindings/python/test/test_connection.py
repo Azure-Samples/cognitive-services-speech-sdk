@@ -3,8 +3,7 @@ import time
 
 import azure.cognitiveservices.speech as msspeech
 
-from .utils import (_TestCallback, _setup_callbacks, _check_callbacks, _check_sr_result,
-        _TIMEOUT_IN_SECONDS)
+from .utils import (_TestCallback, _check_callbacks, _check_sr_result, _TIMEOUT_IN_SECONDS)
 
 
 speech_config_types = (msspeech.SpeechConfig, msspeech.translation.SpeechTranslationConfig)
@@ -13,11 +12,8 @@ recognizer_types = (msspeech.SpeechRecognizer, msspeech.translation.TranslationR
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
-def test_connection_with_recognize_once(subscription, speech_input, endpoint, speech_region):
-    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
-    speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
-
-    reco = msspeech.SpeechRecognizer(speech_config, audio_config)
+def test_connection_with_recognize_once(from_file_speech_reco_with_callbacks, speech_input):
+    reco, callbacks = from_file_speech_reco_with_callbacks(setup_stop_callback=False)
 
     # setup connection
     connection = reco.connection
@@ -36,8 +32,6 @@ def test_connection_with_recognize_once(subscription, speech_input, endpoint, sp
             break
         time.sleep(1.)
 
-    callbacks = _setup_callbacks(reco, do_stop=False)
-
     result = reco.recognize_once()
 
     # close the connection
@@ -53,13 +47,8 @@ def test_connection_with_recognize_once(subscription, speech_input, endpoint, sp
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
-def test_connection_with_continuous_recognition(subscription, speech_input, endpoint,
-        speech_region):
-    audio_cfg = msspeech.audio.AudioConfig(filename=speech_input.path)
-    cfg = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
-    reco = msspeech.SpeechRecognizer(cfg, audio_cfg)
-
-    callbacks = _setup_callbacks(reco, do_stop=True)
+def test_connection_with_continuous_recognition(from_file_speech_reco_with_callbacks, speech_input):
+    reco, callbacks = from_file_speech_reco_with_callbacks()
 
     # setup connection
     connection = reco.connection

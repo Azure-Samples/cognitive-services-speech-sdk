@@ -2,6 +2,8 @@ import pytest
 import os
 from collections import namedtuple
 
+import azure.cognitiveservices.speech as msspeech
+from .utils import _setup_callbacks
 
 def pytest_addoption(parser):
     parser.addoption("--inputdir")
@@ -43,6 +45,13 @@ def endpoint(request):
 @pytest.fixture
 def language_understanding_app_id(request):
     return request.config.getoption("--language-understanding-app-id")
+
+
+@pytest.fixture
+def skip_default_microphone(request):
+    no_use_default_microphone = request.config.getoption("--no-use-default-microphone")
+    if no_use_default_microphone:
+        pytest.skip('skipping without default microphone')
 
 
 SpeechInput = namedtuple('SpeechInputData',
@@ -110,4 +119,23 @@ def intent_input(request):
     filename, *args = intent_input_data_raw[request.param]
     path = os.path.join(inputdir, filename)
     return IntentInput(path, *args)
+
+
+@pytest.fixture
+def from_file_speech_reco_with_callbacks(subscription: str, speech_input: SpeechInput,
+        speech_region: str):
+    """
+    set up a `SpeechRecognizer` with the default callbacks, which is configured to recognize the
+    audio specified by the `speech_input`.
+    """
+    def foo(setup_stop_callback: bool = True):
+        audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
+        speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+
+        reco = msspeech.SpeechRecognizer(speech_config, audio_config)
+        callbacks = _setup_callbacks(reco, setup_stop_callback)
+
+        return (reco, callbacks)
+
+    return foo
 
