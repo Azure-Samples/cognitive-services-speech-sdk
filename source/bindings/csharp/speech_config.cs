@@ -169,8 +169,8 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="proxyHostName">The host name of the proxy server.</param>
         /// <param name="proxyPort">The port number of the proxy server.</param>
-        /// <param name="proxyUserName">The user name of the proxy server. Use empty string if no user name is needed.</param>
-        /// <param name="proxyPassword">The password of the proxy server. Use empty string if no password is needed.</param>
+        /// <param name="proxyUserName">The user name of the proxy server.</param>
+        /// <param name="proxyPassword">The password of the proxy server.</param>
         public void SetProxy(string proxyHostName, int proxyPort, string proxyUserName, string proxyPassword)
         {
             if (string.IsNullOrWhiteSpace(proxyHostName))
@@ -181,11 +181,18 @@ namespace Microsoft.CognitiveServices.Speech
             {
                 throw new ArgumentException("Invalid proxy port.");
             }
-            if ((proxyUserName == null) || (proxyPassword == null))
-            {
-                throw new ArgumentNullException("proxy user name or password is empty.");
-            }
             this.configImpl.SetProxy(proxyHostName, (uint)proxyPort, proxyUserName, proxyPassword);
+        }
+
+        /// <summary>
+        /// Sets proxy configuration.
+        /// Added in version 1.3.0
+        /// </summary>
+        /// <param name="proxyHostName">The host name of the proxy server.</param>
+        /// <param name="proxyPort">The port number of the proxy server.</param>
+        public void SetProxy(string proxyHostName, int proxyPort)
+        {
+            this.SetProxy(proxyHostName, proxyPort, null, null);
         }
 
         /// <summary>

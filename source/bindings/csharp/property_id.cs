@@ -59,7 +59,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// The host name of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,
         /// you shouldn't have to use this property directly.
-        /// Instead use <see cref="SpeechConfig.SetProxy"/>.
+        /// Instead use <see cref="SpeechConfig.SetProxy(string,int,string,string)"/>.
         /// NOTE: This property id was added in version 1.1.0.
         /// </summary>
         SpeechServiceConnection_ProxyHostName = Internal.PropertyId.SpeechServiceConnection_ProxyHostName,
@@ -67,7 +67,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// The port of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,
         /// you shouldn't have to use this property directly.
-        /// Instead use <see cref="SpeechConfig.SetProxy"/>.
+        /// Instead use <see cref="SpeechConfig.SetProxy(string,int,string,string)"/>.
         /// NOTE: This property id was added in version 1.1.0.
         /// </summary>
         SpeechServiceConnection_ProxyPort  = Internal.PropertyId.SpeechServiceConnection_ProxyPort,
@@ -75,7 +75,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// The user name of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,
         /// you shouldn't have to use this property directly.
-        /// Instead use <see cref="SpeechConfig.SetProxy"/>.
+        /// Instead use <see cref="SpeechConfig.SetProxy(string,int,string,string)"/>.
         /// NOTE: This property id was added in version 1.1.0.
         /// </summary>
         SpeechServiceConnection_ProxyUserName  = Internal.PropertyId.SpeechServiceConnection_ProxyUserName,
@@ -83,7 +83,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// The password of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,
         /// you shouldn't have to use this property directly.
-        /// Instead use <see cref="SpeechConfig.SetProxy"/>.
+        /// Instead use <see cref="SpeechConfig.SetProxy(string,int,string,string)"/>.
         /// NOTE: This property id was added in version 1.1.0.
         /// </summary>
         SpeechServiceConnection_ProxyPassword = Internal.PropertyId.SpeechServiceConnection_ProxyPassword,

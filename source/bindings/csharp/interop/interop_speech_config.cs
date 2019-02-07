@@ -159,8 +159,14 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         {
             progBag.SetProperty(PropertyId.SpeechServiceConnection_ProxyHostName, proxyHostName);
             progBag.SetProperty(PropertyId.SpeechServiceConnection_ProxyPort, proxyPort.ToString(CultureInfo.CurrentCulture));
-            progBag.SetProperty(PropertyId.SpeechServiceConnection_ProxyUserName, proxyUserName);
-            progBag.SetProperty(PropertyId.SpeechServiceConnection_ProxyPassword, proxyPassword);
+            if (!String.IsNullOrEmpty(proxyUserName))
+            {
+                progBag.SetProperty(PropertyId.SpeechServiceConnection_ProxyUserName, proxyUserName);
+            }
+            if (!String.IsNullOrEmpty(proxyPassword))
+            {
+                progBag.SetProperty(PropertyId.SpeechServiceConnection_ProxyPassword, proxyPassword);
+            }
         }
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
