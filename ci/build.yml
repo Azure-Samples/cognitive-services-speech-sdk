@@ -309,6 +309,10 @@ jobs:
           throw "an error occurred"
       }
     displayName: 'Downloading CompEval data'
+  - powershell: |
+      cd CompEvalRun\CompEval\en-US
+      Remove-Item -Verbose c*.wav,d*.wav,e*.wav,f*.wav
+    displayName: Delete 1/4 of the files
   - bash: |
       # --build-dir is used as a drop directory here
       ./ci/run-tests.sh \
