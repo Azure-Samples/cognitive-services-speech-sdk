@@ -97,7 +97,7 @@ jobs:
           inputs:
             ConnectedServiceName: Speech SDK ESRP Signing
             FolderPath: repack
-            Pattern: '*.pyd'
+            Pattern: '*.pyd,Microsoft.CognitiveServices.Speech.extension.kws.dll'
             signConfigType: inlineSignParams
             inlineOperation: $(SIGN_PARAMS_DLL)
           condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
