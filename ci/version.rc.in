@@ -1,0 +1,66 @@
+#include "winres.h"
+
+// note: need to add a specific build id that is appended indicating the type of build from the id.
+// IDI_ICON1               ICON                    PRODUCT_ICON
+#define FILE_VERSION_RESOURCE           ${SPEECHSDK_MAJOR},${SPEECHSDK_MINOR},${SPEECHSDK_PATCH},${SPEECHSDK_VTAG}
+#define PRODUCT_VERSION_RESOURCE        ${SPEECHSDK_MAJOR},${SPEECHSDK_MINOR},${SPEECHSDK_PATCH},${SPEECHSDK_VTAG}
+#define PRODUCT_COMMENTS                "Microsoft Cognitive Services Speech SDK"
+#define PRODUCT_COMPANY_NAME            "Microsoft Corporation"
+#define PRODUCT_FILE_DESCRIPTION        "Microsoft Cognitive Services Speech SDK"
+#define FILE_VERSION_RESOURCE_STR       "${SPEECHSDK_VERSION}"
+#define PRODUCT_VERSION_RESOURCE_STR    "${SPEECHSDK_VERSION}"
+#define FILE_ORIGINAL_NAME_STR          "${SPEECHSDK_ORIGINAL_FILENAME}"
+#define PRODUCT_COMPANY_COPYRIGHT       "(c) Microsoft Corporation. All rights reserved."
+#define PRODUCT_BUNDLE                  "Microsoft Cognitive Services Speech SDK"
+#define PRODUCT_INTERNAL_NAME           "Microsoft Cognitive Services Speech SDK"
+
+#if ${SPEECHSDK_ISPRIVATE}
+#define SPEECHSDK_FF0       0x8L    // VS_FF_PRIVATEBUILD
+#else
+#define SPEECHSDK_FF0       0x0L
+#endif
+#if ${SPEECHSDK_ISPRERELEASE}
+#define SPEECHSDK_FF1       0x2L    // VS_FF_PRERELEASE
+#else
+#define SPEECHSDK_FF1       0x0L
+#endif
+#ifdef _DEBUG
+#define SPEECHSDK_FF2       0x1L    // VS_FF_DEBUG
+#else
+#define SPEECHSDK_FF2       0x0L
+#endif
+
+LANGUAGE 0x0C00, SUBLANG_DEFAULT
+
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION     FILE_VERSION_RESOURCE
+    PRODUCTVERSION  PRODUCT_VERSION_RESOURCE
+    FILEFLAGSMASK   0x3fL   // Mask of the fileflags defined below.
+    FILEFLAGS       SPEECHSDK_FF2 | SPEECHSDK_FF1 | SPEECHSDK_FF0
+    FILEOS          0x4L    // VOS__WINDOWS32 (This file is designed for Windows NT)
+    FILETYPE        0x2L    // VFT_DLL (This file contains a dll)
+    FILESUBTYPE     0x0L    // VFT2_UNKNOWN (There is no subtype for a dll)
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "0C0004b0" // Unicode
+        BEGIN
+#if ${SPEECHSDK_ISPRIVATE}
+            VALUE "PrivateBuild",      "Private build, not for distribution"
+#endif
+            VALUE "Comments",           PRODUCT_COMMENTS
+            VALUE "CompanyName",        PRODUCT_COMPANY_NAME
+            VALUE "FileDescription",    PRODUCT_FILE_DESCRIPTION
+            VALUE "FileVersion",        FILE_VERSION_RESOURCE_STR
+            VALUE "OriginalFilename",   FILE_ORIGINAL_NAME_STR
+            VALUE "InternalName",       FILE_ORIGINAL_NAME_STR
+            VALUE "LegalCopyright",     PRODUCT_COMPANY_COPYRIGHT
+            VALUE "ProductName",        PRODUCT_BUNDLE
+            VALUE "ProductVersion",     PRODUCT_VERSION_RESOURCE_STR
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0C00, 1200
+    END
+END

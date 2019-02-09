@@ -34,6 +34,17 @@ elseif(ANDROID)
     set(CMAKE_CXX_FLAGS "-D__GNUC__=4 -std=c++11 -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -fno-strict-aliasing -fPIC")
 endif()
 
+if(WIN32)
+  set(SPEECHSDK_ORIGINAL_FILENAME "${JAVA_BINDINGS}.dll")
+  configure_file(
+    ${CARBON_ROOT}/ci/version.rc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/windows/version.rc)
+
+  set(SOURCES_VERSION "${CMAKE_CURRENT_BINARY_DIR}/windows/version.rc")
+else()
+  set(SOURCES_VERSION "")
+endif()
+
 # ${SWIG_INTERFACE} and ${SWIG_WRAPPERS} point to common interface / header files
 set(SWIG_MODULE_${JAVA_BINDINGS}_EXTRA_DEPS
     ${SWIG_INTERFACE}
@@ -53,9 +64,9 @@ include_directories(${JNI_INCLUDE_DIRS})
 include_directories("${PROJECT_SOURCE_DIR}/..")
 
 if("${CMAKE_VERSION}" VERSION_GREATER 3.8)
-    swig_add_library(${JAVA_BINDINGS} LANGUAGE java SOURCES ${SWIG_JAVA_INTERFACE})
+    swig_add_library(${JAVA_BINDINGS} LANGUAGE java SOURCES ${SWIG_JAVA_INTERFACE} ${SOURCES_VERSION})
 else()
-    swig_add_module(${JAVA_BINDINGS} java ${SWIG_JAVA_INTERFACE})
+    swig_add_module(${JAVA_BINDINGS} java ${SWIG_JAVA_INTERFACE} ${SOURCES_VERSION})
 endif()
 
 if(WIN32 AND SPECTRE_MITIGATION)

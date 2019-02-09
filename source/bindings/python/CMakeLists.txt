@@ -62,15 +62,26 @@ set(SWIG_MODULE_${PROJECT_NAME}_EXTRA_DEPS ${SWIG_INTERFACE} ${SWIG_WRAPPERS})
 include_directories("${swig_include_dirs}")
 set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_PACKAGE_NAME})
 
+if(WIN32)
+  set(SPEECHSDK_ORIGINAL_FILENAME ${PROJECT_NAME})
+  configure_file(
+    ${CARBON_ROOT}/ci/version.rc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/windows/version.rc)
+
+  set(SOURCES_VERSION "${CMAKE_CURRENT_BINARY_DIR}/windows/version.rc")
+else()
+  set(SOURCES_VERSION "")
+endif()
+
 if("${CMAKE_VERSION}" VERSION_GREATER 3.8)
     swig_add_library(${PROJECT_NAME}
         LANGUAGE python
         OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_PACKAGE_NAME} # only supported on cmake > 3.11
-        SOURCES ${SOURCES}
+        SOURCES ${SOURCES} ${SOURCES_VERSION}
         $<TARGET_OBJECTS:c_api>
     )
 else()
-    swig_add_module(${PROJECT_NAME} python ${SOURCES})
+    swig_add_module(${PROJECT_NAME} python ${SOURCES} ${SOURCES_VERSION})
 endif()
 
 target_include_directories(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}

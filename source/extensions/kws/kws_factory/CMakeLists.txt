@@ -16,6 +16,16 @@ source_group("Header Files (public)" FILES ${HEADERS})
 source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
+if(WIN32)
+  set(SPEECHSDK_ORIGINAL_FILENAME "Microsoft.CognitiveServices.Speech.extension.kws.dll")
+  configure_file(
+    ${CARBON_ROOT}/ci/version.rc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/windows/version.rc)
+
+  list(APPEND SOURCES "${CMAKE_CURRENT_BINARY_DIR}/windows/version.rc")
+endif()
+
+
 add_library(kws_factory SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
 target_include_directories(kws_factory

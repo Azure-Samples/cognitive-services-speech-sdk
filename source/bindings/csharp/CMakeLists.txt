@@ -1,4 +1,5 @@
 project(Microsoft.CognitiveServices.Speech.csharp)
+
 set(CSPROJFILENAME "Microsoft.CognitiveServices.Speech.csharp")
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(CSHARP_BINDINGS_SRC_DIR "${SRC_DIR}/interop")

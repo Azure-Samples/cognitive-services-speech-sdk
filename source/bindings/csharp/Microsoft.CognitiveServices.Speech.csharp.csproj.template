@@ -13,10 +13,20 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <Configurations>Debug;Release;DebugUnixOS;ReleaseUnixOS</Configurations>
     <NoWarn>1701;1702;1705;1591</NoWarn>
-    <Version>0.0.0</Version>
+    <Version>@SPEECHSDK_MAJOR@.@SPEECHSDK_MINOR@.@SPEECHSDK_PATCH@.@SPEECHSDK_VTAG@</Version>
     <DebugSymbols>true</DebugSymbols>
     <FxCopAnalyzerVersion>2.6.2</FxCopAnalyzerVersion>
     <CodeAnalysisRuleSet>$(USERPROFILE)\.nuget\packages\microsoft.codeanalysis.fxcopanalyzers\$(FxCopAnalyzerVersion)\rulesets\legacy\Sdl-7.1.Recommended.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Company>Microsoft Corporation</Company>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <Description>Microsoft Cognitive Services Speech SDK</Description>
+    <Product>Microsoft Cognitive Services Speech SDK</Product>
+    <AssemblyTitle>Microsoft Cognitive Services Speech SDK</AssemblyTitle>
+    <FileVersion>@SPEECHSDK_MAJOR@.@SPEECHSDK_MINOR@.@SPEECHSDK_PATCH@.@SPEECHSDK_VTAG@</FileVersion>
+    <AssemblyVersion>@SPEECHSDK_MAJOR@.@SPEECHSDK_MINOR@.@SPEECHSDK_PATCH@.@SPEECHSDK_VTAG@</AssemblyVersion>
+    <InformationalVersion>@SPEECHSDK_VERSION@</InformationalVersion>
   </PropertyGroup>
   <PropertyGroup>
     <OutputPath>${CMAKE_RUNTIME_OUTPUT_DIRECTORY}\$(Configuration)\</OutputPath>

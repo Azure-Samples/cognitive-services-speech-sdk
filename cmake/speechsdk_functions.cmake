@@ -73,11 +73,12 @@ endfunction()
 # Parse version and validate with respect to the build type (local, dev, int,
 # prod). Return the version components in variables with the specified prefix:
 #
-# * ${PREFIX}_MAJOR - major version
-# * ${PREFIX}_MINOR - minor version
-# * ${PREFIX}_PATCH - patch version
+# * ${PREFIX}_MAJOR    - major version
+# * ${PREFIX}_MINOR    - minor version
+# * ${PREFIX}_PATCH    - patch version
+# * ${PREFIX}_VTAG     - build environment (8 local, 12 dev, 16 int, 24 prod)
 # * ${PREFIX}_ISPRERELEASE - 1 if pre-release version, 0 otherwise.
-# * ${PREFIX}_PRELEASE - pre-release portion of the version number or empty.1 if pre-release version, 0 otherwise.
+# * ${PREFIX}_PRERELEASE - pre-release portion of the version number or empty. 1 if pre-release version, 0 otherwise.
 function(PARSE_VERSION)
   cmake_parse_arguments(OPT "" "PREFIX;BUILD_TYPE;VERSION" "" ${ARGN})
   if(NOT (DEFINED OPT_BUILD_TYPE AND DEFINED OPT_VERSION AND DEFINED OPT_PREFIX))
@@ -87,18 +88,22 @@ function(PARSE_VERSION)
   if(OPT_VERSION MATCHES
       "^(${NUM_RE})\\.(${NUM_RE})\\.(${NUM_RE})(-(alpha|beta|rc)\\.(${NUM_RE})(\\.(${NUM_RE}))?)?$")
     if(OPT_BUILD_TYPE STREQUAL "local")
+      set("${OPT_PREFIX}_ISPRIVATE" 1 PARENT_SCOPE)
       if(NOT "${CMAKE_MATCH_5}.${CMAKE_MATCH_6}${CMAKE_MATCH_7}" STREQUAL "alpha.0.1")
         message(FATAL_ERROR "version number for build type '${OPT_BUILD_TYPE}' must be MAJOR.MINOR.PATCH-alpha.0.1 but is '${OPT_VERSION}'")
       endif()
     elseif(OPT_BUILD_TYPE STREQUAL "dev")
+      set("${OPT_PREFIX}_ISPRIVATE" 1 PARENT_SCOPE)
       if(NOT (("${CMAKE_MATCH_5}.${CMAKE_MATCH_6}" STREQUAL "alpha.0") AND (DEFINED CMAKE_MATCH_7)))
         message(FATAL_ERROR "version number for build type '${OPT_BUILD_TYPE}' must be MAJOR.MINOR.PATCH-alpha.0.BUILDID but is '${OPT_VERSION}'")
       endif()
     elseif(OPT_BUILD_TYPE STREQUAL "int")
+      set("${OPT_PREFIX}_ISPRIVATE" 1 PARENT_SCOPE)
       if(NOT (("${CMAKE_MATCH_5}.${CMAKE_MATCH_6}" STREQUAL "beta.0") AND (DEFINED CMAKE_MATCH_7)))
         message(FATAL_ERROR "version number for build type '${OPT_BUILD_TYPE}' must be MAJOR.MINOR.PATCH-beta.0.BUILDID but is '${OPT_VERSION}'")
       endif()
     elseif(OPT_BUILD_TYPE STREQUAL "prod")
+      set("${OPT_PREFIX}_ISPRIVATE" 0 PARENT_SCOPE)
       if((DEFINED CMAKE_MATCH_4) AND (DEFINED CMAKE_MATCH_7 OR CMAKE_MATCH_6 EQUAL 0))
         message(FATAL_ERROR "version number for build type '${OPT_BUILD_TYPE}' must be MAJOR.MINOR.PATCH-(alpha|beta|rc).NUM' ${OPT_VERSION}'")
       endif()
@@ -116,6 +121,28 @@ function(PARSE_VERSION)
     set("${OPT_PREFIX}_PRERELEASE" ${CMAKE_MATCH_4} PARENT_SCOPE)
   else()
     message(FATAL_ERROR "cannot parse version '${OPT_VERSION}'")
+  endif()
+
+  if(OPT_BUILD_TYPE STREQUAL "prod")
+    if(OPT_VERSION MATCHES "-alpha")
+      set("${OPT_PREFIX}_VTAG" 25 PARENT_SCOPE)
+    elseif(OPT_VERSION MATCHES "-beta")
+      set("${OPT_PREFIX}_VTAG" 26 PARENT_SCOPE)
+    elseif(OPT_VERSION MATCHES "-rc")
+      set("${OPT_PREFIX}_VTAG" 27 PARENT_SCOPE)
+    else()
+      set("${OPT_PREFIX}_VTAG" 28 PARENT_SCOPE)
+    endif()
+  else()
+    if(OPT_VERSION MATCHES "-alpha")
+      set("${OPT_PREFIX}_VTAG" 8 PARENT_SCOPE)
+    elseif(OPT_VERSION MATCHES "-beta")
+      set("${OPT_PREFIX}_VTAG" 12 PARENT_SCOPE)
+    elseif(OPT_VERSION MATCHES "-rc")
+      set("${OPT_PREFIX}_VTAG" 16 PARENT_SCOPE)
+    else()
+      set("${OPT_PREFIX}_VTAG" 24 PARENT_SCOPE)
+    endif()
   endif()
 endfunction()
 

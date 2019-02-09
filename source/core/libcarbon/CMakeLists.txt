@@ -31,6 +31,13 @@ if(WIN32)
 
   endif()
   list(APPEND HEADERS_PRIVATE "${SRC_DIR}/windows/targetver.h")
+
+  set(SPEECHSDK_ORIGINAL_FILENAME "${SPEECHSDK_CORE_LIBRARY}.dll")
+  configure_file(
+    ${CARBON_ROOT}/ci/version.rc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/windows/version.rc)
+
+    list(APPEND SOURCES "${CMAKE_CURRENT_BINARY_DIR}/windows/version.rc")
 endif()
 
 source_group("Header Files (public)" FILES ${HEADERS})
