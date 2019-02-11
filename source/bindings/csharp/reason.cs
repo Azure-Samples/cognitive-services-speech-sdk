@@ -70,7 +70,7 @@ namespace Microsoft.CognitiveServices.Speech
         RecognizingKeyword = 10,
 
         /// <summary>
-        /// Indicates that Keyword Recognition completed recognizing the given keyword.
+        /// Indicates that keyword recognition completed recognizing the given keyword.
         /// Added in version 1.3.0
         /// </summary>
         RecognizedKeyword = 11

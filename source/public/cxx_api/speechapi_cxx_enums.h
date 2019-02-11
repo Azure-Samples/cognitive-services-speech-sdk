@@ -300,8 +300,7 @@ enum class ResultReason
     RecognizingKeyword = 10,
 
     /// <summary>
-    /// Indicates that Keyword Recognition completed recognizing the given keyword.
-    /// In case keyword verification is configured, additionally indicates successful verification of the keyword.
+    /// Indicates that keyword recognition completed recognizing the given keyword.
     /// Added in version 1.3.0
     /// </summary>
     RecognizedKeyword = 11
