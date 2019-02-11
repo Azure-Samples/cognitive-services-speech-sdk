@@ -76,43 +76,5 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 return textResultEvents;
             }
         }
-
-        public async Task<List<List<SpeechRecognitionEventArgs>>> GetSpeechIntermediateRecognitionContinuous(SpeechConfig config, string audioFile)
-        {
-            using (var recognizer = TrackSessionId(CreateSpeechRecognizerWithStream(config, audioFile)))
-            {
-                var tcs = new TaskCompletionSource<bool>();
-                var listOfIntermediateResults = new List<List<SpeechRecognitionEventArgs>>();
-                List<SpeechRecognitionEventArgs> receivedRecognizingEvents = null;
-
-                recognizer.SessionStarted += (s, e) =>
-                {
-                    receivedRecognizingEvents = new List<SpeechRecognitionEventArgs>();
-                };
-                recognizer.Recognizing += (s, e) => receivedRecognizingEvents.Add(e);
-                recognizer.Recognized += (s, e) =>
-                {
-                    listOfIntermediateResults.Add(receivedRecognizingEvents);
-                    receivedRecognizingEvents = new List<SpeechRecognitionEventArgs>();
-                };
-                recognizer.SessionStopped += (s, e) =>
-                {
-                    tcs.TrySetResult(true);
-                };
-                string canceled = string.Empty;
-                recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
-
-                await recognizer.StartContinuousRecognitionAsync();
-                await Task.WhenAny(tcs.Task, Task.Delay(timeout));
-                await recognizer.StopContinuousRecognitionAsync();
-
-                if (!string.IsNullOrEmpty(canceled))
-                {
-                    Assert.Fail($"Recognition Canceled: {canceled}");
-                }
-
-                return listOfIntermediateResults;
-            }
-        }
     }
 }

@@ -19,7 +19,8 @@ namespace MicrosoftSpeechSDKSamples
     {
         private static void MyRecognizingEventHandler(object sender, SpeechRecognitionEventArgs e)
         {
-            Console.WriteLine($"Speech recognition: intermediate result: {e.ToString()}, Offset: {e.Result.OffsetInTicks}, Duration: {e.Result.Duration}.");
+            var resultLatency = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatency);
+            Console.WriteLine($"Intermediate result (latency={resultLatency}): {e.ToString()}, Offset: {e.Result.OffsetInTicks}, Duration: {e.Result.Duration}.");
         }
 
         private static void MyRecognizedEventHandler(object sender, SpeechRecognitionEventArgs e)
@@ -239,6 +240,7 @@ namespace MicrosoftSpeechSDKSamples
             var connection = Connection.FromRecognizer(reco);
             connection.Connected += MyConnectedEventHandler;
             connection.Disconnected += MyDisconnectedEventHandler;
+            reco.Recognizing += MyRecognizingEventHandler;
             reco.Recognized += MyRecognizedEventHandler;
             reco.Canceled += MyCanceledEventHandler;
             reco.SessionStarted += MySessionStartedEventHandler;

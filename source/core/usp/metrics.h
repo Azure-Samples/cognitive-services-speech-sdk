@@ -93,6 +93,7 @@ struct TELEMETRY_DATA
     nlohmann::json ttsJson{};
     nlohmann::json deviceJson{};
     nlohmann::json phraseLatencyJson{};
+    nlohmann::json hypothesisLatencyJson{};
 };
 
 /**
@@ -157,11 +158,12 @@ struct Telemetry
     void RecordReceivedMsg(const std::string& requestId, const std::string&receivedMsg);
 
     /**
-     * Phrase latency population function.
+     * Result latency population function.
      * @param requestId The requestId associated with the received message.
      * @param latencyInTicks The latency value in ticks.
+     * @param isPhraseLatency If it is true, the latency is for phrase result. Otherwise it is for hypothesis result.
      */
-    void RecordPhraseLatency(const std::string& requestId, uint64_t latencyInTicks);
+    void RecordResultLatency(const std::string& requestId, uint64_t latencyInTicks, bool isPhraseLatency);
 
     /**
      * Handles the necessary changes for a requestId change event.
@@ -235,6 +237,7 @@ namespace event
         static const std::string Notification = "notification";
         static const std::string SDK = "sdk";
         static const std::string PhraseLatency = "PhraseLatency";
+        static const std::string HypothesisLatency = "HypothesisLatency";
     }
 }
 
@@ -256,9 +259,9 @@ inline void MetricsAudioEnd(Telemetry& telemetry, const std::string& requestId)
     telemetry.InbandEventTimestampPopulate(requestId, event::name::Microphone, std::string{}, event::keys::End);
 }
 
-inline void MetricsPhraseLatency(Telemetry& telemetry, const std::string& requestId, uint64_t latencyInTicks)
+inline void MetricsResultLatency(Telemetry& telemetry, const std::string& requestId, uint64_t latencyInTicks, bool isPhraseLatency)
 {
-    telemetry.RecordPhraseLatency(requestId, latencyInTicks);
+    telemetry.RecordResultLatency(requestId, latencyInTicks, isPhraseLatency);
 }
 
 inline void MetricsTransportStart(Telemetry& telemetry, const std::string& connectionId)

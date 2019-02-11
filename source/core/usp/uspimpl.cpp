@@ -582,11 +582,11 @@ void Connection::Impl::QueueAudioEnd()
     ScheduleWork();
 }
 
-void Connection::Impl::WriteTelemetryLatency(uint64_t latencyInTicks)
+void Connection::Impl::WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency)
 {
     if (m_valid)
     {
-        MetricsPhraseLatency(*m_telemetry, m_speechRequestId, latencyInTicks);
+        MetricsResultLatency(*m_telemetry, m_speechRequestId, latencyInTicks, isPhraseLatency);
     }
     else
     {

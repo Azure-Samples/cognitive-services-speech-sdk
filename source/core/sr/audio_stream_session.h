@@ -105,7 +105,7 @@ public:
 
     void OpenConnection(bool forContinuousRecognition) override;
     void CloseConnection() override;
-    void WriteTelemetryLatency(uint64_t latencyInTicks) override;
+    void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) override;
 
     // --- ISpxKwsEngineAdapterSite
     void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint64_t duration, double confidence, const std::string& keyword, const DataChunkPtr& audioChunk) override;
@@ -258,6 +258,7 @@ private:
     void RecognizeOnceAsync(const std::shared_ptr<Operation>& singleShot);
 
     void SetAudioConfigurationInProperties();
+    uint64_t GetResultLatencyInTicks(const ProcessedAudioTimestampPtr& audiotimestamp) const;
 
 private:
 
@@ -303,6 +304,7 @@ private:
 
     bool m_expectAdapterStartedTurn;
     bool m_expectAdapterStoppedTurn;
+    bool m_expectFirstHypothesis;
     bool m_adapterAudioMuted;
     RecognitionKind m_turnEndStopKind;
 

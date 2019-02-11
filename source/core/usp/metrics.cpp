@@ -220,6 +220,11 @@ static nlohmann::json telemetry_add_metricevents(const TELEMETRY_DATA& telemetry
         auto recvObj = PropertybagInitializeWithKeyValue(event::name::PhraseLatency, telemetry_object.phraseLatencyJson);
         json_array.push_back(recvObj);
     }
+    if (telemetry_object.hypothesisLatencyJson != nullptr)
+    {
+        auto recvObj = PropertybagInitializeWithKeyValue(event::name::HypothesisLatency, telemetry_object.hypothesisLatencyJson);
+        json_array.push_back(recvObj);
+    }
 
     return json_array;
 }
@@ -460,7 +465,7 @@ void Telemetry::RecordReceivedMsg(const std::string& requestId, const std::strin
     }
 }
 
-void Telemetry::RecordPhraseLatency(const std::string& requestId, uint64_t latencyInTicks)
+void Telemetry::RecordResultLatency(const std::string& requestId, uint64_t latencyInTicks, bool isPhraseLatency)
 {
     std::lock_guard<std::mutex> lk{ m_lock };
     auto telemetry_object = GetTelemetryForRequestId(requestId);
@@ -468,8 +473,8 @@ void Telemetry::RecordPhraseLatency(const std::string& requestId, uint64_t laten
     {
         auto& telemetry_data = m_telemetry_object_map[requestId];
         assert(telemetry_object == telemetry_data.get());
-        auto& phraseJson = telemetry_data->phraseLatencyJson;
-        auto& evArray = initialize_jsonArray(phraseJson);
+        auto& resultLatencyJson = isPhraseLatency ? telemetry_data->phraseLatencyJson : telemetry_data->hypothesisLatencyJson;
+        auto& evArray = initialize_jsonArray(resultLatencyJson);
         /* If we reach the max number of messages, drop it */
         if (evArray.size() < MaxMessagesToRecord)
         {
@@ -478,7 +483,7 @@ void Telemetry::RecordPhraseLatency(const std::string& requestId, uint64_t laten
     }
     else
     {
-        LogError("Telemetry: received unexpected requestId: (%s).", requestId.c_str());
+        LogError("%s: Telemetry for %s: received unexpected requestId: (%s).", __FUNCTION__, isPhraseLatency ? "phrase" : "hypothesis", requestId.c_str());
     }
 }
 

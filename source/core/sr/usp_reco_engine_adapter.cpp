@@ -793,7 +793,7 @@ void CSpxUspRecoEngineAdapter::UspWriteFlush()
     }
 }
 
-void CSpxUspRecoEngineAdapter::WriteTelemetryLatency(uint64_t latencyInTicks)
+void CSpxUspRecoEngineAdapter::WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency)
 {
     SPX_DBG_ASSERT(m_uspConnection != nullptr);
     if (m_uspConnection == nullptr)
@@ -802,7 +802,7 @@ void CSpxUspRecoEngineAdapter::WriteTelemetryLatency(uint64_t latencyInTicks)
     }
     else
     {
-        m_uspConnection->WriteTelemetryLatency(latencyInTicks);
+        m_uspConnection->WriteTelemetryLatency(latencyInTicks, isPhraseLatency);
     }
 }
 
@@ -1018,8 +1018,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
     else if (IsState(UspState::WaitingForPhrase))
     {
         {
-            SPX_DBG_TRACE_SCOPE("Fire final translation result: Creating Result", "FireFinalResul: GetSite()->FireAdapterResult_FinalResult()  complete!");
-
+            SPX_DBG_TRACE_SCOPE("Fire intermediate translation result: Creating Result", "FireIntermeidateResult: GetSite()->FireAdapterResult_Intermediate()  complete!");
             InvokeOnSite([&](const SitePtr& site)
             {
                 // Create the result

@@ -329,18 +329,51 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             { 
                 var connection = Connection.FromRecognizer(recognizer);
+                bool expectFirstRecognizingResult = true;
+                long hypothesisLatency = 0;
+                long phraseLatency = 0;
+
                 if (usingPreConnection)
                 {
                     connection.Open(true);
                 }
+
                 List<string> recognizedText = new List<string>();
                 helper.SubscribeToCounterEventHandlers(recognizer, connection);
+                recognizer.Recognizing += (s, e) =>
+                {
+                    var latencyString = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatency);
+                    if (expectFirstRecognizingResult)
+                    {
+                        hypothesisLatency = 0;
+                        if (!string.IsNullOrEmpty(latencyString))
+                        {
+                            hypothesisLatency = Convert.ToInt64(latencyString);
+                        }
+                        Assert.IsTrue(hypothesisLatency > 0, $"Invalid hypothesis latency {latencyString}.");
+                        expectFirstRecognizingResult = false;
+                    }
+                    else
+                    {
+                        Assert.IsTrue(string.IsNullOrEmpty(latencyString), $"Unexpected hypothesis latency {latencyString}.");
+                    }
+                };
                 recognizer.Recognized += (s, e) =>
                 {
                     if (e.Result.Text.Length > 0)
                     {
                         recognizedText.Add(e.Result.Text);
                     }
+                    var latencyString = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatency);
+                    phraseLatency = 0;
+                    if (!string.IsNullOrEmpty(latencyString))
+                    {
+                        phraseLatency = Convert.ToInt64(latencyString);
+                    }
+                    Assert.IsTrue(phraseLatency > 0, $"Invalid phrase latency {latencyString}.");
+                    Assert.IsTrue(phraseLatency > hypothesisLatency, $"Phrase latency ({phraseLatency}) is smaller than hypothesis latency ({hypothesisLatency}).");
+                    expectFirstRecognizingResult = true;
+                    hypothesisLatency = 0;
                 };
 
                 await helper.CompleteContinuousRecognition(recognizer);

@@ -65,7 +65,7 @@ namespace Impl {
         mutable std::shared_ptr<uint8_t> data;
     };
 
-    AudioTimeStampForPhrasePtr PcmAudioBuffer::DiscardBytesUnlocked(uint64_t bytes)
+    ProcessedAudioTimestampPtr PcmAudioBuffer::DiscardBytesUnlocked(uint64_t bytes)
     {
         system_clock::time_point audioTimestamp;
         uint64_t remainingInTicks;
@@ -121,10 +121,10 @@ namespace Impl {
             m_totalSizeInBytes -= bytes;
         }
 
-        return foundTimeStamp ? std::make_shared<DiscardedAudioTimeStamp>(audioTimestamp, remainingInTicks) : nullptr;
+        return foundTimeStamp ? std::make_shared<ProcessedAudioTimestamp>(audioTimestamp, remainingInTicks) : nullptr;
     }
 
-    AudioTimeStampForPhrasePtr PcmAudioBuffer::DiscardTill(uint64_t offsetInTicks)
+    ProcessedAudioTimestampPtr PcmAudioBuffer::DiscardTill(uint64_t offsetInTicks)
     {
         std::unique_lock<std::mutex> guard(m_lock);
         return DiscardTillUnlocked(offsetInTicks);
@@ -234,18 +234,16 @@ namespace Impl {
         return result;
     }
 
-    AudioTimeStampForPhrasePtr PcmAudioBuffer::DiscardTillUnlocked(uint64_t offsetInTicks)
+    ProcessedAudioTimestampPtr PcmAudioBuffer::DiscardTillUnlocked(uint64_t offsetInTicks)
     {
-        int64_t bytes = DurationToBytes(offsetInTicks) - m_bufferStartOffsetInBytesTurnRelative;
-        if (bytes < 0)
+        uint64_t offsetInBytes = DurationToBytes(offsetInTicks);
+        if (offsetInBytes < m_bufferStartOffsetInBytesTurnRelative)
         {
-            SPX_DBG_TRACE_WARNING("%s: Offset is not monothonically increasing. Current turn offset in bytes %d, discarding bytes", __FUNCTION__,
-                (int)m_bufferStartOffsetInBytesTurnRelative,
-                (int)bytes);
-
+            SPX_DBG_TRACE_WARNING("%s: Offset is not monothonically increasing. Current turn offset in bytes %d, discarding bytes %d",
+                __FUNCTION__, (int)m_bufferStartOffsetInBytesTurnRelative, (int)offsetInBytes);
             return nullptr;
         }
-        return DiscardBytesUnlocked(bytes);
+        return DiscardBytesUnlocked(offsetInBytes - m_bufferStartOffsetInBytesTurnRelative);
     }
 
     uint64_t PcmAudioBuffer::NonAcknowledgedSizeInBytes() const
@@ -259,4 +257,46 @@ namespace Impl {
         std::unique_lock<std::mutex> guard(m_lock);
         return BytesToDurationInTicks(m_bufferStartOffsetInBytesAbsolute);
     }
+
+    ProcessedAudioTimestampPtr PcmAudioBuffer::GetTimestamp(uint64_t offsetInTicks) const
+    {
+        std::unique_lock<std::mutex> guard(m_lock);
+
+        uint64_t offsetInBytes = DurationToBytes(offsetInTicks);
+        if (offsetInBytes < m_bufferStartOffsetInBytesTurnRelative)
+        {
+            SPX_DBG_TRACE_WARNING("%s: Offset is not monothonically increasing. Current turn offset in bytes %d, offset to get timestamp in bytes %d",
+                __FUNCTION__, (int)m_bufferStartOffsetInBytesTurnRelative, (int)offsetInBytes);
+            return nullptr;
+        }
+
+        uint64_t bytes = offsetInBytes - m_bufferStartOffsetInBytesTurnRelative;
+        uint64_t chunkBytes = 0;
+        auto queueSize = m_audioBuffers.size();
+        size_t index;
+        for (index = 0; index < queueSize; index++)
+        {
+            chunkBytes = m_audioBuffers[index]->size;
+            if (chunkBytes >= bytes)
+            {
+                break;
+            }
+            else
+            {
+                bytes -= chunkBytes;
+            }
+        }
+
+        if (index >= queueSize)
+        {
+            SPX_DBG_ASSERT_WITH_MESSAGE(bytes > 0, "Reach end of queue, but no bytes left.");
+            SPX_DBG_TRACE_WARNING("%s: Offset exceeds what is available in the buffer %d. No timestamp can be retrieved.", __FUNCTION__, (int)bytes);
+            return nullptr;
+        }
+
+        system_clock::time_point audioTimestamp = m_audioBuffers[index]->receivedTime;;
+        uint64_t remainingInTicks = BytesToDurationInTicks(chunkBytes - bytes);
+        return std::make_shared<ProcessedAudioTimestamp>(audioTimestamp, remainingInTicks);
+    }
+
 }}}}

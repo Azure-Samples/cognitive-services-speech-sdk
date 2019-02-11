@@ -101,7 +101,7 @@ public:
     void SetAdapterMode(bool singleShot) override;
     void OpenConnection(bool singleShot) override;
     void CloseConnection() override;
-    void WriteTelemetryLatency(uint64_t latencyInTicks) override;
+    void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) override;
 
     // --- ISpxAudioProcessor
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;

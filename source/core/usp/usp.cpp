@@ -50,9 +50,9 @@ void Connection::SendMessage(const std::string& messagePath, const uint8_t* buff
     m_impl->QueueMessage(messagePath, buffer, size, messageType);
 }
 
-void Connection::WriteTelemetryLatency(uint64_t latencyInTicks)
+void Connection::WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency)
 {
-    m_impl->WriteTelemetryLatency(latencyInTicks);
+    m_impl->WriteTelemetryLatency(latencyInTicks, isPhraseLatency);
 }
 
 Client& Client::SetProxyServerInfo(const char *proxyHost, int proxyPort, const char *proxyUsername, const char *proxyPassword)

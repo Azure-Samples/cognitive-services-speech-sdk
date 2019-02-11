@@ -99,8 +99,9 @@ public:
     /**
     * Writes latency value into telemetry data.
     * @param latencyInTicks The latency value in ticks.
+    * @param isPhraseLatency If it is true, the latency is for phrase result. Otherwise it is for hypothesis result.
     */
-    void WriteTelemetryLatency(uint64_t latencyInTicks);
+    void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency);
 
     /**
     * Requests the connection to service to be shut down.

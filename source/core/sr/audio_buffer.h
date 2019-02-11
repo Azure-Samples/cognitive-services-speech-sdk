@@ -19,13 +19,12 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-    // Time stamp of the last dicarded audio segment. The chunkReceivedTime is the time when the last audio chunk
-    // is recevied, and the remainingAudioInTicks is the length (in ticks) of audio in the last chunk that has
-    // not been discarded. DiscardedAudioTimeStamp presents the time point when the last audio that contributes
-    // to a phrase result has been received.
-    struct DiscardedAudioTimeStamp
+    // ProcessedAudioTimestamp presents the received time of the last audio that contributes a hypothesis or phrase result.
+    // The chunkReceivedTime is the time when the last audio chunk is recevied, and the remainingAudioInTicks is the length
+    // (in ticks) of audio in the last chunk that is not a part of hypothesis or phrase result.
+    struct ProcessedAudioTimestamp
     {
-        DiscardedAudioTimeStamp(std::chrono::system_clock::time_point chunkTimeStamp, uint64_t remainingInTicks)
+        ProcessedAudioTimestamp(std::chrono::system_clock::time_point chunkTimeStamp, uint64_t remainingInTicks)
             : chunkReceivedTime{ chunkTimeStamp }, remainingAudioInTicks{ remainingInTicks }
         { }
 
@@ -33,7 +32,7 @@ namespace Impl {
         uint64_t remainingAudioInTicks;
     };
 
-    using AudioTimeStampForPhrasePtr = std::shared_ptr<DiscardedAudioTimeStamp>;
+    using ProcessedAudioTimestampPtr = std::shared_ptr<ProcessedAudioTimestamp>;
 
     class AudioBuffer;
     using AudioBufferPtr = std::shared_ptr<AudioBuffer>;
@@ -56,7 +55,7 @@ namespace Impl {
         // Discards all chunks till the specified offset in ticks.
         // Offset is relative to the current turn. Should be called on successful final result.
         // It returns the timestamp of the last discarded audio.
-        virtual AudioTimeStampForPhrasePtr DiscardTill(uint64_t offsetInTicksTurnRelative /*Tick = HNS*/) = 0;
+        virtual ProcessedAudioTimestampPtr DiscardTill(uint64_t offsetInTicksTurnRelative /*Tick = HNS*/) = 0;
 
         // Discards "size" bytes from the beginning of unconfirmed chunks.
         // Currently used only for KWS, (in the future DiscardTill should be used instead).
@@ -83,7 +82,11 @@ namespace Impl {
         // Copies unconfirmed chunks to the target buffer.
         virtual void CopyNonAcknowledgedDataTo(AudioBufferPtr buffer) const = 0;
 
-        virtual ~AudioBuffer() {}
+        // Gets timestamp of the last audio that matches the specified offset in ticks.
+        // Offset is relative to the current turn.
+        virtual ProcessedAudioTimestampPtr GetTimestamp(uint64_t offsetInTicksTurnRelative /*Tick = HNS*/) const = 0;
+
+        virtual ~AudioBuffer() {};
     };
 
     // Audio buffer based on pcm format.
@@ -95,7 +98,7 @@ namespace Impl {
         void Add(const DataChunkPtr& audioChunk) override;
         DataChunkPtr GetNext() override;
         void NewTurn() override;
-        AudioTimeStampForPhrasePtr DiscardTill(uint64_t offset) override;
+        ProcessedAudioTimestampPtr DiscardTill(uint64_t offset) override;
         void DiscardBytes(uint64_t bytes) override;
         uint64_t ToAbsolute(uint64_t offsetInTicksTurnRelative) const override;
         uint64_t StashedSizeInBytes() const override;
@@ -103,13 +106,14 @@ namespace Impl {
         void CopyNonAcknowledgedDataTo(AudioBufferPtr buffer) const override;
         uint64_t NonAcknowledgedSizeInBytes() const override;
         uint64_t GetAbsoluteOffset() const override;
+        ProcessedAudioTimestampPtr GetTimestamp(uint64_t offsetInTicksTurnRelative /*Tick = HNS*/) const override;
 
     private:
         DISABLE_COPY_AND_MOVE(PcmAudioBuffer);
 
-        AudioTimeStampForPhrasePtr DiscardBytesUnlocked(uint64_t bytes);
+        ProcessedAudioTimestampPtr DiscardBytesUnlocked(uint64_t bytes);
         DataChunkPtr GetNextUnlocked();
-        AudioTimeStampForPhrasePtr DiscardTillUnlocked(uint64_t offsetInTicks);
+        ProcessedAudioTimestampPtr DiscardTillUnlocked(uint64_t offsetInTicks);
 
         uint64_t DurationToBytes(uint64_t durationInTicks) const;
         uint64_t BytesToDurationInTicks(uint64_t bytes) const;
