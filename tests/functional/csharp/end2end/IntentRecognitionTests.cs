@@ -59,7 +59,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 if (e.Reason == CancellationReason.Error)
                 {
-                    Console.WriteLine("CancellationReason.Error: ErrorCode {e.ErrorCode}, ErrorDetails {e.ErrorDetails}");
+                    Console.WriteLine($"CancellationReason.Error: ErrorCode {e.ErrorCode}, ErrorDetails {e.ErrorDetails}");
                 }
             };
             return recognizer;

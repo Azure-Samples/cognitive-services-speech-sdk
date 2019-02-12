@@ -57,6 +57,8 @@ public:
     /// For example, if language is defined in uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
     /// the language setting in uri takes precedence, and the effective language is "de-DE".
     /// Only the parameters that are not specified in the endpoint URL can be set by other APIs.
+    /// Note: To use authorization token with FromEndpoint, pass an empty string to the subscription in the FromEndpoint method,
+    /// and then call SetAuthorizationToken() on the created SpeechTranslationConfig instance to use the authorization token.
     /// </summary>
     /// <param name="endpoint">The service endpoint to connect to.</param>
     /// <param name="subscription">The subscription key.</param>

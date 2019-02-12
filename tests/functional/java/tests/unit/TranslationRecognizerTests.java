@@ -14,6 +14,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.net.URI;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -549,6 +550,65 @@ public class TranslationRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
+
+        r.close();
+        s.close();
+    }
+
+    @Test
+    public void testEndpointWithAuthTokenInTranslation() throws InterruptedException, ExecutionException, TimeoutException {
+        String endpoint = "wss://" + Settings.SpeechRegion + ".s2s.speech.microsoft.com/speech/translation/cognitiveservices/v1?format=simple&from=en-us&to=de-DE";
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromEndpoint(URI.create(endpoint), "");
+
+        assertNotNull(s);
+
+        String language = "en-US";
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage("de");
+
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        assertNotNull(r);
+        assertNotNull(r.getRecoImpl());
+        assertTrue(r instanceof Recognizer);
+
+        final ArrayList<String> rEvents = new ArrayList<>();
+
+        r.setAuthorizationToken(Settings.SpeechAuthorizationToken);
+        System.out.println("AuthToken:" + r.getAuthorizationToken());
+
+        r.recognized.addEventListener((o, e) -> {
+            rEvents.add("Result@" + System.currentTimeMillis());
+            System.out.println("Translated: SessionId:" + e.getSessionId()+ ", recognized:" + e.getResult().getText());
+        });
+
+        Future<?> future = r.startContinuousRecognitionAsync();
+        assertNotNull(future);
+
+        // Wait for max 30 seconds
+        future.get(30, TimeUnit.SECONDS);
+
+        assertFalse(future.isCancelled());
+        assertTrue(future.isDone());
+
+        // wait until we get at least on final result
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) &&
+                (rEvents.isEmpty())) {
+            Thread.sleep(200);
+        }
+
+        // test that we got one result
+        // TODO multi-phrase test with several phrases in one session
+        assertEquals(1, rEvents.size());
+
+        future = r.stopContinuousRecognitionAsync();
+        assertNotNull(future);
+
+        // Wait for max 30 seconds
+        future.get(30, TimeUnit.SECONDS);
+
+        assertFalse(future.isCancelled());
+        assertTrue(future.isDone());
 
         r.close();
         s.close();

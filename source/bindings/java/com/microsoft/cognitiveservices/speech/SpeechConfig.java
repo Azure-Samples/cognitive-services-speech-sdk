@@ -124,13 +124,17 @@ public class SpeechConfig implements Closeable {
      * For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
      * the language setting in uri takes precedence, and the effective language is "de-DE".
      * Only the parameters that are not specified in the endpoint URL can be set by other APIs.
+     * Note: To use authorization token with fromEndpoint, pass an empty string to the subscriptionKey in the fromEndpoint method,
+     * and then call setAuthorizationToken() on the created SpeechConfig instance to use the authorization token.
      * @param endpoint The service endpoint to connect to.
      * @param subscriptionKey The subscription key.
      * @return A speech config instance.
      */
     public static SpeechConfig fromEndpoint(java.net.URI endpoint, String subscriptionKey) {
         Contracts.throwIfNull(endpoint, "endpoint");
-        Contracts.throwIfIllegalSubscriptionKey(subscriptionKey, "subscriptionKey");
+        if(subscriptionKey == null) {
+            throw new NullPointerException("subscriptionKey");
+        }
 
         return new SpeechConfig(com.microsoft.cognitiveservices.speech.internal.SpeechConfig.FromEndpoint(endpoint.toString(), subscriptionKey));
     }

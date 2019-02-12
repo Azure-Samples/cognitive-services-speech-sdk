@@ -50,6 +50,8 @@ SPX_EXPORT
   * For example, if language is defined in the uri as query parameter "language=de-DE", and is also set to "en-US" via
   * property speechRecognitionLanguage in SpeechConfiguration, the language setting in uri takes precedence, and the effective language is "de-DE".
   * Only the parameters that are not specified in the endpoint URL can be set by other APIs.
+  * Note: To use authorization token with initWithEndpoint, pass an empty string to the subscriptionKey in the initWithEndpoint method,
+  * and then set the authorizationToken property on the created SpeechTranslationConfiguration instance to use the authorization token.
   * @param endpointUri The service endpoint to connect to.
   * @param subscriptionKey the subscription key.
   * @return an instance of speech translation configuration.

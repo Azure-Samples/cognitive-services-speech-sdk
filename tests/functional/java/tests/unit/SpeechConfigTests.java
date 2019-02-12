@@ -13,7 +13,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
 
-
 import java.net.URI;
 import java.util.ArrayList;
 
@@ -70,6 +69,37 @@ public class SpeechConfigTests {
 
         assertNotNull(s);
         
+        s.close();
+    }
+
+    @Test
+    public void testFromAuthorizationToken() {
+        SpeechConfig s = SpeechConfig.fromAuthorizationToken(Settings.SpeechAuthorizationToken, Settings.SpeechRegion);
+        assertNotNull(s);
+        s.close();
+    }
+
+    @Test
+    public void testGetAuthorizationToken() {
+        String token1 = "token1";
+        SpeechConfig s = SpeechConfig.fromAuthorizationToken(token1, Settings.SpeechRegion);
+        assertNotNull(s);
+        String actualToken = s.getAuthorizationToken();
+        assertEquals(token1, actualToken);
+        s.close();
+    }
+
+    @Test
+    public void testSetAuthorizationToken() {
+        String token1 = "token1";
+        String token2 = "token2";
+        SpeechConfig s = SpeechConfig.fromAuthorizationToken(token1, Settings.SpeechRegion);
+        assertNotNull(s);
+        String actualToken = s.getAuthorizationToken();
+        assertEquals(token1, actualToken);
+        s.setAuthorizationToken(token2);
+        actualToken = s.getAuthorizationToken();
+        assertEquals(token2, actualToken);
         s.close();
     }
 

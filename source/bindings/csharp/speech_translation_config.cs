@@ -53,6 +53,8 @@ namespace Microsoft.CognitiveServices.Speech
         /// For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
         /// the language setting in uri takes precedence, and the effective language is "de-DE".
         /// Only the parameters that are not specified in the endpoint URL can be set by other APIs.
+        /// Note: To use authorization token with FromEndpoint, pass an empty string to the subscriptionKey in the FromEndpoint method,
+        /// and then set the AuthorizationToken property on the created SpeechTranslationConfig instance to use the authorization token.
         /// </summary>
         /// <param name="endpoint">The service endpoint to connect to.</param>
         /// <param name="subscriptionKey">The subscription key.</param>

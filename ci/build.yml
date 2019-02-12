@@ -579,6 +579,8 @@ jobs:
          -D luis-key=$(luis-westus-s0-201809-key1) \
          -D speech-key=$(NorthEuropeKeySkyman) \
          -D long-running=false)
+       . ci/functions.sh
+       SPEECHSDK_SPEECH_AUTHTOKEN="$(getAuthorizationToken "$SPEECHSDK_SPEECH_KEY" "$SPEECHSDK_SPEECH_REGION")"
        java \
         -cp $(printf "%s;" \
            "$(MavenPackageDirWindows)/$(ArtifactBasename).jar" \
@@ -592,6 +594,7 @@ jobs:
          -DKeyword=Computer \
          -DKeywordModel=/data/keyword/kws.table \
          -DTestOutputFilename=test-java-unittests-package.xml \
+         -DSpeechAuthorizationToken=$SPEECHSDK_SPEECH_AUTHTOKEN \
          tests.runner.Runner \
          tests.AllTests
     displayName: Run unit test
