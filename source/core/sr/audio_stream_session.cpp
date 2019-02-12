@@ -1269,12 +1269,12 @@ void CSpxAudioStreamSession::FireAdapterResult_Intermediate(ISpxRecoEngineAdapte
             }
             else
             {
-                SPX_DBG_TRACE_ERROR("FirstHypothesisLatency:(%S): no audio timestamp available.", result->GetResultId().c_str());
+                SPX_DBG_TRACE_ERROR("FirstHypothesisLatency:(%ls): no audio timestamp available.", result->GetResultId().c_str());
             }
         }
         else
         {
-            SPX_DBG_TRACE_ERROR("FirstHypothesisLatency:(%S): audio buffer is empty, cannot get audio timestamp.", result->GetResultId().c_str());
+            SPX_DBG_TRACE_ERROR("FirstHypothesisLatency:(%ls): audio buffer is empty, cannot get audio timestamp.", result->GetResultId().c_str());
         }
         // Write latency entry in result and telemetry.
         result->SetLatency(ticks);
@@ -1310,7 +1310,7 @@ void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter
         }
         else
         {
-            SPX_DBG_TRACE_ERROR("ResultLatency:(%S): no audio timestamp available.", result->GetResultId().c_str());
+            SPX_DBG_TRACE_ERROR("ResultLatency:(%ls): no audio timestamp available.", result->GetResultId().c_str());
         }
     }
     // Write latency entry in result and telemetry.
