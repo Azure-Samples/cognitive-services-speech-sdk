@@ -909,21 +909,16 @@ jobs:
       mkdir localnuget
       cp --verbose "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
 
-      # Supply mock and dependencies for running the test suite
-      mkdir private_lib
-      cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/private/lib/libcarbon-mock.so" private_lib
-      cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" private_lib
-
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
         # Run the unit tests (skip Ubuntu 18.04 in dev builds)
         [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
-          docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --env LD_LIBRARY_PATH=/test/private_lib --workdir /test "$i" bash - <<"SCRIPT" || \
+          docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$i" bash - <<"SCRIPT" || \
           { ((++ERRORS)); vsts_logissue error "Running tests/functional/csharp/end2end for image $i failed."; }
             set -e -x -o pipefail
             cd tests/functional/csharp/end2end
             dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
-            dotnet test --filter "TestCategory!=LongTest" --framework netcoreapp2.0 --settings csharp.runsettings --logger 'trx;LogFileName=test-csharp_unit_tests-nupkg-Linux-x64-Release.trx'
+            dotnet test --filter "TestCategory!=LongTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests" --framework netcoreapp2.0 --settings csharp.runsettings --logger 'trx;LogFileName=test-csharp_unit_tests-nupkg-Linux-x64-Release.trx'
       SCRIPT
 
         ./ci/samples/test-quickstart-csharp-dotnetcore.sh "$i" localnuget ||

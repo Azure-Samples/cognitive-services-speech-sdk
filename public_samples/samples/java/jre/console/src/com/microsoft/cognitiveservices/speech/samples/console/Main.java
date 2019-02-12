@@ -18,10 +18,9 @@ public class Main {
         System.out.println("3. Speech recognition using customized model.");
         System.out.println("4. Speech continuous recognition using events with file.");
         System.out.println("5. Speech recognition with audio stream.");
-        System.out.println("6. Speech recognition with keyword spotting.");
-        System.out.println("7. Translation with microphone input.");
-        System.out.println("8. Translation with file input.");
-        System.out.println("9. Translation with audio stream.");
+        System.out.println("6. Translation with microphone input.");
+        System.out.println("7. Translation with file input.");
+        System.out.println("8. Translation with audio stream.");
         System.out.println("A. Intent recognition with microphone.");
         System.out.println("B. Intent recognition with language.");
         System.out.println("C. Intent continuous recognition using events with file.");
@@ -50,15 +49,12 @@ public class Main {
                     SpeechRecognitionSamples.recognitionWithAudioStreamAsync();
                     break;
                 case "6":
-                    SpeechRecognitionSamples.keywordTriggeredSpeechRecognitionWithMicrophone();
-                    break;
-                case "7":
                     TranslationSamples.translationWithMicrophoneAsync();
                     break;
-                case "8":
+                case "7":
                     TranslationSamples.translationWithFileAsync();
                     break;
-                case "9":
+                case "8":
                     TranslationSamples.translationWithAudioStreamAsync();
                     break;
                 case "a":
@@ -79,7 +75,7 @@ public class Main {
                 }
                 System.out.println("\nRecognition done. " + prompt);
             } while (!x.equals("0"));
-            
+
             System.out.println("Finishing demo.");
             System.exit(0);
         } catch (Exception ex) {

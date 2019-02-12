@@ -39,7 +39,7 @@ jobs:
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_PYTHON_PLATFORM "$(BuildPlatform)"
         vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Unix Makefiles"
-        vsts_setvar SPEECHSDK_ENABLE_KWS true
+        vsts_setvar SPEECHSDK_ENABLE_KWS false
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: ./ci/install-build-dependencies.sh
@@ -62,7 +62,7 @@ jobs:
             [[ ${#wheel[@]} = 1 ]]
             unzip -d repack "${wheel[0]}"
             sharedLibs=(repack/azure_cognitiveservices_speech-*/data/lib/python*/site-packages/azure/cognitiveservices/speech/*.so)
-            [[ ${#sharedLibs[@]} -gt 1 ]]
+            [[ ${#sharedLibs[@]} = 1 ]]
             cp --preserve "${sharedLibs[@]}" "$unstrippedLib"
             strip "${sharedLibs[@]}"
             cd repack

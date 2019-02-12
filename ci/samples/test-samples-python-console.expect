@@ -54,7 +54,6 @@ proc selectMenuOption {top {sub -1}} {
 # Note: use Stop exactly once, at the end of the list.
 foreach scenario [list \
   recognize_intent_once_from_mic \
-  speech_recognize_keyword_from_microphone \
   Stop \
 ] {
   incr testIndex
@@ -130,45 +129,6 @@ foreach scenario [list \
         }
         timeout {
           send_user "### TIMEOUT waiting for result\n"
-          incr testFailures
-        }
-      }
-    }
-
-    speech_recognize_keyword_from_microphone {
-      selectMenuOption 0 8
-      expect {
-        "Say something starting with" {
-          set maxAttempts 3
-          for {set attempt 1} {$attempt <= $maxAttempts} {incr attempt} {
-            paplay $kwsWeatherWav [expr $attempt*1300]
-
-            expect {
-              -re "RECOGNIZED: \[^\r]*, text=(\[^)]*)\\)\\)\r\n" {
-                assertTextEqual testFailures "reco text" $kwsWeatherText $expect_out(1,string)
-                break
-              }
-              "CANCELED: Reason=" {
-                incr testFailures
-                break
-              }
-              timeout {
-                send_user "### TIMEOUT waiting for RECOGNIZED/CANCELED\n"
-              }
-            }
-          }
-          if {$attempt > $maxAttempts} {
-             # No way to stop the sample.
-             send_user "### Could not finish keyword-triggered recognition. Must stop.\n"
-             exit 1
-          }
-        }
-        "Error running sample:" {
-          send_user "### Error running sample.\n"
-          incr testFailures
-        }
-        timeout {
-          send_user "### TIMEOUT waiting for 'Say something'\n"
           incr testFailures
         }
       }

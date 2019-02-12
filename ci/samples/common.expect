@@ -8,9 +8,6 @@
 set weatherWav [file join $inputDir "audio/whatstheweatherlike.wav"]
 set weatherText "What's the weather like?"
 
-set kwsWeatherWav [file join $inputDir "kws/kws_whatstheweatherlike.wav"]
-set kwsWeatherText "Computer what's the weather like?"
-
 set germanWav [file join $inputDir "audio/RemindMeToPickupDryKitOnFriday.wav"]
 set germanText "Erinner mich am Freitag um 04:40 Uhr die Reinigung abzuholen."
 

@@ -67,7 +67,7 @@ jobs:
   - bash: |
       set -e -o pipefail -u
       . ci/functions.sh
-      vsts_setvar SPEECHSDK_ENABLE_KWS true
+      vsts_setvar SPEECHSDK_ENABLE_KWS false
     displayName: Set KWS variables
   - template: get-kws-artifact.yml
     parameters:
@@ -97,7 +97,7 @@ jobs:
           inputs:
             ConnectedServiceName: Speech SDK ESRP Signing
             FolderPath: repack
-            Pattern: '*.pyd,Microsoft.CognitiveServices.Speech.extension.kws.dll'
+            Pattern: '*.pyd'
             signConfigType: inlineSignParams
             inlineOperation: $(SIGN_PARAMS_DLL)
           condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))

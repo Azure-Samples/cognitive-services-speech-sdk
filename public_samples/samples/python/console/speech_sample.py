@@ -215,60 +215,6 @@ def speech_recognize_continuous_from_file():
         time.sleep(.5)
     # </SpeechContinuousRecognitionWithFile>
 
-def speech_recognize_keyword_from_microphone():
-    """performs keyword-triggered speech recognition with input microphone"""
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
-
-    # Creates an instance of a keyword recognition model. Update this to
-    # point to the location of your keyword recognition model.
-    model = speechsdk.KeywordRecognitionModel("YourKeywordRecognitionModelFile.table")
-
-    # The phrase your keyword recognition model triggers on.
-    keyword = "YourKeyword"
-
-    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
-
-    done = False
-
-    def stop_cb(evt):
-        """callback that stops continuous recognition upon receiving an event `evt`"""
-        print('CLOSING on {}'.format(evt))
-        speech_recognizer.stop_keyword_recognition()
-        nonlocal done
-        done = True
-
-    def recognizing_cb(evt):
-        """callback for recognizing event"""
-        if evt.result.reason == speechsdk.ResultReason.RecognizingKeyword:
-            print('RECOGNIZING KEYWORD: {}'.format(evt))
-        elif evt.result.reason == speechsdk.ResultReason.RecognizingSpeech:
-            print('RECOGNIZING: {}'.format(evt))
-
-    def recognized_cb(evt):
-        """callback for recognized event"""
-        if evt.result.reason == speechsdk.ResultReason.RecognizedKeyword:
-            print('RECOGNIZED KEYWORD: {}'.format(evt))
-        elif evt.result.reason == speechsdk.ResultReason.RecognizedSpeech:
-            print('RECOGNIZED: {}'.format(evt))
-        elif evt.result.reason == speechsdk.ResultReason.NoMatch:
-            print('NOMATCH: {}'.format(evt))
-
-    # Connect callbacks to the events fired by the speech recognizer
-    speech_recognizer.recognizing.connect(recognizing_cb)
-    speech_recognizer.recognized.connect(recognized_cb)
-    speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
-    speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
-    speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
-    # stop continuous recognition on either session stopped or canceled events
-    speech_recognizer.session_stopped.connect(stop_cb)
-    speech_recognizer.canceled.connect(stop_cb)
-
-    # Start keyword recognition
-    speech_recognizer.start_keyword_recognition(model)
-    print('Say something starting with "{}" followed by whatever you want...'.format(keyword))
-    while not done:
-        time.sleep(.5)
-
 def speech_recognition_with_pull_stream():
     """gives an example how to use a pull audio stream to recognize speech from a custom audio
     source"""

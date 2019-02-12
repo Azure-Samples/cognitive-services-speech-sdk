@@ -44,9 +44,6 @@ It runs under .NET Core 2.0 on Windows or Linux (Ubuntu 16.04 or 18.04 x64 only)
     * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.
     * `YourLanguageUnderstandingAppId`: replace with the ID of a Language Understanding service application that you want to recognize intents with.
     * `YourLanguageUnderstandingIntentName1`, `YourLanguageUnderstandingIntentName2`, `YourLanguageUnderstandingIntentName3`: replace with names of intents that your Language Understanding service application recognizes.
-  * The following settings apply to keyword-triggered recognition:
-    * `YourKeywordRecognitionModelFile.table`: replace with the location of your keyword recognition model file.
-    * `YourKeyword`: replace with the phrase your keyword recognition model triggers on.
 * If you are using Microsoft Visual Studio 2017 on Windows, press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 * If you are using the .NET Core CLI, run the following command from the directory that contains this sample:
 

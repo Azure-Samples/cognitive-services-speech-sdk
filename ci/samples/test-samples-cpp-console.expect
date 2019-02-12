@@ -59,7 +59,6 @@ foreach scenario [list \
   SpeechRecognitionUsingCustomizedModel \
   SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat \
   SpeechRecognitionWithMicrophone \
-  KeywordTriggeredSpeechRecognitionWithMicrophone \
   Stop \
 ] {
   incr testIndex
@@ -109,45 +108,6 @@ foreach scenario [list \
         }
       }
 
-      goToMainMenu
-    }
-
-    KeywordTriggeredSpeechRecognitionWithMicrophone {
-      selectMenuOption 1 7
-      # TODO do a negative reco also
-      expect {
-        "Say something starting with" {
-          set maxAttempts 3
-          for {set attempt 1} {$attempt <= $maxAttempts} {incr attempt} {
-            send_user "### Attempt $attempt\n"
-            paplay $kwsWeatherWav [expr $attempt*1300]
-
-            expect {
-              -re "RECOGNIZED: Text=(\[^\r]*)\r\n" {
-                assertTextEqual testFailures "reco text" $kwsWeatherText $expect_out(1,string)
-                break
-              }
-              "CANCELED: Reason=" {
-                incr testFailures
-                break
-              }
-              timeout {
-                send_user "### TIMEOUT waiting for RECOGNIZED/CANCELED\n"
-              }
-            }
-          }
-
-          if {$attempt > $maxAttempts} {
-             # No way to stop the sample.
-             send_user "### Could not finish keyword-triggered recognition. Must stop.\n"
-             exit 1
-          }
-        }
-        timeout {
-          send_user "### TIMEOUT waiting for 'Say something'\n"
-          incr testFailures
-        }
-      }
       goToMainMenu
     }
 
