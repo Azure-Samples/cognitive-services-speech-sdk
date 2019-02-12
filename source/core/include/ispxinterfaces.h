@@ -371,6 +371,8 @@ public:
 
     enum class State { NoInput, Idle, Paused, Processing };
     virtual State GetState() = 0;
+
+    virtual std::string GetPropertyValue(const std::string& key) const = 0;
 };
 
 class ISpxAudioPumpInit : public ISpxInterfaceBaseFor<ISpxAudioPumpInit>

@@ -53,6 +53,7 @@ public:
             return parentProperties->GetStringValue(name, defaultValue);
         }
 
+        LogPropertyAndValue(name, "");
         return std::string(defaultValue);
     }
 

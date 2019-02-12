@@ -112,6 +112,12 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_library(audio STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
+    # Need C++17 for WinRT API access via cppwinrt.
+    set_target_properties(audio PROPERTIES CXX_STANDARD 17)
+    target_compile_definitions(audio PUBLIC _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
+endif()
+
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET audio PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()

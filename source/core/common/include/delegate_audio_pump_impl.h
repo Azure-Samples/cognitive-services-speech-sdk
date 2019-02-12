@@ -28,6 +28,10 @@ class ISpxDelegateAudioPumpImpl : public ISpxAudioPump
 
     State GetState() override { return m_delegateToAudioPump->GetState(); }
 
+    virtual std::string GetPropertyValue(const std::string& key) const override {
+        return m_delegateToAudioPump->GetPropertyValue(key);
+    }
+
 
 protected:
 

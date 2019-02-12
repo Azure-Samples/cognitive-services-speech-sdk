@@ -49,7 +49,8 @@ public:
 
     State GetState() override;
 
-    
+    virtual std::string GetPropertyValue(const std::string& key) const override;
+
 private:
     using SitePtr = std::shared_ptr<ISpxAudioPumpSite>;
 

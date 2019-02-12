@@ -118,6 +118,9 @@ extern AUDIO_RESULT  audio_input_stop(AUDIO_SYS_HANDLE handle);
 extern AUDIO_RESULT  audio_output_set_volume(AUDIO_SYS_HANDLE handle, long volume);
 extern AUDIO_RESULT  audio_output_get_volume(AUDIO_SYS_HANDLE handle, long* volume);
 
+// retrieve the detailed name of the audio interface, if available.
+extern STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

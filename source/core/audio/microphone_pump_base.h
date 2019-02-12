@@ -60,6 +60,8 @@ public:
         SPX_THROW_HR(SPXERR_NOT_IMPL);
     }
 
+    virtual std::string GetPropertyValue(const std::string& key) const override;
+
     // --- ISpxObjectInit
     virtual void Init() override;
     virtual void Term() override;

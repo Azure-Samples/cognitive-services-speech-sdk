@@ -643,7 +643,7 @@ void CSpxUspRecoEngineAdapter::SetSpeechConfig(std::shared_ptr<ISpxNamedProperti
 
     // Set the audio configuration data.
     // Todo: Fill audio configuration data with the value via property bags.
-    speechConfig["context"]["audio"]["source"]["model"] = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_DeviceNameForCapture));
+    speechConfig["context"]["audio"]["source"]["model"] = properties->GetStringValue("SPEECH-MicrophoneNiceName");
     speechConfig["context"]["audio"]["source"]["samplerate"] = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_SampleRateForCapture));
     speechConfig["context"]["audio"]["source"]["bitspersample"] = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_BitsPerSampleForCapture));
     speechConfig["context"]["audio"]["source"]["channelcount"] = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture));

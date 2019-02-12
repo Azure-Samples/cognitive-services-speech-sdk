@@ -342,7 +342,7 @@ static int Alsa_GetDevice(snd_pcm_t** ppPcmHandle, snd_pcm_stream_t streamType, 
     int result = __LINE__;
     bool deviceFound = false;
     void** hints = NULL, **iterator;
-    char* name, *io;
+    char *name, *io;
 
     if (snd_device_name_hint(-1, "pcm", &hints) < 0 && hints != NULL)
     {
@@ -355,13 +355,19 @@ static int Alsa_GetDevice(snd_pcm_t** ppPcmHandle, snd_pcm_stream_t streamType, 
         {
             name = snd_device_name_get_hint(*iterator, "NAME");
             io = snd_device_name_get_hint(*iterator, "IOID");
+
             if (name != NULL && strcmp("null", name) != 0)
             {
                 if (comparator(io))
                 {
                     if (0 == snd_pcm_open(ppPcmHandle, name, streamType, 0))
                     {
-                        LogInfo("Successfully opened '%s' device for %s.", name, io);
+                        char *descr = snd_device_name_get_hint(*iterator, "DESC");
+                        LogInfo("Successfully opened '%s' (%s) device for %s.", name, descr, io);
+                        if (descr)
+                        {
+                            free(descr);
+                        }
                         deviceFound = true;
                         result = 0;
                     }
@@ -386,6 +392,53 @@ static int Alsa_GetDevice(snd_pcm_t** ppPcmHandle, snd_pcm_stream_t streamType, 
         snd_device_name_free_hint(hints);
     }
     return result;
+}
+
+STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE handle)
+{
+    AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
+    STRING_HANDLE ret = STRING_new();
+    if (audioData->pcmHandle == NULL)
+    {
+        LogError("could not get audio device info, no open device");
+        return ret;
+    }
+
+    snd_pcm_info_t* pcminfo;
+    int card, err, dev;
+    snd_pcm_info_alloca(&pcminfo);
+    snd_pcm_info(audioData->pcmHandle, pcminfo);
+    card = snd_pcm_info_get_card(pcminfo);
+    dev = snd_pcm_info_get_device(pcminfo);
+    const char* id = snd_pcm_info_get_id(pcminfo);
+    const char* name = snd_pcm_info_get_id(pcminfo);
+
+    LogInfo("card %i: device %i: %s [%s]\n",
+            card, dev, id, name);
+
+    char* cardName;
+    err = snd_card_get_name(card, &cardName);
+    if (err != 0) {
+        LogError("could not get card name");
+    }
+    else {
+        LogInfo("card short name: %s", cardName);
+        STRING_copy(ret, cardName);
+        free(cardName);
+        cardName = NULL;
+    }
+
+    err = snd_card_get_longname(card, &cardName);
+    if (err != 0) {
+        LogError("could not get card long name");
+    }
+    else {
+        LogInfo("card long name: %s", cardName);
+        STRING_copy(ret, cardName);
+        free(cardName);
+        cardName = NULL;
+    }
+    return ret;
 }
 
 static int init_alsa_pcm_device(snd_pcm_t** pcmHandle, snd_pcm_stream_t streamType, snd_pcm_uframes_t frames, AUDIO_SYS_DATA* audioData)
@@ -577,6 +630,15 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
         }
         audio_set_options(result, AUDIO_OPTION_DEVICENAME, STRING_c_str(format->hDeviceName));
     }
+
+    // try to open the audio device
+    if (init_alsa_pcm_device(&result->pcmHandle, SND_PCM_STREAM_CAPTURE, INPUT_FRAME_COUNT, result) != 0)
+    {
+        LogError("Error opening audio device");
+        audio_destroy(result);
+        result = NULL;
+    }
+
     return result;
 }
 
@@ -1506,3 +1568,4 @@ AUDIO_RESULT audio_output_get_volume(AUDIO_SYS_HANDLE handle, long* volume)
 
     return result;
 }
+

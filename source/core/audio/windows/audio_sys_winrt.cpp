@@ -25,7 +25,16 @@
 #include <windows/audio_sys_win_base.h>
 #include <string_utils.h>
 
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Devices.Enumeration.h>
+#include <winrt/Windows.Media.Devices.h>
+
+
 using namespace Microsoft::WRL;
+using namespace std;
+using namespace  winrt::Windows::Media::Devices;
+using winrt::Windows::Devices::Enumeration::DeviceInformation;
+using winrt::Windows::Foundation::IAsyncOperation;
 
 const IID IID_IAudioCaptureClient = __uuidof(IAudioCaptureClient);
 
@@ -44,7 +53,7 @@ public:
     HANDLE hBufferReady;
     HANDLE hCaptureThreadShouldExit;
 
-    std::promise<HRESULT> m_promise;
+    promise<HRESULT> m_promise;
 };
 
 typedef struct AUDIO_SYS_DATA_TAG
@@ -72,6 +81,8 @@ typedef struct AUDIO_SYS_DATA_TAG
     AUDIO_STATE current_input_state;
     STRING_HANDLE hDeviceName;
     uint32_t inputFrameCnt;
+
+    winrt::hstring deviceLongname;
 } AUDIO_SYS_DATA;
 
 
@@ -100,7 +111,7 @@ Exit:
 
 WASAPICapture::~WASAPICapture()
 {
-    if(INVALID_HANDLE_VALUE != hBufferReady)
+    if (INVALID_HANDLE_VALUE != hBufferReady)
     {
         SAFE_CLOSE_HANDLE(hBufferReady);
     }
@@ -162,23 +173,53 @@ HRESULT audio_input_create(AUDIO_SYS_DATA* audioData)
 
     auto future = audioData->spCapture->m_promise.get_future();
 
-    std::wstring mic_name = PAL::ToWString(std::string(STRING_c_str(audioData->hDeviceName)));
+    shared_ptr<promise<HRESULT>> longnamePromise = make_shared< promise<HRESULT> >();
+    auto longnameFuture = longnamePromise->get_future();
 
-    // This call must be made on the main UI thread.  Async operation will call back to
+    wstring deviceNameFromConfig = PAL::ToWString(STRING_c_str(audioData->hDeviceName));
+    winrt::hstring fullMicrophoneId;
+    IAsyncOperation<DeviceInformation> promise;
+
+    // The call to ActivateAudioInterfaceAsync must be made on the main UI thread.  Async operation will call back to
     // IActivateAudioInterfaceCompletionHandler::ActivateCompleted, which must be an agile interface implementation
-    if (L"" == mic_name)
+    if (L"" == deviceNameFromConfig)
     {
         StringFromIID(DEVINTERFACE_AUDIO_CAPTURE, &audioCaptureGuidString);
         hr = ActivateAudioInterfaceAsync(audioCaptureGuidString, __uuidof(IAudioClient2), nullptr, audioData->spCapture.Get(), &asyncOp);
+
+        fullMicrophoneId = MediaDevice::GetDefaultAudioCaptureId(AudioDeviceRole::Communications);
     }
     else
     {
-        hr = ActivateAudioInterfaceAsync(mic_name.c_str(), __uuidof(IAudioClient2), nullptr, audioData->spCapture.Get(), &asyncOp);
+        hr = ActivateAudioInterfaceAsync(deviceNameFromConfig.c_str(), __uuidof(IAudioClient2), nullptr, audioData->spCapture.Get(), &asyncOp);
+        fullMicrophoneId = winrt::hstring(deviceNameFromConfig);
+
     }
     EXIT_ON_ERROR(hr);
 
-    // wait
+    // get the long name of the device from the system
+    promise = DeviceInformation::CreateFromIdAsync(fullMicrophoneId);
+    promise.Completed(
+        [audioData, longnamePromise](IAsyncOperation<DeviceInformation> const& container, winrt::Windows::Foundation::AsyncStatus) {
+        auto err = container.ErrorCode();
+        if (err != S_OK) {
+            LogError("ERROR getting device long name with CreateFromIdAsync: %d ", err);
+        }
+        else
+        {
+            auto device = container.GetResults();
+            LogInfo("found nice name %s for device %s", device.Name().c_str(), device.Id().c_str());
+            if (audioData != nullptr)
+            {
+                audioData->deviceLongname = device.Name();
+            }
+        }
+        longnamePromise->set_value(err);
+    });
+
+    // wait until device is initialized and long name is populated
     future.wait();
+    longnameFuture.wait();
     hr = future.get();
 Exit:
     CoTaskMemFree(audioCaptureGuidString);
@@ -264,7 +305,7 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
     {
         AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
 
-        if (audioData->hRenderThreadShouldExit != NULL  &&
+        if (audioData->hRenderThreadShouldExit != NULL &&
             audioData->hRenderThreadDidExit != NULL)
         {
             force_render_thread_to_exit_and_wait(audioData);
@@ -282,14 +323,14 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
 }
 
 AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle,
-                                ON_AUDIOOUTPUT_STATE_CALLBACK output_cb,
-                                void*                         output_ctx,
-                                ON_AUDIOINPUT_STATE_CALLBACK  input_cb,
-                                void*                         input_ctx,
-                                AUDIOINPUT_WRITE              audio_write_cb,
-                                void*                         audio_write_ctx,
-                                ON_AUDIOERROR_CALLBACK        error_cb,
-                                void*                         error_ctx)
+    ON_AUDIOOUTPUT_STATE_CALLBACK output_cb,
+    void*                         output_ctx,
+    ON_AUDIOINPUT_STATE_CALLBACK  input_cb,
+    void*                         input_ctx,
+    AUDIOINPUT_WRITE              audio_write_cb,
+    void*                         audio_write_ctx,
+    ON_AUDIOERROR_CALLBACK        error_cb,
+    void*                         error_ctx)
 {
     AUDIO_RESULT result = AUDIO_RESULT_INVALID_ARG;
     if (handle != NULL && audio_write_cb != NULL)
@@ -333,7 +374,7 @@ DWORD WINAPI captureThreadProc(
     }
     pInput->current_input_state = AUDIO_STATE_RUNNING;
 
-    hr = pInput->spCapture->pAudioInputClient->GetService(IID_IAudioCaptureClient,(void**)&pCaptureClient);
+    hr = pInput->spCapture->pAudioInputClient->GetService(IID_IAudioCaptureClient, (void**)&pCaptureClient);
     EXIT_ON_ERROR(hr);
 
     audioBuff.totalSize = pInput->inputFrameCnt * pInput->spCapture->audioInFormat.nBlockAlign;
@@ -383,7 +424,7 @@ DWORD WINAPI captureThreadProc(
 
 Exit:
 
-    delete [] audioBuff.pAudioData;
+    delete[] audioBuff.pAudioData;
 
     pInput->current_input_state = AUDIO_STATE_STOPPED;
     if (pInput->input_state_cb)
@@ -474,7 +515,7 @@ AUDIO_RESULT audio_set_options(AUDIO_SYS_HANDLE handle, const char* optionName, 
         {
             if (!audioData->hDeviceName)
             {
-                if(value)
+                if (value)
                     audioData->hDeviceName = STRING_construct(reinterpret_cast<const char*>(value));
                 else
                     audioData->hDeviceName = STRING_construct("");
@@ -510,4 +551,9 @@ AUDIO_RESULT audio_playwavfile(AUDIO_SYS_HANDLE hAudioOut, const char* file)
     UNUSED(hAudioOut);
     UNUSED(file);
     return AUDIO_RESULT_OK;
+}
+
+STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE audioData) {
+    STRING_HANDLE result = STRING_construct(winrt::to_string(audioData->deviceLongname).c_str());
+    return result;
 }

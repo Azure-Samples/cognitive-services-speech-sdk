@@ -13,6 +13,7 @@
 #include <mmdeviceapi.h>
 #include <mmstream.h>
 #include <endpointvolume.h>
+#include <Functiondiscoverykeys_devpkey.h>
 #include <spxdebug.h>
 #include <windows/audio_sys_win_base.h>
 #include <string_utils.h>
@@ -20,6 +21,7 @@
 // remove this when the SDK supports it.
 #define AudioCategory_Speech (AUDIO_STREAM_CATEGORY)9
 
+#define AUDIO_OPTION_DEVICE_LONGNAME "devicelongname"
 
 const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
 const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
@@ -54,6 +56,7 @@ typedef struct AUDIO_SYS_DATA_TAG
     AUDIO_STATE                     current_output_state;
     AUDIO_STATE                     current_input_state;
     STRING_HANDLE                   hDeviceName;
+    STRING_HANDLE                   hDeviceLongName;
     uint32_t                        inputFrameCnt;
 } AUDIO_SYS_DATA;
 
@@ -81,6 +84,8 @@ struct Deleter
         p->Release();
     }
 };
+
+std::string get_nice_name_from_endpoint(const std::shared_ptr<IMMDevice>& pEndpoint);
 
 size_t LoadDataChunk(BYTE* pDestBuffer, size_t destBufferSize, BYTE* pSourceBuffer, size_t sourceBufferSize, DWORD& flags)
 {
@@ -351,6 +356,7 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
     std::shared_ptr<IMMDevice> pDevice(nullptr);
     std::shared_ptr<IAudioClient2> pAudioClient2(nullptr);
     std::wstring mic_name {};
+    std::string nice_name;
 
     REFERENCE_TIME      hnsRequestedDuration = REFTIMES_PER_SEC;
 
@@ -393,6 +399,10 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
         EXIT_ON_ERROR_IF(E_FAIL, pDeviceRaw == nullptr || hrlocal != S_OK);
         pDevice.reset(pDeviceRaw, Deleter<IMMDevice>());
     }
+
+    // get microphone nice name here
+    nice_name = get_nice_name_from_endpoint(pDevice);
+    audio_set_options(result, AUDIO_OPTION_DEVICE_LONGNAME, nice_name.c_str());
 
     hr = pDevice->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&result->pAudioInputClient);
     EXIT_ON_ERROR(hr);
@@ -453,6 +463,48 @@ Exit:
         }
     }
     return result;
+}
+
+/// Get the friendly name of an endpoint device.
+std::string get_nice_name_from_endpoint(const std::shared_ptr<IMMDevice>& pEndpoint)
+{
+    HRESULT hr = E_FAIL;
+    std::string ret;
+
+    // Initialize container for property value.
+    PROPVARIANT varName;
+    PropVariantInit(&varName);
+
+    IPropertyStore *pProps = NULL;
+
+    hr = pEndpoint->OpenPropertyStore(
+        STGM_READ, &pProps);
+    if (FAILED(hr))
+    {
+        LogError("OpenPropertyStore returned error 0x%x", hr);
+    }
+    else
+    {
+        // Get the endpoint's friendly-name property.
+        hr = pProps->GetValue(PKEY_Device_FriendlyName, &varName);
+        if (FAILED(hr))
+        {
+            LogError("Get friendly name returned error 0x%x", hr);
+        }
+        else
+        {
+            // Print endpoint friendly name and endpoint ID.
+            LogInfo("Endpoint: \"%ls\"\n", varName.pwszVal);
+            ret = PAL::ToString(varName.pwszVal);
+        }
+    }
+
+    PropVariantClear(&varName);
+    return ret;
+}
+
+STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE audioData) {
+    return audioData->hDeviceLongName;
 }
 
 HRESULT audio_create_events(AUDIO_SYS_DATA * const audioData)
@@ -523,6 +575,10 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
         if (audioData->hDeviceName)
         {
             STRING_delete(audioData->hDeviceName);
+        }
+        if (audioData->hDeviceLongName)
+        {
+            STRING_delete(audioData->hDeviceLongName);
         }
 
         free(audioData);
@@ -862,6 +918,29 @@ AUDIO_RESULT audio_set_options(AUDIO_SYS_HANDLE handle, const char* optionName, 
             }
 
             if (audioData->hDeviceName)
+            {
+                return AUDIO_RESULT_OK;
+            }
+        }
+
+        if (strcmp(AUDIO_OPTION_DEVICE_LONGNAME, optionName) == 0)
+        {
+            if (!audioData->hDeviceLongName)
+            {
+                if (value)
+                    audioData->hDeviceLongName = STRING_construct((char*)value);
+                else
+                    audioData->hDeviceLongName = STRING_construct("");
+            }
+            else
+            {
+                if (value)
+                    STRING_copy(audioData->hDeviceLongName, (char*)value);
+                else
+                    STRING_copy(audioData->hDeviceLongName, "");
+            }
+
+            if (audioData->hDeviceLongName)
             {
                 return AUDIO_RESULT_OK;
             }

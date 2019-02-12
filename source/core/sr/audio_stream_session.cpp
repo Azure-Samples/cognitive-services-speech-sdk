@@ -243,6 +243,9 @@ void CSpxAudioStreamSession::SetAudioConfigurationInProperties()
 
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_SampleRateForCapture), to_string(waveformat->nSamplesPerSec).c_str());
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_BitsPerSampleForCapture), to_string(waveformat->wBitsPerSample).c_str());
+
+    // copy input audio device name retrieved from system
+    SetStringValue("SPEECH-MicrophoneNiceName", m_audioPump->GetPropertyValue("SPEECH-MicrophoneNiceName").c_str());
 }
 
 void CSpxAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)

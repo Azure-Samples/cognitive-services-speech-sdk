@@ -48,6 +48,8 @@ typedef struct AUDIO_SYS_DATA_TAG {
     AudioQueueBufferRef bufferStack[N_RECORD_BUFFERS];
     int nStackedBuffers;
     LOCK_HANDLE bufferStackLock;
+
+    STRING_HANDLE hDeviceName;
 } AUDIO_SYS_DATA;
 
 
@@ -184,7 +186,7 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
         audioData->current_output_state = AUDIO_STATE_STOPPED;
         audioData->current_input_state = AUDIO_STATE_STOPPED;
 
-        STRING_copy(format->hDeviceName, STRING_c_str(format->hDeviceName));
+        audioData->hDeviceName = STRING_clone(format->hDeviceName);
 
         // Set audio stream description for Linear PCM
         AudioStreamBasicDescription recordFormat = {0};
@@ -312,6 +314,11 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
         }
         audioData->audioQueue = NULL;
         SPX_DBG_TRACE_INFO("AudioQueue destroyed.");
+
+        if (audioData->hDeviceName)
+        {
+            STRING_delete(audioData->hDeviceName);
+        }
     }
 }
 
@@ -442,4 +449,15 @@ AUDIO_RESULT audio_input_stop(AUDIO_SYS_HANDLE handle)
         result = AUDIO_RESULT_INVALID_ARG;
     }
     return result;
+}
+
+STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE handle) {
+    AUDIO_SYS_DATA* audioData = reinterpret_cast<AUDIO_SYS_DATA*>(handle);
+
+    if (handle)
+    {
+        return STRING_clone(audioData->hDeviceName);
+    }
+
+    return nullptr;
 }

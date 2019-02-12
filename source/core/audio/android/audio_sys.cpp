@@ -832,3 +832,15 @@ static int output_write_async(void *p)
     free(async);
     return 0;
 }
+
+STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE handle)
+{
+    auto audioData = reinterpret_cast<AUDIO_SYS_DATA*>(handle);
+
+    if (handle)
+    {
+        return STRING_clone(audioData->deviceName);
+    }
+
+    return nullptr;
+}

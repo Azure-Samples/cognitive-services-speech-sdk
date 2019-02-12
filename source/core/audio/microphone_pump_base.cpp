@@ -44,6 +44,14 @@ void CSpxMicrophonePumpBase::Init()
     SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT_OK, SPXERR_MIC_ERROR);
 
     SetOptionsAfterCreateAudioHandle();
+
+    // get the nice name of the audio input device and store it in a property.
+    STRING_HANDLE nice_name = get_input_device_nice_name(m_audioHandle);
+    string niceNameStr = STRING_c_str(nice_name) == nullptr ? "" : STRING_c_str(nice_name);
+    STRING_delete(nice_name);
+    SPX_DBG_TRACE_VERBOSE("Received '%s' as nice name of the audio device", niceNameStr.c_str());
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    properties->SetStringValue("SPEECH-MicrophoneNiceName", niceNameStr.c_str());
 }
 
 void CSpxMicrophonePumpBase::Term()
@@ -202,7 +210,7 @@ uint16_t CSpxMicrophonePumpBase::GetChannelsFromConfig()
 {
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     auto channels = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture));
-    SPX_TRACE_VERBOSE("The number of channels as a property is '%s' in CSpxMicrophonePump", channels.c_str());
+    SPX_DBG_TRACE_VERBOSE("The number of channels as a property is '%s' in CSpxMicrophonePump", channels.c_str());
     return channels.empty() ? 0 : static_cast<uint16_t>(stoi(channels));
 }
 
@@ -212,11 +220,17 @@ std::string CSpxMicrophonePumpBase::GetDeviceNameFromConfig()
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_INVALID_ARG);
 
     auto deviceName = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_DeviceNameForCapture));
-    SPX_TRACE_VERBOSE("The device name of microphone as a property is '%s'", deviceName.c_str());
+    SPX_DBG_TRACE_VERBOSE("The device name of microphone as a property is '%s'", deviceName.c_str());
 
     return deviceName;
 }
 
-} } } } // Microsoft::CognitiveServices::Speech::Impl
 
+std::string CSpxMicrophonePumpBase::GetPropertyValue(const std::string& key) const
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    return properties->GetStringValue(key.c_str());
+}
+
+} } } } // Microsoft::CognitiveServices::Speech::Impl
 

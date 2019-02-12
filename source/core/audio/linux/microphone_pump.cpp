@@ -22,9 +22,9 @@ AUDIO_SETTINGS_HANDLE CSpxMicrophonePump::SetOptionsBeforeCreateAudioHandle()
     auto channels = GetChannelsFromConfig();
     if (channels > 0)
     {
-        SPX_TRACE_VERBOSE("Linux microphone only supports 1 or 2 channels.");
+        // Linux microphone only supports 1 or 2 channels.
+        SPX_DBG_TRACE_VERBOSE("The number of channels of microphone is set as %d", channels);
         SPX_IFTRUE_THROW_HR(channels != 1 && channels != 2, SPXERR_MIC_ERROR);
-        SPX_TRACE_VERBOSE("The number of channel of microphone is set as %d", channels);
     }
 
     return CSpxMicrophonePumpBase::SetOptionsBeforeCreateAudioHandle();

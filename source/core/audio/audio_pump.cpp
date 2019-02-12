@@ -11,6 +11,7 @@
 #include <fstream>
 #include <thread>
 #include "audio_pump.h"
+#include "service_helpers.h"
 
 
 namespace Microsoft {
@@ -244,6 +245,12 @@ void CSpxAudioPump::WaitForPumpIdle(std::unique_lock<std::mutex>& lock)
 
     SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpIdle() ... post m_cv.wait_for(); state=%d (requestedState=%d)", m_state, m_stateRequested);
     SPX_DBG_TRACE_WARNING_IF(m_state != State::Idle, "CSpxAudioPump::WaitForPumpIdle(): Unexpected: state != State::Idle; state=%d", m_state);
+}
+
+std::string CSpxAudioPump::GetPropertyValue(const std::string& key) const
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    return properties->GetStringValue(key.c_str());
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -43,7 +43,7 @@ fi
 ${VIRTUALENV_PYTHON} -m pip install ${BUILD_DIR}/*.whl
 
 # run pytest on test files in the source tree
-if [[ $PLATFORM == Windows-* ]]; then
+if [[ $PLATFORM == Windows-* ]] || [[ $PLATFORM == Linux* ]]; then
     extra_args=--no-use-default-microphone
 else
     extra_args=
