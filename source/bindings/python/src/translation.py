@@ -207,6 +207,7 @@ class TranslationRecognizer(Recognizer):
     def recognize_once(self) -> TranslationRecognitionResult:
         """
         Performs recognition in a blocking (synchronous) mode.
+        Returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use start_continuous_recognition instead.
 
         :return: The result value of the synchronous recognition.
         """
@@ -215,6 +216,7 @@ class TranslationRecognizer(Recognizer):
     def recognize_once_async(self) -> ResultFuture:
         """
         Performs recognition in a non-blocking (asynchronous) mode.
+        Will recognize the first utterance, it is suitable only for single shot recognition like command or query. For long-running recognition, use start_continuous_recognition_async instead.
 
         :return: A future containing the result value of the asynchronous recognition.
         """

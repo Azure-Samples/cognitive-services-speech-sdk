@@ -82,7 +82,7 @@ SPX_EXPORT
 /**
  * Sets proxy configuration
  * Added in version 1.1.0
- * @param proxyHostName the host name of the proxy server.
+ * @param proxyHostName the host name of the proxy server, without the protocol scheme (http://)
  * @param proxyPort the port number of the proxy server.
  * @param proxyUserName the user name of the proxy server. Use empty string if no user name is needed.
  * @param proxyPassword the password of the proxy server. Use empty string if no user password is needed.

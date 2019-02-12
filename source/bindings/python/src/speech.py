@@ -180,7 +180,7 @@ class SpeechConfig():
         """
         Set proxy information.
 
-        :param hostname: The host name of the proxy server.
+        :param hostname: The host name of the proxy server. Do not add protocol information (http) to the hostname.
         :param port: The port number of the proxy server.
         :param username: The user name of the proxy server.
         :param password: The password of the proxy server.
@@ -378,6 +378,7 @@ class Recognizer():
     def recognize_once(self) -> "Union[SpeechRecognitionResult, TranslationRecognitionResult,IntentRecognitionResult]":
         """
         Performs recognition in a blocking (synchronous) mode.
+        Returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use start_continuous_recognition instead.
 
         :return: The result value of the synchronous recognition.
         """
@@ -386,6 +387,7 @@ class Recognizer():
     def recognize_once_async(self) -> ResultFuture:
         """
         Performs recognition in a non-blocking (asynchronous) mode.
+        Will recognize the first utterance, it is suitable only for single shot recognition like command or query. For long-running recognition, use start_continuous_recognition_async instead.
 
         :return: A future containing the result value of the asynchronous recognition.
         """
@@ -393,8 +395,9 @@ class Recognizer():
 
     def start_continuous_recognition_async(self):
         """
-        Asynchronously initiates continuous recognition operation.
-
+        Asynchronously initiates continuous recognition operation. User has to connect to EventSignal to receive recognition results.
+        Call stop_continuous_recognition_async to stop the recogniztion.
+        
         :return: A future that is fulfilled once recognition has been initialized.
         """
         return self._impl.start_continuous_recognition_async()
@@ -409,7 +412,8 @@ class Recognizer():
 
     def start_continuous_recognition(self):
         """
-        Synchronously initiates continuous recognition operation.
+        Synchronously initiates continuous recognition operation. User has to connect to EventSignal to receive recognition results.
+        Call stop_continuous_recognition to stop the recogniztion.
         """
         return self._impl.start_continuous_recognition()
 
@@ -521,6 +525,7 @@ class SpeechRecognizer(Recognizer):
     def recognize_once(self) -> SpeechRecognitionResult:
         """
         Performs recognition in a blocking (synchronous) mode.
+        Returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use start_continuous_recognition instead.
 
         :return: The result value of the synchronous recognition.
         """
@@ -529,6 +534,7 @@ class SpeechRecognizer(Recognizer):
     def recognize_once_async(self) -> ResultFuture:
         """
         Performs recognition in a non-blocking (asynchronous) mode.
+        Will recognize the first utterance, it is suitable only for single shot recognition like command or query. For long-running recognition, use start_continuous_recognition_async instead.
 
         :return: A future containing the result value of the asynchronous recognition.
         """
