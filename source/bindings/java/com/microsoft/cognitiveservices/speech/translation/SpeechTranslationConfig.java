@@ -89,32 +89,6 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     }
 
     /**
-     * Sets the authorization token.
-     * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
-     * expires, the caller needs to refresh it by calling this setter with a new valid token.
-     * As configuration values are copied when creating a new recognizer, the new token value will not apply to recognizers that have already been created.
-     * For recognizers that have been created before, you need to set authorization token of the corresponding recognizer
-     * to refresh the token. Otherwise, the recognizers will encounter errors during recognition.
-     * @param value the authorization token.
-     */
-    @Override
-    public void setAuthorizationToken(String value) {
-        Contracts.throwIfNullOrWhitespace(value, "value");
-        translatorConfigImpl.SetAuthorizationToken(value);
-    }
-
-    /**
-     * Sets the speech recognition language
-     * @param value the authorization token.
-     */
-    @Override
-    public void setSpeechRecognitionLanguage(String value) {
-        Contracts.throwIfNullOrWhitespace(value, "value");
-
-        translatorConfigImpl.SetSpeechRecognitionLanguage(value);
-    }
-
-    /**
      * Adds a (text) target language for translation.
      * @param value the language identifier in BCP-47 format.
      */
@@ -156,18 +130,6 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
         Contracts.throwIfNullOrWhitespace(value, "value");
 
         translatorConfigImpl.SetVoiceName(value);
-    }
-
-    /**
-     * Sets a named property as value
-     * @param name the name of the property
-     * @param value the value
-     */
-    @Override
-    public void setProperty(String name, String value) {
-        Contracts.throwIfNullOrWhitespace(value, "value");
-
-        translatorConfigImpl.SetProperty(name, value);
     }
 
     /**

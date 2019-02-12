@@ -32,6 +32,12 @@ public class TranslationRecognitionEventArgs extends com.microsoft.cognitiveserv
      */
     @Override
     public String toString() {
-        return "TranslationRecognitionResult";
+        String text = "TranslationRecognitionResult " + super.toString();
+
+        for(String key : _Result.getTranslations().keySet()) {
+            text += "    Translation in " + key + ": <" + _Result.getTranslations().get(key) + ">.\n";
+        }
+
+        return text;
     }
 }
