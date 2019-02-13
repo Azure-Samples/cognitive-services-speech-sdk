@@ -45,18 +45,25 @@ typedef void (^SPXTranslationSynthesisEventHandler)(SPXTranslationRecognizer * _
 - (nullable instancetype)initWithSpeechTranslationConfiguration:(nonnull SPXSpeechTranslationConfiguration *)translationConfiguration audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration;
 
 /**
-  * Starts speech translation, and stops after the first utterance is recognized. It returns the transcribed and translated texts as result.
-  * Note: it returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query.
-  * For long-running recognition, use continuous recognition instead.
+  * Starts speech translation, and returns after a single utterance is recognized. The end of a
+  * single utterance is determined by listening for silence at the end or until a maximum of 15
+  * seconds of audio is processed.  The task returns the recognition text as result. 
+  * Note: Since recognizeOnce() returns only a single utterance, it is suitable only for single
+  * shot recognition like command or query. 
+  * For long-running multi-utterance recognition, use startContinuousRecognition() instead.
   * @return the result of translation.
   */
 - (nonnull SPXTranslationRecognitionResult *)recognizeOnce;
 
 /**
-  * Starts asynchronous speech translation.
+  * Starts translation, and returns after a single utterance is recognized. The end of a
+  * single utterance is determined by listening for silence at the end or until a maximum of 15
+  * seconds of audio is processed.  The task returns the recognition text as result. 
+  * Note: Since recognizeOnceAsync() returns only a single utterance, it is suitable only for single
+  * shot recognition like command or query. 
+  * For long-running multi-utterance recognition, use startContinuousRecognition() instead.
   * @param resultReceivedHandler the block function to be called when the first utterance has been recognized.
-  * Note: recognizeOnceAsync stops recognizing when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use continuous recognition instead.
-  */
+    */
 - (void)recognizeOnceAsync:(nonnull void (^)(SPXTranslationRecognitionResult * _Nonnull))resultReceivedHandler;
 
 /**

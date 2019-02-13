@@ -393,7 +393,10 @@ class Recognizer():
     def recognize_once(self) -> "Union[SpeechRecognitionResult, TranslationRecognitionResult,IntentRecognitionResult]":
         """
         Performs recognition in a blocking (synchronous) mode.
-        Returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use start_continuous_recognition instead.
+        Returns after a single utterance is recognized. The end of a
+        single utterance is determined by listening for silence at the end or until a maximum of 15
+        seconds of audio is processed. The task returns the recognition text as result. 
+        For long-running multi-utterance recognition, use start_continuous_recognition_async instead.
 
         :return: The result value of the synchronous recognition.
         """
@@ -402,7 +405,10 @@ class Recognizer():
     def recognize_once_async(self) -> ResultFuture:
         """
         Performs recognition in a non-blocking (asynchronous) mode.
-        Will recognize the first utterance, it is suitable only for single shot recognition like command or query. For long-running recognition, use start_continuous_recognition_async instead.
+        This will recognize a single utterance. The end of a
+        single utterance is determined by listening for silence at the end or until a maximum of 15
+        seconds of audio is processed.
+        For long-running multi-utterance recognition, use start_continuous_recognition_async instead.
 
         :return: A future containing the result value of the asynchronous recognition.
         """
@@ -540,7 +546,10 @@ class SpeechRecognizer(Recognizer):
     def recognize_once(self) -> SpeechRecognitionResult:
         """
         Performs recognition in a blocking (synchronous) mode.
-        Returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use start_continuous_recognition instead.
+        Returns after a single utterance is recognized. The end of a
+        single utterance is determined by listening for silence at the end or until a maximum of 15
+        seconds of audio is processed. The task returns the recognition text as result. 
+        For long-running multi-utterance recognition, use start_continuous_recognition_async instead.
 
         :return: The result value of the synchronous recognition.
         """
@@ -549,8 +558,11 @@ class SpeechRecognizer(Recognizer):
     def recognize_once_async(self) -> ResultFuture:
         """
         Performs recognition in a non-blocking (asynchronous) mode.
-        Will recognize the first utterance, it is suitable only for single shot recognition like command or query. For long-running recognition, use start_continuous_recognition_async instead.
-
+        This will recognize a single utterance. The end of a
+        single utterance is determined by listening for silence at the end or until a maximum of 15
+        seconds of audio is processed.
+        For long-running multi-utterance recognition, use start_continuous_recognition_async instead.
+        
         :return: A future containing the result value of the asynchronous recognition.
         """
         return ResultFuture(self._impl.recognize_once_async(), SpeechRecognitionResult)

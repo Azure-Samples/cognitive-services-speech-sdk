@@ -106,8 +106,12 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     private PropertyCollection _Parameters;
 
     /**
-     * Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
-     * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+     * Starts intent recognition, and returns after a single utterance is recognized. The end of a
+     * single utterance is determined by listening for silence at the end or until a maximum of 15
+     * seconds of audio is processed.  The task returns the recognition text as result. 
+     * Note: Since recognizeOnceAsync() returns only a single utterance, it is suitable only for single
+     * shot recognition like command or query. 
+     * For long-running multi-utterance recognition, use startContinuousRecognitionAsync() instead.
      * @return A task representing the recognition operation. The task returns a value of IntentRecognitionResult
      */
     public Future<IntentRecognitionResult> recognizeOnceAsync() {

@@ -192,8 +192,12 @@ namespace Microsoft.CognitiveServices.Speech
         public PropertyCollection Properties { get; internal set; }
 
         /// <summary>
-        /// Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
-        /// Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+        /// Starts speech recognition, and returns after a single utterance is recognized. The end of a
+        /// single utterance is determined by listening for silence at the end or until a maximum of 15
+        /// seconds of audio is processed.  The task returns the recognition text as result. 
+        /// Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+        /// shot recognition like command or query. 
+        /// For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
         /// </summary>
         /// <returns>A task representing the recognition operation. The task returns a value of <see cref="SpeechRecognitionResult"/> </returns>
         /// <example>
@@ -210,9 +214,12 @@ namespace Microsoft.CognitiveServices.Speech
         ///     {
         ///         Console.WriteLine("Say something...");
         ///
-        ///         // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
-        ///         // so it is suitable only for single shot recognition like command or query. For long-running
-        ///         // recognition, use StartContinuousRecognitionAsync() instead.
+        ///         // Starts speech recognition, and returns after a single utterance is recognized. The end of a
+        ///         // single utterance is determined by listening for silence at the end or until a maximum of 15
+        ///         // seconds of audio is processed.  The task returns the recognition text as result. 
+        ///         // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+        ///         // shot recognition like command or query. 
+        ///         // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
         ///         var result = await recognizer.RecognizeOnceAsync();
         ///
         ///         // Checks result.
