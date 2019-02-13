@@ -18,6 +18,7 @@ except ImportError:
 from .speech_py_impl import (
     CancellationDetails,
     CancellationReason,
+    CancellationErrorCode,
     NoMatchDetails,
     NoMatchReason,
     OutputFormat,
@@ -29,6 +30,7 @@ from .speech_py_impl import (
 # override __module__ for correct docs generation
 for cls in (
     CancellationReason,
+    CancellationErrorCode,
     NoMatchReason,
     OutputFormat,
     PropertyCollection,

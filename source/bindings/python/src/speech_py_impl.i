@@ -500,6 +500,8 @@ def inject_enum(prefix: str):
     new_enum_vars = {k[len(prefix) + 1: ]: v for k, v in swig_enum_vars.items()}
     # create python enum and inject into module namespace
     globals()[prefix] = Enum(prefix, new_enum_vars)
+    globals()[prefix].__doc__ = globals()['DocstringFor' + prefix]
+    del globals()['DocstringFor' + prefix]
 
 inject_enum('CancellationReason')
 inject_enum('CancellationErrorCode')
