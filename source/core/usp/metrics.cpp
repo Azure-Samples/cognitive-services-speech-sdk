@@ -220,9 +220,9 @@ static nlohmann::json telemetry_add_metricevents(const TELEMETRY_DATA& telemetry
         auto recvObj = PropertybagInitializeWithKeyValue(event::name::PhraseLatency, telemetry_object.phraseLatencyJson);
         json_array.push_back(recvObj);
     }
-    if (telemetry_object.hypothesisLatencyJson != nullptr)
+    if (telemetry_object.firstHypothesisLatencyJson != nullptr)
     {
-        auto recvObj = PropertybagInitializeWithKeyValue(event::name::HypothesisLatency, telemetry_object.hypothesisLatencyJson);
+        auto recvObj = PropertybagInitializeWithKeyValue(event::name::FirstHypothesisLatency, telemetry_object.firstHypothesisLatencyJson);
         json_array.push_back(recvObj);
     }
 
@@ -473,7 +473,7 @@ void Telemetry::RecordResultLatency(const std::string& requestId, uint64_t laten
     {
         auto& telemetry_data = m_telemetry_object_map[requestId];
         assert(telemetry_object == telemetry_data.get());
-        auto& resultLatencyJson = isPhraseLatency ? telemetry_data->phraseLatencyJson : telemetry_data->hypothesisLatencyJson;
+        auto& resultLatencyJson = isPhraseLatency ? telemetry_data->phraseLatencyJson : telemetry_data->firstHypothesisLatencyJson;
         auto& evArray = initialize_jsonArray(resultLatencyJson);
         /* If we reach the max number of messages, drop it */
         if (evArray.size() < MaxMessagesToRecord)

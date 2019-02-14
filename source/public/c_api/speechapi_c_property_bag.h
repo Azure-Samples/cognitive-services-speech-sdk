@@ -45,7 +45,7 @@ enum  PropertyId
 
     SpeechServiceResponse_JsonResult = 5000,
     SpeechServiceResponse_JsonErrorDetails = 5001,
-    SpeechServiceResponse_RecognitionLatency = 5002,
+    SpeechServiceResponse_RecognitionLatencyMs = 5002,
 
     CancellationDetails_Reason = 6000,
     CancellationDetails_ReasonText = 6001,

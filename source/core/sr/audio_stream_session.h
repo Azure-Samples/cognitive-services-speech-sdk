@@ -258,7 +258,7 @@ private:
     void RecognizeOnceAsync(const std::shared_ptr<Operation>& singleShot);
 
     void SetAudioConfigurationInProperties();
-    uint64_t GetResultLatencyInTicks(const ProcessedAudioTimestampPtr& audiotimestamp) const;
+    uint64_t GetResultLatencyInMs(const ProcessedAudioTimestampPtr& audiotimestamp) const;
 
 private:
 

@@ -42,7 +42,7 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::SpeechServiceResponse_JsonResult: return "RESULT-Json";
     case PropertyId::LanguageUnderstandingServiceResponse_JsonResult: return "RESULT-LanguageUnderstandingJson";
     case PropertyId::SpeechServiceResponse_JsonErrorDetails: return "RESULT-ErrorDetails";
-    case PropertyId::SpeechServiceResponse_RecognitionLatency: return "RESULT-RecognitionLatency";
+    case PropertyId::SpeechServiceResponse_RecognitionLatencyMs: return "RESULT-RecognitionLatencyMs";
     case PropertyId::CancellationDetails_Reason: return "CancellationDetails_Reason";
     case PropertyId::CancellationDetails_ReasonText: return "CancellationDetails_ReasonText";
     case PropertyId::CancellationDetails_ReasonDetailedText: return "CancellationDetails_ReasonDetailedText";

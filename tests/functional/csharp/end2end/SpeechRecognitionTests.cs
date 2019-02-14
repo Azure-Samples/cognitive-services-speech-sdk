@@ -342,7 +342,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 helper.SubscribeToCounterEventHandlers(recognizer, connection);
                 recognizer.Recognizing += (s, e) =>
                 {
-                    var latencyString = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatency);
+                    var latencyString = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatencyMs);
                     if (expectFirstRecognizingResult)
                     {
                         hypothesisLatency = 0;
@@ -364,7 +364,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         recognizedText.Add(e.Result.Text);
                     }
-                    var latencyString = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatency);
+                    var latencyString = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatencyMs);
                     phraseLatency = 0;
                     if (!string.IsNullOrEmpty(latencyString))
                     {

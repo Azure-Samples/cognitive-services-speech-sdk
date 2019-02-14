@@ -169,13 +169,12 @@ enum class PropertyId
     SpeechServiceResponse_JsonErrorDetails = 5001,
 
     /// <summary>
-    /// The recognition latency. Read-only, available on final speech/translation/intent results.
+    /// The recognition latency in milliseconds. Read-only, available on final speech/translation/intent results.
     /// This measures the latency between when an audio input is received by the SDK, and the moment the final result is received from the service.
     /// The SDK computes the time difference between the last audio fragment from the audio input that is contributing to the final result, and the time the final result is received from the speech service.
-    /// The value is in ticks, represented as a string. A single tick represents one hundred nanoseconds or one ten-millionth of a second.
     /// Added in version 1.3.0.
     /// </summary>
-    SpeechServiceResponse_RecognitionLatency = 5002,
+    SpeechServiceResponse_RecognitionLatencyMs = 5002,
 
     /// <summary>
     /// The cancellation reason. Currently unused.

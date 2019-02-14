@@ -294,7 +294,7 @@ void CSpxAudioStreamSession::ProcessAudio(const DataChunkPtr& audioChunk)
 {
     static_assert(MaxBufferedBeforeSimulateRealtime < MaxBufferedBeforeOverflow,
         "Buffer size triggering real time data consumption cannot be bigger than overflow limit");
-    SPX_DBG_TRACE_INFO("ResultLatency: Received audio chunk: time: %s, size:%d.", PAL::GetTimeInString(audioChunk->receivedTime).c_str(), audioChunk->size);
+    SPX_DBG_TRACE_INFO("Received audio chunk: time: %s, size:%d.", PAL::GetTimeInString(audioChunk->receivedTime).c_str(), audioChunk->size);
 
     SlowDownThreadIfNecessary(audioChunk->size);
     auto task = CreateTask([=]() {
@@ -1221,7 +1221,7 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult
     return result;
 }
 
-uint64_t CSpxAudioStreamSession::GetResultLatencyInTicks(const ProcessedAudioTimestampPtr& audioTimestamp) const
+uint64_t CSpxAudioStreamSession::GetResultLatencyInMs(const ProcessedAudioTimestampPtr& audioTimestamp) const
 {
     auto nowTime = system_clock::now();
     if (nowTime < audioTimestamp->chunkReceivedTime)
@@ -1237,10 +1237,8 @@ uint64_t CSpxAudioStreamSession::GetResultLatencyInTicks(const ProcessedAudioTim
         ticks += audioTimestamp->remainingAudioInTicks;
     }
 
-    SPX_DBG_TRACE_INFO("Result latency:%" PRIu64 ".%" PRIu64 "(s), ResultTime: %s, AudioTime: %s, remaingAudio:%" PRIu64 ".",
-        ticks / 10000000, ticks % 10000000,
-        PAL::GetTimeInString(nowTime).c_str(), PAL::GetTimeInString(audioTimestamp->chunkReceivedTime).c_str(), audioTimestamp->remainingAudioInTicks);
-    return ticks;
+    uint64_t latencyMs = (ticks + 5000) / 10000;
+    return latencyMs;
 }
 
 void CSpxAudioStreamSession::FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
@@ -1262,13 +1260,13 @@ void CSpxAudioStreamSession::FireAdapterResult_Intermediate(ISpxRecoEngineAdapte
 
     if (recordHypothesisLatency)
     {
-        uint64_t ticks = 0;
+        uint64_t latencyMs = 0;
         if (buffer)
         {
             auto audioTimestamp = buffer->GetTimestamp(offset + result->GetDuration());
             if (audioTimestamp != nullptr)
             {
-                ticks = GetResultLatencyInTicks(audioTimestamp);
+                latencyMs = GetResultLatencyInMs(audioTimestamp);
             }
             else
             {
@@ -1280,8 +1278,8 @@ void CSpxAudioStreamSession::FireAdapterResult_Intermediate(ISpxRecoEngineAdapte
             SPX_DBG_TRACE_ERROR("FirstHypothesisLatency:(%ls): audio buffer is empty, cannot get audio timestamp.", result->GetResultId().c_str());
         }
         // Write latency entry in result and telemetry.
-        result->SetLatency(ticks);
-        WriteTelemetryLatency(ticks, false);
+        result->SetLatency(latencyMs);
+        WriteTelemetryLatency(latencyMs, false);
     }
 
     FireResultEvent(GetSessionId(), result);
@@ -1302,14 +1300,14 @@ void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter
     m_expectFirstHypothesis = true;
 
     auto buffer = m_audioBuffer;
-    uint64_t ticks = 0;
+    uint64_t latencyMs = 0;
     if (buffer)
     {
         result->SetOffset(buffer->ToAbsolute(offset));
         auto audioTimeStamp = buffer->DiscardTill(offset + result->GetDuration());
         if (audioTimeStamp != nullptr)
         {
-            ticks = GetResultLatencyInTicks(audioTimeStamp);
+            latencyMs = GetResultLatencyInMs(audioTimeStamp);
         }
         else
         {
@@ -1317,8 +1315,8 @@ void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter
         }
     }
     // Write latency entry in result and telemetry.
-    result->SetLatency(ticks);
-    WriteTelemetryLatency(ticks, true);
+    result->SetLatency(latencyMs);
+    WriteTelemetryLatency(latencyMs, true);
 
     // For translation, this means that RecognizeAsync() only returns text result, but no audio result. Audio result
     // has to be received via callbacks.

@@ -106,7 +106,7 @@ void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, ResultReaso
 
 void CSpxRecognitionResult::SetLatency(uint64_t latencyInTicks)
 {
-    SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RecognitionLatency), std::to_string(latencyInTicks).c_str());
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RecognitionLatencyMs), std::to_string(latencyInTicks).c_str());
 }
 
 wstring CSpxRecognitionResult::GetIntentId()

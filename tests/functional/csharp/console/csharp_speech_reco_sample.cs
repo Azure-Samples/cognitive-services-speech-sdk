@@ -19,24 +19,24 @@ namespace MicrosoftSpeechSDKSamples
     {
         private static void MyRecognizingEventHandler(object sender, SpeechRecognitionEventArgs e)
         {
-            var resultLatency = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatency);
-            Console.WriteLine($"Intermediate result (latency={resultLatency}): {e.ToString()}, Offset: {e.Result.OffsetInTicks}, Duration: {e.Result.Duration}.");
+            var resultLatency = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatencyMs);
+            Console.WriteLine($"Intermediate result (latencyMs={resultLatency}): {e.ToString()}, Offset: {e.Result.OffsetInTicks}, Duration: {e.Result.Duration}.");
         }
 
         private static void MyRecognizedEventHandler(object sender, SpeechRecognitionEventArgs e)
         {
-            var resultLatency = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatency);
+            var resultLatency = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatencyMs);
             if (e.Result.Reason == ResultReason.RecognizedSpeech)
             {
-                Console.WriteLine($"RECOGNIZED (latency={resultLatency}): Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+                Console.WriteLine($"RECOGNIZED (latencyMs={resultLatency}): Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
             }
             else if (e.Result.Reason == ResultReason.NoMatch)
             {
-                Console.WriteLine($"NOMATCH (latency={resultLatency}): Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+                Console.WriteLine($"NOMATCH (latencyMs={resultLatency}): Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
             }
             else
             {
-                Console.WriteLine($"Unexpected result.(latency={resultLatency}). Reason={e.Result.Reason}, result={e.Result}");
+                Console.WriteLine($"Unexpected result.(latencyMs={resultLatency}). Reason={e.Result.Reason}, result={e.Result}");
             }
         }
 

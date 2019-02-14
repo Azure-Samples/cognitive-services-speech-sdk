@@ -93,7 +93,7 @@ struct TELEMETRY_DATA
     nlohmann::json ttsJson{};
     nlohmann::json deviceJson{};
     nlohmann::json phraseLatencyJson{};
-    nlohmann::json hypothesisLatencyJson{};
+    nlohmann::json firstHypothesisLatencyJson{};
 };
 
 /**
@@ -236,8 +236,8 @@ namespace event
         static const std::string Device = "device";
         static const std::string Notification = "notification";
         static const std::string SDK = "sdk";
-        static const std::string PhraseLatency = "PhraseLatency";
-        static const std::string HypothesisLatency = "HypothesisLatency";
+        static const std::string PhraseLatency = "PhraseLatencyMs";
+        static const std::string FirstHypothesisLatency = "FirstHypothesisLatencyMs";
     }
 }
 
