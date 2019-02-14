@@ -11,7 +11,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXHR = System.IntPtr;
     using SPXERRORHANDLE = System.IntPtr;
 
-    internal class SpxError : SpxExceptionThrower
+    internal static class SpxError
     {
         public static readonly SPXHR BufferTooSmall = (SPXHR) 0x019;
         public static readonly SPXHR RuntimeError = (SPXHR) 0x01B;
@@ -47,7 +47,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         public static void Release(SPXERRORHANDLE errorHandle)
         {
-            ThrowIfFail(error_release(errorHandle));
+            SpxExceptionThrower.ThrowIfFail(error_release(errorHandle));
         }
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]

@@ -4,39 +4,30 @@
 //
 
 using System;
-using System.Text;
 using System.Runtime.InteropServices;
+using System.Threading;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Internal
 {
     using SPXHR = System.IntPtr;
-    using SPXAUDIOSTREAMFORMATHANDLE = System.IntPtr;
     using SPXAUDIOSTREAMHANDLE = System.IntPtr;
-    using SPXAUDIOCONFIGHANDLE = System.IntPtr;
 
-    internal class AudioInputStream : SpxExceptionThrower, IDisposable
+    internal class AudioInputStream : IDisposable
     {
-        protected SPXAUDIOCONFIGHANDLE streamHandle = IntPtr.Zero;
+        protected InteropSafeHandle streamHandle;
         protected bool disposed = false;
         protected bool isDisposing = false;
-        protected readonly object thisLock = new object();
+        protected object thisLock = new object();
 
         internal AudioInputStream(IntPtr streamPtr)
         {
-            streamHandle = streamPtr;
-        }
-
-        ~AudioInputStream()
-        {
-            Dispose(false);
+            streamHandle = new InteropSafeHandle(streamPtr, audio_stream_release);
         }
 
         public void Dispose()
         {
-            lock (thisLock)
-            {
-                isDisposing = true;
-            }
+            isDisposing = true;
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -50,11 +41,6 @@ namespace Microsoft.CognitiveServices.Speech.Internal
                 // dispose managed resources
             }
             // dispose unmanaged resources
-            if (streamHandle != IntPtr.Zero)
-            {
-                LogErrorIfFail(audio_stream_release(streamHandle));
-                streamHandle = IntPtr.Zero;
-            }
             disposed = true;
         }
 
@@ -63,7 +49,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             return format != null ? format : AudioStreamFormat.DefaultInputFormat;
         }
 
-        public SPXAUDIOSTREAMFORMATHANDLE StreamHandle
+        public InteropSafeHandle StreamHandle
         {
             get
             {
@@ -92,9 +78,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         }
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern bool audio_stream_is_handle_valid(SPXAUDIOSTREAMHANDLE haudioStream);
+        public static extern bool audio_stream_is_handle_valid(InteropSafeHandle audioStream);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR audio_stream_release(SPXAUDIOSTREAMHANDLE haudioStream);
+        public static extern SPXHR audio_stream_release(SPXAUDIOSTREAMHANDLE audioStream);
 
     }
 }

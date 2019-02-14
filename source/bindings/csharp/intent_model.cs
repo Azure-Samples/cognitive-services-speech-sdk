@@ -3,8 +3,8 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
 using System;
-
-using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Intent
 {
@@ -20,7 +20,9 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <returns>The language understanding model being created.</returns>
         public static LanguageUnderstandingModel FromEndpoint(string uri)
         {
-            return new LanguageUnderstandingModel(Internal.LanguageUnderstandingModel.FromEndpoint(uri));
+            IntPtr luModel = IntPtr.Zero;
+            ThrowIfFail(Internal.LanguageUnderstandingModel.language_understanding_model_create_from_uri(out luModel, uri));
+            return new LanguageUnderstandingModel(luModel);
         }
 
         /// <summary>
@@ -30,7 +32,9 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <returns>The language understanding model being created.</returns>
         public static LanguageUnderstandingModel FromAppId(string appId)
         {
-            return new LanguageUnderstandingModel(Internal.LanguageUnderstandingModel.FromAppId(appId));
+            IntPtr luModel = IntPtr.Zero;
+            ThrowIfFail(Internal.LanguageUnderstandingModel.language_understanding_model_create_from_app_id(out luModel, appId));
+            return new LanguageUnderstandingModel(luModel);
         }
 
         /// <summary>
@@ -42,17 +46,16 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <returns>The language understanding model being created.</returns>
         public static LanguageUnderstandingModel FromSubscription(string subscriptionKey, string appId, string region)
         {
-            return new LanguageUnderstandingModel(Internal.LanguageUnderstandingModel.FromSubscription(subscriptionKey, appId, region));
+            IntPtr luModel = IntPtr.Zero;
+            ThrowIfFail(Internal.LanguageUnderstandingModel.language_understanding_model_create_from_subscription(out luModel, subscriptionKey, appId, region));
+            return new LanguageUnderstandingModel(luModel);
         }
 
-        internal LanguageUnderstandingModel(Internal.LanguageUnderstandingModel model)
+        private LanguageUnderstandingModel(IntPtr luPtr)
         {
-            modelImpl = model;
+            luHandle = new InteropSafeHandle(luPtr, Internal.LanguageUnderstandingModel.language_understanding_model__handle_release);
         }
 
-        // Hold the reference.
-        internal Microsoft.CognitiveServices.Speech.Internal.LanguageUnderstandingModel modelImpl { get; }
+        internal InteropSafeHandle luHandle;
     }
-
-    
 }

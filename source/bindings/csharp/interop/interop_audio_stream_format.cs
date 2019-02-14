@@ -12,42 +12,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXHR = System.IntPtr;
     using SPXAUDIOSTREAMFORMATHANDLE = System.IntPtr;
 
-    internal class AudioStreamFormat : SpxExceptionThrower, IDisposable
+    internal class AudioStreamFormat
     {
-        private SPXAUDIOSTREAMFORMATHANDLE formatHandle = IntPtr.Zero;
-        private bool disposed = false;
-
         internal AudioStreamFormat(IntPtr formatPtr)
         {
-            formatHandle = formatPtr;
-        }
-
-        ~AudioStreamFormat()
-        {
-            Dispose(false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed) return;
-
-            if (disposing)
-            {
-                // dispose managed resources
-            }
-            // dispose unmanaged resources
-            if (formatHandle != IntPtr.Zero)
-            {
-                LogErrorIfFail(audio_stream_format_release(formatHandle));
-                formatHandle = IntPtr.Zero;
-            }
-            disposed = true;
+            FormatHandle = new InteropSafeHandle(formatPtr, audio_stream_format_release);
         }
 
         public static AudioStreamFormat DefaultInputFormat
@@ -55,7 +24,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             get
             {
                 SPXAUDIOSTREAMFORMATHANDLE streamFormatHandle = IntPtr.Zero;
-                ThrowIfFail(audio_stream_format_create_from_default_input(out streamFormatHandle));
+                SpxExceptionThrower.ThrowIfFail(audio_stream_format_create_from_default_input(out streamFormatHandle));
                 return new AudioStreamFormat(streamFormatHandle);
             }
         }
@@ -63,7 +32,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static AudioStreamFormat GetWaveFormatPCM(uint samplesPerSecond, byte bitsPerSample, byte channels)
         {
             SPXAUDIOSTREAMFORMATHANDLE streamFormatHandle = IntPtr.Zero;
-            ThrowIfFail(audio_stream_format_create_from_waveformat_pcm(out streamFormatHandle, samplesPerSecond, bitsPerSample, channels));
+            SpxExceptionThrower.ThrowIfFail(audio_stream_format_create_from_waveformat_pcm(out streamFormatHandle, samplesPerSecond, bitsPerSample, channels));
             return new AudioStreamFormat(streamFormatHandle);
         }
 
@@ -77,22 +46,16 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             return GetWaveFormatPCM(samplesPerSecond, 16, 1);
         }
 
-        public SPXAUDIOSTREAMFORMATHANDLE FormatHandle
-        {
-            get
-            {
-                return formatHandle;
-            }
-        }
+        public InteropSafeHandle FormatHandle { get; }
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern bool audio_stream_format_is_handle_valid(SPXAUDIOSTREAMFORMATHANDLE hformat);
+        public static extern bool audio_stream_format_is_handle_valid(SPXAUDIOSTREAMFORMATHANDLE format);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR audio_stream_format_create_from_default_input(out SPXAUDIOSTREAMFORMATHANDLE hformat);
+        public static extern SPXHR audio_stream_format_create_from_default_input(out SPXAUDIOSTREAMFORMATHANDLE format);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR audio_stream_format_create_from_waveformat_pcm(out SPXAUDIOSTREAMFORMATHANDLE hformat, UInt32 samplesPerSecond, Byte bitsPerSample, Byte channels);
+        public static extern SPXHR audio_stream_format_create_from_waveformat_pcm(out SPXAUDIOSTREAMFORMATHANDLE format, UInt32 samplesPerSecond, Byte bitsPerSample, Byte channels);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR audio_stream_format_release(SPXAUDIOSTREAMFORMATHANDLE hformat);
+        public static extern SPXHR audio_stream_format_release(SPXAUDIOSTREAMFORMATHANDLE format);
 
     }
 }

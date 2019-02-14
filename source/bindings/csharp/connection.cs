@@ -6,6 +6,9 @@
 using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Threading;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -32,44 +35,37 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>The Connection instance of the recognizer.</returns>
         public static Connection FromRecognizer(Recognizer recognizer)
         {
-            var connectionImpl = Internal.Connection.FromRecognizer(recognizer.recoImpl);
-            return new Connection(connectionImpl);
+            ThrowIfNull(recognizer, "null recognizer");
+            IntPtr handle = IntPtr.Zero;
+            ThrowIfFail(Internal.Connection.connection_from_recognizer(recognizer.recoHandle, out handle));
+            return new Connection(handle);
         }
 
         ~Connection()
         {
-            lock(connectionLock)
+            inFinalizer = true;
+
+            if (connectionHandle != null)
             {
-                isDisposing = true;
+                LogErrorIfFail(Internal.Connection.connection_connected_set_callback(connectionHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.Connection.connection_disconnected_set_callback(connectionHandle, null, IntPtr.Zero));
             }
-            try
-            {
-                connectionImpl.SetConnectedCallback(null, GCHandle.ToIntPtr(gch));
-                connectionImpl.SetDisconnectedCallback(null, GCHandle.ToIntPtr(gch));
-                connectionImpl.Dispose();
-            }
-            catch (ApplicationException e)
-            {
-                Internal.SpxExceptionThrower.LogError(e.Message);
-            }
-            if (gch.IsAllocated)
-            {
-                gch.Free();
-            }
+
+            // keep delegates alive and set null here
+            connectedCallbackDelegate = null;
+            disconnectedCallbackDelegate = null;
         }
 
-        internal Connection(Internal.Connection connectionImpl)
+        internal Connection(IntPtr connectionPtr)
         {
-            if (connectionImpl == null)
-            {
-                throw new ArgumentException("Invalid connection.");
-            }
-            this.connectionImpl = connectionImpl;
-            gch = GCHandle.Alloc(this, GCHandleType.Normal);
-            connectedCallbackDelegate = new Internal.ConnectionCallbackFunctionDelegate(FireEvent_Connected);
-            disconnectedCallbackDelegate = new Internal.ConnectionCallbackFunctionDelegate(FireEvent_Disconnected);
-            connectionImpl.SetConnectedCallback(connectedCallbackDelegate, GCHandle.ToIntPtr(gch));
-            connectionImpl.SetDisconnectedCallback(disconnectedCallbackDelegate, GCHandle.ToIntPtr(gch));
+            ThrowIfNull(connectionPtr, "Invalid connectionPtr.");
+            connectionHandle = new InteropSafeHandle(connectionPtr, Internal.Connection.connection_handle_release);
+
+            connectedCallbackDelegate = FireEvent_Connected;
+            disconnectedCallbackDelegate = FireEvent_Disconnected;
+
+            ThrowIfFail(Internal.Connection.connection_connected_set_callback(connectionHandle, connectedCallbackDelegate, IntPtr.Zero));
+            ThrowIfFail(Internal.Connection.connection_disconnected_set_callback(connectionHandle, disconnectedCallbackDelegate, IntPtr.Zero));
         }
 
         /// <summary>
@@ -83,7 +79,8 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="forContinuousRecognition">Indicates whether the connection is used for continuous recognition or single-shot recognition.</param>
         public void Open(bool forContinuousRecognition)
         {
-            this.connectionImpl.Open(forContinuousRecognition);
+            ThrowIfFail(connectionHandle != null, SpxError.InvalidHandle.ToInt32());
+            ThrowIfFail(Internal.Connection.connection_open(connectionHandle, forContinuousRecognition));
         }
 
         /// <summary>
@@ -94,7 +91,8 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public void Close()
         {
-            this.connectionImpl.Close();
+            ThrowIfFail(connectionHandle != null, SpxError.InvalidHandle.ToInt32());
+            ThrowIfFail(Internal.Connection.connection_close(connectionHandle));
         }
 
         /// <summary>
@@ -111,12 +109,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public event EventHandler<ConnectionEventArgs> Disconnected;
 
-        private readonly Internal.Connection connectionImpl;
-        private static Internal.ConnectionCallbackFunctionDelegate connectedCallbackDelegate;
-        private static Internal.ConnectionCallbackFunctionDelegate disconnectedCallbackDelegate;
-        private volatile bool isDisposing = false;
-        private readonly object connectionLock = new object();
-        private GCHandle gch;
+        private InteropSafeHandle connectionHandle;
+        private ConnectionCallbackFunctionDelegate connectedCallbackDelegate;
+        private ConnectionCallbackFunctionDelegate disconnectedCallbackDelegate;
+        private volatile bool inFinalizer = false;
 
         /// <summary>
         /// Defines a private methods which raise a C# event when a corresponding callback is invoked from the native layer.
@@ -124,48 +120,34 @@ namespace Microsoft.CognitiveServices.Speech
         ///
 
         [Internal.MonoPInvokeCallback]
-        private static void FireEvent_Connected(IntPtr hevent, IntPtr pvContext)
+        private void FireEvent_Connected(IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                EventHandler<ConnectionEventArgs> eventHandle;
-                Connection connection = (Connection)GCHandle.FromIntPtr(pvContext).Target;
-                lock (connection.connectionLock)
-                {
-                    if (connection.isDisposing) return;
-                    eventHandle = connection.Connected;
-                }
-                var eventArgs = new Internal.ConnectionEventArgs(hevent);
-                var resultEventArg = new ConnectionEventArgs(eventArgs);
-                eventHandle?.Invoke(connection, resultEventArg);
-                eventArgs.Dispose();
+                if (inFinalizer)
+                    return;
+                var resultEventArg = new ConnectionEventArgs(hevent);
+                Connected?.Invoke(this, resultEventArg);
             }
             catch (InvalidOperationException)
             {
-                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+                LogError(Internal.SpxError.InvalidHandle);
             }
         }
 
         [Internal.MonoPInvokeCallback]
-        private static void FireEvent_Disconnected(IntPtr hevent, IntPtr pvContext)
+        private void FireEvent_Disconnected(IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                EventHandler<ConnectionEventArgs> eventHandle;
-                Connection connection = (Connection)GCHandle.FromIntPtr(pvContext).Target;
-                lock (connection.connectionLock)
-                {
-                    if (connection.isDisposing) return;
-                    eventHandle = connection.Disconnected;
-                }
-                var eventArgs = new Internal.ConnectionEventArgs(hevent);
-                var resultEventArg = new ConnectionEventArgs(eventArgs);
-                eventHandle?.Invoke(connection, resultEventArg);
-                eventArgs.Dispose();
+                if (inFinalizer)
+                    return;
+                var resultEventArg = new ConnectionEventArgs(hevent);
+                Disconnected?.Invoke(this, resultEventArg);
             }
             catch (InvalidOperationException)
             {
-                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+                LogError(Internal.SpxError.InvalidHandle);
             }
         }
     }

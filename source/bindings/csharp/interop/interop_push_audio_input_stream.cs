@@ -4,24 +4,18 @@
 //
 
 using System;
-using System.Text;
 using System.Runtime.InteropServices;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Internal
 {
     using SPXHR = System.IntPtr;
-    using SPXAUDIOSTREAMFORMATHANDLE = System.IntPtr;
     using SPXAUDIOSTREAMHANDLE = System.IntPtr;
 
     internal class PushAudioInputStream : AudioInputStream
     {
         internal PushAudioInputStream(IntPtr streamPtr) : base(streamPtr)
         {
-        }
-
-        ~PushAudioInputStream()
-        {
-            Dispose(false);
         }
 
         protected override void Dispose(bool disposing)
@@ -31,6 +25,13 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             if (disposing)
             {
                 // Free any other managed objects here.
+                if (streamHandle != null)
+                {
+                    if (audio_stream_is_handle_valid(streamHandle))
+                    {
+                        LogErrorIfFail(push_audio_input_stream_close(streamHandle));
+                    }
+                }
             }
             // Free any unmanaged objects here.
             disposed = true;
@@ -53,22 +54,24 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         public void Write(byte[] dataBuffer, uint size)
         {
+            ThrowIfNull(streamHandle, "Invalid stream handle.");
             ThrowIfFail(push_audio_input_stream_write(streamHandle, dataBuffer, size));
         }
 
         public void Close()
         {
+            ThrowIfNull(streamHandle, "Invalid stream handle.");
             ThrowIfFail(push_audio_input_stream_close(streamHandle));
         }
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR audio_stream_create_push_audio_input_stream(out SPXAUDIOSTREAMHANDLE haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat);
+        public static extern SPXHR audio_stream_create_push_audio_input_stream(out SPXAUDIOSTREAMHANDLE audioStream, InteropSafeHandle format);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR push_audio_input_stream_write(SPXAUDIOSTREAMHANDLE haudioStream, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] byte[] buffer, UInt32 size);
+        public static extern SPXHR push_audio_input_stream_write(InteropSafeHandle audioStream, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] byte[] buffer, UInt32 size);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR push_audio_input_stream_close(SPXAUDIOSTREAMHANDLE haudioStream);
+        public static extern SPXHR push_audio_input_stream_close(InteropSafeHandle audioStream);
 
     }
 }

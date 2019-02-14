@@ -4,15 +4,13 @@
 //
 
 using System;
-using System.Text;
 using System.Runtime.InteropServices;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Internal
 {
     using SPXHR = System.IntPtr;
     using SPXRECOHANDLE = System.IntPtr;
-    using SPXSPEECHCONFIGHANDLE = System.IntPtr;
-    using SPXAUDIOCONFIGHANDLE = System.IntPtr;
 
     internal static class Import
     {
@@ -28,17 +26,42 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public MonoPInvokeCallbackAttribute() { }
     }
 
-    internal static class SpxFactory 
+    public delegate IntPtr HandleRelease(IntPtr hresult);
+    public sealed class InteropSafeHandle : SafeHandle
     {
-        public delegate IntPtr GetResultDelegate(IntPtr handle, IntPtr result, UInt32 maxCharCount);
+        private HandleRelease releaseHandleFunc = null;
+        public InteropSafeHandle(IntPtr handle, HandleRelease releaseHandle) : base(handle, true)
+        {
+            releaseHandleFunc = releaseHandle;
+            SetHandle(handle);
+        }
 
-        public static string GetDataFromHandleUsingDelegate(GetResultDelegate functionPtr, IntPtr handle, Int32 maxCharCount)
+        public override bool IsInvalid
+        {
+            get { return handle == IntPtr.Zero; }
+        }
+
+        protected override bool ReleaseHandle()
+        {
+            if (releaseHandleFunc != null)
+            {
+                LogErrorIfFail(releaseHandleFunc(handle));
+            }
+            return true;
+        }
+    }
+
+    internal static class SpxFactory
+    {
+        public delegate IntPtr GetResultDelegate(InteropSafeHandle handle, IntPtr result, UInt32 maxCharCount);
+
+        public static string GetDataFromHandleUsingDelegate(GetResultDelegate functionPtr, InteropSafeHandle handle, Int32 maxCharCount)
         {
             string resultTextStr = string.Empty;
             IntPtr resultTextPtr = Marshal.AllocHGlobal(maxCharCount + 1);
             try
             {
-                SpxExceptionThrower.ThrowIfFail(functionPtr(handle, resultTextPtr, (uint)maxCharCount));
+                ThrowIfFail(functionPtr(handle, resultTextPtr, (uint)maxCharCount));
                 resultTextStr = Utf8StringMarshaler.MarshalNativeToManaged(resultTextPtr);
             }
             finally
@@ -49,12 +72,12 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         }
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_create_speech_recognizer_from_config(out SPXRECOHANDLE phreco, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioInput);
+        public static extern SPXHR recognizer_create_speech_recognizer_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_create_translation_recognizer_from_config(out SPXRECOHANDLE phreco, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioInput);
+        public static extern SPXHR recognizer_create_translation_recognizer_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_create_intent_recognizer_from_config(out SPXRECOHANDLE phreco, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioInput);
+        public static extern SPXHR recognizer_create_intent_recognizer_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
     }    
 }

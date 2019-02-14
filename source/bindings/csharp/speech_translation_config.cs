@@ -6,6 +6,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -14,11 +16,11 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public sealed class SpeechTranslationConfig : SpeechConfig
     {
-        internal readonly Internal.SpeechTranslationConfig impl;
+        private readonly object configLock = new object();
+        private string targetLanguages = string.Empty;
 
-        internal SpeechTranslationConfig(Internal.SpeechTranslationConfig impl) : base(impl)
+        internal SpeechTranslationConfig(IntPtr configPtr) : base(configPtr)
         {
-            this.impl = impl;
         }
 
         /// <summary>
@@ -29,7 +31,9 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public new static SpeechTranslationConfig FromSubscription(string subscriptionKey, string region)
         {
-            return new SpeechTranslationConfig(Internal.SpeechTranslationConfig.FromSubscription(subscriptionKey, region));
+            IntPtr config = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechConfig.speech_config_from_subscription(out config, subscriptionKey, region));
+            return new SpeechTranslationConfig(config);
         }
 
         /// <summary>
@@ -43,7 +47,9 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public new static SpeechTranslationConfig FromAuthorizationToken(string authorizationToken, string region)
         {
-            return new SpeechTranslationConfig(Internal.SpeechTranslationConfig.FromAuthorizationToken(authorizationToken, region));
+            IntPtr config = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechConfig.speech_config_from_authorization_token(out config, authorizationToken, region));
+            return new SpeechTranslationConfig(config);
         }
 
         /// <summary>
@@ -61,7 +67,9 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public new static SpeechTranslationConfig FromEndpoint(Uri endpoint, string subscriptionKey)
         {
-            return new SpeechTranslationConfig(Internal.SpeechTranslationConfig.FromEndpoint(Uri.EscapeUriString(endpoint.ToString()), subscriptionKey));
+            IntPtr config = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechConfig.speech_config_from_endpoint(out config, Uri.EscapeUriString(endpoint.ToString()), subscriptionKey));
+            return new SpeechTranslationConfig(config);
         }
 
         /// <summary>
@@ -72,10 +80,17 @@ namespace Microsoft.CognitiveServices.Speech
             get
             {
                 var result = new List<string>();
-                var v  = this.impl.GetTargetLanguages();
-                for (int i = 0; i < v.Length; ++i)
+
+                string[] targetLanguagesArray = new string[0];
+                var targetLanguages = progBag.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+                if (targetLanguages != string.Empty)
                 {
-                    result.Add(v[i]);
+                    targetLanguagesArray = targetLanguages.Split(',');
+                }
+
+                for (int i = 0; i < targetLanguagesArray.Length; ++i)
+                {
+                    result.Add(targetLanguagesArray[i]);
                 }
 
                 return new ReadOnlyCollection<string>(result);
@@ -90,7 +105,15 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="language"></param>
         public void AddTargetLanguage(string language)
         {
-            this.impl.AddTargetLanguage(language);
+            lock (configLock)
+            {
+                if (targetLanguages != string.Empty)
+                {
+                    targetLanguages += ",";
+                }
+                targetLanguages += language;
+            }
+            progBag.SetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages, targetLanguages);
         }
 
         /// <summary>
@@ -100,11 +123,12 @@ namespace Microsoft.CognitiveServices.Speech
         {
             set
             {
-                this.impl.VoiceName = value;
+                progBag.SetProperty(PropertyId.SpeechServiceConnection_TranslationFeatures, "textToSpeech");
+                progBag.SetProperty(PropertyId.SpeechServiceConnection_TranslationVoice, value);
             }
             get
             {
-                return this.impl.VoiceName;
+                return progBag.GetProperty(PropertyId.SpeechServiceConnection_TranslationVoice);
             }
         }
     }

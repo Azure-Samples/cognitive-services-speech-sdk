@@ -4,9 +4,9 @@
 //
 
 using System;
-using System.Globalization;
 using System.Threading;
-using System.Runtime.InteropServices;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -35,19 +35,26 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public event EventHandler<RecognitionEventArgs> SpeechEndDetected;
 
-        internal Recognizer(Internal.Recognizer recoImpl)
+        internal Recognizer(InteropSafeHandle recoPtr)
         {
-            this.recoImpl = recoImpl;
-            gch = GCHandle.Alloc(this, GCHandleType.Normal);
+            ThrowIfNull(recoPtr);
+            recoHandle = recoPtr;
+
             speechStartDetectedCallbackDelegate = FireEvent_SpeechStartDetected;
             speechEndDetectedCallbackDelegate = FireEvent_SpeechEndDetected;
             sessionStartedCallbackDelegate = FireEvent_SetSessionStarted;
             sessionStoppedCallbackDelegate = FireEvent_SetSessionStopped;
 
-            recoImpl.SetSpeechStartDetectedCallback(speechStartDetectedCallbackDelegate, GCHandle.ToIntPtr(gch));
-            recoImpl.SetSpeechEndDetectedCallback(speechEndDetectedCallbackDelegate, GCHandle.ToIntPtr(gch));
-            recoImpl.SetSessionStartedCallback(sessionStartedCallbackDelegate, GCHandle.ToIntPtr(gch));
-            recoImpl.SetSessionStoppedCallback(sessionStoppedCallbackDelegate, GCHandle.ToIntPtr(gch));
+            ThrowIfFail(Internal.Recognizer.recognizer_speech_start_detected_set_callback(recoHandle, speechStartDetectedCallbackDelegate, IntPtr.Zero));
+            ThrowIfFail(Internal.Recognizer.recognizer_speech_end_detected_set_callback(recoHandle, speechEndDetectedCallbackDelegate, IntPtr.Zero));
+            ThrowIfFail(Internal.Recognizer.recognizer_session_started_set_callback(recoHandle, sessionStartedCallbackDelegate, IntPtr.Zero));
+            ThrowIfFail(Internal.Recognizer.recognizer_session_stopped_set_callback(recoHandle, sessionStoppedCallbackDelegate, IntPtr.Zero));
+        }
+
+        ~Recognizer()
+        {
+            isDisposing = true;
+            Dispose(false);
         }
 
         /// <summary>
@@ -57,9 +64,9 @@ namespace Microsoft.CognitiveServices.Speech
         {
             try
             {
+                isDisposing = true;
                 lock (recognizerLock)
                 {
-                    isDisposing = true;
                     if (activeAsyncRecognitionCounter != 0)
                     {
                         throw new InvalidOperationException("Cannot dispose a recognizer while async recognition is running. Await async recognitions to avoid unexpected disposals.");
@@ -86,36 +93,24 @@ namespace Microsoft.CognitiveServices.Speech
                 return;
             }
 
-            if (disposing)
-            {
-            }
-
-            if (gch.IsAllocated)
-            {
-                gch.Free();
-            }
-
             speechStartDetectedCallbackDelegate = null;
             speechEndDetectedCallbackDelegate = null;
             sessionStartedCallbackDelegate = null;
             sessionStoppedCallbackDelegate = null;
 
-            lock (recognizerLock)
-            {
-                disposed = true;
-            }
+            disposed = true;
         }
 
-        internal readonly Internal.Recognizer recoImpl;
-        private Internal.CallbackFunctionDelegate speechStartDetectedCallbackDelegate;
-        private Internal.CallbackFunctionDelegate speechEndDetectedCallbackDelegate;
-        private Internal.CallbackFunctionDelegate sessionStartedCallbackDelegate;
-        private Internal.CallbackFunctionDelegate sessionStoppedCallbackDelegate;
+        internal InteropSafeHandle recoHandle;
+        private IntPtr asyncStartContinuousHandle = IntPtr.Zero;
+        private IntPtr asyncStopContinuousHandle = IntPtr.Zero;
+        private IntPtr asyncStartKeywordHandle = IntPtr.Zero;
+        private IntPtr asyncStopKeywordHandle = IntPtr.Zero;
+        private CallbackFunctionDelegate speechStartDetectedCallbackDelegate;
+        private CallbackFunctionDelegate speechEndDetectedCallbackDelegate;
+        private CallbackFunctionDelegate sessionStartedCallbackDelegate;
+        private CallbackFunctionDelegate sessionStoppedCallbackDelegate;
 
-        /// <summary>
-        /// GC handle for callbacks for context.
-        /// </summary>
-        protected GCHandle gch;
         /// <summary>
         /// disposed is a flag used to indicate if object is disposed.
         /// </summary>
@@ -127,7 +122,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// recognizerLock is used to synchronize access to objects member variables from multiple threads
         /// </summary>
-        protected readonly object recognizerLock = new object();
+        protected object recognizerLock = new object();
         private int activeAsyncRecognitionCounter = 0;
 
         /// <summary>
@@ -136,98 +131,74 @@ namespace Microsoft.CognitiveServices.Speech
         ///
 
         [Internal.MonoPInvokeCallback]
-        private static void FireEvent_SetSessionStarted(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private void FireEvent_SetSessionStarted(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                EventHandler<SessionEventArgs> eventHandle;
-                Recognizer recognizer = (Recognizer)GCHandle.FromIntPtr(pvContext).Target;
-                lock (recognizer.recognizerLock)
+                if (isDisposing)
                 {
-                    if (recognizer.isDisposing) return;
-                    eventHandle = recognizer.SessionStarted;
+                    return;
                 }
-                var eventArgs = new Internal.SessionEventArgs(hevent);
-                var resultEventArg = new SessionEventArgs(eventArgs);
-                eventHandle?.Invoke(recognizer, resultEventArg);
-                // event do not need to be hold for SessionEventArgs
-                eventArgs.Dispose();
+                var resultEventArg = new SessionEventArgs(hevent);
+                SessionStarted?.Invoke(this, resultEventArg);
             }
             catch (InvalidOperationException)
             {
-                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+                LogError(SpxError.InvalidHandle);
             }
         }
 
         [Internal.MonoPInvokeCallback]
-        private static void FireEvent_SetSessionStopped(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private void FireEvent_SetSessionStopped(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                EventHandler<SessionEventArgs> eventHandle;
-                Recognizer recognizer = (Recognizer)GCHandle.FromIntPtr(pvContext).Target;
-                lock (recognizer.recognizerLock)
+                if (isDisposing)
                 {
-                    if (recognizer.isDisposing) return;
-                    eventHandle = recognizer.SessionStopped;
+                    return;
                 }
-                var eventArgs = new Internal.SessionEventArgs(hevent);
-                var resultEventArg = new SessionEventArgs(eventArgs);
-                eventHandle?.Invoke(recognizer, resultEventArg);
-                // event do not need to be hold for SessionEventArgs
-                eventArgs.Dispose();
+                var resultEventArg = new SessionEventArgs(hevent);
+                SessionStopped?.Invoke(this, resultEventArg);
             }
             catch (InvalidOperationException)
             {
-                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+                LogError(SpxError.InvalidHandle);
             }
         }
 
         [Internal.MonoPInvokeCallback]
-        private static void FireEvent_SpeechStartDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private void FireEvent_SpeechStartDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                EventHandler<RecognitionEventArgs> eventHandle;
-                Recognizer recognizer = (Recognizer)GCHandle.FromIntPtr(pvContext).Target;
-                lock (recognizer.recognizerLock)
+                if (isDisposing)
                 {
-                    if (recognizer.isDisposing) return;
-                    eventHandle = recognizer.SpeechStartDetected;
+                    return;
                 }
-                var eventArgs = new Internal.RecognitionEventArgs(hevent);
-                var resultEventArg = new RecognitionEventArgs(eventArgs);
-                eventHandle?.Invoke(recognizer, resultEventArg);
-                // event do not need to be hold for RecognitionEventArgs
-                eventArgs.Dispose();
+                var resultEventArg = new RecognitionEventArgs(hevent);
+                SpeechStartDetected?.Invoke(this, resultEventArg);
             }
             catch (InvalidOperationException)
             {
-                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+                LogError(SpxError.InvalidHandle);
             }
         }
 
         [Internal.MonoPInvokeCallback]
-        private static void FireEvent_SpeechEndDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private void FireEvent_SpeechEndDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                EventHandler<RecognitionEventArgs> eventHandle;
-                Recognizer recognizer = (Recognizer)GCHandle.FromIntPtr(pvContext).Target;
-                lock (recognizer.recognizerLock)
+                if (isDisposing)
                 {
-                    if (recognizer.isDisposing) return;
-                    eventHandle = recognizer.SpeechEndDetected;
+                    return;
                 }
-                var eventArgs = new Internal.RecognitionEventArgs(hevent);
-                var resultEventArg = new RecognitionEventArgs(eventArgs);
-                eventHandle?.Invoke(recognizer, resultEventArg);
-                // event do not need to be hold for RecognitionEventArgs
-                eventArgs.Dispose();
+                var resultEventArg = new RecognitionEventArgs(hevent);
+                SpeechEndDetected?.Invoke(this, resultEventArg);
             }
             catch (InvalidOperationException)
             {
-                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+                LogError(SpxError.InvalidHandle);
             }
         }
 
@@ -260,6 +231,95 @@ namespace Microsoft.CognitiveServices.Speech
                     activeAsyncRecognitionCounter--;
                 }
             }
+        }
+
+        internal IntPtr RecognizeOnce()
+        {
+            IntPtr hresult = IntPtr.Zero;
+            ThrowIfNull(recoHandle, "Invalid recognizer handle");
+            ThrowIfFail(Internal.Recognizer.recognizer_recognize_once(recoHandle, out hresult));
+            return hresult;
+        }
+
+        internal void StartContinuousRecognition()
+        {
+            if (asyncStartContinuousHandle != IntPtr.Zero)
+            {
+                ThrowIfFail(Internal.Recognizer.recognizer_async_handle_release(asyncStartContinuousHandle));
+            }
+            ThrowIfNull(recoHandle, "Invalid recognizer handle");
+            ThrowIfFail(Internal.Recognizer.recognizer_start_continuous_recognition_async(recoHandle, out asyncStartContinuousHandle));
+            ThrowIfFail(Internal.Recognizer.recognizer_start_continuous_recognition_async_wait_for(asyncStartContinuousHandle, UInt32.MaxValue));
+            ThrowIfFail(Internal.Recognizer.recognizer_async_handle_release(asyncStartContinuousHandle));
+            asyncStartContinuousHandle = IntPtr.Zero;
+        }
+
+        internal void StopContinuousRecognition()
+        {
+            if (asyncStopContinuousHandle != IntPtr.Zero)
+            {
+                ThrowIfFail(Internal.Recognizer.recognizer_async_handle_release(asyncStopContinuousHandle));
+            }
+            ThrowIfNull(recoHandle, "Invalid recognizer handle");
+            ThrowIfFail(Internal.Recognizer.recognizer_stop_continuous_recognition_async(recoHandle, out asyncStopContinuousHandle));
+            ThrowIfFail(Internal.Recognizer.recognizer_stop_continuous_recognition_async_wait_for(asyncStopContinuousHandle, UInt32.MaxValue));
+            ThrowIfFail(Internal.Recognizer.recognizer_async_handle_release(asyncStopContinuousHandle));
+            asyncStopContinuousHandle = IntPtr.Zero;
+        }
+
+        internal void StartKeywordRecognition(KeywordRecognitionModel model)
+        {
+            if (asyncStartKeywordHandle != IntPtr.Zero)
+            {
+                ThrowIfFail(Internal.Recognizer.recognizer_async_handle_release(asyncStartKeywordHandle));
+            }
+            ThrowIfNull(recoHandle, "Invalid recognizer handle");
+            ThrowIfFail(Internal.Recognizer.recognizer_start_keyword_recognition_async(recoHandle, model.keywordHandle, out asyncStartKeywordHandle));
+            GC.KeepAlive(model);
+            ThrowIfFail(Internal.Recognizer.recognizer_start_keyword_recognition_async_wait_for(asyncStartKeywordHandle, UInt32.MaxValue));
+            ThrowIfFail(Internal.Recognizer.recognizer_async_handle_release(asyncStartKeywordHandle));
+            asyncStartKeywordHandle = IntPtr.Zero;
+        }
+
+        internal void StopKeywordRecognition()
+        {
+            if (asyncStopKeywordHandle != IntPtr.Zero)
+            {
+                ThrowIfFail(Internal.Recognizer.recognizer_async_handle_release(asyncStopKeywordHandle));
+            }
+            ThrowIfNull(recoHandle, "Invalid recognizer handle");
+            ThrowIfFail(Internal.Recognizer.recognizer_stop_keyword_recognition_async(recoHandle, out asyncStopKeywordHandle));
+            ThrowIfFail(Internal.Recognizer.recognizer_stop_keyword_recognition_async_wait_for(asyncStopKeywordHandle, UInt32.MaxValue));
+            ThrowIfFail(Internal.Recognizer.recognizer_async_handle_release(asyncStopKeywordHandle));
+            asyncStopKeywordHandle = IntPtr.Zero;
+        }
+
+        internal delegate IntPtr GetRecognizerFromConfigDelegate(out IntPtr phreco, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
+
+        internal static InteropSafeHandle FromConfig(GetRecognizerFromConfigDelegate fromConfig, SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
+        {
+            if (speechConfig == null) throw new ArgumentNullException(nameof(speechConfig));
+            if (audioConfig == null) throw new ArgumentNullException(nameof(audioConfig));
+
+            IntPtr recoHandlePtr = IntPtr.Zero;
+            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, audioConfig.configImpl.configHandle));
+            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
+            GC.KeepAlive(speechConfig);
+            GC.KeepAlive(audioConfig);
+            return recoHandle;
+        }
+
+        internal static InteropSafeHandle FromConfig(GetRecognizerFromConfigDelegate fromConfig, SpeechConfig speechConfig)
+        {
+            if (speechConfig == null) throw new ArgumentNullException(nameof(speechConfig));
+
+            IntPtr recoHandlePtr = IntPtr.Zero;
+            IntPtr audioConfigPtr = IntPtr.Zero;
+            InteropSafeHandle audioConfigHandle = new InteropSafeHandle(audioConfigPtr, null);
+            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, audioConfigHandle));
+            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
+            GC.KeepAlive(speechConfig);
+            return recoHandle;
         }
     }
 }

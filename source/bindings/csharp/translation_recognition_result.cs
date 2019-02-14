@@ -5,54 +5,58 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.InteropServices;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
-namespace Microsoft.CognitiveServices.Speech.Internal
+namespace Microsoft.CognitiveServices.Speech.Translation
 {
-    using SPXHR = System.IntPtr;
-    using SPXRESULTHANDLE = System.IntPtr;
-
-    internal class TranslationRecognitionResult : RecognitionResult
+    /// <summary>
+    /// Defines tranlsation result.
+    /// </summary>
+    public sealed class TranslationRecognitionResult : RecognitionResult
     {
-
         internal TranslationRecognitionResult(IntPtr resultPtr) : base(resultPtr)
         {
             GetTranslationTexts();
         }
 
-        ~TranslationRecognitionResult()
-        {
-            Dispose(false);
-        }
+        /// <summary>
+        /// Presents the translation results. Each item in the dictionary represents translation result in one of target languages, where the key 
+        /// is the name of the target language, in BCP-47 format, and the value is the translation text in the specified language.
+        /// </summary>
+        public IReadOnlyDictionary<string, string> Translations { get { return translationTextResultMap; } }
 
-        protected override void Dispose(bool disposing)
+        /// <summary>
+        /// Returns a string that represents the speech recognition result.
+        /// </summary>
+        /// <returns>A string that represents the speech recognition result.</returns>
+        public override string ToString()
         {
-            if (disposed) return;
-
-            if (disposing)
+            var text = string.Format(CultureInfo.InvariantCulture, "ResultId:{0} Reason:{1}, Recognized text:<{2}>.\n", ResultId, Reason, Text);
+            foreach (var element in Translations)
             {
-                // dispose managed resources
+                text += $"    Translation in {element.Key}: <{element.Value}>.\n";
             }
-            // dispose unmanaged resources
-            disposed = true;
-            base.Dispose(disposing);
+            return text;
         }
-
-        public Dictionary<string, string> Translations { get; private set; } = null;
 
         private void GetTranslationTexts()
         {
-            if (recognizer_result_handle_is_valid(resultHandle))
+            ThrowIfNull(resultHandle, "Invalid result handle");
+
+            if (Internal.RecognitionResult.recognizer_result_handle_is_valid(resultHandle))
             {
                 int bufLen = 0;
-                Translations = new Dictionary<string, string>();
-                SPXHR hr = translation_text_result_get_translation_text_buffer_header(resultHandle, IntPtr.Zero, ref bufLen);
+                translationTextResultMap = new Dictionary<string, string>();
+                IntPtr hr = Internal.RecognitionResult.translation_text_result_get_translation_text_buffer_header(resultHandle, IntPtr.Zero, ref bufLen);
                 if (hr == SpxError.BufferTooSmall)
                 {
                     IntPtr translationResultBuffer = Marshal.AllocHGlobal(bufLen);
                     try
                     {
-                        ThrowIfFail(translation_text_result_get_translation_text_buffer_header(resultHandle, translationResultBuffer, ref bufLen));
+                        ThrowIfFail(Internal.RecognitionResult.translation_text_result_get_translation_text_buffer_header(resultHandle, translationResultBuffer, ref bufLen));
 
                         int offset = 0;
                         int bufferSize = (int)Marshal.ReadIntPtr(translationResultBuffer, offset);
@@ -76,7 +80,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
                             string language = Utf8StringMarshaler.MarshalNativeToManaged(targetLanguageStrPtr);
                             IntPtr translationTextStrPtr = Marshal.ReadIntPtr(translationTextsPtr, offset);
                             string text = Utf8StringMarshaler.MarshalNativeToManaged(translationTextStrPtr);
-                            Translations[language] = text;
+                            translationTextResultMap[language] = text;
                         }
                     }
                     finally
@@ -87,7 +91,6 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             }
         }
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR translation_text_result_get_translation_text_buffer_header(SPXRESULTHANDLE handle, IntPtr translationResultBuffer, ref int lengthPointer);
+        private Dictionary<string, string> translationTextResultMap;
     }
 }

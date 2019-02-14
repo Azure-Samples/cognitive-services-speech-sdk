@@ -6,8 +6,9 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Collections.Generic;
-using Microsoft.CognitiveServices.Speech;
+using System.Runtime.InteropServices;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Translation
 {
@@ -16,14 +17,16 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     /// </summary>
     public sealed class TranslationSynthesisResult
     {
-        internal TranslationSynthesisResult(Internal.TranslationSynthesisResult result)
+        internal TranslationSynthesisResult(IntPtr resultPtr)
         {
-            resultImpl = result;
+            ThrowIfNull(resultPtr);
+            resultHandle = new InteropSafeHandle(resultPtr, Internal.RecognitionResult.recognizer_result_handle_release);
 
-            Reason = (ResultReason)((int)result.Reason);
+            ResultReason resultReason = ResultReason.NoMatch;
+            ThrowIfFail(Internal.RecognitionResult.result_get_reason(resultHandle, ref resultReason));
+            this.Reason = resultReason;
 
-            audio = new byte[result.Audio.Length];
-            result.Audio.CopyTo(audio, 0);
+            GetAudioData(resultHandle);
         }
 
         /// <summary>
@@ -51,8 +54,33 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             return text;
         }
 
-        // Hold the referece.
-        private Internal.TranslationSynthesisResult resultImpl;
-        private byte[] audio;
+        private void GetAudioData(InteropSafeHandle resultHandle)
+        {
+            ThrowIfNull(resultHandle, "Invalid synthesis result handle.");
+            if (Internal.RecognitionResult.recognizer_result_handle_is_valid(resultHandle))
+            {
+                int bufLen = 0;
+                IntPtr hr = Internal.RecognitionResult.translation_synthesis_result_get_audio_data(resultHandle, IntPtr.Zero, ref bufLen);
+                if (hr == SpxError.BufferTooSmall)
+                {
+                    IntPtr audioBuffer = Marshal.AllocHGlobal(bufLen);
+                    try
+                    {
+                        ThrowIfFail(Internal.RecognitionResult.translation_synthesis_result_get_audio_data(resultHandle, audioBuffer, ref bufLen));
+                        audio = new byte[bufLen];
+                        Marshal.Copy(audioBuffer, audio, 0, bufLen);
+                    }
+                    finally
+                    {
+                        Marshal.FreeHGlobal(audioBuffer);
+                    }
+                    return;
+                }
+                ThrowIfFail(hr);
+            }
+        }
+
+        private byte[] audio = new byte[0];
+        private InteropSafeHandle resultHandle;
     }
 }

@@ -4,8 +4,9 @@
 //
 
 using System;
-using System.Text;
 using System.Runtime.InteropServices;
+using System.Threading;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Internal
 {
@@ -27,21 +28,14 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     internal class PullAudioInputStream : AudioInputStream
     {
         private PullAudioInputStreamCallback callback = null;
-        private GCHandle gch;
         private PullAudioStreamReadDelegate streamReadDelegate;
         private PullAudioStreamCloseDelegate streamCloseDelegate;
         internal PullAudioInputStream(IntPtr streamPtr, PullAudioInputStreamCallback cb) : base(streamPtr)
         {
             callback = cb;
-            gch = GCHandle.Alloc(this);
             streamReadDelegate = StreamReadCallback;
             streamCloseDelegate = StreamCloseCallback;
-            ThrowIfFail(pull_audio_input_stream_set_callbacks(streamPtr, GCHandle.ToIntPtr(gch), streamReadDelegate, streamCloseDelegate));
-        }
-
-        ~PullAudioInputStream()
-        {
-            Dispose(false);
+            ThrowIfFail(pull_audio_input_stream_set_callbacks(streamHandle, IntPtr.Zero, streamReadDelegate, streamCloseDelegate));
         }
 
         protected override void Dispose(bool disposing)
@@ -62,10 +56,6 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             // dispose unmanaged resources
 
             base.Dispose(disposing);
-            if (gch.IsAllocated)
-            {
-                gch.Free();
-            }
             streamReadDelegate = null;
             streamCloseDelegate = null;
         }
@@ -86,17 +76,19 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         }
 
         [MonoPInvokeCallback]
-        private static int StreamReadCallback(IntPtr context, IntPtr buffer, uint size)
+        private int StreamReadCallback(IntPtr context, IntPtr buffer, uint size)
         {
             int result = 0;
             try
             {
                 PullAudioInputStreamCallback callback = null;
-                PullAudioInputStream stream = (PullAudioInputStream)GCHandle.FromIntPtr(context).Target;
-                lock (stream.thisLock)
+                if (isDisposing)
                 {
-                    if (stream.isDisposing) return result;
-                    callback = stream.callback;
+                    return result;
+                }
+                lock (thisLock)
+                {
+                    callback = this.callback;
                 }
                 ThrowIfNull(callback);
                 byte[] srcBuffer = new byte[size];
@@ -114,16 +106,18 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         }
 
         [MonoPInvokeCallback]
-        private static void StreamCloseCallback(IntPtr context)
+        private void StreamCloseCallback(IntPtr context)
         {
             try
             {
                 PullAudioInputStreamCallback callback = null;
-                PullAudioInputStream stream = (PullAudioInputStream)GCHandle.FromIntPtr(context).Target;
-                lock (stream.thisLock)
+                if (isDisposing)
                 {
-                    if (stream.isDisposing) return;
-                    callback = stream.callback;
+                    return;
+                }
+                lock (thisLock)
+                {
+                    callback = this.callback;
                 }
                 ThrowIfNull(callback);
                 callback.Close();
@@ -135,9 +129,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         }
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR audio_stream_create_pull_audio_input_stream(out SPXAUDIOSTREAMHANDLE haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat);
+        public static extern SPXHR audio_stream_create_pull_audio_input_stream(out SPXAUDIOSTREAMHANDLE audioStream, InteropSafeHandle format);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR pull_audio_input_stream_set_callbacks(SPXAUDIOSTREAMHANDLE haudioStream, IntPtr pvContext, PullAudioStreamReadDelegate readCallback, PullAudioStreamCloseDelegate closeCallback);
+        public static extern SPXHR pull_audio_input_stream_set_callbacks(InteropSafeHandle audioStream, IntPtr context, PullAudioStreamReadDelegate readCallback, PullAudioStreamCloseDelegate closeCallback);
 
     }
 }

@@ -5,7 +5,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Text;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Internal
 {
@@ -14,42 +14,13 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXLUMODELHANDLE = System.IntPtr;
     using SPXTRIGGERHANDLE = System.IntPtr;
 
-    internal class IntentTrigger : SpxExceptionThrower, IDisposable
+    internal class IntentTrigger
     {
-        internal SPXTRIGGERHANDLE triggerHandle = IntPtr.Zero;
-        private bool disposed = false;
+        internal InteropSafeHandle triggerHandle;
 
         internal IntentTrigger(IntPtr triggerPtr)
         {
-            triggerHandle = triggerPtr;
-        }
-
-        ~IntentTrigger()
-        {
-            Dispose(false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed) return;
-
-            if (disposing)
-            {
-                // dispose managed resources
-            }
-            // dispose unmanaged resources
-            if (triggerHandle != IntPtr.Zero)
-            {
-                ThrowIfFail(intent_trigger_handle_release(triggerHandle));
-                triggerHandle = IntPtr.Zero;
-            }
-            disposed = true;
+            triggerHandle = new InteropSafeHandle(triggerPtr, Internal.IntentTrigger.intent_trigger_handle_release);
         }
 
         public static IntentTrigger From(string simplePhrase)
@@ -59,7 +30,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             return new IntentTrigger(triggerHandle);
         }
 
-        public static IntentTrigger From(LanguageUnderstandingModel model)
+        public static IntentTrigger From(Intent.LanguageUnderstandingModel model)
         {
             SPXTRIGGERHANDLE triggerHandle = IntPtr.Zero;
             ThrowIfFail(intent_trigger_create_from_language_understanding_model(out triggerHandle, model.luHandle, null));
@@ -67,7 +38,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             return new IntentTrigger(triggerHandle);
         }
 
-        public static IntentTrigger From(LanguageUnderstandingModel model, string intentName)
+        public static IntentTrigger From(Intent.LanguageUnderstandingModel model, string intentName)
         {
             SPXTRIGGERHANDLE triggerHandle = IntPtr.Zero;
             ThrowIfFail(intent_trigger_create_from_language_understanding_model(out triggerHandle, model.luHandle, intentName));
@@ -76,17 +47,17 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         }
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern bool intent_trigger_handle_is_valid(SPXTRIGGERHANDLE htrigger);
+        public static extern bool intent_trigger_handle_is_valid(SPXTRIGGERHANDLE trigger);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR intent_trigger_create_from_phrase(out SPXTRIGGERHANDLE htrigger,
+        public static extern SPXHR intent_trigger_create_from_phrase(out SPXTRIGGERHANDLE trigger,
             [MarshalAs(UnmanagedType.LPStr)] string phrase);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR intent_trigger_create_from_language_understanding_model(out SPXTRIGGERHANDLE htrigger, SPXLUMODELHANDLE hlumodel,
+        public static extern SPXHR intent_trigger_create_from_language_understanding_model(out SPXTRIGGERHANDLE trigger, InteropSafeHandle lumodel,
             [MarshalAs(UnmanagedType.LPStr)] string intentName);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR intent_trigger_handle_release(SPXTRIGGERHANDLE htrigger);
+        public static extern SPXHR intent_trigger_handle_release(SPXTRIGGERHANDLE trigger);
     }
 }

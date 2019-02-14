@@ -5,6 +5,8 @@
 
 using System;
 using System.Globalization;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Translation
 {
@@ -13,11 +15,12 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     /// </summary>
     public sealed class TranslationSynthesisEventArgs : SessionEventArgs
     {
-        internal TranslationSynthesisEventArgs(Microsoft.CognitiveServices.Speech.Internal.TranslationSynthesisEventArgs e)
-            : base(e)
+        internal TranslationSynthesisEventArgs(IntPtr eventHandlePtr)
+            : base(eventHandlePtr)
         {
-            eventArgImpl = e;
-            Result = new TranslationSynthesisResult(e.Result);
+            IntPtr result = IntPtr.Zero;
+            ThrowIfFail(Internal.Recognizer.recognizer_recognition_event_get_result(eventHandle, out result));
+            Result = new TranslationSynthesisResult(result);
         }
 
         /// <summary>
@@ -33,8 +36,5 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             return string.Format(CultureInfo.InvariantCulture, "SessionId:{0} Result:{1}.", SessionId, Result.ToString());
         }
-
-        // Hold the reference
-        private Microsoft.CognitiveServices.Speech.Internal.TranslationSynthesisEventArgs eventArgImpl;
     }
 }

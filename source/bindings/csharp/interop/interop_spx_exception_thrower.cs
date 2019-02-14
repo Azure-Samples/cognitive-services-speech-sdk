@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 namespace Microsoft.CognitiveServices.Speech.Internal
 {
     using SPXHR = System.IntPtr;
-    internal class SpxExceptionThrower
+    internal static class SpxExceptionThrower
     {
         internal static void ThrowIfFail(SPXHR hr)
         {
@@ -27,20 +27,26 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             }
         }
 
-        internal static void ThrowIfNull(object item)
+        internal static void ThrowIfNull(object item, string message = null)
         {
             if (item == null)
             {
-                string message = "NullReferenceException";
+                if (string.IsNullOrEmpty(message))
+                {
+                    message = "NullReferenceException";
+                }
                 throw new ApplicationException(message);
             }
         }
 
-        internal static void ThrowIfNull(IntPtr item)
+        internal static void ThrowIfNull(IntPtr item, string message = null)
         {
             if (item == null)
             {
-                string message = "NullReferenceException";
+                if (string.IsNullOrEmpty(message))
+                {
+                    message = "NullReferenceException";
+                }
                 throw new ApplicationException(message);
             }
         }

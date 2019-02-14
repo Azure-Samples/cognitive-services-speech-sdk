@@ -2,8 +2,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using System;
+using System.Text;
 using System.Globalization;
-using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Internal;
 
 namespace Microsoft.CognitiveServices.Speech.Intent
 {
@@ -12,11 +14,10 @@ namespace Microsoft.CognitiveServices.Speech.Intent
     /// </summary>
     public sealed class IntentRecognitionResult : RecognitionResult
     {
-        internal IntentRecognitionResult(Internal.IntentRecognitionResult result)
-            : base(result)
+        internal IntentRecognitionResult(IntPtr resultPtr)
+            : base(resultPtr)
         {
-            intentResultImpl = result;
-            IntentId = result.IntentId;
+            IntentId = SpxFactory.GetDataFromHandleUsingDelegate(Internal.RecognitionResult.intent_result_get_intent_id, resultHandle, maxCharCount);
         }
 
         /// <summary>
@@ -34,7 +35,5 @@ namespace Microsoft.CognitiveServices.Speech.Intent
                 ResultId, Reason, IntentId, Text, Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult), Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult));
         }
 
-        // Hold the reference
-        Internal.IntentRecognitionResult intentResultImpl;
     }
 }

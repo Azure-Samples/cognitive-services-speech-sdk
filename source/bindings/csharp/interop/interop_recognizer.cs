@@ -19,253 +19,104 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void CallbackFunctionDelegate(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, IntPtr context);
 
-    internal class Recognizer : SpxExceptionThrower, IDisposable
+    internal static class Recognizer
     {
-        internal SPXRECOHANDLE recoHandle = IntPtr.Zero;
-        private SPXASYNCHANDLE asyncStartContinuousHandle = IntPtr.Zero;
-        private SPXASYNCHANDLE asyncStopContinuousHandle = IntPtr.Zero;
-        private SPXASYNCHANDLE asyncStartKeywordHandle = IntPtr.Zero;
-        private SPXASYNCHANDLE asyncStopKeywordHandle = IntPtr.Zero;
-        protected bool disposed = false;
-
-        internal Recognizer(IntPtr recoPtr)
-        {
-            recoHandle = recoPtr;
-            SPXPROPERTYBAGHANDLE propertyHandle = IntPtr.Zero;
-            ThrowIfFail(recognizer_get_property_bag(recoHandle, out propertyHandle));
-            Properties = new PropertyCollection(propertyHandle);
-        }
-
-        ~Recognizer()
-        {
-            Dispose(false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed) return;
-
-            if (disposing)
-            {
-                // dispose managed resources
-                if (Properties != null)
-                {
-                    Properties.Dispose();
-                }
-            }
-            // dispose unmanaged resources
-            if (recoHandle != IntPtr.Zero)
-            {
-                LogErrorIfFail(recognizer_handle_release(recoHandle));
-                recoHandle = IntPtr.Zero;
-            }
-            disposed = true;
-        }
-
-        public virtual bool IsEnabled()
-        {
-            bool enabled = false;
-            ThrowIfFail(recognizer_is_enabled(recoHandle, out enabled));
-            return enabled;
-        }
-
-        public virtual void Enable()
-        {
-            ThrowIfFail(recognizer_enable(recoHandle));
-        }
-
-        public virtual void Disable()
-        {
-            ThrowIfFail(recognizer_disable(recoHandle));
-        }
-
-        public SPXRESULTHANDLE RecognizeOnce()
-        {
-            SPXRESULTHANDLE hresult = IntPtr.Zero;
-            ThrowIfFail(recognizer_recognize_once(recoHandle, out hresult));
-            return hresult;
-        }
-
-        public void StartContinuousRecognition()
-        {
-            if (asyncStartContinuousHandle != IntPtr.Zero)
-            {
-                ThrowIfFail(recognizer_async_handle_release(asyncStartContinuousHandle));
-            }
-            ThrowIfFail(recognizer_start_continuous_recognition_async(recoHandle, out asyncStartContinuousHandle));
-            ThrowIfFail(recognizer_start_continuous_recognition_async_wait_for(asyncStartContinuousHandle, UInt32.MaxValue));
-            ThrowIfFail(recognizer_async_handle_release(asyncStartContinuousHandle));
-            asyncStartContinuousHandle = IntPtr.Zero;
-        }
-
-        public void StopContinuousRecognition()
-        {
-            if (asyncStopContinuousHandle != IntPtr.Zero)
-            {
-                ThrowIfFail(recognizer_async_handle_release(asyncStopContinuousHandle));
-            }
-            ThrowIfFail(recognizer_stop_continuous_recognition_async(recoHandle, out asyncStopContinuousHandle));
-            ThrowIfFail(recognizer_stop_continuous_recognition_async_wait_for(asyncStopContinuousHandle, UInt32.MaxValue));
-            ThrowIfFail(recognizer_async_handle_release(asyncStopContinuousHandle));
-            asyncStopContinuousHandle = IntPtr.Zero;
-        }
-
-        public void StartKeywordRecognition(KeywordRecognitionModel model)
-        {
-            if (asyncStartKeywordHandle != IntPtr.Zero)
-            {
-                ThrowIfFail(recognizer_async_handle_release(asyncStartKeywordHandle));
-            }
-            ThrowIfFail(recognizer_start_keyword_recognition_async(recoHandle, model.keywordHandle, out asyncStartKeywordHandle));
-            GC.KeepAlive(model);
-            ThrowIfFail(recognizer_start_keyword_recognition_async_wait_for(asyncStartKeywordHandle, UInt32.MaxValue));
-            ThrowIfFail(recognizer_async_handle_release(asyncStartKeywordHandle));
-            asyncStartKeywordHandle = IntPtr.Zero;
-        }
-
-        public void StopKeywordRecognition()
-        {
-            if (asyncStopKeywordHandle != IntPtr.Zero)
-            {
-                ThrowIfFail(recognizer_async_handle_release(asyncStopKeywordHandle));
-            }
-            ThrowIfFail(recognizer_stop_keyword_recognition_async(recoHandle, out asyncStopKeywordHandle));
-            ThrowIfFail(recognizer_stop_keyword_recognition_async_wait_for(asyncStopKeywordHandle, UInt32.MaxValue));
-            ThrowIfFail(recognizer_async_handle_release(asyncStopKeywordHandle));
-            asyncStopKeywordHandle = IntPtr.Zero;
-        }
-
-        public void SetRecognizingCallback(CallbackFunctionDelegate callbackDelegate, IntPtr gcHandlePtr)
-        {
-            ThrowIfFail(recognizer_recognizing_set_callback(recoHandle, callbackDelegate, gcHandlePtr));
-        }
-
-        public void SetRecognizedCallback(CallbackFunctionDelegate callbackDelegate, IntPtr gcHandlePtr)
-        {
-            ThrowIfFail(recognizer_recognized_set_callback(recoHandle, callbackDelegate, gcHandlePtr));
-        }
-
-        public void SetCanceledCallback(CallbackFunctionDelegate callbackDelegate, IntPtr gcHandlePtr)
-        {
-            ThrowIfFail(recognizer_canceled_set_callback(recoHandle, callbackDelegate, gcHandlePtr));
-        }
-
-        public void SetSpeechStartDetectedCallback(CallbackFunctionDelegate callbackDelegate, IntPtr gcHandlePtr)
-        {
-            ThrowIfFail(recognizer_speech_start_detected_set_callback(recoHandle, callbackDelegate, gcHandlePtr));
-        }
-
-        public void SetSpeechEndDetectedCallback(CallbackFunctionDelegate callbackDelegate, IntPtr gcHandlePtr)
-        {
-            ThrowIfFail(recognizer_speech_end_detected_set_callback(recoHandle, callbackDelegate, gcHandlePtr));
-        }
-
-        public void SetSessionStartedCallback(CallbackFunctionDelegate callbackDelegate, IntPtr gcHandlePtr)
-        {
-            ThrowIfFail(recognizer_session_started_set_callback(recoHandle, callbackDelegate, gcHandlePtr));
-        }
-
-        public void SetSessionStoppedCallback(CallbackFunctionDelegate callbackDelegate, IntPtr gcHandlePtr)
-        {
-            ThrowIfFail(recognizer_session_stopped_set_callback(recoHandle, callbackDelegate, gcHandlePtr));
-        }
-
-        public PropertyCollection Properties { get; } = null;        
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_get_property_bag(SPXRECOHANDLE hreco, out SPXPROPERTYBAGHANDLE hpropbag);
+        public static extern SPXHR recognizer_get_property_bag(InteropSafeHandle recoHandle, out SPXPROPERTYBAGHANDLE propbag);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern bool recognizer_handle_is_valid(SPXRECOHANDLE hreco);
+        public static extern bool recognizer_handle_is_valid(SPXRECOHANDLE recoHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_handle_release(SPXRECOHANDLE hreco);
+        public static extern SPXHR recognizer_handle_release(SPXRECOHANDLE recoHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_enable(SPXRECOHANDLE hreco);
+        public static extern SPXHR recognizer_enable(SPXRECOHANDLE recoHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_disable(SPXRECOHANDLE hreco);
+        public static extern SPXHR recognizer_disable(SPXRECOHANDLE recoHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_is_enabled(SPXRECOHANDLE hreco, out bool pfEnabled);
+        public static extern SPXHR recognizer_is_enabled(SPXRECOHANDLE recoHandle, out bool enabled);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_recognize_once(SPXRECOHANDLE hreco, out SPXRESULTHANDLE phresult);
+        public static extern SPXHR recognizer_recognize_once(InteropSafeHandle recoHandle, out SPXRESULTHANDLE result);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_recognize_once_async(SPXRECOHANDLE hreco, out SPXASYNCHANDLE phasync);
+        public static extern SPXHR recognizer_recognize_once_async(SPXRECOHANDLE recoHandle, out SPXASYNCHANDLE asyncHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_recognize_once_async_wait_for(SPXASYNCHANDLE hasync, UInt32 milliseconds, out SPXRESULTHANDLE phresult);
+        public static extern SPXHR recognizer_recognize_once_async_wait_for(SPXASYNCHANDLE asyncHandle, UInt32 milliseconds, out SPXRESULTHANDLE phresult);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_start_continuous_recognition(SPXRECOHANDLE hreco);
+        public static extern SPXHR recognizer_start_continuous_recognition(SPXRECOHANDLE recoHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_start_continuous_recognition_async(SPXRECOHANDLE hreco, out SPXASYNCHANDLE phasync);
+        public static extern SPXHR recognizer_start_continuous_recognition_async(InteropSafeHandle recoHandle, out SPXASYNCHANDLE asyncHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_start_continuous_recognition_async_wait_for(SPXASYNCHANDLE hasync, UInt32 milliseconds);
+        public static extern SPXHR recognizer_start_continuous_recognition_async_wait_for(SPXASYNCHANDLE asyncHandle, UInt32 milliseconds);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_stop_continuous_recognition(SPXRECOHANDLE hreco);
+        public static extern SPXHR recognizer_stop_continuous_recognition(SPXRECOHANDLE recoHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_stop_continuous_recognition_async(SPXRECOHANDLE hreco, out SPXASYNCHANDLE phasync);
+        public static extern SPXHR recognizer_stop_continuous_recognition_async(InteropSafeHandle recoHandle, out SPXASYNCHANDLE asyncHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_stop_continuous_recognition_async_wait_for(SPXASYNCHANDLE hasync, UInt32 milliseconds);
+        public static extern SPXHR recognizer_stop_continuous_recognition_async_wait_for(SPXASYNCHANDLE asyncHandle, UInt32 milliseconds);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern bool recognizer_async_handle_is_valid(SPXASYNCHANDLE hasync);
+        public static extern bool recognizer_async_handle_is_valid(SPXASYNCHANDLE asyncHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_async_handle_release(SPXASYNCHANDLE hasync);
+        public static extern SPXHR recognizer_async_handle_release(SPXASYNCHANDLE asyncHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_start_keyword_recognition(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword);
+        public static extern SPXHR recognizer_start_keyword_recognition(SPXRECOHANDLE recoHandle, SPXKEYWORDHANDLE keyword);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_start_keyword_recognition_async(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword, out SPXASYNCHANDLE phasync);
+        public static extern SPXHR recognizer_start_keyword_recognition_async(InteropSafeHandle recoHandle, InteropSafeHandle hkeyword, out SPXASYNCHANDLE asyncHandle);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_start_keyword_recognition_async_wait_for(SPXASYNCHANDLE hasync, UInt32 milliseconds);
+        public static extern SPXHR recognizer_start_keyword_recognition_async_wait_for(SPXASYNCHANDLE asyncHandle, UInt32 milliseconds);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_stop_keyword_recognition(SPXRECOHANDLE hreco);
+        public static extern SPXHR recognizer_stop_keyword_recognition(SPXRECOHANDLE recoHandle);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_stop_keyword_recognition_async(SPXRECOHANDLE hreco, out SPXASYNCHANDLE phasync);
+        public static extern SPXHR recognizer_stop_keyword_recognition_async(InteropSafeHandle recoHandle, out SPXASYNCHANDLE asyncHandle);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_stop_keyword_recognition_async_wait_for(SPXASYNCHANDLE hasync, UInt32 milliseconds);
+        public static extern SPXHR recognizer_stop_keyword_recognition_async_wait_for(SPXASYNCHANDLE asyncHandle, UInt32 milliseconds);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_recognition_event_get_offset(SPXEVENTHANDLE hevent, ref UInt64 offset);
+        public static extern SPXHR recognizer_recognition_event_get_offset(InteropSafeHandle eventHandle, ref UInt64 offset);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-        public static extern SPXHR recognizer_session_event_get_session_id(SPXEVENTHANDLE hevent, IntPtr sessionIdStr, UInt32 sessionId);
+        public static extern SPXHR recognizer_session_event_get_session_id(InteropSafeHandle eventHandle, IntPtr sessionIdStr, UInt32 sessionId);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_recognition_event_get_result(SPXEVENTHANDLE hevent, out SPXRESULTHANDLE phresult);
+        public static extern SPXHR recognizer_recognition_event_get_result(InteropSafeHandle eventHandle, out SPXRESULTHANDLE result);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern bool recognizer_event_handle_is_valid(SPXEVENTHANDLE hevent);
+        public static extern bool recognizer_event_handle_is_valid(SPXEVENTHANDLE eventHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_session_started_set_callback(SPXRECOHANDLE hreco, CallbackFunctionDelegate pCallback, IntPtr pvContext);
+        public static extern SPXHR recognizer_session_started_set_callback(InteropSafeHandle recoHandle, CallbackFunctionDelegate callback, IntPtr context);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_session_stopped_set_callback(SPXRECOHANDLE hreco, CallbackFunctionDelegate pCallback, IntPtr pvContext);
+        public static extern SPXHR recognizer_session_stopped_set_callback(InteropSafeHandle recoHandle, CallbackFunctionDelegate callback, IntPtr context);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_speech_start_detected_set_callback(SPXRECOHANDLE hreco, CallbackFunctionDelegate pCallback, IntPtr pvContext);
+        public static extern SPXHR recognizer_speech_start_detected_set_callback(InteropSafeHandle recoHandle, CallbackFunctionDelegate callback, IntPtr context);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_speech_end_detected_set_callback(SPXRECOHANDLE hreco, CallbackFunctionDelegate pCallback, IntPtr pvContext);
+        public static extern SPXHR recognizer_speech_end_detected_set_callback(InteropSafeHandle recoHandle, CallbackFunctionDelegate callback, IntPtr context);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_recognizing_set_callback(SPXRECOHANDLE hreco, CallbackFunctionDelegate pCallback, IntPtr pvContext);
+        public static extern SPXHR recognizer_recognizing_set_callback(InteropSafeHandle recoHandle, CallbackFunctionDelegate callback, IntPtr context);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_recognized_set_callback(SPXRECOHANDLE hreco, CallbackFunctionDelegate pCallback, IntPtr pvContext);
+        public static extern SPXHR recognizer_recognized_set_callback(InteropSafeHandle recoHandle, CallbackFunctionDelegate callback, IntPtr context);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_canceled_set_callback(SPXRECOHANDLE hreco, CallbackFunctionDelegate pCallback, IntPtr pvContext);
+        public static extern SPXHR recognizer_canceled_set_callback(InteropSafeHandle recoHandle, CallbackFunctionDelegate callback, IntPtr context);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR intent_recognizer_add_intent(InteropSafeHandle recoHandle, [MarshalAs(UnmanagedType.LPStr)] string intentId,
+            InteropSafeHandle trigger);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR translator_synthesizing_audio_set_callback(InteropSafeHandle recoHandle, CallbackFunctionDelegate callback, IntPtr context);
 
     }
 }

@@ -4,6 +4,9 @@
 //
 
 using System;
+using System.Globalization;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -13,12 +16,18 @@ namespace Microsoft.CognitiveServices.Speech
     public class SpeechConfig
     {
         // Should be set only by derived classes of this assembly.
-        internal Internal.SpeechConfig configImpl { get; set; }
+        internal InteropSafeHandle configHandle;
+        internal PropertyCollection progBag = null;
 
-        internal SpeechConfig(Internal.SpeechConfig impl)
+        internal SpeechConfig(IntPtr configPtr)
         {
-            this.configImpl = impl;
-            this.configImpl.SetProperty("SPEECHSDK-SPEECH-CONFIG-SYSTEM-LANGUAGE", "C#");
+            ThrowIfNull(configPtr);
+            configHandle = new InteropSafeHandle(configPtr, Internal.SpeechConfig.speech_config_release);
+            IntPtr hpropbag = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechConfig.speech_config_get_property_bag(configHandle, out hpropbag));
+            progBag = new PropertyCollection(hpropbag);
+
+            SetProperty("SPEECHSDK-SPEECH-CONFIG-SYSTEM-LANGUAGE", "C#");
         }
 
         /// <summary>
@@ -29,7 +38,9 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public static SpeechConfig FromSubscription(string subscriptionKey, string region)
         {
-            return new SpeechConfig(Internal.SpeechConfig.FromSubscription(subscriptionKey, region));
+            IntPtr speechConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechConfig.speech_config_from_subscription(out speechConfigHandle, subscriptionKey, region));
+            return new SpeechConfig(speechConfigHandle);
         }
 
         /// <summary>
@@ -45,7 +56,9 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public static SpeechConfig FromAuthorizationToken(string authorizationToken, string region)
         {
-            return new SpeechConfig(Internal.SpeechConfig.FromAuthorizationToken(authorizationToken, region));
+            IntPtr speechConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechConfig.speech_config_from_authorization_token(out speechConfigHandle, authorizationToken, region));
+            return new SpeechConfig(speechConfigHandle);
         }
 
         /// <summary>
@@ -63,7 +76,9 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public static SpeechConfig FromEndpoint(Uri endpoint, string subscriptionKey)
         {
-            return new SpeechConfig(Internal.SpeechConfig.FromEndpoint(Uri.EscapeUriString(endpoint.ToString()), subscriptionKey));
+            IntPtr speechConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechConfig.speech_config_from_endpoint(out speechConfigHandle, Uri.EscapeUriString(endpoint.ToString()), subscriptionKey));
+            return new SpeechConfig(speechConfigHandle);
         }
 
         /// <summary>
@@ -73,7 +88,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.configImpl.SubscriptionKey;
+                return progBag.GetProperty(PropertyId.SpeechServiceConnection_Key);
             }
         }
 
@@ -84,7 +99,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.configImpl.Region;
+                return progBag.GetProperty(PropertyId.SpeechServiceConnection_Region);
             }
         }
 
@@ -101,7 +116,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.configImpl.AuthorizationToken;
+                return progBag.GetProperty(PropertyId.SpeechServiceAuthorization_Token);
             }
 
             set
@@ -110,7 +125,7 @@ namespace Microsoft.CognitiveServices.Speech
                 {
                     throw new ArgumentNullException(nameof(value));
                 }
-                this.configImpl.AuthorizationToken = value;
+                progBag.SetProperty(PropertyId.SpeechServiceAuthorization_Token, value);
             }
         }
 
@@ -121,12 +136,12 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.configImpl.SpeechRecognitionLanguage;
+                return progBag.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
             }
 
             set
             {
-                this.configImpl.SpeechRecognitionLanguage = value;
+                progBag.SetProperty(PropertyId.SpeechServiceConnection_RecoLanguage, value);
             }
         }
 
@@ -137,14 +152,14 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                var val = this.configImpl.GetProperty(Internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse);
+                var val = progBag.GetProperty(PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse);
                 return val == "true" ? OutputFormat.Detailed : OutputFormat.Simple;
             }
 
             set
             {
-                this.configImpl.SetProperty(
-                    Internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse,
+                progBag.SetProperty(
+                    PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse,
                     value == OutputFormat.Detailed ? "true" : "false");
             }
         }
@@ -156,12 +171,12 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.configImpl.EndpointId;
+                return progBag.GetProperty(PropertyId.SpeechServiceConnection_EndpointId);
             }
 
             set
             {
-                this.configImpl.EndpointId = value;
+                progBag.SetProperty(PropertyId.SpeechServiceConnection_EndpointId, value);
             }
         }
 
@@ -183,7 +198,16 @@ namespace Microsoft.CognitiveServices.Speech
             {
                 throw new ArgumentException("Invalid proxy port.");
             }
-            this.configImpl.SetProxy(proxyHostName, (uint)proxyPort, proxyUserName, proxyPassword);
+            progBag.SetProperty(PropertyId.SpeechServiceConnection_ProxyHostName, proxyHostName);
+            progBag.SetProperty(PropertyId.SpeechServiceConnection_ProxyPort, proxyPort.ToString(CultureInfo.CurrentCulture));
+            if (!String.IsNullOrEmpty(proxyUserName))
+            {
+                progBag.SetProperty(PropertyId.SpeechServiceConnection_ProxyUserName, proxyUserName);
+            }
+            if (!String.IsNullOrEmpty(proxyPassword))
+            {
+                progBag.SetProperty(PropertyId.SpeechServiceConnection_ProxyPassword, proxyPassword);
+            }
         }
 
         /// <summary>
@@ -204,7 +228,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="value">Value of the property</param>
         public void SetProperty(string name, string value)
         {
-            this.configImpl.SetProperty(name, value);
+            progBag.SetProperty(name, value);
         }
 
         /// <summary>
@@ -214,7 +238,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>Value of the property</returns>
         public string GetProperty(string name)
         {
-            return this.configImpl.GetProperty(name);
+            return progBag.GetProperty(name);
         }
    }
 }

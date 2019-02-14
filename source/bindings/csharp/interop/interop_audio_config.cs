@@ -4,8 +4,8 @@
 //
 
 using System;
-using System.Text;
 using System.Runtime.InteropServices;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Internal
 {
@@ -13,42 +13,14 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXAUDIOSTREAMHANDLE = System.IntPtr;
     using SPXAUDIOCONFIGHANDLE = System.IntPtr;
 
-    internal class AudioConfig: SpxExceptionThrower, IDisposable
+    internal class AudioConfig
     {
-        internal SPXAUDIOCONFIGHANDLE configHandle = IntPtr.Zero;
-        private bool disposed = false;
+        internal InteropSafeHandle configHandle;
 
         internal AudioConfig(IntPtr configPtr)
         {
-            configHandle = configPtr;
-        }
-
-        ~AudioConfig()
-        {
-            Dispose(false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed) return;
-
-            if (disposing)
-            {
-                // dispose managed resources
-            }
-            // dispose unmanaged resources
-            if (configHandle != IntPtr.Zero)
-            {
-                LogErrorIfFail(audio_config_release(configHandle));
-                configHandle = IntPtr.Zero;
-            }
-            disposed = true;
+            ThrowIfNull(configPtr);
+            configHandle = new InteropSafeHandle(configPtr, audio_config_release);
         }
 
         public static AudioConfig FromDefaultMicrophoneInput()
@@ -82,18 +54,18 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         }
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern bool audio_config_is_handle_valid(SPXAUDIOCONFIGHANDLE haudioConfig);
+        public static extern bool audio_config_is_handle_valid(SPXAUDIOCONFIGHANDLE audioConfig);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR audio_config_create_audio_input_from_default_microphone(out SPXAUDIOCONFIGHANDLE haudioConfig);
+        public static extern SPXHR audio_config_create_audio_input_from_default_microphone(out SPXAUDIOCONFIGHANDLE audioConfig);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-        public static extern SPXHR audio_config_create_audio_input_from_wav_file_name(out SPXAUDIOCONFIGHANDLE haudioConfig,
+        public static extern SPXHR audio_config_create_audio_input_from_wav_file_name(out SPXAUDIOCONFIGHANDLE audioConfig,
             [MarshalAs(UnmanagedType.LPStr)] string fileName);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-        public static extern SPXHR audio_config_create_audio_input_from_a_microphone(out SPXAUDIOCONFIGHANDLE haudioConfig,
+        public static extern SPXHR audio_config_create_audio_input_from_a_microphone(out SPXAUDIOCONFIGHANDLE audioConfig,
             [MarshalAs(UnmanagedType.LPStr)] string deviceName);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR audio_config_create_audio_input_from_stream(out SPXAUDIOCONFIGHANDLE haudioConfig, SPXAUDIOSTREAMHANDLE haudioStream);        
+        public static extern SPXHR audio_config_create_audio_input_from_stream(out SPXAUDIOCONFIGHANDLE audioConfig, InteropSafeHandle audioStream);        
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR audio_config_release(SPXAUDIOCONFIGHANDLE haudioConfig);
+        public static extern SPXHR audio_config_release(SPXAUDIOCONFIGHANDLE audioConfig);
     }
 }

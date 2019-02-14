@@ -2,7 +2,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using System;
 using System.Globalization;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
+
 namespace Microsoft.CognitiveServices.Speech.Intent
 {
     /// <summary>
@@ -10,11 +13,12 @@ namespace Microsoft.CognitiveServices.Speech.Intent
     /// </summary>
     public class IntentRecognitionEventArgs : RecognitionEventArgs
     {
-        internal IntentRecognitionEventArgs(Internal.IntentRecognitionEventArgs e)
-            : base(e)
+        internal IntentRecognitionEventArgs(IntPtr eventHandlePtr)
+            : base(eventHandlePtr)
         {
-            eventArgImpl = e;
-            Result = new IntentRecognitionResult(e.Result);
+            IntPtr result = IntPtr.Zero;
+            ThrowIfFail(Internal.Recognizer.recognizer_recognition_event_get_result(eventHandle, out result));
+            Result = new IntentRecognitionResult(result);
         }
 
         /// <summary>
@@ -32,8 +36,6 @@ namespace Microsoft.CognitiveServices.Speech.Intent
                 SessionId, Result.ResultId, Result.Reason, Result.IntentId, Result.Text);
         }
 
-        // Hold the reference.
-        private Internal.IntentRecognitionEventArgs eventArgImpl;
     }
 
     /// <summary>
@@ -41,14 +43,12 @@ namespace Microsoft.CognitiveServices.Speech.Intent
     /// </summary>
     public sealed class IntentRecognitionCanceledEventArgs : IntentRecognitionEventArgs
     {
-        internal IntentRecognitionCanceledEventArgs(Internal.IntentRecognitionCanceledEventArgs e)
-            : base(e)
+        internal IntentRecognitionCanceledEventArgs(IntPtr eventHandlePtr)
+            : base(eventHandlePtr)
         {
-            eventArgImpl = e;
-
-            var cancellation = e.CancellationDetails;
-            Reason = (CancellationReason)cancellation.Reason;
-            ErrorCode = (CancellationErrorCode)cancellation.ErrorCode;
+            var cancellation = CancellationDetails.FromResult(Result);
+            Reason = cancellation.Reason;
+            ErrorCode = cancellation.ErrorCode;
             ErrorDetails = cancellation.ErrorDetails;
         }
 
@@ -77,8 +77,5 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             return string.Format(CultureInfo.InvariantCulture,"SessionId:{0} ResultId:{1} CancellationReason:{2}. CancellationErrorCode:{3}", SessionId, Result.ResultId, Reason, ErrorCode);
         }
-
-        // Hold the reference.
-        private Internal.IntentRecognitionCanceledEventArgs eventArgImpl;
     }
 }

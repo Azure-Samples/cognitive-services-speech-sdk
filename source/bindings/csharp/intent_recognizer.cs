@@ -6,8 +6,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CognitiveServices.Speech;
-using System.Runtime.InteropServices;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Intent
 {
@@ -36,7 +36,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// </summary>
         /// <param name="speechConfig">Speech configuration</param>
         public IntentRecognizer(SpeechConfig speechConfig)
-            : this(speechConfig != null ? speechConfig.configImpl : throw new ArgumentNullException(nameof(speechConfig)), null)
+            : this(FromConfig(SpxFactory.recognizer_create_intent_recognizer_from_config, speechConfig))
         {
         }
 
@@ -46,30 +46,25 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <param name="speechConfig">Speech configuration</param>
         /// <param name="audioConfig">Audio configuration</param>
         public IntentRecognizer(SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
-            : this(speechConfig != null ? speechConfig.configImpl : throw new ArgumentNullException(nameof(speechConfig)),
-                   audioConfig != null ? audioConfig.configImpl : throw new ArgumentNullException(nameof(audioConfig)))
+            : this(FromConfig(SpxFactory.recognizer_create_intent_recognizer_from_config, speechConfig, audioConfig))
         {
             this.audioConfig = audioConfig;
         }
 
-        internal IntentRecognizer(Internal.SpeechConfig config, Internal.AudioConfig audioConfig)
-            : this(Internal.IntentRecognizer.FromConfig(config, audioConfig))
+        internal IntentRecognizer(InteropSafeHandle recoHandle) : base(recoHandle)
         {
-        }
-
-        internal IntentRecognizer(Internal.IntentRecognizer recoImpl) : base(recoImpl)
-        {
-            this.recoImpl = recoImpl;
-
             recognizingCallbackDelegate = FireEvent_Recognizing;
             recognizedCallbackDelegate = FireEvent_Recognized;
             canceledCallbackDelegate = FireEvent_Canceled;
 
-            recoImpl.SetRecognizingCallback(recognizingCallbackDelegate, GCHandle.ToIntPtr(gch));
-            recoImpl.SetRecognizedCallback(recognizedCallbackDelegate, GCHandle.ToIntPtr(gch));
-            recoImpl.SetCanceledCallback(canceledCallbackDelegate, GCHandle.ToIntPtr(gch));
+            ThrowIfNull(recoHandle, "Invalid recognizer handle");
+            ThrowIfFail(Internal.Recognizer.recognizer_recognizing_set_callback(recoHandle, recognizingCallbackDelegate, IntPtr.Zero));
+            ThrowIfFail(Internal.Recognizer.recognizer_recognized_set_callback(recoHandle, recognizedCallbackDelegate, IntPtr.Zero));
+            ThrowIfFail(Internal.Recognizer.recognizer_canceled_set_callback(recoHandle, canceledCallbackDelegate, IntPtr.Zero));
 
-            Properties = new PropertyCollection(recoImpl.Properties);
+            IntPtr propertyHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.Recognizer.recognizer_get_property_bag(recoHandle, out propertyHandle));
+            Properties = new PropertyCollection(propertyHandle);
         }
 
         /// <summary>
@@ -93,7 +88,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             get
             {
-                return this.recoImpl.AuthorizationToken;
+                return Properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token, "");
             }
 
             set
@@ -103,7 +98,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
                     throw new ArgumentNullException(nameof(value));
                 }
 
-                this.recoImpl.AuthorizationToken = value;
+                Properties.SetProperty(PropertyId.SpeechServiceAuthorization_Token, value);
             }
         }
 
@@ -126,7 +121,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             return Task.Run(() =>
             {
                 IntentRecognitionResult result = null;
-                base.DoAsyncRecognitionAction(() => result = new IntentRecognitionResult(this.recoImpl.RecognizeOnce()));
+                base.DoAsyncRecognitionAction(() => result = new IntentRecognitionResult(RecognizeOnce()));
                 return result;
             });
         }
@@ -140,7 +135,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             return Task.Run(() =>
             {
-                base.DoAsyncRecognitionAction(this.recoImpl.StartContinuousRecognition);
+                base.DoAsyncRecognitionAction(StartContinuousRecognition);
             });
         }
 
@@ -152,7 +147,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             return Task.Run(() =>
             {
-                base.DoAsyncRecognitionAction(this.recoImpl.StopContinuousRecognition);
+                base.DoAsyncRecognitionAction(StopContinuousRecognition);
             });
         }
 
@@ -167,7 +162,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             return Task.Run(() =>
             {
-                base.DoAsyncRecognitionAction(() => this.recoImpl.StartKeywordRecognition(model.modelImpl));
+                base.DoAsyncRecognitionAction(() => StartKeywordRecognition(model));
             });
         }
 
@@ -180,7 +175,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             return Task.Run(() =>
             {
-                base.DoAsyncRecognitionAction(this.recoImpl.StopKeywordRecognition);
+                base.DoAsyncRecognitionAction(StopKeywordRecognition);
             });
         }
 
@@ -191,7 +186,8 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <remarks>Once recognized, the IntentRecognitionResult's IntentId property will match the simplePhrase specified here.</remarks>
         public void AddIntent(string simplePhrase)
         {
-            recoImpl.AddIntent(simplePhrase);
+            var intentTrigger = IntentTrigger.From(simplePhrase);
+            AddIntent(intentTrigger, simplePhrase);
         }
 
         /// <summary>
@@ -202,7 +198,8 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <remarks>Once recognized, the result's intent id will match the id supplied here.</remarks>
         public void AddIntent(string simplePhrase, string intentId)
         {
-            recoImpl.AddIntent(simplePhrase, intentId);
+            var intentTrigger = IntentTrigger.From(simplePhrase);
+            AddIntent(intentTrigger, intentId);
         }
 
         /// <summary>
@@ -213,7 +210,8 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <remarks>Once recognized, the IntentRecognitionResult's IntentId property will contain the intentName specified here.</remarks>
         public void AddIntent(LanguageUnderstandingModel model, string intentName)
         {
-            recoImpl.AddIntent(model.modelImpl, intentName);
+            var intentTrigger = IntentTrigger.From(model, intentName);
+            AddIntent(intentTrigger, intentName);
         }
 
         /// <summary>
@@ -224,7 +222,8 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <param name="intentId">A custom id string to be returned in the IntentRecognitionResult's IntentId property.</param>
         public void AddIntent(LanguageUnderstandingModel model, string intentName, string intentId)
         {
-            recoImpl.AddIntent(model.modelImpl, intentName, intentId);
+            var intentTrigger = IntentTrigger.From(model, intentName);
+            AddIntent(intentTrigger, intentId);
         }
 
         /// <summary>
@@ -234,7 +233,8 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <param name="intentId">A custom string id to be returned in the IntentRecognitionResult's IntentId property.</param>
         public void AddAllIntents(LanguageUnderstandingModel model, string intentId)
         {
-            recoImpl.AddAllIntents(model.modelImpl, intentId);
+            var intentTrigger = IntentTrigger.From(model);
+            AddIntent(intentTrigger, intentId);
         }
 
         /// <summary>
@@ -243,7 +243,21 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <param name="model">The language understanding model from Language Understanding service.</param>
         public void AddAllIntents(LanguageUnderstandingModel model)
         {
-            recoImpl.AddAllIntents(model.modelImpl);
+            var intentTrigger = IntentTrigger.From(model);
+            AddIntent(intentTrigger, "");
+        }
+
+        private void AddIntent(IntentTrigger intentTrigger, string intentId)
+        {
+            ThrowIfNull(recoHandle, "Invalid recognizer handle");
+            ThrowIfFail(Internal.Recognizer.intent_recognizer_add_intent(recoHandle, intentId, intentTrigger.triggerHandle));
+            GC.KeepAlive(intentTrigger);
+        }
+
+        ~IntentRecognizer()
+        {
+            isDisposing = true;
+            Dispose(false);
         }
 
         protected override void Dispose(bool disposing)
@@ -253,105 +267,83 @@ namespace Microsoft.CognitiveServices.Speech.Intent
                 return;
             }
 
-            if (disposing)
+            if (recoHandle != null)
             {
-                try
-                {
-                    recoImpl.SetRecognizingCallback(null, GCHandle.ToIntPtr(gch));
-                    recoImpl.SetRecognizedCallback(null, GCHandle.ToIntPtr(gch));
-                    recoImpl.SetCanceledCallback(null, GCHandle.ToIntPtr(gch));
-                    recoImpl.SetSessionStartedCallback(null, GCHandle.ToIntPtr(gch));
-                    recoImpl.SetSessionStoppedCallback(null, GCHandle.ToIntPtr(gch));
-                    recoImpl.SetSpeechStartDetectedCallback(null, GCHandle.ToIntPtr(gch));
-                    recoImpl.SetSpeechEndDetectedCallback(null, GCHandle.ToIntPtr(gch));
-                }
-                catch (ApplicationException e)
-                {
-                    Internal.SpxExceptionThrower.LogError(e.Message);
-                }
-
-                recoImpl?.Dispose();
-
-                recognizingCallbackDelegate = null;
-                recognizedCallbackDelegate = null;
-                canceledCallbackDelegate = null;
-
-                base.Dispose(disposing);
+                LogErrorIfFail(Internal.Recognizer.recognizer_recognizing_set_callback(recoHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.Recognizer.recognizer_recognized_set_callback(recoHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.Recognizer.recognizer_canceled_set_callback(recoHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.Recognizer.recognizer_session_started_set_callback(recoHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.Recognizer.recognizer_session_stopped_set_callback(recoHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.Recognizer.recognizer_speech_start_detected_set_callback(recoHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.Recognizer.recognizer_speech_end_detected_set_callback(recoHandle, null, IntPtr.Zero));
             }
+
+            recognizingCallbackDelegate = null;
+            recognizedCallbackDelegate = null;
+            canceledCallbackDelegate = null;
+
+            base.Dispose(disposing);
         }
 
-        private new readonly Internal.IntentRecognizer recoImpl;
-        private Internal.CallbackFunctionDelegate recognizingCallbackDelegate;
-        private Internal.CallbackFunctionDelegate recognizedCallbackDelegate;
-        private Internal.CallbackFunctionDelegate canceledCallbackDelegate;
+        private CallbackFunctionDelegate recognizingCallbackDelegate;
+        private CallbackFunctionDelegate recognizedCallbackDelegate;
+        private CallbackFunctionDelegate canceledCallbackDelegate;
 
         private readonly Audio.AudioConfig audioConfig;
 
         // Defines a private methods to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
 
         [Internal.MonoPInvokeCallback]
-        private static void FireEvent_Recognizing(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private void FireEvent_Recognizing(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                EventHandler<IntentRecognitionEventArgs> eventHandle;
-                IntentRecognizer recognizer = (IntentRecognizer)GCHandle.FromIntPtr(pvContext).Target;
-                lock (recognizer.recognizerLock)
+                if (isDisposing)
                 {
-                    if (recognizer.isDisposing) return;
-                    eventHandle = recognizer.Recognizing;
+                    return;
                 }
-                var eventArgs = new Internal.IntentRecognitionEventArgs(hevent);
-                var resultEventArg = new IntentRecognitionEventArgs(eventArgs);
-                eventHandle?.Invoke(recognizer, resultEventArg);
+                var resultEventArg = new IntentRecognitionEventArgs(hevent);
+                Recognizing?.Invoke(this, resultEventArg);
             }
             catch (InvalidOperationException)
             {
-                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+                LogError(Internal.SpxError.InvalidHandle);
             }
         }
 
         [Internal.MonoPInvokeCallback]
-        private static void FireEvent_Recognized(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private void FireEvent_Recognized(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                EventHandler<IntentRecognitionEventArgs> eventHandle;
-                IntentRecognizer recognizer = (IntentRecognizer)GCHandle.FromIntPtr(pvContext).Target;
-                lock (recognizer.recognizerLock)
+                if (isDisposing)
                 {
-                    if (recognizer.isDisposing) return;
-                    eventHandle = recognizer.Recognized;
+                    return;
                 }
-                var eventArgs = new Internal.IntentRecognitionEventArgs(hevent);
-                var resultEventArg = new IntentRecognitionEventArgs(eventArgs);
-                eventHandle?.Invoke(recognizer, resultEventArg);
+                var resultEventArg = new IntentRecognitionEventArgs(hevent);
+                Recognized?.Invoke(this, resultEventArg);
             }
             catch (InvalidOperationException)
             {
-                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+                LogError(Internal.SpxError.InvalidHandle);
             }
         }
 
         [Internal.MonoPInvokeCallback]
-        private static void FireEvent_Canceled(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private void FireEvent_Canceled(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                EventHandler<IntentRecognitionCanceledEventArgs> eventHandle;
-                IntentRecognizer recognizer = (IntentRecognizer)GCHandle.FromIntPtr(pvContext).Target;
-                lock (recognizer.recognizerLock)
+                if (isDisposing)
                 {
-                    if (recognizer.isDisposing) return;
-                    eventHandle = recognizer.Canceled;
+                    return;
                 }
-                var eventArgs = new Internal.IntentRecognitionCanceledEventArgs(hevent);
-                var resultEventArg = new IntentRecognitionCanceledEventArgs(eventArgs);
-                eventHandle?.Invoke(recognizer, resultEventArg);
+                var resultEventArg = new IntentRecognitionCanceledEventArgs(hevent);
+                Canceled?.Invoke(this, resultEventArg);
             }
             catch (InvalidOperationException)
             {
-                Internal.SpxExceptionThrower.LogError(Internal.SpxError.InvalidHandle);
+                LogError(Internal.SpxError.InvalidHandle);
             }
         }
     }

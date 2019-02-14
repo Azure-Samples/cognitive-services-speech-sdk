@@ -46,7 +46,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
                 return;
             }
 
-            formatImpl.Dispose();
             disposed = true;
         }
 
@@ -223,7 +222,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
                 return;
             }
 
-            configImpl.Dispose();
             disposed = true;
 
             if (disposeStream)

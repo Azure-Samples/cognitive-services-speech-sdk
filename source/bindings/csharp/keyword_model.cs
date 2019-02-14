@@ -3,6 +3,8 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
 using System;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -20,7 +22,9 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>The keyword recognition model being created.</returns>
         public static KeywordRecognitionModel FromFile(string fileName)
         {
-            return new KeywordRecognitionModel(Microsoft.CognitiveServices.Speech.Internal.KeywordRecognitionModel.FromFile(fileName));
+            IntPtr keywordModelHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.KeywordRecognitionModel.keyword_recognition_model_create_from_file(fileName, out keywordModelHandle));
+            return new KeywordRecognitionModel(keywordModelHandle);
         }
 
         /// <summary>
@@ -28,22 +32,31 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public void Dispose()
         {
+            Dispose(true);
+        }
+
+        private void Dispose(bool disposing)
+        {
             if (disposed)
             {
                 return;
             }
 
-            modelImpl.Dispose();
+            if (disposing)
+            {
+                // dispose managed resources
+            }
+            // dispose unmanaged resources
             disposed = true;
+            GC.SuppressFinalize(this);
+        }
+
+        private KeywordRecognitionModel(IntPtr keywordHandlePtr)
+        {
+            keywordHandle = new InteropSafeHandle(keywordHandlePtr, Internal.KeywordRecognitionModel.keyword_recognition_model_handle_release);
         }
 
         private bool disposed = false;
-
-        internal KeywordRecognitionModel(Microsoft.CognitiveServices.Speech.Internal.KeywordRecognitionModel model)
-        {
-            modelImpl = model;
-        }
-
-        internal Microsoft.CognitiveServices.Speech.Internal.KeywordRecognitionModel modelImpl { get; }
+        internal InteropSafeHandle keywordHandle;
     }
 }

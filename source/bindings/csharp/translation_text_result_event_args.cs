@@ -4,8 +4,8 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Translation
 {
@@ -14,11 +14,12 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     /// </summary>
     public class TranslationRecognitionEventArgs : RecognitionEventArgs
     {
-        internal TranslationRecognitionEventArgs(Microsoft.CognitiveServices.Speech.Internal.TranslationRecognitionEventArgs e)
-            : base(e)
+        internal TranslationRecognitionEventArgs(IntPtr eventHandlePtr)
+            : base(eventHandlePtr)
         {
-            eventArgImpl = e;
-            Result = new TranslationRecognitionResult(e.Result);
+            IntPtr result = IntPtr.Zero;
+            ThrowIfFail(Internal.Recognizer.recognizer_recognition_event_get_result(eventHandle, out result));
+            Result = new TranslationRecognitionResult(result);
         }
 
         /// <summary>
@@ -35,8 +36,6 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             return string.Format(CultureInfo.InvariantCulture,"SessionId:{0} Result:{1}.", SessionId, Result.ToString());
         }
 
-        // Hold the reference
-        Microsoft.CognitiveServices.Speech.Internal.TranslationRecognitionEventArgs eventArgImpl;
     }
 
     /// <summary>
@@ -44,13 +43,12 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     /// </summary>
     public sealed class TranslationRecognitionCanceledEventArgs : TranslationRecognitionEventArgs
     {
-        internal TranslationRecognitionCanceledEventArgs(Microsoft.CognitiveServices.Speech.Internal.TranslationRecognitionCanceledEventArgs e)
-            : base(e)
+        internal TranslationRecognitionCanceledEventArgs(IntPtr eventHandlePtr)
+            : base(eventHandlePtr)
         {
-            eventArgImpl = e;
-            var cancellation = e.CancellationDetails;
-            Reason = (CancellationReason)cancellation.Reason;
-            ErrorCode = (CancellationErrorCode)cancellation.ErrorCode;
+            var cancellation = CancellationDetails.FromResult(Result);
+            Reason = cancellation.Reason;
+            ErrorCode = cancellation.ErrorCode;
             ErrorDetails = cancellation.ErrorDetails;
         }
 
@@ -80,7 +78,5 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             return string.Format(CultureInfo.InvariantCulture,"SessionId:{0} ResultId:{1} CancellationReason:{2}. CancellationErrorCode:{3}", SessionId, Result.ResultId, Reason, ErrorCode);
         }
 
-        // Hold the reference
-        Microsoft.CognitiveServices.Speech.Internal.TranslationRecognitionCanceledEventArgs eventArgImpl;
     }
 }

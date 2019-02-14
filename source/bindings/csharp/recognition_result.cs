@@ -6,6 +6,8 @@
 using System;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -14,14 +16,20 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public class RecognitionResult
     {
-        internal RecognitionResult(Internal.RecognitionResult result)
+        internal RecognitionResult(IntPtr resultHandlePtr)
         {
+            ThrowIfNull(resultHandlePtr);
+            resultHandle = new InteropSafeHandle(resultHandlePtr, Internal.RecognitionResult.recognizer_result_handle_release);
+            this.ResultId = SpxFactory.GetDataFromHandleUsingDelegate(Internal.RecognitionResult.result_get_result_id, resultHandle, maxCharCount);
+            this.Text = SpxFactory.GetDataFromHandleUsingDelegate(Internal.RecognitionResult.result_get_text, resultHandle, maxCharCount);
 
-            resultImpl = result;
-            this.ResultId = result.ResultId;
-            this.Text = result.Text;
-            this.Reason = (ResultReason)((int)result.Reason);
-            Properties = new PropertyCollection(result.Properties);
+            ResultReason resultReason = ResultReason.NoMatch;
+            ThrowIfFail(Internal.RecognitionResult.result_get_reason(resultHandle, ref resultReason));
+            this.Reason = resultReason;
+
+            IntPtr propertyHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.RecognitionResult.result_get_property_bag(resultHandle, out propertyHandle));
+            Properties = new PropertyCollection(propertyHandle);
         }
 
         /// <summary>
@@ -42,13 +50,13 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Duration of the recognized speech.
         /// </summary>
-        public TimeSpan Duration => TimeSpan.FromTicks((long)this.resultImpl.Duration);
+        public TimeSpan Duration => TimeSpan.FromTicks((long)GetDuration());
 
         /// <summary>
         /// Offset of the recognized speech in ticks. A single tick represents one hundred nanoseconds or one ten-millionth of a second.
         /// </summary>
-        public long OffsetInTicks => (long)this.resultImpl.Offset;
-
+        public long OffsetInTicks => (long) GetOffset();
+            
         /// <summary>
         /// Contains properties of the results.
         /// </summary>
@@ -64,8 +72,24 @@ namespace Microsoft.CognitiveServices.Speech
                 ResultId, Reason, Text, Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult));
         }
 
-        // Hold the reference.
-        internal Internal.RecognitionResult resultImpl { get; }
+        private ulong GetDuration()
+        {
+            ThrowIfNull(resultHandle);
+            UInt64 duration = 0;
+            ThrowIfFail(Internal.RecognitionResult.result_get_duration(resultHandle, ref duration));
+            return duration;
+        }
+
+        private ulong GetOffset()
+        {
+            ThrowIfNull(resultHandle);
+            UInt64 offset = 0;
+            ThrowIfFail(Internal.RecognitionResult.result_get_offset(resultHandle, ref offset));
+            return offset;
+        }
+
+        internal InteropSafeHandle resultHandle;
+        internal const Int32 maxCharCount = 1024;
     }
 
     /// <summary>
@@ -80,17 +104,24 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>The CancellationDetails object being created.</returns>
         public static CancellationDetails FromResult(RecognitionResult result)
         {
-            var canceledImpl = Internal.CancellationDetails.FromResult(result.resultImpl);
-            return new CancellationDetails(canceledImpl);
+            return new CancellationDetails(result);
         }
 
-        internal CancellationDetails(Internal.CancellationDetails cancellation)
+        internal CancellationDetails(RecognitionResult result)
         {
+            ThrowIfNull(result);
+            recognitionResult = result;
+            ThrowIfNull(recognitionResult.resultHandle, "Invalid result handle.");
 
-            canceledImpl = cancellation;
-            this.Reason = (CancellationReason)((int)cancellation.Reason);
-            this.ErrorCode = (CancellationErrorCode)((int)cancellation.ErrorCode);
-            this.ErrorDetails = cancellation.ErrorDetails;
+            CancellationReason reason;
+            ThrowIfFail(Internal.CancellationDetails.result_get_reason_canceled(recognitionResult.resultHandle, out reason));
+            this.Reason = reason;
+
+            CancellationErrorCode errorCode;
+            ThrowIfFail(Internal.CancellationDetails.result_get_canceled_error_code(recognitionResult.resultHandle, out errorCode));
+            this.ErrorCode = errorCode;
+
+            this.ErrorDetails = recognitionResult.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonErrorDetails);
         }
 
         /// <summary>
@@ -119,8 +150,7 @@ namespace Microsoft.CognitiveServices.Speech
             return string.Format(CultureInfo.InvariantCulture,"Reason:{0} ErrorDetails:<{1}>", Reason, ErrorDetails);
         }
 
-        // Hold the reference.
-        private Internal.CancellationDetails canceledImpl;
+        private RecognitionResult recognitionResult = null;
     }
 
     /// <summary>
@@ -135,14 +165,17 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>The NoMatchDetails object being created.</returns>
         public static NoMatchDetails FromResult(RecognitionResult result)
         {
-            var noMatchImpl = Internal.NoMatchDetails.FromResult(result.resultImpl);
-            return new NoMatchDetails(noMatchImpl);
+            return new NoMatchDetails(result);
         }
 
-        internal NoMatchDetails(Internal.NoMatchDetails noMatch)
+        internal NoMatchDetails(RecognitionResult result)
         {
-            noMatchImpl = noMatch;
-            this.Reason = (NoMatchReason)((int)noMatch.Reason);
+            ThrowIfNull(result);
+            recognitionResult = result;
+            ThrowIfNull(recognitionResult.resultHandle, "Invalid result handle.");
+            NoMatchReason reason = NoMatchReason.NotRecognized;
+            ThrowIfFail(Internal.NoMatchDetails.result_get_no_match_reason(recognitionResult.resultHandle, ref reason));
+            this.Reason = reason;
         }
 
         /// <summary>
@@ -159,7 +192,6 @@ namespace Microsoft.CognitiveServices.Speech
             return string.Format(CultureInfo.InvariantCulture, "NoMatchReason:{0}", Reason);
         }
 
-        // Hold the reference.
-        private Internal.NoMatchDetails noMatchImpl;
+        private RecognitionResult recognitionResult = null;
     }
 }

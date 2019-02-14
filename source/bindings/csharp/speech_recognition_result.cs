@@ -4,8 +4,6 @@
 //
 
 using System;
-using System.Diagnostics;
-using System.Globalization;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -14,12 +12,9 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public class SpeechRecognitionResult : RecognitionResult
     {
-        internal SpeechRecognitionResult(Internal.SpeechRecognitionResult result) : base(result)
+        internal SpeechRecognitionResult(IntPtr resultPtr) : base(resultPtr)
         {
-            this.speechResultImpl = result;
         }
 
-        // Hold the reference
-        Internal.SpeechRecognitionResult speechResultImpl;
     }
 }

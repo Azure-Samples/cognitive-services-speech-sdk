@@ -2,7 +2,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using System;
 using System.Globalization;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -11,11 +14,13 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public class RecognitionEventArgs : SessionEventArgs
     {
-        internal RecognitionEventArgs(Internal.RecognitionEventArgs arg)
-            : base(arg)
+        internal RecognitionEventArgs(IntPtr eventHandlePtr)
+            : base(eventHandlePtr)
         {
-            eventArgsImpl = arg;
-            Offset = arg.Offset;
+            ThrowIfNull(eventHandle);
+            ulong offset = 0;
+            ThrowIfFail(Internal.Recognizer.recognizer_recognition_event_get_offset(eventHandle, ref offset));
+            Offset = offset;
         }
 
         /// <summary>
@@ -32,7 +37,5 @@ namespace Microsoft.CognitiveServices.Speech
             return string.Format(CultureInfo.InvariantCulture, "SessionId: {0} Offset: {1}", SessionId, Offset);
         }
 
-        // hold the reference
-        private Internal.RecognitionEventArgs eventArgsImpl;
     }
 }
