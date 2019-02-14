@@ -1,5 +1,5 @@
-#  Copyright (c) Microsoft. All rights reserved.
-#  See https://aka.ms/csspeech/license201809 for the full license information.
+# Copyright (c) Microsoft. All rights reserved.
+# See https://aka.ms/csspeech/license201809 for the full license information.
 """
 Classes related to intent recognition from speech.
 """
@@ -185,10 +185,11 @@ class IntentRecognizer(Recognizer):
           specified :class:`.LanguageUnderstandingModel`.
 
         :param model: The language understanding model containing the intent.
-        :param intent_name: The name of the single intent to be included from the language understanding model.
+        :param intent_name: The name of the single intent to be included from the language
+            understanding model.
         :param simple_phrase: The phrase corresponding to the intent.
         :param intent_id: A custom id string to be returned in the
-            :class:`.IntentRecognitionResult`'s `intent_id` property.
+          :class:`.IntentRecognitionResult`'s `intent_id` property.
         """
         if isinstance(args[0], LanguageUnderstandingModel):
             args = (args[0]._impl, ) + args[1:]
@@ -197,11 +198,11 @@ class IntentRecognizer(Recognizer):
 
     def recognize_once(self) -> IntentRecognitionResult:
         """
-        Performs recognition in a blocking (synchronous) mode.
-        Returns after a single utterance is recognized. The end of a
-        single utterance is determined by listening for silence at the end or until a maximum of 15
-        seconds of audio is processed. The task returns the recognition text as result. 
-        For long-running multi-utterance recognition, use start_continuous_recognition_async instead.
+        Performs recognition in a blocking (synchronous) mode. Returns after a single utterance is
+        recognized. The end of a single utterance is determined by listening for silence at the end
+        or until a maximum of 15 seconds of audio is processed. The task returns the recognition
+        text as result. For long-running multi-utterance recognition, use
+        :py:meth:`.start_continuous_recognition_async` instead.
 
         :return: The result value of the synchronous recognition.
         """
@@ -209,11 +210,10 @@ class IntentRecognizer(Recognizer):
 
     def recognize_once_async(self) -> ResultFuture:
         """
-        Performs recognition in a non-blocking (asynchronous) mode.
-        This will recognize a single utterance. The end of a
-        single utterance is determined by listening for silence at the end or until a maximum of 15
-        seconds of audio is processed.
-        For long-running multi-utterance recognition, use start_continuous_recognition_async instead.
+        Performs recognition in a non-blocking (asynchronous) mode. This will recognize a single
+        utterance. The end of a single utterance is determined by listening for silence at the end
+        or until a maximum of 15 seconds of audio is processed. For long-running multi-utterance
+        recognition, use :py:meth:`.start_continuous_recognition_async` instead.
 
         :return: A future containing the result value of the asynchronous recognition.
         """
@@ -247,8 +247,8 @@ class IntentRecognizer(Recognizer):
         that was canceled as a result or a direct cancellation request or, alternatively, a
         transport or protocol failure).
 
-        Callbacks connected to this signal are called with a :class:`.IntentRecognitionCanceledEventArgs`,
-        instance as the single argument.
+        Callbacks connected to this signal are called with a
+        :class:`.IntentRecognitionCanceledEventArgs`, instance as the single argument.
         """
         return EventSignal(self._impl.canceled, IntentRecognitionCanceledEventArgs)
 

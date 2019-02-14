@@ -1,5 +1,5 @@
-#  Copyright (c) Microsoft. All rights reserved.
-#  See https://aka.ms/csspeech/license201809 for the full license information.
+# Copyright (c) Microsoft. All rights reserved.
+# See https://aka.ms/csspeech/license201809 for the full license information.
 """
 Classes related to recognizing text from speech, and general classes used in the various recognizers.
 """
@@ -160,8 +160,8 @@ class SpeechConfig():
 
           The caller needs to ensure that the authorization token is valid. Before the
           authorization token expires, the caller needs to refresh it by calling this setter with a
-          new valid token.  As configuration values are copied when creating a new recognizer, the
-          new token value will not apply to recognizers that have already been created.  For
+          new valid token. As configuration values are copied when creating a new recognizer, the
+          new token value will not apply to recognizers that have already been created. For
           recognizers that have been created before, you need to set authorization token of the
           corresponding recognizer to refresh the token. Otherwise, the recognizers will encounter
           errors during recognition.
@@ -190,7 +190,8 @@ class SpeechConfig():
         """
         Set proxy information.
 
-        :param hostname: The host name of the proxy server. Do not add protocol information (http) to the hostname.
+        :param hostname: The host name of the proxy server. Do not add protocol information (http)
+            to the hostname.
         :param port: The port number of the proxy server.
         :param username: The user name of the proxy server.
         :param password: The password of the proxy server.
@@ -382,7 +383,7 @@ class Recognizer():
         .. note::
           The caller needs to ensure that the authorization token is valid. Before the
           authorization token expires, the caller needs to refresh it by calling this setter with a
-          new valid token.  Otherwise, the recognizer will encounter errors during recognition.
+          new valid token. Otherwise, the recognizer will encounter errors during recognition.
         """
         return self._impl.get_authorization_token()
 
@@ -390,13 +391,14 @@ class Recognizer():
     def authorization_token(self, authorization_token: str):
         self._impl.set_authorization_token(authorization_token)
 
-    def recognize_once(self) -> "Union[SpeechRecognitionResult, TranslationRecognitionResult,IntentRecognitionResult]":
+    def recognize_once(self) -> "Union[SpeechRecognitionResult, TranslationRecognitionResult, " \
+            "IntentRecognitionResult]":
         """
-        Performs recognition in a blocking (synchronous) mode.
-        Returns after a single utterance is recognized. The end of a
-        single utterance is determined by listening for silence at the end or until a maximum of 15
-        seconds of audio is processed. The task returns the recognition text as result. 
-        For long-running multi-utterance recognition, use start_continuous_recognition_async instead.
+        Performs recognition in a blocking (synchronous) mode. Returns after a single utterance is
+        recognized. The end of a single utterance is determined by listening for silence at the end
+        or until a maximum of 15 seconds of audio is processed. The task returns the recognition
+        text as result. For long-running multi-utterance recognition, use
+        :py:meth:`.start_continuous_recognition_async` instead.
 
         :return: The result value of the synchronous recognition.
         """
@@ -404,11 +406,10 @@ class Recognizer():
 
     def recognize_once_async(self) -> ResultFuture:
         """
-        Performs recognition in a non-blocking (asynchronous) mode.
-        This will recognize a single utterance. The end of a
-        single utterance is determined by listening for silence at the end or until a maximum of 15
-        seconds of audio is processed.
-        For long-running multi-utterance recognition, use start_continuous_recognition_async instead.
+        Performs recognition in a non-blocking (asynchronous) mode. This will recognize a single
+        utterance. The end of a single utterance is determined by listening for silence at the end
+        or until a maximum of 15 seconds of audio is processed. For long-running multi-utterance
+        recognition, use :py:meth:`.start_continuous_recognition_async` instead.
 
         :return: A future containing the result value of the asynchronous recognition.
         """
@@ -416,9 +417,10 @@ class Recognizer():
 
     def start_continuous_recognition_async(self):
         """
-        Asynchronously initiates continuous recognition operation. User has to connect to EventSignal to receive recognition results.
-        Call stop_continuous_recognition_async to stop the recogniztion.
-        
+        Asynchronously initiates continuous recognition operation. User has to connect to
+        EventSignal to receive recognition results. Call
+        :py:meth:`.stop_continuous_recognition_async` to stop the recognition.
+
         :return: A future that is fulfilled once recognition has been initialized.
         """
         return self._impl.start_continuous_recognition_async()
@@ -433,8 +435,9 @@ class Recognizer():
 
     def start_continuous_recognition(self):
         """
-        Synchronously initiates continuous recognition operation. User has to connect to EventSignal to receive recognition results.
-        Call stop_continuous_recognition to stop the recogniztion.
+        Synchronously initiates continuous recognition operation. User has to connect to
+        EventSignal to receive recognition results. Call
+        :py:meth:`.stop_continuous_recognition_async` to stop the recognition.
         """
         return self._impl.start_continuous_recognition()
 
@@ -545,11 +548,11 @@ class SpeechRecognizer(Recognizer):
 
     def recognize_once(self) -> SpeechRecognitionResult:
         """
-        Performs recognition in a blocking (synchronous) mode.
-        Returns after a single utterance is recognized. The end of a
-        single utterance is determined by listening for silence at the end or until a maximum of 15
-        seconds of audio is processed. The task returns the recognition text as result. 
-        For long-running multi-utterance recognition, use start_continuous_recognition_async instead.
+        Performs recognition in a blocking (synchronous) mode. Returns after a single utterance is
+        recognized. The end of a single utterance is determined by listening for silence at the end
+        or until a maximum of 15 seconds of audio is processed. The task returns the recognition
+        text as result. For long-running multi-utterance recognition, use
+        :py:meth:`.start_continuous_recognition_async` instead.
 
         :return: The result value of the synchronous recognition.
         """
@@ -557,12 +560,11 @@ class SpeechRecognizer(Recognizer):
 
     def recognize_once_async(self) -> ResultFuture:
         """
-        Performs recognition in a non-blocking (asynchronous) mode.
-        This will recognize a single utterance. The end of a
-        single utterance is determined by listening for silence at the end or until a maximum of 15
-        seconds of audio is processed.
-        For long-running multi-utterance recognition, use start_continuous_recognition_async instead.
-        
+        Performs recognition in a non-blocking (asynchronous) mode. This will recognize a single
+        utterance. The end of a single utterance is determined by listening for silence at the end
+        or until a maximum of 15 seconds of audio is processed. For long-running multi-utterance
+        recognition, use :py:meth:`.start_continuous_recognition_async` instead.
+
         :return: A future containing the result value of the asynchronous recognition.
         """
         return ResultFuture(self._impl.recognize_once_async(), SpeechRecognitionResult)
@@ -572,7 +574,7 @@ class SpeechRecognizer(Recognizer):
         """
         Signal for events containing intermediate recognition results.
 
-        Callbacks connected to this signal are called with a :class:`.SpeechRecognitionEventArgs`,
+        Callbacks connected to this signal are called with a :class:`.SpeechRecognitionEventArgs`
         instance as the single argument.
         """
         return EventSignal(self._impl.recognizing, SpeechRecognitionEventArgs)
@@ -583,7 +585,7 @@ class SpeechRecognizer(Recognizer):
         Signal for events containing final recognition results (indicating a successful
         recognition attempt).
 
-        Callbacks connected to this signal are called with a :class:`.SpeechRecognitionEventArgs`,
+        Callbacks connected to this signal are called with a :class:`.SpeechRecognitionEventArgs`
         instance as the single argument, dependent on the type of recognizer.
         """
         return EventSignal(self._impl.recognized, SpeechRecognitionEventArgs)
@@ -595,8 +597,8 @@ class SpeechRecognizer(Recognizer):
         that was canceled as a result or a direct cancellation request or, alternatively, a
         transport or protocol failure).
 
-        Callbacks connected to this signal are called with a :class:`.SpeechRecognitionCanceledEventArgs`,
-        instance as the single argument.
+        Callbacks connected to this signal are called with a
+        :class:`.SpeechRecognitionCanceledEventArgs`, instance as the single argument.
         """
         return EventSignal(self._impl.canceled, SpeechRecognitionCanceledEventArgs)
 
@@ -707,7 +709,8 @@ class SpeechRecognitionCanceledEventArgs(SpeechRecognitionEventArgs):
 
 class Connection():
     """
-    Proxy class for managing the connection to the speech service of the specified :class:`.Recognizer`.
+    Proxy class for managing the connection to the speech service of the specified
+    :class:`.Recognizer`.
 
     By default, a :class:`.Recognizer` autonomously manages connection to service when needed. The
     :class:`.Connection` class provides additional methods for users to explicitly open or close a

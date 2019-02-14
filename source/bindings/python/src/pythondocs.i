@@ -265,7 +265,7 @@ DocstringForPropertyId = """
       The Cognitive Services Speech Service subscription key. If you are using
       an intent recognizer, you need to specify the LUIS endpoint key for your
       particular LUIS app. Under normal circumstances, you shouldn't have to
-      use this property directly.  Instead, construct a
+      use this property directly. Instead, construct a
       :py:class:`.SpeechConfig` instance from a subscription key.
 
     .. py:attribute:: SpeechServiceConnection_Endpoint
@@ -281,7 +281,7 @@ DocstringForPropertyId = """
     .. py:attribute:: SpeechServiceConnection_Region
 
       The Cognitive Services Speech Service region. Under normal circumstances,
-      you shouldn't have to use this property directly.  Instead, construct a
+      you shouldn't have to use this property directly. Instead, construct a
       :py:class:`.SpeechConfig` instance from a subscription key, an endpoint
       or an authorization token.
 
@@ -295,7 +295,7 @@ DocstringForPropertyId = """
 
     .. py:attribute:: SpeechServiceAuthorization_Type
 
-      The Cognitive Services Speech Service authorization type.  Currently
+      The Cognitive Services Speech Service authorization type. Currently
       unused.
 
     .. py:attribute:: SpeechServiceConnection_EndpointId
@@ -346,7 +346,7 @@ DocstringForPropertyId = """
 
     .. py:attribute:: SpeechServiceConnection_TranslationVoice
 
-      The name of the Cognitive Service Text to Speech Service voice.  Under
+      The name of the Cognitive Service Text to Speech Service voice. Under
       normal circumstances, you shouldn't have to use this property directly.
       Instead set :py:attr:`.SpeechTranslationConfig.voice_name`.
 
@@ -361,7 +361,7 @@ DocstringForPropertyId = """
     .. py:attribute:: SpeechServiceConnection_IntentRegion
 
       The Language Understanding Service region. Under normal circumstances,
-      you shouldn't have to use this property directly.  Instead use
+      you shouldn't have to use this property directly. Instead use
       :py:class:`.LanguageUnderstandingModel`.
 
     .. py:attribute:: SpeechServiceConnection_RecoMode
@@ -413,7 +413,7 @@ DocstringForPropertyId = """
       The recognition latency. Read-only, available on final
       speech/translation/intent results. This measures the latency between
       when an audio input is received by the SDK, and the moment the final
-      result is received from the service.  The SDK computes the time
+      result is received from the service. The SDK computes the time
       difference between the last audio fragment from the audio input that is
       contributing to the final result, and the time the final result is
       received from the speech service.

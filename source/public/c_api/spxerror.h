@@ -214,7 +214,7 @@ typedef uintptr_t SPXHR;
 #define SPXERR_SWITCH_MODE_NOT_ALLOWED  __SPX_ERRCODE_FAILED(0x01E)
 
 /// <summary>
-/// Changing connection status is not supported in the current recognitzion state.
+/// Changing connection status is not supported in the current recognition state.
 /// </summary>
 #define SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED __SPX_ERRCODE_FAILED(0x01F)
 

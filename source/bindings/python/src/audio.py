@@ -1,5 +1,5 @@
-#  Copyright (c) Microsoft. All rights reserved.
-#  See https://aka.ms/csspeech/license201809 for the full license information.
+# Copyright (c) Microsoft. All rights reserved.
+# See https://aka.ms/csspeech/license201809 for the full license information.
 """
 Classes that are concerned with the handling of audio input to the various recognizers.
 """

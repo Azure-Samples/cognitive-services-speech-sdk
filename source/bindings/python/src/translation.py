@@ -1,5 +1,5 @@
-#  Copyright (c) Microsoft. All rights reserved.
-#  See https://aka.ms/csspeech/license201809 for the full license information.
+# Copyright (c) Microsoft. All rights reserved.
+# See https://aka.ms/csspeech/license201809 for the full license information.
 """
 Classes related to translation of speech to other languages.
 """
@@ -36,8 +36,8 @@ class SpeechTranslationConfig(SpeechConfig):
                  endpoint: OptionalStr = None, auth_token: OptionalStr = None,
                  target_languages: Iterable[str] = None, voice_name: str = '',
                  speech_recognition_language: str = ''):
-        self._impl = self._get_impl(impl.SpeechTranslationConfig, subscription, region, endpoint, auth_token,
-                                    speech_recognition_language)
+        self._impl = self._get_impl(impl.SpeechTranslationConfig, subscription, region, endpoint,
+                auth_token, speech_recognition_language)
 
         if target_languages:
             for lang in target_languages:
@@ -206,11 +206,11 @@ class TranslationRecognizer(Recognizer):
 
     def recognize_once(self) -> TranslationRecognitionResult:
         """
-        Performs recognition in a blocking (synchronous) mode.
-        Returns after a single utterance is recognized. The end of a
-        single utterance is determined by listening for silence at the end or until a maximum of 15
-        seconds of audio is processed. The task returns the recognition text as result. 
-        For long-running multi-utterance recognition, use start_continuous_recognition_async instead.
+        Performs recognition in a blocking (synchronous) mode. Returns after a single utterance is
+        recognized. The end of a single utterance is determined by listening for silence at the end
+        or until a maximum of 15 seconds of audio is processed. The task returns the recognition
+        text as result. For long-running multi-utterance recognition, use
+        :py:meth:`.start_continuous_recognition_async` instead.
 
         :return: The result value of the synchronous recognition.
         """
@@ -218,11 +218,10 @@ class TranslationRecognizer(Recognizer):
 
     def recognize_once_async(self) -> ResultFuture:
         """
-        Performs recognition in a non-blocking (asynchronous) mode.
-        This will recognize a single utterance. The end of a
-        single utterance is determined by listening for silence at the end or until a maximum of 15
-        seconds of audio is processed.
-        For long-running multi-utterance recognition, use start_continuous_recognition_async instead.
+        Performs recognition in a non-blocking (asynchronous) mode. This will recognize a single
+        utterance. The end of a single utterance is determined by listening for silence at the end
+        or until a maximum of 15 seconds of audio is processed. For long-running multi-utterance
+        recognition, use :py:meth:`.start_continuous_recognition_async` instead.
 
         :return: A future containing the result value of the asynchronous recognition.
         """
@@ -271,3 +270,4 @@ class TranslationRecognizer(Recognizer):
         :class:`.TranslationRecognitionCanceledEventArgs`, instance as the single argument.
         """
         return EventSignal(self._impl.canceled, TranslationRecognitionCanceledEventArgs)
+
