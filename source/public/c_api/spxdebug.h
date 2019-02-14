@@ -286,7 +286,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #ifndef __SPX_THROW_HR
 #define __SPX_THROW_HR(hr) __SPX_THROW_HR_IMPL(hr)
 #endif
-#if defined(SPX_CONFIG_TRACE_THROW_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
+#if defined(SPX_CONFIG_TRACE_THROW_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_THROW_ON_FAIL(hr)                                   \
     do {                                                        \
         SPXHR x = hr;                                           \
@@ -358,7 +358,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #define SPX_THROW_HR(hr)                        static_assert(false)
 #endif
 
-#if defined(SPX_CONFIG_REPORT_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
+#if defined(SPX_CONFIG_REPORT_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_REPORT_ON_FAIL(hr)                                  \
     do {                                                        \
         SPXHR x = hr;                                           \
@@ -380,7 +380,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
     UNUSED(hrNot);
 #endif
 
-#if defined(SPX_CONFIG_TRACE_RETURN_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
+#if defined(SPX_CONFIG_TRACE_RETURN_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_RETURN_HR(hr)                                       \
     do {                                                        \
         SPXHR x = hr;                                           \
@@ -437,7 +437,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
     } } } while (0)
 #endif
 
-#if defined(SPX_CONFIG_TRACE_EXITFN_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
+#if defined(SPX_CONFIG_TRACE_EXITFN_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_EXITFN_HR(hr)                                       \
     do {                                                        \
         SPXHR x = hr;                                           \
