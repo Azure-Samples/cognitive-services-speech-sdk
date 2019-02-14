@@ -74,17 +74,28 @@ function runPythonSampleSuite {
   testsuiteName="${5?$usage}"
   timeoutSeconds="${6?$usage}"
 
+  # monkeypatch session callbacks into samples without callbacks to get session ids
+  cat > monkey.py <<SCRIPT
+def newinit(obj, *args, **kwargs):
+    obj.__old_init(*args, **kwargs)
+    obj.session_started.connect(lambda evt: print('SESSION_STARTED: {}'.format(evt)))
+    obj.session_stopped.connect(lambda evt: print('SESSION_STOPPED: {}'.format(evt)))
+def patch(recotype):
+    recotype.__old_init = recotype.__init__
+    recotype.__init__ = newinit
+SCRIPT
+
   testCases=(
-    "import speech_sample; speech_sample.speech_recognize_once_from_file()"
-    "import speech_sample; speech_sample.speech_recognize_once_from_file_with_customized_model()"
-    "import speech_sample; speech_sample.speech_recognize_once_from_file_with_custom_endpoint_parameters()"
-    "import speech_sample; speech_sample.speech_recognize_async_from_file()"
+    "import speech_sample; import monkey; monkey.patch(speech_sample.speechsdk.SpeechRecognizer); speech_sample.speech_recognize_once_from_file()"
+    "import speech_sample; import monkey; monkey.patch(speech_sample.speechsdk.SpeechRecognizer); speech_sample.speech_recognize_once_from_file_with_customized_model()"
+    "import speech_sample; import monkey; monkey.patch(speech_sample.speechsdk.SpeechRecognizer); speech_sample.speech_recognize_once_from_file_with_custom_endpoint_parameters()"
+    "import speech_sample; import monkey; monkey.patch(speech_sample.speechsdk.SpeechRecognizer); speech_sample.speech_recognize_async_from_file()"
     "import speech_sample; speech_sample.speech_recognize_continuous_from_file()"
     "import speech_sample; speech_sample.speech_recognition_with_pull_stream()"
     "import speech_sample; speech_sample.speech_recognition_with_push_stream()"
-    "import translation_sample; translation_sample.translation_once_from_file()"
+    "import translation_sample; import monkey; monkey.patch(translation_sample.speechsdk.translation.TranslationRecognizer); translation_sample.translation_once_from_file()"
     "import translation_sample; translation_sample.translation_continuous()"
-    "import intent_sample; intent_sample.recognize_intent_once_from_file()"
+    "import intent_sample; import monkey; monkey.patch(intent_sample.speechsdk.intent.IntentRecognizer); intent_sample.recognize_intent_once_from_file()"
     "import intent_sample; intent_sample.recognize_intent_continuous()"
   )
 
