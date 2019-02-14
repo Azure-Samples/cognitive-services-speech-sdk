@@ -288,7 +288,8 @@ class RecognitionResult():
         return self._error_json
 
     def __str__(self):
-        return u'{}:(result_id={}, text={})'.format(type(self), self.result_id, self.text)
+        return u'{}(result_id={}, text="{}", reason={})'.format(
+                type(self).__name__, self.result_id, self.text, self.reason)
 
 
 class SpeechRecognitionResult(RecognitionResult):
@@ -301,6 +302,7 @@ class SpeechRecognitionResult(RecognitionResult):
         Constructor for internal use.
         """
         super().__init__(impl_result)
+
 
 class ResultFuture():
     """
@@ -623,7 +625,7 @@ class SessionEventArgs():
         return self._session_id
 
     def __str__(self):
-        return u'{}:(session_id={})'.format(type(self), self.session_id)
+        return u'{}(session_id={})'.format(type(self).__name__, self.session_id)
 
 
 class ConnectionEventArgs(SessionEventArgs):
@@ -682,7 +684,7 @@ class SpeechRecognitionEventArgs(RecognitionEventArgs):
         return self._result
 
     def __str__(self):
-        return u'{}:(session_id={}, result={})'.format(type(self), self.session_id, self.result)
+        return u'{}(session_id={}, result={})'.format(type(self).__name__, self.session_id, self.result)
 
 
 class SpeechRecognitionCanceledEventArgs(SpeechRecognitionEventArgs):

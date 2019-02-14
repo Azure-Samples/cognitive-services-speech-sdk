@@ -1,48 +1,36 @@
+from functools import partial
 import pytest
-import time
 
-import azure.cognitiveservices.speech as msspeech
-
-from .utils import (_TestCallback, _check_callbacks, _check_sr_result, _TIMEOUT_IN_SECONDS)
-
-
-speech_config_types = (msspeech.SpeechConfig, msspeech.translation.SpeechTranslationConfig)
-recognizer_types = (msspeech.SpeechRecognizer, msspeech.translation.TranslationRecognizer,
-                    msspeech.intent.IntentRecognizer)
-
+from .utils import (_TestCallback, _check_callbacks, _check_sr_result, _setup_callbacks, _wait_for_event)
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_connection_with_recognize_once(from_file_speech_reco_with_callbacks, speech_input):
-    reco, callbacks = from_file_speech_reco_with_callbacks(setup_stop_callback=False)
+    reco, callbacks = from_file_speech_reco_with_callbacks(
+            partial(_setup_callbacks, setup_stop_callbacks=False))
 
     # setup connection
     connection = reco.connection
+
     connected_callback = _TestCallback('CONNECTED: {evt}')
     disconnected_callback = _TestCallback('DISCONNECTED: {evt}')
     connection.connected.connect(connected_callback)
     connection.disconnected.connect(disconnected_callback)
+    callbacks.update({'connected': connected_callback,
+        'disconnected': disconnected_callback})
 
     # open the connection
     connection.open(for_continuous_recognition=False)
     # wait for connection
-    start = time.time()
-    while connected_callback.num_calls == 0:
-        if time.time() - start > _TIMEOUT_IN_SECONDS:
-            pytest.fail("Waiting for Connected timed out, giving up.")
-            break
-        time.sleep(1.)
+    _wait_for_event(callbacks, 'connected')
 
     result = reco.recognize_once()
 
     # close the connection
     connection.close()
-    while disconnected_callback.num_calls == 0:
-        if time.time() - start > _TIMEOUT_IN_SECONDS:
-            pytest.fail("Waiting for Disconnected timed out, giving up.")
-            break
-        time.sleep(1.)
+    _wait_for_event(callbacks, 'disconnected')
 
     _check_sr_result(result, speech_input, 0)
+    _wait_for_event(callbacks, 'session_stopped')
     _check_callbacks(callbacks)
 
 
@@ -52,24 +40,23 @@ def test_connection_with_continuous_recognition(from_file_speech_reco_with_callb
 
     # setup connection
     connection = reco.connection
+
     connected_callback = _TestCallback('CONNECTED: {evt}')
     disconnected_callback = _TestCallback('DISCONNECTED: {evt}')
     connection.connected.connect(connected_callback)
     connection.disconnected.connect(disconnected_callback)
+    callbacks.update({'connected': connected_callback,
+        'disconnected': disconnected_callback})
 
     # open the connection
     connection.open(for_continuous_recognition=True)
     # wait for connection
-    start = time.time()
-    while connected_callback.num_calls == 0:
-        if time.time() - start > _TIMEOUT_IN_SECONDS:
-            pytest.fail("Waiting for Connected timed out, giving up.")
-            break
-        time.sleep(1.)
+    _wait_for_event(callbacks, 'connected')
 
     reco.start_continuous_recognition()
 
     # wait for session stopped event and check callbacks
+    _wait_for_event(callbacks, 'session_stopped')
     _check_callbacks(callbacks)
 
     recognized_events = [evt for (evt, _) in callbacks['recognized'].events]
@@ -79,9 +66,5 @@ def test_connection_with_continuous_recognition(from_file_speech_reco_with_callb
 
     # close the connection
     connection.close()
-    while disconnected_callback.num_calls == 0:
-        if time.time() - start > _TIMEOUT_IN_SECONDS:
-            pytest.fail("Waiting for Disconnected timed out, giving up.")
-            break
-        time.sleep(1.)
+    _wait_for_event(callbacks, 'disconnected')
 

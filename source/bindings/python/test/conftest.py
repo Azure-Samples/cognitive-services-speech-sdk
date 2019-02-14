@@ -1,6 +1,7 @@
 import pytest
 import os
 from collections import namedtuple
+from typing import Callable
 
 import azure.cognitiveservices.speech as msspeech
 from .utils import _setup_callbacks
@@ -125,17 +126,91 @@ def intent_input(request):
 def from_file_speech_reco_with_callbacks(subscription: str, speech_input: SpeechInput,
         speech_region: str):
     """
-    set up a `SpeechRecognizer` with the default callbacks, which is configured to recognize the
-    audio specified by the `speech_input`.
+    Fixture to generate a `SpeechRecognizer` setup with audio input from file as defined by
+    `speech_input` and subscription information.
+
+    @return: A function that takes a function `setup_callback_handle` to setup callbacks on the
+        recognizer, and key word arguments which override subscription information. It returns a
+        tuple `(recognizer, callbacks)`.
     """
-    def foo(setup_stop_callback: bool = True):
+    def build_recognizer(setup_callback_handle: Callable = _setup_callbacks, **kwargs):
         audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
-        speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+        speech_config = msspeech.SpeechConfig(
+                subscription=kwargs.get('subscription', subscription),
+                region=kwargs.get('speech_region', speech_region),
+                endpoint=kwargs.get('endpoint', None))
 
         reco = msspeech.SpeechRecognizer(speech_config, audio_config)
-        callbacks = _setup_callbacks(reco, setup_stop_callback)
+        callbacks = setup_callback_handle(reco)
 
         return (reco, callbacks)
 
-    return foo
+    return build_recognizer
+
+
+@pytest.fixture
+def from_file_translation_reco_with_callbacks(subscription: str, speech_input: SpeechInput,
+        speech_region: str):
+    """
+    Fixture to generate a `TranslationRecognizer` setup with audio input from file as defined by
+    `speech_input` and subscription information.
+
+    @return: A function that takes a function `setup_callback_handle` to setup callbacks on the
+        recognizer, and key word arguments which override subscription information. It returns a
+        tuple `(recognizer, callbacks)`.
+    """
+    def build_recognizer(setup_callback_handle: Callable = _setup_callbacks, **kwargs):
+        audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
+        translation_config = msspeech.translation.SpeechTranslationConfig(
+                subscription=kwargs.get('subscription', subscription),
+                region=kwargs.get('speech_region', speech_region),
+                endpoint=kwargs.get('endpoint', None))
+
+        translation_config.speech_recognition_language = speech_input.input_language
+        for language in speech_input.translations:
+            translation_config.add_target_language(language)
+
+        translation_config.voice_name = "de-DE-Hedda"
+
+        reco = msspeech.translation.TranslationRecognizer(translation_config, audio_config)
+        callbacks = setup_callback_handle(reco)
+
+        return (reco, callbacks)
+
+    return build_recognizer
+
+
+@pytest.fixture
+def from_file_intent_reco_with_callbacks(luis_subscription: str, intent_input: IntentInput,
+        luis_region: str, language_understanding_app_id: str):
+    """
+    Fixture to generate a `IntentRecognizer` setup with audio input from file as defined by
+    `speech_input` and subscription information.
+
+    @return: A function that takes a function `setup_callback_handle` to setup callbacks on the
+        recognizer, and key word arguments which override subscription information. It returns a
+        tuple `(recognizer, callbacks)`.
+    """
+    def build_recognizer(setup_callback_handle: Callable = _setup_callbacks, **kwargs):
+        audio_config = msspeech.audio.AudioConfig(filename=intent_input.path)
+        speech_config = msspeech.SpeechConfig(
+                subscription=kwargs.get('subscription', luis_subscription),
+                region=kwargs.get('luis_region', luis_region),
+                endpoint=kwargs.get('endpoint', None))
+
+        reco = msspeech.intent.IntentRecognizer(speech_config, audio_config)
+
+        model = msspeech.intent.LanguageUnderstandingModel(app_id=language_understanding_app_id)
+        reco.add_intent(model, "HomeAutomation.TurnOn")
+        reco.add_intent(model, "HomeAutomation.TurnOff")
+
+        reco.add_intent("This is a test.", "test")
+        reco.add_intent("Switch the to channel 34.", "34")
+        reco.add_intent("what's the weather like", "weather")
+
+        callbacks = setup_callback_handle(reco)
+
+        return (reco, callbacks)
+
+    return build_recognizer
 

@@ -5,13 +5,15 @@ from typing import Union
 import azure.cognitiveservices.speech as msspeech
 
 from .utils import (_TestCallback, _check_sr_result, _check_translation_result,
-        _check_intent_result, _check_callbacks)
-from .conftest import SpeechInput
+        _check_intent_result, _check_callbacks, _wait_for_event)
+from .conftest import SpeechInput, IntentInput
 
 
 def session_checks(evt: msspeech.SessionEventArgs):
     assert isinstance(evt, msspeech.SessionEventArgs)
     assert evt.session_id
+    if type(evt) is msspeech.SessionEventArgs:
+        assert str(evt) == 'SessionEventArgs(session_id={})'.format(evt.session_id)
 
 
 def recognition_checks(evt: msspeech.RecognitionEventArgs):
@@ -19,12 +21,17 @@ def recognition_checks(evt: msspeech.RecognitionEventArgs):
     assert isinstance(evt, msspeech.RecognitionEventArgs)
     assert isinstance(evt.offset, int)
     assert evt.offset >= 0
+    if type(evt) is msspeech.RecognitionEventArgs:
+        assert str(evt) == 'RecognitionEventArgs(session_id={})'.format(evt.session_id)
 
 
 def speech_recognition_checks(evt: msspeech.SpeechRecognitionEventArgs):
     recognition_checks(evt)
     assert isinstance(evt, msspeech.SpeechRecognitionEventArgs)
     assert evt.result
+    if type(evt) is msspeech.SpeechRecognitionEventArgs:
+        assert str(evt) == 'SpeechRecognitionEventArgs(session_id={}, result={})'.format(
+                evt.session_id, evt.result)
 
 
 def speech_recognition_canceled_checks(evt: msspeech.SpeechRecognitionCanceledEventArgs):
@@ -32,24 +39,34 @@ def speech_recognition_canceled_checks(evt: msspeech.SpeechRecognitionCanceledEv
     assert isinstance(evt, msspeech.SpeechRecognitionCanceledEventArgs)
     assert evt.cancellation_details
     assert isinstance(evt.cancellation_details, msspeech.CancellationDetails)
+    assert str(evt) == 'SpeechRecognitionCanceledEventArgs(session_id={}, result={})'.format(
+            evt.session_id, evt.result)
 
 
 def intent_recognition_checks(evt: msspeech.intent.IntentRecognitionEventArgs):
     recognition_checks(evt)
     assert isinstance(evt, msspeech.intent.IntentRecognitionEventArgs)
     assert evt.result
+    if type(evt) is msspeech.intent.IntentRecognitionEventArgs:
+        assert str(evt) == 'IntentRecognitionEventArgs(session_id={}, result={})'.format(
+                evt.session_id, evt.result)
 
 
 def intent_recognition_canceled_checks(evt: msspeech.intent.IntentRecognitionCanceledEventArgs):
     intent_recognition_checks(evt)
     assert isinstance(evt, msspeech.intent.IntentRecognitionCanceledEventArgs)
     assert evt.cancellation_details
+    assert str(evt) == 'IntentRecognitionCanceledEventArgs(session_id={}, result={})'.format(
+            evt.session_id, evt.result)
 
 
 def translation_recognition_checks(evt: msspeech.translation.TranslationRecognitionEventArgs):
     recognition_checks(evt)
     assert isinstance(evt, msspeech.translation.TranslationRecognitionEventArgs)
     assert evt.result
+    if type(evt) is msspeech.translation.TranslationRecognitionEventArgs:
+        assert str(evt) == 'TranslationRecognitionEventArgs(session_id={}, result={})'.format(
+                evt.session_id, evt.result)
 
 
 def translation_synthesis_checks(evt: msspeech.translation.TranslationSynthesisEventArgs):
@@ -65,16 +82,38 @@ def translation_synthesis_checks(evt: msspeech.translation.TranslationSynthesisE
     else:
         raise ValueError('unexpected reason: {}'.format(evt.result.reason))
 
+    assert str(evt.result) == 'TranslationSynthesisResult(audio=<{} bytes of audio>, reason={})'.format(
+            len(evt.result.audio), evt.result.reason)
+    assert str(evt) == 'TranslationSynthesisEventArgs(session_id={}, result={})'.format(
+            evt.session_id, evt.result)
+
 
 def translation_recognition_canceled_checks(evt: msspeech.translation.TranslationRecognitionCanceledEventArgs):
     recognition_checks(evt)
     assert isinstance(evt, msspeech.translation.TranslationRecognitionCanceledEventArgs)
     assert evt.cancellation_details
+    assert str(evt) == 'TranslationRecognitionCanceledEventArgs(session_id={}, result={})'.format(
+            evt.session_id, evt.result)
 
 
 def bad_callback_check(_):
     """used to check that the re-raising of exceptions works"""
     assert False
+
+
+def _check_bad_callback(callbacks):
+    """
+    Verify that assertions raised in an event are registered during evaluation.
+    Removes the 'bad_callback' used for checking from `callbacks` when done.
+    """
+    bad_callback = callbacks['bad_callback']
+    assert bad_callback.events
+    for evt, exc_info in bad_callback.events:
+        assert exc_info
+        with pytest.raises(AssertionError):
+            raise exc_info[0].with_traceback(exc_info[1], exc_info[2])
+
+    del callbacks['bad_callback']
 
 
 def _setup_callbacks_for_event_check(reco: Union[msspeech.SpeechRecognizer,
@@ -113,6 +152,10 @@ def _setup_callbacks_for_event_check(reco: Union[msspeech.SpeechRecognizer,
     reco.session_stopped.connect(stop)
     reco.canceled.connect(stop)
 
+    bad_callback = _TestCallback(None, bad_callback_check, quiet=True)
+    reco.recognizing.connect(bad_callback)
+    callbacks['bad_callback'] = bad_callback
+
     return callbacks
 
 
@@ -125,26 +168,16 @@ def _check_events(callbacks):
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
-def test_speech_recognition_events(speech_input: SpeechInput, subscription: str, speech_region: str):
-    audio_cfg = msspeech.audio.AudioConfig(filename=speech_input.path)
-    cfg = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
-    reco = msspeech.SpeechRecognizer(cfg, audio_cfg)
-
-    callbacks = _setup_callbacks_for_event_check(reco)
-
-    bad_callback = _TestCallback(None, bad_callback_check, quiet=True)
-    reco.recognizing.connect(bad_callback)
+def test_speech_recognition_events(speech_input: SpeechInput, from_file_speech_reco_with_callbacks):
+    reco, callbacks = from_file_speech_reco_with_callbacks(
+            setup_callback_handle=_setup_callbacks_for_event_check)
 
     reco.start_continuous_recognition()
 
+    _wait_for_event(callbacks, 'session_stopped')
+    _check_bad_callback(callbacks)
     _check_callbacks(callbacks)
     _check_events(callbacks)
-
-    assert bad_callback.events
-    for evt, exc_info in bad_callback.events:
-        assert exc_info
-        with pytest.raises(AssertionError):
-            raise exc_info[0].with_traceback(exc_info[1], exc_info[2])
 
     recognized_events = [evt for (evt, _) in callbacks['recognized'].events]
     assert 1 == len(recognized_events)
@@ -154,37 +187,16 @@ def test_speech_recognition_events(speech_input: SpeechInput, subscription: str,
 
 
 @pytest.mark.parametrize('intent_input,', ['lamp'], indirect=True)
-def test_intent_recognition_events(intent_input: SpeechInput, luis_subscription: str,
-        luis_region: str, language_understanding_app_id: str):
-    audio_config = msspeech.audio.AudioConfig(filename=intent_input.path)
-    intent_config = msspeech.SpeechConfig(subscription=luis_subscription,
-            region=luis_region)
-
-    intent_recognizer = msspeech.intent.IntentRecognizer(intent_config, audio_config)
-
-    model = msspeech.intent.LanguageUnderstandingModel(app_id=language_understanding_app_id)
-    intent_recognizer.add_intent(model, "HomeAutomation.TurnOn")
-    intent_recognizer.add_intent(model, "HomeAutomation.TurnOff")
-
-    intent_recognizer.add_intent("This is a test.", "test")
-    intent_recognizer.add_intent("Switch the to channel 34.", "34")
-    intent_recognizer.add_intent("what's the weather like", "weather")
-
-    callbacks = _setup_callbacks_for_event_check(intent_recognizer)
-
-    bad_callback = _TestCallback(None, bad_callback_check, quiet=True)
-    intent_recognizer.recognizing.connect(bad_callback)
+def test_intent_recognition_events(intent_input: IntentInput, from_file_intent_reco_with_callbacks):
+    intent_recognizer, callbacks = from_file_intent_reco_with_callbacks(
+            setup_callback_handle=_setup_callbacks_for_event_check)
 
     intent_recognizer.start_continuous_recognition()
 
+    _wait_for_event(callbacks, 'session_stopped')
+    _check_bad_callback(callbacks)
     _check_callbacks(callbacks, check_num_recognized=False)
     _check_events(callbacks)
-
-    assert bad_callback.events
-    for evt, exc_info in bad_callback.events:
-        assert exc_info
-        with pytest.raises(AssertionError):
-            raise exc_info[0].with_traceback(exc_info[1], exc_info[2])
 
     # TODO remove workaround once intent is fixed and delivers only a single valid result
     # recognized_events = [evt for (evt, _) in callbacks['recognized'].events]
@@ -198,37 +210,66 @@ def test_intent_recognition_events(intent_input: SpeechInput, luis_subscription:
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
-def test_translation_recognition_events(speech_input: SpeechInput, subscription: str,
-        speech_region: str):
-    translation_config = msspeech.translation.SpeechTranslationConfig(subscription=subscription,
-            region=speech_region)
-    translation_config.speech_recognition_language = 'en-US'
-    translation_config.add_target_language('de')
-    translation_config.voice_name = "de-DE-Hedda"
-    translation_config.add_target_language('fr')
-    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
-
-    translation_recognizer = msspeech.translation.TranslationRecognizer(translation_config, audio_config)
-
-    callbacks = _setup_callbacks_for_event_check(translation_recognizer)
-
-    bad_callback = _TestCallback(None, bad_callback_check, quiet=True)
-    translation_recognizer.recognizing.connect(bad_callback)
+def test_translation_recognition_events(speech_input: SpeechInput,
+        from_file_translation_reco_with_callbacks):
+    translation_recognizer, callbacks = from_file_translation_reco_with_callbacks(
+            setup_callback_handle=_setup_callbacks_for_event_check)
 
     translation_recognizer.start_continuous_recognition()
 
+    _wait_for_event(callbacks, 'session_stopped')
+    _check_bad_callback(callbacks)
     _check_callbacks(callbacks)
     _check_events(callbacks)
-
-    assert bad_callback.events
-    for evt, exc_info in bad_callback.events:
-        assert exc_info
-        with pytest.raises(AssertionError):
-            raise exc_info[0].with_traceback(exc_info[1], exc_info[2])
 
     recognized_events = [evt for (evt, _) in callbacks['recognized'].events]
     assert 1 == len(recognized_events)
     recognized_result = recognized_events[-1].result
 
     _check_translation_result(recognized_result, speech_input, 0, ['de', 'fr'])
+
+
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_speech_recognition_canceled_events(speech_input: SpeechInput,
+        from_file_speech_reco_with_callbacks):
+    reco, callbacks = from_file_speech_reco_with_callbacks(
+            setup_callback_handle=_setup_callbacks_for_event_check, endpoint='invalid',
+            subscription='invalid', speech_region=None)
+
+    reco.start_continuous_recognition()
+
+    _wait_for_event(callbacks, 'canceled')
+    _check_events(callbacks)
+    assert callbacks['session_started'].num_calls == 1
+    assert callbacks['canceled'].num_calls == 1
+
+
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_translation_recognition_canceled_events(speech_input: SpeechInput,
+        from_file_translation_reco_with_callbacks):
+    translation_recognizer, callbacks = from_file_translation_reco_with_callbacks(
+            setup_callback_handle=_setup_callbacks_for_event_check, endpoint='invalid',
+            subscription='invalid', speech_region=None)
+
+    translation_recognizer.start_continuous_recognition()
+
+    _wait_for_event(callbacks, 'canceled')
+    _check_events(callbacks)
+    assert callbacks['session_started'].num_calls == 1
+    assert callbacks['canceled'].num_calls == 1
+
+
+@pytest.mark.parametrize('intent_input,', ['lamp'], indirect=True)
+def test_intent_recognition_canceled_events(intent_input: IntentInput,
+        from_file_intent_reco_with_callbacks):
+    intent_recognizer, callbacks = from_file_intent_reco_with_callbacks(
+            setup_callback_handle=_setup_callbacks_for_event_check, endpoint='invalid',
+            subscription='invalid', luis_region=None)
+
+    intent_recognizer.start_continuous_recognition()
+
+    _wait_for_event(callbacks, 'canceled')
+    _check_events(callbacks)
+    assert callbacks['session_started'].num_calls == 1
+    assert callbacks['canceled'].num_calls == 1
 

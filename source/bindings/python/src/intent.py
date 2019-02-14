@@ -80,6 +80,10 @@ class IntentRecognitionResult(RecognitionResult):
         """
         return self._intent_json
 
+    def __str__(self):
+        return u'{}(result_id={}, text="{}", intent_id={}, reason={})'.format(
+                type(self).__name__, self.result_id, self.text, self.intent_id, self.reason)
+
 
 class IntentRecognitionEventArgs(RecognitionEventArgs):
     """
@@ -101,7 +105,7 @@ class IntentRecognitionEventArgs(RecognitionEventArgs):
         return self._result
 
     def __str__(self):
-        return u'{}:(session_id={}, result={})'.format(type(self), self.session_id, self.result)
+        return u'{}(session_id={}, result={})'.format(type(self).__name__, self.session_id, self.result)
 
 
 class IntentRecognitionCanceledEventArgs(IntentRecognitionEventArgs):

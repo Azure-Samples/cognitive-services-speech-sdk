@@ -68,7 +68,7 @@ class _TestCallback(object):
         self._events = []
 
 
-def _setup_callbacks(reco, do_stop=False):
+def _setup_callbacks(reco, setup_stop_callbacks=False):
     callbacks = {
             'session_started': _TestCallback('SESSION_STARTED: {evt}'),
             'session_stopped': _TestCallback('SESSION_STOPPED: {evt}'),
@@ -99,21 +99,23 @@ def _setup_callbacks(reco, do_stop=False):
         print('STOPPING: {}'.format(evt))
         reco.stop_continuous_recognition()
 
-    if do_stop:
+    if setup_stop_callbacks:
         reco.session_stopped.connect(stop)
         reco.canceled.connect(stop)
 
     return callbacks
 
 
-def _check_callbacks(callbacks, check_num_recognized=True):
+def _wait_for_event(callbacks, signal_name):
     start = time.time()
-    while callbacks['session_stopped'].num_calls == 0:
+    while callbacks[signal_name].num_calls == 0:
         if time.time() - start > _TIMEOUT_IN_SECONDS:
-            pytest.fail("Waiting for SessionStopped timed out, giving up.")
+            pytest.fail("Waiting for '{}' event timed out, giving up.".format(signal_name))
             break
         time.sleep(1.)
 
+
+def _check_callbacks(callbacks, check_num_recognized=True):
     assert callbacks['session_started'].num_calls == 1
     assert callbacks['session_stopped'].num_calls == 1
     assert callbacks['recognizing'].num_calls >= 1

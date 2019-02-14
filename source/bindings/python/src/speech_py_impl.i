@@ -115,6 +115,20 @@ from typing import Optional
 %threadallow Microsoft::CognitiveServices::Speech::EventSignal::_Disconnect;
 %threadallow Microsoft::CognitiveServices::Speech::EventSignal::DisconnectAll;
 
+%extend Microsoft::CognitiveServices::Speech::CancellationDetails {
+    %pythoncode %{
+    def __str__(self):
+        return u'{}(error_details="{}")'.format(type(self).__name__, self.error_details)
+    %}
+}
+
+%extend Microsoft::CognitiveServices::Speech::NoMatchDetails {
+    %pythoncode %{
+    def __str__(self):
+        return u'{}(reason={})'.format(type(self).__name__, self.reason)
+    %}
+}
+
 %extend Microsoft::CognitiveServices::Speech::RecognitionResult {
     %pythoncode %{
     def __str__(self):

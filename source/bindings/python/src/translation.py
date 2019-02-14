@@ -92,7 +92,7 @@ class TranslationRecognitionEventArgs(RecognitionEventArgs):
         return self._result
 
     def __str__(self):
-        return u'{}:(session_id={}, result={})'.format(type(self), self.session_id, self.result)
+        return u'{}(session_id={}, result={})'.format(type(self).__name__, self.session_id, self.result)
 
 
 class TranslationRecognitionCanceledEventArgs(TranslationRecognitionEventArgs):
@@ -137,6 +137,10 @@ class TranslationSynthesisEventArgs(SessionEventArgs):
         """
         return self._result
 
+    def __str__(self):
+        return '{}(session_id={}, result={})'.format(
+            type(self).__name__, self.session_id, self.result)
+
 
 class TranslationRecognitionResult(RecognitionResult):
     """
@@ -159,6 +163,10 @@ class TranslationRecognitionResult(RecognitionResult):
         language.
         """
         return self._translations
+
+    def __str__(self):
+        return u'{}(result_id={}, translations={}, reason={})'.format(
+                type(self).__name__, self.result_id, dict(self.translations), self.reason)
 
 
 class TranslationSynthesisResult():
@@ -187,6 +195,10 @@ class TranslationSynthesisResult():
         Recognition reason.
         """
         return self._reason
+
+    def __str__(self):
+        return '{}(audio=<{} bytes of audio>, reason={})'.format(
+            type(self).__name__, len(self.audio), self.reason)
 
 
 class TranslationRecognizer(Recognizer):

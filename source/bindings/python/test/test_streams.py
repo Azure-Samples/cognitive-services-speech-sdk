@@ -4,7 +4,7 @@ import wave
 import azure.cognitiveservices.speech as msspeech
 
 from .conftest import SpeechInput
-from .utils import (_setup_callbacks, _check_callbacks, _check_sr_result)
+from .utils import (_setup_callbacks, _check_callbacks, _check_sr_result, _wait_for_event)
 
 
 class WavFileReaderCallback(msspeech.audio.PullAudioInputStreamCallback):
@@ -61,11 +61,12 @@ def test_pull_audio_input_stream_callback(speech_input: SpeechInput, subscriptio
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
 
-    callbacks = _setup_callbacks(reco, do_stop=True)
+    callbacks = _setup_callbacks(reco, setup_stop_callbacks=True)
 
     reco.start_continuous_recognition()
 
     # TODO: expected number of callback calls should be a property of the input
+    _wait_for_event(callbacks, 'session_stopped')
     _check_callbacks(callbacks, check_num_recognized=False)
 
     valid_events = [evt for (evt, _) in callbacks['recognized'].events
@@ -95,7 +96,7 @@ def test_push_audio_input_stream(speech_input: SpeechInput, subscription: str, s
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_cfg)
 
-    callbacks = _setup_callbacks(reco, do_stop=False)
+    callbacks = _setup_callbacks(reco, setup_stop_callbacks=False)
 
     n_bytes = 3200
     wav_fh = wave.open(speech_input.path)
@@ -117,6 +118,7 @@ def test_push_audio_input_stream(speech_input: SpeechInput, subscription: str, s
         wav_fh.close()
         stream.close()
 
+    _wait_for_event(callbacks, 'session_stopped')
     _check_callbacks(callbacks)
 
     # TODO: investigate different offsets between stream methods (VSTS1550242).

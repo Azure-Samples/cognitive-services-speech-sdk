@@ -5,20 +5,26 @@ from .conftest import SpeechInput
 from .utils import _check_translation_result
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
-def test_translation_simple(subscription: str, speech_input: SpeechInput, endpoint: str,
-        speech_region: str):
-    translation_config = msspeech.translation.SpeechTranslationConfig(subscription=subscription,
-            region=speech_region)
-    translation_config.speech_recognition_language = speech_input.input_language
-    for language in speech_input.translations:
-        translation_config.add_target_language(language)
-
-    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
-
-    recognizer = msspeech.translation.TranslationRecognizer(translation_config, audio_config)
+def test_translation_simple(speech_input: SpeechInput, from_file_translation_reco_with_callbacks):
+    recognizer, callbacks = from_file_translation_reco_with_callbacks()
 
     result = recognizer.recognize_once()
     _check_translation_result(result, speech_input, 0, speech_input.translations.keys())
+
+    # test string representation, ordering of dict entries is nondeterministic
+    # TranslationRecognitionResult:(result_id=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx, translations={'de':
+    # 'Wie ist das Wetter?', 'fr': 'Quel temps fait-il?'}, reason=ResultReason.TranslatedSpeech)
+    from itertools import permutations
+    desired_result_strs = []
+    translations = list(speech_input.translations.items())
+    for perm in permutations(translations):
+        permuted_dict_str = '{' + ', '.join("'{}': '{}'".format(k, v) for k, v in perm) + '}'
+        desired_result_strs.append(
+                'TranslationRecognitionResult(result_id={}, translations={}, '
+                'reason=ResultReason.TranslatedSpeech)'.format(
+                    result.result_id, permuted_dict_str))
+
+    assert str(result) in desired_result_strs
 
 
 def test_translation_config_constructor():

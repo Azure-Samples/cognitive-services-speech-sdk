@@ -6,24 +6,18 @@ from .utils import _check_intent_result
 
 
 @pytest.mark.parametrize('intent_input,', ['lamp'], indirect=True)
-def test_intent_recognition_simple(intent_input: IntentInput, luis_subscription: str,
-                                   luis_region: str, language_understanding_app_id: str):
-    audio_config = msspeech.audio.AudioConfig(filename=intent_input.path)
-    intent_config = msspeech.SpeechConfig(subscription=luis_subscription, region=luis_region)
-
-    intent_recognizer = msspeech.intent.IntentRecognizer(intent_config, audio_config)
-
-    model = msspeech.intent.LanguageUnderstandingModel(app_id=language_understanding_app_id)
-    intent_recognizer.add_intent(model, "HomeAutomation.TurnOn")
-    intent_recognizer.add_intent(model, "HomeAutomation.TurnOff")
-
-    intent_recognizer.add_intent("This is a test.", "test")
-    intent_recognizer.add_intent("Switch the to channel 34.", "34")
-    intent_recognizer.add_intent("what's the weather like", "weather")
+def test_intent_recognition_simple(intent_input: IntentInput, from_file_intent_reco_with_callbacks):
+    intent_recognizer, _ = from_file_intent_reco_with_callbacks()
 
     result = intent_recognizer.recognize_once()
 
     _check_intent_result(result, intent_input, 0)
+
+    desired_result_str = 'IntentRecognitionResult(' \
+            'result_id={}, text="{}", intent_id={}, reason=ResultReason.RecognizedIntent)'.format(
+                    result.result_id, intent_input.transcription[0], intent_input.intent_id)
+
+    assert str(result) == desired_result_str
 
 
 def test_language_understanding_model_constructor():

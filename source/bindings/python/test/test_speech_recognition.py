@@ -2,7 +2,7 @@ import pytest
 
 import azure.cognitiveservices.speech as msspeech
 
-from .utils import (_TestCallback, _check_callbacks, _check_sr_result)
+from .utils import (_TestCallback, _check_callbacks, _check_sr_result, _wait_for_event)
 
 speech_config_types = (msspeech.SpeechConfig, msspeech.translation.SpeechTranslationConfig)
 recognizer_types = (msspeech.SpeechRecognizer, msspeech.translation.TranslationRecognizer,
@@ -14,8 +14,14 @@ def test_recognize_once(from_file_speech_reco_with_callbacks, speech_input):
 
     result = reco.recognize_once()
     _check_sr_result(result, speech_input, 0)
+    _wait_for_event(callbacks, 'session_stopped')
     _check_callbacks(callbacks)
 
+    desired_result_str = 'SpeechRecognitionResult(' \
+            'result_id={}, text="{}", reason=ResultReason.RecognizedSpeech)'.format(
+                    result.result_id, speech_input.transcription[0])
+
+    assert str(result) == desired_result_str
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_recognize_async(from_file_speech_reco_with_callbacks, speech_input):
@@ -25,6 +31,7 @@ def test_recognize_async(from_file_speech_reco_with_callbacks, speech_input):
     result = future.get()
 
     _check_sr_result(result, speech_input, 0)
+    _wait_for_event(callbacks, 'session_stopped')
     _check_callbacks(callbacks)
 
     # verify that the second call to get from future fails orderly
@@ -75,8 +82,9 @@ def test_multiple_callbacks(from_file_speech_reco_with_callbacks, speech_input):
     reco.recognized.connect(other_recognized_cb)
 
     result = reco.recognize_once()
-    _check_sr_result(result, speech_input, 0)
 
+    _check_sr_result(result, speech_input, 0)
+    _wait_for_event(callbacks, 'session_stopped')
     _check_callbacks(callbacks)
     assert other_recognized_cb.num_calls == 1
 
@@ -188,6 +196,10 @@ def test_canceled_result(speech_input):
     assert msspeech.CancellationReason.Error == cancellation_details.reason
     assert 'Runtime error: Failed to create transport request.' == cancellation_details.error_details
 
+    assert "ResultReason.Canceled" == str(result.reason)
+    assert 'CancellationDetails(error_details="Runtime error: ' \
+            'Failed to create transport request.")' == str(result.cancellation_details)
+
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_bad_language_config(subscription, speech_input, speech_region):
@@ -217,6 +229,8 @@ def test_no_match_result(from_file_speech_reco_with_callbacks, speech_input):
     assert result.cancellation_details is None
     details = result.no_match_details
     assert msspeech.NoMatchReason.InitialSilenceTimeout == details.reason
+
+    assert "NoMatchDetails(reason=NoMatchReason.InitialSilenceTimeout)" == str(result.no_match_details)
 
 
 def test_speech_config_properties(subscription, speech_region):
