@@ -32,6 +32,17 @@ public final class AudioConfig
     }
 
     /**
+     * Creates an AudioConfig object representing a specific microphone on the system.
+     * @param deviceName Specifies the platform-specific id of the audio input device.
+     *     Please refer to the <a href="https://aka.ms/csspeech/microphone-selection">the online documentation</a> about how to retrieve that id on different platforms.
+     * This functionality was added in version 1.3.0.
+     * @return The audio input configuration being created.
+     */
+    public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromMicrophoneInput(String deviceName) {
+        return new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromMicrophoneInput(deviceName));
+    }
+
+    /**
      * Creates an AudioConfig object representing the specified file.
      * @param fileName Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
      * @return The audio input configuration being created.

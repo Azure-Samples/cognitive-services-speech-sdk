@@ -199,7 +199,7 @@ enum class PropertyId
     /// <summary>
     /// The device name for audio capture. Under normal circumstances, you shouldn't have to
     /// use this property directly.
-    /// Instead, use <see cref="AudioConfig::FromAMicrophoneInput"/>.
+    /// Instead, use <see cref="AudioConfig::FromMicrophoneInput"/>.
     /// NOTE: This property id was added in version 1.3.0.
     /// </summary>
     AudioConfig_DeviceNameForCapture = 8000,
