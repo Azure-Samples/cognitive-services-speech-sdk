@@ -148,7 +148,7 @@ static void audioQueueInputCallback(void *inUserData,
         // call the application callback
         audioData->audio_write_cb(audioData->user_write_ctx, reinterpret_cast<uint8_t*>(inBuffer->mAudioData), inBuffer->mAudioDataByteSize);
 
-        //Re-enqueue used buffer
+        // Re-enqueue used buffer
         OSStatus result = AudioQueueEnqueueBuffer(inQueue, inBuffer, 0, NULL);
 
         if (noErr != result) {
@@ -239,7 +239,7 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
         {
             audioData->bufferStackLock = Lock_Init();
             // Allocate and enqueue buffers
-            int bufferByteSize = recordFormat.mSampleRate;
+            int bufferByteSize = recordFormat.mSampleRate * recordFormat.mBytesPerFrame / 10; // 100ms buffer length
             for (int bufferIndex = 0; bufferIndex < N_RECORD_BUFFERS; ++bufferIndex)
             {
                 AudioQueueBufferRef buffer;
