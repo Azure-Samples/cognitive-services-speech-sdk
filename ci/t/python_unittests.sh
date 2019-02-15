@@ -79,7 +79,6 @@ function runPythonSampleSuite {
 def newinit(obj, *args, **kwargs):
     obj.__old_init(*args, **kwargs)
     obj.session_started.connect(lambda evt: print('SESSION_STARTED: {}'.format(evt)))
-    obj.session_stopped.connect(lambda evt: print('SESSION_STOPPED: {}'.format(evt)))
 def patch(recotype):
     recotype.__old_init = recotype.__init__
     recotype.__init__ = newinit
