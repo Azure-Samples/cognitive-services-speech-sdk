@@ -327,35 +327,41 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
+            {
                 var connection = Connection.FromRecognizer(recognizer);
-                bool expectFirstRecognizingResult = true;
-                long hypothesisLatency = 0;
-                long phraseLatency = 0;
-
                 if (usingPreConnection)
                 {
                     connection.Open(true);
                 }
 
                 List<string> recognizedText = new List<string>();
+                bool expectFirstRecognizingResult = true;
+                long firstHypothesisLatency = 0;
+                string hypothesisLatencyError = string.Empty;
+                string phraseLatencyError = string.Empty;
+
                 helper.SubscribeToCounterEventHandlers(recognizer, connection);
                 recognizer.Recognizing += (s, e) =>
                 {
                     var latencyString = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatencyMs);
                     if (expectFirstRecognizingResult)
                     {
-                        hypothesisLatency = 0;
                         if (!string.IsNullOrEmpty(latencyString))
                         {
-                            hypothesisLatency = Convert.ToInt64(latencyString);
+                            firstHypothesisLatency = Convert.ToInt64(latencyString);
                         }
-                        Assert.IsTrue(hypothesisLatency > 0, $"Invalid hypothesis latency {latencyString}.");
+                        if (firstHypothesisLatency <= 0)
+                        {
+                            hypothesisLatencyError += $"({e.Result.ResultId}, invalid latency {firstHypothesisLatency})";
+                        }
                         expectFirstRecognizingResult = false;
                     }
                     else
                     {
-                        Assert.IsTrue(string.IsNullOrEmpty(latencyString), $"Unexpected hypothesis latency {latencyString}.");
+                        if (!string.IsNullOrEmpty(latencyString))
+                        {
+                            hypothesisLatencyError += $"({e.Result.ResultId}, lantecy in non-first hypothesis: {latencyString})";
+                        }
                     }
                 };
                 recognizer.Recognized += (s, e) =>
@@ -365,15 +371,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         recognizedText.Add(e.Result.Text);
                     }
                     var latencyString = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatencyMs);
-                    phraseLatency = 0;
+                    long val = 0;
                     if (!string.IsNullOrEmpty(latencyString))
                     {
-                        phraseLatency = Convert.ToInt64(latencyString);
+                        val = Convert.ToInt64(latencyString);
                     }
-                    Assert.IsTrue(phraseLatency > 0, $"Invalid phrase latency {latencyString}.");
-                    Assert.IsTrue(phraseLatency > hypothesisLatency, $"Phrase latency ({phraseLatency}) is smaller than hypothesis latency ({hypothesisLatency}).");
+                    if (val <= 0)
+                    {
+                        phraseLatencyError += $"({e.Result.ResultId}, invalid latency {val})";
+                    }
                     expectFirstRecognizingResult = true;
-                    hypothesisLatency = 0;
+                    firstHypothesisLatency = 0;
                 };
 
                 await helper.CompleteContinuousRecognition(recognizer);
@@ -387,9 +395,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertMatching(TestData.English.Batman.Utterances[0], recognizedText[0]);
                 AssertMatching(TestData.English.Batman.Utterances.Last(), recognizedText.Last());
 
-                // It is not required to close the conneciton explictly. But it is also used to keep the connection object alive to ensure that
-                // connected and disconencted events can be received.
-                connection.Close();
+                Assert.IsTrue(string.IsNullOrEmpty(hypothesisLatencyError), $"hypothesisLatencyError: {hypothesisLatencyError}");
+                Assert.IsTrue(string.IsNullOrEmpty(phraseLatencyError), $"phraseLatencyError: {phraseLatencyError}");
+
+                GC.KeepAlive(connection);
             }
         }
 
