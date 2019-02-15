@@ -232,6 +232,17 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
+        /// Sets the property by propertyId
+        /// Added in version 1.3.0.
+        /// </summary>
+        /// <param name="id">PropertyId of the property</param>
+        /// <param name="value">Value of the property</param>
+        public void SetProperty(PropertyId id, string value)
+        {
+            progBag.SetProperty(id, value);
+        }
+
+        /// <summary>
         /// Gets the property by name.
         /// </summary>
         /// <param name="name">Name of the property</param>
@@ -240,5 +251,16 @@ namespace Microsoft.CognitiveServices.Speech
         {
             return progBag.GetProperty(name);
         }
-   }
+
+        /// <summary>
+        /// Gets the property by propertyId
+        /// Added in version 1.3.0.
+        /// </summary>
+        /// <param name="id">PropertyId of the property</param>
+        /// <returns>Value of the property</returns>
+        public string GetProperty(PropertyId id)
+        {
+            return progBag.GetProperty(id);
+        }
+    }
 }
