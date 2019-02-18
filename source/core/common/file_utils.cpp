@@ -16,18 +16,6 @@
 
 namespace PAL {
 
-#ifndef _MSC_VER
-std::string wtocharpath(const wchar_t *wstr)
-{
-    size_t length = wcslen(wstr);
-    std::string str;
-    str.resize(2 * length + 1); // max: 1 wchar => 2 mb chars
-    std::wcstombs(&str[0], wstr, str.size()); // note: technically it is forbidden to stomp over std::strings 0 terminator, but it is known to work in all implementations
-    str.resize(std::strlen(&str[0])); // set size correctly for shorter strings
-    return str;
-}
-#endif
-
 errno_t fopen_s(FILE** file, const char* fileName, const char* mode)
 {
 #ifdef _MSC_VER
@@ -49,7 +37,7 @@ int waccess(const wchar_t *path, int mode)
 #ifdef _MSC_VER
     return _waccess(path, mode);
 #else
-    return ::access(wtocharpath(path).c_str(), mode);
+    return path ? ::access(PAL::ToString(path).c_str(), mode) : -1;
 #endif
 }
 
@@ -74,7 +62,7 @@ void OpenStream(std::fstream& stream, const std::wstring& filename, bool readonl
 #ifdef _MSC_VER
     stream.open(filename.c_str(), mode);
 #else
-    stream.open(wtocharpath(filename.c_str()).c_str(), mode);
+    stream.open(PAL::ToString(filename.c_str()).c_str(), mode);
 #endif
 }
 

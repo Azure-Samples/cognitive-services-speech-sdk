@@ -22,9 +22,4 @@ namespace PAL {
     errno_t fopen_s(FILE **file, const char *fileName, const char *mode);
 
     void OpenStream(std::fstream& stream, const std::wstring& filename, bool readonly);
-
-#ifndef _MSC_VER
-    std::string wtocharpath(const wchar_t *wstr);
-#endif
-
 } // PAL
