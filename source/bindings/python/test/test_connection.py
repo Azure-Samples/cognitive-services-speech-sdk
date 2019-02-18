@@ -1,5 +1,6 @@
 from functools import partial
 import pytest
+import azure.cognitiveservices.speech as msspeech
 
 from .utils import (_TestCallback, _check_callbacks, _check_sr_result, _setup_callbacks, _wait_for_event)
 
@@ -9,7 +10,7 @@ def test_connection_with_recognize_once(from_file_speech_reco_with_callbacks, sp
             partial(_setup_callbacks, setup_stop_callbacks=False))
 
     # setup connection
-    connection = reco.connection
+    connection = msspeech.Connection.from_recognizer(reco)
 
     connected_callback = _TestCallback('CONNECTED: {evt}')
     disconnected_callback = _TestCallback('DISCONNECTED: {evt}')
@@ -39,7 +40,7 @@ def test_connection_with_continuous_recognition(from_file_speech_reco_with_callb
     reco, callbacks = from_file_speech_reco_with_callbacks()
 
     # setup connection
-    connection = reco.connection
+    connection = msspeech.Connection.from_recognizer(reco)
 
     connected_callback = _TestCallback('CONNECTED: {evt}')
     disconnected_callback = _TestCallback('DISCONNECTED: {evt}')

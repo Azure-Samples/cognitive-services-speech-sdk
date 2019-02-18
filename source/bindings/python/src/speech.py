@@ -527,13 +527,6 @@ class Recognizer():
         """
         raise NotImplementedError  # implemented in derived class
 
-    @property
-    def connection(self):
-        """
-        Gets the :class:`.Connection` instance of this recognizer.
-        """
-        return Connection(impl.Connection.from_recognizer(self._impl))
-
 
 class SpeechRecognizer(Recognizer):
     """
@@ -735,6 +728,13 @@ class Connection():
         Constructor for internal use.
         """
         self._impl = impl_connection
+
+    @classmethod
+    def from_recognizer(cls, recognizer: Recognizer):
+        """
+        Gets the :class:`.Connection` instance from the specified recognizer.
+        """
+        return cls(impl.Connection.from_recognizer(recognizer._impl))
 
     def open(self, for_continuous_recognition: bool):
         """
