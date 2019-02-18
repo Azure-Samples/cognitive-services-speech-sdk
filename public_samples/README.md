@@ -88,6 +88,12 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Speech recognition and translation sample for the browser, using JavaScript](./samples/js/browser)         | Web  | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech recognition and translation sample using JavaScript and Node.js](./samples/js/node)                 | Node.js  | Demonstrates speech recognition, intent recognition, and translation |
 
+Samples for using the Speech Service REST API (no Speech SDK installation required):
+
+| Sample                                  | Description |
+| ---                                     | --- |
+| [Batch transcription](./samples/batch)  | Demonstrates usage of batch transcription from different programming languages |
+
 ## Resources
 
 - [Microsoft Cognitive Services Speech Service and SDK Documentation](https://aka.ms/csspeech)

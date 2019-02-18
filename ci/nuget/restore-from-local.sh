@@ -17,4 +17,4 @@ type $NUGETEXETOOLPATH
 PACKAGE_PATH="$(cygpath --windows --absolute "$PACKAGE_PATH")"
 
 find "$SLN_PATH" -name \*.sln -print0 |
-  xargs -0 -n1 --verbose $NUGETEXETOOLPATH restore -noninteractive -NonInteractive -NoCache -Source "$(dirname "$PACKAGE_PATH")"
+  xargs -0 -n1 --verbose $NUGETEXETOOLPATH restore -noninteractive -NonInteractive -NoCache -Source "$(dirname "$PACKAGE_PATH")" -Source https://api.nuget.org/v3/index.json
