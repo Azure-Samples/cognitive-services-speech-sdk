@@ -25,6 +25,27 @@ BEGIN {
   $samplesDir = shift
     or die "Supply directory to use as second argument\n";
 
+  # Note: revision for file/assembly version (8 local, 12 dev, 16 int, 25..28
+  #       prod alpha/beta/rc/release)
+  $version =~ qr(
+    ^
+    (?<mmp>\d+\.\d+\.\d+)
+    (?:
+      (?<rev8>-alpha\.0\.1) |
+      (?<rev12>-alpha\.0\.\d+) |
+      (?<rev16>-beta\.0\.\d+) |
+      (?<rev25>-alpha\.[1-9]\d*) |
+      (?<rev26>-beta\.[1-9]\d*) |
+      (?<rev27>-rc\.[1-9]\d*) |
+      (?<rev28>)
+    )
+    $
+  )x or die "Unexpected version number $version\n";
+
+  # Parse out revision number from capture group rev*
+  $rev = substr((grep { $_ ne 'mmp' } keys %+)[0], 3);
+  $assemblyVersion = "$+{mmp}.$rev";
+
   -d $samplesDir
     or die "Cannot find $samplesDir\n";
 
@@ -45,6 +66,9 @@ $ARGV =~ m(.*/$rePkgConfig$) && s/(<package id="$reNugetId" version=")([^"]*)"/$
 $ARGV =~ m(.*/(?:$reCsProj|$reVcxProj)$) && do {
   # <HintPath>...<HintPath>, <Import Project ... />, <Error ... />
   s((["'>](?:\.\.\\)*packages\\$reNugetId\.)[^\\]*\\)($1$version\\)g;
+
+  # Assembly reference
+  s((?<=<Reference Include="$reNugetId\.csharp, Version=)\d+\.\d+\.\d+\.\d+)($assemblyVersion)g;
 
   # <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="X" />
   s((?<=<PackageReference Include="$reNugetId" Version=")[^"]*)($version)g;
