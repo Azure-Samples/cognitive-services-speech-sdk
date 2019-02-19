@@ -52,7 +52,7 @@ public:
     /// Creates an AudioConfig object representing a specific microphone on the system.
     /// Added in version 1.3.0.
     /// </summary>
-    /// <param name="deviceName">Specifies the device name. Under Linux, run "arecord -L" to list all available devices. The maunal of arecord is <a href="https://manpages.debian.org/jessie/alsa-utils/arecord.1.en.html">here</a>  </param>
+    /// <param name="deviceName">Specifies the device name. Please refer to <a href="https://aka.ms/csspeech/microphone-selection">this page</a> on how to retrieve platform-specific microphone names.</param>
     /// <returns>A shared pointer to the AudioConfig object</returns>
     static std::shared_ptr<AudioConfig> FromMicrophoneInput(const SPXSTRING& deviceName)
     {
@@ -66,7 +66,7 @@ public:
     /// <summary>
     /// Creates an AudioConfig object representing the specified file.
     /// </summary>
-    /// <param name="fileName">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples and a single cahnnel is supported.</param>
+    /// <param name="fileName">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples and a single channel is supported.</param>
     /// <returns>A shared pointer to the AudioConfig object</returns>
     static std::shared_ptr<AudioConfig> FromWavFileInput(const SPXSTRING& fileName)
     {

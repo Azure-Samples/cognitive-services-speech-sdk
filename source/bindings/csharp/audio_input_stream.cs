@@ -205,7 +205,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// Creates an AudioConfig object representing the designated input device.
         /// NOTE: This method was added in version 1.3.0.
         /// </summary>
-        /// <param name="deviceName">The identifier of the input device.</param>
+        /// <param name="deviceName">Specifies the device name. Please refer to <a href="https://aka.ms/csspeech/microphone-selection">this page</a> on how to retrieve platform-specific microphone names.</param>
         /// <returns>The audio input configuration being created.</returns>
         public static AudioConfig FromMicrophoneInput(string deviceName)
         {

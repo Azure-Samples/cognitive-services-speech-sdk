@@ -123,8 +123,10 @@ class AudioConfig():
 
     :param use_default_microphone: Specifies to use the default system microphone for audio
         input.
-    :param device_name: Specifies the name of the audio device to use. This functionality was added
-        in version 1.3.0.
+    :param device_name: Specifies the id of the audio device to use.
+         Please refer to `this page <https://aka.ms/csspeech/microphone-selection>`_
+         on how to retrieve platform-specific microphone names.
+         This functionality was added in version 1.3.0.
     :param filename: Specifies an audio input file. Currently, only WAV / PCM with 16-bit
         samples, 16 kHz sample rate, and a single channel (Mono) is supported.
     :param stream: Creates an AudioConfig object representing the specified stream.
