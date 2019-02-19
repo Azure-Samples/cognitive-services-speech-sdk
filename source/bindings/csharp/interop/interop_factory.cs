@@ -46,8 +46,25 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             if (releaseHandleFunc != null)
             {
                 LogErrorIfFail(releaseHandleFunc(handle));
+                releaseHandleFunc = null;
+                handle = IntPtr.Zero;
             }
             return true;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            ReleaseHandle();
+        }
+
+        public static T GetObjectFromWeakHandle<T>(IntPtr nativeHandle)
+        {
+            var weakGCHandle = GCHandle.FromIntPtr(nativeHandle);
+            if (!weakGCHandle.IsAllocated)
+            {
+                return default(T);
+            }
+            return (T)weakGCHandle.Target;
         }
     }
 

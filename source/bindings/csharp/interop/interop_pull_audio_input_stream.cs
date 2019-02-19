@@ -5,13 +5,11 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Threading;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Internal
 {
     using SPXHR = System.IntPtr;
-    using SPXAUDIOSTREAMFORMATHANDLE = System.IntPtr;
     using SPXAUDIOSTREAMHANDLE = System.IntPtr;
 
     internal class PullAudioInputStreamCallback : IDisposable
@@ -30,12 +28,14 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         private PullAudioInputStreamCallback callback = null;
         private PullAudioStreamReadDelegate streamReadDelegate;
         private PullAudioStreamCloseDelegate streamCloseDelegate;
+        private GCHandle gch;
         internal PullAudioInputStream(IntPtr streamPtr, PullAudioInputStreamCallback cb) : base(streamPtr)
         {
             callback = cb;
             streamReadDelegate = StreamReadCallback;
             streamCloseDelegate = StreamCloseCallback;
-            ThrowIfFail(pull_audio_input_stream_set_callbacks(streamHandle, IntPtr.Zero, streamReadDelegate, streamCloseDelegate));
+            gch = GCHandle.Alloc(this, GCHandleType.Weak);
+            ThrowIfFail(pull_audio_input_stream_set_callbacks(streamHandle, GCHandle.ToIntPtr(gch), streamReadDelegate, streamCloseDelegate));
         }
 
         protected override void Dispose(bool disposing)
@@ -44,20 +44,18 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
             if (disposing)
             {
-                lock (thisLock)
-                {
-                    // dispose managed resources
-                    if (callback != null)
-                    {
-                        callback = null;
-                    }
-                }
+                // dispose managed resources
+                callback = null;
             }
             // dispose unmanaged resources
-
-            base.Dispose(disposing);
             streamReadDelegate = null;
             streamCloseDelegate = null;
+            if (gch.IsAllocated)
+            {
+                gch.Free();
+            }
+
+            base.Dispose(disposing);
         }
 
         public static PullAudioInputStream Create(PullAudioInputStreamCallback callback)
@@ -76,20 +74,19 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         }
 
         [MonoPInvokeCallback]
-        private int StreamReadCallback(IntPtr context, IntPtr buffer, uint size)
+        private static int StreamReadCallback(IntPtr context, IntPtr buffer, uint size)
         {
             int result = 0;
             try
             {
                 PullAudioInputStreamCallback callback = null;
-                if (isDisposing)
+                var stream = InteropSafeHandle.GetObjectFromWeakHandle<PullAudioInputStream>(context);
+                ThrowIfNull(stream);
+                if (stream.isDisposing)
                 {
                     return result;
                 }
-                lock (thisLock)
-                {
-                    callback = this.callback;
-                }
+                callback = stream.callback;
                 ThrowIfNull(callback);
                 byte[] srcBuffer = new byte[size];
                 result = callback.Read(srcBuffer, size);
@@ -106,19 +103,18 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         }
 
         [MonoPInvokeCallback]
-        private void StreamCloseCallback(IntPtr context)
+        private static void StreamCloseCallback(IntPtr context)
         {
             try
             {
                 PullAudioInputStreamCallback callback = null;
-                if (isDisposing)
+                var stream = InteropSafeHandle.GetObjectFromWeakHandle<PullAudioInputStream>(context);
+                ThrowIfNull(stream);
+                if (stream.isDisposing)
                 {
                     return;
                 }
-                lock (thisLock)
-                {
-                    callback = this.callback;
-                }
+                callback = stream.callback;
                 ThrowIfNull(callback);
                 callback.Close();
             }

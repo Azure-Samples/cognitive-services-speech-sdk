@@ -20,6 +20,11 @@ namespace Microsoft.CognitiveServices.Speech
             propbagHandle = new InteropSafeHandle(propertyBagPtr, Internal.PropertyCollection.property_bag_release);
         }
 
+        internal void Close()
+        {
+            propbagHandle.Dispose();
+        }
+
         /// <summary>
         /// Returns value of a property.
         /// If the property value is not defined, an empty string is returned.

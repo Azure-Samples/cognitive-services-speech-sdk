@@ -5,7 +5,7 @@
 
 using System;
 using System.Collections.ObjectModel;
-using System.Threading;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Internal;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
@@ -148,10 +148,10 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             translationSynthesisCallbackDelegate = FireEvent_SynthesisResult;
 
             ThrowIfNull(recoHandle, "Invalid recognizer handle");
-            ThrowIfFail(Internal.Recognizer.recognizer_recognizing_set_callback(recoHandle, recognizingCallbackDelegate, IntPtr.Zero));
-            ThrowIfFail(Internal.Recognizer.recognizer_recognized_set_callback(recoHandle, recognizedCallbackDelegate, IntPtr.Zero));
-            ThrowIfFail(Internal.Recognizer.recognizer_canceled_set_callback(recoHandle, canceledCallbackDelegate, IntPtr.Zero));
-            ThrowIfFail(Internal.Recognizer.translator_synthesizing_audio_set_callback(recoHandle, translationSynthesisCallbackDelegate, IntPtr.Zero));
+            ThrowIfFail(Internal.Recognizer.recognizer_recognizing_set_callback(recoHandle, recognizingCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.Recognizer.recognizer_recognized_set_callback(recoHandle, recognizedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.Recognizer.recognizer_canceled_set_callback(recoHandle, canceledCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.Recognizer.translator_synthesizing_audio_set_callback(recoHandle, translationSynthesisCallbackDelegate, GCHandle.ToIntPtr(gch)));
 
             IntPtr propertyHandle = IntPtr.Zero;
             ThrowIfFail(Internal.Recognizer.recognizer_get_property_bag(recoHandle, out propertyHandle));
@@ -194,7 +194,8 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         }
 
         /// <summary>
-        /// The collection or properties and their values defined for this <see cref="TranslationRecognizer"/>.
+        /// The collection of properties and their values defined for this <see cref="TranslationRecognizer"/>.
+        /// Note: The property collection is only valid until the recognizer owning this Properties is disposed or finalized.
         /// </summary>
         public PropertyCollection Properties { get; internal set; }
 
@@ -346,6 +347,12 @@ namespace Microsoft.CognitiveServices.Speech.Translation
                 return;
             }
 
+            if (disposing)
+            {
+                // This will make Properties unaccessible.
+                Properties.Close();
+            }
+
             if (recoHandle != null)
             {
                 LogErrorIfFail(Internal.Recognizer.recognizer_recognizing_set_callback(recoHandle, null, IntPtr.Zero));
@@ -373,19 +380,19 @@ namespace Microsoft.CognitiveServices.Speech.Translation
 
         private readonly Audio.AudioConfig audioConfig;
 
-        // Defines a private methods to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
-
+        // Defines private methods to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         [Internal.MonoPInvokeCallback]
-        private void FireEvent_Recognizing(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private static void FireEvent_Recognizing(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                if (isDisposing)
+                var recognizer = InteropSafeHandle.GetObjectFromWeakHandle<TranslationRecognizer>(pvContext);
+                if (recognizer == null || recognizer.isDisposing)
                 {
                     return;
                 }
                 var resultEventArg = new TranslationRecognitionEventArgs(hevent);
-                Recognizing?.Invoke(this, resultEventArg);
+                recognizer.Recognizing?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -394,16 +401,17 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         }
 
         [Internal.MonoPInvokeCallback]
-        private void FireEvent_Recognized(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private static void FireEvent_Recognized(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                if (isDisposing)
+                var recognizer = InteropSafeHandle.GetObjectFromWeakHandle<TranslationRecognizer>(pvContext);
+                if (recognizer == null || recognizer.isDisposing)
                 {
                     return;
                 }
                 var resultEventArg = new TranslationRecognitionEventArgs(hevent);
-                Recognized?.Invoke(this, resultEventArg);
+                recognizer.Recognized?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -412,16 +420,17 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         }
 
         [Internal.MonoPInvokeCallback]
-        private void FireEvent_Canceled(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private static void FireEvent_Canceled(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                if (isDisposing)
+                var recognizer = InteropSafeHandle.GetObjectFromWeakHandle<TranslationRecognizer>(pvContext);
+                if (recognizer == null || recognizer.isDisposing)
                 {
                     return;
                 }
                 var resultEventArg = new TranslationRecognitionCanceledEventArgs(hevent);
-                Canceled?.Invoke(this, resultEventArg);
+                recognizer.Canceled?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -430,16 +439,17 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         }
 
         [Internal.MonoPInvokeCallback]
-        private void FireEvent_SynthesisResult(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private static void FireEvent_SynthesisResult(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                if (isDisposing)
+                var recognizer = InteropSafeHandle.GetObjectFromWeakHandle<TranslationRecognizer>(pvContext);
+                if (recognizer == null || recognizer.isDisposing)
                 {
                     return;
                 }
                 var resultEventArg = new TranslationSynthesisEventArgs(hevent);
-                Synthesizing?.Invoke(this, resultEventArg);
+                recognizer.Synthesizing?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {

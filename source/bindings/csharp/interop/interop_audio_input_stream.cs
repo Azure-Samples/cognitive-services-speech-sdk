@@ -18,7 +18,6 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         protected InteropSafeHandle streamHandle;
         protected bool disposed = false;
         protected bool isDisposing = false;
-        protected object thisLock = new object();
 
         internal AudioInputStream(IntPtr streamPtr)
         {

@@ -51,6 +51,10 @@ namespace Microsoft.CognitiveServices.Speech
                 LogErrorIfFail(Internal.Connection.connection_disconnected_set_callback(connectionHandle, null, IntPtr.Zero));
             }
 
+            if (gch.IsAllocated)
+            {
+                gch.Free();
+            }
             // keep delegates alive and set null here
             connectedCallbackDelegate = null;
             disconnectedCallbackDelegate = null;
@@ -64,8 +68,9 @@ namespace Microsoft.CognitiveServices.Speech
             connectedCallbackDelegate = FireEvent_Connected;
             disconnectedCallbackDelegate = FireEvent_Disconnected;
 
-            ThrowIfFail(Internal.Connection.connection_connected_set_callback(connectionHandle, connectedCallbackDelegate, IntPtr.Zero));
-            ThrowIfFail(Internal.Connection.connection_disconnected_set_callback(connectionHandle, disconnectedCallbackDelegate, IntPtr.Zero));
+            gch = GCHandle.Alloc(this, GCHandleType.Weak);
+            ThrowIfFail(Internal.Connection.connection_connected_set_callback(connectionHandle, connectedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.Connection.connection_disconnected_set_callback(connectionHandle, disconnectedCallbackDelegate, GCHandle.ToIntPtr(gch)));
         }
 
         /// <summary>
@@ -109,6 +114,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public event EventHandler<ConnectionEventArgs> Disconnected;
 
+        private GCHandle gch;
         private InteropSafeHandle connectionHandle;
         private ConnectionCallbackFunctionDelegate connectedCallbackDelegate;
         private ConnectionCallbackFunctionDelegate disconnectedCallbackDelegate;
@@ -120,14 +126,15 @@ namespace Microsoft.CognitiveServices.Speech
         ///
 
         [Internal.MonoPInvokeCallback]
-        private void FireEvent_Connected(IntPtr hevent, IntPtr pvContext)
+        private static void FireEvent_Connected(IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                if (inFinalizer)
+                var connection = InteropSafeHandle.GetObjectFromWeakHandle<Connection>(pvContext);
+                if (connection == null || connection.inFinalizer)
                     return;
                 var resultEventArg = new ConnectionEventArgs(hevent);
-                Connected?.Invoke(this, resultEventArg);
+                connection.Connected?.Invoke(connection, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -136,14 +143,15 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         [Internal.MonoPInvokeCallback]
-        private void FireEvent_Disconnected(IntPtr hevent, IntPtr pvContext)
+        private static void FireEvent_Disconnected(IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                if (inFinalizer)
+                var connection = InteropSafeHandle.GetObjectFromWeakHandle<Connection>(pvContext);
+                if (connection == null || connection.inFinalizer)
                     return;
                 var resultEventArg = new ConnectionEventArgs(hevent);
-                Disconnected?.Invoke(this, resultEventArg);
+                connection.Disconnected?.Invoke(connection, resultEventArg);
             }
             catch (InvalidOperationException)
             {

@@ -4,7 +4,7 @@
 //
 
 using System;
-using System.Threading;
+using System.Runtime.InteropServices;
 using Microsoft.CognitiveServices.Speech.Internal;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
@@ -39,16 +39,16 @@ namespace Microsoft.CognitiveServices.Speech
         {
             ThrowIfNull(recoPtr);
             recoHandle = recoPtr;
-
+            gch = GCHandle.Alloc(this, GCHandleType.Weak);
             speechStartDetectedCallbackDelegate = FireEvent_SpeechStartDetected;
             speechEndDetectedCallbackDelegate = FireEvent_SpeechEndDetected;
             sessionStartedCallbackDelegate = FireEvent_SetSessionStarted;
             sessionStoppedCallbackDelegate = FireEvent_SetSessionStopped;
 
-            ThrowIfFail(Internal.Recognizer.recognizer_speech_start_detected_set_callback(recoHandle, speechStartDetectedCallbackDelegate, IntPtr.Zero));
-            ThrowIfFail(Internal.Recognizer.recognizer_speech_end_detected_set_callback(recoHandle, speechEndDetectedCallbackDelegate, IntPtr.Zero));
-            ThrowIfFail(Internal.Recognizer.recognizer_session_started_set_callback(recoHandle, sessionStartedCallbackDelegate, IntPtr.Zero));
-            ThrowIfFail(Internal.Recognizer.recognizer_session_stopped_set_callback(recoHandle, sessionStoppedCallbackDelegate, IntPtr.Zero));
+            ThrowIfFail(Internal.Recognizer.recognizer_speech_start_detected_set_callback(recoHandle, speechStartDetectedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.Recognizer.recognizer_speech_end_detected_set_callback(recoHandle, speechEndDetectedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.Recognizer.recognizer_session_started_set_callback(recoHandle, sessionStartedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.Recognizer.recognizer_session_stopped_set_callback(recoHandle, sessionStoppedCallbackDelegate, GCHandle.ToIntPtr(gch)));
         }
 
         ~Recognizer()
@@ -97,7 +97,10 @@ namespace Microsoft.CognitiveServices.Speech
             speechEndDetectedCallbackDelegate = null;
             sessionStartedCallbackDelegate = null;
             sessionStoppedCallbackDelegate = null;
-
+            if (gch.IsAllocated)
+            {
+                gch.Free();
+            }
             disposed = true;
         }
 
@@ -112,35 +115,43 @@ namespace Microsoft.CognitiveServices.Speech
         private CallbackFunctionDelegate sessionStoppedCallbackDelegate;
 
         /// <summary>
+        /// GC handle for callbacks for context.
+        /// </summary>
+        protected GCHandle gch;
+
+        /// <summary>
         /// disposed is a flag used to indicate if object is disposed.
         /// </summary>
         protected volatile bool disposed = false;
+
         /// <summary>
         /// isDisposing is a flag used to indicate if object is being disposed.
         /// </summary>
         protected volatile bool isDisposing = false;
+
         /// <summary>
         /// recognizerLock is used to synchronize access to objects member variables from multiple threads
         /// </summary>
         protected object recognizerLock = new object();
+
         private int activeAsyncRecognitionCounter = 0;
 
         /// <summary>
         /// Define a private methods which raise a C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
         ///
-
         [Internal.MonoPInvokeCallback]
-        private void FireEvent_SetSessionStarted(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private static void FireEvent_SetSessionStarted(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                if (isDisposing)
+                var recognizer = InteropSafeHandle.GetObjectFromWeakHandle<Recognizer>(pvContext);
+                if (recognizer == null || recognizer.isDisposing)
                 {
                     return;
                 }
                 var resultEventArg = new SessionEventArgs(hevent);
-                SessionStarted?.Invoke(this, resultEventArg);
+                recognizer.SessionStarted?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -149,16 +160,17 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         [Internal.MonoPInvokeCallback]
-        private void FireEvent_SetSessionStopped(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private static void FireEvent_SetSessionStopped(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                if (isDisposing)
+                var recognizer = InteropSafeHandle.GetObjectFromWeakHandle<Recognizer>(pvContext);
+                if (recognizer == null || recognizer.isDisposing)
                 {
                     return;
                 }
                 var resultEventArg = new SessionEventArgs(hevent);
-                SessionStopped?.Invoke(this, resultEventArg);
+                recognizer.SessionStopped?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -167,16 +179,17 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         [Internal.MonoPInvokeCallback]
-        private void FireEvent_SpeechStartDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private static void FireEvent_SpeechStartDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                if (isDisposing)
+                var recognizer = InteropSafeHandle.GetObjectFromWeakHandle<Recognizer>(pvContext);
+                if (recognizer == null || recognizer.isDisposing)
                 {
                     return;
                 }
                 var resultEventArg = new RecognitionEventArgs(hevent);
-                SpeechStartDetected?.Invoke(this, resultEventArg);
+                recognizer.SpeechStartDetected?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -185,16 +198,17 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         [Internal.MonoPInvokeCallback]
-        private void FireEvent_SpeechEndDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
+        private static void FireEvent_SpeechEndDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
             {
-                if (isDisposing)
+                var recognizer = InteropSafeHandle.GetObjectFromWeakHandle<Recognizer>(pvContext);
+                if (recognizer == null || recognizer.isDisposing)
                 {
                     return;
                 }
                 var resultEventArg = new RecognitionEventArgs(hevent);
-                SpeechEndDetected?.Invoke(this, resultEventArg);
+                recognizer.SpeechEndDetected?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {
