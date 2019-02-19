@@ -58,12 +58,6 @@ jobs:
     displayName: Set variables
   - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
-  # TODO detect installation failures, export diagnostics. For now, we'll fail in msbuild a little bit down.
-  - powershell: |
-      Invoke-WebRequest -OutFile vs_enterprise.exe https://aka.ms/vs/15/release/vs_enterprise.exe
-      Start-Process -Wait cmd -Verb runas -ArgumentList /c, cd, (Get-Location), '&&', start, /wait, .\vs_enterprise.exe, modify, --installPath, '"%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise"', --add, Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre, --quiet, --norestart, --wait, '&&', echo, '%ERRORLEVEL%', '>', result.txt
-    displayName: Install Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre VS component
-    condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
   - bash: |
       set -e -o pipefail -u
       . ci/functions.sh
