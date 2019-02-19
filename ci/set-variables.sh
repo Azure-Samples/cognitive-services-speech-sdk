@@ -228,7 +228,7 @@ case $SPEECHSDK_BUILD_TYPE in
   prod)
     # Prod builds take exactly the version from version.txt, no extra
     # pre-release or meta.
-    SPEECHSDK_BUILD_PHASES+="WackTest "
+    SPEECHSDK_BUILD_PHASES+="WackTest IosMultiPlatformTests "
     PRERELEASE_VERSION=
     META=
     SPEECHSDK_SIGN=true
