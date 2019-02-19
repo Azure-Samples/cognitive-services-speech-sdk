@@ -287,6 +287,14 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
+# Unity project
+quickstart/csharp-unity/[Ll]ibrary/
+quickstart/csharp-unity/[Tt]emp/
+quickstart/csharp-unity/[Oo]bj/
+quickstart/csharp-unity/[Bb]uild/
+quickstart/csharp-unity/[Bb]uilds/
+quickstart/csharp-unity/[Ll]ogs/
+
 # Linux executables
 quickstart/cpp-linux/helloworld
 samples/cpp/windows/console/samples/sample

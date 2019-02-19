@@ -50,6 +50,8 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart C++ for Windows](./quickstart/cpp-windows/) | Windows  | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart C# .NET for Windows](./quickstart/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart C# .NET Core (Windows or Linux)](./quickstart/csharp-dotnetcore/) | Windows, Linux | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart C# UWP for Windows](./quickstart/csharp-uwp/) | Windows | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart C# Unity (Windows or Android)](./quickstart/csharp-unity/) | Windows, Android | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart for Android](./quickstart/java-android/) | Android  | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart Java JRE](./quickstart/java-jre/) | Windows, Linux | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart JavaScript](./quickstart/js-browser/) | Web | Demonstrates one-shot speech recognition from a microphone. |

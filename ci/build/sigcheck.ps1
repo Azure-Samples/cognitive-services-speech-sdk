@@ -45,6 +45,20 @@ function CheckJarsigner
     $script:jarsignerExe = $filename
 }
 
+function CheckTar
+{
+    $filename = "tar.exe"
+    if ((Get-Command "$filename" -ErrorAction SilentlyContinue) -eq $null) {
+        $dir = "C:\Program Files\Git\usr\bin"
+        $filename = Join-Path $dir $filename
+
+        if ((Get-Command "$filename" -ErrorAction SilentlyContinue) -eq $null) {
+            throw "Unable to find tar in PATH or $dir"
+        }
+    }
+    $script:tarExe = $filename
+}
+
 function CheckSigntool
 {
     $filename = "signtool.exe"
@@ -119,6 +133,32 @@ function ExpandIntoDirectory (
     Microsoft.PowerShell.Archive\Expand-Archive $workZip -DestinationPath $workDirectory -Force | Out-Null
 }
 
+function UntarIntoDirectory (
+    [string][parameter(Mandatory=$true)] $workDirectory,
+    [string][parameter(Mandatory=$true)] $filename)
+{
+    Remove-Item $workDirectory -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+    New-Item $workDirectory -Type Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    Copy-Item $filename $workDirectory -Force -ErrorAction Stop | Out-Null
+
+    Push-Location $workDirectory
+    & $script:tarExe -xzf (Split-Path -Leaf $filename)
+    if ($LASTEXITCODE -ne 0) {
+        $script:errorFound = $true
+        Write-Host "`nFAILURE: tar failure for file $filename.`n"
+        return
+    }
+    dir -Recurse -File pathname | ForEach-Object {
+       $path = Get-Content $_.FullName
+       if ($path -like '*.dll') {
+          Move-Item `
+            -LiteralPath (Join-Path $_.DirectoryName asset) `
+            -Destination (Join-Path $_.DirectoryName (Split-Path -Leaf $path))
+       }
+    }
+    Pop-Location
+}
+
 function Check_ar(
     [string][parameter(Mandatory=$true)] $directory,
     [string][parameter(Mandatory=$true)] $filter)
@@ -181,6 +221,25 @@ function CheckWindowsNuget(
     }
 }
 
+function CheckUnitypackage(
+    [string][parameter(Mandatory=$true)] $directory)
+{
+    CheckDirectory -directory $directory
+
+    $files = Get-ChildItem $directory -file -recurse -filter *.unitypackage
+    foreach($entry in $files) {
+        $filename = $entry.Fullname
+
+        $workDirectory = Join-Path $directory "tmpdir"
+
+        UntarIntoDirectory -workDirectory $workDirectory -filename $filename
+
+        CheckWindowsDlls -directory $workDirectory
+
+        Remove-Item $workDirectory -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+    }
+}
+
 function CheckWindowsWheel(
     [string][parameter(Mandatory=$true)] $directory)
 {
@@ -235,6 +294,7 @@ Function main
         CheckNuget
         CheckSigntool
         CheckJarsigner
+        CheckTar
 
         $directory = Join-Path $RootDirectory "Windows"
 
@@ -257,6 +317,13 @@ Function main
         Write-Host *** Checking JAR files in $directory ***
         Check_ar -directory $directory -filter "*.jar"
         Write-Host
+
+        $directory = Join-Path $RootDirectory Unity
+
+        Write-Host *** Checking Unitypackage files in $directory ***
+        CheckUnitypackage -directory $directory
+        Write-Host
+
     }
     catch {
         Write-Host "Exception caught - function main / failure"

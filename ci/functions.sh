@@ -219,3 +219,38 @@ function retry() {
   printf "Command didn't succeed in $retry attempt(s): %s\n" "$*" 1>&2
   return 1
 }
+
+function unity_batch() {
+  local log_dir editor_log old_log_dir unity_exe tail_pid exit_code
+
+  log_dir=$HOME/AppData/Local/Unity/Editor
+  editor_log=$log_dir/Editor.log
+  old_log_dir=${log_dir}/old
+  unity_exe="/c/Program Files/Unity2018.3.0f2/Editor/Unity.exe"
+
+  [[ -x $unity_exe ]] || {
+    printf "Error: cannot find Unity here: %s\n" "$unity_exe"
+    return 1
+  }
+
+  # Move an old log file out of the way
+  [[ -d $old_log_dir ]] || mkdir -p "$old_log_dir"
+  ! [[ -f $editor_log ]] || mv --backup=numbered "$editor_log" "$old_log_dir"
+
+  # Tail future logs into the console
+  tail -F "$editor_log" &
+  tail_pid=$!
+
+  "$unity_exe" -batchmode -quit -nographics "$@"
+  exit_code=$?
+
+  # Allow some extra time for logs being fully flushed and output.
+  sleep 7
+
+  kill "$tail_pid" || true
+
+  # Unity doesn't (always?) end logs with a newline.
+  printf "\n"
+
+  return $exit_code
+}

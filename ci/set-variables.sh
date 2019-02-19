@@ -74,7 +74,8 @@ case $(uname -a) in
   Linux*x86_64\ GNU/Linux)
     SPEECHSDK_BUILD_AGENT_PLATFORM=Linux-x64
     ;;
-  MINGW64_NT-*x86_64\ Msys)
+  MINGW64_NT-*x86_64\ Msys|MSYS_NT-10.0-WOW*i686\ Msys)
+    # Note: second pattern matches the architecture of the UnityBuild build agent.
     SPEECHSDK_BUILD_AGENT_PLATFORM=Windows-x64
     ;;
   Darwin*\ x86_64)
@@ -196,7 +197,7 @@ else
 fi
 
 # Build phases to run
-SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage JavaJrePackageLinuxTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs "
+SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage JavaJrePackageLinuxTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs UnityBuild "
 
 # Running tests is default
 SPEECHSDK_RUN_TESTS=true

@@ -3,6 +3,7 @@ subject to the license (https://aka.ms/csspeech/license201809).
 
 Microsoft.CognitiveServices.Speech.core.dll
 Microsoft.CognitiveServices.Speech.csharp.dll
+Microsoft.CognitiveServices.Speech.csharp.unix.dll
 MicrosoftCognitiveServicesSpeech.framework/MicrosoftCognitiveServicesSpeech
 client-sdk-<VERSION>.aar (or content derived from it)
 client-sdk-<VERSION>.jar

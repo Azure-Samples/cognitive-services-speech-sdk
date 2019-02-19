@@ -1860,7 +1860,7 @@ jobs:
     enabled: false
 
 - job: CheckSignatures
-  dependsOn: [Pre, NuGet, AndroidPackage, JavaJrePackage, WindowsPythonBuild]
+  dependsOn: [Pre, NuGet, AndroidPackage, JavaJrePackage, WindowsPythonBuild, UnityBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CheckSignatures '))
   pool:
     name: Hosted VS2017
@@ -1890,6 +1890,11 @@ jobs:
     inputs:
       artifactName: JavaJrePackage
       itemPattern: '**/*.jar'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Unity'
+    inputs:
+      artifactName: Unity
+      itemPattern: '**/*.unitypackage'
   - task: PowerShell@2
     displayName: 'Check Signatures'
     inputs:
@@ -1897,3 +1902,78 @@ jobs:
       filePath: './ci/build/sigcheck.ps1'
       arguments: '-RootDirectory $(System.ArtifactsDirectory)'
 
+- job: UnityBuild
+  dependsOn: [Pre, AndroidBuild, WindowsBuild, WindowsUwpBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' UnityBuild '))
+  pool:
+    # The "Skyman Unity On-Prem" agent pool currently contains a single build
+    # agent called "UnityBuild". It has three licensed Unity versions installed
+    # on it, cf. the build agent's capabilities at
+    # https://msasg.visualstudio.com/_settings/agentpools?_a=agents&poolId=620:
+    #
+    # Unity2017.2.1p2 - c:\program files\unity\editor\unity.exe
+    # Unity2018.1.2f1 - c:\Program Files\Unity2018.1.2f1
+    # Unity2018.3.0f2 - c:\Program Files\Unity2018.3.0f2
+    #
+    # Below we're using the last (newest) of these.
+    #
+    # The agent has been contributed and set up by Nick Horvath - many thanks!
+    name: Skyman Unity On-Prem
+  timeoutInMinutes: 30
+  # Note: since the build agent isn't our "default" hosted agent, we have to
+  # patch up how some things work. Also, be aware that it's persistent (not
+  # restored to clean state after the build). So, be careful with things such
+  # as secrets.
+  # TODO we may need to extend wrt cancellation/process clean-up if we encounter any problems
+  steps:
+  - script: git clean -fdx
+    displayName: Clean working directory
+  - powershell: |
+      Copy-Item -Recurse "$(Agent.HomeDirectory)\externals\git" copiedgit
+      Copy-Item copiedgit\usr\bin\sh.exe copiedgit\usr\bin\bash.exe
+      Write-Output "##vso[task.prependpath]$(Build.Repository.LocalPath)\copiedgit\usr\bin"
+    displayName: Add VSTS Agent Git sh.exe as bash.exe to path
+  # N.B. some things are still missing in the Bash setup, e.g., cygpath
+  - script: where bash
+    displayName: Validate that bash is in path
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Windows artifacts'
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)\In
+      itemPattern: '**/public/lib/**'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Android artifacts'
+    inputs:
+      artifactName: Android
+      downloadPath: $(System.ArtifactsDirectory)\In
+      itemPattern: '**/public/lib/**'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading WindowsUwp artifacts'
+    inputs:
+      artifactName: WindowsUwp
+      downloadPath: $(System.ArtifactsDirectory)\In
+      itemPattern: '**/public/lib/**'
+  - bash: ./ci/unity/build-unity.sh "$(Build.ArtifactStagingDirectory)/In"
+    displayName: Build Unity Plugin content
+  - bash: |
+      . ci/functions.sh &&
+      unity_batch \
+        -projectPath ci/unity/unity \
+        -exportPackage \
+          Assets/SpeechSDK \
+          Microsoft.CognitiveServices.Speech.$(SPEECHSDK_SEMVER2NOMETA).unitypackage
+    displayName: Build Unity package
+  - script: |
+      mkdir "$(Build.ArtifactStagingDirectory)\Unity" && ^
+      move ci\unity\unity\*.unitypackage "$(Build.ArtifactStagingDirectory)\Unity"
+    displayName: Move Unity package into upload folder
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Unity'
+      ArtifactName: Unity
+      publishLocation: Container
+    condition: succeededOrFailed()
+    displayName: Publish Unity package

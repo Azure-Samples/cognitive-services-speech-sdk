@@ -48,6 +48,7 @@ BEGIN {
       quickstart/cpp-windows/helloworld/helloworld.cpp#code
       quickstart/csharp-dotnet-windows/helloworld/Program.cs#code
       quickstart/csharp-dotnetcore/helloworld/Program.cs#code
+      quickstart/csharp-unity/Assets/Scripts/HelloWorld.cs#code
       quickstart/csharp-uwp/helloworld/MainPage.xaml#StackPanel
       quickstart/csharp-uwp/helloworld/MainPage.xaml.cs#code
       quickstart/java-android/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code

@@ -8,6 +8,7 @@ gradlew text
 proguard-rules.pro text
 
 *.appxmanifest text
+*.asset text
 *.bat text
 *.config text
 *.cpp text
@@ -22,6 +23,7 @@ proguard-rules.pro text
 *.json text
 *.m text
 *.md text
+*.meta text
 *.pbxproj text
 *.php text
 *.pl text
@@ -32,6 +34,7 @@ proguard-rules.pro text
 *.py text
 *.sln text
 *.storyboard text
+*.unity text
 *.vcxproj text
 *.vcxproj.filters text
 *.xaml text

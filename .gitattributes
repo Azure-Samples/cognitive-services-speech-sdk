@@ -38,6 +38,7 @@ setup.cfg text
 *.lock text
 *.m text
 *.md text
+*.meta text
 *.mm text
 *.nuspec text
 *.pbxproj text
