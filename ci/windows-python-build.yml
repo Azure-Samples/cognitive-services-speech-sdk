@@ -75,11 +75,12 @@ jobs:
         -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION)
         -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
       postbuildsteps:
-        - powershell: |
-            $dir = New-Item -ItemType Directory -Path "$(OutputDirectory)/pdb-$(BuildPlatform)-$(BuildConfiguration)-py$(PythonVersion)"
-            Copy-Item _skbuild\win-*\cmake-build\lib/Release\_speech_py_impl.pdb $dir
+        - bash: |
+            set -x
+            dir="$(OutputDirectory)/pdb-$(BuildPlatform)-$(BuildConfiguration)-py$(PythonVersion)"
+            mkdir -p "$dir" &&
+            cp _skbuild/win*/cmake-build/lib/Release/_speech_py_impl.pdb "$dir"
           displayName: copy .PDB
-
         # Remove *.dist-info/RECORD, otherwise "wheel pack" seem to pack it
         # twice on Windows (zipfile.py warns: UserWarning: Duplicate name:
         # 'azure_cognitiveservices_speech-.../RECORD)
