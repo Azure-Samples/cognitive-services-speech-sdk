@@ -22,7 +22,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
   ```sh
   sudo apt-get update
-  sudo apt-get install build-essential libssl1.0.0 libcurl3 libasound2 wget
+  sudo apt-get install build-essential libssl1.0.0 libasound2 wget
   ```
 
 ## Build the sample

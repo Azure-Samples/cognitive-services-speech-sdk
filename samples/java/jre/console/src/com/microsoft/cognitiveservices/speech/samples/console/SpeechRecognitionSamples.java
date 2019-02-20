@@ -18,6 +18,7 @@ import com.microsoft.cognitiveservices.speech.audio.*;
 
 @SuppressWarnings("resource") // scanner
 public class SpeechRecognitionSamples {
+
     // Speech recognition from microphone.
     public static void recognitionWithMicrophoneAsync() throws InterruptedException, ExecutionException
     {
@@ -189,7 +190,7 @@ public class SpeechRecognitionSamples {
                 System.out.println("\n    Session stopped event.");
             });
 
-            // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+            // Starts continuous recognition. Uses stopContinuousRecognitionAsync() to stop recognition.
             System.out.println("Say something...");
             recognizer.startContinuousRecognitionAsync().get();
 
@@ -260,7 +261,7 @@ public class SpeechRecognitionSamples {
                 stopRecognitionSemaphore.release();
             });
 
-            // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+            // Starts continuous recognition. Uses stopContinuousRecognitionAsync() to stop recognition.
             recognizer.startContinuousRecognitionAsync().get();
 
             // Waits for completion.

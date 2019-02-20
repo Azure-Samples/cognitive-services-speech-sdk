@@ -25,9 +25,7 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>
-	<array>
-		<string>armv7</string>
-	</array>
+	<array/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -41,7 +39,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>Need microphone access for speech recognition from microphone.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Need microphone access for speech recognition from microphone.</string>
 </dict>
 </plist>

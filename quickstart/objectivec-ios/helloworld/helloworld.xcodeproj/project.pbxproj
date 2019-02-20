@@ -399,12 +399,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = NK6235ZV5V;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SRCROOT)/..",
 					"$(PROJECT_DIR)",
 				);
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = helloworld/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(SRCROOT)/..",
 					"@executable_path/Frameworks",
@@ -422,12 +424,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = NK6235ZV5V;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SRCROOT)/..",
 					"$(PROJECT_DIR)",
 				);
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = helloworld/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(SRCROOT)/..",
 					"@executable_path/Frameworks",
@@ -442,9 +446,16 @@
 		F3D2F4A6216A516E006E5F52 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					armv7s,
+					armv7,
+					i386,
+				);
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = NK6235ZV5V;
 				INFOPLIST_FILE = helloworldUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -460,9 +471,16 @@
 		F3D2F4A7216A516E006E5F52 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					armv7s,
+					armv7,
+					i386,
+				);
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = NK6235ZV5V;
 				INFOPLIST_FILE = helloworldUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

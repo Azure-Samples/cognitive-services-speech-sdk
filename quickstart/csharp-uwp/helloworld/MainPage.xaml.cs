@@ -57,7 +57,12 @@ namespace helloworld
                 // Creates a speech recognizer using microphone as audio input.
                 using (var recognizer = new SpeechRecognizer(config))
                 {
-                    // Starts recognition. It returns when the first utterance has been recognized.
+                    // Starts speech recognition, and returns after a single utterance is recognized. The end of a
+                    // single utterance is determined by listening for silence at the end or until a maximum of 15
+                    // seconds of audio is processed.  The task returns the recognition text as result.
+                    // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+                    // shot recognition like command or query.
+                    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
                     // Checks result.
