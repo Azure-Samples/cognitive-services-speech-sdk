@@ -732,6 +732,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public void CloseConnectionWithoutOpen()
+        {
+            this.config.SpeechRecognitionLanguage = Language.DE_DE;
+            var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
+            var recognizer = new SpeechRecognizer(this.config, audioInput);
+            var connection = Connection.FromRecognizer(recognizer);
+            // Close the connection without opening it.
+            connection.Close();
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public async Task AsyncRecognitionAfterDisposingSpeechRecognizer()
         {

@@ -469,7 +469,10 @@ void CSpxAudioStreamSession::CloseConnection()
 {
     auto task = CreateTask([=]() {
         SPX_IFTRUE_THROW_HR(!IsState(SessionState::Idle), SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
-        m_recoAdapter->CloseConnection();
+        if (m_recoAdapter != nullptr)
+        {
+            m_recoAdapter->CloseConnection();
+        }
     }, false);
 
     shared_future<void> taskFuture(task.get_future());
