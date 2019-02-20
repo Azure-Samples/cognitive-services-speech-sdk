@@ -34,9 +34,7 @@ public class HelloWorld : MonoBehaviour
         // Replace with your own subscription key and service region (e.g., "westus").
         var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-        // N.B. make sure to dispose the recognizer after use. Undisposed
-        //      recognizers (with open connection to the Speech Service) may hang
-        //      the Unity Editor.
+        // Make sure to dispose the recognizer after use!
         using (var recognizer = new SpeechRecognizer(config))
         {
             lock (threadLocker)

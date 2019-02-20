@@ -364,8 +364,8 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         }
         // If we are in the exception handler, something really bad happened.
         // Not the task, but some of our structures misbehaved and we are in unknown state.
-        // We cannot really recover, because this can lead to hangs or live lock.
-        // so we abort all outstanding promises and set the whole thread to invalid state,
+        // We cannot really recover, because this can lead to live locks.
+        // We abort all outstanding promises and set the whole thread to invalid state,
         // so that the next access to the thread object will result in an error.
         catch (const exception& e)
         {
