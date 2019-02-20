@@ -1,4 +1,4 @@
-# Quickstart: Recognize speech in Unity using the Speech SDK for Unity (beta)
+# Quickstart: Recognize speech in Unity using the Speech SDK for Unity (Beta)
 
 This sample demonstrates how to recognize speech in [Unity](https://unity3d.com/).
 
@@ -16,10 +16,10 @@ This sample demonstrates how to recognize speech in [Unity](https://unity3d.com/
 * Access to your computer's microphone.
 * To target Android: an Android device (ARM32/64, x86; API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
 
-## Download the Speech SDK for Unity (beta) and the sample code
+## Download the Speech SDK for Unity (Beta) and the sample code
 
-* **By downloading the Speech SDK for Unity (beta) you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
-* The Speech SDK for Unity (beta) is packaged as a Unity asset package (.unitypackage).
+* **By downloading the Speech SDK for Unity (Beta) you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+* The Speech SDK for Unity (Beta) is packaged as a Unity asset package (.unitypackage).
   Download it from [here](https://aka.ms/csspeech/unitypackage).
 * Also, [download the sample code to your development PC.](../../README.md#get-the-samples)
 
