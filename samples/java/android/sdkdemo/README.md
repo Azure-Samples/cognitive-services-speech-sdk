@@ -36,6 +36,28 @@ This sample demonstrates how to recognize speech and intents with Java using the
 * In the deployment target windows that comes up, pick your Android device.
 * On your Android device, use the buttons in the user interface to pick the different sample scenarios.
 
+## Note on Android permission handling
+
+Please note that the Speech SDK requires two permissions, i.e., the INTERNET as well as the RECORD_AUDIO permission. As for Android API levels up to 22, requesting the permissions is handled at installation time but from API level 23 users are able to grant/revoke permissions at any time.
+
+Note that this sample targets minSdkVersion 23 or later, so you need to remove the following code if you want to retarget to minSdkVersion 22 or earlier:
+
+```java
+// Initialize SpeechSDK and request required permissions.
+try {
+    // a unique number within the application to allow
+    // correlating permission request responses with the request.
+    int permissionRequestId = 5;
+
+    // Request permissions needed for speech recognition
+    ActivityCompat.requestPermissions(MainActivity.this, new String[]{RECORD_AUDIO, INTERNET}, permissionRequestId);
+}
+catch (Exception ex) {
+    Log.e("SpeechSDK", "could not init sdk, " + ex.toString());
+    recognizedTextView.setText("Could not initialize: " + ex.toString());
+}
+```
+
 ## References
 
 * [Speech SDK API reference for Java](https://aka.ms/csspeech/javaref)

@@ -11,6 +11,8 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
+        String prompt = "Your choice (0: Stop): ";
+
         System.out.println("1. Speech recognition with microphone input.");
         System.out.println("2. Speech recognition in the specified language.");
         System.out.println("3. Speech recognition using customized model.");
@@ -23,7 +25,7 @@ public class Main {
         System.out.println("B. Intent recognition with language.");
         System.out.println("C. Intent continuous recognition using events with file.");
 
-        System.out.print("Your choice (0: Stop.): ");
+        System.out.print(prompt);
 
         try {
             String x;
@@ -71,9 +73,9 @@ public class Main {
                     System.out.println("Exiting...");
                     break;
                 }
-                System.out.println("\nRecognition done. Your Choice (0: Stop): ");
+                System.out.println("\nRecognition done. " + prompt);
             } while (!x.equals("0"));
-            
+
             System.out.println("Finishing demo.");
             System.exit(0);
         } catch (Exception ex) {

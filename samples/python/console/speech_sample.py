@@ -215,7 +215,6 @@ def speech_recognize_continuous_from_file():
         time.sleep(.5)
     # </SpeechContinuousRecognitionWithFile>
 
-
 def speech_recognition_with_pull_stream():
     """gives an example how to use a pull audio stream to recognize speech from a custom audio
     source"""

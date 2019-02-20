@@ -4,12 +4,12 @@ This sample demonstrates various forms of speech recognition, intent recognition
 
 ## Prerequisites
 
-* Python 3.5 (64 bit) or later needs to be installed. Downloads are available [here](https://www.python.org/downloads/).
-* The Speech SDK Python package is available for Windows (x64), Mac (macOS X version 10.12 or later), and Linux (x64).
+* Python 3.5 or later needs to be installed. Downloads are available [here](https://www.python.org/downloads/).
+* The Speech SDK Python package is available for Windows (x64 and x86), Mac (macOS X version 10.12 or later), and Linux (x64).
 * On Ubuntu 16.04 or 18.04, run the following commands for the installation of required packages:
   ```sh
   sudo apt-get update
-  sudo apt-get install build-essential libssl1.0.0 libcurl3 libasound2 wget
+  sudo apt-get install build-essential libssl1.0.0 libasound2 wget
   ```
 * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
 

@@ -35,6 +35,7 @@ void SpeechSamples()
         cout << "5.) Speech recognition using pull stream input.\n";
         cout << "6.) Speech recognition using push stream input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
+        cout.flush();
 
         input.empty();
         getline(cin, input);
@@ -75,6 +76,7 @@ void IntentSamples()
         cout << "2.) Intent recognition in the specified language.\n";
         cout << "3.) Intent continuous recognition with file input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
+        cout.flush();
 
         input.empty();
         getline(cin, input);
@@ -105,6 +107,7 @@ void TranslationSamples()
         cout << "1.) Translation with microphone input.\n";
         cout << "2.) Translation continuous recognition.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
+        cout.flush();
 
         input.empty();
         getline(cin, input);
@@ -123,7 +126,12 @@ void TranslationSamples()
     } while (input[0] != '0');
 }
 
+
+#ifdef _WIN32
 int wmain(int argc, wchar_t **argv)
+#else
+int main(int argc, char **argv)
+#endif
 {
     string input;
     do
@@ -133,6 +141,7 @@ int wmain(int argc, wchar_t **argv)
         cout << "2.) Intent recognition samples.\n";
         cout << "3.) Translation samples.\n";
         cout << "\nChoice (0 to Exit): ";
+        cout.flush();
 
         input.empty();
         getline(cin, input);

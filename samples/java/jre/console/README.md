@@ -15,7 +15,7 @@ This sample demonstrates various forms of speech recognition, intent recognition
 
   ```sh
   sudo apt-get update
-  sudo apt-get install libssl1.0.0 libcurl3 libasound2 wget
+  sudo apt-get install libssl1.0.0 libasound2 wget
   ```
 
 ## Build the sample

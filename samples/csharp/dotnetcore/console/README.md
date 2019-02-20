@@ -19,7 +19,7 @@ It runs under .NET Core 2.0 on Windows or Linux (Ubuntu 16.04 or 18.04 x64 only)
 
   ```sh
   sudo apt-get update
-  sudo apt-get install libssl1.0.0 libcurl3 libasound2 wget
+  sudo apt-get install libssl1.0.0 libasound2 wget
   ```
 
 ## Build the sample

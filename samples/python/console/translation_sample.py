@@ -132,6 +132,8 @@ def translation_continuous():
         done = True
 
     # connect callback functions to the events fired by the recognizer
+    recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
     # event for intermediate results
     recognizer.recognizing.connect(lambda evt: result_callback('RECOGNIZING', evt))
     # event for final result
