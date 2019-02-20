@@ -76,7 +76,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
                 int error = (int)SpxError.GetErrorCode(hr);
                 string message = String.Format(CultureInfo.CurrentCulture, "Failed with an error code: {0}", error.ToString("X", CultureInfo.CurrentCulture).ToLower(CultureInfo.CurrentCulture));
                 SpxError.Release(hr);
-                System.Diagnostics.Trace.WriteLine(message);
+                System.Diagnostics.Debug.WriteLine(message);
             }
         }
 
@@ -87,13 +87,13 @@ namespace Microsoft.CognitiveServices.Speech.Internal
                 int error = (int)SpxError.GetErrorCode(hr);
                 string message = String.Format(CultureInfo.CurrentCulture, "Failed with an error code: {0}", error.ToString("X", CultureInfo.CurrentCulture).ToLower(CultureInfo.CurrentCulture));
                 SpxError.Release(hr);
-                System.Diagnostics.Trace.WriteLine(message);
+                System.Diagnostics.Debug.WriteLine(message);
             }
         }
 
         internal static void LogError(string message)
         {
-            System.Diagnostics.Trace.WriteLine(message);
+            System.Diagnostics.Debug.WriteLine(message);
         }
     }
 }

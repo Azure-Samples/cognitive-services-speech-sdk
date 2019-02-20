@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.CognitiveServices.Speech.Internal
 {
-    public enum PropertyId
+    internal enum PropertyId
     {
         SpeechServiceConnection_Key = 1000,
         SpeechServiceConnection_Endpoint = 1001,

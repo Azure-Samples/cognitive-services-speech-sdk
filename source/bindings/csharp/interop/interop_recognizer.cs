@@ -17,7 +17,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXEVENTHANDLE = System.IntPtr;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void CallbackFunctionDelegate(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, IntPtr context);
+    internal delegate void CallbackFunctionDelegate(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, IntPtr context);
 
     internal static class Recognizer
     {

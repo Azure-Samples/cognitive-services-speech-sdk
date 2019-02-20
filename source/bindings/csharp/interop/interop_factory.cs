@@ -26,8 +26,8 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public MonoPInvokeCallbackAttribute() { }
     }
 
-    public delegate IntPtr HandleRelease(IntPtr hresult);
-    public sealed class InteropSafeHandle : SafeHandle
+    internal delegate IntPtr HandleRelease(IntPtr hresult);
+    internal sealed class InteropSafeHandle : SafeHandle
     {
         private HandleRelease releaseHandleFunc = null;
         public InteropSafeHandle(IntPtr handle, HandleRelease releaseHandle) : base(handle, true)

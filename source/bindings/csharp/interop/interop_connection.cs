@@ -14,7 +14,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXEVENTHANDLE = System.IntPtr;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void ConnectionCallbackFunctionDelegate(SPXEVENTHANDLE hevent, IntPtr context);
+    internal delegate void ConnectionCallbackFunctionDelegate(SPXEVENTHANDLE hevent, IntPtr context);
 
     internal class Connection
     {

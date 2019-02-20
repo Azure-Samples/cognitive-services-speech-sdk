@@ -20,9 +20,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate int PullAudioStreamReadDelegate(IntPtr context, IntPtr dataBuffer, uint size);
+    internal delegate int PullAudioStreamReadDelegate(IntPtr context, IntPtr dataBuffer, uint size);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void PullAudioStreamCloseDelegate(IntPtr context);
+    internal delegate void PullAudioStreamCloseDelegate(IntPtr context);
     internal class PullAudioInputStream : AudioInputStream
     {
         private PullAudioInputStreamCallback callback = null;
