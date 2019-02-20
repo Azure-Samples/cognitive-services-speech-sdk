@@ -16,7 +16,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             if (args.Length < 3)
             {
-                Console.WriteLine("Usage: carbon_csharp_console mode(speech|intent|translation:cont|single) key(key|token:key) region audioinput(mic|filename|stream:file) model:modelId|lang:language|endpoint:url|devicename:id");
+                Console.WriteLine("Usage: carbon_csharp_console mode(speech|intent|translation|memleak:cont|single) key(key|token:key) region audioinput(mic|filename|stream:file) model:modelId|lang:language|endpoint:url|devicename:id");
                 Environment.Exit(1);
             }
 
@@ -30,6 +30,8 @@ namespace MicrosoftSpeechSDKSamples
             bool isSpeechReco = false;
             bool isIntentReco = false;
             bool isTranslation = false;
+            bool isMemoryLeakTest = false;
+            string memoryLeakTestKind = null;
             string lang = null;
             string modelId = null;
             string endpoint = null;
@@ -51,6 +53,15 @@ namespace MicrosoftSpeechSDKSamples
                 else if (string.Compare(modeStr, "translation", true) == 0)
                 {
                     isTranslation = true;
+                }
+                else if (string.Compare(modeStr, "memleak", true) == 0)
+                {
+                    isMemoryLeakTest = true;
+                    if (index != -1)
+                    {
+                        memoryLeakTestKind = args[0].Substring(index + 1);
+                    }
+                    index = -1;
                 }
                 else
                 {
@@ -90,7 +101,7 @@ namespace MicrosoftSpeechSDKSamples
                 subKey = args[1];
             }
 
-            Trace.Assert(isSpeechReco || isIntentReco || isTranslation);
+            Trace.Assert(isSpeechReco || isIntentReco || isTranslation || isMemoryLeakTest);
             Trace.Assert(subKey != null);
             if (useToken && (isIntentReco || isTranslation))
             {
@@ -204,7 +215,11 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
 
-            if (isSpeechReco)
+            if (isMemoryLeakTest)
+            {
+                MemoryLeakTests.MemoryLeakTest(subKey, region, fileName, memoryLeakTestKind).Wait();
+            }
+            else if (isSpeechReco)
             {
                 if (useEndpoint)
                 {
