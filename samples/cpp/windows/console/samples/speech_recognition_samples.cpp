@@ -27,9 +27,12 @@ void SpeechRecognitionWithMicrophone()
     auto recognizer = SpeechRecognizer::FromConfig(config);
     cout << "Say something...\n";
 
-    // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
-    // so it is suitable only for single shot recognition like command or query. For long-running
-    // recognition, use StartContinuousRecognitionAsync() instead.
+    // Starts speech recognition, and returns after a single utterance is recognized. The end of a
+    // single utterance is determined by listening for silence at the end or until a maximum of 15
+    // seconds of audio is processed.  The task returns the recognition text as result.
+    // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+    // shot recognition like command or query.
+    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeOnceAsync().get();
 
     // Checks result.
@@ -74,9 +77,12 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
     auto recognizer = SpeechRecognizer::FromConfig(config);
     cout << "Say something in " << lang << "...\n";
 
-    // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
-    // so it is suitable only for single shot recognition like command or query. For long-running
-    // recognition, use StartContinuousRecognitionAsync() instead.
+    // Starts speech recognition, and returns after a single utterance is recognized. The end of a
+    // single utterance is determined by listening for silence at the end or until a maximum of 15
+    // seconds of audio is processed.  The task returns the recognition text as result. 
+    // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+    // shot recognition like command or query. 
+    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeOnceAsync().get();
 
     // Checks result.
@@ -122,15 +128,15 @@ void SpeechContinuousRecognitionWithFile()
     // Subscribes to events.
     recognizer->Recognizing.Connect([] (const SpeechRecognitionEventArgs& e)
     {
-        cout << "Recognizing:" << e.Result->Text << endl;
+        cout << "Recognizing:" << e.Result->Text << std::endl;
     });
 
     recognizer->Recognized.Connect([] (const SpeechRecognitionEventArgs& e)
     {
         if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
-            cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl
-                 << "  Offset=" << e.Result->Offset() << std::endl
+            cout << "RECOGNIZED: Text=" << e.Result->Text << "\n"
+                 << "  Offset=" << e.Result->Offset() << "\n"
                  << "  Duration=" << e.Result->Duration() << std::endl;
         }
         else if (e.Result->Reason == ResultReason::NoMatch)
@@ -145,11 +151,10 @@ void SpeechContinuousRecognitionWithFile()
 
         if (e.Reason == CancellationReason::Error)
         {
-            cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << std::endl;
-            cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
-            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+            cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << "\n"
+                 << "CANCELED: ErrorDetails=" << e.ErrorDetails << "\n"
+                 << "CANCELED: Did you update the subscription info?" << std::endl;
         }
-
         recognitionEnd.set_value(); // Notify to stop recognition.
     });
 
@@ -160,13 +165,13 @@ void SpeechContinuousRecognitionWithFile()
     });
 
     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-    recognizer->StartContinuousRecognitionAsync().wait();
+    recognizer->StartContinuousRecognitionAsync().get();
 
     // Waits for recognition end.
-    recognitionEnd.get_future().wait();
+    recognitionEnd.get_future().get();
 
     // Stops recognition.
-    recognizer->StopContinuousRecognitionAsync().wait();
+    recognizer->StopContinuousRecognitionAsync().get();
     // </SpeechContinuousRecognitionWithFile>
 }
 
@@ -186,9 +191,12 @@ void SpeechRecognitionUsingCustomizedModel()
 
     cout << "Say something...\n";
 
-    // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
-    // so it is suitable only for single shot recognition like command or query. For long-running
-    // recognition, use StartContinuousRecognitionAsync() instead.
+    // Starts speech recognition, and returns after a single utterance is recognized. The end of a
+    // single utterance is determined by listening for silence at the end or until a maximum of 15
+    // seconds of audio is processed.  The task returns the recognition text as result. 
+    // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+    // shot recognition like command or query. 
+    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeOnceAsync().get();
 
     // Checks result.
@@ -226,7 +234,7 @@ void SpeechContinuousRecognitionWithPullStream()
     public:
         // Constructor that creates an input stream from a file.
         AudioInputFromFileCallback(const string& audioFileName)
-            :m_reader(audioFileName)
+            : m_reader(audioFileName)
         {
         }
 
@@ -294,13 +302,13 @@ void SpeechContinuousRecognitionWithPullStream()
         case CancellationReason::EndOfStream:
             cout << "CANCELED: Reach the end of the file." << std::endl;
             break;
-            
+
         case CancellationReason::Error:
             cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
             recognitionEnd.set_value();
             break;
-            
+
         default:
             cout << "unknown reason ?!" << std::endl;
         }
@@ -365,13 +373,13 @@ void SpeechContinuousRecognitionWithPushStream()
         case CancellationReason::EndOfStream:
             cout << "CANCELED: Reach the end of the file." << std::endl;
             break;
-            
+
         case CancellationReason::Error:
             cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << std::endl;
             cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
             recognitionEnd.set_value();
             break;
-            
+
         default:
             cout << "CANCELED: received unknown reason." << std::endl;
         }
@@ -387,10 +395,10 @@ void SpeechContinuousRecognitionWithPushStream()
     WavFileReader reader("whatstheweatherlike.wav");
 
     vector<uint8_t> buffer(1000);
-    
+
     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
     recognizer->StartContinuousRecognitionAsync().wait();
-    
+
     // Read data and push them into the stream
     int readSamples = 0;
     while((readSamples = reader.Read(buffer.data(), (uint32_t)buffer.size())) != 0)
@@ -403,8 +411,8 @@ void SpeechContinuousRecognitionWithPushStream()
     pushStream->Close();
 
     // Waits for recognition end.
-    recognitionEnd.get_future().wait();
+    recognitionEnd.get_future().get();
 
     // Stops recognition.
-    recognizer->StopContinuousRecognitionAsync().wait();
+    recognizer->StopContinuousRecognitionAsync().get();
 }

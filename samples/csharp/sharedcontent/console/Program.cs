@@ -14,6 +14,8 @@ namespace MicrosoftSpeechSDKSamples
         static void Main(string[] args)
         {
 
+            var prompt = "Your choice (0: Stop): ";
+
             Console.WriteLine("1. Speech recognition with microphone input.");
             Console.WriteLine("2. Speech recognition in the specified language and using detailed output format.");
             Console.WriteLine("3. Speech continuous recognition with file input.");
@@ -28,7 +30,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("C. Intent continuous recognition with file input.");
             Console.WriteLine("D. Intent recognition in the specified language with microphone input.");
 
-            Console.Write("Your choice (0: Stop.): ");
+            Console.Write(prompt);
 
             ConsoleKeyInfo x;
             do
@@ -83,7 +85,7 @@ namespace MicrosoftSpeechSDKSamples
                         Console.WriteLine("Invalid input.");
                         break;
                 }
-                Console.WriteLine("\nRecognition done. Your Choice (0: Stop): ");
+                Console.WriteLine("\nRecognition done. " + prompt);
             } while (x.Key != ConsoleKey.D0);
         }
     }

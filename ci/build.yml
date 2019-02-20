@@ -48,8 +48,7 @@ jobs:
           ;;
         VstsFeed)
           V_VSTS_FEED="$(SpeechSdkVstsFeed)"
-          # TODO should revisit if we depend on other public NuGet packages:
-          V_INCLUDE_NUGET_ORG=false
+          V_INCLUDE_NUGET_ORG=true
           ;;
         *)
           echo Unexpected value SpeechSdkNuGetSource=$(SpeechSdkNuGetSource)

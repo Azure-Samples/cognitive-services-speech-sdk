@@ -4,20 +4,24 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 
 ## News
 
+* Speech SDK Release 1.3.0
+
+  Mid of February 2019 we released version 1.3.0 of the Speech SDK.
+
 * Speech SDK Release 1.2.0
 
-  Mid of December we released version 1.2.0 of the Speech SDK.
+  Mid of December 2018 we released version 1.2.0 of the Speech SDK.
 
 * Speech SDK Release 1.1.0
 
-  Beginning of November we released version 1.1.0 of the Speech SDK. The release notes can be found [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/releasenotes#speech-service-sdk-110).
+  Beginning of November 2018 we released version 1.1.0 of the Speech SDK. The release notes can be found [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/releasenotes#speech-service-sdk-110).
 
 ## Features
 
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK (1.2.0) on Windows 10, Ubuntu 16.04 and 18.04 x64, Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
+We tested the samples with the latest released version of the SDK (1.3.0) on Windows 10, Ubuntu 16.04 and 18.04 x64, Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
 
 ## Getting Started
 
@@ -50,6 +54,8 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart C++ for Windows](./quickstart/cpp-windows/) | Windows  | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart C# .NET for Windows](./quickstart/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart C# .NET Core (Windows or Linux)](./quickstart/csharp-dotnetcore/) | Windows, Linux | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart C# UWP for Windows](./quickstart/csharp-uwp/) | Windows | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart C# Unity (Windows or Android)](./quickstart/csharp-unity/) | Windows, Android | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart for Android](./quickstart/java-android/) | Android  | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart Java JRE](./quickstart/java-jre/) | Windows, Linux | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart JavaScript](./quickstart/js-browser/) | Web | Demonstrates one-shot speech recognition from a microphone. |
@@ -87,6 +93,12 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Speech recognition sample for Android](./samples/java/android/sdkdemo)                                     | Android  | Demonstrates speech and intent recognition |
 | [Speech recognition and translation sample for the browser, using JavaScript](./samples/js/browser)         | Web  | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech recognition and translation sample using JavaScript and Node.js](./samples/js/node)                 | Node.js  | Demonstrates speech recognition, intent recognition, and translation |
+
+Samples for using the Speech Service REST API (no Speech SDK installation required):
+
+| Sample                                  | Description |
+| ---                                     | --- |
+| [Batch transcription](./samples/batch)  | Demonstrates usage of batch transcription from different programming languages |
 
 ## Resources
 

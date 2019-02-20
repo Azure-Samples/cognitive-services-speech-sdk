@@ -46,7 +46,7 @@ public class IntentRecognitionSamples {
         if (result.getReason() == ResultReason.RecognizedIntent) {
             System.out.println("RECOGNIZED: Text=" + result.getText());
             System.out.println("    Intent Id: " + result.getIntentId());
-            System.out.println("    Intent Service Json: " + result.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult));
+            System.out.println("    Intent Service JSON: " + result.getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult));
         }
         else if (result.getReason() == ResultReason.RecognizedSpeech) {
             System.out.println("RECOGNIZED: Text=" + result.getText());
@@ -98,7 +98,7 @@ public class IntentRecognitionSamples {
         if (result.getReason() == ResultReason.RecognizedIntent) {
             System.out.println("RECOGNIZED: Text=" + result.getText());
             System.out.println("    Intent Id: " + result.getIntentId());
-            System.out.println("    Intent Service Json: " + result.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult));
+            System.out.println("    Intent Service JSON: " + result.getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult));
         }
         else if (result.getReason() == ResultReason.RecognizedSpeech) {
             System.out.println("RECOGNIZED: Text=" + result.getText());
@@ -150,7 +150,7 @@ public class IntentRecognitionSamples {
             if (e.getResult().getReason() == ResultReason.RecognizedIntent) {
                 System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
                 System.out.println("    Intent Id: " + e.getResult().getIntentId());
-                System.out.println("    Intent Service Json: " + e.getResult().getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult));
+                System.out.println("    Intent Service JSON: " + e.getResult().getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult));
             }
             else if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
                 System.out.println("RECOGNIZED: Text=" + e.getResult().getText());

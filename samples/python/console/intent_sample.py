@@ -64,7 +64,7 @@ def recognize_intent_once_from_mic():
     elif intent_result.reason == speechsdk.ResultReason.NoMatch:
         print("No speech could be recognized: {}".format(intent_result.no_match_details))
     elif intent_result.reason == speechsdk.ResultReason.Canceled:
-        print("Translation canceled: {}".format(intent_result.cancellation_details.reason))
+        print("Intent recognition canceled: {}".format(intent_result.cancellation_details.reason))
         if intent_result.cancellation_details.reason == speechsdk.CancellationReason.Error:
             print("Error details: {}".format(intent_result.cancellation_details.error_details))
     # </IntentRecognitionOnceWithMic>
@@ -103,7 +103,7 @@ def recognize_intent_once_from_file():
     elif intent_result.reason == speechsdk.ResultReason.NoMatch:
         print("No speech could be recognized: {}".format(intent_result.no_match_details))
     elif intent_result.reason == speechsdk.ResultReason.Canceled:
-        print("Translation canceled: {}".format(intent_result.cancellation_details.reason))
+        print("Intent recognition canceled: {}".format(intent_result.cancellation_details.reason))
         if intent_result.cancellation_details.reason == speechsdk.CancellationReason.Error:
             print("Error details: {}".format(intent_result.cancellation_details.error_details))
     # </IntentRecognitionOnceWithFile>
@@ -146,7 +146,7 @@ def recognize_intent_continuous():
     intent_recognizer.recognizing.connect(lambda evt: print("RECOGNIZING: {}".format(evt)))
     # event for final result
     intent_recognizer.recognized.connect(lambda evt: print(
-        "RECOGNIZED: {}\n\tText: {} (Reason: {})\n\tIntent Id: {}\n\tIntent Json: {}".format(
+        "RECOGNIZED: {}\n\tText: {} (Reason: {})\n\tIntent Id: {}\n\tIntent JSON: {}".format(
             evt, evt.result.text, evt.result.reason, evt.result.intent_id, evt.result.intent_json)))
 
     # cancellation event
