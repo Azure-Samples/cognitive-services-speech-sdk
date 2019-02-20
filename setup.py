@@ -12,17 +12,19 @@ PACKAGE_PPRINT_NAME = "Microsoft Cognitive Services Speech SDK"
 SOURCE_DIR = 'source/bindings/python/src'
 
 DESCRIPTION = """
-# Microsoft Speech SDK for Python
+Microsoft Speech SDK for Python
+===============================
 
-For an introduction to this package, have a look at [the quickstart
-article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-python).
+For an introduction to this package, have a look at `the quickstart
+article <https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-python>`_.
 
-For information about the speech service, please refer to [its
-website](https://docs.microsoft.com/azure/cognitive-services/speech-service/).
+For information about the Speech Service, please refer to `its
+website <https://docs.microsoft.com/azure/cognitive-services/speech-service/>`_.
 
-## Documentation
+Documentation
+-------------
 
-API documentation for this package can be found [here](https://aka.ms/csspeech/pythonref).
+API documentation for this package can be found `here <https://aka.ms/csspeech/pythonref>`_.
 """
 
 version = None
@@ -65,6 +67,5 @@ setup(name=PACKAGE_NAME,
           'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
       ],
-      long_description=DESCRIPTION,
-      long_description_content_type="text/markdown"
+      long_description=DESCRIPTION
       )
