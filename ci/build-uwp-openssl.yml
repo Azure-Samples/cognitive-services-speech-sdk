@@ -1,0 +1,141 @@
+# https://msasg.visualstudio.com/DefaultCollection/Skyman/_build?definitionId=8520
+variables:
+  TargetOs: Universal
+  Win10KitVersion: 10.0
+  Charset: Unicode
+  Sha1: 33c1190a9d27da3f03717466cd496c3d06fc890e
+
+pool:
+  vmImage: vs2017-win2016
+
+steps:
+- script: where perl || choco install strawberryperl -y
+  displayName: Install Perl if missing
+- bash: curl -L https://github.com/Microsoft/openssl/archive/$(Sha1).tar.gz | tar -xzf -
+  displayName: Get source
+  # N.B. web download is smaller (no history) and also works around newline
+  #      issues with the openssl repo (cf.
+  #      https://github.com/git-for-windows/git/issues/469)
+- script: .\ms\do_vsprojects15.bat
+  timeoutInMinutes: 10 # safe-guard for hang during configure
+  displayName: Configure projects
+  workingDirectory: openssl-$(Sha1)
+- task: VSBuild@1
+  inputs:
+    solution: openssl-$(Sha1)/vsout/NT-$(TargetOs)-$(Win10KitVersion)-$(Linkage)-$(Charset)/NT-$(TargetOs)-$(Win10KitVersion)-$(Linkage)-$(Charset).vcxproj
+    vsVersion: 15.0
+    platform: $(BuildPlatform)
+    configuration: $(BuildConfiguration)
+  displayName: Build library
+- script: |
+    set PDBDIR=vsout\package\pdb\$(TargetOs)\$(Win10KitVersion)\$(Linkage)\$(Charset)\$(BuildConfiguration)\$(BuildPlatform)
+    .\ms\do_packwinuniversal.bat && ^
+    mkdir "%PDBDIR%" && ^
+    copy vsout\NT-$(TargetOs)-$(Win10KitVersion)-$(Linkage)-$(Charset)\$(BuildConfiguration)\$(BuildPlatform)\tmp\*.pdb "%PDBDIR%"
+  workingDirectory: openssl-$(Sha1)
+  displayName: Package all
+- task: PublishBuildArtifacts@1
+  displayName: Publish drop (all)
+  inputs:
+    PathtoPublish: openssl-$(Sha1)/vsout/package
+    ArtifactName: package
+    publishLocation: Container
+- script: |
+    set SDIR=vsout\speechsdk-static-release
+    mkdir "%SDIR%" && ^
+    xcopy ^
+      vsout\package\include ^
+      "%SDIR%"\include ^
+      /h /k /r /e /i /y >nul && ^
+    xcopy ^
+      vsout\package\lib\$(TargetOs)\$(Win10KitVersion)\$(Linkage)\$(Charset)\$(BuildConfiguration)\$(BuildPlatform) ^
+      "%SDIR%"\lib\$(BuildPlatform) ^
+      /h /k /r /e /i /y >nul
+  workingDirectory: openssl-$(Sha1)
+  displayName: Package static release libraries for Speech SDK
+  condition: and(succeeded(), eq(variables.BuildConfiguration, 'Release'), eq(variables.Linkage, 'Static'))
+- task: PublishBuildArtifacts@1
+  displayName: Publish drop (static)
+  inputs:
+    PathtoPublish: openssl-$(Sha1)/vsout/speechsdk-static-release
+    ArtifactName: speechsdk-static-release
+    publishLocation: Container
+  condition: and(succeeded(), eq(variables.BuildConfiguration, 'Release'), eq(variables.Linkage, 'Static'))
+
+strategy:
+  maxParallel: 16
+  matrix:
+    Universal_10.0_Static_Unicode_Debug_Win32:
+      Linkage: Static
+      BuildConfiguration: Debug
+      BuildPlatform: Win32
+    Universal_10.0_Static_Unicode_Debug_arm:
+      Linkage: Static
+      BuildConfiguration: Debug
+      BuildPlatform: arm
+    Universal_10.0_Static_Unicode_Debug_x64:
+      Linkage: Static
+      BuildConfiguration: Debug
+      BuildPlatform: x64
+    Universal_10.0_Static_Unicode_Debug_arm64:
+      Linkage: Static
+      BuildConfiguration: Debug
+      BuildPlatform: arm64
+    Universal_10.0_Static_Unicode_Release_Win32:
+      Linkage: Static
+      BuildConfiguration: Release
+      BuildPlatform: Win32
+    Universal_10.0_Static_Unicode_Release_arm:
+      Linkage: Static
+      BuildConfiguration: Release
+      BuildPlatform: arm
+    Universal_10.0_Static_Unicode_Release_x64:
+      Linkage: Static
+      BuildConfiguration: Release
+      BuildPlatform: x64
+    Universal_10.0_Static_Unicode_Release_arm64:
+      Linkage: Static
+      BuildConfiguration: Release
+      BuildPlatform: arm64
+    Universal_10.0_Dll_Unicode_Debug_Win32:
+      Linkage: Dll
+      BuildConfiguration: Debug
+      BuildPlatform: Win32
+    Universal_10.0_Dll_Unicode_Debug_arm:
+      Linkage: Dll
+      BuildConfiguration: Debug
+      BuildPlatform: arm
+    Universal_10.0_Dll_Unicode_Debug_x64:
+      Linkage: Dll
+      BuildConfiguration: Debug
+      BuildPlatform: x64
+    Universal_10.0_Dll_Unicode_Debug_arm64:
+      Linkage: Dll
+      BuildConfiguration: Debug
+      BuildPlatform: arm64
+    Universal_10.0_Dll_Unicode_Release_Win32:
+      Linkage: Dll
+      BuildConfiguration: Release
+      BuildPlatform: Win32
+    Universal_10.0_Dll_Unicode_Release_arm:
+      Linkage: Dll
+      BuildConfiguration: Release
+      BuildPlatform: arm
+    Universal_10.0_Dll_Unicode_Release_x64:
+      Linkage: Dll
+      BuildConfiguration: Release
+      BuildPlatform: x64
+    Universal_10.0_Dll_Unicode_Release_arm64:
+      Linkage: Dll
+      BuildConfiguration: Release
+      BuildPlatform: arm64
+
+# for linkage in Static Dll; do
+# for buildconfiguration in Debug Release; do
+# for buildplatform in Win32 arm x64 arm64; do
+#   printf "Universal_10.0_%s_Unicode_%s_%s:\n  Linkage: %s\n  BuildConfiguration: %s\n  BuildPlatform: %s\n" \
+#           $linkage $buildconfiguration $buildplatform \
+#           $linkage $buildconfiguration $buildplatform
+# done
+# done
+# done

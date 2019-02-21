@@ -52,6 +52,8 @@
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.core.dll" />
     <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
     <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x64\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsUwpDropDir$\arm\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win10-arm\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsUwpDropDir$\arm64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win10-arm64\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
 
     <!-- .NET standard dlls, built on Windows, used on Linux -->
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />

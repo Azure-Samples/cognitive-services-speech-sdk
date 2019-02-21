@@ -31,9 +31,6 @@ for flavor in Release; do # no Debug for now
   # Copy required meta information from template (e.g., library settings)
   cp -r "$SCRIPT_DIR/SpeechSDK-template" "$UNITY_DIR/Assets/SpeechSDK"
 
-  # Create directories for libraries
-  #mkdir -p "$UNITY_DIR"/Assets/SpeechSDK/Plugins/{Android/libs/{armeabi-v7a,arm64-v8a,x86},WSA/{x86,x64},x86,x86_64}
-
   # Copy libraries
   cp --verbose --preserve \
     "$DROP_DIR"/Android/Android-arm32/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.core.so \
@@ -54,6 +51,10 @@ for flavor in Release; do # no Debug for now
   cp --verbose --preserve \
     "$DROP_DIR"/WindowsUwp/x64/$flavor/public/lib/Microsoft.CognitiveServices.Speech.core.dll \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/x64
+
+  cp --verbose --preserve \
+    "$DROP_DIR"/WindowsUwp/ARM/$flavor/public/lib/Microsoft.CognitiveServices.Speech.core.dll \
+    "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/ARM
 
   cp --verbose --preserve \
     "$DROP_DIR"/Windows/Win32/$flavor/public/lib/Microsoft.CognitiveServices.Speech.core.dll \

@@ -440,8 +440,20 @@ jobs:
     name: Hosted VS2017
   timeoutInMinutes: 30
   strategy:
-    maxParallel: 4
+    maxParallel: 8
     matrix:
+      arm64_debug:
+        BuildPlatform: ARM64
+        BuildConfiguration: Debug
+      arm64_release:
+        BuildPlatform: ARM64
+        BuildConfiguration: Release
+      arm32_release:
+        BuildPlatform: ARM
+        BuildConfiguration: Release
+      arm32_debug:
+        BuildPlatform: ARM
+        BuildConfiguration: Debug
       x64_debug:
         BuildPlatform: x64
         BuildConfiguration: Debug
@@ -455,6 +467,30 @@ jobs:
         BuildPlatform: Win32
         BuildConfiguration: Debug
   steps:
+  - bash: |
+      set -u -e -o pipefail
+      . ci/functions.sh
+      IFS=$' \t\n\r' read build_id should_be_empty < external/uwp_ssl/build_id.txt
+      # checks
+      [[ -z $should_be_empty ]]
+      printf '%d' "$build_id" > /dev/null
+
+      vsts_setvar SPEECHSDK_UWP_OPENSSL_BUILD_ID "$build_id"
+    displayName: Get UWP OpenSSL build ID
+  - task: DownloadBuildArtifacts@0
+    displayName: Download UWP OpenSSL build artifact
+    inputs:
+      buildType: specific
+      project: 'e71f1362-9c7d-488b-99c7-3376db8d3302' # Skyman
+      pipeline: 8520 # Yml - Carbon UWP openssl
+      buildVersionToDownload: specific
+      buildId: $(SPEECHSDK_UWP_OPENSSL_BUILD_ID)
+      artifactName: speechsdk-static-release
+  - script: |
+      move $(System.ArtifactsDirectory)\speechsdk-static-release\include external\uwp_ssl\include && ^
+      move $(System.ArtifactsDirectory)\speechsdk-static-release\lib external\uwp_ssl\lib && ^
+      dir /s/a/b external\uwp_ssl
+    displayName: Move UWP OpenSSL into appropriate place
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set Windows target platform (Windows-x86 or Windows-x64)
     inputs:
@@ -463,11 +499,14 @@ jobs:
         . ci/functions.sh
         if [[ "$(BuildPlatform)" == Win32 ]]; then
           vsts_setvar SPEECHSDK_TARGET_PLATFORM "WindowsUwp-x86"
-          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
+        elif [[ "$(BuildPlatform)" == ARM ]]; then
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "WindowsUwp-arm32"
+        elif [[ "$(BuildPlatform)" == ARM64 ]]; then
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "WindowsUwp-arm64"
         else
           vsts_setvar SPEECHSDK_TARGET_PLATFORM "WindowsUwp-x64"
-          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15 Win64"
         fi
+        vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
   - bash: . ci/functions.sh && ./ci/set-variables.sh
   - bash: ./ci/install-build-dependencies.sh
@@ -479,7 +518,7 @@ jobs:
   - task: CMake@1
     displayName: Generate solution
     inputs:
-      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) ..'
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -A "$(BuildPlatform)" -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) ..'
   - task: VSBuild@1
     displayName: Build solution
     inputs:

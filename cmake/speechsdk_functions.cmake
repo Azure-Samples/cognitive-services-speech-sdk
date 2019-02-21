@@ -8,6 +8,7 @@ function(GET_WINDOWS_PLATFORM OUTVAR)
       set(_arch arm32)
     elseif(CMAKE_GENERATOR STREQUAL "Visual Studio 15 2017")
       # Handle "cmake -A"
+      # (note: seems case insensitive at first as an option, but there's some internal logic which is not)
       if(CMAKE_GENERATOR_PLATFORM STREQUAL "Win32")
         set(_arch x86)
       elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
@@ -160,6 +161,8 @@ function(PARSE_PLATFORM)
     Windows-x64
     WindowsUwp-x86
     WindowsUwp-x64
+    WindowsUwp-arm32
+    WindowsUwp-arm64
     Linux-x86
     Linux-x64
     Linux-arm32
