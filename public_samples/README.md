@@ -4,20 +4,24 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 
 ## News
 
+* Speech SDK Release 1.3.0
+
+  Mid of February 2019 we released version 1.3.0 of the Speech SDK.
+
 * Speech SDK Release 1.2.0
 
-  Mid of December we released version 1.2.0 of the Speech SDK.
+  Mid of December 2018 we released version 1.2.0 of the Speech SDK.
 
 * Speech SDK Release 1.1.0
 
-  Beginning of November we released version 1.1.0 of the Speech SDK. The release notes can be found [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/releasenotes#speech-service-sdk-110).
+  Beginning of November 2018 we released version 1.1.0 of the Speech SDK. The release notes can be found [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/releasenotes#speech-service-sdk-110).
 
 ## Features
 
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK (1.2.0) on Windows 10, Ubuntu 16.04 and 18.04 x64, Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
+We tested the samples with the latest released version of the SDK (1.3.0) on Windows 10, Ubuntu 16.04 and 18.04 x64, Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
 
 ## Getting Started
 
