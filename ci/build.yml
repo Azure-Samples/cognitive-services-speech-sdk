@@ -1488,6 +1488,9 @@ jobs:
     JointCmakeArgs: -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
     Developer.Dir: /Applications/Xcode_10.1.app/Contents/Developer
   steps:
+  # Update bash really early so it will be picked up by "bash" steps.
+  - bash: brew config && brew install bash
+    displayName: Install modern bash
   - bash: |
       . ci/functions.sh &&
       vsts_setvar SPEECHSDK_TARGET_PLATFORM IOS &&
@@ -1568,16 +1571,38 @@ jobs:
       inlineOperation: $(SIGN_PARAMS_IOS)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - bash: |
-      # .zip from ESRP puts the content in a deep sub directory.
-      # We re-zip it, and rename it to include the version number.
-      set -e -o pipefail -x
-      mkdir temp
-      cd temp
+      # .zip from ESRP used to put the contents in a deep sub directory.
+      # Now they seem not do the deep directory anymore, but drop our
+      # additional files (REDIST.txt etc.) on the floor.
+      #
+      # We try to re-zip and recreate any missing content.
+      set -u -e -x -o pipefail
+      mkdir -p temp/nested
+      cd temp/nested
       unzip '$(OutputDirectory)/$(VersionedFrameworkName).zip'
+      FrameworkDir="$(find . -type d -name "$(FrameworkName).framework" -prune)"
+      if [[ -z $FrameworkDir ]]; then
+        # Did not find it, framework content must be here or we can't continue.
+        [[ -f "$(FrameworkName)" ]]
+        [[ -d Headers ]]
+        cd ..
+        mv nested "$(FrameworkName).framework"
+        cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} .
+      else
+        cd "$FrameworkDir"
+        cd ..
+      fi
+      # Be paranoid, check some stuff.
+      [[ "$(find . -maxdepth 1 | wc -l)" -eq 5 ]]
+      [[ -f license.md ]]
+      [[ -d "$(FrameworkName).framework" ]]
+      [[ -f REDIST.txt ]]
+      [[ -f ThirdPartyNotices.md ]]
+      [[ -f "$(FrameworkName).framework/$(FrameworkName)" ]]
+      [[ -d "$(FrameworkName).framework/Headers" ]]
+      [[ -d "$(FrameworkName).framework/_CodeSignature" ]]
       # Remove original package.
       rm '$(OutputDirectory)/$(VersionedFrameworkName).zip'
-      cd "$(find . -type d -name $(FrameworkName).framework -prune)"
-      cd ..
       zip --symlinks -r '$(OutputDirectory)/$(VersionedFrameworkName).zip' .
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
     displayName: Package signed framework
@@ -1626,6 +1651,9 @@ jobs:
     BuildPlatform: iOS
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Release
   steps:
+  # Update bash really early so it will be picked up by "bash" steps.
+  - bash: brew config && brew install bash
+    displayName: Install modern bash
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - task: DownloadBuildArtifacts@0
@@ -1714,6 +1742,9 @@ jobs:
     FrameworkName: MicrosoftCognitiveServicesSpeech
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
   steps:
+  # Update bash really early so it will be picked up by "bash" steps.
+  - bash: brew config && brew install bash
+    displayName: Install modern bash
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set OSX-x64 target platform
     inputs:
@@ -1776,6 +1807,9 @@ jobs:
   variables:
     ArtifactOut: $(Build.ArtifactStagingDirectory)/Out
   steps:
+  # Update bash really early so it will be picked up by "bash" steps.
+  - bash: brew config && brew install bash
+    displayName: Install modern bash
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: |

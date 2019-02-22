@@ -25,6 +25,9 @@ jobs:
     WheelParams: "--plat-name macosx-10.12-x86_64"
     OutputDirectory: "$(Build.ArtifactStagingDirectory)/wheelhouse"
   steps:
+  # Update bash really early so it will be picked up by "bash" steps.
+  - bash: brew config && brew install bash
+    displayName: Install modern bash
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set OSX-x64 target platform
     inputs:
