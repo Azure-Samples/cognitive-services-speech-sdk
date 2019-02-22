@@ -503,8 +503,15 @@ std::string get_nice_name_from_endpoint(const std::shared_ptr<IMMDevice>& pEndpo
     return ret;
 }
 
-STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE audioData) {
-    return audioData->hDeviceLongName;
+STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE handle) {
+    AUDIO_SYS_DATA* audioData = reinterpret_cast<AUDIO_SYS_DATA*>(handle);
+
+    if (audioData)
+    {
+        return STRING_clone(audioData->hDeviceLongName);
+    }
+
+    return nullptr;
 }
 
 HRESULT audio_create_events(AUDIO_SYS_DATA * const audioData)

@@ -33,7 +33,7 @@ protected:
 public:
 
     CSpxMicrophonePumpBase();
-    virtual ~CSpxMicrophonePumpBase() {};
+    virtual ~CSpxMicrophonePumpBase();
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)

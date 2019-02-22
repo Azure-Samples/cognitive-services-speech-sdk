@@ -57,6 +57,13 @@ void CSpxMicrophonePumpBase::Init()
 void CSpxMicrophonePumpBase::Term()
 {
     audio_destroy(m_audioHandle);
+    m_audioHandle = nullptr;
+}
+
+
+CSpxMicrophonePumpBase::~CSpxMicrophonePumpBase()
+{
+    Term();
 }
 
 AUDIO_SETTINGS_HANDLE CSpxMicrophonePumpBase::SetOptionsBeforeCreateAudioHandle()
