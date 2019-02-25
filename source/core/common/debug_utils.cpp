@@ -2,6 +2,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+#if defined(ANDROID) || defined(__ANDROID__)
+#define _ANDROID_LEGACY_SIGNAL_INLINES_H_
+#endif
 
 #include "stdafx.h"
 #include "debug_utils.h"
@@ -242,6 +245,52 @@ static void SignalHandler()
 
     exit(1);
 }
+
+// In case of Android, we claim to run with API level 19 and later.
+// The problem with this is that some functions were not availble
+// on the earlier versions (19-21) while part of the libc in later
+// api versions.
+// So, to support the old as well as the newer api levels, we provide
+// stub functions with "weak" attributes for the linker to link against
+// in case no other function is found.
+// Please note that this is not a 100% solution since the Android
+// linker takes "the first" function with a given name, not the first
+// non-weak, only falling back to the weak function if no other has
+// been found.
+// That means, even if the libc provides the functions below, we could
+// still end up with our stubs.
+// Second note: signal() is only used for debugging and to hide
+// pipe signals in the networking code.
+// The tc*etattr() are only used to configure the terminal - which is
+// not used in our library.
+// The pthread_setclock() is used to select a particular clock used for
+// timestamps.
+#if defined(ANDROID) || defined(__ANDROID__)
+#if __ANDROID_API__ < 21
+extern "C" sighandler_t __attribute__((weak)) __attribute__((visibility("default"))) signal(int, void(*)(int))
+{
+    SPX_TRACE_VERBOSE("signal called on weak reference. probably running on api level 19");
+    return (sighandler_t)0;
+}
+
+extern "C" void __attribute__((weak)) __attribute__((visibility("default"))) tcsetattr(int, int, void*)
+{
+    SPX_TRACE_VERBOSE("tcsetattr called on weak reference. probably running on api level 19");
+}
+
+extern "C" int __attribute__((weak)) __attribute__((visibility("default"))) tcgetattr(int, void*)
+{
+    SPX_TRACE_VERBOSE("tcgetattr called on weak reference. probably running on api level 19");
+    return -1;
+}
+
+extern "C" void __attribute__((weak)) __attribute__((visibility("default"))) pthread_condattr_setclock(void *, int)
+{
+    SPX_TRACE_VERBOSE("pthread_condattr_setclock called on weak reference. probably running on api level 19");
+}
+#endif
+#endif
+
 
 static void SignalHandler(int sig) {
     SPX_TRACE_VERBOSE("\nReceived an error signal: %d\n", sig);
