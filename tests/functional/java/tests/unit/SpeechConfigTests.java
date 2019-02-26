@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.audio.AudioInputStream;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
@@ -1534,6 +1535,32 @@ public class SpeechConfigTests {
         assertNotNull(s);
         assertNotNull(s.getImpl());
     }
+    
+    @Test
+    public void testSetProperty() {
+        String auth_token = "token";
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setProperty(PropertyId.SpeechServiceAuthorization_Token, auth_token);
+        assertEquals(auth_token, s.getProperty(PropertyId.SpeechServiceAuthorization_Token));
+        assertEquals(auth_token, s.getAuthorizationToken());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testSetProperty1() {
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setProperty(PropertyId.SpeechServiceConnection_Endpoint, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetProperty2() {
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setProperty(PropertyId.SpeechServiceConnection_Endpoint, "");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetProperty3() {
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setProperty(PropertyId.SpeechServiceConnection_Endpoint, " ");
+    }
 
 }
-

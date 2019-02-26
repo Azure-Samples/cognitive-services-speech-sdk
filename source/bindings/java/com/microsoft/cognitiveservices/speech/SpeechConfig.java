@@ -249,12 +249,34 @@ public class SpeechConfig implements Closeable {
     }
 
     /**
+     * Sets the property by propertyId
+     * Added in version 1.3.0.
+     * @param id PropertyId of the property
+     * @param value The value
+     */
+    public void setProperty(PropertyId id, String value) {
+        Contracts.throwIfNullOrWhitespace(value, "value");
+
+        speechConfigImpl.SetProperty(id.getValue(), value);
+    }
+
+    /**
      * Gets a named property as value
      * @param name the name of the property
      * @return The value
      */
     public String getProperty(String name) {
         return speechConfigImpl.GetProperty(name);
+    }
+
+    /**
+     * Gets the property by propertyId
+     * Added in version 1.3.0.
+     * @param id PropertyId of the property
+     * @return The value
+     */
+    public String getProperty(PropertyId id) {
+        return speechConfigImpl.GetProperty(id.getValue());
     }
 
     /**
