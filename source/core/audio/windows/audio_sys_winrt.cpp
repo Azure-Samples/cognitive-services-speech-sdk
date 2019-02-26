@@ -119,7 +119,6 @@ WASAPICapture::~WASAPICapture()
     {
         SAFE_CLOSE_HANDLE(hCaptureThreadShouldExit);
     }
-    pAudioInputClient->Release();
 }
 
 HRESULT WASAPICapture::ActivateCompleted(IActivateAudioInterfaceAsyncOperation *operation)
@@ -152,10 +151,6 @@ HRESULT WASAPICapture::ActivateCompleted(IActivateAudioInterfaceAsyncOperation *
     hr = pAudioInputClient->SetEventHandle(hBufferReady);
 
 Exit:
-    if (FAILED(hr))
-    {
-        pAudioInputClient->Release();
-    }
     m_promise.set_value(hr);
 
     // Need to return S_OK
@@ -169,7 +164,6 @@ HRESULT audio_input_create(AUDIO_SYS_DATA* audioData)
     PWSTR audioCaptureGuidString = nullptr;
 
     audioData->spCapture = Make<WASAPICapture>(audioData->audioInFormat);
-    audioData->spCapture.Get()->AddRef();
 
     auto future = audioData->spCapture->m_promise.get_future();
 
