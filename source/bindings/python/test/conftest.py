@@ -59,7 +59,7 @@ SpeechInput = namedtuple('SpeechInputData',
                          ('path', 'transcription', 'offset', 'duration', 'input_language', 'translations'))
 
 batman_offsets, batman_durations = zip(*[
-    (5500000, 145300000),
+    (5400000, 145300000),
     (156400000, 144400000),
     (229200000, 200000000),
     (440500000, 200000000),
@@ -77,13 +77,13 @@ batman_offsets, batman_durations = zip(*[
     (2143300000, 113000000)])
 
 speech_input_data_raw = {'weather':
-                         ('whatstheweatherlike.wav', ["What's the weather like?"], (300000, ),
-                          (15900000, ), 'en-US',
+                         ('whatstheweatherlike.wav', ["What's the weather like?"], (200000, ),
+                          (16000000, ), 'en-US',
                           {'fr': "Quel temps fait-il?",
                            'de': "Wie ist das Wetter?"}
                           ),
-                         'lamp': ('TurnOnTheLamp.wav', ["Turn on the lamp."], (3400000, ),
-                             (15600000, ), 'en-US', dict()),
+                         'lamp': ('TurnOnTheLamp.wav', ["Turn on the lamp."], (3300000, ),
+                             (15700000, ), 'en-US', dict()),
                          'silence': ('silenceshort.wav', [''], None, None, 'en-US', dict()),
                          'silencehello': ('silencehello.wav', ['Hello.'], None, None, 'en-US', dict()),
                          'batman': ('batman.wav', [
