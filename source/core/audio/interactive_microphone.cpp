@@ -30,6 +30,11 @@ void CSpxInteractiveMicrophone::Init()
     }
 }
 
+void CSpxInteractiveMicrophone::Term()
+{
+    SpxTermAndClear(m_delegateToAudioPump);
+}
+
 // relay the property query to its site, which is CSpxAudioStreamSession
 std::shared_ptr<ISpxNamedProperties> CSpxInteractiveMicrophone::GetParentProperties() const
 {

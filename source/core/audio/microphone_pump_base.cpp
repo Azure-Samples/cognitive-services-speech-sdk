@@ -24,6 +24,13 @@ CSpxMicrophonePumpBase::CSpxMicrophonePumpBase():
     m_state {State::NoInput},
     m_format { WAVE_FORMAT_PCM, CHANNELS, SAMPLES_PER_SECOND, AVG_BYTES_PER_SECOND, BLOCK_ALIGN, BITS_PER_SAMPLE, 0 }
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+}
+
+CSpxMicrophonePumpBase::~CSpxMicrophonePumpBase()
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    SPX_DBG_ASSERT(m_audioHandle == nullptr);
 }
 
 void CSpxMicrophonePumpBase::Init()
@@ -58,12 +65,6 @@ void CSpxMicrophonePumpBase::Term()
 {
     audio_destroy(m_audioHandle);
     m_audioHandle = nullptr;
-}
-
-
-CSpxMicrophonePumpBase::~CSpxMicrophonePumpBase()
-{
-    Term();
 }
 
 AUDIO_SETTINGS_HANDLE CSpxMicrophonePumpBase::SetOptionsBeforeCreateAudioHandle()

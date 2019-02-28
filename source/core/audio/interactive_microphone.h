@@ -38,7 +38,9 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
     SPX_INTERFACE_MAP_END()
 
+    // --- ISpxObjectInit
     void Init() override;
+    void Term() override;
 
     // --- IServiceProvider
     SPX_SERVICE_MAP_BEGIN()
