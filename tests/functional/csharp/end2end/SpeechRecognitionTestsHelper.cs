@@ -280,5 +280,63 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertHelpers.AssertStringContains(cancellation.ErrorDetails, expectedErrorMessage);
             }
         }
+
+        static public void AssertStringWordEdits(string expectedString, string comparisonString, int deltaPercentage)
+        // Using standard implementation for Levenshtein distance. Caveat: not optimized for memory consumption
+        //   but sufficient for our test case and the string length we are expecting (less 600 words)
+        // 
+        // expectedString - normalized expected string
+        // comparisonString - the normalized comparison string
+        // deltaPercentage - how many word operations are allowed to change the input string into the comparison string
+        //   expressed as a percentage of words
+        //   Example: if input string contains 200 words, deltaPercantage is 5, 10 edit operations would be allowed
+        {
+            String[] wordsExpected = expectedString.Split(' ');
+            String[] wordsComparison = comparisonString.Split(' ');
+
+            const int maxWordsExpected = 800;  // just an arbitrary bound for this operation
+                                               // reconsider memory usage (or alternative algorithm) if you need to increase this significantly
+            Assert.IsTrue((wordsExpected.Length < maxWordsExpected) && (wordsExpected.Length > 0), $"number of words in expectedString out of bounds: '{wordsExpected.Length}'");
+            Assert.IsTrue((wordsComparison.Length < maxWordsExpected) && (wordsComparison.Length > 0), $"number of words in wordsComparison out of bounds: '{wordsComparison.Length}'");
+
+            int allowedEdits = deltaPercentage * wordsExpected.Length / 100;
+
+            int[][] matrix = new int[wordsExpected.Length + 1][];
+
+            // initialize matrix
+            for (int i = 0; i < wordsExpected.Length + 1; i++)
+            {
+                matrix[i] = new int[wordsComparison.Length + 1];
+                for (int j = 0; j < wordsComparison.Length + 1; j++)
+                {
+                    if (i == 0)
+                        matrix[0][j] = j;
+                    else if (j == 0)
+                        matrix[i][0] = i;
+                }
+            }
+
+            // compute matrix with distances to compute the shortest path 
+            // using substitutions, inserts, deletes
+            for (int i = 1; i < wordsExpected.Length + 1; i++)
+            {
+                for (int j = 1; j < wordsComparison.Length + 1; j++)
+                {
+                    if (wordsExpected[i - 1] == wordsComparison[j - 1])
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    else
+                    {
+                        var substitution = matrix[i - 1][j - 1] + 1;
+                        var insertion = matrix[i][j - 1] + 1;
+                        var deletion = matrix[i - 1][j] + 1;
+                        matrix[i][j] = Math.Min(substitution, Math.Min(insertion, deletion));
+                    }
+                }
+            }
+
+            int edits = matrix[wordsExpected.Length][wordsComparison.Length];
+
+            Assert.IsTrue(edits <= allowedEdits,$"Number of edit operations '{edits}' exceeding allowed edits '{allowedEdits}'\ninput:  '{expectedString}'compare: '{comparisonString}'\n");
+        }
     }
 }
