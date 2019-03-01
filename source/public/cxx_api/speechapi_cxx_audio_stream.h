@@ -194,6 +194,7 @@ public:
 
     /// <summary>
     /// Writes the audio data specified by making an internal copy of the data.
+    /// Note: The dataBuffer should not contain any audio header.
     /// </summary>
     /// <param name="dataBuffer">The pointer to the audio buffer of which this function will make a copy.</param>
     /// <param name="size">The size of the buffer.</param>
@@ -242,6 +243,7 @@ public:
 
     /// <summary>
     /// This function is called to synchronously get data from the audio stream.
+    /// Note: The dataBuffer returned by Read() should not contain any audio header.
     /// </summary>
     /// <param name="dataBuffer">The pointer to the buffer to which to copy the audio data.</param>
     /// <param name="size">The size of the buffer.</param>
@@ -280,6 +282,7 @@ public:
 #if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() "C" callback functions pointers
+    /// Note: The dataBuffer returned by Read() should not contain any audio header.
     /// </summary>
     /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
     /// <param name="readCallback">Read callback.</param>
@@ -292,6 +295,7 @@ public:
 
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
+    /// Note: The dataBuffer returned by Read() should not contain any audio header.
     /// </summary>
     /// <param name="readCallback">Read callback.</param>
     /// <param name="closeCallback">Close callback.</param>
@@ -315,6 +319,7 @@ public:
 #if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() "C" callback functions pointers
+    /// Note: The dataBuffer returned by Read() should not contain any audio header.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
     /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
@@ -330,6 +335,7 @@ public:
 
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
+    /// Note: The dataBuffer returned by Read() should not contain any audio header.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
     /// <param name="readCallback">Read callback.</param>
@@ -382,6 +388,7 @@ protected:
         {
         };
 
+        /// Note: The dataBuffer returned by Read() should not contain any audio header.
         int Read(uint8_t* dataBuffer, uint32_t size) override { return m_readCallback(dataBuffer, size); }
         void Close() override { if (m_closeCallback != nullptr) m_closeCallback(); };
 
@@ -460,6 +467,5 @@ inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(
 {
     return PullAudioInputStream::Create(format, callback);
 }
-
 
 } } } } // Microsoft::CognitiveServices::Speech::Audio

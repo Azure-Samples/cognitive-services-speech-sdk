@@ -55,6 +55,7 @@ class PullAudioInputStreamCallback(impl.PullAudioInputStreamCallback):
     def read(self, buffer: memoryview) -> int:
         """
         This function is called to synchronously get data from the audio stream.
+        The buffer returned by read() should not contain any audio header.
 
         :param buffer: the buffer that audio data should be passed in.
         :return: The number of bytes passed into the stream.
@@ -102,6 +103,7 @@ class PushAudioInputStream(AudioInputStream):
     def write(self, buffer: bytes):
         """
         Writes the audio data specified by making an internal copy of the data.
+        The buffer should not contain any audio header.
 
         :param buffer: The audio data.
         """

@@ -273,6 +273,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Writes the audio data specified by making an internal copy of the data.
+        /// Note: The dataBuffer should not contain any audio header.
         /// </summary>
         /// <param name="dataBuffer">The audio buffer of which this function will make a copy.</param>
         public void Write(byte[] dataBuffer)
@@ -411,6 +412,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Reads binary data from the stream.
+        /// Note: The dataBuffer returned by Read() should not contain any audio header.
         /// </summary>
         /// <param name="dataBuffer">The buffer to fill</param>
         /// <param name="size">The size of the buffer.</param>

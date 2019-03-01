@@ -41,6 +41,7 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
 
     /**
      * Writes the audio data specified by making an internal copy of the data.
+     * Note: The dataBuffer should not contain any audio header.
      * @param dataBuffer The audio buffer of which this function will make a copy.
      */
     public void write(byte[] dataBuffer) {
