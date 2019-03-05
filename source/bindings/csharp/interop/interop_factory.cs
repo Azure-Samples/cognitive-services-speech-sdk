@@ -14,8 +14,10 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
     internal static class Import
     {
-#if !UNIX
+#if !UNIX && !OS_BUILD
         public const string NativeDllName = "Microsoft.CognitiveServices.Speech.core.dll";
+#elif !UNIX && OS_BUILD
+        public const string NativeDllName = "Microsoft.CognitiveServices.Speech.core.os.dll";
 #else
         public const string NativeDllName = "libMicrosoft.CognitiveServices.Speech.core.so";
 #endif

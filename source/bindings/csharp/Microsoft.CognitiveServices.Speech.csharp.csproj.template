@@ -46,6 +46,9 @@
     <DefineConstants>UNIX</DefineConstants>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
   </PropertyGroup>
+  <PropertyGroup Condition="'@OS_BUILD@' == 'OS_BUILD'">
+    <DefineConstants>OS_BUILD</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="$(FxCopAnalyzerVersion)" PrivateAssets="all" />
   </ItemGroup>

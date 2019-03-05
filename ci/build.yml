@@ -325,113 +325,18 @@ jobs:
         -D output_dir=CompEvalRun -- compeval_tests
     displayName: 'Transcription'
 
-- job: WindowsBuild
-  dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsBuild '))
-  pool:
-    name: Hosted VS2017
-  timeoutInMinutes: 150
-  strategy:
-    maxParallel: 4
-    matrix:
-      x64_debug:
-        BuildPlatform: x64
-        BuildConfiguration: Debug
-      x64_release:
-        BuildPlatform: x64
-        BuildConfiguration: Release
-      x86_release:
-        BuildPlatform: Win32
-        BuildConfiguration: Release
-      x86_debug:
-        BuildPlatform: Win32
-        BuildConfiguration: Debug
-  steps:
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Set Windows target platform (Windows-x86 or Windows-x64)
-    inputs:
-      type: InlineScript
-      script: |
-        . ci/functions.sh
-        if [[ "$(BuildPlatform)" == Win32 ]]; then
-          vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x86"
-          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
-        else
-          vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x64"
-          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15 Win64"
-        fi
-        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
-        vsts_setvar SPEECHSDK_ENABLE_KWS true
-  - bash: ./ci/set-variables.sh
-    displayName: Set variables
-  - bash: . ./ci/functions.sh && vsts_setvar SPEECHSDK_SPECTRE_MITIGATION false
-    displayName: Reset SPEECHSDK_SPECTRE_MITIGATION in Debug
-    condition: eq(variables['BuildConfiguration'], 'Debug')
-  - template: get-kws-artifact.yml
-    parameters:
-      enableVariable: SPEECHSDK_ENABLE_KWS
-      os: Windows
-  - bash: ./ci/install-build-dependencies.sh
-    displayName: Install build dependencies
-  - task: NuGetToolInstaller@0
-    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
-    inputs:
-      versionSpec: $(SPEECHSDK_NUGET_VERSION)
-  - task: CMake@1
-    displayName: Generate solution
-    inputs:
-      cmakeArgs: >-
-        -G "$(SPEECHSDK_CMAKE_GENERATOR)"
-        -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM)
-        -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE)
-        -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
-        -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION)
-        -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
-        ..
-  - task: VSBuild@1
-    displayName: Build solution
-    inputs:
-      solution: 'build/carbon.sln'
-      platform: '$(BuildPlatform)'
-      configuration: '$(BuildConfiguration)'
-      clean: true
-      maximumCpuCount: true
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-    displayName: 'Sign Windows C++, C# and Java binaries'
-    inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing'
-      FolderPath: 'build/bin'
-      Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll'
-      signConfigType: inlineSignParams
-      inlineOperation: $(SIGN_PARAMS_DLL)
-    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-  - template: test-during-build.yml
-    parameters:
-      extraTests:
-        - bash: |
-            ./ci/run-tests.sh \
-              --test-configuration ci/test-config.json \
-              --build-dir build \
-              --platform Windows-x64-Release \
-              --timeout 120m \
-              -D luis-key=$(luis-westus-s0-201809-key1) \
-              -D speech-key=$(NorthEuropeKeySkyman) \
-              -D long-running=true \
-              -- csharp_unit_tests
-          displayName: Run LongRunning tests
-          condition: and(eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), eq(variables['SPEECHSDK_BUILD_TYPE'], 'int'), eq(variables['BuildPlatform'], 'x64'), eq(variables['BuildConfiguration'], 'Release'))
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Create drop files
-    inputs:
-      type: FilePath
-      scriptPath: './ci/drop/bindrop.sh'
-      args: '$(BuildPlatform) $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)'
-  - task: PublishBuildArtifacts@1
-    displayName: Publish drop
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: Windows
-      publishLocation: Container
+- template: build-windows.yml
+  parameters:
+    crt: PUBLIC_VCRT
+    name: Windows
+    kws: true
+
+- template: build-windows.yml
+  parameters:
+    crt: OS_UCRT
+    name: WindowsOS
+    kws: false
+    suffix: .os
 
 - job: WindowsUwpBuild
   dependsOn: Pre
@@ -720,8 +625,18 @@ jobs:
 
 - job: NuGet
   # Note: NuGet currently does not depend on LinuxDockerBuild (only needs x64 binaries)
-  dependsOn: [Pre, LinuxBuild, WindowsBuild, WindowsUwpBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGet '))
+  variables:
+    HAS_OS_BUILD: $[contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild ')]
+  dependsOn: [Pre, LinuxBuild, WindowsBuild, WindowsOSBuild, WindowsUwpBuild]
+  condition: |
+    and(
+      succeeded('Pre', 'LinuxBuild', 'WindowsBuild', 'WindowsUwpBuild'),
+      xor(
+        succeeded('WindowsOSBuild'),
+        not(contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild '))
+      ),
+      contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGet ')
+    )
   pool:
     name: Hosted VS2017
   timeoutInMinutes: 30
@@ -729,10 +644,16 @@ jobs:
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading Windows artifacts'
+    displayName: 'Downloading Windows public artifacts'
     inputs:
       artifactName: Windows
       downloadPath: $(System.ArtifactsDirectory)\In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Windows OS artifacts'
+    inputs:
+      artifactName: WindowsOS
+      downloadPath: $(System.ArtifactsDirectory)\In
+    condition: and(succeeded(), eq(variables['HAS_OS_BUILD'], 'true'))
   - task: DownloadBuildArtifacts@0
     displayName: 'Downloading Linux artifacts'
     inputs:
@@ -755,8 +676,15 @@ jobs:
     inputs:
       type: FilePath
       scriptPath: './ci/nuget/pack.sh'
-      args: '$(Build.Repository.LocalPath) $(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\Windows'
-    displayName: Create NuGet
+      args: './ci/nuget/carbon.nuspec $(Build.Repository.LocalPath) $(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\Windows'
+    displayName: Create public NuGet
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    inputs:
+      type: FilePath
+      scriptPath: './ci/nuget/pack.sh'
+      args: './ci/nuget/carbon_os.nuspec $(Build.Repository.LocalPath) $(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\WindowsOS true'
+    displayName: Create OS NuGet
+    condition: and(succeeded(), eq(variables['HAS_OS_BUILD'], 'true'))
   # We could / should generate this elsewhere? Doesn't only apply to Windows + NuGet anymore...
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     inputs:
@@ -829,6 +757,8 @@ jobs:
     inputs:
       command: push
       publishVstsFeed: $(SPEECHSDK_VSTS_FEED)
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      includeSymbols: true
     condition: eq(variables['SPEECHSDK_NUGET_VSTS_PUSH'],'true')
   - task: PublishBuildArtifacts@1
     inputs:
@@ -837,6 +767,13 @@ jobs:
       publishLocation: Container
     condition: succeededOrFailed()
     displayName: 'Publish .zip and .nupkg'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/WindowsOS'
+      ArtifactName: WindowsOS
+      publishLocation: Container
+    condition: and(succeededOrFailed(), eq(variables['HAS_OS_BUILD'], 'true'))
+    displayName: 'Publish OS .nupkg'
 
 - job: WackTest
   dependsOn: [Pre, NuGet]

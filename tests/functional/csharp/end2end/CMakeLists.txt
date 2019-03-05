@@ -4,6 +4,12 @@ if(WIN32)
 enable_language(CSharp)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 FILE(GLOB END2END_TEST_SOURCES "${SRC_DIR}/*.cs" "${SRC_DIR}/**/*.cs" "${SRC_DIR}/../console/util.cs")
+
+if(DISABLE_KWS_TESTS)
+  message(STATUS "Disabling KWS Tests")
+  list(FILTER END2END_TEST_SOURCES EXCLUDE REGEX "${SRC_DIR}.*Kws.*")
+endif()
+
 source_group("Source Files" FILES ${END2END_TEST_SOURCES})
 
 add_library(${PROJECT_NAME} SHARED ${END2END_TEST_SOURCES})

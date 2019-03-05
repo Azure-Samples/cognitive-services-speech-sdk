@@ -15,12 +15,14 @@ fi
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 
-USAGE="Usage: $0 <redist-dir> <drop-dir> <version> <output-directory>"
+USAGE="Usage: $0 <nuspec-file> <redist-dir> <drop-dir> <version> <output-directory> [<is-os-build>]"
 
-REDIST_DIR="${1?$USAGE}"
-DROP_DIR="${2?$USAGE}"
-VERSION="${3?$USAGE}"
-OUTPUT_DIR="${4?$USAGE}"
+NUSPEC_FILE_PATH="${1?$USAGE}"
+REDIST_DIR="${2?$USAGE}"
+DROP_DIR="${3?$USAGE}"
+VERSION="${4?$USAGE}"
+OUTPUT_DIR="${5?$USAGE}"
+IS_OS_BUILD="${6:false}"
 
 REDIST_DIR="$(cygpath --unix --absolute "$REDIST_DIR")"
 [[ -e $REDIST_DIR ]]
@@ -30,6 +32,13 @@ REDIST_DIR="$(cygpath --windows --absolute "$REDIST_DIR")"
 WINDOWS_DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR/Windows")"
 [[ -e $WINDOWS_DROP_DIR ]]
 WINDOWS_DROP_DIR="$(cygpath --windows --absolute "$WINDOWS_DROP_DIR")"
+
+# Check that Windows OS drop directory exists and turn into Windows Path (only if OS build is present).
+if [[ "$IS_OS_BUILD" = "true" ]]; then
+  WINDOWS_OS_DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR/WindowsOS")"
+  [[ -e $WINDOWS_OS_DROP_DIR ]]
+  WINDOWS_OS_DROP_DIR="$(cygpath --windows --absolute "$WINDOWS_OS_DROP_DIR")"
+fi
 
 # Check that Windows UWP drop directory exists and turn into Windows path.
 WINDOWS_UWP_DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR/WindowsUwp")"
@@ -43,6 +52,7 @@ LINUX_DROP_DIR="$(cygpath --windows --absolute "$LINUX_DROP_DIR")"
 
 OUTPUT_DIR="$(cygpath --windows --absolute "$OUTPUT_DIR")"
 
-"$NUGETEXETOOLPATH" pack ./ci/nuget/carbon.nuspec \
-  -Properties "RedistDir=$REDIST_DIR;WindowsDropDir=$WINDOWS_DROP_DIR;WindowsUwpDropDir=$WINDOWS_UWP_DROP_DIR;LinuxDropDir=$LINUX_DROP_DIR;Version=$VERSION" \
-  -OutputDirectory "$OUTPUT_DIR"
+"$NUGETEXETOOLPATH" pack "$NUSPEC_FILE_PATH" \
+  -Properties "RedistDir=$REDIST_DIR;WindowsDropDir=$WINDOWS_DROP_DIR;WindowsOSDropDir=$WINDOWS_OS_DROP_DIR;WindowsUwpDropDir=$WINDOWS_UWP_DROP_DIR;LinuxDropDir=$LINUX_DROP_DIR;Version=$VERSION" \
+  -OutputDirectory "$OUTPUT_DIR" \
+  -Symbols
