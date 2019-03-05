@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 SOURCE_ROOT="$SCRIPT_DIR/.."

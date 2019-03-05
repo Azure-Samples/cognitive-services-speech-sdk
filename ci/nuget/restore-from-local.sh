@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e -x -o pipefail
 USAGE="Usage: $0 <path-to-nuget-package-path> <sln-path>"

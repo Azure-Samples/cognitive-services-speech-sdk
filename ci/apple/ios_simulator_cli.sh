@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) <2018> <Maksym Rusynyk>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy

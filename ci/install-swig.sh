@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Run as root.
 
 SWIG_VERSION=3.0.12

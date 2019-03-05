@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Run in a empty ubuntu:16.04 docker
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"

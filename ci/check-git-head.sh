@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # vim:set expandtab shiftwidth=2 tabstop=2:
 
 errorCount=0

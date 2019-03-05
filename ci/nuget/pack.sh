@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # This is supposed to be run under Git Bash.
 
 set -e -x -o pipefail

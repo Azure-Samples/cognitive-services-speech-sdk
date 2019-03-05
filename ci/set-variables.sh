@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Set variables based on source commit and requested options.
 # This is only run in VSTS currently.
 #

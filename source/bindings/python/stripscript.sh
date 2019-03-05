@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # strip python annotations from source file so as to not confuse sphinx
 set -e
