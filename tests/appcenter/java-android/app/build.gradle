@@ -1,0 +1,52 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        applicationId "com.microsoft.cognitiveservices.speech.samples.sdsdkstarterapp"
+        minSdkVersion 19
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+     lintOptions {
+          abortOnError false
+      }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+
+    def appCenterSdkVersion = '1.11.2'
+    implementation "com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}"
+    implementation "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"
+
+    implementation files('src/main/jniLibs/com.microsoft.cognitiveservices.speech.jar')
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestImplementation files('src/main/jniLibs/com.microsoft.cognitiveservices.speech.tests.jar')
+
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    androidTestImplementation 'androidx.test:runner:1.1.0'
+    androidTestImplementation 'androidx.test:rules:1.1.0'
+    androidTestImplementation('com.microsoft.appcenter:espresso-test-extension:1.3')
+}
