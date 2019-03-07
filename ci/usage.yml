@@ -1,6 +1,11 @@
 resources:
 - repo: self
   fetchDepth: 1
+variables:
+  # Component governance for the Carbon repository runs as part of the Pre job
+  # of the main Carbon build
+  # (https://msasg.visualstudio.com/Skyman/_build?definitionId=4833), disabled here.
+  CG_RAN: true
 queue:
   name: Hosted VS2017
 steps:
