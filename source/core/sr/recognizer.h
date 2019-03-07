@@ -91,6 +91,8 @@ protected:
     
     void OnIsEnabledChanged();
 
+    void CheckLogFilename();
+
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
 
 

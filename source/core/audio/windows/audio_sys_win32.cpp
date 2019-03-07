@@ -361,7 +361,10 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
     REFERENCE_TIME      hnsRequestedDuration = REFTIMES_PER_SEC;
 
     result = (AUDIO_SYS_DATA*)malloc(sizeof(AUDIO_SYS_DATA));
-    SPX_RETURN_HR_IF(nullptr, result == nullptr);
+    if (result == nullptr)
+    {
+        return nullptr;
+    }
 
     memset(result, 0, sizeof(AUDIO_SYS_DATA));
 

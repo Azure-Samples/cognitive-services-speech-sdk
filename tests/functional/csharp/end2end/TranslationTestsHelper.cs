@@ -26,7 +26,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             timeout = TimeSpan.FromMinutes(6);
         }
 
-        public SpeechTranslationConfig GetConfig(string path, string fromLanguage, List<string> toLanguages, string voice, string endpointId = null)
+        public SpeechTranslationConfig GetConfig(string fromLanguage, List<string> toLanguages, string voice, string endpointId = null)
         {
             var config = SpeechTranslationConfig.FromSubscription(this.subscriptionKey, this.region);
             config.SpeechRecognitionLanguage = fromLanguage;
@@ -47,7 +47,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public TranslationRecognizer CreateTranslationRecognizer(string path, string fromLanguage, List<string> toLanguages, string voice = null, string endpointId = null)
         {
             var audioInput = AudioConfig.FromWavFileInput(path);
-            return new TranslationRecognizer(GetConfig(path, fromLanguage, toLanguages, voice, endpointId), audioInput);
+            return new TranslationRecognizer(GetConfig(fromLanguage, toLanguages, voice, endpointId), audioInput);
         }
 
         public async Task<EventArgs> GetTranslationRecognizedEvents(string path, string fromLanguage, List<string> toLanguages)

@@ -1,17 +1,14 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "stdafx.h"
 #include "debug_utils.h"
+#include "file_logger.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
 void InitLogging()
 {
-    #ifndef _DEBUG
-        xlogging_set_log_function(nullptr);
-    #else
-        xlogging_set_log_function(SpxConsoleLogger_Log);
-    #endif // DEBUG
+    xlogging_set_log_function(SpxConsoleLogger_Log);
 }
 
 #ifdef _MSC_VER

@@ -20,7 +20,7 @@
 
 #if defined(ANDROID) || defined(__ANDROID__)
 #define __SPX_DO_TRACE_IMPL __swig_spx_do_trace_message
-void __swig_spx_do_trace_message(int level, const char* pszTitle, const char* pszFormat, ...) throw();
+void __swig_spx_do_trace_message(int level, const char* pszTitle, bool enableDebugOutput, const char* pszFormat, ...) throw();
 #endif
 %}
 
@@ -104,36 +104,38 @@ struct StdMapStringStringMapIterator {
 #include <android/log.h>
 #endif
 
-void __swig_spx_do_trace_message(int level, const char* pszTitle, const char* pszFormat, ...) throw()
+void __swig_spx_do_trace_message(int level, const char* pszTitle, bool enableDebugOutput, const char* pszFormat, ...) throw()
 {
-    UNUSED(level);
-    try 
+    if (enableDebugOutput)
     {
-        va_list argptr;
-        va_start(argptr, pszFormat);
-
-        std::string format;
-        while (*pszFormat == '\n' || *pszFormat == '\r')
+        UNUSED(level);
+        try 
         {
-            if (*pszFormat == '\r')
+            va_list argptr;
+            va_start(argptr, pszFormat);
+
+            std::string format;
+            while (*pszFormat == '\n' || *pszFormat == '\r')
             {
-                pszTitle = nullptr;
+                if (*pszFormat == '\r')
+                {
+                    pszTitle = nullptr;
+                }
+
+                format += *pszFormat++;
             }
 
-            format += *pszFormat++;
-        }
+            if (pszTitle != nullptr)
+            {
+                format += pszTitle;
+            }
 
-        if (pszTitle != nullptr)
-        {
-            format += pszTitle;
-        }
+            format += pszFormat;
 
-        format += pszFormat;
-
-        if (format.length() < 1 || format[format.length() - 1] != '\n')
-        {
-            format += "\n";
-        }
+            if (format.length() < 1 || format[format.length() - 1] != '\n')
+            {
+                format += "\n";
+            }
 
 // In current NDK, static libc does not provide
 // symbols for stderr. In case, the dynamic libc does
@@ -142,37 +144,27 @@ void __swig_spx_do_trace_message(int level, const char* pszTitle, const char* ps
 // Thus, we drop all logging into logcat if we are in debug mode or
 // drain it if in release mode)
 #if defined(ANDROID) || defined(__ANDROID__)
+            int androidPrio = ANDROID_LOG_ERROR;
+            switch (level)
+            {
+                case __SPX_TRACE_LEVEL_INFO:    androidPrio = ANDROID_LOG_INFO;     break; // Trace_Info
+                case __SPX_TRACE_LEVEL_WARNING: androidPrio = ANDROID_LOG_WARN;     break; // Trace_Warning
+                case __SPX_TRACE_LEVEL_ERROR:   androidPrio = ANDROID_LOG_ERROR;    break; // Trace_Error
+                case __SPX_TRACE_LEVEL_VERBOSE: androidPrio = ANDROID_LOG_VERBOSE;  break; // Trace_Verbose
+                default: androidPrio = ANDROID_LOG_FATAL; break;
+            }
 
-        // In debug mode, log everything to system log.
-#if defined(DEBUG) || defined(_DEBUG)
-        int androidPrio = ANDROID_LOG_ERROR;
-        switch (level)
-        {
-        case __SPX_TRACE_LEVEL_INFO:    androidPrio = ANDROID_LOG_INFO;     break; // Trace_Info
-        case __SPX_TRACE_LEVEL_WARNING: androidPrio = ANDROID_LOG_WARN;     break; // Trace_Warning
-        case __SPX_TRACE_LEVEL_ERROR:   androidPrio = ANDROID_LOG_ERROR;    break; // Trace_Error
-        case __SPX_TRACE_LEVEL_VERBOSE: androidPrio = ANDROID_LOG_VERBOSE;  break; // Trace_Verbose
-        default: androidPrio = ANDROID_LOG_FATAL; break;
+            __android_log_vprint(androidPrio, "SpeechSDKJavaBinding", format.c_str(), argptr);
+
+#else
+            vfprintf(stderr, format.c_str(), argptr);
+#endif
+
+            va_end(argptr);
         }
-
-        __android_log_vprint(androidPrio, "SpeechSDKJavaBinding", format.c_str(), argptr);
-
-        // In release mode, do not log anything.
-#else
-        UNUSED(level);
-        UNUSED(pszTitle);
-        UNUSED(pszFormat);
-        UNUSED(argptr);
-#endif
-
-#else
-        vfprintf(stderr, format.c_str(), argptr);
-#endif
-
-        va_end(argptr);
-    }
-    catch(...)
-    {
-    }
+        catch(...)
+        {
+        } 
+    } //if (enableDebugOutput)
 }
 %}

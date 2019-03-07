@@ -51,6 +51,7 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::AudioConfig_SampleRateForCapture: return "AudioConfig_SampleRateForCapture";
     case PropertyId::AudioConfig_BitsPerSampleForCapture: return "AudioConfig_BitsPerSampleForCapture";
     case PropertyId::AudioConfig_AudioSource: return "AudioConfig_AudioSource";
+    case PropertyId::SpeechServiceLog_Filename: return "SPEECH-LogFilename";
     default:
         LogError("undefined PropertyId of %d", static_cast<int>(id));
         SPX_THROW_ON_FAIL(SPXERR_INVALID_ARG);

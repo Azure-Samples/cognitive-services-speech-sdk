@@ -239,6 +239,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="value">Value of the property</param>
         public void SetProperty(PropertyId id, string value)
         {
+            if (String.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("Invalid property value.");
+            }
             progBag.SetProperty(id, value);
         }
 

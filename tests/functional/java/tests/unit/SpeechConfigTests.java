@@ -13,6 +13,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
 
+import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 
@@ -1563,4 +1564,16 @@ public class SpeechConfigTests {
         s.setProperty(PropertyId.SpeechServiceConnection_Endpoint, " ");
     }
 
+    @Test
+    public void testSetLogFilename() {
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("de");
+        String logFilename = "test_filename.txt";
+
+        s.setProperty(PropertyId.SpeechServiceLog_Filename, logFilename);
+        assertEquals(s.getProperty(PropertyId.SpeechServiceLog_Filename), logFilename);
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        assertTrue(new File(logFilename).length() > 0);
+    }
 }

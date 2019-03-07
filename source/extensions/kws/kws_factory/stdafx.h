@@ -17,7 +17,7 @@
 #define SPX_CONFIG_INCLUDE_ALL 1
 #endif
 
-extern void SpxTraceMessage(int level, const char* pszTitle, const char* pszFormat, ...);
+extern void SpxTraceMessage(int level, const char* pszTitle, bool enableDebugOutput, const char* pszFormat, ...);
 #define __SPX_DO_TRACE_IMPL SpxTraceMessage
 
 #include "exception.h"

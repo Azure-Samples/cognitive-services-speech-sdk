@@ -37,6 +37,7 @@ set(HEADERS
     "${INC_DIR}/data_buffer.h"
     "${INC_DIR}/audio_chunk.h"
     "${INC_DIR}/time_utils.h"
+    "${INC_DIR}/file_logger.h"
     )
 
 set(HEADERS_PRIVATE

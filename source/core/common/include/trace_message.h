@@ -10,5 +10,5 @@
 #include "azure_c_shared_utility_xlogging_wrapper.h"
 
 
-void SpxTraceMessage(int level, const char* pszTitle, const char* pszFormat, ...);
+void SpxTraceMessage(int level, const char* pszTitle, bool enableDebugOutput, const char* pszFormat, ...);
 void SpxConsoleLogger_Log(LOG_CATEGORY log_category, const char* file, const char* func, int line, unsigned int options, const char* format, ...);

@@ -226,7 +226,12 @@ enum class PropertyId
     /// The audio source. Allowed values are "microphone", "file", and "stream".
     /// Added in version 1.3.0.
     /// </summary>
-    AudioConfig_AudioSource = 8004
+    AudioConfig_AudioSource = 8004,
+
+    /// <summary>
+    /// The file name to write logs.
+    /// </summary>
+    SpeechServiceLog_Filename = 9001
 };
 
 enum class OutputFormat

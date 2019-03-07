@@ -184,7 +184,12 @@ public enum PropertyId {
     /**
      * The Language Understanding Service response output (in JSON format). Available via <see cref="IntentRecognitionResult.Properties"/>.
      */
-    LanguageUnderstandingServiceResponse_JsonResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
+    LanguageUnderstandingServiceResponse_JsonResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.LanguageUnderstandingServiceResponse_JsonResult),
+
+    /**
+    * The file name to write logs.
+    */
+    SpeechServiceLog_Filename ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceLog_Filename);
 
     private PropertyId(com.microsoft.cognitiveservices.speech.internal.PropertyId id) {
         this.id = id;

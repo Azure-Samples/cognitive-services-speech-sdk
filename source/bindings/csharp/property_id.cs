@@ -184,5 +184,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// The Language Understanding Service response output (in JSON format). Available via <see cref="RecognitionResult.Properties"/>.
         /// </summary>
         LanguageUnderstandingServiceResponse_JsonResult = Internal.PropertyId.LanguageUnderstandingServiceResponse_JsonResult,
+
+        /// <summary>
+        /// The file name to write logs.
+        /// </summary>
+        SpeechServiceLog_Filename = Internal.PropertyId.SpeechServiceLog_Filename
     }
 }

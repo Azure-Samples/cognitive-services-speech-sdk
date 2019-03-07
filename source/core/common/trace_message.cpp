@@ -5,12 +5,15 @@
 // trace_message.cpp: SpxTraceMessage() implementation definition
 //
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "stdafx.h"
 #include "trace_message.h"
+#include "file_utils.h"
+#include "file_logger.h"
 #include <chrono>
 #include <stdio.h>
 #include <stdarg.h>
-#include <string>
 
 // Note: in case of android, log to logcat
 #if defined(ANDROID) || defined(__ANDROID__)
@@ -28,8 +31,14 @@
 decltype(std::chrono::high_resolution_clock::now()) __g_spx_trace_message_time0 = std::chrono::high_resolution_clock::now();
 
 
-void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* pszFormat, va_list argptr)
+void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* pszFormat, va_list argptr, bool logToConsole)
 {
+    bool logToFile = FileLogger::Instance().IsFileLoggingEnabled();
+    if (!logToConsole && !logToFile)
+    {
+        return;
+    }
+
     UNUSED(level);
 
     std::string format;
@@ -68,31 +77,33 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* pszFo
     }
 
 #if defined(ANDROID) || defined(__ANDROID__)
-
-// In debug mode, log everything to system log.
-#if defined(DEBUG) || defined(_DEBUG)
     int androidPrio = ANDROID_LOG_ERROR;
     switch (level)
     {
-        case __SPX_TRACE_LEVEL_INFO:    androidPrio = ANDROID_LOG_INFO;     break; // Trace_Info
-        case __SPX_TRACE_LEVEL_WARNING: androidPrio = ANDROID_LOG_WARN;     break; // Trace_Warning
-        case __SPX_TRACE_LEVEL_ERROR:   androidPrio = ANDROID_LOG_ERROR;    break; // Trace_Error
-        case __SPX_TRACE_LEVEL_VERBOSE: androidPrio = ANDROID_LOG_VERBOSE;  break; // Trace_Verbose
-        default: androidPrio = ANDROID_LOG_FATAL; break;
+    case __SPX_TRACE_LEVEL_INFO:    androidPrio = ANDROID_LOG_INFO;     break; // Trace_Info
+    case __SPX_TRACE_LEVEL_WARNING: androidPrio = ANDROID_LOG_WARN;     break; // Trace_Warning
+    case __SPX_TRACE_LEVEL_ERROR:   androidPrio = ANDROID_LOG_ERROR;    break; // Trace_Error
+    case __SPX_TRACE_LEVEL_VERBOSE: androidPrio = ANDROID_LOG_VERBOSE;  break; // Trace_Verbose
+    default: androidPrio = ANDROID_LOG_FATAL; break;
     }
 
-    __android_log_vprint(androidPrio, "SpeechSDK", format.c_str(), argptr);
-
-// In release mode, do not log anything.
+    if (logToConsole)
+    {
+        __android_log_vprint(androidPrio, "SpeechSDK", format.c_str(), argptr);
+    }
+    if (logToFile)
+    {
+        FileLogger::Instance().LogToFile(std::move(format), argptr);
+    }
 #else
-    UNUSED(level);
-    UNUSED(pszTitle);
-    UNUSED(pszFormat);
-    UNUSED(argptr);
-#endif
-
-#else
-    vfprintf(stderr, format.c_str(), argptr);
+    if (logToFile)
+    {
+        FileLogger::Instance().LogToFile(std::move(format), argptr);
+    }
+    if (logToConsole)
+    {
+        vfprintf(stderr, format.c_str(), argptr);
+    }
 #endif
 
 #ifdef SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
@@ -102,16 +113,14 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* pszFo
 #endif // SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
 }
 
-void SpxTraceMessage(int level, const char* pszTitle, const char* pszFormat, ...)
+void SpxTraceMessage(int level, const char* pszTitle, bool enableDebugOutput, const char* pszFormat, ...)
 {
     UNUSED(level);
     try
     {
         va_list argptr;
         va_start(argptr, pszFormat);
-
-        SpxTraceMessage_Internal(level, pszTitle, pszFormat, argptr);
-
+        SpxTraceMessage_Internal(level, pszTitle, pszFormat, argptr, enableDebugOutput);
         va_end(argptr);
     }
     catch(...)
@@ -126,14 +135,19 @@ void SpxConsoleLogger_Log(LOG_CATEGORY log_category, const char* file, const cha
     va_list args;
     va_start(args, format);
 
+    bool enable_console_log = false;
+#ifdef _DEBUG
+    enable_console_log = true;
+#endif
+
     switch (log_category)
     {
     case AZ_LOG_INFO:
-        SpxTraceMessage_Internal(__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_INFO: AZ_LOG_INFO: ", format, args);
+        SpxTraceMessage_Internal(__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_INFO: AZ_LOG_INFO: ", format, args, enable_console_log);
         break;
 
     case AZ_LOG_ERROR:
-        SpxTraceMessage_Internal(__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_ERROR: AZ_LOG_ERROR: ", format, args);
+        SpxTraceMessage_Internal(__SPX_TRACE_LEVEL_INFO, "SPX_TRACE_ERROR: AZ_LOG_ERROR: ", format, args, enable_console_log);
         SPX_TRACE_ERROR("Error: File:%s Func:%s Line:%d ", file, func, line);
         break;
 
@@ -142,4 +156,57 @@ void SpxConsoleLogger_Log(LOG_CATEGORY log_category, const char* file, const cha
     }
 
     va_end(args);
+}
+
+void FileLogger::SetFilename(std::string&& name)
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    // if user tries to change a filename, throw error
+    if (!filename.empty() && name != filename)
+    {
+        SPX_THROW_HR(SPXERR_ALREADY_INITIALIZED);
+    }
+    // if user sets the same filename again, do nothing
+    if (file != nullptr)
+    {
+        return;
+    }
+
+    errno_t err = PAL::fopen_s(&file, name.c_str(), "w");
+    SPX_IFFALSE_THROW_HR(err == 0, SPXERR_FILE_OPEN_FAILED);
+    filename = name;
+}
+
+std::string FileLogger::GetFilename()
+{
+    return filename;
+}
+
+bool FileLogger::IsFileLoggingEnabled()
+{
+    return file != nullptr;
+}
+
+void FileLogger::CloseFile()
+{
+    if (file != nullptr)
+    {
+        fclose(file);
+        file = nullptr;
+    }
+}
+
+void FileLogger::LogToFile(std::string&& format, va_list argptr)
+{
+    if (file != nullptr)
+    {
+        vfprintf(file, format.c_str(), argptr);
+        fflush(file);
+    }
+}
+
+FileLogger& FileLogger::Instance()
+{
+    static FileLogger instance;
+    return instance;
 }

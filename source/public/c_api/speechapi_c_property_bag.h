@@ -57,7 +57,8 @@ enum  PropertyId
     AudioConfig_NumberOfChannelsForCapture = 8001,
     AudioConfig_SampleRateForCapture = 8002,
     AudioConfig_BitsPerSampleForCapture = 8003,
-    AudioConfig_AudioSource = 8004
+    AudioConfig_AudioSource = 8004,
+    SpeechServiceLog_Filename = 9001
 };
 #endif
 

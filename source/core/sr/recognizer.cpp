@@ -6,6 +6,7 @@
 #include "service_helpers.h"
 #include "create_object_helpers.h"
 #include "property_id_2_name_map.h"
+#include "file_logger.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -31,6 +32,7 @@ void CSpxRecognizer::Init()
     SPX_DBG_TRACE_FUNCTION();
     SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
     EnsureDefaultSession();
+    CheckLogFilename();
 }
 
 void CSpxRecognizer::Term()
@@ -294,6 +296,16 @@ void CSpxRecognizer::TermDefaultSession()
 void CSpxRecognizer::OnIsEnabledChanged()
 {
     // no op currently
+}
+
+void CSpxRecognizer::CheckLogFilename()
+{
+    auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
+    auto filename = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceLog_Filename), "");
+    if (!filename.empty())
+    {
+        FileLogger::Instance().SetFilename(std::move(filename));
+    }
 }
 
 std::shared_ptr<ISpxNamedProperties> CSpxRecognizer::GetParentProperties() const

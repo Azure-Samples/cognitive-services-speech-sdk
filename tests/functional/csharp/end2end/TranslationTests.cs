@@ -466,5 +466,57 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var errorDetails = actualTranslations[ResultType.Cancelled].Cast<TranslationRecognitionCanceledEventArgs>().Last().ErrorDetails;
             Assert.IsTrue(errorDetails.Contains("bad request"));
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(ApplicationException), "Cannot change log filename after the first recognizer has been created.")]
+        public void SetAndRenameLogFilename()
+        {
+            var toLanguages = new List<string>() { Language.DE };
+            var config = this.translationHelper.GetConfig(Language.EN, toLanguages, "");
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+
+            var logFilename = "test_filename.txt";
+            var logFilename2 = "test_filename2.txt";
+            config.SetProperty(PropertyId.SpeechServiceLog_Filename, logFilename);
+            Assert.AreEqual(config.GetProperty(PropertyId.SpeechServiceLog_Filename), logFilename);
+            var recognizer = new TranslationRecognizer(config, audioInput);
+            Assert.IsTrue(File.Exists(logFilename), "log file must exist when recognizer is created");
+
+            config.SetProperty(PropertyId.SpeechServiceLog_Filename, logFilename2);
+            Assert.AreEqual(config.GetProperty(PropertyId.SpeechServiceLog_Filename), logFilename2);
+            Assert.IsFalse(File.Exists(logFilename2));
+            
+            try
+            {
+                var recognizer2 = new TranslationRecognizer(config, audioInput);
+            }
+            finally
+            {
+                Assert.IsTrue(new FileInfo(logFilename).Length > 0, "log file must contain logs after recognizer created");
+            }
+        }
+
+        [TestMethod]
+        public void SetLogFilename()
+        {
+            var toLanguages = new List<string>() { Language.DE };
+            var config = this.translationHelper.GetConfig(Language.EN, toLanguages, "");
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+
+            var logFilename = "test_filename.txt";
+            config.SetProperty(PropertyId.SpeechServiceLog_Filename, logFilename);
+            Assert.AreEqual(config.GetProperty(PropertyId.SpeechServiceLog_Filename), logFilename);
+            var recognizer = new TranslationRecognizer(config, audioInput);
+            Assert.IsTrue(new FileInfo(logFilename).Length > 0, "log file must contain logs after recognizer created");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException), "Cannot set a property to whitespace")]
+        public void SetPropertyToWhiteSpace()
+        {
+            var toLanguages = new List<string>() { Language.DE };
+            var config = this.translationHelper.GetConfig(Language.EN, toLanguages, "");
+            config.SetProperty(PropertyId.SpeechServiceLog_Filename, " ");
+        }
     }
 }
