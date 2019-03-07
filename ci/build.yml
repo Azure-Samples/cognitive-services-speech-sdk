@@ -2027,3 +2027,20 @@ jobs:
       publishLocation: Container
     condition: succeededOrFailed()
     displayName: Publish Unity package
+
+- job: DocFX
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' DocFX '))
+  pool:
+    name: Hosted VS2017
+  steps:
+  - script: choco install docfx -y
+    displayName: Install DocFX
+  - script: docfx
+    displayName: Run docfx
+    workingDirectory: ci/docfx
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: docfx'
+    inputs:
+      PathtoPublish: 'build/docfx'
+      ArtifactName: docfx

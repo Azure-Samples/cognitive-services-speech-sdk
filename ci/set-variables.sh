@@ -47,7 +47,7 @@
 #     Defaults to our CarbonPre VSTS feed for 'dev' builds, Carbon otherwise.
 # * SPEECHSDK_BUILD_AGENT_PLATFORM - can be "Windows-x64", "OSX-x64", "Linux-x64"
 # * SPEECHSDK_BUILD_PHASES - space-separated and space-enclosed list of build phases to run
-#     Default: " WindowsBuild WindowsOSBuild WindowsUwpBuild NuGet NuGetLinuxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs "
+#     Default: " WindowsBuild WindowsOSBuild WindowsUwpBuild NuGet NuGetLinuxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs "
 #     For int (nightly) builds, "TsaUpload WindowsSDLFortifyJava WackTest CheckSignatures" are added to the default phases.
 #     For prod (release) builds, "WackTest CheckSignatures" are added to the default phases.
 #     Check phase condition in build.yml for valid phase names.
@@ -197,7 +197,7 @@ else
 fi
 
 # Build phases to run
-SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs UnityBuild "
+SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs UnityBuild "
 
 
 # Running tests is default
@@ -214,9 +214,9 @@ case $SPEECHSDK_BUILD_TYPE in
     SPEECHSDK_SDL_ALL=false
     ;;
   int)
-    # TSA Upload only for Nightly, not for manually scheduled
+    # For Nightly add some additional jobs.
     if [[ $BUILD_REASON == Schedule ]]; then
-      SPEECHSDK_BUILD_PHASES+="TsaUpload WindowsSDLFortifyJava WackTest IosMultiPlatformTests "
+      SPEECHSDK_BUILD_PHASES+="TsaUpload WindowsSDLFortifyJava WackTest IosMultiPlatformTests DocFX "
     fi
     PRERELEASE_VERSION=-beta.0.$_BUILD_ID
     META=+$_BUILD_COMMIT
@@ -227,9 +227,10 @@ case $SPEECHSDK_BUILD_TYPE in
     SPEECHSDK_SDL_ALL=true
     ;;
   prod)
+    # Additional jobs for production builds.
+    SPEECHSDK_BUILD_PHASES+="WackTest IosMultiPlatformTests "
     # Prod builds take exactly the version from version.txt, no extra
     # pre-release or meta.
-    SPEECHSDK_BUILD_PHASES+="WackTest IosMultiPlatformTests "
     PRERELEASE_VERSION=
     META=
     SPEECHSDK_SIGN=true
