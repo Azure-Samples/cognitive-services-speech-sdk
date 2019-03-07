@@ -198,22 +198,6 @@ jobs:
       targetArgument: 'source'
       result: PoliCheckSource.xml
       optionsFC: 1
-    # We've ran into below warning, which seems fishy since it's refers to policheckdev. Asked them about this.
-    # Related: #1663205
-    #
-    # <TermTbl>
-    # <Term Term="Bad" Severity="1" TermClass="Geopolitical" CaseSensitive="" WholeWord="" CommentSearch="" RowCount="1" TermVersionId="1" FieldsImpacted="" TermId="213371">
-    # <Comment>
-    # For detailed info see - http://policheckdev.azurewebsites.net/Pages/TermInfo.aspx?LCID=9&TermID=213371
-    # </Comment>
-    # <Actions>
-    # For detailed info see - http://policheckdev.azurewebsites.net/Pages/TermInfo.aspx?LCID=9&TermID=213371
-    # <Context>Every context this term is offensive</Context>
-    # <ActionRecommendation><b>REMOVE</b></ActionRecommendation>
-    # </Actions>
-    # </Term>
-    # </TermTbl>
-    enabled: false
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
     displayName: 'PoliCheck (source-scan, dir: public samples)'
     inputs:
@@ -223,22 +207,6 @@ jobs:
       result: PoliCheckSamples.xml
       SOMEnabled: true
       optionsFC: 1
-    # We've ran into below warning, which seems fishy since it's refers to policheckdev. Asked them about this.
-    # Related: #1663205
-    #
-    # <TermTbl>
-    # <Term Term="Bad" Severity="1" TermClass="Geopolitical" CaseSensitive="" WholeWord="" CommentSearch="" RowCount="1" TermVersionId="1" FieldsImpacted="" TermId="213371">
-    # <Comment>
-    # For detailed info see - http://policheckdev.azurewebsites.net/Pages/TermInfo.aspx?LCID=9&TermID=213371
-    # </Comment>
-    # <Actions>
-    # For detailed info see - http://policheckdev.azurewebsites.net/Pages/TermInfo.aspx?LCID=9&TermID=213371
-    # <Context>Every context this term is offensive</Context>
-    # <ActionRecommendation><b>REMOVE</b></ActionRecommendation>
-    # </Actions>
-    # </Term>
-    # </TermTbl>
-    enabled: false
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-fxcop.FxCop@2
     displayName: 'Run FxCop'
     inputs:
