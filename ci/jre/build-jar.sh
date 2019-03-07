@@ -3,6 +3,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 #
+set -u -e -x -o pipefail
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
@@ -39,7 +40,7 @@ unzip -q -o "$BASE_JAR" -d "$JAR_DIR"
 NOW=$(date -Iseconds)
 
 # (Shipping) platform list
-platforms=({Linux,Windows}-x64-Release)
+platforms=({Linux,Windows,OSX}-x64-Release)
 
 # Will need extension to support more archs / debug flavor (in sync with NativeLibraryLoader.java).
 for platformString in "${platforms[@]}"; do
@@ -66,7 +67,7 @@ for platformString in "${platforms[@]}"; do
       assetDir+=/linux
       ;;
     OSX)
-      dropPrefix+="/$os/$os-$arch/$flavor"
+      dropPrefix+="/macOS/$arch/$flavor"
       libPrefix=lib
       libSuffix=.dylib
       jnilibSuffix=.jnilib
@@ -80,11 +81,14 @@ for platformString in "${platforms[@]}"; do
   assetDir+="$bitness"
 
   mkdir -p "$JAR_DIR/$assetDir"
-  cp --verbose "$dropPrefix/${libPrefix}Microsoft.CognitiveServices.Speech"{.core$libSuffix,.java.bindings$jnilibSuffix} "$JAR_DIR/$assetDir"
+  if [[ $os == "Windows" ]] || [[ $os == "Linux" ]] || [[ $os == "OSX" ]]; then
+    cp --verbose "$dropPrefix/${libPrefix}Microsoft.CognitiveServices.Speech"{.core$libSuffix,.java.bindings$jnilibSuffix} "$JAR_DIR/$assetDir"
+  fi
 
 done
 
-cp --verbose "$SCRIPT_DIR/../../"{REDIST.txt,license.md,ThirdPartyNotices.md} "$JAR_DIR"
+cp -v "$SCRIPT_DIR/../../"{REDIST.txt,license.md,ThirdPartyNotices.md} "$JAR_DIR"
 
 # Timestamp
 find "$JAR_DIR" -print0 | xargs -0 touch --date=$NOW
+

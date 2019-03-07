@@ -1,0 +1,38 @@
+parameters:
+  name: ''
+  poolName: ''
+  extraSteps: ''
+
+jobs:
+- job: ${{ parameters.name }}
+  dependsOn: [Pre, JavaJrePackage]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' ${{ parameters.name }} '))
+  pool:
+    name: ${{ parameters.poolName }}
+  timeoutInMinutes: 5
+  steps:
+  - bash: brew config && brew install bash
+    displayName: Install modern bash on macOS
+    condition: contains('${{ parameters.poolName }}', 'macOS')
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      PublishArtifactName=JavaJrePackage
+      ArtifactIn="$(Build.ArtifactStagingDirectory)/In/$PublishArtifactName"
+      MavenRoot="$ArtifactIn/maven"
+      JarName="$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA).jar"
+      relativeMavenPackageDir="${SPEECHSDK_MAVEN_GROUP_ID//\./\/}/$SPEECHSDK_MAVEN_ARTIFACT_ID/$SPEECHSDK_SEMVER2NOMETA"
+      PathToJar="$MavenRoot/$relativeMavenPackageDir/$JarName"
+      vsts_setvars_by_ref PublishArtifactName ArtifactIn MavenRoot JarName PathToJar
+    displayName: Set package variables
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading JavaJrePackage artifacts'
+    inputs:
+      artifactName: $(PublishArtifactName)
+      downloadPath: $(Build.ArtifactStagingDirectory)/In
+  - ${{ parameters.extraSteps }}

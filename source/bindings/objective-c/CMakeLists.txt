@@ -14,8 +14,8 @@ FILE(GLOB OBJC_PUBLIC_HEADERS "${OBJC_PUBLIC_HEADER_DIR}/*.h")
 FILE(GLOB OBJC_PRIVATE_HEADERS "${SRC_DIR}/*.h")
 FILE(GLOB OBJC_SOURCE "${SRC_DIR}/*.mm")
 
-set(HEADERS ${OBJC_PUBLIC_HEADERS}) 
-set(HEADERS_PRIVATE ${OBJC_PRIVATE_HEADERS}) 
+set(HEADERS ${OBJC_PUBLIC_HEADERS})
+set(HEADERS_PRIVATE ${OBJC_PRIVATE_HEADERS})
 set(SOURCES ${OBJC_SOURCE})
 
 source_group("Header Files (public)" FILES ${HEADERS})
@@ -68,9 +68,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE sr
-    PRIVATE audio 
+    PRIVATE audio
     PRIVATE usp
-    PRIVATE common 
+    PRIVATE common
     PRIVATE factory)
 
 # Install
@@ -98,4 +98,16 @@ install(EXPORT speechsdk-objc-export
   DESTINATION
     ${CMAKE_INSTALL_LIBDIR}/cmake/MicrosoftCognitiveServicesSpeech
 )
+
+# build a .dylib for java, since the .jar can't preserve the symbolic links in the framework bundle
+if (BUILD_JAVA)
+    add_library(${SPEECHSDK_CORE_DYNLIB} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
+
+  target_link_libraries(${SPEECHSDK_CORE_DYNLIB}
+    PRIVATE sr
+    PRIVATE audio
+    PRIVATE usp
+    PRIVATE common
+    PRIVATE factory)
+endif()
 

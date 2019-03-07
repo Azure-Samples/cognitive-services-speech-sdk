@@ -63,16 +63,16 @@ if [[ $OS = "Windows_NT" ]]; then
        ;;
   esac
 else
-  LIBPREFIX=libMicrosoft.CognitiveServices.Speech.
 
   SRCBIN="$BUILD_ROOT/bin"
   SRCLIB="$BUILD_ROOT/lib"
   SRCDYNLIB="$BUILD_ROOT/lib"
 
+  LIBPREFIX=libMicrosoft.CognitiveServices.Speech.
   if [[ $(uname) = Linux ]]; then
     DYNLIBSUFFIX=.so
     SRCJAVABINDINGS="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.so"
-  else
+  else # OSX
     DYNLIBSUFFIX=.dylib
     SRCJAVABINDINGS="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
   fi
@@ -117,6 +117,7 @@ mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBL
 CPOPT="-v -p"
 
 cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*$DYNLIBSUFFIX "$DESTPUBLIB"
+
 # On Windows and not Android, copy import libraries, XMLDoc, and PDBs.
 if [[ $OS = "Windows_NT" ]]; then
   if [[ $TARGET != Android-* ]]; then
@@ -165,6 +166,13 @@ if [[ $TARGET = Android-* ]]; then
   find "$DESTPUBLIB" -name \*.so -print0 | xargs -0 $STRIP
 fi
 
+# osx: copy unstripped dylib, and strip the public one
+if [[ $PLATFORM = OSX-* ]]; then
+  mkdir -p "$DESTPRIVLIBUNSTRIPPED"
+  cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*$DYNLIBSUFFIX "$DESTPRIVLIBUNSTRIPPED"
+  STRIP="strip -x"
+  find "$DESTPUBLIB" -name \*.dylib -print0 | xargs -0 $STRIP
+fi
 # copy additional private binaries (non-shipping)
 for var in carbonx Microsoft.CognitiveServices.Speech.Tests.ParallelRunner core_tests cxx_api_tests; do
   [[ -e "$SRCBIN/$var" ]] && mkdir -p "$DESTPRIVBIN" && cp $CPOPT "$SRCBIN/$var" "$DESTPRIVBIN"

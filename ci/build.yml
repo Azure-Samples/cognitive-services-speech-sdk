@@ -456,7 +456,7 @@ jobs:
 
 # Note: for now this packages up only {Linux,Windows}-x64-Release
 - job: JavaJrePackage
-  dependsOn: [Pre, LinuxBuild, WindowsBuild]
+  dependsOn: [Pre, LinuxBuild, WindowsBuild, OsxBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JavaJrePackage '))
   pool:
     name: Hosted VS2017
@@ -487,6 +487,11 @@ jobs:
     displayName: 'Downloading Linux artifacts'
     inputs:
       artifactName: Linux
+      downloadPath: $(System.ArtifactsDirectory)/In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading OSX artifacts'
+    inputs:
+      artifactName: macOS
       downloadPath: $(System.ArtifactsDirectory)/In
   - bash: |
       ./ci/jre/build-jar.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/In
@@ -555,73 +560,95 @@ jobs:
     displayName: 'Publish .jar'
     condition: succeededOrFailed()
 
-- job: JavaJrePackageLinuxTest
-  dependsOn: [Pre, JavaJrePackage]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JavaJrePackageLinuxTest '))
-  pool:
-    name: Hosted Ubuntu 1604
-  timeoutInMinutes: 30
-  steps:
-  - bash: |
-      set -x -e -o pipefail
-      . ci/functions.sh
-      ./ci/set-variables.sh
-    displayName: Set variables
-  - bash: |
-      set -x -e -o pipefail
-      . ci/functions.sh
-      PublishArtifactName=JavaJrePackage
-      ArtifactIn="$(Build.ArtifactStagingDirectory)/In/$PublishArtifactName"
-      MavenRoot="$ArtifactIn/maven"
-      JarName="$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA).jar"
-      relativeMavenPackageDir="${SPEECHSDK_MAVEN_GROUP_ID//\./\/}/$SPEECHSDK_MAVEN_ARTIFACT_ID/$SPEECHSDK_SEMVER2NOMETA"
-      PathToJar="$MavenRoot/$relativeMavenPackageDir/$JarName"
-      vsts_setvars_by_ref PublishArtifactName ArtifactIn MavenRoot JarName PathToJar
-    displayName: Set package variables
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading JavaJrePackage artifacts'
-    inputs:
-      artifactName: $(PublishArtifactName)
-      downloadPath: $(Build.ArtifactStagingDirectory)/In
-  - bash: |
-      set -u -e -x -o pipefail
-      . ci/functions.sh
-      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
-      java -version
-      patchSamplesFromTestConfig public_samples/quickstart/java-jre \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D long-running=false
-      patchSamplesFromTestConfig public_samples/samples/java/jre/console \
-        ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D long-running=false
-      ./ci/run-maven.sh public_samples "$(MavenRoot)"
-    displayName: Patch and build samples
-  - template: get-docker-image.yml
-    parameters:
-      imageBase: oobejre_ubuntu1604_x64 oobejre_ubuntu1804_x64
-      outvarImage: DOCKER_IMAGES
-  - bash: |
-      set -u -e -x -o pipefail
-      . ci/functions.sh
-      cp "$(PathToJar)" $(Build.Repository.LocalPath) || exitWithFailure "cp failed"
+- template: java-jre-package-test.yml
+  parameters:
+    name: JavaJrePackageLinuxTest
+    poolName: Hosted Ubuntu 1604
+    extraSteps:
+      - bash: |
+          set -u -e -x -o pipefail
+          . ci/functions.sh
+          perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+          java -version
+          patchSamplesFromTestConfig public_samples/quickstart/java-jre \
+            ci/test-config.json \
+            -D luis-key=$(luis-westus-s0-201809-key1) \
+            -D speech-key=$(NorthEuropeKeySkyman) \
+            -D long-running=false
+          patchSamplesFromTestConfig public_samples/samples/java/jre/console \
+            ci/test-config.json \
+            -D luis-key=$(luis-westus-s0-201809-key1) \
+            -D speech-key=$(NorthEuropeKeySkyman) \
+            -D long-running=false
+          ./ci/run-maven.sh public_samples "$(MavenRoot)"
+        displayName: Patch and build samples
+      - template: get-docker-image.yml
+        parameters:
+          imageBase: oobejre_ubuntu1604_x64 oobejre_ubuntu1804_x64
+          outvarImage: DOCKER_IMAGES
+      - bash: |
+          set -u -e -x -o pipefail
+          . ci/functions.sh
+          cp "$(PathToJar)" $(Build.Repository.LocalPath) || exitWithFailure "cp failed"
+          #
+          ERRORS=0
+          for i in $(DOCKER_IMAGES); do
+            ./ci/samples/test-quickstart-java-jre.sh "$i" "$(JarName)" ||
+              { ((++ERRORS)); vsts_logissue error "Running quickstart/java-jre for image $i failed."; }
+            #
+            # Skip other samples on Ubuntu 18.04 in dev builds
+            [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
+              ./ci/samples/test-samples-java-jre-console.sh "$i" "$(JarName)" ||
+                { ((++ERRORS)); vsts_logissue error "Running samples/java/jre/console for image $i failed."; }
+          done
+          #
+          [[ $ERRORS == 0 ]] || exitWithError "Not all samples ran successfully."
+        displayName: Test samples
 
-      ERRORS=0
-      for i in $(DOCKER_IMAGES); do
-        ./ci/samples/test-quickstart-java-jre.sh "$i" "$(JarName)" ||
-          { ((++ERRORS)); vsts_logissue error "Running quickstart/java-jre for image $i failed."; }
-
-        # Skip other samples on Ubuntu 18.04 in dev builds
-        [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
-          ./ci/samples/test-samples-java-jre-console.sh "$i" "$(JarName)" ||
-            { ((++ERRORS)); vsts_logissue error "Running samples/java/jre/console for image $i failed."; }
-      done
-
-      [[ $ERRORS == 0 ]] || exitWithError "Not all samples ran successfully."
-    displayName: Test samples
+- template: java-jre-package-test.yml
+  parameters:
+    name: JavaJrePackageOsxUnitTest
+    poolName: Hosted macOS Preview
+    extraSteps:
+      - task: DownloadBuildArtifacts@0
+        displayName: 'Downloading macOS Java test'
+        inputs:
+          artifactName: macOS
+          downloadPath: $(Build.ArtifactStagingDirectory)/In
+          Pattern: '*.jar'
+      - bash: |
+          set -x -e
+          eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+            -D luis-key=$(luis-westus-s0-201809-key1) \
+            -D speech-key=$(NorthEuropeKeySkyman) \
+            -D long-running=false)
+          . ci/functions.sh
+          SPEECHSDK_SPEECH_AUTHTOKEN="$(getAuthorizationToken "$SPEECHSDK_SPEECH_KEY" "$SPEECHSDK_SPEECH_REGION")"
+          testJarFile="$(Build.ArtifactStagingDirectory)/In/macOS/x64/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar"
+          [[ -f ${testJarFile} ]]
+          [[ -f $(PathToJar) ]]
+          java \
+            -cp $(printf "%s:" \
+              "$(PathToJar)" \
+              "${testJarFile}" \
+              "external/junit/junit-4.12.jar" \
+              "external/junit/hamcrest-core-1.3.jar") \
+            -DSpeechSubscriptionKey="$SPEECHSDK_SPEECH_KEY" \
+            -DSpeechRegion="$SPEECHSDK_SPEECH_REGION" \
+            -DLuisRegion="$SPEECHSDK_LUIS_REGION" \
+            -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
+            -DKeyword=Computer \
+            -DKeywordModel=/data/keyword/kws.table \
+            -DTestOutputFilename=test-java-unittests-package.xml \
+            -DSpeechAuthorizationToken=$SPEECHSDK_SPEECH_AUTHTOKEN \
+            tests.runner.Runner \
+            tests.AllTests
+        displayName: Run unit test
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFiles: '**/test-*.xml'
+        condition: succeededOrFailed()
+        displayName: Publish test results
 
 - job: NuGet
   # Note: NuGet currently does not depend on LinuxDockerBuild (only needs x64 binaries)
@@ -1727,6 +1754,19 @@ jobs:
       zip --symlinks -r "$(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
       rm -rf REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
     displayName: Create archive for signing
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: Sign .dylib (dynamic library)
+    inputs:
+      ConnectedServiceName: Speech SDK ESRP Signing
+      FolderPath: build/lib
+      Pattern: '*.dylib'
+      signConfigType: inlineSignParams
+      inlineOperation: '[ { "keyCode": "CP-401337-Apple", "operationSetCode": "MacAppDeveloperSign" } ]'
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      ./ci/drop/bindrop.sh \
+          $(SPEECHSDK_TARGET_PLATFORM) $(BuildConfiguration) "$(Build.ArtifactStagingDirectory)"/$(BuildPlatform)/$(BuildConfiguration)
+    displayName: Create drop files
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
