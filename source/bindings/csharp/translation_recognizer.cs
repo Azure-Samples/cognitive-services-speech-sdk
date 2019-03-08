@@ -226,9 +226,9 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <summary>
         /// Starts speech translation, and returns after a single utterance is recognized. The end of a
         /// single utterance is determined by listening for silence at the end or until a maximum of 15
-        /// seconds of audio is processed.  The task returns the recognition text as result. 
+        /// seconds of audio is processed.  The task returns the recognition text as result.
         /// Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-        /// shot recognition like command or query. 
+        /// shot recognition like command or query.
         /// For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
         /// </summary>
         /// <returns>A task representing the recognition operation. The task returns a value of <see cref="TranslationRecognitionResult"/> </returns>
@@ -253,9 +253,9 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         ///
         ///         // Starts translation recognition, and returns after a single utterance is recognized. The end of a
         ///         // single utterance is determined by listening for silence at the end or until a maximum of 15
-        ///         // seconds of audio is processed.  The task returns the recognition text as result. 
+        ///         // seconds of audio is processed. The task returns the recognized text as well as the translation.
         ///         // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-        ///         // shot recognition like command or query. 
+        ///         // shot recognition like command or query.
         ///         // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
         ///         var result = await recognizer.RecognizeOnceAsync();
         ///

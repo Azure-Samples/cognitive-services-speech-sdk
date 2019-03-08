@@ -10,13 +10,13 @@ Before you get started, here's a list of prerequisites:
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * Python 3.5 or later needs to be installed. Downloads are available [here](https://www.python.org/downloads/).
-* The Python Speech SDK package is available for Windows (x64 and x86), Mac (macOS X version 10.12 or later), and Linux (x64).
-* On Ubuntu 16.04, run the following commands for the installation of required packages:
+* The Python Speech SDK package is available for Windows (x64 and x86), Mac (macOS X version 10.12 or later), and Linux (x64; Ubuntu 16.04 or 18.04).
+* On Ubuntu 16.04 or 18.04, run the following commands for the installation of required packages:
   ```sh
   sudo apt-get update
-  sudo apt-get install build-essential libssl1.0.0 libasound2 wget
+  sudo apt-get install libssl1.0.0 libasound2
   ```
-* On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
+* On Windows you need the [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
 
 ## Get the Speech SDK Python Package
 

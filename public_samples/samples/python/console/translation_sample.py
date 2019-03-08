@@ -40,10 +40,12 @@ def translation_once_from_mic():
     recognizer = speechsdk.translation.TranslationRecognizer(
         translation_config=translation_config, audio_config=audio_config)
 
-    # Perform recognition. `recognize_once` blocks until an utterance has been recognized, after
-    # which recognition stops and a result is returned.  Thus, it is suitable only for single shot
-    # recognition like command or query.  For long-running recognition, use continuous recognitions
-    # instead.
+    # Starts translation, and returns after a single utterance is recognized. The end of a
+    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # seconds of audio is processed. It returns the recognized text as well as the translation.
+    # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
+    # shot recognition like command or query.
+    # For long-running multi-utterance recognition, use start_continuous_recognition() instead.
     result = recognizer.recognize_once()
 
     # Check the result
@@ -80,10 +82,12 @@ def translation_once_from_file():
     recognizer = speechsdk.translation.TranslationRecognizer(
         translation_config=translation_config, audio_config=audio_config)
 
-    # Perform recognition. `recognize_once` blocks until an utterance has been recognized, after
-    # which recognition stops and a result is returned.  Thus, it is suitable only for single shot
-    # recognition like command or query.  For long-running recognition, use continuous recognitions
-    # instead.
+    # Starts translation, and returns after a single utterance is recognized. The end of a
+    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # seconds of audio is processed. The task returns the recognition text as result.
+    # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
+    # shot recognition like command or query.
+    # For long-running multi-utterance recognition, use start_continuous_recognition() instead.
     result = recognizer.recognize_once()
 
     # Check the result
