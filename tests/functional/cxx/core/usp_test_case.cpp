@@ -208,3 +208,65 @@ TEST_CASE("USP uses TLS12", "[usp]")
     connection->WriteAudio(std::make_shared<DataChunk>(buffer, dataSize));
     this_thread::sleep_for(5s);
 }
+
+class PortCheck : public USP::Callbacks
+{
+    void OnError(bool /*transport*/, USP::ErrorCode errorCode, const std::string& errorMessage) override
+    {
+        REQUIRE(errorCode == USP::ErrorCode::ConnectionError);
+        REQUIRE(errorMessage.find("Connection failed") != std::string::npos);
+    }
+};
+
+TEST_CASE("Port specification", "[usp]")
+{
+    SECTION("Valid port specification")
+    {
+        auto service = std::make_shared<CSpxThreadService>();
+        service->Init();
+        auto callbacks = std::make_shared<PortCheck>();
+        auto client = USP::Client(callbacks, USP::EndpointType::Speech, PAL::CreateGuidWithoutDashes(), service)
+            .SetRegion("westus")
+            .SetEndpointUrl("ws://127.0.0.1:12345/mytest")
+            .SetAuthentication(USP::AuthenticationType::SubscriptionKey, "test");
+
+        auto connection = client.Connect();
+        constexpr unsigned int dataSize = 7;
+        auto data = new uint8_t[dataSize]{ 1, 2, 3, 4, 5, 6, 7 };
+        std::shared_ptr<uint8_t> buffer(data, [](uint8_t* p) { delete[] p; });
+        connection->WriteAudio(std::make_shared<DataChunk>(buffer, dataSize));
+        this_thread::sleep_for(5s);
+    }
+
+    SECTION("Valid port specification 2")
+    {
+        auto service = std::make_shared<CSpxThreadService>();
+        service->Init();
+        auto callbacks = std::make_shared<PortCheck>();
+        auto client = USP::Client(callbacks, USP::EndpointType::Speech, PAL::CreateGuidWithoutDashes(), service)
+            .SetRegion("westus")
+            .SetEndpointUrl("wss://myserver:50/mydir/myapi?foo=bar")
+            .SetAuthentication(USP::AuthenticationType::SubscriptionKey, "test");
+
+        auto connection = client.Connect();
+        constexpr unsigned int dataSize = 7;
+        auto data = new uint8_t[dataSize]{ 1, 2, 3, 4, 5, 6, 7 };
+        std::shared_ptr<uint8_t> buffer(data, [](uint8_t* p) { delete[] p; });
+        connection->WriteAudio(std::make_shared<DataChunk>(buffer, dataSize));
+        this_thread::sleep_for(5s);
+    }
+
+
+    SECTION("Invalid port specification")
+    {
+        auto service = std::make_shared<CSpxThreadService>();
+        service->Init();
+        auto callbacks = std::make_shared<PortCheck>();
+        auto client = USP::Client(callbacks, USP::EndpointType::Speech, PAL::CreateGuidWithoutDashes(), service)
+            .SetRegion("westus")
+            .SetEndpointUrl("ws://127.0.0.1:abc/mytest")  // Invalid port specification, should fail on connect.
+            .SetAuthentication(USP::AuthenticationType::SubscriptionKey, "test");
+
+        REQUIRE_THROWS_WITH(client.Connect(), "Runtime error: Failed to create transport request.");
+    }
+}

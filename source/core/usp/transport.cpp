@@ -672,7 +672,8 @@ TransportHandle TransportRequestCreate(const char* host, void* context, Telemetr
     const char* src;
     char* dst;
     int port = -1;
-    const char* localHost = NULL;
+    const char* hostName = NULL;
+    size_t hostOffset = 0;
 
     bool use_ssl = false;
 
@@ -681,20 +682,30 @@ TransportHandle TransportRequestCreate(const char* host, void* context, Telemetr
         return NULL;
     }
 
-    if (strstr(host, g_keywordWSS) != host && strstr(host, g_keywordWS) != host)
+    if (strstr(host, g_keywordWSS) == host)
+    {
+        hostOffset = strlen(g_keywordWSS);
+    }
+    else if(strstr(host, g_keywordWS) == host)
+    {
+        hostOffset = strlen(g_keywordWS);
+    }
+    else
     {
         // Only WebSockets-based transport
         return NULL;
     }
 
-    // parse port number from localhost if it is specified in the url
-    if ((localHost = strstr(host, "localhost:")) != NULL)
+    // parse port number from host name if it is specified in the url
+
+    hostName = host + hostOffset;
+    const char* front = strchr(hostName, ':');
+    if (front)
     {
-        const char* front = strchr(localHost, ':');
         const char* back = strchr(front, '/');
         if (back == NULL)
         {
-            back = front + strlen(front) + 1;
+            back = front + strlen(front);
         }
         size_t length = back - front;
         char* portStr = (char*)malloc(length);
@@ -731,7 +742,7 @@ TransportHandle TransportRequestCreate(const char* host, void* context, Telemetr
         request->ws.config.port = port == -1 ? 443 : port;
         use_ssl = true;
     }
-    else if(strstr(host, g_keywordWS) == host)
+    else if (strstr(host, g_keywordWS) == host)
     {
         request->ws.config.port = port == -1 ? 80 : port;
         use_ssl = false;
@@ -768,78 +779,92 @@ TransportHandle TransportRequestCreate(const char* host, void* context, Telemetr
     {
         host += strlen(use_ssl ? g_keywordWSS : g_keywordWS);
         dst = request->url;
-        request->ws.config.hostname = port == -1 ? dst : "localhost";
+        request->ws.config.hostname = dst;
 
         // split up host + path
         src = strchr(host, '/');
         if (NULL != src)
         {
-            err = 0;
-            memcpy(dst, host, src - host);
-            dst += (src - host);
-            *dst = 0; dst++;
-            request->ws.config.resource_name = dst;
-            strcpy_s(dst, len + 2 - (dst - request->url), src);
-
-            if (proxyInfo != NULL)
+            // Pull out port if it is there.
+            const char *portSpec = strchr(host, ':');
+            size_t copyLen = (portSpec == NULL ? src : portSpec) - host;
+            if (copyLen <= len)
             {
-                HTTP_PROXY_IO_CONFIG proxy_config;
-                proxy_config.hostname = request->ws.config.hostname;
-                proxy_config.port = request->ws.config.port;
-                proxy_config.proxy_hostname = proxyInfo->host;
-                proxy_config.proxy_port = proxyInfo->port;
-                proxy_config.username = proxyInfo->username;
-                proxy_config.password = proxyInfo->password;
-                const IO_INTERFACE_DESCRIPTION *underlying_io_interface = http_proxy_io_get_interface_description();
-                if (underlying_io_interface == NULL)
-                {
-                    LogError("NULL proxy interface description");
-                    free(request->url);
-                    free(request);
-                    free(headers);
-                    free(str);
-                    return NULL;
-                }
-                void *underlying_io_parameters = &proxy_config;
+                err = 0;
+                memcpy(dst, host, copyLen);
+                *(dst + copyLen) = 0;
+                dst += (src - host) + 1;
+                request->ws.config.resource_name = dst;
+                strcpy_s(dst, len + 2 - (dst - request->url), src);
 
-                TLSIO_CONFIG tlsio_config;
-                if (use_ssl == true)
+                if (proxyInfo != NULL)
                 {
-                    const IO_INTERFACE_DESCRIPTION *tlsio_interface = platform_get_default_tlsio();
-                    if (tlsio_interface == NULL)
+                    HTTP_PROXY_IO_CONFIG proxy_config;
+                    proxy_config.hostname = request->ws.config.hostname;
+                    proxy_config.port = request->ws.config.port;
+                    proxy_config.proxy_hostname = proxyInfo->host;
+                    proxy_config.proxy_port = proxyInfo->port;
+                    proxy_config.username = proxyInfo->username;
+                    proxy_config.password = proxyInfo->password;
+                    const IO_INTERFACE_DESCRIPTION *underlying_io_interface = http_proxy_io_get_interface_description();
+                    if (underlying_io_interface == NULL)
                     {
-                        LogError("NULL TLSIO interface description");
+                        LogError("NULL proxy interface description");
                         free(request->url);
                         free(request);
                         free(headers);
                         free(str);
                         return NULL;
                     }
-                    else
+                    void *underlying_io_parameters = &proxy_config;
+
+                    TLSIO_CONFIG tlsio_config;
+                    if (use_ssl == true)
                     {
-                        tlsio_config.hostname = request->ws.config.hostname;
-                        tlsio_config.port = request->ws.config.port;
-                        tlsio_config.underlying_io_interface = underlying_io_interface;
-                        tlsio_config.underlying_io_parameters = underlying_io_parameters;
-                        underlying_io_interface = tlsio_interface;
-                        underlying_io_parameters = &tlsio_config;
+                        const IO_INTERFACE_DESCRIPTION *tlsio_interface = platform_get_default_tlsio();
+                        if (tlsio_interface == NULL)
+                        {
+                            LogError("NULL TLSIO interface description");
+                            free(request->url);
+                            free(request);
+                            free(headers);
+                            free(str);
+                            return NULL;
+                        }
+                        else
+                        {
+                            tlsio_config.hostname = request->ws.config.hostname;
+                            tlsio_config.port = request->ws.config.port;
+                            tlsio_config.underlying_io_interface = underlying_io_interface;
+                            tlsio_config.underlying_io_parameters = underlying_io_parameters;
+                            underlying_io_interface = tlsio_interface;
+                            underlying_io_parameters = &tlsio_config;
+                        }
                     }
+
+                    request->ws.WSHandle = uws_client_create_with_io(underlying_io_interface, underlying_io_parameters, request->ws.config.hostname, request->ws.config.port, request->ws.config.resource_name, (WS_PROTOCOL *)&request->ws.config.protocol, 1);
+                }
+                else
+                {
+                    WSIO_CONFIG cfg = request->ws.config;
+                    WS_PROTOCOL ws_proto;
+                    ws_proto.protocol = cfg.protocol;
+                    request->ws.WSHandle = uws_client_create(cfg.hostname, cfg.port, cfg.resource_name, use_ssl, &ws_proto, 1);
                 }
 
-                request->ws.WSHandle = uws_client_create_with_io(underlying_io_interface, underlying_io_parameters, request->ws.config.hostname, request->ws.config.port, request->ws.config.resource_name, (WS_PROTOCOL *)&request->ws.config.protocol, 1);
-            }
-            else
-            {
-                WSIO_CONFIG cfg = request->ws.config;
-                WS_PROTOCOL ws_proto;
-                ws_proto.protocol = cfg.protocol;
-                request->ws.WSHandle = uws_client_create(cfg.hostname, cfg.port, cfg.resource_name, use_ssl, &ws_proto, 1);
-            }
-
 #ifdef SPEECHSDK_USE_OPENSSL
-            int tls_version = OPTION_TLS_VERSION_1_2;
-            uws_client_set_option(request->ws.WSHandle, OPTION_TLS_VERSION, &tls_version);
+                int tls_version = OPTION_TLS_VERSION_1_2;
+                uws_client_set_option(request->ws.WSHandle, OPTION_TLS_VERSION, &tls_version);
 #endif
+            }
+        }
+
+        if (err)
+        {
+            free(request->url);
+            free(request);
+            LogError("Invalid URL");
+            // Fall through will clear remaining objects and return NULL
         }
     }
 
