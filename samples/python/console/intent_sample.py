@@ -53,7 +53,12 @@ def recognize_intent_once_from_mic():
     ]
     intent_recognizer.add_intents(intents)
 
-    # Run the intent recognizer.
+    # Starts intent recognition, and returns after a single utterance is recognized. The end of a
+    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # seconds of audio is processed. It returns the recognition text as result.
+    # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
+    # shot recognition like command or query.
+    # For long-running multi-utterance recognition, use start_continuous_recognition() instead.
     intent_result = intent_recognizer.recognize_once()
 
     # Check the results
@@ -92,7 +97,12 @@ def recognize_intent_once_from_file():
     ]
     intent_recognizer.add_intents(intents)
 
-    # Run the intent recognizer.
+    # Starts intent recognition, and returns after a single utterance is recognized. The end of a
+    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # seconds of audio is processed. It returns the recognition text as result.
+    # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
+    # shot recognition like command or query.
+    # For long-running multi-utterance recognition, use start_continuous_recognition() instead.
     intent_result = intent_recognizer.recognize_once()
 
     # Check the results
