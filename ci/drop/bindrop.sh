@@ -116,7 +116,12 @@ mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBL
 # N.B. no long option for -v (verbose) and -p (preserve) on OSX.
 CPOPT="-v -p"
 
-cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*$DYNLIBSUFFIX "$DESTPUBLIB"
+# Copy public libraries.
+# Note: On Mac, there are two versions of the dynamic libraries:
+# - stripped and potentially signed (.dylib): copied here
+# - unstripped and unsigned (.unstripped.dylib): copied to private destination below
+shopt -s extglob
+cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX!(*.unstripped)$DYNLIBSUFFIX "$DESTPUBLIB"
 
 # On Windows and not Android, copy import libraries, XMLDoc, and PDBs.
 if [[ $OS = "Windows_NT" ]]; then
@@ -166,12 +171,11 @@ if [[ $TARGET = Android-* ]]; then
   find "$DESTPUBLIB" -name \*.so -print0 | xargs -0 $STRIP
 fi
 
-# osx: copy unstripped dylib, and strip the public one
 if [[ $PLATFORM = OSX-* ]]; then
+  # osx: copy the unstripped dylib
   mkdir -p "$DESTPRIVLIBUNSTRIPPED"
-  cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*$DYNLIBSUFFIX "$DESTPRIVLIBUNSTRIPPED"
-  STRIP="strip -x"
-  find "$DESTPUBLIB" -name \*.dylib -print0 | xargs -0 $STRIP
+  cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.unstripped$DYNLIBSUFFIX "$DESTPRIVLIBUNSTRIPPED"
+
 fi
 # copy additional private binaries (non-shipping)
 for var in carbonx Microsoft.CognitiveServices.Speech.Tests.ParallelRunner core_tests cxx_api_tests; do

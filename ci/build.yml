@@ -1754,14 +1754,31 @@ jobs:
       zip --symlinks -r "$(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
       rm -rf REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
     displayName: Create archive for signing
+  - bash: |
+      set -u -x -e -o pipefail
+      dylibname="build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib"
+      [[ -f ${dylibname} ]]
+      cp "${dylibname}" "${dylibname%%dylib}"unstripped.dylib
+      strip -x "${dylibname}"
+      [[ $SPEECHSDK_SIGN != true ]] || zip "${dylibname}"{.zip,}
+    displayName: "Strip dylib and create archive for signing dylib if necessary"
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: Sign .dylib (dynamic library)
     inputs:
       ConnectedServiceName: Speech SDK ESRP Signing
       FolderPath: build/lib
-      Pattern: '*.dylib'
+      Pattern: '*.dylib.zip'
       signConfigType: inlineSignParams
       inlineOperation: '[ { "keyCode": "CP-401337-Apple", "operationSetCode": "MacAppDeveloperSign" } ]'
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      set -u -x -e -o pipefail
+      archive="build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib.zip"
+      [[ -f ${archive} ]]
+      unzip -o "${archive}"
+      # simple signing check, this will fail if not signed
+      codesign --display --verbose=4 build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib
+    displayName: "Unpack archive with signed dylib"
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - bash: |
       ./ci/drop/bindrop.sh \
