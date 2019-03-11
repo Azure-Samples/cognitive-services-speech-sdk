@@ -290,9 +290,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        static public void AssertStringWordEdits(string expectedString, string comparisonString, int deltaPercentage)
+        static public void AssertStringWordEditPercentage(string expectedString, string comparisonString, int deltaPercentage)
         // Using standard implementation for Levenshtein distance. Caveat: not optimized for memory consumption
-        //   but sufficient for our test case and the string length we are expecting (less 600 words)
+        //   but sufficient for our test case and the string length we are expecting (less 10000 words)
         // 
         // expectedString - normalized expected string
         // comparisonString - the normalized comparison string
@@ -303,12 +303,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             String[] wordsExpected = expectedString.Split(' ');
             String[] wordsComparison = comparisonString.Split(' ');
 
-            const int maxWordsExpected = 800;  // just an arbitrary bound for this operation
-                                               // reconsider memory usage (or alternative algorithm) if you need to increase this significantly
+            int allowedEdits = deltaPercentage * wordsExpected.Length / 100;
+            AssertStringWordEditCount(expectedString, comparisonString, allowedEdits);
+        }
+
+
+        static public void AssertStringWordEditCount(string expectedString, string comparisonString, int allowedEdits)
+        // Using standard implementation for Levenshtein distance. Caveat: not optimized for memory consumption
+        //   but sufficient for our test case and the string length we are expecting (less 10000 words)
+        // 
+        // expectedString - normalized expected string
+        // comparisonString - the normalized comparison string
+        // allowedEdits - number of word-edits which are tollerated
+        {
+            String[] wordsExpected = expectedString.Split(' ');
+            String[] wordsComparison = comparisonString.Split(' ');
+
+            const int maxWordsExpected = 10000;  // just an arbitrary bound for this operation
+                                                 // reconsider memory usage (or alternative algorithm) if you need to increase this significantly
             Assert.IsTrue((wordsExpected.Length < maxWordsExpected) && (wordsExpected.Length > 0), $"number of words in expectedString out of bounds: '{wordsExpected.Length}'");
             Assert.IsTrue((wordsComparison.Length < maxWordsExpected) && (wordsComparison.Length > 0), $"number of words in wordsComparison out of bounds: '{wordsComparison.Length}'");
-
-            int allowedEdits = deltaPercentage * wordsExpected.Length / 100;
 
             int[][] matrix = new int[wordsExpected.Length + 1][];
 
@@ -345,7 +359,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             int edits = matrix[wordsExpected.Length][wordsComparison.Length];
 
-            Assert.IsTrue(edits <= allowedEdits,$"Number of edit operations '{edits}' exceeding allowed edits '{allowedEdits}'\ninput:  '{expectedString}'compare: '{comparisonString}'\n");
+            Assert.IsTrue(edits <= allowedEdits, $"Number of edit operations '{edits}' exceeding allowed edits '{allowedEdits}'\ninput:   '{expectedString}'\ncompare: '{comparisonString}'\n");
         }
     }
+
 }

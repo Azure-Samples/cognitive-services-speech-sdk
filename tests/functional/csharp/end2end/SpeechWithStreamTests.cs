@@ -201,7 +201,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var actual = string.Join(" ", texts.ToArray());
                 actual = Normalize(actual);
                 // dont do a hard string comparison, we allow a small percentage of word edits (word insert/delete/move)
-                AssertStringWordEdits(expected, actual, 2);
+                AssertStringWordEditPercentage(expected, actual, 2);
 
                 // Checking durations.
                 var offsets = results
@@ -237,10 +237,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 recognizer.Recognized += (s, e) =>
                 {
-                    Console.WriteLine($"Result recognized {e.ToString()}");
-                    Console.WriteLine($"Result OffsetInTicks {e.Result.OffsetInTicks.ToString()}");
-                    Console.WriteLine($"Result Duration {e.Result.Duration.Ticks.ToString()}\n");
-
+                    // Console.WriteLine($"Result OffsetInTicks: {e.Result.OffsetInTicks.ToString()}; Duration: {e.Result.Duration.Ticks.ToString()}; Recognized {e.ToString()}");
                     if (e.Result.Reason == ResultReason.RecognizedSpeech)
                     {
                         results.Add(e.Result);
@@ -272,12 +269,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 // Checking text results.
                 var texts = results.Select(r => r.Text).Where(t => !string.IsNullOrEmpty(t)).ToList();
                 var expected = string.Join(" ", TestData.English.Batman.Utterances);
-                expected += " ";
-                expected += string.Join(" ", TestData.English.Batman.Utterances2);
+                for (int i = 1; i < Times; i++)
+                {
+                    expected += " ";
+                    expected += string.Join(" ", TestData.English.Batman.Utterances2);
+                }
+                expected = Normalize(expected);
 
                 var actual = string.Join(" ", texts.ToArray());
-                Assert.AreEqual(TestData.English.Batman.Utterances.Length * Times, results.Count);
-                AssertMatching(expected, actual);
+                actual = Normalize(actual);
+                // dont do a hard string comparison, we allow a small percentage of word edits (word insert/delete/move)
+                AssertStringWordEditCount(expected, actual, 10);
             }
         }
     }
