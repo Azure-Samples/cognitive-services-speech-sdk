@@ -1,0 +1,3 @@
+RUN pip3 install --no-cache-dir setuptools==40.8.0 && \
+    pip3 install --no-cache-dir jupyter==1.0.0
+

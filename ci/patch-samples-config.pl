@@ -72,8 +72,9 @@ if ($ARGV =~ m(\.md$)) {
   ))(SOMETHING)gx;
 } else {
   s("YourAudioFile\.wav")("$escapedAudioFile");
-  s((["'])YourSubscriptionKey\1)(\1$speechKey\1)g;
-  s((["'])YourServiceRegion\1)(\1$speechRegion\1)g;
+  # Note: in ipynb (Jupyter notebook), we need to replace \"X\"
+  s((\\?["'])YourSubscriptionKey\1)(\1$speechKey\1)g;
+  s((\\?["'])YourServiceRegion\1)(\1$speechRegion\1)g;
   s("YourEndpointId")("$speechEndpointId")g;
   s("YourLanguageUnderstandingAppId")("$luisAppId")g;
   s("YourLanguageUnderstandingSubscriptionKey")("$luisKey")g;

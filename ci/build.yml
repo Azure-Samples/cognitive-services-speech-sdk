@@ -1253,10 +1253,14 @@ jobs:
       for i in $(DOCKER_IMAGES); do
         ./ci/samples/test-quickstart-python.sh "$i" wheelhouse ||
           { ((++ERRORS)); vsts_logissue error "Running quickstart/python for image $i failed."; }
+
         # Skip other samples on Ubuntu 18.04 in dev builds
-        [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
-          ./ci/samples/test-samples-python-console.sh "$i" wheelhouse ||
-            { ((++ERRORS)); vsts_logissue error "Running samples/python/console for image $i failed."; }
+        ! [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] || continue
+
+        ./ci/samples/test-quickstart-python-jupyter.sh "$i" wheelhouse ||
+          { ((++ERRORS)); vsts_logissue error "Running quickstart/python (Jupyter notebook) for image $i failed."; }
+        ./ci/samples/test-samples-python-console.sh "$i" wheelhouse ||
+          { ((++ERRORS)); vsts_logissue error "Running samples/python/console for image $i failed."; }
       done
       [[ $ERRORS == 0 ]] || exitWithError "Not all samples ran successfully."
     displayName: Test samples

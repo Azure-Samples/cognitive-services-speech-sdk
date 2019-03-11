@@ -132,12 +132,12 @@ my %images = (
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps test_deps_ubuntu1804/), 'oobedevdnc21_ubuntu1804_x64_deps', 'builduser'],
   },
   oobedevpy35_ubuntu1604_x64 => {
-    version => 2,
-    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobepython_ubuntu_deps test_deps/), 'builduser'],
+    version => 3,
+    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobepython_ubuntu_deps test_deps/), 'oobepython_jupyter', 'builduser'],
   },
   oobedevpy36_ubuntu1804_x64 => {
-    version => 2,
-    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobepython_ubuntu_deps test_deps_ubuntu1804/), 'builduser'],
+    version => 3,
+    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobepython_ubuntu_deps test_deps_ubuntu1804/), 'oobepython_jupyter', 'builduser'],
   },
 );
 
