@@ -212,7 +212,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             AssertMatching(TestData.English.Weather.Utterance, result.Text);
             AssertMatching(TestData.French.Weather.Utterance, result.Translations[Language.FR]);
-            AssertMatching(TestData.Spanish.Weather.Utterance, result.Translations[Language.ES]);
+            AssertOneEqual(TestData.Spanish.Weather.PossibleUtterances, result.Translations[Language.ES]);
         }
 
         [TestMethod]
@@ -246,7 +246,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertMatching(TestData.German.FirstOne.Utterance, actualTranslationRecognition.Result.Text);
 
             AssertMatching(TestData.French.FirstOne.Utterance, actualTranslationRecognition.Result.Translations[Language.FR]);
-            AssertMatching(TestData.Spanish.FirstOne.Utterance, actualTranslationRecognition.Result.Translations[Language.ES]);
+            AssertOneEqual(TestData.Spanish.FirstOne.PossibleUtterances, actualTranslationRecognition.Result.Translations[Language.ES]);
         }
 
         [TestMethod]

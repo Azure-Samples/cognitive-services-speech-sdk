@@ -5,6 +5,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -214,6 +215,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 Assert.Fail($"Actual value {actual} does not match the expected value {expected}. {errorMessage}");
             }
+        }
+
+        public static void AssertOneEqual(string[] expected, string actual)
+        {
+            var expectedString = String.Join("', '", expected);
+            Assert.IsTrue(
+                expected.Contains(actual),
+                $"'{actual}' (actual) is not a member of '{expectedString}' (expected)");
         }
 
         public static void AssertMatching(string expectedText, string actualText)

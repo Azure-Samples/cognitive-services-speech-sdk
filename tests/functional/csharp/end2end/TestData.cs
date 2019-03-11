@@ -229,12 +229,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             public static class FirstOne
             {
-                public static readonly string Utterance = "Llama al primero.";
+                public static readonly string[] PossibleUtterances =
+                {
+                    "Llama al primero.",
+                    "Llama a la primera."
+                };
             }
 
             public static class Weather
             {
-                public static readonly string Utterance = "¿Cómo es el clima?";
+                public static readonly string[] PossibleUtterances =
+                {
+                    "¿Cómo es el clima?",
+                    "¿Cómo es el tiempo?"
+                };
             }
         }
 
