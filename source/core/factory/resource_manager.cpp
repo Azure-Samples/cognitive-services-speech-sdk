@@ -33,7 +33,7 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.so"));
 
     // Note: due to new naming, removing any carbon prefix in name
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.pmakws.so"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.pma.so"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.kws.so"));
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
@@ -41,7 +41,7 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.dylib"));
 
     // Note: due to new naming, removing any carbon prefix in name
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.pmakws.dylib"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.pma.dylib"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.kws.dylib"));
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
@@ -52,7 +52,7 @@ CSpxResourceManager::CSpxResourceManager()
     // Note: due to dots in filenames, MUST append .dll suffix!
     //       (added them for consistency to all names, but the
     //       special "carbon" core component)
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.pmakws.dll"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.pma.dll"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.kws.dll"));
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon")); // this is special, internal name, no dll extension!
