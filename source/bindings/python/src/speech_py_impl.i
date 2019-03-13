@@ -118,7 +118,8 @@ from typing import Optional
 %extend Microsoft::CognitiveServices::Speech::CancellationDetails {
     %pythoncode %{
     def __str__(self):
-        return u'{}(error_details="{}")'.format(type(self).__name__, self.error_details)
+        return u'{}(reason={}, error_details="{}")'.format(type(self).__name__,
+            self.reason, self.error_details)
     %}
 }
 

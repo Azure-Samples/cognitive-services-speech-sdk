@@ -115,6 +115,28 @@ def _wait_for_event(callbacks, signal_name):
         time.sleep(1.)
 
 
+def _check_result_properties(result):
+    """check that properties are defined on recognition result. In particular, check that
+    recognition latency is exposed on final results."""
+    assert type(result.properties) is dict
+    if result.reason in (msspeech.ResultReason.RecognizedSpeech,
+            msspeech.ResultReason.TranslatedSpeech, msspeech.ResultReason.RecognizedIntent):
+        latency = result.properties[msspeech.PropertyId.SpeechServiceResponse_RecognitionLatencyMs]
+        assert int(latency) > 0, (result, result.reason)
+    else:
+        pass
+
+    error_json_property_id = msspeech.PropertyId.SpeechServiceResponse_JsonErrorDetails
+    if result.reason is msspeech.ResultReason.Canceled and result.cancellation_details.reason != \
+            msspeech.CancellationReason.EndOfStream:
+        assert error_json_property_id in result.properties, (result.reason, result,
+                str(result.cancellation_details))
+        error_json = result.properties[error_json_property_id]
+        assert error_json, result.reason
+    else:
+        assert error_json_property_id not in result.properties, result.reason
+
+
 def _check_callbacks(callbacks, check_num_recognized=True):
     assert callbacks['session_started'].num_calls == 1
     assert callbacks['session_stopped'].num_calls == 1
@@ -141,12 +163,15 @@ def _check_result_common(result, speech_input, utterance_index, do_check_duratio
     assert result.json
     assert '' == result.error_json
 
+    _check_result_properties(result)
+
 
 def _check_sr_result(result, speech_input, utterance_index):
     assert isinstance(result, msspeech.SpeechRecognitionResult)
     assert msspeech.ResultReason.RecognizedSpeech == result.reason
 
     _check_result_common(result, speech_input, utterance_index)
+
 
 def _check_translation_result(result, speech_input, utterance_index, target_languages):
     assert isinstance(result, msspeech.translation.TranslationRecognitionResult)

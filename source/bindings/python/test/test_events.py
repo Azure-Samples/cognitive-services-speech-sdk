@@ -5,7 +5,7 @@ from typing import Union
 import azure.cognitiveservices.speech as msspeech
 
 from .utils import (_TestCallback, _check_sr_result, _check_translation_result,
-        _check_intent_result, _check_callbacks, _wait_for_event)
+        _check_intent_result, _check_callbacks, _wait_for_event, _check_result_properties)
 from .conftest import SpeechInput, IntentInput
 
 
@@ -33,6 +33,8 @@ def speech_recognition_checks(evt: msspeech.SpeechRecognitionEventArgs):
         assert str(evt) == 'SpeechRecognitionEventArgs(session_id={}, result={})'.format(
                 evt.session_id, evt.result)
 
+    _check_result_properties(evt.result)
+
 
 def speech_recognition_canceled_checks(evt: msspeech.SpeechRecognitionCanceledEventArgs):
     speech_recognition_checks(evt)
@@ -51,6 +53,8 @@ def intent_recognition_checks(evt: msspeech.intent.IntentRecognitionEventArgs):
         assert str(evt) == 'IntentRecognitionEventArgs(session_id={}, result={})'.format(
                 evt.session_id, evt.result)
 
+    _check_result_properties(evt.result)
+
 
 def intent_recognition_canceled_checks(evt: msspeech.intent.IntentRecognitionCanceledEventArgs):
     intent_recognition_checks(evt)
@@ -67,6 +71,8 @@ def translation_recognition_checks(evt: msspeech.translation.TranslationRecognit
     if type(evt) is msspeech.translation.TranslationRecognitionEventArgs:
         assert str(evt) == 'TranslationRecognitionEventArgs(session_id={}, result={})'.format(
                 evt.session_id, evt.result)
+
+    _check_result_properties(evt.result)
 
 
 def translation_synthesis_checks(evt: msspeech.translation.TranslationSynthesisEventArgs):

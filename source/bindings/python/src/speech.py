@@ -217,6 +217,11 @@ class RecognitionResult():
         self._text = impl_result.text
         self._json = impl_result.json
         self._error_json = impl_result.error_json
+        self._properties = {}
+        for property_id in PropertyId:
+            value = impl_result.properties.get_property(property_id)
+            if value:
+                self._properties[property_id] = value
 
     @property
     def cancellation_details(self) -> "CancellationDetails":
@@ -286,6 +291,15 @@ class RecognitionResult():
         The bare JSON representation of the error from the Speech Service.
         """
         return self._error_json
+
+    @property
+    def properties(self) -> dict:
+        """
+        Other properties of the result.
+
+        :returns: `dict` indexed with :py:class:`.PropertyId`, and `str` values.
+        """
+        return self._properties.copy()
 
     def __str__(self):
         return u'{}(result_id={}, text="{}", reason={})'.format(

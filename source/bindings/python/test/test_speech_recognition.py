@@ -197,7 +197,7 @@ def test_canceled_result(speech_input):
     assert 'Runtime error: Failed to create transport request.' == cancellation_details.error_details
 
     assert "ResultReason.Canceled" == str(result.reason)
-    assert 'CancellationDetails(error_details="Runtime error: ' \
+    assert 'CancellationDetails(reason=CancellationReason.Error, error_details="Runtime error: ' \
             'Failed to create transport request.")' == str(result.cancellation_details)
 
 
