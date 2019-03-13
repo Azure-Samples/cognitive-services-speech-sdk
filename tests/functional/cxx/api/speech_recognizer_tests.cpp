@@ -502,8 +502,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         auto cancellation = CancellationDetails::FromResult(result);
         SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
-        // Bug: https://msasg.visualstudio.com/Skyman/_workitems/edit/1480495
-        //SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
+        SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
         SPXTEST_REQUIRE(!cancellation->ErrorDetails.empty());
 
         // NOTE: Looks like we still do need this...
