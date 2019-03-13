@@ -9,7 +9,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' ${{ parameters.name }} '))
   pool:
     name: ${{ parameters.poolName }}
-  timeoutInMinutes: 5
+  timeoutInMinutes: 30
   steps:
   - bash: brew config && brew install bash
     displayName: Install modern bash on macOS
