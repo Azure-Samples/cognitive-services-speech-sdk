@@ -5,6 +5,7 @@ package com.microsoft.cognitiveservices.speech.samples.console;
 //
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
@@ -271,4 +272,84 @@ public class SpeechRecognitionSamples {
             recognizer.stopContinuousRecognitionAsync().get();
         }
     }
+
+    // Speech recognition with events from a push stream
+    // This sample takes and existing file and reads it by chunk into a local buffer and then pushes the 
+    // buffer into an PushAudioStream for speech recognition.
+    public static void continuousRecognitionWithPushStream() throws InterruptedException, ExecutionException, IOException
+    {
+        // Creates an instance of a speech config with specified
+        // subscription key and service region. Replace with your own subscription key
+        // and service region (e.g., "westus").
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+        // Replace with your own audio file name.
+        // The input stream the sample will read from.
+        InputStream inputStream = new FileInputStream("YourAudioFile.wav");
+
+        // Create the push stream to push audio to.
+        PushAudioInputStream pushStream = AudioInputStream.createPushStream();
+
+        // Creates a speech recognizer using Push Stream as audio input.
+        AudioConfig audioInput = AudioConfig.fromStreamInput(pushStream);
+
+        SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
+        {
+            // Subscribes to events.
+            recognizer.recognizing.addEventListener((s, e) -> {
+                System.out.println("RECOGNIZING: Text=" + e.getResult().getText());
+            });
+
+            recognizer.recognized.addEventListener((s, e) -> {
+                if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                    System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
+                }
+                else if (e.getResult().getReason() == ResultReason.NoMatch) {
+                    System.out.println("NOMATCH: Speech could not be recognized.");
+                }
+            });
+
+            recognizer.canceled.addEventListener((s, e) -> {
+                System.out.println("CANCELED: Reason=" + e.getReason());
+
+                if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + e.getErrorCode());
+                    System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
+            });
+
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\n    Session started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\n    Session stopped event.");
+            });
+
+            // Starts continuous recognition. Uses stopContinuousRecognitionAsync() to stop recognition.
+            System.out.println("Say something...");
+            recognizer.startContinuousRecognitionAsync().get();
+
+            // Arbitrary buffer size.
+            byte[] readBuffer = new byte[4096];
+        
+            // Push audio read from the file into the PushStream.
+            // The audio can be pushed into the stream before, after, or during recognition
+            // and recognition will continue as data becomes available.
+            while(  inputStream.read(readBuffer) != -1)
+            {
+                pushStream.write(readBuffer);
+            }
+
+            pushStream.close();
+            inputStream.close();
+            
+            System.out.println("Press any key to stop");
+            new Scanner(System.in).nextLine();
+
+            recognizer.stopContinuousRecognitionAsync().get();
+        }
+    }
+
 }
