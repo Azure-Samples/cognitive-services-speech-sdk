@@ -18,8 +18,8 @@ constexpr const char* g_recoModeInteractive = "INTERACTIVE";
 constexpr const char* g_recoModeDictation = "DICTATION";
 constexpr const char* g_recoModeConversation = "CONVERSATION";
 
-constexpr const char* g_audioSourceMicrophone = "MICROPHONE";
-constexpr const char* g_audioSourceStream = "STREAM";
-constexpr const char* g_audioSourceFile = "FILE";
+constexpr const char* g_audioSourceMicrophone = "Microphones";
+constexpr const char* g_audioSourceStream = "Stream";
+constexpr const char* g_audioSourceFile = "File";
 
 }}}}

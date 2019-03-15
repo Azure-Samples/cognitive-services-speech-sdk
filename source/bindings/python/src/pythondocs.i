@@ -472,7 +472,7 @@ DocstringForPropertyId = """
 
     .. py:attribute:: AudioConfig_AudioSource
 
-      The audio source. Allowed values are "microphone", "file", and "stream".
+      The audio source. Allowed values are "Microphones", "File", and "Stream".
 
       .. note::
         This property id was added in version 1.3.0.

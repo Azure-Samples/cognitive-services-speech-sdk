@@ -223,7 +223,7 @@ enum class PropertyId
     AudioConfig_BitsPerSampleForCapture = 8003,
 
     /// <summary>
-    /// The audio source. Allowed values are "microphone", "file", and "stream".
+    /// The audio source. Allowed values are "Microphones", "File", and "Stream".
     /// Added in version 1.3.0.
     /// </summary>
     AudioConfig_AudioSource = 8004,
