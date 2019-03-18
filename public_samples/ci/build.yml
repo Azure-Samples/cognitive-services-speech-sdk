@@ -21,6 +21,7 @@ resources:
 
 variables:
   SPEECHSDK_NUGET_VERSION: 4.6
+  CG_RAN: true # we do Component Governance explicitly only in the Pre job
 
 jobs:
 
@@ -28,6 +29,8 @@ jobs:
   pool:
     name: Hosted Ubuntu 1604
   timeoutInMinutes: 10
+  variables:
+    CG_RAN: false
   steps:
   - bash: ./ci/check-git-head.sh
     displayName: Repository checks
