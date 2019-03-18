@@ -33,6 +33,9 @@ This sample demonstrates various forms of speech recognition, intent recognition
     * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).
     * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.
     * `YourLanguageUnderstandingAppId`: replace with the ID of a Language Understanding service application that you want to recognize intents with.
+  * The following settings apply to keyword-triggered recognition:
+    * `YourKeywordRecognitionModelFile.table`: replace with the location of your keyword recognition model file.
+    * `YourKeyword`: replace with the phrase your keyword recognition model triggers on.
   * Some samples require audio files to be present. Put appropriate audio files somewhere on your file system and adapt the paths in the Python source files.
 
 ## Run the samples

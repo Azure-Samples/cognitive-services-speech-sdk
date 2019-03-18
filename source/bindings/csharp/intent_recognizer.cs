@@ -155,7 +155,6 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <summary>
         /// Starts speech recognition on a continuous audio stream with keyword spotting, until StopKeywordRecognitionAsync() is called.
         /// User must subscribe to events to receive recognition results.
-        /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
         /// </summary>
         /// <param name="model">The keyword recognition model that specifies the keyword to be recognized.</param>
         /// <returns>A task representing the asynchronous operation that starts the recognition.</returns>
@@ -169,7 +168,6 @@ namespace Microsoft.CognitiveServices.Speech.Intent
 
         /// <summary>
         /// Stops continuous speech recognition with keyword spotting.
-        /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
         /// </summary>
         /// <returns>A task representing the asynchronous operation that stops the recognition.</returns>
         public Task StopKeywordRecognitionAsync()

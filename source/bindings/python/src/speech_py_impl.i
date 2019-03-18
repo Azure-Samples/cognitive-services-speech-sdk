@@ -21,23 +21,6 @@ from typing import Optional
 %rename("_get_result") *::GetResult;
 %rename("_get_cancellation_details") *::GetCancellationDetails;
 
-// generate python-only default constructors
-// ignoring the C++ constructors here creates default __init__ functions in the swig-generated python file, which are then overridden by the implementations below
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::KeywordRecognitionModel::KeywordRecognitionModel();
-%extend Microsoft::CognitiveServices::Speech::KeywordRecognitionModel {
-    %pythoncode %{
-    def __new__(cls, filename:Optional[str]=None):
-        if filename is None:
-            return super().__new__(cls)
-
-        return cls._from_file(filename)
-
-    def __init__(self, filename=None):
-        if filename is None:
-            raise ValueError('a filename needs to be provided')
-    %}
-}
-
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::PropertyCollection::GetProperty(const std::string& propertyName, const std::string& defaultValue) const;
 %feature("shadow") Microsoft::CognitiveServices::Speech::PropertyCollection::GetProperty const %{
     def get_property(self, property_id: "PropertyId", default_value: str = '') -> str:
@@ -58,22 +41,6 @@ from typing import Optional
 //don't expose all the different methods to create push and pull streams
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Audio::AudioInputStream::CreatePushStream;
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Audio::AudioInputStream::CreatePullStream;
-
-// don't expose keyword recognition
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::SpeechRecognizer::StartKeywordRecognition;
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::SpeechRecognizer::StopKeywordRecognition;
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::SpeechRecognizer::StartKeywordRecognitionAsync;
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::SpeechRecognizer::StopKeywordRecognitionAsync;
-
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::StartKeywordRecognition;
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::StopKeywordRecognition;
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::StartKeywordRecognitionAsync;
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::StopKeywordRecognitionAsync;
-
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::StartKeywordRecognition;
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::StopKeywordRecognition;
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::StartKeywordRecognitionAsync;
-%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::StopKeywordRecognitionAsync;
 
 // hide constructors for internally used classes
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::RecognitionResult::RecognitionResult;

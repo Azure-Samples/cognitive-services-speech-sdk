@@ -65,14 +65,12 @@ namespace Microsoft.CognitiveServices.Speech
 
         /// <summary>
         /// Indicates the speech result contains (unverified) keyword text.
-        /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
         /// Added in version 1.3.0
         /// </summary>
         RecognizingKeyword = 10,
 
         /// <summary>
         /// Indicates that keyword recognition completed recognizing the given keyword.
-        /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
         /// Added in version 1.3.0
         /// </summary>
         RecognizedKeyword = 11

@@ -51,14 +51,12 @@ public:
     /// <summary>
     /// Asynchronously initiates keyword recognition operation.
     /// </summary>
-    /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
     /// <param name="model">The keyword recognition model that specifies the keyword to be recognized.</param>
     /// <returns>An asynchronous operation that starts the keyword recognition.</returns>
     virtual std::future<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model) = 0;
 
     /// <summary>
     /// Asynchronously terminates ongoing keyword recognition operation.
-    /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
     /// </summary>
     /// <returns>An empty future.</returns>
     virtual std::future<void> StopKeywordRecognitionAsync() = 0;
@@ -416,11 +414,11 @@ protected:
     class PrivatePropertyCollection : public PropertyCollection
     {
     public:
-        PrivatePropertyCollection(SPXRECOHANDLE hreco) :
+        PrivatePropertyCollection(SPXRECOHANDLE hreco) : 
             PropertyCollection(
-                [=](){
+                [=](){ 
                 SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
-                recognizer_get_property_bag(hreco, &hpropbag);
+                recognizer_get_property_bag(hreco, &hpropbag); 
                 return hpropbag;
             }())
         {

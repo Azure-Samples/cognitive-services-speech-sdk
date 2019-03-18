@@ -12,10 +12,18 @@
       <Link>Microsoft.CognitiveServices.Speech.core.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="$(SpeechPackageRoot)runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.extension.kws.dll">
+      <Link>Microsoft.CognitiveServices.Speech.extension.kws.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == '' AND ('$(Platform)' == 'x64' OR '$(PlatformTarget)' == 'x64')">
     <None Include="$(SpeechPackageRoot)runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.core.dll">
       <Link>Microsoft.CognitiveServices.Speech.core.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(SpeechPackageRoot)runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.extension.kws.dll">
+      <Link>Microsoft.CognitiveServices.Speech.extension.kws.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

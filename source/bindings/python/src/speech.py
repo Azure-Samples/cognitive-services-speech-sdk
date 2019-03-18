@@ -363,6 +363,19 @@ class EventSignal():
         self._impl.disconnect_all()
 
 
+class KeywordRecognitionModel():
+    """
+    Represents a keyword recognition model.
+
+    :param filename: file name for the keyword recognition model.
+
+    """
+
+    def __init__(self, filename: str = None):
+        if filename is None:
+            raise ValueError('filename needs to be provided')
+        self._impl = impl.KeywordRecognitionModel._from_file(filename)
+
 class Recognizer():
     """
     Base class for different recognizers
@@ -462,6 +475,38 @@ class Recognizer():
         Synchronously terminates ongoing continuous recognition operation.
         """
         return self._impl.stop_continuous_recognition()
+
+    def start_keyword_recognition_async(self, model: KeywordRecognitionModel):
+        """
+        Asynchronously initiates keyword recognition operation.
+
+        :param model: the keyword recognition model that specifies the keyword to be recognized.
+
+        :return: A future that is fulfilled once recognition has been initialized.
+        """
+        return self._impl.start_keyword_recognition_async(model._impl)
+
+    def stop_keyword_recognition_async(self):
+        """
+        Asynchronously terminates ongoing keyword recognition operation.
+
+        :return: A future that is fulfilled once recognition has been stopped.
+        """
+        return self._impl.stop_keyword_recognition_async()
+
+    def start_keyword_recognition(self, model: KeywordRecognitionModel):
+        """
+        Synchronously initiates keyword recognition operation.
+
+        :param model: the keyword recognition model that specifies the keyword to be recognized.
+        """
+        return self._impl.start_keyword_recognition(model._impl)
+
+    def stop_keyword_recognition(self):
+        """
+        Synchronously terminates ongoing keyword recognition operation.
+        """
+        return self._impl.stop_keyword_recognition()
 
     @property
     def session_started(self) -> EventSignal:

@@ -356,7 +356,6 @@ def test_speech_config_set_properties():
         speech_config.set_properties({1000: "bad_value"})
 
 
-@pytest.mark.skip(reason="keyword recognition is not implemented")
 def test_keyword_recognition_model_constructor():
     model = msspeech.KeywordRecognitionModel(__file__)
     assert model

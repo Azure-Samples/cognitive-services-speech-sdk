@@ -38,3 +38,5 @@ For example, to build for Windows x64:
           \---kwsrunner
               \---Release
   ```
+
+ * Configure your workspace as usual with cmake, adding the additional parameter "-DEXTENSION_KWS_ENABLED=true" to enable extension building.
