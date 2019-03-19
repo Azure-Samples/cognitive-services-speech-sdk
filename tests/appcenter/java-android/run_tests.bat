@@ -66,6 +66,10 @@ if NOT EXIST "%SPEECHSDK_BUILD_ROOT%\MainActivity.properties" (
     echo LuisAppId = enter your LUIS AppId
     echo Keyword = Computer
     echo KeywordModel = kws-computer.zip
+    echo Keyword = Computer
+    echo KeywordModel = kws-computer.zip
+    echo SasToken = YourSasToken
+    echo SasContainerPrefix = uploadtest/testrun
     echo.
     exit /b 1
 )
@@ -111,7 +115,7 @@ if errorlevel 1 (
 
 echo.
 echo Now submitting executable to App Center for testing
-appcenter test run espresso %APPCENTER_TOKEN_OPTION% ^
+call appcenter test run espresso %APPCENTER_TOKEN_OPTION% ^
         --app         "%APPCENTER_USER_ID%/%APPCENTER_APPID%" ^
         --devices     "%APPCENTER_USER_ID%/%APPCENTER_DEVICESET%" ^
         --app-path    "%SPEECHSDK_TEST_ROOT%\app\build\outputs\apk\debug\app-debug.apk" ^

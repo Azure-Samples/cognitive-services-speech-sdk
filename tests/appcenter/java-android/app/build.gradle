@@ -34,6 +34,8 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
 
+    implementation 'com.microsoft.azure.android:azure-storage-android:2.0.0@aar'
+
     def appCenterSdkVersion = '1.11.2'
     implementation "com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}"
     implementation "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"

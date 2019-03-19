@@ -1569,7 +1569,7 @@ public class SpeechConfigTests {
         SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("de");
-        String logFilename = "test_filename.txt";
+        String logFilename = new java.io.File(System.getProperty("java.io.tmpdir", ""), "test_filename.txt").getAbsolutePath();
 
         s.setProperty(PropertyId.SpeechServiceLog_Filename, logFilename);
         assertEquals(s.getProperty(PropertyId.SpeechServiceLog_Filename), logFilename);

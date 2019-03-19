@@ -1,10 +1,10 @@
-# Readme.md
+# Running Speech SDK unit tests for Java in App Center
 
 ## Setting up App Center
 
 * Install [Node.js](https://nodejs.org/) if you don't have it yet.
 
-* Set up App Center cli tool:
+* Set up the App Center CLI:
 
   ``` shell
   npm -g i appcenter-cli
@@ -27,8 +27,9 @@
 
 ## Running the Speech SDK Tests
 
+* We assume the environment variable `%SPEECHSDK_BUILD_ROOT%` points to your build directory for the Speech SDK for Android.
 * Configure subscription keys and other test settings
-  * Create or edit %SPEECHSDK_BUILD_ROOT%\MainActivity.properties and update it with the subscription key(s) and region data. Enter at least:
+  * Create or edit `%SPEECHSDK_BUILD_ROOT%\MainActivity.properties` and update it with the subscription key(s) and region data. Enter at least:
 
     ```shell
     # test properties
@@ -41,22 +42,38 @@
     KeywordModel = kws-computer.zip
     ```
 
-  * Edit .\run_tests.bat and replace APPCENTER_USER_ID with your App Center user-id.
+  * Optionally, if you want the test suite to upload the test results (JUnit XML) to an Azure Blob Storage container, also add these two settings:
 
-* Prepare a command window by starting a cmd shell in the repository root
+    ```shell
+    SasToken = YourSasToken
+    SasContainerPrefix = https://YourStorageAccountName.blob.core.windows.net/YourContainer/Path/To/Results/
+    ```
+
+    Make sure that the container exists and the SAS token is valid at the time the test is run in App Center
+    (the [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli) can be used to perform all of these tasks).
+
+  * Set up environment to configure your App Center user ID (your account) and app ID (should be `SpeechSDKTester` if you followed above instructions):
+
+    ```shell
+    set APPCENTER_USER_ID=YourUser
+    set APPCENTER_APPID=SpeechSDKTester
+    ```
+
+* Build the Speech SDK for Android from a command window in the repository root:
 
   ``` shell
-  cmd
-  cd java-android
+  set SPEECHSDK_REPO_ROOT=%CD%
+  md "%SPEECHSDK_BUILD_ROOT%" && pushd "%SPEECHSDK_BUILD_ROOT"
+  cmake -G "NMake Makefiles" -DSPEECHSDK_TARGET_PLATFORM=Android-arm32 ^
+        -DCMAKE_ANDROID_NDK=/android-ndk-r16b -DCMAKE_BUILD_TYPE=Debug "%SPEECHSDK_REPO_ROOT%"
+  cmake --build .
+  popd
   ```
 
-* Build the Speech SDK
+* From your repository root, go to the `java-android` directory:
 
   ``` shell
-  md build && cd build
-  cmake -G "NMake Makefiles" -DSPEECHSDK_TARGET_PLATFORM=Android-arm32 ^
-        -DCMAKE_ANDROID_NDK=/android-ndk-r16b -DCMAKE_BUILD_TYPE=Debug ..
-  cmake --build .
+  cd tests\appcenter\java-android
   ```
 
 * Submit the test application

@@ -26,12 +26,15 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Calendar;
 import java.util.Properties;
 
 import tests.Settings;
 
+import java.nio.charset.Charset;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -43,6 +46,14 @@ import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.junit.Assert.*;
+
+import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageCredentials;
+import com.microsoft.azure.storage.StorageCredentialsSharedAccessSignature;
+import com.microsoft.azure.storage.blob.CloudBlobClient;
+import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import com.microsoft.azure.storage.blob.CloudBlockBlob;
+import com.microsoft.azure.storage.blob.ListBlobItem;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -79,9 +90,12 @@ public class SpeechSdkInstrumentedTest {
         reportHelper.label("Expecting wave file at " + Settings.WavFile);
         reportHelper.label("Properties loaded");
 
-        String xmlResults = System.getProperty("TestOutputFilename", null);
-        boolean successfull = tests.runner.Runner.mainRunner("tests.AllTests");
+        // note: this property, if set, is picked up by the junit results
+        System.setProperty("OS_DESCRIPTION", android.os.Build.MANUFACTURER + "-" + android.os.Build.HARDWARE + "-" + android.os.Build.VERSION.RELEASE + "-" + android.os.Build.DISPLAY);
 
+        boolean successful = tests.runner.Runner.mainRunner("tests.AllTests");
+
+        String xmlResults = System.getProperty("TestOutputFilename", null);
         FileInputStream fis = new FileInputStream(xmlResults);
         InputStreamReader isr = new InputStreamReader(fis);
         BufferedReader br = new BufferedReader(isr);
@@ -95,8 +109,21 @@ public class SpeechSdkInstrumentedTest {
             errMessage += "\r\n" + line;
         }
 
-        reportHelper.label("Unit tests executed, state " + successfull);
-        if (!successfull) {
+        if (System.getProperty("SasToken", "unconfigured") != "unconfigured") {
+            // When upload is configured, it needs to succeeed.
+            try {
+                reportHelper.label("Unit tests executed, uploading results " + successful);
+                uploadTestResults();
+            }
+            catch(Exception ex) {
+                reportHelper.label("Unit tests uploading results failed with " + ex);
+                errMessage += "\r\n" + ex;
+                successful = false;
+            }
+        }
+
+        reportHelper.label("Unit tests executed, state " + successful);
+        if (!successful) {
             throw new IOException(errMessage);
         }
     }
@@ -155,12 +182,12 @@ public class SpeechSdkInstrumentedTest {
             try {
                 Context targetContext = InstrumentationRegistry.getTargetContext();
                 AssetManager assets = targetContext.getAssets();
-    
+
                 InputStream inputStream = assets.open(filename);
                 Properties properties = new Properties();
                 properties.load(inputStream);
                 inputStream.close();
-    
+
                 for (Object name: properties.keySet()) {
                     String key = name.toString();
                     System.setProperty(key, properties.getProperty(key));
@@ -210,5 +237,27 @@ public class SpeechSdkInstrumentedTest {
 
         Settings.WavFile = System.getProperty("SampleAudioInput", waveFileDefault);
         Settings.SpeechAuthorizationToken = retrieveAuthorizationToken(Settings.SpeechRegion, Settings.SpeechSubscriptionKey);
+
+        directoryPrefix = System.getProperty("SasContainerPrefix", "unconfigured");
+        sasToken = System.getProperty("SasToken", "unconfigured");
+    }
+
+    public static String directoryPrefix = "unconfigured";
+    public static String sasToken = "unconfigured";
+
+    public String uploadTestResults() throws Exception {
+        String androidId = android.os.Build.DEVICE + "-" + android.os.Build.VERSION.RELEASE + "-" + Calendar.getInstance().getTimeInMillis();
+        String imageName = directoryPrefix + (directoryPrefix.endsWith("/") ? "" : "/") + "test-" + androidId;
+
+        String blobLocation = imageName + ".xml";
+        reportHelper.label("Unit tests uploading to " + blobLocation);
+
+        CloudBlockBlob imageBlob = new CloudBlockBlob(new java.net.URI(blobLocation), new StorageCredentialsSharedAccessSignature(sasToken));
+        String xmlResults = System.getProperty("TestOutputFilename", null);
+        if(xmlResults != null) {
+            imageBlob.uploadFromFile(xmlResults);
+        }
+
+        return imageName;
     }
 }

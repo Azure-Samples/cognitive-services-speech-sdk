@@ -1,5 +1,5 @@
 /* Schmant, the build tool, http://www.schmant.org
- * Copyright (C) 2007, 2008 Karl Gustafsson, Holocene Software, 
+ * Copyright (C) 2007, 2008 Karl Gustafsson, Holocene Software,
  * http://www.holocene.se
  *
  * Schmant is free software; you can redistribute it and/or modify
@@ -62,10 +62,10 @@ public class AntXmlRunListener extends RunListener {
     public void testRunStarted(Description description) {
         String testsuiteName = description.getDisplayName();
         if (testsuiteName == "null") testsuiteName = null;
-        
+
         this.document = getDocumentBuilder().newDocument();
         this.rootElement = this.document.createElement("testsuite");
-        this.rootElement.setAttribute("name", testsuiteName == null ? "Java Test Run (" + System.getProperty("os.name") + ")" : testsuiteName);
+        this.rootElement.setAttribute("name", testsuiteName == null ? "Java Test Run (" + System.getProperty("OS_DESCRIPTION", System.getProperty("os.name", "unknown")) + ")" : testsuiteName);
         this.rootElement.setAttribute("timestamp", DateUtils.format(new Date(), DateUtils.ISO8601_DATETIME_PATTERN));
         this.rootElement.setAttribute("hostname", getHostname());
         this.rootElement.appendChild(this.document.createElement("properties"));
@@ -120,7 +120,7 @@ public class AntXmlRunListener extends RunListener {
         if (message != null && message.length() > 0) {
             skippedElement.setAttribute("message", message);
         }
-        
+
         skippedElement.setAttribute("type", description.getDisplayName());
         this.failedTests.put(displayName, description);
     }
@@ -135,7 +135,7 @@ public class AntXmlRunListener extends RunListener {
         Element currentTestElement = null;
         if (!this.failedTests.containsKey(description)) {
             currentTestElement = this.document.createElement("testcase");
-            
+
             String testCaseName = getTestCaseName(description.getDisplayName());
             currentTestElement.setAttribute("name", testCaseName == null ? "unknown" : testCaseName);
 
@@ -156,18 +156,18 @@ public class AntXmlRunListener extends RunListener {
     public void testRunFinished(Result result) {
         try {
             OutputStream o = this.outputStream == null ? System.out : this.outputStream;
-            
+
             this.rootElement.setAttribute("tests", "" + result.getRunCount());
             this.rootElement.setAttribute("failures", "" + result.getFailureCount());
             this.rootElement.setAttribute("errors", "" + numErrors);
             this.rootElement.setAttribute("skipped", "" + numSkipped);
             this.rootElement.setAttribute("time", "" + (result.getRunTime() / 1000.0));
-            
+
             Writer writer = new BufferedWriter(new OutputStreamWriter(o, "UTF8"));
             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
-            
+
             (new DOMElementWriter()).write(this.rootElement, writer, 0, "  ");
-            
+
             writer.flush();
             o.flush();
         } catch (IOException ex) {
@@ -211,9 +211,9 @@ public class AntXmlRunListener extends RunListener {
     private static String getStackTrace(Throwable throwable) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw, true);
-        
+
         throwable.printStackTrace(pw);
-        
+
         pw.flush();
         pw.close();
         return sw.toString();
