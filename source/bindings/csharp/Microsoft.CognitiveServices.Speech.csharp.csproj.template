@@ -16,7 +16,7 @@
     <Version>@SPEECHSDK_MAJOR@.@SPEECHSDK_MINOR@.@SPEECHSDK_PATCH@.@SPEECHSDK_VTAG@</Version>
     <DebugSymbols>true</DebugSymbols>
     <FxCopAnalyzerVersion>2.6.2</FxCopAnalyzerVersion>
-    <CodeAnalysisRuleSet>$(USERPROFILE)\.nuget\packages\microsoft.codeanalysis.fxcopanalyzers\$(FxCopAnalyzerVersion)\rulesets\legacy\Sdl-7.1.Recommended.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>${NUGET_PACKAGE_BASE}/packages/microsoft.codeanalysis.fxcopanalyzers/$(FxCopAnalyzerVersion)/rulesets/legacy/Sdl-7.1.Recommended.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <Company>Microsoft Corporation</Company>
@@ -49,6 +49,10 @@
   <PropertyGroup Condition="'@OS_BUILD@' == 'OS_BUILD'">
     <DefineConstants>OS_BUILD</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('MacOS'))">
+    <DefineConstants>OSX</DefineConstants>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="$(FxCopAnalyzerVersion)" PrivateAssets="all" />
   </ItemGroup>
@@ -58,7 +62,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="${SRC_DIR}\interop\*.cs"/>
-    <Compile Include="${SRC_DIR}\*.cs"/>
+    <Compile Include="${NATIVE_INTEROP_CS_FILES}"/>
+    <Compile Include="${NATIVE_BASE_CS_FILES}"/>
   </ItemGroup>
 </Project>

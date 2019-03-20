@@ -654,10 +654,10 @@ jobs:
   # Note: NuGet currently does not depend on LinuxDockerBuild (only needs x64 binaries)
   variables:
     HAS_OS_BUILD: $[contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild ')]
-  dependsOn: [Pre, LinuxBuild, WindowsBuild, WindowsOSBuild, WindowsUwpBuild]
+  dependsOn: [Pre, LinuxBuild, WindowsBuild, WindowsOSBuild, WindowsUwpBuild, OsxBuild]
   condition: |
     and(
-      succeeded('Pre', 'LinuxBuild', 'WindowsBuild', 'WindowsUwpBuild'),
+      succeeded('Pre', 'LinuxBuild', 'WindowsBuild', 'WindowsUwpBuild', 'OsxBuild'),
       xor(
         succeeded('WindowsOSBuild'),
         not(contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild '))
@@ -690,6 +690,11 @@ jobs:
     displayName: 'Downloading WindowsUwp artifacts'
     inputs:
       artifactName: WindowsUwp
+      downloadPath: $(System.ArtifactsDirectory)\In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading OSX artifacts'
+    inputs:
+      artifactName: macOS
       downloadPath: $(System.ArtifactsDirectory)\In
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
@@ -946,6 +951,67 @@ jobs:
     inputs:
       testRunner: VSTest
       testResultsFiles: '**/test-*.trx'
+
+- job: NuGetOsxTest
+  dependsOn: [Pre, NuGet]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetOsxTest '))
+  pool:
+    name: Hosted macOS Preview
+  timeoutInMinutes: 30
+  steps:
+  - bash: brew config && brew install bash
+    displayName: Install modern bash on macOS
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Downloading Windows artifacts
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: '**/*.nupkg'
+  - bash: |
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false)
+      # dotnet test does not allow to supply TestRunParameters from command-line?!
+      perl -pi - \
+        UnifiedSpeechSubscriptionKey "$SPEECHSDK_SPEECH_KEY" \
+        Region "$SPEECHSDK_SPEECH_REGION" \
+        DeploymentId "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS" \
+        InputDir ${PWD}/tests/input/ \
+        LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
+        LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
+        LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
+        tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
+        BEGIN {
+          %A = splice(@ARGV, 0, $#ARGV);
+          $keysRe = "(?:\\b" . (join "\\b|\\b", keys %A) . "\\b)";
+          $keysRe = qr/$keysRe/;
+        }
+        s/(<Parameter name="($keysRe)" value=")([^"]*)/$1.$A{$2}/ge
+      SCRIPT
+      mkdir localnuget
+      nugetsource=${PWD}/localnuget
+      cp -v "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
+      #
+      cd tests/functional/csharp/end2end
+      dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source ${nugetsource} Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
+      dotnet test --blame --verbosity detailed --filter \
+        "TestCategory!=LongTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests" \
+        --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_osx_unit_tests.trx"
+    displayName: Run C# unit tests
+  - task: PublishTestResults@2
+    inputs:
+      testRunner: VSTest
+      testResultsFiles: '**/test-*.trx'
+    condition: succeededOrFailed()
 
 - job: AndroidBuild
   variables:
@@ -1892,6 +1958,15 @@ jobs:
       Pattern: '*.dylib.zip'
       signConfigType: inlineSignParams
       inlineOperation: '[ { "keyCode": "CP-401337-Apple", "operationSetCode": "MacAppDeveloperSign" } ]'
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign Mac .dll for nuget package'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: 'build/bin/$(BuildConfiguration)MacOS/netstandard2.0/'
+      Pattern: 'Microsoft.CognitiveServices.Speech.csharp.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - bash: |
       set -u -x -e -o pipefail

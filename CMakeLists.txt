@@ -102,7 +102,7 @@ elseif(SPEECHSDK_OS MATCHES "^IOS")
   set(IOS_DEPLOYMENT_TARGET 9.2)
 elseif(SPEECHSDK_OS STREQUAL "OSX")
   option(BUILD_PYTHON "Build Python SWIG module" OFF)
-  option(BUILD_CSHARP "Build C# module" OFF)
+  option(BUILD_CSHARP "Build C# module" ON)
   option(BUILD_JAVA "Build Java/Android SWIG module" ON)
   set(use_builtin_httpapi ON CACHE BOOL "")
   set(use_openssl OFF CACHE BOOL "") # TODO why wasn't this there before?

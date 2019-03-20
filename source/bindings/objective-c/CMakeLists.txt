@@ -99,9 +99,9 @@ install(EXPORT speechsdk-objc-export
     ${CMAKE_INSTALL_LIBDIR}/cmake/MicrosoftCognitiveServicesSpeech
 )
 
-# build a .dylib for java, since the .jar can't preserve the symbolic links in the framework bundle
-if (BUILD_JAVA)
-    add_library(${SPEECHSDK_CORE_DYNLIB} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
+# build a standalone .dylib for java and CSharp
+if (BUILD_JAVA OR BUILD_CSHARP)
+  add_library(${SPEECHSDK_CORE_DYNLIB} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
 
   target_link_libraries(${SPEECHSDK_CORE_DYNLIB}
     PRIVATE sr

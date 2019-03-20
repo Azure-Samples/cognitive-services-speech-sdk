@@ -50,9 +50,15 @@ LINUX_DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR/Linux")"
 [[ -e $LINUX_DROP_DIR ]]
 LINUX_DROP_DIR="$(cygpath --windows --absolute "$LINUX_DROP_DIR")"
 
+# Check that OSX drop directory exists and turn into Windows path.
+OSX_DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR/macOS")"
+[[ -e $OSX_DROP_DIR ]]
+OSX_DROP_DIR="$(cygpath --windows --absolute "$OSX_DROP_DIR")"
+
 OUTPUT_DIR="$(cygpath --windows --absolute "$OUTPUT_DIR")"
 
 "$NUGETEXETOOLPATH" pack "$NUSPEC_FILE_PATH" \
-  -Properties "RedistDir=$REDIST_DIR;WindowsDropDir=$WINDOWS_DROP_DIR;WindowsOSDropDir=$WINDOWS_OS_DROP_DIR;WindowsUwpDropDir=$WINDOWS_UWP_DROP_DIR;LinuxDropDir=$LINUX_DROP_DIR;Version=$VERSION" \
+  -Properties "RedistDir=$REDIST_DIR;WindowsDropDir=$WINDOWS_DROP_DIR;WindowsOSDropDir=$WINDOWS_OS_DROP_DIR;WindowsUwpDropDir=$WINDOWS_UWP_DROP_DIR;LinuxDropDir=$LINUX_DROP_DIR;OSXDropDir=$OSX_DROP_DIR;Version=$VERSION" \
   -OutputDirectory "$OUTPUT_DIR" \
   -Symbols
+

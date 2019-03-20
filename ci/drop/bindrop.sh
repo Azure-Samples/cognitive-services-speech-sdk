@@ -73,13 +73,14 @@ else
     DYNLIBSUFFIX=.so
     SRCJAVABINDINGS="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.so"
   else # OSX
+    DOTNET_LIBPREFIX=Microsoft.CognitiveServices.Speech.
     DYNLIBSUFFIX=.dylib
     SRCJAVABINDINGS="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
   fi
 
   STATLIBSUFFIX=.a
 
-  if [[ $PLATFORM == Linux-arm* || $PLATFORM == Linux-x86 || $TARGET == OSX ]]; then
+  if [[ $PLATFORM == Linux-arm* || $PLATFORM == Linux-x86 ]]; then
     CSHARPSUPPORTED=false
   else
     CSHARPSUPPORTED=true
@@ -176,7 +177,11 @@ if [[ $PLATFORM = OSX-* ]]; then
   mkdir -p "$DESTPRIVLIBUNSTRIPPED"
   cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.unstripped$DYNLIBSUFFIX "$DESTPRIVLIBUNSTRIPPED"
 
+  # copy dotnet dll
+  SRCDYNLIB_DOTNETCORE="${SRCBIN}/${CONFIG}MacOS"
+  cp $CPOPT "$SRCDYNLIB_DOTNETCORE"/netstandard2.0/$DOTNET_LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNETSTANDARD20"
 fi
+
 # copy additional private binaries (non-shipping)
 for var in carbonx Microsoft.CognitiveServices.Speech.Tests.ParallelRunner core_tests cxx_api_tests; do
   [[ -e "$SRCBIN/$var" ]] && mkdir -p "$DESTPRIVBIN" && cp $CPOPT "$SRCBIN/$var" "$DESTPRIVBIN"
@@ -193,3 +198,4 @@ cp $CPOPT "$SRCLIB"/*carbon-mock* "$DESTPRIVLIB"
 
 cp $CPOPT -R "$SRCPRIVINC" "$DESTPRIVINC"
 cp $CPOPT -R "$SRCPRIVINC2" "$DESTPRIVINC2"
+
