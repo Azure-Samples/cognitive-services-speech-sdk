@@ -246,6 +246,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        public static void AssertFuzzyMatching(string[] expectedUtterances, string[] actualUtterances, int tolerance)
+        {
+            // Checking text results.
+            var texts = actualUtterances.Select(t => t).Where(t => !string.IsNullOrEmpty(t)).ToList();
+            var expected = string.Join(" ", expectedUtterances);
+            expected = Normalize(expected);
+
+            var actual = string.Join(" ", texts.ToArray());
+            actual = Normalize(actual);
+            // dont do a hard string comparison, we allow a small percentage of word edits (word insert/delete/move)
+            AssertStringWordEditPercentage(expected, actual, tolerance);
+        }
+
         public SpeechRecognizer GetSpeechRecognizingAsyncNotAwaited(SpeechRecognizer recognizer)
         {
             using (var rec = recognizer)
