@@ -45,6 +45,19 @@ void CSpxRecognizer::SetStringValue(const char* name, const char* value)
     SetStringValueInProperties(name, value);
 }
 
+std::shared_ptr<ISpxGrammar> CSpxRecognizer::GetPhraseListGrammar(const wchar_t* name)
+{
+    SPX_IFFALSE_THROW_HR(name == nullptr || name[0] == L'\0', SPXERR_INVALID_ARG); // only support one phrase list at this point
+    return SpxQueryInterface<ISpxGrammar>(EnsureDefaultPhraseListGrammar());
+}
+
+std::list<std::string> CSpxRecognizer::GetListenForList()
+{
+    return m_phraselist == nullptr
+        ? std::list<std::string>()
+        : m_phraselist->GetListenForList();
+}
+
 bool CSpxRecognizer::IsEnabled()
 {
     return m_fEnabled;
@@ -291,6 +304,19 @@ void CSpxRecognizer::TermDefaultSession()
         m_defaultSession->RemoveRecognizer(this);
     }
     SpxTermAndClear(m_defaultSession);
+}
+
+std::shared_ptr<ISpxPhraseList> CSpxRecognizer::EnsureDefaultPhraseListGrammar()
+{
+    if (m_phraselist == nullptr)
+    {
+        auto phraselist = SpxCreateObjectWithSite<ISpxPhraseList>("CSpxPhraseListGrammar", this);
+        phraselist->InitPhraseList(L"");
+
+        m_phraselist = phraselist;
+    }
+
+    return m_phraselist;
 }
 
 void CSpxRecognizer::OnIsEnabledChanged()

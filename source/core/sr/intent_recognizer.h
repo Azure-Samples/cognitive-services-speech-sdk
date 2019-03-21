@@ -28,6 +28,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxIntentRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxConnectionFromRecognizer)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGrammarList)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectInit (overrides) ---

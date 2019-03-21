@@ -775,6 +775,39 @@ public:
     virtual void InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength) = 0;
 };
 
+class ISpxPhrase : public ISpxInterfaceBaseFor<ISpxPhrase>
+{
+public:
+
+    virtual void InitPhrase(const wchar_t* phrase) = 0;
+    virtual std::wstring GetPhrase() const = 0;
+};
+
+class ISpxPhraseList : public ISpxInterfaceBaseFor<ISpxPhraseList>
+{
+public:
+
+    virtual void InitPhraseList(const wchar_t* name) = 0;
+    virtual std::wstring GetName() = 0;
+
+    virtual void AddPhrase(std::shared_ptr<ISpxPhrase> phrase) = 0;
+    virtual void Clear() = 0;
+
+    virtual std::list<std::string> GetListenForList() = 0;
+};
+
+class ISpxGrammar : public ISpxInterfaceBaseFor<ISpxGrammar>
+{
+};
+
+class ISpxGrammarList : public ISpxInterfaceBaseFor<ISpxGrammarList>
+{
+public:
+
+    virtual std::shared_ptr<ISpxGrammar> GetPhraseListGrammar(const wchar_t* name) = 0;
+    virtual std::list<std::string> GetListenForList() = 0;
+};
+
 class ISpxLanguageUnderstandingModel : public ISpxInterfaceBaseFor<ISpxLanguageUnderstandingModel>
 {
 public:

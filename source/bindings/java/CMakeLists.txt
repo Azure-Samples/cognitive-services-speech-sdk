@@ -140,6 +140,8 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SessionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/Connection.java
+    ${CMAKE_SWIG_OUTDIR}/Grammar.java
+    ${CMAKE_SWIG_OUTDIR}/PhraseListGrammar.java
     ${CMAKE_SWIG_OUTDIR}/ConnectionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/ConnectionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/ConnectionEventSignal.java
@@ -181,6 +183,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXSESSIONHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXTRIGGERHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXCONNECTIONHANDLE.java
+    ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXGRAMMARHANDLE.java
 
     ${CMAKE_SWIG_OUTDIR}/VoidFuture.java
     ${CMAKE_SWIG_OUTDIR}/StringVector.java
@@ -208,6 +211,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/NoMatchDetails.java
     ${PACKAGE_DIR}/NoMatchReason.java
     ${PACKAGE_DIR}/Connection.java
+    ${PACKAGE_DIR}/PhraseListGrammar.java
     ${PACKAGE_DIR}/Recognizer.java
     ${PACKAGE_DIR}/SessionEventArgs.java
     ${PACKAGE_DIR}/ConnectionEventArgs.java

@@ -34,6 +34,8 @@
     catch (...) { SWIG_exception(SWIG_UnknownError,"Runtime exception"); }
 }
 
+%shared_ptr(Microsoft::CognitiveServices::Speech::Grammar)
+%shared_ptr(Microsoft::CognitiveServices::Speech::PhraseListGrammar)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Connection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::RecognitionResult, Microsoft::CognitiveServices::Speech::RecognitionEventArgs, Microsoft::CognitiveServices::Speech::RecognitionEventArgs>)
@@ -456,4 +458,7 @@
 %include <speechapi_cxx_session.h>
 
 %include <speechapi_cxx_connection.h>
+%include <speechapi_cxx_grammar.h>
+%include <speechapi_cxx_phrase_list_grammar.h>
 
+%template(FromRecognizer) Microsoft::CognitiveServices::Speech::PhraseListGrammar::FromRecognizer<Microsoft::CognitiveServices::Speech::Recognizer>;

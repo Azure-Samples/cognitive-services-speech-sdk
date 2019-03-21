@@ -1017,9 +1017,26 @@ void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* c
 
 std::list<std::string> CSpxAudioStreamSession::GetListenForList()
 {
-    return m_luAdapter != nullptr
-        ? GetListenForListFromLuEngineAdapter()
-        : std::list<std::string>();
+    // Get the listen for list from the recognizer(s)
+    SPX_DBG_ASSERT(m_recognizers.size() == 1);
+    auto recognizer = m_recognizers.front().lock();
+    auto grammarlist = SpxQueryInterface<ISpxGrammarList>(recognizer);
+    auto listenForList = grammarlist->GetListenForList();
+
+    // If we also have an lu adapter...
+    if (m_luAdapter != nullptr)
+    {
+        // Get the listen for list for the lu adapter
+        auto intentListenForList = GetListenForListFromLuEngineAdapter();
+
+        // Combine the two listen for lists into a single list
+        auto insertAt = listenForList.end();
+        auto insertBegin = intentListenForList.begin();
+        auto insertEnd = intentListenForList.end();
+        listenForList.insert(insertAt, insertBegin, insertEnd);
+    }
+
+    return listenForList;
 }
 
 void CSpxAudioStreamSession::GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region)

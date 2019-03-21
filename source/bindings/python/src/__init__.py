@@ -48,6 +48,7 @@ for cls in (
     Recognizer,
     Connection,
     ConnectionEventArgs,
+    PhraseListGrammar,
     ResultFuture,
     ResultReason,
     SessionEventArgs,
@@ -83,5 +84,6 @@ __all__ = [
     'Recognizer',
     'Connection',
     'ConnectionEventArgs',
+    'PhraseListGrammar',
 ]
 

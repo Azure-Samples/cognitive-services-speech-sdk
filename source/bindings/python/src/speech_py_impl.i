@@ -139,7 +139,8 @@ from typing import Optional
 %rename ("_from_endpoint") Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig::FromEndpoint;
 %rename ("_from_subscription") Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig::FromSubscription;
 %rename ("_from_config") Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::FromConfig;
-
+%rename ("from_recognizer") Microsoft::CognitiveServices::Speech::PhraseListGrammar::FromRecognizer;
+ 
 // return synthesized audio as bytes object
 %rename ("_audio") Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult::Audio;
 %extend Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult {

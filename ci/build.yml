@@ -538,7 +538,9 @@ jobs:
            "external/junit/hamcrest-core-1.3.jar") \
          -DSpeechSubscriptionKey="$SPEECHSDK_SPEECH_KEY" \
          -DSpeechRegion="$SPEECHSDK_SPEECH_REGION" \
+         -DLuisSubscriptionKey=$(luis-westus-s0-201809-key1) \
          -DLuisRegion="$SPEECHSDK_LUIS_REGION" \
+         -DAudioInputDirectory=tests/input/audio \
          -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
          -DKeyword=Computer \
          -DKeywordModel=/data/keyword/kws.table \
@@ -635,7 +637,9 @@ jobs:
               "external/junit/hamcrest-core-1.3.jar") \
             -DSpeechSubscriptionKey="$SPEECHSDK_SPEECH_KEY" \
             -DSpeechRegion="$SPEECHSDK_SPEECH_REGION" \
+            -DLuisSubscriptionKey=$(luis-westus-s0-201809-key1) \
             -DLuisRegion="$SPEECHSDK_LUIS_REGION" \
+            -DAudioInputDirectory=tests/input/audio \
             -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
             -DKeyword=Computer \
             -DKeywordModel=/data/keyword/kws.table \

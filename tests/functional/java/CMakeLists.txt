@@ -37,6 +37,7 @@ set(JAVA_SOURCES_TESTS
     ${PROJECT_SOURCE_DIR}/tests/unit/AudioInputStreamTests.java
     ${PROJECT_SOURCE_DIR}/tests/unit/PropertyCollectionTests.java
     ${PROJECT_SOURCE_DIR}/tests/unit/WavFileAudioInputStream.java
+    ${PROJECT_SOURCE_DIR}/tests/unit/PhraseListGrammarTests.java
 )
 
 add_jar(${PROJECT_NAME}

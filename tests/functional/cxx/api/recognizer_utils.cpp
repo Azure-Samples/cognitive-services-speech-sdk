@@ -14,6 +14,7 @@ TestData wrongSamplingRateFile {"/audio/11khztest.wav", "" };
 TestData cortana {"/audio/heyCortana.wav", "Hey Cortana," };
 TestData callTheFirstOne{ "/audio/CallTheFirstOne.wav", "" };
 TestData turnOnLamp {"/audio/TurnOnTheLamp.wav", "Turn on lamp" };
+TestData dgiWreckANiceBeach {"/audio/wreck-a-nice-beach.wav", "Wreck a nice beach." };
 
 std::shared_ptr<SpeechConfig> CurrentSpeechConfig()
 {

@@ -95,8 +95,10 @@ speech_input_data_raw = {'weather':
                              "Storyline Superman also considers Batman to be one of the most brilliant minds on the planet. Batman has the ability to function under great physical pain and withstand mind control, he is a master.",
                              "Disguise Multilingual and an expert in espionage, often gathering information under different identity's Batman's.",
                              "Karate judo and jujitsu training has made him after Master of stealth an escape, allowing tumor allowing him to appear and disappear at Will and to break free."
-                         ], batman_offsets, batman_durations, 'en-US', dict())}
-
+                         ], batman_offsets, batman_durations, 'en-US', dict()),
+                         'beach': ('wreck-a-nice-beach.wav', ["Wreck a nice beach."], (1700000,), (10800000,), 'en-us', dict()),
+                         'beach_nohelp': ('wreck-a-nice-beach.wav', ["Recognize speech."], (1000000,), (17500000,), 'en-us', dict()),
+                         'beach_nohelp_truman': ('wreck-a-nice-beach.wav', ["Recognize speech."], (1700000,), (10800000,), 'en-us', dict())}
 
 @pytest.fixture
 def speech_input(request):
@@ -110,7 +112,14 @@ def speech_input(request):
 IntentInput = namedtuple('IntentInputData',
                          ('path', 'transcription', 'offset', 'duration', 'intent_id'))
 intent_input_data_raw = {
-    'lamp': ('TurnOnTheLamp.wav', ["Turn on the lamp."], (4000000, ), (11000000, ), 'HomeAutomation.TurnOn')}
+    'lamp': ('TurnOnTheLamp.wav', ["Turn on the lamp."], (3800000, ), (11200000, ),
+             'HomeAutomation.TurnOn'),
+    'beach': ('wreck-a-nice-beach.wav', ["Wreck a nice beach."], (1700000,),
+              (10800000,), None),
+    'beach_nohelp': ('wreck-a-nice-beach.wav', ["Recognize speech."],
+                     (1000000,), (17500000,), None),
+    'beach_nohelp_truman': ('wreck-a-nice-beach.wav', ["Recognize speech."],
+                            (1700000,), (10800000,), None)}
 
 
 @pytest.fixture

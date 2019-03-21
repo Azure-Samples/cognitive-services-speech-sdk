@@ -837,3 +837,34 @@ class Connection():
         """
         return EventSignal(self._impl.disconnected, ConnectionEventArgs)
 
+class PhraseListGrammar():
+    """
+    Class that allows runtime addition of phrase hints to aid in speech recognition. 
+
+    Phrases added to the recognizer are effective at the start of the next recognition, or the next time the speech recognizer must 
+    reconnect to the speech service.
+    """
+    @classmethod
+    def from_recognizer(cls, recognizer: Recognizer):
+        """
+        Gets the :class:`.PhraseListGrammar` instance from the specified recognizer.
+        """
+        return cls(impl.PhraseListGrammar.from_recognizer(recognizer._impl))
+
+    def __init__(self, impl_phraseListGrammar):
+        """
+        Constructor for internal use.
+        """
+        self._impl = impl_phraseListGrammar
+
+    def addPhrase(self, phrase: str):
+        """
+        Adds a single phrase to the current recognizer.
+        """
+        self._impl.add_phrase(phrase)
+
+    def clear(self):
+        """
+        Clears all phrases from the current recognizer.
+        """
+        self._impl.clear()    

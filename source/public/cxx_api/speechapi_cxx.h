@@ -44,6 +44,10 @@
 #include <speechapi_cxx_speech_translation_config.h>
 #include <speechapi_cxx_translation_recognizer.h>
 
+#include <speechapi_cxx_grammar.h>
+#include <speechapi_cxx_grammar_phrase.h>
+#include <speechapi_cxx_phrase_list_grammar.h>
+
 #include <speechapi_cxx_session.h>
 
 #include <speechapi_cxx_connection.h>

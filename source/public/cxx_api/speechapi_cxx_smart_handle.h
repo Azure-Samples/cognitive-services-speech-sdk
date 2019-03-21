@@ -7,6 +7,7 @@
 
 #pragma once
 #include <speechapi_cxx_common.h>
+#include <spxdebug.h>
 
 
 namespace Microsoft {
@@ -16,6 +17,7 @@ namespace Speech {
 
 typedef SPXHR(SPXAPI_CALLTYPE *SmartHandleCloseFunction)(SPXHANDLE);
 
+
 /// <summary>
 /// Smart handle class.
 /// </summary>
@@ -24,7 +26,7 @@ class SmartHandle
 {
 public:
 
-    SmartHandle(T handle) : m_handle(handle) { };
+    SmartHandle(T handle = SPXHANDLE_INVALID) : m_handle(handle) { };
     ~SmartHandle() { reset(); }
 
     explicit operator T&() const { return m_handle; }
@@ -32,9 +34,15 @@ public:
     T get() const { return m_handle; }
     operator T() const { return m_handle; }
 
+    T* operator &()
+    {
+        SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, !InvalidHandle(m_handle));
+        return &m_handle;
+    }
+
     void reset()
     {
-        if (m_handle != nullptr)
+        if (!InvalidHandle(m_handle))
         {
             closeFunction(m_handle);
             m_handle = SPXHANDLE_INVALID;
@@ -42,6 +50,8 @@ public:
     }
 
 private:
+
+    static bool InvalidHandle(T t) { return t == nullptr || t == SPXHANDLE_INVALID; }
 
     DISABLE_COPY_AND_MOVE(SmartHandle);
     T m_handle;

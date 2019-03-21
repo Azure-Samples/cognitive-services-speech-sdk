@@ -179,6 +179,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     public static readonly string Utterance = "Shut down the computer.";
                 }
             }
+
+            public static class DgiWreckANiceBeach
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "wreck-a-nice-beach.wav");
+                public static readonly string CorrectRecoText = "Wreck a nice beach.";
+                public static readonly string DefaultRecoText = "Recognize speech.";
+            }
         }
 
         public static class French

@@ -20,6 +20,7 @@ class CSpxRecognizer :
     public ISpxSessionFromRecognizer,
     public ISpxObjectWithSiteInitImpl<ISpxRecognizerSite>,
     public ISpxPropertyBagImpl,
+    public ISpxGrammarList,
     public ISpxConnectionFromRecognizer,
     public ISpxGenericSite
 {
@@ -36,6 +37,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerEvents)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGrammarList)
         SPX_INTERFACE_MAP_ENTRY(ISpxConnectionFromRecognizer)
     SPX_INTERFACE_MAP_END()
 
@@ -45,6 +47,10 @@ public:
 
     // --- ISpxNamedProperties (overrides)
     void SetStringValue(const char* name, const char* value) override;
+
+    // --- ISpxGrammarList
+    std::shared_ptr<ISpxGrammar> GetPhraseListGrammar(const wchar_t* name) override;
+    std::list<std::string> GetListenForList() override;
 
     // --- ISpxRecognizer
     bool IsEnabled() override;
@@ -86,9 +92,12 @@ public:
     std::shared_ptr<ISpxConnection> GetConnection() override;
 
 protected:
+
     void EnsureDefaultSession();
     void TermDefaultSession();
-    
+
+    std::shared_ptr<ISpxPhraseList> EnsureDefaultPhraseListGrammar();
+
     void OnIsEnabledChanged();
 
     void CheckLogFilename();
@@ -105,6 +114,8 @@ private:
 
     std::shared_ptr<ISpxSession> m_defaultSession;
     std::atomic_bool m_fEnabled;
+
+    std::shared_ptr<ISpxPhraseList> m_phraselist;
 
     void SetStringValueInProperties(const char* name, const char* value);
     std::string GetStringValueFromProperties(const char* name, const char* defaultValue);

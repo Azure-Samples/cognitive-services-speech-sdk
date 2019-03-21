@@ -22,6 +22,11 @@ class Recognizer : public std::enable_shared_from_this<Recognizer>
 public:
 
     /// <summary>
+    /// Internal operator used to get underlying handle value.
+    /// </summary>
+    explicit operator SPXRECOHANDLE() const { return m_hreco; }
+
+    /// <summary>
     /// Returns true if the recognizer is enabled.
     /// </summary>
     /// <returns>A Boolean indicating whether the recognizer is enabled.</returns>

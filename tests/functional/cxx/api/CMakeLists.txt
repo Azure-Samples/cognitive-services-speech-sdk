@@ -15,6 +15,7 @@ set(SOURCES
     "${SRC_DIR}/main.cpp"
     "${SRC_DIR}/audio_config_tests.cpp"
     "${SRC_DIR}/speech_recognizer_tests.cpp"
+    "${SRC_DIR}/speech_recognizer_dynamic_grammar_tests.cpp"
     "${SRC_DIR}/intent_recognizer_tests.cpp"
     "${SRC_DIR}/speech_event_signal_tests.cpp"
     "${SRC_DIR}/recognizer_utils.cpp"

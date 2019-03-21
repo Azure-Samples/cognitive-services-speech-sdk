@@ -54,6 +54,7 @@ extern TestData batman;
 extern TestData wrongSamplingRateFile;
 extern TestData callTheFirstOne;
 extern TestData turnOnLamp;
+extern TestData dgiWreckANiceBeach;
 
 void UseMocks(bool value);
 void UseMockUsp(bool value);

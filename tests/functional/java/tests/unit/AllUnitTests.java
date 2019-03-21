@@ -19,7 +19,8 @@ import org.junit.runners.Suite.SuiteClasses;
     RecognizerTests.class,
     SpeechPropertyIdTests.class,
     AudioInputStreamTests.class,
-    PropertyCollectionTests.class
+    PropertyCollectionTests.class,
+    PhraseListGrammarTests.class,
     })
 public class AllUnitTests {
 
