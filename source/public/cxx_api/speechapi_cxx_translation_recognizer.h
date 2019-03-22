@@ -110,6 +110,7 @@ public:
     /// <summary>
     /// Starts keyword recognition on a continuous audio stream, until StopKeywordRecognitionAsync() is called.
     /// </summary>
+    /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
     /// <param name="model">Specifies the keyword model to be used.</param>
     /// <returns>An asynchronous operation that starts the keyword recognition.</returns>
     std::future<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model) override
@@ -120,6 +121,7 @@ public:
     /// <summary>
     /// Stops continuous keyword recognition.
     /// </summary>
+    /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
     /// <returns>A task representing the asynchronous operation that stops the keyword recognition.</returns>
     std::future<void> StopKeywordRecognitionAsync() override
     {

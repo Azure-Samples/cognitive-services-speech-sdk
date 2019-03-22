@@ -181,6 +181,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     /**
      * Starts speech recognition on a continuous audio stream with keyword spotting, until stopKeywordRecognitionAsync() is called.
      * User must subscribe to events to receive recognition results.
+     * Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
      * @param model The keyword recognition model that specifies the keyword to be recognized.
      * @return A task representing the asynchronous operation that starts the recognition.
      */
@@ -199,6 +200,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
     /**
      * Stops continuous speech recognition.
+     * Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
      * @return A task representing the asynchronous operation that stops the recognition.
      */
     public Future<Void> stopKeywordRecognitionAsync() {

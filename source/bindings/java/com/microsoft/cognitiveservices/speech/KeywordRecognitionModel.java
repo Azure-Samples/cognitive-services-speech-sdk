@@ -21,6 +21,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 /**
  * Represents a keyword recognition model for recognizing when
  * the user says a keyword to initiate further speech recognition.
+ * Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
  */
 public class KeywordRecognitionModel implements Closeable
 {

@@ -11,6 +11,7 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Represents keyword recognition model used with StartKeywordRecognitionAsync.
     /// </summary>
+    /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
     public sealed class KeywordRecognitionModel : IDisposable
     { 
         /// <summary>

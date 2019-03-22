@@ -51,6 +51,7 @@ public:
     /// <summary>
     /// Asynchronously initiates keyword recognition operation.
     /// </summary>
+    /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
     /// <param name="model">The keyword recognition model that specifies the keyword to be recognized.</param>
     /// <returns>An asynchronous operation that starts the keyword recognition.</returns>
     virtual std::future<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model) = 0;
@@ -58,6 +59,7 @@ public:
     /// <summary>
     /// Asynchronously terminates ongoing keyword recognition operation.
     /// </summary>
+    /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
     /// <returns>An empty future.</returns>
     virtual std::future<void> StopKeywordRecognitionAsync() = 0;
 
