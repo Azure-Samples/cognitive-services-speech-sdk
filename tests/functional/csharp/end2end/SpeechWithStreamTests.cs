@@ -86,7 +86,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var actualRecognitionTextResults = result.Select(t => t.Result.Text).ToArray();
             for (var i = 0; i < result.Count; i++)
             {
-                AssertMatching(TestData.English.Batman.Utterances[i], actualRecognitionTextResults[i]);
+                AssertStringWordEditPercentage(TestData.English.Batman.Utterances[i], actualRecognitionTextResults[i], 5);
             }
         }
 

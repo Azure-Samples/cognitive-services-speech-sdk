@@ -272,7 +272,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static string Normalize(string str)
         {
             str = str.ToLower();
-            return Regex.Replace(str, "[^a-z0-9' ]+", "", RegexOptions.Compiled);
+            return Regex.Replace(str, @"[^\w ]+", "", RegexOptions.Compiled);
         }
 
         public static void AssertConnectionCountMatching(int connectedEventCount, int disconnectedEventCount)
