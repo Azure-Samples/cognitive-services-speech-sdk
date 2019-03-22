@@ -109,6 +109,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task RecognizeIntentSpecialCharacters()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TStockValue.AudioFile);
+            using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
+            {
+                var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
+                recognizer.AddAllIntents(model);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                var json = result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
+                Assert.IsTrue(json.Contains("AT&T"), $"Could not find AT&T in JSON response: {json}");
+            }
+        }
+
+        [TestMethod]
         public void TestSetAndGetAuthTokenOnIntent()
         {
             var token = "x";

@@ -180,6 +180,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
             }
 
+            public static class TStockValue
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "TStockValue.wav");
+                public static readonly string Utterance = "What's the AT&T stock value today?";
+            }
+
             public static class DgiWreckANiceBeach
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "wreck-a-nice-beach.wav");
