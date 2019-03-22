@@ -7,7 +7,7 @@ namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Defines speech property ids.
-    /// Changed in version 1.1.0.
+    /// Changed in version 1.4.0.
     /// </summary>
     public enum PropertyId
     {
@@ -187,7 +187,8 @@ namespace Microsoft.CognitiveServices.Speech
 
         /// <summary>
         /// The file name to write logs.
+        /// Added in version 1.4.0.
         /// </summary>
-        SpeechServiceLog_Filename = Internal.PropertyId.SpeechServiceLog_Filename
+        Speech_LogFilename = Internal.PropertyId.Speech_LogFilename
     }
 }

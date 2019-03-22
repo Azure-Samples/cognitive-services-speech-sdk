@@ -36,6 +36,6 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         CancellationDetails_ReasonText = 6001,
         CancellationDetails_ReasonDetailedText = 6002,
         LanguageUnderstandingServiceResponse_JsonResult = 7000,
-        SpeechServiceLog_Filename = 9001
+        Speech_LogFilename = 9001
     }
 }

@@ -6,7 +6,7 @@ package com.microsoft.cognitiveservices.speech;
 
 /**
  * Defines property ids.
- * Changed in version 1.1.0.
+ * Changed in version 1.4.0.
  */
 public enum PropertyId {
 
@@ -188,8 +188,9 @@ public enum PropertyId {
 
     /**
     * The file name to write logs.
+    * Added in version 1.4.0.
     */
-    SpeechServiceLog_Filename ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceLog_Filename);
+    Speech_LogFilename ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Speech_LogFilename);
 
     private PropertyId(com.microsoft.cognitiveservices.speech.internal.PropertyId id) {
         this.id = id;

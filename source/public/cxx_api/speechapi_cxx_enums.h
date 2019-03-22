@@ -16,7 +16,7 @@ namespace Speech {
 
 /// <summary>
 /// Defines speech property ids.
-/// Changed in version 1.1.0.
+/// Changed in version 1.4.0.
 /// </summary>
 enum class PropertyId
 {
@@ -230,8 +230,9 @@ enum class PropertyId
 
     /// <summary>
     /// The file name to write logs.
+    /// Added in version 1.4.0.
     /// </summary>
-    SpeechServiceLog_Filename = 9001
+    Speech_LogFilename = 9001
 };
 
 enum class OutputFormat

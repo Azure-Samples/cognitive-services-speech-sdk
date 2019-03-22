@@ -477,13 +477,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             var logFilename = "test_filename.txt";
             var logFilename2 = "test_filename2.txt";
-            config.SetProperty(PropertyId.SpeechServiceLog_Filename, logFilename);
-            Assert.AreEqual(config.GetProperty(PropertyId.SpeechServiceLog_Filename), logFilename);
+            config.SetProperty(PropertyId.Speech_LogFilename, logFilename);
+            Assert.AreEqual(config.GetProperty(PropertyId.Speech_LogFilename), logFilename);
             var recognizer = new TranslationRecognizer(config, audioInput);
             Assert.IsTrue(File.Exists(logFilename), "log file must exist when recognizer is created");
 
-            config.SetProperty(PropertyId.SpeechServiceLog_Filename, logFilename2);
-            Assert.AreEqual(config.GetProperty(PropertyId.SpeechServiceLog_Filename), logFilename2);
+            config.SetProperty(PropertyId.Speech_LogFilename, logFilename2);
+            Assert.AreEqual(config.GetProperty(PropertyId.Speech_LogFilename), logFilename2);
             Assert.IsFalse(File.Exists(logFilename2));
             
             try
@@ -504,8 +504,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
 
             var logFilename = "test_filename.txt";
-            config.SetProperty(PropertyId.SpeechServiceLog_Filename, logFilename);
-            Assert.AreEqual(config.GetProperty(PropertyId.SpeechServiceLog_Filename), logFilename);
+            config.SetProperty(PropertyId.Speech_LogFilename, logFilename);
+            Assert.AreEqual(config.GetProperty(PropertyId.Speech_LogFilename), logFilename);
             var recognizer = new TranslationRecognizer(config, audioInput);
             Assert.IsTrue(new FileInfo(logFilename).Length > 0, "log file must contain logs after recognizer created");
         }
@@ -516,7 +516,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.DE };
             var config = this.translationHelper.GetConfig(Language.EN, toLanguages, "");
-            config.SetProperty(PropertyId.SpeechServiceLog_Filename, " ");
+            config.SetProperty(PropertyId.Speech_LogFilename, " ");
         }
     }
 }

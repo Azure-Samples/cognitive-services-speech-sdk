@@ -5,7 +5,7 @@
 
 /**
   * Defines property ids.
-  * Changed in version 1.1.0
+  * Changed in version 1.4.0
   */
 typedef NS_ENUM(NSUInteger, SPXPropertyId)
 {
@@ -175,7 +175,13 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     /**
       * The Language Understanding Service response output (in JSON format). Available via IntentRecognitionResult.Properties.
       */
-    SPXLanguageUnderstandingServiceResponseJsonResult = 7000
+    SPXLanguageUnderstandingServiceResponseJsonResult = 7000,
+
+    /**
+      * The file name to write logs.
+      * NOTE: This property was added in version 1.4.0.
+      */
+    SPXSpeechLogFilename = 9001
 };
 
 /**

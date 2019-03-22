@@ -327,7 +327,7 @@ void CSpxRecognizer::OnIsEnabledChanged()
 void CSpxRecognizer::CheckLogFilename()
 {
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
-    auto filename = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceLog_Filename), "");
+    auto filename = namedProperties->GetStringValue(GetPropertyName(PropertyId::Speech_LogFilename), "");
     if (!filename.empty())
     {
         FileLogger::Instance().SetFilename(std::move(filename));

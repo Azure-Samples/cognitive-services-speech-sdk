@@ -1571,8 +1571,8 @@ public class SpeechConfigTests {
         s.addTargetLanguage("de");
         String logFilename = new java.io.File(System.getProperty("java.io.tmpdir", ""), "test_filename.txt").getAbsolutePath();
 
-        s.setProperty(PropertyId.SpeechServiceLog_Filename, logFilename);
-        assertEquals(s.getProperty(PropertyId.SpeechServiceLog_Filename), logFilename);
+        s.setProperty(PropertyId.Speech_LogFilename, logFilename);
+        assertEquals(s.getProperty(PropertyId.Speech_LogFilename), logFilename);
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertTrue(new File(logFilename).length() > 0);
     }
