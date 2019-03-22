@@ -84,6 +84,7 @@ def patch(recotype):
     recotype.__init__ = newinit
 SCRIPT
 
+  sleepCmd="; import time; time.sleep(1.)"
   testCases=(
     "import speech_sample; import monkey; monkey.patch(speech_sample.speechsdk.SpeechRecognizer); speech_sample.speech_recognize_once_from_file()"
     "import speech_sample; import monkey; monkey.patch(speech_sample.speechsdk.SpeechRecognizer); speech_sample.speech_recognize_once_from_file_with_customized_model()"
@@ -97,6 +98,8 @@ SCRIPT
     "import intent_sample; import monkey; monkey.patch(intent_sample.speechsdk.intent.IntentRecognizer); intent_sample.recognize_intent_once_from_file()"
     "import intent_sample; intent_sample.recognize_intent_continuous()"
   )
+  # sleep a bit at the end of each sample to make sure the interpreter is still alive during cleanup
+  testCases=( "${testCases[@]/%/"${sleepCmd}"}" )
 
   # these samples use microphone input
   # "import intent_sample; intent_sample.recognize_intent_once_from_mic()"
