@@ -134,6 +134,24 @@ namespace Microsoft.CognitiveServices.Speech
         Speech_SessionId = Internal.PropertyId.Speech_SessionId,
 
         /// <summary>
+        /// The spoken language to be synthesized (e.g. en-US)
+        /// Added in version 1.4.0
+        /// </summary>
+        SpeechServiceConnection_SynthLanguage = Internal.PropertyId.SpeechServiceConnection_SynthLanguage,
+
+        /// <summary>
+        /// The name of the voice to be used for speech synthesis
+        /// Added in version 1.4.0
+        /// </summary>
+        SpeechServiceConnection_SynthVoice = Internal.PropertyId.SpeechServiceConnection_SynthVoice,
+
+        /// <summary>
+        /// The string to specify speech synthesis output audio format (e.g. riff-16khz-16bit-mono-pcm)
+        /// Added in version 1.4.0
+        /// </summary>
+        SpeechServiceConnection_SynthOutputFormat = Internal.PropertyId.SpeechServiceConnection_SynthOutputFormat,
+
+        /// <summary>
         /// The requested Cognitive Services Speech Service response output format (simple or detailed). Under normal circumstances, you shouldn't have
         /// to use this property directly.
         /// Instead, use <see cref="SpeechConfig.OutputFormat"/>.

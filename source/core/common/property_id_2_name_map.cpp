@@ -36,6 +36,9 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::SpeechServiceConnection_IntentRegion: return "INTENT-region";
     case PropertyId::SpeechServiceConnection_RecoMode: return "SPEECH-RecoMode";
     case PropertyId::SpeechServiceConnection_RecoLanguage: return "SPEECH-RecoLanguage";
+    case PropertyId::SpeechServiceConnection_SynthLanguage: return "SPEECH-SynthLanguage";
+    case PropertyId::SpeechServiceConnection_SynthVoice: return "SPEECH-SynthVoice";
+    case PropertyId::SpeechServiceConnection_SynthOutputFormat: return "SPEECH-SynthOutputFormat";
     case PropertyId::Speech_SessionId: return "SessionId";
     case PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse: return "SpeechServiceResponse_RequestDetailedResultTrueFalse";
     case PropertyId::SpeechServiceResponse_RequestProfanityFilterTrueFalse: return "SpeechServiceResponse_RequestProfanityFilterTrueFalse";

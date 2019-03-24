@@ -208,6 +208,7 @@ private:
     friend class ::Microsoft::CognitiveServices::Speech::Impl::ISpxRecognizerEvents;
     friend class ::Microsoft::CognitiveServices::Speech::Connection;
     template <class, class, class> friend class AsyncRecognizer;
+    friend class SpeechSynthesizer;
 
     /// <summary>
     /// Type for callbacks used when any client connects to the signal (the number of connected clients changes from zero to one) or

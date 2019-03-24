@@ -20,8 +20,10 @@
 #include <speechapi_c_audio_stream_format.h>
 #include <speechapi_c_audio_stream.h>
 #include <speechapi_c_audio_config.h>
+#include <speechapi_c_speech_config.h>
 #include <speechapi_c_factory.h>
 #include <speechapi_c_recognizer.h>
+#include <speechapi_c_synthesizer.h>
 #include <speechapi_c_result.h>
 #include <speechapi_c_grammar.h>
 #include <speechapi_c_session.h>

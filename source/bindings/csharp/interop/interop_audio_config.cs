@@ -53,6 +53,29 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             return new AudioConfig(audioConfigHandle);
         }
 
+        public static AudioConfig FromDefaultSpeakerOutput()
+        {
+            SPXAUDIOCONFIGHANDLE audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(audio_config_create_audio_output_from_default_speaker(out audioConfigHandle));
+            return new AudioConfig(audioConfigHandle);
+        }
+
+        public static AudioConfig FromWavFileOutput(string fileName)
+        {
+            SPXAUDIOCONFIGHANDLE audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(audio_config_create_audio_output_from_wav_file_name(out audioConfigHandle, fileName));
+            return new AudioConfig(audioConfigHandle);
+        }
+
+        public static AudioConfig FromOutputStream(AudioOutputStream stream)
+        {
+            ThrowIfNull(stream);
+            SPXAUDIOCONFIGHANDLE audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(audio_config_create_audio_output_from_stream(out audioConfigHandle, stream.StreamHandle));
+            GC.KeepAlive(stream);
+            return new AudioConfig(audioConfigHandle);
+        }
+
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern bool audio_config_is_handle_valid(SPXAUDIOCONFIGHANDLE audioConfig);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
@@ -65,6 +88,13 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             [MarshalAs(UnmanagedType.LPStr)] string deviceName);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR audio_config_create_audio_input_from_stream(out SPXAUDIOCONFIGHANDLE audioConfig, InteropSafeHandle audioStream);        
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR audio_config_create_audio_output_from_default_speaker(out SPXAUDIOCONFIGHANDLE audioConfig);
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR audio_config_create_audio_output_from_wav_file_name(out SPXAUDIOCONFIGHANDLE audioConfig,
+            [MarshalAs(UnmanagedType.LPStr)] string fileName);
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR audio_config_create_audio_output_from_stream(out SPXAUDIOCONFIGHANDLE audioConfig, InteropSafeHandle audioStream);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR audio_config_release(SPXAUDIOCONFIGHANDLE audioConfig);
     }

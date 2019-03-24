@@ -52,3 +52,7 @@
 
 #include <speechapi_cxx_connection.h>
 #include <speechapi_cxx_connection_eventargs.h>
+
+#include <speechapi_cxx_speech_synthesis_result.h>
+#include <speechapi_cxx_speech_synthesis_eventargs.h>
+#include <speechapi_cxx_speech_synthesizer.h>

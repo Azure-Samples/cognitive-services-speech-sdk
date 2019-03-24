@@ -195,6 +195,7 @@ cp $CPOPT -R "$SRCINC"/* "$DESTPUBINC"
 find "$SRCLIB" -type f -name \*$STATLIBSUFFIX -not -name $LIBPREFIX\* -print0 |
   xargs -n 1 -0 -I % cp % "$DESTPRIVLIB"
 cp $CPOPT "$SRCLIB"/*carbon-mock* "$DESTPRIVLIB"
+cp $CPOPT "$SRCLIB"/*carbon-tts-mock* "$DESTPRIVLIB"
 
 cp $CPOPT -R "$SRCPRIVINC" "$DESTPRIVINC"
 cp $CPOPT -R "$SRCPRIVINC2" "$DESTPRIVINC2"

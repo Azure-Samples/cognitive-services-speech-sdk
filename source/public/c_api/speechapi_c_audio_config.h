@@ -16,6 +16,10 @@ SPXAPI audio_config_create_audio_input_from_wav_file_name(SPXAUDIOCONFIGHANDLE* 
 SPXAPI audio_config_create_audio_input_from_stream(SPXAUDIOCONFIGHANDLE* haudioConfig, SPXAUDIOSTREAMHANDLE haudioStream);
 SPXAPI audio_config_create_push_audio_input_stream(SPXAUDIOCONFIGHANDLE* haudioConfig, SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat);
 SPXAPI audio_config_create_pull_audio_input_stream(SPXAUDIOCONFIGHANDLE* haudioConfig, SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat);
+SPXAPI audio_config_create_audio_output_from_default_speaker(SPXAUDIOCONFIGHANDLE* haudioConfig);
+SPXAPI audio_config_create_audio_output_from_wav_file_name(SPXAUDIOCONFIGHANDLE* haudioConfig, const char* fileName);
+SPXAPI audio_config_create_audio_output_from_stream(SPXAUDIOCONFIGHANDLE* haudioConfig, SPXAUDIOSTREAMHANDLE haudioStream);
+SPXAPI audio_config_create_push_audio_output_stream(SPXAUDIOCONFIGHANDLE* haudioConfig, SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat);
 SPXAPI audio_config_release(SPXAUDIOCONFIGHANDLE haudioConfig);
 SPXAPI audio_config_get_property_bag(SPXAUDIOCONFIGHANDLE haudioConfig, SPXPROPERTYBAGHANDLE* hpropbag);
 

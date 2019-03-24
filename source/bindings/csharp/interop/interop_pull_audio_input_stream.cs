@@ -99,6 +99,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             {
                 LogError(SpxError.InvalidHandle);
             }
+            catch (ApplicationException ex)
+            {
+                LogError(nameof(ApplicationException) + ": " + ex.Message);
+            }
+
             return result;
         }
 
@@ -121,6 +126,10 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             catch (InvalidOperationException)
             {
                 LogError(SpxError.InvalidHandle);
+            }
+            catch (ApplicationException ex)
+            {
+                LogError(nameof(ApplicationException) + ": " + ex.Message);
             }
         }
 

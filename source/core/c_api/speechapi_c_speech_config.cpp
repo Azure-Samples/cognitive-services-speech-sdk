@@ -8,6 +8,7 @@
 #include "string_utils.h"
 #include "handle_table.h"
 #include "property_id_2_name_map.h"
+#include "audio_format_id_2_name_map.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
@@ -92,6 +93,18 @@ SPXAPI speech_config_get_property_bag(SPXSPEECHCONFIGHANDLE hconfig, SPXPROPERTY
         auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
         *hpropbag = baghandle->TrackHandle(namedProperties);
 
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI speech_config_set_audio_output_format(SPXSPEECHCONFIGHANDLE hconfig, Speech_Synthesis_Output_Format formatId)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(speech_config_get_property_bag(hconfig, &hpropbag));
+        auto formatName = GetAudioFormatName(static_cast<SpeechSynthesisOutputFormat>(formatId));
+        SPX_THROW_ON_FAIL(property_bag_set_string(hpropbag, static_cast<int>(PropertyId::SpeechServiceConnection_SynthOutputFormat), nullptr, formatName));
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

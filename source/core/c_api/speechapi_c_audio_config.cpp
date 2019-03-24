@@ -106,6 +106,61 @@ SPXAPI audio_config_create_pull_audio_input_stream(SPXAUDIOCONFIGHANDLE* haudioC
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI audio_config_create_audio_output_from_default_speaker(SPXAUDIOCONFIGHANDLE* haudioConfig)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *haudioConfig = SPXHANDLE_INVALID;
+
+        auto config = SpxCreateObjectWithSite<ISpxAudioConfig>("CSpxAudioConfig", SpxGetRootSite());
+        config->InitFromDefaultDevice();
+
+        *haudioConfig = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxAudioConfig, SPXAUDIOCONFIGHANDLE>(config);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI audio_config_create_audio_output_from_wav_file_name(SPXAUDIOCONFIGHANDLE* haudioConfig, const char* fileName)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *haudioConfig = SPXHANDLE_INVALID;
+
+        auto config = SpxCreateObjectWithSite<ISpxAudioConfig>("CSpxAudioConfig", SpxGetRootSite());
+        config->InitFromFile(PAL::ToWString(fileName).c_str());
+
+        *haudioConfig = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxAudioConfig, SPXAUDIOCONFIGHANDLE>(config);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI audio_config_create_audio_output_from_stream(SPXAUDIOCONFIGHANDLE* haudioConfig, SPXAUDIOSTREAMHANDLE haudioStream)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *haudioConfig = SPXHANDLE_INVALID;
+
+        auto stream = CSpxSharedPtrHandleTableManager::GetPtr<ISpxAudioStream, SPXAUDIOSTREAMHANDLE>(haudioStream);
+        auto config = SpxCreateObjectWithSite<ISpxAudioConfig>("CSpxAudioConfig", SpxGetRootSite());
+        config->InitFromStream(stream);
+
+        *haudioConfig = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxAudioConfig, SPXAUDIOCONFIGHANDLE>(config);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI audio_config_create_push_audio_output_stream(SPXAUDIOCONFIGHANDLE* haudioConfig, SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SPX_IFTRUE_THROW_HR(haudioConfig == nullptr, SPXERR_INVALID_ARG);
+        SPX_IFTRUE_THROW_HR(haudioStream == nullptr, SPXERR_INVALID_ARG);
+        SPX_THROW_ON_FAIL(audio_stream_create_push_audio_output_stream(haudioStream, hformat));
+        SPX_THROW_ON_FAIL(audio_config_create_audio_output_from_stream(haudioConfig, *haudioStream));
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 SPXAPI audio_config_release(SPXAUDIOCONFIGHANDLE haudioConfig)
 {
     return Handle_Close<SPXAUDIOCONFIGHANDLE, ISpxAudioConfig>(haudioConfig);

@@ -181,6 +181,60 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
+        /// Gets/sets the speech synthesis language, e.g. en-US
+        /// Added in version 1.4.0
+        /// </summary>
+        public string SpeechSynthesisLanguage
+        {
+            get
+            {
+                return progBag.GetProperty(PropertyId.SpeechServiceConnection_SynthLanguage);
+            }
+            set
+            {
+                progBag.SetProperty(PropertyId.SpeechServiceConnection_SynthLanguage, value);
+            }
+        }
+
+        /// <summary>
+        /// Gets/sets the speech synthesis voice name
+        /// Added in version 1.4.0
+        /// </summary>
+        public string SpeechSynthesisVoiceName
+        {
+            get
+            {
+                return progBag.GetProperty(PropertyId.SpeechServiceConnection_SynthVoice);
+            }
+            set
+            {
+                progBag.SetProperty(PropertyId.SpeechServiceConnection_SynthVoice, value);
+            }
+        }
+
+        /// <summary>
+        /// Gets the speech synthesis output format
+        /// Added in version 1.4.0
+        /// </summary>
+        public string SpeechSynthesisOutputFormat
+        {
+            get
+            {
+                return progBag.GetProperty(PropertyId.SpeechServiceConnection_SynthOutputFormat);
+            }
+        }
+
+        /// <summary>
+        /// Sets the speech synthesis output format.
+        /// Added in version 1.4.0
+        /// </summary>
+        /// <param name="format">The synthesis output format ID (e.g. Riff16Khz16BitMonoPcm).</param>
+        public void SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat format)
+        {
+            ThrowIfFail(Internal.SpeechConfig.speech_config_set_audio_output_format(configHandle, format));
+        }
+
+        /// <summary>
         /// Sets proxy configuration.
         /// Added in version 1.1.0
         /// </summary>

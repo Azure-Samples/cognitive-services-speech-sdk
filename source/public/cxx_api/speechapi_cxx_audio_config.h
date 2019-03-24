@@ -94,6 +94,51 @@ public:
     }
 
     /// <summary>
+    /// Creates an AudioConfig object representing the default audio output device (speaker) on the system.
+    /// Added in version 1.4.0
+    /// </summary>
+    /// <returns>A shared pointer to the AudioConfig object</returns>
+    static std::shared_ptr<AudioConfig> FromDefaultSpeakerOutput()
+    {
+        SPXAUDIOCONFIGHANDLE haudioConfig = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(audio_config_create_audio_output_from_default_speaker(&haudioConfig));
+
+        auto config = new AudioConfig(haudioConfig);
+        return std::shared_ptr<AudioConfig>(config);
+    }
+
+    /// <summary>
+    /// Creates an AudioConfig object representing the specified file for audio output.
+    /// Added in version 1.4.0
+    /// </summary>
+    /// <param name="fileName">Specifies the audio output file.</param>
+    /// <returns>A shared pointer to the AudioConfig object</returns>
+    static std::shared_ptr<AudioConfig> FromWavFileOutput(const SPXSTRING& fileName)
+    {
+        SPXAUDIOCONFIGHANDLE haudioConfig = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(audio_config_create_audio_output_from_wav_file_name(&haudioConfig, Utils::ToUTF8(fileName).c_str()));
+
+        auto config = new AudioConfig(haudioConfig);
+        return std::shared_ptr<AudioConfig>(config);
+    }
+
+    /// <summary>
+    /// Creates an AudioConfig object representing the specified output stream.
+    /// Added in version 1.4.0
+    /// </summary>
+    /// <param name="stream">Specifies the custom audio output stream.</param>
+    /// <returns>A shared pointer to the AudioConfig object</returns>
+    static std::shared_ptr<AudioConfig> FromStreamOutput(std::shared_ptr<AudioOutputStream> stream)
+    {
+        SPX_IFTRUE_THROW_HR(stream == nullptr, SPXERR_INVALID_ARG);
+
+        SPXAUDIOCONFIGHANDLE haudioConfig = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(audio_config_create_audio_output_from_stream(&haudioConfig, GetOutputStreamHandle(stream)));
+
+        auto config = new AudioConfig(haudioConfig);
+        return std::shared_ptr<AudioConfig>(config);
+    }
+
     /// Sets a property value by name.
     /// </summary>
     /// <param name="name">The property name.</param>
@@ -160,6 +205,11 @@ protected:
     /// Internal helper method to get the audio stream format handle.
     /// </summary>
     static SPXAUDIOSTREAMHANDLE GetStreamHandle(std::shared_ptr<AudioInputStream> stream) { return (SPXAUDIOSTREAMHANDLE)(*stream.get()); }
+
+    /// <summary>
+    /// Internal helper method to get the audio output stream format handle.
+    /// </summary>
+    static SPXAUDIOSTREAMHANDLE GetOutputStreamHandle(std::shared_ptr<AudioOutputStream> stream) { return (SPXAUDIOSTREAMHANDLE)(*stream.get()); }
 
     /*! \endcond */
 

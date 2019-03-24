@@ -84,7 +84,7 @@ CSpxModuleFactory::PCREATE_MODULE_OBJECT_FUNC CSpxModuleFactory::GetCreateModule
 
     void* handle = dlopen(filename.c_str(), RTLD_LOCAL | RTLD_LAZY);
     SPX_DBG_TRACE_VERBOSE_IF(handle != NULL, "dlopen('%s') returned non-NULL", filename.c_str());
-    // SPX_DBG_TRACE_VERBOSE_IF(handle == NULL, "dlopen('%s') returned NULL: %s", filename.c_str(), dlerror());
+    SPX_DBG_TRACE_VERBOSE_IF(handle == NULL, "dlopen('%s') returned NULL: %s", filename.c_str(), dlerror());
 
     if (handle != NULL)
     {

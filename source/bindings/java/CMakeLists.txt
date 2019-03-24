@@ -96,16 +96,21 @@ set_target_properties(${SWIG_MODULE_${JAVA_BINDINGS}_REAL_NAME}
 set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/AudioConfig.java
     ${CMAKE_SWIG_OUTDIR}/AudioInputStream.java
+    ${CMAKE_SWIG_OUTDIR}/AudioOutputStream.java
     ${CMAKE_SWIG_OUTDIR}/AudioStreamFormat.java
     ${CMAKE_SWIG_OUTDIR}/PushAudioInputStream.java
     ${CMAKE_SWIG_OUTDIR}/PullAudioInputStream.java
     ${CMAKE_SWIG_OUTDIR}/PullAudioInputStreamCallback.java
+    ${CMAKE_SWIG_OUTDIR}/PullAudioOutputStream.java
+    ${CMAKE_SWIG_OUTDIR}/PushAudioOutputStream.java
+    ${CMAKE_SWIG_OUTDIR}/PushAudioOutputStreamCallback.java
 
     ${CMAKE_SWIG_OUTDIR}/BaseAsyncRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/BaseRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/PropertyId.java
     ${CMAKE_SWIG_OUTDIR}/carbon_java.java
     ${CMAKE_SWIG_OUTDIR}/carbon_javaJNI.java
+    ${CMAKE_SWIG_OUTDIR}/carbon_javaConstants.java
     ${CMAKE_SWIG_OUTDIR}/EventArgs.java
     ${CMAKE_SWIG_OUTDIR}/IntentEventListener.java
     ${CMAKE_SWIG_OUTDIR}/IntentEventSignal.java
@@ -175,6 +180,17 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/StdMapStringString.java
     ${CMAKE_SWIG_OUTDIR}/StdMapStringStringMapIterator.java
 
+    ${CMAKE_SWIG_OUTDIR}/AudioDataStream.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechSynthesizer.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisResult.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisResultPtrFuture.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisEventArgs.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisEventSignal.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisEventListener.java
+    ${CMAKE_SWIG_OUTDIR}/StreamStatus.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisCancellationDetails.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisOutputFormat.java
+
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXEVENTHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXKEYWORDHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXLUMODELHANDLE.java
@@ -220,7 +236,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/SpeechRecognitionEventArgs.java
     ${PACKAGE_DIR}/SpeechRecognitionCanceledEventArgs.java
     ${PACKAGE_DIR}/SpeechRecognizer.java
-    
+
     ${PACKAGE_DIR}/OutputFormat.java
 
     ${PACKAGE_DIR}/audio/AudioConfig.java

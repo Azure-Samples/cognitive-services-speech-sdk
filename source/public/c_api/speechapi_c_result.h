@@ -19,7 +19,10 @@ enum Result_Reason
     ResultReason_TranslatingSpeech = 6,
     ResultReason_TranslatedSpeech = 7,
     ResultReason_SynthesizingAudio = 8,
-    ResultReason_SynthesizingAudioComplete = 9
+    ResultReason_SynthesizingAudioComplete = 9,
+    ResultReason_RecognizingKeyword = 10,
+    ResultReason_RecognizedKeyword = 11,
+    ResultReason_SynthesizingAudioStart = 12
 };
 typedef enum Result_Reason Result_Reason;
 
@@ -65,3 +68,12 @@ SPXAPI result_get_offset(SPXRESULTHANDLE hresult, uint64_t* offset);
 SPXAPI result_get_duration(SPXRESULTHANDLE hresult, uint64_t* duration);
 
 SPXAPI result_get_property_bag(SPXRESULTHANDLE hresult, SPXPROPERTYBAGHANDLE* hpropbag);
+
+SPXAPI synth_result_get_result_id(SPXRESULTHANDLE hresult, char* resultId, uint32_t resultIdLength);
+SPXAPI synth_result_get_reason(SPXRESULTHANDLE hresult, Result_Reason* reason);
+SPXAPI synth_result_get_reason_canceled(SPXRESULTHANDLE hresult, Result_CancellationReason* reason);
+SPXAPI synth_result_get_canceled_error_code(SPXRESULTHANDLE hresult, Result_CancellationErrorCode* errorCode);
+SPXAPI synth_result_get_audio_data(SPXRESULTHANDLE hresult, uint8_t* buffer, uint32_t bufferSize, uint32_t* filledSize);
+SPXAPI synth_result_get_audio_length(SPXRESULTHANDLE hresult, uint32_t* audioLength);
+SPXAPI synth_result_get_audio_format(SPXRESULTHANDLE hresult, SPXAUDIOSTREAMFORMATHANDLE* hformat);
+SPXAPI synth_result_get_property_bag(SPXRESULTHANDLE hresult, SPXPROPERTYBAGHANDLE* hpropbag);

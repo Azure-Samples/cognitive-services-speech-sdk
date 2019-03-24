@@ -291,12 +291,18 @@ class ISpxAudioStream : public ISpxInterfaceBaseFor<ISpxAudioStream>
 {
 public:
     virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
+    virtual bool HasHeader() { return false; };
+    virtual std::string GetFormatString() { return std::string(); };
+    virtual std::string GetRawFormatString() { return std::string(); };
 };
 
 class ISpxAudioStreamInitFormat : public ISpxInterfaceBaseFor<ISpxAudioStreamInitFormat>
 {
 public:
     virtual void SetFormat(SPXWAVEFORMATEX* format) = 0;
+    virtual void SetHeader(bool hasHeader) { UNUSED(hasHeader); };
+    virtual void SetFormatString(const std::string& formatString) { UNUSED(formatString); };
+    virtual void SetRawFormatString(const std::string& rawFormatString) { UNUSED(rawFormatString); };
 };
 
 class ISpxAudioStreamInitRealTime : public ISpxInterfaceBaseFor<ISpxAudioStreamInitRealTime>
@@ -312,6 +318,15 @@ public:
     using CloseCallbackFunction_Type = std::function<void()>;
 
     virtual void SetCallbacks(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback) = 0;
+};
+
+class ISpxAudioStreamWriterInitCallbacks : public ISpxInterfaceBaseFor<ISpxAudioStreamWriterInitCallbacks>
+{
+public:
+    using WriteCallbackFunction_Type = std::function<int(uint8_t*, uint32_t)>;
+    using CloseCallbackFunction_Type = std::function<void()>;
+
+    virtual void SetCallbacks(WriteCallbackFunction_Type writeCallback, CloseCallbackFunction_Type closeCallback) = 0;
 };
 
 class ISpxAudioStreamReader : public ISpxInterfaceBaseFor<ISpxAudioStreamReader>
@@ -338,6 +353,27 @@ public:
 
     virtual void SetContinuousLoop(bool value) = 0;
     virtual void SetIterativeLoop(bool value) = 0;
+};
+
+class ISpxAudioOutput : public ISpxInterfaceBaseFor<ISpxAudioOutput>
+{
+public:
+    virtual uint32_t Write(uint8_t* buffer, uint32_t size) = 0;
+    virtual void Close() = 0;
+};
+
+class ISpxAudioRender : public ISpxInterfaceBaseFor<ISpxAudioOutput>
+{
+public:
+    virtual void StartPlayback() = 0;
+    virtual void PausePlayback() = 0;
+    virtual void StopPlayback() = 0;
+};
+
+class ISpxAudioOutputReader : public ISpxInterfaceBaseFor<ISpxAudioOutputReader>
+{
+public:
+    virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize) = 0;
 };
 
 class ISpxAudioConfig : public ISpxInterfaceBaseFor<ISpxAudioConfig>
@@ -424,6 +460,52 @@ public:
     virtual void InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, bool is_verified) = 0;
 };
 
+class ISpxSynthesizerEvents;
+class ISpxAudioDataStream;
+
+class ISpxSynthesisResult : public ISpxInterfaceBaseFor<ISpxSynthesisResult>
+{
+public:
+    virtual std::wstring GetResultId() = 0;
+    virtual std::wstring GetRequestId() = 0;
+    virtual std::shared_ptr<ISpxSynthesizerEvents> GetEvents() = 0;
+    virtual std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> GetFutureResult() = 0;
+    virtual ResultReason GetReason() = 0;
+    virtual CancellationReason GetCancellationReason() = 0;
+    virtual CancellationErrorCode GetCancellationErrorCode() = 0;
+    virtual uint32_t GetAudioLength() = 0;
+    virtual std::shared_ptr<std::vector<uint8_t>> GetAudioData() = 0;
+    virtual std::shared_ptr<ISpxAudioDataStream> GetAudioDataStream() = 0;
+    virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
+    virtual bool HasHeader() = 0;
+};
+
+class ISpxSynthesisResultInit : public ISpxInterfaceBaseFor<ISpxSynthesisResultInit>
+{
+public:
+    virtual void InitSynthesisResult(const std::wstring& requestId, ResultReason reason,
+        CancellationReason cancellation, CancellationErrorCode errorCode,
+        uint8_t* audio_buffer, size_t audio_length, SPXWAVEFORMATEX* format, bool hasHeader) = 0;
+    virtual void SetEvents(const std::shared_ptr<ISpxSynthesizerEvents>& events) = 0;
+    virtual void SetFutureResult(std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> futureResult) = 0;
+};
+
+class ISpxAudioDataStream : public ISpxInterfaceBaseFor<ISpxAudioDataStream>
+{
+public:
+    virtual void InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult> result) = 0;
+    virtual StreamStatus GetStatus() = 0;
+    virtual CancellationReason GetCancellationReason() = 0;
+    virtual CancellationErrorCode GetCancellationErrorCode() = 0;
+    virtual bool CanReadData(uint32_t requestedSize) = 0;
+    virtual bool CanReadData(uint32_t requestedSize, uint32_t pos) = 0;
+    virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize) = 0;
+    virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize, uint32_t pos) = 0;
+    virtual void SaveToWaveFile(const wchar_t* fileName) = 0;
+    virtual uint32_t GetPosistion() = 0;
+    virtual void SetPosition(uint32_t pos) = 0;
+};
+
 class ISpxRecognizer : public ISpxInterfaceBaseFor<ISpxRecognizer>
 {
 public:
@@ -440,6 +522,22 @@ public:
 
     virtual void OpenConnection(bool forContinuousRecognition) = 0;
     virtual void CloseConnection() = 0;
+};
+
+class ISpxSynthesizer : public ISpxInterfaceBaseFor<ISpxSynthesizer>
+{
+public:
+    virtual bool IsEnabled() = 0;
+    virtual void Enable() = 0;
+    virtual void Disable() = 0;
+
+    virtual void SetOutput(std::shared_ptr<ISpxAudioOutput> output) = 0;
+    virtual std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml) = 0;
+    virtual CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>> SpeakAsync(const std::string& text, bool isSsml) = 0;
+    virtual std::shared_ptr<ISpxSynthesisResult> StartSpeaking(const std::string& text, bool isSsml) = 0;
+    virtual CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>> StartSpeakingAsync(const std::string& text, bool isSsml) = 0;
+
+    virtual void Close() = 0;
 };
 
 class ISpxConnection : public ISpxInterfaceBaseFor<ISpxConnection>
@@ -552,6 +650,34 @@ protected:
 
 private:
     ISpxRecognizerEvents() = delete;
+};
+
+class ISpxSynthesisEventArgs : public ISpxInterfaceBaseFor<ISpxSynthesisEventArgs>
+{
+public:
+    virtual std::shared_ptr<ISpxSynthesisResult> GetResult() = 0;
+};
+
+class ISpxSynthesisEventArgsInit : public ISpxInterfaceBaseFor<ISpxSynthesisEventArgsInit>
+{
+public:
+    virtual void Init(std::shared_ptr<ISpxSynthesisResult> result) = 0;
+};
+
+class ISpxSynthesizerEvents : public ISpxInterfaceBaseFor<ISpxSynthesizerEvents>
+{
+public:
+    using SynthEvent_Type = EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>;
+
+    virtual void FireSynthesisStarted(std::shared_ptr<ISpxSynthesisResult> result) = 0;
+    virtual void FireSynthesizing(std::shared_ptr<ISpxSynthesisResult> result) = 0;
+    virtual void FireSynthesisCompleted(std::shared_ptr<ISpxSynthesisResult> result) = 0;
+    virtual void FireSynthesisCanceled(std::shared_ptr<ISpxSynthesisResult> result) = 0;
+
+    std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> SynthesisStarted;
+    std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> Synthesizing;
+    std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> SynthesisCompleted;
+    std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> SynthesisCanceled;
 };
 
 class ISpxSession : public ISpxInterfaceBaseFor<ISpxSession>
@@ -671,6 +797,21 @@ public:
     virtual void Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload) = 0;
 };
 
+class ISpxTtsEngineAdapterSite;
+
+class ISpxTtsEngineAdapter : public ISpxInterfaceBaseFor<ISpxTtsEngineAdapter>, public ISpxObjectWithSiteInitImpl<ISpxTtsEngineAdapterSite>
+{
+public:
+    virtual void SetOutput(std::shared_ptr<ISpxAudioOutput> output) = 0;
+    virtual std::shared_ptr<ISpxSynthesisResult> Speak(const std::string& text, bool isSsml, const std::wstring& requestId) = 0;
+};
+
+class ISpxTtsEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxTtsEngineAdapterSite>
+{
+public:
+    virtual uint32_t Write(ISpxTtsEngineAdapter* adapter, const std::wstring& requestId, uint8_t* buffer, uint32_t size) = 0;
+};
+
 class ISpxAudioPumpSite : public ISpxInterfaceBaseFor<ISpxAudioPumpSite>
 {
 public:
@@ -725,6 +866,12 @@ public:
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfig(const std::string& sourcelanguage, const std::vector<std::string>& targetLanguages, const std::string& voice, std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
+};
+
+class ISpxSpeechSynthesisApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechSynthesisApiFactory>
+{
+public:
+    virtual std::shared_ptr<ISpxSynthesizer> CreateSpeechSynthesizerFromConfig(const char* language, const char* voice, const char* outputFormat, std::shared_ptr<ISpxAudioConfig> audioConfig) = 0;
 };
 
 class ISpxNamedProperties : public ISpxInterfaceBaseFor<ISpxNamedProperties>

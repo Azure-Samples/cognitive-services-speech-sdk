@@ -86,4 +86,46 @@ SPXAPI_PRIVATE connection_set_event_callback(ISpxRecognizerEvents::ConnectionEve
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI_PRIVATE synthesizer_set_event_callback(std::list<std::pair<void*, std::shared_ptr<ISpxSynthesizerEvents::SynthEvent_Type>>> ISpxSynthesizerEvents::*psynthEvents, SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
+        auto synthesizer = (*synthhandles)[hsynth];
+
+        auto pfn = [=](std::shared_ptr<ISpxSynthesisEventArgs> e) {
+            auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesisEventArgs, SPXEVENTHANDLE>();
+            auto hevent = eventhandles->TrackHandle(e);
+            (*pCallback)(hsynth, hevent, pvContext);
+        };
+
+        auto pISpxSynthesizerEvents = SpxQueryInterface<ISpxSynthesizerEvents>(synthesizer).get();
+
+        // Clean up existing callback hooks to pfn
+        auto iterator = (pISpxSynthesizerEvents->*psynthEvents).begin();
+        while (iterator != (pISpxSynthesizerEvents->*psynthEvents).end())
+        {
+            iterator->second->Disconnect(pfn);
+            if (!iterator->second->IsConnected())
+            {
+                std::pair<void*, std::shared_ptr<ISpxSynthesizerEvents::SynthEvent_Type>> pair = { iterator->first, iterator->second };
+                iterator++;
+                (pISpxSynthesizerEvents->*psynthEvents).remove(pair);
+                continue;
+            }
+
+            iterator++;
+        }
+
+        // Add pfn
+        if (pCallback != nullptr)
+        {
+            auto synthesisEvent = std::make_shared<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>();
+            synthesisEvent->Connect(pfn);
+            (pISpxSynthesizerEvents->*psynthEvents).emplace_back(pvContext, synthesisEvent);
+        }
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 } } } } // Microsoft::CognitiveServices::Speech::Impl

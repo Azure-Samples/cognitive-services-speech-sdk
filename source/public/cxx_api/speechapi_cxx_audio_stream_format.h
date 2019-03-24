@@ -69,6 +69,20 @@ public:
         return std::shared_ptr<AudioStreamFormat>(format);
     }
 
+    /// <summary>
+    /// Creates an audio stream format object representing the default audio stream format (16Khz 16bit mono PCM).
+    /// Added in version 1.4.0
+    /// </summary>
+    /// <returns>A shared pointer to AudioStreamFormat</returns>
+    static std::shared_ptr<AudioStreamFormat> GetDefaultOutputFormat()
+    {
+        SPXAUDIOSTREAMFORMATHANDLE hformat = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(audio_stream_format_create_from_default_output(&hformat));
+
+        auto format = new AudioStreamFormat(hformat);
+        return std::shared_ptr<AudioStreamFormat>(format);
+    }
+
 
 protected:
 

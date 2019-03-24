@@ -32,6 +32,7 @@ set(HEADERS
     "${INC_DIR}/file_utils.h"
     "${CARBON_INCLUDE}/ispxinterfaces.h"
     "${INC_DIR}/property_id_2_name_map.h"
+    "${INC_DIR}/audio_format_id_2_name_map.h"
     "${INC_DIR}/speech_config.h"
     "${INC_DIR}/try_catch_helpers.h"
     "${INC_DIR}/data_buffer.h"

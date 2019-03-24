@@ -18,7 +18,7 @@ namespace CognitiveServices {
 namespace Speech {
 
 /// <summary>
-/// Class that defines configurations for speech or intent recognition.
+/// Class that defines configurations for speech / intent recognition, or speech synthesis.
 /// </summary>
 class SpeechConfig
 {
@@ -105,6 +105,66 @@ public:
     }
 
     /// <summary>
+    /// Set the language of the speech synthesizer.
+    /// Added in version 1.4.0
+    /// </summary>
+    /// <param name="lang">Specifies the name of language (e.g. en-US)</param>
+    void SetSpeechSynthesisLanguage(const SPXSTRING& lang)
+    {
+        SPX_THROW_ON_FAIL(property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_SynthLanguage), nullptr, Utils::ToUTF8(lang).c_str()));
+    }
+
+    /// <summary>
+    /// Gets the language of the speech synthesizer.
+    /// Added in version 1.4.0
+    /// </summary>
+    /// <returns>The speech synthesis language.</returns>
+    SPXSTRING GetSpeechSynthesisLanguage() const
+    {
+        return GetProperty(PropertyId::SpeechServiceConnection_SynthLanguage);
+    }
+
+    /// <summary>
+    /// Set the voice of the speech synthesizer.
+    /// Added in version 1.4.0
+    /// </summary>
+    /// <param name="voiceName">Specifies the name of voice</param>
+    void SetSpeechSynthesisVoiceName(const SPXSTRING& voiceName)
+    {
+        SPX_THROW_ON_FAIL(property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_SynthVoice), nullptr, Utils::ToUTF8(voiceName).c_str()));
+    }
+
+    /// <summary>
+    /// Gets the voice of the speech synthesizer.
+    /// Added in version 1.4.0
+    /// </summary>
+    /// <returns>The speech synthesis voice name.</returns>
+    SPXSTRING GetSpeechSynthesisVoiceName() const
+    {
+        return GetProperty(PropertyId::SpeechServiceConnection_SynthVoice);
+    }
+
+    /// <summary>
+    /// Set the speech synthesis output format (e.g. Riff16Khz16BitMonoPcm).
+    /// Added in version 1.4.0
+    /// </summary>
+    /// <param name="formatId">Specifies the output format ID</param>
+    void SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat formatId)
+    {
+        SPX_THROW_ON_FAIL(speech_config_set_audio_output_format(m_hconfig, static_cast<Speech_Synthesis_Output_Format>(formatId)));
+    }
+
+    /// <summary>
+    /// Gets the speech synthesis output format.
+    /// Added in version 1.4.0
+    /// </summary>
+    /// <returns>The speech synthesis output format.</returns>
+    SPXSTRING GetSpeechSynthesisOutputFormat() const
+    {
+        return GetProperty(PropertyId::SpeechServiceConnection_SynthOutputFormat);
+    }
+
+    /// <summary>
     /// Sets the endpoint ID.
     /// </summary>
     /// <param name="endpointId">Endpoint ID.</param>
@@ -146,7 +206,7 @@ public:
     }
 
     /// <summary>
-    /// Gets the subscription key that is used to create Speech Recognizer or Intent Recognizer or Translation Recognizer.
+    /// Gets the subscription key that is used to create Speech Recognizer or Intent Recognizer or Translation Recognizer or Speech Synthesizer.
     /// </summary>
     /// <returns>The subscription key.</returns>
     SPXSTRING GetSubscriptionKey() const
@@ -155,7 +215,7 @@ public:
     }
 
     /// <summary>
-    /// Gets the region key that used to create Speech Recognizer or Intent Recognizer or Translation Recognizer.
+    /// Gets the region key that used to create Speech Recognizer or Intent Recognizer or Translation Recognizer or speech Synthesizer.
     /// </summary>
     /// <returns>Region.</returns>
     SPXSTRING GetRegion() const

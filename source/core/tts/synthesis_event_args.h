@@ -1,0 +1,43 @@
+#pragma once
+#include "ispxinterfaces.h"
+#include "interface_helpers.h"
+
+
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
+
+
+class CSpxSynthesisEventArgs :
+    public ISpxSynthesisEventArgs, 
+    public ISpxSynthesisEventArgsInit
+{
+public:
+
+    CSpxSynthesisEventArgs();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxSynthesisEventArgs)
+        SPX_INTERFACE_MAP_ENTRY(ISpxSynthesisEventArgsInit)
+    SPX_INTERFACE_MAP_END()
+
+    // --- ISpxSynthesisEventArgs
+    virtual std::shared_ptr<ISpxSynthesisResult> GetResult() override;
+
+    // --- ISpxSynthesisEventArgsInit
+    virtual void Init(std::shared_ptr<ISpxSynthesisResult> result) override;
+
+
+private:
+
+    CSpxSynthesisEventArgs(const CSpxSynthesisEventArgs&) = delete;
+    CSpxSynthesisEventArgs(const CSpxSynthesisEventArgs&&) = delete;
+
+    CSpxSynthesisEventArgs& operator=(const CSpxSynthesisEventArgs&) = delete;
+
+    std::shared_ptr<ISpxSynthesisResult> m_result;
+};
+
+
+} } } } // Microsoft::CognitiveServices::Speech::Impl

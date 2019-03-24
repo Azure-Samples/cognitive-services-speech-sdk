@@ -20,4 +20,6 @@ SPXAPI_PRIVATE recognizer_recognition_set_event_callback(ISpxRecognizerEvents::R
 
 SPXAPI_PRIVATE connection_set_event_callback(ISpxRecognizerEvents::ConnectionEvent_Type ISpxRecognizerEvents::*connectionEvent, SPXCONNECTIONHANDLE connection, CONNECTION_CALLBACK_FUNC callback, void* context);
 
+SPXAPI_PRIVATE synthesizer_set_event_callback(std::list<std::pair<void*, std::shared_ptr<ISpxSynthesizerEvents::SynthEvent_Type>>> ISpxSynthesizerEvents::*psynthEvents, SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext);
+
 } } } } // Microsoft::CognitiveServices::Speech::Impl

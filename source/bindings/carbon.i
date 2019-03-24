@@ -67,14 +67,24 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult,Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs,Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs >::PrivatePropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig)
+%shared_ptr(Microsoft::CognitiveServices::Speech::SpeechSynthesisResult)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AudioDataStream)
+%shared_ptr(Microsoft::CognitiveServices::Speech::SpeechSynthesisCancellationDetails)
+%shared_ptr(Microsoft::CognitiveServices::Speech::SpeechSynthesizer)
+%shared_ptr(std::vector<uint8_t>)
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioInputStream)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioOutputStream)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioStreamFormat)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PushAudioInputStream)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PullAudioInputStream)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PullAudioInputStream::FunctionCallbackWrapper)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PullAudioInputStreamCallback)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PullAudioOutputStream)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PushAudioOutputStream)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PushAudioOutputStream::FunctionCallbackWrapper)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PushAudioOutputStreamCallback)
 
 #ifdef SPX_UWP
 %template(StringVector) std::vector<std::wstring>;
@@ -119,11 +129,13 @@
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult> SpeechRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult> IntentRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult> TranslationRecognitionResultPtr;
+    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechSynthesisResult> SpeechSynthesisResultPtr;
 %}
 
 %template(SpeechRecognitionResultPtrFuture) FutureWrapper<SpeechRecognitionResultPtr>;
 %template(IntentRecognitionResultPtrFuture) FutureWrapper<IntentRecognitionResultPtr>;
 %template(TranslationRecognitionResultPtrFuture) FutureWrapper<TranslationRecognitionResultPtr>;
+%template(SpeechSynthesisResultPtrFuture) FutureWrapper<SpeechSynthesisResultPtr>;
 %template(VoidFuture) FutureWrapper<void>;
 
 
@@ -299,6 +311,42 @@
     }
 }
 
+%extend Microsoft::CognitiveServices::Speech::SpeechSynthesizer {
+
+    FutureWrapper<SpeechSynthesisResultPtr> SpeakTextAsync(const std::string& text)
+    {
+        auto future = ($self)->SpeakTextAsync(text);
+        return FutureWrapper<SpeechSynthesisResultPtr>(std::move(future));
+    }
+
+    FutureWrapper<SpeechSynthesisResultPtr> SpeakSsmlAsync(const std::string& ssml)
+    {
+        auto future = ($self)->SpeakSsmlAsync(ssml);
+        return FutureWrapper<SpeechSynthesisResultPtr>(std::move(future));
+    }
+
+    FutureWrapper<SpeechSynthesisResultPtr> StartSpeakingTextAsync(const std::string& text)
+    {
+        auto future = ($self)->StartSpeakingTextAsync(text);
+        return FutureWrapper<SpeechSynthesisResultPtr>(std::move(future));
+    }
+
+    FutureWrapper<SpeechSynthesisResultPtr> StartSpeakingSsmlAsync(const std::string& ssml)
+    {
+        auto future = ($self)->StartSpeakingSsmlAsync(ssml);
+        return FutureWrapper<SpeechSynthesisResultPtr>(std::move(future));
+    }
+}
+
+%extend Microsoft::CognitiveServices::Speech::AudioDataStream {
+
+    FutureWrapper<void> SaveToWavFileAsync(std::string fileName)
+    {
+        auto future = ($self)->SaveToWavFileAsync(fileName);
+        return FutureWrapper<void>(std::move(future));
+    }
+}
+
 #ifndef SWIGPYTHON
 %feature("director") CallbackWrapper;
 
@@ -351,12 +399,20 @@
 %ignore StopContinuousRecognitionAsync;
 %ignore StartKeywordRecognitionAsync;
 %ignore StopKeywordRecognitionAsync;
+%ignore SpeakTextAsync;
+%ignore SpeakSsmlAsync;
+%ignore StartSpeakingTextAsync;
+%ignore StartSpeakingSsmlAsync;
+%ignore SaveToWavFileAsync;
 
 %immutable Microsoft::CognitiveServices::Speech::SpeechRecognizer::Properties;
 %immutable Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::Properties;
 %immutable Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::Properties;
 %immutable Microsoft::CognitiveServices::Speech::RecognitionResult::Properties;
 %immutable Microsoft::CognitiveServices::Speech::Session::Properties;
+%immutable Microsoft::CognitiveServices::Speech::SpeechSynthesizer::Properties;
+%immutable Microsoft::CognitiveServices::Speech::SpeechSynthesisResult::Properties;
+%immutable Microsoft::CognitiveServices::Speech::AudioDataStream::Properties;
 
 %include <speechapi_cxx_properties.h>
 
@@ -452,6 +508,20 @@
 %template(TranslationTextCanceledEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs&>;
 %template(TranslationSynthesisEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisEventArgs&>;
 %template(TranslationRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs>;
+
+%include <speechapi_cxx_speech_synthesis_result.h>
+%include <speechapi_cxx_speech_synthesis_eventargs.h>
+
+#ifdef SWIGPYTHON
+#elif defined(SWIGJAVA)
+%template(SpeechSynthesisEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SpeechSynthesisEventArgs&>;
+#else
+%template(SpeechSynthesisEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SpeechSynthesisEventArgs&>;
+#endif
+
+%template(SpeechSynthesisEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::SpeechSynthesisEventArgs&>;
+
+%include <speechapi_cxx_speech_synthesizer.h>
 
 %include <speechapi_cxx_translation_recognizer.h>
 

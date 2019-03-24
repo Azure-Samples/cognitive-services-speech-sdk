@@ -66,6 +66,8 @@ set_target_properties (${PROJECT_NAME} PROPERTIES
 if(ANDROID)
   target_link_libraries(${PROJECT_NAME}
     PRIVATE sr
+    PRIVATE tts
+    PRIVATE tts_rest
     PRIVATE audio
     PRIVATE usp
     PRIVATE common

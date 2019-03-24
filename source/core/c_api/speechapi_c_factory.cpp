@@ -154,3 +154,40 @@ SPXAPI recognizer_create_intent_recognizer_from_config(SPXRECOHANDLE* phreco, SP
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
+
+SPXAPI synthesizer_create_speech_synthesizer_from_config(SPXSYNTHHANDLE* phsynth, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioconfig)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phsynth == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(hspeechconfig));
+
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phsynth = SPXHANDLE_INVALID;
+
+        // get the speech synthesis related parameters from the hspeechconfig
+        auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
+        auto speechconfig = (*confighandles)[hspeechconfig];
+        auto speechconfig_propertybag = SpxQueryInterface<ISpxNamedProperties>(speechconfig);
+        auto factory = SpxCreateObjectWithSite<ISpxSpeechSynthesisApiFactory>("CSpxSpeechSynthesisApiFactory", SpxGetRootSite());
+
+        // copy the properties from the speech config into the factory
+        auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
+        fbag->Copy(speechconfig_propertybag.get());
+
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
+        auto synthLanguage = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthLanguage));
+        auto synthVoice = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthVoice));
+        auto synthOutputFormat = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthOutputFormat));
+
+        auto audioOutput = AudioConfigFromHandleOrEmptyIfInvalid(haudioconfig);
+
+        auto synthesizer = factory->CreateSpeechSynthesizerFromConfig(synthLanguage.c_str(), synthVoice.c_str(), synthOutputFormat.c_str(), audioOutput);
+
+        // track the synth handle
+        auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
+        *phsynth = synthhandles->TrackHandle(synthesizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}

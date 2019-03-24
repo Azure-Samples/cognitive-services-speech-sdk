@@ -37,6 +37,7 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_speech_config.cpp"
     "${SRC_DIR}/speechapi_c_property_bag.cpp"
     "${SRC_DIR}/speechapi_c_connection.cpp"
+    "${SRC_DIR}/speechapi_c_synthesizer.cpp"
 
     "${SRC_DIR}/stdafx.cpp"
     )

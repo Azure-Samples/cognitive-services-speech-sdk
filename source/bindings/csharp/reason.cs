@@ -73,6 +73,12 @@ namespace Microsoft.CognitiveServices.Speech
         /// Indicates that keyword recognition completed recognizing the given keyword.
         /// Added in version 1.3.0
         /// </summary>
-        RecognizedKeyword = 11
+        RecognizedKeyword = 11,
+
+        /// <summary>
+        /// Indicates the speech synthesis is now started.
+        /// Added in version 1.4.0
+        /// </summary>
+        SynthesizingAudioStarted = 12
     }
 }

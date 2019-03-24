@@ -877,6 +877,7 @@ jobs:
       downloadPath: $(System.ArtifactsDirectory)/In
       itemPattern: |
         Linux/Linux-x64/Release/private/lib/libcarbon-mock.so
+        Linux/Linux-x64/Release/private/lib/libcarbon-tts-mock.so
         Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
   - template: get-docker-image.yml
     parameters:
@@ -924,6 +925,7 @@ jobs:
       # Supply mock and dependencies for running the test suite
       mkdir private_lib
       cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/private/lib/libcarbon-mock.so" private_lib
+      cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/private/lib/libcarbon-tts-mock.so" private_lib
       cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" private_lib
 
       ERRORS=0
@@ -1008,7 +1010,7 @@ jobs:
       cd tests/functional/csharp/end2end
       dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source ${nugetsource} Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
       dotnet test --blame --verbosity detailed --filter \
-        "TestCategory!=LongTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests" \
+        "TestCategory!=LongTest&TestCategory!=SpeechSynthesisMockTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests" \
         --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_osx_unit_tests.trx"
     displayName: Run C# unit tests
   - task: PublishTestResults@2

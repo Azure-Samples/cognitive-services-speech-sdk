@@ -40,6 +40,10 @@ enum  PropertyId
     SpeechServiceConnection_RecoLanguage = 3001,
     Speech_SessionId = 3002,
 
+    SpeechServiceConnection_SynthLanguage = 3100,
+    SpeechServiceConnection_SynthVoice = 3101,
+    SpeechServiceConnection_SynthOutputFormat = 3102,
+
     SpeechServiceResponse_RequestDetailedResultTrueFalse = 4000,
     SpeechServiceResponse_RequestProfanityFilterTrueFalse = 4001,
 

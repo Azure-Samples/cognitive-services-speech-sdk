@@ -10,6 +10,7 @@ include_directories(${CARBON_INCLUDE})
 
 include_directories("${COMMON}/include")
 include_directories("${SR}")
+include_directories("${TTS}")
 include_directories("${USP}/include")
 
 set(HEADERS
@@ -37,5 +38,5 @@ set_target_properties (factory PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(factory sr audio usp ${CMAKE_DL_LIBS})
+target_link_libraries(factory sr tts audio usp tts_rest ${CMAKE_DL_LIBS})
 

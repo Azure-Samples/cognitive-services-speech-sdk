@@ -39,5 +39,8 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR speech_config_get_property_bag(InteropSafeHandle config, out SPXPROPERTYBAGHANDLE propbag);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR speech_config_set_audio_output_format(InteropSafeHandle config, SpeechSynthesisOutputFormat formatId);
     }
 }

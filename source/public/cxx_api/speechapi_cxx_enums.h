@@ -145,6 +145,24 @@ enum class PropertyId
     Speech_SessionId = 3002,
 
     /// <summary>
+    /// The spoken language to be synthesized (e.g. en-US)
+    /// Added in version 1.4.0
+    /// </summary>
+    SpeechServiceConnection_SynthLanguage = 3100,
+
+    /// <summary>
+    /// The name of the TTS voice to be used for speech synthesis
+    /// Added in version 1.4.0
+    /// </summary>
+    SpeechServiceConnection_SynthVoice = 3101,
+
+    /// <summary>
+    /// The string to specify TTS output audio format
+    /// Added in version 1.4.0
+    /// </summary>
+    SpeechServiceConnection_SynthOutputFormat = 3102,
+
+    /// <summary>
     /// The requested Cognitive Services Speech Service response output format (simple or detailed). Under normal circumstances, you shouldn't have
     /// to use this property directly.
     /// Instead use <see cref="SpeechConfig::SetOutputFormat"/>.
@@ -309,7 +327,13 @@ enum class ResultReason
     /// Indicates that keyword recognition completed recognizing the given keyword.
     /// Added in version 1.3.0
     /// </summary>
-    RecognizedKeyword = 11
+    RecognizedKeyword = 11,
+
+    /// <summary>
+    /// Indicates the speech synthesis is now started
+    /// Added in version 1.4.0
+    /// </summary>
+    SynthesizingAudioStarted = 12
 };
 
 /// <summary>
@@ -404,6 +428,130 @@ enum class NoMatchReason
     /// Indicates that the start of the audio stream contained only noise, and the service timed out waiting for speech.
     /// </summary>
     InitialBabbleTimeout = 3
+};
+
+/// <summary>
+/// Defines the possible speech synthesis output audio format.
+/// Added in version 1.4.0
+/// </summary>
+enum class SpeechSynthesisOutputFormat
+{
+    /// <summary>
+    /// raw-8khz-8bit-mono-mulaw
+    /// </summary>
+    Raw8Khz8BitMonoMULaw = 1,
+
+    /// <summary>
+    /// riff-16khz-16kbps-mono-siren
+    /// </summary>
+    Riff16Khz16KbpsMonoSiren = 2,
+
+    /// <summary>
+    /// audio-16khz-16kbps-mono-siren
+    /// </summary>
+    Audio16Khz16KbpsMonoSiren = 3,
+
+    /// <summary>
+    /// audio-16khz-32kbitrate-mono-mp3
+    /// </summary>
+    Audio16Khz32KBitRateMonoMp3 = 4,
+
+    /// <summary>
+    /// audio-16khz-128kbitrate-mono-mp3
+    /// </summary>
+    Audio16Khz128KBitRateMonoMp3 = 5,
+
+    /// <summary>
+    /// audio-16khz-64kbitrate-mono-mp3
+    /// </summary>
+    Audio16Khz64KBitRateMonoMp3 = 6,
+
+    /// <summary>
+    /// audio-24khz-48kbitrate-mono-mp3
+    /// </summary>
+    Audio24Khz48KBitRateMonoMp3 =7,
+
+    /// <summary>
+    /// audio-24khz-96kbitrate-mono-mp3
+    /// </summary>
+    Audio24Khz96KBitRateMonoMp3 = 8,
+
+    /// <summary>
+    /// audio-24khz-160kbitrate-mono-mp3
+    /// </summary>
+    Audio24Khz160KBitRateMonoMp3 = 9,
+
+    /// <summary>
+    /// raw-16khz-16bit-mono-truesilk
+    /// </summary>
+    Raw16Khz16BitMonoTrueSilk = 10,
+
+    /// <summary>
+    /// riff-16khz-16bit-mono-pcm
+    /// </summary>
+    Riff16Khz16BitMonoPcm = 11,
+
+    /// <summary>
+    /// riff-8khz-16bit-mono-pcm
+    /// </summary>
+    Riff8Khz16BitMonoPcm = 12,
+
+    /// <summary>
+    /// riff-24khz-16bit-mono-pcm
+    /// </summary>
+    Riff24Khz16BitMonoPcm = 13,
+
+    /// <summary>
+    /// riff-8khz-8bit-mono-mulaw
+    /// </summary>
+    Riff8Khz8BitMonoMULaw = 14,
+
+    /// <summary>
+    /// raw-16khz-16bit-mono-pcm
+    /// </summary>
+    Raw16Khz16BitMonoPcm = 15,
+
+    /// <summary>
+    /// raw-24khz-16bit-mono-pcm
+    /// </summary>
+    Raw24Khz16BitMonoPcm = 16,
+
+    /// <summary>
+    /// raw-8khz-16bit-mono-pcm
+    /// </summary>
+    Raw8Khz16BitMonoPcm = 17
+};
+
+/// <summary>
+/// Defines the possible status of audio data stream.
+/// Added in version 1.4.0
+/// </summary>
+enum class StreamStatus
+{
+    /// <summary>
+    /// The audio data stream status is unknown
+    /// </summary>
+    Unknown = 0,
+
+    /// <summary>
+    /// The audio data stream contains no data
+    /// </summary>
+    NoData = 1,
+
+    /// <summary>
+    /// The audio data stream contains partial data of a speak request
+    /// </summary>
+    PartialData = 2,
+
+    /// <summary>
+    /// The audio data stream contains all data of a speak request
+    /// </summary>
+    AllData = 3,
+
+    /// <summary>
+    /// The audio data stream was cancelled
+    /// </summary>
+    Canceled = 4
 };
 
 } } } // Microsoft::CognitiveServices::Speech

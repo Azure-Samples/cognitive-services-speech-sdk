@@ -46,6 +46,11 @@ SPXAPI audio_stream_format_create_from_waveformat_pcm(SPXAUDIOSTREAMFORMATHANDLE
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI audio_stream_format_create_from_default_output(SPXAUDIOSTREAMFORMATHANDLE* hformat)
+{
+    return audio_stream_format_create_from_waveformat_pcm(hformat, 16000, 16, 1);
+}
+
 SPXAPI audio_stream_format_release(SPXAUDIOSTREAMFORMATHANDLE hformat)
 {
     return Handle_Close<SPXAUDIOSTREAMFORMATHANDLE, SPXWAVEFORMATEX>(hformat);

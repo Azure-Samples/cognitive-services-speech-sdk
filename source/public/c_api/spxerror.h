@@ -244,3 +244,15 @@ typedef uintptr_t SPXHR;
 /// Added in version 1.3.0.
 /// </summary>
 #define SPXERR_EXTENSION_LIBRARY_NOT_FOUND    __SPX_ERRCODE_FAILED(0x024)
+
+/// <summary>
+/// An unexpected error was encountered when trying to access the TTS engine site.
+/// Added in version 1.4.0.
+/// </summary>
+#define SPXERR_UNEXPECTED_TTS_ENGINE_SITE_FAILURE  __SPX_ERRCODE_FAILED(0x025)
+
+/// <summary>
+/// An unexpected error was encountered when trying to access the audio output stream.
+/// Added in version 1.4.0.
+/// </summary>
+#define SPXERR_UNEXPECTED_AUDIO_OUTPUT_FAILURE  __SPX_ERRCODE_FAILED(0x026)

@@ -31,6 +31,8 @@ CSpxResourceManager::CSpxResourceManager()
 
 #ifdef __linux__
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.so"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-tts-mock.so"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-tts-local.so"));
 
     // Note: due to new naming, removing any carbon prefix in name
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.pma.so"));
@@ -39,6 +41,7 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
 #elif __MACH__
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.dylib"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-tts-mock.dylib"));
 
     // Note: due to new naming, removing any carbon prefix in name
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.pma.dylib"));
@@ -57,6 +60,8 @@ CSpxResourceManager::CSpxResourceManager()
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon")); // this is special, internal name, no dll extension!
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-unidec.dll"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-tts-mock.dll"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-tts-local.dll"));
 #endif
 }
 

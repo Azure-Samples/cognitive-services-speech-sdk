@@ -11,10 +11,16 @@
 #include "audio_config.h"
 #include "pull_audio_input_stream.h"
 #include "push_audio_input_stream.h"
+#include "push_audio_output_stream.h"
+#include "pull_audio_output_stream.h"
 #include "interactive_microphone.h"
 #include "factory_helpers.h"
 #include "wav_file_reader.h"
 #include "wav_file_pump.h"
+#include "wav_file_writer.h"
+#include "default_speaker.h"
+#include "null_audio_output.h"
+#include "audio_data_stream.h"
 #include "microphone_pump.h"
 
 
@@ -32,9 +38,16 @@ SPX_EXTERN_C void* AudioLib_CreateModuleObject(const char* className, const char
     SPX_FACTORY_MAP_ENTRY(CSpxAudioConfig, ISpxAudioConfig);
     SPX_FACTORY_MAP_ENTRY(CSpxPushAudioInputStream, ISpxAudioStreamInitFormat);
     SPX_FACTORY_MAP_ENTRY(CSpxPullAudioInputStream, ISpxAudioStreamInitFormat);
+    SPX_FACTORY_MAP_ENTRY(CSpxPushAudioOutputStream, ISpxAudioStreamInitFormat);
+    SPX_FACTORY_MAP_ENTRY(CSpxPullAudioOutputStream, ISpxAudioStreamInitFormat);
+    SPX_FACTORY_MAP_ENTRY(CSpxPullAudioOutputStream, ISpxAudioOutput);
     SPX_FACTORY_MAP_ENTRY(CSpxInteractiveMicrophone, ISpxAudioPump);
     SPX_FACTORY_MAP_ENTRY(CSpxWavFileReader, ISpxAudioFile);
     SPX_FACTORY_MAP_ENTRY(CSpxWavFilePump, ISpxAudioFile);
+    SPX_FACTORY_MAP_ENTRY(CSpxWavFileWriter, ISpxAudioFile);
+    SPX_FACTORY_MAP_ENTRY(CSpxDefaultSpeaker, ISpxAudioOutput);
+    SPX_FACTORY_MAP_ENTRY(CSpxNullAudioOutput, ISpxAudioOutput);
+    SPX_FACTORY_MAP_ENTRY(CSpxAudioDataStream, ISpxAudioDataStream);
     SPX_FACTORY_MAP_END();
 }
 

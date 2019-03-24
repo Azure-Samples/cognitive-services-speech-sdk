@@ -29,6 +29,16 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             }
         }
 
+        public static AudioStreamFormat DefaultOutputFormat
+        {
+            get
+            {
+                SPXAUDIOSTREAMFORMATHANDLE streamFormatHandle = IntPtr.Zero;
+                SpxExceptionThrower.ThrowIfFail(audio_stream_format_create_from_default_output(out streamFormatHandle));
+                return new AudioStreamFormat(streamFormatHandle);
+            }
+        }
+
         public static AudioStreamFormat GetWaveFormatPCM(uint samplesPerSecond, byte bitsPerSample, byte channels)
         {
             SPXAUDIOSTREAMFORMATHANDLE streamFormatHandle = IntPtr.Zero;
@@ -52,6 +62,8 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern bool audio_stream_format_is_handle_valid(SPXAUDIOSTREAMFORMATHANDLE format);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR audio_stream_format_create_from_default_input(out SPXAUDIOSTREAMFORMATHANDLE format);
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR audio_stream_format_create_from_default_output(out SPXAUDIOSTREAMFORMATHANDLE format);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR audio_stream_format_create_from_waveformat_pcm(out SPXAUDIOSTREAMFORMATHANDLE format, UInt32 samplesPerSecond, Byte bitsPerSample, Byte channels);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
