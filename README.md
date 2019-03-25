@@ -1,3 +1,20 @@
+---
+topic: sample
+languages:
+  - cpp
+  - csharp
+  - java
+  - javascript
+  - nodejs
+  - objc
+  - python
+name: Speech SDK Samples
+description: |
+  Learn how to use the Microsoft Cognitive Services Speech SDK to add speech-enabled features to your applications.
+products:
+  - azure-cognitive-services
+---
+
 # Sample Repository for the Microsoft Cognitive Services Speech SDK
 
 This project hosts the **samples** for the Microsoft Cognitive Services Speech SDK. To find out more about the Microsoft Cognitive Services Speech SDK itself, please visit the [SDK documentation site](https://aka.ms/csspeech).
