@@ -54,14 +54,17 @@ proc goToMainMenu {} {
 
 spawn {*}$cmd
 
-
-foreach scenario [list \
+set scenarioList [list \
   SpeechRecognitionUsingCustomizedModel \
   SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat \
   SpeechRecognitionWithMicrophone \
-  KeywordTriggeredSpeechRecognitionWithMicrophone \
-  Stop \
-] {
+]
+if {$tcl_platform(wordSize) == 8} {
+  lappend scenarioList KeywordTriggeredSpeechRecognitionWithMicrophone
+}
+lappend scenarioList Stop
+
+foreach scenario $scenarioList {
   incr testIndex
   send_user "\n### Running test [set testIndex] - scenario [set scenario]\n"
 

@@ -41,6 +41,7 @@ jobs:
       . ci/functions.sh
       ./ci/set-variables.sh
       if [[ $SPEECHSDK_TARGET_PLATFORM = Linux-x86 ]]; then
+        # N.B. this is built but not shipped in LinuxDrop.
         vsts_setvar SPEECHSDK_ENABLE_KWS true
       else
         vsts_setvar SPEECHSDK_ENABLE_KWS false
