@@ -406,7 +406,7 @@ Defaults to I<csspeech> if not specified.
   perl dockertool.pl build \
     --repository myuser oobedevcpp_ubuntu1604_x86 \
     --build-arg BUILD_UID=$(id -u) \
-    --build-user BUILD_USER=$(id -un)
+    --build-arg BUILD_USER=$(id -un)
   docker run --rm -ti $fullImage bash
 
 =back
