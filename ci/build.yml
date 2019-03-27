@@ -13,7 +13,7 @@ variables:
   SIGN_PARAMS_JAVA: |
     [
       {
-        "keyCode": "CP-232612-Java",
+        "keyCode": "CP-447347-Java",
         "operationSetCode": "JavaSign",
         "parameters": [
         {
@@ -29,7 +29,7 @@ variables:
         "toolVersion": "1.0"
       },
       {
-        "keyCode": "CP-232612-Java",
+        "keyCode": "CP-447347-Java",
         "operationSetCode": "JavaVerify",
         "parameters": [ ],
         "toolName": "sign",
