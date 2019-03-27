@@ -204,7 +204,7 @@ void DoKWS(SpeechRecognizer* recognizer, PushAudioInputStream* pushStream)
 
     ConnectCallbacks(recognizer, res);
     PushData(pushStream, cortana.m_audioFilename);
-    auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/heycortana_en-US.table");
+    auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
     recognizer->StartKeywordRecognitionAsync(model).get();
     auto text = WaitForResult(res.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopKeywordRecognitionAsync().get();

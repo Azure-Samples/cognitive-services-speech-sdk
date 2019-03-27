@@ -245,7 +245,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
         auto audio = AudioConfig::FromWavFileInput(wrongSamplingRateFile.m_audioFilename);
         auto recognizer = SpeechRecognizer::FromConfig(config, audio);
-        auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/heycortana_en-US.table");
+        auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
         REQUIRE_THROWS(recognizer->StartKeywordRecognitionAsync(model).get());
     }
     SPXTEST_SECTION("throw exception when the file does not existing")
@@ -341,7 +341,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             }
         }
 
-        auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/heycortana_en-US.table");
+        auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
         SPXTEST_REQUIRE(model != nullptr);
 
         {
@@ -740,7 +740,7 @@ TEST_CASE("KWS basics", "[api][cxx]")
                 cv.notify_all();
             };
 
-            auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/heycortana_en-US.table");
+            auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
             recognizer->StartKeywordRecognitionAsync(model);
 
             THEN("We wait up to 30 seconds for a KwsSingleShot recognition and it's accompanying SessionStopped")
