@@ -20,7 +20,7 @@ namespace MicrosoftSpeechSDKSamples
             // The default language is "en-us".
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Creates a speech synthesizer using spaker as audio output.
+            // Creates a speech synthesizer using speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(config))
             {
                 for (int i = 0; i < 2; ++i)

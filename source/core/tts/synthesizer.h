@@ -81,7 +81,7 @@ protected:
 
 private:
 
-    void PushRequestIntoQueue(const std::wstring& requestId);
+    void PushRequestIntoQueue(const std::wstring requestId);
     void WaitUntilRequestInFrontOfQueue(const std::wstring& requestId);
     void PopRequestFromQueue();
 

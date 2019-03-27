@@ -39,7 +39,10 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             {
                 // dispose managed resources
             }
+
             // dispose unmanaged resources
+            streamHandle.Dispose();
+
             disposed = true;
         }
 

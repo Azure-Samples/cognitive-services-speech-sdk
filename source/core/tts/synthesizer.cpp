@@ -208,7 +208,7 @@ std::shared_ptr<ISpxNamedProperties> CSpxSynthesizer::GetParentProperties() cons
     return SpxQueryService<ISpxNamedProperties>(GetSite());
 }
 
-void CSpxSynthesizer::PushRequestIntoQueue(const std::wstring& requestId)
+void CSpxSynthesizer::PushRequestIntoQueue(const std::wstring requestId)
 {
     std::unique_lock<std::mutex> lock(m_queueOperationMutex);
     m_requestQueue.emplace(requestId);

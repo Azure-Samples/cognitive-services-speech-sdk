@@ -19,7 +19,7 @@ void SpeechSynthesisToSpeaker()
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Creates a speech synthesizer using spaker as audio output. The default spoken language is "en-us".
+    // Creates a speech synthesizer using speaker as audio output. The default spoken language is "en-us".
     auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
     for (int i = 0; i < 2; ++i)

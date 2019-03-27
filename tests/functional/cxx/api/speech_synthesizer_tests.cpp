@@ -398,7 +398,7 @@ TEST_CASE("Speak output in streams before done from method start speaking text a
     auto stream2 = AudioDataStream::FromResult(result2); /* of type std::shared_ptr<AudioDataStream>, does not block */
     auto future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); /* does not block, just spins a thread up */
 }
-/*
+
 TEST_CASE("Speak output in streams before done queued", "[api][cxx]")
 {
     auto config = CurrentSpeechConfig();
@@ -443,7 +443,7 @@ TEST_CASE("Speak output in streams before done queued", "[api][cxx]")
     future1.wait();
     future2.wait();
 }
-*/
+
 TEST_CASE("Speak output in streams with all data get on synthesis started result", "[api][cxx]")
 {
     auto config = CurrentSpeechConfig();

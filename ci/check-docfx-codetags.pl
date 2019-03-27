@@ -68,6 +68,9 @@ BEGIN {
       quickstart/speech-translation/csharp-uwp/helloworld/MainPage.xaml#StackPanel
       quickstart/speech-translation/csharp-uwp/helloworld/MainPage.xaml.cs#code
       quickstart/speech-translation/java-jre/src/speechsdk/quickstart/Main.java#code
+      quickstart/text-to-speech/cpp-linux/helloworld.cpp#code
+      quickstart/text-to-speech/cpp-windows/helloworld/helloworld.cpp#code
+      quickstart/text-to-speech/csharp-dotnet-windows/helloworld/Program.cs#code
       samples/batch/csharp/program.cs#batchdefinition
       samples/batch/csharp/program.cs#batchstatus
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentContinuousRecognitionWithFile

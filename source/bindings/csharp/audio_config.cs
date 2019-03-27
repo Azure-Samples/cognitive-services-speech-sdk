@@ -107,7 +107,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio output configuration being created.</returns>
         public static AudioConfig FromStreamOutput(AudioOutputStream audioStream)
         {
-            return new AudioConfig(Internal.AudioConfig.FromOutputStream(audioStream.streamImpl), audioStream, true);
+            return new AudioConfig(Internal.AudioConfig.FromOutputStream(audioStream.streamImpl), audioStream, false);
         }
 
         /// <summary>

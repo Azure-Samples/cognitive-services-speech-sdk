@@ -61,6 +61,16 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
     if (result->GetReason() == ResultReason::SynthesizingAudioCompleted || result->GetReason() == ResultReason::Canceled)
     {
         m_writingEnded = true;
+
+        // Set cancellation details if it's canceled result
+        if (result->GetReason() == ResultReason::Canceled)
+        {
+            m_cancellationReason = result->GetCancellationReason();
+            m_cancellationErrorCode = result->GetCancellationErrorCode();
+            auto properties = SpxQueryInterface<ISpxNamedProperties>(result);
+            auto cancellationDetailedText = properties->GetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), "");
+            SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), cancellationDetailedText.data());
+        }
     }
 
     // Define synthesis event handling functions for audio data stream
@@ -122,8 +132,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
             iterator->second->Disconnect(m_pfnSynthesizing);
             if (!iterator->second->IsConnected())
             {
-                std::pair<void*, std::shared_ptr<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>> synthesizingEvent = { iterator->first, iterator->second };
-                events->Synthesizing.remove(synthesizingEvent);
+                events->Synthesizing.remove(*iterator);
             }
         }
 
@@ -139,8 +148,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
             iterator->second->Disconnect(m_pfnSynthesisStopped);
             if (!iterator->second->IsConnected())
             {
-                std::pair<void*, std::shared_ptr<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>> synthesisCompletedEvent = { iterator->first, iterator->second };
-                events->SynthesisCompleted.remove(synthesisCompletedEvent);
+                events->SynthesisCompleted.remove(*iterator);
             }
         }
 
@@ -156,8 +164,7 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
             iterator->second->Disconnect(m_pfnSynthesisStopped);
             if (!iterator->second->IsConnected())
             {
-                std::pair<void*, std::shared_ptr<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>> synthesisCanceledEvent = { iterator->first, iterator->second };
-                events->SynthesisCanceled.remove(synthesisCanceledEvent);
+                events->SynthesisCanceled.remove(*iterator);
             }
         }
     };
@@ -408,8 +415,7 @@ void CSpxAudioDataStream::DisconnectSythEvents()
         if (iterator != m_synthEvents->Synthesizing.end())
         {
             iterator->second->DisconnectAll();
-            std::pair<void*, std::shared_ptr<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>> synthesizingEvent = { iterator->first, iterator->second };
-            m_synthEvents->Synthesizing.remove(synthesizingEvent);
+            m_synthEvents->Synthesizing.remove(*iterator);
         }
 
         // Disconnect synthesis completed event
@@ -422,8 +428,7 @@ void CSpxAudioDataStream::DisconnectSythEvents()
         if (iterator != m_synthEvents->SynthesisCompleted.end())
         {
             iterator->second->DisconnectAll();
-            std::pair<void*, std::shared_ptr<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>> synthesisCompletedEvent = { iterator->first, iterator->second };
-            m_synthEvents->SynthesisCompleted.remove(synthesisCompletedEvent);
+            m_synthEvents->SynthesisCompleted.remove(*iterator);
         }
 
         // Disconnect synthesis canceled event
@@ -436,8 +441,7 @@ void CSpxAudioDataStream::DisconnectSythEvents()
         if (iterator != m_synthEvents->SynthesisCanceled.end())
         {
             iterator->second->DisconnectAll();
-            std::pair<void*, std::shared_ptr<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>> synthesisCanceledEvent = { iterator->first, iterator->second };
-            m_synthEvents->SynthesisCanceled.remove(synthesisCanceledEvent);
+            m_synthEvents->SynthesisCanceled.remove(*iterator);
         }
     }
 }

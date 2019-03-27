@@ -28,7 +28,6 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             }
 
             // Free any unmanaged objects here.
-            disposed = true;
             base.Dispose(disposing);
         }
 

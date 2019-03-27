@@ -38,8 +38,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var synthesizer = new SpeechSynthesizer(config))
             {
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has now completed rendering to default speakers */
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has now completed rendering to default speakers */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
                 }
             }
@@ -52,8 +52,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var synthesizer = new SpeechSynthesizer(config, deviceConfig))
                 {
-                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has now completed rendering to default speakers */
-                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has now completed rendering to default speakers */
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                     {
                     }
                 }
@@ -66,8 +66,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.SpeechSynthesisLanguage = "en-GB";
             using (var synthesizer = new SpeechSynthesizer(config))
             {
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has now completed rendering to default speakers */
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has now completed rendering to default speakers */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
                 }
             }
@@ -79,8 +79,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.SpeechSynthesisVoiceName = "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)";
             using (var synthesizer = new SpeechSynthesizer(config))
             {
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has now completed rendering to default speakers */
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has now completed rendering to default speakers */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
                 }
             }
@@ -93,21 +93,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var synthesizer = new SpeechSynthesizer(config, fileConfig))
                 {
-                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"" */
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"
                     {
                     }
-                } /* "{{{wavefile.wav}}}" is now closed */
+                } // "{{{wavefile.wav}}}" is now closed
 
                 var waveSize1 = new FileInfo("wavefile.wav").Length;
                 Assert.IsTrue(waveSize1 > EmptyWaveFileSize);
 
+                // Make a second run with 2 speaks to verify that the audio can be append to the file while speaking
                 using (var synthesizer = new SpeechSynthesizer(config, fileConfig))
                 {
-                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"" */
-                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{wavefile.wav}}}" now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}" */
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}"
                     {
                     }
-                } /* "{{{wavefile.wav}}}" is now closed */
+                } // "{{{wavefile.wav}}}" is now closed
 
                 var waveSize2 = new FileInfo("wavefile.wav").Length;
                 Assert.IsTrue(waveSize2 > waveSize1);
@@ -123,8 +124,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var synthesizer = new SpeechSynthesizer(config, streamConfig))
                 {
-                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering to pushstream */
-                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering to pushstream */
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pushstream
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pushstream
                     {
                     }
 
@@ -144,13 +145,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var synthesizer = new SpeechSynthesizer(config, streamConfig))
                 {
-                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering to pullstream */
-                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering to pullstream */
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
                     {
                     }
                 }
 
-                DoSomethingWithAudioInPullStream(stream);
+                DoSomethingWithAudioInPullStream(stream, new bool[] { false });
             }
         }
 
@@ -159,13 +160,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var stream = AudioOutputStream.CreatePullStream())
             {
-                var future = DoSomethingWithAudioInPullStreamInBackground(stream);
+                var future = DoSomethingWithAudioInPullStreamInBackground(stream, new bool[] { false });
 
                 using (var streamConfig = AudioConfig.FromStreamOutput(stream))
                 using (var synthesizer = new SpeechSynthesizer(config, streamConfig))
                 {
-                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering to pullstream */
-                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering to pullstream */
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
                     {
                     }
                 }
@@ -177,22 +178,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task SpeakOutInResults()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
             {
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering, and available in result1 */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
                     Assert.IsTrue(result1.ResultId.Length == GuidLength);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason);
-
-                    DoSomethingWithAudioInVector(result1.AudioData);
+                    Assert.IsTrue(ResultReason.SynthesizingAudioCompleted == result1.Reason);
+                    Assert.IsTrue(result1.AudioData.Length > 0);
                 }
 
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering, and available in result2 */
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
                     Assert.IsTrue(result2.ResultId.Length == GuidLength);
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason);
-
-                    DoSomethingWithAudioInVector(result2.AudioData);
+                    Assert.IsTrue(ResultReason.SynthesizingAudioCompleted == result2.Reason);
+                    Assert.IsTrue(result2.AudioData.Length > 0);
                 }
             }
         }
@@ -200,7 +199,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task SpeakOutputInChunksInEventSynthesizing()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 synthesizer.Synthesizing += (s, e) =>
                 {
@@ -209,12 +208,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     var audioLength = e.Result.AudioData.Length;
                     Assert.IsTrue(audioLength > 0);
-
-                    DoSomethingWithAudioInVector(e.Result.AudioData);
                 };
 
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering */
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering
                 {
                 }
             }
@@ -223,24 +220,25 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task SpeakOutputInStreams()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
             {
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering, and available in result1 */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason);
+                    Assert.IsTrue(ResultReason.SynthesizingAudioCompleted == result1.Reason);
                     Assert.IsTrue(result1.AudioData.Length > 0);
-                    using (var stream1 = AudioDataStream.FromResult(result1)) /* of type AudioDataStream, does not block */
+
+                    using (var stream1 = AudioDataStream.FromResult(result1)) // of type AudioDataStream, does not block
                     {
                         DoSomethingWithAudioInDataStream(stream1, true);
                     }
                 }
 
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering, and available in result2 */
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
-                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason);
+                    Assert.IsTrue(ResultReason.SynthesizingAudioCompleted == result2.Reason);
                     Assert.IsTrue(result2.AudioData.Length > 0);
 
-                    using (var stream2 = AudioDataStream.FromResult(result2)) /* of type AudioDataStream, does not block */
+                    using (var stream2 = AudioDataStream.FromResult(result2)) // of type AudioDataStream, does not block
                     {
                         DoSomethingWithAudioInDataStream(stream2, true);
                     }
@@ -251,7 +249,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task SpeakOutputInStreamsBeforeDoneFromEventSynthesisStarted()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 var futureList = new List<Task>();
                 var streamList = new List<AudioDataStream>();
@@ -262,18 +260,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     var audioLength = e.Result.AudioData.Length;
                     Assert.AreEqual(0, audioLength);
 
-                    var stream = AudioDataStream.FromResult(e.Result); /* of type AudioDataStream, does not block */
+                    var stream = AudioDataStream.FromResult(e.Result); // of type AudioDataStream, does not block
                     futureList.Add(DoSomethingWithAudioInDataStreamInBackground(stream, false));
                     streamList.Add(stream);
                 };
 
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering */
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering
                 {
                 }
 
-                var future3 = synthesizer.SpeakTextAsync("{{{text3}}}"); /* "{{{text3}}}" synthesis might have started */
-                using (var result3 = await future3) /* "{{{text3}}}" synthesis has completed */
+                var future3 = synthesizer.SpeakTextAsync("{{{text3}}}"); // "{{{text3}}}" synthesis might have started
+                using (var result3 = await future3) // "{{{text3}}}" synthesis has completed
                 {
                 }
 
@@ -292,25 +290,25 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task SpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingTextAsync()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
             {
-                using (var result1 = await synthesizer.StartSpeakingTextAsync("{{{text1}}}")) /* "{{{text1}}}" synthesis has started, likely not finished */
+                using (var result1 = await synthesizer.StartSpeakingTextAsync("{{{text1}}}")) // "{{{text1}}}" synthesis has started, likely not finished
                 {
                     Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result1.Reason);
                     Assert.AreEqual(0, result1.AudioData.Length);
 
-                    using (var stream1 = AudioDataStream.FromResult(result1)) /* of type AudioDataStream, does not block */
+                    using (var stream1 = AudioDataStream.FromResult(result1)) // of type AudioDataStream, does not block
                     {
-                        var future1 = DoSomethingWithAudioInDataStreamInBackground(stream1, false); /* does not block, just spins a thread up */
+                        var future1 = DoSomethingWithAudioInDataStreamInBackground(stream1, false); // does not block, just spins a thread up
 
-                        using (var result2 = await synthesizer.StartSpeakingTextAsync("{{{text2}}}")) /* "{{{text2}}}" synthesis has started, likely not finished */
+                        using (var result2 = await synthesizer.StartSpeakingTextAsync("{{{text2}}}")) // "{{{text2}}}" synthesis has started, likely not finished
                         {
                             Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result2.Reason);
                             Assert.AreEqual(0, result2.AudioData.Length);
 
-                            using (var stream2 = AudioDataStream.FromResult(result2)) /* of type AudioDataStream, does not block */
+                            using (var stream2 = AudioDataStream.FromResult(result2)) // of type AudioDataStream, does not block
                             {
-                                var future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); /* does not block, just spins a thread up */
+                                var future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); // does not block, just spins a thread up
 
                                 await future1;
                                 await future2;
@@ -324,7 +322,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task SpeakOutputInStreamsBeforeDoneQueued()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 int startedRequests = 0;
                 synthesizer.SynthesisStarted += (s, e) =>
@@ -344,11 +342,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
-                var futureResult1 = synthesizer.StartSpeakingTextAsync("{{{text1}}}"); /* "{{{text1}}}" synthesis might have started, likely not finished */
-                var futureResult2 = synthesizer.StartSpeakingTextAsync("{{{text2}}}"); /* "{{{text2}}}" synthesis might have started (very unlikely) */
+                var futureResult1 = synthesizer.StartSpeakingTextAsync("{{{text1}}}"); // "{{{text1}}}" synthesis might have started, likely not finished
+                var futureResult2 = synthesizer.StartSpeakingTextAsync("{{{text2}}}"); // "{{{text2}}}" synthesis might have started (very unlikely)
 
-                var future1 = DoSomethingWithAudioInResultInBackground(futureResult1, false); /* does not block, just spins a thread up */
-                var future2 = DoSomethingWithAudioInResultInBackground(futureResult2, false); /* does not block, just spins a thread up */
+                var future1 = DoSomethingWithAudioInResultInBackground(futureResult1, false); // does not block, just spins a thread up
+                var future2 = DoSomethingWithAudioInResultInBackground(futureResult2, false); // does not block, just spins a thread up
 
                 await future1;
                 await future2;
@@ -358,7 +356,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task SpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResult()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 using (var result = await synthesizer.StartSpeakingTextAsync("{{{text1}}}"))
                 {
@@ -378,7 +376,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     while(!synthesisDone)
                     {
-                        Thread.Sleep(100); /* wait for the synthesis to be done */
+                        Thread.Sleep(100); // wait for the synthesis to be done
                     }
 
                     using (var stream = AudioDataStream.FromResult(result))
@@ -396,8 +394,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var synthesizer = new SpeechSynthesizer(mockConfig))
             {
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has now completed rendering to default speakers */
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has now completed rendering to default speakers */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
                     var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
                     var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
@@ -416,8 +414,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var synthesizer = new SpeechSynthesizer(mockConfig, deviceConfig))
                 {
-                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has now completed rendering to default speakers */
-                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has now completed rendering to default speakers */
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                     {
                         var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
                         var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
@@ -436,8 +434,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             mockConfig.SpeechSynthesisLanguage = "en-GB";
             using (var synthesizer = new SpeechSynthesizer(mockConfig))
             {
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has now completed rendering to default speakers */
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has now completed rendering to default speakers */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
                     var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
                     var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
@@ -455,8 +453,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             mockConfig.SpeechSynthesisVoiceName = "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)";
             using (var synthesizer = new SpeechSynthesizer(mockConfig))
             {
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has now completed rendering to default speakers */
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has now completed rendering to default speakers */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
                 {
                     var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
                     var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
@@ -475,10 +473,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var synthesizer = new SpeechSynthesizer(mockConfig, fileConfig))
                 {
-                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"" */
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}""
                     {
                     }
-                } /* "{{{wavefile.wav}}}" is now closed */
+                } // "{{{wavefile.wav}}}" is now closed
 
                 var waveData1 = LoadWaveFileData("wavefile.wav");
                 var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
@@ -486,11 +484,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 using (var synthesizer = new SpeechSynthesizer(mockConfig, fileConfig))
                 {
-                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"" */
-                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{wavefile.wav}}}" now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}" */
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}""
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}"
                     {
                     }
-                } /* "{{{wavefile.wav}}}" is now closed */
+                } // "{{{wavefile.wav}}}" is now closed
 
                 var waveData12 = LoadWaveFileData("wavefile.wav");
                 var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
@@ -514,13 +512,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
                     var expectedAudioData12 = MergeBinary(expectedAudioData1, expectedAudioData2);
 
-                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering to pushstream */
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pushstream
                     {
                         Assert.IsTrue(AreBinaryEqual(expectedAudioData1, callback.GetAudioData()));
                         Assert.IsFalse(callback.IsClosed());
                     }
 
-                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering to pushstream */
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pushstream
                     {
                         Assert.IsTrue(AreBinaryEqual(expectedAudioData12, callback.GetAudioData()));
                         Assert.IsFalse(callback.IsClosed());
@@ -542,8 +540,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var synthesizer = new SpeechSynthesizer(mockConfig, streamConfig))
                 {
-                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering to pullstream */
-                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering to pullstream */
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
                     {
                     }
                 }
@@ -552,7 +550,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
                 var expectedAudioData12 = MergeBinary(expectedAudioData1, expectedAudioData2);
 
-                DoSomethingWithAudioInPullStream(stream, expectedAudioData12);
+                DoSomethingWithAudioInPullStream(stream, new bool[] { false }, expectedAudioData12);
             }
         }
 
@@ -566,13 +564,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
                 var expectedAudioData12 = MergeBinary(expectedAudioData1, expectedAudioData2);
 
-                var future = DoSomethingWithAudioInPullStreamInBackground(stream, expectedAudioData12);
+                var future = DoSomethingWithAudioInPullStreamInBackground(stream, new bool[] { false }, expectedAudioData12);
 
                 using (var streamConfig = AudioConfig.FromStreamOutput(stream))
                 using (var synthesizer = new SpeechSynthesizer(mockConfig, streamConfig))
                 {
-                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering to pullstream */
-                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering to pullstream */
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
                     {
                     }
                 }
@@ -585,9 +583,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutInResultsMock()
         {
-            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering, and available in result1 */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
                     Assert.IsTrue(result1.ResultId.Length == GuidLength);
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason);
@@ -596,7 +594,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Assert.IsTrue(AreBinaryEqual(expectedAudioData1, result1.AudioData));
                 }
 
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering, and available in result2 */
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                 {
                     Assert.IsTrue(result2.ResultId.Length == GuidLength);
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason);
@@ -611,7 +609,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInChunksInEventSynthesizingMock()
         {
-            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
                 var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
@@ -633,8 +631,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     offset += audioLength;
                 };
 
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering */
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering
                 {
                 }
             }
@@ -644,29 +642,29 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInStreamsMock()
         {
-            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering, and available in result1 */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason);
                     Assert.IsTrue(result1.AudioData.Length > 0);
-                    using (var stream1 = AudioDataStream.FromResult(result1)) /* of type AudioDataStream, does not block */
+                    using (var stream1 = AudioDataStream.FromResult(result1)) // of type AudioDataStream, does not block
                     {
                         var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
                         DoSomethingWithAudioInDataStream(stream1, true, expectedAudioData1);
 
-                        using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering, and available in result2 */
+                        using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
                         {
                             Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason);
                             Assert.IsTrue(result2.AudioData.Length > 0);
 
-                            using (var stream2 = AudioDataStream.FromResult(result2)) /* of type AudioDataStream, does not block */
+                            using (var stream2 = AudioDataStream.FromResult(result2)) // of type AudioDataStream, does not block
                             {
                                 var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
                                 DoSomethingWithAudioInDataStream(stream2, true, expectedAudioData2);
 
                                 stream1.SetPosition(0);
-                                DoSomethingWithAudioInDataStream(stream1, true, expectedAudioData1); /* re-check stream1 to make sure it's not impacted by stream2 */
+                                DoSomethingWithAudioInDataStream(stream1, true, expectedAudioData1); // re-check stream1 to make sure it's not impacted by stream2
                             }
                         }
                     }
@@ -678,7 +676,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInStreamsBeforeDoneFromEventSynthesisStartedMock()
         {
-            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 var expectedAudioData = new List<byte[]>();
                 expectedAudioData.Add(BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice));
@@ -697,18 +695,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     requestOrder++;
 
-                    var stream = AudioDataStream.FromResult(e.Result); /* of type AudioDataStream, does not block */
+                    var stream = AudioDataStream.FromResult(e.Result); // of type AudioDataStream, does not block
                     futureList.Add(DoSomethingWithAudioInDataStreamInBackground(stream, false, expectedAudioData[requestOrder]));
                     streamList.Add(stream);
                 };
 
-                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) /* "{{{text1}}}" has completed rendering */
-                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) /* "{{{text2}}}" has completed rendering */
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering
                 {
                 }
 
-                var future3 = synthesizer.SpeakTextAsync("{{{text3}}}"); /* "{{{text3}}}" synthesis might have started */
-                using (var result3 = await future3) /* "{{{text3}}}" synthesis has completed */
+                var future3 = synthesizer.SpeakTextAsync("{{{text3}}}"); // "{{{text3}}}" synthesis might have started
+                using (var result3 = await future3) // "{{{text3}}}" synthesis has completed
                 {
                 }
 
@@ -728,27 +726,27 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingTextAsyncMock()
         {
-            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
-                using (var result1 = await synthesizer.StartSpeakingTextAsync("{{{text1}}}")) /* "{{{text1}}}" synthesis has started, likely not finished */
+                using (var result1 = await synthesizer.StartSpeakingTextAsync("{{{text1}}}")) // "{{{text1}}}" synthesis has started, likely not finished
                 {
                     Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result1.Reason);
                     Assert.AreEqual(0, result1.AudioData.Length);
 
-                    using (var stream1 = AudioDataStream.FromResult(result1)) /* of type AudioDataStream, does not block */
+                    using (var stream1 = AudioDataStream.FromResult(result1)) // of type AudioDataStream, does not block
                     {
                         var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
-                        var future1 = DoSomethingWithAudioInDataStreamInBackground(stream1, false, expectedAudioData1); /* does not block, just spins a thread up */
+                        var future1 = DoSomethingWithAudioInDataStreamInBackground(stream1, false, expectedAudioData1); // does not block, just spins a thread up
 
-                        using (var result2 = await synthesizer.StartSpeakingTextAsync("{{{text2}}}")) /* "{{{text2}}}" synthesis has started, likely not finished */
+                        using (var result2 = await synthesizer.StartSpeakingTextAsync("{{{text2}}}")) // "{{{text2}}}" synthesis has started, likely not finished
                         {
                             Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result2.Reason);
                             Assert.AreEqual(0, result2.AudioData.Length);
 
-                            using (var stream2 = AudioDataStream.FromResult(result2)) /* of type AudioDataStream, does not block */
+                            using (var stream2 = AudioDataStream.FromResult(result2)) // of type AudioDataStream, does not block
                             {
                                 var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
-                                var future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false, expectedAudioData2); /* does not block, just spins a thread up */
+                                var future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false, expectedAudioData2); // does not block, just spins a thread up
 
                                 await future1;
                                 await future2;
@@ -763,7 +761,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInStreamsBeforeDoneQueuedMock()
         {
-            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 int startedRequests = 0;
                 synthesizer.SynthesisStarted += (s, e) =>
@@ -783,13 +781,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
-                var futureResult1 = synthesizer.StartSpeakingTextAsync("{{{text1}}}"); /* "{{{text1}}}" synthesis might have started, likely not finished */
-                var futureResult2 = synthesizer.StartSpeakingTextAsync("{{{text2}}}"); /* "{{{text2}}}" synthesis might have started (very unlikely) */
+                var futureResult1 = synthesizer.StartSpeakingTextAsync("{{{text1}}}"); // "{{{text1}}}" synthesis might have started, likely not finished
+                var futureResult2 = synthesizer.StartSpeakingTextAsync("{{{text2}}}"); // "{{{text2}}}" synthesis might have started (very unlikely)
 
                 var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
-                var future1 = DoSomethingWithAudioInResultInBackground(futureResult1, false, expectedAudioData1); /* does not block, just spins a thread up */
+                var future1 = DoSomethingWithAudioInResultInBackground(futureResult1, false, expectedAudioData1); // does not block, just spins a thread up
                 var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
-                var future2 = DoSomethingWithAudioInResultInBackground(futureResult2, false, expectedAudioData2); /* does not block, just spins a thread up */
+                var future2 = DoSomethingWithAudioInResultInBackground(futureResult2, false, expectedAudioData2); // does not block, just spins a thread up
 
                 await future1;
                 await future2;
@@ -800,7 +798,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResultMock()
         {
-            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 using (var result = await synthesizer.StartSpeakingTextAsync("{{{text1}}}"))
                 {
@@ -815,12 +813,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     while (!synthesisCompleted)
                     {
-                        Thread.Sleep(100); /* wait for the synthesis to be done */
+                        Thread.Sleep(100); // wait for the synthesis to be done
                     }
 
                     using (var stream = AudioDataStream.FromResult(result))
                     {
-                        Thread.Sleep(500); /* wait for more time for synthesis completed event to be sent to stream */
+                        Thread.Sleep(500); // wait for more time for synthesis completed event to be sent to stream
                         var expectedAudioData = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
                         DoSomethingWithAudioInDataStream(stream, true, expectedAudioData);
                     }
@@ -832,7 +830,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SpeakOutputInStreamsWithAllDataGetSinceSynthesizingResultMock()
         {
-            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) /* null indicates to do nothing with synthesizer audio by default */
+            using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 bool firstChunkSkipped = false;
                 AudioDataStream stream = null;
@@ -864,12 +862,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        private void DoSomethingWithAudioInPullStream(PullAudioOutputStream stream)
+        private void DoSomethingWithAudioInPullStream(PullAudioOutputStream stream, bool[] canceled)
         {
-            DoSomethingWithAudioInPullStream(stream, null);
+            DoSomethingWithAudioInPullStream(stream, canceled, null);
         }
 
-        private void DoSomethingWithAudioInPullStream(PullAudioOutputStream stream, byte[] expectedData)
+        private void DoSomethingWithAudioInPullStream(PullAudioOutputStream stream, bool[] canceled, byte[] expectedData)
         {
             byte[] audioData = new byte[0];
             byte[] buffer = new byte[1024];
@@ -877,8 +875,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             uint filledSize = 0;
 
             while ((filledSize = stream.Read(buffer)) > 0)
-            { /* blocks until atleast 1024 bytes are available */
-              /* do something with buffer */
+            { // blocks until atleast 1024 bytes are available
+              // do something with buffer
                 totalSize += filledSize;
                 Array.Resize(ref audioData, (int)totalSize);
                 for (int i = 0; i < filledSize; ++i)
@@ -887,7 +885,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
             }
 
-            Assert.IsTrue(totalSize > 0);
+            if (canceled[0])
+            {
+                Assert.IsTrue(totalSize == 0);
+            }
+            else
+            {
+                Assert.IsTrue(totalSize > 0);
+            }
 
             if (expectedData != null)
             {
@@ -895,22 +900,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        private Task DoSomethingWithAudioInPullStreamInBackground(PullAudioOutputStream stream)
+        private Task DoSomethingWithAudioInPullStreamInBackground(PullAudioOutputStream stream, bool[] canceled)
         {
-            return DoSomethingWithAudioInPullStreamInBackground(stream, null);
+            return DoSomethingWithAudioInPullStreamInBackground(stream, canceled, null);
         }
 
-        private Task DoSomethingWithAudioInPullStreamInBackground(PullAudioOutputStream stream, byte[] expectedData)
+        private Task DoSomethingWithAudioInPullStreamInBackground(PullAudioOutputStream stream, bool[] canceled, byte[] expectedData)
         {
             return Task.Run(() =>
             {
-                DoSomethingWithAudioInPullStream(stream, expectedData);
+                DoSomethingWithAudioInPullStream(stream, canceled, expectedData);
             });
-        }
-
-        private void DoSomethingWithAudioInVector(byte[] audioData)
-        {
-            Assert.IsTrue(audioData.Length > 0);
         }
 
         private void DoSomethingWithAudioInDataStream(AudioDataStream stream, bool afterSynthesisDone)
@@ -920,14 +920,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         private void DoSomethingWithAudioInDataStream(AudioDataStream stream, bool afterSynthesisDone, byte[] expectedData)
         {
-            if (afterSynthesisDone)
+            if (afterSynthesisDone && stream.GetStatus() != StreamStatus.Canceled)
             {
                 Assert.AreEqual(StreamStatus.AllData, stream.GetStatus());
             }
 
             CheckAudioInDataStream(stream, expectedData);
 
-            if (!afterSynthesisDone)
+            if (!afterSynthesisDone && stream.GetStatus() != StreamStatus.Canceled)
             {
                 Assert.AreEqual(StreamStatus.AllData, stream.GetStatus());
             }
@@ -941,8 +941,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             uint filledSize = 0;
 
             while ((filledSize = stream.ReadData(buffer)) > 0)
-            { /* blocks until atleast 1024 bytes are available */
-              /* do something with buffer */
+            { // blocks until atleast 1024 bytes are available
+              // do something with buffer
                 totalSize += filledSize;
                 Array.Resize(ref audioData, (int)totalSize);
                 for (int i = 0; i < filledSize; ++i)
@@ -961,7 +961,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.IsTrue(totalSize == 0);
 
                 var cancelDetails = SpeechSynthesisCancellationDetails.FromStream(stream);
-                /* do something with cancellation details */
+                // do something with cancellation details
                 Assert.AreEqual(CancellationReason.Error, cancelDetails.Reason);
                 Assert.AreNotEqual(CancellationErrorCode.NoError, cancelDetails.ErrorCode);
             }
