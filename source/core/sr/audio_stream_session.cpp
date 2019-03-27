@@ -10,6 +10,27 @@
 #include <list>
 #include <memory>
 #include <inttypes.h>
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <TraceLoggingProvider.h>
+
+#define MICROSOFT_KEYWORD_MEASURES 0x0000400000000000 // Bit 46
+#define MICROSOFT_KEYWORD_TELEMETRY 0x0000200000000000 // Bit 45
+#define TraceLoggingOptionMicrosoftTelemetry() TraceLoggingOptionGroup(0x4f50731a, 0x89cf, 0x4782, 0xb3, 0xe0, 0xdc, 0xe8, 0xc9, 0x4, 0x76, 0xba)
+
+// forward-declare
+TRACELOGGING_DECLARE_PROVIDER(tracingEventProvider);
+#endif
+
+#ifdef _WIN32
+TRACELOGGING_DEFINE_PROVIDER(tracingEventProvider,
+    "Microsoft.CognitiveServices.Speech.SDK",
+    (0xbbdb52c5, 0xeb5c, 0x4616, 0x83, 0x1d, 0x90, 0x12, 0x13, 0xd3, 0x79, 0x1c),
+    TraceLoggingOptionMicrosoftTelemetry());
+#endif
+
 #include "audio_stream_session.h"
 #include "spxcore_common.h"
 #include "asyncop.h"
@@ -23,7 +44,6 @@
 #include "property_id_2_name_map.h"
 #include "try_catch_helpers.h"
 #include "time_utils.h"
-
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -198,6 +218,9 @@ void CSpxAudioStreamSession::InitFromMicrophone()
 
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceMicrophone);
     SetAudioConfigurationInProperties();
+
+    // Write microphone device name and session id
+    WriteTracingEvent();
 }
 
 void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> stream)
@@ -246,6 +269,19 @@ void CSpxAudioStreamSession::SetAudioConfigurationInProperties()
 
     // copy input audio device name retrieved from system
     SetStringValue("SPEECH-MicrophoneNiceName", m_audioPump->GetPropertyValue("SPEECH-MicrophoneNiceName").c_str());
+}
+
+void CSpxAudioStreamSession::WriteTracingEvent()
+{
+#ifdef _WIN32
+    const char * sessionId = PAL::ToString(m_sessionId).c_str();
+    const char * micName = GetStringValue("SPEECH-MicrophoneNiceName", "").c_str();
+
+    TraceLoggingWrite(tracingEventProvider, "RecognizerCreationEvent",
+        TraceLoggingKeyword(MICROSOFT_KEYWORD_TELEMETRY),
+        TraceLoggingString(sessionId, "SessionId"),
+        TraceLoggingString(micName, "Microphone"));
+#endif
 }
 
 void CSpxAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)

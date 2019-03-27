@@ -1,10 +1,24 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 // dllmain.cpp : Defines the entry point for the DLL application.
+
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <TraceLoggingProvider.h>
+
+// forward-declare
+TRACELOGGING_DECLARE_PROVIDER(tracingEventProvider);
+#endif
+
 #include "stdafx.h"
 #include "debug_utils.h"
 #include "file_logger.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
-
 
 void InitLogging()
 {
@@ -23,6 +37,9 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     {
         case DLL_PROCESS_ATTACH:
             InitLogging();
+#ifdef _WIN32
+            TraceLoggingRegister(tracingEventProvider);
+#endif
             break;
 
         case DLL_THREAD_ATTACH:
@@ -32,6 +49,9 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             break;
 
         case DLL_PROCESS_DETACH:
+#ifdef _WIN32
+            TraceLoggingUnregister(tracingEventProvider);
+#endif
             CSpxSharedPtrHandleTableManager::Term();
             break;
     }
