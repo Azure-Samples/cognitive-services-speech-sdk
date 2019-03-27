@@ -40,10 +40,6 @@ if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET tts_rest PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()
 
-if(MSVC)
-    add_definitions(/wd4996) # Suppress C4996 which is known issue of httpapi code
-endif()
-
 if (UNIX)
     add_definitions(-Wno-error)
 endif()

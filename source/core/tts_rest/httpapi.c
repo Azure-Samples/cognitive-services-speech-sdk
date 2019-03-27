@@ -1289,7 +1289,7 @@ HTTPAPI_RESULT HTTPAPI_SetOption(HTTP_HANDLE handle, const char* optionName, con
         else
         {
             /*Codes_SRS_HTTPAPI_COMPACT_21_064: [ If the HTTPAPI_SetOption get success setting the option, it shall return HTTPAPI_OK. ]*/
-            (void)strcpy(http_instance->certificate, (const char*)value);
+            (void)strcpy_s(http_instance->certificate, len + 1, (const char*)value);
             result = HTTPAPI_OK;
         }
     }
@@ -1309,7 +1309,7 @@ HTTPAPI_RESULT HTTPAPI_SetOption(HTTP_HANDLE handle, const char* optionName, con
         }
         else
         {
-            (void)strcpy(http_instance->tlsIoVersion, (const char*)value);
+            (void)strcpy_s(http_instance->tlsIoVersion, len + 1, (const char*)value);
             result = HTTPAPI_OK;
         }
     }
@@ -1332,7 +1332,7 @@ HTTPAPI_RESULT HTTPAPI_SetOption(HTTP_HANDLE handle, const char* optionName, con
         else
         {
             /*Codes_SRS_HTTPAPI_COMPACT_21_064: [ If the HTTPAPI_SetOption get success setting the option, it shall return HTTPAPI_OK. ]*/
-            (void)strcpy(http_instance->x509ClientCertificate, (const char*)value);
+            (void)strcpy_s(http_instance->x509ClientCertificate, len + 1, (const char*)value);
             result = HTTPAPI_OK;
         }
     }
@@ -1355,7 +1355,7 @@ HTTPAPI_RESULT HTTPAPI_SetOption(HTTP_HANDLE handle, const char* optionName, con
         else
         {
             /*Codes_SRS_HTTPAPI_COMPACT_21_064: [ If the HTTPAPI_SetOption get success setting the option, it shall return HTTPAPI_OK. ]*/
-            (void)strcpy(http_instance->x509ClientPrivateKey, (const char*)value);
+            (void)strcpy_s(http_instance->x509ClientPrivateKey, len + 1, (const char*)value);
             result = HTTPAPI_OK;
         }
     }
@@ -1399,7 +1399,7 @@ HTTPAPI_RESULT HTTPAPI_CloneOption(const char* optionName, const void* value, co
         else
         {
             /*Codes_SRS_HTTPAPI_COMPACT_21_072: [ If the HTTPAPI_CloneOption get success setting the option, it shall return HTTPAPI_OK. ]*/
-            (void)strcpy(tempCert, (const char*)value);
+            (void)strcpy_s(tempCert, certLen + 1, (const char*)value);
             *savedValue = tempCert;
             result = HTTPAPI_OK;
         }
@@ -1416,7 +1416,7 @@ HTTPAPI_RESULT HTTPAPI_CloneOption(const char* optionName, const void* value, co
         else
         {
             /*Codes_SRS_HTTPAPI_COMPACT_21_072: [ If the HTTPAPI_CloneOption get success setting the option, it shall return HTTPAPI_OK. ]*/
-            (void)strcpy(tempCert, (const char*)value);
+            (void)strcpy_s(tempCert, certLen + 1, (const char*)value);
             *savedValue = tempCert;
             result = HTTPAPI_OK;
         }
@@ -1433,7 +1433,7 @@ HTTPAPI_RESULT HTTPAPI_CloneOption(const char* optionName, const void* value, co
         else
         {
             /*Codes_SRS_HTTPAPI_COMPACT_21_072: [ If the HTTPAPI_CloneOption get success setting the option, it shall return HTTPAPI_OK. ]*/
-            (void)strcpy(tempCert, (const char*)value);
+            (void)strcpy_s(tempCert, certLen + 1, (const char*)value);
             *savedValue = tempCert;
             result = HTTPAPI_OK;
         }

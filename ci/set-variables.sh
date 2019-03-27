@@ -37,10 +37,10 @@
 #   We are currently using this (and not SPEECHSDK_SEMVER2) for NuGet packages,
 #   since VSTS package management does not support build meta information.
 # * SPEECHSDK_SIGN - equal to "true" if should sign, "false" otherwise.
-# * SPEECHSDK_SDL_ALL - equal to "true" if SDL build should also run long-running tasks.
-#   Note: Needs SPEECHSDK_SPECTRE_MITIGATION set to "true" to pass in binskim.
 # * SPEECHSDK_SPECTRE_MITIGATION - equal to "true" if should build with Spectre mitigations, "false" otherwise.
 #   Note: on Windows, requires VS component install Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre.
+#         This used to be not installed by default on the hosted build agent,
+#         but now it is, and we're defaulting this to true for Windows builds.
 # * SPEECHSDK_NUGET_VSTS_PUSH - equal to "true" if a push to (one of) our internal
 #   VSTS packagement feeds should be made.
 # * SPEECHSDK_VSTS_FEED - VSTS feed to push to (if a push is done)
@@ -202,6 +202,8 @@ SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGet
 # Running tests is default
 SPEECHSDK_RUN_TESTS=true
 
+SPEECHSDK_SPECTRE_MITIGATION=true
+
 case $SPEECHSDK_BUILD_TYPE in
   dev)
     PRERELEASE_VERSION=-alpha.0.$_BUILD_ID
@@ -209,8 +211,6 @@ case $SPEECHSDK_BUILD_TYPE in
     SPEECHSDK_SIGN=false
     SPEECHSDK_NUGET_VSTS_PUSH=false
     SPEECHSDK_VSTS_FEED=6e3392a0-60e1-412f-8fc5-41de1c818f6c # CarbonPre
-    SPEECHSDK_SPECTRE_MITIGATION=false
-    SPEECHSDK_SDL_ALL=false
     ;;
   int)
     # For Nightly add some additional jobs.
@@ -222,8 +222,6 @@ case $SPEECHSDK_BUILD_TYPE in
     SPEECHSDK_SIGN=true
     SPEECHSDK_NUGET_VSTS_PUSH=true
     SPEECHSDK_VSTS_FEED=6cad1ef4-30c7-40bd-8d67-d624d756c9c8 # Carbon
-    SPEECHSDK_SPECTRE_MITIGATION=true
-    SPEECHSDK_SDL_ALL=true
     ;;
   prod)
     # Additional jobs for production builds.
@@ -235,8 +233,6 @@ case $SPEECHSDK_BUILD_TYPE in
     SPEECHSDK_SIGN=true
     SPEECHSDK_NUGET_VSTS_PUSH=false # do not push
     SPEECHSDK_VSTS_FEED=6cad1ef4-30c7-40bd-8d67-d624d756c9c8 # Carbon
-    SPEECHSDK_SPECTRE_MITIGATION=true
-    SPEECHSDK_SDL_ALL=true
     ;;
 esac
 
@@ -271,7 +267,6 @@ for var in \
   SPEECHSDK_SEMVER2NOMETA \
   SPEECHSDK_SIGN \
   SPEECHSDK_SPECTRE_MITIGATION \
-  SPEECHSDK_SDL_ALL \
   SPEECHSDK_VERSION_CODE \
   SPEECHSDK_VSTS_FEED \
   ; \
