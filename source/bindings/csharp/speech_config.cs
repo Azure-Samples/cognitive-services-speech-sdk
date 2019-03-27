@@ -237,6 +237,8 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Sets proxy configuration.
         /// Added in version 1.1.0
+        ///
+        /// Note: Proxy functionality is not available on macOS. This function will have no effect on this platform.
         /// </summary>
         /// <param name="proxyHostName">The host name of the proxy server, without the protocol scheme (http://)</param>
         /// <param name="proxyPort">The port number of the proxy server.</param>

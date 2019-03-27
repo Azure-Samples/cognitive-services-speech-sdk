@@ -190,6 +190,11 @@ class SpeechConfig():
         """
         Set proxy information.
 
+        .. note::
+
+            Proxy functionality is not available on macOS. This function will have no effect on
+            this platform.
+
         :param hostname: The host name of the proxy server. Do not add protocol information (http)
             to the hostname.
         :param port: The port number of the proxy server.
@@ -837,12 +842,13 @@ class Connection():
         """
         return EventSignal(self._impl.disconnected, ConnectionEventArgs)
 
+
 class PhraseListGrammar():
     """
-    Class that allows runtime addition of phrase hints to aid in speech recognition. 
+    Class that allows runtime addition of phrase hints to aid in speech recognition.
 
-    Phrases added to the recognizer are effective at the start of the next recognition, or the next time the speech recognizer must 
-    reconnect to the speech service.
+    Phrases added to the recognizer are effective at the start of the next recognition, or the next
+    time the speech recognizer must reconnect to the speech service.
     """
     @classmethod
     def from_recognizer(cls, recognizer: Recognizer):
@@ -867,4 +873,5 @@ class PhraseListGrammar():
         """
         Clears all phrases from the current recognizer.
         """
-        self._impl.clear()    
+        self._impl.clear()
+

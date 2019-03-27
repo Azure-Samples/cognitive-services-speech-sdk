@@ -82,6 +82,7 @@ SPX_EXPORT
 /**
  * Sets proxy configuration
  * Added in version 1.1.0
+ * Note: Proxy functionality is not available on iOS and macOS. This function will have no effect on these platforms.
  * @param proxyHostName the host name of the proxy server, without the protocol scheme (http://)
  * @param proxyPort the port number of the proxy server.
  * @param proxyUserName the user name of the proxy server. Use empty string if no user name is needed.
