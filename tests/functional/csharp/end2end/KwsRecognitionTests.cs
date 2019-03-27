@@ -533,6 +533,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [Ignore] // TODO temporarily disabled
         [TestMethod]
         public async Task TestSpeechKeywordspotterComputerFound2DifferentUtterances()
         {
@@ -991,6 +992,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [Ignore] // TODO temporarily disabled
         [TestMethod]
         public async Task TestTranslationKeywordspotterComputerFound2DifferentUtterances()
         {

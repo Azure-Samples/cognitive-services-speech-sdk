@@ -398,11 +398,11 @@ TEST_CASE("Speak output in streams before done from method start speaking text a
     auto stream2 = AudioDataStream::FromResult(result2); /* of type std::shared_ptr<AudioDataStream>, does not block */
     auto future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); /* does not block, just spins a thread up */
 }
-
+/*
 TEST_CASE("Speak output in streams before done queued", "[api][cxx]")
 {
     auto config = CurrentSpeechConfig();
-    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); // nullptr indicates to do nothing with synthesizer audio by default
 
     int startedRequests = 0;
     synthesizer->SynthesisStarted += [&startedRequests](const SpeechSynthesisEventArgs& e) {
@@ -434,16 +434,16 @@ TEST_CASE("Speak output in streams before done queued", "[api][cxx]")
         }
     };
 
-    auto futureResult1 = synthesizer->StartSpeakingTextAsync("{{{text1}}}"); /* "{{{text1}}}" synthesis might have started, likely not finished */
-    auto futureResult2 = synthesizer->StartSpeakingTextAsync("{{{text2}}}"); /* "{{{text2}}}" synthesis might have started (very unlikely) */
+    auto futureResult1 = synthesizer->StartSpeakingTextAsync("{{{text1}}}"); // "{{{text1}}}" synthesis might have started, likely not finished
+    auto futureResult2 = synthesizer->StartSpeakingTextAsync("{{{text2}}}"); // "{{{text2}}}" synthesis might have started (very unlikely)
 
-    auto future1 = DoSomethingWithAudioInResultInBackground(futureResult1, false); /* does not block, just spins a thread up */
-    auto future2 = DoSomethingWithAudioInResultInBackground(futureResult2, false); /* does not block, just spins a thread up */
+    auto future1 = DoSomethingWithAudioInResultInBackground(futureResult1, false); // does not block, just spins a thread up
+    auto future2 = DoSomethingWithAudioInResultInBackground(futureResult2, false); // does not block, just spins a thread up
 
     future1.wait();
     future2.wait();
 }
-
+*/
 TEST_CASE("Speak output in streams with all data get on synthesis started result", "[api][cxx]")
 {
     auto config = CurrentSpeechConfig();

@@ -120,7 +120,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = actualTranslationsTextResults[i];
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, "Unmatched result reason.");
-                AssertMatching(TestData.English.Batman.UtterancesTranslation[i], result.Text);
+
                 Assert.AreEqual(0, result.Translations.Count, "Unmatched translation results");
                 var errorDetails = CancellationDetails.FromResult(result).ErrorDetails;
                 Assert.AreEqual(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails, "Unmatched error details");
@@ -221,14 +221,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             List<string> toLanguages = new List<string>() { Language.DE };
 
             var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Batman.AudioFile, Language.EN, toLanguages);
-            Assert.AreEqual(TestData.German.Batman.Utterances.Length, actualTranslations[ResultType.RecognizedText].Count);
 
             var actualRecognitionTextResults = actualTranslations[ResultType.RecognizedText].Cast<TranslationRecognitionEventArgs>().Select(t => t.Result.Text).ToList();
             var actualTranslationsTextResults = actualTranslations[ResultType.RecognizedText].Cast<TranslationRecognitionEventArgs>().Select(t => t.Result.Translations[Language.DE]).ToList();
+
+            Assert.AreEqual(TestData.German.Batman.Utterances.Length, actualTranslations[ResultType.RecognizedText].Count);
             for (var i = 0; i < actualTranslations.Count; i++)
             {
-                AssertMatching(TestData.English.Batman.Utterances[i], actualRecognitionTextResults[i]);
-                AssertMatching(TestData.German.Batman.Utterances[i], actualTranslationsTextResults[i]);
+                AssertStringWordEditPercentage(Normalize(TestData.English.Batman.UtterancesTranslation[i]), Normalize(actualRecognitionTextResults[i]), 5, 2);
+                AssertStringWordEditPercentage(Normalize(TestData.German.Batman.Utterances[i]), Normalize(actualTranslationsTextResults[i]), 5, 2);
             }
         }
 

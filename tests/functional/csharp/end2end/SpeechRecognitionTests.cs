@@ -97,7 +97,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
                 AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
                 Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "Duration == 0");
-                Assert.AreEqual(200000, result.OffsetInTicks, "Offset not zero");
+                Assert.IsTrue(100000 < result.OffsetInTicks && result.OffsetInTicks < 500000, "Offset value seems incorrect");
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
             }
         }
@@ -723,11 +723,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await helper.CompleteContinuousRecognition(recognizer);
 
                 Assert.AreEqual(TestData.English.Margarita.Utterance.Length, recognizedText.Count);
-                for (var i = 0; i < recognizedText.Count; i++)
-                {
-                    AssertMatching(TestData.English.Margarita.Utterance[i], recognizedText[i]);
-                }
-                
+                AssertFuzzyMatching(TestData.English.Margarita.Utterance, recognizedText.ToArray(), 5);
             }
         }
 

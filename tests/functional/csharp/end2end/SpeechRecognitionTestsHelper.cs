@@ -303,7 +303,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        static public void AssertStringWordEditPercentage(string expectedString, string comparisonString, int deltaPercentage)
+        static public void AssertStringWordEditPercentage(string expectedString, string comparisonString, int deltaPercentage, int absoluteAllowedErrorCount=0)
         // Using standard implementation for Levenshtein distance. Caveat: not optimized for memory consumption
         //   but sufficient for our test case and the string length we are expecting (less 10000 words)
         // 
@@ -312,11 +312,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         // deltaPercentage - how many word operations are allowed to change the input string into the comparison string
         //   expressed as a percentage of words
         //   Example: if input string contains 200 words, deltaPercantage is 5, 10 edit operations would be allowed
+        // absoluteAllowedErrorCount - an absolute lower limit on the number of allowed errors.
+        //
+        // The actual number of allowed errors is the higher number of the relative or the absolute counts.
         {
             String[] wordsExpected = expectedString.Split(' ');
             String[] wordsComparison = comparisonString.Split(' ');
 
-            int allowedEdits = deltaPercentage * wordsExpected.Length / 100;
+            int allowedEdits = Math.Max(deltaPercentage * wordsExpected.Length / 100, absoluteAllowedErrorCount);
             AssertStringWordEditCount(expectedString, comparisonString, allowedEdits);
         }
 

@@ -46,9 +46,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             this.config.SpeechRecognitionLanguage = Language.EN;
             this.config.OutputFormat = OutputFormat.Detailed;
             var result = await this.speechHelper.GetSpeechFinalRecognitionResult(this.config, TestData.English.Batman.AudioFile);
-            var detailedRecognitionText = string.Join(" ", result.Best().Select(r => r.Text).ToList());
-            var detailedRecognitionNormalizedForm = string.Join(" ", result.Best().Select(r => r.NormalizedForm).ToList());
-            var detailedRecognitionLexicalForm = string.Join(" ", result.Best().Select(r => r.NormalizedForm).ToList());
+            var detailedRecognitionText = result.Best().ToArray()[0].Text;
+            var detailedRecognitionNormalizedForm = result.Best().ToArray()[0].NormalizedForm;
+            var detailedRecognitionLexicalForm = result.Best().ToArray()[0].NormalizedForm;
 
             AssertMatching(TestData.English.Batman.Utterances[0], detailedRecognitionText);
             AssertMatching(TestData.English.Batman.Utterances[0], detailedRecognitionNormalizedForm);
@@ -73,9 +73,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(this.config, TestData.English.Batman.AudioFile);
             Assert.AreNotEqual(result.Count, 0);
 
-            string[] bestResultUtterances = result.Select(r => r.Result.Best()).Select(r => string.Join(" ", r.Select(t => t.Text))).ToArray();
-            string[] normalizedFormResultUtterances = result.Select(r => r.Result.Best()).Select(r => string.Join(" ", r.Select(t => t.NormalizedForm))).ToArray();
-            string[] lexicalFormResultUtterances = result.Select(r => r.Result.Best()).Select(r => string.Join(" ", r.Select(t => t.LexicalForm))).ToArray();
+            string[] bestResultUtterances = result.Select(r => r.Result.Best().ToArray()[0].Text).ToArray();
+            string[] normalizedFormResultUtterances = result.Select(r => r.Result.Best().ToArray()[0].NormalizedForm).ToArray();
+            string[] lexicalFormResultUtterances = result.Select(r => r.Result.Best().ToArray()[0].LexicalForm).ToArray();
             lexicalFormResultUtterances = lexicalFormResultUtterances.Select(s => Regex.Replace(s, " '", "", RegexOptions.Compiled)).ToArray();
 
             AssertFuzzyMatching(bestResultUtterances, TestData.English.Batman.Utterances, 2);
@@ -86,7 +86,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var actualRecognitionTextResults = result.Select(t => t.Result.Text).ToArray();
             for (var i = 0; i < result.Count; i++)
             {
-                AssertStringWordEditPercentage(TestData.English.Batman.Utterances[i], actualRecognitionTextResults[i], 5);
+                // allow 5 % of word error rate, or at least 2 errors (for short utterances)
+                AssertStringWordEditPercentage(Normalize(TestData.English.Batman.Utterances[i]), Normalize(actualRecognitionTextResults[i]), 5, 2);
             }
         }
 
@@ -119,10 +120,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     results.Add(result);
                 }
 
-                var texts = results.Select(r => r.Text).Where(t => !string.IsNullOrEmpty(t)).ToList();
-                var expected = string.Join(" ", TestData.English.Batman.UtterancesInteractiveMode);
-                var actual = string.Join(" ", texts.ToArray());
-                AssertMatching(expected, actual);
+                var texts = results.Select(r => r.Text).Where(t => !string.IsNullOrEmpty(t)).ToArray();
+                AssertFuzzyMatching(TestData.English.Batman.UtterancesInteractive, texts, 5);
             }
         }
 
