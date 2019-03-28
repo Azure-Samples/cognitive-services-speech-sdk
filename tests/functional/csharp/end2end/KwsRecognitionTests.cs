@@ -23,15 +23,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     // provides an input stream that does playback a file in "realtime", i.e.,
     // returns 32000bytes/sec assuming our standard mono/16bits/16000hz
     // wav file format.
+    // Note: the behaviour can be configured per instance and has a default of "false"
     public class RealTimeAudioInputStream : PullAudioInputStreamCallback
     {
+        // Default behavior for new streams. true, if realtime,
+        // false, if best effort.
+        public static bool defaultIsRealtime = false;
+
         FileStream fs;
         DateTime notBefore;
+        bool currentIsRealtime;
 
         public RealTimeAudioInputStream(string filename)
         {
             fs = File.OpenRead(filename);
             notBefore = DateTime.Now;
+            currentIsRealtime = defaultIsRealtime;
         }
 
         public override int Read(byte[] dataBuffer, uint size)
@@ -42,10 +49,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             // a stream of mono/16bits/16000hz audio input.
             var newNotBefore = notBefore.AddMilliseconds((1000 * size) / 32000);
 
-            var delay = notBefore - now;
-            if (delay > TimeSpan.Zero)
+            if (currentIsRealtime)
             {
-                Thread.Sleep((int)delay.TotalMilliseconds);
+                var delay = notBefore - now;
+                if (delay > TimeSpan.Zero)
+                {
+                    Thread.Sleep((int)delay.TotalMilliseconds);
+                }
             }
 
             notBefore = newNotBefore;
