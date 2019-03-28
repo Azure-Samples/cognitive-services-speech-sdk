@@ -14,12 +14,12 @@ Extract the archives' content into this directory, so folders for operating syst
 
 For example, to build for Windows x64:
 
-* Download the artifacts named `Windows_Win64_Debug` and `Windows_Win64_Release` from the build page.
+* Download the artifacts named `Windows_x64_Debug` and `Windows_x64_Release` from the build page.
 * Extract them here so the directory structure looks like this:
 
   ```
   external\KWS
-  +---Windows_Win64_Debug
+  +---Windows_x64_Debug
   |   +---targets
   |   |   +---CortanaSDK
   |   |   |   \---Debug
@@ -28,7 +28,7 @@ For example, to build for Windows x64:
   |   \---tools
   |       \---kwsrunner
   |           \---Debug
-  \---Windows_Win64_Release
+  \---Windows_x64_Release
       +---targets
       |   +---CortanaSDK
       |   |   \---Release
