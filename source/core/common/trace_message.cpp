@@ -76,6 +76,33 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* pszFo
         format += "\n";
     }
 
+#ifdef SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
+    va_list argptrDbg;
+#ifdef _MSC_VER
+    // Avoid warnings:
+    // Warning C4701: potentially uninitialized local variable 'X' used
+    // Warning C4703: potentially uninitialized local pointer variable 'X' used
+    argptrDbg = nullptr;
+#endif
+    va_copy(argptrDbg, argptr);
+    char sz[4096];
+    vsprintf_s(sz, 4096, format.c_str(), argptrDbg);
+    OutputDebugStringA(sz);
+#endif // SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
+
+    va_list argptrConsole;
+#ifdef _MSC_VER
+    // Avoid warnings:
+    // Warning C4701: potentially uninitialized local variable 'X' used
+    // Warning C4703: potentially uninitialized local pointer variable 'X' used
+    argptrConsole = nullptr;
+#endif
+
+    if (logToConsole)
+    {
+        va_copy(argptrConsole, argptr);
+    }
+
 #if defined(ANDROID) || defined(__ANDROID__)
     int androidPrio = ANDROID_LOG_ERROR;
     switch (level)
@@ -89,28 +116,31 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* pszFo
 
     if (logToConsole)
     {
-        __android_log_vprint(androidPrio, "SpeechSDK", format.c_str(), argptr);
+        __android_log_vprint(androidPrio, "SpeechSDK", format.c_str(), argptrConsole);
     }
     if (logToFile)
     {
         FileLogger::Instance().LogToFile(std::move(format), argptr);
     }
 #else
+    if (logToConsole)
+    {
+        vfprintf(stderr, format.c_str(), argptrConsole);
+    }
     if (logToFile)
     {
         FileLogger::Instance().LogToFile(std::move(format), argptr);
     }
-    if (logToConsole)
-    {
-        vfprintf(stderr, format.c_str(), argptr);
-    }
 #endif
 
+    if (logToConsole)
+    {
+        va_end(argptrConsole);
+    }
+
 #ifdef SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
-    char sz[4096];
-    vsprintf_s(sz, 4096, format.c_str(), argptr);
-    OutputDebugStringA(sz);
-#endif // SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
+    va_end(argptrDbg);
+#endif
 }
 
 void SpxTraceMessage(int level, const char* pszTitle, bool enableDebugOutput, const char* pszFormat, ...)
