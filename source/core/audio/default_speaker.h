@@ -86,6 +86,7 @@ private:
     void InitializeAudio();
 
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
+    AUDIO_SETTINGS_HANDLE m_hsetting;
     AUDIO_SYS_HANDLE m_haudio;
 #endif
 

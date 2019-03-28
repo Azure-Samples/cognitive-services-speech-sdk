@@ -52,13 +52,18 @@ void CSpxDefaultSpeaker::Init()
 
 void CSpxDefaultSpeaker::Term()
 {
-    if (m_audioInitialized)
-    {
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
+    if (m_haudio != nullptr)
+    {
         audio_destroy(m_haudio);
-#endif
-        m_audioInitialized = false;
     }
+
+    if (m_hsetting != nullptr)
+    {
+        audio_format_destroy(m_hsetting);
+    }
+#endif
+    m_audioInitialized = false;
 }
 
 void CSpxDefaultSpeaker::StartPlayback()
@@ -164,11 +169,16 @@ void CSpxDefaultSpeaker::InitializeAudio()
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
     if (!m_audioInitialized)
     {
-        auto hsetting = audio_format_create();
-        memcpy(hsetting, m_audioFormat.get(), sizeof(AUDIO_WAVEFORMAT));
+        m_hsetting = audio_format_create();
+        if (m_hsetting == nullptr)
+        {
+            return;
+        }
+
+        memcpy(m_hsetting, m_audioFormat.get(), sizeof(AUDIO_WAVEFORMAT));
 
         // If the audio format is not PCM, this will fail with internal error code 0x88890008
-        m_haudio = audio_create_with_parameters(hsetting);
+        m_haudio = audio_create_with_parameters(m_hsetting);
 
         // Just return, instead of abort, in order to make the synthesizer still running without audio device available
         if (m_haudio == nullptr)

@@ -191,7 +191,7 @@ std::string CSpxRestTtsEngineAdapter::ParseRegionFromCognitiveServiceEndpoint(co
 
     std::string host_str = std::string(host, host_length);
     size_t first_dot_pos = host_str.find('.');
-    if (first_dot_pos == -1)
+    if (first_dot_pos == size_t(-1))
     {
         ThrowRuntimeError("The given endpoint is not valid TTS cognitive service endpoint. Expected *.tts.speech.microsoft.com or *.voice.speech.microsoft.com");
     }
@@ -220,7 +220,7 @@ bool CSpxRestTtsEngineAdapter::IsCustomVoiceEndpoint(const std::string& endpoint
 
     std::string host_str = std::string(host, host_length);
     size_t first_dot_pos = host_str.find('.');
-    if (first_dot_pos == -1)
+    if (first_dot_pos == size_t(-1))
     {
         return false;
     }
@@ -251,7 +251,7 @@ bool CSpxRestTtsEngineAdapter::IsStandardVoiceEndpoint(const std::string& endpoi
 
     std::string host_str = std::string(host, host_length);
     size_t first_dot_pos = host_str.find('.');
-    if (first_dot_pos == -1)
+    if (first_dot_pos == size_t(-1))
     {
         return false;
     }
