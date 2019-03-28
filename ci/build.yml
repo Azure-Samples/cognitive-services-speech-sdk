@@ -1543,7 +1543,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDrop '))
   pool:
     name: Hosted Ubuntu 1604
-  timeoutInMinutes: 30
+  timeoutInMinutes: 60
   steps:
   - bash: |
       set -x -e -o pipefail
