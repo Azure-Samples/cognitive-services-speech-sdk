@@ -154,8 +154,9 @@ void SpeechContinuousRecognitionWithFile()
             cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << "\n"
                  << "CANCELED: ErrorDetails=" << e.ErrorDetails << "\n"
                  << "CANCELED: Did you update the subscription info?" << std::endl;
+            
+            recognitionEnd.set_value(); // Notify to stop recognition.
         }
-        recognitionEnd.set_value(); // Notify to stop recognition.
     });
 
     recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
