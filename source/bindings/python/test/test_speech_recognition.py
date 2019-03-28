@@ -181,6 +181,14 @@ def test_speech_config_default_constructor(config_type):
                         auth_token=auth_token)
 
 
+@pytest.mark.parametrize("config_type", speech_config_types)
+def test_config_system_language(config_type):
+    speech_config = config_type(subscription="somesubscription", region="someregion",
+                                speech_recognition_language='zh-CN')
+    value = speech_config._impl.get_property("SPEECHSDK-SPEECH-CONFIG-SYSTEM-LANGUAGE")
+    assert "Python" == value
+
+
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_canceled_result(speech_input):
     invalid_cfg = msspeech.SpeechConfig(endpoint="invalid", subscription="invalid")

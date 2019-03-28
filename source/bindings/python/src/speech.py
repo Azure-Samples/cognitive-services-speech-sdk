@@ -44,7 +44,6 @@ class SpeechConfig():
 
         self._impl = self._get_impl(impl.SpeechConfig, subscription, region, endpoint, auth_token,
                 speech_recognition_language)
-        self._impl.set_property("SPEECHSDK-SPEECH-CONFIG-SYSTEM-LANGUAGE", "Python")
 
     def get_property(self, property_id: PropertyId) -> str:
         """
@@ -112,6 +111,7 @@ class SpeechConfig():
 
         if _impl is not None:
             _impl.set_speech_recognition_language(speech_recognition_language)
+            _impl.set_property("SPEECHSDK-SPEECH-CONFIG-SYSTEM-LANGUAGE", "Python")
             return _impl
 
         raise ValueError(generic_error_message)
