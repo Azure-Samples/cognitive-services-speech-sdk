@@ -6,7 +6,7 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 # Associative array for most options
 declare -A options
-options[timeout]="1800s"
+options[timeout]="3600s"
 
 # Defines we collect separately in an array
 defines=()
