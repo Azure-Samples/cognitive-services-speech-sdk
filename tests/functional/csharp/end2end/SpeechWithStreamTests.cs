@@ -77,7 +77,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual(TestData.English.Batman.Utterances.Length, result.Count, "Unexpected number of utterances.");
 
             string[] resultUtterances = result.Select(r => r.Result.Text).ToArray();
-            AssertFuzzyMatching(resultUtterances, TestData.English.Batman.Utterances, 2);
+            AssertFuzzyMatching(resultUtterances, TestData.English.Batman.Utterances, 5);
         }
 
         [TestMethod]

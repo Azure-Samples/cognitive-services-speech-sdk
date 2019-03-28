@@ -114,9 +114,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { "invalidLanguages" };
             var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Batman.AudioFile, Language.EN, toLanguages, voice: null, requireTranslatedSpeech: false);
-            Assert.AreEqual(TestData.German.Batman.Utterances.Length, actualTranslations[ResultType.RecognizedText].Count, "Unmatched number of translated utterances");
-            var actualTranslationsTextResults = actualTranslations[ResultType.RecognizedText].Cast<TranslationRecognitionEventArgs>().Select(t => t.Result).ToList();
-            for (var i = 0; i < actualTranslationsTextResults.Count; i++)
+
+            // only look at non-empty results
+            var actualTranslationsTextResults = actualTranslations[ResultType.RecognizedText].Cast<TranslationRecognitionEventArgs>().Select(t => t.Result).ToArray();
+            actualTranslationsTextResults = actualTranslationsTextResults.Where(r => !string.IsNullOrEmpty(r.Text)).ToArray();
+
+            var expectedUtterances = TestData.English.Batman.UtterancesTranslation.Where(t => !string.IsNullOrEmpty(t)).ToArray();
+
+            Assert.AreEqual(expectedUtterances.Count(), actualTranslationsTextResults.Count());
+            for (var i = 0; i < actualTranslationsTextResults.Count(); i++)
             {
                 var result = actualTranslationsTextResults[i];
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, "Unmatched result reason.");
@@ -222,14 +228,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Batman.AudioFile, Language.EN, toLanguages);
 
-            var actualRecognitionTextResults = actualTranslations[ResultType.RecognizedText].Cast<TranslationRecognitionEventArgs>().Select(t => t.Result.Text).ToList();
-            var actualTranslationsTextResults = actualTranslations[ResultType.RecognizedText].Cast<TranslationRecognitionEventArgs>().Select(t => t.Result.Translations[Language.DE]).ToList();
+            var actualRecognitionTextResults = actualTranslations[ResultType.RecognizedText].Cast<TranslationRecognitionEventArgs>().Select(t => t.Result.Text).ToArray();
+            actualRecognitionTextResults = actualRecognitionTextResults.Where(t => !string.IsNullOrEmpty(t)).ToArray();
+            var actualTranslationsTextResults = actualTranslations[ResultType.RecognizedText].Cast<TranslationRecognitionEventArgs>().Select(t => t.Result.Translations[Language.DE]).ToArray();
+            actualTranslationsTextResults = actualTranslationsTextResults.Where(t => !string.IsNullOrEmpty(t)).ToArray();
 
-            Assert.AreEqual(TestData.German.Batman.Utterances.Length, actualTranslations[ResultType.RecognizedText].Count);
+            var expectedUtterances = TestData.English.Batman.UtterancesTranslation.Where(t => !string.IsNullOrEmpty(t)).ToArray();
+            var expectedTranslations = TestData.German.Batman.Utterances.Where(t => !string.IsNullOrEmpty(t)).ToArray();
+
+            // compare only nonempty utterances, either expected or actual
+            Assert.AreEqual(expectedUtterances.Count(), actualTranslationsTextResults.Count());
             for (var i = 0; i < actualTranslations.Count; i++)
             {
-                AssertStringWordEditPercentage(Normalize(TestData.English.Batman.UtterancesTranslation[i]), Normalize(actualRecognitionTextResults[i]), 5, 2);
-                AssertStringWordEditPercentage(Normalize(TestData.German.Batman.Utterances[i]), Normalize(actualTranslationsTextResults[i]), 5, 2);
+                AssertStringWordEditPercentage(Normalize(expectedUtterances[i]), Normalize(actualRecognitionTextResults[i]), 5, 2);
+                AssertStringWordEditPercentage(Normalize(expectedTranslations[i]), Normalize(actualTranslationsTextResults[i]), 5, 2);
             }
         }
 
