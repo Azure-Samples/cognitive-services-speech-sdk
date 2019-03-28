@@ -71,7 +71,7 @@
 		3CA6CF95211F471600CD2768 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3CA6CF97211F471600CD2768 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3CA6CF98211F471600CD2768 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SPXSpeechRecognitionTest.m; sourceTree = "<group>"; };
+		3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXSpeechRecognitionTest.m; path = ../../shared/testrunners/SPXSpeechRecognitionTest.m; sourceTree = "<group>"; };
 		3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ../../../input/audio/whatstheweatherlike.wav; sourceTree = "<group>"; };
 		3CCD06CF2157F71D00A348DB /* microphone_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = microphone_test.h; path = ../../shared/microphone_test.h; sourceTree = "<group>"; };
 		3CCD06D02157F71E00A348DB /* test_audio.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = test_audio.mm; path = ../../shared/test_audio.mm; sourceTree = "<group>"; };
@@ -81,9 +81,9 @@
 		3CCD06D42157F71E00A348DB /* test_audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test_audio.h; path = ../../shared/test_audio.h; sourceTree = "<group>"; };
 		3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
 		F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
-		F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SPXDummyTestRunner.m; sourceTree = "<group>"; };
-		F3C06E3A216E439C003989B2 /* SPXAudioTestRunner.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SPXAudioTestRunner.m; sourceTree = "<group>"; };
-		F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
+		F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXDummyTestRunner.m; path = ../../shared/testrunners/SPXDummyTestRunner.m; sourceTree = "<group>"; };
+		F3C06E3A216E439C003989B2 /* SPXAudioTestRunner.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXAudioTestRunner.m; path = ../../shared/testrunners/SPXAudioTestRunner.m; sourceTree = "<group>"; };
+		F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXTranslationRecognitionTest.m; path = ../../shared/testrunners/SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
 		F3EABAC321639F5600BA4B2C /* SpeechSDK_iOSUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpeechSDK_iOSUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3EABAC721639F5700BA4B2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */

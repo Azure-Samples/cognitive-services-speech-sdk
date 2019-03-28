@@ -71,11 +71,11 @@
     <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="runtimes\linux-x64\native\libMicrosoft.CognitiveServices.Speech.core.so" />
 
     <!-- .NET standard dlls for OSX -->
-    <file src="$OSXDropDir$\x64\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\osx-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
-    <file src="$OSXDropDir$\x64\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="runtimes\osx-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
+    <file src="$OSXDropDir$\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\osx-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$OSXDropDir$\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="runtimes\osx-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
 
     <!-- .NET standard macOS native dlls -->
-    <file src="$OSXDropDir$\x64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.dylib" target="runtimes\osx-x64\native\libMicrosoft.CognitiveServices.Speech.core.dylib" />
+    <file src="$OSXDropDir$\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.dylib" target="runtimes\osx-x64\native\libMicrosoft.CognitiveServices.Speech.core.dylib" />
 
     <!-- Redistributable notice -->
     <file src="$RedistDir$\REDIST.txt" target="build\REDIST.txt" />

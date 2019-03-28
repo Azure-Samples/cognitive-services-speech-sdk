@@ -1,0 +1,82 @@
+jobs:
+- job: OsxBuildSampleApp
+  dependsOn: [Pre, OsxBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuildSampleApp '))
+  pool:
+    name: Hosted macOS Preview
+  timeoutInMinutes: 10
+  variables:
+    BuildPlatform: macOS
+    BuildConfiguration: Release
+    FrameworkName: MicrosoftCognitiveServicesSpeech
+    VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
+  steps:
+  - bash: brew config && brew install bash coreutils
+    displayName: Install modern bash and coreutils
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Download signed macOS framework (Release build)
+    inputs:
+      artifactName: $(BuildPlatform)
+      itemPattern: $(BuildPlatform)/$(BuildConfiguration)/$(VersionedFrameworkName).zip
+  - bash: |
+      set -u -x -e -o pipefail
+      mkdir -p '$(Build.Repository.LocalPath)/xcode-build-output'
+      unzip "$(OutputDirectory)/$(VersionedFrameworkName).zip" -d '$(Build.Repository.LocalPath)/xcode-build-output'
+      rm -rf "$(OutputDirectory)"
+    displayName: Unpack the framework and place in link directory for test app
+  - bash: |
+      set -u -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+      patchSamplesFromTestConfig tests/functional/objective-c/osx/SpeechSDK/ \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false
+    displayName: Patch the sample app
+  - bash: |
+      set -u -x -e -o pipefail
+      mkdir osxbuild
+      # Build the app, with hardening. It is signed later, so no development team is given.
+      xcrun xcodebuild build -project tests/functional/objective-c/osx/SpeechSDK.xcodeproj \
+        -scheme SpeechSDK \
+        CONFIGURATION_BUILD_DIR=${PWD}/osxbuild \
+        CODE_SIGN_IDENTITY="-" \
+        ENABLE_HARDENED_RUNTIME=YES \
+        INJECT_BASE_ENTITLEMENTS=NO
+    displayName: Build the sample app
+  - bash: |
+      set -u -x -e -o pipefail
+      appname=SpeechSDKSample
+      cd osxbuild
+      mkdir ${appname}
+      cp -R SpeechSDK.app ${appname}/
+      hdiutil create -volname ${appname}.dmg -srcfolder ${appname} -ov -format UDZO ${appname}.dmg
+    displayName: Create the disk image for the sample app (necessary for notarization)
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    inputs:
+      ConnectedServiceName: Speech SDK ESRP Signing
+      FolderPath: osxbuild
+      Pattern: '*.dmg'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_MACOS)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+    displayName: Sign the sample app disk image
+  # TODO: add notarization step once ESRP signing supports it
+  - bash: |
+      set -u -x -e -o pipefail
+      mkdir -p $(OutputDirectory)
+      mv osxbuild/SpeechSDKSample.dmg $(OutputDirectory)
+    displayName: Save dmg to artifacts
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)'
+      ArtifactName: $(BuildPlatform)
+      publishLocation: Container
+    condition: succeededOrFailed()
+

@@ -33,8 +33,8 @@ do
       shift
       ;;
     --platform)
-      # TODO fix OSX vs. MacOS (everywhere)
-      platformRe="(Windows|WindowsUwp|Linux|MacOS|OSX|Android)-(arm32|arm64|x86|x64)-(Debug|Release)"
+      # TODO fix OSX vs. macOS (everywhere)
+      platformRe="(Windows|WindowsUwp|Linux|macOS|OSX|iOS|Android)-(arm32|arm64|x86|x64)-(Debug|Release)"
       [[ $2 =~ ^$platformRe$ ]] ||
         exitWithError "Error: invalid platform specification '%s', expected %s.\n" "$2" "$platformRe"
       options[${key:2}]="$2"

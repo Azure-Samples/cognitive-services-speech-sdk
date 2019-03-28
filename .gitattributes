@@ -25,6 +25,7 @@ setup.cfg text
 *.cpp text
 *.cs text
 *.csproj text
+*.entitlements text
 *.expect text
 *.gradle text
 *.h text

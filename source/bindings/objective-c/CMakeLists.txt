@@ -73,6 +73,11 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE common
     PRIVATE factory)
 
+add_custom_target(${PROJECT_NAME}-macos-headers ALL
+    COMMAND sed -i \"\" -E "\'s@#include <(((speechapi_.*)|(spxerror)|(spxdebug))\.h)>@#include \"\\1\"@\'" ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${PROJECT_NAME}.framework/Headers/*.h
+)
+add_dependencies(${PROJECT_NAME}-macos-headers ${PROJECT_NAME} )
+
 # Install
 
 if (CMAKE_IOS_INSTALL_COMBINED AND CMAKE_OSX_SYSROOT MATCHES "os")

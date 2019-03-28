@@ -101,7 +101,6 @@ void GetFormatFromWavFile(std::fstream& fs)
     NSString *weatherFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType:@"wav"];
     NSLog(@"Main bundle path: %@", mainBundle);
     NSLog(@"weatherFile path: %@", weatherFile);
-    NSString *lampFile = [mainBundle pathForResource: @"TurnOnTheLamp" ofType:@"wav"];
     
     std::string audioFileName = [weatherFile UTF8String];
     if (audioFileName.empty())
@@ -197,7 +196,6 @@ void GetFormatFromWavFile(std::fstream& fs)
         NSString *weatherFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType:@"wav"];
         NSLog(@"Main bundle path: %@", mainBundle);
         NSLog(@"weatherFile path: %@", weatherFile);
-        NSString *lampFile = [mainBundle pathForResource: @"TurnOnTheLamp" ofType:@"wav"];
         
         std::string audioFileName = [weatherFile UTF8String];
         if (audioFileName.empty()) {

@@ -71,7 +71,7 @@ jobs:
             FolderPath: build
             Pattern: '*.zip'
             signConfigType: inlineSignParams
-            inlineOperation: '[ { "keyCode": "CP-401337-Apple", "operationSetCode": "MacAppDeveloperSign" } ]'
+            inlineOperation: $(SIGN_PARAMS_MACOS)
           condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
         - bash: |
             set -u -x -e -o pipefail

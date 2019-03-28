@@ -1,0 +1,66 @@
+parameters:
+  jobName: "OsxUnitTests"
+  jobDependsOn: "Pre"
+  buildPlatform: macOS
+
+jobs:
+- job: ${{ parameters.jobName }}
+  dependsOn:
+    - ${{ parameters.jobDependsOn }}
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' ${{ parameters.jobName }} '))
+  pool:
+    name: Hosted macOS Preview
+  timeoutInMinutes: 10
+  strategy:
+    maxParallel: 2
+    matrix:
+      debug:
+        BuildConfiguration: Debug
+      release:
+        BuildConfiguration: Release
+  variables:
+    BuildPlatform: ${{ parameters.buildPlatform }}
+    FrameworkName: MicrosoftCognitiveServicesSpeech
+    VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Out/$(BuildConfiguration)
+    Developer.Dir: /Applications/Xcode_10.1.app/Contents/Developer
+  steps:
+  - bash: brew config && brew install bash coreutils
+    displayName: Install modern bash and coreutils
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set target platform
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM $(BuildPlatform)-x64
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+  - task: DownloadBuildArtifacts@0
+    displayName: Download signed framework
+    inputs:
+      artifactName: $(BuildPlatform)
+      itemPattern: "$(BuildPlatform)/$(BuildConfiguration)/$(VersionedFrameworkName).zip"
+  - bash: |
+      set -e -o pipefail -x
+      mkdir -p "$(OutputDirectory)/logs"
+      # set up framework in the correct position - the Xcode project expects the framework here
+      mkdir -p '$(Build.Repository.LocalPath)/xcode-build-output'
+      unzip "$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)/$(VersionedFrameworkName).zip" -d '$(Build.Repository.LocalPath)/xcode-build-output'
+      # runtests.sh requires the build directory to exist
+      mkdir -p build/bin/$(BuildConfiguration)
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+    displayName: "Prepare for objective-C unit tests"
+  - template: test-during-build.yml
+    parameters:
+      testsToRun: objectivec_unittests
+      runTestArgs: ""
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Out'
+      ArtifactName: '$(BuildPlatform)'
+      publishLocation: Container
+      condition: succeededOrFailed()
+

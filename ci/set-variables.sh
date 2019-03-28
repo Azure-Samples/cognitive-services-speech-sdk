@@ -47,7 +47,7 @@
 #     Defaults to our CarbonPre VSTS feed for 'dev' builds, Carbon otherwise.
 # * SPEECHSDK_BUILD_AGENT_PLATFORM - can be "Windows-x64", "OSX-x64", "Linux-x64"
 # * SPEECHSDK_BUILD_PHASES - space-separated and space-enclosed list of build phases to run
-#     Default: " WindowsBuild WindowsOSBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs "
+#     Default: " WindowsBuild WindowsOSBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild OsxUnitTests OsxBuildSampleApp IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs "
 #     For int (nightly) builds, "TsaUpload WindowsSDLFortifyJava WackTest CheckSignatures" are added to the default phases.
 #     For prod (release) builds, "WackTest CheckSignatures" are added to the default phases.
 #     Check phase condition in build.yml for valid phase names.
@@ -197,7 +197,7 @@ else
 fi
 
 # Build phases to run
-SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs UnityBuild "
+SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild OsxUnitTests OsxBuildSampleApp IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs UnityBuild "
 
 # Running tests is default
 SPEECHSDK_RUN_TESTS=true

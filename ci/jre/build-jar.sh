@@ -67,7 +67,7 @@ for platformString in "${platforms[@]}"; do
       assetDir+=/linux
       ;;
     OSX)
-      dropPrefix+="/macOS/$arch/$flavor"
+      dropPrefix+="/macOS/$flavor"
       libPrefix=lib
       libSuffix=.dylib
       jnilibSuffix=.jnilib

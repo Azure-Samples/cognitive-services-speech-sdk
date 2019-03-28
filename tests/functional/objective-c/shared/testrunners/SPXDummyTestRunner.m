@@ -7,6 +7,8 @@
 #import "dummytest.h"
 
 @interface SPXDummyTestRunner : XCTestCase
+@property (nonatomic, assign) NSString * speechKey;
+@property (nonatomic, assign) NSString * serviceRegion;
 
 @end
 
@@ -14,6 +16,8 @@
 
 - (void)setUp {
     [super setUp];
+    self.speechKey = [[[NSProcessInfo processInfo] environment] objectForKey:@"subscriptionKey"];
+    self.serviceRegion = [[[NSProcessInfo processInfo] environment] objectForKey:@"serviceRegion"];
 }
 
 - (void)tearDown {
@@ -21,7 +25,7 @@
 }
 
 - (void)testAPI {
-    [DummyTest runTest];
+    [DummyTest runTest:self.speechKey withRegion:self.serviceRegion];
 }
 
 @end

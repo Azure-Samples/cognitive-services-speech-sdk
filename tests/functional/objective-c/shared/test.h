@@ -7,7 +7,7 @@
 
 @interface EndToEndTests : NSObject
 
-+(void) runTest;
++(void)runTest:(NSString *)speechKey withRegion:(NSString *)serviceRegion withIntentKey:(NSString *)intentKey withIntentRegion:(NSString*)intentRegion;
 
 @end
 

@@ -7,13 +7,7 @@
 
 @implementation EndToEndTests
 
-extern NSString *speechKey;
-extern NSString *intentKey;
-extern NSString *intentRegion;
-extern NSString *serviceRegion;
-extern NSString *intentRegion;
-    
-+ (void)runTest
++ (void)runTest:(NSString *)speechKey withRegion:(NSString *)serviceRegion withIntentKey:(NSString *)intentKey withIntentRegion:(NSString*)intentRegion
 {
     NSBundle *mainBundle = [NSBundle mainBundle];
     NSString *weatherFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType:@"wav"];
@@ -22,28 +16,28 @@ extern NSString *intentRegion;
     NSString *lampFile = [mainBundle pathForResource: @"TurnOnTheLamp" ofType:@"wav"];
     SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
     SPXAudioConfiguration* lampAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:lampFile];
-    
+
     __block bool end = false;
-    
+
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
     SPXSpeechRecognizer* speechRecognizer;
     NSString *speechRegion = [speechConfig getPropertyByName:@"SPEECH-Region"];
     NSLog(@"Speech Config: Region is read from speech config: %@", speechRegion);
-    
+
     [speechConfig setPropertyTo:@"de-DE" byId:SPXSpeechServiceConnectionRecognitionLanguage];
     NSString *speechRecoLang = [speechConfig getPropertyByName:@"SPEECH-RecoLanguage"];
     NSLog(@"Speech Config: RecoLang is read from speech config: %@", speechRecoLang);
     [speechConfig setPropertyTo:@"en-US" byName:@"SPEECH-RecoLanguage"];
 
-    
+
     // Test1: Use RecognizeOnce()
-    
+
     speechRecognizer= [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
     speechRegion = [speechRecognizer.properties getPropertyById:SPXSpeechServiceConnectionRegion defaultValue:@"Unknown speech region"];
     NSLog(@"Property Collection: Region is read from property collection: %@", speechRegion);
     speechRecoLang = [speechRecognizer.properties getPropertyById:SPXSpeechServiceConnectionRecognitionLanguage];
     NSLog(@"Property Collection: RecoLang is read from property collection: %@", speechRecoLang);
-    
+
     SPXSpeechRecognitionResult *speechResult = [speechRecognizer recognizeOnce];
     NSLog(@"RecognizeOnce: Recognition result %@. Status %ld, Offset %llu Duration %llu.", speechResult.text, (long)speechResult.reason, speechResult.offset, speechResult.duration);
     if (speechResult.reason == SPXResultReason_Canceled) {
@@ -104,7 +98,7 @@ extern NSString *intentRegion;
     [translationConfig addTargetLanguage:@"de"];
     [translationConfig addTargetLanguage:@"zh-Hans"];
     [translationConfig setVoiceName:@"Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)"];
-    
+
     NSMutableString *targetLangsStr = [[NSMutableString alloc] init];
     for (id item in translationConfig.targetLanguages)
     {
@@ -122,7 +116,7 @@ extern NSString *intentRegion;
     for (id lang in [translationResult.translations allKeys]) {
         NSLog(@"RecognizeOnce: Translation result: translated into %@: %@", lang, [translationResult.translations objectForKey:lang]);
     }
-    
+
     // Test2: Use RecognizeOnceAsync() with completion block
     translationRecognizer = [[SPXTranslationRecognizer alloc] initWithSpeechTranslationConfiguration:translationConfig audioConfiguration:weatherAudioSource];
     end = false;
@@ -178,12 +172,12 @@ extern NSString *intentRegion;
     while (end == false)
         [NSThread sleepForTimeInterval:1.0f];
     [translationRecognizer stopContinuousRecognition];
-    
+
     // Test: Intent
     SPXSpeechConfiguration *intentConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:intentKey region:intentRegion];
     SPXIntentRecognizer *intentRecognizer;
     SPXLanguageUnderstandingModel *model = [[SPXLanguageUnderstandingModel alloc] initWithAppId:@"b687b851-56c5-4d31-816f-35a741a3f0be"];
-    
+
     // test intent recognizer for completeness
     SPXIntentRecognizer *intentRecoTest = [[SPXIntentRecognizer alloc] init:intentConfig];
     [intentRecoTest addIntentFromPhrase:@"SimplePhrase"];
@@ -192,16 +186,16 @@ extern NSString *intentRegion;
     [intentRecoTest addIntent:@"HomeAutomation.TurnOn" fromModel:model mappingToId:@"TestIntent2"];
     [intentRecoTest addAllIntentsFromModel:model];
     [intentRecoTest addAllIntentsFromModel:model mappingToId:@"LocalAllIntents"];
-    
-    
+
+
     // Test1: Use RecognizeOnce()
-    
+
     intentRecognizer = [[SPXIntentRecognizer alloc] initWithSpeechConfiguration:intentConfig audioConfiguration:lampAudioSource];
-    
+
     [intentRecognizer addIntent:@"HomeAutomation.TurnOn" fromModel:model mappingToId:@"MyIntentRecognizeOnce" ] ;
     SPXIntentRecognitionResult *result = [intentRecognizer recognizeOnce];
     NSLog(@"RecognizeOnce: Intent result: recognized: %@. Status %ld. IntentId %@.", result.text, (long)result.reason, result.intentId);
-    
+
     // Test2: Use RecognizeOnceAsync() with completion block
     intentRecognizer = [[SPXIntentRecognizer alloc] initWithSpeechConfiguration:intentConfig audioConfiguration:lampAudioSource];
     [intentRecognizer addIntent:@"HomeAutomation.TurnOn" fromModel:model];
@@ -215,11 +209,11 @@ extern NSString *intentRegion;
 
     // Test3: Use StartContinuousRecognitionAsync()
     intentRecognizer = [[SPXIntentRecognizer alloc] initWithSpeechConfiguration:intentConfig audioConfiguration:lampAudioSource];
-    // BUGUG: addAllIntents throw exception at c++
-    // [intentRecognizer addAllIntentsFromModel:model mappingToId:@"AllIntentInHomeAutomation"];
+    [intentRecognizer addAllIntentsFromModel:model mappingToId:@"AllIntentInHomeAutomation"];
     [intentRecognizer addIntent:@"HomeAutomation.TurnOn" fromModel:model];
-    NSString *intentRegion = [intentRecognizer.properties getPropertyByName:@"INTENT-region" defaultValue:@"unknown resgion"];
-    NSLog(@"PropertyCollection: Region is read from property collection: %@", intentRegion);
+
+    NSString *invalidIntentRegion = [intentRecognizer.properties getPropertyByName:@"INTENT-region" defaultValue:@"unknown region"];
+    NSLog(@"PropertyCollection: Region is read from property collection: %@", invalidIntentRegion);
     [intentRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {
         NSLog(@"Received SessionStarted event. SessionId: %@", eventArgs.sessionId);
     }];
@@ -254,7 +248,7 @@ extern NSString *intentRegion;
     while (end == false)
         [NSThread sleepForTimeInterval:1.0f];
     [intentRecognizer stopContinuousRecognition];
-    
+
     return;
 }
 

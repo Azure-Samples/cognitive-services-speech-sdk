@@ -81,6 +81,13 @@ variables:
         "operationSetCode": "iOSSdkSign"
       }
     ]
+  SIGN_PARAMS_MACOS: |
+    [
+      {
+        "keyCode": "CP-401337-Apple",
+        "operationSetCode": "MacAppDeveloperSign"
+      }
+    ]
   SPEECHSDK_MAVEN_ARTIFACT_ID: client-sdk
   SPEECHSDK_MAVEN_GROUP_ID: com.microsoft.cognitiveservices.speech
   SPEECHSDK_NUGET_VERSION: 4.6
@@ -629,7 +636,7 @@ jobs:
             -D long-running=false)
           . ci/functions.sh
           SPEECHSDK_SPEECH_AUTHTOKEN="$(getAuthorizationToken "$SPEECHSDK_SPEECH_KEY" "$SPEECHSDK_SPEECH_REGION")"
-          testJarFile="$(Build.ArtifactStagingDirectory)/In/macOS/x64/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar"
+          testJarFile="$(Build.ArtifactStagingDirectory)/In/macOS/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar"
           [[ -f ${testJarFile} ]]
           [[ -f $(PathToJar) ]]
           java \
@@ -1656,7 +1663,7 @@ jobs:
     displayName: Install modern bash
   - bash: |
       . ci/functions.sh &&
-      vsts_setvar SPEECHSDK_TARGET_PLATFORM IOS &&
+      vsts_setvar SPEECHSDK_TARGET_PLATFORM IOSSIMULATOR-x64 &&
       vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
     displayName: Set iOS target platform
   - bash: ./ci/set-variables.sh
@@ -1734,65 +1741,9 @@ jobs:
       inlineOperation: $(SIGN_PARAMS_IOS)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - bash: |
-      # .zip from ESRP used to put the contents in a deep sub directory.
-      # Now they seem not do the deep directory anymore, but drop our
-      # additional files (REDIST.txt etc.) on the floor.
-      #
-      # We try to re-zip and recreate any missing content.
-      set -u -e -x -o pipefail
-      mkdir -p temp/nested
-      cd temp/nested
-      unzip '$(OutputDirectory)/$(VersionedFrameworkName).zip'
-      FrameworkDir="$(find . -type d -name "$(FrameworkName).framework" -prune)"
-      if [[ -z $FrameworkDir ]]; then
-        # Did not find it, framework content must be here or we can't continue.
-        [[ -f "$(FrameworkName)" ]]
-        [[ -d Headers ]]
-        cd ..
-        mv nested "$(FrameworkName).framework"
-        cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} .
-      else
-        cd "$FrameworkDir"
-        cd ..
-      fi
-      # Be paranoid, check some stuff.
-      [[ "$(find . -maxdepth 1 | wc -l)" -eq 5 ]]
-      [[ -f license.md ]]
-      [[ -d "$(FrameworkName).framework" ]]
-      [[ -f REDIST.txt ]]
-      [[ -f ThirdPartyNotices.md ]]
-      [[ -f "$(FrameworkName).framework/$(FrameworkName)" ]]
-      [[ -d "$(FrameworkName).framework/Headers" ]]
-      [[ -d "$(FrameworkName).framework/_CodeSignature" ]]
-      # Remove original package.
-      rm '$(OutputDirectory)/$(VersionedFrameworkName).zip'
-      zip --symlinks -r '$(OutputDirectory)/$(VersionedFrameworkName).zip' .
+      ci/apple/unpack_signed_archive.sh $(OutputDirectory) $(FrameworkName) $(VersionedFrameworkName) $(Build.Repository.LocalPath)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
     displayName: Package signed framework
-  - bash: . ci/functions.sh && vsts_setvar SPEECHSDK_RUN_TESTS false
-    condition: or(failed(), canceled())
-    displayName: Skip tests on build failure.
-  - bash: |
-      set -e -o pipefail -x
-      mkdir -p "$(OutputDirectory)/logs"
-      # set up framework in the correct position - the Xcode project expects the framework here (used for both Release and Debug configs atm)
-      mkdir -p '$(Build.Repository.LocalPath)/xcode-build-output'
-      pushd '$(Build.Repository.LocalPath)/xcode-build-output'
-      unzip "$(OutputDirectory)/$(VersionedFrameworkName).zip"
-      popd
-      # run the test
-      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
-        -D luis-key=$(luis-westus-s0-201809-key1) \
-        -D speech-key=$(NorthEuropeKeySkyman) \
-        -D long-running=false)
-      xcodebuild test -project tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
-        -scheme SpeechSDK_iOS \
-        -destination 'platform=iOS Simulator,name=iPhone 8,OS=12.1' \
-        SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION" 2>&1 |
-          tee "$(OutputDirectory)/logs/xcodebuild-ios-unittests.log" |
-          xcpretty --report junit --output test-ios-unittests.xml
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
-    displayName: "Run iOS unit tests"
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
@@ -1812,11 +1763,13 @@ jobs:
   variables:
     FrameworkName: MicrosoftCognitiveServicesSpeech
     BuildPlatform: iOS
-    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Release
+    BuildConfiguration: Release
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
+    Developer.Dir: /Applications/Xcode_10.1.app/Contents/Developer
   steps:
   # Update bash really early so it will be picked up by "bash" steps.
-  - bash: brew config && brew install bash
-    displayName: Install modern bash
+  - bash: brew config && brew install bash coreutils
+    displayName: Install modern bash and coreutils
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - task: DownloadBuildArtifacts@0
@@ -1829,13 +1782,10 @@ jobs:
       . ci/functions.sh
       mkdir xcode-build-output
       cd xcode-build-output
-      cp -R $(System.ArtifactsDirectory)/$(BuildPlatform)/Release/*.zip .
+      cp -R $(OutputDirectory)/*.zip .
       for f in *.zip; do unzip $f; done
       cd ..
     displayName: "Unpack build artifacts"
-  - bash: |
-      brew install coreutils
-    displayName: "Install coreutils for test harness"
   - bash: |
       set -e -o pipefail -x
       mkdir -p "$(OutputDirectory)/logs"
@@ -1843,8 +1793,6 @@ jobs:
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
         -D long-running=false)
-      # use a recent Xcode version
-      export DEVELOPER_DIR=/Applications/Xcode_10.1.app/Contents/Developer
       # run the tests
       ci/apple/multiplatformtests.sh tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
         SpeechSDK_iOS SpeechSDK_iOS $(OutputDirectory)/logs unittests
@@ -1865,8 +1813,6 @@ jobs:
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
         -D long-running=false
-      # use a recent Xcode version
-      export DEVELOPER_DIR=/Applications/Xcode_10.1.app/Contents/Developer
       # run the tests
       ci/apple/multiplatformtests.sh public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
         helloworldUITests helloworldUITests-Runner $(OutputDirectory)/logs quickstart --usegui
@@ -1896,13 +1842,12 @@ jobs:
     matrix:
       debug:
         BuildConfiguration: Debug
-        BuildPlatform: x64
       release:
         BuildConfiguration: Release
-        BuildPlatform: x64
   variables:
     BuildPlatform: macOS
     FrameworkName: MicrosoftCognitiveServicesSpeech
+    VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
   steps:
   # Update bash really early so it will be picked up by "bash" steps.
@@ -1928,7 +1873,6 @@ jobs:
     displayName: CMake build
     inputs:
       cmakeArgs: '--build . -- -j4'
-  - template: test-during-build.yml
   - bash: |
       . ci/apple/apple-functions.sh
       build_dsym_bundle "build/lib" "$(FrameworkName)"
@@ -1938,7 +1882,7 @@ jobs:
       mkdir -p "$(OutputDirectory)"
       mv "build/lib/$(FrameworkName).framework.dSYM" "$(OutputDirectory)"
       cd "$(OutputDirectory)"
-      zip --symlinks -r "$(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA).framework.dSYM.zip" "$(FrameworkName).framework.dSYM"
+      zip --symlinks -r "$(VersionedFrameworkName).framework.dSYM.zip" "$(FrameworkName).framework.dSYM"
       rm -rf "$(OutputDirectory)/$(FrameworkName).framework.dSYM"
     condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
     displayName: Archive debug symbols
@@ -1947,12 +1891,25 @@ jobs:
     displayName: Strip dynamic library in universal framework for release builds
     condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
   - bash: |
-      mv "build/lib/$(FrameworkName).framework" "$(OutputDirectory)"
+      cp -R "build/lib/$(FrameworkName).framework" "$(OutputDirectory)"
       cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$(OutputDirectory)"
       cd "$(OutputDirectory)"
-      zip --symlinks -r "$(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
+      zip --symlinks -r "$(VersionedFrameworkName).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
       rm -rf REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
     displayName: Create archive for signing
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign OSX framework'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: '$(OutputDirectory)'
+      Pattern: $(VersionedFrameworkName).zip
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_MACOS)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      ci/apple/unpack_signed_archive.sh $(OutputDirectory) $(FrameworkName) $(VersionedFrameworkName) $(Build.Repository.LocalPath)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+    displayName: Package signed framework
   - bash: |
       set -u -x -e -o pipefail
       dylibname="build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib"
@@ -1968,7 +1925,7 @@ jobs:
       FolderPath: build/lib
       Pattern: '*.dylib.zip'
       signConfigType: inlineSignParams
-      inlineOperation: '[ { "keyCode": "CP-401337-Apple", "operationSetCode": "MacAppDeveloperSign" } ]'
+      inlineOperation: $(SIGN_PARAMS_MACOS)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign Mac .dll for nuget package'
@@ -1988,17 +1945,36 @@ jobs:
       codesign --display --verbose=4 build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib
     displayName: "Unpack archive with signed dylib"
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - template: test-during-build.yml
   - bash: |
       ./ci/drop/bindrop.sh \
-          $(SPEECHSDK_TARGET_PLATFORM) $(BuildConfiguration) "$(Build.ArtifactStagingDirectory)"/$(BuildPlatform)/$(BuildConfiguration)
+          $(SPEECHSDK_TARGET_PLATFORM) $(BuildConfiguration) "$(OutputDirectory)"
     displayName: Create drop files
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)'
       ArtifactName: macOS
       publishLocation: Container
-      # condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+      condition: succeededOrFailed()
+
+- template: objectivec-unit-tests.yml
+  parameters:
+    jobName: "OsxUnitTests"
+    jobDependsOn:
+      - Pre
+      - OsxBuild
+    buildPlatform: macOS
+
+- template: objectivec-unit-tests.yml
+  parameters:
+    jobName: "IosUnitTests"
+    jobDependsOn:
+      - Pre
+      - IosBuild
+    buildPlatform: iOS
+
+- template: osx-test-app.yml
 
 - job: Doxygen
   dependsOn: Pre

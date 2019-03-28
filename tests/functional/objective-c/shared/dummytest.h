@@ -7,6 +7,6 @@
 
 @interface DummyTest : NSObject
     
-+(void) runTest;
++(void) runTest:(NSString *)speechKey withRegion:(NSString *)region;
     
 @end

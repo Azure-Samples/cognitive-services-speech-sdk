@@ -7,24 +7,24 @@
 
 @implementation DummyTest
     
-+ (void)runTest
++ (void)runTest:(NSString *)speechKey withRegion:(NSString *)region;
 {
     // Test AudioStreamFormat
-    SPXAudioStreamFormat *streamFormat = [[SPXAudioStreamFormat alloc] init];
+    SPXAudioStreamFormat *streamFormat __attribute__((unused)) = [[SPXAudioStreamFormat alloc] init];
     streamFormat = [[SPXAudioStreamFormat alloc] initUsingPCMWithSampleRate:16000 bitsPerSample:16 channels:1];
     
     // Test audio stream.
-    SPXPushAudioInputStream *pushStream = [[SPXPushAudioInputStream alloc] init];
+    SPXPushAudioInputStream *pushStream __attribute__((unused)) = [[SPXPushAudioInputStream alloc] init];
     pushStream = [[SPXPushAudioInputStream alloc] initWithAudioFormat:streamFormat];
     NSData *streamData = [[NSData alloc] init];
     [pushStream write:streamData];
     [pushStream close];
     
-    SPXPullAudioInputStream *pullStream = [[SPXPullAudioInputStream alloc] initWithReadHandler:^ (NSMutableData *data, NSUInteger size) { return (NSInteger)0; } closeHandler: ^(void) {return;}];
+    SPXPullAudioInputStream *pullStream __attribute__((unused)) = [[SPXPullAudioInputStream alloc] initWithReadHandler:^ (NSMutableData *data, NSUInteger size) { return (NSInteger)0; } closeHandler: ^(void) {return;}];
     pullStream = [[SPXPullAudioInputStream alloc] initWithAudioFormat:streamFormat readHandler:^ (NSMutableData *data, NSUInteger size) { return (NSInteger)0; } closeHandler: ^(void) {return;}];
     
     // Test audio configuration
-    SPXAudioConfiguration *audioConfig = [[SPXAudioConfiguration alloc] init];
+    SPXAudioConfiguration *audioConfig __attribute__((unused))  = [[SPXAudioConfiguration alloc] init];
     audioConfig = [[SPXAudioConfiguration alloc] initWithWavFileInput:@"testaudio.wav"];
     audioConfig =[[SPXAudioConfiguration alloc] initWithStreamInput:pullStream];
     audioConfig =[[SPXAudioConfiguration alloc] initWithStreamInput:pushStream];
@@ -32,15 +32,15 @@
     audioConfig =[[SPXAudioConfiguration alloc] initWithMicrophone:@"mymicrophone"]; // this would break when starting recognition.
     
     // Test luis model
-    SPXLanguageUnderstandingModel *luisModel;
-        //luisModel = [[SPXLanguageUnderstandingModel alloc] initWithEndpoint:@"https://www.luis.ai"];
-        luisModel = [[SPXLanguageUnderstandingModel alloc] initWithAppId:@"LuisAppId"];
-        luisModel = [[SPXLanguageUnderstandingModel alloc] initWithSubscription:@"werwe" withAppId:@"LuisAppId" andRegion:@"someregion"];
+    SPXLanguageUnderstandingModel *luisModel __attribute__((unused));
+    //luisModel = [[SPXLanguageUnderstandingModel alloc] initWithEndpoint:@"https://www.luis.ai"];
+    luisModel = [[SPXLanguageUnderstandingModel alloc] initWithAppId:@"LuisAppId"];
+    luisModel = [[SPXLanguageUnderstandingModel alloc] initWithSubscription:@"werwe" withAppId:@"LuisAppId" andRegion:@"someregion"];
     
     // Test Speech Configuration
-    SPXSpeechConfiguration *testSpeechConfig = [[SPXSpeechConfiguration alloc] initWithAuthorizationToken:@"SDFSDF"  region:@"someregion"];
+    SPXSpeechConfiguration *testSpeechConfig __attribute__((unused)) = [[SPXSpeechConfiguration alloc] initWithAuthorizationToken:@"SDFSDF"  region:@"someregion"];
     testSpeechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:@"https://someregion.api.com" subscription:@"dummy"];
-    NSString *value = [testSpeechConfig getPropertyById:SPXSpeechServiceConnectionKey];
+    NSString *value __attribute__((unused)) = [testSpeechConfig getPropertyById:SPXSpeechServiceConnectionKey];
     [testSpeechConfig setPropertyTo:@"Dummy2" byId:SPXSpeechServiceConnectionKey];
     value = testSpeechConfig.speechRecognitionLanguage;
     testSpeechConfig.speechRecognitionLanguage = value;
@@ -57,7 +57,7 @@
     value = testSpeechRecognizer.authorizationToken;
     
     // Test speech translation configuration
-    SPXSpeechTranslationConfiguration *testTranslationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithAuthorizationToken:@"SDFSDF"  region:@"someregion"];
+    SPXSpeechTranslationConfiguration *testTranslationConfig __attribute__((unused)) = [[SPXSpeechTranslationConfiguration alloc] initWithAuthorizationToken:@"SDFSDF"  region:@"someregion"];
     testTranslationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithEndpoint:@"https://someregion.api.com" subscription:@"dummy"];
     value = [testTranslationConfig getPropertyById:SPXSpeechServiceConnectionKey];
     [testTranslationConfig setPropertyTo:@"dummy" byId:SPXSpeechServiceConnectionKey];
@@ -67,8 +67,8 @@
     testTranslationConfig.speechRecognitionLanguage = value;
 
     [testTranslationConfig addTargetLanguage:@"de-DE"];
-    NSArray *target = [testTranslationConfig targetLanguages];
-    NSString *voiceName = [testTranslationConfig voiceName];
+    NSArray *target __attribute__((unused)) = [testTranslationConfig targetLanguages];
+    NSString *voiceName __attribute__((unused)) = [testTranslationConfig voiceName];
     
     // test translation recognizer
     SPXTranslationRecognizer *testTranslationRecognizer = [[SPXTranslationRecognizer alloc] init:testTranslationConfig];

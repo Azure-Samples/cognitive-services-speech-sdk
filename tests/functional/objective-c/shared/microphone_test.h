@@ -11,9 +11,9 @@
 
 @interface MicrophoneTest : NSObject
 
-+(void) runAsync;
-+(void) runTranslation;
-+(void) runContinuous;
++(void) runAsync:(NSString *)speechKey withRegion:(NSString *)serviceRegion;
++(void) runTranslation:(NSString *)speechKey withRegion:(NSString *)serviceRegion;
++(void) runContinuous:(NSString *)speechKey withRegion:(NSString *)serviceRegion;
 
 @end
 

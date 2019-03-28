@@ -8,11 +8,7 @@
 @implementation MicrophoneTest
     
 
-extern NSString *speechKey;
-extern NSString *serviceRegion;
-extern NSString *intentRegion;
-
-+ (void) runAsync
++ (void) runAsync:(NSString *)speechKey withRegion:(NSString *)serviceRegion
 {
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
     SPXSpeechRecognizer* speechRecognizer;
@@ -25,7 +21,7 @@ extern NSString *intentRegion;
 
 }
 
-+ (void) runContinuous
++ (void) runContinuous:(NSString *)speechKey withRegion:(NSString *)serviceRegion
 {
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
     SPXSpeechRecognizer* speechRecognizer;
@@ -68,7 +64,8 @@ extern NSString *intentRegion;
     NSLog(@"Finishing recognition");
 }
     
-+ (void) runTranslation{
++ (void) runTranslation:(NSString *)speechKey withRegion:(NSString *)serviceRegion
+{
     __block bool end = false;
     SPXTranslationRecognizer *translationRecognizer;
     SPXSpeechTranslationConfiguration *translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];

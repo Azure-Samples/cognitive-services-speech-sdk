@@ -12,6 +12,8 @@
 
 extern NSString *speechKey;
 extern NSString *serviceRegion;
+extern NSString *intentKey;
+extern NSString *intentRegion;
 
 
 @interface ViewController ()
@@ -23,11 +25,11 @@ extern NSString *serviceRegion;
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    [DummyTest runTest];
-    [EndToEndTests runTest];
-    [MicrophoneTest runAsync];
-    [MicrophoneTest runTranslation];
-    [MicrophoneTest runContinuous];
+    [DummyTest runTest:speechKey withRegion:serviceRegion];
+    [EndToEndTests  runTest:speechKey withRegion:serviceRegion withIntentKey:intentKey withIntentRegion:intentRegion];
+    [MicrophoneTest runAsync:speechKey withRegion:serviceRegion];
+    [MicrophoneTest runTranslation:speechKey withRegion:serviceRegion];
+    [MicrophoneTest runContinuous:speechKey withRegion:serviceRegion];
     [AudioStreamTest runPullTest:speechKey withRegion:serviceRegion];
     [AudioStreamTest runPushTest:speechKey withRegion:serviceRegion];
 }

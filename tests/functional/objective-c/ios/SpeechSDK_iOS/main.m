@@ -8,10 +8,10 @@
 
 
 
-NSString *speechKey = @"";
-NSString *serviceRegion = @"";
-NSString *intentKey = @"";
-NSString *intentRegion = @"";
+NSString *speechKey = @"YourSubscriptionKey";
+NSString *serviceRegion = @"YourServiceRegion";
+NSString *intentKey = @"YourLanguageUnderstandingSubscriptionKey";
+NSString *intentRegion = @"YourLanguageUnderstandingServiceRegion";
 
 
 int main(int argc, char * argv[]) {

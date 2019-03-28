@@ -45,6 +45,7 @@ BEGIN {
     # IMPORTANT - before updating this list talk to wolfma/zhouwang/mahilleb.
     @expectedTags = map { m/^([^#]+)#([^#]+)$/ or die "misconfigured $_\n"; (lc $1) . "#$2"  } qw(
       quickstart/cpp-linux/helloworld.cpp#code
+      quickstart/cpp-macos/helloworld.cpp#code
       quickstart/cpp-windows/helloworld/helloworld.cpp#code
       quickstart/csharp-dotnet-windows/helloworld/Program.cs#code
       quickstart/csharp-dotnetcore/helloworld/Program.cs#code
