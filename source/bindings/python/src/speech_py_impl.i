@@ -228,7 +228,7 @@ class PyCallback
             if (!Py_IsInitialized())
             {
                 // Interpreter is dead, don't use the Python API to avoid throwing
-                throw std::runtime_error("Cannot aquire python interpreter to copy callback");
+                throw std::runtime_error("Cannot acquire python interpreter to copy callback");
             }
             PyGILState_STATE state = PyGILState_Ensure();
             Py_XINCREF(m_func);
@@ -250,7 +250,7 @@ class PyCallback
             if (!Py_IsInitialized())
             {
                 // Interpreter is dead, don't use the Python API to avoid throwing
-                throw std::runtime_error("Cannot aquire python interpreter to create callback");
+                throw std::runtime_error("Cannot acquire python interpreter to create callback");
             }
             PyGILState_STATE state = PyGILState_Ensure();
             Py_XINCREF(m_func);
@@ -305,6 +305,12 @@ class PyCallback
             PyObject* wrap_result = PyObject_CallObject(m_event_args_pytype, (PyObject *)wrap_args);
             Py_XDECREF(wrap_args);
 
+            if (nullptr == wrap_result)
+            {
+                PyGILState_Release(state);
+                throw std::runtime_error("Error occurred when trying to construct the arguments for the callback function.");
+            }
+
             int result_typecheck = PyObject_TypeCheck((PyObject *)wrap_result, (PyTypeObject *)m_event_args_pytype);
             if (!result_typecheck)
             {
@@ -317,8 +323,15 @@ class PyCallback
             Py_XDECREF(wrap_result);
 
             PyObject* result = PyObject_CallObject(m_func, (PyObject *)args);
-            Py_XDECREF(result);
+
             Py_XDECREF(args);
+            if (nullptr == result)
+            {
+                PyGILState_Release(state);
+                throw std::runtime_error("Error occurred when trying to call the callback function.");
+            }
+
+            Py_XDECREF(result);
             PyGILState_Release(state);
         }
 };
