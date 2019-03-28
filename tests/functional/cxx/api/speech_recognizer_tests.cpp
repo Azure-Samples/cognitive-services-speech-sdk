@@ -14,6 +14,133 @@ static std::shared_ptr<RecogType> CreateRecognizers(const string& filename)
     return RecogType::FromConfig(CurrentSpeechConfig(), audioInput);
 }
 
+static void DoRecoFromCompressedPushStreamHelper(TestData fileName, std::shared_ptr<SpeechRecognizer> recognizer, std::shared_ptr<PushAudioInputStream> pushStream)
+{
+    promise<string> result;
+
+    ConnectCallbacks(recognizer.get(), result);
+    recognizer->StartContinuousRecognitionAsync().get();
+    PushData(pushStream.get(), fileName.m_audioFilename, true);
+    auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+    recognizer->StopContinuousRecognitionAsync().get();
+    SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
+}
+
+static void DoRecoFromCompressedPushStream(TestData fileName, AudioStreamContainerFormat containerType)
+{
+#ifndef __linux__
+    try
+    {
+#endif
+        auto config = CurrentSpeechConfig();
+        // Create the recognizer with the pull stream
+        auto pushStream = AudioInputStream::CreatePushStream(AudioStreamFormat::GetCompressedFormat(containerType));
+        auto audioConfig = AudioConfig::FromStreamInput(pushStream);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
+        DoRecoFromCompressedPushStreamHelper(fileName,recognizer, pushStream);
+#ifndef __linux__
+    }
+    catch (const std::exception& e)
+    {
+        std::string str(e.what());
+        std::string refException("Exception with an error code: 0x29 (SPXERR_GSTREAMER_NOT_FOUND_ERROR)");
+        SPXTEST_REQUIRE(str.find(refException) != string::npos);
+    }
+#endif
+}
+
+static void DoRecoFromCompressedPullStreamHelper(std::shared_ptr<SpeechRecognizer> recognizer)
+{
+    promise<string> result;
+
+    ConnectCallbacks(recognizer.get(), result);
+    recognizer->StartContinuousRecognitionAsync().get();
+    auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+    recognizer->StopContinuousRecognitionAsync().get();
+    SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
+}
+
+static void DoRecoFromCompressedPullStream(TestData filename, AudioStreamContainerFormat containerType)
+{
+#ifndef __linux__
+    try
+    {
+#endif
+        promise<string> result;
+        filename.UpdateFullFilename(Config::InputDir);
+        REQUIRE(exists(filename.m_audioFilename));
+        auto config = CurrentSpeechConfig();
+
+        // Prepare for the stream to be "Pulled"
+        auto fs = OpenFile(filename.m_audioFilename);
+
+        // Create the "pull stream" object with C++ lambda callbacks
+        auto pullStream = AudioInputStream::CreatePullStream(
+            AudioStreamFormat::GetCompressedFormat(containerType),
+            [&fs](uint8_t* buffer, uint32_t size) -> int { return (int)ReadBuffer(fs, buffer, size); },
+            [=]() {});
+
+        // Create the recognizer with the pull stream
+        auto audioConfig = AudioConfig::FromStreamInput(pullStream);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
+
+        DoRecoFromCompressedPullStreamHelper(recognizer);
+#ifndef __linux__
+    }
+    catch (const std::exception& e)
+    {
+        std::string str(e.what());
+        std::string refException("Exception with an error code: 0x29 (SPXERR_GSTREAMER_NOT_FOUND_ERROR)");
+        SPXTEST_REQUIRE(str.find(refException) != string::npos);
+    }
+#endif
+}
+
+TEST_CASE("compressed stream test", "[api][cxx]")
+{
+    weathermp3.UpdateFullFilename(Config::InputDir);
+    REQUIRE(exists(weathermp3.m_audioFilename));
+
+    weatheropus.UpdateFullFilename(Config::InputDir);
+    REQUIRE(exists(weatheropus.m_audioFilename));
+
+
+
+    SPXTEST_SECTION("push stream works mp3")
+    {
+        DoRecoFromCompressedPushStream(weathermp3, AudioStreamContainerFormat::MP3);
+    }
+
+    SPXTEST_SECTION("push stream works opus")
+    {
+        DoRecoFromCompressedPushStream(weatheropus, AudioStreamContainerFormat::OGG_OPUS);
+    }
+
+
+    SPXTEST_SECTION("pull stream works mp3")
+    {
+        DoRecoFromCompressedPullStream(weathermp3, AudioStreamContainerFormat::MP3);
+    }
+
+    SPXTEST_SECTION("pull stream works opus")
+    {
+        DoRecoFromCompressedPullStream(weatheropus, AudioStreamContainerFormat::OGG_OPUS);
+    }
+
+    SPXTEST_SECTION("pull stream failed with FLAC")
+    {
+        try {
+            DoRecoFromCompressedPullStream(weathermp3, AudioStreamContainerFormat::FLAC);
+        }
+        catch (const std::exception& e)
+        {
+            std::string str(e.what());
+            std::string refException("Exception with an error code: 0x28 (SPXERR_CONTAINER_FORMAT_NOT_SUPPORTED_ERROR)");
+            SPXTEST_REQUIRE(str.find(refException) != string::npos);
+        }
+    }
+}
+
 TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
 {
     auto config = CurrentSpeechConfig();

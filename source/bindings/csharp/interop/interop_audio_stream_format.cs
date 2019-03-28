@@ -46,6 +46,13 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             return new AudioStreamFormat(streamFormatHandle);
         }
 
+        public static AudioStreamFormat GetCompressedFormat(Microsoft.CognitiveServices.Speech.Audio.AudioStreamContainerFormat compressedFormat)
+        {
+            SPXAUDIOSTREAMFORMATHANDLE streamFormatHandle = IntPtr.Zero;
+            SpxExceptionThrower.ThrowIfFail(audio_stream_format_create_from_compressed_format(out streamFormatHandle, compressedFormat));
+            return new AudioStreamFormat(streamFormatHandle);
+        }
+
         public static AudioStreamFormat GetWaveFormatPCM(uint samplesPerSecond, byte bitsPerSample)
         {
             return GetWaveFormatPCM(samplesPerSecond, bitsPerSample, 1);
@@ -68,6 +75,8 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR audio_stream_format_create_from_waveformat_pcm(out SPXAUDIOSTREAMFORMATHANDLE format, UInt32 samplesPerSecond, Byte bitsPerSample, Byte channels);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR audio_stream_format_release(SPXAUDIOSTREAMFORMATHANDLE format);
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR audio_stream_format_create_from_compressed_format(out SPXAUDIOSTREAMFORMATHANDLE format, Microsoft.CognitiveServices.Speech.Audio.AudioStreamContainerFormat compressedFormat);
 
     }
 }

@@ -13,6 +13,7 @@ using MicrosoftSpeechSDKSamples;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using System.Text.RegularExpressions;
+    using Microsoft.CognitiveServices.Speech.Audio;
     using System.Threading;
     using static SpeechRecognitionTestsHelper;
 
@@ -38,6 +39,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var result = await this.speechHelper.GetSpeechFinalRecognitionResult(this.config, TestData.English.Batman.AudioFile);
             AssertMatching(TestData.English.Batman.Utterances[0], result.Text);
+        }
+
+        [TestMethod, TestCategory(TestCategory.CompressedStreamTest)]
+        public async Task SimpleRecognitionCompressedMP3()
+        {
+            var result = await this.speechHelper.GetSpeechFinalRecognitionResultPullStreamWithCompressedFile(this.config, TestData.English.WeatherMP3.AudioFile, AudioStreamContainerFormat.MP3);
+            AssertMatching(TestData.English.WeatherMP3.Utterance, result.Text);
+        }
+
+        [TestMethod, TestCategory(TestCategory.CompressedStreamTest)]
+        public async Task SimpleRecognitionCompressedOPUS()
+        {
+            var result = await this.speechHelper.GetSpeechFinalRecognitionResultPullStreamWithCompressedFile(this.config, TestData.English.WeatherOPUS.AudioFile, AudioStreamContainerFormat.OGG_OPUS);
+            AssertMatching(TestData.English.WeatherOPUS.Utterance, result.Text);
         }
 
         [TestMethod]
@@ -91,6 +106,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [Ignore]
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]

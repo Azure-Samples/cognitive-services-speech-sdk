@@ -63,7 +63,7 @@ sub aptInstallWith {
 
 my %images = (
   dev_ubuntu1604_x64 => { # Not used yet
-    version => 1,
+    version => 2,
     spec => [
         # Stage 0
         qw/from-ubuntu1604-x64 stage_cmake_binary_ubuntu1604_x64/,
@@ -75,7 +75,7 @@ my %images = (
         'builduser'],
   },
   dev_ubuntu1604_x86 => {
-    version => 2,
+    version => 3,
     spec => [
         # Stage 0
         qw/from-ubuntu1604-x86 stage_cmake_fromsource_ubuntu1604/,
@@ -87,7 +87,7 @@ my %images = (
         'builduser'],
   },
   dev_ubuntu1604_arm32 => {
-    version => 2,
+    version => 3,
     urls => [qw(https://github.com/multiarch/qemu-user-static/releases/download/v2.12.0-1/qemu-arm-static.tar.gz)],
     spec => [
         # Stage 0
@@ -100,36 +100,36 @@ my %images = (
         'builduser'],
   },
   oobedevcpp_ubuntu1804_x64 => {
-    version => 2,
-    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps test_deps_ubuntu1804/), 'builduser'],
+    version => 3,
+    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'builduser'],
   },
   oobedevcpp_ubuntu1604_x64 => {
-    version => 3,
-    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps test_deps/), 'builduser'],
+    version => 4,
+    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
   },
   oobedevcpp_ubuntu1804_x86 => {
-    version => 2,
-    spec => ['from-ubuntu1804-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps test_deps_ubuntu1804/), 'builduser'],
+    version => 3,
+    spec => ['from-ubuntu1804-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'builduser'],
   },
   oobedevcpp_ubuntu1604_x86 => {
-    version => 2,
-    spec => ['from-ubuntu1604-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps test_deps/), 'builduser'],
+    version => 3,
+    spec => ['from-ubuntu1604-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
   },
   oobejre_ubuntu1604_x64 => {
-    version => 2,
-    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobejre_ubuntu1604_deps test_deps/), 'builduser'],
+    version => 3,
+    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobejre_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
   },
   oobejre_ubuntu1804_x64 => {
-    version => 2,
-    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobejre_ubuntu1604_deps test_deps_ubuntu1804/), 'builduser'],
+    version => 3,
+    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobejre_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'builduser'],
   },
   oobedevdnc20_ubuntu1604_x64 => {
-    version => 3,
-    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps test_deps/), 'oobedevdnc20_ubuntu1604_x64_deps', 'builduser'],
+    version => 4,
+    spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc20_ubuntu1604_x64_deps', 'builduser'],
   },
   oobedevdnc21_ubuntu1804_x64 => {
-    version => 2,
-    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps test_deps_ubuntu1804/), 'oobedevdnc21_ubuntu1804_x64_deps', 'builduser'],
+    version => 3,
+    spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc21_ubuntu1804_x64_deps', 'builduser'],
   },
   oobedevpy35_ubuntu1604_x64 => {
     version => 3,

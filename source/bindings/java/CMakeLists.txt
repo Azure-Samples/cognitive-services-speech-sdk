@@ -126,6 +126,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/KeywordRecognitionModel.java
     ${CMAKE_SWIG_OUTDIR}/LanguageUnderstandingModel.java
     ${CMAKE_SWIG_OUTDIR}/OutputFormat.java
+    ${CMAKE_SWIG_OUTDIR}/AudioStreamContainerFormat.java
     ${CMAKE_SWIG_OUTDIR}/PropertyCollection.java
 
     ${CMAKE_SWIG_OUTDIR}/ResultReason.java
@@ -238,6 +239,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/SpeechRecognizer.java
 
     ${PACKAGE_DIR}/OutputFormat.java
+    ${PACKAGE_DIR}/audio/AudioStreamContainerFormat.java
 
     ${PACKAGE_DIR}/audio/AudioConfig.java
     ${PACKAGE_DIR}/audio/AudioInputStream.java

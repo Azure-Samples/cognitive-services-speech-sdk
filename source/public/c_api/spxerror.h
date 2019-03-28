@@ -256,3 +256,21 @@ typedef uintptr_t SPXHR;
 /// Added in version 1.4.0.
 /// </summary>
 #define SPXERR_UNEXPECTED_AUDIO_OUTPUT_FAILURE  __SPX_ERRCODE_FAILED(0x026)
+
+/// <summary>
+/// Gstreamer internal error.
+/// Added in version 1.4.0.
+/// </summary>
+#define SPXERR_GSTREAMER_INTERNAL_ERROR    __SPX_ERRCODE_FAILED(0x027)
+
+/// <summary>
+/// Compressed contrainer format not supported.
+/// Added in version 1.4.0.
+/// </summary>
+#define SPXERR_CONTAINER_FORMAT_NOT_SUPPORTED_ERROR    __SPX_ERRCODE_FAILED(0x028)
+
+/// <summary>
+/// Codec extension or gstreamer not found.
+/// Added in version 1.4.0.
+/// </summary>
+#define SPXERR_GSTREAMER_NOT_FOUND_ERROR    __SPX_ERRCODE_FAILED(0x029)

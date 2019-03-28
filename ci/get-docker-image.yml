@@ -44,6 +44,7 @@ steps:
       azureContainerRegistry: $(AZURE_CONTAINER_REGISTRY)
       command: pull
       arguments: $(__getDockerImageInternal_Image)
+    condition: and(succeeded(), eq(variables['__getDockerImageInternal_DoPull'], 'true'))
 
 # Multiple-image case
 - ${{ if contains(parameters.imageBase, ' ') }}:

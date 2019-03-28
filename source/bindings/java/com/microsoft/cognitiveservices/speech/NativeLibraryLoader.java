@@ -19,19 +19,21 @@ import java.util.ArrayList;
 /**
  * A helper class for loading native Speech SDK libraries from Java
  *
- * The jar with the Speech native libraries may contain a file name 'NATIVE_MANIFEST' that lists
- * all native files (one per line, full name) to be extracted.
- * The libraries will be loaded in the order specified in the manifest and are expected in the
- * folders named as the operating system they run on. Supported OSes are Linux, Windows, Mac.
- *
- * In case the above manifest does not exist, a fallback is implemented loading a fixed set
- * of libraries, i.e., the Speech.core, and the Speech.java.binding library (in that order).
+ * - Native libraries are placed in an OS-specific package assets folder
+ *   (/ASSETS/{mac,linux,window}64)
+ * - From this folder, a known list of libraries is extracted into a temporary folder.
+ * - On Windows and OSX, these libraries are loaded in the list order (bottom
+ *   to top dependency), by full extracted path name.
+ *   TODO this may need to be revisited on OSX
+ * - On Linux, only the last of these libraries (top dependency) is loaded,
+ *   which resolves static dependency via RPATH; dynamic dependencies will be
+ *   loaded later, also via RPATH.
  */
 class NativeLibraryLoader {
 
-    private static final String manifestName = "NATIVE_MANIFEST";
     private static String[] nativeList = new String[0];
     private static Boolean extractionDone = false;
+    private static Boolean loadAll = false;
     private static File tempDir;
 
     static {
@@ -45,42 +47,36 @@ class NativeLibraryLoader {
     }
 
     /**
-     * Loads binding native libraries from the jar file, if the jar contains a plain text file
-     * named 'NATIVE_MANIFEST'.
-     *
-     * The NATIVE_MANIFEST contains what libraries need to be extracted (one per line, full name)
-     * and the order in which they should be loaded.
-     *
-     * If NATIVE_MANIFEST is not found, a platform specific set of libraries and their order
-     * is assumed (comprising at least the core library and the java.binding library).
-     *
-     * The libraries must be located under the "/ASSETS/" root, followed by the operating system name.
+     * Extract and load OS-specific libraries from the JAR file.
      */
     public static void loadNativeBinding() {
         try {
             extractNativeLibraries();
 
-            // Load the libraries in the order provided by the NATIVE_MANIFEST
-            for (String libName: nativeList) {
-                String fullPathName = new File(tempDir.getCanonicalPath(), libName).getCanonicalPath();
-                if(!fullPathName.startsWith(tempDir.getCanonicalPath())) {
-                    throw new SecurityException("illegal path");
+            // Load extracted libraries (either all or the last one)
+            for (int i = 0; i < nativeList.length; i++)
+            {
+                if (loadAll || (i == nativeList.length - 1)) {
+                    String libName = nativeList[i];
+                    String fullPathName = new File(tempDir.getCanonicalPath(), libName).getCanonicalPath();
+                    if(!fullPathName.startsWith(tempDir.getCanonicalPath())) {
+                        throw new SecurityException("illegal path");
+                    }
+                    System.load(fullPathName);
                 }
-
-                System.load(fullPathName);
             }
         }
         catch (Exception e) {
             // If nothing worked, throw exception
             throw new UnsatisfiedLinkError(
-                    String.format("Could not load all Speech SDK libraries because we encountered the following error: %s", e.getMessage()));
+                    String.format("Could not extract/load all Speech SDK libraries because we encountered the following error: %s", e.getMessage()));
         }
     }
 
     private static void extractNativeLibraries() throws IOException {
         try {
             if (!extractionDone) {
-                nativeList = getResourceLines(manifestName);
+                nativeList = getResourceLines();
 
                 // Extract all operatingSystem specific native libraries to temporary location
                 for (String libName: nativeList) {
@@ -93,65 +89,38 @@ class NativeLibraryLoader {
         }
     }
 
-    private static String[] getResourceLines(String resourceName) throws IOException {
-        // Read resource file if it exists
-        InputStream inStream = SpeechConfig.class.getResourceAsStream(getResourcesPath() + resourceName);
-        BufferedReader resourceReader = null;
-        ArrayList<String> lines = new ArrayList<String>();
+    /**
+     * Depending on the OS, return the list of libraries to be extracted, the
+     * first of which is to be loaded as well.
+     */
+    private static String[] getResourceLines() throws IOException {
+        String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
 
-        try {
-            // in case there is no embedded jni-manifest, use fixed names
-            if (inStream == null) {
-                String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
-
-                if (operatingSystem.contains("linux")) {
-                    return new String[] {
-                            "libMicrosoft.CognitiveServices.Speech.core.so",
-                            "libMicrosoft.CognitiveServices.Speech.extension.kws.so",
-                            "libMicrosoft.CognitiveServices.Speech.java.bindings.so"
-                    };
-                }
-                else if (operatingSystem.contains("windows")) {
-                    return new String[] {
-                            "Microsoft.CognitiveServices.Speech.core.dll",
-                            "Microsoft.CognitiveServices.Speech.extension.kws.dll",
-                            "Microsoft.CognitiveServices.Speech.java.bindings.dll"
-                    };
-                }
-                else if (operatingSystem.contains("mac") || operatingSystem.contains("darwin")) {
-                    // Note: currently no KWS on macOS
-                    return new String[] {
-                            "libMicrosoft.CognitiveServices.Speech.core.dylib",
-                            "libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
-                    };
-                }
-
-                throw new UnsatisfiedLinkError(
-                        String.format("The Speech SDK doesn't currently have native support for operating system: %s", operatingSystem));
-            }
-
-            resourceReader = new BufferedReader(new InputStreamReader(inStream, "UTF-8"));
-
-            int numLibs = 0;
-            final int maxLibNameLength = 128;
-            for (String line; (numLibs < 10) && (line = resourceReader.readLine()) != null; numLibs++) {
-                // strip all whitespace at the endings.
-                line = line.trim();
-
-                // validate input
-                if(line.isEmpty() || line.length() > maxLibNameLength || line.indexOf('\n') >= 0) {
-                    continue;
-                }
-
-                lines.add(line);
-            }
+        if (operatingSystem.contains("linux")) {
+            return new String[] {
+                    "libMicrosoft.CognitiveServices.Speech.core.so",
+                    "libMicrosoft.CognitiveServices.Speech.extension.kws.so",
+                    "libMicrosoft.CognitiveServices.Speech.extension.codec.so",
+                    "libMicrosoft.CognitiveServices.Speech.java.bindings.so"
+            };
         }
-        finally {
-            safeClose(resourceReader);
-            safeClose(inStream);
+        else if (operatingSystem.contains("windows")) {
+            return new String[] {
+                    "Microsoft.CognitiveServices.Speech.core.dll",
+                    "Microsoft.CognitiveServices.Speech.extension.kws.dll",
+                    "Microsoft.CognitiveServices.Speech.java.bindings.dll"
+            };
+        }
+        else if (operatingSystem.contains("mac") || operatingSystem.contains("darwin")) {
+            // Note: currently no KWS on macOS
+            return new String[] {
+                    "libMicrosoft.CognitiveServices.Speech.core.dylib",
+                    "libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
+            };
         }
 
-        return lines.toArray(new String[lines.size()]);
+        throw new UnsatisfiedLinkError(
+                String.format("The Speech SDK doesn't currently have native support for operating system: %s", operatingSystem));
     }
 
     private static String getResourcesPath() {
@@ -173,9 +142,11 @@ class NativeLibraryLoader {
             return String.format(speechPrefix, "linux", dataModelSize);
         }
         else if (operatingSystem.contains("windows")) {
+            loadAll = true; // signal to load all libraries
             return String.format(speechPrefix, "windows", dataModelSize);
         }
         else if (operatingSystem.contains("mac")|| operatingSystem.contains("darwin")) {
+            loadAll = true; // signal to load all libraries
             return String.format(speechPrefix, "mac", dataModelSize);
         }
         else {

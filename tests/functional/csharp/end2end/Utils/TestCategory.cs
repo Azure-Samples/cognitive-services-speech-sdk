@@ -7,5 +7,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     public static class TestCategory
     {
        public const string LongRunning = "LongTest";
+
+       public const string CompressedStreamTest = "CompressedStreamTest";
     }
 }

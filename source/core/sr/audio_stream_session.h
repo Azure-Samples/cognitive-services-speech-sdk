@@ -287,6 +287,7 @@ private:
     std::shared_ptr<ISpxRecoEngineAdapter> m_resetRecoAdapter;
 
     std::shared_ptr<ISpxLuEngineAdapter> m_luAdapter;
+    std::shared_ptr<ISpxAudioStreamReader> m_codecAdapter;
 
     // Our current "state" is kept in two parts and can only be changed from the background thread.
     //      1.) RecognitionKind (m_recoKind): Keeps track of what kind of recognition we're doing

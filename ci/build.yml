@@ -1013,7 +1013,7 @@ jobs:
       cd tests/functional/csharp/end2end
       dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source ${nugetsource} Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
       dotnet test --blame --verbosity detailed --filter \
-        "TestCategory!=LongTest&TestCategory!=SpeechSynthesisMockTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests" \
+        "TestCategory!=LongTest&TestCategory!=SpeechSynthesisMockTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests&TestCategory!=CompressedStreamTest" \
         --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_osx_unit_tests.trx"
     displayName: Run C# unit tests
   - task: PublishTestResults@2

@@ -90,6 +90,11 @@ for platformString in "${platforms[@]}"; do
   ! [[ -f $KWS_LIB ]] ||
     cp --verbose "$KWS_LIB" "$JAR_DIR/$assetDir"
 
+  # Copy CODEC extension if available
+  CODEC_LIB=$dropPrefix/${libPrefix}Microsoft.CognitiveServices.Speech.extension.codec$libSuffix
+  ! [[ -f $CODEC_LIB ]] ||
+    cp --verbose "$CODEC_LIB" "$JAR_DIR/$assetDir"
+
 done
 
 cp -v "$SCRIPT_DIR/../../"{REDIST.txt,license.md,ThirdPartyNotices.md} "$JAR_DIR"

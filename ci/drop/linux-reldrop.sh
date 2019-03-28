@@ -40,6 +40,7 @@ tar \
   "$BASE_NAME" \
   Linux-x86/Release/public/include/* \
   Linux-x*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so \
+  Linux-x*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.codec.so \
   Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so
   # KWS only ships for Linux-x64 currently
 

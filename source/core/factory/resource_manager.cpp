@@ -37,6 +37,8 @@ CSpxResourceManager::CSpxResourceManager()
     // Note: due to new naming, removing any carbon prefix in name
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.pma.so"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.kws.so"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.codec.so"));
+
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
 #elif __MACH__
@@ -57,6 +59,7 @@ CSpxResourceManager::CSpxResourceManager()
     //       special "carbon" core component)
     m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.pma.dll"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.kws.dll"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.codec.dll"));
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon")); // this is special, internal name, no dll extension!
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-unidec.dll"));

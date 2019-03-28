@@ -133,6 +133,7 @@ void CSpxAudioStreamSession::Term()
     SpxTermAndClear(m_recoAdapter);
     SpxTermAndClear(m_luAdapter);
     SpxTermAndClear(m_siteKeepAlive);
+    SpxTermAndClear(m_codecAdapter);
     m_audioProcessor = nullptr;
     m_audioBuffer = nullptr;
 }
@@ -228,13 +229,44 @@ void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> str
     SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
     SPX_DBG_ASSERT(IsKind(RecognitionKind::Idle) && IsState(SessionState::Idle));
     SPX_DBG_TRACE_VERBOSE("%s: Now Idle ...", __FUNCTION__);
+    std::shared_ptr<ISpxAudioPumpInit> audioPump;
+    std::shared_ptr<ISpxAudioStreamReader> reader;
 
     // Create the stream pump
-    auto audioPump = SpxCreateObjectWithSite<ISpxAudioPumpInit>("CSpxAudioPump", this);
+    auto cbFormat = stream->GetFormat(nullptr, 0);
+    auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
+    stream->GetFormat(waveformat.get(), cbFormat);
+
+    if (waveformat->wFormatTag != WAVE_FORMAT_PCM)
+    {
+        m_codecAdapter = SpxCreateObjectWithSite<ISpxAudioStreamReader>("CSpxCodecAdapter", GetSite());
+        SPX_IFTRUE_THROW_HR(m_codecAdapter == nullptr, SPXERR_GSTREAMER_NOT_FOUND_ERROR);
+
+        reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
+
+        auto initCallbacks = SpxQueryInterface<ISpxAudioStreamReaderInitCallbacks>(m_codecAdapter);
+        initCallbacks->SetCallbacks(
+            [=](uint8_t* buffer, uint32_t size) { return reader->Read(buffer, size); },
+            [=]() { { reader->Close(); } });
+
+        auto adapterAsSetFormat = SpxQueryInterface<ISpxAudioStreamInitFormat>(m_codecAdapter);
+        adapterAsSetFormat->SetFormat(waveformat.get());
+    }
+
+    audioPump = SpxCreateObjectWithSite<ISpxAudioPumpInit>("CSpxAudioPump", this);
+
     m_audioPump = SpxQueryInterface<ISpxAudioPump>(audioPump);
 
     // Attach the stream to the pump
-    auto reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
+    if (m_codecAdapter == nullptr)
+    {
+        reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
+    }
+    else
+    {
+        reader = SpxQueryInterface<ISpxAudioStreamReader>(m_codecAdapter);
+    }
+
     audioPump->SetReader(reader);
 
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceStream);

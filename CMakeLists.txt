@@ -373,6 +373,10 @@ endif()
 
 add_subdirectory(${CARBON_BINDINGS})
 
+if(SPEECHSDK_OS STREQUAL "Linux")
+  add_subdirectory(${CARBON_EXTENSIONS}/codec)
+endif()
+
 if(NOT DEFINED SKBUILD)
   # don't build c++ tests and carbonx with scikit-build based python wheel build
   add_subdirectory(${TESTS})

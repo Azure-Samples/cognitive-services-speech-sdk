@@ -50,6 +50,8 @@ struct TestData
 
 // declare the test data here
 extern TestData weather;
+extern TestData weathermp3;
+extern TestData weatheropus;
 extern TestData batman;
 extern TestData wrongSamplingRateFile;
 extern TestData callTheFirstOne;
@@ -61,11 +63,12 @@ void UseMockUsp(bool value);
 bool IsUsingMocks(bool uspMockRequired = true);
 int ReadBuffer(fstream& fs, uint8_t* dataBuffer, uint32_t size);
 fstream OpenWaveFile(const string& filename);
+fstream OpenFile(const string& filename);
 shared_ptr<SpeechConfig> CurrentSpeechConfig();
 void SetMockRealTimeSpeed(int value);
 void ConnectCallbacks(SpeechRecognizer * pRecognizer, promise<string>& result);
 string  WaitForResult(future<string>&& f, MilliSeconds duration);
-void PushData(PushAudioInputStream* pushStream, const string& filename);
+void PushData(PushAudioInputStream* pushStream, const string& filename, bool compressed = false);
 void DoContinuousReco(SpeechRecognizer * recognizer, PushAudioInputStream * pushStream);
 void DoKWS(SpeechRecognizer * recognizer, PushAudioInputStream * pushStream);
 

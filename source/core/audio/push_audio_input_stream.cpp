@@ -128,8 +128,11 @@ uint32_t CSpxPushAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
         m_bytesLeftInBuffer -= bytesThisLoop;
         bytesToRead -= bytesThisLoop;
         totalBytesRead += bytesThisLoop;
-
-        SimulateRealtime(bytesThisLoop);
+        if (m_format->wFormatTag == WAVE_FORMAT_PCM)
+        {
+            // for compressed format rate control is inside gstreamer adapter
+            SimulateRealtime(bytesThisLoop);
+        }
     }
 
     SPX_DBG_TRACE_VERBOSE("CSpxPushAudioInputStream::Read: totalBytesRead=%d", totalBytesRead);

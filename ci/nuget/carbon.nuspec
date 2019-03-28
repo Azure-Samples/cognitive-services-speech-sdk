@@ -67,6 +67,7 @@
 
     <!-- .NET standard Linux native dlls -->
     <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.kws.so" target="runtimes\linux-x64\native\libMicrosoft.CognitiveServices.Speech.extension.kws.so" />
+    <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.codec.so" target="runtimes\linux-x64\native\libMicrosoft.CognitiveServices.Speech.extension.codec.so" />
     <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="runtimes\linux-x64\native\libMicrosoft.CognitiveServices.Speech.core.so" />
 
     <!-- .NET standard dlls for OSX -->

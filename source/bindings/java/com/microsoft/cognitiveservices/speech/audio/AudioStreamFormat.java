@@ -6,6 +6,8 @@ package com.microsoft.cognitiveservices.speech.audio;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerFormat;
+
 
 /**
  * Represents audio stream format used for custom audio input configurations.
@@ -40,6 +42,16 @@ public final class AudioStreamFormat
      */
     public static AudioStreamFormat getWaveFormatPCM(long samplesPerSecond, short bitsPerSample, short channels) {
         return new AudioStreamFormat(com.microsoft.cognitiveservices.speech.internal.AudioStreamFormat.GetWaveFormatPCM(samplesPerSecond, bitsPerSample, channels));
+    }
+
+    /**
+     * Creates an audio stream format object with the specified compressed audio container format, to be used as input format.
+     * Added in version 1.4.0
+     * @param compressedFormat are defined in AudioStreamContainerFormat enum
+     * @return The audio stream format being created.
+     */
+    public static AudioStreamFormat getCompressedFormat(AudioStreamContainerFormat compressedFormat) {
+        return new AudioStreamFormat(com.microsoft.cognitiveservices.speech.internal.AudioStreamFormat.GetCompressedFormat(compressedFormat));
     }
 
     /**

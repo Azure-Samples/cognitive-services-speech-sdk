@@ -9,6 +9,8 @@
 
 
 TestData weather {"/audio/whatstheweatherlike.wav", "What's the weather like?" };
+TestData weathermp3{ "/audio/whatstheweatherlike.mp3", "What's the weather like?" };
+TestData weatheropus{ "/audio/whatstheweatherlike.opus", "What's the weather like?" };
 TestData batman{ "/audio/batman.wav", "" };
 TestData wrongSamplingRateFile {"/audio/11khztest.wav", "" };
 TestData cortana {"/audio/heyCortana.wav", "Hey Cortana," };
@@ -47,7 +49,7 @@ void SetMockRealTimeSpeed(int value)
     SpxSetMockParameterNumber("CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", value);
 }
 
-fstream OpenWaveFile(const string& filename)
+fstream OpenFile(const string& filename)
 {
     if (filename.empty())
     {
@@ -61,6 +63,13 @@ fstream OpenWaveFile(const string& filename)
         throw invalid_argument("Failed to open the specified audio file.");
     }
 
+
+    return fs;
+}
+
+fstream OpenWaveFile(const string& filename)
+{
+    fstream fs = OpenFile(filename);
     //skip the wave header
     fs.seekg(44);
 
@@ -157,12 +166,19 @@ string WaitForResult(future<string>&& f, MilliSeconds duration)
     return f.get();
 }
 
-void PushData(PushAudioInputStream* pushStream, const string& filename)
+void PushData(PushAudioInputStream* pushStream, const string& filename, bool compressed)
 {
     fstream fs;
     try
     {
-        fs = OpenWaveFile(filename);
+        if (compressed)
+        {
+            fs = OpenFile(filename);
+        }
+        else
+        {
+            fs = OpenWaveFile(filename);
+        }
     }
     catch (const exception& e)
     {

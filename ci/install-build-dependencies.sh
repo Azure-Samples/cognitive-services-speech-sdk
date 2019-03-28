@@ -36,6 +36,12 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
     sudo apt-get remove --yes libssl-dev
     sudo apt-get install --yes --target-release xenial-updates libssl-dev
     sudo apt-get install --yes pkg-config zlib1g-dev libasound2-dev uuid-dev default-jdk libpcre++-dev bison automake
+    sudo apt-get install --yes --no-install-recommends libgstreamer1.0-dev \
+                               gstreamer1.0-plugins-base \
+                               gstreamer1.0-plugins-good \
+                               gstreamer1.0-plugins-ugly \
+                               gstreamer1.0-plugins-bad \
+
     sudo "$SCRIPT_DIR/install-swig.sh"
     ;;
   Windows-x64)

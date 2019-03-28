@@ -162,6 +162,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string Utterance = "What's the weather like?";
             }
 
+            public static class WeatherMP3
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "whatstheweatherlike.mp3");
+                public static readonly string Utterance = "What's the weather like?";
+            }
+
+            public static class WeatherOPUS
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "whatstheweatherlike.opus");
+                public static readonly string Utterance = "What's the weather like?";
+            }
+
             public static class Silence
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "silenceshort.wav");

@@ -1634,6 +1634,38 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
     }
 }
 
+void *CarbonTestConsole::OpenCompressedFile(const std::string& compressedFileName)
+{
+    FILE *filep = NULL;
+    {
+#ifdef WIN32
+        std::wstring filename(compressedFileName.begin(), compressedFileName.end());
+        _wfopen_s(&filep, filename.c_str(), L"rb");
+#else
+        filep = fopen(compressedFileName.c_str(), "rb");
+#endif
+    }
+    return filep;
+}
+
+void CarbonTestConsole::closeStream(void* fp)
+{
+    fclose((FILE*)fp);
+}
+
+int CarbonTestConsole::ReadCompressedBinaryData(void *stream, uint8_t *ptr, uint32_t buf_size)
+{
+    size_t  ret = 0;
+    FILE* localRead = (FILE*)stream;
+
+    if (!feof(localRead))
+    {
+        ret = fread(ptr, 1, buf_size, localRead);
+    }
+    return (int)ret;
+}
+
+
 void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::string& wavFileName, const std::string& deviceName)
 {
     if (recognizerType == PAL::GetTypeName<SpeechRecognizer>())
@@ -1644,7 +1676,30 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
 
         if (deviceName.empty())
         {
-            m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(wavFileName));
+            if (wavFileName.find(".mp3") == (wavFileName.size() - 4))
+            {
+                m_pullAudioStream = AudioInputStream::CreatePullStream(
+                    AudioStreamFormat::GetCompressedFormat(AudioStreamContainerFormat::MP3),
+                    OpenCompressedFile(wavFileName),
+                    ReadCompressedBinaryData,
+                    closeStream
+                );
+                m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromStreamInput(m_pullAudioStream));
+            }
+            else if (wavFileName.find(".opus") == (wavFileName.size() - 5))
+            {
+                m_pullAudioStream = AudioInputStream::CreatePullStream(
+                    AudioStreamFormat::GetCompressedFormat(AudioStreamContainerFormat::OGG_OPUS),
+                    OpenCompressedFile(wavFileName),
+                    ReadCompressedBinaryData,
+                    closeStream
+                );
+                m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromStreamInput(m_pullAudioStream));
+            }
+            else
+            {
+                m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(wavFileName));
+            }
         }
         else
         {

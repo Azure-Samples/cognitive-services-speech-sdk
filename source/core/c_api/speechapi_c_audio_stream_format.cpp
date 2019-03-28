@@ -11,10 +11,14 @@
 #include "platform.h"
 #include "site_helpers.h"
 #include "string_utils.h"
+#include "speechapi_cxx_audio_stream_format.h"
 
-
+using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
+static_assert((int)AudioStreamContainerFormat::MP3 == (int)StreamFormat_Mp3, "AudioStreamContainerFormat should match between C and C++ layers");
+static_assert((int)AudioStreamContainerFormat::OGG_OPUS == (int)StreamFormat_Ogg_Opus, "AudioStreamContainerFormat should match between C and C++ layers");
+static_assert((int)AudioStreamContainerFormat::FLAC == (int)StreamFormat_Flac, "AudioStreamContainerFormat should match between C and C++ layers");
 
 SPXAPI_(bool) audio_stream_format_is_handle_valid(SPXAUDIOSTREAMFORMATHANDLE hformat)
 {
@@ -49,6 +53,20 @@ SPXAPI audio_stream_format_create_from_waveformat_pcm(SPXAUDIOSTREAMFORMATHANDLE
 SPXAPI audio_stream_format_create_from_default_output(SPXAUDIOSTREAMFORMATHANDLE* hformat)
 {
     return audio_stream_format_create_from_waveformat_pcm(hformat, 16000, 16, 1);
+}
+
+SPXAPI audio_stream_format_create_from_compressed_format(SPXAUDIOSTREAMFORMATHANDLE* hformat, Audio_Stream_Container_Format compressedFormat)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *hformat = SPXHANDLE_INVALID;
+
+        auto format = SpxAllocWAVEFORMATEX(sizeof(SPXWAVEFORMATEX));
+        memset(format.get(), 0, sizeof(SPXWAVEFORMATEX));
+        format->wFormatTag = static_cast<uint16_t>(compressedFormat);
+        *hformat = CSpxSharedPtrHandleTableManager::TrackHandle<SPXWAVEFORMATEX, SPXAUDIOSTREAMFORMATHANDLE>(format);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI audio_stream_format_release(SPXAUDIOSTREAMFORMATHANDLE hformat)

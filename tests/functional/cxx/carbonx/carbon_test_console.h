@@ -155,6 +155,10 @@ private:
     void IntentRecognizer_NoMatchHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("NoMatchHandler: %s", ToString(e).c_str()); }
     void IntentRecognizer_CanceledHandler(const IntentRecognitionCanceledEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("CanceledHandler: %s", ToString(e).c_str()); };
 
+    static int ReadCompressedBinaryData(void *_stream, uint8_t *_ptr, uint32_t _buf_size);
+    void *OpenCompressedFile(const std::string& compressedFileName);
+    static void closeStream(void* fp);
+
     bool ToBool(const char* psz);
 
     std::string BoolToString(bool f);
@@ -261,5 +265,6 @@ private:
     std::vector<std::string> m_intentNames;
 
     void* m_commandSystem = nullptr;
+    std::shared_ptr<PullAudioInputStream> m_pullAudioStream;
 };
 

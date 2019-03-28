@@ -47,6 +47,17 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         }
 
         /// <summary>
+        /// Creates an audio stream format object with the specified compressed audio container format, to be used as input format.
+        /// Support added in 1.4.0.
+        /// </summary>
+        /// <param name="compressedFormat">Formats are defined in AudioStreamContainerFormat enum</param>
+        /// <returns>The audio stream format being created.</returns>
+        public static AudioStreamFormat GetCompressedFormat(Microsoft.CognitiveServices.Speech.Audio.AudioStreamContainerFormat compressedFormat)
+        {
+            return new AudioStreamFormat(Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat.GetCompressedFormat(compressedFormat));
+        }
+
+        /// <summary>
         /// Dispose of associated resources.
         /// </summary>
         public void Dispose()

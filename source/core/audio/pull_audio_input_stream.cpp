@@ -66,7 +66,11 @@ uint16_t CSpxPullAudioInputStream::GetFormat(SPXWAVEFORMATEX* formatBuffer, uint
 uint32_t CSpxPullAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
 {
     auto bytesActuallyRead = m_readCallback(buffer, bytesToRead);
-    SimulateRealTime(bytesActuallyRead);
+    if (m_format->wFormatTag == WAVE_FORMAT_PCM)
+    {
+        // for compressed format rate control is inside gstreamer adapter
+        SimulateRealTime(bytesActuallyRead);
+    }
     return bytesActuallyRead;
 }
 

@@ -13,12 +13,35 @@
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_smart_handle.h>
 #include <speechapi_c_audio_stream_format.h>
+#include <speechapi_cxx_enums.h>
 
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Audio {
+
+/// <summary>
+/// Defines supported audio stream container format.
+/// Changed in version 1.4.0.
+/// </summary>
+enum class AudioStreamContainerFormat
+{
+    /// <summary>
+    /// Stream ContainerFormat definition for OGG OPUS.
+    /// </summary>
+    OGG_OPUS = 0x101,
+
+    /// <summary>
+    /// Stream ContainerFormat definition for MP3.
+    /// </summary>
+    MP3 = 0x102,
+
+    /// <summary>
+    /// Stream ContainerFormat definition for FLAC. Not supported yet.
+    /// </summary>
+    FLAC = 0x103
+};
 
 /// <summary>
 /// Class to represent the audio stream format used for custom audio input configurations.
@@ -83,6 +106,23 @@ public:
         return std::shared_ptr<AudioStreamFormat>(format);
     }
 
+    /// <summary>
+    /// Creates an audio stream format object with the specified compressed audio container format, to be used as input format.
+    /// Support added in 1.4.0.
+    /// </summary>
+    /// <remarks>
+    /// Formats are defined in AudioStreamContainerFormat enum.
+    /// </remarks>
+    /// <param name="compressedFormat">Compressed format type.</param>
+    /// <returns>A shared pointer to AudioStreamFormat.</returns>
+    static std::shared_ptr<AudioStreamFormat> GetCompressedFormat(AudioStreamContainerFormat compressedFormat)
+    {
+        SPXAUDIOSTREAMFORMATHANDLE hformat = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(audio_stream_format_create_from_compressed_format(&hformat, (Audio_Stream_Container_Format)compressedFormat));
+
+        auto format = new AudioStreamFormat(hformat);
+        return std::shared_ptr<AudioStreamFormat>(format);
+    }
 
 protected:
 

@@ -10,11 +10,28 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
+using System.IO;
+using System.Threading;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using static SpeechRecognitionTestsHelper;
+
+    public class ClientPullStreamCallback : PullAudioInputStreamCallback
+    {
+        FileStream fs;
+
+        public ClientPullStreamCallback(string filename)
+        {
+            fs = File.OpenRead(filename);
+        }
+
+        public override int Read(byte[] dataBuffer, uint size)
+        {
+            return fs.Read(dataBuffer, 0, (int)size);
+        }
+    }
 
     sealed class SpeechWithStreamHelper
     {
@@ -34,6 +51,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task<SpeechRecognitionResult> GetSpeechFinalRecognitionResult(SpeechConfig config, string audioFile)
         {
             using (var recognizer = TrackSessionId(new SpeechRecognizer(config, AudioConfig.FromWavFileInput(audioFile))))
+            {
+                SpeechRecognitionResult result = null;
+                await Task.WhenAny(recognizer.RecognizeOnceAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
+                return result;
+            }
+        }
+
+        public async Task<SpeechRecognitionResult> GetSpeechFinalRecognitionResultPullStreamWithCompressedFile(SpeechConfig config, string audioFile, AudioStreamContainerFormat containerType)
+        {
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(config,
+                AudioConfig.FromStreamInput(new PullAudioInputStream(new ClientPullStreamCallback(audioFile),
+                                                    AudioStreamFormat.GetCompressedFormat(containerType))))))
             {
                 SpeechRecognitionResult result = null;
                 await Task.WhenAny(recognizer.RecognizeOnceAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
