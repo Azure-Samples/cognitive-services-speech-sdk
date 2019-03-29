@@ -235,6 +235,7 @@ public class SpeechSdkInstrumentedTest {
         Settings.Keyword = System.getProperty("Keyword", "Computer");
         Settings.KeywordModel = System.getProperty("KeywordModel", "kws-computer.zip");
 
+        Settings.AudioInputDirectory =  System.getProperty("AudioInputDirectory", tempDir);
         Settings.WavFile = System.getProperty("SampleAudioInput", waveFileDefault);
         Settings.SpeechAuthorizationToken = retrieveAuthorizationToken(Settings.SpeechRegion, Settings.SpeechSubscriptionKey);
 

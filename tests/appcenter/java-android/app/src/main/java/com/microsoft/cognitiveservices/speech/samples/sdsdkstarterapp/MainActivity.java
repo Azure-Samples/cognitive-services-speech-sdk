@@ -13,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.zip.*;
 
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
@@ -31,6 +32,51 @@ public class MainActivity extends AppCompatActivity {
         final AssetManager assets = this.getAssets();
 
         prepareEnvironment(assets, "MainActivity.properties");
+    }
+
+    private static void extractAll(InputStream zipStream, String outputBaseFolder) throws IOException {
+        byte buf[] = new byte[1024];
+        String baseDir = new File(outputBaseFolder).getCanonicalPath();
+
+        ZipInputStream zis = new ZipInputStream(zipStream);
+        ZipEntry ze = zis.getNextEntry();
+        while(ze != null) {
+            String filename = ze.getName();
+            
+            // work-around non-standards conforming .zip created with older .NET versions.
+            // See [https://docs.microsoft.com/dotnet/framework/migration-guide/mitigation-ziparchiveentry-fullname-path-separator](https://docs.microsoft.com/dotnet/framework/migration-guide/mitigation-ziparchiveentry-fullname-path-separator)
+            if (filename != null) {
+                filename = filename.replace('\\', '/');
+
+                File outFile = new File(baseDir, filename);
+                String fullPathName = outFile.getCanonicalPath();
+                if(!fullPathName.startsWith(baseDir)) {
+                    throw new SecurityException("illegal path");
+                }
+
+                File parent = new File(outFile.getParent());
+
+                if(!parent.exists()) {
+                    parent.mkdirs();
+                }
+
+                FileOutputStream fos = new FileOutputStream(outFile);
+
+                int len;
+                while ((len = zis.read(buf)) > 0) {
+                    fos.write(buf, 0, len);
+                }
+
+                fos.close();
+            }
+            else {
+                int len;
+                while ((len = zis.read(buf)) > 0) {
+                }
+            }
+
+            ze = zis.getNextEntry();
+        }
     }
 
     private static void prepareEnvironment(AssetManager assets, String filename) {
@@ -53,26 +99,18 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        String SampleAudioInput = System.getProperty("SampleAudioInput", "/data/keyword/kws-computer.wav");
+        String tempDir = System.getProperty("java.io.tmpdir", "/data/local/tmp/");
+        String AudioInputDirectory =  System.getProperty("AudioInputDirectory", tempDir);
+
+        String SampleAudioInput = System.getProperty("SampleAudioInput", AudioInputDirectory + "/kws-computer.wav");
         if (!new File(SampleAudioInput).exists()) {
+            System.setProperty("AudioInputDirectory", tempDir);
+
             try {
-                InputStream inputStream = assets.open("whatstheweatherlike.wav");
+                InputStream inputStream = assets.open("testassets.zip");
 
                 if (inputStream != null) {
-                    String tempDir = System.getProperty("java.io.tmpdir", "/data/data");
-                    File file = new File(tempDir, "whatstheweatherlike.wav");
-                    FileOutputStream os = new FileOutputStream(file);
-
-                    if (os != null) {
-                        byte buf[]= new byte[1024];
-                        int len;
-                        while ((len = inputStream.read(buf, 0, buf.length))> 0) {
-                            os.write(buf, 0, len);
-                        }
-
-                        os.close();
-                    }
-
+                    extractAll(inputStream, tempDir);
                     inputStream.close();
                 }
             } catch (IOException e) {

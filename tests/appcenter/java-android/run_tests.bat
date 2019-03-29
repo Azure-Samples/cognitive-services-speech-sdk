@@ -7,8 +7,8 @@ setlocal
 
 REM override these settings by using environment variables, if necessary
 if "%APPCENTER_APPID%"     EQU "" set APPCENTER_APPID=SpeechSDKTester
-if "%APPCENTER_TESTQUEUE%" EQU "" set APPCENTER_TESTQUEUE=master
-if "%APPCENTER_DEVICESET%" EQU "" set APPCENTER_DEVICESET=master
+if "%APPCENTER_TESTQUEUE%" EQU "" set APPCENTER_TESTQUEUE=local
+if "%APPCENTER_DEVICESET%" EQU "" set APPCENTER_DEVICESET=deviceset-dev:1
 if "%APPCENTER_USER_ID%"   EQU "" (
     echo Missing: set APPCENTER_USER_ID=YOUR_APPCENTER_ID
     exit /b 1
@@ -77,7 +77,7 @@ if NOT EXIST "%SPEECHSDK_BUILD_ROOT%\MainActivity.properties" (
 echo.
 echo Copying audio test files to test application
 md "%SPEECHSDK_TEST_ROOT%\app\src\main\assets" && ^
-copy /Y "%SPEECHSDK_ROOT%\tests\input\audio\whatstheweatherlike.wav"     "%SPEECHSDK_TEST_ROOT%\app\src\main\assets\" && ^
+powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -NonInteractive Add-Type -Assembly System.IO.Compression.FileSystem; $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal; [System.IO.Compression.ZipFile]::CreateFromDirectory('%SPEECHSDK_ROOT%\tests\input\audio', '%SPEECHSDK_TEST_ROOT%\app\src\main\assets\testassets.zip', $compressionLevel, $false) && ^
 copy /Y "%SPEECHSDK_ROOT%\tests\input\kws\Computer\kws-computer.zip"     "%SPEECHSDK_TEST_ROOT%\app\src\main\assets\" && ^
 copy /Y "%SPEECHSDK_BUILD_ROOT%\MainActivity.properties"                 "%SPEECHSDK_TEST_ROOT%\app\src\main\assets\"
 if errorlevel 1 (
