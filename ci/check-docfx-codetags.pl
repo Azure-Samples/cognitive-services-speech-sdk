@@ -62,6 +62,7 @@ BEGIN {
       quickstart/js-browser/index.html#uidiv
       quickstart/js-node/index.js#code
       quickstart/objectivec-ios/helloworld/helloworld/ViewController.m#code
+      quickstart/objectivec-macos/helloworld/helloworld/AppDelegate.m#code
       quickstart/python/quickstart.py#code
       quickstart/speech-translation/cpp-windows/helloworld/helloworld.cpp#code
       quickstart/speech-translation/csharp-dotnet-windows/helloworld/Program.cs#code
