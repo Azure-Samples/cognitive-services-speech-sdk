@@ -7,7 +7,7 @@
 #import <MicrosoftCognitiveServicesSpeech/SPXSpeechApi.h>
 
 
-@interface SPXTranslationRecognitionTest : XCTestCase{
+@interface SPXTranslationRecognitionEndToEndTest : XCTestCase{
     NSString *weatherTextEnglish;
     NSString *weatherTextGerman;
     NSString *weatherTextChinese;
@@ -24,7 +24,7 @@
     @property (nonatomic, assign) SPXConnection* connection;
 @end
 
-@implementation SPXTranslationRecognitionTest
+@implementation SPXTranslationRecognitionEndToEndTest
 
 - (void)setUp {
     [super setUp];
@@ -166,5 +166,78 @@
         XCTAssertTrue([chineseTranslation isEqualToString:self->weatherTextChinese], "Chinese translation does not match");
      }];
 }
+@end
 
+
+@interface SPXSpeechTranslationTest : XCTestCase {
+}
+@property (nonatomic, assign) NSString * speechKey;
+@property (nonatomic, assign) NSString * serviceRegion;
+@end
+
+
+@implementation SPXSpeechTranslationTest
+
+- (void)setUp {
+    [super setUp];
+    
+    self.speechKey = [[[NSProcessInfo processInfo] environment] objectForKey:@"subscriptionKey"];
+    self.serviceRegion = [[[NSProcessInfo processInfo] environment] objectForKey:@"serviceRegion"];
+}
+
+- (void)testInvalidSubscriptionKey {
+    NSString *weatherFileName = @"whatstheweatherlike";
+    
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    
+    SPXSpeechTranslationConfiguration *translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithSubscription:@"YourSubscriptionKey" region:@"westus"];
+    XCTAssertNotNil(translationConfig);
+    [translationConfig setSpeechRecognitionLanguage:@"en-us"];
+    [translationConfig addTargetLanguage:@"de-DE"];
+    
+    // this shouldn't throw, but fail on opening the connection
+    SPXTranslationRecognizer *translationRecognizer = [[SPXTranslationRecognizer alloc] initWithSpeechTranslationConfiguration:translationConfig audioConfiguration:weatherAudioSource];
+    XCTAssertNotNil(translationRecognizer);
+}
+
+- (void)testInvalidRegion {
+    NSString *weatherFileName = @"whatstheweatherlike";
+    
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    
+    SPXSpeechTranslationConfiguration *translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithSubscription:self.speechKey region:@"YourServiceRegion"];
+    XCTAssertNotNil(translationConfig);
+    [translationConfig setSpeechRecognitionLanguage:@"en-us"];
+    [translationConfig addTargetLanguage:@"de-DE"];
+    
+    // this shouldn't throw, but fail on opening the connection
+    SPXTranslationRecognizer *translationRecognizer = [[SPXTranslationRecognizer alloc] initWithSpeechTranslationConfiguration:translationConfig audioConfiguration:weatherAudioSource];
+    XCTAssertNotNil(translationRecognizer);
+}
+
+- (void)testEmptyRegion {
+    SPXSpeechTranslationConfiguration *translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithSubscription:@"YourSubscriptionKey" region:@""];
+    XCTAssertNil(translationConfig);
+}
+
+- (void)testEmptyKey {
+    SPXSpeechTranslationConfiguration *translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithSubscription:@"" region:@"westus"];
+    XCTAssertNil(translationConfig);
+}
+
+- (void)testInvalidWavefileName {
+    SPXAudioConfiguration* invalidAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:@"invalidFilename"];
+    
+    SPXSpeechTranslationConfiguration *translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithSubscription:@"InvalidKey" region:@"westus"];
+    XCTAssertNotNil(translationConfig);
+    
+    SPXTranslationRecognizer *translationRecognizer = [[SPXTranslationRecognizer alloc] initWithSpeechTranslationConfiguration:translationConfig audioConfiguration:invalidAudioSource];
+    XCTAssertNil(translationRecognizer);
+}
 @end

@@ -6,7 +6,6 @@
 #import "ViewController.h"
 
 #import "../../shared/test.h"
-#import "../../shared/test_audio.h"
 #import "../../shared/microphone_test.h"
 #import "../../shared/dummytest.h"
 
@@ -30,8 +29,6 @@ extern NSString *intentRegion;
     [MicrophoneTest runAsync:speechKey withRegion:serviceRegion];
     [MicrophoneTest runTranslation:speechKey withRegion:serviceRegion];
     [MicrophoneTest runContinuous:speechKey withRegion:serviceRegion];
-    [AudioStreamTest runPullTest:speechKey withRegion:serviceRegion];
-    [AudioStreamTest runPushTest:speechKey withRegion:serviceRegion];
 }
 
 

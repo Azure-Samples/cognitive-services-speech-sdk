@@ -90,6 +90,12 @@ struct ConnectionEventHandlerHelper
 
 - (void)dealloc {
     NSLog(@"connection object deallocated.");
+    if (!self->connectionHandle)
+    {
+        NSLog(@"connectionHandle is nil in speech recognizer destructor");
+        return;
+    }
+    
     try 
     {
         connectionHandle->Connected.DisconnectAll();
@@ -98,7 +104,7 @@ struct ConnectionEventHandlerHelper
     }
     catch (...)
     {
-        NSLog(@"Exception caught in speech recognizer destructor");
+        NSLog(@"Exception caught in Connection destructor");
     }
 }
 

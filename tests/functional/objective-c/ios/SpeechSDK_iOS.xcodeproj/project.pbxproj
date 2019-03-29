@@ -16,18 +16,17 @@
 		3CA6CF96211F471600CD2768 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3CA6CF94211F471600CD2768 /* LaunchScreen.storyboard */; };
 		3CA6CF99211F471600CD2768 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CF98211F471600CD2768 /* main.m */; };
 		3CC3789C2121CFD600F07A66 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */; };
-		3CCD06D52157F71E00A348DB /* test_audio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D02157F71E00A348DB /* test_audio.mm */; };
 		3CCD06D62157F71E00A348DB /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D12157F71E00A348DB /* microphone_test.m */; };
 		3CCD06D72157F71E00A348DB /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D22157F71E00A348DB /* dummytest.m */; };
 		3CCD06D92157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
 		3CCD06DA2157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		DCADF5572245623200DD94FE /* stream_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCADF5562245623100DD94FE /* stream_utils.cpp */; };
+		DCADF5582245627F00DD94FE /* stream_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCADF5562245623100DD94FE /* stream_utils.cpp */; };
 		F342D645216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */; };
 		F3C06E37216E3AE2003989B2 /* SPXDummyTestRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */; };
 		F3C06E38216E4148003989B2 /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D22157F71E00A348DB /* dummytest.m */; };
-		F3C06E39216E435E003989B2 /* test_audio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D02157F71E00A348DB /* test_audio.mm */; };
-		F3C06E3B216E439C003989B2 /* SPXAudioTestRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = F3C06E3A216E439C003989B2 /* SPXAudioTestRunner.m */; };
 		F3C06E3C216E4737003989B2 /* TurnOnTheLamp.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */; };
-		F3EABACD21639F6000BA4B2C /* SPXSpeechRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */; };
+		F3EABACD21639F6000BA4B2C /* SPXSpeechRecognitionTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.mm */; };
 		F3EABACE21639F6300BA4B2C /* SPXTranslationRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */; };
 		F3EABAD12163AD9900BA4B2C /* MicrosoftCognitiveServicesSpeech.framework in Resources */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
 		F3EABAD22163B3E200BA4B2C /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */; };
@@ -71,18 +70,17 @@
 		3CA6CF95211F471600CD2768 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3CA6CF97211F471600CD2768 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3CA6CF98211F471600CD2768 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXSpeechRecognitionTest.m; path = ../../shared/testrunners/SPXSpeechRecognitionTest.m; sourceTree = "<group>"; };
+		3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SPXSpeechRecognitionTest.mm; path = ../../shared/testrunners/SPXSpeechRecognitionTest.mm; sourceTree = "<group>"; };
 		3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ../../../input/audio/whatstheweatherlike.wav; sourceTree = "<group>"; };
 		3CCD06CF2157F71D00A348DB /* microphone_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = microphone_test.h; path = ../../shared/microphone_test.h; sourceTree = "<group>"; };
-		3CCD06D02157F71E00A348DB /* test_audio.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = test_audio.mm; path = ../../shared/test_audio.mm; sourceTree = "<group>"; };
 		3CCD06D12157F71E00A348DB /* microphone_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = microphone_test.m; path = ../../shared/microphone_test.m; sourceTree = "<group>"; };
 		3CCD06D22157F71E00A348DB /* dummytest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = dummytest.m; path = ../../shared/dummytest.m; sourceTree = "<group>"; };
 		3CCD06D32157F71E00A348DB /* dummytest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dummytest.h; path = ../../shared/dummytest.h; sourceTree = "<group>"; };
-		3CCD06D42157F71E00A348DB /* test_audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test_audio.h; path = ../../shared/test_audio.h; sourceTree = "<group>"; };
 		3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
+		DCADF5552245623100DD94FE /* stream_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = stream_utils.hpp; path = ../../shared/stream_utils.hpp; sourceTree = "<group>"; };
+		DCADF5562245623100DD94FE /* stream_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stream_utils.cpp; path = ../../shared/stream_utils.cpp; sourceTree = "<group>"; };
 		F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
 		F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXDummyTestRunner.m; path = ../../shared/testrunners/SPXDummyTestRunner.m; sourceTree = "<group>"; };
-		F3C06E3A216E439C003989B2 /* SPXAudioTestRunner.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXAudioTestRunner.m; path = ../../shared/testrunners/SPXAudioTestRunner.m; sourceTree = "<group>"; };
 		F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXTranslationRecognitionTest.m; path = ../../shared/testrunners/SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
 		F3EABAC321639F5600BA4B2C /* SpeechSDK_iOSUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpeechSDK_iOSUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3EABAC721639F5700BA4B2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -133,12 +131,12 @@
 		3CA6CF88211F471500CD2768 /* SpeechSDK_iOS */ = {
 			isa = PBXGroup;
 			children = (
+				DCADF5562245623100DD94FE /* stream_utils.cpp */,
+				DCADF5552245623100DD94FE /* stream_utils.hpp */,
 				3CCD06D32157F71E00A348DB /* dummytest.h */,
 				3CCD06D22157F71E00A348DB /* dummytest.m */,
 				3CCD06CF2157F71D00A348DB /* microphone_test.h */,
 				3CCD06D12157F71E00A348DB /* microphone_test.m */,
-				3CCD06D42157F71E00A348DB /* test_audio.h */,
-				3CCD06D02157F71E00A348DB /* test_audio.mm */,
 				3C5D93F92146CC61000C7129 /* test.m */,
 				3CA6CF89211F471500CD2768 /* AppDelegate.h */,
 				3CA6CF8A211F471500CD2768 /* AppDelegate.m */,
@@ -165,8 +163,7 @@
 		F3EABAC421639F5700BA4B2C /* SpeechSDK_iOSUnitTests */ = {
 			isa = PBXGroup;
 			children = (
-				F3C06E3A216E439C003989B2 /* SPXAudioTestRunner.m */,
-				3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */,
+				3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.mm */,
 				F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */,
 				F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */,
 				F3EABAC721639F5700BA4B2C /* Info.plist */,
@@ -286,8 +283,8 @@
 				3C5D93FA2146CC61000C7129 /* test.m in Sources */,
 				3CA6CF99211F471600CD2768 /* main.m in Sources */,
 				3CA6CF8B211F471500CD2768 /* AppDelegate.m in Sources */,
-				3CCD06D52157F71E00A348DB /* test_audio.mm in Sources */,
 				3CCD06D72157F71E00A348DB /* dummytest.m in Sources */,
+				DCADF5572245623200DD94FE /* stream_utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -295,12 +292,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F3C06E3B216E439C003989B2 /* SPXAudioTestRunner.m in Sources */,
 				F3C06E37216E3AE2003989B2 /* SPXDummyTestRunner.m in Sources */,
 				F3EABACE21639F6300BA4B2C /* SPXTranslationRecognitionTest.m in Sources */,
 				F3C06E38216E4148003989B2 /* dummytest.m in Sources */,
-				F3EABACD21639F6000BA4B2C /* SPXSpeechRecognitionTest.m in Sources */,
-				F3C06E39216E435E003989B2 /* test_audio.mm in Sources */,
+				F3EABACD21639F6000BA4B2C /* SPXSpeechRecognitionTest.mm in Sources */,
+				DCADF5582245627F00DD94FE /* stream_utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

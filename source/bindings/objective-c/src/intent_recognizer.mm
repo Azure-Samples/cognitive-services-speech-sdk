@@ -167,6 +167,11 @@ struct IntentEventHandlerHelper
 
 - (void)dealloc {
     NSLog(@"Intent recognizer object deallocated.");
+    if (!self->intentRecoImpl)
+    {
+        NSLog(@"intentRecoImpl is nil in intent recognizer destructor");
+        return;
+    }
     try 
     {
         self->intentRecoImpl->SessionStarted.DisconnectAll();

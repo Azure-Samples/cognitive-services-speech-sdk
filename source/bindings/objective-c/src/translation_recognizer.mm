@@ -182,6 +182,12 @@ struct TranslationEventHandlerHelper
 
 - (void)dealloc {
     NSLog(@"translation recognizer object deallocated.");
+    if (!self->translationRecoImpl)
+    {
+        NSLog(@"translationRecoImpl is nil in translation recognizer destructor");
+        return;
+    }
+    
     try 
     {
         self->translationRecoImpl->SessionStarted.DisconnectAll();

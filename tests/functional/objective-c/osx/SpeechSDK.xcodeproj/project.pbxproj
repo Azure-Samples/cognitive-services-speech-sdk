@@ -9,22 +9,20 @@
 /* Begin PBXBuildFile section */
 		3C5D93F72146CB57000C7129 /* TurnOnTheLamp.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93F52146CB56000C7129 /* TurnOnTheLamp.wav */; };
 		3C5D93F82146CB57000C7129 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93F62146CB56000C7129 /* whatstheweatherlike.wav */; };
-		3C5D93FE2146D411000C7129 /* test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93FC2146D410000C7129 /* test.m */; };
-		3C5D941321483ACE000C7129 /* test_audio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D941221483ACE000C7129 /* test_audio.mm */; };
-		3C676488214EA6CB00FCB533 /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C676487214EA6CA00FCB533 /* microphone_test.m */; };
 		3CBD7F13211CD69B00F72336 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CBD7F12211CD69B00F72336 /* Assets.xcassets */; };
 		3CBD7F19211CD69C00F72336 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD7F18211CD69C00F72336 /* main.m */; };
 		3CCD06CB2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
-		3CCD06CE215798DC00A348DB /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06CD215798DC00A348DB /* dummytest.m */; };
 		DC2A2813223FBFB0008CACAC /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		DCB56302224285E300662DC3 /* SPXSpeechRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */; };
+		DCADF54B2245375700DD94FE /* test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93FC2146D410000C7129 /* test.m */; };
+		DCADF54C2245378200DD94FE /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C676487214EA6CA00FCB533 /* microphone_test.m */; };
+		DCADF55222454DDE00DD94FE /* stream_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCADF55122454DDE00DD94FE /* stream_utils.cpp */; };
+		DCB56302224285E300662DC3 /* SPXSpeechRecognitionTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.mm */; };
 		DCB56303224285E300662DC3 /* SPXDummyTestRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */; };
-		DCB56304224285E300662DC3 /* SPXAudioTestRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB56300224285E300662DC3 /* SPXAudioTestRunner.m */; };
 		DCB56305224285E300662DC3 /* SPXTranslationRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB56301224285E300662DC3 /* SPXTranslationRecognitionTest.m */; };
-		DCB5630F2242AB1900662DC3 /* test_audio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D941221483ACE000C7129 /* test_audio.mm */; };
 		DCB563102242AB2300662DC3 /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06CD215798DC00A348DB /* dummytest.m */; };
 		DCB563112242AD8000662DC3 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
 		DCB563122242B27800662DC3 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93F62146CB56000C7129 /* whatstheweatherlike.wav */; };
+		DCC36FFC224D71B3009E274B /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C676487214EA6CA00FCB533 /* microphone_test.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,8 +54,6 @@
 		3C5D93F62146CB56000C7129 /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ../../../input/audio/whatstheweatherlike.wav; sourceTree = "<group>"; };
 		3C5D93FC2146D410000C7129 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = test.m; path = ../../shared/test.m; sourceTree = "<group>"; };
 		3C5D93FD2146D410000C7129 /* test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test.h; path = ../../shared/test.h; sourceTree = "<group>"; };
-		3C5D941121480C1E000C7129 /* test_audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = test_audio.h; path = ../../shared/test_audio.h; sourceTree = "<group>"; };
-		3C5D941221483ACE000C7129 /* test_audio.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = test_audio.mm; path = ../../shared/test_audio.mm; sourceTree = "<group>"; };
 		3C676486214EA6CA00FCB533 /* microphone_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = microphone_test.h; path = ../../shared/microphone_test.h; sourceTree = "<group>"; };
 		3C676487214EA6CA00FCB533 /* microphone_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = microphone_test.m; path = ../../shared/microphone_test.m; sourceTree = "<group>"; };
 		3CBD7F06211CD69B00F72336 /* SpeechSDK.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDK.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -70,9 +66,10 @@
 		3CCD06CC215798C100A348DB /* dummytest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = dummytest.h; path = ../../shared/dummytest.h; sourceTree = "<group>"; };
 		3CCD06CD215798DC00A348DB /* dummytest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = dummytest.m; path = ../../shared/dummytest.m; sourceTree = "<group>"; };
 		DC2A2812223FBF4D008CACAC /* SpeechSDK.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SpeechSDK.entitlements; sourceTree = "<group>"; };
-		DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXSpeechRecognitionTest.m; path = ../../shared/testrunners/SPXSpeechRecognitionTest.m; sourceTree = "<group>"; };
+		DCADF55022454DDE00DD94FE /* stream_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = stream_utils.hpp; path = ../../shared/stream_utils.hpp; sourceTree = "<group>"; };
+		DCADF55122454DDE00DD94FE /* stream_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stream_utils.cpp; path = ../../shared/stream_utils.cpp; sourceTree = "<group>"; };
+		DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SPXSpeechRecognitionTest.mm; path = ../../shared/testrunners/SPXSpeechRecognitionTest.mm; sourceTree = "<group>"; };
 		DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXDummyTestRunner.m; path = ../../shared/testrunners/SPXDummyTestRunner.m; sourceTree = "<group>"; };
-		DCB56300224285E300662DC3 /* SPXAudioTestRunner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXAudioTestRunner.m; path = ../../shared/testrunners/SPXAudioTestRunner.m; sourceTree = "<group>"; };
 		DCB56301224285E300662DC3 /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXTranslationRecognitionTest.m; path = ../../shared/testrunners/SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -120,6 +117,8 @@
 		3CBD7F08211CD69B00F72336 /* SpeechSDK */ = {
 			isa = PBXGroup;
 			children = (
+				DCADF55122454DDE00DD94FE /* stream_utils.cpp */,
+				DCADF55022454DDE00DD94FE /* stream_utils.hpp */,
 				DC2A2812223FBF4D008CACAC /* SpeechSDK.entitlements */,
 				3C676486214EA6CA00FCB533 /* microphone_test.h */,
 				3C676487214EA6CA00FCB533 /* microphone_test.m */,
@@ -128,8 +127,6 @@
 				3CBD7F12211CD69B00F72336 /* Assets.xcassets */,
 				3CBD7F17211CD69B00F72336 /* Info.plist */,
 				3CBD7F18211CD69C00F72336 /* main.m */,
-				3C5D941121480C1E000C7129 /* test_audio.h */,
-				3C5D941221483ACE000C7129 /* test_audio.mm */,
 				3CCD06CC215798C100A348DB /* dummytest.h */,
 				3CCD06CD215798DC00A348DB /* dummytest.m */,
 			);
@@ -139,9 +136,8 @@
 		3CBD7F21211CD69C00F72336 /* SpeechSDKTests */ = {
 			isa = PBXGroup;
 			children = (
-				DCB56300224285E300662DC3 /* SPXAudioTestRunner.m */,
 				DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */,
-				DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */,
+				DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.mm */,
 				DCB56301224285E300662DC3 /* SPXTranslationRecognitionTest.m */,
 				3CBD7F24211CD69C00F72336 /* Info.plist */,
 			);
@@ -265,10 +261,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3CBD7F19211CD69C00F72336 /* main.m in Sources */,
-				3C5D93FE2146D411000C7129 /* test.m in Sources */,
-				3CCD06CE215798DC00A348DB /* dummytest.m in Sources */,
-				3C5D941321483ACE000C7129 /* test_audio.mm in Sources */,
-				3C676488214EA6CB00FCB533 /* microphone_test.m in Sources */,
+				DCC36FFC224D71B3009E274B /* microphone_test.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -276,12 +269,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DCADF54B2245375700DD94FE /* test.m in Sources */,
 				DCB56303224285E300662DC3 /* SPXDummyTestRunner.m in Sources */,
-				DCB56304224285E300662DC3 /* SPXAudioTestRunner.m in Sources */,
 				DCB56305224285E300662DC3 /* SPXTranslationRecognitionTest.m in Sources */,
-				DCB56302224285E300662DC3 /* SPXSpeechRecognitionTest.m in Sources */,
+				DCB56302224285E300662DC3 /* SPXSpeechRecognitionTest.mm in Sources */,
 				DCB563102242AB2300662DC3 /* dummytest.m in Sources */,
-				DCB5630F2242AB1900662DC3 /* test_audio.mm in Sources */,
+				DCADF54C2245378200DD94FE /* microphone_test.m in Sources */,
+				DCADF55222454DDE00DD94FE /* stream_utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

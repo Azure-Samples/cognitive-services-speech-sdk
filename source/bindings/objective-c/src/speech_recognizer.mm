@@ -165,6 +165,12 @@ struct SpeechEventHandlerHelper
 
 - (void)dealloc {
     NSLog(@"Speech recognizer object deallocated.");
+    if (!self->speechRecoImpl)
+    {
+        NSLog(@"speechRecoImpl is nil in speech recognizer destructor");
+        return;
+    }
+    
     try 
     {
         self->speechRecoImpl->SessionStarted.DisconnectAll();
