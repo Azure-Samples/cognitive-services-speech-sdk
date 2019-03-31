@@ -144,8 +144,8 @@ namespace MicrosoftSpeechSDKSamples
     }
 
     /// <summary>
-    /// Adapter class to the native stream api.
-    /// This is to receive the audio data when synthesizer has produced audio data
+    /// Implements a custom class for PushAudioOutputStreamCallback.
+    /// This is to receive the audio data when the synthesizer has produced audio data.
     /// </summary>
     public sealed class PushAudioOutputStreamSampleCallback : PushAudioOutputStreamCallback
     {
@@ -160,7 +160,7 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         /// <summary>
-        /// A callback which is invoked when synthesizer has a output audio chunk to write out
+        /// A callback which is invoked when the synthesizer has a output audio chunk to write out
         /// </summary>
         /// <param name="dataBuffer">The output audio chunk sent by synthesizer</param>
         /// <returns>Tell synthesizer how many bytes are received</returns>
@@ -179,7 +179,7 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         /// <summary>
-        /// A callback which is invoked when synthesizer is about to close the stream
+        /// A callback which is invoked when the synthesizer is about to close the stream
         /// </summary>
         public override void Close()
         {

@@ -74,7 +74,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample
             var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
             config.SpeechSynthesisLanguage = this.SynthesisLanguage;
 
-            // Creates a speech synthesizer using speaker as audio output.
+            // Creates a speech synthesizer using the default speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(config))
             {
                 // Receive a text from "Text for Synthesizing" text box and synthesize it to speaker.

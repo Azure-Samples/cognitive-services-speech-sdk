@@ -12,19 +12,19 @@ using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 
-// Speech synthesis to speaker.
+// Speech synthesis to the default speaker.
 void SpeechSynthesisToSpeaker()
 {
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Creates a speech synthesizer using speaker as audio output. The default spoken language is "en-us".
+    // Creates a speech synthesizer using the default speaker as audio output. The default spoken language is "en-us".
     auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
     for (int i = 0; i < 2; ++i)
     {
-        // Receive a text from console input and synthesize it to speaker.
+        // Receives a text from console input and synthesize it to speaker.
         cout << "Type some text that you want to speak..." << std::endl;
         cout << "> ";
         std::string text;
@@ -65,18 +65,18 @@ void SpeechSynthesisWithLanguage()
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Replace the language with your language in BCP-47 format, e.g., en-US.
+    // Sets the synthesis language.
     // The full list of supported language can be found here:
-    // https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support
+    // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
     auto language = "de-DE";
     config->SetSpeechSynthesisLanguage(language);
 
-    // Creates a speech synthesizer for the specified language, using speaker as audio output.
+    // Creates a speech synthesizer for the specified language, using the default speaker as audio output.
     auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
     for (int i = 0; i < 2; ++i)
     {
-        // Receive a text from console input and synthesize it to speaker.
+        // Receives a text from console input and synthesize it to speaker.
         cout << "Type some text that you want to speak..." << std::endl;
         cout << "> ";
         std::string text;
@@ -108,7 +108,6 @@ void SpeechSynthesisWithLanguage()
     // This is to give some time for the speaker to finish playing back the audio
     cout << "Press enter to exit..." << std::endl;
     cin.get();
-
 }
 
 // Speech synthesis in the specified voice.
@@ -118,19 +117,19 @@ void SpeechSynthesisWithVoice()
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Replace the voice name with your preferred voice
-    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)"
+    // Sets the voice name.
+    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)".
     // The full list of supported voices can be found here:
-    // https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support
+    // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
     auto voice = "Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)";
     config->SetSpeechSynthesisVoiceName(voice);
 
-    // Creates a speech synthesizer for the specified voice, using speaker as audio output.
+    // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.
     auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
     for (int i = 0; i < 2; ++i)
     {
-        // Receive a text from console input and synthesize it to speaker.
+        // Receives a text from console input and synthesize it to speaker.
         cout << "Type some text that you want to speak..." << std::endl;
         cout << "> ";
         std::string text;
@@ -179,7 +178,7 @@ void SpeechSynthesisToWaveFile()
 
     for (int i = 0; i < 2; ++i)
     {
-        // Receive a text from console input and synthesize it to wave file.
+        // Receives a text from console input and synthesize it to wave file.
         cout << "Type some text that you want to synthesize..." << std::endl;
         cout << "> ";
         std::string text;
@@ -216,9 +215,9 @@ void SpeechSynthesisToMp3File()
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Set the synthesis output format
+    // Sets the synthesis output format.
     // The full list of supported format can be found here:
-    // https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
+    // https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
     config->SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat::Audio16Khz32KBitRateMonoMp3);
 
     // Creates a speech synthesizer using file as audio output.
@@ -229,7 +228,7 @@ void SpeechSynthesisToMp3File()
 
     for (int i = 0; i < 2; ++i)
     {
-        // Receive a text from console input and synthesize it to mp3 file.
+        // Receives a text from console input and synthesize it to mp3 file.
         cout << "Type some text that you want to synthesize..." << std::endl;
         cout << "> ";
         std::string text;
@@ -259,14 +258,14 @@ void SpeechSynthesisToMp3File()
     }
 }
 
-// Speech synthesis to pull audio output stream
+// Speech synthesis to pull audio output stream.
 void SpeechSynthesisToPullAudioOutputStream()
 {
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Create an audio out stream.
+    // Creates an audio out stream.
     auto stream = AudioOutputStream::CreatePullStream();
 
     // Creates a speech synthesizer using audio stream output.
@@ -275,7 +274,7 @@ void SpeechSynthesisToPullAudioOutputStream()
 
     for (int i = 0; i < 2; ++i)
     {
-        // Receive a text from console input and synthesize it to pull audio output stream.
+        // Receives a text from console input and synthesize it to pull audio output stream.
         cout << "Type some text that you want to synthesize..." << std::endl;
         cout << "> ";
         std::string text;
@@ -304,10 +303,10 @@ void SpeechSynthesisToPullAudioOutputStream()
         }
     }
 
-    // Destruct the synthesizer so that the while statement below won't infinitly wait for data from the stream
+    // Destroys the synthesizer so that the while statement below won't infinitely wait for data from the stream.
     synthesizer = nullptr;
 
-    // Read(pull) data from the stream
+    // Reads(pulls) data from the stream
     uint8_t buffer[32000];
     uint32_t totalSize = 0;
     uint32_t filledSize = 0;
@@ -321,12 +320,12 @@ void SpeechSynthesisToPullAudioOutputStream()
     cout << "Totally " << totalSize << " bytes received." << endl;
 }
 
-// Speech synthesis to push audio output stream
+// Speech synthesis to push audio output stream.
 void SpeechSynthesisToPushAudioOutputStream()
 {
-    // First, define your own push audio output stream callback class that implements the
+    // First, defines push audio output stream callback class that implements the
     // PushAudioOutputStreamCallback interface. The sample here illustrates how to define such
-    // a callback that writes audio data to a byte vector
+    // a callback that writes audio data to a byte vector.
     // PushAudioOutputStreamSampleCallback implements PushAudioOutputStreamCallback interface
     class PushAudioOutputStreamSampleCallback : public PushAudioOutputStreamCallback
     {
@@ -337,7 +336,7 @@ void SpeechSynthesisToPushAudioOutputStream()
         }
 
         /// <summary>
-        /// The callback function which is invoked when synthesizer has a output audio chunk to write out.
+        /// The callback function which is invoked when the synthesizer has a output audio chunk to write out.
         /// </summary>
         /// <param name="dataBuffer">The output audio chunk sent by synthesizer.</param>
         /// <param name="size">Size of the output audio chunk in bytes.</param>
@@ -354,7 +353,7 @@ void SpeechSynthesisToPushAudioOutputStream()
         }
 
         /// <summary>
-        /// A callback which is invoked when synthesizer is about to close the stream
+        /// The callback which is invoked when the synthesizer is about to close the stream.
         /// </summary>
         void Close() override
         {
@@ -362,7 +361,7 @@ void SpeechSynthesisToPushAudioOutputStream()
         }
 
         /// <summary>
-        /// Get the received audio data size
+        /// Gets the received audio data size
         /// </summary>
         /// <returns>The received audio data size</returns>
         size_t GetAudioSize()
@@ -371,7 +370,7 @@ void SpeechSynthesisToPushAudioOutputStream()
         }
 
         /// <summary>
-        /// Get the received audio data
+        /// Gets the received audio data
         /// </summary>
         /// <returns>The received audio data in byte vector</returns>
         std::shared_ptr<std::vector<uint8_t>> GetAudioData()
@@ -387,10 +386,10 @@ void SpeechSynthesisToPushAudioOutputStream()
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Create an instance of the callback class inherited from PushAudioOutputStreamCallback
+    // Creates an instance of the callback class inherited from PushAudioOutputStreamCallback.
     auto callback = std::make_shared<PushAudioOutputStreamSampleCallback>();
 
-    // Create an audio out stream from the callback
+    // Creates an audio out stream from the callback.
     auto stream = AudioOutputStream::CreatePushStream(callback);
 
     // Creates a speech synthesizer using audio stream output.
@@ -399,7 +398,7 @@ void SpeechSynthesisToPushAudioOutputStream()
 
     for (int i = 0; i < 2; ++i)
     {
-        // Receive a text from console input and synthesize it to push audio output stream.
+        // Receives a text from console input and synthesize it to push audio output stream.
         cout << "Type some text that you want to synthesize..." << std::endl;
         cout << "> ";
         std::string text;
@@ -431,7 +430,7 @@ void SpeechSynthesisToPushAudioOutputStream()
     cout << "Totally " << callback->GetAudioSize() << " bytes received." << endl;
 }
 
-// Get synthesized audio data from result.
+// Gets synthesized audio data from result.
 void SpeechSynthesisToResult()
 {
     // Creates an instance of a speech config with specified subscription key and service region.
@@ -445,7 +444,7 @@ void SpeechSynthesisToResult()
 
     for (int i = 0; i < 2; ++i)
     {
-        // Receive a text from console input and synthesize it to result.
+        // Receives a text from console input and synthesize it to result.
         cout << "Type some text that you want to synthesize..." << std::endl;
         cout << "> ";
         std::string text;
@@ -491,7 +490,7 @@ void SpeechSynthesisToAudioDataStream()
 
     for (int i = 0; i < 2; ++i)
     {
-        // Receive a text from console input and synthesize it to result.
+        // Receives a text from console input and synthesize it to result.
         cout << "Type some text that you want to synthesize..." << std::endl;
         cout << "> ";
         std::string text;
@@ -512,7 +511,7 @@ void SpeechSynthesisToAudioDataStream()
             cout << "Audio data for text [" << text << "] was saved to [" << fileName.str() << "]" << endl;
 
             // You can also read data from audio data stream and process it in memory
-            // Reset the stream position to the beginnging since saving to file puts the postion to end
+            // Reset the stream position to the beginnging since saving to file puts the postion to end.
             audioDataStream->SetPosition(0);
 
             uint8_t buffer[16000];
@@ -556,7 +555,7 @@ void SpeechSynthesisEvents()
     // You can just get the audio from the result.
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
 
-    // Add events
+    // Subscribes to events
     synthesizer->SynthesisStarted += [](const SpeechSynthesisEventArgs& e)
     {
         UNUSED(e);
@@ -576,7 +575,7 @@ void SpeechSynthesisEvents()
 
     for (int i = 0; i < 2; ++i)
     {
-        // Receive a text from console input and synthesize it to result.
+        // Receives a text from console input and synthesize it to result.
         cout << "Type some text that you want to synthesize..." << std::endl;
         cout << "> ";
         std::string text;

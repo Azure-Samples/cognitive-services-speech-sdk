@@ -19,7 +19,7 @@ namespace helloworld
             // The default language is "en-us".
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Creates a speech synthesizer using speaker as audio output.
+            // Creates a speech synthesizer using the default speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(config))
             {
                 // Receive a text from console input and synthesize it to speaker.

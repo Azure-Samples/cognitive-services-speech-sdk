@@ -12,7 +12,7 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class SpeechSynthesisSamples
     {
-        // Speech synthesis to speaker.
+        // Speech synthesis to the default speaker.
         public static async Task SynthesisToSpeakerAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
@@ -20,12 +20,12 @@ namespace MicrosoftSpeechSDKSamples
             // The default language is "en-us".
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Creates a speech synthesizer using speaker as audio output.
+            // Creates a speech synthesizer using the default speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(config))
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    // Receive a text from console input and synthesize it to speaker.
+                    // Receives a text from console input and synthesize it to speaker.
                     Console.WriteLine("Type some text that you want to speak...");
                     Console.Write("> ");
                     string text = Console.ReadLine();
@@ -66,18 +66,18 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Replace the language with your language in BCP-47 format, e.g., en-US.
+            // Sets the synthesis language.
             // The full list of supported language can be found here:
-            // https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support
+            // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
             var language = "de-DE";
             config.SpeechSynthesisLanguage = language;
 
-            // Creates a speech synthesizer for the specified language, using speaker as audio output.
+            // Creates a speech synthesizer for the specified language, using the default speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(config))
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    // Receive a text from console input and synthesize it to speaker.
+                    // Receives a text from console input and synthesize it to speaker.
                     Console.WriteLine("Type some text that you want to speak...");
                     Console.Write("> ");
                     string text = Console.ReadLine();
@@ -118,19 +118,19 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Replace the voice name with your preferred voice
+            // Sets the voice name.
             // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)"
             // The full list of supported voices can be found here:
-            // https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support
+            // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
             var voice = "Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)";
             config.SpeechSynthesisVoiceName = voice;
 
-            // Creates a speech synthesizer for the specified voice, using speaker as audio output.
+            // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(config))
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    // Receive a text from console input and synthesize it to speaker.
+                    // Receives a text from console input and synthesize it to speaker.
                     Console.WriteLine("Type some text that you want to speak...");
                     Console.Write("> ");
                     string text = Console.ReadLine();
@@ -180,7 +180,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    // Receive a text from console input and synthesize it to wave file.
+                    // Receives a text from console input and synthesize it to wave file.
                     Console.WriteLine("Type some text that you want to synthesize...");
                     Console.Write("> ");
                     string text = Console.ReadLine();
@@ -218,9 +218,9 @@ namespace MicrosoftSpeechSDKSamples
             // The default language is "en-us".
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Set the synthesis output format
+            // Sets the synthesis output format.
             // The full list of supported format can be found here:
-            // https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
+            // https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
             config.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3);
 
             // Creates a speech synthesizer using file as audio output.
@@ -231,7 +231,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    // Receive a text from console input and synthesize it to mp3 file.
+                    // Receives a text from console input and synthesize it to mp3 file.
                     Console.WriteLine("Type some text that you want to synthesize...");
                     Console.Write("> ");
                     string text = Console.ReadLine();
@@ -261,14 +261,14 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        // Speech synthesis to pull audio output stream
+        // Speech synthesis to pull audio output stream.
         public static async Task SynthesisToPullAudioOutputStreamAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Create an audio out stream.
+            // Creates an audio out stream.
             using (var stream = AudioOutputStream.CreatePullStream())
             {
                 // Creates a speech synthesizer using audio stream output.
@@ -277,7 +277,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     for (int i = 0; i < 2; ++i)
                     {
-                        // Receive a text from console input and synthesize it to pull audio output stream.
+                        // Receives a text from console input and synthesize it to pull audio output stream.
                         Console.WriteLine("Type some text that you want to synthesize...");
                         Console.Write("> ");
                         string text = Console.ReadLine();
@@ -306,7 +306,7 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 }
 
-                // Read(pull) data from the stream
+                // Reads(pulls) data from the stream
                 byte[] buffer = new byte[32000];
                 uint filledSize = 0;
                 uint totalSize = 0;
@@ -320,17 +320,17 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        // Speech synthesis to push audio output stream
+        // Speech synthesis to push audio output stream.
         public static async Task SynthesisToPushAudioOutputStreamAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Create an instance of a customer class inherited from PushAudioOutputStreamCallback
+            // Creates an instance of a customer class inherited from PushAudioOutputStreamCallback
             var callback = new PushAudioOutputStreamSampleCallback();
 
-            // Create an audio out stream from the callback.
+            // Creates an audio out stream from the callback.
             using (var stream = AudioOutputStream.CreatePushStream(callback))
             {
                 // Creates a speech synthesizer using audio stream output.
@@ -372,7 +372,7 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        // Get synthesized audio data from result
+        // Gets synthesized audio data from result.
         public static async Task SynthesisToResultAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
@@ -386,7 +386,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    // Receive a text from console input and synthesize it to result.
+                    // Receives a text from console input and synthesize it to result.
                     Console.WriteLine("Type some text that you want to synthesize...");
                     Console.Write("> ");
                     string text = Console.ReadLine();
@@ -418,7 +418,7 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        // Speech synthesis to audio data stream
+        // Speech synthesis to audio data stream.
         public static async Task SynthesisToAudioDataStreamAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
@@ -432,7 +432,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    // Receive a text from console input and synthesize it to result.
+                    // Receives a text from console input and synthesize it to result.
                     Console.WriteLine("Type some text that you want to synthesize...");
                     Console.Write("> ");
                     string text = Console.ReadLine();
@@ -486,7 +486,7 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        // Speech synthesis events
+        // Speech synthesis events.
         public static async Task SynthesisEventsAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
@@ -498,7 +498,7 @@ namespace MicrosoftSpeechSDKSamples
             // You can just get the audio from the result.
             using (var synthesizer = new SpeechSynthesizer(config, null))
             {
-                // Add events
+                // Subscribes to events
                 synthesizer.SynthesisStarted += (s, e) =>
                 {
                     Console.WriteLine("Synthesis started.");
@@ -516,7 +516,7 @@ namespace MicrosoftSpeechSDKSamples
 
                 for (int i = 0; i < 2; ++i)
                 {
-                    // Receive a text from console input and synthesize it to result.
+                    // Receives a text from console input and synthesize it to result.
                     Console.WriteLine("Type some text that you want to synthesize...");
                     Console.Write("> ");
                     string text = Console.ReadLine();
