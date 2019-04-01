@@ -122,7 +122,7 @@ bool BaseGstreamer::GetStatus()
     {
         try
         {
-            msg = gst_bus_timed_pop_filtered(m_bus, 10 * GST_MSECOND, (GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+            msg = gst_bus_timed_pop_filtered(m_bus, 2 * GST_MSECOND, (GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
 
             if (msg != nullptr)
             {
@@ -226,6 +226,7 @@ GstFlowReturn BaseGstreamer::NewSamples(GstElement *sink, BaseGstreamer *data)
                             memcpy(sharedmem.get(), map.data, map.size);
                             obj->m_ringBuffer->AddBuffer(std::make_shared<DataChunk>(sharedmem, (uint32_t)map.size));
                             ret = GST_FLOW_OK;
+                            gst_buffer_unmap(buffer, &map);
                         }
                     }
                 }
@@ -268,7 +269,6 @@ void BaseGstreamer::PushData(BaseGstreamer *data)
                     {
                         auto bytesActuallyRead = obj->m_readCallback((uint8_t*)raw, CHUNK_SIZE);
                         map.size = bytesActuallyRead;
-                        gst_buffer_unmap(buffer, &map);
 
                         if (bytesActuallyRead > 0)
                         {
@@ -285,6 +285,7 @@ void BaseGstreamer::PushData(BaseGstreamer *data)
                             SPX_TRACE_ERROR_IF(true, "Error pushing buffer to gstreamer");
                         }
                     }
+                    gst_buffer_unmap(buffer, &map);
                 }
             }
         }

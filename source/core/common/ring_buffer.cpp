@@ -54,7 +54,6 @@ uint32_t RingBuffer::GetData(uint8_t* buffer, uint32_t bytesToRead)
 
                 std::memcpy(&buffer[amountFilled], &(front->data.get()[m_firstBufferStartPosition]), lastAmountCopied);
                 amountFilled += lastAmountCopied;
-                m_currentSize -= lastAmountCopied;
 
                 if (lastAmountCopied == front->size)
                 {
@@ -78,7 +77,7 @@ uint32_t RingBuffer::GetData(uint8_t* buffer, uint32_t bytesToRead)
             front->size = front->size - lastAmountCopied;
         }
     }
-
+    m_currentSize -= amountFilled;
     return amountFilled;
 }
 
