@@ -46,8 +46,12 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
 
-if(UNIX)
-  set_target_properties(${PROJECT_NAME} PROPERTIES BUILD_RPATH "$ORIGIN")
+if(APPLE)
+  set_target_properties(${PROJECT_NAME}
+    PROPERTIES BUILD_RPATH "@loader_path")
+elseif(UNIX)
+  set_target_properties(${PROJECT_NAME}
+    PROPERTIES BUILD_RPATH "$ORIGIN")
 endif()
 
 if(WIN32 AND SPECTRE_MITIGATION)
@@ -73,6 +77,11 @@ if(ANDROID)
     PRIVATE common
     PRIVATE factory
     PRIVATE z) # libz
+elseif (SKBUILD)
+  target_link_libraries(${PROJECT_NAME}
+    PUBLIC common
+    PUBLIC factory
+    )
 else()
   target_link_libraries(${PROJECT_NAME}
     PRIVATE common

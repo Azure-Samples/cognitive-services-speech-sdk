@@ -55,10 +55,16 @@ jobs:
             [[ ${#wheel[@]} = 1 ]]
             mkdir repack # error out if existing
             unzip -d repack "${wheel[0]}"
+            # archive the unstripped python bindings lib
             pythonExtension=(repack/azure_cognitiveservices_speech-*/data/lib/python*/site-packages/azure/cognitiveservices/speech/_speech_py_impl.so)
             [[ ${#pythonExtension[@]} = 1 ]]
             cp -p "${pythonExtension[0]}" "$unstrippedLib"
             strip -x "${pythonExtension[0]}"
+            # archive the unstripped core lib
+            coreLib=(repack/azure_cognitiveservices_speech-*/data/lib/python*/site-packages/azure/cognitiveservices/speech/libMicrosoft.CognitiveServices.Speech.core.dylib)
+            [[ ${#coreLib[@]} = 1 ]]
+            cp -p "${coreLib[0]}" "$unstrippedLib"
+            strip -x "${coreLib[0]}"
             python -m wheel pack --dest-dir build repack
             rm -rf repack
             # ESRP wants a .zip extension
@@ -80,6 +86,8 @@ jobs:
             mkdir repack # error out if existing
             # Not using 'wheel unpack' to avoid error on hash mismatch:
             unzip -d repack "${wheel[0]}"
+            [[ $SPEECHSDK_SIGN != true ]] ||
+               find repack -name \*.dylib -or -name \*.so -print0 | xargs -0 -n1 codesign --display --verbose=4
             python -m wheel pack --dest-dir build repack
             rm -rf repack
           condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))

@@ -34,8 +34,6 @@ set(swig_include_dirs
     ${CARBON_C_API}
     ${CARBON_CXX_API}
     ${SRC_DIR}/..
-    ${SRC_DIR}/swig-patch
-    ${SRC_DIR}/swig-patch/python
     )
 
 set_source_files_properties("${SRC_DIR}/src/speech_py_impl.i" PROPERTIES
@@ -78,7 +76,6 @@ if("${CMAKE_VERSION}" VERSION_GREATER 3.8)
         LANGUAGE python
         OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_PACKAGE_NAME} # only supported on cmake > 3.11
         SOURCES ${SOURCES} ${SOURCES_VERSION}
-        $<TARGET_OBJECTS:c_api>
     )
 else()
     swig_add_module(${PROJECT_NAME} python ${SOURCES} ${SOURCES_VERSION})
@@ -93,27 +90,22 @@ target_include_directories(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
 
 if(MSVC)
     target_link_libraries(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
-            PRIVATE sr
-            PRIVATE audio
-            PRIVATE usp
-            PRIVATE common
-            PRIVATE factory
-            PRIVATE ${PYTHON_LIBRARIES}
+        PRIVATE ${SPEECHSDK_CORE_LIBRARY}
+        PRIVATE ${PYTHON_LIBRARIES}
         )
 else()
     target_link_libraries(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
-            PRIVATE sr
-            PRIVATE audio
-            PRIVATE usp
-            PRIVATE common
-            PRIVATE factory
+        PRIVATE ${SPEECHSDK_CORE_LIBRARY}
         )
-    set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
-        PROPERTIES INSTALL_RPATH "$ORIGIN")
 endif()
 
 if(APPLE)
     set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+    set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
+        PROPERTIES INSTALL_RPATH "@loader_path")
+elseif(UNIX)
+    set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
+        PROPERTIES INSTALL_RPATH "$ORIGIN")
 endif()
 
 # Copied from https://www.vlam3d.com/2016/09/14/swig-monologues-part-1-getting-started-with-cmake/?lang=en,
@@ -131,6 +123,9 @@ if(DEFINED SKBUILD)
   set(module_dir "${PYTHON_RELATIVE_SITE_PACKAGES_DIR}/${PYTHON_PACKAGE_NAME}")
 
   install(TARGETS ${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} DESTINATION ${module_dir})
+  # TODO needs cmake 3.13 for out-of-dir targets:
+  # install(TARGETS "$<TARGET_FILE:${SPEECHSDK_CORE_LIBRARY}>" DESTINATION ${module_dir})
+  install(FILES "$<TARGET_FILE:${SPEECHSDK_CORE_LIBRARY}>" DESTINATION ${module_dir})
 
   # strip swig-generated type hints. This only works on bash and fails silently otherwise, e.g. when the
   # build is run from powershell etc.

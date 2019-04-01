@@ -176,6 +176,7 @@ if [[ $PLATFORM = OSX-* ]]; then
   # osx: copy the unstripped dylib
   mkdir -p "$DESTPRIVLIBUNSTRIPPED"
   cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.unstripped$DYNLIBSUFFIX "$DESTPRIVLIBUNSTRIPPED"
+  cp $CPOPT "${SRCJAVABINDINGS%%jnilib}"unstripped.jnilib "$DESTPRIVLIBUNSTRIPPED"
 
   # copy dotnet dll
   SRCDYNLIB_DOTNETCORE="${SRCBIN}/${CONFIG}MacOS"

@@ -19,6 +19,10 @@
 SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName);
 
 
+#if _MSC_VER
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+#endif
+
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -69,12 +73,23 @@ CSpxModuleFactory::PCREATE_MODULE_OBJECT_FUNC CSpxModuleFactory::GetCreateModule
         return CreateModuleObject;
     }
 
-    #if _MSC_VER
+#if _MSC_VER
+    std::vector<char> basePath(_MAX_PATH); // zero-initialized
+    if (::GetModuleFileNameA((HINSTANCE)&__ImageBase, &basePath[0], _MAX_PATH) != 0)
+    {
+        char *lastBackslash = ::strrchr(&basePath[0], '\\');
+        if (lastBackslash)
+        {
+            // Terminate after final backslash
+            *(lastBackslash + 1) = '\0';
+        }
+    }
+    std::string fullPath = std::string(&basePath[0]) + filename;
 
 #if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP)
-    HMODULE handle = LoadLibraryA(filename.c_str());
+    HMODULE handle = LoadLibraryA(fullPath.c_str());
 #else // Windows Store WinRT app
-    HMODULE handle = LoadPackagedLibrary(PAL::ToWString(filename).c_str(), 0);
+    HMODULE handle = LoadPackagedLibrary(PAL::ToWString(fullPath).c_str(), 0);
 #endif
     if (handle != NULL)
     {

@@ -76,11 +76,13 @@ jobs:
         -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
       postbuildsteps:
         - bash: |
-            set -x
+            set -x -e -o pipefail -u
             dir="$(OutputDirectory)/pdb-$(BuildPlatform)-$(BuildConfiguration)-py$(PythonVersion)"
-            mkdir -p "$dir" &&
+            mkdir -p "$dir"
             cp _skbuild/win*/cmake-build/lib/Release/_speech_py_impl.pdb "$dir"
-          displayName: copy .PDB
+            cp _skbuild/win*/cmake-build/bin/Release/Microsoft.CognitiveServices.Speech.core.pdb "$dir"
+            cp _skbuild/win*/cmake-build/bin/Release/Microsoft.CognitiveServices.Speech.extension.kws.pdb "$dir"
+          displayName: copy .PDBs
         # Remove *.dist-info/RECORD, otherwise "wheel pack" seem to pack it
         # twice on Windows (zipfile.py warns: UserWarning: Duplicate name:
         # 'azure_cognitiveservices_speech-.../RECORD)
@@ -88,11 +90,11 @@ jobs:
           displayName: Unzip .whl for signing
           condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
         - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-          displayName: Sign .pyd
+          displayName: Sign DLLs
           inputs:
             ConnectedServiceName: Speech SDK ESRP Signing
             FolderPath: repack
-            Pattern: '*.pyd,Microsoft.CognitiveServices.Speech.extension.kws.dll'
+            Pattern: '*.pyd,Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll'
             signConfigType: inlineSignParams
             inlineOperation: $(SIGN_PARAMS_DLL)
           condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
@@ -101,3 +103,4 @@ jobs:
             wheel pack --dest-dir build repack && rm -rf repack
           displayName: Repack .whl
           condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+

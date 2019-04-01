@@ -73,16 +73,15 @@ if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET ${JAVA_BINDINGS} PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()
 
-if (APPLE)
-    swig_link_libraries(${JAVA_BINDINGS} ${SPEECHSDK_CORE_DYNLIB})
-else()
-    swig_link_libraries(${JAVA_BINDINGS} ${SPEECHSDK_CORE_LIBRARY})
-endif()
+swig_link_libraries(${JAVA_BINDINGS} ${SPEECHSDK_CORE_LIBRARY})
 
 if(WIN32)
     # Ensure we build with debug information (TODO global setting does not apply?)
     set_target_properties(${JAVA_BINDINGS} PROPERTIES LINK_FLAGS "/DEBUG /OPT:REF /OPT:ICF")
-else()
+elseif(APPLE)
+    set_target_properties(${JAVA_BINDINGS}
+      PROPERTIES BUILD_RPATH "@loader_path")
+elseif(UNIX)
     set_target_properties(${JAVA_BINDINGS} PROPERTIES BUILD_RPATH "$ORIGIN")
 endif()
 

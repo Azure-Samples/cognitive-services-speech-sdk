@@ -1913,17 +1913,23 @@ jobs:
   - bash: |
       set -u -x -e -o pipefail
       dylibname="build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib"
+      jnilibname="build/bin/libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
       [[ -f ${dylibname} ]]
+      [[ -f ${jnilibname} ]]
       cp "${dylibname}" "${dylibname%%dylib}"unstripped.dylib
+      cp "${jnilibname}" "${jnilibname%%jnilib}"unstripped.jnilib
       strip -x "${dylibname}"
-      [[ $SPEECHSDK_SIGN != true ]] || zip "${dylibname}"{.zip,}
+      strip -x "${jnilibname}"
+      if [[ $SPEECHSDK_SIGN == true ]]; then
+        mkdir tosign && zip tosign/libs.zip "${dylibname}" "${jnilibname}"
+      fi
     displayName: "Strip dylib and create archive for signing dylib if necessary"
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: Sign .dylib (dynamic library)
     inputs:
       ConnectedServiceName: Speech SDK ESRP Signing
-      FolderPath: build/lib
-      Pattern: '*.dylib.zip'
+      FolderPath: tosign
+      Pattern: '*.zip'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_MACOS)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
@@ -1938,11 +1944,12 @@ jobs:
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - bash: |
       set -u -x -e -o pipefail
-      archive="build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib.zip"
+      archive="tosign/libs.zip"
       [[ -f ${archive} ]]
       unzip -o "${archive}"
       # simple signing check, this will fail if not signed
-      codesign --display --verbose=4 build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib
+      shopt -s extglob
+      ls build/**/libMicrosoft!(*unstripped).{dylib,jnilib} | xargs -n1 codesign --display --verbose=4
     displayName: "Unpack archive with signed dylib"
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - template: test-during-build.yml

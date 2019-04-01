@@ -107,6 +107,10 @@ class NativeLibraryLoader {
         else if (operatingSystem.contains("windows")) {
             return new String[] {
                     "Microsoft.CognitiveServices.Speech.core.dll",
+                    // Note: the Speech SDK core library loads extension DLLs
+                    // relative to its location, so this one is currently only
+                    // needed for extraction (TODO however due to 'loadAll ==
+                    // true' below, we'll still load it later; should fix).
                     "Microsoft.CognitiveServices.Speech.extension.kws.dll",
                     "Microsoft.CognitiveServices.Speech.java.bindings.dll"
             };
@@ -146,7 +150,6 @@ class NativeLibraryLoader {
             return String.format(speechPrefix, "windows", dataModelSize);
         }
         else if (operatingSystem.contains("mac")|| operatingSystem.contains("darwin")) {
-            loadAll = true; // signal to load all libraries
             return String.format(speechPrefix, "mac", dataModelSize);
         }
         else {

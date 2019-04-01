@@ -1,4 +1,4 @@
-project(${SPEECHSDK_CORE_LIBRARY})
+project(${SPEECHSDK_CORE_FRAMEWORK})
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
 set(OBJC_PUBLIC_HEADER_DIR "${PROJECT_SOURCE_DIR}/public")
@@ -58,7 +58,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   PRIVATE_HEADER "${PRIVATE_HEADERS}"
   # settings for generating an Xcode project
   XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-  XCODE_ATTRIBUTE_PRODUCT_NAME ${SPEECHSDK_CORE_LIBRARY}
+  XCODE_ATTRIBUTE_PRODUCT_NAME ${SPEECHSDK_CORE_FRAMEWORK}
   XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES
 
   CXX_VISIBILITY_PRESET hidden
@@ -103,16 +103,4 @@ install(EXPORT speechsdk-objc-export
   DESTINATION
     ${CMAKE_INSTALL_LIBDIR}/cmake/MicrosoftCognitiveServicesSpeech
 )
-
-# build a standalone .dylib for java and CSharp
-if (BUILD_JAVA OR BUILD_CSHARP)
-  add_library(${SPEECHSDK_CORE_DYNLIB} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
-
-  target_link_libraries(${SPEECHSDK_CORE_DYNLIB}
-    PRIVATE sr
-    PRIVATE audio
-    PRIVATE usp
-    PRIVATE common
-    PRIVATE factory)
-endif()
 
