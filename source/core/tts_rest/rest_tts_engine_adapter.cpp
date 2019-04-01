@@ -17,6 +17,7 @@
 #include "property_bag_impl.h"
 #include "property_id_2_name_map.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #define SPX_DBG_TRACE_REST_TTS 0
 
@@ -289,6 +290,20 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(const std::string& endpoint, const
 
     // Allocate resources
     HTTP_HANDLE http_connect = HTTPAPI_CreateConnection(host_str.data());
+    if (!http_connect)
+    {
+        throw std::runtime_error("Could not create HTTP connection");
+    }
+
+#ifdef SPEECHSDK_USE_OPENSSL
+    int tls_version = OPTION_TLS_VERSION_1_2;
+    if (HTTPAPI_SetOption(http_connect, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
+    {
+        HTTPAPI_CloseConnection(http_connect);
+        throw std::runtime_error("Could not set TLS 1.2 option");
+    }
+#endif
+
     HTTP_HEADERS_HANDLE httpRequestHeaders = HTTPHeaders_Alloc();
     HTTP_HEADERS_HANDLE httpResponseHeaders = HTTPHeaders_Alloc();
     BUFFER_HANDLE buffer = BUFFER_new();
