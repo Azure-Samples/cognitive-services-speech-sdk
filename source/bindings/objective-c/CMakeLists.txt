@@ -16,7 +16,9 @@ FILE(GLOB OBJC_SOURCE "${SRC_DIR}/*.mm")
 
 set(HEADERS ${OBJC_PUBLIC_HEADERS})
 set(HEADERS_PRIVATE ${OBJC_PRIVATE_HEADERS})
-set(SOURCES ${OBJC_SOURCE})
+set(SOURCES ${OBJC_SOURCE}
+  "${SRC_DIR}/../../../core/libcarbon/dll.cpp"
+  )
 
 source_group("Header Files (public)" FILES ${HEADERS})
 source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
