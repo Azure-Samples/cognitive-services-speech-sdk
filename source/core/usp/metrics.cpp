@@ -301,7 +301,7 @@ void Telemetry::InbandConnectionTelemetry(const std::string& connectionId, const
     else
     {
         connection_data->bPayloadSet &= value.is_null() ?
-            populate_event_timestamp(connectionJson, eventName, connectionId, event::keys::Start) :
+            populate_event_timestamp(connectionJson, eventName, connectionId, key) :
             populate_event_key_value(connectionJson, eventName, connectionId, key, value);
 
         if (connection_data->bPayloadSet)
