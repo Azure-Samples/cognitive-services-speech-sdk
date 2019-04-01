@@ -1,7 +1,12 @@
 jobs:
 - job: OsxBuildSampleApp
   dependsOn: [Pre, OsxBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuildSampleApp '))
+  condition: |
+    and(
+      succeeded(),
+      contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuildSampleApp '),
+      eq(dependencies.Pre.outputs['var.SPEECHSDK_SIGN'], 'true')
+    )
   pool:
     name: Hosted macOS Preview
   timeoutInMinutes: 10

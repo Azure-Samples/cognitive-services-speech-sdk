@@ -279,9 +279,11 @@ do
   vsts_setvar $var "${overrideValue:-${!var}}"
 done
 
-# Some outputs are (cross-phase) outputs. Potentially all could / should be, still testing this.
+# Some outputs are (cross-phase/multi-job) outputs. Potentially all could / should be, still testing this.
 for var in \
   SPEECHSDK_BUILD_PHASES \
+  SPEECHSDK_RUN_TESTS \
+  SPEECHSDK_SIGN \
   ; \
 do
   overrideVar=OVERRIDE_${var}${_OVERRIDE_SUFFIX}

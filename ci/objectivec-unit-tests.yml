@@ -7,7 +7,12 @@ jobs:
 - job: ${{ parameters.jobName }}
   dependsOn:
     - ${{ parameters.jobDependsOn }}
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' ${{ parameters.jobName }} '), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'))
+  condition: |
+    and(
+      succeeded(),
+      contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' ${{ parameters.jobName }} '),
+      eq(dependencies.Pre.outputs['var.SPEECHSDK_RUN_TESTS'], 'true')
+    )
   pool:
     name: Hosted macOS Preview
   timeoutInMinutes: 10
