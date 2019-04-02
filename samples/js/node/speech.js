@@ -84,9 +84,10 @@ module.exports = {
   };
 
     // start the recognizer and wait for a result.
-    reco.recognizeOnceAsync(
+    reco.startContinuousRecognitionAsync(
       function (result) {
-        reco.close();
+        console.log("result", result);
+//         reco.close();
         reco = undefined;
       },
       function (err) {
