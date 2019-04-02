@@ -511,7 +511,8 @@ void CSpxAudioStreamSession::RemoveRecognizer(ISpxRecognizer* recognizer)
     unique_lock<mutex> lock(m_recognizersLock);
     m_recognizers.remove_if([&](weak_ptr<ISpxRecognizer>& item)
     {
-        return item.lock().get() == recognizer;
+        auto recoSharedPtr = item.lock();
+        return recoSharedPtr == nullptr || recoSharedPtr.get() == recognizer;
     });
 }
 
@@ -1073,6 +1074,11 @@ void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* c
 
     SPX_DBG_ASSERT(m_recognizers.size() == 1);
     auto recognizer = m_recognizers.front().lock();
+    if (recognizer == nullptr)
+    {
+        SPX_TRACE_ERROR("%s: going to throw recognizer destroyed runtime_error", __FUNCTION__);
+        ThrowRuntimeError("GetScenariosCount: Recognizer is already destroyed, cannot continue.");
+    }
     auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer);
     auto translationRecognizer = SpxQueryInterface<ISpxTranslationRecognizer>(recognizer);
 
@@ -1085,9 +1091,16 @@ void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* c
 
 std::list<std::string> CSpxAudioStreamSession::GetListenForList()
 {
-    // Get the listen for list from the recognizer(s)
+    unique_lock<mutex> lock(m_recognizersLock);
     SPX_DBG_ASSERT(m_recognizers.size() == 1);
     auto recognizer = m_recognizers.front().lock();
+    lock.unlock();
+    if (!recognizer)
+    {
+        SPX_TRACE_ERROR("%s: going to throw recognizer destroyed runtime_error", __FUNCTION__);
+        ThrowRuntimeError("GetListenForList: Recognizer is already destroyed, cannot continue.");
+    }
+    // Get the listen for list from the recognizer(s)
     auto grammarlist = SpxQueryInterface<ISpxGrammarList>(recognizer);
     auto listenForList = grammarlist->GetListenForList();
 
