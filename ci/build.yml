@@ -1959,11 +1959,11 @@ jobs:
     displayName: Create drop files
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
+    condition: succeededOrFailed()
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)'
       ArtifactName: macOS
       publishLocation: Container
-      condition: succeededOrFailed()
 
 - template: objectivec-unit-tests.yml
   parameters:

@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleExecutable</key>
-	<string>@SPEECHSDK_CORE_LIBRARY@</string>
+	<string>@SPEECHSDK_CORE_FRAMEWORK@</string>
 	<key>CFBundleIdentifier</key>
 	<string>@MACOSX_FRAMEWORK_IDENTIFIER@</string>
 	<key>CFBundleName</key>
-	<string>@SPEECHSDK_CORE_LIBRARY@</string>
+	<string>@SPEECHSDK_CORE_FRAMEWORK@</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
