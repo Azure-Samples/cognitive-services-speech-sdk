@@ -511,8 +511,7 @@ void CSpxAudioStreamSession::RemoveRecognizer(ISpxRecognizer* recognizer)
     unique_lock<mutex> lock(m_recognizersLock);
     m_recognizers.remove_if([&](weak_ptr<ISpxRecognizer>& item)
     {
-        auto recoSharedPtr = item.lock();
-        return recoSharedPtr == nullptr || recoSharedPtr.get() == recognizer;
+        return item.lock().get() == recognizer;
     });
 }
 
@@ -1076,11 +1075,6 @@ void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* c
 
     SPX_DBG_ASSERT(m_recognizers.size() == 1);
     auto recognizer = m_recognizers.front().lock();
-    if (recognizer == nullptr)
-    {
-        SPX_TRACE_ERROR("%s: going to throw recognizer destroyed runtime_error", __FUNCTION__);
-        ThrowRuntimeError("GetScenariosCount: Recognizer is already destroyed, cannot continue.");
-    }
     auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer);
     auto translationRecognizer = SpxQueryInterface<ISpxTranslationRecognizer>(recognizer);
 
