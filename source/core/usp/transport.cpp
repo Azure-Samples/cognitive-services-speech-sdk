@@ -951,6 +951,7 @@ static int TransportOpen(TransportRequest* request)
         }
         else
         {
+            LogInfo("Start to open websocket. TransportRequest: 0x%x, wsio handle: 0x%x", request, request->ws.WSHandle);
             MetricsTransportStart(*request->telemetry, request->connectionId);
             const int result = uws_client_open_async(request->ws.WSHandle,
                 OnWSOpened, request,

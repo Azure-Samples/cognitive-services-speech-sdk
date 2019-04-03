@@ -211,5 +211,10 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
         }
+
+        public static string GetCurrentTime()
+        {
+            return DateTime.Now.ToString("HH:mm:ss.ffffffZ");
+        }
     }
 }

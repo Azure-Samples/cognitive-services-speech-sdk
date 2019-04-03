@@ -876,6 +876,7 @@ void CSpxAudioStreamSession::FireSessionStartedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
 
+    SPX_DBG_TRACE_VERBOSE("Firing SessionStarted event: SessionId: %ls", m_sessionId.c_str());
     FireEvent(EventType::SessionStart);
     m_fireEndOfStreamAtSessionStop = true;
 }
@@ -883,6 +884,7 @@ void CSpxAudioStreamSession::FireSessionStartedEvent()
 void CSpxAudioStreamSession::FireSessionStoppedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_VERBOSE("Firing SessionStopped event: SessionId: %ls", m_sessionId.c_str());
     EnsureFireResultEvent();
 
     FireEvent(EventType::SessionStop);

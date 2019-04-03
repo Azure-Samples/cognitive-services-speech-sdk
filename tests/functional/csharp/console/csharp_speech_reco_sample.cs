@@ -20,7 +20,7 @@ namespace MicrosoftSpeechSDKSamples
         private static void MyRecognizingEventHandler(object sender, SpeechRecognitionEventArgs e)
         {
             var resultLatency = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatencyMs);
-            Console.WriteLine($"Intermediate result (latencyMs={resultLatency}): {e.ToString()}, Offset: {e.Result.OffsetInTicks}, Duration: {e.Result.Duration}.");
+            Console.WriteLine($"({Util.GetCurrentTime()}) Intermediate result (latencyMs={resultLatency}): {e.ToString()}, Offset: {e.Result.OffsetInTicks}, Duration: {e.Result.Duration}.");
         }
 
         private static void MyRecognizedEventHandler(object sender, SpeechRecognitionEventArgs e)
@@ -28,21 +28,21 @@ namespace MicrosoftSpeechSDKSamples
             var resultLatency = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatencyMs);
             if (e.Result.Reason == ResultReason.RecognizedSpeech)
             {
-                Console.WriteLine($"RECOGNIZED (latencyMs={resultLatency}): Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+                Console.WriteLine($"({Util.GetCurrentTime()}) RECOGNIZED (latencyMs={resultLatency}): Text={e.Result.Text}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
             }
             else if (e.Result.Reason == ResultReason.NoMatch)
             {
-                Console.WriteLine($"NOMATCH (latencyMs={resultLatency}): Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
+                Console.WriteLine($"({Util.GetCurrentTime()}) NOMATCH (latencyMs={resultLatency}): Speech could not be recognized. Reason={NoMatchDetails.FromResult(e.Result).Reason}, Offset={e.Result.OffsetInTicks}, Duration={e.Result.Duration}");
             }
             else
             {
-                Console.WriteLine($"Unexpected result.(latencyMs={resultLatency}). Reason={e.Result.Reason}, result={e.Result}");
+                Console.WriteLine($"({Util.GetCurrentTime()}) Unexpected result.(latencyMs={resultLatency}). Reason={e.Result.Reason}, result={e.Result}");
             }
         }
 
         private static void MyCanceledEventHandler(object sender, SpeechRecognitionCanceledEventArgs e)
         {
-            Console.WriteLine($"CANCELED: Reason={e.Reason}");
+            Console.WriteLine($"({Util.GetCurrentTime()}) CANCELED: Reason={e.Reason}");
 
             if (e.Reason == CancellationReason.Error)
             {
@@ -53,31 +53,31 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MySpeechStartDetectedEventHandler(object sender, RecognitionEventArgs e)
         {
-            Console.WriteLine($"SpeechStartDetected received: offset: {e.Offset}.");
+            Console.WriteLine($"({Util.GetCurrentTime()}) SpeechStartDetected received: offset: {e.Offset}.");
         }
 
         private static void MySpeechEndDetectedEventHandler(object sender, RecognitionEventArgs e)
         {
-            Console.WriteLine($"SpeechEndDetected received: offset: {e.Offset}.");
+            Console.WriteLine($"({Util.GetCurrentTime()}) SpeechEndDetected received: offset: {e.Offset}.");
         }
 
         private static void MySessionStartedEventHandler(object sender, SessionEventArgs e)
         {
-            Console.WriteLine($"Session started event: {e.ToString()}.");
+            Console.WriteLine($"({Util.GetCurrentTime()}) Session started event: {e.ToString()}.");
         }
 
         private static void MySessionStoppedEventHandler(object sender, SessionEventArgs e)
         {
-            Console.WriteLine($"Session stopped event: {e.ToString()}.");
+            Console.WriteLine($"({Util.GetCurrentTime()}) Session stopped event: {e.ToString()}.");
         }
 
         private static void MyConnectedEventHandler(object sender, ConnectionEventArgs e)
         {
-            Console.WriteLine($"Connected event: {e.ToString()}.");
+            Console.WriteLine($"({Util.GetCurrentTime()}) Connected event: {e.ToString()}.");
         }
         private static void MyDisconnectedEventHandler(object sender, ConnectionEventArgs e)
         {
-            Console.WriteLine($"Disconnected event: {e.ToString()}.");
+            Console.WriteLine($"({Util.GetCurrentTime()}) Disconnected event: {e.ToString()}.");
         }
 
         public static async Task SpeechRecognitionBaseModelAsync(string key, string region, string lang, string fileName, bool useStream, bool useToken, bool useContinuousRecognition, string deviceName = null)
@@ -141,10 +141,9 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task RecognizeAsync(SpeechConfig config, string fileName, bool useStream, bool useContinuousRecognition, string deviceName = null)
         {
+            config.SetProperty(PropertyId.Speech_LogFilename, "logfile-"+ DateTime.Now.ToString("HH-mm-ss") + ".txt");
             if (string.IsNullOrEmpty(fileName) || String.Compare(fileName, "mic", true) == 0)
             {
-                var stopWatchCreation = Stopwatch.StartNew();
-
                 AudioConfig audioConfig;
                 if (string.IsNullOrEmpty(deviceName))
                 {
@@ -156,8 +155,6 @@ namespace MicrosoftSpeechSDKSamples
                 }
                 using (var reco = new SpeechRecognizer(config, audioConfig))
                 {
-                    stopWatchCreation.Stop();
-                    Console.WriteLine("Time for creating speech recognizer: " + stopWatchCreation.ElapsedMilliseconds);
                     await LaunchRecognizerAsync(reco, useContinuousRecognition);
                 }
             }
@@ -167,21 +164,15 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     Console.WriteLine("Using stream input.");
                     var audioInput = Util.OpenWavFile(fileName);
-                    var stopWatchCreation = Stopwatch.StartNew();
                     using (var reco = new SpeechRecognizer(config, audioInput))
                     {
-                        stopWatchCreation.Stop();
-                        Console.WriteLine("Time for creating speech recognizer: " + stopWatchCreation.ElapsedMilliseconds);
                         await LaunchRecognizerAsync(reco, useContinuousRecognition);
                     }
                 }
                 else
                 {
-                    var stopWatchCreation = Stopwatch.StartNew();
                     using (var reco = new SpeechRecognizer(config, AudioConfig.FromWavFileInput(fileName)))
                     {
-                        stopWatchCreation.Stop();
-                        Console.WriteLine("Time for creating speech recognizer: " + stopWatchCreation.ElapsedMilliseconds);
                         await LaunchRecognizerAsync(reco, useContinuousRecognition);
                     }
                 }
@@ -198,6 +189,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 await SingleShotRecognitionAsync(reco).ConfigureAwait(false);
             }
+            await Task.Delay(2000);
         }
 
         private static async Task SingleShotRecognitionAsync(SpeechRecognizer reco)
@@ -217,7 +209,9 @@ namespace MicrosoftSpeechSDKSamples
             reco.SessionStopped += MySessionStoppedEventHandler;
 
             // Starts recognition.
+            Console.WriteLine($"({Util.GetCurrentTime()}): Single-shot recognition starts.");
             var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
+            Console.WriteLine($"({Util.GetCurrentTime()}): Single-shot recognition completes.");
 
             Console.WriteLine("Speech Recognition: Recognition result: " + result);
 
@@ -254,6 +248,7 @@ namespace MicrosoftSpeechSDKSamples
             };
 
             // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+            Console.WriteLine($"({Util.GetCurrentTime()}): Continuous recognition starts.");
             await reco.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
             // Waits for completion.
@@ -262,6 +257,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Stops translation.
             await reco.StopContinuousRecognitionAsync().ConfigureAwait(false);
+            Console.WriteLine($"({Util.GetCurrentTime()}): Continuous recognition completes.");
 
             connection.Connected -= MyConnectedEventHandler;
             connection.Disconnected -= MyDisconnectedEventHandler;
