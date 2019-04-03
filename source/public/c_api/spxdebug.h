@@ -19,7 +19,7 @@
 
 #ifndef __cplusplus
 #define static_assert _Static_assert
-#endif 
+#endif
 
 #define UNUSED(x) (void)(x)
 
@@ -64,6 +64,14 @@
 #define __SPX_TRACE_LEVEL_WARNING     0x04 // Trace_Warning
 #define __SPX_TRACE_LEVEL_ERROR       0x02 // Trace_Error
 #define __SPX_TRACE_LEVEL_VERBOSE     0x10 // Trace_Verbose
+
+#ifndef ENABLE_DEBUG_OUTPUT
+#if defined(__SPX_DO_TRACE_IMPL) && (defined(DEBUG) || defined(_DEBUG))
+    #define ENABLE_DEBUG_OUTPUT true
+#else
+    #define ENABLE_DEBUG_OUTPUT false
+#endif
+#endif
 
 #ifndef __SPX_DO_TRACE_IMPL
 #ifdef __cplusplus
@@ -115,7 +123,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, bool enableD
 #define __SPX_DO_TRACE_IMPL __spx_do_trace_message
 #else
 #define __SPX_DO_TRACE_IMPL
-#endif 
+#endif
 #endif
 
 #define __SPX_DOTRACE(level, title, enableDebugOutput, ...)                            \
@@ -184,12 +192,6 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, bool enableD
 #define SPX_STATIC_ASSERT_IS_BASE_OF(x, y)  static_assert(std::is_base_of<x, y>::value, "std::is_base_of<" # x ", " # y ">::value")
 #else
 #define SPX_STATIC_ASSERT_IS_BASE_OF(x, y)
-#endif
-
-#if defined(DEBUG) || defined(_DEBUG)
-    #define ENABLE_DEBUG_OUTPUT true
-#else
-    #define ENABLE_DEBUG_OUTPUT false
 #endif
 
 #define SPX_TRACE_INFO(msg, ...)             __SPX_TRACE_INFO("SPX_TRACE_INFO: ", ENABLE_DEBUG_OUTPUT, msg, ##__VA_ARGS__)
@@ -476,7 +478,7 @@ void main()
     SPX_REPORT_ON_FAIL(hr1);
     SPX_REPORT_ON_FAIL_IFNOT(hr1, 0x80001000);
     SPX_TRACE_VERBOSE("Testing out SPX_REPORT_ON_FAIL, should see two failures... Done!");
-    
+
     SPX_TRACE_VERBOSE("Testing out SPX_REPORT_ON_FAIL, should see zero failures...");
     SPX_REPORT_ON_FAIL(hr2);
     SPX_REPORT_ON_FAIL_IFNOT(hr1, 0x80001111);

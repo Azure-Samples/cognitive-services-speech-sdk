@@ -7,6 +7,8 @@
 
 #include "ring_buffer.h"
 #include <cstring>
+#include "trace_message.h"
+#define __SPX_DO_TRACE_IMPL SpxTraceMessage
 #include "spxdebug.h"
 
 namespace Microsoft {

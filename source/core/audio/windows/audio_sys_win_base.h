@@ -19,6 +19,8 @@
 #include <mmdeviceapi.h>
 #include <mmstream.h>
 #include <endpointvolume.h>
+#include "trace_message.h"
+#define __SPX_DO_TRACE_IMPL SpxTraceMessage
 #include <spxdebug.h>
 
 #define MAGIC_TAG_RIFF      0x46464952

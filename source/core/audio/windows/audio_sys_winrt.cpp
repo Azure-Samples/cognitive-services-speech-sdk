@@ -21,7 +21,6 @@
 #include <mmdeviceapi.h>
 #include <mmstream.h>
 #include <endpointvolume.h>
-#include <spxdebug.h>
 #include <windows/audio_sys_win_base.h>
 #include <string_utils.h>
 
