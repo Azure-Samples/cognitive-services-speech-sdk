@@ -177,7 +177,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
 
         /// <summary>
         /// Sets corresponding voice parameter for set of languages used in this app
-        /// Complete list of available voices can be found here: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/supported-languages
+        /// Complete list of available voices can be found here: https://docs.microsoft.com/azure/cognitive-services/speech-service/supported-languages
         /// </summary>
         private void InitializeVoiceMap()
         {

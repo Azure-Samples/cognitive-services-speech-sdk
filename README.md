@@ -21,6 +21,10 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 
 ## News
 
+* Speech SDK Release 1.4.0
+
+  Beginning of April 2019 we released version 1.4.0 of the Speech SDK.
+
 * Speech SDK Release 1.3.1
 
   End of February 2019 we released version 1.3.1 of the Speech SDK.
@@ -29,13 +33,7 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 
   Mid of February 2019 we released version 1.3.0 of the Speech SDK.
 
-* Speech SDK Release 1.2.0
-
-  Mid of December 2018 we released version 1.2.0 of the Speech SDK.
-
-* Speech SDK Release 1.1.0
-
-  Beginning of November 2018 we released version 1.1.0 of the Speech SDK. The release notes can be found [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/releasenotes#speech-service-sdk-110).
+Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and older releases.
 
 ## Features
 
@@ -83,6 +81,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart Node.js](./quickstart/js-node/) | Node.js | Demonstrates one-shot speech recognition from a file. |
 | [Quickstart Python](./quickstart/python/) | Windows, Linux, macOS | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart Objective-C](./quickstart/objectivec-ios/) | iOS | Demonstrates one-shot speech recognition from a file with recorded speech. |
+| [Quickstart Objective-C](./quickstart/objectivec-macos/) | macOS | Demonstrates one-shot speech recognition from a microphone. |
 
 ### Speech translation quickstarts
 
@@ -97,15 +96,27 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart C# UWP for Windows](./quickstart/speech-translation/csharp-uwp/) | Windows | Demonstrates one-shot speech translation/transcription from a microphone. |
 | [Quickstart Java JRE](./quickstart/speech-translation/java-jre/) | Windows, Linux | Demonstrates one-shot speech translation/transcription from a microphone. |
 
+### Speech synthesis quickstarts
+
+The following quickstarts demonstrate how to perform one-shot speech synthesis to a speaker.
+If you want to build them from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
+
+| Quickstart | Platform | Description |
+| ---------- | -------- | ----------- |
+| [Quickstart C++ for Linux](./quickstart/text-to-speech/cpp-linux/) | Linux | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart C++ for Windows](./quickstart/text-to-speech/cpp-windows/) | Windows  | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart C# .NET for Windows](./quickstart/text-to-speech/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech synthesis to the default speaker. |
+
 ### Samples
 
 The following samples demonstrate additional capabilities of the Speech SDK, such additional modes of speech recognition as well as intent recognition and translation:
 
 | Sample                                                                                                      | Platform | Description                                                          |
 | ---                                                                                                         | ---      | ---                                                                  |
-| [C++ Console app for Windows](./samples/cpp/windows/console)                                                | Windows  | Demonstrates speech recognition, intent recognition, and translation |
-| [C# Console app for .NET Framework on Windows](./samples/csharp/dotnet-windows/console)                     | Windows  | Demonstrates speech recognition, intent recognition, and translation |
-| [C# Console app for .NET Core (Windows or Linux)](./samples/csharp/dotnetcore/console)                      | Windows, Linux  | Demonstrates speech recognition, intent recognition, and translation |
+| [C++ Console app for Windows](./samples/cpp/windows/console)                                                | Windows  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
+| [C++ Speech Recognition from MP3/Opus file (Linux only)](./samples/cpp/linux/compressed-audio-input)        | Linux   | Demonstrates speech recognition from an MP3/Opus file |
+| [C# Console app for .NET Framework on Windows](./samples/csharp/dotnet-windows/console)                     | Windows  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
+| [C# Console app for .NET Core (Windows or Linux)](./samples/csharp/dotnetcore/console)                      | Windows, Linux  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
 | [Java Console app for JRE](./samples/java/jre/console)                                                      | Windows, Linux | Demonstrates speech recognition, intent recognition, and translation |
 | [Python Console app](./samples/python/console)                                                              | Windows, Linux, macOS  | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech-to-text WPF sample for .NET Framework on Windows](./samples/csharp/dotnet-windows/speechtotext-wpf) | Windows  | Demonstrates speech recognition |
@@ -114,6 +125,7 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Speech recognition sample for Android](./samples/java/android/sdkdemo)                                     | Android  | Demonstrates speech and intent recognition |
 | [Speech recognition and translation sample for the browser, using JavaScript](./samples/js/browser)         | Web  | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech recognition and translation sample using JavaScript and Node.js](./samples/js/node)                 | Node.js  | Demonstrates speech recognition, intent recognition, and translation |
+| [Speech recognition sample for iOS using a connection object](./samples/objective-c/ios)                    | iOS  | Demonstrates speech recognition |
 
 Samples for using the Speech Service REST API (no Speech SDK installation required):
 

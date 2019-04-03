@@ -154,8 +154,9 @@ void SpeechContinuousRecognitionWithFile()
             cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << "\n"
                  << "CANCELED: ErrorDetails=" << e.ErrorDetails << "\n"
                  << "CANCELED: Did you update the subscription info?" << std::endl;
+            
+            recognitionEnd.set_value(); // Notify to stop recognition.
         }
-        recognitionEnd.set_value(); // Notify to stop recognition.
     });
 
     recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
@@ -415,4 +416,90 @@ void SpeechContinuousRecognitionWithPushStream()
 
     // Stops recognition.
     recognizer->StopContinuousRecognitionAsync().get();
+}
+
+// Keyword-triggered speech recognition using microphone.
+void KeywordTriggeredSpeechRecognitionWithMicrophone()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
+    auto recognizer = SpeechRecognizer::FromConfig(config);
+
+    // Promise for synchronization of recognition end.
+    promise<void> recognitionEnd;
+
+    // Subscribes to events.
+    recognizer->Recognizing.Connect([] (const SpeechRecognitionEventArgs& e)
+    {
+        if (e.Result->Reason == ResultReason::RecognizingSpeech)
+        {
+            cout << "RECOGNIZING: Text=" << e.Result->Text << std::endl;
+        }
+        else if (e.Result->Reason == ResultReason::RecognizingKeyword)
+        {
+            cout << "RECOGNIZING KEYWORD: Text=" << e.Result->Text << std::endl;
+        }
+    });
+
+    recognizer->Recognized.Connect([] (const SpeechRecognitionEventArgs& e)
+    {
+        if (e.Result->Reason == ResultReason::RecognizedKeyword)
+        {
+            cout << "RECOGNIZED KEYWORD: Text=" << e.Result->Text << std::endl;
+        }
+        else if (e.Result->Reason == ResultReason::RecognizedSpeech)
+        {
+            cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl;
+        }
+        else if (e.Result->Reason == ResultReason::NoMatch)
+        {
+            cout << "NOMATCH: Speech could not be recognized." << std::endl;
+        }
+    });
+
+    recognizer->Canceled.Connect([&recognitionEnd](const SpeechRecognitionCanceledEventArgs& e)
+    {
+        cout << "CANCELED: Reason=" << (int)e.Reason << std::endl;
+
+        if (e.Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << "\n"
+                 << "CANCELED: ErrorDetails=" << e.ErrorDetails << "\n"
+                 << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
+    });
+
+    recognizer->SessionStarted.Connect([&recognitionEnd](const SessionEventArgs& e)
+    {
+        cout << "SESSIONSTARTED: SessionId=" << e.SessionId << std::endl;
+    });
+
+    recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
+    {
+        cout << "SESSIONSTOPPED: SessionId=" << e.SessionId << std::endl;
+
+        recognitionEnd.set_value(); // Notify to stop recognition.
+    });
+
+    // Creates an instance of a keyword recognition model. Update this to
+    // point to the location of your keyword recognition model.
+    auto model = KeywordRecognitionModel::FromFile("YourKeywordRecognitionModelFile.table");
+
+    // The phrase your keyword recognition model triggers on.
+    auto keyword = "YourKeyword";
+
+    // Starts continuous recognition. Use StopContinuousRecognitionAsync() to stop recognition.
+    recognizer->StartKeywordRecognitionAsync(model).get();
+
+    cout << "Say something starting with '" << keyword
+         << "' followed by whatever you want..." << std::endl;
+
+    // Waits for a single successful keyword-triggered speech recognition (or error).
+    recognitionEnd.get_future().get();
+
+    // Stops recognition.
+    recognizer->StopKeywordRecognitionAsync().get();
 }
