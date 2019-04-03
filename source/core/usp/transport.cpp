@@ -78,11 +78,9 @@ typedef struct _TransportRequest
     struct
     {
         UWS_CLIENT_HANDLE WSHandle;
-        size_t pathLen;
         WSIO_CONFIG config;
         bool chunksent;
     } ws;
-    const char*                  path;
     TransportResponseCallback    onRecvResponse;
     TransportErrorCallback       onTransportError;
     TransportOpenedCallback      onOpenedCallback;
@@ -1062,7 +1060,7 @@ int TransportRequestPrepare(TransportHandle transportHandle)
     return err;
 }
 
-int TransportMessageWrite(TransportHandle transportHandle, const char* path, const uint8_t* buffer, size_t bufferSize, const char* requestId)
+int TransportMessageWrite(TransportHandle transportHandle, const std::string& path, const uint8_t* buffer, size_t bufferSize, const char* requestId)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     int ret;
@@ -1071,9 +1069,6 @@ int TransportMessageWrite(TransportHandle transportHandle, const char* path, con
     {
         return -1;
     }
-
-    request->path = path;
-    request->ws.pathLen = strlen(request->path);
 
     ret = TransportRequestPrepare(request);
     if (ret)
@@ -1084,7 +1079,7 @@ int TransportMessageWrite(TransportHandle transportHandle, const char* path, con
     bool includeRequestId = requestId != NULL && requestId[0] != '\0';
 
     size_t payloadSize = sizeof(g_messageHeader) +
-                         (size_t)(request->ws.pathLen) +
+                         path.size() +
                          (includeRequestId ? sizeof(g_keywordRequestId) : 0) +
                          (includeRequestId ? NO_DASH_UUID_LEN : 0) +
                          sizeof(g_timeStampHeaderName) +
@@ -1116,7 +1111,7 @@ int TransportMessageWrite(TransportHandle transportHandle, const char* path, con
                                 g_messageHeader,
                                 g_timeStampHeaderName,
                                 timeString,
-                                request->path,
+                                path.c_str(),
                                 g_keywordRequestId,
                                 requestId);
     }
@@ -1127,7 +1122,7 @@ int TransportMessageWrite(TransportHandle transportHandle, const char* path, con
                                 g_messageHeaderWithoutRequestId,
                                 g_timeStampHeaderName,
                                 timeString,
-                                request->path);
+                                path.c_str());
     }
 
     // add body
@@ -1138,7 +1133,7 @@ int TransportMessageWrite(TransportHandle transportHandle, const char* path, con
     return 0;
 }
 
-int TransportStreamPrepare(TransportHandle transportHandle, const char* path)
+int TransportStreamPrepare(TransportHandle transportHandle)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     int ret;
@@ -1150,17 +1145,11 @@ int TransportStreamPrepare(TransportHandle transportHandle, const char* path)
 
     request->streamId++;
 
-    if (NULL != path)
-    {
-        request->path = path + 1; // 1=remove "/"
-        request->ws.pathLen = strlen(request->path);
-    }
-
     ret = TransportRequestPrepare(request);
     return ret;
 }
 
-int TransportStreamWrite(TransportHandle transportHandle, const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char* requestId)
+int TransportStreamWrite(TransportHandle transportHandle, const std::string& path, const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char* requestId)
 {
     size_t bufferSize = (size_t)audioChunk->size;
     auto buffer = audioChunk->data.get();
@@ -1201,7 +1190,7 @@ int TransportStreamWrite(TransportHandle transportHandle, const Microsoft::Cogni
 
     size_t headerLen;
     size_t payloadSize = sizeof(g_requestFormat) +
-        (size_t)request->ws.pathLen +
+        path.size() +
         sizeof(g_KeywordStreamId) +
         30 +
         sizeof(g_keywordRequestId) +
@@ -1232,7 +1221,7 @@ int TransportStreamWrite(TransportHandle transportHandle, const Microsoft::Cogni
         g_requestFormat,
         g_timeStampHeaderName,
         timeString,
-        request->path,
+        path.c_str(),
         g_KeywordStreamId,
         request->streamId,
         g_keywordRequestId,
@@ -1251,7 +1240,7 @@ int TransportStreamWrite(TransportHandle transportHandle, const Microsoft::Cogni
     return 0;
 }
 
-int TransportStreamFlush(TransportHandle transportHandle, const char* requestId)
+int TransportStreamFlush(TransportHandle transportHandle, const std::string& path, const char* requestId)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     if (NULL == request)
@@ -1268,7 +1257,7 @@ int TransportStreamFlush(TransportHandle transportHandle, const char* requestId)
     // flush is called even before the WS connection is established, in
     // particular if the audio file is very short. Just append the zero-sized
     // buffer as indication of end-of-audio.
-    return TransportStreamWrite(request, std::make_shared<Microsoft::CognitiveServices::Speech::Impl::DataChunk>(nullptr, 0), requestId);
+    return TransportStreamWrite(request, path, std::make_shared<Microsoft::CognitiveServices::Speech::Impl::DataChunk>(nullptr, 0), requestId);
 }
 
 void TransportDoWork(TransportHandle transportHandle)

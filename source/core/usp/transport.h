@@ -53,10 +53,9 @@ int TransportRequestPrepare(TransportHandle transportHandle);
 /**
  * Prepares the start of a new transport stream.
  * @param transportHandle The request to prepare.
- * @param path The path to use for stream I/O.
  * @return A return code or zero if successful.
  */
-int TransportStreamPrepare(TransportHandle transportHandle, const char* path);
+int TransportStreamPrepare(TransportHandle transportHandle);
 
 /**
  * Write a text message to the websocket.
@@ -67,24 +66,26 @@ int TransportStreamPrepare(TransportHandle transportHandle, const char* path);
  * @param requestId The requestId for the given message.
  * @return A return code or zero if successful.
  */
-int TransportMessageWrite(TransportHandle transportHandle, const char* path, const uint8_t* buffer, size_t bufferSize, const char* requestId);
+int TransportMessageWrite(TransportHandle transportHandle, const std::string& path, const uint8_t* buffer, size_t bufferSize, const char* requestId);
 
 /**
  * Writes to the transport stream.
  * @param transportHandle The request to prepare.
+ * @param path The path to use for message.
  * @param buffer The audio chunk to be sent.
  * @param requestId The requestId for the current stream.
  * @return A return code or zero if successful.
  */
-int TransportStreamWrite(TransportHandle transportHandle, const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char* requestId);
+int TransportStreamWrite(TransportHandle transportHandle, const std::string& path, const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char* requestId);
 
 /**
  * Flushes any outstanding I/O on the transport stream.
  * @param transportHandle The request to prepare.
+ * @param path The path to use for message.
  * @param requestId The requestId for the current stream.
  * @return A return code or zero if successful.
  */
-int TransportStreamFlush(TransportHandle transportHandle, const char* requestId);
+int TransportStreamFlush(TransportHandle transportHandle, const std::string& path, const char* requestId);
 
 /**
  * Processes any outstanding operations that need attention.
@@ -117,7 +118,7 @@ typedef enum _TransportError
     TRANSPORT_ERROR_DNS_FAILURE
 } TransportError;
 
-typedef enum _HttpStatusCode 
+typedef enum _HttpStatusCode
 {
     HTTP_BADREQUEST = 400,
     HTTP_UNAUTHORIZED = 401,
@@ -186,7 +187,7 @@ typedef struct _TransportResponse
  * @param response Pointer to struct containing response information.
  * @param context A pointer to the application-defined callback context.
  */
-typedef void(*TransportResponseCallback)(TransportResponse* response, void* context); 
+typedef void(*TransportResponseCallback)(TransportResponse* response, void* context);
 
 /**
  * Registers for events from the transport.

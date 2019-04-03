@@ -284,6 +284,9 @@ string Connection::Impl::ConstructConnectionUrl() const
         case EndpointType::CDSDK:
             oss << endpoint::CDSDK::url;
             break;
+        case EndpointType::Bot:
+            oss << endpoint::bot::url;
+            break;
         default:
             ThrowInvalidArgumentException("Unknown endpoint type.");
         }
@@ -366,6 +369,15 @@ string Connection::Impl::ConstructConnectionUrl() const
         break;
     case EndpointType::CDSDK:
         // no query parameter needed.
+        break;
+    case EndpointType::Bot:
+        if (!m_config.m_language.empty())
+        {
+            if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
+            {
+                oss << '&' << endpoint::unifiedspeech::langQueryParam << m_config.m_language;
+            }
+        }
         break;
     }
 
@@ -473,11 +485,15 @@ string Connection::Impl::CreateRequestId()
     auto requestId = PAL::ToString(PAL::CreateGuidWithoutDashes());
 
     LogInfo("RequestId: '%s'", requestId.c_str());
-    MetricsTransportRequestId(m_telemetry.get(), requestId.c_str());
-
-    m_activeRequestIds.insert(requestId);
+    RegisterRequestId(requestId);
 
     return requestId;
+}
+
+void Connection::Impl::RegisterRequestId(const string& requestId)
+{
+    MetricsTransportRequestId(m_telemetry.get(), requestId.c_str());
+    m_activeRequestIds.insert(requestId);
 }
 
 void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size, MessageType messageType)
@@ -543,14 +559,14 @@ void Connection::Impl::QueueAudioSegment(const Microsoft::CognitiveServices::Spe
         MetricsAudioStreamInit();
         MetricsAudioStart(*m_telemetry, m_speechRequestId);
 
-        ret = TransportStreamPrepare(m_transport.get(), "/audio");
+        ret = TransportStreamPrepare(m_transport.get());
         if (ret != 0)
         {
             ThrowRuntimeError("TransportStreamPrepare failed. error=" + to_string(ret));
         }
     }
 
-    ret = TransportStreamWrite(m_transport.get(), audioChunk, m_speechRequestId.c_str());
+    ret = TransportStreamWrite(m_transport.get(), path::audio, audioChunk, m_speechRequestId.c_str());
     if (ret != 0)
     {
         ThrowRuntimeError("TransportStreamWrite failed. error=" + to_string(ret));
@@ -568,7 +584,7 @@ void Connection::Impl::QueueAudioEnd()
     {
         return;
     }
-    auto ret = TransportStreamFlush(m_transport.get(), m_speechRequestId.c_str());
+    auto ret = TransportStreamFlush(m_transport.get(), path::audio, m_speechRequestId.c_str());
 
     m_audioOffset = 0;
     MetricsAudioStreamFlush();
@@ -849,11 +865,19 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
     }
 
     string requestId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::requestId);
-    if (requestId.empty() || !connection->m_activeRequestIds.count(requestId))
+    if (!connection->m_activeRequestIds.count(requestId))
     {
-        PROTOCOL_VIOLATION("Empty or unexpected request id '%s', Path: %s", requestId.c_str(), path);
-        MetricsUnexpectedRequestId(requestId);
-        return;
+        if (requestId.empty() || path != path::turnStart)
+        {
+            PROTOCOL_VIOLATION("Unexpected request id '%s', Path: %s", requestId.c_str(), path);
+            MetricsUnexpectedRequestId(requestId);
+            return;
+        }
+        else
+        {
+            LogInfo("Service originated request received with requestId: %s", requestId.c_str());
+            connection->RegisterRequestId(requestId);
+        }
     }
 
     const char *contentType = NULL;
@@ -886,6 +910,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
 
             AudioOutputChunkMsg msg;
             msg.streamId = streamId == nullptr ? -1 : atoi(streamId);
+            msg.requestId = requestId;
             msg.audioBuffer = (uint8_t *)response->buffer;
             msg.audioLength = response->bufferSize;
             connection->Invoke([&] { callbacks->OnAudioOutputChunk(msg); });
@@ -916,7 +941,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
         else if (pathStr == path::turnStart)
         {
             auto tag = json[json_properties::context][json_properties::tag].get<string>();
-            connection->Invoke([&] { callbacks->OnTurnStart({PAL::ToWString(json.dump()), tag}); });
+            connection->Invoke([&] { callbacks->OnTurnStart({ PAL::ToWString(json.dump()), tag }); });
         }
         else if (pathStr == path::turnEnd)
         {

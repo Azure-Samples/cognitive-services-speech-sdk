@@ -75,10 +75,15 @@ namespace USP {
             const std::string pathSuffix = "/cognitiveservices/v1";
             const std::string langQueryParam = "language=";
         }
-            
+
         namespace CDSDK
         {
             const std::string url = "speech.platform.bing.com/cortana/api/v1?environment=Home&";
+        }
+
+        namespace bot
+        {
+            const std::string url = "speech.platform.bing.com/convai/api/v2";
         }
     }
 

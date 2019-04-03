@@ -227,14 +227,15 @@ struct TranslationPhraseMsg : public TranslationHypothesisMsg
 struct AudioOutputChunkMsg
 {
     int streamId { -1 };
+    std::string requestId;
     const uint8_t* audioBuffer { nullptr };
-    size_t audioLength { 0 };    
+    size_t audioLength { 0 };
 };
 
 /**
 * Represents a message corresponding to a user defined path.
 */
-struct UserMsg 
+struct UserMsg
 {
     const std::string path;
     const std::string contentType;

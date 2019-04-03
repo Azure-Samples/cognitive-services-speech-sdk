@@ -103,7 +103,7 @@ struct Callbacks
 
 using CallbacksPtr = std::shared_ptr<Callbacks>;
 
-enum class EndpointType { Speech, Intent, Translation, CDSDK };
+enum class EndpointType { Speech, Intent, Translation, CDSDK, Bot };
 
 enum class RecognitionMode : unsigned int { Interactive = 0, Conversation = 1, Dictation = 2 };
 
@@ -138,9 +138,9 @@ public:
     * @param buffer The message payload.
     * @param size The length of the message in bytes.
     * @param messageType The type of message to be sent. The USP currently has three different types of messages:
-    *  1. Config:  Config messages are not associated with a specific request. Some endpoints require that a config message is  
+    *  1. Config:  Config messages are not associated with a specific request. Some endpoints require that a config message is
     *              sent as the first message after opening the connection.
-    *  2. Context: Client applications can send a context message at any time before sending the first audio chunk for a request. 
+    *  2. Context: Client applications can send a context message at any time before sending the first audio chunk for a request.
     *              You must send at most one context message for each turn.
     *  3. Agent:   Agent messages are meant for communicating with a back end agent.
     *              Each message represents the start of a new request.

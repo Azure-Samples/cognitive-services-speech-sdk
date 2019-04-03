@@ -130,6 +130,7 @@ private:
     std::string ConstructConnectionUrl() const;
 
     std::string CreateRequestId();
+    void RegisterRequestId(const std::string& requestId);
     std::unordered_set<std::string> m_activeRequestIds;
     std::string m_speechRequestId;
 
