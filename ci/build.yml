@@ -1762,6 +1762,7 @@ jobs:
     BuildConfiguration: Release
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
     Developer.Dir: /Applications/Xcode_10.1.app/Contents/Developer
+    microsoftDevTeamId: UBF8T346G9
   steps:
   # Update bash really early so it will be picked up by "bash" steps.
   - bash: brew config && brew install bash coreutils
@@ -1791,13 +1792,13 @@ jobs:
         -D long-running=false)
       # run the tests
       ci/apple/multiplatformtests.sh tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
-        SpeechSDK_iOS SpeechSDK_iOS $(OutputDirectory)/logs unittests
+        SpeechSDK_iOS SpeechSDK_iOS $(OutputDirectory)/logs unittests $(microsoftDevTeamId)
     displayName: "Run iOS unit tests"
     continueOnError: true
   - bash: |
       set -u -e -o pipefail -x
       . ci/functions.sh
-      # set up framework in the correct position - the Xcode project expects the framework here (used for both Release and Debug configs atm)
+      # set up framework in the correct position - the Xcode project expects the framework here
       ln -s '$(Build.Repository.LocalPath)/xcode-build-output/$(FrameworkName).framework' public_samples/quickstart/objectivec-ios/
       # fix the keys
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
@@ -1811,7 +1812,7 @@ jobs:
         -D long-running=false
       # run the tests
       ci/apple/multiplatformtests.sh public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
-        helloworldUITests helloworldUITests-Runner $(OutputDirectory)/logs quickstart --usegui
+        helloworldUITests helloworldUITests-Runner $(OutputDirectory)/logs quickstart $(microsoftDevTeamId) --usegui
     continueOnError: true
     displayName: "Run iOS UI test for quickstart"
   - task: PublishTestResults@2

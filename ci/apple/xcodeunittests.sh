@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e -u -o pipefail
+set -e -u -x -o pipefail
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 XCODE_CONFIGURATION_BUILD_DIR=${PWD}/iostestbuild
@@ -12,16 +12,29 @@ LOGDIR="${4?$USAGE}"  # path to the directory to store logs in
 TESTNAME="${5?$USAGE}"  # name of the kind of test (unittest/quickstart) to use for naming the logfile
 DEVICE="${6?$USAGE}"  # device name to test on
 OS="${7?$USAGE}"  # os to test with
-XCODE_EXTRA_ARGS=
-if [[ ${8:-} == --extra-args ]]; then
-  XCODE_EXTRA_ARGS="$9"
-  shift 2
-fi
+shift 7
+
+xcodeExtraArgs=()
 USEGUI=
-if [[ ${8:-} == --usegui ]]; then
-  USEGUI=1
-  shift
-fi
+while [[ $# > 0 ]]
+do
+    key="$1"
+    case $key in
+    --extra-args)
+        [[ -n $2 ]] ||
+            exitWithError "Error: expected argument for %s option\n" "$key"
+        xcodeExtraArgs+=("$2")
+        shift
+        ;;
+    --usegui)
+        USEGUI=1
+        ;;
+    *)
+        exitWithError "Error: unrecognized option '%s'\n" "$key"
+        ;;
+    esac
+shift # past argument or value
+done
 
 run_test() {
     local thistestname simname uid
@@ -53,9 +66,9 @@ run_test() {
 
     rm -rf ${XCODE_CONFIGURATION_BUILD_DIR}
 
-    xcodebuild build-for-testing -project ${PROJECT} ${XCODE_EXTRA_ARGS} \
+    xcodebuild build-for-testing -project ${PROJECT} \
         -destination "platform=iOS Simulator,id=${uid}" \
-        -scheme ${SCHEME} \
+        -scheme ${SCHEME} ${xcodeExtraArgs[@]} \
         CONFIGURATION_BUILD_DIR=${XCODE_CONFIGURATION_BUILD_DIR} \
         SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION" 2>&1 |
           tee "${LOGDIR}/xcodebuild-ios-build-${thistestname}.log" |
@@ -64,7 +77,7 @@ run_test() {
     ${SCRIPT_DIR}/ios_simulator_cli.sh ${simname} wait
     xcrun simctl install ${uid} ${XCODE_CONFIGURATION_BUILD_DIR}/${APPNAME}.app/
 
-    xcodebuild test-without-building -project ${PROJECT} ${XCODE_EXTRA_ARGS} \
+    xcodebuild test-without-building -project ${PROJECT} ${xcodeExtraArgs[@]} \
         -destination "platform=iOS Simulator,id=${uid}" \
         -scheme ${SCHEME} \
         CONFIGURATION_BUILD_DIR=${XCODE_CONFIGURATION_BUILD_DIR} \

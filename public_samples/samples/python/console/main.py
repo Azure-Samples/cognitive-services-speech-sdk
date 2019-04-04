@@ -12,7 +12,6 @@ from collections import OrderedDict
 import platform
 
 eofkey = 'Ctrl-Z' if "Windows" == platform.system() else 'Ctrl-D'
-print('system: {}, eofkey: {}'.format(platform.system(), eofkey))
 
 samples = OrderedDict([
     (speech_sample, [

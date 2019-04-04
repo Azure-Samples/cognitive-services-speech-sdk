@@ -454,7 +454,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 6H88U8258Q;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				HEADER_SEARCH_PATHS = "";
@@ -486,7 +486,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = UBF8T346G9;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				HEADER_SEARCH_PATHS = "";
@@ -518,7 +518,7 @@
 					i386,
 				);
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = NK6235ZV5V;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = SpeechSDK_iOSUnitTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks $(SRCROOT)/../../../../xcode-build-output/";
@@ -538,7 +538,7 @@
 					i386,
 				);
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = NK6235ZV5V;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = SpeechSDK_iOSUnitTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks $(SRCROOT)/../../../../xcode-build-output/";
