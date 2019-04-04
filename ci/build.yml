@@ -1076,7 +1076,6 @@ jobs:
         else
           vsts_setvar SPEECHSDK_ENABLE_KWS false
         fi
-        vsts_setvar SPEECHSDK_ENABLE_KWS false
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: ./ci/install-build-dependencies.sh
