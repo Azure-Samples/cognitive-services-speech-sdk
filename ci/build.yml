@@ -204,8 +204,6 @@ jobs:
       targetArgument: 'source'
       result: PoliCheckSource.xml
       optionsFC: 1
-      # TODO should be removed once Policheck latest deployment is fixed:
-      toolVersion: 5.8.2.1
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
     displayName: 'PoliCheck (source-scan, dir: public samples)'
     inputs:
@@ -215,8 +213,6 @@ jobs:
       result: PoliCheckSamples.xml
       SOMEnabled: true
       optionsFC: 1
-      # TODO should be removed once Policheck latest deployment is fixed:
-      toolVersion: 5.8.2.1
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-fxcop.FxCop@2
     displayName: 'Run FxCop'
     inputs:
