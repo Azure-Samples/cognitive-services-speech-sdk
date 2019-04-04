@@ -321,7 +321,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
                 isChecked = this.immediateResultsCheckBox.IsChecked == true;
             });
 
-            EventHandler<SpeechRecognitionEventArgs> recognizingHandler = (sender, e) => RecognizedEventHandler(e, recoType);
+            EventHandler<SpeechRecognitionEventArgs> recognizingHandler = (sender, e) => RecognizingEventHandler(e, recoType);
             if (isChecked)
             {
                 recognizer.Recognizing += recognizingHandler;
