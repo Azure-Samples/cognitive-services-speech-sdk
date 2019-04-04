@@ -32,6 +32,8 @@ private:
     /// </summary>
     SPXSYNTHHANDLE m_hsynth;
 
+    /*! \cond PRIVATE */
+
     class PrivatePropertyCollection : public PropertyCollection
     {
     public:
@@ -51,6 +53,7 @@ private:
     /// </summary>
     PrivatePropertyCollection m_properties;
 
+    /*! \endcond */
 
 public:
 

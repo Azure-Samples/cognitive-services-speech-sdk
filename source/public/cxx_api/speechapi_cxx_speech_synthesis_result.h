@@ -36,6 +36,8 @@ private:
     /// </summary>
     SPXRESULTHANDLE m_hresult;
 
+    /*! \cond PRIVATE */
+
     class PrivatePropertyCollection : public PropertyCollection
     {
     public:
@@ -54,6 +56,8 @@ private:
     /// Internal member variable that holds the properties associating to the tts result.
     /// </summary>
     PrivatePropertyCollection m_properties;
+
+    /*! \endcond */
 
 public:
 
@@ -186,6 +190,8 @@ private:
     /// </summary>
     SmartHandle<SPXAUDIOSTREAMHANDLE, &audio_data_stream_release> m_haudioStream;
 
+    /*! \cond PRIVATE */
+
     class PrivatePropertyCollection : public PropertyCollection
     {
     public:
@@ -204,6 +210,8 @@ private:
     /// Internal member variable that holds the properties associating to the audio data stream.
     /// </summary>
     PrivatePropertyCollection m_properties;
+
+    /*! \endcond */
 
 public:
 

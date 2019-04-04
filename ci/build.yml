@@ -2031,13 +2031,22 @@ jobs:
       * We typically do not document protected members (Java, C++):
         Hide them at the source level by enclosing in the following Doxygen mark-up:
 
-          /*! \cond PROTECTED */`
+          /*! \cond PROTECTED */
+          ...
+          /*! \endcond */
+
+      * Similarly, in C++, a nested class definition may show up as public even
+        if the definition was done under a private qualifier. Hide these
+        classes at the source level by enclosing in the following Doxygen
+        mark-up:
+
+          /*! \cond PRIVATE */
           ...
           /*! \endcond */
 
       * In Java, we also use the following mark-up for public things that really should be internal:
 
-          /*! \cond INTERNAL */`
+          /*! \cond INTERNAL */
           ...
           /*! \endcond */
 
