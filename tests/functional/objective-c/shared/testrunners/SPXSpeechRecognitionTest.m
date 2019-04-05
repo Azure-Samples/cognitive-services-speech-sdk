@@ -4,13 +4,8 @@
 //
 
 #import <XCTest/XCTest.h>
+#import <AVFoundation/AVFoundation.h>
 #import <MicrosoftCognitiveServicesSpeech/SPXSpeechApi.h>
-
-#import "stream_utils.hpp"
-
-#include <iostream>
-#include <fstream>
-
 
 @interface SPXSpeechRecognitionEndtoEndTest : XCTestCase {
     NSString *weatherFileName;
@@ -320,6 +315,22 @@
     // this shouldn't throw, but fail on opening the connection
     SPXSpeechRecognizer *speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
     XCTAssertNotNil(speechRecognizer);
+
+    SPXSpeechRecognitionResult *result = [speechRecognizer recognizeOnce];
+    NSLog(@"recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@",
+          result.text, (long)result.reason, result.offset, result.duration, result.resultId);
+
+    SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:result];
+    NSLog(@"Error Details: %@", details.errorDetails);
+
+    XCTAssertTrue([result.text isEqualToString:@""], "Final Result Text does not match");
+    XCTAssertEqual(details.reason, SPXCancellationReason_Error);
+    XCTAssertEqualObjects(details.errorDetails, @"WebSocket Upgrade failed with an authentication error (401). Please check for correct subscription key (or authorization token) and region name.");
+    XCTAssertEqual(result.reason, SPXResultReason_Canceled);
+    XCTAssertEqual(result.duration, 0);
+    XCTAssertEqual(result.offset, 0);
+    XCTAssertGreaterThan([result.resultId length], 0);
+
 }
 
 - (void)testInvalidRegion {
@@ -336,6 +347,21 @@
     // this shouldn't throw, but fail on opening the connection
     SPXSpeechRecognizer *speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
     XCTAssertNotNil(speechRecognizer);
+
+    SPXSpeechRecognitionResult *result = [speechRecognizer recognizeOnce];
+    NSLog(@"recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@",
+          result.text, (long)result.reason, result.offset, result.duration, result.resultId);
+
+    SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:result];
+    NSLog(@"Error Details: %@", details.errorDetails);
+
+    XCTAssertTrue([result.text isEqualToString:@""], "Final Result Text does not match");
+    XCTAssertEqual(details.reason, SPXCancellationReason_Error);
+    XCTAssertEqualObjects(details.errorDetails, @"Connection failed (no connection to the remote host). Internal error: 11. Error details: 0. Please check network connection, firewall setting, and the region name used to create speech factory.");
+    XCTAssertEqual(result.reason, SPXResultReason_Canceled);
+    XCTAssertEqual(result.duration, 0);
+    XCTAssertEqual(result.offset, 0);
+    XCTAssertGreaterThan([result.resultId length], 0);
 }
 
 - (void)testEmptyRegion {
@@ -361,7 +387,6 @@
 
 
 @interface SPXSpeechRecognitionPullStreamEndtoEndTest : SPXSpeechRecognitionEndtoEndTest {
-    std::fstream m_fs;
     SPXPullAudioInputStream* stream;
 }
 
@@ -374,50 +399,56 @@
 - (void) setAudioSource {
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    NSURL *weatherUrl = [NSURL URLWithString:weatherFile];
 
-    std::string audioFileName = [weatherFile UTF8String];
-    if (audioFileName.empty())
-        throw std::invalid_argument("Audio filename is empty");
+    NSError *error = nil;
+    AVAudioFile *audioFile = [[AVAudioFile alloc] initForReading:weatherUrl commonFormat:AVAudioPCMFormatInt16 interleaved:NO error:&error];
+    const NSInteger bytesPerFrame = audioFile.fileFormat.streamDescription->mBytesPerFrame;
 
-    std::ios_base::openmode mode = std::ios_base::binary | std::ios_base::in;
-    self->m_fs.open(audioFileName, mode);
-    if (!self->m_fs.good())
-        throw std::invalid_argument("Failed to open the specified audio file.");
+    if (error)
+    {
+        NSLog(@"Error while opening file: %@", error);
+        self->stream = nil;
+        self.audioConfig = nil;
+        return;
+    }
 
-    // Get audio format from the file header.
-    GetFormatFromWavFile(self->m_fs);
+    // check the format of the file
+    NSAssert(1 == audioFile.fileFormat.channelCount, @"Bad channel count");
+    NSAssert(16000 == audioFile.fileFormat.sampleRate, @"Unexpected sample rate");
 
     self->stream = [[SPXPullAudioInputStream alloc]
                                        initWithReadHandler:
                                        ^NSInteger(NSMutableData *data, NSUInteger size) {
-                                           if (self->m_fs.eof()) {
-                                               // returns 0 to indicate that the stream reaches end.
-                                               return 0;
-                                           }
+                                           AVAudioPCMBuffer *buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:audioFile.fileFormat frameCapacity:(AVAudioFrameCount) size / bytesPerFrame];
+                                           NSError *bufferError = nil;
+                                           bool success = [audioFile readIntoBuffer:buffer error:&bufferError];
 
-                                           char* buffer = (char *)malloc(size);
-                                           self->m_fs.read((char*)buffer, size);
-                                           int count = (int)self->m_fs.gcount();
-                                           if (!self->m_fs.eof() && !self->m_fs.good()) {
+                                           NSInteger nBytes = 0;
+                                           if (!success) {
                                                // returns 0 to close the stream on read error.
-                                               NSLog(@"Read error on stream.");
-                                               count = 0;
+                                               NSLog(@"Read error on stream: %@", bufferError);
                                            }
                                            else
                                            {
+                                               // number of bytes in the buffer
+                                               nBytes = [buffer frameLength] * bytesPerFrame;
+
                                                NSRange range;
                                                range.location = 0;
-                                               range.length = count;
-                                               [data replaceBytesInRange:range withBytes:buffer];
+                                               range.length = nBytes;
+
+                                               NSAssert(1 == buffer.stride, @"only one channel allowed");
+                                               NSAssert(nil != buffer.int16ChannelData, @"assure correct format");
+
+                                               [data replaceBytesInRange:range withBytes:buffer.int16ChannelData[0]];
                                                NSLog(@"%d bytes data returned", (int)[data length]);
                                            }
-                                           free(buffer);
-                                           // returns the number of bytes that have been read.
-                                           return (NSInteger)count;
+                                           // returns the number of bytes that have been read, 0 closes the stream.
+                                           return nBytes;
                                        }
                                        closeHandler:
                                        ^(void) {
-                                           self->m_fs.close();
                                        }];
 
     self.audioConfig = [[SPXAudioConfiguration alloc] initWithStreamInput:self->stream];
@@ -451,7 +482,7 @@
 
 
 @interface SPXSpeechRecognitionPushStreamEndtoEndTest : SPXSpeechRecognitionEndtoEndTest {
-    std::fstream m_fs;
+    AVAudioFile *audioFile;
     SPXPushAudioInputStream* stream;
 }
 
@@ -465,18 +496,21 @@
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
 
-    std::string audioFileName = [weatherFile UTF8String];
-    if (audioFileName.empty()) {
-        throw std::invalid_argument("Audio filename is empty");
+    NSURL *weatherUrl = [NSURL URLWithString:weatherFile];
+    NSError *error = nil;
+    audioFile = [[AVAudioFile alloc] initForReading:weatherUrl commonFormat:AVAudioPCMFormatInt16 interleaved:NO error:&error];
+
+    if (error)
+    {
+        NSLog(@"Error while opening file: %@", error);
+        self->stream = nil;
+        self.audioConfig = nil;
+        return;
     }
 
-    std::ios_base::openmode mode = std::ios_base::binary | std::ios_base::in;
-    self->m_fs.open(audioFileName, mode);
-    if (!self->m_fs.good())
-        throw std::invalid_argument("Failed to open the specified audio file.");
-
-    // Get audio format from the file header.
-    GetFormatFromWavFile(self->m_fs);
+    // check the format of the file
+    NSAssert(1 == audioFile.fileFormat.channelCount, @"Bad channel count");
+    NSAssert(16000 == audioFile.fileFormat.sampleRate, @"Unexpected sample rate");
 
     self->stream = [[SPXPushAudioInputStream alloc] init];
 
@@ -485,32 +519,37 @@
 
 - (void)testContinuousRecognition {
     [self.speechRecognizer startContinuousRecognition];
+    const AVAudioFrameCount nBytesToRead = 3200;
+    const NSInteger bytesPerFrame = audioFile.fileFormat.streamDescription->mBytesPerFrame;
+    AVAudioPCMBuffer *buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:audioFile.fileFormat frameCapacity:nBytesToRead / bytesPerFrame];
 
-    // push stream;
-    size_t bytes = 3200;
-    char* buffer = (char *)malloc(bytes);
+    NSAssert(1 == buffer.stride, @"only one channel allowed");
+    NSAssert(nil != buffer.int16ChannelData, @"assure correct format");
+
+    // push data to stream;
     while (1)
     {
-        if (m_fs.eof()) {
-            // returns 0 to indicate that the stream reaches end.
-            [self->stream close];
-            break;
-        }
-        [NSThread sleepForTimeInterval:0.2f];
-        m_fs.read((char*)buffer, bytes);
-        int count = (int)m_fs.gcount();
-        if (!m_fs.eof() && !m_fs.good()) {
-            // returns 0 to close the stream on read error.
-            NSLog(@"Read error on stream.");
+        NSError *bufferError = nil;
+        bool success = [audioFile readIntoBuffer:buffer error:&bufferError];
+        if (!success) {
+            NSLog(@"Read error on stream: %@", bufferError);
             [self->stream close];
             break;
         }
         else
         {
-            NSData *data = [NSData dataWithBytes:buffer length:count];
+            NSInteger nBytesRead = [buffer frameLength] * bytesPerFrame;
+
+            NSLog(@"Read %d bytes from file", (int)nBytesRead);
+
+            NSData *data = [NSData dataWithBytesNoCopy:buffer.int16ChannelData[0] length:nBytesRead freeWhenDone:NO];
+            NSLog(@"%d bytes data returned", (int)[data length]);
+
             [self->stream write:data];
-            NSLog(@"Wrote %d bytes", (int)[data length]);
+            NSLog(@"Wrote %d bytes to stream", (int)[data length]);
         }
+
+        [NSThread sleepForTimeInterval:0.1f];
     }
 
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];

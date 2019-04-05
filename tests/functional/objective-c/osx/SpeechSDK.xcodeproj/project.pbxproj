@@ -12,11 +12,11 @@
 		3CBD7F13211CD69B00F72336 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CBD7F12211CD69B00F72336 /* Assets.xcassets */; };
 		3CBD7F19211CD69C00F72336 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD7F18211CD69C00F72336 /* main.m */; };
 		3CCD06CB2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
+		DC24739A22552029003FBAE6 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC24739922552029003FBAE6 /* AVFoundation.framework */; };
 		DC2A2813223FBFB0008CACAC /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DCADF54B2245375700DD94FE /* test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93FC2146D410000C7129 /* test.m */; };
 		DCADF54C2245378200DD94FE /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C676487214EA6CA00FCB533 /* microphone_test.m */; };
-		DCADF55222454DDE00DD94FE /* stream_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCADF55122454DDE00DD94FE /* stream_utils.cpp */; };
-		DCB56302224285E300662DC3 /* SPXSpeechRecognitionTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.mm */; };
+		DCB56302224285E300662DC3 /* SPXSpeechRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */; };
 		DCB56303224285E300662DC3 /* SPXDummyTestRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */; };
 		DCB56305224285E300662DC3 /* SPXTranslationRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB56301224285E300662DC3 /* SPXTranslationRecognitionTest.m */; };
 		DCB563102242AB2300662DC3 /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06CD215798DC00A348DB /* dummytest.m */; };
@@ -65,10 +65,9 @@
 		3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
 		3CCD06CC215798C100A348DB /* dummytest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = dummytest.h; path = ../../shared/dummytest.h; sourceTree = "<group>"; };
 		3CCD06CD215798DC00A348DB /* dummytest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = dummytest.m; path = ../../shared/dummytest.m; sourceTree = "<group>"; };
+		DC24739922552029003FBAE6 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		DC2A2812223FBF4D008CACAC /* SpeechSDK.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SpeechSDK.entitlements; sourceTree = "<group>"; };
-		DCADF55022454DDE00DD94FE /* stream_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = stream_utils.hpp; path = ../../shared/stream_utils.hpp; sourceTree = "<group>"; };
-		DCADF55122454DDE00DD94FE /* stream_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stream_utils.cpp; path = ../../shared/stream_utils.cpp; sourceTree = "<group>"; };
-		DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SPXSpeechRecognitionTest.mm; path = ../../shared/testrunners/SPXSpeechRecognitionTest.mm; sourceTree = "<group>"; };
+		DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXSpeechRecognitionTest.m; path = ../../shared/testrunners/SPXSpeechRecognitionTest.m; sourceTree = "<group>"; };
 		DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXDummyTestRunner.m; path = ../../shared/testrunners/SPXDummyTestRunner.m; sourceTree = "<group>"; };
 		DCB56301224285E300662DC3 /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXTranslationRecognitionTest.m; path = ../../shared/testrunners/SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -86,6 +85,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC24739A22552029003FBAE6 /* AVFoundation.framework in Frameworks */,
 				DCB563112242AD8000662DC3 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -117,8 +117,6 @@
 		3CBD7F08211CD69B00F72336 /* SpeechSDK */ = {
 			isa = PBXGroup;
 			children = (
-				DCADF55122454DDE00DD94FE /* stream_utils.cpp */,
-				DCADF55022454DDE00DD94FE /* stream_utils.hpp */,
 				DC2A2812223FBF4D008CACAC /* SpeechSDK.entitlements */,
 				3C676486214EA6CA00FCB533 /* microphone_test.h */,
 				3C676487214EA6CA00FCB533 /* microphone_test.m */,
@@ -137,7 +135,7 @@
 			isa = PBXGroup;
 			children = (
 				DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */,
-				DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.mm */,
+				DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */,
 				DCB56301224285E300662DC3 /* SPXTranslationRecognitionTest.m */,
 				3CBD7F24211CD69C00F72336 /* Info.plist */,
 			);
@@ -147,6 +145,7 @@
 		A2AB0BD821532D8800171A08 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DC24739922552029003FBAE6 /* AVFoundation.framework */,
 				3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */,
 			);
 			name = Frameworks;
@@ -272,10 +271,9 @@
 				DCADF54B2245375700DD94FE /* test.m in Sources */,
 				DCB56303224285E300662DC3 /* SPXDummyTestRunner.m in Sources */,
 				DCB56305224285E300662DC3 /* SPXTranslationRecognitionTest.m in Sources */,
-				DCB56302224285E300662DC3 /* SPXSpeechRecognitionTest.mm in Sources */,
+				DCB56302224285E300662DC3 /* SPXSpeechRecognitionTest.m in Sources */,
 				DCB563102242AB2300662DC3 /* dummytest.m in Sources */,
 				DCADF54C2245378200DD94FE /* microphone_test.m in Sources */,
-				DCADF55222454DDE00DD94FE /* stream_utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
