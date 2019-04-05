@@ -113,6 +113,16 @@
     return [NSString StringWithStdString:speechConfigImpl->GetRegion()];
 }
 
+- (void)setOutputFormat: (SPXOutputFormat)outputFormat
+{
+    speechConfigImpl->SetOutputFormat((SpeechImpl::OutputFormat)(int)outputFormat);
+}
+
+- (SPXOutputFormat)outputFormat
+{
+    return [Util fromOutputFormatImpl:speechConfigImpl->GetOutputFormat()];
+}
+
 -(void)setProxyUsingHost:(NSString *)proxyHostName Port:(unsigned int)proxyPort UserName:(NSString *)proxyUserName Password:(NSString *)proxyPassword
 {
     if ((proxyHostName == NULL) || ([proxyHostName length] == 0))
@@ -131,11 +141,6 @@
 }
 
 -(NSString *)getPropertyByName:(NSString *)name
-{
-    return [NSString StringWithStdString:speechConfigImpl->GetProperty([name string])];
-}
-
--(NSString *)setPropertyByName:(NSString *)name
 {
     return [NSString StringWithStdString:speechConfigImpl->GetProperty([name string])];
 }

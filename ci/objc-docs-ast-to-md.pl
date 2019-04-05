@@ -54,7 +54,7 @@ $RE{ObjCPropertyDecl} = qr/
   \s$H{col}
   \s(?<name>\w+)
   \s'(?<type>.*?)':'(?<basetype>.*?)'
-  (?:\s(?<flags>(?:readwrite|readonly|copy|atomic|nonatomic))(?:\s(?:readwrite|readonly|copy|atomic|nonatomic))*)?
+  (?:\s(?<flags>(?:readwrite|readonly|copy|atomic|nonatomic|unsafe_unretained|assign)(?:\s(?:readwrite|readonly|copy|atomic|nonatomic|unsafe_unretained|assign))*))?
   \r?$
 /x;
 $RE{ObjCProtocolDecl} = qr/ObjCProtocolDecl $H{hex} $H{range} $H{loc} (?<name>\w*)\r?$/;
@@ -378,7 +378,7 @@ foreach my $if (@interfaces) {
     foreach my $m (@{$if->{property}}) {
       printf $fh "### %s\n\n```objc\n\@property (%s) %s %s;\n```\n\n%s\n\n",
         $m->{name},
-        $m->{flags},
+        (join ', ', (split " ", $m->{flags})),
         $m->{type},
         $m->{name},
         $m->{fullcomment}{description};

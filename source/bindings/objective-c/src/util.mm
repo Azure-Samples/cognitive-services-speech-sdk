@@ -138,4 +138,25 @@
     return reason;
 }
 
++ (SPXOutputFormat) fromOutputFormatImpl:(SpeechImpl::OutputFormat)outputFormatImpl
+{
+    SPXOutputFormat outputFormat;
+    switch (outputFormatImpl)
+    {
+        case SpeechImpl::OutputFormat::Simple:
+            outputFormat = SPXOutputFormat_Simple;
+            break;
+        case SpeechImpl::OutputFormat::Detailed:
+            outputFormat = SPXOutputFormat_Detailed;
+            break;
+        default:
+            // Todo error handling.
+            NSLog(@"Unknown NoMatchReason value: %d.", (int)outputFormatImpl);
+            outputFormat = SPXOutputFormat_Simple;
+            break;
+    }
+    return outputFormat;
+}
+
+
 @end

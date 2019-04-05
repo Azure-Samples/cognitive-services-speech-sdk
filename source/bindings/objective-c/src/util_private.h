@@ -13,5 +13,6 @@
 + (SPXCancellationReason) fromCancellationReasonImpl:(SpeechImpl::CancellationReason)reasonImpl;
 + (SPXCancellationErrorCode) fromCancellationErrorCodeImpl:(SpeechImpl::CancellationErrorCode)errorCodeImpl;
 + (SPXNoMatchReason) fromNoMatchReasonImpl:(SpeechImpl::NoMatchReason)reasonImpl;
++ (SPXOutputFormat) fromOutputFormatImpl:(SpeechImpl::OutputFormat)outputFormatImpl;
 
 @end

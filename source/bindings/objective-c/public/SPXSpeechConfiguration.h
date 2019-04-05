@@ -23,6 +23,11 @@ SPX_EXPORT
 @property (nonatomic, copy, nullable)NSString *endpointId;
 
 /**
+ * The output format of the recognition result.
+ */
+@property (nonatomic)SPXOutputFormat outputFormat;
+
+/**
   * Authorization token.
   * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
   * expires, the caller needs to refresh it by calling this setter with a new valid token.
@@ -41,7 +46,6 @@ SPX_EXPORT
   * Region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
   */
 @property (nonatomic, copy, readonly, nullable)NSString *region;
-
 
 /**
   * Initializes an instance of a speech configuration with the specified subscription key and service region.

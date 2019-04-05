@@ -50,7 +50,14 @@
     testSpeechConfig.authorizationToken = value;
     value = testSpeechConfig.subscriptionKey;
     value = testSpeechConfig.region;
-    
+
+    // test setting/getting output format
+    NSAssert(SPXOutputFormat_Simple == testSpeechConfig.outputFormat, @"Unexpected default output format");
+    testSpeechConfig.outputFormat = SPXOutputFormat_Simple;
+    NSAssert(SPXOutputFormat_Simple == testSpeechConfig.outputFormat, @"Unexpected output format");
+    testSpeechConfig.outputFormat = SPXOutputFormat_Detailed;
+    NSAssert(SPXOutputFormat_Detailed == testSpeechConfig.outputFormat, @"Unexpected output format");
+
     // test speech recognizer
     SPXSpeechRecognizer *testSpeechRecognizer = [[SPXSpeechRecognizer alloc] init:testSpeechConfig];
     value = testSpeechRecognizer.endpointId;
