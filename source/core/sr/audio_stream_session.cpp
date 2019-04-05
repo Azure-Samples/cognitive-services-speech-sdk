@@ -310,7 +310,7 @@ void CSpxAudioStreamSession::WriteTracingEvent()
     const char * micName = GetStringValue("SPEECH-MicrophoneNiceName", "").c_str();
 
     TraceLoggingWrite(tracingEventProvider, "RecognizerCreationEvent",
-        TraceLoggingKeyword(MICROSOFT_KEYWORD_TELEMETRY),
+        TraceLoggingKeyword(MICROSOFT_KEYWORD_MEASURES),
         TraceLoggingString(sessionId, "SessionId"),
         TraceLoggingString(micName, "Microphone"));
 #endif
