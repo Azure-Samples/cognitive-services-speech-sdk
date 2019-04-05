@@ -722,7 +722,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await helper.CompleteContinuousRecognition(recognizer);
 
-                Assert.AreEqual(TestData.English.Margarita.Utterance.Length, recognizedText.Count);
                 AssertFuzzyMatching(TestData.English.Margarita.Utterance, recognizedText.ToArray(), 5);
             }
         }
