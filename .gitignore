@@ -19,6 +19,7 @@
 [Rr]eleases/
 x64/
 x86/
+amd64/
 bld/
 [Bb]in/
 [Oo]bj/
@@ -301,6 +302,4 @@ samples/cpp/windows/console/samples/sample
 *.dll
 *.exe
 samples/csharp/dotnet-windows/speechtotext-wpf/speechtotext-wpf/objd/amd64/speechtotext-wpf.exe.config
-samples/csharp/dotnet-windows/speechtotext-wpf/speechtotext-wpf/objd/amd64/whatstheweatherlike.wav
-samples/batch/csharp/App.config
 samples/csharp/dotnet-windows/speechtotext-wpf/speechtotext-wpf/objd/amd64/Microsoft.CognitiveServices.Speech.csharp.xml
