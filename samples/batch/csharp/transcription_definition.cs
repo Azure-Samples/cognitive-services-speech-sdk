@@ -36,7 +36,7 @@ namespace BatchClient
 
         public IEnumerable<ModelIdentity> Models { get; set; }
 
-        IDictionary<string, string> properties { get; set; }
+        public IDictionary<string, string> properties { get; set; }
 
         public static TranscriptionDefinition Create(
             string name,
