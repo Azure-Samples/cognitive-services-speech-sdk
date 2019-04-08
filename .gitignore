@@ -299,5 +299,3 @@ quickstart/csharp-unity/[Ll]ogs/
 # Linux executables
 quickstart/cpp-linux/helloworld
 samples/cpp/windows/console/samples/sample
-*.dll
-*.exe
