@@ -301,5 +301,3 @@ quickstart/cpp-linux/helloworld
 samples/cpp/windows/console/samples/sample
 *.dll
 *.exe
-samples/csharp/dotnet-windows/speechtotext-wpf/speechtotext-wpf/objd/amd64/speechtotext-wpf.exe.config
-samples/csharp/dotnet-windows/speechtotext-wpf/speechtotext-wpf/objd/amd64/Microsoft.CognitiveServices.Speech.csharp.xml
