@@ -5,6 +5,8 @@
 // usp_reco_engine_adapter.cpp: Implementation definitions for CSpxUspRecoEngineAdapter C++ class
 //
 
+#include <vector>
+
 #include "stdafx.h"
 #include "usp_reco_engine_adapter.h"
 #include "handle_table.h"
@@ -500,24 +502,13 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISpx
     auto uspSubscriptionKey = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key));
     auto uspAuthToken = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token));
     auto uspRpsToken = properties->GetStringValue("SPEECH-RpsToken");
+    std::vector<std::string> authData((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
 
-    // Use those properties to determine which authentication type to use
-    if (!uspSubscriptionKey.empty())
-    {
-        return client.SetAuthentication(USP::AuthenticationType::SubscriptionKey, uspSubscriptionKey);
-    }
-    if (!uspAuthToken.empty())
-    {
-        return client.SetAuthentication(USP::AuthenticationType::AuthorizationToken, uspAuthToken);
-    }
-    if (!uspRpsToken.empty())
-    {
-        return client.SetAuthentication(USP::AuthenticationType::SearchDelegationRPSToken, uspRpsToken);
-    }
+    authData[(size_t)USP::AuthenticationType::SubscriptionKey] = uspSubscriptionKey;
+    authData[(size_t)USP::AuthenticationType::AuthorizationToken] = uspAuthToken;
+    authData[(size_t)USP::AuthenticationType::SearchDelegationRPSToken] = uspRpsToken;
 
-    ThrowInvalidArgumentException("No Authentication parameters were specified.");
-
-    return client; // fixes "not all control paths return a value"
+    return client.SetAuthentication(authData);
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspProxyInfo(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)

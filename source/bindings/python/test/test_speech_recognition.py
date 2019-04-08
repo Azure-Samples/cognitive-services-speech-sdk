@@ -118,7 +118,7 @@ def test_speech_config_default_constructor(config_type):
     assert "sometoken" == speech_config.authorization_token
     assert "someregion" == speech_config.region
 
-    # from_endpoint
+    # from_endpoint and subscription
     speech_config = config_type(endpoint="someendpoint", subscription="somesubscription")
     assert speech_config
     assert "somesubscription" == speech_config.subscription_key
@@ -163,6 +163,7 @@ def test_speech_config_default_constructor(config_type):
 
     # check that all nonsupported construction methods raise
     from itertools import product
+    endpoint_id = msspeech.PropertyId.SpeechServiceConnection_Endpoint
     for subscription, region, endpoint, auth_token in product((None, "somekey"),
             (None, "someregion"),
             (None, "someendpoint"),
@@ -176,6 +177,11 @@ def test_speech_config_default_constructor(config_type):
                     endpoint=endpoint,
                     auth_token=auth_token)
             assert speech_config
+            assert speech_config.region == (region or '')
+            actual_endpoint = speech_config.get_property(endpoint_id)
+            assert actual_endpoint == (endpoint or '')
+            assert speech_config.subscription_key == (subscription or '')
+            assert speech_config.authorization_token == (auth_token or '')
         else:
             with pytest.raises(ValueError):
                 speech_config = config_type(subscription=subscription,
@@ -424,3 +430,69 @@ def test_speech_config_set_proxy(config_type):
     assert "username" == config.get_property(msspeech.PropertyId.SpeechServiceConnection_ProxyUserName)
     assert "very_secret123" == config.get_property(msspeech.PropertyId.SpeechServiceConnection_ProxyPassword)
 
+
+import requests
+def get_token(subscription, region):
+    fetch_token_url = "https://{}.api.cognitive.microsoft.com/sts/v1.0/issueToken".format(region)
+    headers = {
+        'Ocp-Apim-Subscription-Key': subscription
+    }
+    response = requests.post(fetch_token_url, headers=headers)
+    return str(response.text)
+
+
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_set_authorization_token_on_recognizer(subscription, speech_input, speech_region):
+    invalid_token = "InvalidToken"
+    config_with_token = msspeech.SpeechConfig(auth_token=invalid_token, region=speech_region)
+    assert invalid_token == config_with_token.authorization_token
+
+    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    speech_recognizer = msspeech.SpeechRecognizer(config_with_token, audio_input)
+
+    new_token = get_token(subscription, speech_region)
+    speech_recognizer.authorization_token = new_token
+    assert new_token == speech_recognizer.authorization_token
+
+    result = speech_recognizer.recognize_once()
+    _check_sr_result(result, speech_input, 0)
+
+
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_subscription_key_and_invalid_auth_token(subscription, speech_input, speech_region):
+    invalid_token = "InvalidToken"
+    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+
+    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    speech_recognizer = msspeech.SpeechRecognizer(config, audio_input)
+    speech_recognizer.authorization_token = invalid_token
+
+    result = speech_recognizer.recognize_once()
+    _check_sr_result(result, speech_input, 0)
+
+
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_subscription_key_and_valid_auth_token(subscription, speech_input, speech_region):
+    valid_token = get_token(subscription, speech_region)
+    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config.authorization_token = valid_token
+
+    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    speech_recognizer = msspeech.SpeechRecognizer(config, audio_input)
+
+    result = speech_recognizer.recognize_once()
+    _check_sr_result(result, speech_input, 0)
+
+
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_subscription_key_and_expired_auth_token(subscription, speech_input, speech_region):
+    expired_token = "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1cm46bXMuY29nbml0aXZlc2VydmljZXMiLCJleHAiOiIxNTU0MzE1Nzk5IiwicmVnaW9uIjoibm9ydGhldXJvcGUiLCJzdWJzY3JpcHRpb24taWQiOiIwNmZlNjU2MWVkZTM0NDdiYTg2NDY5Njc4YTIwNTNkYiIsInByb2R1Y3QtaWQiOiJTcGVlY2hTZXJ2aWNlcy5TMCIsImNvZ25pdGl2ZS1zZXJ2aWNlcy1lbmRwb2ludCI6Imh0dHBzOi8vYXBpLmNvZ25pdGl2ZS5taWNyb3NvZnQuY29tL2ludGVybmFsL3YxLjAvIiwiYXp1cmUtcmVzb3VyY2UtaWQiOiIvc3Vic2NyaXB0aW9ucy8zYTk2ZWY1Ni00MWE5LTQwYTAtYjBmMy1mYjEyNWMyYjg3OTgvcmVzb3VyY2VHcm91cHMvY3NzcGVlY2hzZGstY2FyYm9uL3Byb3ZpZGVycy9NaWNyb3NvZnQuQ29nbml0aXZlU2VydmljZXMvYWNjb3VudHMvc3BlZWNoc2Rrbm9ydGhldXJvcGUiLCJzY29wZSI6InNwZWVjaHNlcnZpY2VzIiwiYXVkIjoidXJuOm1zLnNwZWVjaHNlcnZpY2VzLm5vcnRoZXVyb3BlIn0.hVAWT2YHjknFI6qLhnjmjzoNgOgxKWguuFhJLlyDxLU"
+    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config.authorization_token = expired_token
+
+    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    speech_recognizer = msspeech.SpeechRecognizer(config, audio_input)
+    assert expired_token == speech_recognizer.authorization_token
+
+    result = speech_recognizer.recognize_once()
+    _check_sr_result(result, speech_input, 0)

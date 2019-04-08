@@ -33,7 +33,7 @@ else
 fi
 
 # install dependencies inside the virtualenv
-${VIRTUALENV_PYTHON} -m pip install pytest==4.2.0
+${VIRTUALENV_PYTHON} -m pip install pytest==4.2.0 requests==2.21.0
 
 if ! existsExactlyOneFile ${BUILD_DIR}/*.whl; then
     exitWithError "there is more than one wheel built, don't know which one to choose\n"

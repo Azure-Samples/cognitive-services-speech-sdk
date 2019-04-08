@@ -341,13 +341,17 @@ int main(int argc, char* argv[])
     // Set Authentication.
     if (!authData.empty())
     {
-        auto type = USP::AuthenticationType::SubscriptionKey;
+        vector<string> authInfo((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
         if (client.GetEndpointType() == USP::EndpointType::CDSDK)
         {
-            type = USP::AuthenticationType::SearchDelegationRPSToken;
+            authInfo[(size_t)USP::AuthenticationType::SearchDelegationRPSToken] = authData;;
+        }
+        else
+        {
+            authInfo[(size_t)USP::AuthenticationType::SubscriptionKey] = authData;
         }
 
-        client.SetAuthentication(type, authData);
+        client.SetAuthentication(authInfo);
     }
 
     if (useFiddlerProxy == true)

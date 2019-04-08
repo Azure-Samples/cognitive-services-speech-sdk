@@ -297,8 +297,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertEqual(0, connectedEventCount, AssertOutput.WrongConnectedEventCount);
                 Assert.AreEqual(ResultReason.Canceled, result.Reason);
                 var cancellation = CancellationDetails.FromResult(result);
-                Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
-                Assert.AreEqual(cancellation.ErrorCode, expectedErrorCode);
+                Assert.AreEqual(CancellationReason.Error, cancellation.Reason);
+                Assert.AreEqual(expectedErrorCode, cancellation.ErrorCode);
                 AssertHelpers.AssertStringContains(cancellation.ErrorDetails, expectedErrorMessage);
             }
         }

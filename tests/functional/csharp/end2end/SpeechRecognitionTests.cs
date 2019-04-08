@@ -168,10 +168,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task InvalidTokenHandledProperly()
+        public async Task InvalidAuthTokenHandledProperly()
         {
             var invalidToken = "InvalidToken";
             var configWithInvalidToken = SpeechConfig.FromAuthorizationToken(invalidToken, region);
+            await AssertConnectionError(configWithInvalidToken, CancellationErrorCode.AuthenticationFailure, "WebSocket Upgrade failed with an authentication error (401)");
+        }
+
+        [TestMethod]
+        public async Task ExpiredAuthTokenHandledProperly()
+        {
+            var expiredToken = "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1cm46bXMuY29nbml0aXZlc2VydmljZXMiLCJleHAiOiIxNTU0MzE1Nzk5IiwicmVnaW9uIjoibm9ydGhldXJvcGUiLCJzdWJzY3JpcHRpb24taWQiOiIwNmZlNjU2MWVkZTM0NDdiYTg2NDY5Njc4YTIwNTNkYiIsInByb2R1Y3QtaWQiOiJTcGVlY2hTZXJ2aWNlcy5TMCIsImNvZ25pdGl2ZS1zZXJ2aWNlcy1lbmRwb2ludCI6Imh0dHBzOi8vYXBpLmNvZ25pdGl2ZS5taWNyb3NvZnQuY29tL2ludGVybmFsL3YxLjAvIiwiYXp1cmUtcmVzb3VyY2UtaWQiOiIvc3Vic2NyaXB0aW9ucy8zYTk2ZWY1Ni00MWE5LTQwYTAtYjBmMy1mYjEyNWMyYjg3OTgvcmVzb3VyY2VHcm91cHMvY3NzcGVlY2hzZGstY2FyYm9uL3Byb3ZpZGVycy9NaWNyb3NvZnQuQ29nbml0aXZlU2VydmljZXMvYWNjb3VudHMvc3BlZWNoc2Rrbm9ydGhldXJvcGUiLCJzY29wZSI6InNwZWVjaHNlcnZpY2VzIiwiYXVkIjoidXJuOm1zLnNwZWVjaHNlcnZpY2VzLm5vcnRoZXVyb3BlIn0.hVAWT2YHjknFI6qLhnjmjzoNgOgxKWguuFhJLlyDxLU";
+            var configWithInvalidToken = SpeechConfig.FromAuthorizationToken(expiredToken, region);
             await AssertConnectionError(configWithInvalidToken, CancellationErrorCode.AuthenticationFailure, "WebSocket Upgrade failed with an authentication error (401)");
         }
 
@@ -604,11 +612,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine($"Result1: {result.ToString()}");
                 Console.WriteLine($"Result2: {result2.ToString()}");
 
-                Assert.AreEqual(result.Reason, ResultReason.RecognizedSpeech);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
                 AssertStringContains(result.Text, "detective skills");
                 Assert.IsTrue(result.Duration.Ticks > 0, $"Result duration {result.Duration.Ticks} in {result.ToString()} should be greater than 0");
 
-                Assert.AreEqual(result2.Reason, ResultReason.RecognizedSpeech);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result2.Reason);
                 Assert.IsTrue(offset2 >= expectedNextOffset, $"Offset of the second recognition {offset2} should be greater or equal than offset of the first plus duration {expectedNextOffset}.");
             }
         }

@@ -35,12 +35,15 @@ public:
     void Init()
     {
         auto region = Config::Region.empty() ? "westus" : Config::Region;
+        vector<string> authData((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
+        authData[(size_t)USP::AuthenticationType::SubscriptionKey] = Keys::Speech;
+
         m_threadService = std::make_shared<CSpxThreadService>();
         m_threadService->Init();
         auto client = USP::Client(shared_from_this(), m_endpoint, PAL::CreateGuidWithoutDashes(), m_threadService)
             .SetRecognitionMode(m_mode)
             .SetRegion(region)
-            .SetAuthentication(USP::AuthenticationType::SubscriptionKey, Keys::Speech);
+            .SetAuthentication(authData);
         if (!Config::Endpoint.empty())
         {
             client.SetEndpointType(USP::EndpointType::Speech).SetEndpointUrl(Config::Endpoint);
@@ -196,10 +199,12 @@ TEST_CASE("USP uses TLS12", "[usp]")
     auto service = std::make_shared<CSpxThreadService>();
     service->Init();
     auto callbacks = std::make_shared<TlsCheck>();
+    vector<string> authData((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
+    authData[(size_t)USP::AuthenticationType::SubscriptionKey] = "test";
     auto client = USP::Client(callbacks, USP::EndpointType::Speech, PAL::CreateGuidWithoutDashes(), service)
         .SetRegion("westus")
         .SetEndpointUrl("wss://www.github.com/")
-        .SetAuthentication(USP::AuthenticationType::SubscriptionKey, "test");
+        .SetAuthentication(authData);
 
     auto connection = client.Connect();
     constexpr unsigned int dataSize = 7;
@@ -225,10 +230,12 @@ TEST_CASE("Port specification", "[usp]")
         auto service = std::make_shared<CSpxThreadService>();
         service->Init();
         auto callbacks = std::make_shared<PortCheck>();
+        vector<string> authData((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
+        authData[(size_t)USP::AuthenticationType::SubscriptionKey] = "test";
         auto client = USP::Client(callbacks, USP::EndpointType::Speech, PAL::CreateGuidWithoutDashes(), service)
             .SetRegion("westus")
             .SetEndpointUrl("ws://127.0.0.1:12345/mytest")
-            .SetAuthentication(USP::AuthenticationType::SubscriptionKey, "test");
+            .SetAuthentication(authData);
 
         auto connection = client.Connect();
         constexpr unsigned int dataSize = 7;
@@ -243,10 +250,12 @@ TEST_CASE("Port specification", "[usp]")
         auto service = std::make_shared<CSpxThreadService>();
         service->Init();
         auto callbacks = std::make_shared<PortCheck>();
+        vector<string> authData((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
+        authData[(size_t)USP::AuthenticationType::SubscriptionKey] = "test";
         auto client = USP::Client(callbacks, USP::EndpointType::Speech, PAL::CreateGuidWithoutDashes(), service)
             .SetRegion("westus")
             .SetEndpointUrl("wss://myserver:50/mydir/myapi?foo=bar")
-            .SetAuthentication(USP::AuthenticationType::SubscriptionKey, "test");
+            .SetAuthentication(authData);
 
         auto connection = client.Connect();
         constexpr unsigned int dataSize = 7;
@@ -262,10 +271,12 @@ TEST_CASE("Port specification", "[usp]")
         auto service = std::make_shared<CSpxThreadService>();
         service->Init();
         auto callbacks = std::make_shared<PortCheck>();
+        vector<string> authData((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
+        authData[(size_t)USP::AuthenticationType::SubscriptionKey] = "test";
         auto client = USP::Client(callbacks, USP::EndpointType::Speech, PAL::CreateGuidWithoutDashes(), service)
             .SetRegion("westus")
             .SetEndpointUrl("ws://127.0.0.1:abc/mytest")  // Invalid port specification, should fail on connect.
-            .SetAuthentication(USP::AuthenticationType::SubscriptionKey, "test");
+            .SetAuthentication(authData);
 
         REQUIRE_THROWS_WITH(client.Connect(), "Runtime error: Failed to create transport request.");
     }

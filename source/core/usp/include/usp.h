@@ -14,6 +14,7 @@
 #include "uspmessages.h"
 #include "ispxinterfaces.h"
 #include "audio_chunk.h"
+#include "exception.h"
 
 struct ProxyServerInfo;
 
@@ -109,7 +110,7 @@ enum class RecognitionMode : unsigned int { Interactive = 0, Conversation = 1, D
 
 enum class OutputFormat : unsigned int { Simple = 0, Detailed = 1 };
 
-enum class AuthenticationType { SubscriptionKey, AuthorizationToken, SearchDelegationRPSToken };
+enum class AuthenticationType { SubscriptionKey, AuthorizationToken, SearchDelegationRPSToken, SIZE_AUTHENTICATION_TYPE };
 
 enum class MessageType { Config, Context, Agent };
 
@@ -196,7 +197,7 @@ public:
         m_recoMode(RecognitionMode::Interactive),
         m_outputFormat(OutputFormat::Simple),
         m_language(s_defaultLanguage),
-        m_authType(AuthenticationType::SubscriptionKey),
+        m_authData((size_t)AuthenticationType::SIZE_AUTHENTICATION_TYPE,""),
         m_connectionId(connectionId),
         m_threadService(threadService)
     {
@@ -258,9 +259,13 @@ public:
     * @param authType The type of authentication to be used.
     * @param authData The authentication data for the specified authentication type.
     */
-    Client& SetAuthentication(AuthenticationType authType, const std::string& authData)
+    Client& SetAuthentication(const std::vector<std::string>& authData)
     {
-        m_authType = authType;
+        if (authData.size() != (size_t)AuthenticationType::SIZE_AUTHENTICATION_TYPE)
+        {
+           ::Microsoft::CognitiveServices::Speech::Impl::ThrowLogicError("Incorrect authentication configuration: array size mismatch.");
+        }
+
         m_authData = authData;
         return *this;
     }
@@ -368,8 +373,7 @@ private:
 
      std::string m_intentRegion;
 
-     AuthenticationType m_authType;
-     std::string m_authData;
+     std::vector<std::string> m_authData;
 
      std::wstring m_connectionId;
 

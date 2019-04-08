@@ -1,10 +1,11 @@
 # Copyright (c) Microsoft. All rights reserved.
 # See https://aka.ms/csspeech/license201809 for the full license information.
 
-import traceback
+import pytest
+import requests
 import sys
 import time
-import pytest
+import traceback
 import azure.cognitiveservices.speech as msspeech
 
 # the timeout to wait for session stopped event after recognition is finished
@@ -191,4 +192,14 @@ def _check_intent_result(result, intent_input, utterance_index):
 
     _check_result_common(result, intent_input, utterance_index, do_check_duration=False,
             do_check_offset=False)
+
+
+def get_token(subscription, region):
+    """retireve an authorization token for the Speech Service"""
+    fetch_token_url = "https://{}.api.cognitive.microsoft.com/sts/v1.0/issueToken".format(region)
+    headers = {
+        'Ocp-Apim-Subscription-Key': subscription
+    }
+    response = requests.post(fetch_token_url, headers=headers)
+    return str(response.text)
 

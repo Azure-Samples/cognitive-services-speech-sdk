@@ -10,8 +10,6 @@
 #endif
 
 #include "stdafx.h"
-#include <vector>
-#include <set>
 
 #include <assert.h>
 #include <inttypes.h>
@@ -226,10 +224,7 @@ bool Connection::Impl::IsConnected()
 
 void Connection::Impl::Validate()
 {
-    if (m_config.m_authData.empty())
-    {
-        ThrowInvalidArgumentException("No valid authentication mechanism was specified.");
-    }
+
 }
 
 string Connection::Impl::EncodeParameterString(const string& parameter) const
@@ -407,39 +402,35 @@ void Connection::Impl::Connect()
         HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::audioResponseFormat, m_config.m_audioResponseFormat.c_str());
     }
 
-    assert(!m_config.m_authData.empty());
-
-    switch (m_config.m_authType)
+    // Set authentication headers.
+    auto authStr = m_config.m_authData[(size_t)AuthenticationType::SubscriptionKey];
+    if (!authStr.empty())
     {
-    case AuthenticationType::SubscriptionKey:
-        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::ocpApimSubscriptionKey, m_config.m_authData.c_str()) != 0)
+        LogInfo("Adding subscription key headers");
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::ocpApimSubscriptionKey, authStr.c_str()) != 0)
         {
             ThrowRuntimeError("Failed to set authentication using subscription key.");
         }
-        break;
-
-    case AuthenticationType::AuthorizationToken:
+    }
+    authStr = m_config.m_authData[(size_t)AuthenticationType::AuthorizationToken];
+    if (!authStr.empty())
+    {
+        LogInfo("Adding authorization token headers");
+        auto token = "Bearer " + authStr;
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::authorization, token.c_str()) != 0)
         {
-            ostringstream oss;
-            oss << "Bearer " << m_config.m_authData;
-            auto token = oss.str();
-            if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::authorization, token.c_str()) != 0)
-            {
-                ThrowRuntimeError("Failed to set authentication using authorization token.");
-            }
+            ThrowRuntimeError("Failed to set authentication using authorization token.");
         }
-        break;
+    }
+    authStr = m_config.m_authData[(size_t)AuthenticationType::SearchDelegationRPSToken];
+    if (!authStr.empty())
+    {
 
-    // TODO(1126805): url builder + auth interfaces
-    case AuthenticationType::SearchDelegationRPSToken:
-        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::searchDelegationRPSToken, m_config.m_authData.c_str()) != 0)
+        LogInfo("Adding search delegation RPS token.");
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::searchDelegationRPSToken, authStr.c_str()) != 0)
         {
             ThrowRuntimeError("Failed to set authentication using Search-DelegationRPSToken.");
         }
-        break;
-
-    default:
-        ThrowRuntimeError("Unsupported authentication type");
     }
 
     auto connectionUrl = ConstructConnectionUrl();
