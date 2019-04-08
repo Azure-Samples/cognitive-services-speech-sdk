@@ -17,16 +17,16 @@ namespace BatchClient
     {
         // <batchdefinition>
         // Replace with your subscription key
-        private const string SubscriptionKey = "<Your Subscription Key>";
+        private const string SubscriptionKey = "<YourSubscriptionKey>";
   
         // Update with your service region
-        private const string HostName = "<region>.cris.ai";
+        private const string HostName = "<YourServiceRegion>.cris.ai";
         private const int Port = 443;
 
         // recordings and locale
         private const string Locale = "en-US";
-        //private const string RecordingsBlobUri = "<URI pointing to an audio file stored in Azure Blob Storage>";
-        private const string RecordingsBlobUri = "<SAS Uri to the recording>";
+        private const string RecordingsBlobUri = "<SAS URI pointing to an audio file stored in Azure Blob Storage>";
+       
 
         // For usage of baseline models, no acoustic and language model needs to be specified.
         private static Guid[] modelList = new Guid[0];
