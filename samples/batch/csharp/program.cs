@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +25,8 @@ namespace BatchClient
 
         // recordings and locale
         private const string Locale = "en-US";
-        private const string RecordingsBlobUri = "<URI pointing to an audio file stored in Azure Blob Storage>";
+        private const string RecordingsBlobUri = "<SAS URI pointing to an audio file stored in Azure Blob Storage>";
+       
 
         // For usage of baseline models, no acoustic and language model needs to be specified.
         private static Guid[] modelList = new Guid[0];
@@ -100,16 +102,18 @@ namespace BatchClient
                             // if the transcription was successfull, check the results
                             if (transcription.Status == "Succeeded")
                             {
-                                var resultsUri = transcription.ResultsUrls["channel_0"];
-
+                                var resultsUri0 = transcription.ResultsUrls["channel_0"];
+                     
                                 WebClient webClient = new WebClient();
 
                                 var filename = Path.GetTempFileName();
-                                webClient.DownloadFile(resultsUri, filename);
-
-                                var results = File.ReadAllText(filename);
+                                webClient.DownloadFile(resultsUri0, filename);
+                                var results0 = File.ReadAllText(filename);
+                                var resultObject0 = JsonConvert.DeserializeObject<RootObject>(results0);
+                                Console.WriteLine(results0);
+                                
                                 Console.WriteLine("Transcription succeeded. Results: ");
-                                Console.WriteLine(results);
+                                Console.WriteLine(results0);
                             }
                             break;
 
