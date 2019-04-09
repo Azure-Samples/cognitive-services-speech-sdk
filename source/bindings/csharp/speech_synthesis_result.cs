@@ -47,7 +47,7 @@ namespace Microsoft.CognitiveServices.Speech
         public ResultReason Reason { get; }
 
         /// <summary>
-        /// Presents the synthsized audio in the result.
+        /// Presents the synthesized audio in the result.
         /// </summary>
         public byte[] AudioData { get; }
 
