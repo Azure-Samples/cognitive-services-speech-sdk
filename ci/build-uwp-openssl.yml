@@ -3,7 +3,7 @@ variables:
   TargetOs: Universal
   Win10KitVersion: 10.0
   Charset: Unicode
-  Sha1: 33c1190a9d27da3f03717466cd496c3d06fc890e
+  Sha1: 92f02f5a311d536b2f7894e46d3b5039ad3568c8 # 1.0.2r in Microsoft/openssl
 
 pool:
   vmImage: vs2017-win2016
