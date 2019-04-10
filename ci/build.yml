@@ -385,7 +385,6 @@ jobs:
       # checks
       [[ -z $should_be_empty ]]
       printf '%d' "$build_id" > /dev/null
-
       vsts_setvar SPEECHSDK_UWP_OPENSSL_BUILD_ID "$build_id"
     displayName: Get UWP OpenSSL build ID
   - task: DownloadBuildArtifacts@0
@@ -1105,6 +1104,27 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
       os: Android
+  - bash: |
+      set -u -e -o pipefail
+      . ci/functions.sh
+      IFS=$' \t\n\r' read build_id should_be_empty < external/android-openssl/build_id.txt
+      # checks
+      [[ -z $should_be_empty ]]
+      printf '%d' "$build_id" > /dev/null
+      vsts_setvar __getAndroidSslArtifactInternal_BuildId "$build_id"
+    displayName: Get Android SSL build ID
+  - task: DownloadBuildArtifacts@0
+    displayName: Download Android SSL build artifact
+    inputs:
+      buildType: specific
+      project: 'e71f1362-9c7d-488b-99c7-3376db8d3302' # Skyman
+      pipeline: 7260 # Yml - Carbon Android Dependencies
+      buildVersionToDownload: specific
+      buildId: $(__getAndroidSslArtifactInternal_BuildId)
+      downloadType: specific
+      itemPattern: android-openssl/**
+      downloadPath: external
+    # TODO only download the one we need
   - task: BatchScript@1
     displayName: Build
     inputs:
