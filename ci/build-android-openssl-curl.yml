@@ -1,21 +1,27 @@
-# Note: this builds both openssl and libcurl; the latter we currently do _not_ use.
+# https://msasg.visualstudio.com/DefaultCollection/Skyman/_build?definitionId=7260
+#
+# Note: this builds openssl.
+# The name of the YML is currently a misnomer; we used to build cURL in the
+# past as well, but not anymore.
 pool:
   vmImage: 'Ubuntu 16.04'
 steps:
 - bash: |
+    set -u -e -x -o pipefail
     DOCKER_IMAGE=ubuntu:16.04
-    docker pull "$DOCKER_IMAGE" &&
+    docker pull "$DOCKER_IMAGE"
     docker run --rm -i --env _UID=$(id -u) --env _GID=$(id -g) --volume "$(Build.Repository.LocalPath):/csspeech" --workdir /csspeech "$DOCKER_IMAGE" bash - <<"SCRIPT"
-      set -e -x -o pipefail
+      set -u -e -x -o pipefail
       mkdir androidlibs
       cd androidlibs
-      ../ci/build-android-openssl-curl.sh
+      ../ci/build-android-openssl.sh
+      cd ..
       chown -R $_UID:$_GID androidlibs
     SCRIPT
-    find androidlibs/speechsdkext/openssl_for_ios_and_android/output -type d
-  displayName: Build OpenSSL and Curl libraries
+    find androidlibs/android-openssl -type d || true
+  displayName: Build OpenSSL library
 - task: PublishBuildArtifacts@1
   displayName: 'Publish artifacts'
   inputs:
-    PathtoPublish: 'androidlibs/speechsdkext/openssl_for_ios_and_android/output'
-    ArtifactName: output
+    PathtoPublish: androidlibs/android-openssl
+    ArtifactName: android-openssl
