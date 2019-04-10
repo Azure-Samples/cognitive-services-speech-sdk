@@ -383,6 +383,24 @@
     SPXSpeechRecognizer *r = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:invalidAudioSource];
     XCTAssertNil(r);
 }
+
+- (void)testFromEndpointWithoutKeyAndToken {
+    NSString *weatherFileName = @"whatstheweatherlike";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+
+    NSString *endpoint = [NSString stringWithFormat:@"wss://%@.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1", self.serviceRegion];
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    SPXSpeechConfiguration* speechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:endpoint];
+    XCTAssertNotNil(speechConfig);
+
+    SPXSpeechRecognizer *r = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+    XCTAssertNotNil(r);
+    // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
+    XCTAssertTrue([[r.properties getPropertyById:SPXSpeechServiceConnectionKey] length] == 0);
+    XCTAssertTrue([r.authorizationToken length] == 0);
+}
+
 @end
 
 

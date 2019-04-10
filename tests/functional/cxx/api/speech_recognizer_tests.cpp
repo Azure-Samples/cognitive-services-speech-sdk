@@ -104,8 +104,6 @@ TEST_CASE("compressed stream test", "[api][cxx]")
     weatheropus.UpdateFullFilename(Config::InputDir);
     REQUIRE(exists(weatheropus.m_audioFilename));
 
-
-
     SPXTEST_SECTION("push stream works mp3")
     {
         DoRecoFromCompressedPushStream(weathermp3, AudioStreamContainerFormat::MP3);
@@ -1191,5 +1189,34 @@ TEST_CASE("ConnectionEventsTest", "[api][cxx]")
     SPXTEST_SECTION("Connected Disconnected Events with ContinuousRecognition")
     {
         ConnectionEventTests(true);
+    }
+}
+
+TEST_CASE("FromEndpoint without key and token")
+{
+    weather.UpdateFullFilename(Config::InputDir);
+    SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+    auto audioInput = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+
+    SPXTEST_SECTION("SpeechConfig FromEndpoint")
+    {
+        auto speechEndpoint = "wss://westus.stt.speech.microsoft.com/speech/recognition/dictation/cognitiveservices/v1";
+        auto config = SpeechConfig::FromEndpoint(speechEndpoint);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+        // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
+        SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token).empty());
+        SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_Key).empty());
+    }
+
+    SPXTEST_SECTION("SpeechTranslationConfig FromEndpoint")
+    {
+        auto translationEndpoint = "wss://westus.s2s.speech.microsoft.com/speech/translationition/cognitiveservices/v1";
+        auto config = SpeechTranslationConfig::FromEndpoint(translationEndpoint);
+        config->SetSpeechRecognitionLanguage("en-us");
+        config->AddTargetLanguage("de");
+        auto recognizer = TranslationRecognizer::FromConfig(config, audioInput);
+        // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
+        SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token).empty());
+        SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_Key).empty());
     }
 }

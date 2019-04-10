@@ -71,17 +71,31 @@ SPX_EXPORT
 /**
   * Initializes an instance of the speech configuration with specified endpoint and subscription key.
   * This method is intended only for users who use a non-standard service endpoint or parameters.
-  * Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
-  * For example, if language is defined in the uri as query parameter "language=de-DE", and is also set to "en-US" via
-  * property speechRecognitionLanguage in SpeechConfiguration, the language setting in the uri takes precedence, and the effective language is "de-DE".
-  * Only the parameters that are not specified in the endpoint URL can be set by other APIs.
-  * Note: To use authorization token with initWithEndpoint, pass an empty string to the subscriptionKey in the initWithEndpoint method,
-  * and then set the authorizationToken property on the created SpeechConfiguration instance to use the authorization token.
+  * Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.
+  * For example, if the recognition language is defined in the URI as query parameter "language=de-DE", and is also set to "en-US" via
+  * property speechRecognitionLanguage in SPXSpeechConfiguration, the language setting in the URI takes precedence, and the effective language is "de-DE".
+  * Only the parameters that are not specified in the endpoint URI can be set by other APIs.
+  * Note: To use an authorization token, use initWithEndpoint, and then set the authorizationToken property on the created SPXSpeechConfiguration instance.
   * @param endpointUri The service endpoint to connect to.
   * @param subscriptionKey the subscription key.
   * @return A speech configuration instance.
   */
 - (nullable instancetype)initWithEndpoint:(nonnull NSString *)endpointUri subscription:(nonnull NSString *)subscriptionKey;
+
+/**
+  * Initializes an instance of the speech configuration with specified endpoint.
+  * This method is intended only for users who use a non-standard service endpoint or parameters.
+  * Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.
+  * For example, if the recognition language is defined in the uri as query parameter "language=de-DE", and is also set to "en-US" via
+  * property speechRecognitionLanguage in SpeechConfiguration, the language setting in the uri takes precedence, and the effective language is "de-DE".
+  * Only the parameters that are not specified in the endpoint URL can be set by other APIs.
+  * Note: if the endpoint requires a subscription key for authentication, please use initWithEndpoint:subscription: to pass the subscription key as parameter.
+  * To use an authorization token, use this method to create a SpeechConfig instance, and then set the authorizationToken property on the created SPXSpeechConfiguration instance.
+  * Note: Added in version 1.5.0.
+  * @param endpointUri The service endpoint to connect to.
+  * @return A speech configuration instance.
+  */
+- (nullable instancetype)initWithEndpoint:(nonnull NSString *)endpointUri;
 
 /**
  * Sets proxy configuration

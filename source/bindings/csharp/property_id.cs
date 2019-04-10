@@ -22,7 +22,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// The Cognitive Services Speech Service endpoint (url). Under normal circumstances, you shouldn't
         /// have to use this property directly.
-        /// Instead, use <see cref="SpeechConfig.FromEndpoint"/>.
+        /// Instead, use  <see cref="SpeechConfig.FromEndpoint(System.Uri, string)"/>, or <see cref="SpeechConfig.FromEndpoint(System.Uri)"/>.
         /// NOTE: This endpoint is not the same as the endpoint used to obtain an access token.
         /// </summary>
         SpeechServiceConnection_Endpoint = Internal.PropertyId.SpeechServiceConnection_Endpoint,
@@ -30,8 +30,8 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// The Cognitive Services Speech Service region. Under normal circumstances, you shouldn't have to
         /// use this property directly.
-        /// Instead, use <see cref="SpeechConfig.FromSubscription"/>, <see cref="SpeechConfig.FromEndpoint"/>,
-        /// <see cref="SpeechConfig.FromAuthorizationToken"/>.
+        /// Instead, use <see cref="SpeechConfig.FromSubscription"/>, <see cref="SpeechConfig.FromEndpoint(System.Uri, string)"/>,
+        /// <see cref="SpeechConfig.FromEndpoint(System.Uri)"/>, <see cref="SpeechConfig.FromAuthorizationToken"/>.
         /// </summary>
         SpeechServiceConnection_Region = Internal.PropertyId.SpeechServiceConnection_Region,
 
@@ -51,7 +51,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// The Cognitive Services Custom Speech Service endpoint id. Under normal circumstances, you shouldn't
         /// have to use this property directly.
-        /// Instead use <see cref="SpeechConfig.FromEndpoint"/>.
+        /// Instead use <see cref="SpeechConfig.FromEndpoint(System.Uri, string)"/>, or <see cref="SpeechConfig.FromEndpoint(System.Uri)"/>.
         /// NOTE: The endpoint id is available in the Custom Speech Portal, listed under Endpoint Details.
         /// </summary>
         SpeechServiceConnection_EndpointId = Internal.PropertyId.SpeechServiceConnection_EndpointId,

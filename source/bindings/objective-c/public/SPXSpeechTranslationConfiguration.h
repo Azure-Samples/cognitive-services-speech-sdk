@@ -44,19 +44,35 @@ SPX_EXPORT
 - (nullable instancetype)initWithAuthorizationToken:(nonnull NSString *)authToken region:(nonnull NSString *)region;
 
 /**
-  * Initializes speech translation configuration with specified subscription key and service region.
+  * Initializes speech translation configuration with specified endpoint and subscription key.
   * This method is intended only for users who use a non-standard service endpoint or parameters.
-  * Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
-  * For example, if language is defined in the uri as query parameter "language=de-DE", and is also set to "en-US" via
-  * property speechRecognitionLanguage in SpeechConfiguration, the language setting in uri takes precedence, and the effective language is "de-DE".
-  * Only the parameters that are not specified in the endpoint URL can be set by other APIs.
-  * Note: To use authorization token with initWithEndpoint, pass an empty string to the subscriptionKey in the initWithEndpoint method,
-  * and then set the authorizationToken property on the created SpeechTranslationConfiguration instance to use the authorization token.
+  * Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.
+  * For example, if the recognition language is defined in the URI as query parameter "language=de-DE", and is also set to "en-US" via
+  * property speechRecognitionLanguage in SPXSpeechTranslationConfiguration, the language setting in URI takes precedence,
+  * and the effective language is "de-DE".
+  * Only the parameters that are not specified in the endpoint URI can be set by other APIs.
+  * Note: To use an authorization token, use initWithEndpoint, and then set the authorizationToken property on the created SPXSpeechTranslationConfiguration instance.
   * @param endpointUri The service endpoint to connect to.
   * @param subscriptionKey the subscription key.
   * @return an instance of speech translation configuration.
   */
 - (nullable instancetype)initWithEndpoint:(nonnull NSString *)endpointUri subscription:(nonnull NSString *)subscriptionKey;
+
+/**
+  * Initializes speech translation configuration with specified endpoint.
+  * This method is intended only for users who use a non-standard service endpoint or parameters.
+  * Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.
+  * For example, if the recognition language is defined in the URI as query parameter "language=de-DE", and is also set to "en-US" via
+  * property speechRecognitionLanguage in SPXSpeechTranslationConfiguration, the language setting in URI takes precedence,
+  * and the effective language is "de-DE".
+  * Only the parameters that are not specified in the endpoint URI can be set by other APIs.
+  * Note: if the endpoint requires a subscription key for authentication, please use initWithEndpoint:subscription: to pass the subscription key as parameter.
+  * To use an authorization token, use this method to create a SPXSpeechTranslationConfig instance, and then set the authorizationToken property on the created SPXSpeechTranslationConfiguration instance.
+  * Note: Added in version 1.5.0.
+  * @param endpointUri The service endpoint to connect to.
+  * @return an instance of speech translation configuration.
+  */
+- (nullable instancetype)initWithEndpoint:(nonnull NSString *)endpointUri;
 
 /**
   * Add a (text) target language for translation.

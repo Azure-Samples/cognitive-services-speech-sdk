@@ -64,12 +64,12 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Creates an instance of the speech config with specified endpoint and subscription key.
         /// This method is intended only for users who use a non-standard service endpoint or parameters.
-        /// Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
-        /// For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
-        /// the language setting in uri takes precedence, and the effective language is "de-DE".
-        /// Only the parameters that are not specified in the endpoint URL can be set by other APIs.
-        /// Note: To use authorization token with FromEndpoint, pass an empty string to the subscriptionKey in the FromEndpoint method,
-        /// and then set the AuthorizationToken property on the created SpeechConfig instance to use the authorization token.
+        /// Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.
+        /// For example, if the recognition language is defined in URI as query parameter "language=de-DE", and the property SpeechRecognitionLanguage is set to "en-US",
+        /// the language setting in URI takes precedence, and the effective language is "de-DE".
+        /// Only the parameters that are not specified in the endpoint URI can be set by other APIs.
+        /// Note: To use an authorization token with FromEndpoint, use FromEndpoint(System.Uri),
+        /// and then set the AuthorizationToken property on the created SpeechConfig instance.
         /// </summary>
         /// <param name="endpoint">The service endpoint to connect to.</param>
         /// <param name="subscriptionKey">The subscription key.</param>
@@ -78,6 +78,28 @@ namespace Microsoft.CognitiveServices.Speech
         {
             IntPtr speechConfigHandle = IntPtr.Zero;
             ThrowIfFail(Internal.SpeechConfig.speech_config_from_endpoint(out speechConfigHandle, Uri.EscapeUriString(endpoint.ToString()), subscriptionKey));
+            return new SpeechConfig(speechConfigHandle);
+        }
+
+        /// <summary>
+        /// Creates an instance of the speech config with specified endpoint.
+        /// This method is intended only for users who use a non-standard service endpoint or parameters.
+        /// Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.
+        /// For example, if the recognition language is defined in URI as query parameter "language=de-DE", and the property SpeechRecognitionLanguage is set to "en-US",
+        /// the language setting in URI takes precedence, and the effective language is "de-DE".
+        /// Only the parameters that are not specified in the endpoint URI can be set by other APIs.
+        /// Note: If the endpoint requires a subscription key for authentication, use FromEndpoint(System.Uri, string) to pass
+        /// the subscription key as parameter.
+        /// To use an authorization token with FromEndpoint, use this method to create a SpeechConfig instance, and then
+        /// set the AuthorizationToken property on the created SpeechConfig instance.
+        /// Note: Added in version 1.5.0.
+        /// </summary>
+        /// <param name="endpoint">The service endpoint to connect to.</param>
+        /// <returns>A speech config instance.</returns>
+        public static SpeechConfig FromEndpoint(Uri endpoint)
+        {
+            IntPtr speechConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechConfig.speech_config_from_endpoint(out speechConfigHandle, Uri.EscapeUriString(endpoint.ToString()), null));
             return new SpeechConfig(speechConfigHandle);
         }
 

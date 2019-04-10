@@ -67,17 +67,17 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     }
 
     /**
-     * Creates an instance of the speech config with specified endpoint and subscription key.
-     * This method is intended only for users who use a non-standard service endpoint or paramters.
-     * Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
-     * For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
-     * the language setting in uri takes precedence, and the effective language is "de-DE".
-     * Only the parameters that are not specified in the endpoint URL can be set by other APIs.
-     * Note: To use authorization token with fromEndpoint, pass an empty string to the subscriptionKey in the fromEndpoint method,
-     * and then call setAuthorizationToken() on the created SpeechTranslationConfig instance to use the authorization token.
+     * Creates an instance of the speech translation config with specified endpoint and subscription key.
+     * This method is intended only for users who use a non-standard service endpoint or parameters.
+     * Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.
+     * For example, if the recognition language is defined in URI as query parameter "language=de-DE", and also set by setSpeechRecognitionLanguage("en-US"),
+     * the language setting in URI takes precedence, and the effective language is "de-DE".
+     * Only the parameters that are not specified in the endpoint URI can be set by other APIs.
+     * Note: To use an authorization token with fromEndpoint, please use fromEndpoint(java.net.URI),
+     * and then call setAuthorizationToken() on the created SpeechTranslationConfig instance.
      * @param endpoint The service endpoint to connect to.
      * @param subscriptionKey The subscription key.
-     * @return A speech config instance.
+     * @return A SpeechTranslationConfig instance.
      */
     public static SpeechTranslationConfig fromEndpoint(java.net.URI endpoint, String subscriptionKey) {
         Contracts.throwIfNull(endpoint, "endpoint");
@@ -87,6 +87,28 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
 
         return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromEndpoint(endpoint.toString(), subscriptionKey));
     }
+
+    /**
+     * Creates an instance of the speech translation config with specified endpoint.
+     * This method is intended only for users who use a non-standard service endpoint or parameters.
+     * Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.
+     * For example, if the recognition language is defined in URI as query parameter "language=de-DE", and also set by setSpeechRecognitionLanguage("en-US"),
+     * the language setting in URI takes precedence, and the effective language is "de-DE".
+     * Only the parameters that are not specified in the endpoint URI can be set by other APIs.
+     * Note: if the endpoint requires a subscription key for authentication, please use fromEndpoint(java.net.URI, String) to pass
+     * the subscription key as parameter.
+     * To use an authorization token with fromEndpoint, please use this method to create a SpeechTranslationConfig instance, and then
+     * call setAuthorizationToken() on the created SpeechTranslationConfig instance.
+     * Note: Added in version 1.5.0.
+     * @param endpoint The service endpoint to connect to.
+     * @return A SpeechTranslationConfig instance.
+     */
+    public static SpeechTranslationConfig fromEndpoint(java.net.URI endpoint) {
+        Contracts.throwIfNull(endpoint, "endpoint");
+
+        return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromEndpoint(endpoint.toString()));
+    }
+
 
     /**
      * Adds a (text) target language for translation.

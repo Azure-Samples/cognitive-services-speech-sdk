@@ -18,6 +18,7 @@ using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Intent;
+using namespace Microsoft::CognitiveServices::Speech::Translation;
 using namespace std;
 
 #define INITIAL_SILENCE_TIMEOUT_STRING "InitialSilenceTimeout"

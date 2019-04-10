@@ -54,7 +54,21 @@
         NSLog(@"Exception caught.");
     }
     return nil;
+}
 
+- (instancetype)initWithEndpoint:(NSString *)endpointUri
+{
+    try {
+        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromEndpoint([endpointUri string]);
+        if (configImpl == nullptr)
+            return nil;
+        return [self initWithImpl:configImpl];
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
 }
 
 - (instancetype)initWithImpl:(std::shared_ptr<TranslationImpl::SpeechTranslationConfig>)translationConfigurationImpl

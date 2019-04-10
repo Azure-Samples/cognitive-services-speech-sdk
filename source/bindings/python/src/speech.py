@@ -28,7 +28,7 @@ class SpeechConfig():
     The configuration can be initialized in different ways:
 
     - from subscription: pass a subscription key and a region
-    - from endpoint: pass a subscription key and an endpoint
+    - from endpoint: pass an endpoint. Subscription key or authorization token are optional.
     - from authorization token: pass an authorization token and a region
 
     :param subscription: The subscription key.
@@ -85,8 +85,8 @@ class SpeechConfig():
         if endpoint is not None:
             if region is not None:
                 raise ValueError('cannot construct SpeechConfig with both region and endpoint information')
-            if subscription is None:
-                raise ValueError('subscription key must be specified along with an endpoint')
+            if auth_token is not None:
+                raise ValueError('cannot specify both auth_token and endpoint when constructing SpeechConfig. Set authorization token separately after creating SpeechConfig.')
 
         if region is not None and subscription is None and auth_token is None:
             raise ValueError('either subscription key or authorization token must be given along with a region')
@@ -104,10 +104,11 @@ class SpeechConfig():
             if endpoint is not None or subscription is not None:
                 raise ValueError(generic_error_message)
             _impl = config_type._from_authorization_token(auth_token, region)
-        elif endpoint is not None and subscription is not None:
-            if region is not None or auth_token is not None:
-                raise ValueError(generic_error_message)
-            _impl = config_type._from_endpoint(endpoint, subscription)
+        elif endpoint is not None:
+            if subscription is not None:
+                _impl = config_type._from_endpoint(endpoint, subscription)
+            else:
+                _impl = config_type._from_endpoint(endpoint)
 
         if _impl is not None:
             _impl.set_speech_recognition_language(speech_recognition_language)

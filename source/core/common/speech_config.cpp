@@ -28,7 +28,10 @@ void CSpxSpeechConfig::InitFromEndpoint(const char * endpoint, const char* subsc
     m_init = true;
 
     SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), endpoint);
-    SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), subscription);
+    if (subscription != nullptr)
+    {
+        SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), subscription);
+    }
 }
 
 

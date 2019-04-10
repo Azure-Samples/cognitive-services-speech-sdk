@@ -211,5 +211,30 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with an authentication error (401)");
             }
         }
+
+        [TestMethod]
+        public void FromEndpointWithoutSubscriptionKeyAndAuthToken()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var speechConfig = SpeechConfig.FromEndpoint(new Uri("wss://westus.stt.speech.microsoft.com/speech/recognition/dictation/cognitiveservices/v1"));
+            // Create recognizer using subscription key.
+            using (var speechRecognizer = new SpeechRecognizer(speechConfig, audioInput))
+            {
+                // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
+                Assert.IsTrue(string.IsNullOrEmpty(speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token)));
+                Assert.IsTrue(string.IsNullOrEmpty(speechRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Key)));
+            }
+
+            var translationConfig = SpeechTranslationConfig.FromEndpoint(new Uri("wss://westus.s2s.speech.microsoft.com/speech/translationition/cognitiveservices/v1"));
+            translationConfig.SpeechRecognitionLanguage = "en-us";
+            translationConfig.AddTargetLanguage("de");
+            // Create recognizer using subscription key.
+            using (var translationRecognizer = new TranslationRecognizer(translationConfig, audioInput))
+            {
+                // We cannot really test whether recognizer works, since there is no endpoint available which supports no authentication.
+                Assert.IsTrue(string.IsNullOrEmpty(translationRecognizer.Properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token)));
+                Assert.IsTrue(string.IsNullOrEmpty(translationRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Key)));
+            }
+        }
     }
 }

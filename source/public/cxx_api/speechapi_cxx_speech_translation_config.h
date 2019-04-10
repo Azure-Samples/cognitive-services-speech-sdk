@@ -53,20 +53,42 @@ public:
     // <summary>
     /// Creates an instance of the speech translation config with specified endpoint and subscription.
     /// This method is intended only for users who use a non-standard service endpoint.
-    /// Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
-    /// For example, if language is defined in uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
-    /// the language setting in uri takes precedence, and the effective language is "de-DE".
-    /// Only the parameters that are not specified in the endpoint URL can be set by other APIs.
-    /// Note: To use authorization token with FromEndpoint, pass an empty string to the subscription in the FromEndpoint method,
-    /// and then call SetAuthorizationToken() on the created SpeechTranslationConfig instance to use the authorization token.
+    /// Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.
+    /// For example, if the recognition language is defined in URI as query parameter "language=de-DE", and also set by SetSpeechRecognitionLanguage("en-US"),
+    /// the language setting in URI takes precedence, and the effective language is "de-DE".
+    /// Only the parameters that are not specified in the endpoint URI can be set by other APIs.
+    /// Note: To use an authorization token with FromEndpoint, please use FromEndpoint(const SPXSTRING&),
+    /// and then call SetAuthorizationToken() on the created SpeechTranslationConfig instance.
     /// </summary>
     /// <param name="endpoint">The service endpoint to connect to.</param>
     /// <param name="subscription">The subscription key.</param>
-    /// <returns>Shared pointer to the speech translation config instance.</returns>
+    /// <returns>Shared pointer to the new SpeechTranslationConfig instance.</returns>
     static std::shared_ptr<SpeechTranslationConfig> FromEndpoint(const SPXSTRING& endpoint, const SPXSTRING& subscription)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
         SPX_THROW_ON_FAIL(speech_config_from_endpoint(&hconfig, Utils::ToUTF8(endpoint).c_str(), Utils::ToUTF8(subscription).c_str()));
+        return std::shared_ptr<SpeechTranslationConfig>(new SpeechTranslationConfig(hconfig));
+    }
+
+    /// <summary>
+    /// Creates an instance of the speech translation config with specified endpoint.
+    /// This method is intended only for users who use a non-standard service endpoint.
+    /// Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.
+    /// For example, if the recognition language is defined in URI as query parameter "language=de-DE", and also set by SetSpeechRecognitionLanguage("en-US"),
+    /// the language setting in URI takes precedence, and the effective language is "de-DE".
+    /// Only the parameters that are not specified in the endpoint URI can be set by other APIs.
+    /// Note: if the endpoint requires a subscription key for authentication, please use FromEndpoint(const SPXSTRING&, const SPXSTRING&) to pass
+    /// the subscription key as parameter.
+    /// To use an authorization token with FromEndpoint, use this method to create a SpeechTranslationConfig instance, and then
+    /// call SetAuthorizationToken() on the created SpeechTranslationConfig instance.
+    /// Note: Added in version 1.5.0.
+    /// </summary>
+    /// <param name="endpoint">The service endpoint to connect to.</param>
+    /// <returns>A shared pointer to the new SpeechTranslationConfig instance.</returns>
+    static std::shared_ptr<SpeechTranslationConfig> FromEndpoint(const SPXSTRING& endpoint)
+    {
+        SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(speech_config_from_endpoint(&hconfig, Utils::ToUTF8(endpoint).c_str(), nullptr));
         return std::shared_ptr<SpeechTranslationConfig>(new SpeechTranslationConfig(hconfig));
     }
 

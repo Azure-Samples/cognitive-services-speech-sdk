@@ -158,9 +158,6 @@ def test_speech_config_default_constructor(config_type):
     with pytest.raises(ValueError, match='cannot construct SpeechConfig with the given arguments'):
         speech_config = config_type()
 
-    with pytest.raises(ValueError, match='subscription key must be specified along with an endpoint'):
-        speech_config = config_type(endpoint='someendpoint')
-
     # check that all nonsupported construction methods raise
     from itertools import product
     endpoint_id = msspeech.PropertyId.SpeechServiceConnection_Endpoint
@@ -170,6 +167,7 @@ def test_speech_config_default_constructor(config_type):
             (None, "sometoken")):
         if ((subscription and region and not endpoint and not auth_token) or
                 (subscription and not region and endpoint and not auth_token) or
+                (not subscription and not region and endpoint and not auth_token) or
                 (not subscription and region and not endpoint and auth_token)):
 
             speech_config = config_type(subscription=subscription,

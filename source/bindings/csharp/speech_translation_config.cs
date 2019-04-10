@@ -55,20 +55,42 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Creates an instance of the speech translation config with specified endpoint and subscription key.
         /// This method is intended only for users who use a non-standard service endpoint or parameters.
-        /// Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
-        /// For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
-        /// the language setting in uri takes precedence, and the effective language is "de-DE".
-        /// Only the parameters that are not specified in the endpoint URL can be set by other APIs.
-        /// Note: To use authorization token with FromEndpoint, pass an empty string to the subscriptionKey in the FromEndpoint method,
-        /// and then set the AuthorizationToken property on the created SpeechTranslationConfig instance to use the authorization token.
+        /// Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.
+        /// For example, if the recognition language is defined in URI as query parameter "language=de-DE", and the property SpeechRecognitionLanguage is set to "en-US",
+        /// the language setting in URI takes precedence, and the effective language is "de-DE".
+        /// Only the parameters that are not specified in the endpoint URI can be set by other APIs.
+        /// Note: To use an authorization token with FromEndpoint, use FromEndpoint(System.Uri),
+        /// and then set the AuthorizationToken property on the created SpeechTranslationConfig instance.
         /// </summary>
         /// <param name="endpoint">The service endpoint to connect to.</param>
         /// <param name="subscriptionKey">The subscription key.</param>
-        /// <returns>A speech config instance.</returns>
+        /// <returns>A SpeechTranslationConfig instance.</returns>
         public new static SpeechTranslationConfig FromEndpoint(Uri endpoint, string subscriptionKey)
         {
             IntPtr config = IntPtr.Zero;
             ThrowIfFail(Internal.SpeechConfig.speech_config_from_endpoint(out config, Uri.EscapeUriString(endpoint.ToString()), subscriptionKey));
+            return new SpeechTranslationConfig(config);
+        }
+
+        /// <summary>
+        /// Creates an instance of the speech translation config with specified endpoint.
+        /// This method is intended only for users who use a non-standard service endpoint or parameters.
+        /// Note: The query parameters specified in the endpoint URI are not changed, even if they are set by any other APIs.
+        /// For example, if the recognition language is defined in URI as query parameter "language=de-DE", and the property SpeechRecognitionLanguage is set to "en-US",
+        /// the language setting in URI takes precedence, and the effective language is "de-DE".
+        /// Only the parameters that are not specified in the endpoint URI can be set by other APIs.
+        /// Note: If the endpoint requires a subscription key for authentication, use FromEndpoint(System.Uri, string) to pass
+        /// the subscription key as parameter.
+        /// To use an authorization token with FromEndpoint, please use this method to create a SpeechTranslationConfig instance, and then
+        /// set the AuthorizationToken property on the created SpeechTranslationConfig instance.
+        /// Note: Added in version 1.5.0.
+        /// </summary>
+        /// <param name="endpoint">The service endpoint to connect to.</param>
+        /// <returns>A SpeechTranslationConfig instance.</returns>
+        public new static SpeechTranslationConfig FromEndpoint(Uri endpoint)
+        {
+            IntPtr config = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechConfig.speech_config_from_endpoint(out config, Uri.EscapeUriString(endpoint.ToString()), null));
             return new SpeechTranslationConfig(config);
         }
 

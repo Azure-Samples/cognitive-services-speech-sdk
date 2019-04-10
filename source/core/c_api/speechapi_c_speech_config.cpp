@@ -58,7 +58,6 @@ SPXAPI speech_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* hconfig, co
 SPXAPI speech_config_from_endpoint(SPXSPEECHCONFIGHANDLE* hconfig, const char* endpoint, const char* subscription)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, endpoint == nullptr || !(*endpoint));
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, subscription == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hconfig == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)

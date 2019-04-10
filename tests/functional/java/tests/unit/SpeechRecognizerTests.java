@@ -725,7 +725,6 @@ public class SpeechRecognizerTests {
 
     @Test
     public void testAuthorizationToken() throws InterruptedException, ExecutionException, TimeoutException {
-        String endpoint = "wss://" + Settings.SpeechRegion + ".stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1";
 
         SpeechConfig s = SpeechConfig.fromAuthorizationToken(Settings.SpeechAuthorizationToken, Settings.SpeechRegion);
         assertNotNull(s);
@@ -747,7 +746,7 @@ public class SpeechRecognizerTests {
     public void testEndpointWithToken() throws InterruptedException, ExecutionException, TimeoutException {
         String endpoint = "wss://" + Settings.SpeechRegion + ".stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1";
 
-        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(endpoint), "");
+        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(endpoint));
         assertNotNull(s);
 
         SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
@@ -758,7 +757,7 @@ public class SpeechRecognizerTests {
         final ArrayList<String> rEvents = new ArrayList<>();
 
         r.setAuthorizationToken(Settings.SpeechAuthorizationToken);
-        System.out.println("AuthToken:" + r.getAuthorizationToken());
+        assertTrue(r.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
 
         r.recognized.addEventListener((o, e) -> {
             rEvents.add("Result@" + System.currentTimeMillis());
@@ -793,6 +792,50 @@ public class SpeechRecognizerTests {
 
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
+
+        r.close();
+        s.close();
+    }
+
+    @Test
+    public void testEndpointWithSubscriptionKeyAndInvalidToken() throws InterruptedException, ExecutionException, TimeoutException {
+        String endpoint = "wss://" + Settings.SpeechRegion + ".stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1";
+        String invalidToken = "InvalidToken";
+
+        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(endpoint), Settings.SpeechSubscriptionKey);
+        assertNotNull(s);
+        s.setAuthorizationToken(invalidToken);
+
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        assertEquals(Settings.SpeechSubscriptionKey, r.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key));
+        assertEquals(invalidToken, r.getAuthorizationToken());
+
+        SpeechRecognitionResult res = r.recognizeOnceAsync().get();
+        assertNotNull(res);
+        assertTrue(ResultReason.RecognizedSpeech == res.getReason());
+        assertEquals("What's the weather like?", res.getText());
+
+        r.close();
+        s.close();
+    }
+
+    @Test
+    public void testEndpointWithInvalidSubscriptionKeyAndValidToken() throws InterruptedException, ExecutionException, TimeoutException {
+        String endpoint = "wss://" + Settings.SpeechRegion + ".stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1";
+        String invalidKey = "InvalidSubscriptionKey";
+
+        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(endpoint), invalidKey);
+        assertNotNull(s);
+        s.setAuthorizationToken(Settings.SpeechAuthorizationToken);
+
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        assertEquals(Settings.SpeechAuthorizationToken, r.getAuthorizationToken());
+        assertEquals(invalidKey, r.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key));
+
+        SpeechRecognitionResult res = r.recognizeOnceAsync().get();
+        assertNotNull(res);
+        assertTrue(ResultReason.RecognizedSpeech == res.getReason());
+        assertEquals("What's the weather like?", res.getText());
 
         r.close();
         s.close();

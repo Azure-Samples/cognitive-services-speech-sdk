@@ -105,6 +105,25 @@ public class SpeechConfigTests {
         s.close();
     }
 
+    @Test
+    public void testFromEndpointWithoutKeyAndToken() {
+        String endpoint = "wss://" + Settings.SpeechRegion + ".stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1";
+        SpeechConfig sc = SpeechConfig.fromEndpoint(URI.create(endpoint));
+        SpeechRecognizer sr = new SpeechRecognizer(sc, AudioConfig.fromWavFileInput(Settings.WavFile));
+        // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
+        assertTrue(sr.getProperties().getProperty(PropertyId.SpeechServiceAuthorization_Token).isEmpty());
+        assertTrue(sr.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
+
+        endpoint = "wss://" + Settings.SpeechRegion + ".s2s.speech.microsoft.com/speech/translationition/cognitiveservices/v1";
+        SpeechTranslationConfig tc = SpeechTranslationConfig.fromEndpoint(URI.create(endpoint));
+        tc.setSpeechRecognitionLanguage("en-us");
+        tc.addTargetLanguage("de");
+        TranslationRecognizer tr = new TranslationRecognizer(tc, AudioConfig.fromWavFileInput(Settings.WavFile));
+        // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
+        assertTrue(tr.getProperties().getProperty(PropertyId.SpeechServiceAuthorization_Token).isEmpty());
+        assertTrue(tr.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
+    }
+
     // -----------------------------------------------------------------------
     // --- 
     // -----------------------------------------------------------------------

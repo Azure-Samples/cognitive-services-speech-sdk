@@ -240,4 +240,23 @@
     SPXTranslationRecognizer *translationRecognizer = [[SPXTranslationRecognizer alloc] initWithSpeechTranslationConfiguration:translationConfig audioConfiguration:invalidAudioSource];
     XCTAssertNil(translationRecognizer);
 }
+
+- (void)testFromEndpointWithoutKeyAndToken {
+    NSString *weatherFileName = @"whatstheweatherlike";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+
+    NSString *endpoint = [NSString stringWithFormat:@"wss://%@.s2s.speech.microsoft.com/speech/translationition/cognitiveservices/v1", self.serviceRegion];
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    SPXSpeechTranslationConfiguration* translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithEndpoint:endpoint];
+    XCTAssertNotNil(translationConfig);
+    [translationConfig setSpeechRecognitionLanguage:@"en-us"];
+    [translationConfig addTargetLanguage:@"de-DE"];
+
+    SPXTranslationRecognizer *translationRecognizer = [[SPXTranslationRecognizer alloc] initWithSpeechTranslationConfiguration:translationConfig audioConfiguration:weatherAudioSource];
+    XCTAssertNotNil(translationRecognizer);
+    // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
+    XCTAssertTrue([[translationRecognizer.properties getPropertyById:SPXSpeechServiceConnectionKey] length] == 0);
+    XCTAssertTrue([translationRecognizer.authorizationToken length] == 0);
+}
 @end
