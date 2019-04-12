@@ -2019,11 +2019,13 @@ jobs:
       ASTOUT="$(ArtifactOut)/objc/ast"
       MDOUT="$(ArtifactOut)/objc/md"
       mkdir -p "$ASTOUT" "$MDOUT"
+      clang --version
       clang -fsyntax-only -x objective-c -Xclang -ast-dump source/bindings/objective-c/public/SPXSpeechApi.h \
         2>&1 1> "$ASTOUT/stdout.txt" | tee "$ASTOUT/stderr.txt"
       cd "$MDOUT"
       perl "$(Build.Repository.LocalPath)/ci/objc-docs-ast-to-md.pl" "$ASTOUT/stdout.txt"
     displayName: Create Objective-C reference docs
+    continueOnError: true # TODO needs investigation - #1733600
   - bash: |
       set -e -o pipefail
       # log brew-related version information
