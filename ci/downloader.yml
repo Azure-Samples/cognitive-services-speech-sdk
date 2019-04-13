@@ -1,0 +1,43 @@
+# https://msasg.visualstudio.com/DefaultCollection/Skyman/_build?definitionId=9377
+#
+# The following parameters need to be specified when queueing this job:
+#
+# - VmImage: which hosted agent image to pick. Should be 'ubuntu-16.04' for now.
+#   This is supposed to be extended for specific artifacts that require
+#   extraction on a specific OS (example: .msi needs msiexec on Windows).
+# - Url: which URL to download
+# - Sha256Sum: SHA256 sum of the downloaded file
+# - Extract: set to 'true' to extract, 'false' otherwise
+# - ArtifactName: the name of the artifact to export
+# - StoreFacl: set to 'true' to save an access permissions file inside the exported artifact.
+jobs:
+- job: DownloadAndExtract
+  pool:
+    vmImage: $(VmImage)
+  timeoutInMinutes: 120
+  steps:
+  - checkout: self
+    fetchDepth: 1
+    submodules: ''
+  - bash: |
+      echo
+      set -x
+      ./ci/downloader.sh \
+        "$(Url)" \
+        "$(Sha256Sum)" \
+        "$(Extract)" \
+        "$(ArtifactName)" \
+        "$(StoreFacl)"
+    condition: and(succeeded(), eq(variables['AGENT.OS'], 'Linux'))
+    displayName: Download and extract (Linux)
+  - bash: |
+      echo Only Linux is supported right now.
+      exit 1
+    condition: and(succeeded(), ne(variables['AGENT.OS'], 'Linux'))
+    displayName: Download and extract (other platforms)
+  - task: PublishBuildArtifacts@1
+    displayName: Publish
+    inputs:
+      PathtoPublish: $(ArtifactName)
+      ArtifactName: $(ArtifactName)
+      publishLocation: Container
