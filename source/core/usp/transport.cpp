@@ -663,7 +663,7 @@ void TransportWriteTelemetry(TransportHandle handle, const uint8_t* buffer, size
     }
 }
 
-TransportHandle TransportRequestCreate(const char* host, void* context, Telemetry* telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId, const ProxyServerInfo* proxyInfo)
+TransportHandle TransportRequestCreate(const char* host, void* context, Telemetry* telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId, const ProxyServerInfo* proxyInfo, const bool disable_default_verify_paths, const char *trustedCert, const bool disable_crl_check)
 {
     TransportRequest *request;
     int err = -1;
@@ -853,6 +853,19 @@ TransportHandle TransportRequestCreate(const char* host, void* context, Telemetr
 #ifdef SPEECHSDK_USE_OPENSSL
                 int tls_version = OPTION_TLS_VERSION_1_2;
                 uws_client_set_option(request->ws.WSHandle, OPTION_TLS_VERSION, &tls_version);
+
+                uws_client_set_option(request->ws.WSHandle, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &disable_default_verify_paths);
+                if (trustedCert)
+                {
+                    uws_client_set_option(request->ws.WSHandle, OPTION_TRUSTED_CERT, trustedCert);
+                }
+
+                // Note: layers above guarantee that CRL check can only be disabled when using a trusted cert.
+                uws_client_set_option(request->ws.WSHandle, OPTION_DISABLE_CRL_CHECK, &disable_crl_check);
+#else
+                UNUSED(trustedCert);
+                UNUSED(disable_crl_check);
+                UNUSED(disable_default_verify_paths);
 #endif
             }
         }

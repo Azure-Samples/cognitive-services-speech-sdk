@@ -275,6 +275,7 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     SetUspEndpoint(properties, client);
     SetUspAuthentication(properties, client);
     SetUspProxyInfo(properties, client);
+    SetUspSingleTrustedCert(properties, client);
 
     // Construct speech.config payload
     SetSpeechConfig(properties);
@@ -447,7 +448,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Translation(std::shared_pt
     auto region = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region));
     SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_REGION);
 
-    auto toLangs = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));    
+    auto toLangs = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
     SPX_IFTRUE_THROW_HR(toLangs.empty(), SPXERR_INVALID_ARG);
 
     auto customSpeechModelId = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId));
@@ -509,6 +510,24 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISpx
     authData[(size_t)USP::AuthenticationType::SearchDelegationRPSToken] = uspRpsToken;
 
     return client.SetAuthentication(authData);
+}
+
+USP::Client& CSpxUspRecoEngineAdapter::SetUspSingleTrustedCert(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+{
+#if SPEECHSDK_USE_OPENSSL
+    // N.B. the names of the options below have been shared with a customer. Do
+    // not change them without consulting with them.
+    auto singleTrustedCert = properties->GetStringValue("OPENSSL_SINGLE_TRUSTED_CERT");
+    if (!singleTrustedCert.empty())
+    {
+        bool disable_crl_check = properties->GetStringValue("OPENSSL_SINGLE_TRUSTED_CERT_CRL_CHECK") == "false";
+        return client.SetSingleTrustedCert(singleTrustedCert, disable_crl_check);
+    }
+#else
+    UNUSED(properties);
+#endif
+
+    return client;
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspProxyInfo(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)

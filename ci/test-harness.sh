@@ -186,18 +186,19 @@ function addToTestOutput {
 # Use the Catch2 XML reporter is streaming and will have more details than the
 # JUnit one in case of crashes.
 function runCatchSuite {
-  local usage testStateVarPrefix output platform redactStrings testsuiteName timeoutSeconds testCases testCaseIndex catchOut exitCode
-  usage="Usage: ${FUNCNAME[0]} <testStateVarPrefix> <output> <platform> <redactStrings> <testsuiteName> <timeoutSeconds> <command...>"
+  local usage testStateVarPrefix output platform redactStrings testsuiteName timeoutSeconds testCases testCaseIndex catchOut exitCode pattern
+  usage="Usage: ${FUNCNAME[0]} <testStateVarPrefix> <output> <platform> <redactStrings> <testsuiteName> <timeoutSeconds> <pattern> <command...>"
   testStateVarPrefix="${1?$usage}"
   output="${2?$usage}"
   platform="${3?$usage}"
   redactStrings="${4?$usage}"
   testsuiteName="${5?$usage}"
   timeoutSeconds="${6?$usage}"
-  shift 6
+  pattern="${7?$usage}"
+  shift 7
 
   testCases=()
-  readarray -t testCases < <("$1" --list-test-names-only | tr -d \\r)
+  readarray -t testCases < <("$1" --list-test-names-only "$pattern" | tr -d \\r)
   [[ ${#testCases[@]} != 0 ]] || {
     echo Failed to discover any test cases.
     return 1

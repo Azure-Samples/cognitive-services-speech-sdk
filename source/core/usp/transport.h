@@ -33,9 +33,12 @@ typedef struct HTTP_HEADERS_HANDLE_DATA_TAG* HTTP_HEADERS_HANDLE;
  * @param telemetry Telemetry handle to record various transport events.
  * @param connectionHeaders A handle to headers that will be used to establish a connection.
  * @param connectionId An identifier of a connection, used for diagnostics of errors on the server side.
+ * @param disable_default_verify_paths OpenSSL only: disable the default verify paths
+ * @param trustedCert OpenSSL only: single trusted cert
+ * @param disable_crl_check OpenSSL only: if true, disable CRL if using single trusted cert.
  * @return A new transport handle.
  */
-TransportHandle TransportRequestCreate(const char* host, void* context, Microsoft::CognitiveServices::Speech::USP::Telemetry* telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId, const ProxyServerInfo* proxyInfo);
+TransportHandle TransportRequestCreate(const char* host, void* context, Microsoft::CognitiveServices::Speech::USP::Telemetry* telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId, const ProxyServerInfo* proxyInfo, const bool disable_default_verify_paths, const char *trustedCert, const bool disable_crl_check);
 
 /**
  * Destroys a transport request.

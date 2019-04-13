@@ -7,6 +7,7 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 # Associative array for most options
 declare -A options
 options[timeout]="3600s"
+options[testset]="dev"
 
 # Defines we collect separately in an array
 defines=()
@@ -64,6 +65,13 @@ do
       [[ -n $2 ]] ||
         exitWithError "Error: expected argument for %s option\n" "$key"
       skips+=("$SCRIPT_DIR/t/$2.sh")
+      shift
+      ;;
+    --testset)
+      testsetRe="(dev|int|prod)"
+      [[ $2 =~ ^$testsetRe$ ]] ||
+        exitWithError "Error: invalid testset '%s', expected %s.\n" "$2" "$testsetRe"
+      options[${key:2}]="$2"
       shift
       ;;
     --)
@@ -137,7 +145,7 @@ for testfile in "${testsToRun[@]}"; do
   T="$(basename "$testfile" .sh)"
   echo Starting $T with timeout ${options[timeout]}
   $cmdTimeout -k 5s "${options[timeout]}" ${callStdbuf[@]} \
-  "$testfile" "${options[build-dir]}" "${options[platform]}" "$binaryDir"
+  "$testfile" "${options[build-dir]}" "${options[platform]}" "$binaryDir" "${options[testset]}"
   exitCode=$?
   if [[ $exitCode == 0 ]]; then
     ((pass++))

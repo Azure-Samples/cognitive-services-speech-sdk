@@ -237,6 +237,21 @@ public:
     Client& SetProxyServerInfo(const char* proxyHost, int proxyPort, const char* proxyUsername = nullptr, const char* proxyPassword = nullptr);
 
     /**
+    * When using OpenSSL only: sets a single trusted cert, optionally w/o CRL checks.
+    * This is meant to be used in a firewall setting with potential lack of
+    * CRLs (particularly on the leaf).
+    * @param trustedCert the certificate to trust (PEM format)
+    * @param disable_crl_check whether to also disable CRL checks
+    * @return Client reference
+    */
+    Client& SetSingleTrustedCert(const std::string& trustedCert, bool disable_crl_check)
+    {
+        m_trustedCert = trustedCert;
+        m_disable_crl_check = disable_crl_check;
+        return *this;
+    }
+
+    /**
     * Sets the speech service type.
     */
     Client& SetEndpointType(EndpointType type)
@@ -362,6 +377,9 @@ private:
      std::string m_region;
 
      std::shared_ptr<ProxyServerInfo> m_proxyServerInfo;
+
+     std::string m_trustedCert;
+     bool m_disable_crl_check;
 
      OutputFormat m_outputFormat;
      std::string m_language;

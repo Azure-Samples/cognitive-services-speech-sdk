@@ -447,7 +447,26 @@ void Connection::Impl::Connect()
     // Log the device uuid
     MetricsDeviceStartup(*m_telemetry, connectionId, PAL::DeviceUuid());
 
-    m_transport = TransportPtr(TransportRequestCreate(connectionUrl.c_str(), this, m_telemetry.get(), headersPtr, connectionId.c_str(), m_config.m_proxyServerInfo.get()), TransportRequestDestroy);
+    bool disable_default_verify_paths = false;
+    const char *trustedCert = nullptr;
+    bool disable_crl_check = false;
+
+#ifdef SPEECHSDK_USE_OPENSSL
+    disable_default_verify_paths = !m_config.m_trustedCert.empty();
+    trustedCert = m_config.m_trustedCert.c_str();
+    disable_crl_check = disable_default_verify_paths && m_config.m_disable_crl_check;
+#endif
+
+    m_transport = TransportPtr(TransportRequestCreate(
+        connectionUrl.c_str(),
+        this,
+        m_telemetry.get(),
+        headersPtr,
+        connectionId.c_str(),
+        m_config.m_proxyServerInfo.get(),
+        disable_default_verify_paths,
+        trustedCert,
+        disable_crl_check), TransportRequestDestroy);
 
     if (m_transport == nullptr)
     {

@@ -18,6 +18,7 @@ steps:
       --test-configuration ci/test-config.json \
       --build-dir build \
       --platform $(SPEECHSDK_TARGET_PLATFORM)-$(SPEECHSDK_BUILD_CONFIGURATION) \
+      --testset $(SPEECHSDK_BUILD_TYPE) \
       -D luis-key=$(luis-westus-s0-201809-key1) \
       -D speech-key=$(NorthEuropeKeySkyman) \
       -D long-running=false \
