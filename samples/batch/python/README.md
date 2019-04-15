@@ -2,7 +2,7 @@ Examples in C# and Python on how to use the Speech Services Batch Transcription 
 
 To execute the sample you need to generate the Python client library.
 
-To do this following the steps:
+To do this follow these steps:
 
 1. Go to https://editor.swagger.io
 2. Click File, then click Import
