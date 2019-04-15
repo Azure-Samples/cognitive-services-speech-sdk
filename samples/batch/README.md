@@ -9,3 +9,4 @@ Available samples:
 | Language | Directory | Description |
 | ---------- | -------- | ----------- |
 | C# | [csharp](csharp) | C# calling batch transcription REST API through System.Net.Http |
+| Python | [python](python) | Python client calling batch transcription REST API |
