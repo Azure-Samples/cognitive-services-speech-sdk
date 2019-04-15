@@ -32,6 +32,13 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 elseif(ANDROID)
     # Since we use CLANG, we need to set __GNUC__=4 because otherwise the generated Swig bindings won't export the symbols
     set(CMAKE_CXX_FLAGS "-D__GNUC__=4 -std=c++11 -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -fno-strict-aliasing -fPIC")
+
+    # compilation flags required by security checks
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_FORTIFY_SOURCE=2 -fstack-protector-strong")
+
+    # relro makes the relocation section read only after loading preventing attacks on the table
+    set(CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} -z nocopyreloc -z relro -z now") # -Wl,-z,relro
+    set(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} -z nocopyreloc -z relro -z now") # -Wl,-z,relro
 endif()
 
 if(WIN32)

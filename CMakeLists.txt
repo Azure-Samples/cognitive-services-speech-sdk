@@ -252,6 +252,19 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 elseif(ANDROID)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic -Wno-gnu-zero-variadic-macro-arguments -Wno-attributes")
 
+  # compilation flags required by security checks
+  # stack protector adds checks to prevent buffer overflows on stack allocated arrays
+  # _FORTIFY_SOURCE=2 replaces glibc functions that are otherwise unsafe with their safe replacements (e.g. strcpy vs. strncpy)
+  # See https://linux.die.net/man/7/feature_test_macros
+  # The stack protector setting enables protection against stack attacks using buffer overflows on stack allocated memory.
+  # See http://lists.llvm.org/pipermail/cfe-dev/2017-April/053662.html
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_FORTIFY_SOURCE=2 -fstack-protector-strong")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FORTIFY_SOURCE=2 -fstack-protector-strong")
+
+  # relro makes the relocation section read only after loading preventing attacks on the table
+  set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -z nocopyreloc -z relro -z now") # -Wl,-z,relro
+  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -z nocopyreloc -z relro -z now") # -Wl,-z,relro
+
   set(CMAKE_POSITION_INDEPENDENT_CODE ON) # -fPIC -fPIE
 
   # Include debug information in release builds

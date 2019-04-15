@@ -332,7 +332,7 @@ static void OnWSPeerClosed(void* context, uint16_t* closeCode, const unsigned ch
             errorReason = (char*)malloc(extraDataLength + 1);
             if (errorReason != nullptr)
             {
-                strncpy(errorReason, (const char*)extraData, extraDataLength);
+                strncpy_s(errorReason, extraDataLength + 1, (const char*)extraData, extraDataLength);
                 errorReason[extraDataLength] = '\0';
             }
         }
