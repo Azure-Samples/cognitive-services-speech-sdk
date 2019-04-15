@@ -27,6 +27,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         private static string languageUnderstandingSubscriptionKey;
         private static string languageUnderstandingServiceRegion;
         private static string languageUnderstandingHomeAutomationAppId;
+        private static string endpointInString;
+        private static Uri endpointUrl;
 
         private SpeechConfig config;
 
@@ -36,6 +38,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             languageUnderstandingSubscriptionKey = Config.GetSettingByKey<String>(context, "LanguageUnderstandingSubscriptionKey");
             languageUnderstandingServiceRegion = Config.GetSettingByKey<String>(context, "LanguageUnderstandingServiceRegion");
             languageUnderstandingHomeAutomationAppId = Config.GetSettingByKey<String>(context, "LanguageUnderstandingHomeAutomationAppId");
+            var intentRegionInUrl = MapToIntentServiceRegion(languageUnderstandingServiceRegion);
+            endpointInString = String.Format("wss://speech.platform.bing.com/speech/{0}/recognition/interactive/cognitiveservices/v1", intentRegionInUrl);
+            endpointUrl = new Uri(endpointInString);
 
             var inputDir = Config.GetSettingByKey<String>(context, "InputDir");
             TestData.AudioDir = Path.Combine(inputDir, "audio");
@@ -46,6 +51,28 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void Initialize()
         {
             config = SpeechConfig.FromSubscription(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
+        }
+
+        public static string MapToIntentServiceRegion(string speechServiceRegion)
+        {
+            var regionMap = new Dictionary<string, string>
+            {
+                {"westus", "uswest"},
+                {"westus2", "uswest2"},
+                {"southcentralus", "ussouthcentral"},
+                {"westcentralus", "uswestcentral"},
+                {"eastus", "useast"},
+                {"eastus2", "useast2"},
+                {"westeurope", "europewest"},
+                {"northeurope", "europenorth"},
+                {"southbrazil", "brazilsouth"},
+                {"eastaustralia", "australiaeast"},
+                {"southeastasia", "asiasoutheast"},
+                {"eastasia", "asiaeast"}
+            };
+
+            Assert.IsTrue(regionMap.ContainsKey(speechServiceRegion), "Cannot map speech service region to intent service region.");
+            return regionMap[speechServiceRegion];
         }
 
         public static IntentRecognizer TrackSessionId(IntentRecognizer recognizer)
@@ -272,6 +299,92 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput));
             recognizer.AddIntent(TestData.English.HomeAutomation.TurnOn.Utterance);
             recognizer = DoAsyncRecognitionNotAwaited(recognizer);
+        }
+
+        [TestMethod]
+        public async Task FromEndpointIntentModel()
+        {
+            var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, languageUnderstandingSubscriptionKey);
+            configFromEndpoint.SpeechRecognitionLanguage = Language.EN;
+            using (var recognizer = TrackSessionId(new IntentRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile))))
+            {
+                var phrase = TestData.English.HomeAutomation.TurnOn.Utterance;
+                var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
+                recognizer.AddAllIntents(model);
+
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
+                Assert.AreEqual(phrase, result.Text);
+                Assert.AreEqual("HomeAutomation.TurnOn", result.IntentId, $"Unexpected intent ID: actual: {result.IntentId}, expected {phrase}");
+
+                var json = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
+                Assert.IsTrue(json.Contains("ITN"), "Detailed result does not contain ITN.");
+                Assert.IsTrue(json.Contains("Lexical"), "Detailed result does not contain Lexical.");
+                Assert.IsTrue(json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
+                Assert.IsTrue(json.Contains("Display"), "Detailed result does not contain Text.");
+            }
+        }
+
+        [TestMethod]
+        public async Task FromEndpointGermanPhraseIntent()
+        {
+            var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, languageUnderstandingSubscriptionKey);
+            configFromEndpoint.SpeechRecognitionLanguage = Language.DE_DE;
+            // Although we set output format to simple, the intent recognizer will set it to detailed for checking intents.
+            configFromEndpoint.OutputFormat = OutputFormat.Simple;
+            using (var recognizer = TrackSessionId(new IntentRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            {
+                var phrase = TestData.German.FirstOne.Utterance;
+                recognizer.AddIntent(phrase);
+
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                // TODO cannot enable below assertion yet, RecognizedIntent is not returned - VSO:1594523
+                // Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                Assert.AreEqual(phrase, result.Text);
+                Assert.AreEqual(phrase, result.IntentId, $"Unexpected intent ID: actual: {result.IntentId}, expected {phrase}");
+
+                var json = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
+                Assert.IsTrue(json.Contains("ITN"), "Detailed result does not contain ITN.");
+                Assert.IsTrue(json.Contains("Lexical"), "Detailed result does not contain Lexical.");
+                Assert.IsTrue(json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
+                Assert.IsTrue(json.Contains("Display"), "Detailed result does not contain Text.");
+            }
+        }
+
+        [TestMethod]
+        public async Task FromEndpointPropertyOverwriteIntent()
+        {
+            var endpointWithProperty = endpointInString + "?language=en-us&format=detailed";
+            var configFromEndpoint = SpeechConfig.FromEndpoint(new Uri(endpointWithProperty), languageUnderstandingSubscriptionKey);
+
+            // The property should not overwrite the query parameter in url.
+            configFromEndpoint.SpeechRecognitionLanguage = "Invalid-Language";
+            configFromEndpoint.OutputFormat = OutputFormat.Simple;
+
+            using (var recognizer = TrackSessionId(new IntentRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile))))
+            {
+                var phrase = TestData.English.HomeAutomation.TurnOn.Utterance;
+                var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
+                recognizer.AddAllIntents(model);
+
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
+                Assert.AreEqual(phrase, result.Text);
+                Assert.AreEqual("HomeAutomation.TurnOn", result.IntentId, $"Unexpected intent ID: actual: {result.IntentId}, expected {phrase}");
+
+                var json = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
+                Assert.IsTrue(json.Contains("ITN"), "Detailed result does not contain ITN.");
+                Assert.IsTrue(json.Contains("Lexical"), "Detailed result does not contain Lexical.");
+                Assert.IsTrue(json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
+                Assert.IsTrue(json.Contains("Display"), "Detailed result does not contain Text.");
+            }
         }
 
         IntentRecognizer DoAsyncRecognitionNotAwaited(IntentRecognizer rec)

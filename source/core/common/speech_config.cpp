@@ -13,7 +13,7 @@ namespace Speech {
 namespace Impl {
 
 
-void CSpxSpeechConfig::InitAuthorizationToken(const char * authToken, const char * region)
+void CSpxSpeechConfig::InitAuthorizationToken(const char* authToken, const char* region)
 {
     SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);
     m_init = true;
@@ -22,7 +22,7 @@ void CSpxSpeechConfig::InitAuthorizationToken(const char * authToken, const char
     SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), region);
 }
 
-void CSpxSpeechConfig::InitFromEndpoint(const char * endpoint, const char* subscription)
+void CSpxSpeechConfig::InitFromEndpoint(const char* endpoint, const char* subscription)
 {
     SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);
     m_init = true;
@@ -35,7 +35,7 @@ void CSpxSpeechConfig::InitFromEndpoint(const char * endpoint, const char* subsc
 }
 
 
-void CSpxSpeechConfig::InitFromSubscription(const char * subscription, const char* region)
+void CSpxSpeechConfig::InitFromSubscription(const char* subscription, const char* region)
 {
     SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);
     m_init = true;

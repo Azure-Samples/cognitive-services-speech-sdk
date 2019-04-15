@@ -280,7 +280,6 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     // Construct speech.config payload
     SetSpeechConfig(properties);
 
-    SPX_DBG_TRACE_VERBOSE("%s: recoMode=%d", __FUNCTION__, m_recoMode);
     USP::ConnectionPtr uspConnection;
 
     try
@@ -335,23 +334,22 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedP
     SPX_DBG_ASSERT(GetSite() != nullptr);
 
     // How many recognizers of each type do we have?
-    uint16_t countSpeech, countIntent, countTranslation;
+    uint16_t countSpeech = 0, countIntent = 0, countTranslation = 0;
     GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation);
     SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation == 1); // currently only support one recognizer
 
-    // now based on the endpoint, which types of recognizers, and/or the custom model id ... set up the endpoint
+    // set endpoint url if this is provided.
     auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
     if (!endpoint.empty())
     {
         m_customEndpoint = true;
-        if (0 == PAL::stricmp(endpoint.c_str(), "CORTANA"))
-        {
-            SetUspEndpoint_Cortana(properties, client);
-        }
-        else
-        {
-            SetUspEndpoint_Custom(properties, client);
-        }
+        SetUspEndpointUrl(endpoint, client);
+    }
+
+    // set endpoint type.
+    if (!endpoint.empty() && 0 == PAL::stricmp(endpoint.c_str(), "CORTANA"))
+    {
+        SetUspEndpoint_Cortana(properties, client);
     }
     else if (countIntent == 1)
     {
@@ -363,45 +361,30 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedP
     }
     else
     {
+        SPX_DBG_ASSERT(countSpeech == 1);
         SetUspEndpoint_DefaultSpeechService(properties, client);
     }
 
     // set reco mode based on recognizer type
     USP::RecognitionMode mode = USP::RecognitionMode::Interactive;
     SPXHR checkHr = SPX_NOERROR;
+    // Reco mode should be already set in properties.
+    checkHr = GetRecoModeFromProperties(properties, mode);
+    SPX_THROW_HR_IF(checkHr, SPX_FAILED(checkHr));
+    m_isInteractiveMode = mode == USP::RecognitionMode::Interactive;
+    client.SetRecognitionMode(mode);
+    SPX_DBG_TRACE_VERBOSE("%s: recoMode=%d", __FUNCTION__, mode);
 
-    // The reco mode in custom endpoint takes precedence.
-    if (m_customEndpoint)
-    {
-        SPX_DBG_TRACE_VERBOSE("%s: Get reco mode string in the custom endpoint URL.", __FUNCTION__);
-
-        checkHr = GetRecoModeFromEndpoint(PAL::ToWString(endpoint), mode);
-        if (checkHr == SPXERR_NOT_FOUND)
-        {
-            SPX_DBG_TRACE_VERBOSE("%s: No reco mode string in the custom endpoint URL.", __FUNCTION__);
-            checkHr = GetRecoModeFromProperties(properties, mode);
-            if (checkHr == SPXERR_NOT_FOUND)
-            {
-                SPX_DBG_TRACE_VERBOSE("%s: No reco mode string set in property collection when using custom endpoint.", __FUNCTION__);
-            }
-        }
-    }
-    else
-    {
-        checkHr = GetRecoModeFromProperties(properties, mode);
-        // For non-custom endpoint, the reco mode must be set.
-        SPX_THROW_HR_IF(checkHr, SPX_FAILED(checkHr));
-    }
-
-    if (checkHr == SPX_NOERROR)
-    {
-        m_recoMode = mode;
-        client.SetRecognitionMode(m_recoMode);
-    }
-
+    // Set output format.
     client.SetOutputFormat(GetOutputFormat(properties));
 
     return client;
+}
+
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointUrl(const std::string& endpointUrl, USP::Client& client)
+{
+    SPX_DBG_TRACE_VERBOSE("%s: Using Custom endpoint: %s", __FUNCTION__, endpointUrl.c_str());
+    return client.SetEndpointUrl(endpointUrl);
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Cortana(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
@@ -412,90 +395,69 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Cortana(std::shared_ptr<IS
     return client.SetEndpointType(USP::EndpointType::CDSDK);
 }
 
-USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Custom(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
-{
-    UNUSED(properties);
-
-    auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
-    SPX_DBG_TRACE_VERBOSE("%s: Using Custom URL/endpoint: %s", __FUNCTION__, endpoint.c_str());
-    return client.SetEndpointUrl(endpoint);
-}
-
 USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Intent(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
-    SPX_DBG_TRACE_VERBOSE("%s: Using Intent URL/endpoint...", __FUNCTION__);
-    m_customEndpoint = false;
-
-    auto intentRegion = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_IntentRegion));
-    SPX_IFTRUE_THROW_HR(intentRegion.empty(), SPXERR_INVALID_REGION);
-
-    client.SetEndpointType(USP::EndpointType::Intent)
-          .SetIntentRegion(intentRegion);
+    SPX_DBG_TRACE_VERBOSE("%s: Endpoint type: Intent", __FUNCTION__);
+    client.SetEndpointType(USP::EndpointType::Intent);
+    SetUspRegion(properties, client, /*isIntentRegion=*/ true);
 
     auto language = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
-    if (!language.empty())
-    {
-        client.SetLanguage(language);
-    }
+    client.SetLanguage(language);
+
     return client;
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Translation(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
-    SPX_DBG_TRACE_VERBOSE("%s: Using Translation URL/endpoint...", __FUNCTION__);
-    m_customEndpoint = false;
+    SPX_DBG_TRACE_VERBOSE("%s: Endpoint type: Translation.", __FUNCTION__);
+    client.SetEndpointType(USP::EndpointType::Translation);
+    SetUspRegion(properties, client, /*isIntentRegion=*/ false);
 
-    auto region = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region));
-    SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_REGION);
-
+    auto fromLang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
+    client.SetTranslationSourceLanguage(fromLang);
     auto toLangs = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
-    SPX_IFTRUE_THROW_HR(toLangs.empty(), SPXERR_INVALID_ARG);
-
+    client.SetTranslationTargetLanguages(toLangs);
     auto customSpeechModelId = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId));
-    if (!customSpeechModelId.empty())
-    {
-        client.SetModelId(customSpeechModelId);
-    }
-    else
-    {
-        auto fromLang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
-        SPX_IFTRUE_THROW_HR(fromLang.empty(), SPXERR_INVALID_ARG);
-        client.SetTranslationSourceLanguage(fromLang);
-    }
-
+    client.SetModelId(customSpeechModelId);
     auto voice = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice));
-    return client.SetEndpointType(USP::EndpointType::Translation)
-        .SetRegion(region)
-        .SetTranslationTargetLanguages(toLangs)
-        .SetTranslationVoice(voice);
-}
-
-USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_DefaultSpeechService(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
-{
-    SPX_DBG_TRACE_VERBOSE("%s: Using Default Speech URL/endpoint...", __FUNCTION__);
-    m_customEndpoint = false;
-
-    auto region = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region));
-    SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_REGION);
-
-    client.SetEndpointType(USP::EndpointType::Speech)
-          .SetRegion(region);
-
-    auto customSpeechModelId = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId));
-    if (!customSpeechModelId.empty())
-    {
-        return client.SetModelId(customSpeechModelId);
-    }
-
-    auto lang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
-    if (!lang.empty())
-    {
-        return client.SetLanguage(lang);
-    }
+    client.SetTranslationVoice(voice);
 
     return client;
 }
 
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_DefaultSpeechService(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+{
+    SPX_DBG_TRACE_VERBOSE("%s: Endpoint type: Speech.", __FUNCTION__);
+    client.SetEndpointType(USP::EndpointType::Speech);
+    SetUspRegion(properties, client, /*isIntentRegion=*/ false);
+
+    auto lang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
+    client.SetLanguage(lang);
+    auto customSpeechModelId = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId));
+    client.SetModelId(customSpeechModelId);
+
+    return client;
+}
+
+USP::Client& CSpxUspRecoEngineAdapter::SetUspRegion(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client, bool isIntentRegion)
+{
+    auto region = isIntentRegion ? properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_IntentRegion))
+        : properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region));
+    if (!m_customEndpoint)
+    {
+        SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_REGION);
+        isIntentRegion ? client.SetIntentRegion(region) : client.SetRegion(region);
+    }
+    else
+    {
+        if (!region.empty())
+        {
+            SPX_DBG_TRACE_ERROR("%s: when using custom endpoint, region should not be specified separately.");
+            SPX_THROW_HR(SPXERR_INVALID_ARG);
+        }
+    }
+    return client;
+}
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
@@ -660,30 +622,6 @@ void CSpxUspRecoEngineAdapter::SetSpeechConfig(std::shared_ptr<ISpxNamedProperti
     speechConfig["context"]["audio"]["source"]["channelcount"] = properties->GetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture));
 
     m_speechConfig = speechConfig.dump();
-}
-
-SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& recoMode)
-{
-    SPXHR hr = SPX_NOERROR;
-
-    if (endpoint.find(L"/interactive/") != std::string::npos)
-    {
-        recoMode = USP::RecognitionMode::Interactive;
-    }
-    else if (endpoint.find(L"/conversation/") != std::string::npos)
-    {
-        recoMode = USP::RecognitionMode::Conversation;
-    }
-    else if (endpoint.find(L"/dictation/") != std::string::npos)
-    {
-        recoMode = USP::RecognitionMode::Dictation;
-    }
-    else
-    {
-        hr = SPXERR_NOT_FOUND;
-    }
-
-    return hr;
 }
 
 void CSpxUspRecoEngineAdapter::UspSendSpeechConfig()
@@ -903,7 +841,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
 void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Speech.Fragment message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message.offset, message.duration, message.text.c_str());
-    SPX_DBG_ASSERT(!IsInteractiveMode());
+    SPX_DBG_ASSERT(!m_isInteractiveMode);
 
     bool sendIntermediate = false;
 
@@ -967,8 +905,8 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
             FireFinalResultLater(message);
         }
     }
-    else if ((IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
-        (!IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
+    else if ((m_isInteractiveMode && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
+        (!m_isInteractiveMode && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
     {
         if (message.recognitionStatus == USP::RecognitionStatus::EndOfDictation)
         {
@@ -1078,8 +1016,8 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
     {
         SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
     }
-    else if ((IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
-             (!IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
+    else if ((m_isInteractiveMode && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
+             (!m_isInteractiveMode && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
     {
         SPX_DBG_TRACE_SCOPE("Fire final translation result: Creating Result", "FireFinalResul: GetSite()->FireAdapterResult_FinalResult()  complete!");
         if (message.recognitionStatus == USP::RecognitionStatus::EndOfDictation)
@@ -1181,8 +1119,8 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
     {
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
-    else if (( IsInteractiveMode() && ChangeState(UspState::WaitingForTurnEnd, UspState::Idle)) ||
-             (!IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::Idle)))
+    else if (( m_isInteractiveMode && ChangeState(UspState::WaitingForTurnEnd, UspState::Idle)) ||
+             (!m_isInteractiveMode && ChangeState(UspState::WaitingForPhrase, UspState::Idle)))
     {
         adapterTurnStopped = true;
     }
@@ -1294,7 +1232,7 @@ void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
             std::string luisJson((const char*)msg.buffer, msg.size);
             SPX_DBG_TRACE_VERBOSE("USP User Message: response; luisJson='%s'", luisJson.c_str());
             FireFinalResultLater_WaitingForIntentComplete(luisJson);
-            ChangeState(UspState::WaitingForIntent2, IsInteractiveMode() ? UspState::WaitingForTurnEnd : UspState::WaitingForPhrase);
+            ChangeState(UspState::WaitingForIntent2, m_isInteractiveMode ? UspState::WaitingForTurnEnd : UspState::WaitingForPhrase);
         }
         else
         {
@@ -1466,6 +1404,7 @@ std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dg
             contextJson += appendComma ? "," : "";
             contextJson += R"("dgi":)";
             contextJson += dgiJson;
+            appendComma = true;
             appendComma = true;
         }
 

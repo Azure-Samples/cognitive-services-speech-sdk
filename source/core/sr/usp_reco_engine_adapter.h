@@ -122,19 +122,17 @@ private:
     void UspTerminate();
 
     USP::Client& SetUspEndpoint(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-
+    USP::Client& SetUspEndpointUrl(const std::string& endpointUrl, USP::Client& client);
     USP::Client& SetUspEndpoint_Cortana(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpoint_Custom(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpoint_Intent(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpoint_Translation(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpoint_DefaultSpeechService(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-
+    USP::Client& SetUspRegion(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client, bool isIntentRegion);
     USP::Client& SetUspRecoMode(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspProxyInfo(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspSingleTrustedCert(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
 
-    SPXHR GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& mode);
     SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;
     USP::OutputFormat GetOutputFormat(const std::shared_ptr<ISpxNamedProperties>& properties) const;
 
@@ -192,8 +190,6 @@ private:
     CancellationReason ToCancellationReason(USP::RecognitionStatus uspRecognitionStatus);
     NoMatchReason ToNoMatchReason(USP::RecognitionStatus uspRecognitionStatus);
 
-    bool IsInteractiveMode() const { return m_recoMode == USP::RecognitionMode::Interactive; }
-
     enum class AudioState { Idle = 0, Ready = 1, Sending = 2, Mute = 9 };
 
     enum class UspState {
@@ -241,7 +237,7 @@ private:
     std::shared_ptr<ISpxUspCallbacks> m_uspCallbacks;
     std::shared_ptr<USP::Connection> m_uspConnection;
 
-    USP::RecognitionMode m_recoMode = USP::RecognitionMode::Interactive;
+    bool m_isInteractiveMode = false;
     std::string m_speechConfig;
     bool m_customEndpoint = false;
 

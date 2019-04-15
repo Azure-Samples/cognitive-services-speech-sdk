@@ -149,7 +149,7 @@ void CSpxLuisDirectEngineAdapter::GetIntentInfo(std::string& provider, std::stri
         }
     }
 
-    if (!id.empty() && !key.empty() && !region.empty())
+    if (!id.empty())
     {
         provider = "LUIS";
     }

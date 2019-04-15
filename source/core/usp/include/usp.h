@@ -196,7 +196,6 @@ public:
         m_endpoint(endpoint),
         m_recoMode(RecognitionMode::Interactive),
         m_outputFormat(OutputFormat::Simple),
-        m_language(s_defaultLanguage),
         m_authData((size_t)AuthenticationType::SIZE_AUTHENTICATION_TYPE,""),
         m_connectionId(connectionId),
         m_threadService(threadService)

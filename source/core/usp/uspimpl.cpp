@@ -277,7 +277,7 @@ string Connection::Impl::ConstructConnectionUrl() const
                 << endpoint::luis::pathSuffix;
             break;
         case EndpointType::CDSDK:
-            oss << endpoint::CDSDK::url;
+            // For CDSDK, it can only be created by providing endpoint URL. So no need to overwrite that.
             break;
         case EndpointType::Bot:
             oss << endpoint::bot::url;
@@ -295,50 +295,52 @@ string Connection::Impl::ConstructConnectionUrl() const
         oss << delim << endpoint::unifiedspeech::outputFormatQueryParam << g_outFormatStrings[format];
     }
 
-    // Todo: use libcurl or another library to encode the url as whole, instead of each parameter.
+    bool usingCustomModel = !m_config.m_modelId.empty();
     switch (m_config.m_endpoint)
     {
     case EndpointType::Speech:
-        if (!m_config.m_modelId.empty())
+        if (usingCustomModel)
         {
             if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::deploymentIdQueryParam))
             {
                 oss << '&' << endpoint::unifiedspeech::deploymentIdQueryParam << m_config.m_modelId;
             }
         }
-        else if (!m_config.m_language.empty())
+        // The language parameter is required for speech recognition if no custom model is given.
+        if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
         {
-            if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
+            std::string langStr = m_config.m_language.empty() && !usingCustomModel ? Client::s_defaultLanguage : m_config.m_language;
+            if (!langStr.empty())
             {
-                oss << '&' << endpoint::unifiedspeech::langQueryParam << m_config.m_language;
+                oss << '&' << endpoint::unifiedspeech::langQueryParam << langStr;
             }
         }
         break;
+
     case EndpointType::Intent:
-        if (!m_config.m_language.empty())
+        // The language parameter is required for intent service.
+        if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
         {
-            if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
-            {
-                oss << '&' << endpoint::unifiedspeech::langQueryParam << m_config.m_language;
-            }
+            std::string langStr = m_config.m_language.empty() ? Client::s_defaultLanguage : m_config.m_language;
+            oss << '&' << endpoint::unifiedspeech::langQueryParam << langStr;
         }
         break;
+
     case EndpointType::Translation:
-        if (!m_config.m_modelId.empty())
+        if (usingCustomModel)
         {
             if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::deploymentIdQueryParam))
             {
                 oss << '&' << endpoint::unifiedspeech::deploymentIdQueryParam << m_config.m_modelId;
             }
         }
-        else if (!m_config.m_translationSourceLanguage.empty())
+        if (!m_config.m_translationSourceLanguage.empty())
         {
             if (!customEndpoint || !contains(oss.str(), endpoint::translation::from))
             {
                 oss << '&' << endpoint::translation::from << EncodeParameterString(m_config.m_translationSourceLanguage);
             }
         }
-
         if (!customEndpoint || !contains(oss.str(), endpoint::translation::to))
         {
             size_t start = 0;
@@ -425,7 +427,6 @@ void Connection::Impl::Connect()
     authStr = m_config.m_authData[(size_t)AuthenticationType::SearchDelegationRPSToken];
     if (!authStr.empty())
     {
-
         LogInfo("Adding search delegation RPS token.");
         if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::searchDelegationRPSToken, authStr.c_str()) != 0)
         {

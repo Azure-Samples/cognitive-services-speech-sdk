@@ -22,12 +22,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         private static string deploymentId;
         private SpeechRecognitionTestsHelper helper;
+        private static string endpointInString;
+        private static Uri endpointUrl;
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
             BaseClassInit(context);
             deploymentId = Config.GetSettingByKey<String>(context, "DeploymentId");
+            endpointInString = String.Format("wss://{0}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1", region);
+            endpointUrl = new Uri(endpointInString);
         }
 
         [TestInitialize]
@@ -304,7 +308,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     connection.Open(false);
                 }
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.IsFalse(string.IsNullOrEmpty(result.Text), result.Reason.ToString());
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
             }
         }
@@ -764,6 +768,111 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
             var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput));
             recognizer = helper.GetSpeechRecognizingAsyncNotAwaited(recognizer);
+        }
+
+        [TestMethod]
+        public async Task FromEndpointGermanRecognition()
+        {
+            var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
+            configFromEndpoint.SpeechRecognitionLanguage = Language.DE_DE;
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+            }
+        }
+
+        [TestMethod]
+        public async Task FromEndpointCustomRecognition()
+        {
+            var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
+            configFromEndpoint.EndpointId = deploymentId;
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, audioInput)))
+            {
+                var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+            }
+        }
+
+        [TestMethod]
+        public async Task FromEndpointDetailedRecognition()
+        {
+            var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
+            configFromEndpoint.OutputFormat = OutputFormat.Detailed;
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                var bestResults = result.Best().ToArray();
+                var detailedRecognitionText = bestResults[0].Text;
+                var detailedRecognitionNormalizedForm = bestResults[0].NormalizedForm;
+                var detailedRecognitionLexicalForm = bestResults[0].LexicalForm;
+                var detailedRecognitionMaskedForm = bestResults[0].MaskedNormalizedForm;
+
+                Assert.IsTrue(detailedRecognitionText.Length > 0);
+                Assert.IsTrue(detailedRecognitionNormalizedForm.Length > 0);
+                Assert.IsTrue(detailedRecognitionLexicalForm.Length > 0);
+                Assert.IsTrue(detailedRecognitionMaskedForm.Length > 0);
+            }
+        }
+
+        [TestMethod]
+        public async Task FromEndpointGermanRecognitionWithPropertyOverwrite()
+        {
+            var endpointWithLang = endpointInString + "?language=de-de";
+            var configFromEndpoint = SpeechConfig.FromEndpoint(new Uri(endpointWithLang), subscriptionKey);
+            // The property should not overwrite the query parameter in url.
+            configFromEndpoint.SpeechRecognitionLanguage = Language.EN;
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+            }
+        }
+
+        [TestMethod]
+        public async Task FromEndpointCustomRecognitionWithPropertyOverwrite()
+        {
+            var endpointWithDeploymentId = endpointInString + "?cid=" + deploymentId;
+            var configFromEndpoint = SpeechConfig.FromEndpoint(new Uri(endpointWithDeploymentId), subscriptionKey);
+            // The endpointId below is an invalid one.
+            configFromEndpoint.EndpointId = "3a2ff182-b6ca-4888-a7d0-7a2de3141572";
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, audioInput)))
+            {
+                var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+            }
+        }
+
+        [TestMethod]
+        public async Task FromEndpointDetailedRecognitionWithPropertyOverwrite()
+        {
+            var endpointWithOutputFormat = endpointInString + "?format=detailed";
+            var configFromEndpoint = SpeechConfig.FromEndpoint(new Uri(endpointWithOutputFormat), subscriptionKey);
+            configFromEndpoint.OutputFormat = OutputFormat.Simple;
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                var bestResults = result.Best().ToArray();
+                var detailedRecognitionText = bestResults[0].Text;
+                var detailedRecognitionNormalizedForm = bestResults[0].NormalizedForm;
+                var detailedRecognitionLexicalForm = bestResults[0].LexicalForm;
+                var detailedRecognitionMaskedForm = bestResults[0].MaskedNormalizedForm;
+
+                Assert.IsTrue(detailedRecognitionText.Length > 0);
+                Assert.IsTrue(detailedRecognitionNormalizedForm.Length > 0);
+                Assert.IsTrue(detailedRecognitionLexicalForm.Length > 0);
+                Assert.IsTrue(detailedRecognitionMaskedForm.Length > 0);
+            }
         }
     }
 }

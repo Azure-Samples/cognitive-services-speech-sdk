@@ -102,28 +102,39 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task<Dictionary<ResultType, List<EventArgs>>> GetTranslationRecognizedContinuous(string path, string fromLanguage, List<string> toLanguages, string voice=null, bool requireTranslatedSpeech = true)
         {
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages, voice)))
-            { 
-                var connection = Connection.FromRecognizer(recognizer);
-                var tcs = new TaskCompletionSource<bool>();
-                var receivedRecognizedEvents = new Dictionary<ResultType, List<EventArgs>>(); ;
-                var textResultEvents = new List<EventArgs>();
-                var synthesisResultEvents = new List<EventArgs>();
-                bool synthesisFailed = false;
+            {
+                return await DoTranslationAsync(recognizer, requireTranslatedSpeech);
+            }
+        }
 
-                int connectedEventCount = 0;
-                int disconnectedEventCount = 0;
-                connection.Connected += (s, e) =>
-                {
+        public async Task<Dictionary<ResultType, List<EventArgs>>> DoTranslationAsync(TranslationRecognizer recognizer, bool requireTranslatedSpeech)
+        {
+            var connection = Connection.FromRecognizer(recognizer);
+            var tcs = new TaskCompletionSource<bool>();
+            var receivedRecognizedEvents = new Dictionary<ResultType, List<EventArgs>>(); ;
+            var textResultEvents = new List<EventArgs>();
+            var synthesisResultEvents = new List<EventArgs>();
+            bool synthesisFailed = false;
+
+            int connectedEventCount = 0;
+            int disconnectedEventCount = 0;
+            connection.Connected += (s, e) => {
                     connectedEventCount++;
                 };
-                connection.Disconnected += (s, e) =>
-                {
+            connection.Disconnected += (s, e) => {
                     disconnectedEventCount++;
                 };
-                string canceled = string.Empty;
-                recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
-                recognizer.Recognized += (s, e) =>
+
+            string canceled = string.Empty;
+            recognizer.Canceled += (s, e) => {
+                if (e.Reason != CancellationReason.EndOfStream)
                 {
+                    canceled = e.ErrorDetails;
+                    tcs.TrySetResult(false);
+                }
+            };
+
+            recognizer.Recognized += (s, e) => {
                     Console.WriteLine($"Received final result event: {e.ToString()}");
                     if (!requireTranslatedSpeech || e.Result.Reason == ResultReason.TranslatedSpeech)
                     {
@@ -131,8 +142,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
-                recognizer.Synthesizing += (s, e) =>
-                {
+            recognizer.Synthesizing += (s, e) => {
                     Console.WriteLine($"Received synthesis event: {e.ToString()}");
                     if (e.Result.GetAudio().Length > 0)
                     {
@@ -145,40 +155,32 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
-                recognizer.SessionStarted += (s, e) =>
-                {
-                    Console.WriteLine($"Received session started event: {e.ToString()}");
-                };
-
-                recognizer.SessionStopped += (s, e) =>
-                {
+            recognizer.SessionStopped += (s, e) => {
                     Console.WriteLine($"Received stopped session event: {e.ToString()}");
                     tcs.TrySetResult(true);
                 };
 
-                await recognizer.StartContinuousRecognitionAsync();
-                await Task.WhenAny(tcs.Task, Task.Delay(timeout));
-                await recognizer.StopContinuousRecognitionAsync();
-                // It is not required to close the conneciton explictly. But it is also used to keep the connection object alive to ensure that
-                // connected and disconencted events can be received.
-                connection.Close();
+            await recognizer.StartContinuousRecognitionAsync();
+            await Task.WhenAny(tcs.Task, Task.Delay(timeout));
+            await recognizer.StopContinuousRecognitionAsync();
 
-                SpeechRecognitionTestsHelper.AssertConnectionCountMatching(connectedEventCount, disconnectedEventCount);
+            GC.KeepAlive(connection);
 
-                if (!string.IsNullOrEmpty(canceled))
-                {
-                    Assert.Fail($"Recognition Canceled: {canceled}");
-                }
-
-                if (synthesisFailed)
-                {
-                    Assert.Fail($"Synthesis failed.");
-                }
-
-                receivedRecognizedEvents.Add(ResultType.RecognizedText, textResultEvents);
-                receivedRecognizedEvents.Add(ResultType.Synthesis, synthesisResultEvents);
-                return receivedRecognizedEvents;
+            if (!string.IsNullOrEmpty(canceled))
+            {
+                Assert.Fail($"Recognition Canceled: {canceled}");
             }
+
+            SpeechRecognitionTestsHelper.AssertConnectionCountMatching(connectedEventCount, disconnectedEventCount);
+
+            if (synthesisFailed)
+            {
+                Assert.Fail($"Synthesis failed.");
+            }
+
+            receivedRecognizedEvents.Add(ResultType.RecognizedText, textResultEvents);
+            receivedRecognizedEvents.Add(ResultType.Synthesis, synthesisResultEvents);
+            return receivedRecognizedEvents;
         }
 
         public async Task<Dictionary<ResultType, List<TranslationRecognitionEventArgs>>> GetTranslationRecognizingContinuous(string path, string fromLanguage, List<string> toLanguages, string endpointId = null, bool allowErrors = false)

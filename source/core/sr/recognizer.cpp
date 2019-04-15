@@ -91,15 +91,15 @@ void CSpxRecognizer::CloseConnection()
 
 CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsync()
 {
-    const char* reco_mode = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
-    auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
+    const char* recModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
+    auto currentRecoMode = GetStringValueFromProperties(recModePropertyName, "");
     auto recoModeToSet = dynamic_cast<ISpxTranslationRecognizer *>(this) != nullptr
         ? g_recoModeConversation
         : g_recoModeInteractive;
 
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(reco_mode, recoModeToSet);
+        SetStringValueInProperties(recModePropertyName, recoModeToSet);
     }
     else
     {
@@ -112,8 +112,8 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsy
 
 CSpxAsyncOp<void> CSpxRecognizer::StartContinuousRecognitionAsync()
 {
-    const char* reco_mode = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
-    auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
+    const char* recModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
+    auto currentRecoMode = GetStringValueFromProperties(recModePropertyName, "");
     auto recoModeToSet = dynamic_cast<ISpxIntentRecognizer *>(this) != nullptr
         ? g_recoModeInteractive
         : g_recoModeConversation;

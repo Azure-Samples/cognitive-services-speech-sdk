@@ -23,7 +23,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
-            BaseClassInit(context);            
+            BaseClassInit(context);
         }
 
         [TestMethod]
@@ -53,7 +53,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
             config.SpeechRecognitionLanguage = Language.EN;
-            config.AddTargetLanguage(Language.DE);            
+            config.AddTargetLanguage(Language.DE);
 
             Assert.AreEqual("", config.VoiceName);
         }

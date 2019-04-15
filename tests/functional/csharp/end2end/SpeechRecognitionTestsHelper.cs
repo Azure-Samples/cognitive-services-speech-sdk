@@ -56,7 +56,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 taskCompletionSource.TrySetResult(0);
             };
             string canceled = string.Empty;
-            recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
+            recognizer.Canceled += (s, e) => {
+                canceled = e.ErrorDetails;
+                taskCompletionSource.TrySetResult(0);
+            };
 
             await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
             await Task.WhenAny(taskCompletionSource.Task, Task.Delay(timeout));
