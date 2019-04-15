@@ -6,7 +6,7 @@ To do this follow these steps:
 
 1. Go to https://editor.swagger.io
 2. Click File, then click Import
-3. Enter the swagger URL including the region for your Speech Services subscription https://<your-region>.cris.ai/docs/v2.0/swagger
+3. Enter the Swagger URL including the region for your Speech Services subscription: https://<your-region>.cris.ai/docs/v2.0/swagger
 4. Click Generate Client and select Python
 5. Save the client library
 
