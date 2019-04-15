@@ -5,7 +5,7 @@ To execute the sample you need to generate the Python client library.
 To do this follow these steps:
 
 1. Go to https://editor.swagger.io
-2. Click File, then click Import
+2. Click **File**, then click **Import URL**
 3. Enter the Swagger URL including the region for your Speech Services subscription: https://<your-region>.cris.ai/docs/v2.0/swagger
 4. Click Generate Client and select Python
 5. Save the client library
