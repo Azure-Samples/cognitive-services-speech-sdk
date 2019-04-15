@@ -1,4 +1,4 @@
-Examples in C# and Python on how to use the Speech Services Batch Transcription API.
+Example in Python on how to use the Speech Services Batch Transcription API.
 
 To execute the sample you need to generate the Python client library.
 
