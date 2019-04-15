@@ -12,4 +12,4 @@ To do this follow these steps:
 
 Copy the library in the folder python-library.
 
-You can use a development environment like PyCharm to edit, debug, execute the sample.
+You can use a development environment like PyCharm to edit, debug, and execute the sample.
