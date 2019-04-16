@@ -288,16 +288,6 @@ extern "C" void __attribute__((weak)) __attribute__((visibility("default"))) pth
 {
     SPX_TRACE_VERBOSE("pthread_condattr_setclock called on weak reference. probably running on api level 19");
 }
-
-extern "C" char* __strncpy_chk(char* dst, const char* src, size_t n, size_t dest_len);
-
-extern "C" __attribute__((weak)) __attribute__((visibility("default"))) char* __strncpy_chk2(char* dst, const char* src, size_t n, size_t dest_len, size_t src_len)
-{
-    // Use __strncpy_chk on API level < 19; doesn't have read past end-of-buffer check.
-    UNUSED(src_len);
-    return __strncpy_chk(dst, src, n, dest_len);
-}
-
 #endif
 #endif
 
