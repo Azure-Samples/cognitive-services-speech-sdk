@@ -72,9 +72,9 @@ public:
     /// <summary>
     /// Starts intent recognition, and returns after a single utterance is recognized. The end of a
     /// single utterance is determined by listening for silence at the end or until a maximum of 15
-    /// seconds of audio is processed.  The task returns the recognition text as result. 
+    /// seconds of audio is processed.  The task returns the recognition text as result.
     /// Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-    /// shot recognition like command or query. 
+    /// shot recognition like command or query.
     /// For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead..
     /// </summary>
     /// <returns>Future containing result value (a shared pointer to IntentRecognitionResult)
@@ -89,7 +89,7 @@ public:
     /// Asynchronously initiates continuous intent recognition operation.
     /// </summary>
     /// <returns>An empty future.</returns>
-    std::future<void> StartContinuousRecognitionAsync() override 
+    std::future<void> StartContinuousRecognitionAsync() override
     {
         return BaseType::StartContinuousRecognitionAsyncInternal();
     }
@@ -106,7 +106,7 @@ public:
     /// <summary>
     /// Asynchronously initiates keyword recognition operation.
     /// </summary>
-    /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
+    /// Note: Keyword spotting (KWS) functionality might work with any microphone type, official KWS support, however, is currently limited to the microphone arrays found in the Azure Kinect DK hardware or the Speech Devices SDK.
     /// <param name="model">Specifies the keyword model to be used.</param>
     /// <returns>An empty future.</returns>
     std::future<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model) override
@@ -117,7 +117,7 @@ public:
     /// <summary>
     /// Asynchronously terminates keyword recognition operation.
     /// </summary>
-    /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
+    /// Note: Keyword spotting (KWS) functionality might work with any microphone type, official KWS support, however, is currently limited to the microphone arrays found in the Azure Kinect DK hardware or the Speech Devices SDK.
     /// <returns>An empty future.</returns>
     std::future<void> StopKeywordRecognitionAsync() override
     {

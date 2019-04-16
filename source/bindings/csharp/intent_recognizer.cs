@@ -113,7 +113,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// single utterance is determined by listening for silence at the end or until a maximum of 15
         /// seconds of audio is processed.  The task returns the recognition text as result.
         /// Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-        /// shot recognition like command or query. 
+        /// shot recognition like command or query.
         /// For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
         /// </summary>
         /// <returns>A task representing the recognition operation. The task returns a value of <see cref="IntentRecognitionResult"/></returns>
@@ -156,7 +156,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// Starts speech recognition on a continuous audio stream with keyword spotting, until StopKeywordRecognitionAsync() is called.
         /// User must subscribe to events to receive recognition results.
         /// </summary>
-        /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
+        /// Note: Keyword spotting (KWS) functionality might work with any microphone type, official KWS support, however, is currently limited to the microphone arrays found in the Azure Kinect DK hardware or the Speech Devices SDK.
         /// <param name="model">The keyword recognition model that specifies the keyword to be recognized.</param>
         /// <returns>A task representing the asynchronous operation that starts the recognition.</returns>
         public Task StartKeywordRecognitionAsync(KeywordRecognitionModel model)
@@ -170,7 +170,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <summary>
         /// Stops continuous speech recognition with keyword spotting.
         /// </summary>
-        /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
+        /// Note: Keyword spotting (KWS) functionality might work with any microphone type, official KWS support, however, is currently limited to the microphone arrays found in the Azure Kinect DK hardware or the Speech Devices SDK.
         /// <returns>A task representing the asynchronous operation that stops the recognition.</returns>
         public Task StopKeywordRecognitionAsync()
         {

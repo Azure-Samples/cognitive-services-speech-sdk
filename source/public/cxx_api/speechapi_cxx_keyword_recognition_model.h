@@ -18,7 +18,7 @@ namespace Speech {
 /// <summary>
 /// Represents keyword recognition model used with StartKeywordRecognitionAsync methods.
 /// </summary>
-/// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
+/// Note: Keyword spotting (KWS) functionality might work with any microphone type, official KWS support, however, is currently limited to the microphone arrays found in the Azure Kinect DK hardware or the Speech Devices SDK.
 class KeywordRecognitionModel
 {
 public:
