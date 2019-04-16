@@ -105,13 +105,15 @@ struct SpeechEndDetectedMsg : public JsonMsg
 */
 struct TurnStartMsg : public JsonMsg
 {
-    TurnStartMsg(std::wstring&& content, const std::string& tag) :
+    TurnStartMsg(std::wstring&& content, const std::string& tag, const std::string& request) :
         JsonMsg(std::move(content)),
-        contextServiceTag(tag)
+        contextServiceTag(tag),
+        requestId{ request }
     {
     }
 
     std::string contextServiceTag;
+    std::string requestId;
 };
 
 /**
@@ -120,9 +122,12 @@ struct TurnStartMsg : public JsonMsg
 */
 struct TurnEndMsg : JsonMsg
 {
-    TurnEndMsg() :
-        JsonMsg(std::wstring())
+    TurnEndMsg(const std::string& request) :
+        JsonMsg(std::wstring()),
+        requestId{ request }
     {}
+
+    std::string requestId;
 };
 
 struct SpeechMsg : public JsonMsg
@@ -238,6 +243,7 @@ struct UserMsg
 {
     const std::string path;
     const std::string contentType;
+    const std::string requestId;
     const uint8_t* buffer;
     size_t size;
 };

@@ -81,9 +81,10 @@ public:
     // --- ISpxTranslationSynthesisResult ---
     const uint8_t* GetAudio() const override;
     size_t GetLength() const override;
+    std::string GetRequestId() const override;
 
     // --- ISpxTranslationSynthesisResultInit ---
-    void InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength) override;
+    void InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength, const std::string& requestId) override;
 
     // --- ISpxNamedProperties (overrides) ---
     void SetStringValue(const char* name, const char* value) override;
@@ -114,6 +115,7 @@ private:
     size_t m_audioLength{0};
     uint64_t m_offset{0};
     uint64_t m_duration{0};
+    std::string m_requestId;
 };
 
 

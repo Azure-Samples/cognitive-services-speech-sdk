@@ -7,6 +7,7 @@ include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
 include_directories("${COMMON}/include")
 include_directories("${SR}/include")
+include_directories("${CARBON_EXTERNAL}/json")
 
 set(HEADERS)
 

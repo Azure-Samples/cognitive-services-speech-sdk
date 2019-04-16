@@ -10,6 +10,7 @@ include_directories(${CARBON_INCLUDE})
 include_directories("${COMMON}/include")
 include_directories(${TEST_INCLUDE})
 include_directories(${SRC_DIR})
+include_directories("${CARBON_EXTERNAL}/json")
 
 set(SOURCES
     "${SRC_DIR}/main.cpp"

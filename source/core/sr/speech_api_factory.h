@@ -48,6 +48,7 @@ public:
 
     // --- ISpxSpeechApiFactory
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput) override;
+    std::shared_ptr<ISpxSpeechBotConnector> CreateSpeechBotConnectorFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput) override;
     std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput) override;
     std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfig(const std::string& sourcelanguage, const std::vector<std::string>& targetLanguages, const std::string& voice, std::shared_ptr<ISpxAudioConfig> audioInput) override;
 
@@ -64,7 +65,7 @@ protected:
 private:
 
     std::shared_ptr<ISpxRecognizer> CreateRecognizerFromConfigInternal(
-        const char* sessionClassName, 
+        const char* sessionClassName,
         const char* recognizerClassName,
         const char* language = nullptr,
         OutputFormat format = OutputFormat::Simple,

@@ -103,6 +103,8 @@ public:
     CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) override;
     CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
 
+    CSpxAsyncOp<std::string> SendActivityAsync(std::shared_ptr<ISpxActivity> activity) final;
+
     void OpenConnection(bool forContinuousRecognition) override;
     void CloseConnection() override;
     void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) override;
@@ -112,7 +114,7 @@ public:
     void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Keyword); }
 
     // --- ISpxRecoEngineAdapterSite (first part...)
-    void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation) override;
+    void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countBot) override;
 
     std::list<std::string> GetListenForList() override;
     void GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region) override;
@@ -131,6 +133,7 @@ public:
     std::shared_ptr<ISpxConnectionEventArgs> CreateConnectionEventArgs(const std::wstring& sessionId) override;
     std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, uint64_t offset) override;
     std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
+    std::shared_ptr<ISpxActivityEventArgs> CreateActivityEventArgs(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) final;
 
     // --- ISpxRecoResultFactory
     std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
@@ -140,6 +143,7 @@ public:
     // --- ISpxRecoEngineAdapterSite (second part...)
     void FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
     void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
+    void FireAdapterResult_ActivityReceived(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) final;
     void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result) override;
     void FireConnectedEvent() override;
     void FireDisconnectedEvent() override;
@@ -184,6 +188,8 @@ private:
         ProcessingAudioLeftovers = 6
     };
 
+    bool IsBotSession() const noexcept;
+
     CSpxAsyncOp<void> StartRecognitionAsync(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
     CSpxAsyncOp<void> StopRecognitionAsync(RecognitionKind stopKind);
 
@@ -201,8 +207,8 @@ private:
     void EnsureFireResultEvent();
     void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result);
 
-    enum EventType { SessionStart, SessionStop, SpeechStart, SpeechEnd, RecoResultEvent, Connected, Disconnected };
-    void FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, wchar_t* sessionId = nullptr, uint64_t offset = 0);
+    enum EventType { SessionStart, SessionStop, SpeechStart, SpeechEnd, RecoResultEvent, ActivityReceivedEvent, Connected, Disconnected };
+    void FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, wchar_t* sessionId = nullptr, uint64_t offset = 0, std::shared_ptr<ISpxActivity> activity = nullptr, std::shared_ptr<ISpxAudioOutput> audio = nullptr);
 
 private:
     std::packaged_task<void()> CreateTask(std::function<void()> func, bool catchAll = true);
@@ -252,7 +258,9 @@ private:
     void CancelPendingSingleShot();
     void SlowDownThreadIfNecessary(uint32_t size);
     void DispatchEvent(const std::list<std::weak_ptr<ISpxRecognizer>>& weakRecognizers,
-        const std::wstring& sessionId, EventType sessionType, uint64_t offset, const std::shared_ptr<ISpxRecognitionResult>& result);
+                       const std::wstring& sessionId, EventType sessionType, uint64_t offset,
+                       std::shared_ptr<ISpxRecognitionResult> result,
+                       std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio);
 
     struct Operation;
     void RecognizeOnceAsync(const std::shared_ptr<Operation>& singleShot);
@@ -325,7 +333,7 @@ private:
     static seconds StopRecognitionTimeout;
 
     std::list<std::weak_ptr<ISpxRecognizer>> m_recognizers;
-    std::mutex m_recognizersLock;
+    mutable std::mutex m_recognizersLock;
 
     bool m_isReliableDelivery;
     uint64_t m_lastErrorGlobalOffset;

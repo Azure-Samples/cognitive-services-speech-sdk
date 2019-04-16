@@ -4,6 +4,7 @@
 //
 // guid_utils.cpp: Utility classes/functions dealing with GUIDs
 //
+#include <cctype>
 
 #define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
@@ -20,17 +21,29 @@ namespace PAL
         auto result = UniqueId_Generate(&uuidStr[0], UUID_LENGTH + 1);
 
         SPX_IFTRUE_THROW_HR(result != UNIQUEID_OK, SPXERR_UUID_CREATE_FAILED);
-
         std::wstring uuidWStr;
+        auto to_lower = [](unsigned char c)
+        {
+            return static_cast<unsigned char>(std::tolower(c));
+        };
         for (int i = 0; i < UUID_LENGTH; i++)
         {
             if (uuidStr[i] != '-')
             {
-                uuidWStr.push_back(uuidStr[i]);
+                uuidWStr.push_back(to_lower(uuidStr[i]));
             }
         }
 
         return uuidWStr;
+    }
+
+    std::string CreateGuidWithDashesUTF8()
+    {
+        std::string uuidStr(UUID_LENGTH, char{0});
+        /* In c++17 we have non-const string::data(), maybe we change this in the future */
+        auto result = UniqueId_Generate(&uuidStr[0], UUID_LENGTH + 1);
+        SPX_IFTRUE_THROW_HR(result != UNIQUEID_OK, SPXERR_UUID_CREATE_FAILED);
+        return uuidStr;
     }
 
     std::string DeviceUuid()

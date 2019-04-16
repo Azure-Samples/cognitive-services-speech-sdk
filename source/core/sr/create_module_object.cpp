@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 
+#include "activity_event_args.h"
 #include "audio_stream_session.h"
 #include "factory_helpers.h"
 #include "intent_recognizer.h"
@@ -23,7 +24,9 @@
 #include "session_event_args.h"
 #include "connection_event_args.h"
 #include "usp_reco_engine_adapter.h"
+#include "bot_connector.h"
 #include "connection.h"
+#include "activity.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -36,9 +39,13 @@ SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* i
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY(CSpxAudioStreamSession, ISpxSession);
     SPX_FACTORY_MAP_ENTRY(CSpxRecognitionEventArgs, ISpxRecognitionEventArgs);
+    SPX_FACTORY_MAP_ENTRY(CSpxActivityEventArgs, ISpxActivityEventArgs);
     SPX_FACTORY_MAP_ENTRY(CSpxRecognitionResult, ISpxRecognitionResult);
     SPX_FACTORY_MAP_ENTRY(CSpxRecognizer, ISpxRecognizer);
     SPX_FACTORY_MAP_ENTRY(CSpxIntentRecognizer, ISpxRecognizer);
+    SPX_FACTORY_MAP_ENTRY(CSpxSpeechBotConnector, ISpxRecognizer);
+    SPX_FACTORY_MAP_ENTRY(CSpxActivity, ISpxActivity);
+    SPX_FACTORY_MAP_ENTRY(CSpxActivityJSONAccessor, ISpxActivityJSONAccessor);
     SPX_FACTORY_MAP_ENTRY(CSpxIntentTrigger, ISpxTrigger);
     SPX_FACTORY_MAP_ENTRY(CSpxKwsModel, ISpxKwsModel);
     SPX_FACTORY_MAP_ENTRY(CSpxLanguageUnderstandingModel, ISpxLanguageUnderstandingModel);

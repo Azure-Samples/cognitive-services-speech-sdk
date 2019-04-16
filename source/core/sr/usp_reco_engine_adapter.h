@@ -9,12 +9,14 @@
 #include <memory>
 #include <list>
 #include <chrono>
+#include <map>
 #include "spxcore_common.h"
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
 #include "recognition_result.h"
 #include "service_helpers.h"
 #include "usp.h"
+#include "activity_session.h"
 
 #ifdef _MSC_VER
 #include <shared_mutex>
@@ -48,20 +50,22 @@ public:
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxUspCallbacks (overrides)
-    void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechStartDetected(m); }); }
-    void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechEndDetected(m); }); }
-    void OnSpeechHypothesis(const USP::SpeechHypothesisMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechHypothesis(m); }); }
-    void OnSpeechPhrase(const USP::SpeechPhraseMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechPhrase(m); }); }
-    void OnSpeechFragment(const USP::SpeechFragmentMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechFragment(m); }); }
-    void OnTurnStart(const USP::TurnStartMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnStart(m); }); }
-    void OnTurnEnd(const USP::TurnEndMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnEnd(m); }); }
-    void OnError(bool transport, USP::ErrorCode errorCode, const std::string& errorMessage) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnError(transport, errorCode, errorMessage); }); }
-    void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationHypothesis(m); }); }
-    void OnTranslationPhrase(const USP::TranslationPhraseMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationPhrase(m); }); }
-    void OnAudioOutputChunk(const USP::AudioOutputChunkMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnAudioOutputChunk(m); }); }
-    void OnUserMessage(const USP::UserMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnUserMessage(m); }); }
-    void OnConnected() override { InvokeOnSite([](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnConnected(); }); }
-    void OnDisconnected() override { InvokeOnSite([](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnDisconnected(); }); }
+    inline void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechStartDetected(m); }); }
+    inline void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechEndDetected(m); }); }
+    inline void OnSpeechHypothesis(const USP::SpeechHypothesisMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechHypothesis(m); }); }
+    inline void OnSpeechPhrase(const USP::SpeechPhraseMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechPhrase(m); }); }
+    inline void OnSpeechFragment(const USP::SpeechFragmentMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechFragment(m); }); }
+    inline void OnTurnStart(const USP::TurnStartMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnStart(m); }); }
+    inline void OnTurnEnd(const USP::TurnEndMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnEnd(m); }); }
+    inline void OnMessageStart(const USP::TurnStartMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnMessageStart(m); }); }
+    inline void OnMessageEnd(const USP::TurnEndMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnMessageEnd(m); }); }
+    inline void OnError(bool transport, USP::ErrorCode errorCode, const std::string& errorMessage) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnError(transport, errorCode, errorMessage); }); }
+    inline void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationHypothesis(m); }); }
+    inline void OnTranslationPhrase(const USP::TranslationPhraseMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationPhrase(m); }); }
+    inline void OnAudioOutputChunk(const USP::AudioOutputChunkMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnAudioOutputChunk(m); }); }
+    inline void OnUserMessage(const USP::UserMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnUserMessage(m); }); }
+    inline void OnConnected() final { InvokeOnSite([](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnConnected(); }); }
+    inline void OnDisconnected() final { InvokeOnSite([](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnDisconnected(); }); }
 
 
 private:
@@ -102,6 +106,7 @@ public:
     void OpenConnection(bool singleShot) override;
     void CloseConnection() override;
     void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) override;
+    void SendAgentMessage(const std::string &buffer) final;
 
     // --- ISpxAudioProcessor
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;
@@ -127,6 +132,7 @@ private:
     USP::Client& SetUspEndpoint_Intent(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpoint_Translation(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpoint_DefaultSpeechService(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpoint_Bot(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspRegion(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client, bool isIntentRegion);
     USP::Client& SetUspRecoMode(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
@@ -136,16 +142,20 @@ private:
     SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;
     USP::OutputFormat GetOutputFormat(const std::shared_ptr<ISpxNamedProperties>& properties) const;
 
-    void SetSpeechConfig(std::shared_ptr<ISpxNamedProperties>& properties);
+    void SetSpeechConfigMessage(const ISpxNamedProperties& properties);
+    void SetAgentConfigMessage(const ISpxNamedProperties& properties);
 
     void UspWrite(const DataChunkPtr& audioChunk);
     void UspSendSpeechConfig();
+    void UspSendAgentConfig();
     void UspSendSpeechContext();
     void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType);
     void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType);
     void UspWriteFormat(SPXWAVEFORMATEX* pformat);
     void UspWriteActual(const DataChunkPtr& audioChunk);
     void UspWriteFlush();
+    void UspResetConnection();
+    void UspClearReconnectCache();
 
     void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg&) override;
     void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg&) override;
@@ -154,6 +164,8 @@ private:
     void OnSpeechPhrase(const USP::SpeechPhraseMsg&) override;
     void OnTurnStart(const USP::TurnStartMsg&) override;
     void OnTurnEnd(const USP::TurnEndMsg&) override;
+    void OnMessageStart(const USP::TurnStartMsg&) final;
+    void OnMessageEnd(const USP::TurnEndMsg&) final;
     void OnError(bool transport, USP::ErrorCode, const std::string& error) override;
     void OnUserMessage(const USP::UserMsg&) override;
     void OnConnected() override;
@@ -182,8 +194,8 @@ private:
 
     std::string GetSpeechContextJson(const std::string& dgiJson, const std::string& LanguageUnderstandingJson);
 
+    void FireActivityResult(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio);
     void FireFinalResultNow(const USP::SpeechPhraseMsg& message, const std::string& luisJson = "");
-
     void FireFinalResultLater(const USP::SpeechPhraseMsg& message);
     void FireFinalResultLater_WaitingForIntentComplete(const std::  string& luisJson = "");
     ResultReason ToReason(USP::RecognitionStatus uspRecognitionStatus);
@@ -233,13 +245,16 @@ private:
 
 
 private:
+    friend CSpxActivitySession;
 
     std::shared_ptr<ISpxUspCallbacks> m_uspCallbacks;
     std::shared_ptr<USP::Connection> m_uspConnection;
 
     bool m_isInteractiveMode = false;
-    std::string m_speechConfig;
+    std::string m_speechConfig{};
+    std::string m_agentConfig{};
     bool m_customEndpoint = false;
+    USP::EndpointType m_endpointType = USP::EndpointType::Speech;
 
     const bool m_allowUspResetAfterAudioByteCount = true;
     const size_t m_resetUspAfterAudioSeconds = 2 * 60; // 2 minutes
@@ -257,8 +272,15 @@ private:
     AudioState m_audioState;
     UspState m_uspState;
 
-    bool m_expectIntentResponse = true;
+    bool m_expectIntentResponse = false;
     USP::SpeechPhraseMsg m_finalResultMessageToFireLater;
+
+    constexpr static size_t c_initialReconnectWaitingTimeMs = 10; // 10 milliseconds
+    constexpr static  size_t c_reconnectWaitingTimeThreasholdMs = 2000; // 2 sec
+    std::string m_botConversationId;
+    size_t m_reconnectWaitingTimeMs = 10;
+
+    std::map<std::string, std::unique_ptr<CSpxActivitySession>> m_request_session_map;
 };
 
 

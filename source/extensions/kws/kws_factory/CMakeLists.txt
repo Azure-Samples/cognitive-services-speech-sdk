@@ -1,5 +1,7 @@
 project(kws_factory)
 
+include_directories("${CARBON_EXTERNAL}/json")
+
 set(HEADERS)
 
 set(HEADERS_PRIVATE

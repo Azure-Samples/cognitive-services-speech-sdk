@@ -7,6 +7,7 @@ include_directories(${INC_DIR})
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
+include_directories("${CARBON_EXTERNAL}/json")
 
 include_directories("${COMMON}/include")
 if((SPEECHSDK_OS STREQUAL "Windows") OR (SPEECHSDK_OS STREQUAL "WindowsUwp"))
@@ -24,7 +25,7 @@ elseif(SPEECHSDK_OS STREQUAL "Linux")
 elseif(ANDROID)
     include_directories("${GSTREAMER_PKG}/include/gstreamer-1.0")
     include_directories("${GSTREAMER_PKG}/include/glib-2.0")
-    include_directories("${GSTREAMER_PKG}/lib/glib-2.0/include")    
+    include_directories("${GSTREAMER_PKG}/lib/glib-2.0/include")
 endif()
 
 set(HEADERS)
@@ -53,7 +54,7 @@ source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
 if((SPEECHSDK_OS STREQUAL "Windows") OR (SPEECHSDK_OS STREQUAL "WindowsUwp"))
-    set(GST_LIBS 
+    set(GST_LIBS
         "${GSTREAMER_PKG}/lib/gstreamer-1.0.lib"
         "${GSTREAMER_PKG}/lib/glib-2.0.lib"
         "${GSTREAMER_PKG}/lib/gobject-2.0.lib"

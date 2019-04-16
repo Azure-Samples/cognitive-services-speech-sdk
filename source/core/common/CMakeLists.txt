@@ -7,6 +7,7 @@ include_directories(${INC_DIR})
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
+include_directories("${CARBON_EXTERNAL}/json")
 
 set(HEADERS
     "${SRC_DIR}/stdafx.h"
@@ -83,7 +84,7 @@ configure_file(
     ${COMMON_GENERATED_INCLUDE}/spx_build_information.h
     ESCAPE_QUOTES)
 
-# make this the last source file to avoid link warning LNK4221 
+# make this the last source file to avoid link warning LNK4221
 list(APPEND SOURCES "${SRC_DIR}/stdafx.cpp")
 
 source_group("Header Files (public)" FILES ${HEADERS})

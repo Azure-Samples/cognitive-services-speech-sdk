@@ -12,6 +12,8 @@ namespace PAL
 // Creates a GUID without dashes.
 std::wstring CreateGuidWithoutDashes();
 
+std::string CreateGuidWithDashesUTF8();
+
 std::string DeviceUuid();
 
 // initializes the random seed for azure-c-shared-utility

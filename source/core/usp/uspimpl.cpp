@@ -952,15 +952,20 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
         else if (pathStr == path::turnStart)
         {
             auto tag = json[json_properties::context][json_properties::tag].get<string>();
-            connection->Invoke([&] { callbacks->OnTurnStart({ PAL::ToWString(json.dump()), tag }); });
+            if (requestId == connection->m_speechRequestId)
+            {
+                /* We know this request id is related to a speech turn */
+                connection->Invoke([&] { callbacks->OnTurnStart({ PAL::ToWString(json.dump()), tag, requestId }); });
+            }
+            else
+            {
+                /* We know this request id is a server initiated request */
+                connection->Invoke([&] { callbacks->OnMessageStart({ PAL::ToWString(json.dump()), tag, requestId }); });
+            }
         }
         else if (pathStr == path::turnEnd)
         {
             {
-                if (requestId == connection->m_speechRequestId)
-                {
-                    connection->m_speechRequestId.clear();
-                }
                 connection->m_activeRequestIds.erase(requestId);
             }
 
@@ -968,7 +973,15 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             // TODO: 1164154
             connection->m_telemetry->Flush(requestId);
 
-            connection->Invoke([&] { callbacks->OnTurnEnd({}); });
+            if (requestId == connection->m_speechRequestId)
+            {
+                connection->m_speechRequestId.clear();
+                connection->Invoke([&] { callbacks->OnTurnEnd({ requestId }); });
+            }
+            else
+            {
+                connection->Invoke([&] { callbacks->OnMessageEnd({ requestId }); });
+            }
         }
         else if (path == path::speechHypothesis || path == path::speechFragment)
         {
@@ -1135,6 +1148,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 msg.streamId = -1;
                 msg.audioBuffer = NULL;
                 msg.audioLength = 0;
+                msg.requestId = requestId;
                 connection->Invoke([&] { callbacks->OnAudioOutputChunk(msg); });
             }
             else
@@ -1147,6 +1161,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             connection->Invoke([&] {
                 callbacks->OnUserMessage({pathStr,
                                           string(contentType == nullptr ? "" : contentType),
+                                          requestId,
                                           response->buffer,
                                           response->bufferSize});
             });

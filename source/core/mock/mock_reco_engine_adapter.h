@@ -64,7 +64,7 @@ private:
     void FireFinalResult();
     void FireSpeechStartDetected();
     void FireSpeechEndDetected();
-    
+
     void EnsureFireFinalResult();
 
 
@@ -75,7 +75,7 @@ private:
 
     const std::wstring m_firstMockWord = L"mock";
     const std::wstring m_eachIntermediateAddsMockWord = L" mock";
-    
+
     std::wstring m_mockResultText;
 
     const uint64_t m_numMsBeforeVeryFirstIntermediate = 500;

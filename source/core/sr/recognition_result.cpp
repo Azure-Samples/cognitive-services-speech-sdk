@@ -217,12 +217,18 @@ size_t CSpxRecognitionResult::GetLength() const
     return m_audioLength;
 }
 
-void CSpxRecognitionResult::InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength)
+string CSpxRecognitionResult::GetRequestId() const
+{
+    return m_requestId;
+}
+
+void CSpxRecognitionResult::InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength, const string& requestId)
 {
     SPX_DBG_TRACE_FUNCTION();
 
     m_audioBuffer.assign(audioData, audioData + audioLength);
     m_audioLength = audioLength;
+    m_requestId = requestId;
 
     m_reason = m_audioLength > 0
         ? ResultReason::SynthesizingAudio

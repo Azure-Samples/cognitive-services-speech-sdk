@@ -273,7 +273,7 @@ bool CSpxUnidecRecoEngineAdapter::InitStream(AudioStreamDescriptor** pAudioStrea
 {
     m_streamId = PAL::CreateGuidWithoutDashes();
     m_audioStream.StreamId = m_streamId.c_str();
-    
+
     m_audioStream.wFormatTag = m_format->wFormatTag;
     m_audioStream.nChannels = m_format->nChannels;
     m_audioStream.nSamplesPerSec = m_format->nSamplesPerSec;
@@ -329,7 +329,7 @@ void CSpxUnidecRecoEngineAdapter::Sentence(const wchar_t* wavId, size_t sentence
 
     m_sentenceComplete = true;
     auto offset = (uint32_t)framePos.SentenceStartIndex;
-    
+
     auto nbestCount = GetUnidecNBestListSize(nbest);
     for (size_t index = 0; index < nbestCount; index++)
     {

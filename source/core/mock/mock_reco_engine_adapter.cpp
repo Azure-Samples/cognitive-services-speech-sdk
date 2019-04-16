@@ -129,7 +129,7 @@ void CSpxMockRecoEngineAdapter::End()
 
 void CSpxMockRecoEngineAdapter::FireIntermediateResult()
 {
-    m_mockResultText += m_mockResultText.empty() 
+    m_mockResultText += m_mockResultText.empty()
         ? m_firstMockWord
         : m_eachIntermediateAddsMockWord;
 
@@ -150,8 +150,8 @@ void CSpxMockRecoEngineAdapter::FireIntermediateResult()
 
 void CSpxMockRecoEngineAdapter::FireFinalResult()
 {
-    auto resultText = m_mockResultText.empty() 
-        ? m_firstMockWord 
+    auto resultText = m_mockResultText.empty()
+        ? m_firstMockWord
         : m_mockResultText;
 
     auto offset = (uint32_t)m_cbAudioProcessed;

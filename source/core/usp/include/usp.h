@@ -66,6 +66,16 @@ struct Callbacks
     virtual void OnTurnEnd(const TurnEndMsg&) {}
 
     /**
+    * A callback function that will be invoked when a turn.start unrelated to speech is received from service.
+    */
+    virtual void OnMessageStart(const TurnStartMsg&) {}
+
+    /**
+    * A callback function that will be invoked when a turn.end message unrelated to speech is received from service.
+    */
+    virtual void OnMessageEnd(const TurnEndMsg&) {}
+
+    /**
     * A callback function that will be invoked when an error occurs in handling communication with service.
     * transport - indicates if the error was origniated on transport, not USP layer.
     */

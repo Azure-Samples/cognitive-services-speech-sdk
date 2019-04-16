@@ -7,6 +7,7 @@ include_directories("${CARBON_CORE}/include")
 include_directories("${SR}")
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
+include_directories("${CARBON_EXTERNAL}/json")
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(SOURCES "${SRC_DIR}/uspclientconsole.cpp")

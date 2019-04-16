@@ -12,6 +12,7 @@ include_directories("${CARBON_EXTERNAL}/Catch2")
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${TEST_INCLUDE})
+include_directories("${CARBON_EXTERNAL}/json")
 
 set(SOURCES
     "${SRC_DIR}/main.cpp"

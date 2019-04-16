@@ -21,10 +21,11 @@ namespace Speech {
 // Forward declaration for friends.
 class Connection;
 namespace Translation { class TranslationRecognizer; }
+namespace Dialog { class SpeechBotConnector; }
 
 /*! \cond PRIVATE */
 
-namespace Impl { class ISpxRecognizerEvents; }
+namespace Impl { class ISpxRecognizerEvents; class ISpxSpeechBotConnectorEvents; }
 
 /*! \endcond */
 
@@ -205,7 +206,9 @@ public:
 
 private:
     friend class ::Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer;
+    friend class ::Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector;
     friend class ::Microsoft::CognitiveServices::Speech::Impl::ISpxRecognizerEvents;
+    friend class ::Microsoft::CognitiveServices::Speech::Impl::ISpxSpeechBotConnectorEvents;
     friend class ::Microsoft::CognitiveServices::Speech::Connection;
     template <class, class, class> friend class AsyncRecognizer;
     friend class SpeechSynthesizer;

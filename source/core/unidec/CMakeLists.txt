@@ -10,6 +10,7 @@ include_directories(${CARBON_INCLUDE})
 include_directories(${INC_DIR})
 include_directories("${COMMON}/include")
 include_directories("${CARBON_EXTERNAL}/unidec/include")
+include_directories("${CARBON_EXTERNAL}/json")
 
 set(HEADERS)
 

@@ -564,6 +564,45 @@ void CSpxAudioStreamSession::WaitForIdle(std::chrono::milliseconds timeout)
     }
 }
 
+bool CSpxAudioStreamSession::IsBotSession() const noexcept
+{
+    /* We need a better way of doing this. */
+    std::shared_ptr<ISpxRecognizer> recognizer;
+    {
+        std::unique_lock<std::mutex> lock{ m_recognizersLock };
+        SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
+        recognizer = m_recognizers.front().lock();
+    }
+    auto botConnector = SpxQueryInterface<ISpxSpeechBotConnector>(recognizer);
+    return botConnector != nullptr;
+}
+
+CSpxAsyncOp<std::string> CSpxAudioStreamSession::SendActivityAsync(std::shared_ptr<ISpxActivity> activity)
+{
+    SPX_DBG_TRACE_FUNCTION();
+
+    auto keep_alive = SpxSharedPtrFromThis<ISpxSession>(this);
+
+    /* Need to change thread service to support generic tasks */
+    std::shared_future<std::string> taskFuture = std::async(std::launch::async, [this, activity, keep_alive]()
+    {
+        auto& message_payload = activity->GetJSON();
+        auto interaction_id = PAL::CreateGuidWithDashesUTF8();
+
+        nlohmann::json message = {
+            { "version", "0.5"},
+            { "context", {
+                {"interactionId", interaction_id}
+            }},
+            { "messagePayload", message_payload }
+        };
+        auto adapter = EnsureInitRecoEngineAdapter();
+        adapter->SendAgentMessage(message.dump());
+        return interaction_id;
+    });
+    return CSpxAsyncOp<std::string>{ taskFuture, AOS_Started};
+}
+
 CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxAudioStreamSession::RecognizeAsync()
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -608,6 +647,7 @@ void CSpxAudioStreamSession::RecognizeOnceAsync(const shared_ptr<Operation>& sin
         // There is another single shot in flight. Report an error.
         singleShot->m_promise.set_exception(
             make_exception_ptr(ExceptionWithCallStack(SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION)));
+        return;
     }
 
     // Start recognizing.
@@ -942,7 +982,9 @@ void CSpxAudioStreamSession::FireResultEvent(const std::wstring& sessionId, std:
 }
 
 void CSpxAudioStreamSession::DispatchEvent(const list<weak_ptr<ISpxRecognizer>>& weakRecognizers,
-    const wstring& sessionId, EventType sessionType, uint64_t offset, const shared_ptr<ISpxRecognitionResult>& result)
+    const wstring& sessionId, EventType sessionType, uint64_t offset,
+    std::shared_ptr<ISpxRecognitionResult> result,
+    std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
 {
     for (auto weakRecognizer : weakRecognizers)
     {
@@ -991,6 +1033,15 @@ void CSpxAudioStreamSession::DispatchEvent(const list<weak_ptr<ISpxRecognizer>>&
                 ptr->FireDisconnected(sessionId);
                 break;
 
+            case EventType::ActivityReceivedEvent:
+            {
+                auto c_events = SpxQueryInterface<ISpxSpeechBotConnectorEvents>(ptr);
+                if (c_events != nullptr)
+                {
+                    c_events->FireActivityReceived(sessionId, activity, audio);
+                }
+                break;
+            }
             default:
                 SPX_DBG_TRACE_ERROR("EventDelivery unknown event type %d", (int)sessionType);
             }
@@ -1002,7 +1053,7 @@ void CSpxAudioStreamSession::DispatchEvent(const list<weak_ptr<ISpxRecognizer>>&
     }
 }
 
-void CSpxAudioStreamSession::FireEvent(EventType eventType, shared_ptr<ISpxRecognitionResult> result, wchar_t* eventSessionId, uint64_t offset)
+void CSpxAudioStreamSession::FireEvent(EventType eventType, shared_ptr<ISpxRecognitionResult> result, wchar_t* eventSessionId, uint64_t offset, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
 {
     // Make a copy of the recognizers (under lock), to use to send events;
     // otherwise the underlying list could be modified while we're sending events...
@@ -1018,7 +1069,10 @@ void CSpxAudioStreamSession::FireEvent(EventType eventType, shared_ptr<ISpxRecog
     // Schedule event dispatch on the user facing thread.
     // DispatchEvent is exception safe in order not to cause livelock of failed messages.
     // i.e. if some events cannot be delivered to the user, we do not try to deliver events about failed events...
-    auto task = CreateTask([=]() { DispatchEvent(weakRecognizers, sessionId, eventType, offset, result); }, false);
+    auto task = CreateTask([=]()
+    {
+        DispatchEvent(weakRecognizers, sessionId, eventType, offset, result, activity, audio);
+    }, false);
     m_threadService->ExecuteAsync(move(task), ISpxThreadService::Affinity::User);
 }
 
@@ -1063,7 +1117,7 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
     }
 }
 
-void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation)
+void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countBot)
 {
     unique_lock<mutex> lock(m_recognizersLock);
     if (m_recognizers.empty())
@@ -1077,12 +1131,14 @@ void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* c
     auto recognizer = m_recognizers.front().lock();
     auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer);
     auto translationRecognizer = SpxQueryInterface<ISpxTranslationRecognizer>(recognizer);
+    auto botConnector = SpxQueryInterface<ISpxSpeechBotConnector>(recognizer);
 
+    *countBot = (botConnector != nullptr) ? 1 : 0;
     *countIntent = (intentRecognizer != nullptr) ? 1 : 0;
     *countTranslation = (translationRecognizer != nullptr) ? 1 : 0;
     *countSpeech = 1 - *countIntent - *countTranslation;
 
-    SPX_DBG_TRACE_VERBOSE("%s: countSpeech=%d; countIntent=%d; countTranslation=%d", __FUNCTION__, *countSpeech, *countIntent, *countTranslation);
+    SPX_DBG_TRACE_VERBOSE("%s: countSpeech=%d; countIntent=%d; countTranslation=%d; countBot=%d", __FUNCTION__, *countSpeech, *countIntent, *countTranslation, *countBot);
 }
 
 std::list<std::string> CSpxAudioStreamSession::GetListenForList()
@@ -1256,6 +1312,16 @@ std::shared_ptr<ISpxSessionEventArgs> CSpxAudioStreamSession::CreateSessionEvent
     return sessionEvent;
 }
 
+std::shared_ptr<ISpxActivityEventArgs> CSpxAudioStreamSession::CreateActivityEventArgs(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
+{
+    auto activityAudioEvent = SpxCreateObjectWithSite<ISpxActivityEventArgs>("CSpxActivityEventArgs", this);
+
+    auto argsInit = SpxQueryInterface<ISpxActivityEventArgsInit>(activityAudioEvent);
+    argsInit->Init(activity, audio);
+
+    return activityAudioEvent;
+}
+
 std::shared_ptr<ISpxConnectionEventArgs> CSpxAudioStreamSession::CreateConnectionEventArgs(const std::wstring& sessionId)
 {
     auto connectionEvent = SpxCreateObjectWithSite<ISpxConnectionEventArgs>("CSpxConnectionEventArgs", this);
@@ -1420,6 +1486,11 @@ void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter
     WaitForRecognition_Complete(result);
 }
 
+void CSpxAudioStreamSession::FireAdapterResult_ActivityReceived(ISpxRecoEngineAdapter*, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
+{
+    FireEvent(EventType::ActivityReceivedEvent, nullptr, const_cast<wchar_t*>(GetSessionId().c_str()), 0, activity, audio);
+}
+
 void CSpxAudioStreamSession::FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result)
 {
     UNUSED(adapter);
@@ -1495,7 +1566,7 @@ void CSpxAudioStreamSession::CheckError(const string& error)
 
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
-    if (IsState(SessionState::Idle))
+    if (IsState(SessionState::Idle) && !IsBotSession())
     {
         if (adapter != m_recoAdapter.get())
         {
