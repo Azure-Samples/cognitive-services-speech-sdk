@@ -60,12 +60,12 @@ fi
 
 originalPath=$PATH
 
-API_LEVEL=21
-
 for target in "${targets[@]}"; do
   echo Building for target $target.
 
   INSTALL_DIR=$BASE_INSTALL_DIR/$target
+
+  # Note: API_LEVEL match what we current have in the main Speech SDK build.
 
   case $target in
     armeabi-v7a)
@@ -73,24 +73,28 @@ for target in "${targets[@]}"; do
       TC_NAME=arm-linux-androideabi-4.9
       OPTIONS=(--target=armv7a-linux-androideabi -Wl,--fix-cortex-a8)
       SSL_TARGET=android-arm
+      API_LEVEL=19
       ;;
     x86)
       TRIPLE=i686-linux-android
       TC_NAME=x86-4.9
       OPTIONS=()
       SSL_TARGET=android-x86
+      API_LEVEL=19
       ;;
     x86_64)
       TRIPLE=x86_64-linux-android
       TC_NAME=x86_64-4.9
       OPTIONS=()
       SSL_TARGET=android-x86_64
+      API_LEVEL=21
       ;;
     arm64-v8a)
       TRIPLE=aarch64-linux-android
       TC_NAME=aarch64-linux-android-4.9
       OPTIONS=()
       SSL_TARGET=android-arm64
+      API_LEVEL=21
       ;;
   esac
   OPTIONS+=(-D__ANDROID_API__="$API_LEVEL")

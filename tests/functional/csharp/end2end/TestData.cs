@@ -116,7 +116,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             public static class Batman
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir,"batman.wav");
-                // This is expected results using StartContinuousRecognitionAsync() which uses converstation mode.
+                // This is expected results using StartContinuousRecognitionAsync() which uses conversation mode.
                 // The result using RecognizeOnceAsync() might be slightly different, since it uses interactive mode.
                 public static readonly string[] Utterances =
                 {

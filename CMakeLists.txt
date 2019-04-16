@@ -114,6 +114,8 @@ elseif(SPEECHSDK_OS STREQUAL "Android")
   set(use_default_uuid ON CACHE BOOL "")
   set(CMAKE_SYSTEM_NAME Android)
   set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION clang)
+  # Note: the API levels below are also matched in the Android OpenSSL build,
+  # cf. ci/build-android-openssl.sh.
   if(SPEECHSDK_ARCH STREQUAL "arm32")
     set(CMAKE_ANDROID_ARCH_ABI "armeabi-v7a")
     set(CMAKE_SYSTEM_VERSION "19")
