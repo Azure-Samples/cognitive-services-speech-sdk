@@ -35,6 +35,8 @@ If you want to host the sample on a web server:
   Use the input fields to set your subscription key and service region.
 * In case you are hosting the sample on a web server, open a web browser and navigate to the full URL where you host the sample.
 
+> Note: On Safari, the sample web page needs to be hosted on a web server; Safari doesn't allow websites loaded from a local file to use the microphone.
+
 ## References
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-browser)

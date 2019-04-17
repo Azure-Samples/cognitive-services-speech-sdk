@@ -398,7 +398,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = NK6235ZV5V;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SRCROOT)/..",
@@ -423,7 +423,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = NK6235ZV5V;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SRCROOT)/..",
@@ -453,7 +453,7 @@
 					i386,
 				);
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = NK6235ZV5V;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = helloworldUITests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -478,7 +478,7 @@
 					i386,
 				);
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = NK6235ZV5V;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = helloworldUITests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = (
