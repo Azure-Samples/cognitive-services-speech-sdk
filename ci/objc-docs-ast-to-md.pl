@@ -17,7 +17,7 @@ my $verbose = 0;
 # TODO include header?
 
 # Helper regular expression. All non-capturing.
-$H{hex} = qr/0x[0-9a-f]{12}/;
+$H{hex} = qr/0x[0-9a-f]{1,12}/;
 $H{loc} = qr/line:\d+:\d+/;
 $H{col} = qr/col:\d+/;
 $H{range} = qr/<(?:source.*:\d+:\d+, (?:$H{loc}|$H{col})|$H{col}|$H{col}, $H{loc}|$H{loc}|$H{col}, $H{col}|$H{loc}, $H{col}|$H{loc}, $H{loc})>/;
