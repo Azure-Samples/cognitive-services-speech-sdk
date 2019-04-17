@@ -1,5 +1,6 @@
 .gitattributes text
 .gitignore text
+Podfile text
 
 .classpath text
 .project text
@@ -14,6 +15,7 @@ proguard-rules.pro text
 *.cpp text
 *.cs text
 *.csproj text
+*.entitlements text
 *.gradle text
 *.h text
 *.html text
@@ -39,6 +41,7 @@ proguard-rules.pro text
 *.vcxproj text
 *.vcxproj.filters text
 *.xaml text
+*.xib text
 *.xml text
 *.yml text
 

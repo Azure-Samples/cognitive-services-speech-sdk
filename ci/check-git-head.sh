@@ -39,7 +39,45 @@ checkEmptyStdout \
   done" \
   "Critical file(s) missing"
 
-# Note: "binary" is a built-in macro attribute, that expands to "-diff -merge -text".
+# We'll do two checks for .gitattributes below.
+# 1. For public_samples/ content
+# 2. For everything.
+# The first one is emulating the "real" .gitattributes check that is in place
+# as part of the samples' repository build
+# (public_samples/ci/check-git-head.sh). To do this, we'll temporarily have to
+# replace .gitattributes with an empty copy and then restore it.
+#
+# Note that both of these checks are interacting with the cache or the working
+# copy, and do not purely operate on $gitTree. So, in a non-clean repository
+# state, false results (positive or negative) may be reported).
+#
+# Note: "binary" used below is a built-in macro attribute, that expands to
+# "-diff -merge -text".
+
+mv .gitattributes{,.bak} && echo > .gitattributes || {
+  echo Error: cannot temporarily empty .gitattributes.
+  exit 1
+}
+
+checkEmptyStdout \
+  "git ls-tree --full-tree -l -r $gitTree public_samples |
+    grep '^[0-9]* blob ' |
+    cut -f 2- |
+    git check-attr text --stdin |
+    grep -v 'text: set' |
+    cut -d: -f1 |
+    git check-attr diff merge text --stdin |
+    grep -v 'diff: unset' |
+    grep -v 'merge: unset' |
+    grep -v 'text: unset' |
+    cut -d: -f1 |
+    sort -u" \
+  "sample files that are neither marked as binary nor text, please extend public_samples/.gitattributes"
+mv .gitattributes{.bak,} || {
+  echo Error could not restore .gitattributes.
+  exit 1
+}
+
 checkEmptyStdout \
   "git ls-tree --full-tree -l -r $gitTree |
     grep '^[0-9]* blob ' |
@@ -53,7 +91,7 @@ checkEmptyStdout \
     grep -v 'text: unset' |
     cut -d: -f1 |
     sort -u" \
-  "files that are neither marked as binary nor text, please extend .gitattributes"
+  "files that are neither marked as binary nor text, please extend public_samples/.gitattributes for sample content, or .gitattributes else"
 
 # Note: we rely on binary files being identified correctly (cf. above)
 # TODO limit to specific extensions if necessary
