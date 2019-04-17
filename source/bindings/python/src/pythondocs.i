@@ -477,6 +477,13 @@ DocstringForPropertyId = """
       .. note::
         This property id was added in version 1.3.0.
 
+    .. py:attribute:: Speech_LogFilename
+
+      The file name to write logs.
+
+      .. note::
+        This property id was added in version 1.4.0.
+
     """
 
 DocstringForNoMatchReason= """
