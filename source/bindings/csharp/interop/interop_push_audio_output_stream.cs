@@ -39,7 +39,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             gch = GCHandle.Alloc(this, GCHandleType.Weak);
             streamWriteDelegate = StreamWriteCallback;
             streamCloseDelegate = StreamCloseCallback;
-            ThrowIfFail(push_audio_output_stream_set_callbacks(streamHandle, GCHandle.ToIntPtr(gch), StreamWriteCallback, streamCloseDelegate));
+            ThrowIfFail(push_audio_output_stream_set_callbacks(streamHandle, GCHandle.ToIntPtr(gch), streamWriteDelegate, streamCloseDelegate));
         }
 
         protected override void Dispose(bool disposing)

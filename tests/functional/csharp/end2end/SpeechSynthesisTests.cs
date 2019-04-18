@@ -497,7 +497,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore]
         [TestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task SynthesizerOutputToPushStreamMock()

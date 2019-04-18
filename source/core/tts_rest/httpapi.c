@@ -1020,7 +1020,7 @@ static HTTPAPI_RESULT ReceiveContentInfoFromXIO(HTTP_HANDLE_DATA* http_instance,
     return result;
 }
 
-static HTTPAPI_RESULT ReadHTTPResponseBodyFromXIO(HTTP_HANDLE_DATA* http_instance, size_t bodyLength, bool chunked, BUFFER_HANDLE responseContent)
+static HTTPAPI_RESULT ReadHTTPResponseBodyFromXIO(HTTP_HANDLE_DATA* http_instance, size_t bodyLength, bool chunked, BUFFER_HANDLE responseContent, ON_CHUNK_RECEIVED on_chunk_received, void* on_chunk_received_context)
 {
     HTTPAPI_RESULT result;
     char    buf[TEMP_BUFFER_SIZE];
@@ -1056,6 +1056,11 @@ static HTTPAPI_RESULT ReadHTTPResponseBodyFromXIO(HTTP_HANDLE_DATA* http_instanc
                 {
                     /*Codes_SRS_HTTPAPI_COMPACT_21_033: [ If the whole process succeed, the HTTPAPI_ExecuteRequest shall retur HTTPAPI_OK. ]*/
                     result = HTTPAPI_OK;
+
+                    if (on_chunk_received != NULL)
+                    {
+                        on_chunk_received(on_chunk_received_context, receivedContent, bodyLength);
+                    }
                 }
             }
             else
@@ -1108,6 +1113,7 @@ static HTTPAPI_RESULT ReadHTTPResponseBodyFromXIO(HTTP_HANDLE_DATA* http_instanc
 
                     result = HTTPAPI_READ_DATA_FAILED;
                 }
+
                 break;
             }
             else
@@ -1132,6 +1138,10 @@ static HTTPAPI_RESULT ReadHTTPResponseBodyFromXIO(HTTP_HANDLE_DATA* http_instanc
                     {
                         result = HTTPAPI_READ_DATA_FAILED;
                     }
+                    else if (on_chunk_received != NULL)
+                    {
+                        on_chunk_received(on_chunk_received_context, receivedContent + size, chunkSize);
+                    }
                 }
                 else
                 {
@@ -1150,6 +1160,7 @@ static HTTPAPI_RESULT ReadHTTPResponseBodyFromXIO(HTTP_HANDLE_DATA* http_instanc
                     {
                         result = HTTPAPI_READ_DATA_FAILED;
                     }
+
                     size += chunkSize;
                 }
             }
@@ -1188,7 +1199,8 @@ static bool validRequestType(HTTPAPI_REQUEST_TYPE requestType)
 HTTPAPI_RESULT HTTPAPI_ExecuteRequest(HTTP_HANDLE handle, HTTPAPI_REQUEST_TYPE requestType, const char* relativePath,
     HTTP_HEADERS_HANDLE httpHeadersHandle, const unsigned char* content,
     size_t contentLength, unsigned int* statusCode,
-    HTTP_HEADERS_HANDLE responseHeadersHandle, BUFFER_HANDLE responseContent)
+    HTTP_HEADERS_HANDLE responseHeadersHandle, BUFFER_HANDLE responseContent,
+    ON_CHUNK_RECEIVED on_chunk_received, void* on_chunk_received_context)
 {
     HTTPAPI_RESULT result = HTTPAPI_ERROR;
     size_t  headersCount;
@@ -1239,7 +1251,7 @@ HTTPAPI_RESULT HTTPAPI_ExecuteRequest(HTTP_HANDLE handle, HTTPAPI_REQUEST_TYPE r
         LogError("Receive content information from HTTP failed (result = %s)", ENUM_TO_STRING(HTTPAPI_RESULT, result));
     }
     /*Codes_SRS_HTTPAPI_COMPACT_21_075: [ The message received by the HTTPAPI_ExecuteRequest can contain a body with the message content. ]*/
-    else if ((result = ReadHTTPResponseBodyFromXIO(http_instance, bodyLength, chunked, responseContent)) != HTTPAPI_OK)
+    else if ((result = ReadHTTPResponseBodyFromXIO(http_instance, bodyLength, chunked, responseContent, on_chunk_received, on_chunk_received_context)) != HTTPAPI_OK)
     {
         LogError("Read HTTP response body from HTTP failed (result = %s)", ENUM_TO_STRING(HTTPAPI_RESULT, result));
     }

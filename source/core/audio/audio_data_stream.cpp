@@ -177,17 +177,17 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
         // Connect synthesizing event
         auto synthesizingEvent = std::make_shared<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>();
         synthesizingEvent->Connect(m_pfnSynthesizing);
-        m_synthEvents->Synthesizing.emplace_back((void *)this, synthesizingEvent);
+        m_synthEvents->Synthesizing.emplace_front((void *)this, synthesizingEvent);
 
         // Connect synthesis completed event
         auto synthesisCompletedEvent = std::make_shared<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>();
         synthesisCompletedEvent->Connect(m_pfnSynthesisStopped);
-        m_synthEvents->SynthesisCompleted.emplace_back((void *)this, synthesisCompletedEvent);
+        m_synthEvents->SynthesisCompleted.emplace_front((void *)this, synthesisCompletedEvent);
 
         // Connect synthesis canceled event
         auto synthesisCanceledEvent = std::make_shared<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>();
         synthesisCanceledEvent->Connect(m_pfnSynthesisStopped);
-        m_synthEvents->SynthesisCanceled.emplace_back((void *)this, synthesisCanceledEvent);
+        m_synthEvents->SynthesisCanceled.emplace_front((void *)this, synthesisCanceledEvent);
     }
 }
 

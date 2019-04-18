@@ -122,7 +122,9 @@ std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri,
             0,
             &statusCode,
             httpResponseHeaders,
-            buffer);
+            buffer,
+            nullptr,
+            nullptr);
 
         // Check result
         if (result != HTTPAPI_OK || statusCode < 200 || statusCode >= 300)

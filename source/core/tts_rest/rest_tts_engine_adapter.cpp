@@ -141,7 +141,19 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
             token = m_authenticator->GetAccessToken();
         }
 
-        PostTtsRequest(m_endpoint, requestId, ssml, true, token, outputFormatString, outputFormat, hasHeader, p, this, resultInit); });
+        RestTtsRequest request;
+        request.requestId = requestId;
+        request.endpoint = m_endpoint;
+        request.postContent = ssml;
+        request.isSsml = true;
+        request.accessToken = token;
+        request.outputFormatString = outputFormatString;
+        request.outputFormat = outputFormat;
+        request.outputHasHeader = hasHeader;
+        request.adapter = this;
+        request.site = p;
+
+        PostTtsRequest(request, resultInit); });
 
     return result;
 }
@@ -269,9 +281,7 @@ bool CSpxRestTtsEngineAdapter::IsStandardVoiceEndpoint(const std::string& endpoi
     }
 }
 
-void CSpxRestTtsEngineAdapter::PostTtsRequest(const std::string& endpoint, const std::wstring& requestId, const std::string& post_content, bool is_ssml, \
-    const std::string& access_token, const std::string& output_format_string, SpxWAVEFORMATEX_Type output_format, bool output_has_header, \
-    const SitePtr& site, ISpxTtsEngineAdapter* adapter, std::shared_ptr<ISpxSynthesisResultInit> result_init)
+void CSpxRestTtsEngineAdapter::PostTtsRequest(RestTtsRequest& request, std::shared_ptr<ISpxSynthesisResultInit> result_init)
 {
     // Parse host name & path from URL
     bool secure = false;
@@ -282,7 +292,7 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(const std::string& endpoint, const
     size_t path_length = 0;
     const char* query = nullptr;
     size_t query_length = 0;
-    CSpxRestTtsHelper::ParseHttpUrl(endpoint.data(), &secure, &host, &host_length, &port, &path, &path_length, &query, &query_length);
+    CSpxRestTtsHelper::ParseHttpUrl(request.endpoint.data(), &secure, &host, &host_length, &port, &path, &path_length, &query, &query_length);
 
     std::string host_str = std::string(host, host_length);
     std::string path_str = std::string("/") + std::string(path, path_length);
@@ -305,21 +315,64 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(const std::string& endpoint, const
 #endif
 
     HTTP_HEADERS_HANDLE httpRequestHeaders = HTTPHeaders_Alloc();
+    if (!httpRequestHeaders)
+    {
+        HTTPAPI_CloseConnection(http_connect);
+        throw std::runtime_error("Could not allocate HTTP request headers");
+    }
+
     HTTP_HEADERS_HANDLE httpResponseHeaders = HTTPHeaders_Alloc();
+    if (!httpResponseHeaders)
+    {
+        HTTPHeaders_Free(httpRequestHeaders);
+        HTTPAPI_CloseConnection(http_connect);
+        throw std::runtime_error("Could not allocate HTTP response headers");
+    }
+
     BUFFER_HANDLE buffer = BUFFER_new();
+    if (!buffer)
+    {
+        HTTPHeaders_Free(httpRequestHeaders);
+        HTTPHeaders_Free(httpResponseHeaders);
+        HTTPAPI_CloseConnection(http_connect);
+        throw std::runtime_error("Could not allocate HTTP data buffer");
+    }
 
     try
     {
         // Add http headers
-        HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Host", host_str.data());
-        HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "User-Agent", USER_AGENT);
-        HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "X-Microsoft-OutputFormat", output_format_string.data());
-        HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Content-Length", CSpxRestTtsHelper::itos(post_content.length()).data());
-        HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Content-Type", is_ssml ? "application/ssml+xml" : "text/plain text");
-        if (!access_token.empty())
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Host", host_str.data()) != HTTP_HEADERS_OK)
+        {
+            throw std::runtime_error("Could not add HTTP request header: Host");
+        }
+
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "User-Agent", USER_AGENT) != HTTP_HEADERS_OK)
+        {
+            throw std::runtime_error("Could not add HTTP request header: User-Agent");
+        }
+
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "X-Microsoft-OutputFormat", request.outputFormatString.data()) != HTTP_HEADERS_OK)
+        {
+            throw std::runtime_error("Could not add HTTP request header: X-Microsoft-OutputFormat");
+        }
+
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Content-Length", CSpxRestTtsHelper::itos(request.postContent.length()).data()) != HTTP_HEADERS_OK)
+        {
+            throw std::runtime_error("Could not add HTTP request header: Content-Length");
+        }
+
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Content-Type", request.isSsml ? "application/ssml+xml" : "text/plain text") != HTTP_HEADERS_OK)
+        {
+            throw std::runtime_error("Could not add HTTP request header: Content-Type");
+        }
+
+        if (!request.accessToken.empty())
         {
             // This is not always required, e.g. not required for on prem service
-            HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Authorization", (std::string("bearer ") + access_token).data());
+            if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Authorization", (std::string("bearer ") + request.accessToken).data()) != HTTP_HEADERS_OK)
+            {
+                throw std::runtime_error("Could not add HTTP request header: Authorization");
+            }
         }
 
         // Execute http request
@@ -329,11 +382,18 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(const std::string& endpoint, const
             HTTPAPI_REQUEST_POST,
             (path_str + query_str).data(),
             httpRequestHeaders,
-            (unsigned char *)post_content.data(),
-            post_content.length(),
+            (unsigned char *)request.postContent.data(),
+            request.postContent.length(),
             &statusCode,
             httpResponseHeaders,
-            buffer);
+            buffer,
+#ifdef __MACH__ // There is issue on streaming for IOS/OSX, disable streaming on IOS/OSX for now
+            nullptr,
+            nullptr);
+#else
+            OnChunkReceived,
+            &request);
+#endif
 
         // Check result
         if (result == HTTPAPI_OK && statusCode >= 200 && statusCode < 300)
@@ -341,24 +401,26 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(const std::string& endpoint, const
             unsigned char* buffer_content = BUFFER_u_char(buffer);
             size_t buffer_length = BUFFER_length(buffer);
 
+#ifdef __MACH__ // There is issue on streaming for IOS/OSX, disable streaming on IOS/OSX for now
             // Write audio to site
-            site->Write(adapter, requestId, buffer_content, (uint32_t)buffer_length);
+            request.site->Write(request.adapter, request.requestId, buffer_content, (uint32_t)buffer_length);
+#endif
 
             // Write audio to result
-            result_init->InitSynthesisResult(requestId, ResultReason::SynthesizingAudioCompleted, REASON_CANCELED_NONE,
-                CancellationErrorCode::NoError, buffer_content, buffer_length, output_format.get(), output_has_header);
+            result_init->InitSynthesisResult(request.requestId, ResultReason::SynthesizingAudioCompleted, REASON_CANCELED_NONE,
+                CancellationErrorCode::NoError, buffer_content, buffer_length, request.outputFormat.get(), request.outputHasHeader);
         }
         else
         {
             if (result != HTTPAPI_OK)
             {
-                result_init->InitSynthesisResult(requestId, ResultReason::Canceled, CancellationReason::Error,
-                    CancellationErrorCode::RuntimeError, nullptr, 0, output_format.get(), output_has_header);
+                result_init->InitSynthesisResult(request.requestId, ResultReason::Canceled, CancellationReason::Error,
+                    CancellationErrorCode::RuntimeError, nullptr, 0, request.outputFormat.get(), request.outputHasHeader);
             }
             else
             {
-                result_init->InitSynthesisResult(requestId, ResultReason::Canceled, CancellationReason::Error,
-                    CSpxRestTtsHelper::HttpStatusCodeToCancellationErrorCode(statusCode), nullptr, 0, output_format.get(), output_has_header);
+                result_init->InitSynthesisResult(request.requestId, ResultReason::Canceled, CancellationReason::Error,
+                    CSpxRestTtsHelper::HttpStatusCodeToCancellationErrorCode(statusCode), nullptr, 0, request.outputFormat.get(), request.outputHasHeader);
             }
 
             // Build error message and set it to error detail string
@@ -389,6 +451,12 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(const std::string& endpoint, const
     HTTPHeaders_Free(httpRequestHeaders);
     HTTPHeaders_Free(httpResponseHeaders);
     HTTPAPI_CloseConnection(http_connect);
+}
+
+void CSpxRestTtsEngineAdapter::OnChunkReceived(void* context, const unsigned char* buffer, size_t size)
+{
+    auto request = (RestTtsRequest *)context;
+    request->site->Write(request->adapter, request->requestId, (uint8_t *)buffer, (uint32_t)size);
 }
 
 

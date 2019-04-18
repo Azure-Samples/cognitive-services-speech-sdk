@@ -85,9 +85,14 @@ private:
 
     void InitializeAudio();
 
+    static int PlayAudioReadCallback(void* pContext, uint8_t* pBuffer, uint32_t size);
+    static void AudioCompleteCallback(void* pContext);
+    static void BufferUnderRunCallback(void* pContext);
+
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
     AUDIO_SETTINGS_HANDLE m_hsetting;
     AUDIO_SYS_HANDLE m_haudio;
+    std::atomic<bool> m_speakCompleted { true };
 #endif
 
     bool m_audioInitialized = false;

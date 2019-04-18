@@ -15,27 +15,6 @@ namespace Speech {
 namespace Impl {
 
 
-#ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
-
-static int PlayAudioReadCallback(void* pContext, uint8_t* pBuffer, uint32_t size)
-{
-    auto audioStream = (CSpxPullAudioOutputStream*)pContext;
-    auto filledSize = audioStream->Read(pBuffer, std::min(size, (uint32_t)CHUNK_SIZE)); // The default buffer size is 1600000, which is too long
-    return (int)filledSize;
-}
-
-static void AudioCompleteCallback(void* pContext)
-{
-    UNUSED(pContext);
-}
-
-static void BufferUnderRunCallback(void* pContext)
-{
-    UNUSED(pContext);
-}
-
-#endif
-
 CSpxDefaultSpeaker::CSpxDefaultSpeaker()
 {
 }
@@ -53,6 +32,12 @@ void CSpxDefaultSpeaker::Init()
 void CSpxDefaultSpeaker::Term()
 {
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
+    while (!m_speakCompleted)
+    {
+        // Wait until speak complete
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
     if (m_haudio != nullptr)
     {
         audio_destroy(m_haudio);
@@ -77,8 +62,9 @@ void CSpxDefaultSpeaker::StartPlayback()
     // Only make playback when audio device is initialized, in order not to abort the synthesizer when audio device is not available
     if (m_audioInitialized)
     {
-        auto result = audio_output_startasync(m_haudio, m_audioFormat.get(), PlayAudioReadCallback, AudioCompleteCallback, BufferUnderRunCallback, m_audioStream.get());
+        auto result = audio_output_startasync(m_haudio, m_audioFormat.get(), PlayAudioReadCallback, AudioCompleteCallback, BufferUnderRunCallback, this);
         SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT::AUDIO_RESULT_OK, SPXERR_RUNTIME_ERROR);
+        m_speakCompleted = false;
     }
 #endif
 }
@@ -192,6 +178,28 @@ void CSpxDefaultSpeaker::InitializeAudio()
     }
 #endif
 }
+
+#ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
+
+int CSpxDefaultSpeaker::PlayAudioReadCallback(void* pContext, uint8_t* pBuffer, uint32_t size)
+{
+    auto defaultSpeaker = (CSpxDefaultSpeaker*)pContext;
+    auto filledSize = defaultSpeaker->m_audioStream->Read(pBuffer, std::min(size, (uint32_t)CHUNK_SIZE)); // The default buffer size is 1600000, which is too long
+    return (int)filledSize;
+}
+
+void CSpxDefaultSpeaker::AudioCompleteCallback(void* pContext)
+{
+    auto defaultSpeaker = (CSpxDefaultSpeaker*)pContext;
+    defaultSpeaker->m_speakCompleted = true;
+}
+
+void CSpxDefaultSpeaker::BufferUnderRunCallback(void* pContext)
+{
+    UNUSED(pContext);
+}
+
+#endif
 
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

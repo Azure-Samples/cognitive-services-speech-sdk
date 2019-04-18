@@ -29,6 +29,21 @@ namespace Speech {
 namespace Impl {
 
 
+typedef struct RestTtsRequest_Tag
+{
+    std::wstring requestId;
+    std::string endpoint;
+    std::string postContent;
+    bool isSsml;
+    std::string accessToken;
+    std::string outputFormatString;
+    SpxWAVEFORMATEX_Type outputFormat;
+    bool outputHasHeader;
+    ISpxTtsEngineAdapter* adapter;
+    std::shared_ptr<ISpxTtsEngineAdapterSite> site;
+} RestTtsRequest;
+
+
 class CSpxRestTtsEngineAdapter :
     public ISpxTtsEngineAdapter,
     public ISpxPropertyBagImpl
@@ -72,9 +87,8 @@ private:
     static std::string ParseRegionFromCognitiveServiceEndpoint(const std::string& endpoint);
     static bool IsCustomVoiceEndpoint(const std::string& endpoint);
     static bool IsStandardVoiceEndpoint(const std::string& endpoint);
-    static void PostTtsRequest(const std::string& endpoint, const std::wstring& requestId, const std::string& post_content, bool is_ssml, \
-        const std::string& access_token, const std::string& output_format_string, SpxWAVEFORMATEX_Type output_format, bool output_has_header, \
-        const SitePtr& p, ISpxTtsEngineAdapter* adapter, std::shared_ptr<ISpxSynthesisResultInit> result_init);
+    static void PostTtsRequest(RestTtsRequest& request, std::shared_ptr<ISpxSynthesisResultInit> result_init);
+    static void OnChunkReceived(void* context, const unsigned char* buffer, size_t size);
 
 
 private:

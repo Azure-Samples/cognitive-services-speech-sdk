@@ -71,6 +71,8 @@ DEFINE_ENUM(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
 #define MAX_USERNAME_LEN        65
 #define MAX_PASSWORD_LEN        65
 
+typedef void(*ON_CHUNK_RECEIVED)(void* context, const unsigned char* buffer, size_t size);
+
 /**
  * @brief Global initialization for the HTTP API component.
  *
@@ -161,7 +163,8 @@ MOCKABLE_FUNCTION(, void, HTTPAPI_CloseConnection, HTTP_HANDLE, handle);
 MOCKABLE_FUNCTION(, HTTPAPI_RESULT, HTTPAPI_ExecuteRequest, HTTP_HANDLE, handle, HTTPAPI_REQUEST_TYPE, requestType, const char*, relativePath,
                                              HTTP_HEADERS_HANDLE, httpHeadersHandle, const unsigned char*, content,
                                              size_t, contentLength, unsigned int*, statusCode,
-                                             HTTP_HEADERS_HANDLE, responseHeadersHandle, BUFFER_HANDLE, responseContent);
+                                             HTTP_HEADERS_HANDLE, responseHeadersHandle, BUFFER_HANDLE, responseContent,
+                                             ON_CHUNK_RECEIVED, on_chunk_received, void*, on_chunk_received_context);
 
 /**
  * @brief Sets the option named @p optionName bearing the value
