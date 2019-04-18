@@ -1028,6 +1028,7 @@ jobs:
 - job: AndroidBuild
   variables:
     ANDROID_NDK: $(System.ArtifactsDirectory)\ndk-r16b
+    ANDROID_GST: $(Build.SourcesDirectory)\external\gstreamer-android
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidBuild '))
   pool:
@@ -1038,27 +1039,43 @@ jobs:
     matrix:
       arm32_debug:
         BuildPlatform: arm32
+        GstBuildPlatform: armv7
+        GstAbiFilter: armeabi-v7a
         BuildConfiguration: Debug
       arm32_release:
         BuildPlatform: arm32
+        GstBuildPlatform: armv7
+        GstAbiFilter: armeabi-v7a
         BuildConfiguration: Release
       arm64_debug:
         BuildPlatform: arm64
+        GstBuildPlatform: arm64
+        GstAbiFilter: arm64-v8a
         BuildConfiguration: Debug
       arm64_release:
         BuildPlatform: arm64
+        GstBuildPlatform: arm64
+        GstAbiFilter: arm64-v8a
         BuildConfiguration: Release
       x64_debug:
         BuildPlatform: x64
+        GstBuildPlatform: x86_64
+        GstAbiFilter: x86_64
         BuildConfiguration: Debug
       x64_release:
         BuildPlatform: x64
+        GstBuildPlatform: x86_64
+        GstAbiFilter: x86_64
         BuildConfiguration: Release
       x86_debug:
         BuildPlatform: x86
+        GstBuildPlatform: x86
+        GstAbiFilter: x86
         BuildConfiguration: Debug
       x86_release:
         BuildPlatform: x86
+        GstBuildPlatform: x86
+        GstAbiFilter: x86
         BuildConfiguration: Release
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
@@ -1069,6 +1086,7 @@ jobs:
         . ci/functions.sh
         vsts_setvar SPEECHSDK_TARGET_PLATFORM Android-$(BuildPlatform)
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+        vsts_setvar GST_BUILD_CONFIGURATION "$(ANDROID_GST)\$(GstBuildPlatform)"
         # Note: KWS currently only for ARM32.
         if [[ $(BuildPlatform) = arm32 ]]; then
           # N.B. this is built but not shipped via AAR.
@@ -1076,6 +1094,7 @@ jobs:
         else
           vsts_setvar SPEECHSDK_ENABLE_KWS false
         fi
+        vsts_setvar SPEECHSDK_ENABLE_CODEC true
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: ./ci/install-build-dependencies.sh
@@ -1125,6 +1144,35 @@ jobs:
       itemPattern: android-openssl/**
       downloadPath: external
     # TODO only download the one we need
+  - bash: |
+      set -u -e -o pipefail
+      . ci/functions.sh
+      IFS=$' \t\n\r' read build_id should_be_empty < external/gstreamer-android/build_id.txt
+      # checks
+      [[ -z $should_be_empty ]]
+      printf '%d' "$build_id" > /dev/null
+      vsts_setvar GSTREAMER_ANDROID_PREBUILT_ARTIFACT_BUILD_ID "$build_id"
+    displayName: Get UWP OpenSSL build ID
+  - task: DownloadBuildArtifacts@0
+    displayName: Download gstreamer-android
+    inputs:
+      buildType: specific
+      project: 'e71f1362-9c7d-488b-99c7-3376db8d3302'
+      pipeline: 9377
+      buildVersionToDownload: specific
+      buildId: $(GSTREAMER_ANDROID_PREBUILT_ARTIFACT_BUILD_ID)
+      downloadType: specific
+      itemPattern: |
+        gstreamer-android/$(GstBuildPlatform)/**
+      downloadPath: external
+  - bash: |
+      set -u -e -o pipefail
+      export PATH=$PATH:$ANDROID_NDK
+      export GSTREAMER_ROOT_ANDROID=$ANDROID_GST
+      export NDK_PROJECT_PATH=$ANDROID_NDK
+      ndk-build.cmd -C ./ci/android/gstreamer "NDK_APPLICATION_MK=Application.mk" APP_ABI=$(GstAbiFilter) NDK_LIBS_OUT=.
+      cp ./ci/android/gstreamer/$(GstAbiFilter)/libgstreamer_android.so "$(ANDROID_GST)\$(GstBuildPlatform)"
+    displayName: Generate gstreamer shared object
   - task: BatchScript@1
     displayName: Build
     inputs:
@@ -1386,6 +1434,7 @@ jobs:
         vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x64
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_KWS true
+        vsts_setvar SPEECHSDK_ENABLE_CODEC true
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: ./ci/install-build-dependencies.sh
@@ -1408,6 +1457,7 @@ jobs:
         -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE)
         -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
         -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
+        -DEXTENSION_CODEC_ENABLED="%SPEECHSDK_ENABLE_CODEC%"
         ..
   - task: CMake@1
     displayName: CMake build

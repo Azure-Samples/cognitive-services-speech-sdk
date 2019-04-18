@@ -16,7 +16,7 @@ namespace Speech {
 namespace Impl {
 
 
-CSpxCodecAdapter::CSpxCodecAdapter() : m_endOfStream(false)
+CSpxCodecAdapter::CSpxCodecAdapter()
 {
     SPX_DBG_TRACE_VERBOSE("%s", __FUNCTION__);
 }

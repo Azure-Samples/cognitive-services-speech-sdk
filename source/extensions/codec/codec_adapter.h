@@ -62,7 +62,6 @@ private:
 
     std::mutex m_mutex;
     std::shared_ptr<ISpxAudioStreamReader> m_reader;
-    bool m_endOfStream;
     bool m_streamStarted = false;
 };
 

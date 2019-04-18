@@ -15,16 +15,21 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-#if defined(ANDROID) || defined(_ANDROID_)
-    extern "C"
-    {
-        GST_PLUGIN_STATIC_DECLARE(coreelements);
-        GST_PLUGIN_STATIC_DECLARE(app);
-        GST_PLUGIN_STATIC_DECLARE(audioconvert);
-        GST_PLUGIN_STATIC_DECLARE(mpg123);
-        GST_PLUGIN_STATIC_DECLARE(audioresample);
-        GST_PLUGIN_STATIC_DECLARE(audioparsers);
-    }
+// The following list has to be maintained same as the one in $(SourceRoot)/ci/android/gstreamer/Android.mk
+// Please search for base_gstreamer.h or base_gstreamer.cpp
+#if defined(ANDROID) || defined(__ANDROID__)
+extern "C"
+{
+    GST_PLUGIN_STATIC_DECLARE(coreelements);
+    GST_PLUGIN_STATIC_DECLARE(app);
+    GST_PLUGIN_STATIC_DECLARE(audioconvert);
+    GST_PLUGIN_STATIC_DECLARE(mpg123);
+    GST_PLUGIN_STATIC_DECLARE(audioresample);
+    GST_PLUGIN_STATIC_DECLARE(audioparsers);
+    GST_PLUGIN_STATIC_DECLARE(ogg);
+    GST_PLUGIN_STATIC_DECLARE(opusparse);
+    GST_PLUGIN_STATIC_DECLARE(opus);
+}
 #endif
 
 enum class ElementType
@@ -67,14 +72,12 @@ private:
     GstElement *m_bufferSource = nullptr;
     GstElement *m_bufferSink = nullptr;
     GstBus *m_bus = nullptr;
-    GstElement *m_local = nullptr;
 
     ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type m_readCallback;
     static const uint32_t CHUNK_SIZE = 512;
     static const uint32_t BUFFER_32KB = 32*1024;
     void *m_this;
     std::shared_ptr<RingBuffer> m_ringBuffer = nullptr;
-    bool m_PushMoreData = true;
     std::string m_gstErrorString;
     bool m_bErrorInsideGstreamer = false;
     std::mutex m_mtx;

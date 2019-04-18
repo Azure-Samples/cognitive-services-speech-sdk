@@ -1,0 +1,1 @@
+# !!! The shared library libgstreamer_android.so built by this makefile should not be distributed with other binaries. We don't have license to share this library. libgstreamer_android.so is used to build codec extension. !!!

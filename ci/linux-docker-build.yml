@@ -46,6 +46,7 @@ jobs:
       else
         vsts_setvar SPEECHSDK_ENABLE_KWS false
       fi
+      vsts_setvar SPEECHSDK_ENABLE_CODEC true
     displayName: Set variables
   - template: get-kws-artifact.yml
     parameters:
@@ -66,6 +67,7 @@ jobs:
           -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) \
           -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) \
           -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS) \
+          -DEXTENSION_CODEC_ENABLED="%SPEECHSDK_ENABLE_CODEC%" \
           ..
         cmake --build . -- -j$(nproc)
       SCRIPT

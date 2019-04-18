@@ -35,6 +35,9 @@ option(SPECTRE_MITIGATION "Build with Spectre mitigation" OFF)
 # Make the compilation of KWS optional
 option(EXTENSION_KWS_ENABLED "Build the KWS extension based on the VoiceActivation component" OFF)
 
+# Make the compilation of gstreamer (for decoding audio format) optional
+option(EXTENSION_CODEC_ENABLED "Build the CODEC extension based on the supported platform" OFF)
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING
       "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
@@ -386,8 +389,14 @@ endif()
 
 add_subdirectory(${CARBON_BINDINGS})
 
-if(SPEECHSDK_OS STREQUAL "Linux")
-  add_subdirectory(${CARBON_EXTENSIONS}/codec)
+if(EXTENSION_CODEC_ENABLED)
+  if(SPEECHSDK_OS STREQUAL "Android")
+    set(GSTREAMER_PKG "${GST_ROOT}")
+  endif()
+
+  if((SPEECHSDK_OS STREQUAL "Linux") OR (SPEECHSDK_OS STREQUAL "Android"))
+    add_subdirectory(${CARBON_EXTENSIONS}/codec)
+  endif()
 endif()
 
 if(NOT DEFINED SKBUILD)

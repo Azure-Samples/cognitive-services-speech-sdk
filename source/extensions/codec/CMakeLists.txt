@@ -10,11 +10,7 @@ include_directories(${CARBON_INCLUDE})
 include_directories("${CARBON_EXTERNAL}/json")
 
 include_directories("${COMMON}/include")
-if((SPEECHSDK_OS STREQUAL "Windows") OR (SPEECHSDK_OS STREQUAL "WindowsUwp"))
-    include_directories("${GSTREAMER_PKG}/include/gstreamer-1.0")
-    include_directories("${GSTREAMER_PKG}/include/glib-2.0")
-    include_directories("${GSTREAMER_PKG}/lib/glib-2.0/include")
-elseif(SPEECHSDK_OS STREQUAL "Linux")
+if(SPEECHSDK_OS STREQUAL "Linux")
     find_package(PkgConfig)
     if (PKG_CONFIG_FOUND)
         pkg_check_modules(GSTL "gstreamer-1.0")
@@ -53,16 +49,11 @@ source_group("Header Files (public)" FILES ${HEADERS})
 source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
-if((SPEECHSDK_OS STREQUAL "Windows") OR (SPEECHSDK_OS STREQUAL "WindowsUwp"))
-    set(GST_LIBS
-        "${GSTREAMER_PKG}/lib/gstreamer-1.0.lib"
-        "${GSTREAMER_PKG}/lib/glib-2.0.lib"
-        "${GSTREAMER_PKG}/lib/gobject-2.0.lib"
-    )
-elseif(SPEECHSDK_OS STREQUAL "Linux")
+if(SPEECHSDK_OS STREQUAL "Linux")
     set(GST_LIBS ${GSTL_LIBRARIES})
 elseif(ANDROID)
-    set(GST_LIBS "${CARBON_EXTERNAL}/gstreamer/android/libgstreamer_android.so")
+# !!! libgstreamer_android.so MUST NOT BE SHIPPED with the distribution binary. We do not have license to do that. !!!
+    set(GST_LIBS "${GSTREAMER_PKG}/libgstreamer_android.so")
 endif()
 
 add_library(codec SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
