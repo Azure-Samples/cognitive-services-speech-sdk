@@ -197,7 +197,7 @@ else
 fi
 
 # Build phases to run
-SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild OsxUnitTests OsxBuildSampleApp IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs UnityBuild "
+SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild OsxUnitTests IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs UnityBuild "
 
 # Running tests is default
 SPEECHSDK_RUN_TESTS=true

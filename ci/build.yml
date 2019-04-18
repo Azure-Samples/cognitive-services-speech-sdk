@@ -1998,7 +1998,8 @@ jobs:
       - IosBuild
     buildPlatform: iOS
 
-- template: osx-test-app.yml
+# deactivated as long as ESRP signing doesn't support notarization
+# - template: osx-test-app.yml
 
 - job: Doxygen
   dependsOn: Pre
