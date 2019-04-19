@@ -256,7 +256,25 @@ enum class PropertyId
     /// The file name to write logs.
     /// Added in version 1.4.0.
     /// </summary>
-    Speech_LogFilename = 9001
+    Speech_LogFilename = 9001,
+
+    /// <summary>
+    /// Secret Key for connecting to the dialog service.
+    /// Added in version 1.5.0.
+    /// </summary>
+    Conversation_Secret_Key = 10000,
+
+    /// <summary>
+    /// Silence timeout for listening
+    /// Added in version 1.5.0.
+    /// </summary>
+    Conversation_Initial_Silence_Timeout = 10002,
+
+    /// <summary>
+    /// From id to be used on speech recognition activities
+    /// Added in version 1.5.0.
+    /// </summary>
+    Conversation_From_Id = 10003
 };
 
 enum class OutputFormat
@@ -435,6 +453,23 @@ enum class NoMatchReason
     /// </summary>
     InitialBabbleTimeout = 3
 };
+
+/// <summary>
+/// Defines the possible types for an activity json value.
+/// Added in version 1.5.0
+/// </summary>
+enum class BotActivityJSONType : int
+{
+    Null = 0,
+    Object = 1,
+    Array = 2,
+    String = 3,
+    Double = 4,
+    UInt = 5,
+    Int = 6,
+    Boolean = 7
+};
+
 
 /// <summary>
 /// Defines the possible speech synthesis output audio format.

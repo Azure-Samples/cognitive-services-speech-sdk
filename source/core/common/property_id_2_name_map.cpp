@@ -1,4 +1,4 @@
-//  
+//
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
@@ -56,6 +56,9 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::AudioConfig_BitsPerSampleForCapture: return "AudioConfig_BitsPerSampleForCapture";
     case PropertyId::AudioConfig_AudioSource: return "AudioConfig_AudioSource";
     case PropertyId::Speech_LogFilename: return "SPEECH-LogFilename";
+    case PropertyId::Conversation_Secret_Key: return "BOT-SecretKey";
+    case PropertyId::Conversation_Initial_Silence_Timeout: return "BOT-InitialSilenceTimeout";
+    case PropertyId::Conversation_From_Id: return "BOT-FromId";
     default:
         LogError("undefined PropertyId of %d", static_cast<int>(id));
         SPX_THROW_ON_FAIL(SPXERR_INVALID_ARG);

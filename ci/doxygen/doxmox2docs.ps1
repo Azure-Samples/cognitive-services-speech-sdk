@@ -97,7 +97,9 @@ foreach ($compound in $index.doxygenindex.compound) {
               #     friend function typedef variable
               #   For namespace:
               #     enum enumvalue typedef
-              if (($member.refid -like "$($compound.refid)_*") -or
+              if ($ourIndex[$member.refid]) {
+                # We already know about this guy, ignore.
+              } elseif (($member.refid -like "$($compound.refid)_*") -or
                   ($compound.kind -eq 'namespace' -and $member.kind -eq 'enum')) {
                 # TODO implement refid shortening
                 $memberIndexEntry = $indexEntry.PsObject.Copy()

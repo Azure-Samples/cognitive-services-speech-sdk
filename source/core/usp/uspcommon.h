@@ -105,14 +105,15 @@ namespace USP {
     const auto g_userAgent = "CortanaSDK (Windows;Win32;DeviceType=Near;SpeechClient=2.0.4)";
 
     namespace headers {
-        const auto userAgent = "User-Agent";
-        const auto ocpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
-        const auto authorization = "Authorization";
-        const auto searchDelegationRPSToken = "X-Search-DelegationRPSToken";
-        const auto audioResponseFormat = "X-Output-AudioCodec";
-        const auto contentType = "Content-Type";
-        const auto streamId = "X-StreamId";
-        const auto requestId = "X-RequestId";
+        constexpr auto userAgent = "User-Agent";
+        constexpr auto ocpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
+        constexpr auto authorization = "Authorization";
+        constexpr auto searchDelegationRPSToken = "X-Search-DelegationRPSToken";
+        constexpr auto audioResponseFormat = "X-Output-AudioCodec";
+        constexpr auto contentType = "Content-Type";
+        constexpr auto streamId = "X-StreamId";
+        constexpr auto requestId = "X-RequestId";
+        constexpr auto region = "Ocp-Apim-Subscription-Region";
     }
 
     namespace json_properties {

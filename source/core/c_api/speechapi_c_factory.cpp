@@ -32,6 +32,40 @@ std::shared_ptr<ISpxAudioConfig> AudioConfigFromHandleOrEmptyIfInvalid(SPXAUDIOC
         : nullptr;
 }
 
+template<typename FactoryMethod>
+auto create_from_config(SPXHANDLE config_handle, SPXHANDLE audio_config_handle, FactoryMethod fm)
+{
+    auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
+
+    // get the input parameters from the hspeechconfig
+    auto config_handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
+
+    auto config = (*config_handles)[config_handle];
+    auto config_property_bag = SpxQueryInterface<ISpxNamedProperties>(config);
+    auto factory_property_bag = SpxQueryInterface<ISpxNamedProperties>(factory);
+
+    //copy the properties from the speech config into the factory
+    if (config_property_bag != nullptr)
+    {
+        factory_property_bag->Copy(config_property_bag.get());
+    }
+
+    auto named_properties = SpxQueryService<ISpxNamedProperties>(config);
+    auto lang = named_properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
+    auto output_format = named_properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
+    auto format = PAL::stricmp(output_format.c_str(), PAL::BoolToString(true).c_str()) == 0 ? OutputFormat::Detailed : OutputFormat::Simple;
+
+    auto audio_input = AudioConfigFromHandleOrEmptyIfInvalid(audio_config_handle);
+    // copy the audio input properties into the factory, if any.
+    auto audio_input_properties = SpxQueryInterface<ISpxNamedProperties>(audio_input);
+    if (audio_input_properties != nullptr)
+    {
+        factory_property_bag->Copy(audio_input_properties.get());
+    }
+
+    return ((*factory).*fm)(lang.c_str(), format, audio_input);
+}
+
 SPXAPI recognizer_create_speech_recognizer_from_config(SPXRECOHANDLE* phreco, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioInput)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phreco == nullptr);
@@ -42,38 +76,31 @@ SPXAPI recognizer_create_speech_recognizer_from_config(SPXRECOHANDLE* phreco, SP
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phreco = SPXHANDLE_INVALID;
-
-        // get the input parameters from the hspeechconfig
-        auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
-        auto speechconfig = (*confighandles)[hspeechconfig];
-        auto speechconfig_propertybag = SpxQueryInterface<ISpxNamedProperties>(speechconfig);
-        auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
-
-        //copy the properties from the speech config into the factory
-        auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
-        if (speechconfig_propertybag != nullptr)
-        {
-            fbag->Copy(speechconfig_propertybag.get());
-        }
-
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
-        auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
-        // copy the audio input properties into the factory, if any.
-        auto audioInput_propertybag = SpxQueryInterface<ISpxNamedProperties>(audioInput);
-        if (audioInput_propertybag != nullptr)
-        {
-            fbag->Copy(audioInput_propertybag.get());
-        }
-
-        auto recoLanguage = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
-        auto outputFormat = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
-        OutputFormat format = PAL::stricmp(outputFormat.c_str(), PAL::BoolToString(true).c_str()) == 0 ? OutputFormat::Detailed : OutputFormat::Simple;
-
-        auto recognizer = factory->CreateSpeechRecognizerFromConfig(recoLanguage.c_str(), format, audioInput);
+        auto recognizer = create_from_config(hspeechconfig, haudioInput, &ISpxSpeechApiFactory::CreateSpeechRecognizerFromConfig);
 
         // track the reco handle
         auto recohandles  = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI bot_connector_create_speech_bot_connector_from_config(SPXRECOHANDLE* ph_bot_connector, SPXSPEECHCONFIGHANDLE h_bot_config, SPXAUDIOCONFIGHANDLE h_audio_input)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_bot_connector == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(h_bot_config));
+
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *ph_bot_connector = SPXHANDLE_INVALID;
+        auto connector = create_from_config(h_bot_config, h_audio_input, &ISpxSpeechApiFactory::CreateSpeechBotConnectorFromConfig);
+
+        // track the handle
+        auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechBotConnector, SPXRECOHANDLE>();
+        *ph_bot_connector = handles->TrackHandle(connector);
+
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -130,23 +157,7 @@ SPXAPI recognizer_create_intent_recognizer_from_config(SPXRECOHANDLE* phreco, SP
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phreco = SPXHANDLE_INVALID;
-
-        // create a factory
-        auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
-
-        auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
-        auto speechconfig = (*confighandles)[hspeechconfig];
-        auto speechconfig_propertybag = SpxQueryInterface<ISpxNamedProperties>(speechconfig);
-        auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
-        fbag->Copy(speechconfig_propertybag.get());
-
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
-        auto lang = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
-        auto outputFormat = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
-        OutputFormat format = PAL::stricmp(outputFormat.c_str(), PAL::BoolToString(true).c_str()) == 0 ? OutputFormat::Detailed : OutputFormat::Simple;
-
-        auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
-        std::shared_ptr<ISpxRecognizer> recognizer = factory->CreateIntentRecognizerFromConfig(lang.c_str(), format, audioInput);
+        auto recognizer = create_from_config(hspeechconfig, haudioInput, &ISpxSpeechApiFactory::CreateIntentRecognizerFromConfig);
 
         // track the reco handle
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();

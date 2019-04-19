@@ -1136,7 +1136,7 @@ void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* c
     *countBot = (botConnector != nullptr) ? 1 : 0;
     *countIntent = (intentRecognizer != nullptr) ? 1 : 0;
     *countTranslation = (translationRecognizer != nullptr) ? 1 : 0;
-    *countSpeech = 1 - *countIntent - *countTranslation;
+    *countSpeech = 1 - *countIntent - *countTranslation - *countBot;
 
     SPX_DBG_TRACE_VERBOSE("%s: countSpeech=%d; countIntent=%d; countTranslation=%d; countBot=%d", __FUNCTION__, *countSpeech, *countIntent, *countTranslation, *countBot);
 }

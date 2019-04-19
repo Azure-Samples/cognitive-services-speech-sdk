@@ -448,6 +448,19 @@ void Connection::Impl::Connect()
         }
     }
 
+    if (m_config.m_endpoint == EndpointType::Bot)
+    {
+        auto& region = m_config.m_region;
+        if (!region.empty())
+        {
+            LogInfo("Adding region header");
+            if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::region, region.c_str()) != 0)
+            {
+                ThrowRuntimeError("Failed to set region.");
+            }
+        }
+    }
+
     auto connectionUrl = ConstructConnectionUrl();
     LogInfo("connectionUrl=%s", connectionUrl.c_str());
 

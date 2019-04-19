@@ -274,3 +274,10 @@ typedef uintptr_t SPXHR;
 /// Added in version 1.4.0.
 /// </summary>
 #define SPXERR_GSTREAMER_NOT_FOUND_ERROR    __SPX_ERRCODE_FAILED(0x029)
+
+/// <summary>
+/// The language specified is missing.
+/// Added in version 1.5.0
+/// </summary>
+#define SPXERR_INVALID_LANGUAGE  __SPX_ERRCODE_FAILED(0x02A)
+

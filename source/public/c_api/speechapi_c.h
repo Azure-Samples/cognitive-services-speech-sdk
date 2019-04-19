@@ -28,3 +28,6 @@
 #include <speechapi_c_grammar.h>
 #include <speechapi_c_session.h>
 #include <speechapi_c_connection.h>
+#include <speechapi_c_activity.h>
+#include <speechapi_c_bot_connector_config.h>
+#include <speechapi_c_speech_bot_connector.h>

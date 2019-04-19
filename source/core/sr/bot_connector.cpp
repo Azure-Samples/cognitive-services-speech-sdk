@@ -74,6 +74,7 @@ CSpxAsyncOp<void> CSpxSpeechBotConnector::DisconnectAsync()
 
 CSpxAsyncOp<std::string> CSpxSpeechBotConnector::SendActivityAsync(std::shared_ptr<ISpxActivity> activity)
 {
+    SetRecoMode(g_recoModeInteractive);
     return m_defaultSession->SendActivityAsync(activity);
 }
 
@@ -94,7 +95,7 @@ void CSpxSpeechBotConnector::SetRecoMode(const char* modeToSet)
 
 CSpxAsyncOp<void> CSpxSpeechBotConnector::StartContinuousListeningAsync()
 {
-    SetRecoMode(g_recoModeConversation);
+    SetRecoMode(g_recoModeInteractive);
     return m_defaultSession->StartContinuousRecognitionAsync();
 }
 
@@ -256,6 +257,24 @@ void CSpxSpeechBotConnector::CheckLogFilename()
     {
         FileLogger::Instance().SetFilename(std::move(filename));
     }
+}
+
+CSpxAsyncOp<void> CSpxSpeechBotConnector::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)
+{
+    const char* reco_mode = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
+    auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
+
+    // currently, kws uses recoModeInteractive as default, but takes the passed mode, if configured
+    if (currentRecoMode.empty())
+    {
+        SetStringValueInProperties(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), g_recoModeInteractive);
+    }
+    return m_defaultSession->StartKeywordRecognitionAsync(model);
+}
+
+CSpxAsyncOp<void> CSpxSpeechBotConnector::StopKeywordRecognitionAsync()
+{
+    return m_defaultSession->StopKeywordRecognitionAsync();
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

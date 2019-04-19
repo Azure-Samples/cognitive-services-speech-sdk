@@ -113,6 +113,10 @@ void CSpxUspRecoEngineAdapter::OpenConnection(bool singleShot)
         // Always use conversation mode for translation recognizer
         recoModeToSet = g_recoModeConversation;
     }
+    else if (countBot == 1)
+    {
+        recoModeToSet = g_recoModeInteractive;
+    }
     // Set reco mode.
     if (currentRecoMode.empty())
     {
@@ -425,8 +429,17 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Bot(std::shared_ptr<ISpxNa
 
     m_endpointType = USP::EndpointType::Bot;
 
+    auto region = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region));
+    SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_REGION);
+
+    auto language = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
+    SPX_IFTRUE_THROW_HR(language.empty(), SPXERR_INVALID_LANGUAGE);
+    client.SetLanguage(language);
+
     SPX_DBG_TRACE_VERBOSE("%s: Using Bot URL/endpoint...", __FUNCTION__);
     return client.SetEndpointType(m_endpointType)
+        .SetRegion(region)
+        .SetLanguage(language)
         .SetAudioResponseFormat("raw-16khz-16bit-mono-pcm");
 }
 
@@ -674,10 +687,10 @@ void CSpxUspRecoEngineAdapter::SetSpeechConfigMessage(const ISpxNamedProperties&
 void CSpxUspRecoEngineAdapter::SetAgentConfigMessage(const ISpxNamedProperties& properties)
 {
     constexpr auto botCommunicationType = "Conversation_Communication_Type";
-    constexpr auto botConnectionId = "Conversation_Connection_Id";
-    constexpr auto botFromId = "Conversation_FromId";
-    constexpr auto botTtsAudioFormat = "Conversation_Text_To_Speech_Audio_Format";
-    constexpr auto botAuthorizationToken = "Conversation_BotAuthorization_Token";
+    constexpr auto botSecretKey = "BOT-SecretKey";
+    constexpr auto botFromId = "BOT-FromId";
+    constexpr auto botTTSAudioFormat = "SPEECH-SynthOutputFormat";
+    constexpr auto botAuthorizationToken = "BOT-BotAuthorizationToken";
 
     json agentConfigJson;
     agentConfigJson["version"] = 0.2;
@@ -689,7 +702,7 @@ void CSpxUspRecoEngineAdapter::SetAgentConfigMessage(const ISpxNamedProperties& 
     }
     agentConfigJson["botInfo"]["commType"] = communicationType;
 
-    auto connectionId = properties.GetStringValue(botConnectionId);
+    auto connectionId = properties.GetStringValue(botSecretKey);
     if (connectionId.empty())
     {
         SPX_THROW_HR(SPXERR_INVALID_ARG);
@@ -702,7 +715,7 @@ void CSpxUspRecoEngineAdapter::SetAgentConfigMessage(const ISpxNamedProperties& 
         agentConfigJson["botInfo"]["fromId"] = fromId;
     }
 
-    auto ttsAudioFormat = properties.GetStringValue(botTtsAudioFormat);
+    auto ttsAudioFormat = properties.GetStringValue(botTTSAudioFormat);
     if (!ttsAudioFormat.empty())
     {
         agentConfigJson["ttsAudioFormat"] = ttsAudioFormat;
@@ -1211,6 +1224,7 @@ void CSpxUspRecoEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg
             auto& machine = it->second;
             machine->Switch(CSpxActivitySession::State::AudioReceived, nullptr, &message);
         }
+        return;
     }
 
     InvokeOnSite([this, &message](const SitePtr &site)

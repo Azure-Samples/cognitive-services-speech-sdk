@@ -1,3 +1,9 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// event_helpers.cpp: Private implementation definitions for EventSignal related C methods
+//
 #include "stdafx.h"
 #include "event_helpers.h"
 
@@ -126,6 +132,46 @@ SPXAPI_PRIVATE synthesizer_set_event_callback(std::list<std::pair<void*, std::sh
         }
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+template<typename EventInterface, typename EventArgs, typename Event>
+SPXHR bot_connector_set_event_callback(Event event, SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void* pv_context)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechBotConnector, SPXRECOHANDLE>();
+        auto connector = (*handles)[h_connector];
+
+        auto pfn = [=](std::shared_ptr<EventArgs> e) {
+            auto eventhandles = CSpxSharedPtrHandleTableManager::Get<EventArgs, SPXEVENTHANDLE>();
+            auto h_event = eventhandles->TrackHandle(e);
+            (*p_callback)(h_connector, h_event, pv_context);
+        };
+
+        auto events = SpxQueryInterface<EventInterface>(connector).get();
+        (events->*event).Disconnect(pfn);
+
+        if (p_callback != nullptr)
+        {
+            (events->*event).Connect(pfn);
+        }
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI_PRIVATE bot_connector_session_set_event_callback(ISpxRecognizerEvents::SessionEvent_Type ISpxRecognizerEvents::*p_session_event, SPXRECOHANDLE h_connector, PSESSION_CALLBACK_FUNC p_callback, void* pv_context)
+{
+    return bot_connector_set_event_callback<ISpxRecognizerEvents, ISpxSessionEventArgs>(p_session_event, h_connector, p_callback, pv_context);
+}
+
+SPXAPI_PRIVATE bot_connector_recognition_set_event_callback(ISpxRecognizerEvents::RecoEvent_Type ISpxRecognizerEvents::*p_reco_event, SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void* pv_context)
+{
+    return bot_connector_set_event_callback<ISpxRecognizerEvents, ISpxRecognitionEventArgs>(p_reco_event, h_connector, p_callback, pv_context);
+}
+
+SPXAPI_PRIVATE bot_connector_activity_received_set_event_callback(ISpxSpeechBotConnectorEvents::ActivityReceivedEvent_Type ISpxSpeechBotConnectorEvents::*p_act_event, SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void* pv_context)
+{
+    return bot_connector_set_event_callback<ISpxSpeechBotConnectorEvents, ISpxActivityEventArgs>(p_act_event, h_connector, p_callback, pv_context);
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

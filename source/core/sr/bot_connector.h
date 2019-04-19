@@ -67,6 +67,9 @@ public:
     CSpxAsyncOp<void> StartContinuousListeningAsync() override;
     CSpxAsyncOp<void> StopContinuousListeningAsync() override;
 
+    CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) final;
+    CSpxAsyncOp<void> StopKeywordRecognitionAsync() final;
+
     CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> ListenOnceAsync() override;
 
     // --- ISpxSessionFromRecognizer

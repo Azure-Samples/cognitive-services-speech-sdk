@@ -21,7 +21,13 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
+
+namespace Dialog {
+    class ActivityReceivedEventArgs;
+}
+
 namespace Audio {
+
 
 
 class PullAudioInputStreamCallback;
@@ -140,7 +146,7 @@ protected:
     /// Internal helper method to get the audio stream format handle.
     /// </summary>
     static SPXAUDIOSTREAMFORMATHANDLE GetFormatHandle(std::shared_ptr<AudioStreamFormat> format) { return (SPXAUDIOSTREAMFORMATHANDLE)(*format.get()); }
-    
+
     /// <summary>
     /// Internal member variable that holds the smart handle.
     /// </summary>
@@ -604,6 +610,7 @@ private:
 class PullAudioOutputStream : public AudioOutputStream
 {
 public:
+    friend class Dialog::ActivityReceivedEventArgs;
 
     /// <summary>
     /// Creates a memory backed PullAudioOutputStream using the default format (16Khz 16bit mono PCM).
@@ -636,7 +643,7 @@ public:
     /// <param name="buffer">A buffer to receive read data.</param>
     /// <param name="bufferSize">Size of the buffer.</param>
     /// <returns>Size of data filled to the buffer, 0 means end of stream</returns>
-    uint32_t Read(uint8_t* buffer, uint32_t bufferSize)
+    inline uint32_t Read(uint8_t* buffer, uint32_t bufferSize)
     {
         uint32_t filledSize = 0;
         SPX_THROW_ON_FAIL(pull_audio_output_stream_read(m_haudioStream, buffer, bufferSize, &filledSize));

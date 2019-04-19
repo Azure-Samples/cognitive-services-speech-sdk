@@ -550,6 +550,9 @@ public:
     virtual CSpxAsyncOp<void> StartContinuousListeningAsync() = 0;
     virtual CSpxAsyncOp<void> StopContinuousListeningAsync() = 0;
 
+    virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
+    virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
+
     /* TODO: Change promise type back to void */
     virtual CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> ListenOnceAsync() = 0;
 };
