@@ -593,13 +593,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertMatching(TestData.English.Weather.Utterance, translationTextResult.Text);
                 Assert.AreEqual(1, translationTextResult.Translations.Count);
                 AssertMatching(TestData.French.Weather.Utterance, translationTextResult.Translations[Language.FR]);
-
-                var json = translationTextResult.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON result from translation recognition.");
-                Assert.IsTrue(json.Contains("ITN"), "Detailed result does not contain ITN.");
-                Assert.IsTrue(json.Contains("Lexical"), "Detailed result does not contain Lexical.");
-                Assert.IsTrue(json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
-                Assert.IsTrue(json.Contains("Text"), "Detailed result does not contain Text.");
+                AssertDetailedOutput(translationTextResult, true);
             }
         }
 
@@ -636,12 +630,59 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Assert.IsTrue(s.Result.GetAudio().Length > MinSize, $"Expects audio size {s.Result.GetAudio().Length} to be greater than {MinSize}");
                 }
 
-                var json = translationTextResult.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
-                Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON result from translation recognition.");
-                Assert.IsFalse(json.Contains("ITN"), "Simple result should not contain ITN.");
-                Assert.IsFalse(json.Contains("Lexical"), "Simple result should not contain Lexical.");
-                Assert.IsFalse(json.Contains("MaskedITN"), "Simple result should not contain MaskedITN.");
-                Assert.IsTrue(json.Contains("Text"), "Simple result does not contain Text.");
+                AssertDetailedOutput(translationTextResult, false);
+            }
+        }
+
+        [TestMethod]
+        public async Task FromEndpointWithoutSettingFromToProperty()
+        {
+            var endpointWithParameters = endpointInString + "?from=de-DE&to=fr";
+            var configFromEndpoint = SpeechTranslationConfig.FromEndpoint(new Uri(endpointWithParameters), subscriptionKey);
+            configFromEndpoint.OutputFormat = OutputFormat.Detailed;
+
+            var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
+
+            using (var recognizer = TrackSessionId(new TranslationRecognizer(configFromEndpoint, audioInput)))
+            {
+                var allResultEvents = await this.translationHelper.DoTranslationAsync(recognizer, true);
+
+                Assert.AreEqual(1, allResultEvents[ResultType.RecognizedText].Count);
+                var translationTextEvent = (TranslationRecognitionEventArgs)allResultEvents[ResultType.RecognizedText].Single();
+                Assert.IsNotNull(translationTextEvent);
+                var translationTextResult = translationTextEvent.Result;
+                Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
+                AssertMatching(TestData.German.FirstOne.Utterance, translationTextResult.Text);
+                Assert.AreEqual(1, translationTextResult.Translations.Count);
+                AssertMatching(TestData.French.FirstOne.Utterance, translationTextResult.Translations[Language.FR]);
+
+                AssertDetailedOutput(translationTextResult, true);
+            }
+        }
+
+        [TestMethod]
+        public async Task SetServicePropertyTranslation()
+        {
+            var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
+            config.SetServiceProperty("from", "en-us", ServicePropertyChannel.UriQueryParameter);
+            config.SetServiceProperty("format", "detailed", ServicePropertyChannel.UriQueryParameter);
+            config.AddTargetLanguage(Language.FR);
+
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
+            {
+                var allResults = await this.translationHelper.DoTranslationAsync(recognizer, true);
+
+                Assert.AreEqual(1, allResults[ResultType.RecognizedText].Count);
+                var translationTextEvent = (TranslationRecognitionEventArgs)allResults[ResultType.RecognizedText].Single();
+                Assert.IsNotNull(translationTextEvent);
+                var translationTextResult = translationTextEvent.Result;
+                Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, translationTextResult.Text);
+                Assert.AreEqual(1, translationTextResult.Translations.Count);
+                AssertMatching(TestData.French.Weather.Utterance, translationTextResult.Translations[Language.FR]);
+
+                AssertDetailedOutput(translationTextResult, true);
             }
         }
     }

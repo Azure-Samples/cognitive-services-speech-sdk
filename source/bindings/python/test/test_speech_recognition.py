@@ -494,3 +494,14 @@ def test_subscription_key_and_expired_auth_token(subscription, speech_input, spe
 
     result = speech_recognizer.recognize_once()
     _check_sr_result(result, speech_input, 0)
+
+
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_set_service_property(subscription, speech_input, speech_region):
+    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config.speech_recognition_language = 'invalid'
+    config.set_service_property(name='language', value='en-us', channel=msspeech.ServicePropertyChannel.UriQueryParameter)
+    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    speech_recognizer = msspeech.SpeechRecognizer(config, audio_input)
+    result = speech_recognizer.recognize_once()
+    _check_sr_result(result, speech_input, 0)

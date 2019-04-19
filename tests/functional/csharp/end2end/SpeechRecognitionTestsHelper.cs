@@ -381,6 +381,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             Assert.IsTrue(edits <= allowedEdits, $"Number of edit operations '{edits}' exceeding allowed edits '{allowedEdits}'\ninput:   '{expectedString}'\ncompare: '{comparisonString}'\n");
         }
+
+        public static void AssertDetailedResult(SpeechRecognitionResult result)
+        {
+            var bestResults = result.Best().ToArray();
+            Assert.IsTrue(bestResults.Length > 0);
+            var detailedRecognitionText = bestResults[0].Text;
+            var detailedRecognitionNormalizedForm = bestResults[0].NormalizedForm;
+            var detailedRecognitionLexicalForm = bestResults[0].LexicalForm;
+            var detailedRecognitionMaskedForm = bestResults[0].MaskedNormalizedForm;
+
+            Assert.IsTrue(detailedRecognitionText.Length > 0);
+            Assert.IsTrue(detailedRecognitionNormalizedForm.Length > 0);
+            Assert.IsTrue(detailedRecognitionLexicalForm.Length > 0);
+            Assert.IsTrue(detailedRecognitionMaskedForm.Length > 0);
+        }
     }
 
 }

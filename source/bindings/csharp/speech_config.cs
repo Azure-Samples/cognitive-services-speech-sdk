@@ -344,5 +344,17 @@ namespace Microsoft.CognitiveServices.Speech
         {
             return progBag.GetProperty(id);
         }
+
+        /// <summary>
+        /// Sets a property value that will be passed to service using the specified channel.
+        /// Added in version 1.5.0.
+        /// </summary>
+        /// <param name="name">The property name.</param>
+        /// <param name="value">The property value.</param>
+        /// <param name="channel">The channel used to pass the specified property to service.</param>
+        public void SetServiceProperty(string name, string value, ServicePropertyChannel channel)
+        {
+            ThrowIfFail(Internal.SpeechConfig.speech_config_set_service_property(configHandle, name, value, channel));
+        }
     }
 }

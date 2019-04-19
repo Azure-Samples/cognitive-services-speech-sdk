@@ -258,6 +258,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             };
             return recognizer;
         }
+
+        public static void AssertDetailedOutput(TranslationRecognitionResult result, bool requireDetailedOutput)
+        {
+            var json = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+            Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON result from translation recognition.");
+            Assert.IsTrue(json.Contains("Text"), "Detailed result does not contain Text.");
+            Assert.IsTrue(requireDetailedOutput == json.Contains("ITN"), "Detailed result does not contain ITN.");
+            Assert.IsTrue(requireDetailedOutput == json.Contains("Lexical"), "Detailed result does not contain Lexical.");
+            Assert.IsTrue(requireDetailedOutput == json.Contains("MaskedITN"), "Detailed result does not contain MaskedITN.");
+            Assert.IsTrue(json.Contains("Text"), "Detailed result does not contain Text.");
+        }
     }
 
     enum ResultType

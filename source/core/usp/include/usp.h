@@ -241,6 +241,15 @@ public:
     }
 
     /**
+    * Sets the query parameters provided by users.
+    */
+    Client& SetUserDefinedQueryParameters(const std::string& queryParameters)
+    {
+        m_userDefinedQueryParameters = queryParameters;
+        return *this;
+    }
+
+    /**
     * Sets the proxy server information, which is used to configure the connection to go through a proxy server.
     */
     Client& SetProxyServerInfo(const char* proxyHost, int proxyPort, const char* proxyUsername = nullptr, const char* proxyPassword = nullptr);
@@ -384,6 +393,7 @@ private:
      RecognitionMode m_recoMode;
      std::string m_customEndpointUrl;
      std::string m_region;
+     std::string m_userDefinedQueryParameters;
 
      std::shared_ptr<ProxyServerInfo> m_proxyServerInfo;
 

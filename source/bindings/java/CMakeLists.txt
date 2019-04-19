@@ -157,6 +157,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/ConnectionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/ConnectionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/ConnectionEventSignal.java
+    ${CMAKE_SWIG_OUTDIR}/ServicePropertyChannel.java
     ${CMAKE_SWIG_OUTDIR}/SpeechConfig.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionCanceledEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionCanceledEventListener.java
@@ -238,6 +239,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/Recognizer.java
     ${PACKAGE_DIR}/SessionEventArgs.java
     ${PACKAGE_DIR}/ConnectionEventArgs.java
+    ${PACKAGE_DIR}/ServicePropertyChannel.java
     ${PACKAGE_DIR}/SpeechConfig.java
     ${PACKAGE_DIR}/SpeechRecognitionResult.java
     ${PACKAGE_DIR}/SpeechRecognitionEventArgs.java

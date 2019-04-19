@@ -32,7 +32,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void TestCreateRecognizerTypes()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var speechRecognizer = new SpeechRecognizer(this.config, audioInput))
+            using (var speechRecognizer = new SpeechRecognizer(this.defaultConfig, audioInput))
             {
                 Assert.IsInstanceOfType(speechRecognizer, typeof(SpeechRecognizer));
             }
@@ -49,7 +49,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.IsInstanceOfType(translationRecognizer, typeof(TranslationRecognizer));
             }
 
-            using (var intentRecognizer = new IntentRecognizer(this.config, audioInput))
+            using (var intentRecognizer = new IntentRecognizer(this.defaultConfig, audioInput))
             {
                 Assert.IsInstanceOfType(intentRecognizer, typeof(IntentRecognizer));
             }
@@ -58,8 +58,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void TestGetters()
         {
-            Assert.AreEqual(subscriptionKey, this.config.SubscriptionKey);
-            Assert.AreEqual(region, this.config.Region);
+            Assert.AreEqual(subscriptionKey, this.defaultConfig.SubscriptionKey);
+            Assert.AreEqual(region, this.defaultConfig.Region);
         }
 
         [TestMethod]
@@ -122,7 +122,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var invalidToken = "InvalidToken";
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             // Create recognizer using subscription key.
-            using (var speechRecognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var speechRecognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 speechRecognizer.AuthorizationToken = invalidToken;
 
@@ -138,10 +138,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task SubscriptionKeyAndValidAuthToken()
         {
             var token = await Config.GetToken(subscriptionKey, region);
-            this.config.AuthorizationToken = token;
+            this.defaultConfig.AuthorizationToken = token;
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             // Create recognizer using subscription key.
-            using (var speechRecognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var speechRecognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
 
@@ -155,10 +155,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task SubscriptionKeyAndExpiredAuthToken()
         {
             var expiredToken = "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1cm46bXMuY29nbml0aXZlc2VydmljZXMiLCJleHAiOiIxNTU0MzE1Nzk5IiwicmVnaW9uIjoibm9ydGhldXJvcGUiLCJzdWJzY3JpcHRpb24taWQiOiIwNmZlNjU2MWVkZTM0NDdiYTg2NDY5Njc4YTIwNTNkYiIsInByb2R1Y3QtaWQiOiJTcGVlY2hTZXJ2aWNlcy5TMCIsImNvZ25pdGl2ZS1zZXJ2aWNlcy1lbmRwb2ludCI6Imh0dHBzOi8vYXBpLmNvZ25pdGl2ZS5taWNyb3NvZnQuY29tL2ludGVybmFsL3YxLjAvIiwiYXp1cmUtcmVzb3VyY2UtaWQiOiIvc3Vic2NyaXB0aW9ucy8zYTk2ZWY1Ni00MWE5LTQwYTAtYjBmMy1mYjEyNWMyYjg3OTgvcmVzb3VyY2VHcm91cHMvY3NzcGVlY2hzZGstY2FyYm9uL3Byb3ZpZGVycy9NaWNyb3NvZnQuQ29nbml0aXZlU2VydmljZXMvYWNjb3VudHMvc3BlZWNoc2Rrbm9ydGhldXJvcGUiLCJzY29wZSI6InNwZWVjaHNlcnZpY2VzIiwiYXVkIjoidXJuOm1zLnNwZWVjaHNlcnZpY2VzLm5vcnRoZXVyb3BlIn0.hVAWT2YHjknFI6qLhnjmjzoNgOgxKWguuFhJLlyDxLU";
-            this.config.AuthorizationToken = expiredToken;
+            this.defaultConfig.AuthorizationToken = expiredToken;
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             // Create recognizer using subscription key.
-            using (var speechRecognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var speechRecognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
 

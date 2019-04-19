@@ -11,6 +11,7 @@
 #include "interface_helpers.h"
 #include "service_helpers.h"
 #include "property_bag_impl.h"
+#include "ispxinterfaces.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -37,9 +38,10 @@ public:
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxSpeechConfig ---
-    void InitAuthorizationToken(const char * authToken, const char * region) override;
-    void InitFromEndpoint(const char * endpoint, const char* subscription) override;
-    void InitFromSubscription(const char * subscription, const char* region) override;
+    void InitAuthorizationToken(const char* authToken, const char* region) override;
+    void InitFromEndpoint(const char* endpoint, const char* subscription) override;
+    void InitFromSubscription(const char* subscription, const char* region) override;
+    void SetServiceProperty(std::string name, std::string, ServicePropertyChannel channel) override;
 
     // --- IServiceProvider
     SPX_SERVICE_MAP_BEGIN()

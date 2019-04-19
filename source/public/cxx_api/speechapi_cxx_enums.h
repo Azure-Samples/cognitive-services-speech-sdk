@@ -145,6 +145,12 @@ enum class PropertyId
     Speech_SessionId = 3002,
 
     /// <summary>
+    /// The query parameters provided by users. They will be passed to service as URL query parameters.
+    /// Added in version 1.5.0
+    /// </summary>
+    SpeechServiceConnection_UserDefinedQueryParameters = 3003,
+
+    /// <summary>
     /// The spoken language to be synthesized (e.g. en-US)
     /// Added in version 1.4.0
     /// </summary>
@@ -552,6 +558,18 @@ enum class StreamStatus
     /// The audio data stream was cancelled
     /// </summary>
     Canceled = 4
+};
+
+/// <summary>
+/// Defines channels used to pass property settings to service.
+/// Added in version 1.5.0.
+/// </summary>
+enum class ServicePropertyChannel
+{
+    /// <summary>
+    /// Uses URI query parameter to pass property settings to service.
+    /// </summary>
+    UriQueryParameter = 0
 };
 
 } } } // Microsoft::CognitiveServices::Speech

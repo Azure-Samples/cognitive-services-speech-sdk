@@ -14,7 +14,8 @@ from .speech_py_impl import (
     PropertyId,
     CancellationDetails,
     ResultReason,
-    NoMatchDetails
+    NoMatchDetails,
+    ServicePropertyChannel,
 )
 
 from typing import Optional, Dict, Union, Callable
@@ -203,6 +204,21 @@ class SpeechConfig():
         :param password: The password of the proxy server.
         """
         self._impl.set_proxy(hostname, port, username, password)
+
+    def set_service_property(self, name: str, value: str, channel: ServicePropertyChannel):
+        """
+        Sets a property value that will be passed to service using the specified channel.
+
+        .. note::
+          Added in version 1.5.0.
+
+        :param name: The property name.
+        :param value: The property value.
+        :param channel: The channel used to pass the specified property to service.
+        """
+        if not isinstance(channel, ServicePropertyChannel):
+            raise TypeError('wrong channel, must be ServicePropertyChannel')
+        self._impl.set_service_property(name, value, channel.value)
 
 
 class RecognitionResult():

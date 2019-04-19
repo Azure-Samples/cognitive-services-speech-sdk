@@ -341,6 +341,18 @@ public:
     }
 
     /// <summary>
+    /// Sets a property value that will be passed to service using the specified channel.
+    /// Added in version 1.5.0.
+    /// </summary>
+    /// <param name="name">The property name.</param>
+    /// <param name="value">The property value.</param>
+    /// <param name="channel">The channel used to pass the specified property to service.</param>
+    void SetServiceProperty(const SPXSTRING& name, const SPXSTRING& value, ServicePropertyChannel channel)
+    {
+        SPX_THROW_ON_FAIL(speech_config_set_service_property(m_hconfig, Utils::ToUTF8(name).c_str(), Utils::ToUTF8(value).c_str(), (SpeechConfig_ServicePropertyChannel)channel));
+    }
+
+    /// <summary>
     /// Destructs the object.
     /// </summary>
     virtual ~SpeechConfig()

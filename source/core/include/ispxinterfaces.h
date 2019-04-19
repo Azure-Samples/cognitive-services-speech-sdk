@@ -1103,6 +1103,7 @@ public:
     virtual void InitFromSubscription(const char * subscription, const char* region) = 0;
     virtual void InitFromEndpoint(const char * endpoint, const char* subscription) = 0;
     virtual void InitAuthorizationToken(const char * authToken, const char * region) = 0;
+    virtual void SetServiceProperty(std::string name, std::string value, ServicePropertyChannel channel) = 0;
 };
 
 class ISpxThreadService : public ISpxInterfaceBaseFor<ISpxThreadService>

@@ -14,7 +14,7 @@ TestData weatheropus{ "/audio/whatstheweatherlike.opus", "What's the weather lik
 TestData batman{ "/audio/batman.wav", "" };
 TestData wrongSamplingRateFile {"/audio/11khztest.wav", "" };
 TestData cortana {"/audio/heyCortana.wav", "Hey Cortana," };
-TestData callTheFirstOne{ "/audio/CallTheFirstOne.wav", "" };
+TestData callTheFirstOne{ "/audio/CallTheFirstOne.wav", "Rufe die erste an." };
 TestData turnOnLamp {"/audio/TurnOnTheLamp.wav", "Turn on lamp" };
 TestData dgiWreckANiceBeach {"/audio/wreck-a-nice-beach.wav", "Wreck a nice beach." };
 

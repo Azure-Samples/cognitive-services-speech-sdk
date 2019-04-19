@@ -23,6 +23,7 @@ import org.junit.Ignore;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
+import com.microsoft.cognitiveservices.speech.ServicePropertyChannel;
 import com.microsoft.cognitiveservices.speech.SessionEventArgs;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.Recognizer;
@@ -609,6 +610,25 @@ public class TranslationRecognizerTests {
 
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
+
+        r.close();
+        s.close();
+    }
+
+    @Test
+    public void testSetServiceProperty() throws InterruptedException, ExecutionException, TimeoutException {
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setServiceProperty("from", "en-US", ServicePropertyChannel.UriQueryParameter);
+        s.setServiceProperty("to", "de", ServicePropertyChannel.UriQueryParameter);
+
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+
+        TranslationRecognitionResult res = r.recognizeOnceAsync().get();
+
+        assertTrue(ResultReason.TranslatedSpeech == res.getReason());
+        assertEquals("What's the weather like?", res.getText());
+        assertEquals(1, res.getTranslations().size());
+        assertEquals("Wie ist das Wetter?", res.getTranslations().get("de")); // translated text
 
         r.close();
         s.close();

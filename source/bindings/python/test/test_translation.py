@@ -71,3 +71,12 @@ def test_speech_translation_config():
     speech_config.voice_name = "myothervoice"
     assert "myothervoice" == speech_config.voice_name
 
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_set_service_property(subscription, speech_input, speech_region):
+    config = msspeech.translation.SpeechTranslationConfig(subscription=subscription, region=speech_region)
+    config.speech_recognition_language = 'en-us'
+    config.set_service_property(name='to', value='de', channel=msspeech.ServicePropertyChannel.UriQueryParameter)
+    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    translation_recognizer = msspeech.translation.TranslationRecognizer(config, audio_input)
+    result = translation_recognizer.recognize_once()
+    _check_translation_result(result, speech_input, 0, target_languages=['de'])

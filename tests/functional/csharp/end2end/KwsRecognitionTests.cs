@@ -96,7 +96,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var str = TestData.Kws.Computer.AudioFile;
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
@@ -114,7 +114,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var str = TestData.Kws.Computer.AudioFile;
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 // since we request the ddk kws implementation, this must fail
                 // on our build servers.
@@ -145,7 +145,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var str = TestData.Kws.Computer.AudioFile;
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 recognizer.Recognizing += (s, e) => {
                     Console.WriteLine("Intermediate result: " + e.ToString());
@@ -188,7 +188,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var str = TestData.Kws.Computer.AudioFile;
             var audioInput = AudioConfig.FromWavFileInput(str);
 
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 recognizer.Recognizing += (s, e) => {
                     Console.WriteLine("Intermediate result: " + e.ToString());
@@ -235,7 +235,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var str = TestData.Kws.Computer.AudioFile;
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 recognizer.Recognizing += (s, e) => {
                     Console.WriteLine("Intermediate result: " + e.ToString());
@@ -282,7 +282,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var str = TestData.Kws.Secret.AudioFile;
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 recognizer.Recognizing += (s, e) => {
                     Console.WriteLine("Intermediate result: " + e.ToString());
@@ -325,7 +325,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             bool tcsComputer = false;
 
             var audioInputSecret = AudioConfig.FromWavFileInput(TestData.Kws.Secret.AudioFile);
-            var recognizerSecret = TrackSessionId(new SpeechRecognizer(this.config, audioInputSecret));
+            var recognizerSecret = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInputSecret));
             {
                 recognizerSecret.Recognizing += (s, e) => {
                     Console.WriteLine("Intermediate result: " + e.ToString());
@@ -355,7 +355,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
 
             var audioInputComputer = AudioConfig.FromWavFileInput(TestData.Kws.Computer.AudioFile);
-            var recognizerComputer = TrackSessionId(new SpeechRecognizer(this.config, audioInputComputer));
+            var recognizerComputer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInputComputer));
             {
                 recognizerComputer.Recognizing += (s, e) => {
                     Console.WriteLine("Intermediate result: " + e.ToString());
@@ -410,7 +410,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var numCanceledCalled = 0;
 
             var audioInputSecret = AudioConfig.FromWavFileInput(TestData.Kws.Secret.AudioFile);
-            var recognizerSecret = TrackSessionId(new SpeechRecognizer(this.config, audioInputSecret));
+            var recognizerSecret = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInputSecret));
             {
                 recognizerSecret.Recognizing += (s, e) => {
                     Console.WriteLine("Intermediate result: " + e.ToString());
@@ -441,7 +441,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
 
             var audioInputComputer = AudioConfig.FromWavFileInput(TestData.Kws.Computer.AudioFile);
-            var recognizerComputer = TrackSessionId(new SpeechRecognizer(this.config, audioInputComputer));
+            var recognizerComputer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInputComputer));
             {
                 recognizerComputer.Recognizing += (s, e) => {
                     Console.WriteLine("Intermediate result: " + e.ToString());
@@ -504,7 +504,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var str = TestData.Kws.Computer2.AudioFileTranslate;
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 recognizer.Recognizing += (s, e) => {
                     Console.WriteLine("Intermediate result: " + e.ToString());
@@ -556,7 +556,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var str = TestData.Kws.Computer2.AudioFileTranslate;
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 recognizer.Recognizing += (s, e) => {
                     Console.WriteLine("Intermediate result: " + e.ToString());
@@ -617,7 +617,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
             var numCanceledCalled = 0;
 
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 recognizer.Recognizing += (s, e) => {
                     Console.WriteLine("Intermediate result: " + e.ToString());
@@ -660,7 +660,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TestSpeechMockKeywordspotterStartStop()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 // TODO: use some explicit model file, not re-use the wave here
                 recognizer.Properties.SetProperty("CARBON-INTERNAL-UseKwsEngine-Mock", "true");

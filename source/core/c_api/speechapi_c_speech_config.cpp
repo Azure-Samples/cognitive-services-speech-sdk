@@ -108,3 +108,20 @@ SPXAPI speech_config_set_audio_output_format(SPXSPEECHCONFIGHANDLE hconfig, Spee
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+
+static_assert((int)SpeechConfig_ServicePropertyChannel_UriQueryParameter == (int)ServicePropertyChannel::UriQueryParameter, "SpeechConfig_ServicePropertyChannel_* enum values == ServicePropertyChannel::* enum values");
+
+SPXAPI speech_config_set_service_property(SPXSPEECHCONFIGHANDLE configHandle, const char* propertyName, const char* propertyValue, SpeechConfig_ServicePropertyChannel channel)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SPX_IFTRUE_THROW_HR(propertyName == nullptr || propertyName[0] == '\0', SPXERR_INVALID_ARG);
+        SPX_IFTRUE_THROW_HR(propertyValue == nullptr || propertyValue[0] == '\0', SPXERR_INVALID_ARG);
+        SPX_IFTRUE_THROW_HR(channel != SpeechConfig_ServicePropertyChannel_UriQueryParameter, SPXERR_INVALID_ARG);
+
+        auto configs = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
+        auto config = (*configs)[configHandle];
+        config->SetServiceProperty(propertyName, propertyValue, (ServicePropertyChannel)channel);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}

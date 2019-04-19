@@ -155,9 +155,11 @@ void CSpxSpeechApiFactory::SetRecognizerProperties(const std::shared_ptr<ISpxNam
 
 void CSpxSpeechApiFactory::SetTranslationProperties(const std::shared_ptr<ISpxNamedProperties>& namedProperties, const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& voice)
 {
-    if (sourceLanguage.empty() && !namedProperties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId)))
+    if (sourceLanguage.empty() && !namedProperties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId))
+        && namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint)).find("from=") == std::string::npos
+        && namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_UserDefinedQueryParameters)).find("from=") == std::string::npos)
     {
-        SPX_DBG_TRACE_ERROR("%s: neither source langauge nor endpointId is set.", __FUNCTION__);
+        SPX_DBG_TRACE_ERROR("%s: neither source language nor endpointId is set.", __FUNCTION__);
         SPX_THROW_HR(SPXERR_INVALID_ARG);
     }
 
@@ -166,22 +168,36 @@ void CSpxSpeechApiFactory::SetTranslationProperties(const std::shared_ptr<ISpxNa
         namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), sourceLanguage.c_str());
     }
 
-    std::string plainStr;
     // The target languages are in BCP-47 format, and should not contain the character ','.
-    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, targetLanguages.size() == 0);
-    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, targetLanguages[0].empty());
-    plainStr = targetLanguages.at(0);
-    for (auto lang = targetLanguages.begin() + 1; lang != targetLanguages.end(); ++lang)
+    if (targetLanguages.size() == 0 || targetLanguages[0].empty())
     {
-        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, lang->empty());
-        plainStr += "," + *lang;
+        if (namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint)).find("to=") == std::string::npos
+            && namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_UserDefinedQueryParameters)).find("to=") == std::string::npos)
+        {
+            SPX_DBG_TRACE_ERROR("%s: no target language is set.", __FUNCTION__);
+            SPX_THROW_HR(SPXERR_INVALID_ARG);
+        }
     }
-    if (plainStr.empty())
+    else
     {
-        SPX_DBG_TRACE_ERROR("%s: target language is empty.", __FUNCTION__);
-        SPX_THROW_HR(SPXERR_INVALID_ARG);
+        auto plainStr = targetLanguages.at(0);
+        for (auto lang = targetLanguages.begin() + 1; lang != targetLanguages.end(); ++lang)
+        {
+            if (lang->empty())
+            {
+                SPX_DBG_TRACE_ERROR("%s: One of specified target languages is empty: %s.", __FUNCTION__, lang->c_str());
+                SPX_THROW_HR(SPXERR_INVALID_ARG);
+            }
+            plainStr += "," + *lang;
+        }
+        if (plainStr.empty())
+        {
+            SPX_DBG_TRACE_ERROR("%s: unexpected error: target language should not be empty at this time.", __FUNCTION__);
+            SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+        }
+        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages), plainStr.c_str());
     }
-    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages), plainStr.c_str());
+
     namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice), voice.c_str());
 
     // Set mode to conversation for translation

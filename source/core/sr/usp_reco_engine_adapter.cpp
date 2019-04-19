@@ -367,8 +367,17 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedP
     auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
     if (!endpoint.empty())
     {
+        SPX_DBG_TRACE_VERBOSE("%s: Using Custom endpoint: %s", __FUNCTION__, endpoint.c_str());
         m_customEndpoint = true;
-        SetUspEndpointUrl(endpoint, client);
+        client.SetEndpointUrl(endpoint);
+    }
+
+    // set user defined query parameters if provided.
+    auto userDefinedQueryParameters = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_UserDefinedQueryParameters));
+    if (!userDefinedQueryParameters.empty())
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: Using user provided query parameters: %s", __FUNCTION__, userDefinedQueryParameters.c_str());
+        client.SetUserDefinedQueryParameters(userDefinedQueryParameters);
     }
 
     // set endpoint type.
@@ -419,12 +428,6 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Bot(std::shared_ptr<ISpxNa
     SPX_DBG_TRACE_VERBOSE("%s: Using Bot URL/endpoint...", __FUNCTION__);
     return client.SetEndpointType(m_endpointType)
         .SetAudioResponseFormat("raw-16khz-16bit-mono-pcm");
-}
-
-USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointUrl(const std::string& endpointUrl, USP::Client& client)
-{
-    SPX_DBG_TRACE_VERBOSE("%s: Using Custom endpoint: %s", __FUNCTION__, endpointUrl.c_str());
-    return client.SetEndpointUrl(endpointUrl);
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Cortana(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)

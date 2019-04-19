@@ -224,7 +224,7 @@ public class SpeechConfig implements Closeable {
 
     /**
      * Sets the endpoint ID of a customized speech model that is used for speech recognition.
-     * @param value the endpoint ID
+     * @param value the endpoint ID.
      */
     public void setEndpointId(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
@@ -234,7 +234,7 @@ public class SpeechConfig implements Closeable {
 
     /**
      * Gets the endpoint ID of a customized speech model that is used for speech recognition.
-     * @return The endpoint ID
+     * @return The endpoint ID.
      */
     public String getEndpointId() {
         return speechConfigImpl.GetEndpointId();
@@ -242,7 +242,7 @@ public class SpeechConfig implements Closeable {
 
     /**
      * Sets proxy configuration
-     * Added in version 1.1.0
+     * Added in version 1.1.0.
      * Note: Proxy functionality is not available on macOS. This function will have no effect on this platform.
      * @param proxyHostName the host name of the proxy server, without the protocol scheme (http://)
      * @param proxyPort the port number of the proxy server.
@@ -260,9 +260,9 @@ public class SpeechConfig implements Closeable {
     }
 
     /**
-     * Sets a named property as value
-     * @param name the name of the property
-     * @param value the value
+     * Sets a named property as value.
+     * @param name the name of the property.
+     * @param value the value.
      */
     public void setProperty(String name, String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
@@ -271,10 +271,10 @@ public class SpeechConfig implements Closeable {
     }
 
     /**
-     * Sets the property by propertyId
+     * Sets the property by propertyId.
      * Added in version 1.3.0.
-     * @param id PropertyId of the property
-     * @param value The value
+     * @param id PropertyId of the property.
+     * @param value The value.
      */
     public void setProperty(PropertyId id, String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
@@ -283,22 +283,33 @@ public class SpeechConfig implements Closeable {
     }
 
     /**
-     * Gets a named property as value
-     * @param name the name of the property
-     * @return The value
+     * Gets a named property as value.
+     * @param name the name of the property.
+     * @return The value.
      */
     public String getProperty(String name) {
         return speechConfigImpl.GetProperty(name);
     }
 
     /**
-     * Gets the property by propertyId
+     * Gets the property by propertyId.
      * Added in version 1.3.0.
-     * @param id PropertyId of the property
-     * @return The value
+     * @param id PropertyId of the property.
+     * @return The value.
      */
     public String getProperty(PropertyId id) {
         return speechConfigImpl.GetProperty(id.getValue());
+    }
+
+    /**
+     *  Sets a property value that will be passed to service using the specified channel.
+     *  Added in version 1.5.0.
+     *  @param name the property name.
+     *  @param value the property value.
+     *  @param channel the channel used to pass the specified property to service.
+     */
+    public void setServiceProperty(String name, String value, ServicePropertyChannel channel) {
+        speechConfigImpl.SetServiceProperty(name, value, channel.getValue());
     }
 
     /**

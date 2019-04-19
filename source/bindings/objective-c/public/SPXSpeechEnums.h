@@ -353,3 +353,14 @@ typedef NS_ENUM(NSUInteger, SPXNoMatchReason)
     SPXNoMatchReason_InitialBabbleTimeout = 3
 };
 
+/**
+ *  Defines channels used to send service properties.
+ *  Added in version 1.5.0.
+ */
+typedef NS_ENUM(NSUInteger, SPXServicePropertyChannel)
+{
+    /**
+     * Uses URI query parameter to pass property settings to service.
+     */
+    SPXServicePropertyChannel_UriQueryParameter = 0
+};

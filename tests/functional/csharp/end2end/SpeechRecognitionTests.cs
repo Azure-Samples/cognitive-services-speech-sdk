@@ -90,7 +90,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ValidBaselineRecognition(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
@@ -112,7 +112,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ContinuousValidBaselineRecognition(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
@@ -130,9 +130,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task ValidCustomRecognition(bool usingPreConnection)
         {
-            this.config.EndpointId = deploymentId;
+            this.defaultConfig.EndpointId = deploymentId;
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
@@ -150,10 +150,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task ContinuousValidCustomRecognition(bool usingPreConnection)
         {
-            this.config.EndpointId = deploymentId;
+            this.defaultConfig.EndpointId = deploymentId;
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
-            { 
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
                 {
@@ -198,29 +198,29 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void InvalidInputFileHandledProperly()
         {
             var audioInput = AudioConfig.FromWavFileInput("invalidFile.wav");
-            Assert.ThrowsException<ApplicationException>(() => new SpeechRecognizer(this.config, audioInput));
+            Assert.ThrowsException<ApplicationException>(() => new SpeechRecognizer(this.defaultConfig, audioInput));
         }
 
         [TestMethod]
         public async Task InvalidDeploymentIdHandledProperly()
         {
-            this.config.EndpointId = "invalidDeploymentId";
-            await AssertConnectionError(this.config, CancellationErrorCode.BadRequest, "WebSocket Upgrade failed with a bad request (400)");
+            this.defaultConfig.EndpointId = "invalidDeploymentId";
+            await AssertConnectionError(this.defaultConfig, CancellationErrorCode.BadRequest, "WebSocket Upgrade failed with a bad request (400)");
         }
 
         [TestMethod]
         public async Task InvalidLanguageHandledProperly()
         {
-            this.config.SpeechRecognitionLanguage = "InvalidLang";
-            await AssertConnectionError(this.config, CancellationErrorCode.BadRequest, "WebSocket Upgrade failed with a bad request (400)");
+            this.defaultConfig.SpeechRecognitionLanguage = "InvalidLang";
+            await AssertConnectionError(this.defaultConfig, CancellationErrorCode.BadRequest, "WebSocket Upgrade failed with a bad request (400)");
         }
 
         [TestMethod]
         public async Task InvalidConnectionForContinuousRecognition()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
                 var connection = Connection.FromRecognizer(recognizer);
                 connection.Open(false);
                 var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.StartContinuousRecognitionAsync());
@@ -232,8 +232,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task InvalidConnectionForSingleShotRecognition()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
                 var connection = Connection.FromRecognizer(recognizer);
                 connection.Open(true);
                 var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.RecognizeOnceAsync());
@@ -248,7 +248,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
 
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var connection = Connection.FromRecognizer(recognizer);
                 var taskCompletionSource = new TaskCompletionSource<int>();
@@ -286,7 +286,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TestCloseConnection()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var connection = Connection.FromRecognizer(recognizer);
                 await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
@@ -299,9 +299,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task GermanRecognition(bool usingPreConnection)
         {
-            this.config.SpeechRecognitionLanguage = Language.DE_DE;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
-            { 
+            this.defaultConfig.SpeechRecognitionLanguage = Language.DE_DE;
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
                 {
@@ -318,10 +318,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task ContinuousGermanRecognition(bool usingPreConnection)
         {
-            this.config.SpeechRecognitionLanguage = Language.DE_DE;
+            this.defaultConfig.SpeechRecognitionLanguage = Language.DE_DE;
             var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
                 {
@@ -338,7 +338,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ContinuousRecognitionOnLongFileInput(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
@@ -420,8 +420,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task SubscribeToManyEventHandlers(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
                 {
@@ -447,8 +447,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task UnsubscribeFromEventHandlers(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
                 {
@@ -474,8 +474,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ResubscribeToEventHandlers(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
                 {
@@ -515,8 +515,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ChangeSubscriptionDuringRecognition(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
                 {
@@ -539,9 +539,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void TestGetters()
         {
-            this.config.EndpointId = deploymentId;
+            this.defaultConfig.EndpointId = deploymentId;
             var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 Assert.IsTrue(string.IsNullOrEmpty(recognizer.SpeechRecognitionLanguage));
                 Assert.AreEqual(recognizer.SpeechRecognitionLanguage, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
@@ -549,23 +549,23 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(OutputFormat.Simple, recognizer.OutputFormat);
             }
 
-            this.config.SpeechRecognitionLanguage = Language.DE_DE;
-            this.config.EndpointId = string.Empty;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            this.defaultConfig.SpeechRecognitionLanguage = Language.DE_DE;
+            this.defaultConfig.EndpointId = string.Empty;
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 Assert.AreEqual(Language.DE_DE, recognizer.SpeechRecognitionLanguage);
                 Assert.AreEqual(Language.DE_DE, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
                 Assert.AreEqual(OutputFormat.Simple, recognizer.OutputFormat);
             }
 
-            this.config.OutputFormat = OutputFormat.Simple;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            this.defaultConfig.OutputFormat = OutputFormat.Simple;
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 Assert.AreEqual(OutputFormat.Simple, recognizer.OutputFormat);
             }
 
-            this.config.OutputFormat = OutputFormat.Detailed;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            this.defaultConfig.OutputFormat = OutputFormat.Detailed;
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 Assert.AreEqual(OutputFormat.Detailed, recognizer.OutputFormat);
             }
@@ -575,7 +575,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TestExceptionSwitchFromSingleShotToContinuous()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.StartContinuousRecognitionAsync());
@@ -587,7 +587,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TestExceptionSwitchFromContinuousToSingleShot()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 recognizer.Canceled += (s, e) => { Console.WriteLine($"Recognition Canceled: {e.ToString()}"); };
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
@@ -601,7 +601,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TestSingleShotTwice()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "First result duration should be greater than 0");
@@ -632,8 +632,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             const int NumberOfIterations = 100;
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
                 {
@@ -660,8 +660,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TestContinuousRecognitionTwice(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
                 {
@@ -687,8 +687,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TestInitialSilenceTimeout(bool usingPreConnection)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Silence.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
-            { 
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
                 {
@@ -709,7 +709,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Silence.AudioFile);
             PropertyCollection properties;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 properties = recognizer.Properties;
             }
@@ -720,7 +720,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TestContinuous44KHz()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Margarita.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 List<string> recognizedText = new List<string>();
                 helper.SubscribeToCounterEventHandlers(recognizer);
@@ -741,9 +741,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void CloseConnectionWithoutOpen()
         {
-            this.config.SpeechRecognitionLanguage = Language.DE_DE;
+            this.defaultConfig.SpeechRecognitionLanguage = Language.DE_DE;
             var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
-            var recognizer = new SpeechRecognizer(this.config, audioInput);
+            var recognizer = new SpeechRecognizer(this.defaultConfig, audioInput);
             var connection = Connection.FromRecognizer(recognizer);
             // Close the connection without opening it.
             connection.Close();
@@ -753,9 +753,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ExpectedException(typeof(ObjectDisposedException))]
         public async Task AsyncRecognitionAfterDisposingSpeechRecognizer()
         {
-            this.config.SpeechRecognitionLanguage = Language.DE_DE;
+            this.defaultConfig.SpeechRecognitionLanguage = Language.DE_DE;
             var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
-            var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput));
+            var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput));
             recognizer.Dispose();
             await recognizer.StartContinuousRecognitionAsync();
         }
@@ -764,9 +764,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ExpectedException(typeof(InvalidOperationException))]
         public void DisposingSpeechRecognizerWhileAsyncRecognition()
         {
-            this.config.SpeechRecognitionLanguage = Language.EN;
+            this.defaultConfig.SpeechRecognitionLanguage = Language.EN;
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
-            var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput));
+            var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput));
             recognizer = helper.GetSpeechRecognizingAsyncNotAwaited(recognizer);
         }
 
@@ -807,16 +807,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
-                var bestResults = result.Best().ToArray();
-                var detailedRecognitionText = bestResults[0].Text;
-                var detailedRecognitionNormalizedForm = bestResults[0].NormalizedForm;
-                var detailedRecognitionLexicalForm = bestResults[0].LexicalForm;
-                var detailedRecognitionMaskedForm = bestResults[0].MaskedNormalizedForm;
-
-                Assert.IsTrue(detailedRecognitionText.Length > 0);
-                Assert.IsTrue(detailedRecognitionNormalizedForm.Length > 0);
-                Assert.IsTrue(detailedRecognitionLexicalForm.Length > 0);
-                Assert.IsTrue(detailedRecognitionMaskedForm.Length > 0);
+                AssertDetailedResult(result);
             }
         }
 
@@ -862,17 +853,85 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
-                var bestResults = result.Best().ToArray();
-                var detailedRecognitionText = bestResults[0].Text;
-                var detailedRecognitionNormalizedForm = bestResults[0].NormalizedForm;
-                var detailedRecognitionLexicalForm = bestResults[0].LexicalForm;
-                var detailedRecognitionMaskedForm = bestResults[0].MaskedNormalizedForm;
-
-                Assert.IsTrue(detailedRecognitionText.Length > 0);
-                Assert.IsTrue(detailedRecognitionNormalizedForm.Length > 0);
-                Assert.IsTrue(detailedRecognitionLexicalForm.Length > 0);
-                Assert.IsTrue(detailedRecognitionMaskedForm.Length > 0);
+                AssertDetailedResult(result);
             }
+        }
+
+        [TestMethod]
+        public async Task SetServicePropertySingleSetting()
+        {
+            this.defaultConfig.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+            }
+        }
+
+        [TestMethod]
+        public async Task SetServicePropertyOverwrite()
+        {
+            this.defaultConfig.SpeechRecognitionLanguage = "en-US";
+            this.defaultConfig.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+            }
+        }
+
+        [TestMethod]
+        public async Task SetServiceProperty2Properties()
+        {
+            this.defaultConfig.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
+            this.defaultConfig.SetServiceProperty("format", "detailed", ServicePropertyChannel.UriQueryParameter);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertDetailedResult(result);
+            }
+        }
+
+        [TestMethod]
+        public async Task SetServicePropertyFromEndpoint()
+        {
+            var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
+            configFromEndpoint.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+            }
+        }
+
+        [TestMethod]
+        public async Task SetServicePropertyFromEndpointWithParameter()
+        {
+            var endpointWithOutputFormat = endpointInString + "?format=detailed";
+            var configFromEndpoint = SpeechConfig.FromEndpoint(new Uri(endpointWithOutputFormat), subscriptionKey);
+            configFromEndpoint.OutputFormat = OutputFormat.Simple;
+            configFromEndpoint.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertDetailedResult(result);
+            }
+        }
+
+        [TestMethod]
+        public void SetServicePropertyInvalidParameters()
+        {
+            Assert.ThrowsException<ApplicationException>(() => this.defaultConfig.SetServiceProperty(null, "value", ServicePropertyChannel.UriQueryParameter));
+            Assert.ThrowsException<ApplicationException>(() => this.defaultConfig.SetServiceProperty("", "value", ServicePropertyChannel.UriQueryParameter));
+            Assert.ThrowsException<ApplicationException>(() => this.defaultConfig.SetServiceProperty("Name", null, ServicePropertyChannel.UriQueryParameter));
+            Assert.ThrowsException<ApplicationException>(() => this.defaultConfig.SetServiceProperty("Name", "", ServicePropertyChannel.UriQueryParameter));
         }
     }
 }

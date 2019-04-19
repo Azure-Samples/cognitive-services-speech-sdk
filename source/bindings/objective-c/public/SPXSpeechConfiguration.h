@@ -137,4 +137,14 @@ SPX_EXPORT
  * @param value value of the property.
  */
 -(void)setPropertyTo:(nonnull NSString *)value byId:(SPXPropertyId)propertyId;
+
+
+/**
+ *  Sets a property value that will be passed to service using the specified channel.
+ *  Added in version 1.5.0.
+ *  @param name the property name.
+ *  @param value the property value.
+ *  @param channel the channel used to pass the specified property to service.
+ */
+-(void)setServicePropertyTo:(nonnull NSString *)value byName:(nonnull NSString*)name usingChannel:(SPXServicePropertyChannel)channel;
 @end

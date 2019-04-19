@@ -175,4 +175,9 @@
     speechConfigImpl->SetProperty((SpeechImpl::PropertyId)(int)propertyId, [value string]);
 }
 
+-(void) setServicePropertyTo:(nonnull NSString *)value byName:(nonnull NSString*)name usingChannel:(SPXServicePropertyChannel)channel
+{
+    speechConfigImpl->SetServiceProperty([name string], [value string], (SpeechImpl::ServicePropertyChannel)(int)channel);
+}
+
 @end

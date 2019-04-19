@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+#include <map>
 #include "test_utils.h"
 #include "file_utils.h"
 #include "recognizer_utils.h"
@@ -806,7 +807,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
-        SPXTEST_REQUIRE(!result->Text.empty());
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
     }
 
     SPXTEST_SECTION("Canceled/EndOfStream works")
@@ -939,21 +941,6 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
             REQUIRE(expectedEvents == events);
         }
-    }
-
-    SPXTEST_SECTION("German Speech Recognition works")
-    {
-        callTheFirstOne.UpdateFullFilename(Config::InputDir);
-        SPXTEST_REQUIRE(exists(callTheFirstOne.m_audioFilename));
-
-        auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
-        sc->SetSpeechRecognitionLanguage("de-DE");
-        auto audioConfig = AudioConfig::FromWavFileInput(callTheFirstOne.m_audioFilename);
-        auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
-
-        auto result = recognizer->RecognizeOnceAsync().get();
-        SPXTEST_REQUIRE(result != nullptr);
-        SPXTEST_REQUIRE(!result->Text.empty());
     }
 }
 
@@ -1322,6 +1309,8 @@ TEST_CASE("ConnectionEventsTest", "[api][cxx]")
 
 TEST_CASE("FromEndpoint without key and token")
 {
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
     weather.UpdateFullFilename(Config::InputDir);
     SPXTEST_REQUIRE(exists(weather.m_audioFilename));
     auto audioInput = AudioConfig::FromWavFileInput(weather.m_audioFilename);
@@ -1347,4 +1336,112 @@ TEST_CASE("FromEndpoint without key and token")
         SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token).empty());
         SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_Key).empty());
     }
+}
+
+TEST_CASE("SetServiceProperty")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    callTheFirstOne.UpdateFullFilename(Config::InputDir);
+    SPXTEST_REQUIRE(exists(callTheFirstOne.m_audioFilename));
+    auto audioInput = AudioConfig::FromWavFileInput(callTheFirstOne.m_audioFilename);
+
+    SPXTEST_SECTION("SetServiceProperty single setting")
+    {
+        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+    }
+
+    SPXTEST_SECTION("SetServiceProperty property overwrite")
+    {
+        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        config->SetSpeechRecognitionLanguage("en-US");
+        config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+    }
+
+    SPXTEST_SECTION("SetServiceProperty 2 properties")
+    {
+        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
+        config->SetServiceProperty("format", "detailed", ServicePropertyChannel::UriQueryParameter);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+        auto detailedResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+        SPXTEST_REQUIRE(detailedResult.find("NBest") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("ITN") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("Lexical") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("MaskedITN") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("Display") != string::npos);
+    }
+
+    SPXTEST_SECTION("SetServiceProperty FromEndpoint")
+    {
+        string speechEndpoint = "wss://" + Config::Region + ".stt.speech.microsoft.com/speech/recognition/interactive/cognitiveservices/v1";
+        auto config = SpeechConfig::FromEndpoint(speechEndpoint, Keys::Speech);
+        config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+    }
+
+    SPXTEST_SECTION("SetServiceProperty FromEndpoint with parameters")
+    {
+        string speechEndpoint = "wss://" + Config::Region + ".stt.speech.microsoft.com/speech/recognition/interactive/cognitiveservices/v1?format=detailed";
+        auto config = SpeechConfig::FromEndpoint(speechEndpoint, Keys::Speech);
+        config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+        auto detailedResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+        SPXTEST_REQUIRE(detailedResult.find("NBest") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("ITN") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("Lexical") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("MaskedITN") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("Display") != string::npos);
+    }
+
+    SPXTEST_SECTION("SetServiceProperty invalid parameters")
+    {
+        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        CHECK_THROWS(config->SetServiceProperty("", "Value", ServicePropertyChannel::UriQueryParameter));
+        CHECK_THROWS(config->SetServiceProperty("Name", "", ServicePropertyChannel::UriQueryParameter));
+        CHECK_THROWS(config->SetServiceProperty("Name", "Value", (ServicePropertyChannel)2));
+    }
+
+    SPXTEST_SECTION("SetServiceProperty SpeechTranslationConfig")
+    {
+        auto config = SpeechTranslationConfig::FromSubscription(Keys::Speech, Config::Region);
+        config->SetServiceProperty("from", "de-DE", ServicePropertyChannel::UriQueryParameter);
+        config->SetServiceProperty("to", "en", ServicePropertyChannel::UriQueryParameter);
+        auto recognizer = TranslationRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
+        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(!result->Translations.at("en").compare("Call the first one."));
+    }
+
 }

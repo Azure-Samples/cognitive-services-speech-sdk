@@ -240,6 +240,7 @@ string Connection::Impl::ConstructConnectionUrl() const
     auto recoMode = static_cast<underlying_type_t<RecognitionMode>>(m_config.m_recoMode);
     ostringstream oss;
     bool customEndpoint = false;
+    char delim = '?';
 
     // Using customized endpoint if it is defined.
     if (!m_config.m_customEndpointUrl.empty())
@@ -287,13 +288,31 @@ string Connection::Impl::ConstructConnectionUrl() const
         }
     }
 
-    // The first query parameter.
+    // Appends user defined query parameters first.
+    if (!m_config.m_userDefinedQueryParameters.empty())
+    {
+        if (oss.str().find('?') != string::npos)
+        {
+            delim = '&';
+        }
+        oss << delim << m_config.m_userDefinedQueryParameters;
+        customEndpoint = true;
+    }
+
+    // Sets output format parameter.
     auto format = static_cast<underlying_type_t<OutputFormat>>(m_config.m_outputFormat);
     if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::outputFormatQueryParam))
     {
-        auto delim = (customEndpoint && (oss.str().find('?') != string::npos)) ? '&' : '?';
+        if (oss.str().find('?') != string::npos)
+        {
+            delim = '&';
+        }
         oss << delim << endpoint::unifiedspeech::outputFormatQueryParam << g_outFormatStrings[format];
     }
+
+    // At least the output format must have been set as query parameter until here.
+    assert(oss.str().find('?') != string::npos);
+    delim = '&';
 
     bool usingCustomModel = !m_config.m_modelId.empty();
     switch (m_config.m_endpoint)
@@ -303,26 +322,24 @@ string Connection::Impl::ConstructConnectionUrl() const
         {
             if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::deploymentIdQueryParam))
             {
-                oss << '&' << endpoint::unifiedspeech::deploymentIdQueryParam << m_config.m_modelId;
+                oss << delim << endpoint::unifiedspeech::deploymentIdQueryParam << m_config.m_modelId;
             }
         }
-        // The language parameter is required for speech recognition if no custom model is given.
         if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
         {
             std::string langStr = m_config.m_language.empty() && !usingCustomModel ? Client::s_defaultLanguage : m_config.m_language;
             if (!langStr.empty())
             {
-                oss << '&' << endpoint::unifiedspeech::langQueryParam << langStr;
+                oss << delim << endpoint::unifiedspeech::langQueryParam << langStr;
             }
         }
         break;
 
     case EndpointType::Intent:
-        // The language parameter is required for intent service.
         if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
         {
             std::string langStr = m_config.m_language.empty() ? Client::s_defaultLanguage : m_config.m_language;
-            oss << '&' << endpoint::unifiedspeech::langQueryParam << langStr;
+            oss << delim << endpoint::unifiedspeech::langQueryParam << langStr;
         }
         break;
 
@@ -331,36 +348,33 @@ string Connection::Impl::ConstructConnectionUrl() const
         {
             if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::deploymentIdQueryParam))
             {
-                oss << '&' << endpoint::unifiedspeech::deploymentIdQueryParam << m_config.m_modelId;
+                oss << delim << endpoint::unifiedspeech::deploymentIdQueryParam << m_config.m_modelId;
             }
         }
-        if (!m_config.m_translationSourceLanguage.empty())
+        if (!customEndpoint || !contains(oss.str(), endpoint::translation::from))
         {
-            if (!customEndpoint || !contains(oss.str(), endpoint::translation::from))
-            {
-                oss << '&' << endpoint::translation::from << EncodeParameterString(m_config.m_translationSourceLanguage);
-            }
+            oss << delim << endpoint::translation::from << EncodeParameterString(m_config.m_translationSourceLanguage);
         }
         if (!customEndpoint || !contains(oss.str(), endpoint::translation::to))
         {
             size_t start = 0;
-            auto delim = ',';
-            size_t end = m_config.m_translationTargetLanguages.find_first_of(delim);
+            const char commaDelim = ',';
+            size_t end = m_config.m_translationTargetLanguages.find_first_of(commaDelim);
             while (end != string::npos)
             {
-                oss << '&' << endpoint::translation::to << EncodeParameterString(m_config.m_translationTargetLanguages.substr(start, end - start));
+                oss << delim << endpoint::translation::to << EncodeParameterString(m_config.m_translationTargetLanguages.substr(start, end - start));
                 start = end + 1;
-                end = m_config.m_translationTargetLanguages.find_first_of(delim, start);
+                end = m_config.m_translationTargetLanguages.find_first_of(commaDelim, start);
             }
-            oss << '&' << endpoint::translation::to << EncodeParameterString(m_config.m_translationTargetLanguages.substr(start, end));
+            oss << delim << endpoint::translation::to << EncodeParameterString(m_config.m_translationTargetLanguages.substr(start, end));
         }
 
         if (!m_config.m_translationVoice.empty())
         {
             if (!customEndpoint || !contains(oss.str(), endpoint::translation::voice))
             {
-                oss << '&' << endpoint::translation::features << endpoint::translation::requireVoice;
-                oss << '&' << endpoint::translation::voice << EncodeParameterString(m_config.m_translationVoice);
+                oss << delim << endpoint::translation::features << endpoint::translation::requireVoice;
+                oss << delim << endpoint::translation::voice << EncodeParameterString(m_config.m_translationVoice);
             }
         }
         break;
@@ -372,7 +386,7 @@ string Connection::Impl::ConstructConnectionUrl() const
         {
             if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
             {
-                oss << '&' << endpoint::unifiedspeech::langQueryParam << m_config.m_language;
+                oss << delim << endpoint::unifiedspeech::langQueryParam << m_config.m_language;
             }
         }
         break;

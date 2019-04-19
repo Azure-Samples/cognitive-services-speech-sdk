@@ -39,6 +39,7 @@ enum  PropertyId
     SpeechServiceConnection_RecoMode = 3000,
     SpeechServiceConnection_RecoLanguage = 3001,
     Speech_SessionId = 3002,
+    SpeechServiceConnection_UserDefinedQueryParameters = 3003,
 
     SpeechServiceConnection_SynthLanguage = 3100,
     SpeechServiceConnection_SynthVoice = 3101,

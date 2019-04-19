@@ -259,4 +259,24 @@
     XCTAssertTrue([[translationRecognizer.properties getPropertyById:SPXSpeechServiceConnectionKey] length] == 0);
     XCTAssertTrue([translationRecognizer.authorizationToken length] == 0);
 }
+
+- (void)testSetServicePropertyTranslation {
+    NSString *weatherFileName = @"whatstheweatherlike";
+    NSString *weatherTextEnglish = @"What's the weather like?";
+    NSString *weatherTextGerman = @"Wie ist das Wetter?";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    SPXSpeechTranslationConfiguration *translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
+    translationConfig.speechRecognitionLanguage = @"en-us";
+    [translationConfig setServicePropertyTo:@"de" byName:@"to" usingChannel:SPXServicePropertyChannel_UriQueryParameter];
+
+    SPXTranslationRecognizer *translationRecognizer = [[SPXTranslationRecognizer alloc] initWithSpeechTranslationConfiguration:translationConfig audioConfiguration:weatherAudioSource];
+    SPXTranslationRecognitionResult *result = [translationRecognizer recognizeOnce];
+    XCTAssertTrue(result.reason == SPXResultReason_TranslatedSpeech);
+    XCTAssertTrue([result.text isEqualToString:weatherTextEnglish], "Final Result Text does not match");
+    NSDictionary* translationDictionary = result.translations;
+    id germanTranslation = [translationDictionary valueForKey:@"de"];
+    XCTAssertTrue([germanTranslation isEqualToString:weatherTextGerman], "German translation does not match");
+}
 @end

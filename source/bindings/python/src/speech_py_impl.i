@@ -505,6 +505,7 @@ inject_enum('NoMatchReason')
 inject_enum('OutputFormat')
 inject_enum('PropertyId')
 inject_enum('ResultReason')
+inject_enum('ServicePropertyChannel')
 
 # clean up the exported names
 del inject_enum

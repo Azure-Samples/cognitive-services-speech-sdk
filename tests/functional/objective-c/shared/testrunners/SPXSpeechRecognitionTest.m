@@ -401,6 +401,23 @@
     XCTAssertTrue([r.authorizationToken length] == 0);
 }
 
+- (void)testSetServiceProperty {
+    NSString *weatherFileName = @"whatstheweatherlike";
+    NSString *weatherTextEnglish = @"What's the weather like?";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
+    speechConfig.speechRecognitionLanguage = @"Invalid";
+    [speechConfig setServicePropertyTo:@"en-us" byName:@"language" usingChannel:SPXServicePropertyChannel_UriQueryParameter];
+    SPXSpeechRecognizer* r = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+
+    [r recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
+        XCTAssertTrue(srresult.reason == SPXResultReason_RecognizedSpeech);
+        XCTAssertTrue([srresult.text isEqualToString:weatherTextEnglish], "Final Result Text does not match");
+    }];
+}
+
 @end
 
 

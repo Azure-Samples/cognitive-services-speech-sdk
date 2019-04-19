@@ -26,6 +26,7 @@ import org.junit.Ignore;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
+import com.microsoft.cognitiveservices.speech.ServicePropertyChannel;
 import com.microsoft.cognitiveservices.speech.SessionEventArgs;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
@@ -840,4 +841,30 @@ public class SpeechRecognizerTests {
         r.close();
         s.close();
     }
+
+    @Test
+    public void testSetServiceProperty() throws InterruptedException, ExecutionException, TimeoutException {
+
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setServiceProperty("format", "detailed", ServicePropertyChannel.UriQueryParameter);
+
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+
+        SpeechRecognitionResult res = r.recognizeOnceAsync().get();
+        assertNotNull(res);
+        assertTrue(ResultReason.RecognizedSpeech == res.getReason());
+        assertEquals("What's the weather like?", res.getText());
+
+        String detailedResult = res.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult);
+        System.out.println("Detailed result:" + detailedResult);
+        assertTrue(detailedResult.contains("NBest"));
+        assertTrue(detailedResult.contains("ITN"));
+        assertTrue(detailedResult.contains("Lexical"));
+        assertTrue(detailedResult.contains("MaskedITN"));
+        assertTrue(detailedResult.contains("Display"));
+
+        r.close();
+        s.close();
+    }
+
 }
