@@ -4,9 +4,8 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Audio
 {
@@ -21,7 +20,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio input configuration being created.</returns>
         public static AudioConfig FromDefaultMicrophoneInput()
         {
-            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromDefaultMicrophoneInput());
+            IntPtr audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_input_from_default_microphone(out audioConfigHandle));
+            return new AudioConfig(audioConfigHandle);
         }
 
         /// <summary>
@@ -31,7 +32,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio input configuration being created.</returns>
         public static AudioConfig FromWavFileInput(string fileName)
         {
-            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromWavFileInput(fileName));
+            IntPtr audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_input_from_wav_file_name(out audioConfigHandle, fileName));
+            return new AudioConfig(audioConfigHandle);
         }
 
         /// <summary>
@@ -41,7 +44,11 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio input configuration being created.</returns>
         public static AudioConfig FromStreamInput(AudioInputStream audioStream)
         {
-            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromStreamInput(audioStream.streamImpl), audioStream);
+            ThrowIfNull(audioStream);
+            IntPtr audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_input_from_stream(out audioConfigHandle, audioStream.StreamHandle));
+            GC.KeepAlive(audioStream);
+            return new AudioConfig(audioConfigHandle, audioStream);
         }
 
         /// <summary>
@@ -52,7 +59,10 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         public static AudioConfig FromStreamInput(PullAudioInputStreamCallback callback)
         {
             PullAudioInputStream pullStream = new PullAudioInputStream(callback);
-            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromStreamInput(pullStream.streamImpl), pullStream, true);
+            IntPtr audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_input_from_stream(out audioConfigHandle, pullStream.StreamHandle));
+            GC.KeepAlive(pullStream);
+            return new AudioConfig(audioConfigHandle, pullStream, true);
         }
 
         /// <summary>
@@ -64,7 +74,10 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         public static AudioConfig FromStreamInput(PullAudioInputStreamCallback callback, AudioStreamFormat format)
         {
             PullAudioInputStream pullStream = new PullAudioInputStream(callback, format);
-            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromStreamInput(pullStream.streamImpl), pullStream, true);
+            IntPtr audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_input_from_stream(out audioConfigHandle, pullStream.StreamHandle));
+            GC.KeepAlive(pullStream);
+            return new AudioConfig(audioConfigHandle, pullStream, true);
         }
 
         /// <summary>
@@ -75,7 +88,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio input configuration being created.</returns>
         public static AudioConfig FromMicrophoneInput(string deviceName)
         {
-            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromMicrophoneInput(deviceName));
+            IntPtr audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_input_from_a_microphone(out audioConfigHandle, deviceName));
+            return new AudioConfig(audioConfigHandle);
         }
 
         /// <summary>
@@ -85,7 +100,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio output configuration being created.</returns>
         public static AudioConfig FromDefaultSpeakerOutput()
         {
-            return new AudioConfig(Internal.AudioConfig.FromDefaultSpeakerOutput());
+            IntPtr audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_output_from_default_speaker(out audioConfigHandle));
+            return new AudioConfig(audioConfigHandle);
         }
 
         /// <summary>
@@ -96,7 +113,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio output configuration being created.</returns>
         public static AudioConfig FromWavFileOutput(string fileName)
         {
-            return new AudioConfig(Internal.AudioConfig.FromWavFileOutput(fileName));
+            IntPtr audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_output_from_wav_file_name(out audioConfigHandle, fileName));
+            return new AudioConfig(audioConfigHandle);
         }
 
         /// <summary>
@@ -107,7 +126,11 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio output configuration being created.</returns>
         public static AudioConfig FromStreamOutput(AudioOutputStream audioStream)
         {
-            return new AudioConfig(Internal.AudioConfig.FromOutputStream(audioStream.streamImpl), audioStream, false);
+            ThrowIfNull(audioStream);
+            IntPtr audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_output_from_stream(out audioConfigHandle, audioStream.streamHandle));
+            GC.KeepAlive(audioStream);
+            return new AudioConfig(audioConfigHandle);
         }
 
         /// <summary>
@@ -119,7 +142,10 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         public static AudioConfig FromStreamOutput(PushAudioOutputStreamCallback callback)
         {
             PushAudioOutputStream pushStream = new PushAudioOutputStream(callback);
-            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromOutputStream(pushStream.streamImpl), pushStream, true);
+            IntPtr audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_output_from_stream(out audioConfigHandle, pushStream.streamHandle));
+            GC.KeepAlive(pushStream);
+            return new AudioConfig(audioConfigHandle, pushStream, true);
         }
 
         /// <summary>
@@ -132,7 +158,10 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         public static AudioConfig FromStreamOutput(PushAudioOutputStreamCallback callback, AudioStreamFormat format)
         {
             PushAudioOutputStream pushStream = new PushAudioOutputStream(callback, format);
-            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromOutputStream(pushStream.streamImpl), pushStream, true);
+            IntPtr audioConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_output_from_stream(out audioConfigHandle, pushStream.streamHandle));
+            GC.KeepAlive(pushStream);
+            return new AudioConfig(audioConfigHandle, pushStream, true);
         }
 
         /// <summary>
@@ -160,21 +189,23 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         private bool disposed = false;
         private IDisposable streamKeepAlive = null;
         private bool disposeStream = false;
+        internal InteropSafeHandle configHandle;
 
-        internal AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig config, AudioInputStream audioStream = null, bool ownStream = false)
+        internal AudioConfig(IntPtr configPtr, AudioInputStream audioStream = null, bool ownStream = false)
         {
-            configImpl = config;
+            ThrowIfNull(configPtr);
+            configHandle = new InteropSafeHandle(configPtr, Internal.AudioConfig.audio_config_release);
             streamKeepAlive = audioStream;
             disposeStream = ownStream;
         }
 
-        internal AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig config, AudioOutputStream audioStream, bool ownStream)
+        internal AudioConfig(IntPtr configPtr, AudioOutputStream audioStream, bool ownStream)
         {
-            configImpl = config;
+            ThrowIfNull(configPtr);
+            configHandle = new InteropSafeHandle(configPtr, Internal.AudioConfig.audio_config_release);
             streamKeepAlive = audioStream;
             disposeStream = ownStream;
         }
 
-        internal Microsoft.CognitiveServices.Speech.Internal.AudioConfig configImpl { get; }
     }
 }

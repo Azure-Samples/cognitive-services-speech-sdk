@@ -316,7 +316,7 @@ namespace Microsoft.CognitiveServices.Speech
             if (audioConfig == null) throw new ArgumentNullException(nameof(audioConfig));
 
             IntPtr recoHandlePtr = IntPtr.Zero;
-            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, audioConfig.configImpl.configHandle));
+            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, audioConfig.configHandle));
             InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
             GC.KeepAlive(speechConfig);
             GC.KeepAlive(audioConfig);

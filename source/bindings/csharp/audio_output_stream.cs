@@ -4,9 +4,9 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
+using System.Runtime.InteropServices;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Audio
 {
@@ -61,6 +61,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// </summary>
         public void Dispose()
         {
+            isDisposing = true;
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -80,20 +81,24 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
             if (disposing)
             {
-                streamImpl.Dispose();
+                streamHandle.Dispose();
             }
 
             disposed = true;
         }
 
+        /// <summary>
+        /// isDisposing is a flag used to indicate if object is being disposed.
+        /// </summary>
+        protected bool isDisposing = false;
         private bool disposed = false;
+        internal readonly InteropSafeHandle streamHandle;
 
-        internal AudioOutputStream(Microsoft.CognitiveServices.Speech.Internal.AudioOutputStream stream)
+        internal AudioOutputStream(IntPtr streamPtr)
         {
-            streamImpl = stream;
+            ThrowIfNull(streamPtr);
+            streamHandle = new InteropSafeHandle(streamPtr, Internal.AudioOutputStream.audio_stream_release);
         }
-
-        internal Microsoft.CognitiveServices.Speech.Internal.AudioOutputStream streamImpl { get; }
     }
 
     /// <summary>
@@ -106,7 +111,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// Creates a memory backed PullAudioOutputStream using the default format (16Khz 16bit mono PCM).
         /// </summary>
         public PullAudioOutputStream() :
-            this(Microsoft.CognitiveServices.Speech.Internal.PullAudioOutputStream.CreatePullStream())
+            this(CreateStreamHandle(AudioInputStream.UseDefaultFormatIfNull(null)))
         {
         }
 
@@ -115,7 +120,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// </summary>
         /// <param name="format">The audio data format in which audio will be read from the pull audio stream's read() method.</param>
         public PullAudioOutputStream(AudioStreamFormat format) :
-            this(Microsoft.CognitiveServices.Speech.Internal.PullAudioOutputStream.CreatePullStream(format.formatImpl))
+            this(CreateStreamHandle(AudioInputStream.UseDefaultFormatIfNull(format)))
         {
             GC.KeepAlive(format);
         }
@@ -129,7 +134,20 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.</returns>
         public uint Read(byte[] buffer)
         {
-            return pullImpl.Read(buffer);
+            ThrowIfNull(streamHandle, "Invalid stream handle.");
+
+            IntPtr nativeBuffer = Marshal.AllocHGlobal(buffer.Length);
+            try
+            {
+                uint filledSize;
+                ThrowIfFail(Internal.PullAudioOutputStream.pull_audio_output_stream_read(streamHandle, nativeBuffer, (uint)(buffer.Length), out filledSize));
+                Marshal.Copy(nativeBuffer, buffer, 0, (int)filledSize);
+                return filledSize;
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(nativeBuffer);
+            }
         }
 
         /// <summary>
@@ -147,7 +165,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
             if (disposing)
             {
-                pullImpl.Dispose();
+
             }
 
             disposed = true;
@@ -156,13 +174,20 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         private bool disposed = false;
 
-        internal PullAudioOutputStream(Microsoft.CognitiveServices.Speech.Internal.PullAudioOutputStream stream) :
-            base(stream)
+        private static IntPtr CreateStreamHandle(AudioStreamFormat streamFormat)
         {
-            pullImpl = stream;
+            ThrowIfNull(streamFormat);
+            IntPtr audioStreamHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.PullAudioOutputStream.audio_stream_create_pull_audio_output_stream(out audioStreamHandle, streamFormat.FormatHandle));
+            GC.KeepAlive(streamFormat);
+            return audioStreamHandle;
         }
 
-        internal Microsoft.CognitiveServices.Speech.Internal.PullAudioOutputStream pullImpl { get; }
+        internal PullAudioOutputStream(IntPtr streamPtr) :
+            base(streamPtr)
+        {
+        }
+
     }
 
     /// <summary>
@@ -177,7 +202,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <param name="callback">The custom audio output object, derived from PushAudioOutputStreamCallback.</param>
         /// <returns>The push audio output stream being created.</returns>
         public PushAudioOutputStream(PushAudioOutputStreamCallback callback) :
-            this(Microsoft.CognitiveServices.Speech.Internal.PushAudioOutputStream.CreatePushStream(callback.Adapter), callback)
+            this(Create(AudioInputStream.UseDefaultFormatIfNull(null)), callback)
         {
         }
 
@@ -188,7 +213,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <param name="format">The audio data format in which audio will be sent to the callback's write() method.</param>
         /// <returns>The push audio output stream being created.</returns>
         public PushAudioOutputStream(PushAudioOutputStreamCallback callback, AudioStreamFormat format) :
-            this(Microsoft.CognitiveServices.Speech.Internal.PushAudioOutputStream.CreatePushStream(format.formatImpl, callback.Adapter), callback)
+            this(Create(AudioInputStream.UseDefaultFormatIfNull(format)), callback)
         {
             GC.KeepAlive(format);
         }
@@ -206,9 +231,12 @@ namespace Microsoft.CognitiveServices.Speech.Audio
                 return;
             }
 
-            if (disposing)
+            callback = null;
+            streamWriteDelegate = null;
+            streamCloseDelegate = null;
+            if (gch.IsAllocated)
             {
-                callbackKeepAlive = null;
+                gch.Free();
             }
 
             disposed = true;
@@ -217,13 +245,86 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         private bool disposed = false;
 
-        internal PushAudioOutputStream(Microsoft.CognitiveServices.Speech.Internal.PushAudioOutputStream stream, PushAudioOutputStreamCallback callback) :
-            base(stream)
+        private static IntPtr Create(AudioStreamFormat streamFormat)
         {
-            callbackKeepAlive = callback;
+            ThrowIfNull(streamFormat);
+            IntPtr audioStreamHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.PushAudioOutputStream.audio_stream_create_push_audio_output_stream(out audioStreamHandle, streamFormat.FormatHandle));
+            GC.KeepAlive(streamFormat);
+            return audioStreamHandle;
         }
 
-        private PushAudioOutputStreamCallback callbackKeepAlive = null;
+        internal PushAudioOutputStream(IntPtr streamPtr, PushAudioOutputStreamCallback cb) :
+            base(streamPtr)
+        {
+            callback = cb;
+            gch = GCHandle.Alloc(this, GCHandleType.Weak);
+            streamWriteDelegate = StreamWriteCallback;
+            streamCloseDelegate = StreamCloseCallback;
+            ThrowIfFail(Internal.PushAudioOutputStream.push_audio_output_stream_set_callbacks(streamHandle, GCHandle.ToIntPtr(gch), streamWriteDelegate, streamCloseDelegate));
+        }
+
+        [MonoPInvokeCallback]
+        private static uint StreamWriteCallback(IntPtr context, IntPtr buffer, uint size)
+        {
+            uint result = 0;
+            try
+            {
+                PushAudioOutputStreamCallback callback = null;
+                var stream = InteropSafeHandle.GetObjectFromWeakHandle<PushAudioOutputStream>(context);
+                ThrowIfNull(stream);
+                if (stream.isDisposing)
+                {
+                    return result;
+                }
+
+                callback = stream.callback;
+
+                ThrowIfNull(callback);
+                uint dstBufferSize = size % int.MaxValue;
+                byte[] dstBuffer = new byte[dstBufferSize];
+                if (buffer != IntPtr.Zero)
+                {
+                    Marshal.Copy(buffer, dstBuffer, 0, (int)(dstBufferSize));
+                }
+
+                result = callback.Write(dstBuffer);
+            }
+            catch (InvalidOperationException)
+            {
+                LogError(SpxError.InvalidHandle);
+            }
+
+            return result;
+        }
+
+        [MonoPInvokeCallback]
+        private static void StreamCloseCallback(IntPtr context)
+        {
+            try
+            {
+                PushAudioOutputStreamCallback callback = null;
+                var stream = InteropSafeHandle.GetObjectFromWeakHandle<PushAudioOutputStream>(context);
+                ThrowIfNull(stream);
+                if (stream.isDisposing)
+                {
+                    return;
+                }
+
+                callback = stream.callback;
+                ThrowIfNull(callback);
+                callback.Close();
+            }
+            catch (InvalidOperationException)
+            {
+                LogError(SpxError.InvalidHandle);
+            }
+        }
+
+        private PushAudioOutputStreamCallback callback = null;
+        private GCHandle gch;
+        private PushAudioStreamWriteDelegate streamWriteDelegate;
+        private PushAudioStreamCloseDelegate streamCloseDelegate;
     }
 
     /// <summary>
@@ -232,18 +333,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     /// </summary>
     public abstract class PushAudioOutputStreamCallback : IDisposable
     {
-        /// <summary>
-        /// The adapter to the internal
-        /// </summary>
-        internal PushAudioOutputStreamCallbackInternalAdapter Adapter { get; private set; }
-
-        /// <summary>
-        /// Creates a new push audio output stream callback.
-        /// </summary>
-        public PushAudioOutputStreamCallback()
-        {
-            Adapter = new PushAudioOutputStreamCallbackInternalAdapter(this);
-        }
 
         /// <summary>
         /// Writes binary data to the stream.
@@ -284,7 +373,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
             if (disposing)
             {
-                this.Adapter.Dispose();
             }
 
             disposed = true;
@@ -293,78 +381,4 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         private bool disposed = false;
     }
 
-    /// <summary>
-    /// Adapter class to the native audio stream interface.
-    /// Added in version 1.4.0
-    /// </summary>
-    internal class PushAudioOutputStreamCallbackInternalAdapter : Internal.PushAudioOutputStreamCallback, IDisposable
-    {
-        private PushAudioOutputStreamCallback callback;
-
-        /// <summary>
-        /// Creates a new push audio output stream callback adapter.
-        /// </summary>
-        /// <param name="callback">PushAudioOutputStreamCallback instance.</param>
-        public PushAudioOutputStreamCallbackInternalAdapter(PushAudioOutputStreamCallback callback)
-        {
-            this.callback = callback;
-        }
-
-        /// <summary>
-        /// Writes binary data into the stream.
-        /// </summary>
-        /// <param name="dataBuffer">The buffer with the binary data.</param>
-        /// <param name="size">The size of the buffer.</param>
-        /// <returns>The number of bytes being written.</returns>
-        public override uint Write(byte[] dataBuffer, uint size)
-        {
-            if (size != dataBuffer.Length)
-            {
-                throw new ArgumentException(nameof(size));
-            }
-
-            return callback.Write(dataBuffer);
-        }
-
-        /// <summary>
-        /// Closes the stream.
-        /// </summary>
-        public override void Close()
-        {
-            callback.Close();
-        }
-
-        /// <summary>
-        /// Dispose of associated resources.
-        /// </summary>
-        public override void Dispose()
-        {
-            Dispose(true);
-            base.Dispose();
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// This method performs cleanup of resources.
-        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
-        /// Derived classes should override this method to dispose resource if needed.
-        /// </summary>
-        /// <param name="disposing">Flag to request disposal.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            if (disposing)
-            {
-                callback = null;
-            }
-
-            disposed = true;
-        }
-
-        private bool disposed = false;
-    };
 }

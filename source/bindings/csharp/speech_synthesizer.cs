@@ -100,7 +100,7 @@ namespace Microsoft.CognitiveServices.Speech
                 throw new ArgumentNullException(nameof(speechConfig));
             }
 
-            AudioConfig audioConfig = AudioConfig.FromDefaultSpeakerOutput(); // Use default speaker as default audio output
+            Audio.AudioConfig audioConfig = Audio.AudioConfig.FromDefaultSpeakerOutput(); // Use default speaker as default audio output
 
             IntPtr synthHandlePtr = IntPtr.Zero;
             ThrowIfFail(SpxFactory.synthesizer_create_speech_synthesizer_from_config(out synthHandlePtr, speechConfig.configHandle, audioConfig.configHandle));
@@ -125,7 +125,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
             else
             {
-                audioConfigHandle = audioConfig.configImpl.configHandle;
+                audioConfigHandle = audioConfig.configHandle;
             }
 
             IntPtr synthHandlePtr = IntPtr.Zero;

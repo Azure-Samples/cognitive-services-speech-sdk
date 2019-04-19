@@ -4,9 +4,8 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
+using Microsoft.CognitiveServices.Speech.Internal;
+using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Audio
 {
@@ -21,7 +20,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio stream format being created.</returns>
         public static AudioStreamFormat GetDefaultInputFormat()
         {
-            return new AudioStreamFormat(Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat.DefaultInputFormat);
+            IntPtr streamFormatHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioStreamFormat.audio_stream_format_create_from_default_input(out streamFormatHandle));
+            return new AudioStreamFormat(streamFormatHandle);
         }
 
         /// <summary>
@@ -31,7 +32,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio stream format being created.</returns>
         public static AudioStreamFormat GetDefaultOutputFormat()
         {
-            return new AudioStreamFormat(Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat.DefaultOutputFormat);
+            IntPtr streamFormatHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioStreamFormat.audio_stream_format_create_from_default_output(out streamFormatHandle));
+            return new AudioStreamFormat(streamFormatHandle);
         }
 
         /// <summary>
@@ -43,7 +46,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio stream format being created.</returns>
         public static AudioStreamFormat GetWaveFormatPCM(uint samplesPerSecond, byte bitsPerSample, byte channels)
         {
-            return new AudioStreamFormat(Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat.GetWaveFormatPCM(samplesPerSecond, bitsPerSample, channels));
+            IntPtr streamFormatHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioStreamFormat.audio_stream_format_create_from_waveformat_pcm(out streamFormatHandle, samplesPerSecond, bitsPerSample, channels));
+            return new AudioStreamFormat(streamFormatHandle);
         }
 
         /// <summary>
@@ -54,7 +59,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <returns>The audio stream format being created.</returns>
         public static AudioStreamFormat GetCompressedFormat(Microsoft.CognitiveServices.Speech.Audio.AudioStreamContainerFormat compressedFormat)
         {
-            return new AudioStreamFormat(Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat.GetCompressedFormat(compressedFormat));
+            IntPtr streamFormatHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.AudioStreamFormat.audio_stream_format_create_from_compressed_format(out streamFormatHandle, compressedFormat));
+            return new AudioStreamFormat(streamFormatHandle);
         }
 
         /// <summary>
@@ -62,9 +69,20 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// </summary>
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
             if (disposed)
             {
                 return;
+            }
+
+            if (disposing)
+            {
+                FormatHandle.Dispose();
             }
 
             disposed = true;
@@ -72,11 +90,12 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         private bool disposed = false;
 
-        internal AudioStreamFormat(Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat format)
+        internal AudioStreamFormat(IntPtr formatPtr)
         {
-            formatImpl = format;
+            ThrowIfNull(formatPtr);
+            FormatHandle = new InteropSafeHandle(formatPtr, Internal.AudioStreamFormat.audio_stream_format_release);
         }
 
-        internal Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat formatImpl { get; }
+        internal InteropSafeHandle FormatHandle { get; }
     }
 }
