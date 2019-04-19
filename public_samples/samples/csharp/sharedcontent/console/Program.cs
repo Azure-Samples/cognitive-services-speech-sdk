@@ -40,6 +40,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("M. Speech synthesis to result.");
             Console.WriteLine("N. Speech synthesis to audio data stream.");
             Console.WriteLine("O. Speech synthesis events.");
+            Console.WriteLine("P. Speech Recognition using Phrase Lists");
 
             Console.Write(prompt);
 
@@ -121,6 +122,9 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.O:
                         SpeechSynthesisSamples.SynthesisEventsAsync().Wait();
+                        break;
+                    case ConsoleKey.P:
+                        SpeechRecognitionSamples.ContinuousRecognitionWithFileAndPhraseListsAsync();
                         break;
                     case ConsoleKey.D0:
                         Console.WriteLine("Exiting...");

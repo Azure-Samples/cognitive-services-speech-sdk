@@ -25,7 +25,8 @@ public class Main {
         System.out.println("A. Intent recognition with microphone.");
         System.out.println("B. Intent recognition with language.");
         System.out.println("C. Intent continuous recognition using events with file.");
-        System.out.println("D. Speech continuous recognition using events with file.");
+        System.out.println("D. Speech continuous recognition using events with a PushStream.");
+        System.out.println("E. Speech continuous recognition using events with file and Phrase List.");
 
         System.out.print(prompt);
 
@@ -77,6 +78,8 @@ public class Main {
                 case "D":
                     SpeechRecognitionSamples.continuousRecognitionWithPushStream();
                     break;
+                case "E":
+                    SpeechRecognitionSamples.continuousRecognitionWithFileWithPhraseListAsync();
                 case "0":
                     System.out.println("Exiting...");
                     break;

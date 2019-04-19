@@ -423,4 +423,67 @@ public class SpeechRecognitionSamples {
             recognizer.stopKeywordRecognitionAsync().get();
         }
     }
+    
+    // Speech recognition with events from file
+    public static void continuousRecognitionWithFileWithPhraseListAsync() throws InterruptedException, ExecutionException, IOException
+    {
+        // Creates an instance of a speech config with specified
+        // subscription key and service region. Replace with your own subscription key
+        // and service region (e.g., "westus").
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+        // Creates a speech recognizer using file as audio input.
+        // Replace with your own audio file name.
+        // The audio file wreck-a-nice-beach.wav included with the C# sample contains ambigious audio.
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+        SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
+        {
+            // Create the recognizer.
+            PhraseListGrammar phraseList = PhraseListGrammar.fromRecognizer(recognizer);
+
+            // Add a phrase to assist in recognition.
+            phraseList.addPhrase("Wreck a nice beach.");
+
+            // Subscribes to events.
+            recognizer.recognizing.addEventListener((s, e) -> {
+                System.out.println("RECOGNIZING: Text=" + e.getResult().getText());
+            });
+
+            recognizer.recognized.addEventListener((s, e) -> {
+                if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                    System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
+                }
+                else if (e.getResult().getReason() == ResultReason.NoMatch) {
+                    System.out.println("NOMATCH: Speech could not be recognized.");
+                }
+            });
+
+            recognizer.canceled.addEventListener((s, e) -> {
+                System.out.println("CANCELED: Reason=" + e.getReason());
+
+                if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + e.getErrorCode());
+                    System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
+            });
+
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\n    Session started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\n    Session stopped event.");
+            });
+
+            // Starts continuous recognition. Uses stopContinuousRecognitionAsync() to stop recognition.
+            System.out.println("Say something...");
+            recognizer.startContinuousRecognitionAsync().get();
+
+            System.out.println("Press any key to stop");
+            new Scanner(System.in).nextLine();
+
+            recognizer.stopContinuousRecognitionAsync().get();
+        }
+    }
 }
