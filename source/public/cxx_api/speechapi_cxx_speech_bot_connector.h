@@ -193,9 +193,7 @@ private:
         auto keep_alive = static_cast<SpeechBotConnector*>(pv_context)->shared_from_this();
         SpeechRecognitionEventArgs event{ h_event };
         keep_alive->Recognized.Signal(event);
-
-        SPX_DBG_ASSERT(::recognizer_event_handle_is_valid(h_event));
-        ::recognizer_event_handle_release(h_event);
+        /* Not releasing the handle as SpeechRecognitionEventArgs manages it */
     }
 
     static void FireEvent_Recognizing(SPXRECOHANDLE, SPXEVENTHANDLE h_event, void* pv_context)
@@ -203,9 +201,7 @@ private:
         auto keep_alive = static_cast<SpeechBotConnector*>(pv_context)->shared_from_this();
         SpeechRecognitionEventArgs event{ h_event };
         keep_alive->Recognizing.Signal(event);
-
-        SPX_DBG_ASSERT(::recognizer_event_handle_is_valid(h_event));
-        ::recognizer_event_handle_release(h_event);
+        /* Not releasing the handle as SpeechRecognitionEventArgs manages it */
     }
 
     void RecognizerEventConnectionChanged(const EventSignal<const SpeechRecognitionEventArgs&>& reco_event)
@@ -233,6 +229,7 @@ private:
         keep_alive->SessionStarted.Signal(event);
 
         SPX_DBG_ASSERT(::recognizer_event_handle_is_valid(h_event));
+        /* Releasing the event handle as SessionEventArgs doesn't keep the handle */
         ::recognizer_event_handle_release(h_event);
     }
 
@@ -243,6 +240,7 @@ private:
         keep_alive->SessionStopped.Signal(event);
 
         SPX_DBG_ASSERT(::recognizer_event_handle_is_valid(h_event));
+        /* Releasing the event handle as SessionEventArgs doesn't keep the handle */
         ::recognizer_event_handle_release(h_event);
     }
 
@@ -269,6 +267,7 @@ private:
         auto keep_alive = static_cast<SpeechBotConnector*>(pv_context)->shared_from_this();
         SpeechRecognitionCanceledEventArgs event{ h_event };
         keep_alive->Canceled.Signal(event);
+        /* Not releasing the handle as SpeechRecognitionCanceledEventArgs manages it */
     }
 
     void CanceledEventConnectionChanged(const EventSignal<const SpeechRecognitionCanceledEventArgs&>& canceled_event)
@@ -290,6 +289,7 @@ private:
         auto keep_alive = static_cast<SpeechBotConnector*>(pv_context)->shared_from_this();
         ActivityReceivedEventArgs event{ h_event };
         keep_alive->ActivityReceived.Signal(event);
+        /* Not releasing the handle as ActivityReceivedEventArgs manages it */
     }
 
     void ActivityReceivedConnectionChanged(const EventSignal<const ActivityReceivedEventArgs&>& activity_event)
