@@ -23,63 +23,75 @@ AAR_DIR="$SCRIPT_DIR/aar"
 # Used for timestamping all published files
 NOW=$(date -Iseconds)
 
-for flavor in Debug Release; do
+for micpermission in false true; do
+  # Note: the only difference for the nomic package ($micpermission false) is
+  #       the removal of the RECORD_AUDIO permission from the manifest.
+  for flavor in Debug Release; do
 
-  # Note: we don't intend to publish the debug version for now; subject to change.
+    # Debug only with microphone permissions
+    $micpermission || [[ $flavor == Release ]] || continue
 
-  FLAVORED_VERSION_NAME="$VERSION_NAME"
-  AAR_DIR="$SCRIPT_DIR/aar"
+    # Note: we don't intend to publish the debug version for now; subject to change.
 
-  [[ $flavor == Debug ]] && {
-    FLAVORED_VERSION_NAME+=-debug
-    AAR_DIR+=-debug
-  }
+    FLAVORED_VERSION_NAME="$VERSION_NAME"
+    AAR_DIR="$SCRIPT_DIR/aar"
 
-  # Clean output
-  [[ -d $AAR_DIR ]] && rm -rf "$AAR_DIR"
+    $micpermission || AAR_DIR+=-nomic
 
-  # Copy template directory
-  cp --verbose --recursive "$AAR_TEMPLATE_DIR" "$AAR_DIR"
-
-  # Patch version code and name
-  perl -l -p -i.bak -e '
-    BEGIN {
-      $versionName = shift;
-      $versionCode = shift;
+    [[ $flavor == Debug ]] && {
+      FLAVORED_VERSION_NAME+=-debug
+      AAR_DIR+=-debug
     }
-    s/(?<=\bandroid:versionCode=")[^"]*/$versionCode/;
-    s/(?<=\bandroid:versionName=")[^"]*/$versionName/;
-  ' "$FLAVORED_VERSION_NAME" "$VERSION_CODE" "$AAR_DIR/AndroidManifest.xml"
-  diff -u "$AAR_DIR/AndroidManifest.xml"{.bak,} || true
-  rm "$AAR_DIR/AndroidManifest.xml.bak"
 
-  # Copy the ARM32 jar
-  cp --verbose --preserve "$DROP_DIR"/Android-arm32/$flavor/public/lib/com.microsoft.cognitiveservices.speech.jar "$AAR_DIR/classes.jar"
+    # Clean output
+    [[ -d $AAR_DIR ]] && rm -rf "$AAR_DIR"
 
-  # Copy native libraries
-  mkdir -p "$AAR_DIR"/jni{,/armeabi-v7a,/arm64-v8a,/x86,/x86_64}
+    # Copy template directory
+    cp --verbose --recursive "$AAR_TEMPLATE_DIR" "$AAR_DIR"
 
-  # Note: KWS currently not shipping in the AAR.
+    # Patch version code and name
+    perl -l -p -i.bak -e '
+      BEGIN {
+        $versionName = shift;
+        $versionCode = shift;
+        $micpermission = shift ne "false";
+      }
+      $micpermission or
+        not m/uses-permission\s+android:name="android.permission.RECORD_AUDIO"/ or
+        $_ = "";
+      s/(?<=\bandroid:versionCode=")[^"]*/$versionCode/;
+      s/(?<=\bandroid:versionName=")[^"]*/$versionName/;
+    ' "$FLAVORED_VERSION_NAME" "$VERSION_CODE" "$micpermission" "$AAR_DIR/AndroidManifest.xml"
+    diff -u "$AAR_DIR/AndroidManifest.xml"{.bak,} || true
+    rm "$AAR_DIR/AndroidManifest.xml.bak"
 
-  cp --verbose --preserve \
-    "$DROP_DIR"/Android-arm32/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec}.so \
-    "$AAR_DIR"/jni/armeabi-v7a
+    # Copy the ARM32 jar
+    cp --verbose --preserve "$DROP_DIR"/Android-arm32/$flavor/public/lib/com.microsoft.cognitiveservices.speech.jar "$AAR_DIR/classes.jar"
 
-  cp --verbose --preserve \
-    "$DROP_DIR"/Android-arm64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec}.so \
-    "$AAR_DIR"/jni/arm64-v8a
+    # Copy native libraries
+    mkdir -p "$AAR_DIR"/jni{,/armeabi-v7a,/arm64-v8a,/x86,/x86_64}
 
-  cp --verbose --preserve \
-    "$DROP_DIR"/Android-x86/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec}.so \
-    "$AAR_DIR"/jni/x86
+    # Note: KWS currently not shipping in the AAR.
 
-  cp --verbose --preserve \
-    "$DROP_DIR"/Android-x64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec}.so \
-    "$AAR_DIR"/jni/x86_64
+    cp --verbose --preserve \
+      "$DROP_DIR"/Android-arm32/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec}.so \
+      "$AAR_DIR"/jni/armeabi-v7a
 
-  cp --verbose "$SCRIPT_DIR/../../"{REDIST.txt,license.md,ThirdPartyNotices.md} "$AAR_DIR"
+    cp --verbose --preserve \
+      "$DROP_DIR"/Android-arm64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec}.so \
+      "$AAR_DIR"/jni/arm64-v8a
 
-  # Timestamp
-  find "$AAR_DIR" -print0 | xargs -0 touch --date=$NOW
+    cp --verbose --preserve \
+      "$DROP_DIR"/Android-x86/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec}.so \
+      "$AAR_DIR"/jni/x86
 
+    cp --verbose --preserve \
+      "$DROP_DIR"/Android-x64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings,extension.codec}.so \
+      "$AAR_DIR"/jni/x86_64
+
+    cp --verbose "$SCRIPT_DIR/../../"{REDIST.txt,license.md,ThirdPartyNotices.md} "$AAR_DIR"
+
+    # Timestamp
+    find "$AAR_DIR" -print0 | xargs -0 touch --date=$NOW
+  done
 done

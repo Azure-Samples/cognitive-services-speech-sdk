@@ -1327,13 +1327,9 @@ jobs:
       PublishArtifactName=Android
       ArtifactOutWindows="$(Build.ArtifactStagingDirectory)/Out/$PublishArtifactName"
       ArtifactOut="$(cygpath -au "$ArtifactOutWindows")"
-      ArtifactBasename="$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA)"
       MavenRootWindows="$ArtifactOutWindows/maven"
       MavenRoot="$ArtifactOut/maven"
-      relativeMavenPackageDir="${SPEECHSDK_MAVEN_GROUP_ID//\./\/}/$SPEECHSDK_MAVEN_ARTIFACT_ID/$SPEECHSDK_SEMVER2NOMETA"
-      MavenPackageDir="$MavenRoot/$relativeMavenPackageDir"
-      MavenPackageDirWindows="$MavenRootWindows/$relativeMavenPackageDir"
-      vsts_setvars_by_ref PublishArtifactName Artifact{Out{,Windows},Basename} Maven{Root,PackageDir}{,Windows}
+      vsts_setvars_by_ref PublishArtifactName ArtifactOut{,Windows} MavenRoot{,Windows}
     displayName: Set package variables
   - task: DownloadBuildArtifacts@0
     inputs:
@@ -1348,29 +1344,42 @@ jobs:
       rootFolderOrFile: './ci/android/aar'
       includeRootFolder: false
       archiveType: zip
-      archiveFile: '$(ArtifactOutWindows)/$(ArtifactBasename).zip'
+      archiveFile: '$(ArtifactOutWindows)/$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA).zip'
     displayName: 'Create .zip (Release)'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: ./ci/android/aar-nomic
+      includeRootFolder: false
+      archiveType: zip
+      archiveFile: '$(ArtifactOutWindows)/$(SPEECHSDK_MAVEN_ARTIFACT_ID)-nomic-$(SPEECHSDK_SEMVER2NOMETA).zip'
+    displayName: 'Create nomic .zip (Release)'
   # Just archive the debug version for now
   - task: ArchiveFiles@2
     inputs:
       rootFolderOrFile: './ci/android/aar-debug'
       includeRootFolder: false
       archiveType: zip
-      archiveFile: '$(ArtifactOutWindows)/$(ArtifactBasename)-debug.zip'
+      archiveFile: '$(ArtifactOutWindows)/$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA)-debug.zip'
     displayName: 'Create .zip (Debug)'
   # TODO if we use the .pom for Android and JRE, should change <packaging/> and <description/>
   - bash: |
-      set -x -e -o pipefail
-      mv "$(ArtifactOut)/$(ArtifactBasename)-debug".{zip,aar}
-      mkdir -p "$(MavenPackageDir)"
-      mv "$(ArtifactOut)/$(ArtifactBasename).zip" "$(MavenPackageDir)/$(ArtifactBasename).aar"
-      cat >> "$(MavenPackageDir)/$(ArtifactBasename).pom" <<POM
+      set -u -x -e -o pipefail
+      # The debug package is just placed into the top-level artifact folder, it won't be published.
+      mv "$(ArtifactOut)/$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA)-debug".{zip,aar}
+      # For the Relase default and no-microphone packages, create directory hierarchy
+      mavenGroupDir="$(MavenRoot)/${SPEECHSDK_MAVEN_GROUP_ID//\./\/}"
+      mkdir -p "$mavenGroupDir/$(SPEECHSDK_MAVEN_ARTIFACT_ID)"{,-nomic}"/$(SPEECHSDK_SEMVER2NOMETA)"
+      # Then, place the packages and pom into these directories.
+      for artifactId in "$(SPEECHSDK_MAVEN_ARTIFACT_ID)"{,-nomic}; do
+        destName="$mavenGroupDir/$artifactId/$(SPEECHSDK_SEMVER2NOMETA)/$artifactId"
+        mv "$(ArtifactOut)/$artifactId-$(SPEECHSDK_SEMVER2NOMETA).zip" "$destName-$(SPEECHSDK_SEMVER2NOMETA).aar"
+        cat >> "$destName-$(SPEECHSDK_SEMVER2NOMETA).pom" <<POM
       <?xml version="1.0" encoding="UTF-8"?>
       <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <modelVersion>4.0.0</modelVersion>
         <groupId>$(SPEECHSDK_MAVEN_GROUP_ID)</groupId>
-        <artifactId>$(SPEECHSDK_MAVEN_ARTIFACT_ID)</artifactId>
+        <artifactId>$artifactId</artifactId>
         <version>$(SPEECHSDK_SEMVER2NOMETA)</version>
         <packaging>aar</packaging>
         <name>Microsoft Cognitive Services Speech SDK for Java</name>
@@ -1386,6 +1395,7 @@ jobs:
         </licenses>
       </project>
       POM
+      done
     displayName: 'Rename .zip -> .aar, place, and create .pom'
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign *.aar (Release)'
