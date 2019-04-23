@@ -9,6 +9,9 @@
 
 %ignore Microsoft::CognitiveServices::Speech::Utils::ToUTF8;
 %ignore Microsoft::CognitiveServices::Speech::Utils::ToSPXString;
+%ignore Microsoft::CognitiveServices::Speech::Utils::NonCopyable;
+%ignore Microsoft::CognitiveServices::Speech::Utils::NonMovable;
+%ignore Microsoft::CognitiveServices::Speech::Utils::HandleOrInvalid;
 
 // Add necessary symbols to generated header
 %{
@@ -71,6 +74,9 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::AudioDataStream)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechSynthesisCancellationDetails)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechSynthesizer)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::BotConnectorActivity)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::BotConnectorConfig)
 %shared_ptr(std::vector<uint8_t>)
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioConfig)
@@ -130,17 +136,20 @@
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult> IntentRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult> TranslationRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechSynthesisResult> SpeechSynthesisResultPtr;
+    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Dialog::BotConnectorActivity> BotConnectorActivityPtr;
 %}
 
 %template(SpeechRecognitionResultPtrFuture) FutureWrapper<SpeechRecognitionResultPtr>;
 %template(IntentRecognitionResultPtrFuture) FutureWrapper<IntentRecognitionResultPtr>;
 %template(TranslationRecognitionResultPtrFuture) FutureWrapper<TranslationRecognitionResultPtr>;
 %template(SpeechSynthesisResultPtrFuture) FutureWrapper<SpeechSynthesisResultPtr>;
+%template(StringFuture) FutureWrapper<std::string>;
 %template(VoidFuture) FutureWrapper<void>;
 
 
 %include <speechapi_cxx_speech_config.h>
 %include <speechapi_cxx_speech_translation_config.h>
+%include <speechapi_cxx_bot_connector_config.h>
 
 // %extend need to come first, before the %ignore for the same method (RecognizeOnceAsync, etc.)
 %extend Microsoft::CognitiveServices::Speech::SpeechRecognizer {
@@ -311,6 +320,45 @@
     }
 }
 
+%extend Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector {
+
+    FutureWrapper<void> ConnectAsync()
+    {
+        auto future = ($self)->ConnectAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> DisconnectAsync()
+    {
+        auto future = ($self)->DisconnectAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<std::string> SendActivityAsync(BotConnectorActivityPtr activity)
+    {
+        auto future = ($self)->SendActivityAsync(activity);
+        return FutureWrapper<std::string>(std::move(future));
+    }
+
+    FutureWrapper<void> ListenOnceAsync()
+    {
+        auto future = ($self)->ListenOnceAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model)
+    {
+        auto future = ($self)->StartKeywordRecognitionAsync(model);
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> StopKeywordRecognitionAsync()
+    {
+        auto future = ($self)->StopKeywordRecognitionAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+}
+
 %extend Microsoft::CognitiveServices::Speech::SpeechSynthesizer {
 
     FutureWrapper<SpeechSynthesisResultPtr> SpeakTextAsync(const std::string& text)
@@ -404,6 +452,13 @@
 %ignore StartSpeakingTextAsync;
 %ignore StartSpeakingSsmlAsync;
 %ignore SaveToWavFileAsync;
+
+%ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::ConnectAsync;
+%ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::DisconnectAsync;
+%ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::SendActivityAsync;
+%ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::ListenOnceAsync;
+%ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::StartKeywordRecognitionAsync;
+%ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::StopKeywordRecognitionAsync;
 
 %immutable Microsoft::CognitiveServices::Speech::SpeechRecognizer::Properties;
 %immutable Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::Properties;
@@ -509,6 +564,12 @@
 %template(TranslationSynthesisEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisEventArgs&>;
 %template(TranslationRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs>;
 
+%include <speechapi_cxx_bot_connector_activity.h>
+%include <speechapi_cxx_bot_connector_eventargs.h>
+
+%template(ActivityReceivedEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Dialog::ActivityReceivedEventArgs&>;
+%template(ActivityReceivedEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Dialog::ActivityReceivedEventArgs&>;
+
 %include <speechapi_cxx_speech_synthesis_result.h>
 %include <speechapi_cxx_speech_synthesis_eventargs.h>
 
@@ -524,6 +585,8 @@
 %include <speechapi_cxx_speech_synthesizer.h>
 
 %include <speechapi_cxx_translation_recognizer.h>
+
+%include <speechapi_cxx_speech_bot_connector.h>
 
 %include <speechapi_cxx_session.h>
 

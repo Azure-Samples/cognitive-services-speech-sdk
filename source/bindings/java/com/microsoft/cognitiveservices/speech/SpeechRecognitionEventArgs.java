@@ -11,11 +11,15 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
  */
 public class SpeechRecognitionEventArgs extends RecognitionEventArgs {
 
-    SpeechRecognitionEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs e) {
-        super(e);
+    /**
+     * Constructs an instance of a SpeechRecognitionEventArgs object.
+     * @param arg internal recognition event args object.
+     */
+    public SpeechRecognitionEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs arg) {
+        super(arg);
 
-        Contracts.throwIfNull(e, "e");
-        this._Result = new SpeechRecognitionResult(e.GetResult());
+        Contracts.throwIfNull(arg, "arg");
+        this._Result = new SpeechRecognitionResult(arg.GetResult());
 
         Contracts.throwIfNull(this.getSessionId(), "SessionId");
     }

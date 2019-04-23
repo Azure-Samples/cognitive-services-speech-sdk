@@ -14,17 +14,21 @@ import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
  */
 public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionEventArgs {
 
-    SpeechRecognitionCanceledEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventArgs e) {
-        super(e);
+    /**
+     * Constructs an instance of a SpeechRecognitionCanceledEventArgs object.
+     * @param arg internal recognition canceled event args object.
+     */
+    public SpeechRecognitionCanceledEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventArgs arg) {
+        super(arg);
 
-        Contracts.throwIfNull(e, "e");
-        this._eventArgImpl = e;
-        this._Result = new SpeechRecognitionResult(e.GetResult());
+        Contracts.throwIfNull(arg, "arg");
+        this._eventArgImpl = arg;
+        this._Result = new SpeechRecognitionResult(arg.GetResult());
 
-        this._SessionId = e.getSessionId();
+        this._SessionId = arg.getSessionId();
         Contracts.throwIfNull(this._SessionId, "SessionId");
 
-        com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation = e.GetCancellationDetails();
+        com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation = arg.GetCancellationDetails();
         this._cancellationReason  = com.microsoft.cognitiveservices.speech.CancellationReason.values()[cancellation.getReason().swigValue() - 1]; // Native CancellationReason enum starts at 1!!
         this._errorCode = com.microsoft.cognitiveservices.speech.CancellationErrorCode.values()[cancellation.getErrorCode().swigValue()];
         this._errorDetails = cancellation.getErrorDetails();
