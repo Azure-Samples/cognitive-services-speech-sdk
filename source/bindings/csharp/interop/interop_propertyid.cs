@@ -39,6 +39,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         CancellationDetails_ReasonText = 6001,
         CancellationDetails_ReasonDetailedText = 6002,
         LanguageUnderstandingServiceResponse_JsonResult = 7000,
-        Speech_LogFilename = 9001
+        Speech_LogFilename = 9001,
+        Conversation_Secret_Key = 10000,
+        Conversation_Initial_Silence_Timeout = 10002,
+        Conversation_From_Id = 10003
     }
 }

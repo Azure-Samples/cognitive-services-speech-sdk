@@ -207,6 +207,24 @@ namespace Microsoft.CognitiveServices.Speech
         /// The file name to write logs.
         /// Added in version 1.4.0.
         /// </summary>
-        Speech_LogFilename = Internal.PropertyId.Speech_LogFilename
+        Speech_LogFilename = Internal.PropertyId.Speech_LogFilename,
+
+        /// <summary>
+        /// Speech Channel secret key.
+        /// Added in version 1.5.0.
+        /// </summary>
+        Conversation_Secret_Key = Internal.PropertyId.Conversation_Secret_Key,
+
+        /// <summary>
+        /// Silence timeout for listening
+        /// Added in version 1.5.0.
+        /// </summary>
+        Conversation_Initial_Silence_Timeout = Internal.PropertyId.Conversation_Initial_Silence_Timeout,
+
+        /// <summary>
+        /// From Id to add to speech recognition activities.
+        /// Added in version 1.5.0.
+        /// </summary>
+        Conversation_From_Id = Internal.PropertyId.Conversation_From_Id
     }
 }

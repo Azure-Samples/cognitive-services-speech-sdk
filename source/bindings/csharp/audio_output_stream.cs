@@ -107,6 +107,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     /// </summary>
     public sealed class PullAudioOutputStream : AudioOutputStream
     {
+
         /// <summary>
         /// Creates a memory backed PullAudioOutputStream using the default format (16Khz 16bit mono PCM).
         /// </summary>
