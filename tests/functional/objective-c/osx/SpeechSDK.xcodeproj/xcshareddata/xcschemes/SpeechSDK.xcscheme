@@ -74,12 +74,22 @@
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "subscriptionKey"
-            value = "$(SUBSCRIPTION_KEY)"
+            value = "$(SPEECHSDK_SPEECH_KEY)"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
             key = "serviceRegion"
-            value = "$(SERVICE_REGION)"
+            value = "$(SPEECHSDK_SPEECH_REGION)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "luisKey"
+            value = "$(SPEECHSDK_LUIS_KEY)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "luisRegion"
+            value = "$(SPEECHSDK_LUIS_REGION)"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>

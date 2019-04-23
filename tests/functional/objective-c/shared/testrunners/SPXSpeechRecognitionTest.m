@@ -601,3 +601,80 @@
 }
 
 @end
+
+
+@interface SPXRecognitionGrammarTests: XCTestCase {
+    NSString *beachFileName;
+    NSString *beachNoHelpTranscription;
+    NSString *beachTranscription;
+}
+
+- (void) setAudioSource;
+
+@property (nonatomic, assign) NSString * luisKey;
+@property (nonatomic, assign) NSString * luisRegion;
+@property (nonatomic, retain) SPXAudioConfiguration* audioConfig;
+@end
+
+@implementation SPXRecognitionGrammarTests
+
+- (void) setUp {
+    beachFileName = @"wreck-a-nice-beach";
+    beachNoHelpTranscription = @"Recognize speech.";
+    beachTranscription = @"Wreck a nice beach.";
+
+    self.luisKey = [[[NSProcessInfo processInfo] environment] objectForKey:@"luisKey"];
+    self.luisRegion = [[[NSProcessInfo processInfo] environment] objectForKey:@"luisRegion"];
+    [self setAudioSource];
+}
+
+- (void) setAudioSource {
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *beachFile = [bundle pathForResource: beachFileName ofType:@"wav"];
+
+    self.audioConfig = [[SPXAudioConfiguration alloc] initWithWavFileInput:beachFile];
+}
+
+- (void)testIntentRecognitionPhraseList {
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.luisKey region:self.luisRegion];
+    NSAssert(nil != speechConfig, @"nil");
+    SPXIntentRecognizer* intentRecognizer = [[SPXIntentRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:self.audioConfig];
+    NSAssert(nil != intentRecognizer, @"nil");
+
+    SPXPhraseListGrammar * phraseListGrammar = [[SPXPhraseListGrammar alloc] initWithRecognizer:intentRecognizer];
+    [phraseListGrammar addPhrase:@"Wreck a nice beach"];
+
+    SPXIntentRecognitionResult *result = [intentRecognizer recognizeOnce];
+    NSLog(@"recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@",
+          result.text, (long)result.reason, result.offset, result.duration, result.resultId);
+
+    XCTAssertTrue([result.text isEqualToString:beachTranscription], "Final Result Text does not match");
+    XCTAssertTrue(result.reason == SPXResultReason_RecognizedSpeech);
+    XCTAssertTrue(result.duration > 0);
+    XCTAssertTrue(result.offset > 0);
+    XCTAssertTrue([result.resultId length] > 0);
+}
+
+- (void)testIntentRecognitionPhraseListCleared {
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.luisKey region:self.luisRegion];
+    NSAssert(nil != speechConfig, @"nil");
+    SPXIntentRecognizer* intentRecognizer = [[SPXIntentRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:self.audioConfig];
+    NSAssert(nil != intentRecognizer, @"nil");
+
+    SPXPhraseListGrammar * phraseListGrammar = [[SPXPhraseListGrammar alloc] initWithRecognizer:intentRecognizer];
+    [phraseListGrammar addPhrase:@"Wreck a nice beach"];
+    [phraseListGrammar clear];
+
+    SPXIntentRecognitionResult *result = [intentRecognizer recognizeOnce];
+    NSLog(@"recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@",
+          result.text, (long)result.reason, result.offset, result.duration, result.resultId);
+
+    XCTAssertTrue([result.text isEqualToString:beachNoHelpTranscription], "Final Result Text does not match");
+    XCTAssertTrue(result.reason == SPXResultReason_RecognizedSpeech);
+    XCTAssertTrue(result.duration > 0);
+    XCTAssertTrue(result.offset > 0);
+    XCTAssertTrue([result.resultId length] > 0);
+}
+
+@end
+

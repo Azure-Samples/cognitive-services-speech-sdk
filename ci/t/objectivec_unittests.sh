@@ -20,7 +20,8 @@ if [[ ${PLATFORM} == macOS-* ]]; then
     xcodebuild test -project ${BUILD_DIR}/../tests/functional/objective-c/osx/SpeechSDK.xcodeproj \
         -scheme SpeechSDK \
         CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO \
-        SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION" 2>&1 |
+        SPEECHSDK_SPEECH_KEY="$SPEECHSDK_SPEECH_KEY" SPEECHSDK_SPEECH_REGION="$SPEECHSDK_SPEECH_REGION" \
+        SPEECHSDK_LUIS_KEY="$SPEECHSDK_LUIS_KEY" SPEECHSDK_LUIS_REGION="$SPEECHSDK_LUIS_REGION" 2>&1 |
             tee "${OUTPUTDIRECTORY}/logs/xcodebuild-osx-unittests.log" |
             xcpretty --report junit --output test-osx-unittests.xml
 elif [[ ${PLATFORM} == iOS-* ]]; then
@@ -30,7 +31,8 @@ elif [[ ${PLATFORM} == iOS-* ]]; then
         -scheme SpeechSDK_iOS \
         -destination 'platform=iOS Simulator,name=iPhone 8,OS=12.1' \
         DEVELOPMENT_TEAM=${MICROSOFT_DEVELOPMENT_TEAM_ID} \
-        SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION" 2>&1 |
+        SPEECHSDK_SPEECH_KEY="$SPEECHSDK_SPEECH_KEY" SPEECHSDK_SPEECH_REGION="$SPEECHSDK_SPEECH_REGION" \
+        SPEECHSDK_LUIS_KEY="$SPEECHSDK_LUIS_KEY" SPEECHSDK_LUIS_REGION="$SPEECHSDK_LUIS_REGION" 2>&1 |
             tee "${OUTPUTDIRECTORY}/logs/xcodebuild-ios-unittests.log" |
             xcpretty --report junit --output test-ios-unittests.xml
 fi

@@ -70,7 +70,8 @@ run_test() {
         -destination "platform=iOS Simulator,id=${uid}" \
         -scheme ${SCHEME} ${xcodeExtraArgs[@]} \
         CONFIGURATION_BUILD_DIR=${XCODE_CONFIGURATION_BUILD_DIR} \
-        SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION" 2>&1 |
+        SPEECHSDK_SPEECH_KEY="$SPEECHSDK_SPEECH_KEY" SPEECHSDK_SPEECH_REGION="$SPEECHSDK_SPEECH_REGION" \
+        SPEECHSDK_LUIS_KEY="$SPEECHSDK_LUIS_KEY" SPEECHSDK_LUIS_REGION="$SPEECHSDK_LUIS_REGION" 2>&1 |
           tee "${LOGDIR}/xcodebuild-ios-build-${thistestname}.log" |
           xcpretty --report junit --output test-ios-build-${thistestname}.xml
 
@@ -81,7 +82,8 @@ run_test() {
         -destination "platform=iOS Simulator,id=${uid}" \
         -scheme ${SCHEME} \
         CONFIGURATION_BUILD_DIR=${XCODE_CONFIGURATION_BUILD_DIR} \
-        SUBSCRIPTION_KEY="$SPEECHSDK_SPEECH_KEY" SERVICE_REGION="$SPEECHSDK_SPEECH_REGION" 2>&1 |
+        SPEECHSDK_SPEECH_KEY="$SPEECHSDK_SPEECH_KEY" SPEECHSDK_SPEECH_REGION="$SPEECHSDK_SPEECH_REGION" \
+        SPEECHSDK_LUIS_KEY="$SPEECHSDK_LUIS_KEY" SPEECHSDK_LUIS_REGION="$SPEECHSDK_LUIS_REGION" 2>&1 |
           tee "${LOGDIR}/xcodebuild-ios-run-${thistestname}.log" |
           xcpretty --report junit --output test-ios-run-${thistestname}.xml
 }

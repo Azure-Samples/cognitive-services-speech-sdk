@@ -43,4 +43,6 @@
 #import "translation_recognizer_private.h"
 #import "connection_private.h"
 
-
+#import "grammar_private.h"
+#import "grammar_phrase_private.h"
+#import "phrase_list_grammar_private.h"
