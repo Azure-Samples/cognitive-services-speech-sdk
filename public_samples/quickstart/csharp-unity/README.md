@@ -117,7 +117,6 @@ Start by running it in the Unity Editor (first option), then explore other optio
 * After the build completes, the app launches on your Android device:
   * When you see the prompt asking for microphone permission, agree to it.
   * Then, click the button and speak an English phrase or sentence into your device's microphone. Your speech is transmitted to the Speech service and transcribed to text, which appears in the window.
-  * Close the app to stop speech recognition.
 
 ## References
 
