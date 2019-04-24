@@ -416,6 +416,46 @@
         XCTAssertTrue(srresult.reason == SPXResultReason_RecognizedSpeech);
         XCTAssertTrue([srresult.text isEqualToString:weatherTextEnglish], "Final Result Text does not match");
     }];
+
+}
+
+- (void)testLogFileExists {
+    NSString *filePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"myfile3.txt"];
+    NSLog(@"file path is %@", filePath);
+
+    NSString *weatherFileName = @"whatstheweatherlike";
+    NSString *weatherTextEnglish = @"What's the weather like?";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
+    XCTAssertNotNil(speechConfig);
+
+    [speechConfig setPropertyTo:filePath byId:SPXSpeechLogFilename];
+
+    speechConfig.speechRecognitionLanguage = @"en-us";
+    SPXSpeechRecognizer* r = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+    XCTAssertNotNil(r);
+
+    __block SPXSpeechRecognitionResult *result;
+    [r recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
+        XCTAssertTrue(srresult.reason == SPXResultReason_RecognizedSpeech);
+        XCTAssertTrue([srresult.text isEqualToString:weatherTextEnglish], "Final Result Text does not match");
+        result = srresult;
+    }];
+
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+
+    XCTAssertTrue([fileManager fileExistsAtPath:filePath]);
+    NSDictionary *attributes = [fileManager attributesOfItemAtPath:filePath error:nil];
+    unsigned long long size = [attributes fileSize];
+    XCTAssertGreaterThan(size, 0, @"log file size is 0");
+
+    NSString* content = [NSString stringWithContentsOfFile:filePath
+                                                  encoding:NSUTF8StringEncoding
+                                                     error:NULL];
+    XCTAssertTrue([content rangeOfString:result.resultId].location != NSNotFound);
+    XCTAssertTrue([content rangeOfString:@"SPX_DBG_TRACE_VERBOSE"].location != NSNotFound);
 }
 
 @end
