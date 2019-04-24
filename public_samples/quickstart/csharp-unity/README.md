@@ -3,16 +3,19 @@
 This sample demonstrates how to recognize speech in [Unity](https://unity3d.com/).
 
 > Note:
-> The Microsoft Cognitive Services Speech SDK for Unity is currently in beta.
-> It supports Windows x86 and x64 (desktop or Universal Windows Platform applications), and Android (ARM32/64, x86).
+> The Speech SDK for Unity is currently in beta.
+> It supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), and Android (x86, ARM32/64).
 
 ## Prerequisites
 
-* This sample is targeted for Unity 2018.3 or later. To install, pick an appropriate option in the [Unity store](https://store.unity.com/).
-  * If you are not familiar with Unity, it is recommended to study the [Unity User Manual](https://docs.unity3d.com/Manual/UnityManual.html) before starting your app development.
+* This sample is targeted for Unity 2018.3 or later. To install, pick an appropriate option in the [Unity store](https://store.unity.com/). 
+  > Note: 
+  > * [UWP ARM64 support was only added in Unity 2019.1](https://blogs.unity3d.com/2019/04/16/introducing-unity-2019-1/#universal)
+  > * If you are not familiar with Unity, it is recommended to study the [Unity User Manual](https://docs.unity3d.com/Manual/UnityManual.html) before starting your app development.
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working microphone.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
+* For ARM64 support, install the [optional build tools, and Windows 10 SDK for ARM/ARM64](https://blogs.windows.com/buildingapps/2018/11/15/official-support-for-windows-10-on-arm-development/) 
 * Access to your computer's microphone.
 * To target Android: an Android device (ARM32/64, x86; API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
 
@@ -74,7 +77,6 @@ Start by running it in the Unity Editor (first option), then explore other optio
 * Navigate to the `HelloWorld_Data/Plugins` folder in your build output folder. Copy the DLL `Microsoft.CognitiveServices.Speech.core.dll` into the `HelloWorld_Data/Managed` folder.
 * Double-click on `HelloWorld.exe` in the build output folder to start the application.
 * Then, click the button and speak an English phrase or sentence into your device's microphone. Your speech is transmitted to the Speech service and transcribed to text, which appears in the window.
-* Close the app to stop speech recognition.
 
 ### Build and run the sample as Universal Windows Platform application
 
@@ -95,7 +97,6 @@ Start by running it in the Unity Editor (first option), then explore other optio
 * After the build completes, the UWP app launches:
   * When you see the `Enable microphone` button, click it.
   * Then, click the button and speak an English phrase or sentence into your device's microphone. Your speech is transmitted to the Speech service and transcribed to text, which appears in the window.
-  * Close the app to stop speech recognition.
 
 ### Build and run the sample for Android platform
 

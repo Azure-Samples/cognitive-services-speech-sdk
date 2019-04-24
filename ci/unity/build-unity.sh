@@ -57,6 +57,10 @@ for flavor in Release; do # no Debug for now
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/ARM
 
   cp --verbose --preserve \
+    "$DROP_DIR"/WindowsUwp/ARM64/$flavor/public/lib/Microsoft.CognitiveServices.Speech.core.dll \
+    "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/ARM64
+
+  cp --verbose --preserve \
     "$DROP_DIR"/Windows/Win32/$flavor/public/lib/Microsoft.CognitiveServices.Speech.core.dll \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/x86
 
