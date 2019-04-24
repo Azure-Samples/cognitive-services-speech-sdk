@@ -161,20 +161,9 @@ namespace Microsoft.CognitiveServices.Speech
 
                     try
                     {
-                        IntPtr asyncSpeakHandle = IntPtr.Zero;
-                        ThrowIfFail(Internal.Synthesizer.synthesizer_speak_text_async(synthHandle, textPtr, textLen, out asyncSpeakHandle));
-
-                        try
-                        {
-                            IntPtr hresult = IntPtr.Zero;
-                            ThrowIfFail(Internal.Synthesizer.synthesizer_speak_async_wait_for(asyncSpeakHandle, UInt32.MaxValue, out hresult));
-                            result = new SpeechSynthesisResult(hresult);
-                        }
-                        finally
-                        {
-                            ThrowIfFail(Internal.Synthesizer.synthesizer_async_handle_release(asyncSpeakHandle));
-                            asyncSpeakHandle = IntPtr.Zero;
-                        }
+                        IntPtr hresult = IntPtr.Zero;
+                        ThrowIfFail(Internal.Synthesizer.synthesizer_speak_text(synthHandle, textPtr, textLen, out hresult));
+                        result = new SpeechSynthesisResult(hresult);
                     }
                     finally
                     {
@@ -204,20 +193,9 @@ namespace Microsoft.CognitiveServices.Speech
 
                     try
                     {
-                        IntPtr asyncSpeakHandle = IntPtr.Zero;
-                        ThrowIfFail(Internal.Synthesizer.synthesizer_speak_ssml_async(synthHandle, ssmlPtr, ssmlLen, out asyncSpeakHandle));
-
-                        try
-                        {
-                            IntPtr hresult = IntPtr.Zero;
-                            ThrowIfFail(Internal.Synthesizer.synthesizer_speak_async_wait_for(asyncSpeakHandle, UInt32.MaxValue, out hresult));
-                            result = new SpeechSynthesisResult(hresult);
-                        }
-                        finally
-                        {
-                            ThrowIfFail(Internal.Synthesizer.synthesizer_async_handle_release(asyncSpeakHandle));
-                            asyncSpeakHandle = IntPtr.Zero;
-                        }
+                        IntPtr hresult = IntPtr.Zero;
+                        ThrowIfFail(Internal.Synthesizer.synthesizer_speak_ssml(synthHandle, ssmlPtr, ssmlLen, out hresult));
+                        result = new SpeechSynthesisResult(hresult);
                     }
                     finally
                     {
@@ -247,20 +225,9 @@ namespace Microsoft.CognitiveServices.Speech
 
                     try
                     {
-                        IntPtr asyncSpeakHandle = IntPtr.Zero;
-                        ThrowIfFail(Internal.Synthesizer.synthesizer_start_speaking_text_async(synthHandle, textPtr, textLen, out asyncSpeakHandle));
-
-                        try
-                        {
-                            IntPtr hresult = IntPtr.Zero;
-                            ThrowIfFail(Internal.Synthesizer.synthesizer_speak_async_wait_for(asyncSpeakHandle, UInt32.MaxValue, out hresult));
-                            result = new SpeechSynthesisResult(hresult);
-                        }
-                        finally
-                        {
-                            ThrowIfFail(Internal.Synthesizer.synthesizer_async_handle_release(asyncSpeakHandle));
-                            asyncSpeakHandle = IntPtr.Zero;
-                        }
+                        IntPtr hresult = IntPtr.Zero;
+                        ThrowIfFail(Internal.Synthesizer.synthesizer_start_speaking_text(synthHandle, textPtr, textLen, out hresult));
+                        result = new SpeechSynthesisResult(hresult);
                     }
                     finally
                     {
@@ -290,20 +257,9 @@ namespace Microsoft.CognitiveServices.Speech
 
                     try
                     {
-                        IntPtr asyncSpeakHandle = IntPtr.Zero;
-                        ThrowIfFail(Internal.Synthesizer.synthesizer_start_speaking_ssml_async(synthHandle, ssmlPtr, ssmlLen, out asyncSpeakHandle));
-
-                        try
-                        {
-                            IntPtr hresult = IntPtr.Zero;
-                            ThrowIfFail(Internal.Synthesizer.synthesizer_speak_async_wait_for(asyncSpeakHandle, UInt32.MaxValue, out hresult));
-                            result = new SpeechSynthesisResult(hresult);
-                        }
-                        finally
-                        {
-                            ThrowIfFail(Internal.Synthesizer.synthesizer_async_handle_release(asyncSpeakHandle));
-                            asyncSpeakHandle = IntPtr.Zero;
-                        }
+                        IntPtr hresult = IntPtr.Zero;
+                        ThrowIfFail(Internal.Synthesizer.synthesizer_start_speaking_ssml(synthHandle, ssmlPtr, ssmlLen, out hresult));
+                        result = new SpeechSynthesisResult(hresult);
                     }
                     finally
                     {
