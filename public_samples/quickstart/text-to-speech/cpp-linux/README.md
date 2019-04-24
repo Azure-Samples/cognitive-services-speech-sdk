@@ -1,4 +1,4 @@
-# Quickstart: Synthesize speech in C++ for Linux (Ubuntu 16.04 or 18.04)
+# Quickstart: Synthesize speech in C++ for Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9)
 
 This sample demonstrates how to synthesize speech with C++ using the Speech SDK for Linux.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-cpp-linux) on the SDK documentation page for step-by-step instructions.
@@ -6,12 +6,18 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* An Ubuntu 16.04 or 18.04 PC with a working speaker or headset.
-* Required packages to build and run this sample:
+* An Ubuntu 16.04, Ubuntu 18.04, or Debian 9 PC with a working speaker or headset.
+* On Ubuntu, install these packages to build and run this sample:
 
   ```sh
   sudo apt-get update
   sudo apt-get install build-essential libssl1.0.0 libasound2 wget
+  ```
+* On Debian 9, install these packages to build and run this sample:
+
+  ```sh
+  sudo apt-get update
+  sudo apt-get install build-essential libssl1.0.2 libasound2 wget
   ```
 
 ## Build the sample
