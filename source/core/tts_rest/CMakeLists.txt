@@ -10,6 +10,7 @@ include_directories("${CARBON_EXTERNAL}/json")
 
 include_directories(${INC_DIR})
 include_directories("${COMMON}/include")
+include_directories("${USP}/include")
 include_directories("${COMMON_GENERATED_INCLUDE}")
 
 set(HEADERS)
@@ -49,4 +50,4 @@ set_target_properties (tts_rest PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(tts_rest)
+target_link_libraries(tts_rest usp)

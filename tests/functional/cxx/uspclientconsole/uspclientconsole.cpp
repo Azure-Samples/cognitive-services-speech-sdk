@@ -356,7 +356,7 @@ int main(int argc, char* argv[])
 
     if (useFiddlerProxy == true)
     {
-        client.SetProxyServerInfo("localhost", 8888);
+        client.SetProxyServerInfo("localhost", 8888, nullptr, nullptr);
     }
 
     if (!recoMode.empty())

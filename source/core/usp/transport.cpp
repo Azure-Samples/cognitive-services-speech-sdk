@@ -800,10 +800,10 @@ TransportHandle TransportRequestCreate(const char* host, void* context, Telemetr
                     HTTP_PROXY_IO_CONFIG proxy_config;
                     proxy_config.hostname = request->ws.config.hostname;
                     proxy_config.port = request->ws.config.port;
-                    proxy_config.proxy_hostname = proxyInfo->host;
+                    proxy_config.proxy_hostname = proxyInfo->host.c_str();
                     proxy_config.proxy_port = proxyInfo->port;
-                    proxy_config.username = proxyInfo->username;
-                    proxy_config.password = proxyInfo->password;
+                    proxy_config.username = proxyInfo->username.c_str();
+                    proxy_config.password = proxyInfo->password.c_str();
                     const IO_INTERFACE_DESCRIPTION *underlying_io_interface = http_proxy_io_get_interface_description();
                     if (underlying_io_interface == NULL)
                     {

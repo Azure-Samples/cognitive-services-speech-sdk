@@ -47,7 +47,7 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
     {                                                       \
        x = StoreException(std::move(ex));                   \
     }                                                       \
-    catch(const std::exception& ex)                         \
+    catch (const std::exception& ex)                        \
     {                                                       \
        x = StoreException(ex);                              \
     }                                                       \
@@ -78,6 +78,33 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
         SPX_TRACE_ERROR(error.c_str());                     \
     }                                                       \
     SPXAPI_FORCED_UNWIND_CATCH                              \
+    catch (...)                                             \
+    {                                                       \
+        SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);     \
+        error = "SPXERR_UNHANDLED_EXCEPTION";               \
+    }                                                       \
+}                                                           \
+
+// Use in destructors where throwing (and re-throwing) is undefined.
+#define SPXAPI_CATCH_ONLY_NO_FORCED_UNWIND()                \
+    catch (SPXHR hrx)                                       \
+    {                                                       \
+        SPX_REPORT_ON_FAIL(hrx);                            \
+        error = stringify(hrx);                             \
+    }                                                       \
+    catch (const ExceptionWithCallStack& ex)                \
+    {                                                       \
+       SPX_REPORT_ON_FAIL(ex.GetErrorCode());               \
+       error = stringify(ex.GetErrorCode());                \
+       error += " ";                                        \
+       error += ex.GetCallStack();                          \
+       SPX_TRACE_ERROR(error.c_str());                      \
+    }                                                       \
+    catch (const std::exception& e)                         \
+    {                                                       \
+        error = e.what();                                   \
+        SPX_TRACE_ERROR(error.c_str());                     \
+    }                                                       \
     catch (...)                                             \
     {                                                       \
         SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);     \

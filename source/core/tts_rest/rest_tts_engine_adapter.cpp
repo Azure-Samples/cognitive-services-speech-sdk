@@ -16,6 +16,7 @@
 #include "shared_ptr_helpers.h"
 #include "property_bag_impl.h"
 #include "property_id_2_name_map.h"
+#include "usp.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
@@ -43,7 +44,8 @@ void CSpxRestTtsEngineAdapter::Init()
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS, __FUNCTION__);
 
     // Initialize websocket platform
-    platform_init();
+    // Note: proxy properties aren't yet implented here, cf. 1733502.
+    Microsoft::CognitiveServices::Speech::USP::PlatformInit(nullptr, 0, nullptr, nullptr);
 
     // Initialize azure-c-shared HTTP API
     HTTPAPI_Init();

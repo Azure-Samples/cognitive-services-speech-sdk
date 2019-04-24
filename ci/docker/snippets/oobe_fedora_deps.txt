@@ -1,0 +1,3 @@
+      # Native dependencies
+      alsa-lib \
+      compat-openssl10 \

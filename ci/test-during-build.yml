@@ -10,8 +10,9 @@ steps:
   displayName: Skip tests on build failure.
 - bash: |
     if [[ -n $dockerImage ]]; then
-      wrapMe=(docker run --rm --workdir /csspeech --volume "$PWD:/csspeech" "$dockerImage")
+      wrapMe=(docker run --rm --workdir /csspeech --env LD_LIBRARY_PATH=/csspeech/build/lib --volume "$PWD:/csspeech" "$dockerImage")
     else
+      export LD_LIBRARY_PATH=$PWD/build/lib
       wrapMe=()
     fi
     "${wrapMe[@]}" ./ci/run-tests.sh \

@@ -27,10 +27,10 @@
 
 typedef struct ProxyServerInfo
 {
-    const char* host;
+    std::string host;
     int port;
-    const char* username;
-    const char* password;
+    std::string username;
+    std::string password;
 } ProxyServerInfo;
 
 #ifdef __cplusplus

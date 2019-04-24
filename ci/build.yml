@@ -591,7 +591,7 @@ jobs:
         displayName: Patch and build samples
       - template: get-docker-image.yml
         parameters:
-          imageBase: oobejre_ubuntu1604_x64 oobejre_ubuntu1804_x64
+          imageBase: oobejre_ubuntu1604_x64 oobejre_ubuntu1804_x64 oobejre_debian9_x64
           outvarImage: DOCKER_IMAGES
       - bash: |
           set -u -e -x -o pipefail
@@ -603,8 +603,8 @@ jobs:
             ./ci/samples/test-quickstart-java-jre.sh "$i" "$(JarName)" ||
               { ((++ERRORS)); vsts_logissue error "Running quickstart/java-jre for image $i failed."; }
             #
-            # Skip other samples on Ubuntu 18.04 in dev builds
-            [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
+            # Skip other samples on non-Ubuntu 16.04 in dev builds
+            [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
               ./ci/samples/test-samples-java-jre-console.sh "$i" "$(JarName)" ||
                 { ((++ERRORS)); vsts_logissue error "Running samples/java/jre/console for image $i failed."; }
           done
@@ -862,7 +862,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetLinuxTest '))
   pool:
     name: Hosted Ubuntu 1604
-  timeoutInMinutes: 130
+  timeoutInMinutes: 210
   steps:
   - bash: |
       set -x -e -o pipefail
@@ -886,7 +886,7 @@ jobs:
         Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64
+      imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64 oobedevdnc20_ubuntu1604_x64 oobedevdnc21_mcr_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
       set -u -e -x -o pipefail
@@ -935,8 +935,8 @@ jobs:
 
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
-        # Run the unit tests (skip Ubuntu 18.04 in dev builds)
-        [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
+        # Run the unit tests (skip non-Ubuntu 16.04 in dev builds)
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
           docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --env LD_LIBRARY_PATH=/test/private_lib --workdir /test "$i" bash - <<SCRIPT || \
           { ((++ERRORS)); vsts_logissue error "Running tests/functional/csharp/end2end for image $i failed."; }
             set -e -x -o pipefail
@@ -951,8 +951,8 @@ jobs:
         ./ci/samples/test-quickstart-csharp-dotnetcore.sh "$i" localnuget ||
           { ((++ERRORS)); vsts_logissue error "Running quickstart/csharp-dotnetcore for image $i failed."; }
 
-        # Skip other samples on Ubuntu 18.04 in dev builds
-        [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
+        # Skip other samples on non-Ubuntu 16.04 in dev builds
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
           ./ci/samples/test-samples-csharp-dotnetcore-console.sh "$i" localnuget ||
             { ((++ERRORS)); vsts_logissue error "Running samples/csharp/dotnetcore/console for image $i failed."; }
       done
@@ -1496,7 +1496,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxPythonOobeTest '))
   pool:
     name: Hosted Ubuntu 1604
-  timeoutInMinutes: 30
+  timeoutInMinutes: 70
   steps:
   - bash: |
       set -x -e -o pipefail
@@ -1511,7 +1511,7 @@ jobs:
       itemPattern: '**/*linux*_x86_64.whl'
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevpy35_ubuntu1604_x64 oobedevpy36_ubuntu1804_x64
+      imageBase: oobedevpy35_ubuntu1604_x64 oobedevpy36_ubuntu1804_x64 oobedevpy35_debian9_x64 oobedevpy37_debian9py37_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
       set -u -e -x -o pipefail
@@ -1529,11 +1529,14 @@ jobs:
         -D long-running=false
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
+        # Python 3.7 wheel is not produced in dev builds.
+        ! [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *py37* ]] || continue
+
         ./ci/samples/test-quickstart-python.sh "$i" wheelhouse ||
           { ((++ERRORS)); vsts_logissue error "Running quickstart/python for image $i failed."; }
 
-        # Skip other samples on Ubuntu 18.04 in dev builds
-        ! [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] || continue
+        # Skip other samples on non-Ubuntu 16.04 in dev builds
+        ! [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] || continue
 
         ./ci/samples/test-quickstart-python-jupyter.sh "$i" wheelhouse ||
           { ((++ERRORS)); vsts_logissue error "Running quickstart/python (Jupyter notebook) for image $i failed."; }
@@ -1642,7 +1645,7 @@ jobs:
     displayName: Create release drop
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevcpp_ubuntu1604_x64 oobedevcpp_ubuntu1604_x86 oobedevcpp_ubuntu1804_x64 oobedevcpp_ubuntu1804_x86
+      imageBase: oobedevcpp_ubuntu1604_x64 oobedevcpp_ubuntu1604_x86 oobedevcpp_ubuntu1804_x64 oobedevcpp_ubuntu1804_x86 oobedevcpp_debian9_x64 oobedevcpp_debian9_x86
       outvarImage: DOCKER_IMAGES
   - bash: |
       . ci/functions.sh &&
@@ -1683,15 +1686,15 @@ jobs:
           ((++ERRORS))
         }
 
-        # Skip other samples on Ubuntu 18.04 in dev builds
-        [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
+        # Skip other samples on non-Ubuntu 16.04 in dev builds
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
           ./ci/samples/test-samples-cpp-console.sh "$i" speechsdk "$architecture" || {
             vsts_logissue error "Running samples/cpp/windows/console sample for image $i failed."
             ((++ERRORS))
           }
 
-        # Run unit tests (skip Ubuntu 18.04 in dev builds)
-        [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *_ubuntu1804_* ]] ||
+        # Run unit tests (skip non-Ubuntu 16.04 in dev builds)
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
           docker run --rm --env LD_LIBRARY_PATH=/csspeech/buildfromdrop$architecture/bin --workdir /csspeech --volume "$PWD:/csspeech" "$i" ./ci/run-tests.sh \
             --test-configuration ci/test-config.json \
             --build-dir buildfromdrop$architecture \

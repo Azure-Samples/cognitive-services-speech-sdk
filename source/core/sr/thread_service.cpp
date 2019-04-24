@@ -33,7 +33,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         {
             Term();
         }
-        SPXAPI_CATCH_ONLY()
+        SPXAPI_CATCH_ONLY_NO_FORCED_UNWIND()
     }
 
     void CSpxThreadService::Term()

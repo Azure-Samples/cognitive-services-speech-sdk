@@ -98,32 +98,17 @@ Connection::Impl::Impl(const Client& config)
 {
     static once_flag initOnce;
 
-    call_once(initOnce, [this] {
-        if (platform_init() != 0) {
-            ThrowRuntimeError("Failed to initialize platform (azure-c-shared)");
-        }
-
-        // Set proxy if needed.
-        if (m_config.m_proxyServerInfo != nullptr)
-        {
-            auto proxy = m_config.m_proxyServerInfo;
-            if (proxy->host == nullptr || *proxy->host == '\0' || proxy->port <= 0)
-            {
-                ThrowRuntimeError("Invalid host name or port of the proxy server.");
-            }
-            string hostAndPort = proxy->host + string(":") + to_string(proxy->port);
-            string userNameAndPassword;
-            if (proxy->username != nullptr)
-            {
-                if (proxy->password == nullptr)
-                {
-                    ThrowRuntimeError("Invalid password of the proxy service. It should not be null if user name is specified");
-                }
-                userNameAndPassword = proxy->username + string(":") + proxy->password;
-            }
-            platform_set_http_proxy(hostAndPort.c_str(), userNameAndPassword.empty() ? nullptr : userNameAndPassword.c_str());
-        }
-    });
+    if (m_config.m_proxyServerInfo != nullptr)
+    {
+        PlatformInit(m_config.m_proxyServerInfo->host.c_str(),
+            m_config.m_proxyServerInfo->port,
+            m_config.m_proxyServerInfo->username.c_str(),
+            m_config.m_proxyServerInfo->password.c_str());
+    }
+    else
+    {
+        PlatformInit(nullptr, 0, nullptr, nullptr);
+    }
 
     m_threadService = m_config.m_threadService;
     Validate();
@@ -1243,6 +1228,37 @@ void Connection::Impl::InvokeRecognitionErrorCallback(RecognitionStatus status, 
     }
 
     this->Invoke([&] { callbacks->OnError(false, error, msg.c_str()); });
+}
+
+void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword)
+{
+    static once_flag initOnce;
+
+    call_once(initOnce, [&] {
+        if (platform_init() != 0) {
+            ThrowRuntimeError("Failed to initialize platform (azure-c-shared)");
+        }
+
+        // Set proxy if needed.
+        if (proxyHost != nullptr && *proxyHost != '\0')
+        {
+            if (proxyPort <= 0)
+            {
+                ThrowRuntimeError("Invalid port of the proxy server.");
+            }
+            string hostAndPort = proxyHost + string(":") + to_string(proxyPort);
+            string userNameAndPassword;
+            if (proxyUsername != nullptr)
+            {
+                if (proxyPassword == nullptr)
+                {
+                    ThrowRuntimeError("Invalid password of the proxy service. It should not be null if user name is specified");
+                }
+                userNameAndPassword = proxyUsername + string(":") + proxyPassword;
+            }
+            platform_set_http_proxy(hostAndPort.c_str(), userNameAndPassword.empty() ? nullptr : userNameAndPassword.c_str());
+        }
+    });
 }
 
 }}}}

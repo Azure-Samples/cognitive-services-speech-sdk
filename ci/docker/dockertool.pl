@@ -61,7 +61,23 @@ sub aptInstallWith {
    return 'apt-deps-begin', @_, 'apt-deps-end';
 }
 
+sub yumInstallWith {
+   return 'yum-deps-begin', @_, 'yum-deps-end';
+}
+
 my %images = (
+  dev_debian9_x64 => { # Only used for source build (OpenSSL 1.1)
+    version => 1,
+    spec => [
+        # Stage 0
+        qw/from-debian9-x64 stage_cmake_binary_ubuntu1604_x64/,
+        # Stage 1
+        qw/from-debian9-x64 stage_swig_ubuntu1604/,
+        # Image
+        qw/from-debian9-x64 copy-layer-01-usr-local/,
+        aptInstallWith(qw/devcore_debian9_deps devjava_debian9_deps/),
+        'builduser'],
+  },
   dev_ubuntu1604_x64 => { # Not used yet
     version => 2,
     spec => [
@@ -107,6 +123,14 @@ my %images = (
     version => 4,
     spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
   },
+  oobedevcpp_debian9_x64 => { # stretch
+    version => 1,
+    spec => ['from-debian9-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
+  },
+  oobedevcpp_fedora27_x64 => { # Note: not used yet, not published yet; just work-in-progress.
+    version => 'TESTLOCAL',
+    spec => ['from-fedora27-x64', yumInstallWith(qw/oobedevcpp_fedora oobe_fedora_deps test_deps/), 'builduser'],
+  },
   oobedevcpp_ubuntu1804_x86 => {
     version => 3,
     spec => ['from-ubuntu1804-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'builduser'],
@@ -114,6 +138,10 @@ my %images = (
   oobedevcpp_ubuntu1604_x86 => {
     version => 3,
     spec => ['from-ubuntu1604-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
+  },
+  oobedevcpp_debian9_x86 => { # stretch
+    version => 1,
+    spec => ['from-debian9-x86', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
   },
   oobejre_ubuntu1604_x64 => {
     version => 3,
@@ -123,6 +151,10 @@ my %images = (
     version => 3,
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobejre_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'builduser'],
   },
+  oobejre_debian9_x64 => {
+    version => 1,
+    spec => ['from-debian9-x64', aptInstallWith(qw/oobe_debian9_deps oobejre_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
+  },
   oobedevdnc20_ubuntu1604_x64 => {
     version => 4,
     spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc20_ubuntu1604_x64_deps', 'builduser'],
@@ -131,6 +163,20 @@ my %images = (
     version => 3,
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'oobedevdnc21_ubuntu1804_x64_deps', 'builduser'],
   },
+  oobedevdnc20_debian9_x64 => {
+    version => 1,
+    spec => ['from-debian9-x64', aptInstallWith(qw/oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'oobedevdnc20_debian9_x64_deps', 'builduser'],
+  },
+  # .NET Core development against official .NET Core images from the Microsoft Container Registry
+  oobedevdnc21_mcr_x64 => {
+    version => 1,
+    # Note: libssl1.0.2 is already in this specific image...
+    spec => ['from-mcrdncsdk21-x64', aptInstallWith(qw/oobe_debian9_deps oobe_ubuntu_gstreamer_deps test_deps/), 'builduser'],
+  },
+  oobedevpy35_debian9_x64 => {
+    version => 1,
+    spec => ['from-debian9-x64', aptInstallWith(qw/oobe_debian9_deps oobepython_ubuntu_deps test_deps/), 'oobepython_jupyter', 'builduser'],
+  },
   oobedevpy35_ubuntu1604_x64 => {
     version => 3,
     spec => ['from-ubuntu1604-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobepython_ubuntu_deps test_deps/), 'oobepython_jupyter', 'builduser'],
@@ -138,6 +184,11 @@ my %images = (
   oobedevpy36_ubuntu1804_x64 => {
     version => 3,
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobe_ubuntu1604_deps oobepython_ubuntu_deps test_deps_ubuntu1804/), 'oobepython_jupyter', 'builduser'],
+  },
+  oobedevpy37_debian9py37_x64 => {
+    version => 1,
+    # Note: libssl1.0.2 is already in this specific image...
+    spec => ['from-python37-x64', aptInstallWith(qw/oobe_debian9_deps test_deps/), 'oobepython_jupyter', 'builduser'],
   },
 );
 

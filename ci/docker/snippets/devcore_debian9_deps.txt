@@ -1,0 +1,13 @@
+        # Speech SDK Core build dependencies (on top of cmake)
+        build-essential \
+        libssl-dev \
+        uuid-dev \
+        libasound2-dev \
+        # Dependencies for gstreamer plugins
+        libgstreamer1.0-dev \
+        gstreamer1.0-plugins-base \
+        gstreamer1.0-plugins-good \
+        # opusparse is in bad plugin
+        gstreamer1.0-plugins-bad \
+        # mpg123audiodec is in ugly plugin
+        gstreamer1.0-plugins-ugly \

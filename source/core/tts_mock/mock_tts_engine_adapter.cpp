@@ -6,6 +6,7 @@
 //
 
 #include "stdafx.h"
+#include <math.h>
 #include "rest_tts_helper.h"
 #include "mock_tts_engine_adapter.h"
 #include "pull_audio_output_stream.h"

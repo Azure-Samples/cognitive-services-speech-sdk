@@ -252,7 +252,7 @@ public:
     /**
     * Sets the proxy server information, which is used to configure the connection to go through a proxy server.
     */
-    Client& SetProxyServerInfo(const char* proxyHost, int proxyPort, const char* proxyUsername = nullptr, const char* proxyPassword = nullptr);
+    Client& SetProxyServerInfo(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword);
 
     /**
     * When using OpenSSL only: sets a single trusted cert, optionally w/o CRL checks.
@@ -418,5 +418,7 @@ private:
 
      std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> m_threadService;
 };
+
+extern void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword);
 
 }}}}

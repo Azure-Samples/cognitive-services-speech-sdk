@@ -24,7 +24,7 @@ static void DoRecoFromCompressedPushStreamHelper(TestData fileName, std::shared_
     PushData(pushStream.get(), fileName.m_audioFilename, true);
     auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopContinuousRecognitionAsync().get();
-    SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
+    SPXTEST_REQUIRE(text == weather.m_utterance);
 }
 
 static void DoRecoFromCompressedPushStream(TestData fileName, AudioStreamContainerFormat containerType)
@@ -45,6 +45,7 @@ static void DoRecoFromCompressedPushStream(TestData fileName, AudioStreamContain
     {
         std::string str(e.what());
         std::string refException("Exception with an error code: 0x29 (SPXERR_GSTREAMER_NOT_FOUND_ERROR)");
+        CAPTURE(e.what());
         SPXTEST_REQUIRE(str.find(refException) != string::npos);
     }
 #endif
@@ -58,7 +59,7 @@ static void DoRecoFromCompressedPullStreamHelper(std::shared_ptr<SpeechRecognize
     recognizer->StartContinuousRecognitionAsync().get();
     auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopContinuousRecognitionAsync().get();
-    SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
+    SPXTEST_REQUIRE(text == weather.m_utterance);
 }
 
 static void DoRecoFromCompressedPullStream(TestData filename, AudioStreamContainerFormat containerType)
@@ -92,6 +93,7 @@ static void DoRecoFromCompressedPullStream(TestData filename, AudioStreamContain
     {
         std::string str(e.what());
         std::string refException("Exception with an error code: 0x29 (SPXERR_GSTREAMER_NOT_FOUND_ERROR)");
+        CAPTURE(e.what());
         SPXTEST_REQUIRE(str.find(refException) != string::npos);
     }
 #endif
@@ -115,7 +117,6 @@ TEST_CASE("compressed stream test", "[api][cxx]")
         DoRecoFromCompressedPushStream(weatheropus, AudioStreamContainerFormat::OGG_OPUS);
     }
 
-
     SPXTEST_SECTION("pull stream works mp3")
     {
         DoRecoFromCompressedPullStream(weathermp3, AudioStreamContainerFormat::MP3);
@@ -135,6 +136,7 @@ TEST_CASE("compressed stream test", "[api][cxx]")
         {
             std::string str(e.what());
             std::string refException("Exception with an error code: 0x28 (SPXERR_CONTAINER_FORMAT_NOT_SUPPORTED_ERROR)");
+            CAPTURE(e.what());
             SPXTEST_REQUIRE(str.find(refException) != string::npos);
         }
     }
@@ -160,7 +162,7 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
         PushData(pushStream.get(), weather.m_audioFilename);
         auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
         recognizer->StopContinuousRecognitionAsync().get();
-        SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
+        SPXTEST_REQUIRE(text == weather.m_utterance);
 
         //todo: we should allow switching recog mode. Fix this later.
         //pushData(pushStream.get(), weather.m_audioFilename);
@@ -185,7 +187,7 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
 
             auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
             recognizer->StopContinuousRecognitionAsync().get();
-            SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
+            SPXTEST_REQUIRE(text == weather.m_utterance);
         }
     }
 #if 0
@@ -223,7 +225,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         ConnectCallbacks(recognizer.get(), result);
         auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
         recognizer->StopContinuousRecognitionAsync().get();
-        SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
+        SPXTEST_REQUIRE(text == weather.m_utterance);
     }
     // Another normal case. no stop is a valid user case.
     SPXTEST_SECTION("start without stop")
@@ -234,7 +236,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         ConnectCallbacks(recognizer.get(), result);
         auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
 
-        SPXTEST_REQUIRE(text.compare(weather.m_utterance) == 0);
+        SPXTEST_REQUIRE(text == weather.m_utterance);
     }
 
     SPXTEST_SECTION("two starts in a row")
@@ -483,8 +485,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         recognitionEnd.get_future().get();
         recognizer->StopContinuousRecognitionAsync().get();
 
-        SPXTEST_REQUIRE(result.compare(weather.m_utterance) == 0);
-        SPXTEST_REQUIRE(error.empty());
+        SPXTEST_REQUIRE(result == weather.m_utterance);
+        SPXTEST_REQUIRE(error == "");
     }
 
     SPXTEST_SECTION("KWS throws exception given 11khz sampling rate")
@@ -529,6 +531,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto cancellation = CancellationDetails::FromResult(result);
         SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
         SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
+        CAPTURE(cancellation->ErrorDetails);
         SPXTEST_REQUIRE(cancellation->ErrorDetails.find("Failed to create transport request.") != std::string::npos);
     }
     SPXTEST_SECTION("return canceled in StartContinuousRecognitionAsync given an invalid endpoint")
@@ -557,6 +560,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         recognizer->StopContinuousRecognitionAsync().get();
 
         SPXTEST_REQUIRE(errorCode == CancellationErrorCode::ConnectionFailure);
+        CAPTURE(errorDetails);
         SPXTEST_REQUIRE(errorDetails.find("Failed to create transport request.") != std::string::npos);
     }
     SPXTEST_SECTION("Check that recognition can set authorization token")

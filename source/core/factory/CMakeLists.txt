@@ -12,7 +12,6 @@ include_directories("${CARBON_EXTERNAL}/json")
 include_directories("${COMMON}/include")
 include_directories("${SR}")
 include_directories("${TTS}")
-include_directories("${USP}/include")
 
 set(HEADERS
     "${SRC_DIR}/stdafx.h"

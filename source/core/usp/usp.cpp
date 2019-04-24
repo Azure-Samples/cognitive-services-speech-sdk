@@ -57,30 +57,20 @@ void Connection::WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLat
 
 Client& Client::SetProxyServerInfo(const char *proxyHost, int proxyPort, const char *proxyUsername, const char *proxyPassword)
 {
-#ifdef _MSC_VER
-#define strdup _strdup
-#endif
-    m_proxyServerInfo = std::shared_ptr<ProxyServerInfo>
-        (new ProxyServerInfo{ proxyHost != nullptr ? strdup(proxyHost) : nullptr,
-                              proxyPort,
-                              proxyUsername != nullptr ? strdup(proxyUsername) : nullptr,
-                              proxyPassword != nullptr ? strdup(proxyPassword) : nullptr }, 
-        [=](ProxyServerInfo *info) 
-        {
-            if (info->host)
-            {
-                free((void*)info->host);
-            }
-            if (info->password)
-            {
-                free((void*)info->password);
-            }
-            if (info->username)
-            {
-                free((void*)info->username);
-            }
-            delete info;
-        });
+    m_proxyServerInfo = std::make_shared<ProxyServerInfo>();
+    if (proxyHost)
+    {
+        m_proxyServerInfo->host = proxyHost;
+    }
+    m_proxyServerInfo->port = proxyPort;
+    if (proxyUsername)
+    {
+        m_proxyServerInfo->username = proxyUsername;
+    }
+    if (proxyPassword)
+    {
+        m_proxyServerInfo->password = proxyPassword;
+    }
     return *this;
 }
 

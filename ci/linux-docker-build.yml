@@ -9,6 +9,9 @@ jobs:
   pool:
     name: Hosted Ubuntu 1604
   timeoutInMinutes: 80
+  variables:
+    # Whether to publish binaries for the specific flavor.
+    Publish: true
   strategy:
     maxParallel: 4
     matrix:
@@ -30,11 +33,18 @@ jobs:
           SPEECHSDK_TARGET_PLATFORM: Linux-arm32
           SPEECHSDK_BUILD_CONFIGURATION: Release
           DOCKER_BASE: dev_ubuntu1604_arm32
+        Debian9 OpenSSL 1.1 x64 Debug:
+          SPEECHSDK_TARGET_PLATFORM: Linux-x64
+          SPEECHSDK_BUILD_CONFIGURATION: Debug
+          DOCKER_BASE: dev_debian9_x64
+          # Do not publish; this is just checking we can build on Debian 9 with
+          # OpenSSL 1.1, and run tests during build.
+          Publish: false
   steps:
   - bash: |
       set -x -e -o pipefail
-      # Emulation needed only on non-Intel
-      [[ $SPEECHSDK_TARGET_PLATFORM =~ ^Linux-(x86|x64)$ ]] || {
+      # Emulation need only on non-Intel
+      [[ $SPEECHSDK_TARGET_PLATFORM =~ ^(Linux|Debian9)-(x86|x64)$ ]] || {
         sudo apt-get update
         sudo apt-get install --yes binfmt-support qemu-user-static
       }
@@ -86,6 +96,7 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: Linux
       publishLocation: Container
+    condition: and(succeeded(), eq(variables['Publish'], 'true'))
   - template: test-during-build.yml
     parameters:
       dockerImage: $(DOCKER_IMAGE)
