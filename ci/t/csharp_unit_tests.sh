@@ -39,6 +39,9 @@ perl -p - \
   LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
   LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
   LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
+  BotRegion "$SPEECHSDK_BOT_REGION" \
+  BotSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
+  BotConnectionId "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
   tests/functional/csharp/end2end/csharp.runsettings \
   > "$runSettings" <<"SCRIPT"
   BEGIN {

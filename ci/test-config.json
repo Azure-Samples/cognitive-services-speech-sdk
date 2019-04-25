@@ -10,5 +10,10 @@
     "KEY": "${luis-key}",
     "REGION": "westus",
     "HOMEAUTOMATION_APPID": "b687b851-56c5-4d31-816f-35a741a3f0be"
+  },
+  "BOT": {
+    "REGION": "${virtualassistant-region}",
+    "SUBSCRIPTION": "${virtualassistant-subscription}",
+    "FUNCTIONALTESTBOT": "${virtualassistant-testbot}"
   }
 }

@@ -40,6 +40,9 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false
     displayName: Patch the sample app
   - bash: |

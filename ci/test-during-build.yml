@@ -22,6 +22,9 @@ steps:
       --testset $(SPEECHSDK_BUILD_TYPE) \
       -D luis-key=$(luis-westus-s0-201809-key1) \
       -D speech-key=$(NorthEuropeKeySkyman) \
+      -D virtualassistant-region=$(BotRegion) \
+      -D virtualassistant-subscription=$(BotSubscriptionKey) \
+      -D virtualassistant-testbot=$(BotFunctionalTest) \
       -D long-running=false \
       ${{ parameters.runTestArgs }} -- ${{ parameters.testsToRun }}
   env:
@@ -34,6 +37,9 @@ steps:
     perl ci/evaluate-test-config.pl --verbose --format azuredevops-variable --input ci/test-config.json \
       -D luis-key=$(luis-westus-s0-201809-key1) \
       -D speech-key=$(NorthEuropeKeySkyman) \
+      -D virtualassistant-region=$(BotRegion) \
+      -D virtualassistant-subscription=$(BotSubscriptionKey) \
+      -D virtualassistant-testbot=$(BotFunctionalTest) \
       -D long-running=false
   displayName: Set test variables
 - ${{ parameters.extraTests }}

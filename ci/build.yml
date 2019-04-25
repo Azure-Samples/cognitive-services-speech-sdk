@@ -532,6 +532,9 @@ jobs:
        eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
          -D luis-key=$(luis-westus-s0-201809-key1) \
          -D speech-key=$(NorthEuropeKeySkyman) \
+         -D virtualassistant-region=$(BotRegion) \
+         -D virtualassistant-subscription=$(BotSubscriptionKey) \
+         -D virtualassistant-testbot=$(BotFunctionalTest) \
          -D long-running=false)
        . ci/functions.sh
        SPEECHSDK_SPEECH_AUTHTOKEN="$(getAuthorizationToken "$SPEECHSDK_SPEECH_KEY" "$SPEECHSDK_SPEECH_REGION")"
@@ -581,11 +584,17 @@ jobs:
             ci/test-config.json \
             -D luis-key=$(luis-westus-s0-201809-key1) \
             -D speech-key=$(NorthEuropeKeySkyman) \
+            -D virtualassistant-region=$(BotRegion) \
+            -D virtualassistant-subscription=$(BotSubscriptionKey) \
+            -D virtualassistant-testbot=$(BotFunctionalTest) \
             -D long-running=false
           patchSamplesFromTestConfig public_samples/samples/java/jre/console \
             ci/test-config.json \
             -D luis-key=$(luis-westus-s0-201809-key1) \
             -D speech-key=$(NorthEuropeKeySkyman) \
+            -D virtualassistant-region=$(BotRegion) \
+            -D virtualassistant-subscription=$(BotSubscriptionKey) \
+            -D virtualassistant-testbot=$(BotFunctionalTest) \
             -D long-running=false
           ./ci/run-maven.sh public_samples "$(MavenRoot)"
         displayName: Patch and build samples
@@ -628,6 +637,9 @@ jobs:
           eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
             -D luis-key=$(luis-westus-s0-201809-key1) \
             -D speech-key=$(NorthEuropeKeySkyman) \
+            -D virtualassistant-region=$(BotRegion) \
+            -D virtualassistant-subscription=$(BotSubscriptionKey) \
+            -D virtualassistant-testbot=$(BotFunctionalTest) \
             -D long-running=false)
           . ci/functions.sh
           SPEECHSDK_SPEECH_AUTHTOKEN="$(getAuthorizationToken "$SPEECHSDK_SPEECH_KEY" "$SPEECHSDK_SPEECH_REGION")"
@@ -896,6 +908,9 @@ jobs:
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false)
       # dotnet test does not allow to supply TestRunParameters from command-line?!
       perl -pi - \
@@ -906,6 +921,9 @@ jobs:
         LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
         LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
         LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
+        BotRegion "$SPEECHSDK_BOT_REGION" \
+        BotSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
+        BotConnectionId "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
         tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
         BEGIN {
           %A = splice(@ARGV, 0, $#ARGV);
@@ -918,11 +936,17 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false
       patchSamplesFromTestConfig public_samples/samples/csharp/sharedcontent/console \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false
       mkdir localnuget
       cp --verbose "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
@@ -991,6 +1015,9 @@ jobs:
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false)
       # dotnet test does not allow to supply TestRunParameters from command-line?!
       perl -pi - \
@@ -1001,6 +1028,9 @@ jobs:
         LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
         LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
         LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
+        BotRegion "$SPEECHSDK_BOT_REGION" \
+        BotSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
+        BotConnectionId "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
         tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
         BEGIN {
           %A = splice(@ARGV, 0, $#ARGV);
@@ -1253,6 +1283,9 @@ jobs:
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false)
       cat > "$FAKE_BUILD/MainActivity.properties" <<EOF
       SpeechSubscriptionKey=$SPEECHSDK_SPEECH_KEY
@@ -1521,11 +1554,17 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false
       patchSamplesFromTestConfig public_samples/samples/python/console \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
@@ -1653,11 +1692,17 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false &&
       patchSamplesFromTestConfig public_samples/samples/cpp/windows/console \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false
     displayName: Patch quickstart
   - bash: |
@@ -1701,6 +1746,9 @@ jobs:
             --platform Linux-$architecture-Release \
             -D luis-key=$(luis-westus-s0-201809-key1) \
             -D speech-key=$(NorthEuropeKeySkyman) \
+            -D virtualassistant-region=$(BotRegion) \
+            -D virtualassistant-subscription=$(BotSubscriptionKey) \
+            -D virtualassistant-testbot=$(BotFunctionalTest) \
             -D long-running=false -- cxx_core_tests cxx_api_tests || {
             vsts_logissue error "Running tests for image $i failed."
             ((++ERRORS))
@@ -1872,6 +1920,9 @@ jobs:
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false)
       # run the tests
       ci/apple/multiplatformtests.sh tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
@@ -1888,11 +1939,17 @@ jobs:
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false)
       patchSamplesFromTestConfig public_samples/quickstart/objectivec-ios/helloworld/helloworld \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
         -D long-running=false
       # run the tests
       ci/apple/multiplatformtests.sh public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \

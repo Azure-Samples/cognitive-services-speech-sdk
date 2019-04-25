@@ -14,5 +14,8 @@
         <Parameter name="LanguageUnderstandingSubscriptionKey" value=""/>
         <Parameter name="LanguageUnderstandingServiceRegion" value="westus"/>
         <Parameter name="LanguageUnderstandingHomeAutomationAppId" value=""/>
+        <Parameter name="BotConnectionId" value=""/>
+        <Parameter name="BotSubscriptionKey" value=""/>
+        <Parameter name="BotRegion" value="westus2"/>
     </TestRunParameters>
 </RunSettings>
