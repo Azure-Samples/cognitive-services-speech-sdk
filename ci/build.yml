@@ -1880,6 +1880,7 @@ jobs:
     continueOnError: true
   - bash: |
       set -u -e -o pipefail -x
+      mkdir -p "$(OutputDirectory)/logs"
       . ci/functions.sh
       # set up framework in the correct position - the Xcode project expects the framework here
       ln -s '$(Build.Repository.LocalPath)/xcode-build-output/$(FrameworkName).framework' public_samples/quickstart/objectivec-ios/
@@ -1898,6 +1899,27 @@ jobs:
         helloworldUITests helloworldUITests-Runner $(OutputDirectory)/logs quickstart $(microsoftDevTeamId) --usegui
     continueOnError: true
     displayName: "Run iOS UI test for quickstart"
+  - bash: |
+      set -u -e -o pipefail -x
+      mkdir -p "$(OutputDirectory)/logs"
+      . ci/functions.sh
+      # set up framework in the correct position - the Xcode project expects the framework here
+      ln -s '$(Build.Repository.LocalPath)/xcode-build-output/$(FrameworkName).framework' public_samples/samples/objective-c/ios/
+      # fix the keys
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false)
+      patchSamplesFromTestConfig public_samples/samples/objective-c/ios/speech-samples/speech-samples \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D long-running=false
+      # run the tests
+      ci/apple/multiplatformtests.sh public_samples/samples/objective-c/ios/speech-samples/speech-samples.xcodeproj \
+        speech-samplesUITests speech-samplesUITests-Runner $(OutputDirectory)/logs speech-samples $(microsoftDevTeamId) --usegui
+    continueOnError: true
+    displayName: "Run iOS UI test for extended samples"
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: '**/test-*.xml'
