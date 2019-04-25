@@ -35,12 +35,16 @@ CSpxRestTtsAuthenticator::~CSpxRestTtsAuthenticator()
 
 void CSpxRestTtsAuthenticator::Init()
 {
-    m_accessToken = HttpPost(m_issueTokenUri, m_subscriptionKey);
-
     // Access token expires every 10 minutes. Renew it every 9 minutes only
     m_accessTokenRenewer.Start(9 * 60 * 1000, std::bind([this]() {
         RenewAccessToken();
+        m_accessTokenInitialized = true;
     }));
+
+    while (!m_accessTokenInitialized)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 }
 
 void CSpxRestTtsAuthenticator::Term()
@@ -100,16 +104,47 @@ std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri,
 #endif
 
     HTTP_HEADERS_HANDLE httpRequestHeaders = HTTPHeaders_Alloc();
+    if (!httpRequestHeaders)
+    {
+        HTTPAPI_CloseConnection(http_connect);
+        throw std::runtime_error("Could not allocate HTTP request headers");
+    }
+
     HTTP_HEADERS_HANDLE httpResponseHeaders = HTTPHeaders_Alloc();
+    if (!httpResponseHeaders)
+    {
+        HTTPHeaders_Free(httpRequestHeaders);
+        HTTPAPI_CloseConnection(http_connect);
+        throw std::runtime_error("Could not allocate HTTP response headers");
+    }
+
     BUFFER_HANDLE buffer = BUFFER_new();
+    if (!buffer)
+    {
+        HTTPHeaders_Free(httpRequestHeaders);
+        HTTPHeaders_Free(httpResponseHeaders);
+        HTTPAPI_CloseConnection(http_connect);
+        throw std::runtime_error("Could not allocate HTTP data buffer");
+    }
 
     std::string accessToken;
     try
     {
         // Add http headers
-        HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Host", host_str.data());
-        HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Ocp-Apim-Subscription-Key", subscriptionKey.data());
-        HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Content-Length", "0");
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Host", host_str.data()) != HTTP_HEADERS_OK)
+        {
+            throw std::runtime_error("Could not add HTTP request header: Host");
+        }
+
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Ocp-Apim-Subscription-Key", subscriptionKey.data()) != HTTP_HEADERS_OK)
+        {
+            throw std::runtime_error("Could not add HTTP request header: Ocp-Apim-Subscription-Key");
+        }
+
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Content-Length", "0") != HTTP_HEADERS_OK)
+        {
+            throw std::runtime_error("Could not add HTTP request header: Content-Length");
+        }
 
         // Execute http request
         unsigned int statusCode = 0;

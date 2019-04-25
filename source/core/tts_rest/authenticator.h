@@ -37,6 +37,8 @@ public:
         }
 
         std::thread([this, intervalInMs, task]() {
+            task();
+
             int checkTimes = intervalInMs / m_checkIntervalInMs;
             int remainingMs = intervalInMs % m_checkIntervalInMs;
 
@@ -137,6 +139,7 @@ private:
     std::string m_issueTokenUri;
     std::string m_subscriptionKey;
     std::string m_accessToken;
+    std::atomic<bool> m_accessTokenInitialized{ false };
     Timer m_accessTokenRenewer;
     std::mutex m_mutex;
 };
