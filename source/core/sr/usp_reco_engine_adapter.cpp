@@ -419,6 +419,10 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedP
 
     // Set output format.
     client.SetOutputFormat(GetOutputFormat(properties));
+    auto pollingInterval = static_cast<uint16_t>(stoi(properties->GetStringValue("SPEECH-USPPollingInterval", "10")));
+    SPX_DBG_TRACE_VERBOSE("%s: Setting Websocket Polling interval to %d", __FUNCTION__, pollingInterval);
+
+    client.SetPollingIntervalms(pollingInterval);
 
     return client;
 }

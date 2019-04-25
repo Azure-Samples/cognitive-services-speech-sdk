@@ -367,6 +367,15 @@ public:
         return *this;
     }
 
+    /**
+    * Sets the polling interval the client will use.
+    */
+    Client& SetPollingIntervalms(const std::uint32_t pollingInterval)
+    {
+        m_pollingIntervalms = pollingInterval;
+        return *this;
+    }
+
      /**
      * Establishes connection to the service.
      */
@@ -417,6 +426,8 @@ private:
      std::string m_audioResponseFormat;
 
      std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> m_threadService;
+
+     std::uint32_t m_pollingIntervalms = 10;
 };
 
 extern void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword);

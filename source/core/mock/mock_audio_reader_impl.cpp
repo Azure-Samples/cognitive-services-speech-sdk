@@ -16,9 +16,14 @@ namespace Speech {
 namespace Impl {
 
 
-void ISpxMockAudioReaderImpl::SetRealTimePercentage(uint8_t percentage)
+void ISpxMockAudioReaderImpl::SetRealTimeThrottlePercentage(uint8_t percentage)
 {
     m_simulateRealtimePercentage = percentage;
+}
+
+uint8_t ISpxMockAudioReaderImpl::GetRealTimeThrottlePercentage()
+{
+    return m_simulateRealtimePercentage;
 }
 
 uint16_t ISpxMockAudioReaderImpl::GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat)

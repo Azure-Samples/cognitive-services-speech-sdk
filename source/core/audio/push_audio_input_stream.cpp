@@ -19,7 +19,6 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-
 CSpxPushAudioInputStream::CSpxPushAudioInputStream() :
     m_bytesInBuffer(0),
     m_ptrIntoBuffer(nullptr),
@@ -38,13 +37,6 @@ void CSpxPushAudioInputStream::SetFormat(SPXWAVEFORMATEX* format)
     SPX_DBG_TRACE_VERBOSE_IF(TURN_ON_VERBOSE_AUDIO_DEBUGGING, "CSpxPushAudioInputStream::SetFormat is called with format 0x%x", format);
     // Copy the format
     memcpy(m_format.get(), format, formatSize);
-}
-
-void CSpxPushAudioInputStream::SetRealTimePercentage(uint8_t percentage)
-{
-    SPX_DBG_TRACE_VERBOSE_IF(TURN_ON_VERBOSE_AUDIO_DEBUGGING, "SetRealTimePercentage is %d", percentage);
-
-    m_simulateRealtimePercentage = percentage;
 }
 
 void CSpxPushAudioInputStream::Write(uint8_t* buffer, uint32_t size)
@@ -128,11 +120,6 @@ uint32_t CSpxPushAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
         m_bytesLeftInBuffer -= bytesThisLoop;
         bytesToRead -= bytesThisLoop;
         totalBytesRead += bytesThisLoop;
-        if (m_format->wFormatTag == WAVE_FORMAT_PCM)
-        {
-            // for compressed format rate control is inside gstreamer adapter
-            SimulateRealtime(bytesThisLoop);
-        }
     }
 
     SPX_DBG_TRACE_VERBOSE("CSpxPushAudioInputStream::Read: totalBytesRead=%d", totalBytesRead);
@@ -177,15 +164,4 @@ void CSpxPushAudioInputStream::SignalEndOfStream()
     m_endOfStream = true;
     m_cv.notify_all();
 }
-
-void CSpxPushAudioInputStream::SimulateRealtime(uint32_t bytesToSimulateRealTime)
-{
-    if (m_simulateRealtimePercentage > 0)
-    {
-        auto milliseconds = bytesToSimulateRealTime * 1000 / m_format->nAvgBytesPerSec * m_simulateRealtimePercentage / 100;
-        std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-    }
-}
-
-
 } } } } // Microsoft::CognitiveServices::Speech::Impl

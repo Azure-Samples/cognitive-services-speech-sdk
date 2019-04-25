@@ -169,6 +169,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
+                recognizer.Canceled += (s, e) =>
+                {
+                    Console.WriteLine("Canceled: " + e.ToString());
+                };
+
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
@@ -210,6 +215,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         Console.WriteLine("Final result UNEXPECTED : " + e.Result.Text.ToString());
                         tcs.TrySetResult(false);
                     }
+                };
+
+                recognizer.Canceled += (s, e) =>
+                {
+                    Console.WriteLine("Canceled: " + e.ToString());
                 };
 
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
@@ -256,6 +266,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         tcsFoundRecognized = idx++;
                         tcs.TrySetResult(true);
                     }
+                };
+
+                recognizer.Canceled += (s, e) =>
+                {
+                    Console.WriteLine("Canceled: " + e.ToString());
                 };
 
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
@@ -306,6 +321,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
+                recognizer.Canceled += (s, e) =>
+                {
+                    Console.WriteLine("Canceled: " + e.ToString());
+                };
+
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Secret.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
@@ -352,6 +372,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         tcs.TrySetResult(false);
                     }
                 };
+
+                recognizerSecret.Canceled += (s, e) =>
+                {
+                    Console.WriteLine("Canceled: " + e.ToString());
+                };
             }
 
             var audioInputComputer = AudioConfig.FromWavFileInput(TestData.Kws.Computer.AudioFile);
@@ -379,6 +404,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         Console.WriteLine("Final result UNEXPECTED(Computer.ModelKeyword): " + e.Result.Text.ToString());
                         tcs.TrySetResult(false);
                     }
+                };
+
+                recognizerComputer.Canceled += (s, e) =>
+                {
+                    Console.WriteLine("Canceled: " + e.ToString());
                 };
             }
 
@@ -435,6 +465,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 recognizerSecret.Canceled += (s, e) =>
                 {
+                    Console.WriteLine("Secret Canceled: " + e.ToString());
+
                     if (2 == Interlocked.Increment(ref numCanceledCalled))
                         tcsCanceled.TrySetResult(true);
                 };
@@ -466,6 +498,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 recognizerComputer.Canceled += (s, e) =>
                 {
+                    Console.Write("Computer Canceled: " + e.ToString());
+
                     if (2 == Interlocked.Increment(ref numCanceledCalled))
                         tcsCanceled.TrySetResult(true);
                 };
@@ -640,6 +674,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 recognizer.Canceled += (s, e) =>
                 {
+                    Console.WriteLine("Canceled: " + e.ToString());
+
                     if (e.Reason == CancellationReason.EndOfStream)
                         Interlocked.Increment(ref numCanceledCalled);
                     tcsCanceled.TrySetResult(e.Reason == CancellationReason.EndOfStream);
@@ -876,6 +912,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         Console.WriteLine("Final result UNEXPECTED: " + e.Result.Text.ToString() + ", " + e.Result.IntentId);
                         tcs.TrySetResult(false);
                     }
+                };
+
+                recognizer.Canceled += (s, e) =>
+                {
+                    Console.WriteLine("Canceled: " + e.ToString());
                 };
 
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);

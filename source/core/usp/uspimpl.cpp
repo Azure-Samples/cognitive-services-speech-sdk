@@ -148,7 +148,7 @@ void Connection::Impl::WorkLoop(shared_ptr<Connection::Impl> ptr)
         DoWork(ptr);
 
         std::packaged_task<void()> task([ptr]() { WorkLoop(ptr); });
-        ptr->m_threadService->ExecuteAsync(std::move(task), std::chrono::milliseconds(100));
+        ptr->m_threadService->ExecuteAsync(std::move(task), std::chrono::milliseconds(ptr->m_config.m_pollingIntervalms));
     });
 
     ptr->m_threadService->ExecuteAsync(std::move(task));

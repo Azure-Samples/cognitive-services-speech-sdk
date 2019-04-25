@@ -8,6 +8,7 @@
 #pragma once
 #include "stdafx.h"
 #include "interface_helpers.h"
+#include "service_helpers.h"
 #include <queue>
 
 
@@ -19,7 +20,6 @@ namespace Impl {
 
 class CSpxPushAudioInputStream : 
     public ISpxAudioStreamInitFormat,
-    public ISpxAudioStreamInitRealTime,
     public ISpxAudioStream,
     public ISpxAudioStreamWriter,
     public ISpxAudioStreamReader
@@ -30,7 +30,6 @@ public:
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitFormat)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitRealTime)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStream)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamWriter)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamReader)
@@ -38,9 +37,6 @@ public:
 
     // --- ISpxAudioStreamInitFormat ---
     void SetFormat(SPXWAVEFORMATEX* format) override;
-
-    // --- ISpxAudioStreamInitRealTime ---
-    void SetRealTimePercentage(uint8_t percentage) override;
 
     // --- ISpxAudioStreamWriter ---
     void Write(uint8_t* buffer, uint32_t size) override;
@@ -59,11 +55,7 @@ private:
 
     void SignalEndOfStream();
 
-    void SimulateRealtime(uint32_t bytesToSimulateRealTime);
-
     std::shared_ptr<SPXWAVEFORMATEX> m_format;
-
-    uint8_t m_simulateRealtimePercentage = 0;     // 0 == as fast as possible; 100 == real time; 200 == 2x slower than real time
 
     std::mutex m_mutex;
     std::condition_variable m_cv;
@@ -73,7 +65,7 @@ private:
     uint32_t m_bytesInBuffer;
     uint8_t* m_ptrIntoBuffer;
     uint32_t m_bytesLeftInBuffer;
-
+    
     bool m_endOfStream;
 };
 

@@ -54,7 +54,6 @@ using namespace std;
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
-constexpr std::chrono::seconds CSpxAudioStreamSession::MaxBufferedBeforeOverflow;
 constexpr std::chrono::milliseconds CSpxAudioStreamSession::MaxBufferedBeforeSimulateRealtime;
 seconds CSpxAudioStreamSession::StopRecognitionTimeout = 3s;
 
@@ -75,7 +74,8 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_isKwsProcessor{ false },
     m_isReliableDelivery{ false },
     m_lastErrorGlobalOffset{ 0 },
-    m_currentTurnGlobalOffset{ 0 }
+    m_currentTurnGlobalOffset{ 0 },
+    m_bytesTransited(0)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 }
@@ -200,10 +200,6 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceFile);
     SetAudioConfigurationInProperties();
 
-    // Limit the maximal speed to 2 times of real-time streaming
-    auto realTime = SpxQueryInterface<ISpxAudioStreamInitRealTime>(audioFilePump);
-    realTime->SetRealTimePercentage(SimulateRealtimePercentage);
-
     m_isReliableDelivery = true;
 }
 
@@ -271,10 +267,6 @@ void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> str
 
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceStream);
     SetAudioConfigurationInProperties();
-
-    // Limit the maximal speed to 2 times of real-time streaming
-    auto realTime = SpxQueryInterface<ISpxAudioStreamInitRealTime>(stream);
-    realTime->SetRealTimePercentage(50);
 
     m_isReliableDelivery = true;
 }
@@ -360,8 +352,7 @@ void CSpxAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
 
 void CSpxAudioStreamSession::ProcessAudio(const DataChunkPtr& audioChunk)
 {
-    static_assert(MaxBufferedBeforeSimulateRealtime < MaxBufferedBeforeOverflow,
-        "Buffer size triggering real time data consumption cannot be bigger than overflow limit");
+    SPX_DBG_TRACE_ERROR_IF(MaxBufferedBeforeSimulateRealtime > m_maxBufferedBeforeOverflow, "Buffer size triggering real time data consumption cannot be bigger than overflow limit");
     SPX_DBG_TRACE_INFO("Received audio chunk: time: %s, size:%d.", PAL::GetTimeInString(audioChunk->receivedTime).c_str(), audioChunk->size);
 
     SlowDownThreadIfNecessary(audioChunk->size);
@@ -375,7 +366,7 @@ void CSpxAudioStreamSession::ProcessAudio(const DataChunkPtr& audioChunk)
             }
 
             auto buffered = milliseconds(m_audioBuffer->StashedSizeInBytes() * 1000 / m_format->nAvgBytesPerSec);
-            overflowHappened = buffered > MaxBufferedBeforeOverflow;
+            overflowHappened = buffered > m_maxBufferedBeforeOverflow;
             if (overflowHappened)
             {
                 // drop everything from the buffer
@@ -414,25 +405,31 @@ void CSpxAudioStreamSession::ProcessAudio(const DataChunkPtr& audioChunk)
 
 void CSpxAudioStreamSession::SlowDownThreadIfNecessary(uint32_t dataSize)
 {
-    // Check whether we have too much data in the buffer,
-    // if yes we need to put the pumping thread to sleep.
-    bool shouldSlowdown = false;
-    uint32_t avgBytesPerSec = 0;
+    // Slowdown the thread anytime we have sent more than 5 seconds of audio.
+    // Also, if there is more than 500ms of unsent audio in the buffer, double the slowdown rate.
+
+    uint8_t slowdownRate = 0;
+    m_bytesTransited += dataSize;
+
+    auto buffer = m_audioBuffer;
+
+    if (m_bytesTransited >=  m_maxFastLaneSizeBytes)
     {
-        unique_lock<mutex> formatLock(m_formatMutex);
-        auto buffer = m_audioBuffer;
-        if (m_format && buffer)
+        slowdownRate = SimulateRealtimePercentage;
+    }
+
+    if (buffer)
+    {
+        if (buffer->StashedSizeInBytes() > m_maxBufferedSizeBeforeThrottleBytes)
         {
-            avgBytesPerSec = m_format->nAvgBytesPerSec;
-            auto buffered = milliseconds(buffer->StashedSizeInBytes() * 1000 / avgBytesPerSec);
-            shouldSlowdown = buffered > MaxBufferedBeforeSimulateRealtime;
+            slowdownRate += SimulateRealtimePercentage;
         }
     }
 
-    if (shouldSlowdown)
+    if (slowdownRate)
     {
         // Sleep to slow down pulling.
-        auto sleepPeriod = std::chrono::milliseconds(dataSize * 1000 / avgBytesPerSec * SimulateRealtimePercentage / 100);
+        auto sleepPeriod = std::chrono::milliseconds(dataSize * 1000 / m_avgBytesPerSecond * slowdownRate / 100);
         SPX_DBG_TRACE_VERBOSE("%s - Stashing ... sleeping for %d ms", __FUNCTION__, sleepPeriod.count());
         std::this_thread::sleep_for(sleepPeriod);
     }
@@ -1916,6 +1913,16 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     {
         FireSessionStartedEvent();
     }
+    else
+    {
+        // Disable the fast lane for KWS.
+        auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+        auto hasProperty = properties->GetStringValue("SPEECH-TransmitLengthBeforThrottleMs", "");
+        if (hasProperty.empty())
+        {
+            properties->SetStringValue("SPEECH-TransmitLengthBeforThrottleMs", "0");
+        }
+    }
 
     if (!m_audioPump)
     {
@@ -1930,6 +1937,8 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
 
     if (!m_audioBuffer)
     {
+        SetThrottleVariables(waveformat.get());
+
         m_audioBuffer = std::make_shared<PcmAudioBuffer>(*waveformat);
     }
     m_audioBuffer->NewTurn();
@@ -2034,6 +2043,19 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStarting(const SPXWAVEFORMATE
     {
         m_audioProcessor->SetFormat(format);
     }
+}
+
+void CSpxAudioStreamSession::SetThrottleVariables(const SPXWAVEFORMATEX* format)
+{
+    // Look for runtime buffer overrides. These are set once when the buffer is created.
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    m_maxBufferedBeforeOverflow = seconds(stoi(properties->GetStringValue("SPEECH-MaxBufferSizeSeconds", "60")));
+    m_maxTransmittedInFastLane = milliseconds(stoi(properties->GetStringValue("SPEECH-TransmitLengthBeforThrottleMs", "5000")));
+
+    m_maxFastLaneSizeBytes = (format->nAvgBytesPerSec / 1000) * m_maxTransmittedInFastLane.count();
+    m_maxBufferedSizeBeforeThrottleBytes = (format->nAvgBytesPerSec / 1000) * MaxBufferedBeforeSimulateRealtime.count();
+    m_avgBytesPerSecond = format->nAvgBytesPerSec;
+    SPX_DBG_TRACE_VERBOSE("%s: FastLane size %" PRIu64 " MaxBuffered Unthrottled %" PRIu64, __FUNCTION__, m_maxFastLaneSizeBytes, m_maxBufferedSizeBeforeThrottleBytes);
 }
 
 void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingFromState)

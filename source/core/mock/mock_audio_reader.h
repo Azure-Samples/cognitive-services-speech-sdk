@@ -25,7 +25,6 @@ public:
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamReader)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitRealTime)
     SPX_INTERFACE_MAP_END()
 
 

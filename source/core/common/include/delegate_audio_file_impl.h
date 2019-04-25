@@ -15,7 +15,7 @@ namespace Speech {
 namespace Impl {
 
 
-class ISpxDelegateAudioFileImpl : public ISpxAudioFile, public ISpxAudioStreamInitRealTime
+class ISpxDelegateAudioFileImpl : public ISpxAudioFile
 {
     // --- ISpxAudioFile
 
@@ -26,15 +26,6 @@ class ISpxDelegateAudioFileImpl : public ISpxAudioFile, public ISpxAudioStreamIn
 
     void SetContinuousLoop(bool value) override { m_delegateToAudioFile->SetContinuousLoop(value); }
     void SetIterativeLoop(bool value) override { m_delegateToAudioFile->SetIterativeLoop(value); }
-
-    // --- ISpxAudioStreamInitRealTime
-
-    void SetRealTimePercentage(uint8_t percentage) override
-    {
-        auto realTime = SpxQueryInterface<ISpxAudioStreamInitRealTime>(m_delegateToAudioFile);
-        realTime->SetRealTimePercentage(percentage);
-    }
-
 
 protected:
 

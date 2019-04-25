@@ -7,6 +7,7 @@
 
 #pragma once
 #include "stdafx.h"
+#include "service_helpers.h"
 #include "interface_helpers.h"
 
 
@@ -18,7 +19,6 @@ namespace Impl {
 
 class CSpxPullAudioInputStream : 
     public ISpxAudioStreamReaderInitCallbacks,
-    public ISpxAudioStreamInitRealTime,
     public ISpxAudioStreamInitFormat,
     public ISpxAudioStream,
     public ISpxAudioStreamReader
@@ -30,17 +30,13 @@ public:
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitFormat)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitRealTime)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamReaderInitCallbacks)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStream)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamReader)
-        SPX_INTERFACE_MAP_END()
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioStreamInitFormat ---
     void SetFormat(SPXWAVEFORMATEX* format) override;
-
-    // --- ISpxAudioStreamInitRealTime ---
-    void SetRealTimePercentage(uint8_t percentage) override;
 
     // --- ISpxAudioStreamReaderInitCallbacks ---
     void SetCallbacks(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, ISpxAudioStreamReaderInitCallbacks::CloseCallbackFunction_Type closeCallback) override;
@@ -54,14 +50,10 @@ private:
 
     DISABLE_COPY_AND_MOVE(CSpxPullAudioInputStream);
 
-    void SimulateRealTime(uint32_t bytesToSimulateRealTime);
-
     std::shared_ptr<SPXWAVEFORMATEX> m_format;
 
     ReadCallbackFunction_Type m_readCallback;
     CloseCallbackFunction_Type m_closeCallback;
-
-    uint8_t m_simulateRealtimePercentage = 0;     // 0 == as fast as possible; 100 == real time; 200 == 2x slower than real time
 };
 
 

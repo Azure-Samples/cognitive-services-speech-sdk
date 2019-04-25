@@ -45,6 +45,10 @@ void CSpxWavFileReader::Open(const wchar_t* fileName)
     SPX_IFTRUE_THROW_HR(file->eof(), SPXERR_UNEXPECTED_EOF);
 
     m_file = std::move(file);
+
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    auto hasProperty = properties->GetStringValue("CARBON-INTERNAL-MOCK-WaveFileRealTimeAudioPercentage", "0");
+    m_simulateRealtimePercentage = static_cast<uint8_t>(stoi(hasProperty));
 }
 
 void CSpxWavFileReader::Close()
@@ -74,11 +78,6 @@ void CSpxWavFileReader::SetContinuousLoop(bool value)
 void CSpxWavFileReader::SetIterativeLoop(bool value)
 {
     m_iterativeAudioLoop = value;
-}
-
-void CSpxWavFileReader::SetRealTimePercentage(uint8_t percentage)
-{
-    m_simulateRealtimePercentage = percentage;
 }
 
 uint16_t CSpxWavFileReader::GetFormat(SPXWAVEFORMATEX* format, uint16_t cbFormat)

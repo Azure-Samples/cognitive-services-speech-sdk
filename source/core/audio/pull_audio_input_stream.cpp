@@ -39,11 +39,6 @@ void CSpxPullAudioInputStream::SetFormat(SPXWAVEFORMATEX* format)
     memcpy(m_format.get(), format, formatSize);
 }
 
-void CSpxPullAudioInputStream::SetRealTimePercentage(uint8_t percentage)
-{
-    m_simulateRealtimePercentage = percentage;
-}
-
 void CSpxPullAudioInputStream::SetCallbacks(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback)
 {
     m_readCallback = readCallback;
@@ -66,11 +61,6 @@ uint16_t CSpxPullAudioInputStream::GetFormat(SPXWAVEFORMATEX* formatBuffer, uint
 uint32_t CSpxPullAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
 {
     auto bytesActuallyRead = m_readCallback(buffer, bytesToRead);
-    if (m_format->wFormatTag == WAVE_FORMAT_PCM)
-    {
-        // for compressed format rate control is inside gstreamer adapter
-        SimulateRealTime(bytesActuallyRead);
-    }
     return bytesActuallyRead;
 }
 
@@ -82,15 +72,5 @@ void CSpxPullAudioInputStream::Close()
         m_closeCallback();
     }
 }
-
-void CSpxPullAudioInputStream::SimulateRealTime(uint32_t bytesToSimulateRealTime)
-{
-    if (m_simulateRealtimePercentage > 0)
-    {
-        auto milliseconds = bytesToSimulateRealTime * 1000 / m_format->nAvgBytesPerSec * m_simulateRealtimePercentage / 100;
-        std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-    }
-}
-
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

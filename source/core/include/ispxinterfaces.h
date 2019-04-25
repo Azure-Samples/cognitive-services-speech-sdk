@@ -306,12 +306,6 @@ public:
     virtual void SetRawFormatString(const std::string& rawFormatString) { UNUSED(rawFormatString); };
 };
 
-class ISpxAudioStreamInitRealTime : public ISpxInterfaceBaseFor<ISpxAudioStreamInitRealTime>
-{
-public:
-    virtual void SetRealTimePercentage(uint8_t percentage) = 0;
-};
-
 class ISpxAudioStreamReaderInitCallbacks : public ISpxInterfaceBaseFor<ISpxAudioStreamReaderInitCallbacks>
 {
 public:

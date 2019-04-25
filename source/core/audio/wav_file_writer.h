@@ -78,7 +78,7 @@ namespace Impl {
 
 class CSpxWavFileWriter :
     public ISpxAudioFile,
-    public ISpxAudioStreamInitRealTime,
+//    public ISpxAudioStreamCanBeThrottled,
     public CSpxNullAudioOutput
 {
 public:
@@ -93,7 +93,6 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutput)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStream)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitFormat)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitRealTime)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioFile
@@ -109,11 +108,6 @@ public:
     // --- ISpxAudioOutput ---
 
     uint32_t Write(uint8_t* buffer, uint32_t size) override;
-
-    // --- ISpxAudioStreamInitRealTime ---
-
-    void SetRealTimePercentage(uint8_t percentage) override;
-
 
 private:
 

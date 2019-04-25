@@ -30,7 +30,7 @@ public:
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamReader)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioFile)
-        SPX_INTERFACE_MAP_ENTRY2(ISpxAudioStreamInitRealTime, ISpxMockAudioFileImpl)
+        SPX_INTERFACE_MAP_ENTRY(ISpxMockAudioFileImpl)
     SPX_INTERFACE_MAP_END()
 
 

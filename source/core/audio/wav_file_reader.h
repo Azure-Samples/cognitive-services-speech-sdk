@@ -6,7 +6,7 @@
 //
 
 #pragma once
-#include "spxcore_common.h"
+#include "service_helpers.h"
 #include "interface_helpers.h"
 
 
@@ -16,7 +16,7 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxWavFileReader : public ISpxAudioFile, public ISpxAudioStream, public ISpxAudioStreamReader, public ISpxAudioStreamInitRealTime
+class CSpxWavFileReader : public ISpxAudioFile, public ISpxAudioStream, public ISpxAudioStreamReader, public ISpxObjectWithSiteInitImpl<ISpxGenericSite>
 {
 public:
 
@@ -29,7 +29,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioFile)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStream)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamReader)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitRealTime)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioFile
@@ -41,10 +41,6 @@ public:
 
     void SetContinuousLoop(bool value) override;
     void SetIterativeLoop(bool value) override;
-
-    // --- ISpxAudioStreamInitRealTime ---
-    
-    void SetRealTimePercentage(uint8_t percentage) override;
 
     // --- ISpxAudioStreamReader
 
@@ -79,9 +75,10 @@ private:
     bool m_iterativeAudioLoop = false;            // Iteratively loop thru the audio data from the .WAV file; 3000 byte audio file calling Read, repeatedly, will return 
                                                   // 2000 bytes, then 1000 bytes, then 0 bytes, then 2000 bytes, then 1000 bytes, then 0 bytes ... over and over again
 
-    uint8_t m_simulateRealtimePercentage = 1;     // 0 == as fast as possible; 100 == real time. E.g. If .WAV file is 12 seconds long, it will take 12 seconds to read all 
+    uint8_t m_simulateRealtimePercentage = 0;     // 0 == as fast as possible; 100 == real time. E.g. If .WAV file is 12 seconds long, it will take 12 seconds to read all 
                                                   // the data when percentage==100; it'll take 1.2 seconds if set to 10; it'll go as fast as possible at 0; and it'll
                                                   // take 24 seconds if set to 200.
+                                                  // This is used by the mock microphone.
 
     std::streamoff m_firstSeekDataChunkPos;
 

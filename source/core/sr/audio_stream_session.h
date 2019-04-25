@@ -17,7 +17,6 @@
 
 #include <shared_mutex>
 
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -269,6 +268,8 @@ private:
     void WriteTracingEvent();
     uint64_t GetResultLatencyInMs(const ProcessedAudioTimestampPtr& audiotimestamp) const;
 
+    void SetThrottleVariables(const SPXWAVEFORMATEX* format);
+
 private:
 
     std::shared_ptr<ISpxGenericSite> m_siteKeepAlive;
@@ -327,9 +328,14 @@ private:
 
     // We replay after the last successful result. Richland currently has the upper bound
     // of 30 seconds to generate a speech segment. To be on the safe side, similar to the old SDK we buffer for 1 minute.
-    constexpr static seconds MaxBufferedBeforeOverflow = seconds(60);
+    seconds m_maxBufferedBeforeOverflow = seconds(60);
+    milliseconds m_maxTransmittedInFastLane = milliseconds(5000);
     constexpr static milliseconds MaxBufferedBeforeSimulateRealtime = milliseconds(500);
     constexpr static int SimulateRealtimePercentage = 50;
+    uint64_t m_maxFastLaneSizeBytes = 16000 * 2 * 5;
+    uint64_t m_maxBufferedSizeBeforeThrottleBytes = 16000;
+    uint32_t m_avgBytesPerSecond = 16000 * 2;
+
     static seconds StopRecognitionTimeout;
 
     std::list<std::weak_ptr<ISpxRecognizer>> m_recognizers;
@@ -339,6 +345,8 @@ private:
     uint64_t m_lastErrorGlobalOffset;
     uint64_t m_currentTurnGlobalOffset;
 
+    uint64_t m_bytesTransited;
+    
     std::shared_ptr<CSpxThreadService> m_threadService;
 
     struct Operation

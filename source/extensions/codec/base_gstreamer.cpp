@@ -126,7 +126,7 @@ bool BaseGstreamer::GetStatus()
     {
         try
         {
-            msg = gst_bus_timed_pop_filtered(m_bus, 2 * GST_MSECOND, (GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+            msg = gst_bus_timed_pop_filtered(m_bus, 0, (GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
 
             if (msg != nullptr)
             {

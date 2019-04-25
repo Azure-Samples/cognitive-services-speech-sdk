@@ -101,11 +101,6 @@ uint32_t CSpxWavFileWriter::Write(uint8_t* buffer, uint32_t size)
     return size;
 }
 
-void CSpxWavFileWriter::SetRealTimePercentage(uint8_t percentage)
-{
-    m_simulateRealtimePercentage = percentage;
-}
-
 void CSpxWavFileWriter::EnsureRiffHeader()
 {
     if (m_hasHeader && !m_bHeaderIsWritten)
