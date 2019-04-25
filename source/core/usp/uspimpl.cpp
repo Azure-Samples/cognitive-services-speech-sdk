@@ -465,9 +465,12 @@ void Connection::Impl::Connect()
     bool disable_crl_check = false;
 
 #ifdef SPEECHSDK_USE_OPENSSL
-    disable_default_verify_paths = !m_config.m_trustedCert.empty();
-    trustedCert = m_config.m_trustedCert.c_str();
-    disable_crl_check = disable_default_verify_paths && m_config.m_disable_crl_check;
+    if (!m_config.m_trustedCert.empty())
+    {
+        disable_default_verify_paths = true;
+        trustedCert = m_config.m_trustedCert.c_str();
+        disable_crl_check = m_config.m_disable_crl_check;
+    }
 #endif
 
     m_transport = TransportPtr(TransportRequestCreate(

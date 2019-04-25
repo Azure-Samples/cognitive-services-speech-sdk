@@ -169,7 +169,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task InavlidSubscriptionKeyAndValidAuthToken()
+        public async Task InvalidSubscriptionKeyAndValidAuthToken()
         {
             var invalidKey = "InvalidKey";
             var token = await Config.GetToken(subscriptionKey, region);
@@ -189,7 +189,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task InavlidSubscriptionKeyAndInvalidAuthToken()
+        public async Task InvalidSubscriptionKeyAndInvalidAuthToken()
         {
             var invalidKey = "InvalidKey";
             var invalidToken = "InvalidToken";
