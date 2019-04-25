@@ -102,11 +102,12 @@ private:
     const std::string m_authTokenName = GetPropertyName(PropertyId::SpeechServiceAuthorization_Token);
     const std::string m_proxyPassName = GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword);
     const std::string m_proxyUserName = GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName);
+    const std::string m_conversationSecretKey = GetPropertyName(PropertyId::Conversation_Secret_Key);
 
     void LogPropertyAndValue(std::string name, std::string value) const
     {
-        // hide property value for subscription key, authorization token, proxy password and proxy username
-        if (name == m_subKeyName || name == m_authTokenName)
+        // hide property value for subscription key, authorization token, conversation secret key, proxy password and proxy username
+        if (name == m_subKeyName || name == m_authTokenName || name == m_conversationSecretKey)
         {
             int l = value.length() > 2 ? 2 : 0;
             value.replace(value.begin(), value.end()-l, value.length()-l, '*');
