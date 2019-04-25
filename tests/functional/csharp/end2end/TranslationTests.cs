@@ -77,6 +77,58 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task TestNoFromInTranslationConfig()
+        {
+            var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
+            config.AddTargetLanguage(Language.DE);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
+            {
+                var result = await translationRecognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                var errorCode = CancellationDetails.FromResult(result).ErrorCode;
+                Assert.AreEqual(CancellationErrorCode.BadRequest, errorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestNoToInTranslationConfig()
+        {
+            var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
+            config.SpeechRecognitionLanguage = Language.EN;
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
+            {
+                var result = await translationRecognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                Assert.AreEqual(TestData.English.Weather.Utterance, result.Text);
+                var errorDetails = CancellationDetails.FromResult(result);
+                // Only translation error. 
+                Assert.AreEqual(CancellationErrorCode.NoError, errorDetails.ErrorCode);
+                Assert.IsTrue(errorDetails.ErrorDetails.Contains("The target language is not valid"), "Actual error:'" + errorDetails.ErrorDetails + "' does not contain expected string.");
+            }
+        }
+
+        [TestMethod]
+        public async Task TestDefaultOutputInTranslationConfig()
+        {
+            var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
+            config.SpeechRecognitionLanguage = Language.EN;
+            config.AddTargetLanguage(Language.DE);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
+            {
+                var result = await translationRecognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                Assert.AreEqual(TestData.English.Weather.Utterance, result.Text);
+                Assert.AreEqual(1, result.Translations.Count);
+                AssertMatching(TestData.German.Weather.Utterance, result.Translations[Language.DE]);
+                // Default output format is simple.
+                AssertDetailedOutput(result, false);
+            }
+        }
+
+        [TestMethod]
         public void TestVoiceName()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -154,8 +206,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     if (e.Reason == CancellationReason.Error)
                     {
                         Console.WriteLine($"Canceled event. ErrorCode:{e.ErrorCode}, ErrorDetails:{e.ErrorDetails}");
-                        errorCode = CancellationErrorCode.ServiceError;
+                        errorCode = e.ErrorCode;
                         errorDetails = e.ErrorDetails;
+                        tcs.TrySetResult(false);
                     }
                 };
 

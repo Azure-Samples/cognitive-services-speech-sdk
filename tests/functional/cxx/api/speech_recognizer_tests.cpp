@@ -1331,7 +1331,7 @@ TEST_CASE("FromEndpoint without key and token")
 
     SPXTEST_SECTION("SpeechTranslationConfig FromEndpoint")
     {
-        auto translationEndpoint = "wss://westus.s2s.speech.microsoft.com/speech/translationition/cognitiveservices/v1";
+        auto translationEndpoint = "wss://westus.s2s.speech.microsoft.com/speech/translation/cognitiveservices/v1";
         auto config = SpeechTranslationConfig::FromEndpoint(translationEndpoint);
         config->SetSpeechRecognitionLanguage("en-us");
         config->AddTargetLanguage("de");

@@ -375,7 +375,7 @@ public class TranslationRecognizerTests {
         assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get("sessionStopped"));
 
         // end events come after start events.
-         assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("sessionStopped"));
+        assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("sessionStopped"));
         assertTrue(eventsMap.get("speechStartDetected") < eventsMap.get("speechEndDetected"));
         assertEquals((Integer)(FIRST_EVENT_ID + 1), eventsMap.get("speechStartDetected"));
         assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 1), eventsMap.get("speechEndDetected"));
@@ -533,6 +533,41 @@ public class TranslationRecognizerTests {
         s.close();
     }
 
+    @Test
+    public void testCreateTranslationRecognizerWithVoice() throws InterruptedException, ExecutionException, TimeoutException {
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("de");
+        s.setVoiceName("Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)");
+
+        AtomicInteger synthesizingEventCount = new AtomicInteger(0);
+        AtomicInteger sessionStoppedCount = new AtomicInteger(0);
+        AtomicInteger audioLength = new AtomicInteger(0);
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        r.synthesizing.addEventListener((o, e) -> {
+            synthesizingEventCount.getAndIncrement();
+            audioLength.getAndAdd(e.getResult().getAudio().length);
+        });
+        r.sessionStopped.addEventListener((o, e) -> {
+            sessionStoppedCount.getAndIncrement();
+        });
+        TranslationRecognitionResult res = r.recognizeOnceAsync().get();
+        // wait until we get the SessionStopped event.
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) && (sessionStoppedCount.get() == 0)) {
+            Thread.sleep(200);
+        }
+        assertEquals(2, synthesizingEventCount.get());
+        assertTrue(audioLength.get() > 0);
+        assertEquals(1, sessionStoppedCount.get());
+        assertEquals(ResultReason.TranslatedSpeech, res.getReason());
+        assertEquals("What's the weather like?", res.getText());
+        assertEquals(1, res.getTranslations().size());
+        assertEquals("Wie ist das Wetter?", res.getTranslations().get("de")); // translated text
+        r.close();
+        s.close();
+    }
+
     // -----------------------------------------------------------------------
     // ---
     // -----------------------------------------------------------------------
@@ -625,7 +660,7 @@ public class TranslationRecognizerTests {
 
         TranslationRecognitionResult res = r.recognizeOnceAsync().get();
 
-        assertTrue(ResultReason.TranslatedSpeech == res.getReason());
+        assertEquals(ResultReason.TranslatedSpeech, res.getReason());
         assertEquals("What's the weather like?", res.getText());
         assertEquals(1, res.getTranslations().size());
         assertEquals("Wie ist das Wetter?", res.getTranslations().get("de")); // translated text

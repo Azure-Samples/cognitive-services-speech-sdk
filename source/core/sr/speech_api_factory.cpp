@@ -18,32 +18,29 @@ namespace Speech {
 namespace Impl {
 
 
-std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput)
 {
-    return CreateRecognizerFromConfigInternal("CSpxAudioStreamSession", "CSpxRecognizer", pszLanguage, format, audioInput);
+    return CreateRecognizerFromConfigInternal("CSpxAudioStreamSession", "CSpxRecognizer", audioInput);
 }
 
-std::shared_ptr<ISpxSpeechBotConnector> CSpxSpeechApiFactory::CreateSpeechBotConnectorFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput)
+std::shared_ptr<ISpxSpeechBotConnector> CSpxSpeechApiFactory::CreateSpeechBotConnectorFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput)
 {
-    return SpxQueryInterface<ISpxSpeechBotConnector>(CreateRecognizerFromConfigInternal("CSpxAudioStreamSession", "CSpxSpeechBotConnector", pszLanguage, format, audioInput));
+    return SpxQueryInterface<ISpxSpeechBotConnector>(CreateRecognizerFromConfigInternal("CSpxAudioStreamSession", "CSpxSpeechBotConnector", audioInput));
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput)
 {
-    format = OutputFormat::Detailed;
-    return CreateRecognizerFromConfigInternal("CSpxAudioStreamSession", "CSpxIntentRecognizer", pszLanguage, format, audioInput);
+    return CreateRecognizerFromConfigInternal("CSpxAudioStreamSession", "CSpxIntentRecognizer", audioInput);
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerFromConfig(const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& voice, std::shared_ptr<ISpxAudioConfig> audioInput)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput)
 {
-    return CreateTranslationRecognizerFromConfigInternal(sourceLanguage, targetLanguages, voice, audioInput);
+    return CreateTranslationRecognizerFromConfigInternal(audioInput);
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerFromConfigInternal(
     const char* sessionClassName,
     const char* recognizerClassName,
-    const char* language,
-    OutputFormat format,
     std::shared_ptr<ISpxAudioConfig> audioInput)
 {
     // Create the session
@@ -59,10 +56,6 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerFromConfig
         auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
         auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>(recognizerClassName, sessionAsSite);
 
-        // Set the recognizer properties
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(session);
-        SetRecognizerProperties(namedProperties, language, format);
-
         // Add the recognizer to the session
         session->AddRecognizer(recognizer);
 
@@ -77,7 +70,7 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerFromConfig
     }
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerFromConfigInternal(const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& voice, std::shared_ptr<ISpxAudioConfig> audioInput)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerFromConfigInternal(std::shared_ptr<ISpxAudioConfig> audioInput)
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
@@ -91,10 +84,6 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognize
         // Create the translation recognizer
         auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
         auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxTranslationRecognizer", sessionAsSite);
-
-        // Set the translation properties
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(session);
-        SetTranslationProperties(namedProperties, sourceLanguage, targetLanguages, voice);
 
         // Add the recognizer to the session
         session->AddRecognizer(recognizer);
@@ -138,70 +127,6 @@ void CSpxSpeechApiFactory::InitSessionFromAudioInputConfig(std::shared_ptr<ISpxS
     {
         sessionInit->InitFromMicrophone();
     }
-}
-
-void CSpxSpeechApiFactory::SetRecognizerProperties(const std::shared_ptr<ISpxNamedProperties>& namedProperties, const char* language, OutputFormat format)
-{
-    // Set the recognition language...
-    if (language != nullptr)
-    {
-        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), language);
-    }
-
-    namedProperties->SetStringValue(
-        GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse),
-        PAL::BoolToString(format == OutputFormat::Detailed).c_str());
-}
-
-void CSpxSpeechApiFactory::SetTranslationProperties(const std::shared_ptr<ISpxNamedProperties>& namedProperties, const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& voice)
-{
-    if (sourceLanguage.empty() && !namedProperties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId))
-        && namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint)).find("from=") == std::string::npos
-        && namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_UserDefinedQueryParameters)).find("from=") == std::string::npos)
-    {
-        SPX_DBG_TRACE_ERROR("%s: neither source language nor endpointId is set.", __FUNCTION__);
-        SPX_THROW_HR(SPXERR_INVALID_ARG);
-    }
-
-    if (!sourceLanguage.empty())
-    {
-        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), sourceLanguage.c_str());
-    }
-
-    // The target languages are in BCP-47 format, and should not contain the character ','.
-    if (targetLanguages.size() == 0 || targetLanguages[0].empty())
-    {
-        if (namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint)).find("to=") == std::string::npos
-            && namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_UserDefinedQueryParameters)).find("to=") == std::string::npos)
-        {
-            SPX_DBG_TRACE_ERROR("%s: no target language is set.", __FUNCTION__);
-            SPX_THROW_HR(SPXERR_INVALID_ARG);
-        }
-    }
-    else
-    {
-        auto plainStr = targetLanguages.at(0);
-        for (auto lang = targetLanguages.begin() + 1; lang != targetLanguages.end(); ++lang)
-        {
-            if (lang->empty())
-            {
-                SPX_DBG_TRACE_ERROR("%s: One of specified target languages is empty: %s.", __FUNCTION__, lang->c_str());
-                SPX_THROW_HR(SPXERR_INVALID_ARG);
-            }
-            plainStr += "," + *lang;
-        }
-        if (plainStr.empty())
-        {
-            SPX_DBG_TRACE_ERROR("%s: unexpected error: target language should not be empty at this time.", __FUNCTION__);
-            SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
-        }
-        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages), plainStr.c_str());
-    }
-
-    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice), voice.c_str());
-
-    // Set mode to conversation for translation
-    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), g_recoModeConversation);
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

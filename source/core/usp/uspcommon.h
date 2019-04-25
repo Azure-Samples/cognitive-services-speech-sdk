@@ -33,8 +33,6 @@ typedef struct ProxyServerInfo
     std::string password;
 } ProxyServerInfo;
 
-#ifdef __cplusplus
-
 #include <string>
 
 namespace Microsoft {
@@ -46,14 +44,20 @@ namespace USP {
     {
         const std::string protocol = "wss://";
 
+        const std::string outputFormatQueryParam = "format=";
+        const std::string langQueryParam = "language=";
+        const std::string deploymentIdQueryParam = "cid=";
+
+        const std::string outputFormatSimple = "simple";
+        const std::string outputFormatDetailed = "detailed";
+
         namespace unifiedspeech
         {
             const std::string hostnameSuffix = ".stt.speech.microsoft.com";
             const std::string pathPrefix = "/speech/recognition/";
             const std::string pathSuffix = "/cognitiveservices/v1";
-            const std::string langQueryParam = "language=";
-            const std::string deploymentIdQueryParam = "cid=";
-            const std::string outputFormatQueryParam = "format=";
+
+            const std::vector<std::string> queryParameters = { langQueryParam, deploymentIdQueryParam, outputFormatQueryParam };
         }
 
         namespace translation
@@ -65,6 +69,8 @@ namespace USP {
             const std::string voice = "voice=";
             const std::string features = "features=";
             const std::string requireVoice = "texttospeech";
+
+            const std::vector<std::string> queryParameters = { from, to, voice, deploymentIdQueryParam, outputFormatQueryParam };
         }
 
         namespace luis
@@ -73,7 +79,8 @@ namespace USP {
             const std::string pathPrefix1 = "/speech/";
             const std::string pathPrefix2 = "/recognition/";
             const std::string pathSuffix = "/cognitiveservices/v1";
-            const std::string langQueryParam = "language=";
+
+            const std::vector<std::string> queryParameters = { langQueryParam, outputFormatQueryParam };
         }
 
         namespace CDSDK
@@ -84,6 +91,8 @@ namespace USP {
         namespace bot
         {
             const std::string url = "speech.platform.bing.com/convai/api/v2";
+
+            const std::vector<std::string> queryParameters = { langQueryParam };
         }
     }
 
@@ -101,8 +110,6 @@ namespace USP {
         const std::string translationSynthesisEnd = "translation.synthesis.end";
         const std::string audio = "audio";
     }
-    //Todo: Figure out what to do about user agent build hash and version number
-    const auto g_userAgent = "CortanaSDK (Windows;Win32;DeviceType=Near;SpeechClient=2.0.4)";
 
     namespace headers {
         constexpr auto userAgent = "User-Agent";
@@ -141,15 +148,4 @@ namespace USP {
 }
 }
 }
-#else
 
-extern const char* g_keywordContentType;
-extern const char* g_messagePathSpeechHypothesis;
-extern const char* g_messagePathSpeechPhrase;
-extern const char* g_messagePathSpeechFragment;
-extern const char* g_messagePathTurnStart;
-extern const char* g_messagePathTurnEnd;
-extern const char* g_messagePathSpeechEndDetected;
-extern const char* g_messagePathSpeechStartDetected;
-
-#endif

@@ -22,13 +22,13 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 class UspClient : public USP::Callbacks, public std::enable_shared_from_this<UspClient>
 {
-    USP::EndpointType m_endpoint;
+    USP::EndpointType m_endpointType;
     USP::RecognitionMode m_mode;
 
 public:
     UspClient(USP::EndpointType endpoint = USP::EndpointType::Speech,
         USP::RecognitionMode mode = USP::RecognitionMode::Interactive)
-        : m_endpoint(endpoint), m_mode(mode)
+        : m_endpointType(endpoint), m_mode(mode)
     {
     }
 
@@ -40,10 +40,11 @@ public:
 
         m_threadService = std::make_shared<CSpxThreadService>();
         m_threadService->Init();
-        auto client = USP::Client(shared_from_this(), m_endpoint, PAL::CreateGuidWithoutDashes(), m_threadService)
+        auto client = USP::Client(shared_from_this(), m_endpointType, PAL::CreateGuidWithoutDashes(), m_threadService)
             .SetRecognitionMode(m_mode)
             .SetRegion(region)
-            .SetAuthentication(authData);
+            .SetAuthentication(authData)
+            .SetLanguage("en-us");
         if (!Config::Endpoint.empty())
         {
             client.SetEndpointType(USP::EndpointType::Speech).SetEndpointUrl(Config::Endpoint);

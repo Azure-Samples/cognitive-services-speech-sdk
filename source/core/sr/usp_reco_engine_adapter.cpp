@@ -387,24 +387,24 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedP
     // set endpoint type.
     if (!endpoint.empty() && 0 == PAL::stricmp(endpoint.c_str(), "CORTANA"))
     {
-        SetUspEndpoint_Cortana(properties, client);
+        SetUspEndpointCortana(properties, client);
     }
     else if (countIntent == 1)
     {
-        SetUspEndpoint_Intent(properties, client);
+        SetUspEndpointIntent(properties, client);
     }
     else if (countTranslation == 1)
     {
-        SetUspEndpoint_Translation(properties, client);
+        SetUspEndpointTranslation(properties, client);
     }
     else if (countBot == 1)
     {
-        SetUspEndpoint_Bot(properties, client);
+        SetUspEndpointBot(properties, client);
     }
     else
     {
         SPX_DBG_ASSERT(countSpeech == 1);
-        SetUspEndpoint_DefaultSpeechService(properties, client);
+        SetUspEndpointDefaultSpeechService(properties, client);
     }
 
     // set reco mode based on recognizer type
@@ -417,8 +417,6 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedP
     client.SetRecognitionMode(mode);
     SPX_DBG_TRACE_VERBOSE("%s: recoMode=%d", __FUNCTION__, mode);
 
-    // Set output format.
-    client.SetOutputFormat(GetOutputFormat(properties));
     auto pollingInterval = static_cast<uint16_t>(stoi(properties->GetStringValue("SPEECH-USPPollingInterval", "10")));
     SPX_DBG_TRACE_VERBOSE("%s: Setting Websocket Polling interval to %d", __FUNCTION__, pollingInterval);
 
@@ -427,7 +425,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedP
     return client;
 }
 
-USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Bot(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointBot(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
     UNUSED(properties);
 
@@ -438,7 +436,6 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Bot(std::shared_ptr<ISpxNa
 
     auto language = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
     SPX_IFTRUE_THROW_HR(language.empty(), SPXERR_INVALID_LANGUAGE);
-    client.SetLanguage(language);
 
     SPX_DBG_TRACE_VERBOSE("%s: Using Bot URL/endpoint...", __FUNCTION__);
     return client.SetEndpointType(m_endpointType)
@@ -447,7 +444,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Bot(std::shared_ptr<ISpxNa
         .SetAudioResponseFormat("raw-16khz-16bit-mono-pcm");
 }
 
-USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Cortana(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointCortana(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
     UNUSED(properties);
 
@@ -456,7 +453,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Cortana(std::shared_ptr<IS
     return client.SetEndpointType(m_endpointType);
 }
 
-USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Intent(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointIntent(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
     SPX_DBG_TRACE_VERBOSE("%s: Endpoint type: Intent", __FUNCTION__);
     m_endpointType = USP::EndpointType::Intent;
@@ -464,12 +461,20 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Intent(std::shared_ptr<ISp
     SetUspRegion(properties, client, /*isIntentRegion=*/ true);
 
     auto language = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
+    // For intent, use default language if user does not specify any language.
+    if (language.empty())
+    {
+        language = s_defaultRecognitionLanguage;
+    }
     client.SetLanguage(language);
+
+    // For intent, always use detailed output format.
+    client.SetOutputFormat(USP::OutputFormat::Detailed);
 
     return client;
 }
 
-USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Translation(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointTranslation(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
     SPX_DBG_TRACE_VERBOSE("%s: Endpoint type: Translation.", __FUNCTION__);
     m_endpointType = USP::EndpointType::Translation;
@@ -477,28 +482,47 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Translation(std::shared_pt
     SetUspRegion(properties, client, /*isIntentRegion=*/ false);
 
     auto fromLang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
+    // For translation, no default source and target languages.
     client.SetTranslationSourceLanguage(fromLang);
     auto toLangs = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
     client.SetTranslationTargetLanguages(toLangs);
     auto customSpeechModelId = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId));
-    client.SetModelId(customSpeechModelId);
+    if (!customSpeechModelId.empty())
+    {
+        client.SetModelId(customSpeechModelId);
+    }
     auto voice = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice));
-    client.SetTranslationVoice(voice);
+    if (!voice.empty())
+    {
+        client.SetTranslationVoice(voice);
+    }
+
+    SetUspOutputFormat(properties, client);
 
     return client;
 }
 
-USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_DefaultSpeechService(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointDefaultSpeechService(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
     SPX_DBG_TRACE_VERBOSE("%s: Endpoint type: Speech.", __FUNCTION__);
     m_endpointType = USP::EndpointType::Speech;
     client.SetEndpointType(m_endpointType);
     SetUspRegion(properties, client, /*isIntentRegion=*/ false);
 
-    auto lang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
-    client.SetLanguage(lang);
     auto customSpeechModelId = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId));
-    client.SetModelId(customSpeechModelId);
+    if (!customSpeechModelId.empty())
+    {
+        client.SetModelId(customSpeechModelId);
+    }
+    auto lang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
+    // For speech recognizer, only set default language when not using custom model and user has not specified language.
+    if (lang.empty() && customSpeechModelId.empty())
+    {
+        lang = s_defaultRecognitionLanguage;
+    }
+    client.SetLanguage(lang);
+
+    SetUspOutputFormat(properties, client);
 
     return client;
 }
@@ -536,6 +560,28 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISpx
     authData[(size_t)USP::AuthenticationType::SearchDelegationRPSToken] = uspRpsToken;
 
     return client.SetAuthentication(authData);
+}
+
+USP::Client& CSpxUspRecoEngineAdapter::SetUspOutputFormat(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+{
+    auto value = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
+    if (!value.empty())
+    {
+        if (PAL::stricmp(value.c_str(), PAL::BoolToString(false).c_str()) == 0)
+        {
+            client.SetOutputFormat(USP::OutputFormat::Simple);
+        }
+        else if (PAL::stricmp(value.c_str(), PAL::BoolToString(true).c_str()) == 0)
+        {
+            client.SetOutputFormat(USP::OutputFormat::Detailed);
+        }
+        else
+        {
+            LogError("Unknown output format value %s", value.c_str());
+            SPX_THROW_HR(SPXERR_INVALID_ARG);
+        }
+    }
+    return client;
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspSingleTrustedCert(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
@@ -631,26 +677,6 @@ SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromProperties(const std::shared_ptr<
     }
 
     return hr;
-}
-
-USP::OutputFormat CSpxUspRecoEngineAdapter::GetOutputFormat(const std::shared_ptr<ISpxNamedProperties>& properties) const
-{
-    if (!properties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse)))
-        return USP::OutputFormat::Simple;
-
-    auto value = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
-    if (value.empty() || PAL::stricmp(value.c_str(), PAL::BoolToString(false).c_str()) == 0)
-    {
-        return USP::OutputFormat::Simple;
-    }
-    else if (PAL::stricmp(value.c_str(), PAL::BoolToString(true).c_str()) == 0)
-    {
-        return USP::OutputFormat::Detailed;
-    }
-
-    LogError("Unknown output format value %s", value.c_str());
-    SPX_THROW_HR(SPXERR_INVALID_ARG);
-    return USP::OutputFormat::Simple; // Make compiler happy.
 }
 
 void CSpxUspRecoEngineAdapter::SetSpeechConfigMessage(const ISpxNamedProperties& properties)

@@ -129,8 +129,13 @@ private:
     std::string EncodeParameterString(const std::string& parameter) const;
     std::string ConstructConnectionUrl() const;
 
+    void BuildQueryParameters(const std::vector<std::string>& parameterList, const std::unordered_map<std::string, std::string>& valueMap, bool isCustomEndpoint, std::ostringstream& oss) const;
+
     std::string CreateRequestId();
     void RegisterRequestId(const std::string& requestId);
+
+    const char queryParameterDelim = '&';
+
     std::unordered_set<std::string> m_activeRequestIds;
     std::string m_speechRequestId;
 

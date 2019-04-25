@@ -382,6 +382,10 @@ int main(int argc, char* argv[])
     {
         client.SetLanguage(language.c_str());
     }
+    else
+    {
+        client.SetLanguage("en-us");
+    }
 
     if (!format.empty())
     {

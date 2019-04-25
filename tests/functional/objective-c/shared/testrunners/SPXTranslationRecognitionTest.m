@@ -246,7 +246,7 @@
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
 
-    NSString *endpoint = [NSString stringWithFormat:@"wss://%@.s2s.speech.microsoft.com/speech/translationition/cognitiveservices/v1", self.serviceRegion];
+    NSString *endpoint = [NSString stringWithFormat:@"wss://%@.s2s.speech.microsoft.com/speech/translation/cognitiveservices/v1", self.serviceRegion];
     SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
     SPXSpeechTranslationConfiguration* translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithEndpoint:endpoint];
     XCTAssertNotNil(translationConfig);

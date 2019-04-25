@@ -10,6 +10,7 @@
 #include <memory>
 #include <functional>
 #include <string>
+#include <unordered_map>
 
 #include "uspmessages.h"
 #include "ispxinterfaces.h"
@@ -191,21 +192,18 @@ using ConnectionPtr = std::unique_ptr<Connection>;
 
 class Client
 {
-    static constexpr auto s_defaultLanguage = "en-us";
-
 public:
     /**
-    * Creates a USP client.
-    * @param callbacks The struct defines callback functions that will be invoked when various USP events occur.
-    * @param endpoint The speech service to be used, Speech, Intent, Translation, and etc.
-    * @param connectionId Connection id, that will be passed to the service in the X-ConnectionId header and can be used for diagnostics.
-    * @param threadService Thread service.
-    */
-    Client(CallbacksPtr callbacks, EndpointType endpoint, const std::wstring& connectionId, const std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService>& threadService):
+     * Creates a USP client.
+     * @param callbacks The struct defines callback functions that will be invoked when various USP events occur.
+     * @param endpointType The speech service to be used, Speech, Intent, Translation, and etc.
+     * @param connectionId Connection id, that will be passed to the service in the X-ConnectionId header and can be used for diagnostics.
+     * @param threadService Thread service.
+     */
+    Client(CallbacksPtr callbacks, EndpointType endpointType, const std::wstring& connectionId, const std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService>& threadService):
         m_callbacks(callbacks),
-        m_endpoint(endpoint),
+        m_endpointType(endpointType),
         m_recoMode(RecognitionMode::Interactive),
-        m_outputFormat(OutputFormat::Simple),
         m_authData((size_t)AuthenticationType::SIZE_AUTHENTICATION_TYPE,""),
         m_connectionId(connectionId),
         m_threadService(threadService)
@@ -213,9 +211,9 @@ public:
     }
 
     /**
-    * Sets the audio response format that will be passed to the service in the X-Output-AudioCodec header.
-    * More info can be found here: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-apis
-    */
+     * Sets the audio response format that will be passed to the service in the X-Output-AudioCodec header.
+     * More info can be found here: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-apis
+     */
     Client& SetAudioResponseFormat(const std::string& format)
     {
         m_audioResponseFormat = format;
@@ -223,8 +221,8 @@ public:
     }
 
     /**
-    * Sets the region of the service endpoint.
-    */
+     * Sets the region of the service endpoint.
+     */
     Client& SetRegion(const std::string& region)
     {
         m_region = region;
@@ -232,8 +230,17 @@ public:
     }
 
     /**
-    * Sets the URL of the service endpoint. It should contain the host name, resource path and all query parameters needed.
-    */
+     * Sets the language understanding region.
+     */
+    Client& SetIntentRegion(const std::string& region)
+    {
+        m_intentRegion = region;
+        return *this;
+    }
+
+    /**
+     * Sets the URL of the service endpoint. It should contain the host name, resource path and all query parameters needed.
+     */
     Client& SetEndpointUrl(const std::string& endpointUrl)
     {
         m_customEndpointUrl = endpointUrl;
@@ -241,8 +248,8 @@ public:
     }
 
     /**
-    * Sets the query parameters provided by users.
-    */
+     * Sets the query parameters provided by users.
+     */
     Client& SetUserDefinedQueryParameters(const std::string& queryParameters)
     {
         m_userDefinedQueryParameters = queryParameters;
@@ -255,13 +262,13 @@ public:
     Client& SetProxyServerInfo(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword);
 
     /**
-    * When using OpenSSL only: sets a single trusted cert, optionally w/o CRL checks.
-    * This is meant to be used in a firewall setting with potential lack of
-    * CRLs (particularly on the leaf).
-    * @param trustedCert the certificate to trust (PEM format)
-    * @param disable_crl_check whether to also disable CRL checks
-    * @return Client reference
-    */
+     * When using OpenSSL only: sets a single trusted cert, optionally w/o CRL checks.
+     * This is meant to be used in a firewall setting with potential lack of
+     * CRLs (particularly on the leaf).
+     * @param trustedCert the certificate to trust (PEM format)
+     * @param disable_crl_check whether to also disable CRL checks
+     * @return Client reference
+     */
     Client& SetSingleTrustedCert(const std::string& trustedCert, bool disable_crl_check)
     {
         m_trustedCert = trustedCert;
@@ -270,17 +277,25 @@ public:
     }
 
     /**
-    * Sets the speech service type.
-    */
+     * Sets the speech service type.
+     */
     Client& SetEndpointType(EndpointType type)
     {
-        m_endpoint = type;
+        m_endpointType = type;
         return *this;
     }
 
     /**
-    * Sets the recognition mode, e.g. Interactive, Conversation, Dictation.
-    */
+     * Get the endpoint type.
+     */
+    const EndpointType& GetEndpointType()
+    {
+        return m_endpointType;
+    }
+
+    /**
+     * Sets the recognition mode, e.g. Interactive, Conversation, Dictation.
+     */
     Client& SetRecognitionMode(RecognitionMode mode)
     {
         m_recoMode = mode;
@@ -288,84 +303,50 @@ public:
     }
 
     /**
-    * Sets authentication parameters.
-    * @param authType The type of authentication to be used.
-    * @param authData The authentication data for the specified authentication type.
-    */
+     * Sets authentication parameters.
+     * @param authType The type of authentication to be used.
+     * @param authData The authentication data for the specified authentication type.
+     */
     Client& SetAuthentication(const std::vector<std::string>& authData)
     {
         if (authData.size() != (size_t)AuthenticationType::SIZE_AUTHENTICATION_TYPE)
         {
            ::Microsoft::CognitiveServices::Speech::Impl::ThrowLogicError("Incorrect authentication configuration: array size mismatch.");
         }
-
         m_authData = authData;
         return *this;
     }
 
     /**
-    * Sets the source audio language, which must be one of the supported languages specified using
-    * an IETF language tag BCP 47 (https://en.wikipedia.org/wiki/IETF_language_tag).
-    */
-    Client& SetLanguage(const std::string& language)
-    {
-        m_language = language;
-        return *this;
-    }
+     * Sets the source audio language, which must be one of the supported languages specified using
+     * an IETF language tag BCP 47 (https://en.wikipedia.org/wiki/IETF_language_tag).
+     */
+    Client& SetLanguage(const std::string& language);
 
     /**
-    * Sets the output format, can be either Simple or Detailed.
-    */
-    Client& SetOutputFormat(OutputFormat format)
-    {
-        m_outputFormat = format;
-        return *this;
-    }
+     * Sets the output format, can be either Simple or Detailed.
+     */
+    Client& SetOutputFormat(OutputFormat format);
 
     /**
-    * Sets the custom speech model id.
-    */
-    Client& SetModelId(const std::string& modelId)
-    {
-        m_modelId = modelId;
-        return *this;
-    }
+     * Sets the custom speech model id.
+     */
+    Client& SetModelId(const std::string& modelId);
 
     /**
-    * Sets the source language of translation.
-    */
-    Client& SetTranslationSourceLanguage(const std::string& lang)
-    {
-        m_translationSourceLanguage = lang;
-        return *this;
-    }
+     * Sets the source language of translation.
+     */
+    Client& SetTranslationSourceLanguage(const std::string& lang);
 
     /**
-    * Sets the target languages of translation.
-    */
-    Client& SetTranslationTargetLanguages(const std::string& langs)
-    {
-        m_translationTargetLanguages = langs;
-        return *this;
-    }
+     * Sets the target languages of translation.
+     */
+    Client& SetTranslationTargetLanguages(const std::string& langs);
 
     /**
-    * Sets the voice that is desired in translation.
-    */
-    Client& SetTranslationVoice(const std::string& voice)
-    {
-        m_translationVoice = voice;
-        return *this;
-    }
-
-    /**
-    * Sets the language understanding region.
-    */
-    Client& SetIntentRegion(const std::string& region)
-    {
-        m_intentRegion = region;
-        return *this;
-    }
+     * Sets the voice that is desired in translation.
+     */
+    Client& SetTranslationVoice(const std::string& voice);
 
     /**
     * Sets the polling interval the client will use.
@@ -379,55 +360,40 @@ public:
      /**
      * Establishes connection to the service.
      */
-     ConnectionPtr Connect();
+    ConnectionPtr Connect();
 
-     /**
-     * Get the endpoint type.
-     */
-     const EndpointType& GetEndpointType()
-     {
-         return m_endpoint;
-     }
-
-     Client(const Client&) = default;
-     ~Client() = default;
+    Client(const Client&) = default;
+    ~Client() = default;
 
 private:
 
-     friend class Connection::Impl;
+    friend class Connection::Impl;
 
-     CallbacksPtr m_callbacks;
+    CallbacksPtr m_callbacks;
 
-     EndpointType m_endpoint;
-     RecognitionMode m_recoMode;
-     std::string m_customEndpointUrl;
-     std::string m_region;
-     std::string m_userDefinedQueryParameters;
+    EndpointType m_endpointType;
+    RecognitionMode m_recoMode;
+    std::string m_customEndpointUrl;
+    std::string m_region;
+    std::string m_userDefinedQueryParameters;
+    std::unordered_map<std::string, std::string> m_queryParameters;
 
-     std::shared_ptr<ProxyServerInfo> m_proxyServerInfo;
+    std::shared_ptr<ProxyServerInfo> m_proxyServerInfo;
 
-     std::string m_trustedCert;
-     bool m_disable_crl_check;
+    std::string m_trustedCert;
+    bool m_disable_crl_check;
 
-     OutputFormat m_outputFormat;
-     std::string m_language;
-     std::string m_modelId;
+    std::string m_intentRegion;
 
-     std::string m_translationSourceLanguage;
-     std::string m_translationTargetLanguages;
-     std::string m_translationVoice;
+    std::vector<std::string> m_authData;
 
-     std::string m_intentRegion;
+    std::wstring m_connectionId;
 
-     std::vector<std::string> m_authData;
+    std::string m_audioResponseFormat;
 
-     std::wstring m_connectionId;
+    std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> m_threadService;
 
-     std::string m_audioResponseFormat;
-
-     std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> m_threadService;
-
-     std::uint32_t m_pollingIntervalms = 10;
+    std::uint32_t m_pollingIntervalms = 10;
 };
 
 extern void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword);

@@ -47,7 +47,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             ThrowIfNull(audioStream);
             IntPtr audioConfigHandle = IntPtr.Zero;
             ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_input_from_stream(out audioConfigHandle, audioStream.StreamHandle));
-            GC.KeepAlive(audioStream);
             return new AudioConfig(audioConfigHandle, audioStream);
         }
 
@@ -61,7 +60,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             PullAudioInputStream pullStream = new PullAudioInputStream(callback);
             IntPtr audioConfigHandle = IntPtr.Zero;
             ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_input_from_stream(out audioConfigHandle, pullStream.StreamHandle));
-            GC.KeepAlive(pullStream);
             return new AudioConfig(audioConfigHandle, pullStream, true);
         }
 
@@ -76,7 +74,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             PullAudioInputStream pullStream = new PullAudioInputStream(callback, format);
             IntPtr audioConfigHandle = IntPtr.Zero;
             ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_input_from_stream(out audioConfigHandle, pullStream.StreamHandle));
-            GC.KeepAlive(pullStream);
             return new AudioConfig(audioConfigHandle, pullStream, true);
         }
 
@@ -144,7 +141,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             PushAudioOutputStream pushStream = new PushAudioOutputStream(callback);
             IntPtr audioConfigHandle = IntPtr.Zero;
             ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_output_from_stream(out audioConfigHandle, pushStream.streamHandle));
-            GC.KeepAlive(pushStream);
             return new AudioConfig(audioConfigHandle, pushStream, true);
         }
 
@@ -160,7 +156,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             PushAudioOutputStream pushStream = new PushAudioOutputStream(callback, format);
             IntPtr audioConfigHandle = IntPtr.Zero;
             ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_output_from_stream(out audioConfigHandle, pushStream.streamHandle));
-            GC.KeepAlive(pushStream);
             return new AudioConfig(audioConfigHandle, pushStream, true);
         }
 
@@ -206,6 +201,5 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             streamKeepAlive = audioStream;
             disposeStream = ownStream;
         }
-
     }
 }

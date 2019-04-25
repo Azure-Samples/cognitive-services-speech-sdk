@@ -127,18 +127,18 @@ private:
     void UspTerminate();
 
     USP::Client& SetUspEndpoint(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpoint_Cortana(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpoint_Intent(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpoint_Translation(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpoint_DefaultSpeechService(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpoint_Bot(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpointCortana(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpointIntent(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpointTranslation(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpointDefaultSpeechService(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpointBot(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspRegion(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client, bool isIntentRegion);
     USP::Client& SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspProxyInfo(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspOutputFormat(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspSingleTrustedCert(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
 
     SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;
-    USP::OutputFormat GetOutputFormat(const std::shared_ptr<ISpxNamedProperties>& properties) const;
 
     void SetSpeechConfigMessage(const ISpxNamedProperties& properties);
     void SetAgentConfigMessage(const ISpxNamedProperties& properties);
@@ -244,6 +244,8 @@ private:
 
 private:
     friend CSpxActivitySession;
+
+    static constexpr auto s_defaultRecognitionLanguage = "en-us";
 
     std::shared_ptr<ISpxUspCallbacks> m_uspCallbacks;
     std::shared_ptr<USP::Connection> m_uspConnection;

@@ -50,11 +50,6 @@ auto create_from_config(SPXHANDLE config_handle, SPXHANDLE audio_config_handle, 
         factory_property_bag->Copy(config_property_bag.get());
     }
 
-    auto named_properties = SpxQueryService<ISpxNamedProperties>(config);
-    auto lang = named_properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
-    auto output_format = named_properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
-    auto format = PAL::stricmp(output_format.c_str(), PAL::BoolToString(true).c_str()) == 0 ? OutputFormat::Detailed : OutputFormat::Simple;
-
     auto audio_input = AudioConfigFromHandleOrEmptyIfInvalid(audio_config_handle);
     // copy the audio input properties into the factory, if any.
     auto audio_input_properties = SpxQueryInterface<ISpxNamedProperties>(audio_input);
@@ -63,7 +58,7 @@ auto create_from_config(SPXHANDLE config_handle, SPXHANDLE audio_config_handle, 
         factory_property_bag->Copy(audio_input_properties.get());
     }
 
-    return ((*factory).*fm)(lang.c_str(), format, audio_input);
+    return ((*factory).*fm)(audio_input);
 }
 
 SPXAPI recognizer_create_speech_recognizer_from_config(SPXRECOHANDLE* phreco, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioInput)
@@ -129,16 +124,8 @@ SPXAPI recognizer_create_translation_recognizer_from_config(SPXRECOHANDLE* phrec
         auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
         fbag->Copy(speechconfig_propertybag.get());
 
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
-        auto source_lang = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
-        auto voice = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice));
-
-        // language names are separated by comma
-        auto to_langs = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
-        auto vlangs = PAL::split(to_langs, ",");
-
         auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
-        recognizer = factory->CreateTranslationRecognizerFromConfig(source_lang, vlangs, voice, audioInput);
+        recognizer = factory->CreateTranslationRecognizerFromConfig(audioInput);
 
         // track the reco handle
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();

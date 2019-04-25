@@ -71,15 +71,8 @@ inline bool contains(const string& content, const string& name)
 
 // Todo(1126805) url builder + auth interfaces
 
-const std::string g_recoModeStrings[] = { "interactive", "conversation", "dictation" };
-const std::string g_outFormatStrings[] = { "simple", "detailed" };
-
-
-// TODO: remove this as soon as transport.c is re-written in cpp.
-extern "C" {
-    const char* g_keywordContentType = headers::contentType;
-}
-
+const string g_recoModeStrings[] = { "interactive", "conversation", "dictation" };
+const string g_outFormatStrings[] = { "simple", "detailed" };
 
 // This is called from telemetry_flush, invoked on a worker thread in turn-end.
 void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId)
@@ -119,7 +112,7 @@ uint64_t Connection::Impl::getTimestamp()
     return telemetry_gettime() - m_creationTime;
 }
 
-void Connection::Impl::Invoke(std::function<void()> callback)
+void Connection::Impl::Invoke(function<void()> callback)
 {
     if (!m_valid)
     {
@@ -134,24 +127,25 @@ void Connection::Impl::ScheduleWork()
     // Reschedule to make sure we do not reenter the transport
     // from one of its callbacks.
     auto keepAlive = shared_from_this();
-    std::packaged_task<void()> task([keepAlive]() { DoWork(keepAlive); });
-    m_threadService->ExecuteAsync(std::move(task));
+    packaged_task<void()> task([keepAlive]() { DoWork(keepAlive); });
+    m_threadService->ExecuteAsync(move(task));
 }
 
 void Connection::Impl::WorkLoop(shared_ptr<Connection::Impl> ptr)
 {
-    std::packaged_task<void()> task([ptr]()
+    packaged_task<void()> task([ptr]()
     {
         if (!ptr->m_valid)
             return;
 
         DoWork(ptr);
 
-        std::packaged_task<void()> task([ptr]() { WorkLoop(ptr); });
-        ptr->m_threadService->ExecuteAsync(std::move(task), std::chrono::milliseconds(ptr->m_config.m_pollingIntervalms));
+        packaged_task<void()> task([ptr]() { WorkLoop(ptr); });
+        ptr->m_threadService->ExecuteAsync(move(task), chrono::milliseconds(ptr->m_config.m_pollingIntervalms));
+
     });
 
-    ptr->m_threadService->ExecuteAsync(std::move(task));
+    ptr->m_threadService->ExecuteAsync(move(task));
 }
 
 void Connection::Impl::DoWork(weak_ptr<Connection::Impl> ptr)
@@ -184,7 +178,7 @@ void Connection::Impl::DoWork(weak_ptr<Connection::Impl> ptr)
             connection->Invoke([&] { callbacks->OnError(false, ErrorCode::RuntimeError, "Unhandled exception in the USP layer."); });
         }
     }
-    catch (const std::exception& ex)
+    catch (const exception& ex)
     {
         (void)ex; // release builds
         LogError("%s Unexpected Exception %s. Thread terminated", __FUNCTION__, ex.what());
@@ -225,7 +219,7 @@ string Connection::Impl::ConstructConnectionUrl() const
     auto recoMode = static_cast<underlying_type_t<RecognitionMode>>(m_config.m_recoMode);
     ostringstream oss;
     bool customEndpoint = false;
-    char delim = '?';
+
 
     // Using customized endpoint if it is defined.
     if (!m_config.m_customEndpointUrl.empty())
@@ -236,7 +230,7 @@ string Connection::Impl::ConstructConnectionUrl() const
     else
     {
         oss << endpoint::protocol;
-        switch (m_config.m_endpoint)
+        switch (m_config.m_endpointType)
         {
         case EndpointType::Speech:
             oss << m_config.m_region
@@ -276,108 +270,89 @@ string Connection::Impl::ConstructConnectionUrl() const
     // Appends user defined query parameters first.
     if (!m_config.m_userDefinedQueryParameters.empty())
     {
-        if (oss.str().find('?') != string::npos)
-        {
-            delim = '&';
-        }
-        oss << delim << m_config.m_userDefinedQueryParameters;
+        oss << queryParameterDelim << m_config.m_userDefinedQueryParameters;
         customEndpoint = true;
     }
 
-    // Sets output format parameter.
-    auto format = static_cast<underlying_type_t<OutputFormat>>(m_config.m_outputFormat);
-    if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::outputFormatQueryParam))
-    {
-        if (oss.str().find('?') != string::npos)
-        {
-            delim = '&';
-        }
-        oss << delim << endpoint::unifiedspeech::outputFormatQueryParam << g_outFormatStrings[format];
-    }
-
-    // At least the output format must have been set as query parameter until here.
-    assert(oss.str().find('?') != string::npos);
-    delim = '&';
-
-    bool usingCustomModel = !m_config.m_modelId.empty();
-    switch (m_config.m_endpoint)
+    switch (m_config.m_endpointType)
     {
     case EndpointType::Speech:
-        if (usingCustomModel)
-        {
-            if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::deploymentIdQueryParam))
-            {
-                oss << delim << endpoint::unifiedspeech::deploymentIdQueryParam << m_config.m_modelId;
-            }
-        }
-        if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
-        {
-            std::string langStr = m_config.m_language.empty() && !usingCustomModel ? Client::s_defaultLanguage : m_config.m_language;
-            if (!langStr.empty())
-            {
-                oss << delim << endpoint::unifiedspeech::langQueryParam << langStr;
-            }
-        }
+        BuildQueryParameters(endpoint::unifiedspeech::queryParameters, m_config.m_queryParameters, customEndpoint, oss);
         break;
 
     case EndpointType::Intent:
-        if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
-        {
-            std::string langStr = m_config.m_language.empty() ? Client::s_defaultLanguage : m_config.m_language;
-            oss << delim << endpoint::unifiedspeech::langQueryParam << langStr;
-        }
+        BuildQueryParameters(endpoint::luis::queryParameters, m_config.m_queryParameters, customEndpoint, oss);
         break;
 
     case EndpointType::Translation:
-        if (usingCustomModel)
+        for (auto queryParameterName : endpoint::translation::queryParameters)
         {
-            if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::deploymentIdQueryParam))
+            if (!customEndpoint || !contains(oss.str(), queryParameterName))
             {
-                oss << delim << endpoint::unifiedspeech::deploymentIdQueryParam << m_config.m_modelId;
-            }
-        }
-        if (!customEndpoint || !contains(oss.str(), endpoint::translation::from))
-        {
-            oss << delim << endpoint::translation::from << EncodeParameterString(m_config.m_translationSourceLanguage);
-        }
-        if (!customEndpoint || !contains(oss.str(), endpoint::translation::to))
-        {
-            size_t start = 0;
-            const char commaDelim = ',';
-            size_t end = m_config.m_translationTargetLanguages.find_first_of(commaDelim);
-            while (end != string::npos)
-            {
-                oss << delim << endpoint::translation::to << EncodeParameterString(m_config.m_translationTargetLanguages.substr(start, end - start));
-                start = end + 1;
-                end = m_config.m_translationTargetLanguages.find_first_of(commaDelim, start);
-            }
-            oss << delim << endpoint::translation::to << EncodeParameterString(m_config.m_translationTargetLanguages.substr(start, end));
-        }
-
-        if (!m_config.m_translationVoice.empty())
-        {
-            if (!customEndpoint || !contains(oss.str(), endpoint::translation::voice))
-            {
-                oss << delim << endpoint::translation::features << endpoint::translation::requireVoice;
-                oss << delim << endpoint::translation::voice << EncodeParameterString(m_config.m_translationVoice);
+                auto entry = m_config.m_queryParameters.find(queryParameterName);
+                if (entry != m_config.m_queryParameters.end() && !entry->second.empty())
+                {
+                    // Need to use separate parameter for each target language.
+                    if (queryParameterName == endpoint::translation::to)
+                    {
+                        size_t start = 0;
+                        const char commaDelim = ',';
+                        size_t end = entry->second.find_first_of(commaDelim);
+                        while (end != string::npos)
+                        {
+                            oss << queryParameterDelim << endpoint::translation::to << EncodeParameterString(entry->second.substr(start, end - start));
+                            start = end + 1;
+                            end = entry->second.find_first_of(commaDelim, start);
+                        }
+                        oss << queryParameterDelim << endpoint::translation::to << EncodeParameterString(entry->second.substr(start, end));
+                    }
+                    // Voice need 2 query parameters.
+                    else if (queryParameterName == endpoint::translation::voice)
+                    {
+                        oss << queryParameterDelim << endpoint::translation::features << endpoint::translation::requireVoice;
+                        oss << queryParameterDelim << endpoint::translation::voice << EncodeParameterString(entry->second);
+                    }
+                    else
+                    {
+                        oss << queryParameterDelim << queryParameterName << entry->second;
+                    }
+                }
             }
         }
         break;
+
     case EndpointType::CDSDK:
         // no query parameter needed.
         break;
+
     case EndpointType::Bot:
-        if (!m_config.m_language.empty())
-        {
-            if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
-            {
-                oss << delim << endpoint::unifiedspeech::langQueryParam << m_config.m_language;
-            }
-        }
+        BuildQueryParameters(endpoint::bot::queryParameters, m_config.m_queryParameters, customEndpoint, oss);
         break;
     }
 
-    return oss.str();
+    auto urlStr = oss.str();
+    auto firstQueryDelim = urlStr.find_first_of("?&");
+    if (firstQueryDelim != string::npos)
+    {
+        urlStr[firstQueryDelim] = '?';
+    }
+
+    return urlStr;
+}
+
+void Connection::Impl::BuildQueryParameters(const vector<string>& parameterList, const unordered_map<string, string>& valueMap, bool isCustomEndpoint, ostringstream& oss) const
+{
+    for (auto queryParameterName : parameterList)
+    {
+        if (!isCustomEndpoint || !contains(oss.str(), queryParameterName))
+        {
+            auto entry = valueMap.find(queryParameterName);
+            if (entry != valueMap.end() && !entry->second.empty())
+            {
+                oss << queryParameterDelim << queryParameterName << entry->second;
+            }
+        }
+    }
 }
 
 void Connection::Impl::Connect()
@@ -433,7 +408,7 @@ void Connection::Impl::Connect()
         }
     }
 
-    if (m_config.m_endpoint == EndpointType::Bot)
+    if (m_config.m_endpointType == EndpointType::Bot)
     {
         auto& region = m_config.m_region;
         if (!region.empty())
@@ -449,13 +424,13 @@ void Connection::Impl::Connect()
     auto connectionUrl = ConstructConnectionUrl();
     LogInfo("connectionUrl=%s", connectionUrl.c_str());
 
-    m_telemetry = std::make_unique<Telemetry>(Connection::Impl::OnTelemetryData, this);
+    m_telemetry = make_unique<Telemetry>(Connection::Impl::OnTelemetryData, this);
     if (m_telemetry == nullptr)
     {
         ThrowRuntimeError("Failed to create telemetry instance.");
     }
 
-    std::string connectionId = PAL::ToString(m_config.m_connectionId);
+    string connectionId = PAL::ToString(m_config.m_connectionId);
 
     // Log the device uuid
     MetricsDeviceStartup(*m_telemetry, connectionId, PAL::DeviceUuid());
@@ -1077,11 +1052,11 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             translationResult.translationStatus = TranslationStatus::Success;
 
             connection->Invoke([&] {
-                callbacks->OnTranslationHypothesis({std::move(speechResult.json),
+                callbacks->OnTranslationHypothesis({move(speechResult.json),
                                                     speechResult.offset,
                                                     speechResult.duration,
-                                                    std::move(speechResult.text),
-                                                    std::move(translationResult)});
+                                                    move(speechResult.text),
+                                                    move(translationResult)});
             });
         }
         else if (path == path::translationPhrase)
@@ -1116,18 +1091,18 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             {
                 // There is no speech recognition error, we fire a translation phrase event.
                 connection->Invoke([&] {
-                    callbacks->OnTranslationPhrase({std::move(speechResult.json),
+                    callbacks->OnTranslationPhrase({move(speechResult.json),
                                                     speechResult.offset,
                                                     speechResult.duration,
-                                                    std::move(speechResult.text),
-                                                    std::move(translationResult),
+                                                    move(speechResult.text),
+                                                    move(translationResult),
                                                     status});
                 });
             }
         }
         else if (path == path::translationSynthesisEnd)
         {
-            std::string failureReason;
+            string failureReason;
             bool synthesisSuccess = false;
 
             auto statusHandle = json.find(json_properties::synthesisStatus);
@@ -1184,7 +1159,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
     }
 }
 
-void Connection::Impl::InvokeRecognitionErrorCallback(RecognitionStatus status, const std::string& response)
+void Connection::Impl::InvokeRecognitionErrorCallback(RecognitionStatus status, const string& response)
 {
     auto callbacks = m_config.m_callbacks;
     string msg;

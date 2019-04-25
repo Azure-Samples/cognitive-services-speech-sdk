@@ -84,6 +84,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual("x", config.SubscriptionKey);
         }
 
+        [TestMethod]
+        public async Task DefaultLanguageAndOutputFormatRecognition()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                var bestResults = result.Best().ToArray();
+                Assert.AreEqual(0, bestResults.Length);
+            }
+        }
+
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]

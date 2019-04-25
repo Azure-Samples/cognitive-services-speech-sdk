@@ -14,10 +14,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace USP {
 
-ConnectionPtr Client::Connect()
-{
-    return ConnectionPtr(new Connection(*this));
-}
+using namespace std;
 
 Connection::~Connection()
 {
@@ -45,7 +42,7 @@ void Connection::FlushAudio()
     m_impl->QueueAudioEnd();
 }
 
-void Connection::SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType)
+void Connection::SendMessage(const string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType)
 {
     m_impl->QueueMessage(messagePath, buffer, size, messageType);
 }
@@ -53,6 +50,12 @@ void Connection::SendMessage(const std::string& messagePath, const uint8_t* buff
 void Connection::WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency)
 {
     m_impl->WriteTelemetryLatency(latencyInTicks, isPhraseLatency);
+}
+
+
+ConnectionPtr Client::Connect()
+{
+    return ConnectionPtr(new Connection(*this));
 }
 
 Client& Client::SetProxyServerInfo(const char *proxyHost, int proxyPort, const char *proxyUsername, const char *proxyPassword)
@@ -71,6 +74,42 @@ Client& Client::SetProxyServerInfo(const char *proxyHost, int proxyPort, const c
     {
         m_proxyServerInfo->password = proxyPassword;
     }
+    return *this;
+}
+
+Client& Client::SetLanguage(const string& language)
+{
+    m_queryParameters[endpoint::langQueryParam] = language;
+    return *this;
+}
+
+Client& Client::SetOutputFormat(OutputFormat format)
+{
+    m_queryParameters[endpoint::outputFormatQueryParam] = (format == OutputFormat::Simple) ? endpoint::outputFormatSimple : endpoint::outputFormatDetailed;
+    return *this;
+}
+
+Client& Client::SetModelId(const string& modelId)
+{
+    m_queryParameters[endpoint::deploymentIdQueryParam] = modelId;
+    return *this;
+}
+
+Client& Client::SetTranslationSourceLanguage(const string& lang)
+{
+    m_queryParameters[endpoint::translation::from] = lang;
+    return *this;
+}
+
+Client& Client::SetTranslationTargetLanguages(const string& langs)
+{
+    m_queryParameters[endpoint::translation::to] = langs;
+    return *this;
+}
+
+Client& Client::SetTranslationVoice(const string& voice)
+{
+    m_queryParameters[endpoint::translation::voice] = voice;
     return *this;
 }
 
