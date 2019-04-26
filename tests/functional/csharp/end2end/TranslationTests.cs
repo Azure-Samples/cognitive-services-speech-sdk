@@ -420,9 +420,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.IsNotNull(actualTranslationRecognition);
 
             Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
-            Assert.AreEqual(TestData.Catalan.HowIsYourWork.Utterance, actualTranslationRecognition.Result.Text);
+            AssertMatching(TestData.Catalan.HowIsYourWork.Utterance, actualTranslationRecognition.Result.Text);
 
-            Assert.AreEqual(TestData.German.HowIsYourWork.Utterance, actualTranslationRecognition.Result.Translations[Language.DE]);
+            AssertMatching(TestData.German.HowIsYourWork.Utterance, actualTranslationRecognition.Result.Translations[Language.DE]);
         }
 
         [TestMethod]
