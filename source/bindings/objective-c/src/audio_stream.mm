@@ -5,7 +5,7 @@
 
 #import "audio_stream_private.h"
 #import "audio_stream_format_private.h"
-#import "common_private.h"
+#import "speechapi_private.h"
 
 @implementation SPXAudioInputStream
 {
@@ -85,7 +85,7 @@
             NSInteger ret = readHandler(data, (NSUInteger)size);
             if (ret > 0) {
                 if (ret > [data length]) {
-                    NSLog(@"The length of data is less than return value.");
+                    LogDebug(@"The length of data is less than return value.");
                     ret = [data length];
                 }
                 std::memcpy(buffer, [data bytes], ret);
@@ -112,7 +112,7 @@
             NSInteger ret = readHandler(data, (NSUInteger)size);
             if (ret > 0) {
                 if (ret > [data length]) {
-                    NSLog(@"The length of data is less than return value.");
+                    LogDebug(@"The length of data is less than return value.");
                     ret = [data length];
                 }
                 std::memcpy(buffer, [data bytes], ret);

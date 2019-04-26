@@ -4,6 +4,7 @@
 //
 
 #import "speechapi_private.h"
+#import "exception.h"
 
 @implementation SPXSpeechConfiguration
 {
@@ -18,9 +19,25 @@
             return nil;
         return [self initWithImpl:configImpl];
     }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
     catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught.");
+        NSLog(@"%@: Exception caught.\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
     }
     return nil;
 }
@@ -33,9 +50,25 @@
             return nil;
         return [self initWithImpl:configImpl];
     }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
     catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught.");
+        NSLog(@"%@: Exception caught.\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
     }
     return nil;
 }
@@ -48,9 +81,25 @@
             return nil;
         return [self initWithImpl:configImpl];
     }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
     catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught.");
+        NSLog(@"%@: Exception caught.\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
     }
     return nil;
 }
@@ -63,9 +112,25 @@
             return nil;
         return [self initWithImpl:configImpl];
     }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
     catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught.");
+        NSLog(@"%@: Exception caught.\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
     }
     return nil;
 }

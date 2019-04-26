@@ -4,6 +4,7 @@
 //
 
 #import "speechapi_private.h"
+#import "exception.h"
 
 struct SpeechEventHandlerHelper
 {
@@ -110,9 +111,25 @@ struct SpeechEventHandlerHelper
             return nil;
         return [self initWithImpl:recoImpl];
     }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
     catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught when creating SPXSpeechRecognizer in core.");
+        NSLog(@"Exception caught when creating SPXSpeechRecognizer in core.\nNOTE: This will raise an exception in the future!");
     }
     return nil;
 }
@@ -125,9 +142,25 @@ struct SpeechEventHandlerHelper
             return nil;
         return [self initWithImpl:recoImpl];
     }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
     catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught when creating SPXSpeechRecognizer in core.");
+        NSLog(@"Exception caught when creating SPXSpeechRecognizer in core.\nNOTE: This will raise an exception in the future!");
     }
     return nil;
 }
@@ -182,8 +215,14 @@ struct SpeechEventHandlerHelper
         self->speechRecoImpl->Canceled.DisconnectAll();
         self->speechRecoImpl.reset();
     }
-    catch (...)
-    {
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s", e.what());
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s", e.what());
+    }
+    catch (...) {
         NSLog(@"Exception caught in speech recognizer destructor");
     }
 }
@@ -222,9 +261,27 @@ struct SpeechEventHandlerHelper
             result = [[SPXSpeechRecognitionResult alloc] init: resultImpl];
         }
     }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        // [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        // [exception raise];
+    }
     catch (...) {
-        // Todo: better error handling
-        NSLog(@"exception caught");
+        NSLog(@"%@: Exception caught\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
         result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
     }
     
@@ -252,9 +309,27 @@ struct SpeechEventHandlerHelper
             result = [[SPXSpeechRecognitionResult alloc] init: resultImpl];
         }
     }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        // [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        // [exception raise];
+    }
     catch (...) {
-        // Todo: better error handling
-        NSLog(@"exception caught");
+        NSLog(@"%@: Exception caught\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
         result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
     }
     
@@ -267,16 +342,32 @@ struct SpeechEventHandlerHelper
 {
     if (speechRecoImpl == nullptr) {
         // Todo: return error?
-        NSLog(@"SPXRecognizer handle is null");
+        NSLog(@"SPXRecognizer handle is null\nNOTE: This will raise an exception in the future!");
         return;
     }
     
     try {
         speechRecoImpl->StartContinuousRecognitionAsync().get();
     }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
     catch (...) {
-        // Todo: better error handling
-        NSLog(@"exception caught");
+        NSLog(@"Exception caught in startContinuousRecognition\nNOTE: This will raise an exception in the future!");
     }
 }
 
@@ -284,16 +375,32 @@ struct SpeechEventHandlerHelper
 {
     if (speechRecoImpl == nullptr) {
         // Todo: return error?
-        NSLog(@"SPXRecognizer handle is null");
+        NSLog(@"SPXRecognizer handle is null\nNOTE: This will raise an exception in the future!");
         return;
     }
     
     try {
         speechRecoImpl->StopContinuousRecognitionAsync().get();
     }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
     catch (...) {
-        // Todo: better error handling
-        NSLog(@"exception caught");
+        NSLog(@"%@: Exception caught\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
     }
 }
 

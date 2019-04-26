@@ -44,7 +44,7 @@
             break;
         default:
             // Todo error handling.
-            NSLog(@"Unknown ResultReason value: %d.", (int)reasonImpl);
+            NSLog(@"Unknown ResultReason value: %d.\nNOTE: This will raise an exception in the future!", (int)reasonImpl);
             reason = SPXResultReason_Canceled;
             break;
     }
@@ -64,7 +64,7 @@
             break;
         default:
             // Todo error handling.
-            NSLog(@"Unknown CancellationReason value: %d.", (int)reasonImpl);
+            NSLog(@"Unknown CancellationReason value: %d.\nNOTE: This will raise an exception in the future!", (int)reasonImpl);
             reason = SPXCancellationReason_Error;
             break;
     }
@@ -108,7 +108,7 @@
             break;
         default:
             // Todo error handling.
-            NSLog(@"Unknown CancellationErrorCode value: %d.", (int)errorCodeImpl);
+            NSLog(@"Unknown CancellationErrorCode value: %d.\nNOTE: This will raise an exception in the future!", (int)errorCodeImpl);
             errorCode = SPXCancellationErrorCode_RuntimeError;
             break;
     }
@@ -131,7 +131,7 @@
             break;
         default:
             // Todo error handling.
-            NSLog(@"Unknown NoMatchReason value: %d.", (int)reasonImpl);
+            NSLog(@"Unknown NoMatchReason value: %d.\nNOTE: This will raise an exception in the future!", (int)reasonImpl);
             reason = SPXNoMatchReason_NotRecognized;
             break;
     }
@@ -151,7 +151,7 @@
             break;
         default:
             // Todo error handling.
-            NSLog(@"Unknown NoMatchReason value: %d.", (int)outputFormatImpl);
+            NSLog(@"Unknown NoMatchReason value: %d.\nNOTE: This will raise an exception in the future!", (int)outputFormatImpl);
             outputFormat = SPXOutputFormat_Simple;
             break;
     }

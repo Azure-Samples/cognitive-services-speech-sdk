@@ -4,6 +4,7 @@
 //
 
 #import "speechapi_private.h"
+#import "exception.h"
 
 struct ConnectionEventHandlerHelper
 {
@@ -59,9 +60,25 @@ struct ConnectionEventHandlerHelper
             return nil;
         return [self initWithImpl:connectionImpl AndDispatchQueue:recognizerQueue];
     }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        UNUSED(exception);
+        // [exception raise];
+    }
     catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught when creating SPXConnection in core.");
+        NSLog(@"Exception caught when creating SPXConnection in core.\nNOTE: This will raise an exception in the future!");
     }
     return nil;
 }
@@ -89,7 +106,7 @@ struct ConnectionEventHandlerHelper
 }
 
 - (void)dealloc {
-    NSLog(@"connection object deallocated.");
+    LogDebug(@"connection object deallocated.");
     if (!self->connectionHandle)
     {
         NSLog(@"connectionHandle is nil in speech recognizer destructor");
@@ -101,6 +118,13 @@ struct ConnectionEventHandlerHelper
         connectionHandle->Connected.DisconnectAll();
         connectionHandle->Disconnected.DisconnectAll();
         connectionHandle.reset();
+    }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s", e.what());
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s", e.what());
     }
     catch (...)
     {

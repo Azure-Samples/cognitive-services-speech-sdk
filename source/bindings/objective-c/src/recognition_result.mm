@@ -5,6 +5,7 @@
 
 #import <Foundation/Foundation.h>
 #import "speechapi_private.h"
+#import "exception.h"
 
 @implementation SPXRecognitionResult
 {
@@ -65,9 +66,27 @@
         try {
             auto cancellationDetailsImpl = SpeechImpl::CancellationDetails::FromResult(handle);
             return [self initWithImpl: cancellationDetailsImpl];
-        } catch (...) {
-            // Todo: better error handling.
-            NSLog(@"Exception caught when creating SPXCancellationDetails in core. Check to make sure that recognition result has the reason Canceled.");
+        }
+        catch (const std::exception &e) {
+            NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+            NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                             reason:[NSString StringWithStdString:e.what()]
+                                                           userInfo:nil];
+            UNUSED(exception);
+            // [exception raise];
+        }
+        catch (const SPXHR &hr) {
+            auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+            NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+            NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                             reason:[NSString StringWithStdString:e.what()]
+                                                           userInfo:nil];
+            UNUSED(exception);
+            // [exception raise];
+        }
+        catch (...)
+        {
+            NSLog(@"Exception caught when creating SPXCancellationDetails in core. Check to make sure that recognition result has the reason Canceled.\nNOTE: This will raise an exception in the future!");
         }
         return nil;
     }
@@ -104,9 +123,27 @@
         try {
             auto noMatchDetailsImpl = SpeechImpl::NoMatchDetails::FromResult([recognitionResult getHandle]);
             return [self initWithImpl: noMatchDetailsImpl];
-        } catch (...) {
-            // Todo: better error handling.
-            NSLog(@"Exception caught when creating SPXNoMatchDetails in core. Check to make sure that recognition result has the reason NoMatch.");
+        }
+        catch (const std::exception &e) {
+            NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+            NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                             reason:[NSString StringWithStdString:e.what()]
+                                                           userInfo:nil];
+            UNUSED(exception);
+            // [exception raise];
+        }
+        catch (const SPXHR &hr) {
+            auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+            NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+            NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                             reason:[NSString StringWithStdString:e.what()]
+                                                           userInfo:nil];
+            UNUSED(exception);
+            // [exception raise];
+        }
+        catch (...)
+        {
+            NSLog(@"Exception caught when creating SPXNoMatchDetails in core. Check to make sure that recognition result has the reason NoMatch.\nNOTE: This will raise an exception in the future!");
         }
     }
     return nil;
