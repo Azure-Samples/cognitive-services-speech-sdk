@@ -100,7 +100,8 @@ public:
         /// </summary>
         /// <param name="v">Value to set</param>
         /// <returns>A const reference to the property value.</returns>
-        inline std::enable_if_t<!isReadOnly, const T&> Set(T&& v)
+        template<typename V, typename = std::enable_if_t<std::is_constructible<T, V>::value>>
+        inline std::enable_if_t<!isReadOnly, const T&> Set(V&& v)
         {
             m_cache = { std::forward<T>(v) };
             m_put(m_cache);
@@ -112,9 +113,10 @@ public:
         /// </summary>
         /// <param name="v">Value to set</param>
         /// <returns>A const reference to the property value.</returns>
-        inline std::enable_if_t<!isReadOnly, const T&> operator=(T&& v)
+        template<typename V, typename = std::enable_if_t<std::is_constructible<T, V>::value>>
+        inline std::enable_if_t<!isReadOnly, const T&> operator=(V&& v)
         {
-            return Set(std::forward<T>(v));
+            return Set(std::forward<V>(v));
         }
 
         /// <summary>
@@ -124,6 +126,48 @@ public:
         operator const T&() const
         {
             return Get();
+        }
+
+        /// <summary>
+        /// Equality operator.
+        /// </summary>
+        /// <param name="rhs">Property object</param>
+        /// <returns>true if the value of the object is equal to the value contained in the property.</returns>
+        bool operator==(const T& rhs) const
+        {
+            return Get() == rhs;
+        }
+
+        /// <summary>
+        /// Inequality operator.
+        /// </summary>
+        /// <param name="rhs">Property object</param>
+        /// <returns>true if the value of the object is not equal to the value contained in the property.</returns>
+        bool operator!=(const T& rhs) const
+        {
+            return !(Get() == rhs);
+        }
+
+        /// <summary>
+        /// Equality operator.
+        /// </summary>
+        /// <param name="lhs">Object of the same type as the property</param>
+        /// <param name="rhs">Property object</param>
+        /// <returns>true if the value of the object is equal to the value contained in the property.</returns>
+        friend bool operator==(const T& lhs, const Property& rhs)
+        {
+            return lhs == rhs.Get();
+        }
+
+        /// <summary>
+        /// Inequality operator.
+        /// </summary>
+        /// <param name="lhs">Object of the same type as the property</param>
+        /// <param name="rhs">Property object</param>
+        /// <returns>true if the value of the object is not equal to the value contained in the property.</returns>
+        friend bool operator!=(const T& lhs, const Property& rhs)
+        {
+            return lhs == rhs.Get();
         }
 
         /// <summary>

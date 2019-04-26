@@ -23,6 +23,7 @@ set(SOURCES
     "${SRC_DIR}/recognizer_utils.cpp"
     "${SRC_DIR}/synthesizer_utils.cpp"
     "${SRC_DIR}/ring_buffer_tests.cpp"
+    "${SRC_DIR}/bot_connector_tests.cpp"
     )
 
 source_group("Source Files" FILES ${SOURCES})

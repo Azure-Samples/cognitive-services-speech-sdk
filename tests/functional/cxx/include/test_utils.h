@@ -46,6 +46,7 @@ namespace Keys
 {
     EXTERN std::string Speech;
     EXTERN std::string LUIS;
+    EXTERN std::string Bot;
 }
 
 namespace Config
@@ -55,6 +56,8 @@ namespace Config
     EXTERN std::string LuisRegion;
     EXTERN std::string LuisAppId;
     EXTERN std::string InputDir;
+    EXTERN std::string BotRegion;
+    EXTERN std::string BotSecret;
 }
 
 
@@ -89,6 +92,9 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Keys::LUIS, "LuisSubscriptionKey")
         ["--keyLUIS"]
     ("The subscription key for language understanding")
+        | Opt(Keys::Bot, "keyBot")
+        ["--keyBot"]
+    ("The subscription key for the Speech Channel")
         | Opt(Config::Endpoint, "endpoint")
         ["--endpoint"]
     ("The endpoint url to test against.")
@@ -104,6 +110,12 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Config::InputDir, "InputDir")
         ["--inputDir"]
     ("The directory where test input files are placed")
+        | Opt(Config::BotRegion, "BotRegion")
+        ["--regionIdBot"]
+    ("The region id to be used for the Speech Channel Service")
+        | Opt(Config::BotSecret, "BotSecret")
+        ["--secretKeyBot"]
+    ("Secret for the functional test bot")
     ;
 
     // Now pass the new composite back to Catch so it uses that
