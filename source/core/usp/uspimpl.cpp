@@ -89,8 +89,6 @@ Connection::Impl::Impl(const Client& config)
     m_audioOffset(0),
     m_creationTime(telemetry_gettime())
 {
-    static once_flag initOnce;
-
     if (m_config.m_proxyServerInfo != nullptr)
     {
         PlatformInit(m_config.m_proxyServerInfo->host.c_str(),
@@ -1017,18 +1015,12 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 }
                 else // Detailed
                 {
+                    // The service returns sorted n-best results and the first result is the best one.
+                    // Use the first one as the default text, irrespective of the confidence value.
                     auto phrases = json.at(json_properties::nbest);
-
-                    double confidence = 0;
-                    for (const auto& object : phrases)
+                    if (!phrases.empty())
                     {
-                        auto currentConfidence = object.at(json_properties::confidence).get<double>();
-                        // Picking up the result with the highest confidence.
-                        if (currentConfidence > confidence)
-                        {
-                            confidence = currentConfidence;
-                            result.displayText = PAL::ToWString(object.at(json_properties::display).get<string>());
-                        }
+                        result.displayText = PAL::ToWString(phrases[0].at(json_properties::display).get<string>());
                     }
                 }
                 connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
