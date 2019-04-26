@@ -124,7 +124,7 @@ namespace MicrosoftSpeechSDKSamples
                         SpeechSynthesisSamples.SynthesisEventsAsync().Wait();
                         break;
                     case ConsoleKey.P:
-                        SpeechRecognitionSamples.ContinuousRecognitionWithFileAndPhraseListsAsync();
+                        SpeechRecognitionSamples.ContinuousRecognitionWithFileAndPhraseListsAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                         Console.WriteLine("Exiting...");
@@ -133,7 +133,7 @@ namespace MicrosoftSpeechSDKSamples
                         Console.WriteLine("Invalid input.");
                         break;
                 }
-                Console.WriteLine("\nExcution done. " + prompt);
+                Console.WriteLine("\nExecution done. " + prompt);
             } while (x.Key != ConsoleKey.D0);
         }
     }
