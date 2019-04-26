@@ -236,5 +236,270 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.IsTrue(string.IsNullOrEmpty(translationRecognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Key)));
             }
         }
+
+        [TestMethod]
+        public void PropertiesSetAndGet()
+        {
+            int initialSilenceTimeout = 6000;
+            int endSilenceTimeout = 10000;
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, initialSilenceTimeout.ToString());
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, endSilenceTimeout.ToString());
+            Assert.AreEqual(initialSilenceTimeout, Convert.ToInt32(this.defaultConfig.GetProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs)));
+            Assert.AreEqual(endSilenceTimeout, Convert.ToInt32(this.defaultConfig.GetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs)));
+
+            int threshold = 15;
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_StablePartialResultThreshold, threshold.ToString());
+            Assert.AreEqual(threshold, Convert.ToInt32(this.defaultConfig.GetProperty(PropertyId.SpeechServiceResponse_StablePartialResultThreshold)));
+
+            var valStr = "detailed";
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_OutputFormatOption, valStr);
+            Assert.AreEqual(valStr, this.defaultConfig.GetProperty(PropertyId.SpeechServiceResponse_OutputFormatOption));
+
+            var profanity = "raw";
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_ProfanityOption, profanity);
+            Assert.AreEqual(profanity, this.defaultConfig.GetProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+
+            var falseStr = "false";
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging, falseStr);
+            Assert.AreEqual(falseStr, this.defaultConfig.GetProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging));
+
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, falseStr);
+            Assert.AreEqual(falseStr, this.defaultConfig.GetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps));
+
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_TranslationRequestStablePartialResult, falseStr);
+            Assert.AreEqual(falseStr, this.defaultConfig.GetProperty(PropertyId.SpeechServiceResponse_TranslationRequestStablePartialResult));
+
+            var trueText = "TrueText";
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_PostProcessingOption, trueText);
+            Assert.AreEqual(trueText, this.defaultConfig.GetProperty(PropertyId.SpeechServiceResponse_PostProcessingOption));
+
+            using (var recognizer = new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile)))
+            {
+                Assert.AreEqual(initialSilenceTimeout, Convert.ToInt32(recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs)));
+                Assert.AreEqual(endSilenceTimeout, Convert.ToInt32(recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs)));
+                Assert.AreEqual(threshold, Convert.ToInt32(recognizer.Properties.GetProperty(PropertyId.SpeechServiceResponse_StablePartialResultThreshold)));
+                Assert.AreEqual(valStr, recognizer.Properties.GetProperty(PropertyId.SpeechServiceResponse_OutputFormatOption));
+                Assert.AreEqual(profanity, recognizer.Properties.GetProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+                Assert.AreEqual(falseStr, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging));
+                Assert.AreEqual(falseStr, recognizer.Properties.GetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps));
+                Assert.AreEqual(falseStr, recognizer.Properties.GetProperty(PropertyId.SpeechServiceResponse_TranslationRequestStablePartialResult));
+                Assert.AreEqual(trueText, recognizer.Properties.GetProperty(PropertyId.SpeechServiceResponse_PostProcessingOption));
+            }
+        }
+
+        [TestMethod]
+        public void PropertiesDirectSetAndGet()
+        {
+            this.defaultConfig.SetProfanity(ProfanityOption.Removed);
+            this.defaultConfig.EnableAudioLogging();
+            this.defaultConfig.RequestWordLevelTimestamps();
+            this.defaultConfig.EnableDictation();
+
+            using (var recognizer = new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile)))
+            {
+                Assert.AreEqual("DICTATION", this.defaultConfig.GetProperty(PropertyId.SpeechServiceConnection_RecoMode));
+                Assert.AreEqual("DICTATION", recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoMode));
+                Assert.AreEqual("removed", this.defaultConfig.GetProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+                Assert.AreEqual("removed", recognizer.Properties.GetProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+                Assert.AreEqual("true", this.defaultConfig.GetProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging));
+                Assert.AreEqual("true", recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging));
+                Assert.AreEqual("true", this.defaultConfig.GetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps));
+                Assert.AreEqual("true", recognizer.Properties.GetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps));
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeechConfigPropertiesSetAndCheckUrl()
+        {
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "5000");
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "12000");
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_StablePartialResultThreshold, "5");
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_OutputFormatOption, "detailed");
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_ProfanityOption, "removed");
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging, "false");
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, "false");
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_PostProcessingOption, "TrueText");
+
+            // This one is for Translation, should not be picked up by SpeechRecognizer.
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_TranslationRequestStablePartialResult, "true");
+
+            // Set one via SetServiceProperty, which should be picked up anyway.
+            this.defaultConfig.SetServiceProperty("clientId", "1234", ServicePropertyChannel.UriQueryParameter);
+
+            string connectionUrl;
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                // Check no word-level timestamps included, but only detailed output.
+                var jsonResult = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                Assert.IsFalse(jsonResult.Contains("Words"), "Word-level timestamps not expected. Returned JSON: " + jsonResult);
+                Assert.IsTrue(result.Best().Count() >= 0, "Best results expected. Returned: " + jsonResult);
+            }
+            Assert.IsTrue(connectionUrl.Length > 0);
+
+            Assert.IsTrue(connectionUrl.Contains("initialSilenceTimeoutMs=5000"), "mismatch initialSilencetimeout in " + connectionUrl);
+            Assert.IsTrue(connectionUrl.Contains("endSilenceTimeoutMs=12000"), "mismatch endSilencetimeout in " + connectionUrl);
+            Assert.IsTrue(connectionUrl.Contains("stableIntermediateThreshold=5"), "mismatch stableIntermediateThreshold in " + connectionUrl);
+            Assert.IsTrue(connectionUrl.Contains("format=detailed"), "mismatch format in " + connectionUrl);
+            Assert.IsTrue(connectionUrl.Contains("profanity=removed"), "mismatch profanity in " + connectionUrl);
+            Assert.IsTrue(connectionUrl.Contains("storeAudio=false"), "mismatch storeAudio in " + connectionUrl);
+            Assert.IsTrue(connectionUrl.Contains("wordLevelTimestamps=false"), "mismatch wordLevelTimestamps in " + connectionUrl);
+            Assert.IsTrue(connectionUrl.Contains("postprocessing=TrueText"), "mismatch postprocessing in " + connectionUrl);
+            Assert.IsTrue(connectionUrl.Contains("clientId=1234"), "mismatch clientId in " + connectionUrl);
+
+            Assert.IsTrue(connectionUrl.Contains("language=en-us"), "mismatch language in " + connectionUrl);
+            Assert.IsFalse(connectionUrl.Contains("stableTranslation="), "unexpected stableTranslation in " + connectionUrl);
+        }
+
+        [TestMethod]
+        public async Task SpeechConfigPropertiesDirectSetAndCheckUrl()
+        {
+            this.defaultConfig.SetProfanity(ProfanityOption.Masked);
+            this.defaultConfig.EnableAudioLogging();
+            this.defaultConfig.RequestWordLevelTimestamps();
+            this.defaultConfig.EnableDictation();
+            this.defaultConfig.SpeechRecognitionLanguage = "de-DE";
+
+            // Set one via SetServiceProperty, which should be picked up anyway.
+            this.defaultConfig.SetServiceProperty("clientConnectionId", "myClient", ServicePropertyChannel.UriQueryParameter);
+
+            string connectionUrl;
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                // Check word-level timestamps as well as best results are included.
+                var jsonResult = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                Assert.IsTrue(jsonResult.Contains("Words"), "No word-level timestamps. Returned JSON: " + jsonResult);
+                Assert.IsTrue(result.Best().Count() >= 0, "Best results expected. Returned: " + jsonResult);
+            }
+            Assert.IsTrue(connectionUrl.Length > 0);
+
+            Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
+            // Word-level timestamps will set format to detailed.
+            Assert.IsTrue(connectionUrl.Contains("format=detailed"), "mismatch format in " + connectionUrl);
+            Assert.IsTrue(connectionUrl.Contains("profanity=masked"), "mismatch profanity in " + connectionUrl);
+            Assert.IsTrue(connectionUrl.Contains("storeAudio=true"), "mismatch storeAudio in " + connectionUrl);
+            Assert.IsTrue(connectionUrl.Contains("wordLevelTimestamps=true"), "mismatch wordLevelTimestamps in " + connectionUrl);
+            Assert.IsTrue(connectionUrl.Contains("language=de-DE"), "mismatch language in " + connectionUrl);
+
+            Assert.IsTrue(connectionUrl.Contains("clientConnectionId=myClient"), "mismatch clientId in " + connectionUrl);
+
+            Assert.IsFalse(connectionUrl.Contains("initialSilenceTimeoutMs="), "unexpected initialSilencetimeout in " + connectionUrl);
+            Assert.IsFalse(connectionUrl.Contains("endSilenceTimeoutMs="), "unexpected endSilencetimeout in " + connectionUrl);
+            Assert.IsFalse(connectionUrl.Contains("stableIntermediateThreshold="), "unexpected stableIntermediateThreshold in " + connectionUrl);
+            Assert.IsFalse(connectionUrl.Contains("postprocessing="), "unexpected postprocessing in " + connectionUrl);
+            Assert.IsFalse(connectionUrl.Contains("stableTranslation="), "unexpected stableTranslation in " + connectionUrl);
+        }
+
+        [TestMethod]
+        public async Task SpeechConfigPropertiesNegativeInteger()
+        {
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "-50");
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                var cancellation = CancellationDetails.FromResult(result);
+                Assert.AreEqual(CancellationReason.Error, cancellation.Reason);
+                Assert.AreEqual(CancellationErrorCode.RuntimeError, cancellation.ErrorCode);
+                AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "SPXERR_INVALID_ARG");
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeechConfigPropertiesInvalidInteger()
+        {
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "A50");
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                var cancellation = CancellationDetails.FromResult(result);
+                Assert.AreEqual(CancellationReason.Error, cancellation.Reason);
+                Assert.AreEqual(CancellationErrorCode.RuntimeError, cancellation.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeechConfigPropertiesInvalidBool()
+        {
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, "nontrue");
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                var cancellation = CancellationDetails.FromResult(result);
+                Assert.AreEqual(CancellationReason.Error, cancellation.Reason);
+                Assert.AreEqual(CancellationErrorCode.RuntimeError, cancellation.ErrorCode);
+                AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "SPXERR_INVALID_ARG");
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeechConfigOutputFormatOptionOverwrite()
+        {
+            this.defaultConfig.OutputFormat = OutputFormat.Detailed;
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_OutputFormatOption, "simple");
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("format=simple"), "mismatch format in " + connectionUrl);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                Assert.IsTrue(result.Best().Count() == 0, "Best results not expected. Returned: " + result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult));
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeechConfigWordLevelTimestampsOverwriteOutputFormatOption()
+        {
+            this.defaultConfig.RequestWordLevelTimestamps();
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_OutputFormatOption, "simple");
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("format=detailed"), "mismatch format in " + connectionUrl);
+                Assert.IsTrue(connectionUrl.Contains("wordLevelTimestamps=true"), "mismatch wordLevelTimestamps in " + connectionUrl);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                var jsonResult = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                Assert.IsTrue(jsonResult.Contains("Words"), "No word-level timestamps. Returned JSON: " + jsonResult);
+                Assert.IsTrue(result.Best().Count() >= 0, "Best results expected. Returned: " + jsonResult);
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeechConfigWordLevelTimestampsOverwriteOutputFormatProperty()
+        {
+            this.defaultConfig.RequestWordLevelTimestamps();
+            this.defaultConfig.OutputFormat = OutputFormat.Simple;
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("format=detailed"), "mismatch format in " + connectionUrl);
+                Assert.IsTrue(connectionUrl.Contains("wordLevelTimestamps=true"), "mismatch wordLevelTimestamps in " + connectionUrl);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                var jsonResult = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                Assert.IsTrue(jsonResult.Contains("Words"), "No word-level timestamps. Returned JSON: " + jsonResult);
+                Assert.IsTrue(result.Best().Count() >= 0, "Best results expected. Returned: " + jsonResult);
+            }
+        }
+
     }
 }

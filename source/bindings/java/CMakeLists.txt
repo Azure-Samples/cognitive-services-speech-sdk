@@ -139,6 +139,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/OutputFormat.java
     ${CMAKE_SWIG_OUTDIR}/AudioStreamContainerFormat.java
     ${CMAKE_SWIG_OUTDIR}/PropertyCollection.java
+    ${CMAKE_SWIG_OUTDIR}/ProfanityOption.java
 
     ${CMAKE_SWIG_OUTDIR}/ResultReason.java
     ${CMAKE_SWIG_OUTDIR}/CancellationReason.java
@@ -252,6 +253,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/SpeechRecognitionEventArgs.java
     ${PACKAGE_DIR}/SpeechRecognitionCanceledEventArgs.java
     ${PACKAGE_DIR}/SpeechRecognizer.java
+    ${PACKAGE_DIR}/ProfanityOption.java
 
     ${PACKAGE_DIR}/OutputFormat.java
     ${PACKAGE_DIR}/audio/AudioStreamContainerFormat.java

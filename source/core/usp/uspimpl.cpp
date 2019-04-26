@@ -69,10 +69,7 @@ inline bool contains(const string& content, const string& name)
     return (content.find(name) != string::npos) ? true : false;
 }
 
-// Todo(1126805) url builder + auth interfaces
-
 const string g_recoModeStrings[] = { "interactive", "conversation", "dictation" };
-const string g_outFormatStrings[] = { "simple", "detailed" };
 
 // This is called from telemetry_flush, invoked on a worker thread in turn-end.
 void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId)
@@ -102,7 +99,6 @@ Connection::Impl::Impl(const Client& config)
     }
 
     m_threadService = m_config.m_threadService;
-    Validate();
 }
 
 uint64_t Connection::Impl::getTimestamp()
@@ -199,9 +195,9 @@ bool Connection::Impl::IsConnected()
     return m_connected;
 }
 
-void Connection::Impl::Validate()
+std::string Connection::Impl::GetConnectionUrl()
 {
-
+    return m_connectionUrl;
 }
 
 string Connection::Impl::EncodeParameterString(const string& parameter) const
@@ -217,7 +213,6 @@ string Connection::Impl::ConstructConnectionUrl() const
     auto recoMode = static_cast<underlying_type_t<RecognitionMode>>(m_config.m_recoMode);
     ostringstream oss;
     bool customEndpoint = false;
-
 
     // Using customized endpoint if it is defined.
     if (!m_config.m_customEndpointUrl.empty())
@@ -291,24 +286,24 @@ string Connection::Impl::ConstructConnectionUrl() const
                 if (entry != m_config.m_queryParameters.end() && !entry->second.empty())
                 {
                     // Need to use separate parameter for each target language.
-                    if (queryParameterName == endpoint::translation::to)
+                    if (queryParameterName == endpoint::translation::toQueryParam)
                     {
                         size_t start = 0;
                         const char commaDelim = ',';
                         size_t end = entry->second.find_first_of(commaDelim);
                         while (end != string::npos)
                         {
-                            oss << queryParameterDelim << endpoint::translation::to << EncodeParameterString(entry->second.substr(start, end - start));
+                            oss << queryParameterDelim << endpoint::translation::toQueryParam << EncodeParameterString(entry->second.substr(start, end - start));
                             start = end + 1;
                             end = entry->second.find_first_of(commaDelim, start);
                         }
-                        oss << queryParameterDelim << endpoint::translation::to << EncodeParameterString(entry->second.substr(start, end));
+                        oss << queryParameterDelim << endpoint::translation::toQueryParam << EncodeParameterString(entry->second.substr(start, end));
                     }
                     // Voice need 2 query parameters.
-                    else if (queryParameterName == endpoint::translation::voice)
+                    else if (queryParameterName == endpoint::translation::voiceQueryParam)
                     {
-                        oss << queryParameterDelim << endpoint::translation::features << endpoint::translation::requireVoice;
-                        oss << queryParameterDelim << endpoint::translation::voice << EncodeParameterString(entry->second);
+                        oss << queryParameterDelim << endpoint::translation::featuresQueryParam << endpoint::translation::requireVoice;
+                        oss << queryParameterDelim << endpoint::translation::voiceQueryParam << EncodeParameterString(entry->second);
                     }
                     else
                     {
@@ -419,8 +414,8 @@ void Connection::Impl::Connect()
         }
     }
 
-    auto connectionUrl = ConstructConnectionUrl();
-    LogInfo("connectionUrl=%s", connectionUrl.c_str());
+    m_connectionUrl = ConstructConnectionUrl();
+    LogInfo("connectionUrl=%s", m_connectionUrl.c_str());
 
     m_telemetry = make_unique<Telemetry>(Connection::Impl::OnTelemetryData, this);
     if (m_telemetry == nullptr)
@@ -447,7 +442,7 @@ void Connection::Impl::Connect()
 #endif
 
     m_transport = TransportPtr(TransportRequestCreate(
-        connectionUrl.c_str(),
+        m_connectionUrl.c_str(),
         this,
         m_telemetry.get(),
         headersPtr,

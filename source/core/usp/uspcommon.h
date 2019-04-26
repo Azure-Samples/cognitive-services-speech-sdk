@@ -40,62 +40,6 @@ namespace CognitiveServices {
 namespace Speech {
 namespace USP {
 
-    namespace endpoint
-    {
-        const std::string protocol = "wss://";
-
-        const std::string outputFormatQueryParam = "format=";
-        const std::string langQueryParam = "language=";
-        const std::string deploymentIdQueryParam = "cid=";
-
-        const std::string outputFormatSimple = "simple";
-        const std::string outputFormatDetailed = "detailed";
-
-        namespace unifiedspeech
-        {
-            const std::string hostnameSuffix = ".stt.speech.microsoft.com";
-            const std::string pathPrefix = "/speech/recognition/";
-            const std::string pathSuffix = "/cognitiveservices/v1";
-
-            const std::vector<std::string> queryParameters = { langQueryParam, deploymentIdQueryParam, outputFormatQueryParam };
-        }
-
-        namespace translation
-        {
-            const std::string hostnameSuffix = ".s2s.speech.microsoft.com";
-            const std::string path = "/speech/translation/cognitiveservices/v1";
-            const std::string from = "from=";
-            const std::string to = "to=";
-            const std::string voice = "voice=";
-            const std::string features = "features=";
-            const std::string requireVoice = "texttospeech";
-
-            const std::vector<std::string> queryParameters = { from, to, voice, deploymentIdQueryParam, outputFormatQueryParam };
-        }
-
-        namespace luis
-        {
-            const std::string hostname = "speech.platform.bing.com";
-            const std::string pathPrefix1 = "/speech/";
-            const std::string pathPrefix2 = "/recognition/";
-            const std::string pathSuffix = "/cognitiveservices/v1";
-
-            const std::vector<std::string> queryParameters = { langQueryParam, outputFormatQueryParam };
-        }
-
-        namespace CDSDK
-        {
-            const std::string url = "speech.platform.bing.com/cortana/api/v1?environment=Home&";
-        }
-
-        namespace bot
-        {
-            const std::string url = "speech.platform.bing.com/convai/api/v2";
-
-            const std::vector<std::string> queryParameters = { langQueryParam };
-        }
-    }
-
     namespace path {
         const std::string speechHypothesis = "speech.hypothesis";
         const std::string speechPhrase = "speech.phrase";

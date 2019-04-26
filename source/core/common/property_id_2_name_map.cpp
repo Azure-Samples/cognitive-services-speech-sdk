@@ -30,6 +30,7 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::SpeechServiceConnection_ProxyPort: return "SPEECH-ProxyPort";
     case PropertyId::SpeechServiceConnection_ProxyUserName: return "SPEECH-ProxyUserName";
     case PropertyId::SpeechServiceConnection_ProxyPassword: return "SPEECH-ProxyPassword";
+    case PropertyId::SpeechServiceConnection_Url: return "SPEECH-ConnectionUrl";
     case PropertyId::SpeechServiceConnection_TranslationToLanguages: return "TRANSLATION-ToLanguages";
     case PropertyId::SpeechServiceConnection_TranslationVoice: return "TRANSLATION-Voice";
     case PropertyId::SpeechServiceConnection_TranslationFeatures: return "TRANSLATION-Features";
@@ -41,8 +42,17 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::SpeechServiceConnection_SynthOutputFormat: return "SPEECH-SynthOutputFormat";
     case PropertyId::SpeechServiceConnection_UserDefinedQueryParameters: return "SPEECH-UserDefinedQueryParameters";
     case PropertyId::Speech_SessionId: return "SessionId";
+    case PropertyId::SpeechServiceConnection_InitialSilenceTimeoutMs: return "SPEECH-InitialSilenceTimeoutMs";
+    case PropertyId::SpeechServiceConnection_EndSilenceTimeoutMs: return "SPEECH-EndSilenceTimeoutMs";
+    case PropertyId::SpeechServiceConnection_EnableAudioLogging: return "SPEECH-EnableAudioLogging";
     case PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse: return "SpeechServiceResponse_RequestDetailedResultTrueFalse";
     case PropertyId::SpeechServiceResponse_RequestProfanityFilterTrueFalse: return "SpeechServiceResponse_RequestProfanityFilterTrueFalse";
+    case PropertyId::SpeechServiceResponse_ProfanityOption: return "SpeechServiceResponse_ProfanityOption";
+    case PropertyId::SpeechServiceResponse_PostProcessingOption: return "SpeechServiceResponse_PostProcessingOption";
+    case PropertyId::SpeechServiceResponse_RequestWordLevelTimestamps: return "SpeechServiceResponse_RequestWordLevelTimestamps";
+    case PropertyId::SpeechServiceResponse_StablePartialResultThreshold: return "SpeechServiceResponse_StablePartialResultThreshold";
+    case PropertyId::SpeechServiceResponse_TranslationRequestStablePartialResult: return "SpeechServiceResponse_TranslationRequestStablePartialResult";
+    case PropertyId::SpeechServiceResponse_OutputFormatOption: return "SpeechServiceResponse_OutputFormatOption";
     case PropertyId::SpeechServiceResponse_JsonResult: return "RESULT-Json";
     case PropertyId::LanguageUnderstandingServiceResponse_JsonResult: return "RESULT-LanguageUnderstandingJson";
     case PropertyId::SpeechServiceResponse_JsonErrorDetails: return "RESULT-ErrorDetails";
@@ -59,6 +69,7 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::Conversation_Secret_Key: return "BOT-SecretKey";
     case PropertyId::Conversation_Initial_Silence_Timeout: return "BOT-InitialSilenceTimeout";
     case PropertyId::Conversation_From_Id: return "BOT-FromId";
+
     default:
         LogError("undefined PropertyId of %d", static_cast<int>(id));
         SPX_THROW_ON_FAIL(SPXERR_INVALID_ARG);

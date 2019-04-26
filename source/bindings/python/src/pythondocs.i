@@ -340,6 +340,14 @@ DocstringForPropertyId = """
       to use this property directly. Instead, use
       :py:meth:`.SpeechConfig.set_proxy`.
 
+    .. py:attribute:: SpeechServiceConnection_Url
+
+      The URL string built from speech configuration. This property is intended
+      to be read-only. The SDK is using it internally.
+
+      .. note::
+        This property id was added in version 1.5.0.
+
     .. py:attribute:: SpeechServiceConnection_TranslationToLanguages
 
       The list of comma separated languages used as target translation
@@ -388,6 +396,27 @@ DocstringForPropertyId = """
       circumstances, you shouldn't have to use this property directly. Instead
       use :py:attr:`.SessionEventArgs.session_id`.
 
+    .. py:attribute:: SpeechServiceConnection_InitialSilenceTimeoutMs
+
+      The initial silence timeout value (in milliseconds) used by the service.
+
+      .. note::
+        This property id was added in version 1.5.0.
+
+    .. py:attribute:: SpeechServiceConnection_EndSilenceTimeoutMs
+
+      The end silence timeout value (in milliseconds) used by the service.
+
+      .. note::
+        This property id was added in version 1.5.0.
+
+    .. py:attribute:: SpeechServiceConnection_EnableAudioLogging
+
+      A boolean value specifying whether audio logging is enabled in the service or not.
+
+      .. note::
+        This property id was added in version 1.5.0.
+
     .. py:attribute:: SpeechServiceResponse_RequestDetailedResultTrueFalse
 
       The requested Cognitive Services Speech Service response output format
@@ -399,6 +428,52 @@ DocstringForPropertyId = """
 
       The requested Cognitive Services Speech Service response output profanity
       level. Currently unused.
+
+    .. py:attribute:: SpeechServiceResponse_ProfanityOption
+
+      The requested Cognitive Services Speech Service response output profanity
+      setting. Allowed values are "masked", "removed", and "raw".
+
+      .. note::
+        This property id was added in version 1.5.0.
+
+    .. py:attribute:: SpeechServiceResponse_PostProcessingOption
+
+      A string value specifying which post processing option should be used by
+      service.  Allowed values are "TrueText".
+
+      .. note::
+        This property id was added in version 1.5.0.
+
+    .. py:attribute:: SpeechServiceResponse_RequestWordLevelTimestamps
+
+      A boolean value specifying whether to include word-level timestamps in the
+      response result.
+
+      .. note::
+        This property id was added in version 1.5.0.
+
+    .. py:attribute:: SpeechServiceResponse_StablePartialResultThreshold
+
+      The number of times a word has to be in partial results to be returned.
+
+      .. note::
+        This property id was added in version 1.5.0.
+
+    .. py:attribute:: SpeechServiceResponse_OutputFormatOption
+
+      A string value specifying the output format option in the response result.
+      Internal use only.
+
+      .. note::
+        This property id was added in version 1.5.0.
+
+    .. py:attribute:: SpeechServiceResponse_OutputFormatOption
+
+      A boolean value to request for stabilizing translation partial results by omitting words in the end.
+
+      .. note::
+        This property id was added in version 1.5.0.
 
     .. py:attribute:: SpeechServiceResponse_JsonResult
 
@@ -642,7 +717,7 @@ DocstringForResultReason = """
       Indicates the synthesized audio is now complete for this phrase.
     """
 
-DocstringForServicePropertyChannel= """
+DocstringForServicePropertyChannel = """
    Defines channels used to pass property settings to service.
 
    .. note::
@@ -653,5 +728,21 @@ DocstringForServicePropertyChannel= """
    .. py:attribute:: UriQueryParameter
 
       Uses URI query parameter to pass property settings to service.
+    """
+
+DocstringForProfanityOption = """
+   Defines the setting for the profanity filter.
+
+   .. note::
+     Added in version 1.5.0.
+
+   *Values:*
+
+   .. py:attribute:: Masked
+
+   .. py:attribute:: Removed
+
+   .. py:attribute:: Raw
+
     """
 %}

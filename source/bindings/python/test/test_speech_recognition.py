@@ -505,3 +505,82 @@ def test_set_service_property(subscription, speech_input, speech_region):
     speech_recognizer = msspeech.SpeechRecognizer(config, audio_input)
     result = speech_recognizer.recognize_once()
     _check_sr_result(result, speech_input, 0)
+
+
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_speech_config_properties_set_and_get(speech_input):
+    from azure.cognitiveservices.speech import PropertyId
+    initialSilenceTimeout = str(6000)
+    endSilenceTimeout = str(10000)
+
+    config = msspeech.SpeechConfig(subscription="somesubscription", region="someregion")
+
+    config.set_property(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs,
+            initialSilenceTimeout)
+    config.set_property(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, endSilenceTimeout)
+    assert initialSilenceTimeout == config.get_property(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs)
+    assert endSilenceTimeout == config.get_property(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs)
+
+    threshold = str(15)
+    config.set_property(PropertyId.SpeechServiceResponse_StablePartialResultThreshold, str(threshold))
+    assert threshold == config.get_property(PropertyId.SpeechServiceResponse_StablePartialResultThreshold)
+
+    valStr = "detailed"
+    config.set_property(PropertyId.SpeechServiceResponse_OutputFormatOption, valStr)
+    assert valStr == config.get_property(PropertyId.SpeechServiceResponse_OutputFormatOption)
+
+    profanity = "raw"
+    config.set_property(PropertyId.SpeechServiceResponse_ProfanityOption, profanity)
+    assert profanity == config.get_property(PropertyId.SpeechServiceResponse_ProfanityOption)
+
+    falseStr = "false"
+    config.set_property(PropertyId.SpeechServiceConnection_EnableAudioLogging, falseStr)
+    assert falseStr == config.get_property(PropertyId.SpeechServiceConnection_EnableAudioLogging)
+
+    config.set_property(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, falseStr)
+    assert falseStr == config.get_property(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps)
+
+    config.set_property(PropertyId.SpeechServiceResponse_TranslationRequestStablePartialResult, falseStr)
+    assert falseStr == config.get_property(PropertyId.SpeechServiceResponse_TranslationRequestStablePartialResult)
+
+    trueText = "TrueText"
+    config.set_property(PropertyId.SpeechServiceResponse_PostProcessingOption, trueText)
+    assert trueText == config.get_property(PropertyId.SpeechServiceResponse_PostProcessingOption)
+
+    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    recognizer = msspeech.SpeechRecognizer(config, audio_input)
+
+    assert initialSilenceTimeout == recognizer.properties.get_property(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs)
+    assert endSilenceTimeout == recognizer.properties.get_property(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs)
+    assert threshold == recognizer.properties.get_property(PropertyId.SpeechServiceResponse_StablePartialResultThreshold)
+    assert valStr == recognizer.properties.get_property(PropertyId.SpeechServiceResponse_OutputFormatOption)
+    assert profanity == recognizer.properties.get_property(PropertyId.SpeechServiceResponse_ProfanityOption)
+    assert falseStr == recognizer.properties.get_property(PropertyId.SpeechServiceConnection_EnableAudioLogging)
+    assert falseStr == recognizer.properties.get_property(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps)
+    assert falseStr == recognizer.properties.get_property(PropertyId.SpeechServiceResponse_TranslationRequestStablePartialResult)
+    assert trueText == recognizer.properties.get_property(PropertyId.SpeechServiceResponse_PostProcessingOption)
+
+
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_speech_config_properties_direct_set_and_get(speech_input):
+    from azure.cognitiveservices.speech import PropertyId, ProfanityOption
+    config = msspeech.SpeechConfig(subscription="somesubscription", region="someregion")
+
+    profanity = "removed"
+    config.set_profanity(ProfanityOption.Removed)
+    config.enable_audio_logging()
+    config.request_word_level_timestamps()
+    config.enable_dictation()
+
+    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    recognizer = msspeech.SpeechRecognizer(config, audio_input)
+
+    assert "DICTATION" == config.get_property(PropertyId.SpeechServiceConnection_RecoMode)
+    assert "DICTATION" == recognizer.properties.get_property(PropertyId.SpeechServiceConnection_RecoMode)
+    assert profanity == config.get_property(PropertyId.SpeechServiceResponse_ProfanityOption)
+    assert profanity == recognizer.properties.get_property(PropertyId.SpeechServiceResponse_ProfanityOption)
+    assert "true" == config.get_property(PropertyId.SpeechServiceConnection_EnableAudioLogging)
+    assert "true" == recognizer.properties.get_property(PropertyId.SpeechServiceConnection_EnableAudioLogging)
+    assert "true" == config.get_property(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps)
+    assert "true" == recognizer.properties.get_property(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps)
+

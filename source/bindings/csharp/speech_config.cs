@@ -356,5 +356,42 @@ namespace Microsoft.CognitiveServices.Speech
         {
             ThrowIfFail(Internal.SpeechConfig.speech_config_set_service_property(configHandle, name, value, channel));
         }
+
+        /// <summary>
+        /// Sets profanity option.
+        /// Added in version 1.5.0.
+        /// </summary>
+        /// <param name="profanity">The property option to set.</param>
+        public void SetProfanity(ProfanityOption profanity)
+        {
+            ThrowIfFail(Internal.SpeechConfig.speech_config_set_profanity(configHandle, profanity));
+        }
+
+        /// <summary>
+        /// Enable audio logging in service.
+        /// Added in version 1.5.0.
+        /// </summary>
+        public void EnableAudioLogging()
+        {
+            progBag.SetProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging, "true");
+        }
+
+        /// <summary>
+        /// Includes word-level timestamps.
+        /// Added in version 1.5.0.
+        /// </summary>
+        public void RequestWordLevelTimestamps()
+        {
+            progBag.SetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, "true");
+        }
+
+        /// <summary>
+        /// Enable dictation. Only supported in speech continuous recognition.
+        /// Added in version 1.5.0.
+        /// </summary>
+        public void EnableDictation()
+        {
+            progBag.SetProperty(PropertyId.SpeechServiceConnection_RecoMode, "DICTATION");
+        }
     }
 }

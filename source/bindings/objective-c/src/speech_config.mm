@@ -245,4 +245,24 @@
     speechConfigImpl->SetServiceProperty([name string], [value string], (SpeechImpl::ServicePropertyChannel)(int)channel);
 }
 
+-(void)setProfanityOptionTo:(SPXSpeechConfigProfanityOption)profanity
+{
+    speechConfigImpl->SetProfanity((SpeechImpl::ProfanityOption)(int)profanity);
+}
+
+-(void)enableAudioLogging
+{
+    speechConfigImpl->EnableAudioLogging();
+}
+
+-(void)requestWordLevelTimestamps
+{
+    speechConfigImpl->RequestWordLevelTimestamps();
+}
+
+-(void)enableDictation
+{
+    speechConfigImpl->EnableDictation();
+}
+
 @end

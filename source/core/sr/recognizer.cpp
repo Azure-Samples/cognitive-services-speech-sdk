@@ -91,20 +91,21 @@ void CSpxRecognizer::CloseConnection()
 
 CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsync()
 {
-    const char* recModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
-    auto currentRecoMode = GetStringValueFromProperties(recModePropertyName, "");
+    const char* recoModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
+    auto currentRecoMode =  GetStringValueFromProperties(recoModePropertyName, "");
     auto recoModeToSet = dynamic_cast<ISpxTranslationRecognizer *>(this) != nullptr
         ? g_recoModeConversation
         : g_recoModeInteractive;
 
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(recModePropertyName, recoModeToSet);
+        SetStringValueInProperties(recoModePropertyName, recoModeToSet);
     }
     else
     {
-        // Since the mode is set during connection setup, no mode switch is allowed.
-        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(recoModeToSet) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
+        // If the reco mode is set to dictation (which can only be set before starting any recognition), just use it.
+        // But switching between interactive and conversation after connection setup is not allowed.
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(g_recoModeDictation) != 0 && currentRecoMode.compare(recoModeToSet)) != 0, SPXERR_SWITCH_MODE_NOT_ALLOWED);
     }
 
     return m_defaultSession->RecognizeAsync();
@@ -112,19 +113,20 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsy
 
 CSpxAsyncOp<void> CSpxRecognizer::StartContinuousRecognitionAsync()
 {
-    const char* recModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
-    auto currentRecoMode = GetStringValueFromProperties(recModePropertyName, "");
+    const char* recoModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
+    auto currentRecoMode = GetStringValueFromProperties(recoModePropertyName, "");
     auto recoModeToSet = dynamic_cast<ISpxIntentRecognizer *>(this) != nullptr
         ? g_recoModeInteractive
         : g_recoModeConversation;
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), recoModeToSet);
+        SetStringValueInProperties(recoModePropertyName, recoModeToSet);
     }
     else
     {
-        // Since the mode is set during connection setup, no mode switch is allowed.
-        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(recoModeToSet) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);;
+        // If the reco mode is set to dictation (which can only be set before starting any recognition), just use it.
+        // But switching between interactive and conversation after connection setup is not allowed.
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(g_recoModeDictation) != 0 && currentRecoMode.compare(recoModeToSet) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);;
     }
     return m_defaultSession->StartContinuousRecognitionAsync();
 }
@@ -136,13 +138,13 @@ CSpxAsyncOp<void> CSpxRecognizer::StopContinuousRecognitionAsync()
 
 CSpxAsyncOp<void> CSpxRecognizer::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)
 {
-    const char* reco_mode = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
-    auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
+    const char* recoModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
+    auto currentRecoMode = GetStringValueFromProperties(recoModePropertyName, "");
 
     // currently, kws uses recoModeInteractive as default, but takes the passed mode, if configured
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), g_recoModeInteractive);
+        SetStringValueInProperties(recoModePropertyName, g_recoModeInteractive);
     }
     return m_defaultSession->StartKeywordRecognitionAsync(model);
 }

@@ -9,12 +9,13 @@ from . import speech_py_impl as impl
 from .audio import AudioConfig
 
 from .speech_py_impl import (
+    CancellationDetails,
+    NoMatchDetails,
     OutputFormat,
+    ProfanityOption,
     PropertyCollection,
     PropertyId,
-    CancellationDetails,
     ResultReason,
-    NoMatchDetails,
     ServicePropertyChannel,
 )
 
@@ -219,6 +220,49 @@ class SpeechConfig():
         if not isinstance(channel, ServicePropertyChannel):
             raise TypeError('wrong channel, must be ServicePropertyChannel')
         self._impl.set_service_property(name, value, channel.value)
+
+    def set_profanity(self, profanity_option: ProfanityOption) -> str:
+        """
+        Set the profanity option.
+
+        .. note::
+          Added in version 1.5.0.
+
+        :param profanity_option: The profanity level to set.
+        """
+        if not isinstance(profanity_option, ProfanityOption):
+            raise TypeError('bad option, must be ProfanityOption')
+        self._impl.set_profanity(profanity_option.value)
+
+    def enable_audio_logging(self):
+        """
+        Enables audio logging in service.
+
+        .. note::
+          Added in version 1.5.0.
+
+        """
+        self._impl.enable_audio_logging()
+
+    def request_word_level_timestamps(self):
+        """
+        Includes word level timestamps in response result.
+
+        .. note::
+          Added in version 1.5.0.
+
+        """
+        self._impl.request_word_level_timestamps()
+
+    def enable_dictation(self):
+        """
+        Enables dictation. Only supported in speech continuous recognition.
+
+        .. note::
+          Added in version 1.5.0.
+
+        """
+        self._impl.enable_dictation()
 
 
 class RecognitionResult():

@@ -126,18 +126,19 @@ private:
     void UspInitialize();
     void UspTerminate();
 
-    USP::Client& SetUspEndpoint(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpointCortana(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpointIntent(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpointTranslation(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpointDefaultSpeechService(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpointBot(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspRegion(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client, bool isIntentRegion);
-    USP::Client& SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspProxyInfo(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspOutputFormat(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspSingleTrustedCert(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpoint(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpointCortana(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpointIntent(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpointTranslation(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpointDefaultSpeechService(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpointBot(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspRegion(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client, bool isIntentRegion);
+    USP::Client& SetUspAuthentication(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspProxyInfo(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspSingleTrustedCert(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspQueryParameters(const std::vector<std::string>& allowedParameterList, const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
 
+    void UpdateOutputFormatOption(const std::shared_ptr<ISpxNamedProperties>& properties);
     SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;
 
     void SetSpeechConfigMessage(const ISpxNamedProperties& properties);

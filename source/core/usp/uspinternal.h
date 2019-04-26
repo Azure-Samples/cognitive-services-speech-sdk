@@ -114,13 +114,17 @@ public:
     */
     bool IsConnected();
 
+    /**
+    * Returns the URL used for connection.
+    */
+    std::string GetConnectionUrl();
+
 private:
     void Invoke(std::function<void()> callback);
 
     using DnsCachePtr = deleted_unique_ptr<std::remove_pointer<DnsCacheHandle>::type>;
     using TransportPtr = deleted_unique_ptr<std::remove_pointer<TransportHandle>::type>;
 
-    void Validate();
     void ScheduleWork();
 
     static void DoWork(std::weak_ptr<Connection::Impl> ptr);
@@ -143,6 +147,7 @@ private:
 
     bool m_valid;
     bool m_connected;
+    std::string m_connectionUrl;
 
     size_t m_audioOffset;
 

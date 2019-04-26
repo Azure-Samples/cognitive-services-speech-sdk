@@ -14,6 +14,9 @@ namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 
+constexpr const char* TrueString = "true";
+constexpr const char* FalseString = "false";
+
 /// <summary>
 /// Defines speech property ids.
 /// Changed in version 1.4.0.
@@ -99,6 +102,13 @@ enum class PropertyId
     SpeechServiceConnection_ProxyPassword = 1103,
 
     /// <summary>
+    /// The URL string built from speech configuration.
+    /// This property is intended to be read-only. The SDK is using it internally.
+    /// NOTE: Added in version 1.5.0.
+    /// </summary>
+    SpeechServiceConnection_Url = 1104,
+
+    /// <summary>
     /// The list of comma separated languages used as target translation languages. Under normal circumstances,
     /// you shouldn't have to use this property directly. Instead use <see cref="SpeechTranslationConfig::AddTargetLanguage"/>
     /// and <see cref="SpeechTranslationConfig::GetTargetLanguages"/>.
@@ -169,6 +179,24 @@ enum class PropertyId
     SpeechServiceConnection_SynthOutputFormat = 3102,
 
     /// <summary>
+    /// The initial silence timeout value (in milliseconds) used by the service.
+    /// Added in version 1.5.0
+    /// </summary>
+    SpeechServiceConnection_InitialSilenceTimeoutMs = 3200,
+
+    /// <summary>
+    /// The end silence timeout value (in milliseconds) used by the service.
+    /// Added in version 1.5.0
+    /// </summary>
+    SpeechServiceConnection_EndSilenceTimeoutMs = 3201,
+
+    /// <summary>
+    /// A boolean value specifying whether audio logging is enabled in the service or not.
+    /// Added in version 1.5.0
+    /// </summary>
+    SpeechServiceConnection_EnableAudioLogging = 3202,
+
+    /// <summary>
     /// The requested Cognitive Services Speech Service response output format (simple or detailed). Under normal circumstances, you shouldn't have
     /// to use this property directly.
     /// Instead use <see cref="SpeechConfig::SetOutputFormat"/>.
@@ -179,6 +207,44 @@ enum class PropertyId
     /// The requested Cognitive Services Speech Service response output profanity level. Currently unused.
     /// </summary>
     SpeechServiceResponse_RequestProfanityFilterTrueFalse = 4001,
+
+    /// <summary>
+    /// The requested Cognitive Services Speech Service response output profanity setting.
+    /// Allowed values are "masked", "removed", and "raw".
+    /// Added in version 1.5.0.
+    /// </summary>
+    SpeechServiceResponse_ProfanityOption = 4002,
+
+    /// <summary>
+    /// A string value specifying which post processing option should be used by service.
+    /// Allowed values are "TrueText".
+    /// Added in version 1.5.0
+    /// </summary>
+    SpeechServiceResponse_PostProcessingOption = 4003,
+
+    /// <summary>
+    /// A boolean value specifying whether to include word-level timestamps in the response result.
+    /// Added in version 1.5.0
+    /// </summary>
+    SpeechServiceResponse_RequestWordLevelTimestamps = 4004,
+
+    /// <summary>
+    /// The number of times a word has to be in partial results to be returned.
+    /// Added in version 1.5.0
+    /// </summary>
+    SpeechServiceResponse_StablePartialResultThreshold = 4005,
+
+    /// <summary>
+    /// A string value specifying the output format option in the response result. Internal use only.
+    /// Added in version 1.5.0.
+    /// </summary>
+    SpeechServiceResponse_OutputFormatOption = 4006,
+
+    /// <summary>
+    /// A boolean value to request for stabilizing translation partial results by omitting words in the end.
+    /// Added in version 1.5.0.
+    /// </summary>
+    SpeechServiceResponse_TranslationRequestStablePartialResult = 4100,
 
     /// <summary>
     /// The Cognitive Services Speech Service response output (in JSON format). This property is available on recognition result objects only.
@@ -281,6 +347,13 @@ enum class OutputFormat
 {
     Simple = 0,
     Detailed = 1
+};
+
+enum class ProfanityOption
+{
+    Masked = 0,
+    Removed = 1,
+    Raw = 2
 };
 
 /// <summary>

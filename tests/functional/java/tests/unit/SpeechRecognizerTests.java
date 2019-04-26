@@ -15,13 +15,11 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.net.URI;
 
-
 import static org.junit.Assert.*;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
-
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
@@ -35,6 +33,7 @@ import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.OutputFormat;
 import com.microsoft.cognitiveservices.speech.Connection;
+import com.microsoft.cognitiveservices.speech.ProfanityOption;
 
 import tests.Settings;
 import tests.TestHelper;
@@ -864,6 +863,107 @@ public class SpeechRecognizerTests {
         assertTrue(detailedResult.contains("Display"));
 
         r.close();
+        s.close();
+    }
+
+    @Test
+    public void testPropertiesSetAndGet() throws NumberFormatException
+    {
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        int initialSilenceTimeout = 6000;
+        int endSilenceTimeout = 10000;
+        s.setProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, Integer.toString(initialSilenceTimeout));
+        s.setProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, Integer.toString(endSilenceTimeout));
+        assertEquals(initialSilenceTimeout, Integer.parseInt(s.getProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs)));
+        assertEquals(endSilenceTimeout, Integer.parseInt(s.getProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs)));
+
+        int threshold = 15;
+        s.setProperty(PropertyId.SpeechServiceResponse_StablePartialResultThreshold, Integer.toString(threshold));
+        assertEquals(threshold, Integer.parseInt(s.getProperty(PropertyId.SpeechServiceResponse_StablePartialResultThreshold)));
+
+        String valStr = "detailed";
+        s.setProperty(PropertyId.SpeechServiceResponse_OutputFormatOption, valStr);
+        assertEquals(valStr, s.getProperty(PropertyId.SpeechServiceResponse_OutputFormatOption));
+
+        String profanity = "raw";
+        s.setProperty(PropertyId.SpeechServiceResponse_ProfanityOption, profanity);
+        assertEquals(profanity, s.getProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+
+        String falseStr = "false";
+        s.setProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging, falseStr);
+        assertEquals(falseStr, s.getProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging));
+
+        s.setProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, falseStr);
+        assertEquals(falseStr, s.getProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps));
+
+        s.setProperty(PropertyId.SpeechServiceResponse_TranslationRequestStablePartialResult, falseStr);
+        assertEquals(falseStr, s.getProperty(PropertyId.SpeechServiceResponse_TranslationRequestStablePartialResult));
+
+        String trueText = "TrueText";
+        s.setProperty(PropertyId.SpeechServiceResponse_PostProcessingOption, trueText);
+        assertEquals(trueText, s.getProperty(PropertyId.SpeechServiceResponse_PostProcessingOption));
+
+        SpeechRecognizer recognizer = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        assertEquals(initialSilenceTimeout, Integer.parseInt(recognizer.getProperties().getProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs)));
+        assertEquals(endSilenceTimeout, Integer.parseInt(recognizer.getProperties().getProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs)));
+        assertEquals(threshold, Integer.parseInt(recognizer.getProperties().getProperty(PropertyId.SpeechServiceResponse_StablePartialResultThreshold)));
+        assertEquals(valStr, recognizer.getProperties().getProperty(PropertyId.SpeechServiceResponse_OutputFormatOption));
+        assertEquals(profanity, recognizer.getProperties().getProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+        assertEquals(falseStr, recognizer.getProperties().getProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging));
+        assertEquals(falseStr, recognizer.getProperties().getProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps));
+        assertEquals(falseStr, recognizer.getProperties().getProperty(PropertyId.SpeechServiceResponse_TranslationRequestStablePartialResult));
+        assertEquals(trueText, recognizer.getProperties().getProperty(PropertyId.SpeechServiceResponse_PostProcessingOption));
+
+        recognizer.close();
+        s.close();
+    }
+
+    @Test
+    public void PropertiesDirectSetAndGet()
+    {
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+
+        s.setProfanity(ProfanityOption.Removed);
+        s.enableAudioLogging();
+        s.requestWordLevelTimestamps();
+        s.enableDictation();
+
+        SpeechRecognizer recognizer = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        assertEquals("DICTATION", s.getProperty(PropertyId.SpeechServiceConnection_RecoMode));
+        assertEquals("DICTATION", recognizer.getProperties().getProperty(PropertyId.SpeechServiceConnection_RecoMode));
+        assertEquals("removed", s.getProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+        assertEquals("removed", recognizer.getProperties().getProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+        assertEquals("true", s.getProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging));
+        assertEquals("true", recognizer.getProperties().getProperty(PropertyId.SpeechServiceConnection_EnableAudioLogging));
+        assertEquals("true", s.getProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps));
+        assertEquals("true", recognizer.getProperties().getProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps));
+
+        s.close();
+        recognizer.close();
+    }
+
+    @Test
+    public void ProfanityPropertySetAndGet()
+    {
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+
+        s.setProfanity(ProfanityOption.Masked);
+        SpeechRecognizer recognizer = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        assertEquals("masked", s.getProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+        assertEquals("masked", recognizer.getProperties().getProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+        recognizer.close();
+
+        s.setProfanity(ProfanityOption.Removed);
+        recognizer = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        assertEquals("removed", s.getProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+        assertEquals("removed", recognizer.getProperties().getProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+        recognizer.close();
+
+        s.setProfanity(ProfanityOption.Raw);
+        recognizer = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        assertEquals("raw", s.getProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+        assertEquals("raw", recognizer.getProperties().getProperty(PropertyId.SpeechServiceResponse_ProfanityOption));
+        recognizer.close();
         s.close();
     }
 

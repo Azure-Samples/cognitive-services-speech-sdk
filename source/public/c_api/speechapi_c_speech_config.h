@@ -69,6 +69,13 @@ typedef enum
 
 } SpeechConfig_ServicePropertyChannel;
 
+typedef enum
+{
+    SpeechConfig_ProfanityMasked = 0,
+    SpeechConfig_ProfanityRemoved = 1,
+    SpeechConfig_ProfanityRaw = 2
+} SpeechConfig_ProfanityOption;
+
 SPXAPI_(bool) speech_config_is_handle_valid(SPXSPEECHCONFIGHANDLE hconfig);
 SPXAPI speech_config_from_subscription(SPXSPEECHCONFIGHANDLE* hconfig, const char* subscription, const char* region);
 SPXAPI speech_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* hconfig, const char* authToken, const char* region);
@@ -77,3 +84,5 @@ SPXAPI speech_config_release(SPXSPEECHCONFIGHANDLE hconfig);
 SPXAPI speech_config_get_property_bag(SPXSPEECHCONFIGHANDLE hconfig, SPXPROPERTYBAGHANDLE* hpropbag);
 SPXAPI speech_config_set_audio_output_format(SPXSPEECHCONFIGHANDLE hconfig, Speech_Synthesis_Output_Format formatId);
 SPXAPI speech_config_set_service_property(SPXSPEECHCONFIGHANDLE configHandle, const char* propertyName, const char* propertyValue, SpeechConfig_ServicePropertyChannel channel);
+SPXAPI speech_config_set_profanity(SPXSPEECHCONFIGHANDLE configHandle, SpeechConfig_ProfanityOption profanity);
+

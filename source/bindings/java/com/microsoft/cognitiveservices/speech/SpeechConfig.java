@@ -313,6 +313,43 @@ public class SpeechConfig implements Closeable {
     }
 
     /**
+     * Sets profanity option.
+     * Added in version 1.5.0.
+     * @param profanity the property option to set.
+     */
+    public void setProfanity(ProfanityOption profanity)
+    {
+        speechConfigImpl.SetProfanity(profanity.getValue());
+    }
+
+    /**
+     * Enable audio logging in service.
+     * Added in version 1.5.0.
+     */
+    public void enableAudioLogging()
+    {
+        speechConfigImpl.EnableAudioLogging();
+    }
+
+    /**
+     * Includes word-level timestamps.
+     * Added in version 1.5.0.
+     */
+    public void requestWordLevelTimestamps()
+    {
+        speechConfigImpl.RequestWordLevelTimestamps();
+    }
+
+    /**
+     * Enable dictation. Only supported in speech continuous recognition.
+     * Added in version 1.5.0.
+     */
+    public void enableDictation()
+    {
+        speechConfigImpl.EnableDictation();
+    }
+
+    /**
      * Dispose of associated resources.
      */
     @Override

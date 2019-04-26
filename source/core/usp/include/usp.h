@@ -172,6 +172,11 @@ public:
     bool IsConnected();
 
     /**
+    * Returns the URL used for connection.
+    */
+    std::string GetConnectionUrl();
+
+    /**
     * Closes the USP connection.
     */
     ~Connection();
@@ -185,6 +190,7 @@ private:
     class Impl;
 
     std::shared_ptr<Impl> m_impl;
+
 };
 
 
@@ -318,35 +324,9 @@ public:
     }
 
     /**
-     * Sets the source audio language, which must be one of the supported languages specified using
-     * an IETF language tag BCP 47 (https://en.wikipedia.org/wiki/IETF_language_tag).
+     * Sets query parameters
      */
-    Client& SetLanguage(const std::string& language);
-
-    /**
-     * Sets the output format, can be either Simple or Detailed.
-     */
-    Client& SetOutputFormat(OutputFormat format);
-
-    /**
-     * Sets the custom speech model id.
-     */
-    Client& SetModelId(const std::string& modelId);
-
-    /**
-     * Sets the source language of translation.
-     */
-    Client& SetTranslationSourceLanguage(const std::string& lang);
-
-    /**
-     * Sets the target languages of translation.
-     */
-    Client& SetTranslationTargetLanguages(const std::string& langs);
-
-    /**
-     * Sets the voice that is desired in translation.
-     */
-    Client& SetTranslationVoice(const std::string& voice);
+    Client& SetQueryParameter(const std::string& name, const std::string& value);
 
     /**
     * Sets the polling interval the client will use.
@@ -398,4 +378,105 @@ private:
 
 extern void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword);
 
+namespace endpoint
+{
+    const std::string protocol = "wss://";
+
+    const std::string outputFormatQueryParam = "format=";
+    const std::string langQueryParam = "language=";
+    const std::string deploymentIdQueryParam = "cid=";
+    const std::string profanityQueryParam = "profanity=";
+    const std::string initialSilenceTimeoutQueryParam = "initialSilenceTimeoutMs=";
+    const std::string endSilenceTimeoutQueryParam = "endSilenceTimeoutMs=";
+    const std::string stableIntermediateThresholdQueryParam = "stableIntermediateThreshold=";
+    const std::string storeAudioQueryParam = "storeAudio=";
+    const std::string wordLevelTimestampsQueryParam = "wordLevelTimestamps=";
+
+    const std::string outputFormatSimple = "simple";
+    const std::string outputFormatDetailed = "detailed";
+
+    const std::string postProcessingTrueText = "TrueText";
+
+    const std::string profanityMasked = "masked";
+    const std::string profanityRemoved = "removed";
+    const std::string profanityRaw = "raw";
+
+    namespace unifiedspeech
+    {
+        const std::string hostnameSuffix = ".stt.speech.microsoft.com";
+        const std::string pathPrefix = "/speech/recognition/";
+        const std::string pathSuffix = "/cognitiveservices/v1";
+
+        const std::string postprocessingQueryParam = "postprocessing=";
+
+        const std::vector<std::string> queryParameters = {
+            langQueryParam,
+            deploymentIdQueryParam,
+            initialSilenceTimeoutQueryParam,
+            endSilenceTimeoutQueryParam,
+            storeAudioQueryParam,
+
+            outputFormatQueryParam,
+            wordLevelTimestampsQueryParam,
+            profanityQueryParam,
+            stableIntermediateThresholdQueryParam,
+            postprocessingQueryParam
+
+        };
+    }
+
+    namespace translation
+    {
+        const std::string hostnameSuffix = ".s2s.speech.microsoft.com";
+        const std::string path = "/speech/translation/cognitiveservices/v1";
+
+        const std::string fromQueryParam = "from=";
+        const std::string toQueryParam = "to=";
+        const std::string voiceQueryParam = "voice=";
+        const std::string featuresQueryParam = "features=";
+        const std::string stableTranslationQueryParam = "stableTranslation=";
+
+        const std::string requireVoice = "texttospeech";
+
+        const std::vector<std::string> queryParameters = {
+            fromQueryParam,
+            toQueryParam,
+            voiceQueryParam,
+
+            deploymentIdQueryParam,
+            initialSilenceTimeoutQueryParam,
+            endSilenceTimeoutQueryParam,
+            storeAudioQueryParam,
+
+            outputFormatQueryParam,
+            wordLevelTimestampsQueryParam,
+            profanityQueryParam,
+            stableIntermediateThresholdQueryParam,
+
+            stableTranslationQueryParam
+        };
+    }
+
+    namespace luis
+    {
+        const std::string hostname = "speech.platform.bing.com";
+        const std::string pathPrefix1 = "/speech/";
+        const std::string pathPrefix2 = "/recognition/";
+        const std::string pathSuffix = "/cognitiveservices/v1";
+
+        const std::vector<std::string> queryParameters = { langQueryParam, outputFormatQueryParam };
+    }
+
+    namespace CDSDK
+    {
+        const std::string url = "speech.platform.bing.com/cortana/api/v1?environment=Home&";
+    }
+
+    namespace bot
+    {
+        const std::string url = "speech.platform.bing.com/convai/api/v2";
+
+        const std::vector<std::string> queryParameters = { langQueryParam };
+    }
+}
 }}}}

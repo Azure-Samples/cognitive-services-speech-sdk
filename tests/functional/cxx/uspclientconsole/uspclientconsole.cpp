@@ -375,27 +375,27 @@ int main(int argc, char* argv[])
 
     if (!modelId.empty())
     {
-        client.SetModelId(modelId.c_str());
+        client.SetQueryParameter(USP::endpoint::deploymentIdQueryParam, modelId);
     }
 
     if (!language.empty())
     {
-        client.SetLanguage(language.c_str());
+        client.SetQueryParameter(USP::endpoint::langQueryParam, language);
     }
     else
     {
-        client.SetLanguage("en-us");
+        client.SetQueryParameter(USP::endpoint::langQueryParam, "en-us");
     }
 
     if (!format.empty())
     {
         if (format.compare("detailed") == 0)
         {
-            client.SetOutputFormat(USP::OutputFormat::Detailed);
+            client.SetQueryParameter(USP::endpoint::outputFormatQueryParam, USP::endpoint::outputFormatDetailed);
         }
         else if (format.compare("simple") == 0)
         {
-            client.SetOutputFormat(USP::OutputFormat::Simple);
+            client.SetQueryParameter(USP::endpoint::outputFormatQueryParam, USP::endpoint::outputFormatSimple);
         }
         else
         {

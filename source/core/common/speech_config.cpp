@@ -6,6 +6,7 @@
 #include "stdafx.h"
 #include "speech_config.h"
 #include "property_id_2_name_map.h"
+#include "usp.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -67,6 +68,28 @@ void CSpxSpeechConfig::SetServiceProperty(string name, string value, ServiceProp
         SPX_DBG_TRACE_ERROR("Unsupported channel: %d. Only UriQueryParameter is supported.", (int)channel);
         SPX_THROW_HR(SPXERR_INVALID_ARG);
     }
+}
+
+void CSpxSpeechConfig::SetProfanity(ProfanityOption profanity)
+{
+    string valueStr;
+    switch (profanity)
+    {
+    case ProfanityOption::Masked:
+        valueStr = USP::endpoint::profanityMasked;
+        break;
+    case ProfanityOption::Removed:
+        valueStr = USP::endpoint::profanityRemoved;
+        break;
+    case ProfanityOption::Raw:
+        valueStr = USP::endpoint::profanityRaw;
+        break;
+    default:
+        SPX_DBG_TRACE_ERROR("Unsupported profanity: %d.", (int)profanity);
+        SPX_THROW_HR(SPXERR_INVALID_ARG);
+        break;
+    }
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_ProfanityOption), valueStr.c_str());
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

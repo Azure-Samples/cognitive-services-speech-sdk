@@ -254,7 +254,7 @@ public:
     OutputFormat GetOutputFormat() const
     {
         auto result = GetProperty(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse);
-        return result == Utils::ToSPXString("true") ? OutputFormat::Detailed : OutputFormat::Simple;
+        return result == Utils::ToSPXString(TrueString) ? OutputFormat::Detailed : OutputFormat::Simple;
     }
 
     /// <summary>
@@ -264,7 +264,44 @@ public:
     void SetOutputFormat(OutputFormat format)
     {
         property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse), nullptr,
-            format == OutputFormat::Detailed ? Utils::ToUTF8("true") : Utils::ToUTF8("false"));
+            format == OutputFormat::Detailed ? Utils::ToUTF8(TrueString) : Utils::ToUTF8(FalseString));
+    }
+
+    /// <summary>
+    /// Sets profanity option.
+    /// Added in version 1.5.0.
+    /// </summary>
+    /// <param name="profanity">Profanity option value.</param>
+    void SetProfanity(ProfanityOption profanity)
+    {
+        SPX_THROW_ON_FAIL(speech_config_set_profanity(m_hconfig, (SpeechConfig_ProfanityOption)profanity));
+    }
+
+    /// <summary>
+    /// Enables audio logging in service.
+    /// Added in version 1.5.0.
+    /// </summary>
+    void EnableAudioLogging()
+    {
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_EnableAudioLogging), nullptr, TrueString);
+    }
+
+    /// <summary>
+    /// Includes word-level timestamps in response result.
+    /// Added in version 1.5.0.
+    /// </summary>
+    void RequestWordLevelTimestamps()
+    {
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceResponse_RequestWordLevelTimestamps), nullptr, TrueString);
+    }
+
+    /// <summary>
+    /// Enables dictation mode. Only supported in speech continuous recognition.
+    /// Added in version 1.5.0.
+    /// </summary>
+    void EnableDictation()
+    {
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_RecoMode), nullptr, "DICTATION");
     }
 
     /// <summary>

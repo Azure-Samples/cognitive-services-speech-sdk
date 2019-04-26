@@ -210,6 +210,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string CorrectRecoText = "Wreck a nice beach.";
                 public static readonly string DefaultRecoText = "Recognize speech.";
             }
+
+            public static class Profanity
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "profanity.wav");
+                public static readonly string MaskedUtterance = "**** **** **** **** ****";
+                public static readonly string RemovedUtterance = "";
+                public static readonly string RawUtterance = "Fuck Fuck Fuck Fuck Fuck.";
+            }
+
+            public static class Punctuation
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "explicitpunc1.wav");
+                public static readonly string Utterance = "If it rains, sent me an email.";
+            }
         }
 
         public static class French

@@ -506,6 +506,7 @@ inject_enum('OutputFormat')
 inject_enum('PropertyId')
 inject_enum('ResultReason')
 inject_enum('ServicePropertyChannel')
+inject_enum('ProfanityOption')
 
 # clean up the exported names
 del inject_enum

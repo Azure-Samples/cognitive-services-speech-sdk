@@ -947,5 +947,116 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.ThrowsException<ApplicationException>(() => this.defaultConfig.SetServiceProperty("Name", null, ServicePropertyChannel.UriQueryParameter));
             Assert.ThrowsException<ApplicationException>(() => this.defaultConfig.SetServiceProperty("Name", "", ServicePropertyChannel.UriQueryParameter));
         }
+
+        [TestMethod]
+        public async Task DictationRecognition()
+        {
+            this.defaultConfig.EnableDictation();
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Punctuation.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                List<string> recognizedText = new List<string>();
+                recognizer.Recognized += (s, e) =>
+                {
+                    Console.WriteLine($"Received result '{e.ToString()}'");
+                    if (e.Result.Text.Length > 0)
+                    {
+                        recognizedText.Add(e.Result.Text);
+                    }
+                };
+
+                await helper.CompleteContinuousRecognition(recognizer);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
+                Assert.AreEqual(1, recognizedText.Count, "The number of recognized texts is not 1, but " + recognizedText.Count);
+                AssertMatching(TestData.English.Punctuation.Utterance, recognizedText[0]);
+            }
+        }
+
+        [TestMethod]
+        public async Task DictationRecognizeOnce()
+        {
+            this.defaultConfig.EnableDictation();
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Punctuation.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Punctuation.Utterance, result.Text);
+            }
+        }
+
+        [TestMethod]
+        public async Task DictationAllowSwitchRecognizeOnceAndContinuous()
+        {
+            this.defaultConfig.EnableDictation();
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+
+                var taskCompletionSource = new TaskCompletionSource<int>();
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    taskCompletionSource.TrySetResult(0);
+                };
+                string canceled = string.Empty;
+                recognizer.Canceled += (s, e) =>
+                {
+                    canceled = e.ErrorDetails;
+                    taskCompletionSource.TrySetResult(0);
+                };
+                recognizer.Recognized += (s, e) =>
+                {
+                    taskCompletionSource.TrySetResult(0);
+                };
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                await Task.WhenAny(taskCompletionSource.Task, Task.Delay(TimeSpan.FromMinutes(3)));
+                connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
+                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+
+                if (!string.IsNullOrEmpty(canceled))
+                {
+                    Assert.Fail($"Recognition Canceled: {canceled}");
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task ProfanityRecognizeOnce()
+        {
+            this.defaultConfig.SetProfanity(ProfanityOption.Masked);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Profanity.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                Assert.AreEqual(TestData.English.Profanity.MaskedUtterance, result.Text);
+            }
+
+            this.defaultConfig.SetProfanity(ProfanityOption.Removed);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                Assert.AreEqual(TestData.English.Profanity.RemovedUtterance, result.Text);
+            }
+
+            this.defaultConfig.SetProfanity(ProfanityOption.Raw);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Profanity.RawUtterance, result.Text);
+            }
+        }
+
     }
 }

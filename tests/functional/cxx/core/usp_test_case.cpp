@@ -44,7 +44,7 @@ public:
             .SetRecognitionMode(m_mode)
             .SetRegion(region)
             .SetAuthentication(authData)
-            .SetLanguage("en-us");
+            .SetQueryParameter(USP::endpoint::langQueryParam, "en-us");
         if (!Config::Endpoint.empty())
         {
             client.SetEndpointType(USP::EndpointType::Speech).SetEndpointUrl(Config::Endpoint);

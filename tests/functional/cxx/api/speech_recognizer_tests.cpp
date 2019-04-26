@@ -1311,7 +1311,7 @@ TEST_CASE("ConnectionEventsTest", "[api][cxx]")
     }
 }
 
-TEST_CASE("FromEndpoint without key and token")
+TEST_CASE("FromEndpoint without key and token", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -1342,7 +1342,7 @@ TEST_CASE("FromEndpoint without key and token")
     }
 }
 
-TEST_CASE("SetServiceProperty")
+TEST_CASE("SetServiceProperty", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -1447,5 +1447,160 @@ TEST_CASE("SetServiceProperty")
         SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
         SPXTEST_REQUIRE(!result->Translations.at("en").compare("Call the first one."));
     }
+}
 
+TEST_CASE("SpeechConfig properties", "[api][cxx]")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    callTheFirstOne.UpdateFullFilename(Config::InputDir);
+    SPXTEST_REQUIRE(exists(callTheFirstOne.m_audioFilename));
+    auto audioInput = AudioConfig::FromWavFileInput(callTheFirstOne.m_audioFilename);
+    auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+
+    SPXTEST_SECTION("property get and set via propertyId")
+    {
+        int initialSilenceTimeout = 6000;
+        int endSilenceTimeout = 10000;
+        config->SetProperty(PropertyId::SpeechServiceConnection_InitialSilenceTimeoutMs, std::to_string(initialSilenceTimeout));
+        config->SetProperty(PropertyId::SpeechServiceConnection_EndSilenceTimeoutMs, std::to_string(endSilenceTimeout));
+        CHECK(initialSilenceTimeout == std::stoi(config->GetProperty(PropertyId::SpeechServiceConnection_InitialSilenceTimeoutMs)));
+        CHECK(endSilenceTimeout == std::stoi(config->GetProperty(PropertyId::SpeechServiceConnection_EndSilenceTimeoutMs)));
+
+        int threshold = 5;
+        config->SetProperty(PropertyId::SpeechServiceResponse_StablePartialResultThreshold, std::to_string(threshold));
+        CHECK(threshold == std::stoi(config->GetProperty(PropertyId::SpeechServiceResponse_StablePartialResultThreshold)));
+
+        std::string valStr = "something";
+        config->SetProperty(PropertyId::SpeechServiceResponse_OutputFormatOption, valStr);
+        CHECK(valStr == config->GetProperty(PropertyId::SpeechServiceResponse_OutputFormatOption));
+
+        std::string profanity = "removed";
+        config->SetProperty(PropertyId::SpeechServiceResponse_ProfanityOption, profanity);
+        CHECK(profanity == config->GetProperty(PropertyId::SpeechServiceResponse_ProfanityOption));
+
+        std::string falseStr = "false";
+        config->SetProperty(PropertyId::SpeechServiceConnection_EnableAudioLogging, falseStr);
+        CHECK(falseStr == config->GetProperty(PropertyId::SpeechServiceConnection_EnableAudioLogging));
+
+        config->SetProperty(PropertyId::SpeechServiceResponse_RequestWordLevelTimestamps, falseStr);
+        CHECK(falseStr == config->GetProperty(PropertyId::SpeechServiceResponse_RequestWordLevelTimestamps));
+
+        config->SetProperty(PropertyId::SpeechServiceResponse_TranslationRequestStablePartialResult, falseStr);
+        CHECK(falseStr == config->GetProperty(PropertyId::SpeechServiceResponse_TranslationRequestStablePartialResult));
+
+        std::string trueText = "TrueText";
+        config->SetProperty(PropertyId::SpeechServiceResponse_PostProcessingOption, trueText);
+        CHECK(trueText == config->GetProperty(PropertyId::SpeechServiceResponse_PostProcessingOption));
+
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        CHECK(initialSilenceTimeout == std::stoi(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_InitialSilenceTimeoutMs)));
+        CHECK(endSilenceTimeout == std::stoi(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_EndSilenceTimeoutMs)));
+        CHECK(threshold == std::stoi(recognizer->Properties.GetProperty(PropertyId::SpeechServiceResponse_StablePartialResultThreshold)));
+        CHECK(valStr == recognizer->Properties.GetProperty(PropertyId::SpeechServiceResponse_OutputFormatOption));
+        CHECK(profanity == recognizer->Properties.GetProperty(PropertyId::SpeechServiceResponse_ProfanityOption));
+        CHECK(falseStr == recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_EnableAudioLogging));
+        CHECK(falseStr == recognizer->Properties.GetProperty(PropertyId::SpeechServiceResponse_RequestWordLevelTimestamps));
+        CHECK(falseStr == recognizer->Properties.GetProperty(PropertyId::SpeechServiceResponse_TranslationRequestStablePartialResult));
+        CHECK(trueText == recognizer->Properties.GetProperty(PropertyId::SpeechServiceResponse_PostProcessingOption));
+    }
+
+    SPXTEST_SECTION("property direct set and get via propertyId")
+    {
+        std::string profanity = "removed";
+        config->SetProfanity(ProfanityOption::Removed);
+        config->EnableAudioLogging();
+        config->RequestWordLevelTimestamps();
+        config->EnableDictation();
+
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        CHECK("DICTATION" == config->GetProperty(PropertyId::SpeechServiceConnection_RecoMode));
+        CHECK("DICTATION" == recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_RecoMode));
+        CHECK(profanity == config->GetProperty(PropertyId::SpeechServiceResponse_ProfanityOption));
+        CHECK(profanity == recognizer->Properties.GetProperty(PropertyId::SpeechServiceResponse_ProfanityOption));
+        CHECK("true" == config->GetProperty(PropertyId::SpeechServiceConnection_EnableAudioLogging));
+        CHECK("true" == recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_EnableAudioLogging));
+        CHECK("true" == config->GetProperty(PropertyId::SpeechServiceResponse_RequestWordLevelTimestamps));
+        CHECK("true" == recognizer->Properties.GetProperty(PropertyId::SpeechServiceResponse_RequestWordLevelTimestamps));
+    }
+
+    SPXTEST_SECTION("Properties set and check URL")
+    {
+        config->SetSpeechRecognitionLanguage("de-DE");
+
+        config->SetProperty(PropertyId::SpeechServiceConnection_InitialSilenceTimeoutMs, "5000");
+        config->SetProperty(PropertyId::SpeechServiceConnection_EndSilenceTimeoutMs, "12000");
+        config->SetProperty(PropertyId::SpeechServiceResponse_StablePartialResultThreshold, "5");
+        config->SetProperty(PropertyId::SpeechServiceResponse_OutputFormatOption, "detailed");
+        config->SetProperty(PropertyId::SpeechServiceResponse_ProfanityOption, "removed");
+        config->SetProperty(PropertyId::SpeechServiceConnection_EnableAudioLogging, "false");
+        config->SetProperty(PropertyId::SpeechServiceResponse_RequestWordLevelTimestamps, "false");
+        config->SetProperty(PropertyId::SpeechServiceResponse_PostProcessingOption, "TrueText");
+
+        // This one is for Translation, should not be picked up by SpeechRecognizer.
+        config->SetProperty(PropertyId::SpeechServiceResponse_TranslationRequestStablePartialResult, "true");
+
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+        auto result = recognizer->RecognizeOnceAsync().get();
+        auto connectionUrl = recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_Url);
+        CAPTURE(connectionUrl);
+
+        CHECK(ResultReason::RecognizedSpeech == result->Reason);
+        CHECK(callTheFirstOne.m_utterance.compare(result->Text) == 0);
+        // Check no word-level timestamps included, but only detailed output.
+        string jsonResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+        CAPTURE(jsonResult);
+        CHECK(jsonResult.find("Words") == string::npos);
+        CHECK(jsonResult.find("Lexical") != string::npos);
+
+        CHECK(connectionUrl.find("initialSilenceTimeoutMs=5000") != string::npos);
+        CHECK(connectionUrl.find("endSilenceTimeoutMs=12000") != string::npos);
+        CHECK(connectionUrl.find("stableIntermediateThreshold=5") != string::npos);
+        CHECK(connectionUrl.find("format=detailed") != string::npos);
+        CHECK(connectionUrl.find("profanity=removed") != string::npos);
+        CHECK(connectionUrl.find("storeAudio=false") != string::npos);
+        CHECK(connectionUrl.find("wordLevelTimestamps=false") != string::npos);
+        CHECK(connectionUrl.find("postprocessing=TrueText") != string::npos);
+        CHECK(connectionUrl.find("language=de-DE") != string::npos);
+        CHECK(connectionUrl.find("stableTranslation=") == string::npos);
+    }
+
+    SPXTEST_SECTION("Properties set and check URL")
+    {
+        config->SetProfanity(ProfanityOption::Raw);
+        config->EnableAudioLogging();
+        config->RequestWordLevelTimestamps();
+        config->EnableDictation();
+        config->SetSpeechRecognitionLanguage("de-DE");
+        config->SetOutputFormat(OutputFormat::Simple);
+
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+        auto result = recognizer->RecognizeOnceAsync().get();
+        auto connectionUrl = recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_Url);
+        CAPTURE(connectionUrl);
+
+        CHECK(ResultReason::RecognizedSpeech == result->Reason);
+        CHECK(callTheFirstOne.m_utterance.compare(result->Text) == 0);
+        // Check word-level timestamps included, but only detailed output.
+        string jsonResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+        CAPTURE(jsonResult);
+        CHECK(jsonResult.find("Words") != string::npos);
+        CHECK(jsonResult.find("Lexical") != string::npos);
+
+        CHECK(connectionUrl.find("speech/recognition/dictation/cognitiveservices") != string::npos);
+         // Word-level timestamps will set format to detailed.
+        CHECK(connectionUrl.find("format=detailed") != string::npos);
+        CHECK(connectionUrl.find("profanity=raw") != string::npos);
+        CHECK(connectionUrl.find("storeAudio=true") != string::npos);
+        CHECK(connectionUrl.find("wordLevelTimestamps=true") != string::npos);
+        CHECK(connectionUrl.find("language=de-DE") != string::npos);
+
+        CHECK(connectionUrl.find("initialSilenceTimeoutMs=") == string::npos);
+        CHECK(connectionUrl.find("endSilenceTimeoutMs=") == string::npos);
+        CHECK(connectionUrl.find("stableIntermediateThreshold=") == string::npos);
+        CHECK(connectionUrl.find("postprocessing=") == string::npos);
+        CHECK(connectionUrl.find("stableTranslation=") == string::npos);
+    }
 }

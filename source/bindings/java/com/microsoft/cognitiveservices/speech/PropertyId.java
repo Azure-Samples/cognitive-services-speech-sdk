@@ -89,6 +89,13 @@ public enum PropertyId {
     SpeechServiceConnection_ProxyPassword (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_ProxyPassword),
 
     /**
+     * The URL string built from speech configuration.
+     * This property is intended to be read-only. The SDK is using it internally.
+     * NOTE: Added in version 1.5.0.
+     */
+    SpeechServiceConnection_Url (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_Url),
+
+    /**
      * The list of comma separated languages (BCP-47 format) used as target translation languages. Under normal circumstances,
      * you shouldn't have to use this property directly.
      * Instead, use <see cref="SpeechTranslationConfig.addTargetLanguage"/>,
@@ -135,6 +142,24 @@ public enum PropertyId {
     Speech_SessionId ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Speech_SessionId),
 
     /**
+     *  The initial silence timeout value (in milliseconds) used by the service.
+     *  Added in version 1.5.0
+     */
+    SpeechServiceConnection_InitialSilenceTimeoutMs ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs),
+
+    /**
+     *  The end silence timeout value (in milliseconds) used by the service.
+     *  Added in version 1.5.0
+     */
+    SpeechServiceConnection_EndSilenceTimeoutMs ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs),
+
+    /**
+     *  A boolean value specifying whether audio logging is enabled in the service or not.
+     *  Added in version 1.5.0
+     */
+    SpeechServiceConnection_EnableAudioLogging ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_EnableAudioLogging),
+
+    /**
      * The requested Cognitive Services Speech Service response output format (simple or detailed). Under normal circumstances, you shouldn't have
      * to use this property directly.
      * Instead use <see cref="SpeechConfig.setOutputFormat"/>.
@@ -145,6 +170,44 @@ public enum PropertyId {
      * The requested Cognitive Services Speech Service response output profanity level. Currently unused.
      */
     SpeechServiceResponse_RequestProfanityFilterTrueFalse (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestProfanityFilterTrueFalse),
+
+    /**
+     *  The requested Cognitive Services Speech Service response output profanity setting.
+     *  Allowed values are "masked", "removed", and "raw".
+     *  Added in version 1.5.0.
+     */
+    SpeechServiceResponse_ProfanityOption ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_ProfanityOption),
+
+    /**
+     *  A string value specifying which post processing option should be used by service.
+     *  Allowed values are "TrueText".
+     *  Added in version 1.5.0
+     */
+    SpeechServiceResponse_PostProcessingOption ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_PostProcessingOption),
+
+    /**
+     *  A boolean value specifying whether to include word-level timestamps in the response result.
+     *  Added in version 1.5.0
+     */
+    SpeechServiceResponse_RequestWordLevelTimestamps ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps),
+
+    /**
+     *  The number of times a word has to be in partial results to be returned.
+     *  Added in version 1.5.0
+     */
+    SpeechServiceResponse_StablePartialResultThreshold ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_StablePartialResultThreshold),
+
+    /**
+     *  A string value specifying the output format option in the response result. Internal use only.
+     *  Added in version 1.5.0.
+     */
+    SpeechServiceResponse_OutputFormatOption ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_OutputFormatOption),
+
+    /**
+     *  A boolean value to request for stabilizing translation partial results by omitting words in the end.
+     *  Added in version 1.5.0.
+     */
+    SpeechServiceResponse_TranslationRequestStablePartialResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_TranslationRequestStablePartialResult),
 
     /**
      * The Cognitive Services Speech Service response output (in JSON format). This property is available on recognition result objects only.

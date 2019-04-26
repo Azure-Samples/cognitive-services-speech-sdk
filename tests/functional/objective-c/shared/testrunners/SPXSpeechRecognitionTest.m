@@ -458,6 +458,92 @@
     XCTAssertTrue([content rangeOfString:@"SPX_DBG_TRACE_VERBOSE"].location != NSNotFound);
 }
 
+- (void)testPropertyGetAndSetViaPropertyId
+{
+    NSString *initialSilenceTimeout = @"6000";
+    NSString *endSilenceTimeout = @"10000";
+
+    SPXSpeechConfiguration *config = [[SPXSpeechConfiguration alloc] initWithSubscription:@"InvalidSubscriptionKey" region:@"someregion"];
+    XCTAssertNotNil(config);
+
+    [config setPropertyTo:initialSilenceTimeout byId:SPXSpeechServiceConnectionInitialSilenceTimeoutMs];
+    [config setPropertyTo:endSilenceTimeout byId:SPXSpeechServiceConnectionEndSilenceTimeoutMs];
+    XCTAssertEqualObjects(initialSilenceTimeout, [config getPropertyById:SPXSpeechServiceConnectionInitialSilenceTimeoutMs]);
+    XCTAssertEqualObjects(endSilenceTimeout, [config getPropertyById:SPXSpeechServiceConnectionEndSilenceTimeoutMs]);
+
+    NSString *threshold = @"5";
+    [config setPropertyTo:threshold byId:SPXSpeechServiceResponseStablePartialResultThreshold];
+    XCTAssertEqualObjects(threshold, [config getPropertyById:SPXSpeechServiceResponseStablePartialResultThreshold]);
+
+    NSString * valStr = @"something";
+    [config setPropertyTo:valStr byId:SPXSpeechServiceResponseOutputFormatOption];
+    XCTAssertEqualObjects(valStr, [config getPropertyById:SPXSpeechServiceResponseOutputFormatOption]);
+
+    NSString * profanity = @"removed";
+    [config setPropertyTo:profanity byId:SPXSpeechServiceResponseProfanityOption];
+    XCTAssertEqualObjects(profanity, [config getPropertyById:SPXSpeechServiceResponseProfanityOption]);
+
+    NSString * falseStr = @"false";
+    [config setPropertyTo:falseStr byId:SPXSpeechServiceConnectionEnableAudioLogging];
+    XCTAssertEqualObjects(falseStr, [config getPropertyById:SPXSpeechServiceConnectionEnableAudioLogging]);
+
+    [config setPropertyTo:falseStr byId:SPXSpeechServiceResponseRequestWordLevelTimestamps];
+    XCTAssertEqualObjects(falseStr, [config getPropertyById:SPXSpeechServiceResponseRequestWordLevelTimestamps]);
+
+    [config setPropertyTo:falseStr byId:SPXSpeechServiceResponseTranslationRequestStablePartialResult];
+    XCTAssertEqualObjects(falseStr, [config getPropertyById:SPXSpeechServiceResponseTranslationRequestStablePartialResult]);
+
+    NSString * trueText = @"TrueText";
+    [config setPropertyTo:trueText byId:SPXSpeechServiceResponsePostProcessingOption];
+    XCTAssertEqualObjects(trueText, [config getPropertyById:SPXSpeechServiceResponsePostProcessingOption]);
+
+    NSString *weatherFileName = @"whatstheweatherlike";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+
+    SPXSpeechRecognizer* recognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:config audioConfiguration:weatherAudioSource];
+    XCTAssertNotNil(recognizer);
+
+    XCTAssertEqualObjects(initialSilenceTimeout, [[recognizer properties] getPropertyById:SPXSpeechServiceConnectionInitialSilenceTimeoutMs]);
+    XCTAssertEqualObjects(endSilenceTimeout, [[recognizer properties] getPropertyById:SPXSpeechServiceConnectionEndSilenceTimeoutMs]);
+    XCTAssertEqualObjects(threshold, [[recognizer properties] getPropertyById:SPXSpeechServiceResponseStablePartialResultThreshold]);
+    XCTAssertEqualObjects(valStr, [[recognizer properties] getPropertyById:SPXSpeechServiceResponseOutputFormatOption]);
+    XCTAssertEqualObjects(profanity, [[recognizer properties] getPropertyById:SPXSpeechServiceResponseProfanityOption]);
+    XCTAssertEqualObjects(falseStr, [[recognizer properties] getPropertyById:SPXSpeechServiceConnectionEnableAudioLogging]);
+    XCTAssertEqualObjects(falseStr, [[recognizer properties] getPropertyById:SPXSpeechServiceResponseRequestWordLevelTimestamps]);
+    XCTAssertEqualObjects(falseStr, [[recognizer properties] getPropertyById:SPXSpeechServiceResponseTranslationRequestStablePartialResult]);
+    XCTAssertEqualObjects(trueText, [[recognizer properties] getPropertyById:SPXSpeechServiceResponsePostProcessingOption]);
+}
+
+-(void)testPropertyDirectSetAndGetViaPropertyId
+{
+    SPXSpeechConfiguration *config = [[SPXSpeechConfiguration alloc] initWithSubscription:@"InvalidSubscriptionKey" region:@"somregion"];
+    XCTAssertNotNil(config);
+
+    NSString * profanity = @"removed";
+    [config setProfanityOptionTo:SPXSpeechConfigProfanityOption_ProfanityRemoved];
+    [config enableAudioLogging];
+    [config requestWordLevelTimestamps];
+    [config enableDictation];
+
+    NSString *weatherFileName = @"whatstheweatherlike";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+
+    SPXSpeechRecognizer* recognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:config audioConfiguration:weatherAudioSource];
+    XCTAssertNotNil(recognizer);
+
+    XCTAssertEqualObjects(@"DICTATION", [config getPropertyById:SPXSpeechServiceConnectionRecognitionMode]);
+    XCTAssertEqualObjects(@"DICTATION", [[recognizer properties] getPropertyById:SPXSpeechServiceConnectionRecognitionMode]);
+    XCTAssertEqualObjects(profanity, [config getPropertyById:SPXSpeechServiceResponseProfanityOption]);
+    XCTAssertEqualObjects(profanity, [[recognizer properties] getPropertyById:SPXSpeechServiceResponseProfanityOption]);
+    XCTAssertEqualObjects(@"true", [config getPropertyById:SPXSpeechServiceConnectionEnableAudioLogging]);
+    XCTAssertEqualObjects(@"true", [[recognizer properties] getPropertyById:SPXSpeechServiceConnectionEnableAudioLogging]);
+    XCTAssertEqualObjects(@"true", [config getPropertyById:SPXSpeechServiceResponseRequestWordLevelTimestamps]);
+    XCTAssertEqualObjects(@"true", [[recognizer properties] getPropertyById:SPXSpeechServiceResponseRequestWordLevelTimestamps]);
+}
 @end
 
 

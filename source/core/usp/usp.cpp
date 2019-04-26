@@ -32,6 +32,11 @@ bool Connection::IsConnected()
     return m_impl->IsConnected();
 }
 
+std::string Connection::GetConnectionUrl()
+{
+    return m_impl->GetConnectionUrl();
+}
+
 void Connection::WriteAudio(const ::Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk)
 {
     m_impl->QueueAudioSegment(audioChunk);
@@ -77,39 +82,9 @@ Client& Client::SetProxyServerInfo(const char *proxyHost, int proxyPort, const c
     return *this;
 }
 
-Client& Client::SetLanguage(const string& language)
+Client& Client::SetQueryParameter(const std::string& name, const std::string& value)
 {
-    m_queryParameters[endpoint::langQueryParam] = language;
-    return *this;
-}
-
-Client& Client::SetOutputFormat(OutputFormat format)
-{
-    m_queryParameters[endpoint::outputFormatQueryParam] = (format == OutputFormat::Simple) ? endpoint::outputFormatSimple : endpoint::outputFormatDetailed;
-    return *this;
-}
-
-Client& Client::SetModelId(const string& modelId)
-{
-    m_queryParameters[endpoint::deploymentIdQueryParam] = modelId;
-    return *this;
-}
-
-Client& Client::SetTranslationSourceLanguage(const string& lang)
-{
-    m_queryParameters[endpoint::translation::from] = lang;
-    return *this;
-}
-
-Client& Client::SetTranslationTargetLanguages(const string& langs)
-{
-    m_queryParameters[endpoint::translation::to] = langs;
-    return *this;
-}
-
-Client& Client::SetTranslationVoice(const string& voice)
-{
-    m_queryParameters[endpoint::translation::voice] = voice;
+    m_queryParameters[name] = value;
     return *this;
 }
 

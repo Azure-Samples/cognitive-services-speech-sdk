@@ -56,7 +56,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 taskCompletionSource.TrySetResult(0);
             };
             string canceled = string.Empty;
-            recognizer.Canceled += (s, e) => {
+            recognizer.Canceled += (s, e) =>
+            {
                 canceled = e.ErrorDetails;
                 taskCompletionSource.TrySetResult(0);
             };
@@ -275,7 +276,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static string Normalize(string str)
         {
             str = str.ToLower();
-            str =  Regex.Replace(str, @"[^\w ]+", "", RegexOptions.Compiled);
+            str = Regex.Replace(str, @"[^\w ]+", "", RegexOptions.Compiled);
             return Regex.Replace(str, @"\s+", " ", RegexOptions.Compiled);
         }
 
@@ -307,7 +308,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        static public void AssertStringWordEditPercentage(string expectedString, string comparisonString, int deltaPercentage, int absoluteAllowedErrorCount=0)
+        static public void AssertStringWordEditPercentage(string expectedString, string comparisonString, int deltaPercentage, int absoluteAllowedErrorCount = 0)
         // Using standard implementation for Levenshtein distance. Caveat: not optimized for memory consumption
         //   but sufficient for our test case and the string length we are expecting (less 10000 words)
         // 
@@ -397,5 +398,4 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.IsTrue(detailedRecognitionMaskedForm.Length > 0);
         }
     }
-
 }

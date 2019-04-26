@@ -72,6 +72,10 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             [MarshalAs(UnmanagedType.LPStr)] string name,
             [MarshalAs(UnmanagedType.LPStr)] string value,
             ServicePropertyChannel channel);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR speech_config_set_profanity(InteropSafeHandle config,
+            ProfanityOption profanity);
     }
 
 }

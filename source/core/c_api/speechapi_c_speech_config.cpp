@@ -108,7 +108,6 @@ SPXAPI speech_config_set_audio_output_format(SPXSPEECHCONFIGHANDLE hconfig, Spee
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-
 static_assert((int)SpeechConfig_ServicePropertyChannel_UriQueryParameter == (int)ServicePropertyChannel::UriQueryParameter, "SpeechConfig_ServicePropertyChannel_* enum values == ServicePropertyChannel::* enum values");
 
 SPXAPI speech_config_set_service_property(SPXSPEECHCONFIGHANDLE configHandle, const char* propertyName, const char* propertyValue, SpeechConfig_ServicePropertyChannel channel)
@@ -122,6 +121,21 @@ SPXAPI speech_config_set_service_property(SPXSPEECHCONFIGHANDLE configHandle, co
         auto configs = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
         auto config = (*configs)[configHandle];
         config->SetServiceProperty(propertyName, propertyValue, (ServicePropertyChannel)channel);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+static_assert((int)SpeechConfig_ProfanityMasked == (int)ProfanityOption::Masked, "Profanity_* enum values == ProfanityOption::* enum values");
+static_assert((int)SpeechConfig_ProfanityRemoved == (int)ProfanityOption::Removed, "Profanity_* enum values == ProfanityOption::* enum values");
+static_assert((int)SpeechConfig_ProfanityRaw == (int)ProfanityOption::Raw, "Profanity_* enum values == ProfanityOption::* enum values");
+
+SPXAPI speech_config_set_profanity(SPXSPEECHCONFIGHANDLE configHandle, SpeechConfig_ProfanityOption profanity)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto configs = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
+        auto config = (*configs)[configHandle];
+        config->SetProfanity((ProfanityOption)profanity);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

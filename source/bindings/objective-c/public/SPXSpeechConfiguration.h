@@ -138,7 +138,6 @@ SPX_EXPORT
  */
 -(void)setPropertyTo:(nonnull NSString *)value byId:(SPXPropertyId)propertyId;
 
-
 /**
  *  Sets a property value that will be passed to service using the specified channel.
  *  Added in version 1.5.0.
@@ -147,4 +146,30 @@ SPX_EXPORT
  *  @param channel the channel used to pass the specified property to service.
  */
 -(void)setServicePropertyTo:(nonnull NSString *)value byName:(nonnull NSString*)name usingChannel:(SPXServicePropertyChannel)channel;
+
+/**
+ * Sets profanity option.
+ * Added in version 1.5.0.
+ * @param profanity Profanity option value.
+ */
+-(void)setProfanityOptionTo:(SPXSpeechConfigProfanityOption)profanity;
+
+/**
+ * Enables audio logging in service.
+ * Added in version 1.5.0.
+ */
+-(void)enableAudioLogging;
+
+/**
+ * Includes word-level timestamps in response result.
+ * Added in version 1.5.0.
+ */
+-(void)requestWordLevelTimestamps;
+
+/**
+ * Enables dictation mode. Only supported in speech continuous recognition.
+ * Added in version 1.5.0.
+ */
+-(void)enableDictation;
+
 @end

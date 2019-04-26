@@ -80,6 +80,13 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     SPXSpeechServiceConnectionProxyPassword = 1103,
 
     /**
+     * The URL string built from speech configuration.
+     * This property is intended to be read-only. The SDK is using it internally.
+     * NOTE: Added in version 1.5.0.
+     */
+    SPXSpeechServiceConnectionUrl = 1104, 
+
+    /**
      * The list of comma separated languages (BCP-47 format) used as target translation languages. Under normal circumstances,
      * you shouldn't have to use this property directly.
      * Instead use SPXSpeechTranslationConfiguration.addTargetLanguage
@@ -128,6 +135,24 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     SPXSpeechSessionId = 3002,
 
     /**
+      * The initial silence timeout value (in milliseconds) used by the service.
+      * Added in version 1.5.0
+      */
+    SPXSpeechServiceConnectionInitialSilenceTimeoutMs = 3200,
+
+    /**
+      * The end silence timeout value (in milliseconds) used by the service.
+      * Added in version 1.5.0
+      */
+    SPXSpeechServiceConnectionEndSilenceTimeoutMs = 3201,
+
+    /**
+      * A boolean value specifying whether audio logging is enabled in the service or not.
+      * Added in version 1.5.0
+      */
+    SPXSpeechServiceConnectionEnableAudioLogging = 3202,
+
+    /**
       * The requested Cognitive Services Speech Service response output format (simple or detailed). Not implemented yet.
       */
     SPXSpeechServiceResponseRequestDetailedResultTrueFalse = 4000,
@@ -136,6 +161,44 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
       * The requested Cognitive Services Speech Service response output profanity level. Currently unused.
       */
     SPXSpeechServiceResponseRequestProfanityFilterTrueFalse = 4001,
+
+    /**
+      * The requested Cognitive Services Speech Service response output profanity setting.
+      * Allowed values are "masked", "removed", and "raw".
+      * Added in version 1.5.0.
+      */
+    SPXSpeechServiceResponseProfanityOption = 4002,
+
+    /**
+      * A string value specifying which post processing option should be used by service.
+      * Allowed values are "TrueText".
+      * Added in version 1.5.0
+      */
+    SPXSpeechServiceResponsePostProcessingOption = 4003,
+
+    /**
+      * A boolean value specifying whether to include word-level timestamps in the response result.
+      * Added in version 1.5.0
+      */
+    SPXSpeechServiceResponseRequestWordLevelTimestamps = 4004,
+
+    /**
+      * The number of times a word has to be in partial results to be returned.
+      * Added in version 1.5.0
+      */
+    SPXSpeechServiceResponseStablePartialResultThreshold = 4005,
+
+    /**
+      * A string value specifying the output format option in the response result. Internal use only.
+      * Added in version 1.5.0.
+      */
+    SPXSpeechServiceResponseOutputFormatOption = 4006,
+
+    /**
+      * A boolean value to request for stabilizing translation partial results by omitting words in the end.
+      * Added in version 1.5.0.
+      */
+    SPXSpeechServiceResponseTranslationRequestStablePartialResult = 4100,
 
     /**
       * The Cognitive Services Speech Service response output (in JSON format). This property is available on recognition result objects only.
@@ -364,3 +427,26 @@ typedef NS_ENUM(NSUInteger, SPXServicePropertyChannel)
      */
     SPXServicePropertyChannel_UriQueryParameter = 0
 };
+
+/**
+ *  Defines the setting for the profanity filter.
+ *  Added in version 1.5.0.
+ */
+typedef NS_ENUM(NSUInteger, SPXSpeechConfigProfanityOption)
+{
+    /**
+     * Mask profanity.
+     */
+    SPXSpeechConfigProfanityOption_ProfanityMasked = 0,
+
+    /**
+     * Remove profanity.
+     */
+    SPXSpeechConfigProfanityOption_ProfanityRemoved = 1,
+
+    /**
+     * Don't filter profanity.
+     */
+    SPXSpeechConfigProfanityOption_ProfanityRaw = 2,
+};
+

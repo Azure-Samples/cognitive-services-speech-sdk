@@ -80,11 +80,11 @@ CSpxAsyncOp<std::string> CSpxSpeechBotConnector::SendActivityAsync(std::shared_p
 
 void CSpxSpeechBotConnector::SetRecoMode(const char* modeToSet)
 {
-    const char* reco_mode = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
-    auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
+    const char* recoModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
+    auto currentRecoMode = GetStringValueFromProperties(recoModePropertyName, "");
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), modeToSet);
+        SetStringValueInProperties(recoModePropertyName, modeToSet);
     }
     else
     {
@@ -261,13 +261,13 @@ void CSpxSpeechBotConnector::CheckLogFilename()
 
 CSpxAsyncOp<void> CSpxSpeechBotConnector::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)
 {
-    const char* reco_mode = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
-    auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
+    const char* recoModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
+    auto currentRecoMode = GetStringValueFromProperties(recoModePropertyName, "");
 
     // currently, kws uses recoModeInteractive as default, but takes the passed mode, if configured
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), g_recoModeInteractive);
+        SetStringValueInProperties(recoModePropertyName, g_recoModeInteractive);
     }
     return m_defaultSession->StartKeywordRecognitionAsync(model);
 }
