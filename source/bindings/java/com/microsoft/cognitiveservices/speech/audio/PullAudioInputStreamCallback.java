@@ -5,12 +5,16 @@ package com.microsoft.cognitiveservices.speech.audio;
 //
 
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import com.microsoft.cognitiveservices.speech.PropertyId;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
   * An abstract base class that defines callback methods (read() and close()) for custom audio input streams).
   */
 public abstract class PullAudioInputStreamCallback
 {
+    private static final String EMPTY_STRING = "";
+
     // load the native library.
     static {
         // trigger loading of native library
@@ -45,6 +49,24 @@ public abstract class PullAudioInputStreamCallback
         }
 
         /**
+         * Get property associated to data buffer, such as a timestamp or userId. If the property is not available, an empty string must be returned.
+         * Added in version 1.5.0
+         * @param id The Property id.
+         * @return The String value associated to Property id.
+         */
+        @Override
+        public String GetProperty(com.microsoft.cognitiveservices.speech.internal.PropertyId id) {
+            String result = EMPTY_STRING;
+            if (com.microsoft.cognitiveservices.speech.internal.PropertyId.DataBuffer_UserId == id) {
+                result = this._target.getProperty(PropertyId.DataBuffer_UserId);
+            }
+            else if(com.microsoft.cognitiveservices.speech.internal.PropertyId.DataBuffer_TimeStamp == id) {
+                result = this._target.getProperty(PropertyId.DataBuffer_TimeStamp);
+            }
+            return result; 
+        }
+
+        /**
           * Closes the audio input stream.
           */
         @Override
@@ -61,6 +83,14 @@ public abstract class PullAudioInputStreamCallback
      * @return The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
      */
     public abstract int read(byte[] dataBuffer);
+
+    /**
+      * Get property associated to data buffer, such as a timestamp or userId. If the property is not available, an empty string must be returned.
+      * Added in version 1.5.0
+      * @param id The Property id.
+      * @return The String value associated to Property id.
+      */
+    public String getProperty(PropertyId id) { return EMPTY_STRING; }
 
     /**
       * Closes the audio input stream.

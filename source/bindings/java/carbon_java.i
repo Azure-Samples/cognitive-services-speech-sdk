@@ -32,6 +32,9 @@ void __swig_spx_do_trace_message(int level, const char* pszTitle, bool enableDeb
 
 %feature("director") PullAudioInputStreamCallback;
 %apply (char *STRING, int LENGTH) { (uint8_t* dataBuffer, uint32_t size) };
+%apply (int ID, char *STRING, int LENGTH) { (uint32_t id, uint8_t* value, uint32_t size) };
+
+%feature("director") PullAudioOutputStreamCallback;
 %apply (char *STRING, int LENGTH) { (uint8_t* buffer, uint32_t bufferSize) };
 %apply (int POS, char *STRING, int LENGTH) { (uint32_t pos, uint8_t* buffer, uint32_t bufferSize) };
 

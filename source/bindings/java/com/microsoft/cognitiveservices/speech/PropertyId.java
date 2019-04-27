@@ -6,7 +6,7 @@ package com.microsoft.cognitiveservices.speech;
 
 /**
  * Defines property ids.
- * Changed in version 1.4.0.
+ * Changed in version 1.5.0.
  */
 public enum PropertyId {
 
@@ -253,7 +253,21 @@ public enum PropertyId {
     * The file name to write logs.
     * Added in version 1.4.0.
     */
-    Speech_LogFilename ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Speech_LogFilename);
+    Speech_LogFilename ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Speech_LogFilename),
+
+    /**
+     * The user id associated to data buffer written by client when using Pull/Push audio mode streams.
+     * Added in version 1.5.0.
+     */
+    DataBuffer_UserId ( com.microsoft.cognitiveservices.speech.internal.PropertyId.DataBuffer_UserId),
+
+    /**
+     * The time stamp associated to data buffer written by client when using Pull/Push audio mode streams.
+     * The time stamp is a 64-bit value with a resolution of 90kHz. The same as the presentation timestamp in an MPEG transport stream.
+     * See https://en.wikipedia.org/wiki/Presentation_timestamp.
+     * Added in version 1.5.0.
+     */
+    DataBuffer_TimeStamp ( com.microsoft.cognitiveservices.speech.internal.PropertyId.DataBuffer_TimeStamp);
 
     private PropertyId(com.microsoft.cognitiveservices.speech.internal.PropertyId id) {
         this.id = id;

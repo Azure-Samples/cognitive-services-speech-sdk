@@ -23,6 +23,8 @@ public class Settings {
 
     public static String AudioInputDirectory = ".";
     public static String WavFile = "whatstheweatherlike.wav";
+    public static String WavFile8Channels = "whatstheweatherlike_8channels.wav";
+    public static String WavFile8ChannelsUtterance = "What's the weather like?";
 
     public static String Keyword = "Computer";
     public static String KeywordModel = "/data/keyword/kws.table";

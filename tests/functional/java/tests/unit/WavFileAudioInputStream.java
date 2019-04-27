@@ -6,7 +6,7 @@ package tests.unit;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
 
 public class WavFileAudioInputStream extends PullAudioInputStreamCallback {
@@ -98,6 +98,23 @@ public class WavFileAudioInputStream extends PullAudioInputStreamCallback {
         } catch (Exception e) {
             throw new IllegalAccessError(e.toString());
         }
+    }
+
+    /**
+      * Get string value for DataBuffer_TimeStamp or DataBuffer_UserId Property ids.
+      * @param id The Property id.
+      * @return The String value associated to Property id.
+      */
+    @Override
+    public String getProperty(PropertyId id) {
+        String propertyIdStr = "";
+        if (PropertyId.DataBuffer_UserId == id) {
+            propertyIdStr = "speaker123";
+        }
+        else if(PropertyId.DataBuffer_TimeStamp == id) {
+            propertyIdStr = "somefaketimestamp";
+        }
+        return propertyIdStr;
     }
 
     /**

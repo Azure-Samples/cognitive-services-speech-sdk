@@ -269,6 +269,13 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/SpeechRecognizer.java
     ${PACKAGE_DIR}/ProfanityOption.java
 
+    ${PACKAGE_DIR}/conversation/Participant.java
+    ${PACKAGE_DIR}/conversation/ConversationTranscriptionResult.java
+    ${PACKAGE_DIR}/conversation/ConversationTranscriptionEventArgs.java
+    ${PACKAGE_DIR}/conversation/ConversationTranscriptionCanceledEventArgs.java
+    ${PACKAGE_DIR}/conversation/ConversationTranscriber.java
+    ${PACKAGE_DIR}/conversation/User.java
+
     ${PACKAGE_DIR}/OutputFormat.java
     ${PACKAGE_DIR}/audio/AudioStreamContainerFormat.java
 
