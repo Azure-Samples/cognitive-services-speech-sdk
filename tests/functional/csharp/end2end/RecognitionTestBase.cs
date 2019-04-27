@@ -11,7 +11,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     [TestClass]
     public class RecognitionTestBase
     {
-        public static string inputDir, subscriptionKey, region;
+        public static string inputDir, subscriptionKey, region, conversationTranscriptionEndpoint;
         public SpeechConfig defaultConfig;
 
         public static void BaseClassInit(TestContext context)
@@ -19,6 +19,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             subscriptionKey = Config.GetSettingByKey<String>(context, "UnifiedSpeechSubscriptionKey");
             region = Config.GetSettingByKey<String>(context, "Region");
             inputDir = Config.GetSettingByKey<String>(context, "InputDir");
+            conversationTranscriptionEndpoint = Config.GetSettingByKey<String>(context, "ConversationTranscriptionEndpoint");
 
             TestData.AudioDir = Path.Combine(inputDir, "audio");
             TestData.KwsDir = Path.Combine(inputDir, "kws");

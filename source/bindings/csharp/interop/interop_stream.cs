@@ -10,10 +10,8 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 {
     using SPXHR = System.IntPtr;
     using SPXAUDIOSTREAMHANDLE = System.IntPtr;
-    using SPXVIDEOSTREAMHANDLE = System.IntPtr;
     using SPXPROPERTYBAGHANDLE = System.IntPtr;
     using SPXAUDIOSTREAMFORMATHANDLE = System.IntPtr;
-    using SPXVIDEOSTREAMFORMATHANDLE = System.IntPtr;
 
     internal static class AudioDataStream
     {
@@ -83,6 +81,8 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate int PullAudioStreamReadDelegate(IntPtr context, IntPtr dataBuffer, uint size);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate void PullAudioStreamGetPropertyDelegate(IntPtr context, PropertyId id, IntPtr dataBuffer, uint size);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void PullAudioStreamCloseDelegate(IntPtr context);
     internal static class PullAudioInputStream
     {
@@ -91,6 +91,9 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR pull_audio_input_stream_set_callbacks(InteropSafeHandle audioStream, IntPtr context, PullAudioStreamReadDelegate readCallback, PullAudioStreamCloseDelegate closeCallback);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR pull_audio_input_stream_set_getproperty_callback(InteropSafeHandle audioStream, IntPtr context, PullAudioStreamGetPropertyDelegate getPropertyCallback);
     }
 
     internal static class PullAudioOutputStream
@@ -111,6 +114,15 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR push_audio_input_stream_close(InteropSafeHandle audioStream);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Auto)]
+        public static extern SPXHR push_audio_input_stream_set_property_by_id(InteropSafeHandle haudioStream, Int32 id,
+                    [MarshalAs(UnmanagedType.LPStr)] string value);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Auto)]
+        public static extern SPXHR push_audio_input_stream_set_property_by_name(InteropSafeHandle haudioStream,
+            [MarshalAs(UnmanagedType.LPStr)] string name,
+            [MarshalAs(UnmanagedType.LPStr)] string value);
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

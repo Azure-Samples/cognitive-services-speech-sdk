@@ -11,7 +11,6 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXAUDIOCONFIGHANDLE = System.IntPtr;
     using SPXSPEECHCONFIGHANDLE = System.IntPtr;
     using SPXPROPERTYBAGHANDLE = System.IntPtr;
-    using SPXVIDEOCONFIGHANDLE = System.IntPtr;
 
     internal static class AudioConfig
     {

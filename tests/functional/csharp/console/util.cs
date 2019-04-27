@@ -4,6 +4,7 @@
 //
 
 using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -53,6 +54,24 @@ namespace MicrosoftSpeechSDKSamples
                 return _reader.Read(dataBuffer, 0, (int)size);
             }
 
+            /// <summary>
+            /// Get property associated to data buffer, such as a timestamp or userId. if the property is not available, an empty string must be returned. 
+            /// </summary>
+            /// <param name="id">A property id.</param>
+            /// <returns>The value of the property </returns>
+            public override string GetProperty(PropertyId id)
+            {
+                if (PropertyId.ConversationTranscribingService_DataBufferUserId == id)
+                {
+                    return "speaker123";
+                }
+                else if(PropertyId.ConversationTranscribingService_DataBufferTimeStamp == id)
+                {
+                    return "somefaketimestamp";
+                }
+                return "";
+            }
+            
             /// <summary>
             /// This method performs cleanup of resources.
             /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
@@ -136,6 +155,19 @@ namespace MicrosoftSpeechSDKSamples
             return AudioConfig.FromStreamInput(callback, format);
         }
 
+        public static BinaryAudioStreamReader CreateWavReader(string filename)
+        {
+            AudioStreamFormat format = null;
+            var reader = OpenWavFile(filename, out format);
+            return (BinaryAudioStreamReader)reader;
+        }
+
+        public static AudioConfig OpenAudioJsonFile(string filename)
+        {
+            var reader = new JsonAudioStreamReader(filename);
+            return AudioConfig.FromStreamInput(reader);
+        }
+
         private static PullAudioInputStreamCallback OpenWavFile(string filename, out AudioStreamFormat format)
         {
             BinaryReader reader = new BinaryReader(File.OpenRead(filename));
@@ -166,21 +198,26 @@ namespace MicrosoftSpeechSDKSamples
             var unusedBlockAlign = reader.ReadUInt16();
             var bitsPerSample = reader.ReadUInt16();
 
-            // The following code is wrong. As the cbSize is not specified
-            // at this position, but should be derived from formatSize.
-            // skip over reamining header bytes, if any
-            //int cbSize = reader.ReadUInt16();
-            //if (cbSize > 0) reader.ReadBytes(cbSize);
-            // Until now we have read 16 bytes in format, the rest is cbSize and is ignored for now.
+            // Until now we have read 16 bytes into format, the rest is cbSize and is ignored for now.
             if (formatSize > 16)
                 reader.ReadBytes((int)(formatSize - 16));
 
-            // Second Chunk, data
-            // tag: data.
-            reader.Read(data, 0, 4);
-            Trace.Assert((data[0] == 'd') && (data[1] == 'a') && (data[2] == 't') && (data[3] == 'a'), "Wrong data tag in wav");
-            // data chunk size
-            int dataSize = reader.ReadInt32();
+            bool foundDataChunk = false;
+            while (!foundDataChunk)
+            {
+                reader.Read(data, 0, 4);
+                var chunkSize = reader.ReadInt32();
+                if ((data[0] == 'd') && (data[1] == 'a') && (data[2] == 't') && (data[3] == 'a'))
+                {
+                    foundDataChunk = true;
+                    break;
+                }
+                reader.ReadBytes(chunkSize);
+            }
+            if (!foundDataChunk)
+            {
+                throw new System.ApplicationException("${filename} does not contain a data chunk!");
+            }
 
             // now, we have the format in the format parameter and the
             // reader set to the start of the body, i.e., the raw sample data
@@ -215,6 +252,157 @@ namespace MicrosoftSpeechSDKSamples
         public static string GetCurrentTime()
         {
             return DateTime.Now.ToString("HH:mm:ss.ffffffZ");
+        }
+
+        public class JsonStreamReader
+        {
+            private StreamReader _reader;
+            private const string FRAME_TYPE_STRING = "\"X-Princeton-Video-FrameType\":\"";
+            private const string TIMESTAMP_STRING = "\"X-Princeton-Timestamp\":\"";
+
+            public JsonStreamReader(string filename)
+            {
+                _reader = new StreamReader(filename);
+            }
+
+            public int Read(byte[] dataBuffer, uint size)
+            {
+                var dataString = ReadData();
+                if (dataString.Length == 0)
+                {
+                    return 0;
+                }
+                Byte[] srcBuffer = System.Convert.FromBase64String(dataString);
+                if (srcBuffer.Length > size)
+                {
+                    throw new System.ArgumentException("Buffer size is too small!");
+                }
+                if (srcBuffer != null)
+                {
+                    srcBuffer.CopyTo(dataBuffer, 0);
+                }
+                return srcBuffer.Length;
+            }
+
+            public string FrameType { get; private set; }
+            public string TimeStamp { get; private set; }
+
+            private string ReadData()
+            {
+                if (_reader.EndOfStream)
+                {
+                    return "";
+                }
+
+                var timeStampStr = _reader.ReadLine();
+                UInt64 timeStamp = Convert.ToUInt64(timeStampStr);
+                string header = _reader.ReadLine();
+                FrameType = GetField(header, FRAME_TYPE_STRING);
+                // Sanity check, type value must be 1, 2, 3
+                if (FrameType.Length > 0)
+                {
+                    var iType = Convert.ToUInt32(FrameType);
+                    Debug.Assert(iType == 1 || iType == 2 || iType == 3);
+                }
+                TimeStamp = GetField(header, TIMESTAMP_STRING);
+                string data = _reader.ReadLine();
+                return data;
+            }
+
+            private string GetField(string header, string field)
+            {
+                string result = "";
+                var frameStringStartPos = header.IndexOf(field);
+                var frameStringEndPos = frameStringStartPos + field.Length;
+
+                if (frameStringStartPos != -1 && frameStringEndPos < header.Length)
+                {
+                    // find the ending " after 3 in "X-Princeton-Video-FrameType":"3"
+                    int endPos = header.IndexOf("\"", frameStringEndPos + 1);
+                    if (endPos != -1)
+                    {
+                        var startPos = frameStringEndPos;
+                        if (startPos >= header.Length || endPos - startPos <= 0)
+                        {
+                            throw new System.ArgumentException("Frame start is bigger than the string len!");
+                        }
+                        var type = header.Substring(startPos, endPos - startPos);
+                        result = type;
+                    }
+                }
+                return result;
+            }
+
+        }
+
+        /// <summary>
+        /// JsonAudioStreamReader class can be used to read ASCII data from the json file and convert it to Base64 data in the object's read method
+        /// </summary>
+        public sealed class JsonAudioStreamReader : PullAudioInputStreamCallback
+        {
+            private JsonStreamReader jsonReader = null;
+            /// <summary>
+            /// Creates and initializes an instance of JsonStreamReader.
+            /// </summary>
+            /// <param name="reader">The underlying stream to read the audio data from. Note: The stream contains the bare sample data, not the container (like wave header data, etc).</param>
+            public JsonAudioStreamReader(string filename)
+            {
+                jsonReader = new JsonStreamReader(filename);
+            }
+
+            /// <summary>
+            /// Reads ASCII data from the json file and convert it to Base64 data.
+            /// </summary>
+            /// <param name="dataBuffer">The buffer to fill</param>
+            /// <param name="size">The size of data in the buffer.</param>
+            /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
+            /// If there is no data immediate available, Read() blocks until the next data becomes available.</returns>
+            public override int Read(byte[] dataBuffer, uint size)
+            {
+                return jsonReader.Read(dataBuffer, size);
+            }
+
+            /// <summary>
+            /// Get property associated to data buffer, such as a timestamp or userId. if the property is not available,
+            /// an emty string is returned. 
+            /// </summary>
+            /// <param name="id">A property id</param>
+            /// <returns>A string which represents given property id.
+            public override string GetProperty(PropertyId id)
+            {
+                if (PropertyId.ConversationTranscribingService_DataBufferUserId == id)
+                {
+                    return "speaker123";
+                }
+                else if (PropertyId.ConversationTranscribingService_DataBufferTimeStamp == id)
+                {
+                    return jsonReader.TimeStamp;
+                }
+                return "";
+            }
+
+            /// <summary>
+            /// This method performs cleanup of resources.
+            /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+            /// Derived classes should override this method to dispose resource if needed.
+            /// </summary>
+            /// <param name="disposing">Flag to request disposal.</param>
+            protected override void Dispose(bool disposing)
+            {
+                if (disposed)
+                {
+                    return;
+                }
+
+                if (disposing)
+                {
+                }
+
+                disposed = true;
+                base.Dispose(disposing);
+            }
+
+            private bool disposed = false;
         }
     }
 }

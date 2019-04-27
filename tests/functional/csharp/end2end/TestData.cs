@@ -180,10 +180,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string Utterance = "What's the weather like?";
             }
 
+            public static class Weather8Channels
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "whatstheweatherlike_8channels.wav");
+                public static readonly string Utterance = "What's the weather like?";
+            }
+
+            public static class TranscriberAudioData
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "RecordedAudioMessages.json");
+            }
+
             public static class Silence
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "silenceshort.wav");
             }
+
             public static class HomeAutomation
             {
                 public static class TurnOn

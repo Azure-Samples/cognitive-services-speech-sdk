@@ -4,6 +4,7 @@
 //
 
 using System;
+using System.Text;
 using System.Runtime.InteropServices;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
@@ -104,9 +105,13 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR recognizer_create_intent_recognizer_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR synthesizer_create_speech_synthesizer_from_config(out SPXSYNTHHANDLE phsynth, InteropSafeHandle speechconfig, InteropSafeHandle audioOutput);
+        public static extern SPXHR synthesizer_create_speech_synthesizer_from_config(out SPXSYNTHHANDLE synthHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioOutput);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR bot_connector_create_speech_bot_connector_from_config(out SPXCONNECTORHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
+        
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR recognizer_create_conversation_transcriber_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
+
     }
 }

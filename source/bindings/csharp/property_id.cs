@@ -288,6 +288,21 @@ namespace Microsoft.CognitiveServices.Speech
         /// From Id to add to speech recognition activities.
         /// Added in version 1.5.0.
         /// </summary>
-        Conversation_From_Id = Internal.PropertyId.Conversation_From_Id
+        Conversation_From_Id = Internal.PropertyId.Conversation_From_Id,
+
+        /// <summary>
+        /// The user id associated to data buffer written by client when using Pull/Push audio mode streams.
+        /// Added in version 1.5.0.
+        /// </summary>
+        ConversationTranscribingService_DataBufferUserId =  Internal.PropertyId.DataBuffer_UserId,
+
+        /// <summary>
+        /// The time stamp associated to data buffer written by client when using Pull/Push audio mode streams.
+        /// The time stamp is a 64-bit value with a resolution of 90kHz. The same as the presentation timestamp in an MPEG transport stream.
+        /// See https://en.wikipedia.org/wiki/Presentation_timestamp.
+        /// Added in version 1.5.0.
+        /// </summary>
+        ConversationTranscribingService_DataBufferTimeStamp = Internal.PropertyId.DataBuffer_TimeStamp
+
     }
 }
