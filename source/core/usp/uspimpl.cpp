@@ -538,6 +538,11 @@ string Connection::Impl::UpdateRequestId(const MessageType messageType)
 
         break;
 
+    case MessageType::AgentContext:
+        requestId = CreateRequestId();
+        m_speechRequestId = requestId;
+        break;
+
     case MessageType::Context:
         if (m_config.m_endpointType == EndpointType::ConversationTranscriptionService)
         {
@@ -806,6 +811,16 @@ static RecognitionStatus ToRecognitionStatus(const string& str)
     return RecognitionStatus::InvalidMessage;
 }
 
+// Function to convert keyword verification status string to KeywordVerificationStatus enum.
+static KeywordVerificationStatus ToKeywordVerificationStatus(const string& str)
+{
+    if (0 == str.compare("Accepted")) return KeywordVerificationStatus::Accepted;
+    if (0 == str.compare("Rejected")) return KeywordVerificationStatus::Rejected;
+
+    PROTOCOL_VIOLATION("Unknown KeywordVerificationStatus: %s", str.c_str());
+    return KeywordVerificationStatus::InvalidMessage;
+}
+
 static TranslationStatus ToTranslationStatus(const string& str)
 {
     if (0 == str.compare("Success")) return  TranslationStatus::Success;
@@ -1020,6 +1035,24 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             {
                 connection->Invoke([&] { callbacks->OnMessageEnd({ requestId }); });
             }
+        }
+        else if (path == path::speechKeyword)
+        {
+            auto status = ToKeywordVerificationStatus(json[json_properties::status].get<string>());
+            auto offsetObj = json[json_properties::offset];
+            auto offset = offsetObj.is_null()? 0 : offsetObj.get<OffsetType>();
+            auto durationObj = json[json_properties::duration];
+            auto duration = durationObj.is_null()? 0 : durationObj.get<DurationType>();
+            auto textObj = json[json_properties::text];
+            auto text = textObj.is_null()? "" : textObj.get<string>();
+            
+            connection->Invoke([&] {
+                callbacks->OnSpeechKeywordDetected({PAL::ToWString(json.dump()),
+                                            offset,
+                                            duration,
+                                            status,
+                                            PAL::ToWString(text) });
+            });
         }
         else if (path == path::speechHypothesis || path == path::speechFragment)
         {

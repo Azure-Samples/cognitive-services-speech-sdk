@@ -584,6 +584,14 @@ DocstringForNoMatchReason= """
 
       Indicates that the start of the audio stream contained only
       noise, and the service timed out waiting for speech.
+
+   .. py:attribute:: KeywordNotRecognized
+
+      Indicates that the spotted keyword has been rejected by the
+      keyword verification service.
+      
+      .. note::
+        This property id was added in version 1.5.0.
     """
 
 DocstringForCancellationReason = """

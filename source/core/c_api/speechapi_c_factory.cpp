@@ -90,6 +90,13 @@ SPXAPI bot_connector_create_speech_bot_connector_from_config(SPXRECOHANDLE* ph_b
     SPXAPI_INIT_HR_TRY(hr)
     {
         *ph_bot_connector = SPXHANDLE_INVALID;
+
+        // Enable keyword verification for bot connector by default
+        auto config_handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
+        auto config = (*config_handles)[h_bot_config];
+        auto config_property_bag = SpxQueryInterface<ISpxNamedProperties>(config);
+        config_property_bag->SetStringValue(KeywordConfig_EnableKeywordVerification, "true");
+
         auto connector = create_from_config(h_bot_config, h_audio_input, &ISpxSpeechApiFactory::CreateSpeechBotConnectorFromConfig);
 
         // track the handle

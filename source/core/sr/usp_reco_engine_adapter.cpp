@@ -923,8 +923,10 @@ void CSpxUspRecoEngineAdapter::UspSendAgentConfig()
     }
 }
 
-void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
+
+void CSpxUspRecoEngineAdapter::UspSendSpeechAgentContext()
 {
+    // The Speech Bot Connector is responsible for generating an interaction ID here, so we send it as a speech.agent.context message
     if (m_endpointType == USP::EndpointType::Bot)
     {
         json contextJson = {
@@ -934,30 +936,35 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
             }},
             {"channelData", ""}
         };
-        UspSendMessage("speech.agent.context", contextJson.dump(), USP::MessageType::Context);
+        UspSendMessage("speech.agent.context", contextJson.dump(), USP::MessageType::AgentContext);
     }
-    else
+}
+
+void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
+{
+    // Get the Dgi json payload
+    std::list<std::string> listenForList = GetListenForListFromSite();
+    auto listenForJson = GetDgiJsonFromListenForList(listenForList);
+
+    // Get the intent payload
+    std::string provider, id, key, region;
+    GetIntentInfoFromSite(provider, id, key, region);
+    auto intentJson = GetLanguageUnderstandingJsonFromIntentInfo(provider, id, key, region);
+
+    // Get keyword detection json payload
+    auto keywordDetectionJson = GetKeywordDetectionJson();
+
+    // Do we expect to receive an intent payload from the service?
+    m_expectIntentResponse = !intentJson.empty();
+
+    // Take the json payload and the intent payload, and create the speech context json
+    auto speechContext = GetSpeechContextJson(listenForJson, intentJson, keywordDetectionJson);
+
+    if (!speechContext.empty())
     {
-        // Get the Dgi json payload
-        std::list<std::string> listenForList = GetListenForListFromSite();
-        auto listenForJson = GetDgiJsonFromListenForList(listenForList);
-
-        // Get the intent payload
-        std::string provider, id, key, region;
-        GetIntentInfoFromSite(provider, id, key, region);
-        auto intentJson = GetLanguageUnderstandingJsonFromIntentInfo(provider, id, key, region);
-
-        // Do we expect to receive an intent payload from the service?
-        m_expectIntentResponse = !intentJson.empty();
-
-        // Take the json payload and the intent payload, and create the speech context json
-        auto speechContext = GetSpeechContextJson(listenForJson, intentJson);
-        if (!speechContext.empty())
-        {
-            // Since it's not empty, we'll send it (empty means we don't have either dgi or intent payload)
-            std::string messagePath = "speech.context";
-            UspSendMessage(messagePath, speechContext, USP::MessageType::Context);
-        }
+        // Since it's not empty, we'll send it (empty means we don't have either dgi or intent payload)
+        std::string messagePath = "speech.context";
+        UspSendMessage(messagePath, speechContext, USP::MessageType::Context);
     }
 }
 
@@ -1154,6 +1161,47 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
             }
             site->FireAdapterResult_Intermediate(this, message.offset, result);
         });
+    }
+    else
+    {
+        SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+    }
+}
+
+void CSpxUspRecoEngineAdapter::OnSpeechKeywordDetected(const USP::SpeechKeywordDetectedMsg& message)
+{
+    SPX_DBG_TRACE_VERBOSE("Response: Speech.Keyword message. Status: %d, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n", message.status, message.text.c_str(), message.offset, message.duration);
+    
+    if (IsBadState())
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
+    }
+    else if (message.status == USP::KeywordVerificationStatus::Accepted && IsState(UspState::WaitingForPhrase))
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: site->FireAdapterResult_Intermediate()", __FUNCTION__);
+
+        InvokeOnSite([&](const SitePtr& site)
+        {
+            auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
+            auto result = factory->CreateKeywordResult(1.0, message.offset, message.duration, message.text.c_str(), ResultReason::RecognizedKeyword);
+            auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+            namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
+            site->FireAdapterResult_KeywordResult(this, message.offset, result, true);
+        });
+    }
+    else if (message.status == USP::KeywordVerificationStatus::Rejected && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd))
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: site->FireAdapterResult_Final()", __FUNCTION__);
+
+        InvokeOnSite([&](const SitePtr& site)
+        {
+            auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
+            auto result = factory->CreateKeywordResult(1.0, message.offset, message.duration, message.text.c_str(), ResultReason::NoMatch);
+            auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+            namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
+            site->FireAdapterResult_KeywordResult(this, message.offset, result, false);
+        });
+
     }
     else
     {
@@ -1805,11 +1853,42 @@ std::string CSpxUspRecoEngineAdapter::GetLanguageUnderstandingJsonFromIntentInfo
     return noIntentJson ? "" : intentJson;
 }
 
-std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dgiJson, const std::string& intentJson)
+// Construct and return the detected keywords in json format based on USP.
+// If no keyword id detected or keyword verification is turned off, return an empty string.
+std::string CSpxUspRecoEngineAdapter::GetKeywordDetectionJson()
+{
+    auto site = GetSite();
+    auto properties = SpxQueryService<ISpxNamedProperties>(site);
+
+    auto keywordVerificationEnabled = PAL::ToBool(properties->GetStringValue(KeywordConfig_EnableKeywordVerification, PAL::BoolToString(false).c_str()));
+    if (keywordVerificationEnabled)
+    {
+        auto spottedKeywordResult = site->GetSpottedKeywordResult();
+
+        if (spottedKeywordResult != nullptr) {
+            json keywordDetection = {{
+                {"type", "startTrigger"},
+                {"clientDetectedKeywords", {{
+                    {"text", PAL::ToString(spottedKeywordResult->GetText())},
+                    {"confidence", SpxQueryInterface<ISpxKeywordRecognitionResult>(spottedKeywordResult)->GetConfidence()},
+                    {"startOffset", spottedKeywordResult->GetOffset()},
+                    {"duration", spottedKeywordResult->GetDuration()}
+                }}},
+                {"onReject", {
+                    {"action", "EndOfTurn"}
+                }}
+            }};
+            return keywordDetection.dump();
+        }
+    }
+    return "";
+}
+
+std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dgiJson, const std::string& intentJson, const std::string& keywordDetectionJson)
 {
     std::string contextJson;
 
-    if (!dgiJson.empty() || !intentJson.empty())
+    if (!dgiJson.empty() || !intentJson.empty() || !keywordDetectionJson.empty())
     {
         bool appendComma = false;
         contextJson += "{";
@@ -1820,7 +1899,6 @@ std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dg
             contextJson += R"("dgi":)";
             contextJson += dgiJson;
             appendComma = true;
-            appendComma = true;
         }
 
         if (!intentJson.empty())
@@ -1828,6 +1906,16 @@ std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dg
             contextJson += appendComma ? "," : "";
             contextJson += R"("intent":)";
             contextJson += intentJson;
+            appendComma = true;
+        }
+        
+        if (!keywordDetectionJson.empty())
+        {
+            contextJson += appendComma ? "," : "";
+            contextJson += R"("invocationSource":"VoiceActivationWithKeyword")";
+            contextJson += ",";
+            contextJson += R"("keywordDetection":)";
+            contextJson += keywordDetectionJson;
         }
 
         contextJson += "}";
@@ -2037,6 +2125,7 @@ void CSpxUspRecoEngineAdapter::SendPreAudioMessages()
     SPX_DBG_ASSERT(IsState(AudioState::Sending));
 
     UspSendSpeechContext();
+    UspSendSpeechAgentContext();
     UspWriteFormat(m_format.get());
 }
 

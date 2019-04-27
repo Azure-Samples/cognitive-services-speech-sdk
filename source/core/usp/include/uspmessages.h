@@ -34,6 +34,16 @@ enum class RecognitionStatus : int
     BadRequest,
     Forbidden,
     ServiceUnavailable,
+    InvalidMessage,
+};
+
+/**
+ * Represents keyword status in speech keyword.
+ */
+enum class KeywordVerificationStatus : int
+{
+    Accepted,
+    Rejected,
     InvalidMessage
 };
 
@@ -169,6 +179,21 @@ struct SpeechFragmentMsg : public SpeechMsg
         text(std::move(text))
     {}
 
+    std::wstring text;
+};
+
+/**
+* Represents speech.keyword message
+*/
+struct SpeechKeywordDetectedMsg : public SpeechMsg
+{
+    SpeechKeywordDetectedMsg(std::wstring&& content, OffsetType offset, DurationType duration, KeywordVerificationStatus status, std::wstring&& text) :
+        SpeechMsg(std::move(content), offset, duration),
+        status(status),
+        text(std::move(text))
+    {}
+
+    KeywordVerificationStatus status;
     std::wstring text;
 };
 

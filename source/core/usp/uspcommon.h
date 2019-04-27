@@ -44,6 +44,7 @@ namespace USP {
         const std::string speechHypothesis = "speech.hypothesis";
         const std::string speechPhrase = "speech.phrase";
         const std::string speechFragment = "speech.fragment";
+        const std::string speechKeyword = "speech.keyword";
         const std::string turnStart = "turn.start";
         const std::string turnEnd = "turn.end";
         const std::string speechStartDetected = "speech.startDetected";
@@ -70,6 +71,7 @@ namespace USP {
     namespace json_properties {
         const std::string offset = "Offset";
         const std::string duration = "Duration";
+        const std::string status = "Status";
         const std::string text = "Text";
         const std::string recoStatus = "RecognitionStatus";
         const std::string displayText = "DisplayText";

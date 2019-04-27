@@ -1958,6 +1958,11 @@ void CarbonTestConsole::RunSample(const std::string& strSampleName)
         ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         ch9_do_kws_speech();
     }
+    else if (PAL::stricmp(strSampleName.c_str(), "do_kws_speech_with_kwv") == 0)
+    {
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
+        ch9_do_kws_speech_with_kwv();
+    }
     else if (PAL::stricmp(strSampleName.c_str(), "do_kws_intent") == 0)
     {
         ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());

@@ -129,6 +129,9 @@
         case SpeechImpl::NoMatchReason::InitialBabbleTimeout:
             reason = SPXNoMatchReason_InitialBabbleTimeout;
             break;
+        case SpeechImpl::NoMatchReason::KeywordNotRecognized:
+            reason = SPXNoMatchReason_KeywordNotRecognized;
+            break;
         default:
             // Todo error handling.
             NSLog(@"Unknown NoMatchReason value: %d.\nNOTE: This will raise an exception in the future!", (int)reasonImpl);

@@ -1086,27 +1086,19 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
     SPX_ASSERT_WITH_MESSAGE(m_threadService->IsOnServiceThread(), "called on wrong thread, must be thread service managed thread.");
 
     // Report that we have a keyword candidate
-    {
-        // Create the result
-        auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
-        auto result = factory->CreateKeywordResult(confidence, offset, duration, PAL::ToWString(keyword).c_str(), false/*not completely verified*/);
+    auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
 
-        // Fire the result as intermediate since we did not yet verify it
-        FireResultEvent(GetSessionId(), result);
+    auto keywordVerificationEnabled = PAL::ToBool(GetStringValue(KeywordConfig_EnableKeywordVerification, PAL::BoolToString(false).c_str()));
 
-    }
+    // Keyword verification is part of USP protocol, thus, we have to store the spotted keyword to enable keyword verification.
+    // If keyword verification is enabled, fire the keyword result as intermediate result. Otherwise, fire it as intermediate and final result
+    // so it's a consistent experience regardless of whether keyword verification is enabled or not.
+    m_spottedKeywordResult = factory->CreateKeywordResult(confidence, offset, duration, PAL::ToWString(keyword).c_str(), ResultReason::RecognizingKeyword);
+    FireResultEvent(GetSessionId(), m_spottedKeywordResult);
 
-    // TODO: perform an optional verification
-    // TODO: here some verification!
-
-    // Now we are here, so send out that we have a keyword recognized
-    {
-        // Create the result
-        auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
-        auto result = factory->CreateKeywordResult(confidence, offset, duration, PAL::ToWString(keyword).c_str(), true/*verified*/);
-
-        // Fire the result as intermediate since we did not yet verify it
-        FireResultEvent(GetSessionId(), result);
+    if (!keywordVerificationEnabled) {
+        m_spottedKeywordResult = factory->CreateKeywordResult(confidence, offset, duration, PAL::ToWString(keyword).c_str(), ResultReason::RecognizedKeyword);
+        FireResultEvent(GetSessionId(), m_spottedKeywordResult);
     }
 
     if (ChangeState(RecognitionKind::Keyword, SessionState::ProcessingAudio, RecognitionKind::KwsSingleShot, SessionState::HotSwapPaused))
@@ -1182,6 +1174,11 @@ void CSpxAudioStreamSession::GetIntentInfo(std::string& provider, std::string& i
     {
         GetIntentInfoFromLuEngineAdapter(provider, id, key, region);
     }
+}
+
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::GetSpottedKeywordResult()
+{
+    return m_spottedKeywordResult;
 }
 
 void CSpxAudioStreamSession::AdapterStartingTurn(ISpxRecoEngineAdapter* /* adapter */)
@@ -1371,12 +1368,12 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediat
     return result;
 }
 
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, bool is_verified)
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason)
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
     auto initResult = SpxQueryInterface<ISpxKeywordRecognitionResultInit>(result);
-    initResult->InitKeywordResult(confidence, offset, duration, keyword, is_verified);
+    initResult->InitKeywordResult(confidence, offset, duration, keyword, reason);
 
     return result;
 }
@@ -1453,6 +1450,28 @@ void CSpxAudioStreamSession::FireAdapterResult_Intermediate(ISpxRecoEngineAdapte
     }
 
     FireResultEvent(GetSessionId(), result);
+}
+
+void CSpxAudioStreamSession::FireAdapterResult_KeywordResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result, bool isAccepted)
+{
+    UNUSED(adapter);
+    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::WaitForPumpSetFormatStart), "ERROR! FireAdapterResult_KeywordResult was called with SessionState==WaitForPumpSetFormatStart");
+
+    auto buffer = m_audioBuffer;
+    offset = buffer ? buffer->ToAbsolute(offset) : offset;
+    result->SetOffset(offset);
+
+    if (isAccepted) {
+        FireResultEvent(GetSessionId(), result);
+    }
+    else {
+        // Drop all current audio since keyword is rejected
+        if (buffer) {
+            buffer->Drop();
+        }
+
+        WaitForRecognition_Complete(result);
+    }
 }
 
 void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)

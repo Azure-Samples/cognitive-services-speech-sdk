@@ -106,6 +106,9 @@ void CarbonTestConsole::Sample_HelloWorld_WithReasonInfo()
         case NoMatchReason::InitialBabbleTimeout:
             ConsoleWriteLine("NOMATCH: The start of the audio stream contains only noise, and the service timed out waiting for speech.");
             break;
+        case NoMatchReason::KeywordNotRecognized:
+            ConsoleWriteLine("NOMATCH: Keyword not recognized");
+            break;
         }
     }
     else if (result->Reason == ResultReason::Canceled)
@@ -237,6 +240,9 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
             case NoMatchReason::InitialBabbleTimeout:
                 ConsoleWriteLine("NOMATCH: The start of the audio stream contains only noise, and the service timed out waiting for speech.");
                 break;
+            case NoMatchReason::KeywordNotRecognized:
+                ConsoleWriteLine("NOMATCH: Keyword not recognized");
+                break;
             }
         }
     });
@@ -330,6 +336,9 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const char* subscriptionKey, co
                 break;
             case NoMatchReason::InitialBabbleTimeout:
                 ConsoleWriteLine("NOMATCH: The start of the audio stream contains only noise, and the service timed out waiting for speech.");
+                break;
+            case NoMatchReason::KeywordNotRecognized:
+                ConsoleWriteLine("NOMATCH: Keyword not recognized");
                 break;
             }
             break;

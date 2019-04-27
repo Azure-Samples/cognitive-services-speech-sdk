@@ -65,7 +65,7 @@ public:
     void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) override;
 
     // --- ISpxKeywordRecognitionResultInit ---
-    void InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, bool is_verified) override;
+    void InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason) override;
 
     // --- ISpxKeywordRecognitionResult ---
     double GetConfidence() override;

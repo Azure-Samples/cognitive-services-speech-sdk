@@ -149,14 +149,14 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
     SetStringValue(GetPropertyName(PropertyId::LanguageUnderstandingServiceResponse_JsonResult), jsonPayload ? PAL::ToString(jsonPayload).c_str() : "");
 }
 
-void CSpxRecognitionResult::InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, bool is_verified)
+void CSpxRecognitionResult::InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason)
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    m_reason = is_verified ? ResultReason::RecognizedKeyword : ResultReason::RecognizingKeyword;
+    m_reason = reason;
     m_cancellationReason = REASON_CANCELED_NONE;
     m_cancellationErrorCode = CancellationErrorCode::NoError;
-    m_noMatchReason = NO_MATCH_REASON_NONE;
+    m_noMatchReason = reason == ResultReason::NoMatch ? NoMatchReason::KeywordNotRecognized : NO_MATCH_REASON_NONE;
 
     m_offset = offset;
     m_duration = duration;

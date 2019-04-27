@@ -413,7 +413,13 @@ typedef NS_ENUM(NSUInteger, SPXNoMatchReason)
     /**
       * Indicates that the start of the audio stream contained only noise, and the service timed out waiting for speech.
       */
-    SPXNoMatchReason_InitialBabbleTimeout = 3
+    SPXNoMatchReason_InitialBabbleTimeout = 3,
+
+    /**
+      * Indicates that the spotted keyword has been rejected by the keyword verification service.
+      * Added in version 1.5.0.
+      */
+    SPXNoMatchReason_KeywordNotRecognized = 4
 };
 
 /**

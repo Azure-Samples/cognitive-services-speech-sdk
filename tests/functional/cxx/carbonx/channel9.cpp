@@ -33,8 +33,9 @@ int CarbonTestConsole::channel9()
         printf("4 - do_intent()\n");
         printf("5 - do_intent_continuous()\n");
         printf("6 - do_kws_speech()\n");
-        printf("7 - do_kws_intent()\n");
-        printf("8 - do_translation()\n");
+        printf("7 - do_kws_speech_with_kwv()\n");
+        printf("8 - do_kws_intent()\n");
+        printf("9 - do_translation()\n");
         printf("x - exit\n");
 
         printf("\nchoice: ");
@@ -53,9 +54,10 @@ int CarbonTestConsole::channel9()
         case '5': ch9_do_intent_continuous(); break;
 
         case '6': ch9_do_kws_speech(); break;
-        case '7': ch9_do_kws_intent(); break;
+        case '7': ch9_do_kws_speech_with_kwv(); break;
+        case '8': ch9_do_kws_intent(); break;
 
-        case '8': ch9_do_translation(); break;
+        case '9': ch9_do_translation(); break;
 
         default: showMenu = false; break;
         }
@@ -96,7 +98,8 @@ constexpr auto bingSpeechEndpoint = R"(wss://speech.platform.bing.com/speech/rec
 constexpr auto luisPpeSpeechEndpoint = R"(wss://speech.platform.bing.com/ppe/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&setflight=cognitiveservicesintent&&language=en-us)";
 constexpr auto luisSpeechEndpoint = R"(wss://speech.platform.bing.com/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
 constexpr auto luisEndpoint = R"(https://REGION.api.cognitive.microsoft.com/luis/v2.0/apps/APP-ID?subscription-key=KEY&verbose=true&timezoneOffset=0&q=)";
-
+constexpr auto kwsPpeEndpoint = R"(wss://speech.platform.bing.com/internal/skymandev/speech/recognition/interactive/keywordverification/v1)";
+constexpr auto kwsEndpoint = R"(wss://speech.platform.bing.com/speech/recognition/interactive/keywordverification/v1)";
 
 void unused()
 {
@@ -112,6 +115,9 @@ void unused()
     UNUSED(luisRegion);
 
     UNUSED(translationRegion);
+
+    UNUSED(kwsPpeEndpoint);
+    UNUSED(kwsEndpoint);
 }
 
 //      ____                       _         ____                            _ _   _                   //
@@ -249,7 +255,6 @@ void CarbonTestConsole::ch9_do_intent_continuous()
 //     | . \  __/ |_| |\ V  V / (_) | | | (_| |   |  _ <  __/ (_| (_) | (_| | | | | | |_| | (_) | | | |      //
 //     |_|\_\___|\__, | \_/\_/ \___/|_|  \__,_|   |_| \_\___|\___\___/ \__, |_| |_|_|\__|_|\___/|_| |_|      //
 //               |___/                                                 |___/                                 //
-
 void CarbonTestConsole::ch9_do_kws_speech()
 {
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, speechRegion);
@@ -260,8 +265,12 @@ void CarbonTestConsole::ch9_do_kws_speech()
     };
 
     recognizer->Recognized += [](const SpeechRecognitionEventArgs& e) {
-        printf("FINAL RESULT: '%s'\n", e.Result->Text.c_str());
-        printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
+        if (e.Result->Reason == ResultReason::RecognizedKeyword) {
+            printf("KEYWORD RECOGNIZED: '%s'\n", e.Result->Text.c_str());
+        }
+        else if (e.Result->Reason == ResultReason::RecognizedSpeech) {
+            printf("FINAL RESULT: '%s'\n", e.Result->Text.c_str());
+        };
     };
 
     auto keywordModel = KeywordRecognitionModel::FromFile("kws.table");
@@ -271,6 +280,57 @@ void CarbonTestConsole::ch9_do_kws_speech()
     while (getchar() != '\n');
 
     // recognizer->StopKeywordRecognitionAsync().get();
+}
+
+void CarbonTestConsole::ch9_do_kws_speech_with_kwv()
+{
+    auto sc = SpeechConfig::FromEndpoint(kwsPpeEndpoint, m_subscriptionKey);
+    auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
+
+    recognizer->SessionStarted += [](const SessionEventArgs& e) {
+        printf("SESSION %s STARTED ...\n", e.SessionId.c_str());
+    };
+
+    recognizer->SessionStopped+= [](const SessionEventArgs& e) {
+        printf("SESSION %s STOPPED ... (press ENTER to exit) \n\n", e.SessionId.c_str());
+    };
+
+    recognizer->Recognizing += [](const SpeechRecognitionEventArgs& e) {
+        if (e.Result->Reason == ResultReason::RecognizingKeyword) {
+            printf("KEYWORD RECOGNIZING: '%s'\n", e.Result->Text.c_str());
+        }
+        else if (e.Result->Reason == ResultReason::RecognizingSpeech) {
+            printf("INTERMEDIATE: %s ...\n", e.Result->Text.c_str());
+        }
+    };
+
+    recognizer->Recognized += [](const SpeechRecognitionEventArgs& e) {
+        if (e.Result->Reason == ResultReason::RecognizedKeyword) {
+            printf("KEYWORD RECOGNIZED: '%s'\n", e.Result->Text.c_str());
+        }
+        else if (e.Result->Reason == ResultReason::RecognizedSpeech) {
+            printf("FINAL RESULT: '%s'\n", e.Result->Text.c_str());
+        }
+        else if (e.Result->Reason == ResultReason::NoMatch) {
+            auto details = NoMatchDetails::FromResult(e.Result);
+            if (details->Reason == NoMatchReason::KeywordNotRecognized) {
+                printf("KEYWORD NOT RECOGNIZED: End of turn ... (press ENTER to exit) \n");
+            }
+
+        }
+    };
+
+    auto keywordModel = KeywordRecognitionModel::FromFile("kws.table");
+
+    // Enable keyword verification.
+    recognizer->Properties.SetProperty("KeywordConfig_EnableKeywordVerification", "true");
+
+    recognizer->StartKeywordRecognitionAsync(keywordModel);
+
+    printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
+    while (getchar() != '\n');
+
+    recognizer->StopKeywordRecognitionAsync().get();
 }
 
 void CarbonTestConsole::ch9_do_kws_intent()

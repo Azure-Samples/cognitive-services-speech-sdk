@@ -53,6 +53,7 @@ public:
     inline void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechStartDetected(m); }); }
     inline void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechEndDetected(m); }); }
     inline void OnSpeechHypothesis(const USP::SpeechHypothesisMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechHypothesis(m); }); }
+    inline void OnSpeechKeywordDetected(const USP::SpeechKeywordDetectedMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechKeywordDetected(m); }); }
     inline void OnSpeechPhrase(const USP::SpeechPhraseMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechPhrase(m); }); }
     inline void OnSpeechFragment(const USP::SpeechFragmentMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechFragment(m); }); }
     inline void OnTurnStart(const USP::TurnStartMsg& m) final { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnStart(m); }); }
@@ -150,6 +151,7 @@ private:
     void UspSendSpeechConfig();
     void UspSendAgentConfig();
     void UspSendSpeechContext();
+    void UspSendSpeechAgentContext();
     void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType);
     void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType);
     void UspWriteFormat(SPXWAVEFORMATEX* pformat);
@@ -162,6 +164,7 @@ private:
     void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg&) override;
     void OnSpeechHypothesis(const USP::SpeechHypothesisMsg&) override;
     void OnSpeechFragment(const USP::SpeechFragmentMsg&) override;
+    void OnSpeechKeywordDetected(const USP::SpeechKeywordDetectedMsg&) override;
     void OnSpeechPhrase(const USP::SpeechPhraseMsg&) override;
     void OnTurnStart(const USP::TurnStartMsg&) override;
     void OnTurnEnd(const USP::TurnEndMsg&) override;
@@ -192,13 +195,14 @@ private:
 
     void GetIntentInfoFromSite(std::string& provider, std::string& id, std::string& key, std::string& region);
     std::string GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key, const std::string& region);
-
-    std::string GetSpeechContextJson(const std::string& dgiJson, const std::string& LanguageUnderstandingJson);
+    std::string GetSpeechContextJson(const std::string& dgiJson, const std::string& LanguageUnderstandingJson, const std::string& keywordDetectionJson);
+    std::string GetKeywordDetectionJson();
 
     void FireActivityResult(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio);
     void FireFinalResultNow(const USP::SpeechPhraseMsg& message, const std::string& luisJson = "");
     void FireFinalResultLater(const USP::SpeechPhraseMsg& message);
     void FireFinalResultLater_WaitingForIntentComplete(const std::  string& luisJson = "");
+
     ResultReason ToReason(USP::RecognitionStatus uspRecognitionStatus);
     CancellationReason ToCancellationReason(USP::RecognitionStatus uspRecognitionStatus);
     NoMatchReason ToNoMatchReason(USP::RecognitionStatus uspRecognitionStatus);

@@ -42,6 +42,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxSpeechBotConnector)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGrammarList)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectWithSiteInit

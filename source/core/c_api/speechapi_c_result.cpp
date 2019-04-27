@@ -43,6 +43,7 @@ static_assert((int)CancellationErrorCode_RuntimeError == (int)CancellationErrorC
 static_assert((int)NoMatchReason_NotRecognized == (int)NoMatchReason::NotRecognized, "NoMatchReason_* enum values == NoMatchReason::* enum values");
 static_assert((int)NoMatchReason_InitialSilenceTimeout == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason_* enum values == NoMatchReason::* enum values");
 static_assert((int)NoMatchReason_InitialBabbleTimeout == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason_* enum values == NoMatchReason::* enum values");
+static_assert((int)NoMatchReason_KeywordNotRecognized == (int)NoMatchReason::KeywordNotRecognized, "NoMatchReason_* enum values == NoMatchReason::* enum values");
 
 SPXAPI result_get_result_id(SPXRESULTHANDLE hresult, char* pszResultId, uint32_t cchResultId)
 {

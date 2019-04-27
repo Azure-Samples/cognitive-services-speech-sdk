@@ -230,7 +230,6 @@ private:
     void Sample_HelloWorld_Subscription();
     void Sample_HelloWorld_Subscription_With_CRIS();
     void Sample_HelloWorld_Language(const char* language);
-
     void Sample_HelloWorld_Kws();
 
     int Sample_Do_Channel9();
@@ -245,6 +244,7 @@ private:
     void ch9_do_intent_continuous();
 
     void ch9_do_kws_speech();
+    void ch9_do_kws_speech_with_kwv();
     void ch9_do_kws_intent();
 
     void ch9_do_translation();

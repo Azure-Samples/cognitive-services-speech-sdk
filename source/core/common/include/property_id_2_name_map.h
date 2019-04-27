@@ -22,4 +22,5 @@ constexpr const char* g_audioSourceMicrophone = "Microphones";
 constexpr const char* g_audioSourceStream = "Stream";
 constexpr const char* g_audioSourceFile = "File";
 
+constexpr const char* KeywordConfig_EnableKeywordVerification = "KeywordConfig_EnableKeywordVerification";
 }}}}

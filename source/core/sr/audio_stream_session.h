@@ -120,6 +120,7 @@ public:
 
     std::list<std::string> GetListenForList() override;
     void GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region) override;
+    std::shared_ptr<ISpxRecognitionResult> GetSpottedKeywordResult() override;
 
     void AdapterStartingTurn(ISpxRecoEngineAdapter* adapter) override;
     void AdapterStartedTurn(ISpxRecoEngineAdapter* adapter, const std::string& id) override;
@@ -140,10 +141,11 @@ public:
     // --- ISpxRecoResultFactory
     std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
     std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) override;
-    std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, bool is_verified) override;
+    std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason) override;
 
     // --- ISpxRecoEngineAdapterSite (second part...)
     void FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
+    void FireAdapterResult_KeywordResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result, bool isAccepted) override;
     void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
     void FireAdapterResult_ActivityReceived(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) final;
     void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result) override;
@@ -378,6 +380,9 @@ private:
 
     // Single shot in flight operation.
     std::shared_ptr<Operation> m_singleShotInFlight;
+
+    // Details about the spotted keyword.
+    std::shared_ptr<ISpxRecognitionResult> m_spottedKeywordResult;
 };
 
 

@@ -471,7 +471,6 @@ public:
 class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionResultInit>
 {
 public:
-
     virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
     virtual void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
 };
@@ -479,8 +478,7 @@ public:
 class ISpxKeywordRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxKeywordRecognitionResultInit>
 {
 public:
-
-    virtual void InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, bool is_verified) = 0;
+    virtual void InitKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason) = 0;
 };
 
 class ISpxSynthesizerEvents;
@@ -871,6 +869,7 @@ public:
 
     virtual std::list<std::string> GetListenForList() = 0;
     virtual void GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> GetSpottedKeywordResult() = 0;
 
     virtual void AdapterStartingTurn(ISpxRecoEngineAdapter* adapter) = 0;
     virtual void AdapterStartedTurn(ISpxRecoEngineAdapter* adapter, const std::string& id) = 0;
@@ -883,6 +882,7 @@ public:
     virtual void AdapterDetectedSoundEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
 
     virtual void FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
+    virtual void FireAdapterResult_KeywordResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload, bool isAccepted) = 0;
     virtual void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
     virtual void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, ResultPayload_Type payload) = 0;
     virtual void FireAdapterResult_ActivityReceived(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) = 0;
@@ -937,7 +937,7 @@ class ISpxRecoResultFactory : public ISpxInterfaceBaseFor<ISpxRecoResultFactory>
 public:
     virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
     virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, CancellationErrorCode errorCode, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, bool is_verified) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateKeywordResult(const double confidence, const uint64_t offset, const uint64_t duration, const wchar_t* keyword, ResultReason reason) = 0;
 };
 
 class ISpxKeywordRecognitionResult : public ISpxInterfaceBaseFor<ISpxKeywordRecognitionResult>

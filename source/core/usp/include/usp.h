@@ -47,6 +47,11 @@ struct Callbacks
     virtual void OnSpeechHypothesis(const SpeechHypothesisMsg&) {}
 
     /**
+    * A callback function that will be invoked when a speech.keyword message is received from service.
+    */
+    virtual void OnSpeechKeywordDetected(const SpeechKeywordDetectedMsg&) {}
+    
+    /**
     * A callback function that will be invoked when a speech.phrase message is received from service.
     */
     virtual void OnSpeechPhrase(const SpeechPhraseMsg&) {}
@@ -123,7 +128,7 @@ enum class OutputFormat : unsigned int { Simple = 0, Detailed = 1 };
 
 enum class AuthenticationType { SubscriptionKey, AuthorizationToken, SearchDelegationRPSToken, SIZE_AUTHENTICATION_TYPE };
 
-enum class MessageType { Config, Context, Agent, Event };
+enum class MessageType { Config, Context, Agent, AgentContext, Event};
 
 template<typename T>
 using deleted_unique_ptr = std::unique_ptr<T, std::function<void(T*)>>;
