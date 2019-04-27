@@ -43,6 +43,9 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/translation_recognizer.h"
     "${SRC_DIR}/audio_buffer.h"
     "${SRC_DIR}/thread_service.h"
+    "${SRC_DIR}/conversation_transcriber.h"
+    "${SRC_DIR}/user.h"
+    "${SRC_DIR}/participant.h"
     )
 
 set(SOURCES
@@ -70,6 +73,10 @@ set(SOURCES
     "${SRC_DIR}/audio_buffer.cpp"
     "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/thread_service.cpp"
+    "${SRC_DIR}/conversation_transcriber.cpp"
+    "${SRC_DIR}/user.cpp"
+    "${SRC_DIR}/participant.cpp"
+
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

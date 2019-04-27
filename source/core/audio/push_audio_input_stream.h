@@ -17,14 +17,17 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+#define DATA_INFO_TIME_STAMP_KEY  "timestamp"
+#define DATA_INFO_SPEAKER_ID_KEY "speakerid"
 
-class CSpxPushAudioInputStream : 
+class CSpxPushAudioInputStream :
     public ISpxAudioStreamInitFormat,
     public ISpxAudioStream,
     public ISpxAudioStreamWriter,
     public ISpxAudioStreamReader
 {
 public:
+    using DataInfo = std::map<std::string, std::string>;
 
     CSpxPushAudioInputStream();
 
@@ -40,10 +43,13 @@ public:
 
     // --- ISpxAudioStreamWriter ---
     void Write(uint8_t* buffer, uint32_t size) override;
+    void SetProperty(PropertyId propertyId, const SPXSTRING& value) override;
+    void SetProperty(const SPXSTRING& name, const SPXSTRING& value) override;
 
     // --- ISpxAudioStreamReader ---
     uint16_t GetFormat(SPXWAVEFORMATEX* format, uint16_t formatSize) override;
     uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer) override;
+    SPXSTRING GetProperty(PropertyId propertyId) override;
     void Close() override { }
 
 private:
@@ -60,12 +66,15 @@ private:
     std::mutex m_mutex;
     std::condition_variable m_cv;
 
-    std::queue<std::pair<SpxSharedAudioBuffer_Type, uint32_t>> m_audioQueue;
+    std::queue<std::tuple<SpxSharedAudioBuffer_Type, uint32_t, DataInfo>> m_audioQueue;
     std::shared_ptr<uint8_t> m_buffer;
     uint32_t m_bytesInBuffer;
     uint8_t* m_ptrIntoBuffer;
     uint32_t m_bytesLeftInBuffer;
-    
+
+    DataInfo m_dataInfo;
+    DataInfo m_dataInfoInRead;
+
     bool m_endOfStream;
 };
 

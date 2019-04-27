@@ -47,6 +47,7 @@ namespace Keys
     EXTERN std::string Speech;
     EXTERN std::string LUIS;
     EXTERN std::string Bot;
+    EXTERN std::string ConversationTranscriber;    
 }
 
 namespace Config
@@ -58,6 +59,8 @@ namespace Config
     EXTERN std::string InputDir;
     EXTERN std::string BotRegion;
     EXTERN std::string BotSecret;
+    EXTERN std::string InroomEndpoint;
+    EXTERN std::string OnlineEndpoint;
 }
 
 
@@ -107,6 +110,15 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Config::LuisAppId, "LuisAppId")
         ["--luisAppId"]
     ("The language understanding app id to be used intent recognition tests")
+        | Opt(Config::InroomEndpoint, "InroomEndpoint")
+        ["--InroomEndpoint"]
+    ("The endpoint that in-room tests in intelligent meeting recognizer talks to")
+        | Opt(Config::OnlineEndpoint, "OnlineEndpoint")
+        ["--OnlineEndpoint"]
+    ("The endpoint that on-line tests in intelligent meeting recognizer talks to")
+        | Opt(Keys::ConversationTranscriber, "ConversationTranscriber")
+        ["--keyConversationTranscriber"]
+    ("The conversation transcriber key")
         | Opt(Config::InputDir, "InputDir")
         ["--inputDir"]
     ("The directory where test input files are placed")

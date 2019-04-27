@@ -40,10 +40,13 @@ public:
 
     // --- ISpxAudioStreamReaderInitCallbacks ---
     void SetCallbacks(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback, ISpxAudioStreamReaderInitCallbacks::CloseCallbackFunction_Type closeCallback) override;
+    void SetPropertyCallback(GetPropertyCallbackFunction_Type getPropertyCallBack) override;
 
     // --- ISpxAudioStreamReader ---
     uint16_t GetFormat(SPXWAVEFORMATEX* format, uint16_t formatSize) override;
     uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer) override;
+    SPXSTRING GetProperty(PropertyId propertyId) override;
+
     void Close() override;
 
 private:
@@ -54,6 +57,8 @@ private:
 
     ReadCallbackFunction_Type m_readCallback;
     CloseCallbackFunction_Type m_closeCallback;
+    GetPropertyCallbackFunction_Type m_getPropertyCallback;
+    static constexpr size_t m_maxPropertyLenInBytes = 1024;
 };
 
 

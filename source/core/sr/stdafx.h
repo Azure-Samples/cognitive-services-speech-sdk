@@ -4,6 +4,7 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <inttypes.h>
 
 #ifdef _DEBUG
 #define SPX_CONFIG_INCLUDE_ALL_DBG 1

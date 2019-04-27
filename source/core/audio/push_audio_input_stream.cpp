@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "push_audio_input_stream.h"
+#include <property_id_2_name_map.h>
 #include <algorithm>
 #include <cstring>
 #include <chrono>
@@ -52,6 +53,28 @@ void CSpxPushAudioInputStream::Write(uint8_t* buffer, uint32_t size)
     }
 }
 
+void CSpxPushAudioInputStream::SetProperty(PropertyId propertyId, const SPXSTRING& value)
+{
+    if (propertyId == PropertyId::DataBuffer_TimeStamp)
+    {
+        m_dataInfo[DATA_INFO_TIME_STAMP_KEY] = value;
+    }
+    else if (propertyId == PropertyId::DataBuffer_UserId)
+    {
+        m_dataInfo[DATA_INFO_SPEAKER_ID_KEY] = value;
+    }
+    else
+    {
+        std::string str = "Error: PropertyId " + std::to_string(static_cast<int>(propertyId)) + " is not supported";
+        ThrowInvalidArgumentException(str);
+    }
+}
+
+void CSpxPushAudioInputStream::SetProperty(const SPXSTRING& name, const SPXSTRING& value)
+{
+    m_dataInfo[name] = value;
+}
+
 uint16_t CSpxPushAudioInputStream::GetFormat(SPXWAVEFORMATEX* formatBuffer, uint16_t formatSize)
 {
     uint16_t formatSizeRequired = sizeof(SPXWAVEFORMATEX) + m_format->cbSize;
@@ -81,8 +104,9 @@ uint32_t CSpxPushAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
             auto item = m_audioQueue.front();
             m_audioQueue.pop();
 
-            m_buffer = item.first;
-            m_bytesInBuffer = item.second;
+            m_buffer = std::get<0>(item);
+            m_bytesInBuffer = std::get<1>(item);
+            m_dataInfoInRead = std::get<2>(item);
 
             m_ptrIntoBuffer = m_buffer.get();
             m_bytesLeftInBuffer = m_bytesInBuffer;
@@ -126,6 +150,25 @@ uint32_t CSpxPushAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
     return totalBytesRead;
 }
 
+SPXSTRING CSpxPushAudioInputStream::GetProperty(PropertyId propertyId)
+{
+    if (propertyId == PropertyId::DataBuffer_TimeStamp)
+    {
+        if (m_dataInfoInRead.find(DATA_INFO_TIME_STAMP_KEY) != m_dataInfoInRead.end())
+        {
+            return m_dataInfoInRead[DATA_INFO_TIME_STAMP_KEY];
+        }
+    }
+    else if (propertyId == PropertyId::DataBuffer_UserId)
+    {
+        if (m_dataInfoInRead.find(DATA_INFO_SPEAKER_ID_KEY) != m_dataInfoInRead.end())
+        {
+            return m_dataInfoInRead[DATA_INFO_SPEAKER_ID_KEY];
+        }
+    }
+    return "";
+}
+
 void CSpxPushAudioInputStream::WriteBuffer(uint8_t* buffer, uint32_t size)
 {
     SPX_DBG_TRACE_VERBOSE("%s: size=%d", __FUNCTION__, size);
@@ -136,7 +179,7 @@ void CSpxPushAudioInputStream::WriteBuffer(uint8_t* buffer, uint32_t size)
 
     // Store the buffer in our queue
     std::unique_lock<std::mutex> lock(m_mutex);
-    m_audioQueue.emplace(newBuffer, size);
+    m_audioQueue.emplace(newBuffer, size, std::move(m_dataInfo));
     m_cv.notify_all();
 }
 

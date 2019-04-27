@@ -63,7 +63,7 @@ private:
     void PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor);
     void WaitForPumpStart(std::unique_lock<std::mutex>& lock);
     void WaitForPumpIdle(std::unique_lock<std::mutex>& lock);
-    
+
     std::mutex m_mutex;
     std::condition_variable m_cv;
 
@@ -74,7 +74,7 @@ private:
     const int m_waitMsStartPumpRequestTimeout = 100;
     const int m_waitMsStopPumpRequestTimeout = 100;
 
-    std::thread m_thread;   
+    std::thread m_thread;
 };
 
 

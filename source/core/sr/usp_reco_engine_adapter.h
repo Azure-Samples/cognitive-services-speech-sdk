@@ -107,6 +107,7 @@ public:
     void CloseConnection() override;
     void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) override;
     void SendAgentMessage(const std::string &buffer) final;
+    void SendSpeechEventMessage(std::string&& msg) override;
 
     // --- ISpxAudioProcessor
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;
@@ -132,6 +133,7 @@ private:
     USP::Client& SetUspEndpointTranslation(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpointDefaultSpeechService(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpointBot(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpointTranscriber(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspRegion(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client, bool isIntentRegion);
     USP::Client& SetUspAuthentication(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspProxyInfo(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
@@ -242,6 +244,7 @@ private:
     bool ShouldResetBeforeFirstAudio();
     void ResetBeforeFirstAudio();
 
+    void CreateConversationResult(std::shared_ptr<ISpxRecognitionResult>& result, const std::wstring& userId);
 
 private:
     friend CSpxActivitySession;

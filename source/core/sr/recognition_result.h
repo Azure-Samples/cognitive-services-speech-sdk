@@ -16,6 +16,8 @@ class CSpxRecognitionResult :
     public ISpxKeywordRecognitionResultInit,
     public ISpxIntentRecognitionResult,
     public ISpxIntentRecognitionResultInit,
+    public ISpxConversationTranscriptionResult,
+    public ISpxConversationTranscriptionResultInit,
     public ISpxTranslationRecognitionResult,
     public ISpxTranslationRecognitionResultInit,
     public ISpxTranslationSynthesisResult,
@@ -34,6 +36,8 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxKeywordRecognitionResultInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxIntentRecognitionResult)
         SPX_INTERFACE_MAP_ENTRY(ISpxIntentRecognitionResultInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxConversationTranscriptionResult)
+        SPX_INTERFACE_MAP_ENTRY(ISpxConversationTranscriptionResultInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxTranslationRecognitionResult)
         SPX_INTERFACE_MAP_ENTRY(ISpxTranslationRecognitionResultInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxTranslationSynthesisResult)
@@ -72,6 +76,12 @@ public:
     // --- ISpxIntentRecognitionResultInit ---
     void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) override;
 
+    // --- ISpxConversationTranscriberResult ---
+    std::wstring GetUserId() override;
+
+    // --- ISpxConversationTranscriptionResultInit ---
+    void InitConversationResult(const wchar_t* userId) override;
+
     // --- ISpxTranslationRecognitionResult ---
     const std::map<std::wstring, std::wstring>& GetTranslationText() override;
 
@@ -106,6 +116,8 @@ private:
     NoMatchReason m_noMatchReason;
 
     double m_confidence;
+
+    std::wstring m_userId;
 
     std::wstring m_intentId;
 

@@ -264,7 +264,7 @@ typedef uintptr_t SPXHR;
 #define SPXERR_GSTREAMER_INTERNAL_ERROR    __SPX_ERRCODE_FAILED(0x027)
 
 /// <summary>
-/// Compressed contrainer format not supported.
+/// Compressed container format not supported.
 /// Added in version 1.4.0.
 /// </summary>
 #define SPXERR_CONTAINER_FORMAT_NOT_SUPPORTED_ERROR    __SPX_ERRCODE_FAILED(0x028)
@@ -277,7 +277,21 @@ typedef uintptr_t SPXHR;
 
 /// <summary>
 /// The language specified is missing.
-/// Added in version 1.5.0
+/// Added in version 1.5.0.
 /// </summary>
 #define SPXERR_INVALID_LANGUAGE  __SPX_ERRCODE_FAILED(0x02A)
+
+
+/// <summary>
+/// An unexpected error was encountered when trying to access the Conversation site.
+/// Added in version 1.5.0.
+/// </summary>
+#define SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE  __SPX_ERRCODE_FAILED(0x030)
+
+/// <summary>
+/// The API is not applicable.
+/// Added in version 1.5.0.
+/// </summary>
+#define SPXERR_UNSUPPORTED_API_ERROR  __SPX_ERRCODE_FAILED(0x02B)
+
 

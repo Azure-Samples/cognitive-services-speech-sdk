@@ -31,3 +31,7 @@
 #include <speechapi_c_activity.h>
 #include <speechapi_c_bot_connector_config.h>
 #include <speechapi_c_speech_bot_connector.h>
+#include <speechapi_c_conversation_transcriber.h>
+#include <speechapi_c_conversation_transcription_result.h>
+#include <speechapi_c_user.h>
+#include <speechapi_c_participant.h>

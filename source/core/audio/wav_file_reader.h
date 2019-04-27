@@ -47,7 +47,6 @@ public:
     uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) override;
     uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer) override;
 
-
 private:
 
     void EnsureGetFormat();
@@ -65,14 +64,14 @@ private:
     static const uint16_t cbTag = 4;
     static const uint16_t cbChunkType = 4;
     static const uint16_t cbChunkSize = 4;
-    
+
     std::wstring m_fileName;
     std::unique_ptr<WavFile_Type> m_file;
     SpxWAVEFORMATEX_Type m_waveformat;
 
     bool m_continuousAudioLoop = false;           // Continuously loop thru the audio from the .WAV file; Essentially, .WAV is a ring buffer for infinite audio data source
 
-    bool m_iterativeAudioLoop = false;            // Iteratively loop thru the audio data from the .WAV file; 3000 byte audio file calling Read, repeatedly, will return 
+    bool m_iterativeAudioLoop = false;            // Iteratively loop thru the audio data from the .WAV file; 3000 byte audio file calling Read, repeatedly, will return
                                                   // 2000 bytes, then 1000 bytes, then 0 bytes, then 2000 bytes, then 1000 bytes, then 0 bytes ... over and over again
 
     uint8_t m_simulateRealtimePercentage = 0;     // 0 == as fast as possible; 100 == real time. E.g. If .WAV file is 12 seconds long, it will take 12 seconds to read all 

@@ -32,7 +32,8 @@ steps:
       -D virtualassistant-region=$(BotRegion) \
       -D virtualassistant-subscription=$(BotSubscriptionKey) \
       -D virtualassistant-testbot=$(BotFunctionalTest) \
-      -D long-running=false
+      -D long-running=false \
+      -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417)
     cp tests/input/audio/*.wav public_samples/samples/python/console
   displayName: Prepare Python samples for testing
 - template: test-during-build.yml

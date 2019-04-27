@@ -15,6 +15,8 @@
 
 #include "speechapi_cxx.h"
 #include "mock_controller.h"
+#include "metrics.h"
+
 
 #ifdef _MSC_VER
 #pragma warning(disable: 6237)
@@ -26,6 +28,8 @@ using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace std;
+using namespace Microsoft::CognitiveServices::Speech::USP; // for GetISO8601Time
+
 
 static std::shared_ptr<SpeechConfig> SpeechConfigForAudioConfigTests()
 {
@@ -39,7 +43,7 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
     std::string sessionId;
 
     weather.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weather.m_audioFilename));
+    REQUIRE(exists(weather.m_inputDataFilename));
 
     auto requireRecognizedSpeech = [&sessionId](std::shared_ptr<SpeechRecognitionResult> result)
     {
@@ -67,7 +71,6 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
         REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
         REQUIRE(!result->Text.empty());
     };
-
     SECTION("Audio Config Properties")
     {
         auto verifyAudioConfigInRecognizerProperties = [](std::shared_ptr< SpeechRecognizer> recognizer, std::string deviceNameExpected = "",  std::string channelsExpected = "1")
@@ -93,7 +96,7 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
 
         WHEN("verify audio configuration from audio file")
         {
-            auto audioConfig = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+            auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
 
             auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
             auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
@@ -105,7 +108,7 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
         {
             auto channelsExpected = "1";
             auto deviceNameExpected = "default";
-            auto audioConfig = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+            auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
 
             // verify number of channels
             audioConfig->SetProperty(PropertyId::AudioConfig_NumberOfChannelsForCapture, channelsExpected);
@@ -127,13 +130,14 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
     SECTION("pull stream works")
     {
         // Prepare for the stream to be "Pulled"
-        auto fs = OpenWaveFile(weather.m_audioFilename);
+        auto fs = OpenWaveFile(weather.m_inputDataFilename);
 
         // Create the "pull stream" object with C++ lambda callbacks
         auto pullStream = AudioInputStream::CreatePullStream(
             AudioStreamFormat::GetWaveFormatPCM(16000, 16, 1),
             [&fs](uint8_t* buffer, uint32_t size) -> int { return (int)ReadBuffer(fs, buffer,size); },
-            [=]() { });
+            [=]() {}
+        );
 
         // Create the recognizer with the pull stream
         auto config = SpeechConfigForAudioConfigTests();
@@ -164,7 +168,7 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
 
         // Prepare to use the "Push stream" by opening the file, and moving to head of data chunk
         FILE* hfile = nullptr;
-        PAL::fopen_s(&hfile, weather.m_audioFilename.c_str(), "rb");
+        PAL::fopen_s(&hfile, weather.m_inputDataFilename.c_str(), "rb");
         fseek(hfile, 44, SEEK_CUR);
 
         // Set up a lambda we'll use to push the data
@@ -172,14 +176,18 @@ TEST_CASE("Audio Basics", "[api][cxx][audio]")
             auto deleter = [](uint8_t * p) { delete[] p; };
             std::unique_ptr<uint8_t[], decltype(deleter)> buffer(new uint8_t[bufferSize], deleter);
             std::this_thread::sleep_for(std::chrono::milliseconds(sleepBefore));
-            for (;;) {
+            for (;;)
+            {
                 auto size = (int)fread(buffer.get(), 1, bufferSize, hfile);
                 if (size == 0) break;
+
                 pushStream->Write(buffer.get(), size);
+
                 std::this_thread::sleep_for(std::chrono::milliseconds(sleepBetween));
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(sleepAfter));
-            if (closeStream) {
+            if (closeStream)
+            {
                 pushStream->Close();
             }
             fclose(hfile);

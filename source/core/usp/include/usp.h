@@ -115,7 +115,7 @@ struct Callbacks
 
 using CallbacksPtr = std::shared_ptr<Callbacks>;
 
-enum class EndpointType { Speech, Intent, Translation, CDSDK, Bot };
+enum class EndpointType { Speech, Intent, Translation, CDSDK, Bot, ConversationTranscriptionService };
 
 enum class RecognitionMode : unsigned int { Interactive = 0, Conversation = 1, Dictation = 2 };
 
@@ -123,7 +123,7 @@ enum class OutputFormat : unsigned int { Simple = 0, Detailed = 1 };
 
 enum class AuthenticationType { SubscriptionKey, AuthorizationToken, SearchDelegationRPSToken, SIZE_AUTHENTICATION_TYPE };
 
-enum class MessageType { Config, Context, Agent };
+enum class MessageType { Config, Context, Agent, Event };
 
 template<typename T>
 using deleted_unique_ptr = std::unique_ptr<T, std::function<void(T*)>>;

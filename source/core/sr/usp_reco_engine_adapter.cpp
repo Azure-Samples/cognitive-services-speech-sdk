@@ -95,9 +95,9 @@ void CSpxUspRecoEngineAdapter::OpenConnection(bool singleShot)
     std::string recoModeToSet;
 
     // Get recognizer type
-    uint16_t countSpeech, countIntent, countTranslation, countBot;
-    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation, &countBot);
-    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation + countBot == 1); // currently only support one recognizer
+    uint16_t countSpeech, countIntent, countTranslation, countBot, countTranscriber;
+    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation, &countBot, &countTranscriber);
+    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation + countBot + countTranscriber == 1); // currently only support one recognizer
 
     if (countIntent == 1)
     {
@@ -150,14 +150,14 @@ void CSpxUspRecoEngineAdapter::CloseConnection()
     SPX_DBG_TRACE_VERBOSE("%s: Close connection.", __FUNCTION__);
 
     // Get recognizer type
-    uint16_t countSpeech, countIntent, countTranslation, countBot;
-    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation, &countBot);
-    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation + countBot == 1); // currently only support one recognizer
+    uint16_t countSpeech, countIntent, countTranslation, countBot, countTranscriber;
+    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation, &countBot, &countTranscriber);
+    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation + countBot + countTranscriber == 1); // currently only support one recognizer
 
     if (countIntent == 1)
     {
         // The connection to service for IntentRecognizer is depending on the Intent model being used,
-        // so it is not possbile to set up the connection now.
+        // so it is not possible to set up the connection now.
         SPX_DBG_TRACE_INFO("%s: Skip setting up connection in advance for intent recognizer.", __FUNCTION__);
         SPX_THROW_HR(SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
         return;
@@ -168,6 +168,22 @@ void CSpxUspRecoEngineAdapter::CloseConnection()
     }
     // Terminate the connection to service.
     UspTerminate();
+}
+
+void CSpxUspRecoEngineAdapter::SendSpeechEventMessage(std::string&& message)
+{
+    // Establish the connection to service.
+    EnsureUspInit();
+    // for some reason, no connection is established
+    if (m_uspConnection == nullptr || IsState(UspState::Error))
+    {
+        return;
+    }
+
+    if (m_endpointType == USP::EndpointType::ConversationTranscriptionService)
+    {
+        UspSendMessage("speech.event", message, USP::MessageType::Event);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
@@ -324,6 +340,11 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
         OnError(true, USP::ErrorCode::ConnectionError, "Error: Unexpected exception in UspInitialize");
     }
 
+    // if error occurs in the above client.Connect, return.
+    if (uspConnection == nullptr)
+    {
+        return;
+    }
     // Keep track of what time we initialized (so we can reset later)
     m_uspInitTime = std::chrono::system_clock::now();
     m_uspResetTime = m_uspInitTime + std::chrono::seconds(m_resetUspAfterTimeSeconds);
@@ -365,9 +386,9 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(const std::shared_ptr<ISpx
     SPX_DBG_ASSERT(GetSite() != nullptr);
 
     // How many recognizers of each type do we have?
-    uint16_t countSpeech = 0, countIntent = 0, countTranslation = 0, countBot = 0;
-    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation, &countBot);
-    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation + countBot == 1); // currently only support one recognizer
+    uint16_t countSpeech = 0, countIntent = 0, countTranslation = 0, countBot = 0, countTranscriber = 0;
+    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation, &countBot, &countTranscriber);
+    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation + countBot + countTranscriber == 1); // currently only support one recognizer
 
     // set endpoint url if this is provided.
     auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
@@ -403,6 +424,10 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(const std::shared_ptr<ISpx
     {
         SetUspEndpointBot(properties, client);
     }
+     else if (countTranscriber == 1)
+    {
+        SetUspEndpointTranscriber(properties, client);
+    }
     else
     {
         SPX_DBG_ASSERT(countSpeech == 1);
@@ -423,6 +448,29 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(const std::shared_ptr<ISpx
     SPX_DBG_TRACE_VERBOSE("%s: Setting Websocket Polling interval to %d", __FUNCTION__, pollingInterval);
 
     client.SetPollingIntervalms(pollingInterval);
+
+    return client;
+}
+
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointTranscriber(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+{
+    m_endpointType = USP::EndpointType::ConversationTranscriptionService;
+    client.SetEndpointType(m_endpointType);
+
+    auto region = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region));
+    SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_REGION);
+
+    auto lang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
+    if (lang.empty())
+    {
+        lang = s_defaultRecognitionLanguage;
+    }
+
+    SetUspQueryParameters(USP::endpoint::bot::queryParameters, properties, client);
+
+    SPX_DBG_TRACE_VERBOSE("%s: Using ConverstaionTranscriptionService URL/endpoint...", __FUNCTION__);
+    client.SetEndpointType(m_endpointType);
+    client.SetRegion(region);
 
     return client;
 }
@@ -1100,6 +1148,10 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
             auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), message.offset, message.duration);
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
+            if (!message.speaker.empty())
+            {
+                CreateConversationResult(result, message.speaker);
+            }
             site->FireAdapterResult_Intermediate(this, message.offset, result);
         });
     }
@@ -1146,6 +1198,10 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
             auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), message.offset, message.duration);
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
+            if (!message.speaker.empty())
+            {
+                CreateConversationResult(result, message.speaker);
+            }
             site->FireAdapterResult_Intermediate(this, message.offset, result);
         });
     }
@@ -1198,6 +1254,16 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
     }
 }
 
+void CSpxUspRecoEngineAdapter::CreateConversationResult(std::shared_ptr<ISpxRecognitionResult>& result, const std::wstring& userId)
+{
+    auto initConversationResult = SpxQueryInterface<ISpxConversationTranscriptionResultInit>(result);
+    if (initConversationResult == nullptr)
+    {
+        ThrowInvalidArgumentException("Can't get conversation result");
+    }
+    initConversationResult->InitConversationResult(userId.c_str());
+
+}
 static TranslationStatusCode GetTranslationStatus(::USP::TranslationStatus uspStatus)
 {
     TranslationStatusCode status = TranslationStatusCode::Error;
@@ -1893,6 +1959,10 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
             namedProperties->SetStringValue(GetPropertyName(PropertyId::LanguageUnderstandingServiceResponse_JsonResult), luisJson.c_str());
         }
 
+        if (!message.speaker.empty())
+        {
+            CreateConversationResult(result, message.speaker);
+        }
         site->FireAdapterResult_FinalResult(this, message.offset, result);
     });
 }
@@ -1955,8 +2025,10 @@ void CSpxUspRecoEngineAdapter::PrepareFirstAudioReadyState(const SPXWAVEFORMATEX
 
 void CSpxUspRecoEngineAdapter::PrepareAudioReadyState()
 {
-    SPX_DBG_ASSERT(IsState(AudioState::Ready, UspState::Idle));
-
+    if (!IsState(AudioState::Ready, UspState::Idle))
+    {
+        SPX_DBG_TRACE_ERROR("wrong state in PrepareAudioReadyState current audio state %d, usp state %d", m_audioState, m_uspState);
+    }
     EnsureUspInit();
 }
 

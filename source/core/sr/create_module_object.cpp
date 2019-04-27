@@ -11,6 +11,7 @@
 #include "audio_stream_session.h"
 #include "factory_helpers.h"
 #include "intent_recognizer.h"
+#include "conversation_transcriber.h"
 #include "intent_trigger.h"
 #include "translation_recognizer.h"
 #include "keyword_spotter_model.h"
@@ -27,6 +28,8 @@
 #include "bot_connector.h"
 #include "connection.h"
 #include "activity.h"
+#include "user.h"
+#include "participant.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -46,6 +49,9 @@ SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* i
     SPX_FACTORY_MAP_ENTRY(CSpxSpeechBotConnector, ISpxRecognizer);
     SPX_FACTORY_MAP_ENTRY(CSpxActivity, ISpxActivity);
     SPX_FACTORY_MAP_ENTRY(CSpxActivityJSONAccessor, ISpxActivityJSONAccessor);
+    SPX_FACTORY_MAP_ENTRY(CSpxConversationTranscriber, ISpxRecognizer);
+    SPX_FACTORY_MAP_ENTRY(CSpxParticipant, ISpxParticipant);
+    SPX_FACTORY_MAP_ENTRY(CSpxUser, ISpxUser);
     SPX_FACTORY_MAP_ENTRY(CSpxIntentTrigger, ISpxTrigger);
     SPX_FACTORY_MAP_ENTRY(CSpxKwsModel, ISpxKwsModel);
     SPX_FACTORY_MAP_ENTRY(CSpxLanguageUnderstandingModel, ISpxLanguageUnderstandingModel);

@@ -27,7 +27,12 @@ public:
 
     // --- ISpxAudioStreamReader ---
     uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat);
-    uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer);
+    uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer);    
+    SPXSTRING GetProperty(PropertyId propertyId)
+    {
+        UNUSED(propertyId);
+        return "";
+    };
     void Close() { }
 
 

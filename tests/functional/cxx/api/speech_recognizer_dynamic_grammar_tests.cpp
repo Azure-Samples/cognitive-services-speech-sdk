@@ -31,10 +31,10 @@ std::shared_ptr<SpeechConfig> GetDynamicGrammarTestsConfig()
 TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
 {
     dgiWreckANiceBeach.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(dgiWreckANiceBeach.m_audioFilename));
+    REQUIRE(exists(dgiWreckANiceBeach.m_inputDataFilename));
 
     auto config = GetDynamicGrammarTestsConfig();
-    auto audioConfig = AudioConfig::FromWavFileInput(dgiWreckANiceBeach.m_audioFilename);
+    auto audioConfig = AudioConfig::FromWavFileInput(dgiWreckANiceBeach.m_inputDataFilename);
     auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
 
     auto recoTextMatches = [](auto recognizer, const std::string& utterance)

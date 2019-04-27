@@ -83,6 +83,7 @@ Connection::Impl::Impl(const Client& config)
     : m_config(config),
     m_valid(false),
     m_connected(false),
+    m_sawSpeechContext(false),
     m_audioOffset(0),
     m_creationTime(telemetry_gettime())
 {
@@ -269,6 +270,10 @@ string Connection::Impl::ConstructConnectionUrl() const
 
     switch (m_config.m_endpointType)
     {
+    case EndpointType::ConversationTranscriptionService:
+        BuildQueryParameters(endpoint::unifiedspeech::queryParameters, m_config.m_queryParameters, customEndpoint, oss);
+        break;
+
     case EndpointType::Speech:
         BuildQueryParameters(endpoint::unifiedspeech::queryParameters, m_config.m_queryParameters, customEndpoint, oss);
         break;
@@ -501,25 +506,68 @@ void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, siz
 
     if (m_valid)
     {
-        // If the service receives multiple context messages for a single turn,
+        // todo: If the service receives multiple context messages for a single turn,
         // the service will close the WebSocket connection with an error.
-        if (messageType == MessageType::Context && !m_speechRequestId.empty())
+        // need a better way to throw a logic exception when we are sending speech.context in the middle of a turn by mistakes.
+        if (messageType == MessageType::Context && m_sawSpeechContext == true )
         {
             ThrowLogicError("Error trying to send a context message while in the middle of a speech turn.");
         }
 
-        // The config message does not require a X-RequestId header, because this message is not associated with a particular request.
-        string requestId;
-        if (messageType != MessageType::Config)
+        auto requestId = UpdateRequestId(messageType);
+        if (messageType == MessageType::Context)
         {
-           requestId = CreateRequestId();
-           m_speechRequestId = (messageType == MessageType::Context) ? requestId : m_speechRequestId;
+            m_sawSpeechContext = true;
         }
 
         (void)TransportMessageWrite(m_transport.get(), path.c_str(), data, size, requestId.c_str());
     }
 
     ScheduleWork();
+}
+
+string Connection::Impl::UpdateRequestId(const MessageType messageType)
+{
+    // The config message does not require a X-RequestId header, because this message is not associated with a particular request.
+    // Other messages, such as speech.event, speech.context etc need a request id.
+    string requestId;
+
+    switch (messageType)
+    {
+    case MessageType::Config:
+
+        break;
+
+    case MessageType::Context:
+        if (m_config.m_endpointType == EndpointType::ConversationTranscriptionService)
+        {
+            m_speechRequestId = m_speechRequestId.empty() ? CreateRequestId() : m_speechRequestId;
+        }
+        else
+        {
+            m_speechRequestId = CreateRequestId();
+        }
+        requestId = m_speechRequestId;
+
+        break;
+
+    case MessageType::Event:
+        assert(m_config.m_endpointType == EndpointType::ConversationTranscriptionService);
+        m_speechRequestId = m_speechRequestId.empty() ? CreateRequestId() : m_speechRequestId;
+        requestId = m_speechRequestId;
+        break;
+
+    case MessageType::Agent:
+        requestId = CreateRequestId();
+        break;
+
+    default:
+        std::ostringstream os;
+        os << "Not supported message type " << (int)messageType;
+        ThrowLogicError(os.str());
+    }
+
+    return requestId;
 }
 
 void Connection::Impl::QueueAudioSegment(const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk)
@@ -550,6 +598,8 @@ void Connection::Impl::QueueAudioSegment(const Microsoft::CognitiveServices::Spe
         // After receiving an audio message with a new request identifier, the service discards any queued or unsent messages
         // that are associated with any previous turn.
         m_speechRequestId = m_speechRequestId.empty() ? CreateRequestId() : m_speechRequestId;
+        LogInfo("The current speech request id is %s", m_speechRequestId.c_str());
+
         MetricsAudioStreamInit();
         MetricsAudioStart(*m_telemetry, m_speechRequestId);
 
@@ -836,6 +886,10 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
 void Connection::Impl::OnTransportData(TransportResponse *response, void *context)
 {
     throw_if_null(context, "context");
+    if (response == nullptr)
+    {
+        return;
+    }
 
     Connection::Impl *connection = static_cast<Connection::Impl *>(context);
 
@@ -959,6 +1013,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             if (requestId == connection->m_speechRequestId)
             {
                 connection->m_speechRequestId.clear();
+                connection->m_sawSpeechContext = false;
                 connection->Invoke([&] { callbacks->OnTurnEnd({ requestId }); });
             }
             else
@@ -971,6 +1026,11 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             auto offset = json[json_properties::offset].get<OffsetType>();
             auto duration = json[json_properties::duration].get<DurationType>();
             auto text = json[json_properties::text].get<string>();
+            std::string speaker;
+            if (json.find(json_properties::speaker) != json.end())
+            {
+                speaker = json[json_properties::speaker].get<string>();
+            }
 
             if (path == path::speechHypothesis)
             {
@@ -978,16 +1038,18 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                     callbacks->OnSpeechHypothesis({PAL::ToWString(json.dump()),
                                                    offset,
                                                    duration,
-                                                   PAL::ToWString(text)});
+                                                   PAL::ToWString(text),
+                                                   PAL::ToWString(speaker)});
                 });
             }
             else
             {
                 connection->Invoke([&] {
-                    callbacks->OnSpeechFragment({PAL::ToWString(json.dump()),
+                    callbacks->OnSpeechFragment({ PAL::ToWString(json.dump()),
                                                  offset,
                                                  duration,
-                                                 PAL::ToWString(text)});
+                                                 PAL::ToWString(text),
+                                                 PAL::ToWString(speaker)});
                 });
             }
         }
@@ -998,6 +1060,10 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             result.offset = json[json_properties::offset].get<OffsetType>();
             result.duration = json[json_properties::duration].get<DurationType>();
             result.recognitionStatus = ToRecognitionStatus(json[json_properties::recoStatus].get<string>());
+            if (json.find(json_properties::speaker) != json.end())
+            {
+                result.speaker = PAL::ToWString(json[json_properties::speaker].get<string>());
+            }
 
             switch (result.recognitionStatus)
             {

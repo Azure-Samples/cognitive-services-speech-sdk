@@ -134,6 +134,16 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/IntentRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/IntentRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/IntentTrigger.java
+    ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberCanceledEventListener.java
+    ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberCanceledEventSignal.java
+    ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberEventListener.java
+    ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberEventSignal.java
+    ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberResultPtrFuture.java
+    ${CMAKE_SWIG_OUTDIR}/ConversationTranscriber.java
+    ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberRecognizerBase.java
+    ${CMAKE_SWIG_OUTDIR}/ConversationTranscriptionResult.java
+    ${CMAKE_SWIG_OUTDIR}/ConversationTranscriptionEventArgs.java
+    ${CMAKE_SWIG_OUTDIR}/ConversationTranscriptionCanceledEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/KeywordRecognitionModel.java
     ${CMAKE_SWIG_OUTDIR}/LanguageUnderstandingModel.java
     ${CMAKE_SWIG_OUTDIR}/OutputFormat.java
@@ -161,6 +171,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/Connection.java
     ${CMAKE_SWIG_OUTDIR}/Grammar.java
     ${CMAKE_SWIG_OUTDIR}/PhraseListGrammar.java
+    ${CMAKE_SWIG_OUTDIR}/Participant.java
     ${CMAKE_SWIG_OUTDIR}/ConnectionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/ConnectionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/ConnectionEventSignal.java
@@ -215,11 +226,14 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXTRIGGERHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXCONNECTIONHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXGRAMMARHANDLE.java
+    ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXPARTICIPANTHANDLE.java
+    ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXUSERHANDLE.java
 
     ${CMAKE_SWIG_OUTDIR}/VoidFuture.java
     ${CMAKE_SWIG_OUTDIR}/StringFuture.java
     ${CMAKE_SWIG_OUTDIR}/StringVector.java
     ${CMAKE_SWIG_OUTDIR}/UInt8Vector.java
+    ${CMAKE_SWIG_OUTDIR}/User.java
 )
 
 set_source_files_properties(${SWIG_JAVA_SOURCES} PROPERTIES GENERATED TRUE)

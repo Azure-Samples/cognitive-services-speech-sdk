@@ -134,14 +134,16 @@ struct SpeechMsg : public JsonMsg
 {
     SpeechMsg() = default;
     SpeechMsg(const SpeechMsg&) = default;
-    SpeechMsg(std::wstring&& content, OffsetType offset, DurationType duration) :
+    SpeechMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& speaker = L"") :
         JsonMsg(std::move(content)),
         offset(offset),
-        duration(duration)
+        duration(duration),
+        speaker(std::move(speaker))
     {}
 
     OffsetType offset{ 0 };
     DurationType duration{ 0 };
+    std::wstring speaker{ L"" };
 };
 
 /**
@@ -149,8 +151,8 @@ struct SpeechMsg : public JsonMsg
  */
 struct SpeechHypothesisMsg : public SpeechMsg
 {
-    SpeechHypothesisMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& text) :
-        SpeechMsg(std::move(content), offset, duration),
+    SpeechHypothesisMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& text, std::wstring&& speaker = L"") :
+        SpeechMsg(std::move(content), offset, duration, std::move(speaker)),
         text(std::move(text))
     {}
 
@@ -162,8 +164,8 @@ struct SpeechHypothesisMsg : public SpeechMsg
 */
 struct SpeechFragmentMsg : public SpeechMsg
 {
-    SpeechFragmentMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& text) :
-        SpeechMsg(std::move(content), offset, duration),
+    SpeechFragmentMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& text, std::wstring&& speaker = L"") :
+        SpeechMsg(std::move(content), offset, duration, std::move(speaker)),
         text(std::move(text))
     {}
 
@@ -178,8 +180,8 @@ struct SpeechPhraseMsg : public SpeechMsg
     SpeechPhraseMsg() = default;
     SpeechPhraseMsg(const SpeechPhraseMsg&) = default;
 
-    SpeechPhraseMsg(std::wstring&& content, OffsetType offset, DurationType duration, RecognitionStatus status, std::wstring&& text) :
-        SpeechMsg(std::move(content), offset, duration),
+    SpeechPhraseMsg(std::wstring&& content, OffsetType offset, DurationType duration, RecognitionStatus status, std::wstring&& text, std::wstring&& speaker = L"") :
+        SpeechMsg(std::move(content), offset, duration, std::move(speaker)),
         recognitionStatus(status),
         displayText(std::move(text))
     {}

@@ -474,6 +474,10 @@ bool CSpxAudioStreamSession::ProcessNextAudio()
 
             return true;
         }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("no audio buffer in the m_audioBuffer.");
+        }
     }
     else if (m_sessionState == SessionState::HotSwapPaused || m_adapterAudioMuted)
     {
@@ -561,7 +565,8 @@ void CSpxAudioStreamSession::WaitForIdle(std::chrono::milliseconds timeout)
     }
 }
 
-bool CSpxAudioStreamSession::IsBotSession() const noexcept
+template<class  ISpx_Recognizer_Type>
+bool CSpxAudioStreamSession::IsRecognizerType() const noexcept
 {
     /* We need a better way of doing this. */
     std::shared_ptr<ISpxRecognizer> recognizer;
@@ -570,8 +575,8 @@ bool CSpxAudioStreamSession::IsBotSession() const noexcept
         SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
         recognizer = m_recognizers.front().lock();
     }
-    auto botConnector = SpxQueryInterface<ISpxSpeechBotConnector>(recognizer);
-    return botConnector != nullptr;
+    auto ispxrecognizer = SpxQueryInterface<ISpx_Recognizer_Type>(recognizer);
+    return ispxrecognizer != nullptr;
 }
 
 CSpxAsyncOp<std::string> CSpxAudioStreamSession::SendActivityAsync(std::shared_ptr<ISpxActivity> activity)
@@ -1114,13 +1119,13 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
     }
 }
 
-void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countBot)
+void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countBot, uint16_t* countTranscriber)
 {
     unique_lock<mutex> lock(m_recognizersLock);
     if (m_recognizers.empty())
     {
         // we only support 1 recognizer today... but can be deleted if user is killing it right now.
-        *countSpeech = *countIntent = *countTranslation = 0;
+        *countSpeech = *countIntent = *countTranslation = *countTranscriber = 0;
         return;
     }
 
@@ -1129,13 +1134,15 @@ void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* c
     auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer);
     auto translationRecognizer = SpxQueryInterface<ISpxTranslationRecognizer>(recognizer);
     auto botConnector = SpxQueryInterface<ISpxSpeechBotConnector>(recognizer);
+    auto transcriber = SpxQueryInterface<ISpxConversationTranscriber>(recognizer);
 
+    *countTranscriber = (transcriber != nullptr) ? 1 : 0;
     *countBot = (botConnector != nullptr) ? 1 : 0;
     *countIntent = (intentRecognizer != nullptr) ? 1 : 0;
     *countTranslation = (translationRecognizer != nullptr) ? 1 : 0;
-    *countSpeech = 1 - *countIntent - *countTranslation - *countBot;
+    *countSpeech = 1 - *countIntent - *countTranslation - *countBot - *countTranscriber;
 
-    SPX_DBG_TRACE_VERBOSE("%s: countSpeech=%d; countIntent=%d; countTranslation=%d; countBot=%d", __FUNCTION__, *countSpeech, *countIntent, *countTranslation, *countBot);
+    SPX_DBG_TRACE_VERBOSE("%s: countSpeech=%d; countIntent=%d; countTranslation=%d; countBot=%d, countTranscriber=%d", __FUNCTION__, *countSpeech, *countIntent, *countTranslation, *countBot, *countTranscriber);
 }
 
 std::list<std::string> CSpxAudioStreamSession::GetListenForList()
@@ -1203,6 +1210,9 @@ void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapte
         m_currentTurnGlobalOffset = m_audioBuffer->GetAbsoluteOffset();
         bufferedBytes = m_audioBuffer->StashedSizeInBytes();
     }
+    SPX_DBG_TRACE_VERBOSE("m_currentTurnGlobalOffset=%d, previousTurnGlobalOffset=%d, bufferedBytes=%d", m_currentTurnGlobalOffset, previousTurnGlobalOffset, bufferedBytes);
+
+    auto bIsConversationTranscriber = IsRecognizerType<ISpxConversationTranscriber>();
 
     if (IsState(SessionState::ProcessingAudioLeftovers))
     {
@@ -1220,7 +1230,7 @@ void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapte
             // Currently the last portion of data (silence) can be non acknowledged by the Bing service,
             // in order to avoid the live lock, we stop if there was no progress during the last
             // turn.
-            if (!bufferedBytes || m_currentTurnGlobalOffset == previousTurnGlobalOffset)
+            if (!bufferedBytes || m_currentTurnGlobalOffset == previousTurnGlobalOffset || bIsConversationTranscriber)
             {
                 SPX_DBG_TRACE_WARNING_IF(m_currentTurnGlobalOffset == previousTurnGlobalOffset, "%s: Dropping %d bytes due to no progress in the last turn", __FUNCTION__, (int)bufferedBytes);
                 ChangeState(SessionState::ProcessingAudioLeftovers, SessionState::WaitForAdapterCompletedSetFormatStop);
@@ -1563,7 +1573,7 @@ void CSpxAudioStreamSession::CheckError(const string& error)
 
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
-    if (IsState(SessionState::Idle) && !IsBotSession())
+    if (IsState(SessionState::Idle) && !IsRecognizerType<ISpxSpeechBotConnector>())
     {
         if (adapter != m_recoAdapter.get())
         {
@@ -1594,6 +1604,7 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
         auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
         auto error = factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, payload->Reason(), payload->ErrorCode(), PAL::ToWString(payload->Info()).c_str(), 0, 0);
         WaitForRecognition_Complete(error);
+        //Bug 1757042  weixu todo sessionstate should go back to idle.
     }
 }
 
@@ -1904,6 +1915,25 @@ void CSpxAudioStreamSession::Ensure16kHzSampleRate()
     }
 }
 
+void CSpxAudioStreamSession::PrepareMeeting()
+{
+    if (IsRecognizerType<ISpxConversationTranscriber>())
+    {
+        std::shared_ptr<ISpxRecognizer> recognizer;
+        {
+            std::unique_lock<std::mutex> lock{ m_recognizersLock };
+            SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
+            recognizer = m_recognizers.front().lock();
+        }
+        auto ct = SpxQueryInterface<ISpxConversationTranscriber>(recognizer);
+        if (ct != nullptr)
+        {
+            auto payload = ct->GetSpeechEventPayload(true); // true for starting audio pumping
+            SendSpeechEventMessage(std::move(payload));
+        }
+    }
+}
+
 void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model)
 {
     SPX_DBG_ASSERT(IsState(SessionState::WaitForPumpSetFormatStart));
@@ -1957,6 +1987,7 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     auto audioPump = m_audioPump;
     if (audioPump)
     {
+        PrepareMeeting();
         audioPump->StartPump(pISpxAudioProcessor);
     }
     // The call to StartPump (immediately above) will initiate calls from the pump to this::SetFormat() and then this::ProcessAudio()...
@@ -2047,15 +2078,17 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStarting(const SPXWAVEFORMATE
 
 void CSpxAudioStreamSession::SetThrottleVariables(const SPXWAVEFORMATEX* format)
 {
+    const char* maxBufferDefault = IsRecognizerType<ISpxConversationTranscriber>() ? "240" : "60";
+
     // Look for runtime buffer overrides. These are set once when the buffer is created.
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    m_maxBufferedBeforeOverflow = seconds(stoi(properties->GetStringValue("SPEECH-MaxBufferSizeSeconds", "60")));
+    m_maxBufferedBeforeOverflow = seconds(stoi(properties->GetStringValue("SPEECH-MaxBufferSizeSeconds", maxBufferDefault)));
     m_maxTransmittedInFastLane = milliseconds(stoi(properties->GetStringValue("SPEECH-TransmitLengthBeforThrottleMs", "5000")));
 
     m_maxFastLaneSizeBytes = (format->nAvgBytesPerSec / 1000) * m_maxTransmittedInFastLane.count();
     m_maxBufferedSizeBeforeThrottleBytes = (format->nAvgBytesPerSec / 1000) * MaxBufferedBeforeSimulateRealtime.count();
     m_avgBytesPerSecond = format->nAvgBytesPerSec;
-    SPX_DBG_TRACE_VERBOSE("%s: FastLane size %" PRIu64 " MaxBuffered Unthrottled %" PRIu64, __FUNCTION__, m_maxFastLaneSizeBytes, m_maxBufferedSizeBeforeThrottleBytes);
+    SPX_DBG_TRACE_VERBOSE("%s: FastLane size %" PRIu64 " MaxBuffered Unthrottled: %" PRIu64, __FUNCTION__, m_maxFastLaneSizeBytes, m_maxBufferedSizeBeforeThrottleBytes);
 }
 
 void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingFromState)
@@ -2275,4 +2308,14 @@ void CSpxAudioStreamSession::WriteTelemetryLatency(uint64_t latencyInTicks, bool
     }
 }
 
+void CSpxAudioStreamSession::SendSpeechEventMessage(std::string&& paypload)
+{
+    EnsureInitRecoEngineAdapter();
+    m_recoAdapter->SendSpeechEventMessage(std::move(paypload));
+}
+
+bool CSpxAudioStreamSession::IsStreaming()
+{
+    return IsState(SessionState::ProcessingAudio) || IsState(SessionState::ProcessingAudioLeftovers);
+}
 } } } } // Microsoft::CognitiveServices::Speech::Impl

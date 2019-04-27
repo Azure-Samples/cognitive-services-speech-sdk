@@ -34,10 +34,10 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
     SECTION("Intent Recognition works")
     {
         turnOnLamp.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(turnOnLamp.m_audioFilename));
+        REQUIRE(exists(turnOnLamp.m_inputDataFilename));
 
         auto config = SpeechConfigForIntentTests();
-        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_audioFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
         auto recognizer = IntentRecognizer::FromConfig(config, audioConfig);
 
         REQUIRE(!Config::LuisAppId.empty());
@@ -63,7 +63,11 @@ TEST_CASE("Intent Recognizer basics", "[api][cxx][intent]")
 #endif
 
             std::ostringstream details;
-
+            if (result == nullptr)
+            {
+                CAPTURE("Under Intent Recognition works section, result is null");
+                return;
+            }
             if (result->Reason == ResultReason::Canceled)
             {
                 auto cancellation = CancellationDetails::FromResult(result);

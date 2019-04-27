@@ -100,6 +100,7 @@ jobs:
               -D virtualassistant-region=$(BotRegion) \
               -D virtualassistant-subscription=$(BotSubscriptionKey) \
               -D virtualassistant-testbot=$(BotFunctionalTest) \
+              -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
               -D long-running=true \
               -- csharp_unit_tests
           displayName: Run LongRunning tests

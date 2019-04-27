@@ -38,6 +38,11 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognize
     return CreateTranslationRecognizerFromConfigInternal(audioInput);
 }
 
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateConversationTranscriberFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput)
+{
+    return CreateRecognizerFromConfigInternal("CSpxAudioStreamSession", "CSpxConversationTranscriber", audioInput);
+}
+
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerFromConfigInternal(
     const char* sessionClassName,
     const char* recognizerClassName,

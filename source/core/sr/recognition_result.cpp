@@ -119,6 +119,11 @@ double CSpxRecognitionResult::GetConfidence()
     return m_confidence;
 }
 
+wstring CSpxRecognitionResult::GetUserId()
+{
+    return m_userId;
+}
+
 void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload)
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -205,6 +210,11 @@ void CSpxRecognitionResult::InitTranslationRecognitionResult(TranslationStatusCo
     {
         SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
     }
+}
+
+void CSpxRecognitionResult::InitConversationResult(const wchar_t* userId)
+{
+    m_userId = (userId != nullptr) ? userId : L"";
 }
 
 const uint8_t* CSpxRecognitionResult::GetAudio() const

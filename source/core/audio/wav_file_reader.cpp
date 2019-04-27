@@ -45,10 +45,13 @@ void CSpxWavFileReader::Open(const wchar_t* fileName)
     SPX_IFTRUE_THROW_HR(file->eof(), SPXERR_UNEXPECTED_EOF);
 
     m_file = std::move(file);
-
+    // test code calls CSpxWavFileReader without setting a site for it.
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    auto hasProperty = properties->GetStringValue("CARBON-INTERNAL-MOCK-WaveFileRealTimeAudioPercentage", "0");
-    m_simulateRealtimePercentage = static_cast<uint8_t>(stoi(hasProperty));
+    if (properties != nullptr)
+    {
+        auto hasProperty = properties->GetStringValue("CARBON-INTERNAL-MOCK-WaveFileRealTimeAudioPercentage", "0");
+        m_simulateRealtimePercentage = static_cast<uint8_t>(stoi(hasProperty));
+    }
 }
 
 void CSpxWavFileReader::Close()
@@ -125,7 +128,6 @@ uint32_t CSpxWavFileReader::Read(uint8_t* pbuffer, uint32_t cbBuffer)
         auto milliseconds = cbRead * 1000 / m_waveformat->nAvgBytesPerSec * m_simulateRealtimePercentage / 100;
         std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
     }
-
     return cbRead;
 }
 
@@ -143,7 +145,7 @@ void CSpxWavFileReader::FindFormatAndDataChunks()
 {
     SPX_IFTRUE_THROW_HR(m_waveformat.get() != nullptr, SPXERR_ALREADY_INITIALIZED);
     SPX_IFTRUE_THROW_HR(!IsOpen(), SPXERR_UNINITIALIZED);
-    
+
     uint8_t tag[cbTag];
     uint8_t chunkType[cbChunkType];
     uint8_t chunkSizeBuffer[cbChunkSize];
@@ -165,7 +167,7 @@ void CSpxWavFileReader::FindFormatAndDataChunks()
 
     // Initialize the first data chunk seek position to zero
     m_firstSeekDataChunkPos = 0;
-    
+
     // Read chunks until we've read the SPXWAVEFORMAT and found the 'data' chunk position
     while ((m_waveformat.get() == nullptr || m_firstSeekDataChunkPos == 0) && ReadChunkTypeAndSize(chunkType, &chunkSize))
     {
@@ -184,7 +186,7 @@ void CSpxWavFileReader::FindFormatAndDataChunks()
         }
     }
 
-    // Did we find everything we needed? 
+    // Did we find everything we needed?
     SPX_IFTRUE_THROW_HR(m_waveformat.get() == nullptr || m_firstSeekDataChunkPos == 0, SPXERR_UNEXPECTED_EOF);
 
     // Finally, move back to the very beginning of the 'data' chunk...
@@ -207,8 +209,8 @@ bool CSpxWavFileReader::ReadChunkTypeAndSize(uint8_t* pchunkType, uint32_t* pchu
         SPX_IFTRUE_THROW_HR(m_file->eof(), SPXERR_UNEXPECTED_EOF);
 
         // chunk size is little endian
-        *pchunkSize = ((uint32_t)chunkSizeBuffer[3] << 24) | 
-                      ((uint32_t)chunkSizeBuffer[2] << 16) | 
+        *pchunkSize = ((uint32_t)chunkSizeBuffer[3] << 24) |
+                      ((uint32_t)chunkSizeBuffer[2] << 16) |
                       ((uint32_t)chunkSizeBuffer[1] <<  8) |
                        (uint32_t)chunkSizeBuffer[0];
 
@@ -221,11 +223,11 @@ bool CSpxWavFileReader::ReadChunkTypeAndSize(uint8_t* pchunkType, uint32_t* pchu
 void CSpxWavFileReader::ReadFormatChunk(uint32_t chunkSize)
 {
     SPX_IFTRUE_THROW_HR(chunkSize < sizeof(SPXWAVEFORMATEX) && chunkSize != sizeof(SPXWAVEFORMAT), SPXERR_INVALID_HEADER);
-    
+
     auto cbAllocate = std::max((size_t)chunkSize, sizeof(SPXWAVEFORMATEX)); // allocate space for EX structure, no matter what
     auto waveformat = SpxAllocWAVEFORMATEX(cbAllocate);
     waveformat->cbSize = 0;
-    
+
     // Read the SPXWAVEFORMAT/SPXWAVEFORMATEX
     SPX_IFTRUE_THROW_HR(!m_file->read((char*)waveformat.get(), chunkSize), SPXERR_UNEXPECTED_EOF);
     SPX_DBG_TRACE_VERBOSE_IF(m_file->eof(), "It's very uncommon, but possible, to hit EOF after reading SPXWAVEFORMAT/SPXWAVEFORMATEX");

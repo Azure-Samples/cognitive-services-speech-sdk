@@ -51,6 +51,7 @@ public:
     std::shared_ptr<ISpxSpeechBotConnector> CreateSpeechBotConnectorFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) override;
     std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) override;
     std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) override;
+    std::shared_ptr<ISpxRecognizer> CreateConversationTranscriberFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) override;
 
     // --- IServiceProvider
     SPX_SERVICE_MAP_BEGIN()

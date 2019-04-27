@@ -103,6 +103,18 @@ SPXAPI pull_audio_input_stream_set_callbacks(SPXAUDIOSTREAMHANDLE haudioStream, 
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI pull_audio_input_stream_set_getproperty_callback(SPXAUDIOSTREAMHANDLE haudioStream, void* pvContext, CUSTOM_AUDIO_PULL_STREAM_GET_PROPERTY_CALLBACK getPropertyCallback)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto stream = CSpxSharedPtrHandleTableManager::GetPtr<ISpxAudioStream, SPXAUDIOSTREAMHANDLE>(haudioStream);
+        auto initCallbacks = SpxQueryInterface<ISpxAudioStreamReaderInitCallbacks>(stream);
+        initCallbacks->SetPropertyCallback(
+            [=](PropertyId id, uint8_t* result, uint32_t size) { return getPropertyCallback(pvContext, static_cast<int>(id), result, size); }
+        );
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
 SPXAPI push_audio_input_stream_write(SPXAUDIOSTREAMHANDLE haudioStream, uint8_t* buffer, uint32_t size)
 {
     SPXAPI_INIT_HR_TRY(hr)
@@ -294,3 +306,26 @@ SPXAPI audio_data_stream_release(SPXAUDIOSTREAMHANDLE haudioStream)
 {
     return Handle_Close<SPXAUDIOSTREAMHANDLE, ISpxAudioDataStream>(haudioStream);
 }
+
+SPXAPI push_audio_input_stream_set_property_by_id(SPXAUDIOSTREAMHANDLE haudioStream, int id, const char* value)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto stream = CSpxSharedPtrHandleTableManager::GetPtr<ISpxAudioStream, SPXAUDIOSTREAMHANDLE>(haudioStream);
+        auto pushStream = SpxQueryInterface<ISpxAudioStreamWriter>(stream);
+        pushStream->SetProperty(static_cast<PropertyId>(id), value);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI push_audio_input_stream_set_property_by_name(SPXAUDIOSTREAMHANDLE haudioStream, const char* name, const char* value)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto stream = CSpxSharedPtrHandleTableManager::GetPtr<ISpxAudioStream, SPXAUDIOSTREAMHANDLE>(haudioStream);
+        auto pushStream = SpxQueryInterface<ISpxAudioStreamWriter>(stream);
+        pushStream->SetProperty(name, value);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+

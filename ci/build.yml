@@ -535,6 +535,7 @@ jobs:
          -D virtualassistant-region=$(BotRegion) \
          -D virtualassistant-subscription=$(BotSubscriptionKey) \
          -D virtualassistant-testbot=$(BotFunctionalTest) \
+         -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
          -D long-running=false)
        . ci/functions.sh
        SPEECHSDK_SPEECH_AUTHTOKEN="$(getAuthorizationToken "$SPEECHSDK_SPEECH_KEY" "$SPEECHSDK_SPEECH_REGION")"
@@ -587,6 +588,7 @@ jobs:
             -D virtualassistant-region=$(BotRegion) \
             -D virtualassistant-subscription=$(BotSubscriptionKey) \
             -D virtualassistant-testbot=$(BotFunctionalTest) \
+            -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
             -D long-running=false
           patchSamplesFromTestConfig public_samples/samples/java/jre/console \
             ci/test-config.json \
@@ -595,6 +597,7 @@ jobs:
             -D virtualassistant-region=$(BotRegion) \
             -D virtualassistant-subscription=$(BotSubscriptionKey) \
             -D virtualassistant-testbot=$(BotFunctionalTest) \
+            -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
             -D long-running=false
           ./ci/run-maven.sh public_samples "$(MavenRoot)"
         displayName: Patch and build samples
@@ -640,6 +643,7 @@ jobs:
             -D virtualassistant-region=$(BotRegion) \
             -D virtualassistant-subscription=$(BotSubscriptionKey) \
             -D virtualassistant-testbot=$(BotFunctionalTest) \
+            -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
             -D long-running=false)
           . ci/functions.sh
           SPEECHSDK_SPEECH_AUTHTOKEN="$(getAuthorizationToken "$SPEECHSDK_SPEECH_KEY" "$SPEECHSDK_SPEECH_REGION")"
@@ -911,6 +915,7 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false)
       # dotnet test does not allow to supply TestRunParameters from command-line?!
       perl -pi - \
@@ -939,6 +944,7 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false
       patchSamplesFromTestConfig public_samples/samples/csharp/sharedcontent/console \
         ci/test-config.json \
@@ -947,6 +953,7 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false
       mkdir localnuget
       cp --verbose "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
@@ -1018,6 +1025,7 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false)
       # dotnet test does not allow to supply TestRunParameters from command-line?!
       perl -pi - \
@@ -1286,6 +1294,7 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false)
       cat > "$FAKE_BUILD/MainActivity.properties" <<EOF
       SpeechSubscriptionKey=$SPEECHSDK_SPEECH_KEY
@@ -1557,6 +1566,7 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false
       patchSamplesFromTestConfig public_samples/samples/python/console \
         ci/test-config.json \
@@ -1565,6 +1575,7 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
@@ -1695,6 +1706,7 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false &&
       patchSamplesFromTestConfig public_samples/samples/cpp/windows/console \
         ci/test-config.json \
@@ -1703,6 +1715,7 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false
     displayName: Patch quickstart
   - bash: |
@@ -1749,6 +1762,7 @@ jobs:
             -D virtualassistant-region=$(BotRegion) \
             -D virtualassistant-subscription=$(BotSubscriptionKey) \
             -D virtualassistant-testbot=$(BotFunctionalTest) \
+            -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
             -D long-running=false -- cxx_core_tests cxx_api_tests || {
             vsts_logissue error "Running tests for image $i failed."
             ((++ERRORS))
@@ -1923,6 +1937,7 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false)
       # run the tests
       ci/apple/multiplatformtests.sh tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
@@ -1942,6 +1957,7 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false)
       patchSamplesFromTestConfig public_samples/quickstart/objectivec-ios/helloworld/helloworld \
         ci/test-config.json \
@@ -1950,6 +1966,7 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false
       # run the tests
       ci/apple/multiplatformtests.sh public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \

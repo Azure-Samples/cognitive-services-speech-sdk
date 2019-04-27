@@ -137,7 +137,7 @@ public:
         auto prevSize = m_callbacks.size();
 
         m_callbacks.remove_if([&](CallbackFunction item) {
-            return callback.target_type() == item.target_type(); 
+            return callback.target_type() == item.target_type();
         });
 
         if (m_callbacks.empty() && prevSize > 0 && m_disconnectedCallback != nullptr)
@@ -182,7 +182,7 @@ public:
         {
             // now, while a callback is in progress, it can disconnect itself and any other connected
             // callback. Check to see if the next one stored in the copy container is still connected.
-            bool connected = (std::find_if(m_callbacks.begin(), m_callbacks.end(), 
+            bool connected = (std::find_if(m_callbacks.begin(), m_callbacks.end(),
                 [&](CallbackFunction item) {
                 return c3.target_type() == item.target_type();
             }) != m_callbacks.end());

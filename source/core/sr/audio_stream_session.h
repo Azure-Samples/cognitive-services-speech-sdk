@@ -108,12 +108,15 @@ public:
     void CloseConnection() override;
     void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) override;
 
+    void SendSpeechEventMessage(std::string&& payload) override;
+    bool IsStreaming() override;
+
     // --- ISpxKwsEngineAdapterSite
     void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint64_t duration, double confidence, const std::string& keyword, const DataChunkPtr& audioChunk) override;
     void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Keyword); }
 
     // --- ISpxRecoEngineAdapterSite (first part...)
-    void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countBot) override;
+    void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countBot, uint16_t* countTranscriber) override;
 
     std::list<std::string> GetListenForList() override;
     void GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region) override;
@@ -187,7 +190,8 @@ private:
         ProcessingAudioLeftovers = 6
     };
 
-    bool IsBotSession() const noexcept;
+    template<class ISpx_Recognizer_Type>
+    bool IsRecognizerType() const noexcept;
 
     CSpxAsyncOp<void> StartRecognitionAsync(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
     CSpxAsyncOp<void> StopRecognitionAsync(RecognitionKind stopKind);
@@ -269,6 +273,7 @@ private:
     uint64_t GetResultLatencyInMs(const ProcessedAudioTimestampPtr& audiotimestamp) const;
 
     void SetThrottleVariables(const SPXWAVEFORMATEX* format);
+    void PrepareMeeting();
 
 private:
 

@@ -340,7 +340,20 @@ enum class PropertyId
     /// From id to be used on speech recognition activities
     /// Added in version 1.5.0.
     /// </summary>
-    Conversation_From_Id = 10003
+    Conversation_From_Id = 10003,
+
+    /// <summary>
+    /// The time stamp associated to data buffer written by client when using Pull/Push audio input streams.
+    /// The time stamp is a 64-bit value with a resolution of 90kHz. It is the same as the presentation timestamp in an MPEG transport stream. See https://en.wikipedia.org/wiki/Presentation_timestamp
+    /// Added in version 1.5.0.
+    /// </summary>
+    DataBuffer_TimeStamp = 11001,
+
+    /// <summary>
+    /// The user id associated to data buffer written by client when using Pull/Push audio input streams.
+    /// Added in version 1.5.0.
+    /// </summary>
+    DataBuffer_UserId = 11002
 };
 
 enum class OutputFormat

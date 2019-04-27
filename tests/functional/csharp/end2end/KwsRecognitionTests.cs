@@ -795,7 +795,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
         }
-
+        [Ignore]
         [TestMethod]
         public async Task TestIntentKeywordspotterComputerFound2DifferentUtterances()
         {

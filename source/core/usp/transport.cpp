@@ -19,6 +19,7 @@
 
 #include "azure_c_shared_utility_includes.h"
 
+#include "stdafx.h"
 #include "metrics.h"
 #include "transport.h"
 
@@ -27,18 +28,30 @@
 // uncomment the line below to see all non-binary protocol messages in the log
 // #define LOG_TEXT_MESSAGES
 
+const char g_keywordPTStimeStampName[] = "PTS";
+const char g_keywordSpeakerIdName[] = "SpeakerId";
 const char g_KeywordStreamId[]       = "X-StreamId";
 const char g_keywordRequestId[]      = "X-RequestId";
+const char g_keywordContentType[] = "Content-Type";
 const char g_keywordWSS[]            = "wss://";
 const char g_keywordWS[]             = "ws://";
 const char g_messageHeader[]         = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n%s:%s\r\n\r\n";
 const char g_messageHeaderWithoutRequestId[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n\r\n";
 
+const char g_wavheaderFormat[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n%s:%s\r\n";
+// this is for audio and video data USP message
 const char g_requestFormat[]  = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n";
+// compared to g_requestFormat2, has one more field PTStimestamp or userId
+const char g_requestFormat2[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n%s:%s\r\n";
+// compared to g_requestFormat3, has two more fields: PTStimestamp and userId
+const char g_requestFormat3[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n%s:%s\r\n%s:%s\r\n";
+
 const char g_telemetryHeader[] = "%s:%s\r\nPath: telemetry\r\nContent-Type: application/json; charset=utf-8\r\n%s:%s\r\n\r\n";
 const char g_timeStampHeaderName[] = "X-Timestamp";
+const char g_audioWavName[] = "audio/x-wav";
 
 static const char g_RPSDelegationHeaderName[] = "X-Search-DelegationRPSToken";
+const int g_waveHeaderSize = 44;
 
 #define WS_MESSAGE_HEADER_SIZE  2
 #define WS_CONNECTION_TIME_MS   (570 * 1000) // 9.5 minutes
@@ -99,6 +112,11 @@ typedef struct _TransportRequest
     TokenStore                   tokenStore;
     Telemetry*                   telemetry;
 } TransportRequest;
+
+/*
+*  Helper function.
+*/
+int TransportCreateDataHeader(TransportHandle transportHandle, const char* requestId, char* buffer, size_t payloadSize, const std::string& psttimeStamp, const std::string& userId, bool wavHeader);
 
 /*
 * Converts a dashed GUID to a no-dash guid string.
@@ -1201,8 +1219,10 @@ int TransportStreamWrite(TransportHandle transportHandle, const std::string& pat
         msgtype = static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_AUDIO_START);
     }
 
-    size_t headerLen;
-    size_t payloadSize = sizeof(g_requestFormat) +
+    std::string pstTimeStamp = audioChunk->capturedTime;
+    std::string userId = audioChunk->userId;
+
+    size_t payloadSize = sizeof(g_requestFormat3) +
         path.size() +
         sizeof(g_KeywordStreamId) +
         30 +
@@ -1210,7 +1230,12 @@ int TransportStreamWrite(TransportHandle transportHandle, const std::string& pat
         sizeof(requestId) +
         sizeof(g_timeStampHeaderName) +
         TIME_STRING_MAX_SIZE +
+        sizeof(g_keywordContentType) +
+        sizeof(g_audioWavName) +
+        pstTimeStamp.length() +
+        userId.length() +
         bufferSize + 2; // 2 = header length
+
     TransportPacket *msg = (TransportPacket*)malloc(sizeof(TransportPacket) + WS_MESSAGE_HEADER_SIZE + payloadSize);
     if (msg == nullptr)
     {
@@ -1220,27 +1245,15 @@ int TransportStreamWrite(TransportHandle transportHandle, const std::string& pat
     msg->msgtype = msgtype;
     msg->wstype = WS_FRAME_TYPE_BINARY;
 
-    char timeString[TIME_STRING_MAX_SIZE];
-    int timeStringLen = GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
-    if (timeStringLen < 0)
+    // fill the msg->buffer with the header content
+    bool wavheader = bufferSize == g_waveHeaderSize ? true:false;
+    auto headerLen = TransportCreateDataHeader(request, requestId, (char*)msg->buffer, payloadSize, pstTimeStamp, userId, wavheader);
+    if (headerLen < 0)
     {
         free(msg);
         return -1;
     }
-
-    // add headers
-    headerLen = sprintf_s((char*)msg->buffer + WS_MESSAGE_HEADER_SIZE,
-        payloadSize,
-        g_requestFormat,
-        g_timeStampHeaderName,
-        timeString,
-        path.c_str(),
-        g_KeywordStreamId,
-        request->streamId,
-        g_keywordRequestId,
-        requestId);
-
-    // two byte length
+    // two bytes length
     msg->buffer[0] = (uint8_t)((headerLen >> 8) & 0xff);
     msg->buffer[1] = (uint8_t)((headerLen >> 0) & 0xff);
     msg->length = WS_MESSAGE_HEADER_SIZE + headerLen;
@@ -1251,6 +1264,103 @@ int TransportStreamWrite(TransportHandle transportHandle, const std::string& pat
 
     WsioQueue(request, msg);
     return 0;
+}
+
+int TransportCreateDataHeader(TransportHandle transportHandle, const char* requestId, char* buffer, size_t payloadSize, const std::string& psttimeStamp, const std::string& userId, bool wavheader)
+{
+    TransportRequest* request = (TransportRequest*)transportHandle;
+    if (NULL == request)
+    {
+        LogError("transportHandle is NULL.");
+        return -1;
+    }
+
+    char timeString[TIME_STRING_MAX_SIZE];
+    int timeStringLen = GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
+    if (timeStringLen < 0)
+    {
+        return -1;
+    }
+    size_t headerLen;
+    std::string path = "audio";
+    if (wavheader)
+    {
+        headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
+            payloadSize,
+            g_wavheaderFormat,
+            g_timeStampHeaderName,
+            timeString,
+            path.c_str(),
+            g_KeywordStreamId,
+            request->streamId,
+            g_keywordRequestId,
+            requestId,
+            g_keywordContentType,
+            g_audioWavName);
+    }
+    else if (psttimeStamp.empty() && userId.empty())
+    {
+        headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
+        payloadSize,
+        g_requestFormat,  // "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n";
+        g_timeStampHeaderName,  //"X-Timestamp";
+            timeString,
+        path.c_str(),
+        g_KeywordStreamId,  //"X-StreamId";
+        request->streamId,  // %d, streamId is uint32_t
+        g_keywordRequestId, //"X-RequestId";
+            requestId);
+    }
+    else if (!psttimeStamp.empty() && userId.empty())
+    {
+        headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
+            payloadSize,
+            g_requestFormat2,
+            g_timeStampHeaderName,
+            timeString,
+            path.c_str(),
+            g_KeywordStreamId,
+            request->streamId,
+            g_keywordRequestId,
+            requestId,
+            g_keywordPTStimeStampName,
+            psttimeStamp.c_str());
+    }
+    else if (psttimeStamp.empty() && !userId.empty())
+    {
+        headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
+            payloadSize,
+            g_requestFormat2,
+            g_timeStampHeaderName,
+            timeString,
+            path.c_str(),
+            g_KeywordStreamId,
+            request->streamId,
+            g_keywordRequestId,
+            requestId,
+            g_keywordSpeakerIdName,
+            userId.c_str());
+    }
+    // both are there
+    else
+    {
+        headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
+            payloadSize,
+            g_requestFormat3,
+            g_timeStampHeaderName,
+            timeString,
+            path.c_str(),
+            g_KeywordStreamId,
+            request->streamId,
+            g_keywordRequestId,
+            requestId,
+            g_keywordSpeakerIdName,
+            userId.c_str(),
+            g_keywordPTStimeStampName,
+            psttimeStamp.c_str());
+    }
+
+    return (int)headerLen;
 }
 
 int TransportStreamFlush(TransportHandle transportHandle, const std::string& path, const char* requestId)

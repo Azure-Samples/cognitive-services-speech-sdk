@@ -15,9 +15,9 @@
 #include "audio_chunk.h"
 #include "platform.h"
 #include "asyncop.h"
-#include <speechapi_cxx_common.h>
 #include "speechapi_cxx_eventsignal.h"
 #include "speechapi_cxx_enums.h"
+#include "speechapi_cxx_string_helpers.h"
 #include "shared_ptr_helpers.h"
 #include "spxdebug.h"
 
@@ -275,7 +275,6 @@ struct SPXWAVEFORMATEX
     uint16_t cbSize;            /* The count in bytes of the size of extra information (after cbSize) */
 };
 #pragma pack (pop)
-
 using SpxWAVEFORMATEX_Type = std::shared_ptr<SPXWAVEFORMATEX>;
 inline SpxWAVEFORMATEX_Type SpxAllocWAVEFORMATEX(size_t sizeInBytes)
 {
@@ -309,10 +308,14 @@ public:
 class ISpxAudioStreamReaderInitCallbacks : public ISpxInterfaceBaseFor<ISpxAudioStreamReaderInitCallbacks>
 {
 public:
+
     using ReadCallbackFunction_Type = std::function<int(uint8_t*, uint32_t)>;
     using CloseCallbackFunction_Type = std::function<void()>;
+    using GetPropertyCallbackFunction_Type = std::function<void(PropertyId, uint8_t*, uint32_t)>;
 
     virtual void SetCallbacks(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback) = 0;
+
+    virtual void SetPropertyCallback(GetPropertyCallbackFunction_Type getPropertyCallBack) { UNUSED(getPropertyCallBack); }
 };
 
 class ISpxAudioStreamWriterInitCallbacks : public ISpxInterfaceBaseFor<ISpxAudioStreamWriterInitCallbacks>
@@ -329,6 +332,9 @@ class ISpxAudioStreamReader : public ISpxInterfaceBaseFor<ISpxAudioStreamReader>
 public:
     virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
     virtual uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer) = 0;
+    // We pull this so that the user can give us timestamp or speaker id that are associated with the audio data.
+    virtual SPXSTRING GetProperty(PropertyId propertyId) { UNUSED(propertyId); return ""; }
+
     virtual void Close() = 0;
 };
 
@@ -336,6 +342,8 @@ class ISpxAudioStreamWriter : public ISpxInterfaceBaseFor<ISpxAudioStreamWriter>
 {
 public:
     virtual void Write(uint8_t* buffer, uint32_t size) = 0;
+    virtual void SetProperty(PropertyId propertyId, const SPXSTRING& value) = 0;
+    virtual void SetProperty(const SPXSTRING& name, const SPXSTRING& value) = 0;
 };
 
 class ISpxAudioFile : public ISpxInterfaceBaseFor<ISpxAudioFile>
@@ -370,6 +378,26 @@ class ISpxAudioOutputReader : public ISpxInterfaceBaseFor<ISpxAudioOutputReader>
 public:
     virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize) = 0;
 };
+
+class ISpxUser : public ISpxInterfaceBaseFor<ISpxUser>
+{
+public:
+    virtual void InitFromUserId(const char* pszUserId) = 0;
+    virtual std::string GetId() const = 0;
+};
+
+class ISpxParticipant : public ISpxInterfaceBaseFor<ISpxParticipant>
+{
+public:
+    virtual void SetPreferredLanguage(std::string&& preferredLanguage) = 0;
+    virtual void SetVoiceSignature(std::string&& voiceSignature) = 0;
+
+    virtual std::string GetPreferredLanguage() const = 0;
+    virtual std::string GetVoiceSignature() const = 0;
+    virtual std::string GetId() const = 0;
+};
+
+using ParticipantPtr = std::shared_ptr<ISpxParticipant>;
 
 class ISpxAudioConfig : public ISpxInterfaceBaseFor<ISpxAudioConfig>
 {
@@ -750,6 +778,7 @@ class ISpxSession : public ISpxInterfaceBaseFor<ISpxSession>
 {
 public:
     virtual const std::wstring& GetSessionId() const = 0;
+    virtual bool IsStreaming() = 0;
 
     virtual void AddRecognizer(std::shared_ptr<ISpxRecognizer> recognizer) = 0;
     virtual void RemoveRecognizer(ISpxRecognizer* recognizer) = 0;
@@ -767,6 +796,7 @@ public:
     virtual CSpxAsyncOp<std::string> SendActivityAsync(std::shared_ptr<ISpxActivity> activity) = 0;
 
     virtual void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) = 0;
+    virtual void SendSpeechEventMessage(std::string&& payload) = 0;
 };
 
 class ISpxAudioStreamSessionInit : public ISpxInterfaceBaseFor<ISpxAudioStreamSessionInit>
@@ -794,6 +824,7 @@ public:
     virtual void SendAgentMessage(const std::string &) {};
 
     virtual void WriteTelemetryLatency(uint64_t, bool) {};
+    virtual void SendSpeechEventMessage(std::string&&) {};
 };
 
 class SpxRecoEngineAdapterError
@@ -836,7 +867,7 @@ public:
     using AdditionalMessagePayload_Type = void*;
     using ErrorPayload_Type = std::shared_ptr<SpxRecoEngineAdapterError>;
 
-    virtual void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countBot) = 0;
+    virtual void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countBot, uint16_t* countTranscriber ) = 0;
 
     virtual std::list<std::string> GetListenForList() = 0;
     virtual void GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region) = 0;
@@ -938,6 +969,7 @@ public:
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxSpeechBotConnector> CreateSpeechBotConnectorFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateConversationTranscriberFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
 };
 
 class ISpxSpeechSynthesisApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechSynthesisApiFactory>
@@ -965,6 +997,18 @@ class ISpxIntentRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxIntentRe
 {
 public:
     virtual void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) = 0;
+};
+
+class ISpxConversationTranscriptionResult : public ISpxInterfaceBaseFor<ISpxConversationTranscriptionResult>
+{
+public:
+    virtual std::wstring GetUserId() = 0;
+};
+
+class ISpxConversationTranscriptionResultInit : public ISpxInterfaceBaseFor< ISpxConversationTranscriptionResultInit>
+{
+public:
+    virtual void InitConversationResult(const wchar_t* userId) = 0;
 };
 
 enum class TranslationStatusCode { Success, Error };
@@ -1072,6 +1116,18 @@ public:
     virtual void AddIntentTrigger(const wchar_t* intentId, std::shared_ptr<ISpxTrigger> trigger) = 0;
 
     // TODO: RobCh: Add additional methods required...
+};
+
+class ISpxConversationTranscriber : public ISpxInterfaceBaseFor< ISpxConversationTranscriber>
+{
+public:
+    virtual void UpdateParticipant(bool add, const std::string& userId) = 0;
+    virtual void UpdateParticipant(bool add, const std::string& userId, std::shared_ptr<ISpxParticipant> participant) = 0;
+    virtual void UpdateParticipants(bool add, std::vector<ParticipantPtr>&& participants) = 0;
+    virtual void SetConversationId(const std::string& id) = 0;
+    virtual void GetConversationId(std::string& id) = 0;
+    virtual void EndConversation() = 0;
+    virtual std::string GetSpeechEventPayload(bool atStartAudioPumping) = 0;
 };
 
 class ISpxTranslationRecognizer : public ISpxInterfaceBaseFor<ISpxTranslationRecognizer>

@@ -29,11 +29,15 @@ SPXAPI audio_stream_release(SPXAUDIOSTREAMHANDLE haudioStream);
 // pull_audio_input_stream
 typedef int (*CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK)(void* pvContext, uint8_t* buffer, uint32_t size);
 typedef void (*CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK)(void* pvContext);
+typedef void (*CUSTOM_AUDIO_PULL_STREAM_GET_PROPERTY_CALLBACK)(void* pvContext, int id, uint8_t* value, uint32_t size);
 SPXAPI pull_audio_input_stream_set_callbacks(SPXAUDIOSTREAMHANDLE haudioStream, void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback);
+SPXAPI pull_audio_input_stream_set_getproperty_callback(SPXAUDIOSTREAMHANDLE haudioStream, void* pvContext, CUSTOM_AUDIO_PULL_STREAM_GET_PROPERTY_CALLBACK getPropertyCallback);
 
 // push_audio_input_stream
 SPXAPI push_audio_input_stream_write(SPXAUDIOSTREAMHANDLE haudioStream, uint8_t* buffer, uint32_t size);
 SPXAPI push_audio_input_stream_close(SPXAUDIOSTREAMHANDLE haudioStream);
+SPXAPI push_audio_input_stream_set_property_by_id(SPXAUDIOSTREAMHANDLE haudioStream, int id, const char* value);
+SPXAPI push_audio_input_stream_set_property_by_name(SPXAUDIOSTREAMHANDLE haudioStream, const char* name, const char* value);
 
 // pull audio output stream
 SPXAPI pull_audio_output_stream_read(SPXAUDIOSTREAMHANDLE haudioStream, uint8_t* buffer, uint32_t bufferSize, uint32_t* pfilledSize);

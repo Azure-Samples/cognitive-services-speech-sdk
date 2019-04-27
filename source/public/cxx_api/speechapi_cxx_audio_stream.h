@@ -11,10 +11,12 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <cstring>
 #include <spxdebug.h>
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_smart_handle.h>
 #include <speechapi_cxx_audio_stream_format.h>
+#include <speechapi_cxx_enums.h>
 #include <speechapi_c_audio_stream.h>
 
 
@@ -48,6 +50,8 @@ public:
 #if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     using ReadCallbackFunction_Type = ::std::function<int(uint8_t*, uint32_t)>;
     using CloseCallbackFunction_Type = ::std::function<void()>;
+    /// Added in version 1.5.0.
+    using GetPropertyCallbackFunction_Type = std::function<SPXSTRING(PropertyId)>;
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
@@ -79,12 +83,33 @@ public:
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback = nullptr);
 
     /// <summary>
+    /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read(), Close() and GetProperty() methods
+    /// Added in version 1.5.0.
+    /// </summary>
+    /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
+    /// <param name="getPropertyCallback">GetProperty callback.</param>
+    /// <returns>A shared pointer to PullAudioInputStream</returns>
+    static std::shared_ptr<PullAudioInputStream> CreatePullStream(void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback, CUSTOM_AUDIO_PULL_STREAM_GET_PROPERTY_CALLBACK getPropertyCallback);
+
     /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods, using the default format (16Khz 16bit mono PCM).
     /// </summary>
     /// <param name="readCallback">Read callback.</param>
     /// <param name="closeCallback">Close callback.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback = nullptr);
+
+    /// <summary>
+    /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read(), Close() and GetProperty() methods.
+    /// Added in version 1.5.0.
+    /// </summary>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
+    /// <param name="getPropertyCallback">Get property callback.</param>
+    /// <returns>A shared pointer to PullAudioInputStream</returns>
+    static std::shared_ptr<PullAudioInputStream> CreatePullStream(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback, GetPropertyCallbackFunction_Type getPropertyCallback);
+
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
@@ -106,6 +131,17 @@ public:
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(std::shared_ptr<AudioStreamFormat> format, void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback = nullptr);
 
     /// <summary>
+    /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read(), Close() and GetProperty() methods.
+    /// Added in version 1.5.0.
+    /// </summary>
+    /// <param name="format">Audio stream format.</param>
+    /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
+    /// <param name="getPropertyCallback">Get property callback.</param>
+    /// <returns>A shared pointer to PullAudioInputStream</returns>
+    static std::shared_ptr<PullAudioInputStream> CreatePullStream(std::shared_ptr<AudioStreamFormat> format, void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback, CUSTOM_AUDIO_PULL_STREAM_GET_PROPERTY_CALLBACK getPropertyCallback);
+
     /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
@@ -113,6 +149,18 @@ public:
     /// <param name="closeCallback">Close callback.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(std::shared_ptr<AudioStreamFormat> format, ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback = nullptr);
+
+    /// <summary>
+    /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods.
+    /// Added in version 1.5.0.
+    /// </summary>
+    /// <param name="format">Audio stream format.</param>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
+    /// <param name="getPropertyCallback">Get property callback.</param>
+    /// <returns>A shared pointer to PullAudioInputStream</returns>
+    static std::shared_ptr<PullAudioInputStream> CreatePullStream(std::shared_ptr<AudioStreamFormat> format, ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback, GetPropertyCallbackFunction_Type getPropertyCallback);
+
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
@@ -151,6 +199,9 @@ protected:
     /// Internal member variable that holds the smart handle.
     /// </summary>
     SmartHandle<SPXAUDIOSTREAMHANDLE, &audio_stream_release> m_haudioStream;
+
+    protected:
+        static constexpr size_t m_maxPropertyLen = 1024;
 
     /*! \endcond */
 
@@ -209,7 +260,32 @@ public:
     /// </summary>
     /// <param name="dataBuffer">The pointer to the audio buffer of which this function will make a copy.</param>
     /// <param name="size">The size of the buffer.</param>
-    void Write(uint8_t* dataBuffer, uint32_t size) { SPX_THROW_ON_FAIL(push_audio_input_stream_write(m_haudioStream, dataBuffer, size)); }
+    void Write(uint8_t* dataBuffer, uint32_t size)
+    {
+        SPX_THROW_ON_FAIL(push_audio_input_stream_write(m_haudioStream, dataBuffer, size));
+    }
+
+    /// <summary>
+    /// Set value of a property. The properties of the audio data should be set before writing the audio data.
+    /// Added in version 1.5.0.
+    /// </summary>
+    /// <param name="id">The id of property. See <see cref="PropertyId"/></param>
+    /// <param name="value">value to set</param>
+    void SetProperty(PropertyId id, const SPXSTRING& value)
+    {
+        SPX_THROW_ON_FAIL(push_audio_input_stream_set_property_by_id(m_haudioStream, static_cast<int>(id), Utils::ToUTF8(value).c_str()));
+    }
+
+    /// <summary>
+    /// Set value of a property. The properties of the audio data should be set before writing the audio data.
+    /// Added in version 1.5.0.
+    /// </summary>
+    /// <param name="propertyName">The name of property.</param>
+    /// <param name="value">value to set</param>
+    void SetProperty(const SPXSTRING& propertyName, const SPXSTRING& value)
+    {
+        SPX_THROW_ON_FAIL(push_audio_input_stream_set_property_by_name(m_haudioStream, Utils::ToUTF8(propertyName.c_str()), Utils::ToUTF8(value.c_str())));
+    }
 
     /// <summary>
     /// Closes the stream.
@@ -262,6 +338,28 @@ public:
     virtual int Read(uint8_t* dataBuffer, uint32_t size) = 0;
 
     /// <summary>
+    /// This function is called to synchronously to get meta information associated to stream data, such as TimeStamp or UserId .
+    /// Added in version 1.5.0.
+    /// </summary>
+    /// <param name="id">The id of the property.</param>
+    /// <returns>The value of the property.</returns>
+    virtual SPXSTRING GetProperty(PropertyId id)
+    {
+        if (PropertyId::DataBuffer_TimeStamp == id)
+        {
+            return "";
+        }
+        else if (PropertyId::DataBuffer_UserId == id)
+        {
+            return "";
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    /// <summary>
     /// This function is called to close the audio stream.
     /// </summary>
     virtual void Close() = 0;
@@ -305,6 +403,20 @@ public:
     }
 
     /// <summary>
+    /// Creates a PullAudioInputStream utilizing the specified Read(), Close() and GetProperty() "C" callback functions pointers
+    /// Note: The dataBuffer returned by Read() should not contain any audio header.
+    /// Added in version 1.5.0.
+    /// </summary>
+    /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
+    /// <param name="getPropertyCallback">Get property callback.</param>
+    /// <returns>A shared pointer to PullAudioInputStream</returns>
+    static std::shared_ptr<PullAudioInputStream> Create(void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback, CUSTOM_AUDIO_PULL_STREAM_GET_PROPERTY_CALLBACK getPropertyCallback)
+    {
+        return Create(nullptr, pvContext, readCallback, closeCallback, getPropertyCallback);
+    }
+
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
     /// Note: The dataBuffer returned by Read() should not contain any audio header.
     /// </summary>
@@ -314,6 +426,20 @@ public:
     static std::shared_ptr<PullAudioInputStream> Create(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback = nullptr)
     {
         return Create(nullptr, readCallback, closeCallback);
+    }
+
+    /// <summary>
+    /// Creates a PullAudioInputStream utilizing the specified Read(), Close() and GetProperty() callback functions.
+    /// Note: The dataBuffer returned by Read() should not contain any audio header.
+    /// Added in version 1.5.0.
+    /// </summary>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
+    /// <param name="getPropertyCallback">Get property callback.</param>
+    /// <returns>A shared pointer to PullAudioInputStream</returns>
+    static std::shared_ptr<PullAudioInputStream> Create(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback, GetPropertyCallbackFunction_Type getPropertyCallback)
+    {
+        return Create(nullptr, readCallback, closeCallback, getPropertyCallback);
     }
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
@@ -345,16 +471,54 @@ public:
     }
 
     /// <summary>
-    /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
+    /// Creates a PullAudioInputStream utilizing the specified Read(), Close() and GetProperty() "C" callback functions pointers
     /// Note: The dataBuffer returned by Read() should not contain any audio header.
+    /// </summary>
+    /// <param name="format">Audio stream format.</param>
+    /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
+    /// <param name="getPropertyCallback">Get property callback.</param>
+    /// <returns>A shared pointer to PullAudioInputStream</returns>
+    static std::shared_ptr<PullAudioInputStream> Create(std::shared_ptr<AudioStreamFormat> format, void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback, CUSTOM_AUDIO_PULL_STREAM_GET_PROPERTY_CALLBACK getPropertyCallback)
+    {
+        return Create(format,
+            [=](uint8_t* buffer, uint32_t size) -> int { return readCallback(pvContext, buffer, size); },
+            [=]() { if (closeCallback != nullptr) { closeCallback(pvContext); } },
+            [=](PropertyId id) -> SPXSTRING
+                {
+                    uint8_t result[m_maxPropertyLen];
+                    getPropertyCallback(pvContext, static_cast<int>(id), result, m_maxPropertyLen);
+                    return reinterpret_cast<char*>(result);
+             });
+    }
+
+   /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
+   /// Note: The dataBuffer returned by Read() should not contain any audio header.
+   /// </summary>
+   /// <param name="format">Audio stream format.</param>
+   /// <param name="readCallback">Read callback.</param>
+   /// <param name="closeCallback">Close callback.</param>
+   /// <returns>A shared pointer to PullAudioInputStream</returns>
+    static std::shared_ptr<PullAudioInputStream> Create(std::shared_ptr<AudioStreamFormat> format, ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback = nullptr)
+    {
+        auto wrapper = std::make_shared<FunctionCallbackWrapper>(readCallback, closeCallback);
+        return Create(format, wrapper);
+    }
+
+    /// <summary>
+    /// Creates a PullAudioInputStream utilizing the specified Read(), Close() and GetProperty() callback functions.
+    /// Note: The dataBuffer returned by Read() should not contain any audio header.
+    /// Added in version 1.5.0.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
     /// <param name="readCallback">Read callback.</param>
     /// <param name="closeCallback">Close callback.</param>
+    /// <param name="getPropertyCallback">Get property callback.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
-    static std::shared_ptr<PullAudioInputStream> Create(std::shared_ptr<AudioStreamFormat> format, ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback = nullptr)
+    static std::shared_ptr<PullAudioInputStream> Create(std::shared_ptr<AudioStreamFormat> format, ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback, GetPropertyCallbackFunction_Type getPropertyCallback)
     {
-        auto wrapper = std::make_shared<FunctionCallbackWrapper>(readCallback, closeCallback);
+        auto wrapper = std::make_shared<FunctionCallbackWrapper>(readCallback, closeCallback, getPropertyCallback);
         return Create(format, wrapper);
     }
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
@@ -374,6 +538,8 @@ public:
 
         auto stream = new PullAudioInputStream(haudioStream);
         SPX_THROW_ON_FAIL(pull_audio_input_stream_set_callbacks(haudioStream, stream, ReadCallbackWrapper, CloseCallbackWrapper));
+        SPX_THROW_ON_FAIL(pull_audio_input_stream_set_getproperty_callback(haudioStream, stream, GetPropertyCallbackWrapper));
+
         stream->m_callback = callback;
 
         return std::shared_ptr<PullAudioInputStream>(stream);
@@ -393,15 +559,27 @@ protected:
     {
     public:
 
-        FunctionCallbackWrapper(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback) :
+        FunctionCallbackWrapper(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback, GetPropertyCallbackFunction_Type getPropertyCallback = nullptr) :
             m_readCallback(readCallback),
-            m_closeCallback(closeCallback)
+            m_closeCallback(closeCallback),
+            m_getPropertyCallback(getPropertyCallback)
         {
         };
 
         /// Note: The dataBuffer returned by Read() should not contain any audio header.
         int Read(uint8_t* dataBuffer, uint32_t size) override { return m_readCallback(dataBuffer, size); }
         void Close() override { if (m_closeCallback != nullptr) m_closeCallback(); };
+        SPXSTRING GetProperty(PropertyId id) override
+        {
+            if (m_getPropertyCallback != nullptr)
+            {
+                return m_getPropertyCallback(id);
+            }
+            else
+            {
+                return "";
+            }
+        }
 
     private:
 
@@ -409,6 +587,8 @@ protected:
 
         ReadCallbackFunction_Type m_readCallback;
         CloseCallbackFunction_Type m_closeCallback;
+        GetPropertyCallbackFunction_Type m_getPropertyCallback;
+
     };
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
@@ -431,6 +611,15 @@ private:
         ptr->m_callback->Close();
     }
 
+    static void GetPropertyCallbackWrapper(void *pvContext, int id, uint8_t* result, uint32_t size)
+    {
+        PullAudioInputStream* ptr = (PullAudioInputStream*)pvContext;
+        auto value = ptr->m_callback->GetProperty(static_cast<PropertyId>(id));
+        auto valueSize = value.size() + 1;
+        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, valueSize > size);
+        std::memcpy(result, value.c_str(), valueSize);
+    }
+
     std::shared_ptr<PullAudioInputStreamCallback> m_callback;
 };
 
@@ -451,9 +640,19 @@ inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(
     return PullAudioInputStream::Create(pvContext, readCallback, closeCallback);
 }
 
+inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback, CUSTOM_AUDIO_PULL_STREAM_GET_PROPERTY_CALLBACK getPropertyCallback)
+{
+    return PullAudioInputStream::Create(pvContext, readCallback, closeCallback, getPropertyCallback);
+}
+
 inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback)
 {
     return PullAudioInputStream::Create(readCallback, closeCallback);
+}
+
+inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback, GetPropertyCallbackFunction_Type getPropertyCallback)
+{
+    return PullAudioInputStream::Create(readCallback, closeCallback, getPropertyCallback);
 }
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
@@ -468,9 +667,19 @@ inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(
     return PullAudioInputStream::Create(format, pvContext, readCallback, closeCallback);
 }
 
+inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(std::shared_ptr<AudioStreamFormat> format, void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback, CUSTOM_AUDIO_PULL_STREAM_GET_PROPERTY_CALLBACK getPropertyCallback)
+{
+    return PullAudioInputStream::Create(format, pvContext, readCallback, closeCallback, getPropertyCallback);
+}
+
 inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(std::shared_ptr<AudioStreamFormat> format, ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback)
 {
     return PullAudioInputStream::Create(format, readCallback, closeCallback);
+}
+
+inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(std::shared_ptr<AudioStreamFormat> format, ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback, GetPropertyCallbackFunction_Type getPropertyCallback)
+{
+    return PullAudioInputStream::Create(format, readCallback, closeCallback, getPropertyCallback);
 }
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 

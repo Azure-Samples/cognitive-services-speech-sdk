@@ -125,6 +125,12 @@ SPXAPI recognizer_create_translation_recognizer_from_config(SPXRECOHANDLE* phrec
         fbag->Copy(speechconfig_propertybag.get());
 
         auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
+        // copy the audio input properties into the factory, if any.
+        auto audioInput_propertybag = SpxQueryInterface<ISpxNamedProperties>(audioInput);
+        if (audioInput_propertybag != nullptr)
+        {
+            fbag->Copy(audioInput_propertybag.get());
+        }
         recognizer = factory->CreateTranslationRecognizerFromConfig(audioInput);
 
         // track the reco handle
@@ -189,3 +195,47 @@ SPXAPI synthesizer_create_speech_synthesizer_from_config(SPXSYNTHHANDLE* phsynth
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
+
+
+SPXAPI recognizer_create_conversation_transcriber_from_config(SPXRECOHANDLE* phreco, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioInput)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phreco == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(hspeechconfig));
+
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phreco = SPXHANDLE_INVALID;
+
+        // get the input parameters from the hspeechconfig
+        auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
+        auto speechconfig = (*confighandles)[hspeechconfig];
+        auto speechconfig_propertybag = SpxQueryInterface<ISpxNamedProperties>(speechconfig);
+        auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
+
+        //copy the properties from the speech config into the factory
+        auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
+        if (speechconfig_propertybag != nullptr)
+        {
+            fbag->Copy(speechconfig_propertybag.get());
+        }
+
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
+        auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
+        // copy the audio input properties into the factory, if any.
+        auto audioInput_propertybag = SpxQueryInterface<ISpxNamedProperties>(audioInput);
+        if (audioInput_propertybag != nullptr)
+        {
+            fbag->Copy(audioInput_propertybag.get());
+        }
+        auto recognizer = factory->CreateConversationTranscriberFromConfig(audioInput);
+
+        // track the reco handle
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+

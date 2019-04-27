@@ -52,9 +52,17 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult, Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs, Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs>::PrivatePropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechRecognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriber)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionResult)
+
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult, Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs, Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionCanceledEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult, Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs, Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionCanceledEventArgs>::PrivatePropertyCollection)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionResult, Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionEventArgs, Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionCanceledEventArgs>)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionResult, Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionEventArgs, Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionCanceledEventArgs>::PrivatePropertyCollection)
+
+
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer)
+%shared_ptr(Microsoft::CognitiveServices::Speech::ConversationTranscriber)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::IntentTrigger)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::LanguageUnderstandingModel)
 %shared_ptr(Microsoft::CognitiveServices::Speech::KeywordRecognitionModel)
@@ -68,6 +76,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult,Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs,Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs >::PrivatePropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult,Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs,Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionCanceledEventArgs >::PrivatePropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult,Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs,Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs >::PrivatePropertyCollection)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionResult,Microsoft::CognitiveServices::Speech::ConversationTranscriptionEventArgs,Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionCanceledEventArgs >::PrivatePropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechSynthesisResult)
@@ -91,6 +100,10 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PushAudioOutputStream)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PushAudioOutputStream::FunctionCallbackWrapper)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PushAudioOutputStreamCallback)
+
+%shared_ptr(Microsoft::CognitiveServices::Speech::Conversation::Participant)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Conversation::Participant::PrivatePropertyCollection)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Conversation::User)
 
 #ifdef SPX_UWP
 %template(StringVector) std::vector<std::wstring>;
@@ -128,6 +141,8 @@
 %ignore operator SPXRESULTHANDLE;
 %ignore operator SPXLUMODELHANDLE;
 %ignore operator SPXSPEECHCONFIGHANDLE;
+%ignore operator SPXPARTICIPANTHANDLE;
+%ignore operator SPXSUSERHANDLE;
 
 %ignore *::PropertyId;
 
@@ -137,6 +152,8 @@
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult> TranslationRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechSynthesisResult> SpeechSynthesisResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Dialog::BotConnectorActivity> BotConnectorActivityPtr;
+    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionResult> ConversationTranscriberResultPtr;
+    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Conversation::Participant> ParticipantPtr;
 %}
 
 %template(SpeechRecognitionResultPtrFuture) FutureWrapper<SpeechRecognitionResultPtr>;
@@ -145,6 +162,7 @@
 %template(SpeechSynthesisResultPtrFuture) FutureWrapper<SpeechSynthesisResultPtr>;
 %template(StringFuture) FutureWrapper<std::string>;
 %template(VoidFuture) FutureWrapper<void>;
+%template(ConversationTranscriberResultPtrFuture) FutureWrapper<ConversationTranscriberResultPtr>;
 
 
 %include <speechapi_cxx_speech_config.h>
@@ -204,6 +222,27 @@
     FutureWrapper<void> StopKeywordRecognitionAsync()
     {
         auto future = ($self)->StopKeywordRecognitionAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+}
+
+%extend Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriber {
+
+    FutureWrapper<void> StartTranscribingAsync()
+    {
+        auto future = ($self)->StartTranscribingAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> StopTranscribingAsync()
+    {
+        auto future = ($self)->StopTranscribingAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> EndConversationAsync()
+    {
+        auto future = ($self)->EndConversationAsync();
         return FutureWrapper<void>(std::move(future));
     }
 }
@@ -460,6 +499,10 @@
 %ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::StartKeywordRecognitionAsync;
 %ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::StopKeywordRecognitionAsync;
 
+%ignore StartTranscribingAsync;
+%ignore StopTranscribingAsync;
+%ignore EndConversationAsync;
+
 %immutable Microsoft::CognitiveServices::Speech::SpeechRecognizer::Properties;
 %immutable Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::Properties;
 %immutable Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::Properties;
@@ -468,6 +511,8 @@
 %immutable Microsoft::CognitiveServices::Speech::SpeechSynthesizer::Properties;
 %immutable Microsoft::CognitiveServices::Speech::SpeechSynthesisResult::Properties;
 %immutable Microsoft::CognitiveServices::Speech::AudioDataStream::Properties;
+%immutable Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriber::Properties;
+%immutable Microsoft::CognitiveServices::Speech::Participant::Properties;
 
 %include <speechapi_cxx_properties.h>
 
@@ -486,6 +531,9 @@
 %immutable Microsoft::CognitiveServices::Speech::RecognitionResult::Properties;
 %include <speechapi_cxx_recognition_result.h>
 %include <speechapi_cxx_recognition_eventargs.h>
+
+%include <speechapi_cxx_participant.h>
+%include <speechapi_cxx_user.h>
 
 #ifdef SWIGPYTHON
 #elif defined(SWIGJAVA)
@@ -543,7 +591,24 @@
 %template(IntentCanceledEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionCanceledEventArgs&>;
 %template(IntentRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult, Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs, Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionCanceledEventArgs>;
 
+%include <speechapi_cxx_conversation_transcription_result.h>
+%include <speechapi_cxx_conversation_transcription_eventargs.h>
+#ifdef SWIGPYTHON
+#elif defined(SWIGJAVA)
+%template(ConversationTranscriberEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionEventArgs&>;
+%template(ConversationTranscriberCanceledEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionCanceledEventArgs&>;
+#else
+%template(ConversationTranscriberEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionEventArgs&>;
+%template(ConversationTranscriberCanceledEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionCanceledEventArgs&>;
+#endif
+
+%template(ConversationTranscriberEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionEventArgs&>;
+%template(ConversationTranscriberCanceledEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionCanceledEventArgs&>;
+%template(ConversationTranscriberRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionResult, Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionEventArgs, Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionCanceledEventArgs>;
+
 %include <speechapi_cxx_intent_recognizer.h>
+
+%include <speechapi_cxx_conversation_transcriber.h>
 
 %include <speechapi_cxx_translation_result.h>
 %include <speechapi_cxx_translation_eventargs.h>

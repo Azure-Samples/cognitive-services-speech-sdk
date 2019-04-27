@@ -17,14 +17,15 @@ static std::shared_ptr<RecogType> CreateRecognizers(const string& filename)
 
 static void DoRecoFromCompressedPushStreamHelper(TestData fileName, std::shared_ptr<SpeechRecognizer> recognizer, std::shared_ptr<PushAudioInputStream> pushStream)
 {
-    promise<string> result;
+    auto result = make_shared<RecoPhrases>();
 
-    ConnectCallbacks(recognizer.get(), result);
+    ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
     recognizer->StartContinuousRecognitionAsync().get();
-    PushData(pushStream.get(), fileName.m_audioFilename, true);
-    auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+    PushData(pushStream.get(), fileName.m_inputDataFilename, true);
+    WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopContinuousRecognitionAsync().get();
-    SPXTEST_REQUIRE(text == weather.m_utterance);
+    SPXTEST_REQUIRE(!result->phrases.empty());
+    SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
 }
 
 static void DoRecoFromCompressedPushStream(TestData fileName, AudioStreamContainerFormat containerType)
@@ -53,13 +54,14 @@ static void DoRecoFromCompressedPushStream(TestData fileName, AudioStreamContain
 
 static void DoRecoFromCompressedPullStreamHelper(std::shared_ptr<SpeechRecognizer> recognizer)
 {
-    promise<string> result;
+    auto result = make_shared<RecoPhrases>();
 
-    ConnectCallbacks(recognizer.get(), result);
+    ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
     recognizer->StartContinuousRecognitionAsync().get();
-    auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+    WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopContinuousRecognitionAsync().get();
-    SPXTEST_REQUIRE(text == weather.m_utterance);
+    SPXTEST_REQUIRE(!result->phrases.empty());
+    SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
 }
 
 static void DoRecoFromCompressedPullStream(TestData filename, AudioStreamContainerFormat containerType)
@@ -70,11 +72,11 @@ static void DoRecoFromCompressedPullStream(TestData filename, AudioStreamContain
 #endif
         promise<string> result;
         filename.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(filename.m_audioFilename));
+        REQUIRE(exists(filename.m_inputDataFilename));
         auto config = CurrentSpeechConfig();
 
         // Prepare for the stream to be "Pulled"
-        auto fs = OpenFile(filename.m_audioFilename);
+        auto fs = OpenFile(filename.m_inputDataFilename);
 
         // Create the "pull stream" object with C++ lambda callbacks
         auto pullStream = AudioInputStream::CreatePullStream(
@@ -102,10 +104,10 @@ static void DoRecoFromCompressedPullStream(TestData filename, AudioStreamContain
 TEST_CASE("compressed stream test", "[api][cxx]")
 {
     weathermp3.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weathermp3.m_audioFilename));
+    REQUIRE(exists(weathermp3.m_inputDataFilename));
 
     weatheropus.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weatheropus.m_audioFilename));
+    REQUIRE(exists(weatheropus.m_inputDataFilename));
 
     SPXTEST_SECTION("push stream works mp3")
     {
@@ -156,13 +158,14 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
 
     SPXTEST_SECTION("continuous and once")
     {
-        promise<string> result;
-        ConnectCallbacks(recognizer.get(), result);
+        auto result = make_shared<RecoPhrases>();
+        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
         recognizer->StartContinuousRecognitionAsync().get();
-        PushData(pushStream.get(), weather.m_audioFilename);
-        auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+        PushData(pushStream.get(), weather.m_inputDataFilename);
+        WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
         recognizer->StopContinuousRecognitionAsync().get();
-        SPXTEST_REQUIRE(text == weather.m_utterance);
+        SPXTEST_REQUIRE(!result->phrases.empty());
+        SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
 
         //todo: we should allow switching recog mode. Fix this later.
         //pushData(pushStream.get(), weather.m_audioFilename);
@@ -178,16 +181,17 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
         auto loop = 3;
         for (int i = 0; i < loop; i++)
         {
-            promise<string> result;
-            ConnectCallbacks(recognizer.get(), result);
+            auto result = make_shared<RecoPhrases>();
+            ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
             // TODO: move PushData() after StartContinuousRecongtion
             // after fixing the bug Bug 1506194: PushStream Improvement, endOfStream
-            PushData(pushStream.get(), weather.m_audioFilename);
+            PushData(pushStream.get(), weather.m_inputDataFilename);
             recognizer->StartContinuousRecognitionAsync().get();
 
-            auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+            WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
             recognizer->StopContinuousRecognitionAsync().get();
-            SPXTEST_REQUIRE(text == weather.m_utterance);
+            SPXTEST_REQUIRE(!result->phrases.empty());
+            SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
         }
     }
 #if 0
@@ -209,42 +213,43 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
 
     UseMocks(false);
     weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
 
     batman.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(batman.m_audioFilename));
+    SPXTEST_REQUIRE(exists(batman.m_inputDataFilename));
 
-    auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_audioFilename);
+    auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
 
     // a normal case.
     SPXTEST_SECTION("start and stop once")
     {
-        promise<string> result;
+        auto result = make_shared<RecoPhrases>();
         recognizer->StartContinuousRecognitionAsync().get();
 
-        ConnectCallbacks(recognizer.get(), result);
-        auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
         recognizer->StopContinuousRecognitionAsync().get();
-        SPXTEST_REQUIRE(text == weather.m_utterance);
+        SPXTEST_REQUIRE(!result->phrases.empty());
+        SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
     }
     // Another normal case. no stop is a valid user case.
     SPXTEST_SECTION("start without stop")
     {
-        promise<string> result;
+        auto result = make_shared<RecoPhrases>();
         recognizer->StartContinuousRecognitionAsync().get();
 
-        ConnectCallbacks(recognizer.get(), result);
-        auto text = WaitForResult(result.get_future(), WAIT_FOR_RECO_RESULT_TIME);
-
-        SPXTEST_REQUIRE(text == weather.m_utterance);
+        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+        SPXTEST_REQUIRE(!result->phrases.empty());
+        SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
     }
 
     SPXTEST_SECTION("two starts in a row")
     {
-        auto recognizer2 = CreateRecognizers<SpeechRecognizer>(batman.m_audioFilename);
+        auto recognizer2 = CreateRecognizers<SpeechRecognizer>(batman.m_inputDataFilename);
 
-        promise<string> result;
-        ConnectCallbacks(recognizer2.get(), result);
+        auto result = make_shared<RecoPhrases>();
+        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer2.get(), result);
 
         recognizer2->StartContinuousRecognitionAsync().get();
         REQUIRE_THROWS_WITH(recognizer2->StartContinuousRecognitionAsync().get(), Catch::Contains("SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION"));
@@ -256,7 +261,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         promise<string> result;
         recognizer->StartContinuousRecognitionAsync().get();
 
-        ConnectCallbacks(recognizer.get(), result);
+        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
         recognizer->StopContinuousRecognitionAsync().get();
 
         // the recognizer should be idle after stop.
@@ -268,7 +273,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         promise<string> result;
         recognizer->StartContinuousRecognitionAsync().get();
 
-        ConnectCallbacks(recognizer.get(), result);
+        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
 
         // wait for 500 ms and stop recognition.
         // hopefully, we cut the audio session while pumping data.
@@ -347,9 +352,9 @@ TEST_CASE("Single trusted root", "[.][int][prod]")
 
     weather.UpdateFullFilename(Config::InputDir);
     UseMocks(false);
-    SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
     SPXTEST_REQUIRE(!IsUsingMocks());
-    auto audio = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+    auto audio = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
 
     SPXTEST_SECTION("with Speech Service cert")
     {
@@ -416,7 +421,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
     SPXTEST_SECTION("push stream with continuous reco")
     {
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
 
         auto config = CurrentSpeechConfig();
         auto pushStream = AudioInputStream::CreatePushStream();
@@ -467,7 +472,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             recognitionEnd.set_value();
         });
 
-        auto fs = OpenWaveFile(weather.m_audioFilename);
+        auto fs = OpenWaveFile(weather.m_inputDataFilename);
 
         std::array<uint8_t, 1000> buffer;
         recognizer->StartContinuousRecognitionAsync().get();
@@ -494,12 +499,12 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
         wrongSamplingRateFile.UpdateFullFilename(Config::InputDir);
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(wrongSamplingRateFile.m_audioFilename));
+        SPXTEST_REQUIRE(exists(wrongSamplingRateFile.m_inputDataFilename));
 
         SPXTEST_REQUIRE(!IsUsingMocks());
 
         auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
-        auto audio = AudioConfig::FromWavFileInput(wrongSamplingRateFile.m_audioFilename);
+        auto audio = AudioConfig::FromWavFileInput(wrongSamplingRateFile.m_inputDataFilename);
         auto recognizer = SpeechRecognizer::FromConfig(config, audio);
         auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
         REQUIRE_THROWS(recognizer->StartKeywordRecognitionAsync(model).get());
@@ -518,11 +523,11 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
         SPXTEST_REQUIRE(!IsUsingMocks());
 
         auto config = SpeechConfig::FromEndpoint("Invalid-endpoint", Keys::Speech);
-        auto audio = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+        auto audio = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
         auto recognizer = SpeechRecognizer::FromConfig(config, audio);
         auto result = recognizer->RecognizeOnceAsync().get();
 
@@ -539,11 +544,11 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
         SPXTEST_REQUIRE(!IsUsingMocks());
 
         auto config = SpeechConfig::FromEndpoint("Invalid-endpoint", Keys::Speech);
-        auto audio = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+        auto audio = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
         auto recognizer = SpeechRecognizer::FromConfig(config, audio);
         std::string errorDetails;
         CancellationErrorCode errorCode;
@@ -568,10 +573,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
         SPXTEST_REQUIRE(!IsUsingMocks());
 
-        auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_audioFilename);
+        auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
 
         std::string token("Thursday");
         recognizer->SetAuthorizationToken(token);
@@ -635,7 +640,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         UseMocks(true);
 
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
 
         mutex mtx;
         condition_variable cv;
@@ -668,7 +673,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
                 SPX_TRACE_VERBOSE("%s: START of loop #%d; mockUsp=%d; realtime=%d", __FUNCTION__, i, useMockUsp, realTimeRate);
 
-                auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_audioFilename);
+                auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
                 SPXTEST_REQUIRE(recognizer != nullptr);
                 SPXTEST_REQUIRE(IsUsingMocks(useMockUsp));
 
@@ -736,10 +741,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
         SPXTEST_REQUIRE(!IsUsingMocks());
 
-        auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_audioFilename);
+        auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(!result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult).empty());
     }
@@ -749,10 +754,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
         SPXTEST_REQUIRE(!IsUsingMocks());
         auto badKeyConfig = SpeechConfig::FromSubscription("invalid_key", "invalid_region");
-        auto audioConfig = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
         auto recognizer = SpeechRecognizer::FromConfig(badKeyConfig, audioConfig);
         auto result = recognizer->RecognizeOnceAsync().get();
 
@@ -772,7 +777,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
     SPXTEST_SECTION("Wrong Key triggers Canceled Event")
     {
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
         UseMocks(false);
         std::promise<void> canceledPromise;
 
@@ -781,7 +786,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         string wrongKey = "wrongKey";
 
         auto sc = SpeechConfig::FromSubscription(wrongKey, "westus");
-        auto a = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+        auto a = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
         auto recognizer = SpeechRecognizer::FromConfig(sc, a);
 
         recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& args) {
@@ -802,11 +807,11 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
     SPXTEST_SECTION("German Speech Recognition works")
     {
         callTheFirstOne.UpdateFullFilename(Config::InputDir);
-        SPXTEST_REQUIRE(exists(callTheFirstOne.m_audioFilename));
+        SPXTEST_REQUIRE(exists(callTheFirstOne.m_inputDataFilename));
 
         auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
         sc->SetSpeechRecognitionLanguage("de-DE");
-        auto audioConfig = AudioConfig::FromWavFileInput(callTheFirstOne.m_audioFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(callTheFirstOne.m_inputDataFilename);
         auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
 
         auto result = recognizer->RecognizeOnceAsync().get();
@@ -817,10 +822,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
     SPXTEST_SECTION("Canceled/EndOfStream works")
     {
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
 
         auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
-        auto audioConfig = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
         auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
 
         WHEN("using RecognizeOnceAsync() result")
@@ -1025,7 +1030,7 @@ TEST_CASE("Speech on local server", "[api][cxx]")
         }
 
         UseMocks(false);
-        SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+        SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
         SPXTEST_REQUIRE(!IsUsingMocks());
 
         const int numLoops = 10;
@@ -1033,7 +1038,7 @@ TEST_CASE("Speech on local server", "[api][cxx]")
         auto sc = SpeechConfig::FromEndpoint(Config::Endpoint, R"({"max_timeout":"0"})");
         for (int i = 0; i < numLoops; i++)
         {
-            auto audioConfig = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+            auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
             auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
             auto result = recognizer->RecognizeOnceAsync().get();
             SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
@@ -1061,7 +1066,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 
     weather.UpdateFullFilename(Config::InputDir);
 
-    SPXTEST_REQUIRE(exists(weather.m_audioFilename));
+    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
 
     mutex mtx;
     condition_variable cv;
@@ -1073,7 +1078,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         bool callback_invoked = false;
 
         SPXTEST_REQUIRE(!IsUsingMocks());
-        auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_audioFilename);
+        auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
 
         auto callback = [&](const SpeechRecognitionEventArgs& args)
         {
@@ -1106,7 +1111,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         SPXTEST_REQUIRE(!IsUsingMocks());
-        auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_audioFilename);
+        auto recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
 
         auto callback1 = [&](const SpeechRecognitionEventArgs& args)
         {
@@ -1134,7 +1139,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         };
         auto canceledCallback2 = [&](const SpeechRecognitionCanceledEventArgs& args) { callback2(args); };
 
-        recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_audioFilename);
+        recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
         recognizer->Recognized.Connect(callback2);
         recognizer->Canceled.Connect(canceledCallback2);
 
@@ -1154,7 +1159,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
             callback3(args);
         };
 
-        recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_audioFilename);
+        recognizer = CreateRecognizers<SpeechRecognizer>(weather.m_inputDataFilename);
         recognizer->Recognized.Connect(callback3);
         recognizer->Canceled.Connect(canceledCallback3);
         auto future = recognizer->RecognizeOnceAsync();
@@ -1199,7 +1204,7 @@ TEST_CASE("Speech Recognizer SpeechConfig validations", "[api][cxx]")
 static void ConnectionEventTests(bool forContinuousRecognition)
 {
     auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
-    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
     auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
     auto connection = Connection::FromRecognizer(recognizer);
 
@@ -1298,7 +1303,7 @@ TEST_CASE("ConnectionEventsTest", "[api][cxx]")
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     weather.UpdateFullFilename(Config::InputDir);
-    REQUIRE(exists(weather.m_audioFilename));
+    REQUIRE(exists(weather.m_inputDataFilename));
 
     SPXTEST_SECTION("Connected Disconnected Events with RecognizeOnceAsnyc")
     {
@@ -1316,8 +1321,8 @@ TEST_CASE("FromEndpoint without key and token", "[api][cxx]")
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_audioFilename));
-    auto audioInput = AudioConfig::FromWavFileInput(weather.m_audioFilename);
+    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
 
     SPXTEST_SECTION("SpeechConfig FromEndpoint")
     {
@@ -1347,8 +1352,8 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     callTheFirstOne.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(callTheFirstOne.m_audioFilename));
-    auto audioInput = AudioConfig::FromWavFileInput(callTheFirstOne.m_audioFilename);
+    SPXTEST_REQUIRE(exists(callTheFirstOne.m_inputDataFilename));
+    auto audioInput = AudioConfig::FromWavFileInput(callTheFirstOne.m_inputDataFilename);
 
     SPXTEST_SECTION("SetServiceProperty single setting")
     {
@@ -1454,8 +1459,8 @@ TEST_CASE("SpeechConfig properties", "[api][cxx]")
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     callTheFirstOne.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(callTheFirstOne.m_audioFilename));
-    auto audioInput = AudioConfig::FromWavFileInput(callTheFirstOne.m_audioFilename);
+    SPXTEST_REQUIRE(exists(callTheFirstOne.m_inputDataFilename));
+    auto audioInput = AudioConfig::FromWavFileInput(callTheFirstOne.m_inputDataFilename);
     auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
 
     SPXTEST_SECTION("property get and set via propertyId")

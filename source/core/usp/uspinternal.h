@@ -137,6 +137,7 @@ private:
 
     std::string CreateRequestId();
     void RegisterRequestId(const std::string& requestId);
+    std::string UpdateRequestId(const MessageType messageType);
 
     const char queryParameterDelim = '&';
 
@@ -147,6 +148,8 @@ private:
 
     bool m_valid;
     bool m_connected;
+
+    bool m_sawSpeechContext;
     std::string m_connectionUrl;
 
     size_t m_audioOffset;

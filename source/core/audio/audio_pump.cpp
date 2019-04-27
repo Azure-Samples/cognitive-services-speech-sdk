@@ -12,7 +12,7 @@
 #include <thread>
 #include "audio_pump.h"
 #include "service_helpers.h"
-
+#include "property_id_2_name_map.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -145,8 +145,10 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
         auto bytesPerSample = waveformat->wBitsPerSample / 8;
         auto samplesPerSec = waveformat->nSamplesPerSec;
         auto framesPerSec = 10;
+        auto channels = waveformat->nChannels;
+        SPX_DBG_ASSERT(channels >= 1);
 
-        auto bytesPerFrame = samplesPerSec / framesPerSec * bytesPerSample;
+        auto bytesPerFrame = samplesPerSec / framesPerSec * bytesPerSample * channels;
         auto data = SpxAllocSharedAudioBuffer(bytesPerFrame);
 
         // When the pump is pumping, m_state is only changed in this lambda, on the background thread
@@ -182,9 +184,17 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
                 data = SpxAllocSharedAudioBuffer(bytesPerFrame);
             }
 
-            // Read the buffer, and send it to the processor
+            // Read audio buffer, and send it to the processor
             auto cbRead = m_reader->Read(data.get(), bytesPerFrame);
-            pISpxAudioProcessor->ProcessAudio(std::make_shared<DataChunk>(data, cbRead));
+            //SPX_DBG_TRACE_VERBOSE("............ audio pump: sending audio buffer size %u", cbRead);
+            std::string capturedTime, userId;
+            if (cbRead != 0)
+            {
+                capturedTime = m_reader->GetProperty(PropertyId::DataBuffer_TimeStamp);
+                userId = m_reader->GetProperty(PropertyId::DataBuffer_UserId);
+            }
+
+            pISpxAudioProcessor->ProcessAudio(std::make_shared<DataChunk>(data, cbRead, std::move(capturedTime), std::move(userId)));
 
             // If we didn't read any data, move to the 'Idle' state
             if (cbRead == 0)
@@ -203,6 +213,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
     }
     catch (const std::exception& e)
     {
+        SPX_DBG_TRACE_ERROR("exception caught during pumping, %s", e.what());
         SPX_DBG_ASSERT(GetSite() != nullptr);
         InvokeOnSite([msg = e.what()](const SitePtr& site)
         {

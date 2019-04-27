@@ -145,10 +145,10 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector]")
     SECTION("Listen Once works")
     {
         turnOnLamp.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(turnOnLamp.m_audioFilename));
+        REQUIRE(exists(turnOnLamp.m_inputDataFilename));
 
         auto config = BotConfigForTests();
-        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_audioFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
 
         test_runner runner{SpeechBotConnector::FromConfig(config, audioConfig)};
 
@@ -197,10 +197,10 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector]")
     SECTION("Send/Receive activity works (w/TTS)")
     {
         turnOnLamp.UpdateFullFilename(Config::InputDir);
-        REQUIRE(exists(turnOnLamp.m_audioFilename));
+        REQUIRE(exists(turnOnLamp.m_inputDataFilename));
 
         auto config = BotConfigForTests();
-        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_audioFilename);
+        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
 
         test_runner runner{SpeechBotConnector::FromConfig(config, audioConfig)};
 

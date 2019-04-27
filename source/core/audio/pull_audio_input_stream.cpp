@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "pull_audio_input_stream.h"
+#include "ispxinterfaces.h"
 #include <chrono>
 #include <cstring>
 
@@ -45,6 +46,11 @@ void CSpxPullAudioInputStream::SetCallbacks(ReadCallbackFunction_Type readCallba
     m_closeCallback = closeCallback;
 }
 
+void CSpxPullAudioInputStream::SetPropertyCallback(GetPropertyCallbackFunction_Type getPropertyCallBack)
+{
+    m_getPropertyCallback = getPropertyCallBack;
+}
+
 uint16_t CSpxPullAudioInputStream::GetFormat(SPXWAVEFORMATEX* formatBuffer, uint16_t formatSize)
 {
     uint16_t formatSizeRequired = sizeof(SPXWAVEFORMATEX) + m_format->cbSize;
@@ -71,6 +77,20 @@ void CSpxPullAudioInputStream::Close()
     {
         m_closeCallback();
     }
+}
+
+// Note: GetProperty should be called after Read the data buffer.
+SPXSTRING CSpxPullAudioInputStream::GetProperty(PropertyId propertyId)
+{
+    if (m_getPropertyCallback != nullptr)
+    {
+        uint8_t result[m_maxPropertyLenInBytes];
+        memset(result, 0, m_maxPropertyLenInBytes);
+
+        m_getPropertyCallback(propertyId, result, m_maxPropertyLenInBytes);
+        return reinterpret_cast<char*>(result);
+    }
+    return "";
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

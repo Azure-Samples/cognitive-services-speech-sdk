@@ -58,3 +58,9 @@
 #include <speechapi_cxx_speech_synthesis_result.h>
 #include <speechapi_cxx_speech_synthesis_eventargs.h>
 #include <speechapi_cxx_speech_synthesizer.h>
+
+#include <speechapi_cxx_conversation_transcriber.h>
+#include <speechapi_cxx_conversation_transcription_eventargs.h>
+#include <speechapi_cxx_conversation_transcription_result.h>
+#include <speechapi_cxx_user.h>
+#include <speechapi_cxx_participant.h>

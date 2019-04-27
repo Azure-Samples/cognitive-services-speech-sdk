@@ -203,7 +203,7 @@ void CSpxRecognizer::FireDisconnected(const std::wstring& sessionId)
 }
 
 void CSpxRecognizer::FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset)
-{   
+{
     FireRecoEvent(&SpeechStartDetected, sessionId, nullptr, offset);
 }
 
@@ -260,8 +260,8 @@ void CSpxRecognizer::FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* pevent,
     if (pevent != nullptr && pevent->IsConnected())
     {
         auto factory = GetEventArgsFactory();
-        auto recoEvent = (result != nullptr) 
-            ? factory->CreateRecognitionEventArgs(sessionId, result) 
+        auto recoEvent = (result != nullptr)
+            ? factory->CreateRecognitionEventArgs(sessionId, result)
             : factory->CreateRecognitionEventArgs(sessionId, offset);
         pevent->Signal(recoEvent);
     }

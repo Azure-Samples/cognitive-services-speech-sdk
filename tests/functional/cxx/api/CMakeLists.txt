@@ -3,19 +3,21 @@ project(cxx_api_tests)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
 include_directories ("${CARBON_EXTERNAL}/Catch2")
-
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
 include_directories("${COMMON}/include")
 include_directories(${TEST_INCLUDE})
 include_directories(${SRC_DIR})
-include_directories("${CARBON_EXTERNAL}/json")
+include_directories(${USP})
+include_directories(${AUDIO})
+include_directories ("${CARBON_EXTERNAL}/json")
 
 set(SOURCES
     "${SRC_DIR}/main.cpp"
     "${SRC_DIR}/audio_config_tests.cpp"
     "${SRC_DIR}/speech_recognizer_tests.cpp"
+    "${SRC_DIR}/conversation_transcriber_tests.cpp"
     "${SRC_DIR}/speech_synthesizer_tests.cpp"
     "${SRC_DIR}/speech_recognizer_dynamic_grammar_tests.cpp"
     "${SRC_DIR}/intent_recognizer_tests.cpp"

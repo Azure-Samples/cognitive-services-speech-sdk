@@ -75,7 +75,7 @@ namespace USP {
         const std::string displayText = "DisplayText";
         const std::string context = "context";
         const std::string tag = "serviceTag";
-
+        const std::string speaker = "SpeakerId";
         const std::string nbest = "NBest";
         const std::string confidence = "Confidence";
         const std::string display = "Display";

@@ -15,5 +15,10 @@
     "REGION": "${virtualassistant-region}",
     "SUBSCRIPTION": "${virtualassistant-subscription}",
     "FUNCTIONALTESTBOT": "${virtualassistant-testbot}"
+  },
+  "PRINCETON": {
+    "INROOM_ENDPOINT": "wss://its.demo.princeton.customspeech.ai/speech/recognition",
+    "ONLINE_ENDPOINT": "wss://omf-lb-official-dev.online.princetondev.customspeech.ai/recognition/onlinemeeting/v1",
+    "CONVERSATIONTRANSCRIBER_KEY": "${conversationtranscriber-key}"
   }
 }

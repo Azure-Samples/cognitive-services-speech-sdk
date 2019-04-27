@@ -75,12 +75,12 @@ enum  PropertyId
     AudioConfig_SampleRateForCapture = 8002,
     AudioConfig_BitsPerSampleForCapture = 8003,
     AudioConfig_AudioSource = 8004,
-
     Speech_LogFilename = 9001,
-
     Conversation_Secret_Key = 10000,
     Conversation_Initial_Silence_Timeout = 10002,
-    Conversation_From_Id = 10003
+    Conversation_From_Id = 10003,
+    DataBuffer_TimeStamp = 11001,
+    DataBuffer_UserId = 11002
 };
 #endif
 
