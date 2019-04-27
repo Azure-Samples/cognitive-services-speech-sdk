@@ -23,18 +23,18 @@ function(create_kwsapi_ddk_target)
     set(_link_lib)
   endif()
 
-  set(_link_debug "${_root}/${_target}_Debug/targets/DDK")
-  set(_link_release "${_root}/${_target}_Release/targets/DDK")
+  set(_link_debug "${_root}/${_target}_Debug/targets/CortanaSDK")
+  set(_link_release "${_root}/${_target}_Release/targets/CortanaSDK")
   if(SPEECHSDK_OS STREQUAL "Windows")
       # Windows KWS artifacts are "multi-config"
       set(_link_debug "${_link_debug}/Debug")
       set(_link_release "${_link_release}/Release")
   endif()
 
-  set(_libname "${CMAKE_SHARED_LIBRARY_PREFIX}kwsapi_ddk${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(_libname "${CMAKE_SHARED_LIBRARY_PREFIX}kwsapi${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
-  add_library(kwsapi_ddk STATIC IMPORTED)
-  set_target_properties(kwsapi_ddk PROPERTIES
+  add_library(kwsapi STATIC IMPORTED)
+  set_target_properties(kwsapi PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${_root}/${_target}_$<IF:$<CONFIG:Debug>,Debug,Release>/targets/DDK"
     IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG CXX
     IMPORTED_LOCATION_DEBUG "${_link_debug}/${_libname}"
@@ -82,5 +82,5 @@ set_target_properties(kws_wrapper PROPERTIES
 target_link_libraries(kws_wrapper PRIVATE
     ${CARBON_COMMON_LIB}
     ${CARBON_CORE_LIB}
-    kwsapi_ddk
+    kwsapi
     )

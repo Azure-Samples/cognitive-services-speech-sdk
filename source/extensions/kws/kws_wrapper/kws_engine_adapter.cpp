@@ -126,6 +126,7 @@ void CSpxSdkKwsEngineAdapter::Init()
     // open the keyword spotter, raising errors if this fails.
     SPEECH_RESULT ret = keyword_spotter_open(&p_impl->m_speechHandle, kwsModelPath.c_str());
     SPX_DBG_TRACE_ERROR_IF(ret < 0, "keyword_spotter_open FAILED: handle %p, status %x\n\n", (void*)p_impl->m_speechHandle, ret);
+    SPX_IFTRUE_THROW_HR(ret == (SPEECH_RESULT)KWS_MODEL_VERSION_MISMATCH, SPXERR_UNSUPPORTED_FORMAT); // as per discussion, this indicates an incompatible model version
     SPX_IFTRUE_THROW_HR(ret < 0, SPXERR_INVALID_ARG);
     SPX_IFTRUE_THROW_HR(!p_impl->m_speechHandle, SPXERR_UNINITIALIZED);
 
