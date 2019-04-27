@@ -29,11 +29,17 @@ public class Settings {
     public static String Keyword = "Computer";
     public static String KeywordModel = "/data/keyword/kws.table";
 
+    public static String SerializedSpeechActivityFile = "activityWithSpeech.json";
+    public static String SpeechSubscriptionKeyForVirtualAssistant = "<<YOUR_SUBSCRIPTION_KEY>>";
+    public static String SpeechRegionForVirtualAssistant = "westus2";
+    public static String SpeechChannelSecretForVirtualAssistant = "<<SPEECH_CHANNEL_SECRET>>";
+
+
     private static SpeechConfig config;
 
     private static Boolean isSettingsInitialized = false;
     public static Object s_settingsClassLock;
-    
+
     static {
         try {
             Class.forName("com.microsoft.cognitiveservices.speech.SpeechConfig");
@@ -44,14 +50,14 @@ public class Settings {
         // prevent classgc from reclaiming the settings class, thus
         // throwing away any custom setting value..
         s_settingsClassLock = new Settings();
-        
+
         LoadSettings();
     };
 
     public static void LoadSettings() {
         if(isSettingsInitialized)
             return;
-        
+
         SpeechAuthorizationToken = System.getProperty("SpeechAuthorizationToken", SpeechAuthorizationToken);
         SpeechSubscriptionKey = System.getProperty("SpeechSubscriptionKey", SpeechSubscriptionKey);
         SpeechRegion = System.getProperty("SpeechRegion", SpeechRegion);
@@ -64,13 +70,19 @@ public class Settings {
 
         WavFile = System.getProperty("WaveFile", AudioInputDirectory + "/" + WavFile);
 
+        SerializedSpeechActivityFile = System.getProperty("SerializedSpeechActivityFile", AudioInputDirectory + "/" + SerializedSpeechActivityFile);
+
+        SpeechSubscriptionKeyForVirtualAssistant = System.getProperty("SpeechSubscriptionKeyForVirtualAssistant", SpeechSubscriptionKeyForVirtualAssistant);
+        SpeechRegionForVirtualAssistant = System.getProperty("SpeechRegionForVirtualAssistant", SpeechRegionForVirtualAssistant);
+        SpeechChannelSecretForVirtualAssistant = System.getProperty("SpeechChannelSecretForVirtualAssistant", SpeechChannelSecretForVirtualAssistant);
+
         Keyword = System.getProperty("Keyword", Keyword);
         KeywordModel = System.getProperty("KeywordModel", KeywordModel);
 
         isSettingsInitialized = true;
     }
-   
-   
+
+
     public static SpeechConfig getSpeechConfig() {
         if (config == null) {
             try {
@@ -88,7 +100,7 @@ public class Settings {
 
         return config;
     }
-   
+
     public static void displayException(Exception ex) {
         System.out.println(ex.getMessage() + "\n");
         for (StackTraceElement item : ex.getStackTrace()) {

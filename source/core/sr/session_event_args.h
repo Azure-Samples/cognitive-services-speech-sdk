@@ -10,7 +10,7 @@ namespace Impl {
 
 
 class CSpxSessionEventArgs :
-    public ISpxSessionEventArgs, 
+    public ISpxSessionEventArgs,
     public ISpxSessionEventArgsInit
 {
 public:
@@ -24,7 +24,7 @@ public:
 
 
     // --- ISpxSessionEventArgs
-    
+
     virtual const std::wstring& GetSessionId() override;
 
     // --- ISpxSessionEventArgsInit

@@ -16,19 +16,16 @@ public class BotConnectorConfig extends SpeechConfig  {
 
     /*! \cond PROTECTED */
     static Class<?> botConnectorConfig = null;
+
+    // load the native library.
     static {
+        // trigger loading of native library
         try {
-            Class<?> ncl = Class.forName("com.microsoft.cognitiveservices.speech.NativeLibraryLoader");
-            java.lang.reflect.Method nclm = ncl.getMethod("loadNativeBinding");
-            nclm.invoke(null); // static.
+            Class.forName(SpeechConfig.class.getName());
         }
-        catch (java.lang.Error ex) {
-            System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        catch (ClassNotFoundException ex) {
+            throw new IllegalStateException(ex);
         }
-        catch (java.lang.Exception ex2) {
-            System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
-        }
-        com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.SetTempDirectory(System.getProperty("java.io.tmpdir"));
         botConnectorConfig = BotConnectorConfig.class;
     }
 

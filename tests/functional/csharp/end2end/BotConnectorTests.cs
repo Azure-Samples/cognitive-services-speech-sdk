@@ -46,6 +46,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [Ignore] // Disabling temporarily due to intermitent crash, bug 1758969
         [DataTestMethod]
         public async Task ValidSendActivity()
         {

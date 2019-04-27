@@ -4,6 +4,7 @@
 //
 package com.microsoft.cognitiveservices.speech.dialog;
 
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
@@ -13,19 +14,17 @@ public class BotConnectorActivity {
 
     /*! \cond PROTECTED */
     static Class<?> botConnectorActivity = null;
+
+
+    // load the native library.
     static {
+        // trigger loading of native library
         try {
-            Class<?> ncl = Class.forName("com.microsoft.cognitiveservices.speech.NativeLibraryLoader");
-            java.lang.reflect.Method nclm = ncl.getMethod("loadNativeBinding");
-            nclm.invoke(null);
+            Class.forName(SpeechConfig.class.getName());
         }
-        catch (java.lang.Error ex) {
-            System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        catch (ClassNotFoundException ex) {
+            throw new IllegalStateException(ex);
         }
-        catch (java.lang.Exception ex2) {
-            System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
-        }
-        com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.SetTempDirectory(System.getProperty("java.io.tmpdir"));
         botConnectorActivity = BotConnectorActivity.class;
     }
 

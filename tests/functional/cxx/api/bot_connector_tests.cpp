@@ -184,7 +184,7 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector]")
         auto result = runner.run<void>([](SpeechBotConnector& connector)
         {
             return connector.ListenOnceAsync();
-        }, 15s);
+        }, 20s);
         bool success = std::get<0>(result);
         if (!success)
         {
@@ -268,7 +268,7 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector]")
             activity->Text = activity_text;
             activity->Speak = activity_speak;
             return connector.SendActivityAsync(activity);
-        }, 5s);
+        }, 20s);
         bool success = std::get<0>(result);
         if (!success)
         {

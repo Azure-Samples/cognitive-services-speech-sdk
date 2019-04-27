@@ -555,6 +555,9 @@ jobs:
          -DKeywordModel=/data/keyword/kws.table \
          -DTestOutputFilename=test-java-unittests-package.xml \
          -DSpeechAuthorizationToken=$SPEECHSDK_SPEECH_AUTHTOKEN \
+         -DSpeechSubscriptionKeyForVirtualAssistant="$(SPEECHSDK_BOT_SUBSCRIPTION)" \
+         -DSpeechRegionForVirtualAssistant="$(SPEECHSDK_BOT_REGION)" \
+         -DSpeechChannelSecretForVirtualAssistant="$(SPEECHSDK_BOT_FUNCTIONALTESTBOT)" \
          tests.runner.Runner \
          tests.AllTests
     displayName: Run unit test
@@ -666,6 +669,9 @@ jobs:
             -DKeywordModel=/data/keyword/kws.table \
             -DTestOutputFilename=test-java-unittests-package.xml \
             -DSpeechAuthorizationToken=$SPEECHSDK_SPEECH_AUTHTOKEN \
+            -DSpeechSubscriptionKeyForVirtualAssistant="$(SPEECHSDK_BOT_SUBSCRIPTION)" \
+            -DSpeechRegionForVirtualAssistant="$(SPEECHSDK_BOT_REGION)" \
+            -DSpeechChannelSecretForVirtualAssistant="$(SPEECHSDK_BOT_FUNCTIONALTESTBOT)" \
             tests.runner.Runner \
             tests.AllTests
         displayName: Run unit test

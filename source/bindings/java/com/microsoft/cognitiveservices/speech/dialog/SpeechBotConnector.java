@@ -14,6 +14,7 @@ import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.SessionEventArgs;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionEventArgs;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionCanceledEventArgs;
 import com.microsoft.cognitiveservices.speech.translation.TranslationSynthesisEventArgs;
@@ -27,22 +28,19 @@ public class SpeechBotConnector implements Closeable {
     static Class<?> speechBotConnector = null;
     private static ExecutorService executorService;
 
+    // load the native library.
     static {
+        // trigger loading of native library
         try {
-            Class<?> ncl = Class.forName("com.microsoft.cognitiveservices.speech.NativeLibraryLoader");
-            java.lang.reflect.Method nclm = ncl.getMethod("loadNativeBinding");
-            nclm.invoke(null);
+            Class.forName(SpeechConfig.class.getName());
         }
-        catch (java.lang.Error ex) {
-            System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        catch (ClassNotFoundException ex) {
+            throw new IllegalStateException(ex);
         }
-        catch (java.lang.Exception ex2) {
-            System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
-        }
-        com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.SetTempDirectory(System.getProperty("java.io.tmpdir"));
         speechBotConnector = SpeechBotConnector.class;
         executorService = Executors.newCachedThreadPool();
     }
+
     /*! \endcond */
 
     /**
