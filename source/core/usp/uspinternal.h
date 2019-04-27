@@ -143,21 +143,15 @@ private:
 
     std::unordered_set<std::string> m_activeRequestIds;
     std::string m_speechRequestId;
-
     Client m_config;
-
     bool m_valid;
     bool m_connected;
-
     bool m_sawSpeechContext;
     std::string m_connectionUrl;
-
     size_t m_audioOffset;
-
     DnsCachePtr m_dnsCache;
     std::unique_ptr<Telemetry> m_telemetry;
     TransportPtr m_transport;
-
     const uint64_t m_creationTime;
 
     static void OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId);

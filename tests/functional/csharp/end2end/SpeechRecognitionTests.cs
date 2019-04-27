@@ -148,6 +148,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
+                var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should be empty. RecoLanguage: " + recoLanguage);
                 var connection = Connection.FromRecognizer(recognizer);
                 if (usingPreConnection)
                 {
@@ -156,6 +158,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
                 AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
             }
         }
 
@@ -805,9 +809,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, audioInput)))
             {
+                var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should be empty. RecoLanguage: " + recoLanguage);
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
             }
         }
 
