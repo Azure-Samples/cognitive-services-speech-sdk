@@ -31,7 +31,7 @@ CSpxAudioDataStream::~CSpxAudioDataStream()
 
 void CSpxAudioDataStream::Term()
 {
-    DisconnectSythEvents();
+    DisconnectSynthEvents();
 }
 
 void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisResult> result)
@@ -76,6 +76,8 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
     // Define synthesis event handling functions for audio data stream
 
     m_pfnSynthesizing = [this](std::shared_ptr<ISpxSynthesisEventArgs> e) {
+        std::unique_lock<std::mutex> lock(m_eventMutex);
+
         // Check consistency of request ID, to make sure the event is handled by the right CSpxAudioDataStream instance
         auto result = e->GetResult();
         auto requestId = result->GetRequestId();
@@ -94,6 +96,8 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
     };
 
     m_pfnSynthesisStopped = [this](std::shared_ptr<ISpxSynthesisEventArgs> e) {
+        std::unique_lock<std::mutex> lock(m_eventMutex);
+
         // Check consistency of request ID, to make sure the event is handled by the right CSpxAudioDataStream instance
         auto result = e->GetResult();
         auto requestId = result->GetRequestId();
@@ -121,52 +125,13 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
         auto events = result->GetEvents();
 
         // Disconnect synthesizing event when SynthesisCompleted/SynthesisCanceled event is fired
-        auto iterator = events->Synthesizing.begin();
-        while (iterator != events->Synthesizing.end() && iterator->first != (void *)this)
-        {
-            iterator++;
-        }
-
-        if (iterator != events->Synthesizing.end())
-        {
-            iterator->second->Disconnect(m_pfnSynthesizing);
-            if (!iterator->second->IsConnected())
-            {
-                events->Synthesizing.remove(*iterator);
-            }
-        }
+        events->DisconnectSynthesizingCallback((void *)this, m_pfnSynthesizing);
 
         // Disconnect synthesis completed event when SynthesisCompleted/SynthesisCanceled event is fired
-        iterator = events->SynthesisCompleted.begin();
-        while (iterator != events->SynthesisCompleted.end() && iterator->first != (void *)this)
-        {
-            iterator++;
-        }
-
-        if (iterator != events->SynthesisCompleted.end())
-        {
-            iterator->second->Disconnect(m_pfnSynthesisStopped);
-            if (!iterator->second->IsConnected())
-            {
-                events->SynthesisCompleted.remove(*iterator);
-            }
-        }
+        events->DisconnectSynthesisCompletedCallback((void *)this, m_pfnSynthesisStopped);
 
         // Disconnect synthesis canceled event when SynthesisCompleted/SynthesisCanceled event is fired
-        iterator = events->SynthesisCanceled.begin();
-        while (iterator != events->SynthesisCanceled.end() && iterator->first != (void *)this)
-        {
-            iterator++;
-        }
-
-        if (iterator != events->SynthesisCanceled.end())
-        {
-            iterator->second->Disconnect(m_pfnSynthesisStopped);
-            if (!iterator->second->IsConnected())
-            {
-                events->SynthesisCanceled.remove(*iterator);
-            }
-        }
+        events->DisconnectSynthesisCanceledCallback((void *)this, m_pfnSynthesisStopped);
     };
 
     // Connect events
@@ -175,19 +140,13 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
     if (result->GetReason() == ResultReason::SynthesizingAudioStarted || result->GetReason() == ResultReason::SynthesizingAudio)
     {
         // Connect synthesizing event
-        auto synthesizingEvent = std::make_shared<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>();
-        synthesizingEvent->Connect(m_pfnSynthesizing);
-        m_synthEvents->Synthesizing.emplace_front((void *)this, synthesizingEvent);
+        m_synthEvents->ConnectSynthesizingCallback((void *)this, m_pfnSynthesizing);
 
         // Connect synthesis completed event
-        auto synthesisCompletedEvent = std::make_shared<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>();
-        synthesisCompletedEvent->Connect(m_pfnSynthesisStopped);
-        m_synthEvents->SynthesisCompleted.emplace_front((void *)this, synthesisCompletedEvent);
+        m_synthEvents->ConnectSynthesisCompletedCallback((void *)this, m_pfnSynthesisStopped);
 
         // Connect synthesis canceled event
-        auto synthesisCanceledEvent = std::make_shared<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>();
-        synthesisCanceledEvent->Connect(m_pfnSynthesisStopped);
-        m_synthEvents->SynthesisCanceled.emplace_front((void *)this, synthesisCanceledEvent);
+        m_synthEvents->ConnectSynthesisCanceledCallback((void *)this, m_pfnSynthesisStopped);
     }
 }
 
@@ -401,48 +360,20 @@ uint32_t CSpxAudioDataStream::FillBuffer(uint8_t* buffer, uint32_t bufferSize, u
     return totalBytesToBeRead;
 }
 
-void CSpxAudioDataStream::DisconnectSythEvents()
+void CSpxAudioDataStream::DisconnectSynthEvents()
 {
+    std::unique_lock<std::mutex> lock(m_eventMutex);
+
     if (m_synthEvents.get() != nullptr)
     {
         // Disconnect synthesizing event
-        auto iterator = m_synthEvents->Synthesizing.begin();
-        while (iterator != m_synthEvents->Synthesizing.end() && iterator->first != (void *)this)
-        {
-            iterator++;
-        }
-
-        if (iterator != m_synthEvents->Synthesizing.end())
-        {
-            iterator->second->DisconnectAll();
-            m_synthEvents->Synthesizing.remove(*iterator);
-        }
+        m_synthEvents->DisconnectSynthesizingCallback((void *)this, nullptr);
 
         // Disconnect synthesis completed event
-        iterator = m_synthEvents->SynthesisCompleted.begin();
-        while (iterator != m_synthEvents->SynthesisCompleted.end() && iterator->first != (void *)this)
-        {
-            iterator++;
-        }
-
-        if (iterator != m_synthEvents->SynthesisCompleted.end())
-        {
-            iterator->second->DisconnectAll();
-            m_synthEvents->SynthesisCompleted.remove(*iterator);
-        }
+        m_synthEvents->DisconnectSynthesisCompletedCallback((void *)this, nullptr);
 
         // Disconnect synthesis canceled event
-        iterator = m_synthEvents->SynthesisCanceled.begin();
-        while (iterator != m_synthEvents->SynthesisCanceled.end() && iterator->first != (void *)this)
-        {
-            iterator++;
-        }
-
-        if (iterator != m_synthEvents->SynthesisCanceled.end())
-        {
-            iterator->second->DisconnectAll();
-            m_synthEvents->SynthesisCanceled.remove(*iterator);
-        }
+        m_synthEvents->DisconnectSynthesisCanceledCallback((void *)this, nullptr);
     }
 }
 

@@ -760,7 +760,16 @@ class ISpxSynthesizerEvents : public ISpxInterfaceBaseFor<ISpxSynthesizerEvents>
 {
 public:
     using SynthEvent_Type = EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>;
+    using SynthesisCallbackFunction_Type = std::function<void(std::shared_ptr<ISpxSynthesisEventArgs>)>;
 
+    virtual void ConnectSynthesisStartedCallback(void* object, SynthesisCallbackFunction_Type callback) = 0;
+    virtual void ConnectSynthesizingCallback(void* object, SynthesisCallbackFunction_Type callback) = 0;
+    virtual void ConnectSynthesisCompletedCallback(void* object, SynthesisCallbackFunction_Type callback) = 0;
+    virtual void ConnectSynthesisCanceledCallback(void* object, SynthesisCallbackFunction_Type callback) = 0;
+    virtual void DisconnectSynthesisStartedCallback(void* object, SynthesisCallbackFunction_Type callback) = 0;
+    virtual void DisconnectSynthesizingCallback(void* object, SynthesisCallbackFunction_Type callback) = 0;
+    virtual void DisconnectSynthesisCompletedCallback(void* object, SynthesisCallbackFunction_Type callback) = 0;
+    virtual void DisconnectSynthesisCanceledCallback(void* object, SynthesisCallbackFunction_Type callback) = 0;
     virtual void FireSynthesisStarted(std::shared_ptr<ISpxSynthesisResult> result) = 0;
     virtual void FireSynthesizing(std::shared_ptr<ISpxSynthesisResult> result) = 0;
     virtual void FireSynthesisCompleted(std::shared_ptr<ISpxSynthesisResult> result) = 0;

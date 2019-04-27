@@ -56,6 +56,14 @@ public:
 
     // --- ISpxSynthesizerEvents ---
 
+    void ConnectSynthesisStartedCallback(void* object, SynthesisCallbackFunction_Type callback) override;
+    void ConnectSynthesizingCallback(void* object, SynthesisCallbackFunction_Type callback) override;
+    void ConnectSynthesisCompletedCallback(void* object, SynthesisCallbackFunction_Type callback) override;
+    void ConnectSynthesisCanceledCallback(void* object, SynthesisCallbackFunction_Type callback) override;
+    void DisconnectSynthesisStartedCallback(void* object, SynthesisCallbackFunction_Type callback) override;
+    void DisconnectSynthesizingCallback(void* object, SynthesisCallbackFunction_Type callback) override;
+    void DisconnectSynthesisCompletedCallback(void* object, SynthesisCallbackFunction_Type callback) override;
+    void DisconnectSynthesisCanceledCallback(void* object, SynthesisCallbackFunction_Type callback) override;
     void FireSynthesisStarted(std::shared_ptr<ISpxSynthesisResult> result) override;
     void FireSynthesizing(std::shared_ptr<ISpxSynthesisResult> result) override;
     void FireSynthesisCompleted(std::shared_ptr<ISpxSynthesisResult> result) override;
@@ -112,6 +120,11 @@ private:
     std::mutex m_queueOperationMutex;
     std::mutex m_requestWaitingMutex;
     std::condition_variable m_cv;
+
+    std::mutex m_synthesisStartedMutex;
+    std::mutex m_synthesizingMutex;
+    std::mutex m_synthesisCompletedMutex;
+    std::mutex m_synthesisCanceledMutex;
 };
 
 

@@ -167,6 +167,222 @@ void CSpxSynthesizer::Close()
     m_audioOutput->Close();
 }
 
+void CSpxSynthesizer::ConnectSynthesisStartedCallback(void* object, SynthesisCallbackFunction_Type callback)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    std::unique_lock<std::mutex> lock(m_synthesisStartedMutex);
+
+    auto iterator = SynthesisStarted.begin();
+    while (iterator != SynthesisStarted.end() && iterator->first != object)
+    {
+        iterator++;
+    }
+
+    if (iterator != SynthesisStarted.end())
+    {
+        iterator->second->Connect(callback);
+    }
+    else
+    {
+        auto eventSignal = std::make_shared<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>();
+        eventSignal->Connect(callback);
+        SynthesisStarted.emplace_front(object, eventSignal);
+    }
+}
+
+void CSpxSynthesizer::ConnectSynthesizingCallback(void* object, SynthesisCallbackFunction_Type callback)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    std::unique_lock<std::mutex> lock(m_synthesizingMutex);
+
+    auto iterator = Synthesizing.begin();
+    while (iterator != Synthesizing.end() && iterator->first != object)
+    {
+        iterator++;
+    }
+
+    if (iterator != Synthesizing.end())
+    {
+        iterator->second->Connect(callback);
+    }
+    else
+    {
+        auto eventSignal = std::make_shared<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>();
+        eventSignal->Connect(callback);
+        Synthesizing.emplace_front(object, eventSignal);
+    }
+}
+
+void CSpxSynthesizer::ConnectSynthesisCompletedCallback(void* object, SynthesisCallbackFunction_Type callback)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    std::unique_lock<std::mutex> lock(m_synthesisCompletedMutex);
+
+    auto iterator = SynthesisCompleted.begin();
+    while (iterator != SynthesisCompleted.end() && iterator->first != object)
+    {
+        iterator++;
+    }
+
+    if (iterator != SynthesisCompleted.end())
+    {
+        iterator->second->Connect(callback);
+    }
+    else
+    {
+        auto eventSignal = std::make_shared<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>();
+        eventSignal->Connect(callback);
+        SynthesisCompleted.emplace_front(object, eventSignal);
+    }
+}
+
+void CSpxSynthesizer::ConnectSynthesisCanceledCallback(void* object, SynthesisCallbackFunction_Type callback)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    std::unique_lock<std::mutex> lock(m_synthesisCanceledMutex);
+
+    auto iterator = SynthesisCanceled.begin();
+    while (iterator != SynthesisCanceled.end() && iterator->first != object)
+    {
+        iterator++;
+    }
+
+    if (iterator != SynthesisCanceled.end())
+    {
+        iterator->second->Connect(callback);
+    }
+    else
+    {
+        auto eventSignal = std::make_shared<EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>>();
+        eventSignal->Connect(callback);
+        SynthesisCanceled.emplace_front(object, eventSignal);
+    }
+}
+
+void CSpxSynthesizer::DisconnectSynthesisStartedCallback(void* object, SynthesisCallbackFunction_Type callback)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    std::unique_lock<std::mutex> lock(m_synthesisStartedMutex);
+
+    auto iterator = SynthesisStarted.begin();
+    while (iterator != SynthesisStarted.end() && iterator->first != object)
+    {
+        iterator++;
+    }
+
+    if (iterator != SynthesisStarted.end())
+    {
+        if (callback != nullptr)
+        {
+            iterator->second->Disconnect(callback);
+        }
+        else
+        {
+            iterator->second->DisconnectAll();
+        }
+
+        if (!iterator->second->IsConnected())
+        {
+            SynthesisStarted.remove(*iterator);
+        }
+    }
+}
+
+void CSpxSynthesizer::DisconnectSynthesizingCallback(void* object, SynthesisCallbackFunction_Type callback)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    std::unique_lock<std::mutex> lock(m_synthesizingMutex);
+
+    auto iterator = Synthesizing.begin();
+    while (iterator != Synthesizing.end() && iterator->first != object)
+    {
+        iterator++;
+    }
+
+    if (iterator != Synthesizing.end())
+    {
+        if (callback != nullptr)
+        {
+            iterator->second->Disconnect(callback);
+        }
+        else
+        {
+            iterator->second->DisconnectAll();
+        }
+
+        if (!iterator->second->IsConnected())
+        {
+            Synthesizing.remove(*iterator);
+        }
+    }
+}
+
+void CSpxSynthesizer::DisconnectSynthesisCompletedCallback(void* object, SynthesisCallbackFunction_Type callback)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    std::unique_lock<std::mutex> lock(m_synthesisCompletedMutex);
+
+    auto iterator = SynthesisCompleted.begin();
+    while (iterator != SynthesisCompleted.end() && iterator->first != object)
+    {
+        iterator++;
+    }
+
+    if (iterator != SynthesisCompleted.end())
+    {
+        if (callback != nullptr)
+        {
+            iterator->second->Disconnect(callback);
+        }
+        else
+        {
+            iterator->second->DisconnectAll();
+        }
+
+        if (!iterator->second->IsConnected())
+        {
+            SynthesisCompleted.remove(*iterator);
+        }
+    }
+}
+
+void CSpxSynthesizer::DisconnectSynthesisCanceledCallback(void* object, SynthesisCallbackFunction_Type callback)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    std::unique_lock<std::mutex> lock(m_synthesisCanceledMutex);
+
+    auto iterator = SynthesisCanceled.begin();
+    while (iterator != SynthesisCanceled.end() && iterator->first != object)
+    {
+        iterator++;
+    }
+
+    if (iterator != SynthesisCanceled.end())
+    {
+        if (callback != nullptr)
+        {
+            iterator->second->Disconnect(callback);
+        }
+        else
+        {
+            iterator->second->DisconnectAll();
+        }
+
+        if (!iterator->second->IsConnected())
+        {
+            SynthesisCanceled.remove(*iterator);
+        }
+    }
+}
+
 void CSpxSynthesizer::FireSynthesisStarted(std::shared_ptr<ISpxSynthesisResult> result)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);

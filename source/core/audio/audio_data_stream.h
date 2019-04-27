@@ -70,7 +70,7 @@ private:
     DISABLE_COPY_AND_MOVE(CSpxAudioDataStream);
 
     uint32_t FillBuffer(uint8_t* buffer, uint32_t bufferSize, uint32_t pos);
-    void DisconnectSythEvents();
+    void DisconnectSynthEvents();
 
     std::wstring m_requestId;
 
@@ -78,6 +78,7 @@ private:
     SynthesisCallbackFunction_Type m_pfnSynthesisStopped; // This is for synthesis is either completed or canceled
 
     std::shared_ptr<ISpxSynthesizerEvents> m_synthEvents;
+    std::mutex m_eventMutex;
 
     std::list<std::pair<SpxSharedAudioBuffer_Type, uint32_t>> m_audioList;
 
