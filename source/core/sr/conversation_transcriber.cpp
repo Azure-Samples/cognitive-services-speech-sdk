@@ -183,11 +183,6 @@ void CSpxConversationTranscriber::SendSpeehEventMessageInternal()
     }
 }
 
-void to_json(json& j, const CSpxConversationTranscriber::Participant& p)
-{
-    j = json{ {"id", p.id}, {"preferredLanguage", p.preferred_language}, {"voice", p.voice} };
-}
-
 void CSpxConversationTranscriber::UpdateParticipantInternal(bool add, const std::string& id, const std::string& preferred_language, const std::string& voice_signature)
 {
     StartUpdateParticipants();
@@ -258,6 +253,16 @@ void CSpxConversationTranscriber::SanityCheckParticipants(const std::string& id,
     }
 }
 
+void to_json(json& j, const CSpxConversationTranscriber::CSpxVoiceSignature& voice)
+{
+    j = json{ {"Version", voice.Version}, {"Tag", voice.Tag}, {"Data", voice.Data} };
+}
+
+void to_json(json& j, const CSpxConversationTranscriber::Participant& p)
+{
+    j = json{ {"id", p.id}, {"preferredLanguage", p.preferred_language},  {"voice", p.voice} };
+}
+
 std::string CSpxConversationTranscriber::CreateSpeechEventPayload(bool atStartAudioPumping)
 {
     if (m_conversation_id.empty())
@@ -315,7 +320,7 @@ std::string CSpxConversationTranscriber::CreateSpeechEventPayload(bool atStartAu
     auto flac_encoded = properties->GetStringValue("FLAC");
     if (!flac_encoded.empty())
     {
-        speech_event["FLAC"] = 1;
+        speech_event["meeting"]["FLAC"] = 1;
     }
 
     return speech_event.dump();

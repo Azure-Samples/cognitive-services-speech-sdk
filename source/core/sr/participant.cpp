@@ -12,6 +12,10 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+static constexpr char versioName[] = "Version";
+static constexpr char tagName[] = "Tag";
+static constexpr char dataName[] = "Data";
+
 CSpxParticipant::CSpxParticipant()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -29,6 +33,25 @@ void CSpxParticipant::SetPreferredLanguage(std::string&& preferredLanguage)
 
 void CSpxParticipant::SetVoiceSignature(std::string&& voiceSignature)
 {
+    if (voiceSignature.empty())
+    {
+        return;
+    }
+    // parse throws exception when voiceSignature is ill-formated.
+    auto j = nlohmann::json::parse(voiceSignature);
+    if (j.find(versioName) == j.end())
+    {
+        ThrowInvalidArgumentException("Could not find Version in voice signature!");
+    }
+    if (j.find(tagName) == j.end())
+    {
+        ThrowInvalidArgumentException("Could not find Tag in voice signature!");
+    }
+    if (j.find(dataName) == j.end())
+    {
+        ThrowInvalidArgumentException("Could not find Data in voice signature!");
+    }
+
     m_voice = voiceSignature;
 }
 

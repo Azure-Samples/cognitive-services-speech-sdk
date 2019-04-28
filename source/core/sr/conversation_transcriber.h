@@ -21,6 +21,13 @@ class CSpxConversationTranscriber :
 public:
     using BaseType = CSpxRecognizer;
 
+    struct CSpxVoiceSignature
+    {
+        int Version;
+        std::string Tag;
+        std::string Data;
+    };
+
     struct Participant
     {
         Participant(const ISpxParticipant* participant)
@@ -31,16 +38,26 @@ public:
             }
             id = participant->GetId();
             preferred_language = participant->GetPreferredLanguage();
-            voice = participant->GetVoiceSignature();
+            auto voice_raw_string = participant->GetVoiceSignature();
+            auto voice_json = nlohmann::json::parse(voice_raw_string);
+
+            voice.Version = voice_json["Version"].get<int>();
+            voice.Tag = voice_json["Tag"].get<std::string>();
+            voice.Data = voice_json["Data"].get<std::string>();
         }
 
-        Participant(const std::string& id, const std::string& language, const std::string& v)
-            :id{ id }, preferred_language{ language }, voice{ v }
-        {}
+        Participant(const std::string& id, const std::string& language, const std::string& voice_raw_string)
+            :id{ id }, preferred_language{ language }
+        {
+            auto voice_json = nlohmann::json::parse(voice_raw_string);
+            voice.Version = voice_json["Version"].get<int>();
+            voice.Tag = voice_json["Tag"].get<std::string>();
+            voice.Data = voice_json["Data"].get<std::string>();
+        }
 
         std::string id;
         std::string preferred_language;
-        std::string voice;
+        CSpxVoiceSignature voice;
     };
 
     CSpxConversationTranscriber();
@@ -111,6 +128,5 @@ private:
 
     DISABLE_COPY_AND_MOVE(CSpxConversationTranscriber);
 };
-
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

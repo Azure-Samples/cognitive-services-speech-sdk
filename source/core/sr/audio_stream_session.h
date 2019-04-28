@@ -353,7 +353,7 @@ private:
     uint64_t m_currentTurnGlobalOffset;
 
     uint64_t m_bytesTransited;
-    
+
     std::shared_ptr<CSpxThreadService> m_threadService;
 
     struct Operation

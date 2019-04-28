@@ -186,7 +186,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
 
             // Read audio buffer, and send it to the processor
             auto cbRead = m_reader->Read(data.get(), bytesPerFrame);
-            //SPX_DBG_TRACE_VERBOSE("............ audio pump: sending audio buffer size %u", cbRead);
+            SPX_DBG_TRACE_VERBOSE("............ audio pump: sending audio buffer size %u", cbRead);
             std::string capturedTime, userId;
             if (cbRead != 0)
             {

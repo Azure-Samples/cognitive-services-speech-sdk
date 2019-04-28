@@ -51,7 +51,6 @@ const char g_timeStampHeaderName[] = "X-Timestamp";
 const char g_audioWavName[] = "audio/x-wav";
 
 static const char g_RPSDelegationHeaderName[] = "X-Search-DelegationRPSToken";
-const int g_waveHeaderSize = 44;
 
 #define WS_MESSAGE_HEADER_SIZE  2
 #define WS_CONNECTION_TIME_MS   (570 * 1000) // 9.5 minutes
@@ -1246,7 +1245,7 @@ int TransportStreamWrite(TransportHandle transportHandle, const std::string& pat
     msg->wstype = WS_FRAME_TYPE_BINARY;
 
     // fill the msg->buffer with the header content
-    bool wavheader = bufferSize == g_waveHeaderSize ? true:false;
+    bool wavheader = audioChunk->isWavHeader;
     auto headerLen = TransportCreateDataHeader(request, requestId, (char*)msg->buffer, payloadSize, pstTimeStamp, userId, wavheader);
     if (headerLen < 0)
     {

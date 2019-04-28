@@ -224,7 +224,7 @@ private:
 
     /// <summary>
     /// Internal member variable that holds the properties of the audio config
-    /// </summary>    
+    /// </summary>
     SPXPROPERTYBAGHANDLE m_propertybag;
 
     std::shared_ptr<AudioInputStream> m_stream;

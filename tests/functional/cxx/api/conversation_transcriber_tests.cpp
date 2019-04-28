@@ -18,6 +18,51 @@ using namespace Microsoft::CognitiveServices::Speech::Audio;
 
 #define SPX_CONFIG_TRACE_INTERFACE_MAP
 
+TEST_CASE("conversation_voice_signature", "[.][int][prod]")
+{
+    auto audioEndpoint = Config::InroomEndpoint;
+    audioEndpoint += "/multiaudio";
+    auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
+
+    //todo: when service is ready replace it with Speech016_30s_xmos_8ch.
+    weather8Channels.UpdateFullFilename(Config::InputDir);
+    auto audioInput = AudioConfig::FromWavFileInput(weather8Channels.m_inputDataFilename);
+    auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
+    auto result = make_shared<RecoPhrases>();
+    ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
+    auto p = Participant::From("SP006@speechdemo.onmicrosoft.com", "en-us");
+    REQUIRE_THROWS(p->SetVoiceSignature(R"(
+    {
+        "Version": 0,
+        "Data" : "IlgqQLfiEofDG1asXEAReulsL3GfTNF"
+    })"));
+    REQUIRE_THROWS(p->SetVoiceSignature(R"(
+    {
+        "Version": 0,
+        "Tag" : "IlgqQLfiEofDG1asXEAReulsL3GfTNF"
+    })"));
+    REQUIRE_THROWS(p->SetVoiceSignature(R"(
+    {
+        "Tag": "asdfasdf",
+        "Data" : "IlgqQLfiEofDG1asXEAReulsL3GfTNF"
+    })"));
+    REQUIRE_THROWS(Participant::From("SP006@speechdemo.onmicrosoft.com", "en-us", "asdf"));
+    REQUIRE_THROWS(p->SetVoiceSignature("asdf"));
+
+    REQUIRE_NOTHROW(p->SetVoiceSignature(R"(
+         {"Version": 0,
+          "Tag": "9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=",
+          "Data": "r4tJwSq280QIBWRX8tKcjxYwDySvX6VZFGkqLLroFV3HIlARgA1xXdFcVK9a2xbylLNQUSNwdUUsIpBDB+jlz6W97XgJ9GlBYLf6xVzUmBg1Qhac32DH3c810HDtpwJk3FkEveM7ohLjhvnYKwjBNqbAVGUONyLYpO28kcxRhvSOxe5/2PeVOgpXMGMcBt3IKN3OmNSOokg4QkqoRUNuRMg5jdoq7BraOyr7CEOP2/GsicmUcONNhFaLuEwy97WRUXE0RWTdDxeR9dn2ngSESq+vYiCkudDi/TGh0ZhxABTxU6EiFQl7uiYG28drjosWdrOV5FPGe2pP8omEoBgtc+yOxYa40HG/yQ160Enqv8umCTcTeW6bkA9CZJ7K8740oZkA8pdpsWkurpFJlMDK3e3Y6w/W1/P55gz/jegYTusDDoz5fINcoWj1zbyLMaFgig3PlEDLKG2hb09Jy4OhEeaBgVqEXiUTEX/R44pd7nUK49xrRJ9yM2gfUq8S+229hJ40N5ZMe+9G848jtsGOziPs20KNlqpL6tiXGAeynhclHyt3pITJjOJi9/cYKYbNm3dR+PtxuLL1WAgIuaK65aGhyW0NmFYm/r7hfAK9a2nTNJIgTsFLG32jljkpaurtwvHuAtIhK8KnopeN6OPXjGl2q06bqI2U92eBxKRroeGUEq3PiXHwVk9DOIFzOAdz"
+        })"));
+    recognizer->SetConversationId("voice_signature_test");
+    recognizer->AddParticipant(p);
+    recognizer->StartTranscribingAsync().get();
+
+    WaitForResult(result->ready.get_future(), 5min);
+    recognizer->StopTranscribingAsync().get();
+    SPXTEST_REQUIRE(result->phrases[0].Text == weather8Channels.m_utterance);
+}
+
 TEST_CASE("conversation_id", "[.][int][prod]")
 {
     auto config = SpeechConfig::FromEndpoint(Config::InroomEndpoint, Keys::ConversationTranscriber);

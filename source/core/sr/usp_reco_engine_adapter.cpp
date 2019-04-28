@@ -1022,7 +1022,9 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(SPXWAVEFORMATEX* pformat)
 
     // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWrite
     SPX_DBG_ASSERT(cbHeader == uint32_t(ptr - buffer.get()));
-    UspWrite(std::make_shared<DataChunk>(buffer, cbHeader));
+    auto wavHeaderDataPtr = std::make_shared<DataChunk>(buffer, cbHeader);
+    wavHeaderDataPtr->isWavHeader = true;
+    UspWrite(wavHeaderDataPtr);
 }
 
 void CSpxUspRecoEngineAdapter::UspWrite(const DataChunkPtr& audioChunk)
