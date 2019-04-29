@@ -908,7 +908,7 @@ jobs:
         Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
   - template: get-docker-image.yml
     parameters:
-      imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64 oobedevdnc20_ubuntu1604_x64 oobedevdnc21_mcr_x64
+      imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64 oobedevdnc20_debian9_x64 oobedevdnc21_mcr_x64
       outvarImage: DOCKER_IMAGES
   - bash: |
       set -u -e -x -o pipefail
