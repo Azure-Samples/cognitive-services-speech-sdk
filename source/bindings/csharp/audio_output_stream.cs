@@ -17,7 +17,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     public class AudioOutputStream : IDisposable
     {
         /// <summary>
-        /// Creates a memory backed PullAudioOutputStream using the default format (16Khz 16bit mono PCM).
+        /// Creates a memory backed PullAudioOutputStream using the default format (16 kHz, 16 bit, mono PCM).
         /// </summary>
         /// <returns>The pull audio output stream being created.</returns>
         public static PullAudioOutputStream CreatePullStream()
@@ -36,7 +36,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         }
 
         /// <summary>
-        /// Creates a PushAudioOutputStream that delegates to the specified callback interface for write() and close() methods, using the default format (16Khz 16bit mono PCM).
+        /// Creates a PushAudioOutputStream that delegates to the specified callback interface for write() and close() methods, using the default format (16 kHz, 16 bit, mono PCM).
         /// </summary>
         /// <param name="callback">The custom audio output object, derived from PushAudioOutputStreamCallback</param>
         /// <returns>The push audio output stream being created.</returns>
@@ -109,7 +109,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     {
 
         /// <summary>
-        /// Creates a memory backed PullAudioOutputStream using the default format (16Khz 16bit mono PCM).
+        /// Creates a memory backed PullAudioOutputStream using the default format (16 kHz, 16 bit, mono PCM).
         /// </summary>
         public PullAudioOutputStream() :
             this(CreateStreamHandle(AudioInputStream.UseDefaultFormatIfNull(null)))
@@ -198,7 +198,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     public sealed class PushAudioOutputStream : AudioOutputStream
     {
         /// <summary>
-        /// Creates a PushAudioOutputStream that delegates to the specified callback interface for write() and close() methods using the default format (16Khz 16bit mono PCM).
+        /// Creates a PushAudioOutputStream that delegates to the specified callback interface for write() and close() methods using the default format (16 kHz, 16 bit, mono PCM).
         /// </summary>
         /// <param name="callback">The custom audio output object, derived from PushAudioOutputStreamCallback.</param>
         /// <returns>The push audio output stream being created.</returns>

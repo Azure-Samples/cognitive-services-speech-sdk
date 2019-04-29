@@ -27,8 +27,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Creates an AudioConfig object representing the specified file.
+        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
         /// </summary>
-        /// <param name="fileName">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="fileName">Specifies the audio input file.</param>
         /// <returns>The audio input configuration being created.</returns>
         public static AudioConfig FromWavFileInput(string fileName)
         {
@@ -39,8 +40,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Creates an AudioConfig object representing the specified stream.
+        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
         /// </summary>
-        /// <param name="audioStream">Specifies the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="audioStream">Specifies the custom audio input stream.</param>
         /// <returns>The audio input configuration being created.</returns>
         public static AudioConfig FromStreamInput(AudioInputStream audioStream)
         {
@@ -52,8 +54,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Creates an AudioConfig object representing the specified stream.
+        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
         /// </summary>
-        /// <param name="callback">Specifies the pull audio input stream callback. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="callback">Specifies the pull audio input stream callback.</param>
         /// <returns>The audio input configuration being created.</returns>
         public static AudioConfig FromStreamInput(PullAudioInputStreamCallback callback)
         {
@@ -65,9 +68,10 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Creates an AudioConfig object representing the specified stream.
+        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
         /// </summary>
-        /// <param name="callback">Specifies the pull audio input stream callback. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
-        /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16Khz 16bit mono PCM).</param>
+        /// <param name="callback">Specifies the pull audio input stream callback.</param>
+        /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method.</param>
         /// <returns>The audio input configuration being created.</returns>
         public static AudioConfig FromStreamInput(PullAudioInputStreamCallback callback, AudioStreamFormat format)
         {

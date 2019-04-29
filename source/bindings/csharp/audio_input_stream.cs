@@ -17,7 +17,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     public class AudioInputStream : IDisposable
     {
         /// <summary>
-        /// Creates a memory backed PushAudioInputStream using the default format (16Khz 16bit mono PCM).
+        /// Creates a memory backed PushAudioInputStream using the default format (16 kHz, 16 bit, mono PCM).
         /// </summary>
         /// <returns>The push audio input stream being created.</returns>
         public static PushAudioInputStream CreatePushStream()
@@ -27,8 +27,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Creates a memory backed PushAudioInputStream with the specified audio format.
+        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
         /// </summary>
-        /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16Khz 16bit mono PCM).</param>
+        /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method.</param>
         /// <returns>The push audio input stream being created.</returns>
         public static PushAudioInputStream CreatePushStream(AudioStreamFormat format)
         {
@@ -36,7 +37,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         }
 
         /// <summary>
-        /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods, using the default format (16Khz 16bit mono PCM).
+        /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods, using the default format (16 kHz, 16 bit, mono PCM).
         /// </summary>
         /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback</param>
         /// <returns>The pull audio input stream being created.</returns>
@@ -47,9 +48,10 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods.
+        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
         /// </summary>
         /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
-        /// <param name="format">The audio data format in which audio will be returned from the callback's read() method (currently only support 16Khz 16bit mono PCM).</param>
+        /// <param name="format">The audio data format in which audio will be returned from the callback's read() method.</param>
         /// <returns>The pull audio input stream being created.</returns>
         public static PullAudioInputStream CreatePullStream(PullAudioInputStreamCallback callback, AudioStreamFormat format)
         {
@@ -113,7 +115,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     public sealed class PushAudioInputStream : AudioInputStream
     {
         /// <summary>
-        /// Creates a memory backed PushAudioInputStream using the default format (16Khz 16bit mono PCM).
+        /// Creates a memory backed PushAudioInputStream using the default format (16 kHz, 16 bit, mono PCM).
         /// </summary>
         public PushAudioInputStream() :
             this(CreateStreamHandle(UseDefaultFormatIfNull(null)))
@@ -122,8 +124,9 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Creates a memory backed PushAudioInputStream with the specified audio format.
+        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
         /// </summary>
-        /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16Khz 16bit mono PCM).</param>
+        /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method.</param>
         public PushAudioInputStream(AudioStreamFormat format) :
             this(CreateStreamHandle(UseDefaultFormatIfNull(format)))
         {
@@ -237,7 +240,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     public sealed class PullAudioInputStream : AudioInputStream
     {
         /// <summary>
-        /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods using the default format (16Khz 16bit mono PCM).
+        /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods using the default format (16 kHz, 16 bit, mono PCM).
         /// </summary>
         /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
         /// <returns>The pull audio input stream being created.</returns>
@@ -248,9 +251,10 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods.
+        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
         /// </summary>
         /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
-        /// <param name="format">The audio data format in which audio will be returned from the callback's read() method (currently only support 16Khz 16bit mono PCM).</param>
+        /// <param name="format">The audio data format in which audio will be returned from the callback's read() method.</param>
         /// <returns>The pull audio input stream being created.</returns>
         public PullAudioInputStream(PullAudioInputStreamCallback callback, AudioStreamFormat format) :
             this(Create(UseDefaultFormatIfNull(format)), callback)
@@ -429,7 +433,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         abstract public int Read(byte[] dataBuffer, uint size);
 
         /// <summary>
-        /// Get property associated to data buffer, such as a timestamp or userId. if the property is not available, an empty string must be returned. 
+        /// Get property associated to data buffer, such as a timestamp or userId. if the property is not available, an empty string must be returned.
         /// Added in version 1.5.0
         /// </summary>
         /// <param name="id">A property id.</param>

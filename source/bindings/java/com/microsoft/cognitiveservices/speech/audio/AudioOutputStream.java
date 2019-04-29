@@ -24,7 +24,7 @@ public class AudioOutputStream
     }
 
     /**
-     * Creates a memory backed PullAudioOutputStream using the default format (16Khz 16bit mono PCM).
+     * Creates a memory backed PullAudioOutputStream using the default format (16 kHz, 16 bit, mono PCM).
      * @return The audio output stream being created.
      */
     public static PullAudioOutputStream createPullStream() {

@@ -24,7 +24,7 @@ public class AudioInputStream
     }
 
     /**
-     * Creates a memory backed PushAudioInputStream using the default format (16Khz 16bit mono PCM).
+     * Creates a memory backed PushAudioInputStream using the default format (16 kHz, 16 bit, mono PCM).
      * @return The audio input stream being created.
      */
     public static PushAudioInputStream createPushStream() {
@@ -33,7 +33,8 @@ public class AudioInputStream
 
     /**
      * Creates a memory backed PushAudioInputStream with the specified audio format.
-     * @param format The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16Khz 16bit mono PCM).
+     * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
+     * @param format The audio data format in which audio will be written to the push audio stream's write() method.
      * @return The audio input stream being created.
      */
     public static PushAudioInputStream createPushStream(AudioStreamFormat format) {
@@ -41,7 +42,7 @@ public class AudioInputStream
     }
 
     /**
-     * Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods, using the default format (16Khz 16bit mono PCM).
+     * Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods, using the default format (16 kHz, 16 bit, mono PCM).
      * @param callback The custom audio input object, derived from PullAudioInputStreamCallback
      * @return The audio input stream being created.
      */
@@ -51,8 +52,9 @@ public class AudioInputStream
 
     /**
      * Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods.
+     * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
      * @param callback The custom audio input object, derived from PullAudioInputStreamCallback
-     * @param format The audio data format in which audio will be returned from the callback's read() method (currently only support 16Khz 16bit mono PCM).
+     * @param format The audio data format in which audio will be returned from the callback's read() method.
      * @return The audio input stream being created.
      */
     public static PullAudioInputStream createPullStream(PullAudioInputStreamCallback callback, AudioStreamFormat format) {

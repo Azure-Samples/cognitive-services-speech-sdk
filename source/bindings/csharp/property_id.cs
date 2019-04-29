@@ -298,7 +298,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         /// <summary>
         /// The time stamp associated to data buffer written by client when using Pull/Push audio mode streams.
-        /// The time stamp is a 64-bit value with a resolution of 90kHz. The same as the presentation timestamp in an MPEG transport stream.
+        /// The time stamp is a 64-bit value with a resolution of 90 kHz. The same as the presentation timestamp in an MPEG transport stream.
         /// See https://en.wikipedia.org/wiki/Presentation_timestamp.
         /// Added in version 1.5.0.
         /// </summary>

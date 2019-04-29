@@ -14,11 +14,11 @@ class AudioStreamFormat():
     """
     Represents specific audio configuration, such as microphone, file, or custom audio streams
 
-    When called without arguments, returns the default `AudioStreamFormat` (16kHz, 16 bit,
-    mono).
+    When called without arguments, returns the default `AudioStreamFormat` (16 kHz, 16 bit, mono
+    PCM).
 
-    Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel
-    (Mono) is supported.
+    Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono)
+    is supported.
 
     :param samples_per_second: The sample rate for the stream.
     :param bits_per_sample: The number of bits per audio sample
@@ -129,8 +129,8 @@ class AudioConfig():
          Please refer to `this page <https://aka.ms/csspeech/microphone-selection>`_
          on how to retrieve platform-specific microphone names.
          This functionality was added in version 1.3.0.
-    :param filename: Specifies an audio input file. Currently, only WAV / PCM with 16-bit
-        samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+    :param filename: Specifies an audio input file. Currently, only WAV / PCM with 16-bit samples,
+         16 kHz sample rate, and a single channel (Mono) is supported.
     :param stream: Creates an AudioConfig object representing the specified stream.
     """
 

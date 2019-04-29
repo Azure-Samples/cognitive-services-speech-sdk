@@ -60,13 +60,14 @@ public:
     explicit operator SPXAUDIOSTREAMHANDLE() const { return m_haudioStream.get(); }
 
     /// <summary>
-    /// Creates a memory backed PushAudioInputStream using the default format (16Khz 16bit mono PCM).
+    /// Creates a memory backed PushAudioInputStream using the default format (16 kHz, 16 bit, mono PCM).
     /// </summary>
     /// <returns>A shared pointer to PushAudioInputStream</returns>
     static std::shared_ptr<PushAudioInputStream> CreatePushStream();
 
     /// <summary>
     /// Creates a memory backed PushAudioInputStream with the specified audio format.
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
     /// <returns>A shared pointer to PushAudioInputStream</returns>
@@ -74,7 +75,7 @@ public:
 
 #if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     /// <summary>
-    /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods, using the default format (16Khz 16bit mono PCM).
+    /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods, using the default format (16 kHz, 16 bit, mono PCM).
     /// </summary>
     /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
     /// <param name="readCallback">Read callback.</param>
@@ -93,7 +94,7 @@ public:
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback, CUSTOM_AUDIO_PULL_STREAM_GET_PROPERTY_CALLBACK getPropertyCallback);
 
-    /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods, using the default format (16Khz 16bit mono PCM).
+    /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods, using the default format (16 kHz, 16 bit, mono PCM).
     /// </summary>
     /// <param name="readCallback">Read callback.</param>
     /// <param name="closeCallback">Close callback.</param>
@@ -113,7 +114,7 @@ public:
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
-    /// Creates a PullAudioInputStream that delegates to the specified callback interface for the Read() and Close() methods, using the default format (16Khz 16bit mono PCM).
+    /// Creates a PullAudioInputStream that delegates to the specified callback interface for the Read() and Close() methods, using the default format (16 kHz, 16 bit, mono PCM).
     /// </summary>
     /// <param name="callback">Shared pointer to PullAudioInputStreamCallback instance.</param>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
@@ -122,6 +123,7 @@ public:
 #if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     /// <summary>
     /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods.
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
     /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
@@ -132,6 +134,7 @@ public:
 
     /// <summary>
     /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read(), Close() and GetProperty() methods.
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
     /// Added in version 1.5.0.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
@@ -143,6 +146,7 @@ public:
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(std::shared_ptr<AudioStreamFormat> format, void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback, CUSTOM_AUDIO_PULL_STREAM_GET_PROPERTY_CALLBACK getPropertyCallback);
 
     /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods.
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
     /// <param name="readCallback">Read callback.</param>
@@ -152,6 +156,7 @@ public:
 
     /// <summary>
     /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods.
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
     /// Added in version 1.5.0.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
@@ -165,6 +170,7 @@ public:
 
     /// <summary>
     /// Creates a PullAudioInputStream that delegates to the specified callback interface for the Read() and Close() methods, using the specified format.
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
     /// <param name="callback">Shared pointer to PullAudioInputStreamCallback instance.</param>
@@ -230,7 +236,7 @@ public:
     }
 
     /// <summary>
-    /// Creates a memory backed PushAudioInputStream using the default format (16Khz 16bit mono PCM).
+    /// Creates a memory backed PushAudioInputStream using the default format (16 kHz, 16 bit, mono PCM).
     /// </summary>
     /// <returns>A shared pointer to PushAudioInputStream</returns>
     static std::shared_ptr<PushAudioInputStream> Create()
@@ -240,6 +246,7 @@ public:
 
     /// <summary>
     /// Creates a memory backed PushAudioInputStream with the specified audio format.
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
     /// <returns>A shared pointer to PushAudioInputStream</returns>
@@ -456,6 +463,7 @@ public:
 #if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() "C" callback functions pointers
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
     /// Note: The dataBuffer returned by Read() should not contain any audio header.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
@@ -472,6 +480,7 @@ public:
 
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read(), Close() and GetProperty() "C" callback functions pointers
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
     /// Note: The dataBuffer returned by Read() should not contain any audio header.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
@@ -493,13 +502,15 @@ public:
              });
     }
 
-   /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
-   /// Note: The dataBuffer returned by Read() should not contain any audio header.
-   /// </summary>
-   /// <param name="format">Audio stream format.</param>
-   /// <param name="readCallback">Read callback.</param>
-   /// <param name="closeCallback">Close callback.</param>
-   /// <returns>A shared pointer to PullAudioInputStream</returns>
+    /// <summary>
+    /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
+    /// Note: The dataBuffer returned by Read() should not contain any audio header.
+    /// </summary>
+    /// <param name="format">Audio stream format.</param>
+    /// <param name="readCallback">Read callback.</param>
+    /// <param name="closeCallback">Close callback.</param>
+    /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> Create(std::shared_ptr<AudioStreamFormat> format, ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback = nullptr)
     {
         auto wrapper = std::make_shared<FunctionCallbackWrapper>(readCallback, closeCallback);
@@ -508,6 +519,7 @@ public:
 
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read(), Close() and GetProperty() callback functions.
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
     /// Note: The dataBuffer returned by Read() should not contain any audio header.
     /// Added in version 1.5.0.
     /// </summary>
@@ -525,6 +537,7 @@ public:
 
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
     /// </summary>
     /// <param name="format">Audio stream format.</param>
     /// <param name="callback">Shared pointer to PullAudioInputStreamCallback instance.</param>
@@ -708,7 +721,7 @@ public:
     explicit operator SPXAUDIOSTREAMHANDLE() const { return m_haudioStream.get(); }
 
     /// <summary>
-    /// Creates a memory backed PullAudioOutputStream using the default format (16Khz 16bit mono PCM).
+    /// Creates a memory backed PullAudioOutputStream using the default format (16 kHz, 16 bit, mono PCM).
     /// </summary>
     /// <returns>A shared pointer to PullAudioOutputStream</returns>
     static std::shared_ptr<PullAudioOutputStream> CreatePullStream();
@@ -722,7 +735,7 @@ public:
 
 #if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     /// <summary>
-    /// Creates a PushAudioOutputStream that delegates to the specified callback functions for Write() and Close() methods, using the default format (16Khz 16bit mono PCM).
+    /// Creates a PushAudioOutputStream that delegates to the specified callback functions for Write() and Close() methods, using the default format (16 kHz, 16 bit, mono PCM).
     /// </summary>
     /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
     /// <param name="writeCallback">Write callback.</param>
@@ -731,7 +744,7 @@ public:
     static std::shared_ptr<PushAudioOutputStream> CreatePushStream(void* pvContext, CUSTOM_AUDIO_PUSH_STREAM_WRITE_CALLBACK writeCallback, CUSTOM_AUDIO_PUSH_STREAM_CLOSE_CALLBACK closeCallback = nullptr);
 
     /// <summary>
-    /// Creates a PushAudioOutputStream that delegates to the specified callback functions for Write() and Close() methods, using the default format (16Khz 16bit mono PCM).
+    /// Creates a PushAudioOutputStream that delegates to the specified callback functions for Write() and Close() methods, using the default format (16 kHz, 16 bit, mono PCM).
     /// </summary>
     /// <param name="writeCallback">Write callback.</param>
     /// <param name="closeCallback">Close callback.</param>
@@ -740,7 +753,7 @@ public:
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
-    /// Creates a PushAudioOutputStream that delegates to the specified callback interface for Write() and Close() methods, using the default format (16Khz 16bit mono PCM).
+    /// Creates a PushAudioOutputStream that delegates to the specified callback interface for Write() and Close() methods, using the default format (16 kHz, 16 bit, mono PCM).
     /// </summary>
     /// <param name="callback">Shared pointer to PushAudioOutputStreamCallback instance.</param>
     /// <returns>A shared pointer to PushAudioOutputStream</returns>
@@ -822,7 +835,7 @@ public:
     friend class Dialog::ActivityReceivedEventArgs;
 
     /// <summary>
-    /// Creates a memory backed PullAudioOutputStream using the default format (16Khz 16bit mono PCM).
+    /// Creates a memory backed PullAudioOutputStream using the default format (16 kHz, 16 bit, mono PCM).
     /// </summary>
     /// <returns>A shared pointer to PullAudioOutputStream</returns>
     static std::shared_ptr<PullAudioOutputStream> Create()

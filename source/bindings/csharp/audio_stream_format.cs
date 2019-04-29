@@ -11,11 +11,12 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 {
     /// <summary>
     /// Represents audio stream format used for custom audio input configurations.
+    /// Updated in version 1.5.0.
     /// </summary>
     public sealed partial class AudioStreamFormat : IDisposable
     {
         /// <summary>
-        /// Creates an audio stream format object representing the default microphone input format (16Khz 16bit mono PCM).
+        /// Creates an audio stream format object representing the default microphone input format (16 kHz, 16 bit, mono PCM).
         /// </summary>
         /// <returns>The audio stream format being created.</returns>
         public static AudioStreamFormat GetDefaultInputFormat()
@@ -26,7 +27,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         }
 
         /// <summary>
-        /// Creates an audio stream format object representing the default speaker output format (16Khz 16bit mono PCM).
+        /// Creates an audio stream format object representing the default speaker output format (16 kHz, 16 bit, mono PCM).
         /// Added in version 1.4.0
         /// </summary>
         /// <returns>The audio stream format being created.</returns>
@@ -38,11 +39,12 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         }
 
         /// <summary>
-        /// Creates an audio stream format object with the specified pcm waveformat characteristics.
+        /// Creates an audio stream format object with the specified PCM waveformat characteristics.
+        /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
         /// </summary>
-        /// <param name="samplesPerSecond">Sample rate, in samples per second (hertz).</param>
-        /// <param name="bitsPerSample">Bits per sample, typically 16.</param>
-        /// <param name="channels">Number of channels in the waveform-audio data. Monaural data uses one channel and stereo data uses two channels.</param>
+        /// <param name="samplesPerSecond">Sample rate, in samples per second (Hertz).</param>
+        /// <param name="bitsPerSample">Bits per sample.</param>
+        /// <param name="channels">Number of channels in the waveform-audio data.</param>
         /// <returns>The audio stream format being created.</returns>
         public static AudioStreamFormat GetWaveFormatPCM(uint samplesPerSecond, byte bitsPerSample, byte channels)
         {

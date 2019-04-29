@@ -45,6 +45,7 @@ enum class AudioStreamContainerFormat
 
 /// <summary>
 /// Class to represent the audio stream format used for custom audio input configurations.
+/// Updated in version 1.5.0.
 /// </summary>
 class AudioStreamFormat
 {
@@ -61,7 +62,7 @@ public:
     explicit operator SPXAUDIOSTREAMFORMATHANDLE() const { return m_hformat.get(); }
 
     /// <summary>
-    /// Creates an audio stream format object representing the default audio stream format (16Khz 16bit mono PCM).
+    /// Creates an audio stream format object representing the default audio stream format (16 kHz, 16 bit, mono PCM).
     /// </summary>
     /// <returns>A shared pointer to AudioStreamFormat</returns>
     static std::shared_ptr<AudioStreamFormat> GetDefaultInputFormat()
@@ -77,7 +78,7 @@ public:
     /// Creates an audio stream format object with the specified PCM waveformat characteristics.
     /// </summary>
     /// <remarks>
-    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
     /// </remarks>
     /// <param name="samplesPerSecond">Samples per second.</param>
     /// <param name="bitsPerSample">Bits per second.</param>
@@ -93,7 +94,7 @@ public:
     }
 
     /// <summary>
-    /// Creates an audio stream format object representing the default audio stream format (16Khz 16bit mono PCM).
+    /// Creates an audio stream format object representing the default audio stream format (16 kHz, 16 bit, mono PCM).
     /// Added in version 1.4.0
     /// </summary>
     /// <returns>A shared pointer to AudioStreamFormat</returns>

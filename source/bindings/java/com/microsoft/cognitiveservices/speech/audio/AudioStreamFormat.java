@@ -11,6 +11,7 @@ import com.microsoft.cognitiveservices.speech.internal.AudioStreamContainerForma
 
 /**
  * Represents audio stream format used for custom audio input configurations.
+ * Updated in version 1.5.0.
  */
 public final class AudioStreamFormat
 {
@@ -26,7 +27,7 @@ public final class AudioStreamFormat
     }
 
     /**
-     * Creates an audio stream format object representing the default audio stream format (16Khz 16bit mono PCM).
+     * Creates an audio stream format object representing the default audio stream format (16 kHz, 16 bit, mono PCM).
      * @return The audio stream format being created.
      */
     public static AudioStreamFormat getDefaultInputFormat() {
@@ -35,9 +36,10 @@ public final class AudioStreamFormat
 
     /**
      * Creates an audio stream format object with the specified pcm waveformat characteristics.
-     * @param samplesPerSecond Sample rate, in samples per second (hertz).
-     * @param bitsPerSample Bits per sample, typically 16.
-     * @param channels Number of channels in the waveform-audio data. Monaural data uses one channel and stereo data uses two channels.
+     * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
+     * @param samplesPerSecond Sample rate, in samples per second (Hertz).
+     * @param bitsPerSample Bits per sample.
+     * @param channels Number of channels in the waveform-audio data.
      * @return The audio stream format being created.
      */
     public static AudioStreamFormat getWaveFormatPCM(long samplesPerSecond, short bitsPerSample, short channels) {

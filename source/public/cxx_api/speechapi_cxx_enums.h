@@ -344,7 +344,7 @@ enum class PropertyId
 
     /// <summary>
     /// The time stamp associated to data buffer written by client when using Pull/Push audio input streams.
-    /// The time stamp is a 64-bit value with a resolution of 90kHz. It is the same as the presentation timestamp in an MPEG transport stream. See https://en.wikipedia.org/wiki/Presentation_timestamp
+    /// The time stamp is a 64-bit value with a resolution of 90 kHz. It is the same as the presentation timestamp in an MPEG transport stream. See https://en.wikipedia.org/wiki/Presentation_timestamp
     /// Added in version 1.5.0.
     /// </summary>
     DataBuffer_TimeStamp = 11001,
@@ -541,7 +541,7 @@ enum class NoMatchReason
 
     /// <summary>
     /// Indicates that the spotted keyword has been rejected by the keyword verification service.
-    /// Added in version 1.5.0. 
+    /// Added in version 1.5.0.
     /// </summary>
     KeywordNotRecognized = 4
 };

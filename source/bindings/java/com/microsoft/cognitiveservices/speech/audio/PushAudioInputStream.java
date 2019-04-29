@@ -23,7 +23,7 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
     }
 
     /**
-     * Creates a memory backed PushAudioInputStream using the default format (16Khz 16bit mono PCM).
+     * Creates a memory backed PushAudioInputStream using the default format (16 kHz, 16 bit, mono PCM).
      * @return The push audio input stream being created.
      */
     public static PushAudioInputStream create() {
@@ -32,7 +32,8 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
 
     /**
      * Creates a memory backed PushAudioInputStream with the specified audio format.
-     * @param format The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16Khz 16bit mono PCM).
+     * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
+     * @param format The audio data format in which audio will be written to the push audio stream's write() method.
      * @return The push audio input stream being created.
      */
     public static PushAudioInputStream create(AudioStreamFormat format) {

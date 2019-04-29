@@ -31,14 +31,16 @@ SPX_EXPORT
 
 /**
   * Initializes an SPXAudioConfiguration object using the specified file as input.
-  * @param path path of the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+  * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+  * @param path path of the audio input file.
   * @return an instance of audio input configuration.
   */
 - (nullable instancetype)initWithWavFileInput:(nonnull NSString *)path;
 
 /**
   * Initializes an SPXAudioConfiguration object using the specified stream as input.
-  * @param stream the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+  * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+  * @param stream the custom audio input stream.
   * @return an instance of audio input configuration.
 */
 - (nullable instancetype)initWithStreamInput:(nonnull SPXAudioInputStream *)stream;
