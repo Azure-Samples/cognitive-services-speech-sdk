@@ -27,6 +27,7 @@ public final class Participant
 
      /**
      * Create a Participant using user id, her/his preferred language and her/his voice signature.
+     * If voice signature is empty then user will not be identified.
      * @param userId user's Id.
      * @param preferredLanguage users' preferred language.
      * @param voiceSignature user's voice signature.
@@ -35,7 +36,7 @@ public final class Participant
     public static Participant from(String userId, String preferredLanguage, String voiceSignature) {
         Contracts.throwIfNullOrWhitespace(userId, "userId");
         Contracts.throwIfNullOrWhitespace(preferredLanguage, "preferredLanguage");
-        Contracts.throwIfNullOrWhitespace(voiceSignature, "voiceSignature");
+        Contracts.throwIfNull(voiceSignature, "voiceSignature");
         return new Participant(com.microsoft.cognitiveservices.speech.internal.Participant.From(userId, preferredLanguage, voiceSignature));
     }
 
@@ -93,10 +94,11 @@ public final class Participant
 
     /**
      * Sets the voice signature for participant.
+     * If voice signature is empty then user will not be identified.
      * @param voiceSignature user's voice signature.
      */
     public void setVoiceSignature(String voiceSignature) {
-        Contracts.throwIfNullOrWhitespace(voiceSignature, "voiceSignature");
+        Contracts.throwIfNull(voiceSignature, "voiceSignature");
         _participantImpl.SetVoiceSignature(voiceSignature);
     }
 

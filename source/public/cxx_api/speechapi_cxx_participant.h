@@ -47,6 +47,7 @@ public:
 
     /// <summary>
     /// Create a participant using user id, her/his preferred language and her/his voice signature.
+    /// If voice signature is empty then user will not be identified.
     /// </summary>
     /// <param name="userId">A user ids.</param>
     /// <param name="preferredLanguage">The preferred languages of the user. It can be optional.</param>
@@ -89,7 +90,8 @@ public:
     }
 
     /// <summary>
-    /// Set voice signature
+    /// Set voice signature.
+    /// If voice signature is empty then user will not be identified.
     /// </summary>
     /// <param name="voiceSignature">The participant's voice signature."</param>
     void SetVoiceSignature(const std::string& voiceSignature)

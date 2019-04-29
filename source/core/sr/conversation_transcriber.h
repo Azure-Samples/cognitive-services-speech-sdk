@@ -39,20 +39,32 @@ public:
             id = participant->GetId();
             preferred_language = participant->GetPreferredLanguage();
             auto voice_raw_string = participant->GetVoiceSignature();
-            auto voice_json = nlohmann::json::parse(voice_raw_string);
-
-            voice.Version = voice_json["Version"].get<int>();
-            voice.Tag = voice_json["Tag"].get<std::string>();
-            voice.Data = voice_json["Data"].get<std::string>();
+            ParseVoiceSignature(voice_raw_string);
         }
 
         Participant(const std::string& id, const std::string& language, const std::string& voice_raw_string)
             :id{ id }, preferred_language{ language }
         {
-            auto voice_json = nlohmann::json::parse(voice_raw_string);
-            voice.Version = voice_json["Version"].get<int>();
-            voice.Tag = voice_json["Tag"].get<std::string>();
-            voice.Data = voice_json["Data"].get<std::string>();
+            ParseVoiceSignature(voice_raw_string);
+        }
+
+        void ParseVoiceSignature(const std::string& voice_raw_string)
+        {
+            if (!voice_raw_string.empty())
+            {
+                try
+                {
+                    auto voice_json = nlohmann::json::parse(voice_raw_string);
+                    voice.Version = voice_json["Version"].get<int>();
+                    voice.Tag = voice_json["Tag"].get<std::string>();
+                    voice.Data = voice_json["Data"].get<std::string>();
+                }
+                catch (nlohmann::json::parse_error& e)
+                {
+                    std::string message = "Voice signature format is invalid, " + std::string(e.what());
+                    ThrowInvalidArgumentException(message);
+                }
+            }
         }
 
         std::string id;

@@ -17,6 +17,7 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
     {
         /// <summary>
         /// Creates a Participant using user id, her/his preferred language and her/his voice signature.
+        /// If voice signature is empty then user will not be identified.
         /// </summary>
         /// <param name="userId">A user id.</param>
         /// <param name="preferredLanguage">A preferred language.</param>
@@ -25,7 +26,6 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         public static Participant From(string userId, string preferredLanguage, string voiceSignature)
         {
             IntPtr participantPtr = IntPtr.Zero;
-            var voiceSize = (voiceSignature == null) ? 0 : voiceSignature.Length;
 
             ThrowIfFail(Internal.Participant.participant_create_handle(out participantPtr, userId, preferredLanguage, voiceSignature));
             return new Participant(participantPtr);
@@ -57,7 +57,8 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         }
 
         /// <summary>
-        /// The participant's voice signature
+        /// The participant's voice signature.
+        /// If voice signature is empty then user will not be identified.
         /// </summary>
         public string VoiceSignature
         {

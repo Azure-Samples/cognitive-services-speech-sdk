@@ -20,6 +20,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         private ConversationTranscriberTestsHelper helper;
         private static string conversationTranscriptionMultiAudioEndpoint;
+        // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
+        private const string voiceSignature = "{ \"Version\": 0,\"Tag\": \"9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=\",         \"Data\": \"r4tJwSq280QIBWRX8tKcjxYwDySvX6VZFGkqLLroFV3HIlARgA1xXdFcVK9a2xbylLNQUSNwdUUsIpBDB+jlz6W97XgJ9GlBYLf6xVzUmBg1Qhac32DH3c810HDtpwJk3FkEveM7ohLjhvnYKwjBNqbAVGUONyLYpO28kcxRhvSOxe5/2PeVOgpXMGMcBt3IKN3OmNSOokg4QkqoRUNuRMg5jdoq7BraOyr7CEOP2/GsicmUcONNhFaLuEwy97WRUXE0RWTdDxeR9dn2ngSESq+vYiCkudDi/TGh0ZhxABTxU6EiFQl7uiYG28drjosWdrOV5FPGe2pP8omEoBgtc+yOxYa40HG/yQ160Enqv8umCTcTeW6bkA9CZJ7K8740oZkA8pdpsWkurpFJlMDK3e3Y6w/W1/P55gz/jegYTusDDoz5fINcoWj1zbyLMaFgig3PlEDLKG2hb09Jy4OhEeaBgVqEXiUTEX/R44pd7nUK49xrRJ9yM2gfUq8S+229hJ40N5ZMe+9G848jtsGOziPs20KNlqpL6tiXGAeynhclHyt3pITJjOJi9/cYKYbNm3dR+PtxuLL1WAgIuaK65aGhyW0NmFYm/r7hfAK9a2nTNJIgTsFLG32jljkpaurtwvHuAtIhK8KnopeN6OPXjGl2q06bqI2U92eBxKRroeGUEq3PiXHwVk9DOIFzOAdz\"}";
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
@@ -72,30 +74,76 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning)]
-        public void ConversationCreateParticipants()
+        public void ConversationCreateParticipantWithValidPreferredLanguageAndVoiceSignature()
         {
-            var participant2 = Participant.From("xyz@example.com", "", string.Empty);
-            participant2.PreferredLanguage = "zh-cn";
             bool exception = false;
             try
             {
-                participant2.PreferredLanguage = "";
+                var participant = Participant.From("xyz@example.com", "zh-cn", voiceSignature);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Got Exception: " + ex.Message.ToString());
                 exception = true;
             }
-            Assert.AreEqual(exception, true);
+            Assert.AreEqual(exception, false);
+        }
 
-            // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-            string voice = "1.1, 2.2";
-            participant2.VoiceSignature = voice;
-
-            exception = false;
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        public void ConversationCreateParticipantWithEmptyPreferredLanguage()
+        {
+            bool exception = false;
             try
             {
-                participant2.VoiceSignature = string.Empty;
+                var participant = Participant.From("xyz@example.com", "", voiceSignature);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Got Exception: " + ex.Message.ToString());
+                exception = true;
+            }
+            Assert.AreEqual(exception, false);
+        }
+
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        public void ConversationCreateParticipantWithInvalidPreferredLanguage()
+        {
+            bool exception = false;
+            try
+            {
+                var participant = Participant.From("xyz@example.com", "invalid", voiceSignature);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Got Exception: " + ex.Message.ToString());
+                exception = true;
+            }
+            Assert.AreEqual(exception, false);
+        }
+
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        public void ConversationCreateParticipantWithEmptyVoiceSignature()
+        {
+            bool exception = false;
+            try
+            {
+                var participant = Participant.From("xyz@example.com", "zh-cn", string.Empty);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Got Exception: " + ex.Message.ToString());
+                exception = true;
+            }
+            Assert.AreEqual(exception, false);
+        }
+
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        public void ConversationCreateParticipantWithInvalidVoiceSignature()
+        {
+            bool exception = false;
+            try
+            {
+                var participant2 = Participant.From("xyz@example.com", "", "1.1, 2.2");
             }
             catch (Exception ex)
             {
@@ -122,7 +170,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 conversationTranscriber.AddParticipant(user);
 
                 // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-                string voice = "1.1, 2.2";
+                string voice = voiceSignature;
                 var participant = Participant.From("userIdForParticipant", "en-us", voice);
                 conversationTranscriber.AddParticipant(participant);
 
@@ -159,8 +207,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 conversationTranscriber.RemoveParticipant(user);
 
                 // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-                string voice = "1.1, 2.2";
-                var participant = Participant.From("userIdForParticipant", "en-us", voice);
+                var participant = Participant.From("userIdForParticipant", "en-us", voiceSignature);
                 conversationTranscriber.AddParticipant(participant);
                 conversationTranscriber.RemoveParticipant(participant);
 

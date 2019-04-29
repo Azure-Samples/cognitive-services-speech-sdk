@@ -44,6 +44,9 @@ public class ConversationTranscriberTests {
     private final Integer FIRST_EVENT_ID = 1;
     private AtomicInteger eventIdentifier = new AtomicInteger(FIRST_EVENT_ID);
     private String inroomEndpoint = "wss://its.demo.princeton.customspeech.ai/speech/recognition/multiaudio?";
+    // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
+    private String voiceSignature = "{ \"Version\": 0,\"Tag\": \"9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=\",         \"Data\": \"r4tJwSq280QIBWRX8tKcjxYwDySvX6VZFGkqLLroFV3HIlARgA1xXdFcVK9a2xbylLNQUSNwdUUsIpBDB+jlz6W97XgJ9GlBYLf6xVzUmBg1Qhac32DH3c810HDtpwJk3FkEveM7ohLjhvnYKwjBNqbAVGUONyLYpO28kcxRhvSOxe5/2PeVOgpXMGMcBt3IKN3OmNSOokg4QkqoRUNuRMg5jdoq7BraOyr7CEOP2/GsicmUcONNhFaLuEwy97WRUXE0RWTdDxeR9dn2ngSESq+vYiCkudDi/TGh0ZhxABTxU6EiFQl7uiYG28drjosWdrOV5FPGe2pP8omEoBgtc+yOxYa40HG/yQ160Enqv8umCTcTeW6bkA9CZJ7K8740oZkA8pdpsWkurpFJlMDK3e3Y6w/W1/P55gz/jegYTusDDoz5fINcoWj1zbyLMaFgig3PlEDLKG2hb09Jy4OhEeaBgVqEXiUTEX/R44pd7nUK49xrRJ9yM2gfUq8S+229hJ40N5ZMe+9G848jtsGOziPs20KNlqpL6tiXGAeynhclHyt3pITJjOJi9/cYKYbNm3dR+PtxuLL1WAgIuaK65aGhyW0NmFYm/r7hfAK9a2nTNJIgTsFLG32jljkpaurtwvHuAtIhK8KnopeN6OPXjGl2q06bqI2U92eBxKRroeGUEq3PiXHwVk9DOIFzOAdz\"}";
+
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         // Override inputs, if necessary
@@ -99,21 +102,15 @@ public class ConversationTranscriberTests {
         }
         assertEquals(exception, true);
 
-        // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-        String voice = "1.1, 2.2";
-
-        a.setVoiceSignature(voice);        
-
+        // Set invalid voice signature.
         exception = false;
         try {
-            a.setVoiceSignature(emptyString);
+            a.setVoiceSignature("1.1, 2.2");
         }
         catch (Exception ex) {
             System.out.println("Got Exception in setVoiceSignature:" + ex.toString());
             exception = true;
         }
-        assertEquals(exception, true);
-
         assertEquals(exception, true);
     }
 
@@ -137,9 +134,7 @@ public class ConversationTranscriberTests {
         t.addParticipant(user);
 
         // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-        String voice = "1.1, 2.2";
-
-        Participant participant = Participant.from("userIdForParticipant", "en-us", voice);
+        Participant participant = Participant.from("userIdForParticipant", "en-us", voiceSignature);
         t.addParticipant(participant);
 
         String result = getFirstTranscriberResult(t);
@@ -182,8 +177,7 @@ public class ConversationTranscriberTests {
         t.removeParticipant(user);
 
         // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-        String voice = "1.1, 2.2";
-        Participant participant = Participant.from("userIdForParticipant", "en-us", voice);
+        Participant participant = Participant.from("userIdForParticipant", "en-us", voiceSignature);
         t.addParticipant(participant);
         t.removeParticipant(participant);
 
