@@ -505,7 +505,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.
-            using (var audioInput = AudioConfig.FromWavFileInput(@"wreck-a-nice-beach.wav.wav"))
+            using (var audioInput = AudioConfig.FromWavFileInput(@"wreck-a-nice-beach.wav"))
             {
                 using (var recognizer = new SpeechRecognizer(config, audioInput))
                 {
