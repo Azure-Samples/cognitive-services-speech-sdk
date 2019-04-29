@@ -95,6 +95,7 @@ fi
 SRCINC="$SOURCE_ROOT/source/public"
 SRCPRIVINC="$SOURCE_ROOT/source/core/include"
 SRCPRIVINC2="$SOURCE_ROOT/source/core/common/include"
+SRCPRIVINCJSON="$SOURCE_ROOT/external/json"
 SRCPRIVTESTJAR="$BUILD_ROOT/bin/com.microsoft.cognitiveservices.speech.tests.jar"
 
 DESTPUBLIB="$DEST/public/lib"
@@ -107,12 +108,12 @@ DESTPRIVLIBUNSTRIPPED="$DEST/private/libunstripped"
 DESTPRIVBIN="$DEST/private/bin"
 DESTPRIVINC="$DEST/private/include"
 DESTPRIVINC2="$DEST/private/include.common"
-
+DESTPRIVINCJSON="$DEST/private/external.json"
 
 printf "\nCopying files to drop location\n"
 
 # N.B. no long option for -p (parents) on OSX.
-mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBLIBUNIXOSNETSTANDARD20" "$DESTPUBINC" "$DESTPRIVLIB" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
+mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBLIBUNIXOSNETSTANDARD20" "$DESTPUBINC" "$DESTPRIVLIB" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")" "$(dirname "$DESTPRIVINCJSON")"  "$DESTPUBLIB"
 
 # N.B. no long option for -v (verbose) and -p (preserve) on OSX.
 CPOPT="-v -p"
@@ -200,4 +201,5 @@ cp $CPOPT "$SRCLIB"/*carbon-tts-mock* "$DESTPRIVLIB"
 
 cp $CPOPT -R "$SRCPRIVINC" "$DESTPRIVINC"
 cp $CPOPT -R "$SRCPRIVINC2" "$DESTPRIVINC2"
+cp $CPOPT -R "$SRCPRIVINCJSON" "$DESTPRIVINCJSON"
 
