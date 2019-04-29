@@ -61,7 +61,7 @@ inline void SpxTerm(const std::shared_ptr<T>& ptr)
     if (ptr == nullptr)
         return;
 
-    SPX_DBG_TRACE_VERBOSE("%s: ptr=0x%8x", __FUNCTION__, ptr.get());
+    SPX_DBG_TRACE_VERBOSE("%s: ptr=0x%8p", __FUNCTION__, (void*)ptr.get());
     auto objectWithSite = SpxQueryInterface<ISpxObjectWithSite>(ptr);
     auto objectInit = SpxQueryInterface<ISpxObjectInit>(ptr);
     if (objectWithSite != nullptr)

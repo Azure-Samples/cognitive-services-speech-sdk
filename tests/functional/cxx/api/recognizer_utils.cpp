@@ -196,12 +196,12 @@ RecordedDataReader::RecordedDataReader(const std::string& type)
 
 RecordedDataReader::~RecordedDataReader()
 {
-    SPX_DBG_TRACE_VERBOSE(" %s total frame count = %d, total bytes = %ld  ", m_type.c_str(), m_numOfBuffer, m_totalBytes);
+    SPX_DBG_TRACE_VERBOSE(" %s total frame count = %d, total bytes = %" PRIu64, m_type.c_str(), m_numOfBuffer, m_totalBytes);
 }
 
 bool RecordedDataReader::Open(const std::string& fileName)
 {
-    SPX_DBG_TRACE_VERBOSE("Opening video file '%ls'", fileName.c_str());
+    SPX_DBG_TRACE_VERBOSE("Opening video file '%s'", fileName.c_str());
     ifs.open(fileName, std::ifstream::in);
 
     if (!ifs.good())
@@ -239,8 +239,8 @@ uint32_t RecordedDataReader::Read(uint8_t* buffer, uint32_t maxSize)
     m_totalBytes += srcBufferLength;
     m_numOfBuffer++;
 
-    SPX_DBG_TRACE_VERBOSE(" RecordedDataReader::Read: return bytes= %d", srcBufferLength);
-    SPX_DBG_TRACE_VERBOSE(" %s total frame count = %d, total bytes = %ld  ", m_type.c_str(), m_numOfBuffer, m_totalBytes);
+    SPX_DBG_TRACE_VERBOSE(" RecordedDataReader::Read: return bytes= %zu", srcBufferLength);
+    SPX_DBG_TRACE_VERBOSE(" %s total frame count = %d, total bytes = %" PRIu64, m_type.c_str(), m_numOfBuffer, m_totalBytes);
 
     return (uint32_t)srcBufferLength;
 }

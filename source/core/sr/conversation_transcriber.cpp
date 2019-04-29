@@ -173,11 +173,11 @@ void CSpxConversationTranscriber::SendSpeehEventMessageInternal()
             }
             catch (const std::exception& e)
             {
-                SPX_TRACE_ERROR(e.what());
+                SPX_TRACE_ERROR("%s", e.what());
             }
             catch (...)
             {
-                SPX_TRACE_ERROR("Exception occured in SendSpeechEventMessage");
+                SPX_TRACE_ERROR("Exception occurred in SendSpeechEventMessage");
             }
         }
     }

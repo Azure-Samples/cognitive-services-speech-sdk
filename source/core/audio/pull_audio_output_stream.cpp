@@ -23,7 +23,7 @@ CSpxPullAudioOutputStream::CSpxPullAudioOutputStream() : m_writingEnded(false)
 
 uint32_t CSpxPullAudioOutputStream::Write(uint8_t* buffer, uint32_t size)
 {
-    SPX_DBG_TRACE_VERBOSE("CSpxPullAudioOutputStream::Write buffer %x size=%d", buffer, size);
+    SPX_DBG_TRACE_VERBOSE("CSpxPullAudioOutputStream::Write buffer %p size=%d", (void*)buffer, size);
     SPX_IFTRUE_THROW_HR(m_writingEnded, SPXERR_UNEXPECTED_EOF);
 
     if (size == 0)

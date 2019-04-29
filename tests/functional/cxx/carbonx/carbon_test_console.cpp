@@ -2024,7 +2024,7 @@ int SafeMain(const std::vector<std::string>& args)
         }
         else
         {
-            SPX_TRACE_ERROR("Carbonx: got exception hr=0x%x", hr);
+            SPX_TRACE_ERROR("Carbonx: got exception hr=0x%" PRIxPTR, hr);
         }
         exit(-1);
     }

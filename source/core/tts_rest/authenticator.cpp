@@ -173,7 +173,7 @@ std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri,
                 errorMessage << " HTTP status code = " << statusCode << ".";
             }
 
-            SPX_TRACE_ERROR(errorMessage.str().data());
+            SPX_TRACE_ERROR("%s", errorMessage.str().data());
         }
         else
         {

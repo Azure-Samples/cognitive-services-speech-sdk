@@ -261,7 +261,7 @@ protected:
     {
         if (m_hreco != SPXHANDLE_INVALID)
         {
-            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8p", __FUNCTION__, (void*)m_hreco);
             SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
 
             if (&recoEvent == &Recognizing)
@@ -279,7 +279,7 @@ protected:
     {
         if (m_hreco != SPXHANDLE_INVALID)
         {
-            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8p", __FUNCTION__, (void*)m_hreco);
             SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
 
             if (&recoEvent == &Canceled)
@@ -293,7 +293,7 @@ protected:
     {
         if (m_hreco != SPXHANDLE_INVALID)
         {
-            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8p", __FUNCTION__, (void*)m_hreco);
             SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
 
             if (&recognitionEvent == &SpeechStartDetected)
@@ -311,7 +311,7 @@ protected:
     {
         if (m_hreco != SPXHANDLE_INVALID)
         {
-            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8p", __FUNCTION__, (void*)m_hreco);
             SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
 
             if (&sessionEvent == &SessionStarted)

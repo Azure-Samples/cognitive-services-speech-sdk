@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include <cstring>
+#include <inttypes.h>
 #include "mock_reco_engine_adapter.h"
 #include "service_helpers.h"
 
@@ -135,7 +136,7 @@ void CSpxMockRecoEngineAdapter::FireIntermediateResult()
 
     auto resultText = m_mockResultText;
     auto offset = (uint32_t)m_cbAudioProcessed;
-    SPX_DBG_TRACE_VERBOSE("%s: text='%s', offset=%d", __FUNCTION__, resultText.c_str(), offset);
+    SPX_DBG_TRACE_VERBOSE("%s: text='%ls', offset=%d", __FUNCTION__, resultText.c_str(), offset);
 
     m_cbFiredLastIntermediate = offset;
     m_cbFireNextIntermediate += m_numMsBetweenIntermediates * m_format->nAvgBytesPerSec / 1000;
@@ -155,7 +156,7 @@ void CSpxMockRecoEngineAdapter::FireFinalResult()
         : m_mockResultText;
 
     auto offset = (uint32_t)m_cbAudioProcessed;
-    SPX_DBG_TRACE_VERBOSE("%s: text='%s', offset=%d", __FUNCTION__, resultText.c_str(), offset);
+    SPX_DBG_TRACE_VERBOSE("%s: text='%ls', offset=%d", __FUNCTION__, resultText.c_str(), offset);
 
     m_cbFiredLastIntermediate = offset;
     m_cbFiredLastFinal = offset;
@@ -176,7 +177,7 @@ void CSpxMockRecoEngineAdapter::FireFinalResult()
 
 void CSpxMockRecoEngineAdapter::EnsureFireFinalResult()
 {
-    SPX_DBG_TRACE_VERBOSE("%s: offset=%d", __FUNCTION__, m_cbAudioProcessed);
+    SPX_DBG_TRACE_VERBOSE("%s: offset=%" PRIu64, __FUNCTION__, m_cbAudioProcessed);
     if (m_cbFiredLastIntermediate > m_cbFiredLastFinal)
     {
         FireFinalResult();
@@ -185,7 +186,7 @@ void CSpxMockRecoEngineAdapter::EnsureFireFinalResult()
 
 void CSpxMockRecoEngineAdapter::FireSpeechStartDetected()
 {
-    SPX_DBG_TRACE_VERBOSE("%s: offset=%llu", __FUNCTION__, m_cbAudioProcessed);
+    SPX_DBG_TRACE_VERBOSE("%s: offset=%" PRIu64, __FUNCTION__, m_cbAudioProcessed);
     InvokeOnSite([this](const SitePtr& site)
     {
         site->AdapterDetectedSpeechStart(this, m_cbAudioProcessed);
@@ -194,7 +195,7 @@ void CSpxMockRecoEngineAdapter::FireSpeechStartDetected()
 
 void CSpxMockRecoEngineAdapter::FireSpeechEndDetected()
 {
-    SPX_DBG_TRACE_VERBOSE("%s: offset=%llu", __FUNCTION__, m_cbAudioProcessed);
+    SPX_DBG_TRACE_VERBOSE("%s: offset=%" PRIu64, __FUNCTION__, m_cbAudioProcessed);
 
     InvokeOnSite([this](const SitePtr& site)
     {

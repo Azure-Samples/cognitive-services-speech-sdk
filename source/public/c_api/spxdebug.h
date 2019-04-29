@@ -6,6 +6,7 @@
 //
 
 #pragma once
+#include <inttypes.h>
 #include <spxerror.h>
 
 #ifndef _MSC_VER
@@ -167,9 +168,9 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, bool enableD
 #ifdef __cplusplus
 #include <memory>
 #define __SPX_TRACE_SCOPE(t1, enableDebugOutput, t2, x, y)                                                      \
-    __SPX_TRACE_INFO(t1, enableDebugOutput, x);                                                                 \
+    __SPX_TRACE_INFO(t1, enableDebugOutput, "%s", x);                                                                 \
     auto evaluateYInScopeInMacros = y;                                                                 \
-    auto leavingScopePrinterInMacros = [&evaluateYInScopeInMacros](int*) -> void { __SPX_TRACE_INFO(t2, enableDebugOutput, evaluateYInScopeInMacros); }; \
+    auto leavingScopePrinterInMacros = [&evaluateYInScopeInMacros](int*) -> void { __SPX_TRACE_INFO(t2, enableDebugOutput, "%s", evaluateYInScopeInMacros); }; \
     std::unique_ptr<int, decltype(leavingScopePrinterInMacros)> onExit((int*)1, leavingScopePrinterInMacros)
 #endif /* __cplusplus */
 
@@ -177,7 +178,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, bool enableD
 #define ___SPX_EXPR_AS_STRING(_String) "" #_String
 #define __SPX_EXPR_AS_STRING(_String) ___SPX_EXPR_AS_STRING(_String)
 
-#define __SPX_TRACE_HR(title, enableDebugOutput, hr, x)             __SPX_TRACE_ERROR(title, enableDebugOutput, __SPX_EXPR_AS_STRING(hr) " = 0x%0x", x)
+#define __SPX_TRACE_HR(title, enableDebugOutput, hr, x)             __SPX_TRACE_ERROR(title, enableDebugOutput, __SPX_EXPR_AS_STRING(hr) " = 0x%0" PRIxPTR, x)
 #define __SPX_TRACE_ASSERT(title, enableDebugOutput, expr)          __SPX_TRACE_ERROR_IF(!(expr), title, enableDebugOutput, __SPX_EXPR_AS_STRING(expr) " = false"); \
     if(!(expr)) abort()
 

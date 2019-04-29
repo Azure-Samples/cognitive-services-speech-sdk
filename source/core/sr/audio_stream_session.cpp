@@ -370,7 +370,7 @@ void CSpxAudioStreamSession::ProcessAudio(const DataChunkPtr& audioChunk)
             if (overflowHappened)
             {
                 // drop everything from the buffer
-                SPX_DBG_TRACE_VERBOSE("%s: Overflow happened, dropping the buffer and resetting the adapter, stashed size %d bytes.", __FUNCTION__, m_audioBuffer->StashedSizeInBytes());
+                SPX_DBG_TRACE_VERBOSE("%s: Overflow happened, dropping the buffer and resetting the adapter, stashed size %" PRIu64 " bytes.", __FUNCTION__, m_audioBuffer->StashedSizeInBytes());
                 m_audioBuffer->Drop();
             }
         }
@@ -430,7 +430,7 @@ void CSpxAudioStreamSession::SlowDownThreadIfNecessary(uint32_t dataSize)
     {
         // Sleep to slow down pulling.
         auto sleepPeriod = std::chrono::milliseconds(dataSize * 1000 / m_avgBytesPerSecond * slowdownRate / 100);
-        SPX_DBG_TRACE_VERBOSE("%s - Stashing ... sleeping for %d ms", __FUNCTION__, sleepPeriod.count());
+        SPX_DBG_TRACE_VERBOSE("%s - Stashing ... sleeping for %llu ms", __FUNCTION__, sleepPeriod.count());
         std::this_thread::sleep_for(sleepPeriod);
     }
 }
@@ -1082,7 +1082,7 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
 {
     UNUSED(adapter);
 
-    SPX_DBG_TRACE_VERBOSE("Keyword detected!! Starting KwsSingleShot recognition... offset=%d; size=%d", offset, audioChunk->size);
+    SPX_DBG_TRACE_VERBOSE("Keyword detected!! Starting KwsSingleShot recognition... offset=%" PRIu64 "; size=%d", offset, audioChunk->size);
     SPX_ASSERT_WITH_MESSAGE(m_threadService->IsOnServiceThread(), "called on wrong thread, must be thread service managed thread.");
 
     // Report that we have a keyword candidate
@@ -1207,7 +1207,7 @@ void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapte
         m_currentTurnGlobalOffset = m_audioBuffer->GetAbsoluteOffset();
         bufferedBytes = m_audioBuffer->StashedSizeInBytes();
     }
-    SPX_DBG_TRACE_VERBOSE("m_currentTurnGlobalOffset=%d, previousTurnGlobalOffset=%d, bufferedBytes=%d", m_currentTurnGlobalOffset, previousTurnGlobalOffset, bufferedBytes);
+    SPX_DBG_TRACE_VERBOSE("m_currentTurnGlobalOffset=%" PRIu64 ", previousTurnGlobalOffset=%" PRIu64 " bufferedBytes=%" PRIu64, m_currentTurnGlobalOffset, previousTurnGlobalOffset, bufferedBytes);
 
     auto bIsConversationTranscriber = IsRecognizerType<ISpxConversationTranscriber>();
 
@@ -1393,7 +1393,7 @@ uint64_t CSpxAudioStreamSession::GetResultLatencyInMs(const ProcessedAudioTimest
     auto nowTime = system_clock::now();
     if (nowTime < audioTimestamp->chunkReceivedTime)
     {
-        SPX_TRACE_ERROR("Unexpected error: result recevied time (%s) is earlier than audio received time (%s).",
+        SPX_TRACE_ERROR("Unexpected error: result received time (%s) is earlier than audio received time (%s).",
             PAL::GetTimeInString(nowTime).c_str(), PAL::GetTimeInString(audioTimestamp->chunkReceivedTime).c_str());
         return 0;
     }
@@ -1717,7 +1717,7 @@ void CSpxAudioStreamSession::EnsureResetEngineEngineAdapterComplete()
     if (m_resetRecoAdapter != nullptr && m_resetRecoAdapter == m_recoAdapter)
     {
         // Let's term and clear our reco adapter...
-        SPX_DBG_TRACE_VERBOSE("%s: resetting reco adapter (0x%8x)...", __FUNCTION__, m_resetRecoAdapter.get());
+        SPX_DBG_TRACE_VERBOSE("%s: resetting reco adapter (0x%8p)...", __FUNCTION__, (void*)m_resetRecoAdapter.get());
         SpxTermAndClear(m_resetRecoAdapter);
 
         m_expectAdapterStartedTurn = false;

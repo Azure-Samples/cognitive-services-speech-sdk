@@ -69,7 +69,7 @@ void CSpxNullAudioOutput::SetFormat(SPXWAVEFORMATEX* pformat)
     // Allocate the buffer for the format
     auto formatSize = sizeof(SPXWAVEFORMATEX) + pformat->cbSize;
     m_format = SpxAllocWAVEFORMATEX(formatSize);
-    SPX_DBG_TRACE_VERBOSE("CSpxNullAudioOuput::SetFormat is called with format 0x%x", pformat);
+    SPX_DBG_TRACE_VERBOSE("CSpxNullAudioOuput::SetFormat is called with format 0x%p", (void*)pformat);
 
     // Copy the format
     memcpy(m_format.get(), pformat, formatSize);

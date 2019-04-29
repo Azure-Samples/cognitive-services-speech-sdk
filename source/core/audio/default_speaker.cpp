@@ -142,7 +142,7 @@ void CSpxDefaultSpeaker::SetFormat(SPXWAVEFORMATEX* pformat)
     // Allocate the buffer for the format
     auto formatSize = sizeof(AUDIO_WAVEFORMAT);
     m_audioFormat = SpxAllocSharedBuffer<AUDIO_WAVEFORMAT>(formatSize);
-    SPX_DBG_TRACE_VERBOSE("CSpxDefaultSpeaker::SetFormat is called with format 0x%x", pformat);
+    SPX_DBG_TRACE_VERBOSE("CSpxDefaultSpeaker::SetFormat is called with format 0x%p", (void*)pformat);
 
     // Copy the format
     memcpy(m_audioFormat.get(), pformat, formatSize);

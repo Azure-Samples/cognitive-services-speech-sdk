@@ -208,7 +208,7 @@ private:
     {
         if (m_handle != SPXHANDLE_INVALID)
         {
-            SPX_DBG_TRACE_VERBOSE("%s: m_handle=0x%8x", __FUNCTION__, m_handle);
+            SPX_DBG_TRACE_VERBOSE("%s: m_handle=0x%8p", __FUNCTION__, (void*)m_handle);
             SPX_DBG_TRACE_VERBOSE_IF(!::bot_connector_handle_is_valid(m_handle), "%s: m_handle is INVALID!!!", __FUNCTION__);
 
             if (&reco_event == &Recognizing)
@@ -248,7 +248,7 @@ private:
     {
         if (m_handle != SPXHANDLE_INVALID)
         {
-            SPX_DBG_TRACE_VERBOSE("%s: m_handle=0x%8x", __FUNCTION__, m_handle);
+            SPX_DBG_TRACE_VERBOSE("%s: m_handle=0x%8p", __FUNCTION__, (void*)m_handle);
             SPX_DBG_TRACE_VERBOSE_IF(!::bot_connector_handle_is_valid(m_handle), "%s: m_handle is INVALID!!!", __FUNCTION__);
 
             if (&session_event == &SessionStarted)
@@ -274,7 +274,7 @@ private:
     {
         if (m_handle != SPXHANDLE_INVALID)
         {
-            SPX_DBG_TRACE_VERBOSE("%s: m_handle=0x%8x", __FUNCTION__, m_handle);
+            SPX_DBG_TRACE_VERBOSE("%s: m_handle=0x%8p", __FUNCTION__, (void*)m_handle);
             SPX_DBG_TRACE_VERBOSE_IF(!::bot_connector_handle_is_valid(m_handle), "%s: m_handle is INVALID!!!", __FUNCTION__);
 
             if (&canceled_event == &Canceled)
@@ -296,7 +296,7 @@ private:
     {
         if (m_handle != SPXHANDLE_INVALID)
         {
-            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_handle);
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8p", __FUNCTION__, (void*)m_handle);
             SPX_DBG_TRACE_VERBOSE_IF(!::bot_connector_handle_is_valid(m_handle), "%s: m_handle is INVALID!!!", __FUNCTION__);
 
             if (&activity_event == &ActivityReceived)

@@ -64,7 +64,7 @@ protected:
         m_hreco(hreco)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-        SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
+        SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8p", __FUNCTION__, (void*)m_hreco);
     }
 
     virtual ~Recognizer()
@@ -81,7 +81,7 @@ protected:
         {
             ::recognizer_handle_release(m_hreco);
             m_hreco = SPXHANDLE_INVALID;
-            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8p", __FUNCTION__, (void*)m_hreco);
         }
     }
 

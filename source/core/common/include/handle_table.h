@@ -44,12 +44,12 @@ public:
         WriteLock_Type writeLock(m_mutex);
 
         T* ptr = t.get();
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s ptr=0x%8x", __FUNCTION__, ptr);
+        SPX_DBG_TRACE_VERBOSE_IF(1, "%s ptr=0x%8p", __FUNCTION__, (void*)ptr);
 
         if (ptr != nullptr)
         {
             handle = reinterpret_cast<Handle>(ptr);
-            SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8x, ptr=0x%8x", __FUNCTION__, handle, ptr);
+            SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8p, ptr=0x%8p", __FUNCTION__, (void*)handle, (void*)ptr);
 
             m_handleMap.emplace(handle, t);
             m_ptrMap.emplace(ptr, handle);
@@ -88,7 +88,7 @@ public:
 
     void StopTracking(Handle handle)
     {
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8x", __FUNCTION__, handle);
+        SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8p", __FUNCTION__, (void*)handle);
         if (IsTracked(handle))
         {
             WriteLock_Type writeLock(m_mutex);
@@ -98,7 +98,7 @@ public:
                 auto sharedPtr = iterHandleMap->second;
                 auto iterPtrMap = m_ptrMap.find(sharedPtr.get());
 
-                SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8x, ptr=0x%8x", __FUNCTION__, handle, sharedPtr.get());
+                SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8p, ptr=0x%8p", __FUNCTION__, (void*)handle, (void*)sharedPtr.get());
 
                 m_handleMap.erase(iterHandleMap);
                 m_ptrMap.erase(iterPtrMap);
@@ -128,7 +128,7 @@ public:
                 auto iterHandleMap = m_handleMap.find(handle);
                 auto sharedPtr = iterHandleMap->second;
 
-                SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8x, ptr=0x%8x", __FUNCTION__, handle, sharedPtr.get());
+                SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8x, ptr=0x%8p", __FUNCTION__, handle, (void*)sharedPtr.get());
 
                 m_ptrMap.erase(iterPtrMap);
                 m_handleMap.erase(iterHandleMap);
@@ -147,8 +147,8 @@ public:
 
     void Term()
     {
-        SPX_DBG_TRACE_VERBOSE_IF(m_ptrMap.size() == 0, "%s: ZERO handles 'leaked'", __FUNCTION__, m_ptrMap.size());
-        SPX_DBG_TRACE_WARNING_IF(m_ptrMap.size() >= 1, "%s: non-zero handles 'leaked'", __FUNCTION__, m_ptrMap.size());
+        SPX_DBG_TRACE_VERBOSE_IF(m_ptrMap.size() == 0, "%s: ZERO handles 'leaked'", __FUNCTION__);
+        SPX_DBG_TRACE_WARNING_IF(m_ptrMap.size() >= 1, "%s: non-zero handles 'leaked'", __FUNCTION__);
 
         WriteLock_Type lock(m_mutex);
         m_handleMap.clear();

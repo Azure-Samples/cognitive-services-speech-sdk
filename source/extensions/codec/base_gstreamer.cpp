@@ -73,7 +73,7 @@ void BaseGstreamer::ThrowAfterClean(bool cond, uint32_t errCode, const char* psz
 {
     if (cond)
     {
-        SPX_TRACE_ERROR_IF(true, pszFormat);
+        SPX_TRACE_ERROR_IF(true, "%s", pszFormat);
         Stop();
         UnrefObject((gpointer *)&m_codecPipeline);
         UnrefObject((gpointer *)&m_bufferSource);
@@ -179,7 +179,7 @@ bool BaseGstreamer::GetStatus()
 
         if (m_bErrorInsideGstreamer)
         {
-            SPX_TRACE_ERROR_IF(true, m_gstErrorString.c_str());
+            SPX_TRACE_ERROR_IF(true, "%s", m_gstErrorString.c_str());
             ThrowRuntimeError(m_gstErrorString);
         }
     }
@@ -195,7 +195,7 @@ bool BaseGstreamer::GetStatus()
 void BaseGstreamer::StartReader()
 {
     GstStateChangeReturn pipelineState = gst_element_set_state(GST_ELEMENT(m_codecPipeline), GST_STATE_PLAYING);
-    
+
     ThrowAfterClean(pipelineState == GST_STATE_CHANGE_FAILURE,
         SPXERR_GSTREAMER_INTERNAL_ERROR,
         "Failed **gst_element_set_state**. Gstreamer pipeline GST_STATE_PLAYING failed");

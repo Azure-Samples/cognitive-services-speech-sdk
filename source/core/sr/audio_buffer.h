@@ -20,7 +20,7 @@ namespace Speech {
 namespace Impl {
 
     // ProcessedAudioTimestamp presents the received time of the last audio that contributes a hypothesis or phrase result.
-    // The chunkReceivedTime is the time when the last audio chunk is recevied, and the remainingAudioInTicks is the length
+    // The chunkReceivedTime is the time when the last audio chunk is received, and the remainingAudioInTicks is the length
     // (in ticks) of audio in the last chunk that is not a part of hypothesis or phrase result.
     struct ProcessedAudioTimestamp
     {

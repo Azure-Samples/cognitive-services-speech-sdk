@@ -35,14 +35,14 @@ void CSpxPushAudioInputStream::SetFormat(SPXWAVEFORMATEX* format)
     // Allocate the buffer for the format
     auto formatSize = sizeof(SPXWAVEFORMATEX) + format->cbSize;
     m_format = SpxAllocWAVEFORMATEX(formatSize);
-    SPX_DBG_TRACE_VERBOSE_IF(TURN_ON_VERBOSE_AUDIO_DEBUGGING, "CSpxPushAudioInputStream::SetFormat is called with format 0x%x", format);
+    SPX_DBG_TRACE_VERBOSE_IF(TURN_ON_VERBOSE_AUDIO_DEBUGGING, "CSpxPushAudioInputStream::SetFormat is called with format 0x%p", (void*)format);
     // Copy the format
     memcpy(m_format.get(), format, formatSize);
 }
 
 void CSpxPushAudioInputStream::Write(uint8_t* buffer, uint32_t size)
 {
-    SPX_DBG_TRACE_VERBOSE_IF(TURN_ON_VERBOSE_AUDIO_DEBUGGING, "CSpxPushAudioInputStream::Write buffer %x size=%d", buffer, size);
+    SPX_DBG_TRACE_VERBOSE_IF(TURN_ON_VERBOSE_AUDIO_DEBUGGING, "CSpxPushAudioInputStream::Write buffer %p size=%d", (void*)buffer, size);
     if (buffer != nullptr && size > 0)
     {
         WriteBuffer(buffer, size);

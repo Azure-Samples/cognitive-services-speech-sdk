@@ -41,7 +41,7 @@ public:
         Translations(m_translations)
     {
         PopulateResultFields(resultHandle);
-        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%s.", __FUNCTION__, this, Handle, ResultId.c_str());
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%p, handle=0x%p) -- resultid=%s.", __FUNCTION__, (void*)this, (void*)Handle, ResultId.c_str());
     };
 
     /// <summary>
@@ -49,7 +49,7 @@ public:
     /// </summary>
     virtual ~TranslationRecognitionResult()
     {
-        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, Handle);
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%p, handle=0x%p)", __FUNCTION__, (void*)this, (void*)Handle);
     }
 
     /// <summary>
@@ -120,7 +120,7 @@ public:
         Audio(m_audioData)
     {
         PopulateResultFields(resultHandle);
-        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) reason=0x%x", __FUNCTION__, this, resultHandle, Reason);
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%p, handle=0x%p) reason=0x%x", __FUNCTION__, (void*)this, (void*)resultHandle, Reason);
     };
 
     /// <summary>
@@ -128,7 +128,7 @@ public:
     /// </summary>
     virtual ~TranslationSynthesisResult()
     {
-        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x)", __FUNCTION__, this);
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%p)", __FUNCTION__, (void*)this);
     };
 
     /// <summary>
@@ -163,7 +163,7 @@ private:
         }
         SPX_THROW_ON_FAIL(hr);
 
-        SPX_DBG_TRACE_VERBOSE("Translation synthesis: audio length: %d, verctor size:", bufLen, m_audioData.size());
+        SPX_DBG_TRACE_VERBOSE("Translation synthesis: audio length: %zu, vector size: %zu", bufLen, m_audioData.size());
     };
 };
 

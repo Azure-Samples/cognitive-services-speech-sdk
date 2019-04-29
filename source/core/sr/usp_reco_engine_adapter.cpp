@@ -39,13 +39,13 @@ CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
     m_uspState(UspState::Idle)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p", __FUNCTION__, (void*)this);
 }
 
 CSpxUspRecoEngineAdapter::~CSpxUspRecoEngineAdapter()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p", __FUNCTION__, (void*)this);
     SPX_DBG_ASSERT(m_uspCallbacks == nullptr);
     SPX_DBG_ASSERT(m_uspConnection == nullptr);
 }
@@ -53,7 +53,7 @@ CSpxUspRecoEngineAdapter::~CSpxUspRecoEngineAdapter()
 void CSpxUspRecoEngineAdapter::Init()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p", __FUNCTION__, (void*)this);
 
     SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
     SPX_IFTRUE_THROW_HR(m_uspConnection != nullptr, SPXERR_ALREADY_INITIALIZED);
@@ -64,17 +64,17 @@ void CSpxUspRecoEngineAdapter::Init()
 void CSpxUspRecoEngineAdapter::Term()
 {
     SPX_DBG_TRACE_SCOPE("Terminating CSpxUspRecoEngineAdapter...", "Terminating CSpxUspRecoEngineAdapter... Done!");
-    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p", __FUNCTION__, (void*)this);
 
     if (ChangeState(UspState::Terminating))
     {
-        SPX_DBG_TRACE_VERBOSE("%s: Terminating USP Connection (0x%8x)", __FUNCTION__, m_uspConnection.get());
+        SPX_DBG_TRACE_VERBOSE("%s: Terminating USP Connection (0x%8p)", __FUNCTION__, (void*)m_uspConnection.get());
         UspTerminate();
         ChangeState(UspState::Zombie);
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
 }
 
@@ -189,7 +189,7 @@ void CSpxUspRecoEngineAdapter::SendSpeechEventMessage(std::string&& message)
 void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p", __FUNCTION__, (void*)this);
 
     SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
     SPX_DBG_TRACE_VERBOSE_IF(pformat != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d",
@@ -204,12 +204,12 @@ void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
 
     if (IsState(UspState::Zombie))
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) USP-ZOMBIE", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) USP-ZOMBIE", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
     else if (IsBadState() && !IsState(UspState::Terminating))
     {
         // In case of error there still can be some calls to SetFormat in flight.
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
     else if (pformat != nullptr && IsState(UspState::Idle) && ChangeState(AudioState::Idle, AudioState::Ready))
     {
@@ -217,19 +217,19 @@ void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
         // The m_audioState is Ready at this time. So, if we have two SetFormat calls in a row, the next one won't come in here
         // it goes to the else.
         //
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x)->PrepareFirstAudioReadyState()", __FUNCTION__, this);
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p)->PrepareFirstAudioReadyState()", __FUNCTION__, (void*)this);
         PrepareFirstAudioReadyState(pformat);
     }
     else if (pformat == nullptr && (ChangeState(AudioState::Idle) || IsState(UspState::Terminating)))
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) site->AdapterCompletedSetFormatStop()", __FUNCTION__, this);
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) site->AdapterCompletedSetFormatStop()", __FUNCTION__, (void*)this);
         InvokeOnSite([this](const SitePtr& p) { p->AdapterCompletedSetFormatStop(this); });
 
         m_format.reset();
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
 }
 
@@ -238,16 +238,16 @@ void CSpxUspRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
     auto size = audioChunk->size;
     if (IsState(UspState::Zombie) && size == 0)
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... size=0 ... (audioState/uspState=%d/%d) USP-ZOMBIE", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... size=0 ... (audioState/uspState=%d/%d) USP-ZOMBIE", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
     else if (IsBadState())
     {
         // In case of error there still can be some calls to ProcessAudio in flight.
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
     else if (size > 0 && ChangeState(AudioState::Ready, UspState::Idle, AudioState::Sending, UspState::WaitingForTurnStart))
     {
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8x)->SendPreAudioMessages() ... size=%d", __FUNCTION__, this, size);
+        SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8p)->SendPreAudioMessages() ... size=%d", __FUNCTION__, (void*)this, size);
         SendPreAudioMessages();
         UspWrite(audioChunk);
 
@@ -256,27 +256,27 @@ void CSpxUspRecoEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
     }
     else if (audioChunk->size > 0 && IsState(AudioState::Sending))
     {
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8x) Sending Audio ... size=%d", __FUNCTION__, this, size);
+        SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8p) Sending Audio ... size=%d", __FUNCTION__, (void*)this, size);
         UspWrite(audioChunk);
     }
     else if (size == 0 && IsState(AudioState::Sending))
     {
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8x) Flushing Audio ... size=0 USP-FLUSH", __FUNCTION__, this);
+        SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8p) Flushing Audio ... size=0 USP-FLUSH", __FUNCTION__, (void*)this);
         UspWriteFlush();
     }
     else if (!IsState(AudioState::Sending))
     {
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8x) Ignoring audio size=%d ... (audioState/uspState=%d/%d)", __FUNCTION__, this, size, m_audioState, m_uspState);
+        SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8p) Ignoring audio size=%d ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, size, m_audioState, m_uspState);
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
 }
 
 void CSpxUspRecoEngineAdapter::SendAgentMessage(const std::string& buffer)
 {
-    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p", __FUNCTION__, (void*)this);
     EnsureUspInit();
     UspSendMessage("agent", buffer, USP::MessageType::Agent);
 }
@@ -291,7 +291,7 @@ void CSpxUspRecoEngineAdapter::EnsureUspInit()
 
 void CSpxUspRecoEngineAdapter::UspInitialize()
 {
-    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p", __FUNCTION__, (void*)this);
     SPX_IFTRUE_THROW_HR(m_uspConnection != nullptr, SPXERR_ALREADY_INITIALIZED);
     SPX_IFTRUE_THROW_HR(m_uspCallbacks != nullptr, SPXERR_ALREADY_INITIALIZED);
 
@@ -654,7 +654,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspRegion(const std::shared_ptr<ISpxNa
     {
         if (!region.empty())
         {
-            SPX_DBG_TRACE_ERROR("%s: when using custom endpoint, region should not be specified separately.");
+            SPX_DBG_TRACE_ERROR("when using custom endpoint, region should not be specified separately.");
             SPX_THROW_HR(SPXERR_INVALID_ARG);
         }
     }
@@ -1093,16 +1093,16 @@ void CSpxUspRecoEngineAdapter::OnSpeechStartDetected(const USP::SpeechStartDetec
 
     if (IsBadState())
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
     else if (IsState(UspState::WaitingForPhrase))
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) site->AdapterDetectedSpeechStart()", __FUNCTION__, this);
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) site->AdapterDetectedSpeechStart()", __FUNCTION__, (void*)this);
         InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterDetectedSpeechStart(this, message.offset); });
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
 }
 
@@ -1114,18 +1114,18 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
 
     if (IsBadState())
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
     else if (IsStateBetweenIncluding(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd) &&
              (IsState(AudioState::Idle) ||
               IsState(AudioState::Mute)))
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) site->AdapterDetectedSpeechEnd()", __FUNCTION__, this);
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) site->AdapterDetectedSpeechEnd()", __FUNCTION__, (void*)this);
         InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterDetectedSpeechEnd(this, message.offset); });
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
         return;
     }
 
@@ -1145,7 +1145,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
 
     if (IsBadState())
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
     else if (IsState(UspState::WaitingForPhrase))
     {
@@ -1166,17 +1166,17 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
 }
 
 void CSpxUspRecoEngineAdapter::OnSpeechKeywordDetected(const USP::SpeechKeywordDetectedMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Speech.Keyword message. Status: %d, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n", message.status, message.text.c_str(), message.offset, message.duration);
-    
+
     if (IsBadState())
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
     else if (message.status == USP::KeywordVerificationStatus::Accepted && IsState(UspState::WaitingForPhrase))
     {
@@ -1207,7 +1207,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechKeywordDetected(const USP::SpeechKeywordD
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
 }
 
@@ -1220,7 +1220,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
 
     if (IsBadState())
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
     else if (ChangeState(UspState::WaitingForIntent, UspState::WaitingForIntent2))
     {
@@ -1235,7 +1235,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
 
     if (sendIntermediate)
@@ -1260,11 +1260,11 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
 void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Speech.Phrase message. Status: %d, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n", message.recognitionStatus, message.displayText.c_str(), message.offset, message.duration);
-    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p", __FUNCTION__, (void*)this);
 
     if (IsBadState())
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
     else if (m_expectIntentResponse &&
              message.recognitionStatus == USP::RecognitionStatus::Success &&
@@ -1300,7 +1300,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
 }
 
@@ -1452,7 +1452,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
 
 void CSpxUspRecoEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg& message)
 {
-    SPX_DBG_TRACE_VERBOSE("Response: Audio output chunk message. Audio data size: %d\n", message.audioLength);
+    SPX_DBG_TRACE_VERBOSE("Response: Audio output chunk message. Audio data size: %zu\n", message.audioLength);
 
     if (m_endpointType == USP::EndpointType::Bot)
     {
@@ -1481,11 +1481,11 @@ void CSpxUspRecoEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg
 void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Turn.Start message. Context.ServiceTag: %s\n", message.contextServiceTag.c_str());
-    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p", __FUNCTION__, (void*)this);
 
     if (IsBadState())
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
     else if (ChangeState(UspState::WaitingForTurnStart, UspState::WaitingForPhrase))
     {
@@ -1495,7 +1495,7 @@ void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
 }
 
@@ -1515,7 +1515,7 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
 
     if (IsBadState())
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
     else if (( m_isInteractiveMode && ChangeState(UspState::WaitingForTurnEnd, UspState::Idle)) ||
              (!m_isInteractiveMode && ChangeState(UspState::WaitingForPhrase, UspState::Idle)))
@@ -1531,7 +1531,7 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
 
     if (prepareReady && !IsBadState())
@@ -1620,7 +1620,7 @@ void CSpxUspRecoEngineAdapter::OnError(bool isTransport, USP::ErrorCode errorCod
 
     if (IsBadState())
     {
-        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
     else if (ChangeState(UspState::Error))
     {
@@ -1662,7 +1662,7 @@ void CSpxUspRecoEngineAdapter::OnError(bool isTransport, USP::ErrorCode errorCod
     }
     else
     {
-       SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+       SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
 }
 
@@ -1699,7 +1699,7 @@ void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
         }
         else
         {
-            SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+            SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
         }
     }
 }
@@ -1910,7 +1910,7 @@ std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dg
             contextJson += intentJson;
             appendComma = true;
         }
-        
+
         if (!keywordDetectionJson.empty())
         {
             contextJson += appendComma ? "," : "";
@@ -2155,7 +2155,7 @@ bool CSpxUspRecoEngineAdapter::ShouldResetAfterTurnStopped()
 void CSpxUspRecoEngineAdapter::ResetAfterTurnStopped()
 {
     SPX_DBG_ASSERT(ShouldResetAfterTurnStopped());
-    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x ... USP-RESET", __FUNCTION__, this);
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p ... USP-RESET", __FUNCTION__, (void*)this);
 
     // Let's terminate our current usp connection and sever our callbacks
     UspTerminate();
@@ -2175,7 +2175,7 @@ bool CSpxUspRecoEngineAdapter::ShouldResetBeforeFirstAudio()
 void CSpxUspRecoEngineAdapter::ResetBeforeFirstAudio()
 {
     SPX_DBG_ASSERT(ShouldResetBeforeFirstAudio() && IsState(AudioState::Ready, UspState::Idle));
-    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x ... USP-RESET", __FUNCTION__, this);
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8p ... USP-RESET", __FUNCTION__, (void*)this);
 
     // Let's terminate our current usp connection and sever our callbacks
     UspTerminate();

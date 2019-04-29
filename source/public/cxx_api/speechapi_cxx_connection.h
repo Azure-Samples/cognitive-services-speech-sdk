@@ -16,15 +16,15 @@ namespace Speech {
 
 /// <summary>
 /// Connection is a proxy class for managing connection to the speech service of the specified Recognizer.
-/// By default, a Recognizer autonomously manages connection to service when needed. 
-/// The Connection class provides additional methods for users to explicitly open or close a connection and 
+/// By default, a Recognizer autonomously manages connection to service when needed.
+/// The Connection class provides additional methods for users to explicitly open or close a connection and
 /// to subscribe to connection status changes.
 /// The use of Connection is optional, and mainly for scenarios where fine tuning of application
-/// behavior based on connection status is needed. Users can optionally call Open() to manually set up a connection 
+/// behavior based on connection status is needed. Users can optionally call Open() to manually set up a connection
 /// in advance before starting recognition on the Recognizer associated with this Connection. After starting recognition,
-/// calling Open() or Close() might fail, depending on the process state of the Recognizer. But this does not affect 
-/// the state of the associated Recognizer. And if the Recognizer needs to connect or disconnect to service, it will 
-/// setup or shutdown the connection independently. In this case the Connection will be notified by change of connection 
+/// calling Open() or Close() might fail, depending on the process state of the Recognizer. But this does not affect
+/// the state of the associated Recognizer. And if the Recognizer needs to connect or disconnect to service, it will
+/// setup or shutdown the connection independently. In this case the Connection will be notified by change of connection
 /// status via Connected/Disconnected events.
 /// Added in version 1.2.0.
 /// </summary>
@@ -33,7 +33,7 @@ class Connection : public std::enable_shared_from_this<Connection>
 
 public:
     /// <summary>
-    /// Gets the Connection instance from the specified recognizer. 
+    /// Gets the Connection instance from the specified recognizer.
     /// </summary>
     /// <param name="recognizer">The recognizer associated with the connection.</param>
     /// <returns>The Connection instance of the recognizer.</returns>
@@ -50,8 +50,8 @@ public:
 
     /// <summary>
     /// Starts to set up connection to the service.
-    /// Users can optionally call Open() to manually set up a connection in advance before starting recognition on the 
-    /// Recognizer associated with this Connection. After starting recognition, calling Open() might fail, depending on 
+    /// Users can optionally call Open() to manually set up a connection in advance before starting recognition on the
+    /// Recognizer associated with this Connection. After starting recognition, calling Open() might fail, depending on
     /// the process state of the Recognizer. But the failure does not affect the state of the associated Recognizer.
     /// Note: On return, the connection might not be ready yet. Please subscribe to the Connected event to
     /// be notfied when the connection is established.
@@ -66,7 +66,7 @@ public:
     /// <summary>
     /// Closes the connection the service.
     /// Users can optionally call Close() to manually shutdown the connection of the associated Recognizer. The call
-    /// might fail, depending on the process state of the Recognizer. But the failure does not affect the state of the 
+    /// might fail, depending on the process state of the Recognizer. But the failure does not affect the state of the
     /// associated Recognizer.
     /// </summary>
     void Close()
@@ -188,7 +188,7 @@ private:
     {
         if (m_connectionHandle != SPXHANDLE_INVALID)
         {
-            SPX_DBG_TRACE_VERBOSE("%s: m_connectionHandle=0x%8x", __FUNCTION__, m_connectionHandle);
+            SPX_DBG_TRACE_VERBOSE("%s: m_connectionHandle=0x%8p", __FUNCTION__, (void*)m_connectionHandle);
             SPX_DBG_TRACE_VERBOSE_IF(!::connection_handle_is_valid(m_connectionHandle), "%s: m_connectionHandle is INVALID!!!", __FUNCTION__);
 
             if (&connectionEvent == &Connected)

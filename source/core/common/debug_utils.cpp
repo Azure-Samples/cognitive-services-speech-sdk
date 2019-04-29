@@ -241,7 +241,7 @@ static void SignalHandler()
 {
     auto callstack = Debug::GetCallStack(1);
 
-    SPX_TRACE_VERBOSE(callstack.c_str());
+    SPX_TRACE_VERBOSE("%s", callstack.c_str());
 
     exit(1);
 }

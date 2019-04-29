@@ -116,7 +116,7 @@ private:
         {
             value = std::string("set to non-empty string");
         }
-        SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x; name='%s'; value='%s'", __FUNCTION__, this, name.c_str(), value.c_str());
+        SPX_DBG_TRACE_VERBOSE("%s: this=0x%p; name='%s'; value='%s'", __FUNCTION__, (void*)this, name.c_str(), value.c_str());
     }
 };
 

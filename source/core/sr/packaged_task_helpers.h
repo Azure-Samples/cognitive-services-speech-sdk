@@ -68,12 +68,12 @@ public:
             std::shared_future<void>& future = m_runAsyncFutures.front();
 
             lock.unlock();
-            SPX_DBG_TRACE_INFO("Task<void> checking future %p", &future);
+            SPX_DBG_TRACE_INFO("Task<void> checking future %p", (void*)&future);
 
             std::future_status status = future.wait_for(std::chrono::milliseconds(5000));
             UNUSED(status); // Release builds
 
-            SPX_DBG_TRACE_ERROR_IF(status == std::future_status::timeout, "************************** Task<void> %p did not complete. This may corrupt your memory", &future);
+            SPX_DBG_TRACE_ERROR_IF(status == std::future_status::timeout, "************************** Task<void> %p did not complete. This may corrupt your memory", (void*)&future);
 
             lock.lock();
             m_runAsyncFutures.pop_front();
@@ -84,12 +84,12 @@ public:
             std::shared_future<std::shared_ptr<ISpxRecognitionResult>>& future = m_runAsyncFutures2.front();
 
             lock.unlock();
-            SPX_DBG_TRACE_INFO("Task<ISpxRecognitionResult> checking future %p", &future);
+            SPX_DBG_TRACE_INFO("Task<ISpxRecognitionResult> checking future %p", (void*)&future);
 
             std::future_status status = future.wait_for(std::chrono::milliseconds(5000));
             UNUSED(status); // Release builds
 
-            SPX_DBG_TRACE_ERROR_IF(status == std::future_status::timeout, "************************** Task<ISpxRecognitionResult> %p did not complete. This may corrupt your memory", &future);
+            SPX_DBG_TRACE_ERROR_IF(status == std::future_status::timeout, "************************** Task<ISpxRecognitionResult> %p did not complete. This may corrupt your memory", (void*)&future);
 
             lock.lock();
             m_runAsyncFutures2.pop_front();
@@ -102,7 +102,7 @@ public:
 
             lock.unlock();
 
-            SPX_DBG_TRACE_INFO("Task<> helper - checking thread %p", thread.native_handle());
+            SPX_DBG_TRACE_INFO("Task<> helper - checking thread %p", (void*)thread.native_handle()); // TODO type is implementation defined
             thread.join();
 
             lock.lock();

@@ -40,13 +40,13 @@ public:
         m_result(std::make_shared<SpeechRecognitionResult>(ResultHandleFromEventHandle(hevent))),
         Result(m_result)
     {
-        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%p, handle=0x%p)", __FUNCTION__, (void*)this, (void*)m_hevent);
     };
 
     /// <inheritdoc/>
     virtual ~SpeechRecognitionEventArgs()
     {
-        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%p, handle=0x%p)", __FUNCTION__, (void*)this, (void*)m_hevent);
         SPX_THROW_ON_FAIL(recognizer_event_handle_release(m_hevent));
     };
 
@@ -112,13 +112,13 @@ public:
         ErrorCode(m_errorCode),
         ErrorDetails(m_cancellation->ErrorDetails)
     {
-        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x)", __FUNCTION__, this);
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%p)", __FUNCTION__, (void*)this);
     };
 
     /// <inheritdoc/>
     virtual ~SpeechRecognitionCanceledEventArgs()
     {
-        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x)", __FUNCTION__, this);
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%p)", __FUNCTION__, (void*)this);
     };
 
 #if defined(SWIG) || defined(BINDING_OBJECTIVE_C)

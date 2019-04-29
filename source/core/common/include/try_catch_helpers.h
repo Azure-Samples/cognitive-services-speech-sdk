@@ -70,12 +70,12 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
        error = stringify(ex.GetErrorCode());                \
        error += " ";                                        \
        error += ex.GetCallStack();                          \
-       SPX_TRACE_ERROR(error.c_str());                      \
+       SPX_TRACE_ERROR("%s", error.c_str());                \
     }                                                       \
     catch (const std::exception& e)                         \
     {                                                       \
         error = e.what();                                   \
-        SPX_TRACE_ERROR(error.c_str());                     \
+        SPX_TRACE_ERROR("%s", error.c_str());               \
     }                                                       \
     SPXAPI_FORCED_UNWIND_CATCH                              \
     catch (...)                                             \
@@ -98,12 +98,12 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
        error = stringify(ex.GetErrorCode());                \
        error += " ";                                        \
        error += ex.GetCallStack();                          \
-       SPX_TRACE_ERROR(error.c_str());                      \
+       SPX_TRACE_ERROR("%s", error.c_str());                \
     }                                                       \
     catch (const std::exception& e)                         \
     {                                                       \
         error = e.what();                                   \
-        SPX_TRACE_ERROR(error.c_str());                     \
+        SPX_TRACE_ERROR("%s", error.c_str());               \
     }                                                       \
     catch (...)                                             \
     {                                                       \

@@ -34,7 +34,7 @@ public:
         IntentId(m_intentId)
     {
         PopulateIntentFields(hresult, &m_intentId);
-        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%s; reason=0x%x; text=%s", __FUNCTION__, this, Handle, Utils::ToUTF8(ResultId).c_str(), Reason, Utils::ToUTF8(Text).c_str());
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%p, handle=0x%p) -- resultid=%s; reason=0x%x; text=%s", __FUNCTION__, (void*)this, (void*)Handle, Utils::ToUTF8(ResultId).c_str(), Reason, Utils::ToUTF8(Text).c_str());
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public:
     /// </summary>
     ~IntentRecognitionResult()
     {
-        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, Handle);
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%p, handle=0x%p)", __FUNCTION__, (void*)this, (void*)Handle);
     }
 
     /// <summary>

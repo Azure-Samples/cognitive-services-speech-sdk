@@ -276,7 +276,7 @@ uint32_t CSpxAudioDataStream::Read(uint8_t* buffer, uint32_t bufferSize, uint32_
 
 uint32_t CSpxAudioDataStream::Write(uint8_t* buffer, uint32_t size)
 {
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::Write buffer %x size=%d", buffer, size);
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::Write buffer %p size=%d", (void*)buffer, size);
     SPX_IFTRUE_THROW_HR(m_writingEnded, SPXERR_UNEXPECTED_EOF);
 
     if (size == 0)
