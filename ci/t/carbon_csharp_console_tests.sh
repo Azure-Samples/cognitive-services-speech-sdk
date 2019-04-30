@@ -65,12 +65,8 @@ for action in $Actions; do
     variantArg="${variants[$variantIndex + 1]}"
     TEST_NAME="$action $variant"
 
-    # Filter out unsupported combos
-    if [[ ($action == intent && ($variant == crisModel || $variant == base*)) ]]; then
-      continue
-    fi
-
     # TODO intent should use different subscriptions / regions / endpoints
+    [[ $action != intent ]] || continue
 
     runTest TESTRUNNER "$TEST_NAME" $TIMEOUT_SECONDS \
       "$TEST_CODE" $action $variantArg
