@@ -21,9 +21,5 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR user_release_handle(SPXUSERHANDLE user);
-
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR user_load_profile(InteropSafeHandle user);
-
     }
 }

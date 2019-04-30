@@ -10,5 +10,4 @@
 
 SPXAPI user_create_from_id(const char* user_id, SPXUSERHANDLE* huser);
 SPXAPI user_release_handle(SPXUSERHANDLE huser);
-SPXAPI user_load_profile(SPXUSERHANDLE huser);
 SPXAPI user_get_id(SPXUSERHANDLE huser, char* user_id, size_t user_id_size);
