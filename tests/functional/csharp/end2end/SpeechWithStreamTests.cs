@@ -93,9 +93,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             string[] lexicalFormResultUtterances = result.Select(r => r.Result.Best().ToArray()[0].LexicalForm).ToArray();
             lexicalFormResultUtterances = lexicalFormResultUtterances.Select(s => Regex.Replace(s, " '", "", RegexOptions.Compiled)).ToArray();
 
-            AssertFuzzyMatching(bestResultUtterances, TestData.English.Batman.Utterances, 2);
-            AssertFuzzyMatching(normalizedFormResultUtterances, TestData.English.Batman.Utterances, 2);
-            AssertFuzzyMatching(lexicalFormResultUtterances, TestData.English.Batman.Utterances, 2);
+            AssertFuzzyMatching(bestResultUtterances, TestData.English.Batman.Utterances, 3);
+            AssertFuzzyMatching(normalizedFormResultUtterances, TestData.English.Batman.Utterances, 3);
+            AssertFuzzyMatching(lexicalFormResultUtterances, TestData.English.Batman.Utterances, 3);
 
             Assert.AreEqual(TestData.English.Batman.Utterances.Length, result.Count, "Unexpected number of utterances");
             var actualRecognitionTextResults = result.Select(t => t.Result.Text).ToArray();
