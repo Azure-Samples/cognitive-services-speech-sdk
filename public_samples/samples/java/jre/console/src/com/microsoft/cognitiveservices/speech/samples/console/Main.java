@@ -35,7 +35,7 @@ public class Main {
             do {
                 x = new Scanner(System.in).nextLine();
                 System.out.println("");
-                switch (x) {
+                switch (x.toLowerCase()) {
                 case "1":
                     SpeechRecognitionSamples.recognitionWithMicrophoneAsync();
                     break;
@@ -64,21 +64,18 @@ public class Main {
                     TranslationSamples.translationWithAudioStreamAsync();
                     break;
                 case "a":
-                case "A":
                     IntentRecognitionSamples.intentRecognitionWithMicrophone();
                     break;
                 case "b":
-                case "B":
                     IntentRecognitionSamples.intentRecognitionWithLanguage();
                     break;
                 case "c":
-                case "C":
                     IntentRecognitionSamples.intentContinuousRecognitionWithFile();
                     break;
-                case "D":
+                case "d":
                     SpeechRecognitionSamples.continuousRecognitionWithPushStream();
                     break;
-                case "E":
+                case "e":
                     SpeechRecognitionSamples.continuousRecognitionWithFileWithPhraseListAsync();
                 case "0":
                     System.out.println("Exiting...");
@@ -86,7 +83,7 @@ public class Main {
                 }
                 System.out.println("\nRecognition done. " + prompt);
             } while (!x.equals("0"));
-            
+
             System.out.println("Finishing demo.");
             System.exit(0);
         } catch (Exception ex) {
