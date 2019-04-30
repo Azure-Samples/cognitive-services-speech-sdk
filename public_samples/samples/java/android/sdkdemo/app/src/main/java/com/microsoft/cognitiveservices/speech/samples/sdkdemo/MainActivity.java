@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             recognizedTextView.setText("Could not initialize: " + ex.toString());
         }
 
-        // create config 
+        // create config
         final SpeechConfig speechConfig;
         try {
             speechConfig = SpeechConfig.fromSubscription(SpeechSubscriptionKey, SpeechRegion);
@@ -215,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
 
                 try {
                     content.clear();
-                    
+
                     // audioInput = AudioConfig.fromDefaultMicrophoneInput();
                     audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
                     reco = new SpeechRecognizer(speechConfig, audioInput);
@@ -251,10 +251,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final HashMap<String, String> intentIdMap = new HashMap<>();
-        intentIdMap.put("1", "play music");
-        intentIdMap.put("2", "stop");
-
         ///////////////////////////////////////////////////
         // recognize intent
         ///////////////////////////////////////////////////
@@ -275,9 +271,7 @@ public class MainActivity extends AppCompatActivity {
                 final IntentRecognizer reco = new IntentRecognizer(intentConfig, audioInput);
 
                 LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromAppId(LanguageUnderstandingAppId);
-                for (Map.Entry<String, String> entry : intentIdMap.entrySet()) {
-                    reco.addIntent(intentModel, entry.getValue(), entry.getKey());
-                }
+                reco.addAllIntents(intentModel);
 
                 reco.recognizing.addEventListener((o, intentRecognitionResultEventArgs) -> {
                     final String s = intentRecognitionResultEventArgs.getResult().getText();
@@ -297,13 +291,9 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     String intentId = result.getIntentId();
-                    String intent = "";
-                    if (intentIdMap.containsKey(intentId)) {
-                        intent = intentIdMap.get(intentId);
-                    }
-                    Log.i(logTag, "Final result received: " + s + ", intent: " + intent);
+                    Log.i(logTag, "Final result received: " + s + ", intent: " + intentId);
                     content.set(0, s);
-                    content.set(1, " [intent: " + intent + "]");
+                    content.set(1, " [intent: " + intentId + "]");
                     setRecognizedText(TextUtils.join(System.lineSeparator(), content));
                     enableButtons();
                 });
