@@ -2156,6 +2156,13 @@ jobs:
       - Pre
       - OsxBuild
     buildPlatform: macOS
+    extraSteps:
+      - bash: |
+          set -u -x -e -o pipefail
+          cd public_samples/quickstart/cpp-macos
+          make SPEECHSDK_ROOT='$(Build.Repository.LocalPath)/xcode-build-output'
+          [[ -f helloworld ]]
+        displayName: "Build quickstart"
 
 - template: objectivec-unit-tests.yml
   parameters:

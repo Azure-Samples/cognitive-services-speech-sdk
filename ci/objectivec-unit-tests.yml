@@ -2,6 +2,7 @@ parameters:
   jobName: "OsxUnitTests"
   jobDependsOn: "Pre"
   buildPlatform: macOS
+  extraSteps: []
 
 jobs:
 - job: ${{ parameters.jobName }}
@@ -61,6 +62,7 @@ jobs:
     parameters:
       testsToRun: objectivec_unittests
       runTestArgs: ""
+  - ${{ parameters.extraSteps }}
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
