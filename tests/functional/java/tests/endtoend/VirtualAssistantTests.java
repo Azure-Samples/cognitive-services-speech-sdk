@@ -10,7 +10,6 @@ import com.microsoft.cognitiveservices.speech.dialog.BotConnectorConfig;
 import com.microsoft.cognitiveservices.speech.dialog.SpeechBotConnector;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import tests.Settings;
 
@@ -36,7 +35,7 @@ public class VirtualAssistantTests {
         Settings.LoadSettings();
     }
 
-    //@Before
+    @Before
     public void setUp() {
         // Bot secret is not required when using AutoReply connection type
         final BotConnectorConfig botConnectorConfig = BotConnectorConfig.fromSecretKey(SpeechChannelSecretForVirtualAssistant, SpeechSubscriptionKeyForVirtualAssistant, SpeechRegionForVirtualAssistant);
@@ -51,7 +50,6 @@ public class VirtualAssistantTests {
         eventRecord = new EventRecord();
     }
 
-    @Ignore
     @Test
     public void testSendActivity() throws IOException {
         assertNotNull(botConnector);
@@ -83,7 +81,6 @@ public class VirtualAssistantTests {
         }
     }
 
-    @Ignore
     @Test
     public void testListenOnce() {
         try {

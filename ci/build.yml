@@ -555,9 +555,9 @@ jobs:
          -DKeywordModel=/data/keyword/kws.table \
          -DTestOutputFilename=test-java-unittests-package.xml \
          -DSpeechAuthorizationToken=$SPEECHSDK_SPEECH_AUTHTOKEN \
-         -DSpeechSubscriptionKeyForVirtualAssistant="$(SPEECHSDK_BOT_SUBSCRIPTION)" \
-         -DSpeechRegionForVirtualAssistant="$(SPEECHSDK_BOT_REGION)" \
-         -DSpeechChannelSecretForVirtualAssistant="$(SPEECHSDK_BOT_FUNCTIONALTESTBOT)" \
+         -DSpeechSubscriptionKeyForVirtualAssistant="$SPEECHSDK_BOT_SUBSCRIPTION" \
+         -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
+         -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
          tests.runner.Runner \
          tests.AllTests
     displayName: Run unit test
@@ -669,9 +669,9 @@ jobs:
             -DKeywordModel=/data/keyword/kws.table \
             -DTestOutputFilename=test-java-unittests-package.xml \
             -DSpeechAuthorizationToken=$SPEECHSDK_SPEECH_AUTHTOKEN \
-            -DSpeechSubscriptionKeyForVirtualAssistant="$(SPEECHSDK_BOT_SUBSCRIPTION)" \
-            -DSpeechRegionForVirtualAssistant="$(SPEECHSDK_BOT_REGION)" \
-            -DSpeechChannelSecretForVirtualAssistant="$(SPEECHSDK_BOT_FUNCTIONALTESTBOT)" \
+            -DSpeechSubscriptionKeyForVirtualAssistant="$SPEECHSDK_BOT_SUBSCRIPTION" \
+            -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
+            -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
             tests.runner.Runner \
             tests.AllTests
         displayName: Run unit test
@@ -1314,6 +1314,9 @@ jobs:
       KeywordModel=kws-computer.zip
       SasToken=$(SPEECHSDK_SASTOKEN)
       SasContainerPrefix=$(SPEECHSDK_TEST_APPCENTERUPLOAD)
+      SpeechSubscriptionKeyForVirtualAssistant=$SPEECHSDK_BOT_SUBSCRIPTION
+      SpeechRegionForVirtualAssistant=$SPEECHSDK_BOT_REGION
+      SpeechChannelSecretForVirtualAssistant=$SPEECHSDK_BOT_FUNCTIONALTESTBOT
       EOF
       cat "$FAKE_BUILD/MainActivity.properties"
       cp --preserve "$DROP_DIR/public/lib/com.microsoft.cognitiveservices.speech.jar" "$FAKE_BUILD/lib"
