@@ -257,7 +257,7 @@ private:
             }
             else if (&session_event == &SessionStopped)
             {
-                ::bot_connector_session_stopped_set_callback(m_handle, SessionStarted.IsConnected() ? SpeechBotConnector::FireEvent_SessionStopped : nullptr, this);
+                ::bot_connector_session_stopped_set_callback(m_handle, SessionStopped.IsConnected() ? SpeechBotConnector::FireEvent_SessionStopped : nullptr, this);
             }
         }
     }
