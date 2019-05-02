@@ -77,3 +77,5 @@ HRESULT GetBufferAndCallBackClient(
     AUDIOINPUT_WRITE audio_write_cb,
     void * user_write_ctx,
     int & audio_result);
+
+HRESULT SetAudioStreamCategory(IAudioClient* pAudioClient, AUDIO_STREAM_CATEGORY category);

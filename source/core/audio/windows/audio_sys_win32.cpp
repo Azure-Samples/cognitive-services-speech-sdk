@@ -17,9 +17,6 @@
 #include <windows/audio_sys_win_base.h>
 #include <string_utils.h>
 
-// remove this when the SDK supports it.
-#define AudioCategory_Speech (AUDIO_STREAM_CATEGORY)9
-
 #define AUDIO_OPTION_DEVICE_LONGNAME "devicelongname"
 
 const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
@@ -353,7 +350,6 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 
     std::shared_ptr<IMMDeviceEnumerator> pEnumerator(nullptr);
     std::shared_ptr<IMMDevice> pDevice(nullptr);
-    std::shared_ptr<IAudioClient2> pAudioClient2(nullptr);
     std::wstring mic_name {};
     std::string nice_name;
 
@@ -409,19 +405,9 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
     hr = pDevice->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&result->pAudioInputClient);
     EXIT_ON_ERROR(hr);
 
-    {
-        IAudioClient2 * pAudioClient2Raw = nullptr;
-        hr = result->pAudioInputClient->QueryInterface(&pAudioClient2Raw);
-        if (SUCCEEDED(hr))
-        {
-            AudioClientProperties props = { 0 };
-
-            props.cbSize = sizeof(AudioClientProperties);
-            props.eCategory = AudioCategory_Speech;
-            hr = pAudioClient2Raw->SetClientProperties(&props);
-            pAudioClient2.reset(pAudioClient2Raw, Deleter<IAudioClient2>());
-        }
-    }
+    // Set the audio stream category for speech recognition
+    hr = SetAudioStreamCategory(result->pAudioInputClient, AudioCategory_Speech);
+    EXIT_ON_ERROR(hr);
 
     result->audioInFormat.wFormatTag = format->wFormatTag;
     result->audioInFormat.wBitsPerSample = format->wBitsPerSample;

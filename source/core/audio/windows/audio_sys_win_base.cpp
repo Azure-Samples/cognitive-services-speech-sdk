@@ -71,3 +71,23 @@ HRESULT GetBufferAndCallBackClient(
 Exit:
     return hr;
 }
+
+HRESULT SetAudioStreamCategory(IAudioClient* pAudioClient, AUDIO_STREAM_CATEGORY category)
+{
+    IAudioClient2 * pAudioClient2 = nullptr;
+    HRESULT hr = S_OK;
+
+    hr = pAudioClient->QueryInterface(&pAudioClient2);
+    if (SUCCEEDED(hr))
+    {
+        AudioClientProperties props = { 0 };
+
+        props.cbSize = sizeof(AudioClientProperties);
+        props.eCategory = category;
+        hr = pAudioClient2->SetClientProperties(&props);
+    }
+
+    SAFE_RELEASE(pAudioClient2);
+
+    return hr;
+}

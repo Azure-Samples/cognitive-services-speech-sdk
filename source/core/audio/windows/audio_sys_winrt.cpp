@@ -137,6 +137,10 @@ HRESULT WASAPICapture::ActivateCompleted(IActivateAudioInterfaceAsyncOperation *
     punkAudioInterface.CopyTo(&pAudioInputClient);
     EXIT_ON_ERROR_IF(E_FAIL, nullptr == pAudioInputClient);
 
+    // Set the audio stream category for speech recognition
+    hr = SetAudioStreamCategory(pAudioInputClient.Get(), AudioCategory_Speech);
+    EXIT_ON_ERROR(hr);
+
     EXIT_ON_ERROR_IF(E_FAIL, audioInFormat.cbSize != 0);
 
     hr = pAudioInputClient->Initialize(AUDCLNT_SHAREMODE_SHARED,
