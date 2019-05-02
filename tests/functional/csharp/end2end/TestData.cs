@@ -126,7 +126,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     "His knowledge and expertise in almost every discipline known to man is nearly unparalleled by any other character in the universe.",
                     "Batman's inexhaustible wealth allows him to access advanced technology as a proficient scientists use able to use and modify those technologies to his advantage.",
                     "Batman describes Superman as the most dangerous man on Earth able to defeat a team of super powered extraterrestrials by himself in order to rescue his imprisoned teammates.",
-                    "In the first storyline, Superman also considers Batman to be one of the most brilliant minds on the planet.",
+                    "In the 1st storyline, Superman also considers Batman to be one of the most brilliant minds on the planet.",
                     "Batman has the ability to function under great physical pain and withstand mind control. He is a master of disguise multilingual and an expert in espionage, often gathering information under different identity's.",
                     "Batman's Karate Judo and jujitsu training has made him a math are master of stealth an escape, allowing allowing him to appear and disappear at Will and to break free.",
                     ""
