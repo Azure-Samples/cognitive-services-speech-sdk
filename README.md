@@ -23,6 +23,10 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 
 Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and older releases.
 
+* Speech SDK Release 1.5.0
+
+  Beginning of May 2019 we released version 1.5.0 of the Speech SDK.
+
 * Speech SDK Release 1.4.0
 
   Beginning of April 2019 we released version 1.4.0 of the Speech SDK.
@@ -31,16 +35,12 @@ Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and olde
 
   End of February 2019 we released version 1.3.1 of the Speech SDK.
 
-* Speech SDK Release 1.3.0
-
-  Mid of February 2019 we released version 1.3.0 of the Speech SDK.
-
 ## Features
 
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK (1.3.1) on Windows 10, Ubuntu 16.04 and 18.04 x64, Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
+We tested the samples with the latest released version of the SDK (1.5.0) on Windows 10, Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9), Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
 
 ## Getting Started
 
@@ -114,7 +114,7 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | Sample                                                                                                      | Platform | Description                                                          |
 | ---                                                                                                         | ---      | ---                                                                  |
 | [C++ Console app for Windows](./samples/cpp/windows/console)                                                | Windows  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
-| [C++ Speech Recognition from MP3/Opus file (Linux only)](./samples/cpp/linux/compressed-audio-input)        | Linux   | Demonstrates speech recognition from an MP3/Opus file |
+| [C++ Speech Recognition from MP3/Opus file (Linux only)](./samples/cpp/linux/compressed-audio-input)        | Linux    | Demonstrates speech recognition from an MP3/Opus file |
 | [C# Console app for .NET Framework on Windows](./samples/csharp/dotnet-windows/console)                     | Windows  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
 | [C# Console app for .NET Core (Windows or Linux)](./samples/csharp/dotnetcore/console)                      | Windows, Linux, macOS  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
 | [Java Console app for JRE](./samples/java/jre/console)                                                      | Windows, Linux, macOS | Demonstrates speech recognition, intent recognition, and translation |
@@ -122,10 +122,12 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Speech-to-text WPF sample for .NET Framework on Windows](./samples/csharp/dotnet-windows/speechtotext-wpf) | Windows  | Demonstrates speech recognition |
 | [Translation WPF sample for .NET Framework on Windows](./samples/csharp/dotnet-windows/translation-wpf)     | Windows  | Demonstrates translation |
 | [Speech-to-text UWP sample](./samples/csharp/uwp/speechtotext-uwp)                                          | Windows  | Demonstrates speech recognition |
+| [Text-to-speech UWP sample](./samples/csharp/uwp/texttospeech-uwp)                                          | Windows  | Demonstrates speech synthesis |
 | [Speech recognition sample for Android](./samples/java/android/sdkdemo)                                     | Android  | Demonstrates speech and intent recognition |
-| [Speech recognition and translation sample for the browser, using JavaScript](./samples/js/browser)         | Web  | Demonstrates speech recognition, intent recognition, and translation |
+| [Speech recognition and translation sample for the browser, using JavaScript](./samples/js/browser)         | Web      | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech recognition and translation sample using JavaScript and Node.js](./samples/js/node)                 | Node.js  | Demonstrates speech recognition, intent recognition, and translation |
-| [Speech recognition sample for iOS using a connection object](./samples/objective-c/ios)                    | iOS  | Demonstrates speech recognition |
+| [Speech recognition sample for iOS using a connection object](./samples/objective-c/ios/README.md#connection-object-sample)  | iOS      | Demonstrates speech recognition |
+| [Extended speech recognition sample for iOS](./samples/objective-c/ios/README.md#example-app-with-various-samples)           | iOS      | Demonstrates speech recognition using streams etc.|
 
 Samples for using the Speech Service REST API (no Speech SDK installation required):
 

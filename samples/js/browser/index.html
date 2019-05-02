@@ -167,6 +167,12 @@
                 </td>
             </tr>
             <tr>
+                <td align="right">Phrase List Values:</td>
+                <td>
+                    <input id="phrases" type="text" size="60" value="">(';' separated list)
+                </td>
+            </tr>
+            <tr>
                 <td align="right">Results:</td>
                 <td align="left">
                     <textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea>
@@ -225,7 +231,7 @@
     <!-- Browser Hooks -->
     <script>
         var phraseDiv, statusDiv;
-        var key, authorizationToken, appId;
+        var key, authorizationToken, appId, phrases;
         var regionOptions;
         var languageOptions, formatOptions, inputSource, filePicker;
         var SpeechSDK;
@@ -268,6 +274,7 @@
             statusDiv = document.getElementById("statusDiv");
             key = document.getElementById("key");
             appId = document.getElementById("appId");
+            phrases = document.getElementById("phrases");
             languageOptions = document.getElementById("languageOptions");
             languageTargetOptions = document.getElementById("languageTargetOptions");
             voiceOutput = document.getElementById("voiceOutput");
@@ -286,6 +293,7 @@
                 // Depending on browser security settings, the user may be prompted to allow microphone use. Using continuous recognition allows multiple
                 // phrases to be recognized from a single use authorization.
                 var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+                
                 var speechConfig;
                 if (authorizationToken) {
                     speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
@@ -431,6 +439,12 @@
 
                 reco = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
 
+                // If Phrases are specified, include them.
+                if(phrases !== ""){
+                    var phraseListGrammar = SpeechSDK.PhraseListGrammar.fromRecognizer(reco);
+                    phraseListGrammar.addPhrase(phrases.value.split(";"));
+                }
+                
                 // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
                 // The event recognizing signals that an intermediate recognition result is received.
@@ -561,6 +575,7 @@
                 // Depending on browser security settings, the user may be prompted to allow microphone use. Using continuous recognition allows multiple
                 // phrases to be recognized from a single use authorization.
                 var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+                
                 var speechConfig;
                 if (authorizationToken) {
                     speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
@@ -574,6 +589,12 @@
 
                 speechConfig.speechRecognitionLanguage = languageOptions.value;
                 reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+
+                // If Phrase are specified, include them.
+                if(phrases !== ""){
+                    var phraseListGrammar = SpeechSDK.PhraseListGrammar.fromRecognizer(reco);
+                    phraseListGrammar.addPhrase(phrases.value.split(";"));
+                }
 
                 // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
@@ -727,6 +748,13 @@
 
                     reco.addAllIntents(lm);
                 }
+
+                // If Phrases are specified, include them.
+                if(phrases !== ""){
+                    var phraseListGrammar = SpeechSDK.PhraseListGrammar.fromRecognizer(reco);
+                    phraseListGrammar.addPhrase(phrases.value.split(";"));
+                }
+
                 // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
                 // The event recognizing signals that an intermediate recognition result is received.
