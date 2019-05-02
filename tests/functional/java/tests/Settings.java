@@ -34,6 +34,8 @@ public class Settings {
     public static String SpeechRegionForVirtualAssistant = "westus2";
     public static String SpeechChannelSecretForVirtualAssistant = "<<SPEECH_CHANNEL_SECRET>>";
 
+    public static String ConversationTranscriptionEndpoint = "<<YOUR_CONVERSATION_TRANSCRIPTION_ENDPOINT>>";
+    public static String ConversationTranscriptionKey = "<<YOUR_CONVERSATION_TRANSCRIPTION_KEY>>";
 
     private static SpeechConfig config;
 
@@ -69,12 +71,16 @@ public class Settings {
         AudioInputDirectory = System.getProperty("AudioInputDirectory", AudioInputDirectory);
 
         WavFile = System.getProperty("WaveFile", AudioInputDirectory + "/" + WavFile);
+        WavFile8Channels = System.getProperty("WaveFile8Channels", AudioInputDirectory + "/" + WavFile8Channels);
 
         SerializedSpeechActivityFile = System.getProperty("SerializedSpeechActivityFile", AudioInputDirectory + "/" + SerializedSpeechActivityFile);
 
         SpeechSubscriptionKeyForVirtualAssistant = System.getProperty("SpeechSubscriptionKeyForVirtualAssistant", SpeechSubscriptionKeyForVirtualAssistant);
         SpeechRegionForVirtualAssistant = System.getProperty("SpeechRegionForVirtualAssistant", SpeechRegionForVirtualAssistant);
         SpeechChannelSecretForVirtualAssistant = System.getProperty("SpeechChannelSecretForVirtualAssistant", SpeechChannelSecretForVirtualAssistant);
+
+        ConversationTranscriptionEndpoint = System.getProperty("ConversationTranscriptionEndpoint", ConversationTranscriptionEndpoint);
+        ConversationTranscriptionKey = System.getProperty("ConversationTranscriptionKey", ConversationTranscriptionKey);
 
         Keyword = System.getProperty("Keyword", Keyword);
         KeywordModel = System.getProperty("KeywordModel", KeywordModel);

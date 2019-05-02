@@ -27,7 +27,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static void TestClassinitialize(TestContext context)
         {
             BaseClassInit(context);
-            conversationTranscriptionMultiAudioEndpoint = conversationTranscriptionEndpoint + "/multiaudio?";
+            conversationTranscriptionMultiAudioEndpoint = conversationTranscriptionEndpoint + "/multiaudio";
         }
 
         [TestInitialize]
@@ -156,7 +156,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationAddParticipant()
         {
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), subscriptionKey);
+            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionKey);
 
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather8Channels.AudioFile);
 
@@ -182,7 +182,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationRemoveParticipant()
         {
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), subscriptionKey);
+            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionKey);
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather8Channels.AudioFile);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {
@@ -221,7 +221,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), subscriptionKey);
+            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionKey);
             var stopRecognition = new TaskCompletionSource<int>();
             string recoResult = string.Empty;
 
@@ -316,7 +316,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationPullStream()
         {
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), subscriptionKey);
+            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionKey);
             var stopRecognition = new TaskCompletionSource<int>();
             bool bGotReco = false;
 

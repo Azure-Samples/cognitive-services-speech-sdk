@@ -43,6 +43,7 @@ perl -p - \
   BotSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
   BotConnectionId "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
   ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
+  ConversationTranscriptionKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_KEY" \
   tests/functional/csharp/end2end/csharp.runsettings \
   > "$runSettings" <<"SCRIPT"
   BEGIN {
