@@ -448,10 +448,37 @@ void StartMeetingAndVerifyResult(ConversationTranscriber* recognizer, const shar
 
 void CreateVoiceSignatures(std::string* voice006, std::string* voice022, std::string* voice042, std::string* voice023)
 {
-    *voice006 = "asdf";
-    *voice023 = "asdf";
-    *voice022 = "asdf";
-    *voice042 = "asdf";
+    *voice006 = R"(
+      {
+          "Version": 0,
+          "Tag": "9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=",
+          "Data": "r4tJwSq280QIBWRX8tKcjxYwDySvX6VZFGkqLLroFV3HIlARgA1xXdFcVK9a2xbylLNQUSNwdUUsIpBDB+jlz6W97XgJ9GlBYLf6xVzUmBg1Qhac32DH3c810HDtpwJk3FkEveM7ohLjhvnYKwjBNqbAVGUONyLYpO28kcxRhvSOxe5/2PeVOgpXMGMcBt3IKN3OmNSOokg4QkqoRUNuRMg5jdoq7BraOyr7CEOP2/GsicmUcONNhFaLuEwy97WRUXE0RWTdDxeR9dn2ngSESq+vYiCkudDi/TGh0ZhxABTxU6EiFQl7uiYG28drjosWdrOV5FPGe2pP8omEoBgtc+yOxYa40HG/yQ160Enqv8umCTcTeW6bkA9CZJ7K8740oZkA8pdpsWkurpFJlMDK3e3Y6w/W1/P55gz/jegYTusDDoz5fINcoWj1zbyLMaFgig3PlEDLKG2hb09Jy4OhEeaBgVqEXiUTEX/R44pd7nUK49xrRJ9yM2gfUq8S+229hJ40N5ZMe+9G848jtsGOziPs20KNlqpL6tiXGAeynhclHyt3pITJjOJi9/cYKYbNm3dR+PtxuLL1WAgIuaK65aGhyW0NmFYm/r7hfAK9a2nTNJIgTsFLG32jljkpaurtwvHuAtIhK8KnopeN6OPXjGl2q06bqI2U92eBxKRroeGUEq3PiXHwVk9DOIFzOAdz"
+        }
+     )";
+
+    *voice023 = R"(
+       {
+          "Version": 0,
+          "Tag": "9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=",
+          "Data": "qW513Jnvb5w1k4y/Z9J3jveiE3D42HCQBYCpldleFYRY+aPPTsI0IBMjCBXnStNSd4zWfdoGbzRlxFWz+kdjpzIA+9jM5/Sb1bqMgEcHod2cK/Cr8+uOUfO6KQ/rEg77B/z/ffb0P6wClO2ECw9KoVtLjdGTdFo5AytiFq3ngVADzRX6jtT5bVM4b9XJCg7VTKa9Im7F6yqMqgIgTJP+E8XEjO5cD2QD+Ea+9FyqQ2AOHHqiP2oHxcNYNXkwCO6vh7E2mKo97DekFGrqLLFwn8gczFxM08g/qoccs1SVvbtjpj7mGTNiq18WTuT1G78X7eal9MFMT4NZNiRzK1haSbM4gxt3HxprA3DlvTJnMWBdttzwzS9II1L/UZgEiw4ldJqDBKHogWEuyKej/DRFZMjsRustw0f+ioVADR9uyImA/lINJFgTMgFpqfcHU+bjy7hGz9sGBOopCvNC/pYfCytS1S3tkr8VVhuKHgdK3yDXoOWf57I8DBn1e88FM0SUmpGHLmE4xQreAmwm0dJRHQAIullTlwM54NIEd3CVETOJO5R3bqLbNH9rioStslHB30UAemSN5u21Hz/hLVlPsNRoEZ1kDB7wzwayE5NtXdCz4PSDrEXSBawUH7/xXiaurWgkvqCsDli+tD58RbxlTXxbOJ9caXjwLCRINu4SLLHXbuf3ksSY+XwiS4BznMUJ"
+        }
+        )";
+
+    *voice022 = R"(
+      {
+          "Version": 0,
+          "Tag": "9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=",
+          "Data": "T8JbMJW8OGEhkWEm9Q6+p94LfPrbgyxz5LWs695CPzGPR64TJf3pw5FPqaXR1r0zf0UeckLAnHWzgD7St7aUy+DucbFGekXXMazDHeKs7jgvh4UhRVIvdukcKuNBOR+M1Hcdo4ZGLNACi7HPjSCqpq4x8GVWsBv0olBmv0f9MODmwqLV4ZdigpFRxjqQNLVFX1E7m3mReZj7Dwe1jnGM2IjqCVXLsvO9i218Gm73h2JmcoUbZt/PZQwNwfD3EAN9GbTBMaN/E65Xd/i43Hwhk9GzQufKWzQUW5UB13BIyGfO97z64CaEq4dbFd5pWxk5N9wyDEdEo+PnchqN0FJaPaHjxqv63BN7UdPRYMJ9coMSXFpQRU9t57tNvy77tGrvQ4RufaIYgkTzZvJDN19vEQXlL+oBU30dU+7tFmICRiTCqPRjYYb9Q8O32Sxpr7iIhMwkviUcfo9Y08eqAv9m4aQO6Lhz0cx4vK7UhZShagZ9dqMVA99CGWW4zp4vY7uThPiYMGqAcePA+Sv8fIBR2GB2YG9OZj/Ao80xWMuK6yoEehqOuY1oj07HJ5wHuoy1gL+6AblKNT29Q8i7zKKflW5MimdVby2WvBP59sdaDjZYXYJFFnAV1g63k7Rotvq6OvhytR2hc3rpSAuqs9pmohg8ssKdmG2bBpp5IxS7VRu7uUwOBNWsyMDAs48pPFae"
+        }
+    )";
+
+    *voice042 = R"(
+      {
+          "Version": 0,
+          "Tag": "9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=",
+          "Data": "IlgqQLfiEofDG1asXEAReulsL3GfTNFOFyfRvImCNlzKsPDUz4NycKT6IahqQYptAcjwAKyOq/OL+hxnjXHYvaf4dNUzL7rriG0ezgFdykxgfGM0MLtuS8S+OFHX2JYCpub4gRjbLo+GpNB1Vn+nt8sILVFjwLbQ93WiI2i4ThzV3tsYrBdCGLXeFEQ3QUS1epuVUWFHxKauzc9d97uv6f6BlBqfeR/n9cytAz1zRupeIijFKrW118qyTIewLuqx/HjE3E54Cdxdv7aNz/0xdo16rGk0RwhT4L9zqKqLw0g7vNJ20q3vmEOgWioCWRRM2517cGdzmezanRXXcHeEBNosihUK2TkNbfCRbwXh8UzD1arPfv2eh4GxEB3zC2WUJPM4+hsF8DDjPbc418NFJmVx7FQTjXNe7HHwyGNs18qFiDDilG/m4wA3k+hRRCsuRcHcjaipNBwfuHiwsNv3ZE+Jymtx0lmhlzmP/4uwezI1JuFo4j0d3QdjF68aHj1iEOFWNvSc3xujkZoi5fYvVHPtEuVgb21ZZ/OtiQmgGy6IDDz61sgVX+b8oQkcsKo93Yg3eM0kmOiFW9CVnIs7BKJWegYfT2sCN44ARNSpHTxAjNXEaeoydq6LhAtkDcUtDhiaUgavoSCYZGDv6w3CMZCYBfleWPUEUAQk4bykAGoHY1D1wf3alqYclqPaYKcm"
+        }
+    )";
 }
 
 bool VerifyResult(std::string& text, const std::string& ref)

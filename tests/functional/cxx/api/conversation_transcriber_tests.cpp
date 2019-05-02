@@ -93,7 +93,7 @@ TEST_CASE("conversation_create_participant", "[.][int][prod]")
     REQUIRE_THROWS(Participant::From(""));
     REQUIRE_NOTHROW(Participant::From("secondparticipant"));
     REQUIRE_NOTHROW(Participant::From("secondparticipant", "en-us"));
-    REQUIRE_NOTHROW(Participant::From("secondparticipant", "en-us", "voiceSignature"));
+    REQUIRE_THROWS(Participant::From("secondparticipant", "en-us", "voiceSignature"));
 }
 
 TEST_CASE("conversation_add_while_pumping", "[.][int][prod]")
@@ -225,7 +225,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
 
         auto p1 = Participant::From("id1");
 
-        REQUIRE_NOTHROW(p1->SetVoiceSignature({ "3.3 4.4" }));
+        REQUIRE_NOTHROW(p1->SetVoiceSignature({ voice006 }));
         REQUIRE_THROWS(p1->SetVoiceSignature(""));
 
         REQUIRE_NOTHROW(p1->SetPreferredLanguage("en-us"));
@@ -246,9 +246,9 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
 
         recognizer->SetConversationId("Conversation12345");
 
-        auto p1 = Participant::From("id1", "en-us", "1.1 2.2");
+        auto p1 = Participant::From("id1", "en-us", voice006);
         recognizer->AddParticipant(p1);
-        auto p2 = Participant::From("id2", "en-us", "5.5 6.6");
+        auto p2 = Participant::From("id2", "en-us", voice022);
         recognizer->AddParticipant(p2);
 
         recognizer->StartTranscribingAsync().get();
@@ -264,9 +264,9 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
 
         recognizer->SetConversationId("AddRemoveParticipants");
 
-        auto p1 = Participant::From("id1", "en-us", "1.1 2.2");
+        auto p1 = Participant::From("id1", "en-us", voice006);
         recognizer->AddParticipant(p1);
-        auto p2 = Participant::From("id2", "en-us", "5.5 6.6");
+        auto p2 = Participant::From("id2", "en-us", voice022);
         recognizer->AddParticipant(p2);
 
         REQUIRE_NOTHROW(recognizer->RemoveParticipant(p1));
