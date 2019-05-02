@@ -129,7 +129,6 @@ private:
     void UspTerminate();
 
     USP::Client& SetUspEndpoint(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpointCortana(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpointIntent(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpointTranslation(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpointDefaultSpeechService(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);

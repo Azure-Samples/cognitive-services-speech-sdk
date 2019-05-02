@@ -50,7 +50,7 @@ struct Callbacks
     * A callback function that will be invoked when a speech.keyword message is received from service.
     */
     virtual void OnSpeechKeywordDetected(const SpeechKeywordDetectedMsg&) {}
-    
+
     /**
     * A callback function that will be invoked when a speech.phrase message is received from service.
     */
@@ -120,7 +120,7 @@ struct Callbacks
 
 using CallbacksPtr = std::shared_ptr<Callbacks>;
 
-enum class EndpointType { Speech, Intent, Translation, CDSDK, Bot, ConversationTranscriptionService };
+enum class EndpointType { Speech, Intent, Translation, Bot, ConversationTranscriptionService };
 
 enum class RecognitionMode : unsigned int { Interactive = 0, Conversation = 1, Dictation = 2 };
 
@@ -470,11 +470,6 @@ namespace endpoint
         const std::string pathSuffix = "/cognitiveservices/v1";
 
         const std::vector<std::string> queryParameters = { langQueryParam, outputFormatQueryParam };
-    }
-
-    namespace CDSDK
-    {
-        const std::string url = "speech.platform.bing.com/cortana/api/v1?environment=Home&";
     }
 
     namespace bot

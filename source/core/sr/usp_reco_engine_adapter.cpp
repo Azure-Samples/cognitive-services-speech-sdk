@@ -408,11 +408,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(const std::shared_ptr<ISpx
     }
 
     // set endpoint type.
-    if (!endpoint.empty() && 0 == PAL::stricmp(endpoint.c_str(), "CORTANA"))
-    {
-        SetUspEndpointCortana(properties, client);
-    }
-    else if (countIntent == 1)
+    if (countIntent == 1)
     {
         SetUspEndpointIntent(properties, client);
     }
@@ -487,15 +483,6 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointBot(const std::shared_ptr<I
     SetUspQueryParameters(USP::endpoint::bot::queryParameters, properties, client);
 
     return client.SetAudioResponseFormat("raw-16khz-16bit-mono-pcm");
-}
-
-USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointCortana(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
-{
-    UNUSED(properties);
-
-    SPX_DBG_TRACE_VERBOSE("%s: Using Cortana endpoint...", __FUNCTION__);
-    m_endpointType = USP::EndpointType::CDSDK;
-    return client.SetEndpointType(m_endpointType);
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointIntent(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)

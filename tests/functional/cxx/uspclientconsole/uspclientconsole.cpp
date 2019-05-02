@@ -139,8 +139,7 @@ virtual void OnTranslationPhrase(const USP::TranslationPhraseMsg& message) overr
 const map<string, USP::EndpointType> typeMap = {
     { "speech", USP::EndpointType::Speech },
     { "intent", USP::EndpointType::Intent },
-    { "translation", USP::EndpointType::Translation },
-    { "cdsdk", USP::EndpointType::CDSDK }
+    { "translation", USP::EndpointType::Translation }
 };
 
 const map<string, USP::RecognitionMode> modeMap = {
@@ -342,14 +341,7 @@ int main(int argc, char* argv[])
     if (!authData.empty())
     {
         vector<string> authInfo((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
-        if (client.GetEndpointType() == USP::EndpointType::CDSDK)
-        {
-            authInfo[(size_t)USP::AuthenticationType::SearchDelegationRPSToken] = authData;;
-        }
-        else
-        {
-            authInfo[(size_t)USP::AuthenticationType::SubscriptionKey] = authData;
-        }
+        authInfo[(size_t)USP::AuthenticationType::SubscriptionKey] = authData;
 
         client.SetAuthentication(authInfo);
     }

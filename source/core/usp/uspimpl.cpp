@@ -250,9 +250,6 @@ string Connection::Impl::ConstructConnectionUrl() const
                 << g_recoModeStrings[recoMode]
                 << endpoint::luis::pathSuffix;
             break;
-        case EndpointType::CDSDK:
-            // For CDSDK, it can only be created by providing endpoint URL. So no need to overwrite that.
-            break;
         case EndpointType::Bot:
             oss << endpoint::bot::url;
             break;
@@ -317,10 +314,6 @@ string Connection::Impl::ConstructConnectionUrl() const
                 }
             }
         }
-        break;
-
-    case EndpointType::CDSDK:
-        // no query parameter needed.
         break;
 
     case EndpointType::Bot:
@@ -1045,7 +1038,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             auto duration = durationObj.is_null()? 0 : durationObj.get<DurationType>();
             auto textObj = json[json_properties::text];
             auto text = textObj.is_null()? "" : textObj.get<string>();
-            
+
             connection->Invoke([&] {
                 callbacks->OnSpeechKeywordDetected({PAL::ToWString(json.dump()),
                                             offset,
