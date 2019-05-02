@@ -103,7 +103,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
                 Assert.AreEqual(TestData.English.Weather.Utterance, result.Text);
                 var errorDetails = CancellationDetails.FromResult(result);
-                // Only translation error. 
+                // Only translation error.
                 Assert.AreEqual(CancellationErrorCode.NoError, errorDetails.ErrorCode);
                 Assert.IsTrue(errorDetails.ErrorDetails.Contains("The target language is not valid"), "Actual error:'" + errorDetails.ErrorDetails + "' does not contain expected string.");
             }
@@ -155,7 +155,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { "invalidLanguages" };
             var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
 
-            Assert.IsNotNull(result, "Translation should not be null");
+            Assert.IsNotNull(result, AssertOutput.TranslationShouldNotBeNull);
             var errorDetails = CancellationDetails.FromResult(result).ErrorDetails;
             Assert.IsFalse(String.IsNullOrEmpty(errorDetails), "Error details cannot be empty when translation language is invalid.");
             Console.WriteLine($"Result: {result.ToString()}, Error details: ErrorDetails: {errorDetails}");
@@ -249,7 +249,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.DE, Language.ZH };
             var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
 
-            Assert.IsNotNull(result, "Translation should not be null");
+            Assert.IsNotNull(result, AssertOutput.TranslationShouldNotBeNull);
             Console.WriteLine(result.ToString());
 
             var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
@@ -267,7 +267,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
 
-            Assert.IsNotNull(result, "Translation should not be null");
+            Assert.IsNotNull(result, AssertOutput.TranslationShouldNotBeNull);
             Console.WriteLine(result.ToString());
 
             var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
@@ -310,7 +310,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.German.FirstOne.AudioFile, Language.DE_DE, toLanguages);
             Assert.AreEqual(1, actualTranslations[ResultType.RecognizedText].Count);
             var actualTranslationRecognition = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
-            Assert.IsNotNull(actualTranslationRecognition);
 
             Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
             AssertMatching(TestData.German.FirstOne.Utterance, actualTranslationRecognition.Result.Text);
@@ -384,12 +383,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.TR };
 
             var actualTranslations = await this.translationHelper.GetTranslationRecognizingContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
-            Assert.AreNotEqual(actualTranslations[ResultType.RecognizedText].Count, 0);
-            Assert.IsTrue(actualTranslations[ResultType.RecognizedText][0].Result.Text.Contains("What"));
+            Assert.AreNotEqual(actualTranslations[ResultType.RecognizedText].Count, 0, "Empty translation received");
+            var finalResultText = actualTranslations[ResultType.RecognizedText][0].Result.Text;
+            Assert.IsTrue(finalResultText.Contains("What"), $"Final result does not contain expected string \"What\", but is {finalResultText}");
 
             if (actualTranslations[ResultType.RecognizingText].Count > 0)
             {
-                Assert.IsTrue(actualTranslations[ResultType.RecognizingText].Last().Result.Text.Contains("What"));
+                var lastIntermediateResultText = actualTranslations[ResultType.RecognizingText].Last().Result.Text;
+                Assert.IsTrue(lastIntermediateResultText.Contains("What"), $"Last intermediate result does not contain expected string \"What\", but is {lastIntermediateResultText}");
             }
         }
 
@@ -399,7 +400,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.DE };
             var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Silence.AudioFile, Language.EN, toLanguages);
 
-            Assert.IsNotNull(result, "Translation should not be null");
+            Assert.IsNotNull(result, AssertOutput.TranslationShouldNotBeNull);
             Console.WriteLine(result.ToString());
 
             var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
@@ -415,9 +416,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.DE };
 
             var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.Catalan.AudioFile, Language.CA_ES, toLanguages);
-            Assert.AreEqual(1, actualTranslations[ResultType.RecognizedText].Count);
+            Assert.AreEqual(1, actualTranslations[ResultType.RecognizedText].Count, AssertOutput.WrongTranslatedUtterancesCount);
             var actualTranslationRecognition = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
-            Assert.IsNotNull(actualTranslationRecognition);
 
             Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
             AssertMatching(TestData.Catalan.HowIsYourWork.Utterance, actualTranslationRecognition.Result.Text);
@@ -457,11 +457,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TranslateFromEachLocaletoEachTextLang(string locale, string lang)
         {
             var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, locale, new List<string> { lang });
-            Assert.IsNotNull(result, "Translation should not be null");
+            Assert.IsNotNull(result, AssertOutput.TranslationShouldNotBeNull);
             Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason, "Unmatched result reason.");
             Assert.IsTrue(String.IsNullOrEmpty(CancellationDetails.FromResult(result).ErrorDetails));
             Assert.IsFalse(String.IsNullOrEmpty(result.Text), $"locale: {locale}, language: {lang}, result: {result.ToString()}");
-            Assert.AreEqual(1, result.Translations.Count);
+            Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
         }
 
         [DataTestMethod, TestCategory(TestCategory.LongRunning)]
@@ -554,8 +554,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             config.SetProperty(PropertyId.Speech_LogFilename, logFilename2);
             Assert.AreEqual(logFilename2, config.GetProperty(PropertyId.Speech_LogFilename));
-            Assert.IsFalse(File.Exists(logFilename2));
-            
+            Assert.IsFalse(File.Exists(logFilename2), "No log file with this name should exist.");
+
             try
             {
                 var recognizer2 = new TranslationRecognizer(config, audioInput);
@@ -599,22 +599,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             configFromEndpoint.VoiceName = Voice.FR;
 
             var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
-           
+
             using (var recognizer = TrackSessionId(new TranslationRecognizer(configFromEndpoint, audioInput)))
             {
                 var allResultEvents = await this.translationHelper.DoTranslationAsync(recognizer, true);
 
-                Assert.AreEqual(1, allResultEvents[ResultType.RecognizedText].Count);
+                Assert.AreEqual(1, allResultEvents[ResultType.RecognizedText].Count, "Bad count of translation events");
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResultEvents[ResultType.RecognizedText].Single();
-                Assert.IsNotNull(translationTextEvent);
                 var translationTextResult = translationTextEvent.Result;
                 Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
                 AssertMatching(TestData.German.FirstOne.Utterance, translationTextResult.Text);
-                Assert.AreEqual(2, translationTextResult.Translations.Count);
+                Assert.AreEqual(2, translationTextResult.Translations.Count, "Bad count of translation utterances");
                 AssertMatching(TestData.French.FirstOne.Utterance, translationTextResult.Translations[Language.FR]);
                 AssertOneEqual(TestData.Spanish.FirstOne.PossibleUtterances, translationTextResult.Translations[Language.ES]);
 
-                Assert.AreNotEqual(allResultEvents[ResultType.Synthesis].Count, 0);
+                Assert.AreNotEqual(allResultEvents[ResultType.Synthesis].Count, 0, "There should not be zero Synthesis events");
                 var synthesisResultEvents = allResultEvents[ResultType.Synthesis].Cast<TranslationSynthesisEventArgs>().ToList();
                 const int MinSize = 50000;
                 foreach (var s in synthesisResultEvents)
@@ -638,13 +637,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var allResults = await this.translationHelper.DoTranslationAsync(recognizer, true);
 
-                Assert.AreEqual(1, allResults[ResultType.RecognizedText].Count);
+                Assert.AreEqual(1, allResults[ResultType.RecognizedText].Count, AssertOutput.WrongRecognizedUtterancesCount);
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResults[ResultType.RecognizedText].Single();
-                Assert.IsNotNull(translationTextEvent);
                 var translationTextResult = translationTextEvent.Result;
                 Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
                 AssertMatching(TestData.English.Weather.Utterance, translationTextResult.Text);
-                Assert.AreEqual(1, translationTextResult.Translations.Count);
+                Assert.AreEqual(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(TestData.French.Weather.Utterance, translationTextResult.Translations[Language.FR]);
                 AssertDetailedOutput(translationTextResult, true);
             }
@@ -665,16 +663,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var allResultEvents = await this.translationHelper.DoTranslationAsync(recognizer, true);
 
-                Assert.AreEqual(1, allResultEvents[ResultType.RecognizedText].Count);
+                Assert.AreEqual(1, allResultEvents[ResultType.RecognizedText].Count, AssertOutput.WrongRecognizedUtterancesCount);
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResultEvents[ResultType.RecognizedText].Single();
-                Assert.IsNotNull(translationTextEvent);
                 var translationTextResult = translationTextEvent.Result;
                 Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
                 AssertMatching(TestData.German.FirstOne.Utterance, translationTextResult.Text);
-                Assert.AreEqual(1, translationTextResult.Translations.Count);
+                Assert.AreEqual(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(TestData.French.FirstOne.Utterance, translationTextResult.Translations[Language.FR]);
 
-                Assert.AreNotEqual(allResultEvents[ResultType.Synthesis].Count, 0);
+                Assert.AreNotEqual(allResultEvents[ResultType.Synthesis].Count, 0, AssertOutput.WrongSynthesizedUtterancesCount);
                 var synthesisResultEvents = allResultEvents[ResultType.Synthesis].Cast<TranslationSynthesisEventArgs>().ToList();
                 const int MinSize = 50000;
                 foreach (var s in synthesisResultEvents)
@@ -700,13 +697,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var allResultEvents = await this.translationHelper.DoTranslationAsync(recognizer, true);
 
-                Assert.AreEqual(1, allResultEvents[ResultType.RecognizedText].Count);
+                Assert.AreEqual(1, allResultEvents[ResultType.RecognizedText].Count, AssertOutput.WrongRecognizedUtterancesCount);
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResultEvents[ResultType.RecognizedText].Single();
-                Assert.IsNotNull(translationTextEvent);
                 var translationTextResult = translationTextEvent.Result;
                 Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
                 AssertMatching(TestData.German.FirstOne.Utterance, translationTextResult.Text);
-                Assert.AreEqual(1, translationTextResult.Translations.Count);
+                Assert.AreEqual(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(TestData.French.FirstOne.Utterance, translationTextResult.Translations[Language.FR]);
 
                 AssertDetailedOutput(translationTextResult, true);
@@ -726,13 +722,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var allResults = await this.translationHelper.DoTranslationAsync(recognizer, true);
 
-                Assert.AreEqual(1, allResults[ResultType.RecognizedText].Count);
+                Assert.AreEqual(1, allResults[ResultType.RecognizedText].Count, AssertOutput.WrongRecognizedUtterancesCount);
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResults[ResultType.RecognizedText].Single();
-                Assert.IsNotNull(translationTextEvent);
                 var translationTextResult = translationTextEvent.Result;
                 Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
                 AssertMatching(TestData.English.Weather.Utterance, translationTextResult.Text);
-                Assert.AreEqual(1, translationTextResult.Translations.Count);
+                Assert.AreEqual(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(TestData.French.Weather.Utterance, translationTextResult.Translations[Language.FR]);
 
                 AssertDetailedOutput(translationTextResult, true);

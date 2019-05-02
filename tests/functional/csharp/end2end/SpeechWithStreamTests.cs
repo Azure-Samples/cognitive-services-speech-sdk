@@ -86,7 +86,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             this.defaultConfig.SpeechRecognitionLanguage = Language.EN;
             this.defaultConfig.OutputFormat = OutputFormat.Detailed;
             var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(this.defaultConfig, TestData.English.Batman.AudioFile);
-            Assert.AreNotEqual(result.Count, 0);
+            Assert.AreNotEqual(result.Count, 0, "Bad count of recognized utterances");
 
             string[] bestResultUtterances = result.Select(r => r.Result.Best().ToArray()[0].Text).ToArray();
             string[] normalizedFormResultUtterances = result.Select(r => r.Result.Best().ToArray()[0].NormalizedForm).ToArray();

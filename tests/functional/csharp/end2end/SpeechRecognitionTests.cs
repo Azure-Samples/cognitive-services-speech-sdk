@@ -94,7 +94,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
                 var bestResults = result.Best().ToArray();
-                Assert.AreEqual(0, bestResults.Length);
+                Assert.AreEqual(0, bestResults.Length, "There should be no detailed result for default output format");
             }
         }
 
@@ -561,7 +561,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                Assert.IsTrue(string.IsNullOrEmpty(recognizer.SpeechRecognitionLanguage));
+                Assert.IsTrue(string.IsNullOrEmpty(recognizer.SpeechRecognitionLanguage), $"No language should be set, is {recognizer.SpeechRecognitionLanguage}");
                 Assert.AreEqual(recognizer.SpeechRecognitionLanguage, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
                 Assert.AreEqual(deploymentId, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_EndpointId));
                 Assert.AreEqual(OutputFormat.Simple, recognizer.OutputFormat);
@@ -714,8 +714,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.NoMatch, result.Reason);
-                Assert.IsTrue(result.OffsetInTicks > 0, result.OffsetInTicks.ToString());
-                Assert.IsTrue(string.IsNullOrEmpty(result.Text), result.Text);
+                Assert.IsTrue(result.OffsetInTicks > 0, $"Bad offset: {result.OffsetInTicks}");
+                Assert.IsTrue(string.IsNullOrEmpty(result.Text), $"Bad result text: {result.Text}");
 
                 var noMatch = NoMatchDetails.FromResult(result);
                 Assert.AreEqual(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
