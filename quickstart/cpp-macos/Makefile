@@ -20,7 +20,7 @@ all: helloworld
 # Note: to run, DYLD_FRAMEWORK_PATH should point to $SPEECHSDK_ROOT.
 helloworld: helloworld.cpp
 	g++ $< -o $@ \
-	    --std=c++11 \
+	    --std=c++14 \
 	    $(patsubst %,-F%, $(SPEECHSDK_ROOT)) \
 	    $(LIBS)
 

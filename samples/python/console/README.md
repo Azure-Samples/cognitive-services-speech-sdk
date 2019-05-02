@@ -9,7 +9,12 @@ This sample demonstrates various forms of speech recognition, intent recognition
 * On Ubuntu 16.04 or 18.04, run the following commands for the installation of required packages:
   ```sh
   sudo apt-get update
-  sudo apt-get install build-essential libssl1.0.0 libasound2 wget
+  sudo apt-get install libssl1.0.0 libasound2
+  ```
+* On Debian 9, run the following commands for the installation of required packages:
+  ```sh
+  sudo apt-get update
+  sudo apt-get install libssl1.0.2 libasound2
   ```
 * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
 
@@ -56,4 +61,3 @@ Choose the scenarios that you're interested in.
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-python)
 * [Speech SDK API reference for Python](https://aka.ms/csspeech/pythonref)
-

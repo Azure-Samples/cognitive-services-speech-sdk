@@ -25,7 +25,8 @@ public class Main {
         System.out.println("A. Intent recognition with microphone.");
         System.out.println("B. Intent recognition with language.");
         System.out.println("C. Intent continuous recognition using events with file.");
-        System.out.println("D. Speech continuous recognition using events with file.");
+        System.out.println("D. Speech continuous recognition using events with a PushStream.");
+        System.out.println("E. Speech continuous recognition using events with file and Phrase List.");
 
         System.out.print(prompt);
 
@@ -34,7 +35,7 @@ public class Main {
             do {
                 x = new Scanner(System.in).nextLine();
                 System.out.println("");
-                switch (x) {
+                switch (x.toLowerCase()) {
                 case "1":
                     SpeechRecognitionSamples.recognitionWithMicrophoneAsync();
                     break;
@@ -63,27 +64,26 @@ public class Main {
                     TranslationSamples.translationWithAudioStreamAsync();
                     break;
                 case "a":
-                case "A":
                     IntentRecognitionSamples.intentRecognitionWithMicrophone();
                     break;
                 case "b":
-                case "B":
                     IntentRecognitionSamples.intentRecognitionWithLanguage();
                     break;
                 case "c":
-                case "C":
                     IntentRecognitionSamples.intentContinuousRecognitionWithFile();
                     break;
-                case "D":
+                case "d":
                     SpeechRecognitionSamples.continuousRecognitionWithPushStream();
                     break;
+                case "e":
+                    SpeechRecognitionSamples.continuousRecognitionWithFileWithPhraseListAsync();
                 case "0":
                     System.out.println("Exiting...");
                     break;
                 }
                 System.out.println("\nRecognition done. " + prompt);
             } while (!x.equals("0"));
-            
+
             System.out.println("Finishing demo.");
             System.exit(0);
         } catch (Exception ex) {
