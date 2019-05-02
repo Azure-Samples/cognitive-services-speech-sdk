@@ -107,6 +107,16 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart C++ for Windows](./quickstart/text-to-speech/cpp-windows/) | Windows  | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C# .NET for Windows](./quickstart/text-to-speech/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech synthesis to the default speaker. |
 
+### Voice-first virtual assistants quickstarts
+
+The following quickstarts demonstrate how to create a custom voice-first virtual assistant (Preview).
+The applications will connect to a previously authored bot configured to use the Direct Line Speech channel, send a voice request, and return a voice response activity (if configured).
+If you want to build these quickstarts from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
+
+| Quickstart | Platform | Description |
+| ---------- | -------- | ----------- |
+| [Quickstart Java JRE](./quickstart/virtual-assistant/java-jre) | Windows, Linux, macOS | Demonstrates speech recognition through the SpeechBotConnector and receiving activity responses. |
+
 ### Samples
 
 The following samples demonstrate additional capabilities of the Speech SDK, such additional modes of speech recognition as well as intent recognition and translation:

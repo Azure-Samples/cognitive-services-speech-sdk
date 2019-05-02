@@ -1,9 +1,9 @@
-package com.speechsdk.quickstart;
-
 /**
  * Copyright (c) Microsoft. All rights reserved.
  * Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
  */
+
+package com.speechsdk.quickstart;
 
 import com.microsoft.cognitiveservices.speech.audio.PullAudioOutputStream;
 
@@ -18,7 +18,7 @@ import java.io.InputStream;
  */
 public final class ActivityAudioStream extends InputStream {
     /**
-     * The number of samples played per second. (16KHz)
+     * The number of samples played per second. (16 kHz)
      */
     public static final long SAMPLE_RATE = 16000;
     /**

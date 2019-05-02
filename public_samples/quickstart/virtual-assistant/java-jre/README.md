@@ -1,7 +1,10 @@
-# Quickstart: Using Virtual assistant in Java on Windows or Linux (Ubuntu 16.04/18.04)
+# Quickstart: Using virtual assistant (Preview) in Java on Windows or Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9)
 
-This sample demonstrates how to translate speech with the Speech SDK for Java on Windows or Linux (Ubuntu 16.04)
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
+This sample demonstrates how to recognize speech for custom voice-first virtual assistants (Preview) and receive activity responses.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-virtual-assistant-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
+
+> **Note:**
+> the Speech SDK for the JRE currently supports only the Windows x64 platform, macOS 10.13 or later, and Linux (Ubuntu 16.04 x64, Ubuntu 18.04 x64, Debian 9 x64).
 
 ## Prerequisites
 
@@ -10,12 +13,17 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * 64-bit JRE/JDK for Java 8.
 * Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.
 * A pre-configured bot created using Bot Framework version 4.2 or above. See [here for steps on how to create a bot](https://blog.botframework.com/2018/05/07/build-a-microsoft-bot-framework-bot-with-the-bot-builder-sdk-v4/). The bot would need to subscribe to the new "Direct Line Speech" channel to receive voice inputs.
-
-On Ubuntu 16.04, run the following commands for the installation of required packages:
+* On Ubuntu 16.04 or 18.04, run the following commands for the installation of required packages:
 
   ```sh
   sudo apt-get update
-  sudo apt-get install build-essential libssl1.0.0 libasound2 wget
+  sudo apt-get install libssl1.0.0 libasound2
+  ```
+* On Debian 9, run the following commands for the installation of required packages:
+
+  ```sh
+  sudo apt-get update
+  sudo apt-get install libssl1.0.2 libasound2
   ```
 
 ## Build the sample
@@ -28,7 +36,7 @@ On Ubuntu 16.04, run the following commands for the installation of required pac
 * Edit the `Main` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For now this will only be supported in "westus2".
+    > **Note:** In preview, the Direct Line Speech channel currently supports only the `westus2` region.
   * Replace the string `YourChannelSecret` with the secret created when you subscribed your bot to the Direct Line Speech channel.    
 * Save the modified file.
 

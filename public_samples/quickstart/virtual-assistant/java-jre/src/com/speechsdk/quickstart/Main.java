@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) Microsoft. All rights reserved. Licensed under the MIT license.
+ * See LICENSE.md file in the project root for full license information.
+ */
+
 package com.speechsdk.quickstart;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
@@ -13,20 +18,19 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 import java.io.InputStream;
 
-/**
- * Copyright (c) Microsoft. All rights reserved. Licensed under the MIT license.
- * See LICENSE.md file in the project root for full license information.
- */
-
 public class Main {
 
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
 
-        final String channelSecret = "YourChannelSecret"; // Your speech channel secret
-        final String subscriptionKey = "YourSubscriptionKey"; // your subscription key
-        final String region = "YourServiceRegion"; // Your service region.
+        // Please replace below with your speech channel secret, speech
+        // subscription key, and service region.
+        //
+        // Note: In preview, the Direct Line Speech channel currently supports only the `westus2` region.
+        final String channelSecret = "YourChannelSecret";
+        final String subscriptionKey = "YourSubscriptionKey";
+        final String region = "YourServiceRegion";
 
         assert !channelSecret.equals("YourChannelSecret") : "Replace the string \"YourChannelSecret\" with your speech channel secret.";
         assert !subscriptionKey.equals("YourSubscriptionKey") : "Replace the string \"YourSubscriptionKey\" with your speech subscription key.";
