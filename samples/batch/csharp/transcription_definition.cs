@@ -17,6 +17,10 @@ namespace BatchClient
             this.RecordingsUrl = recordingsUrl;
             this.Locale = locale;
             this.Models = models;
+            this.properties = new Dictionary<string, string>();
+            this.properties.Add("PunctuationMode", "DictatedAndAutomatic");
+            this.properties.Add("ProfanityFilterMode", "Masked");
+            this.properties.Add("AddWordLevelTimestamps", "True");
         }
 
         /// <inheritdoc />
@@ -31,6 +35,8 @@ namespace BatchClient
         public string Locale { get; set; }
 
         public IEnumerable<ModelIdentity> Models { get; set; }
+
+        public IDictionary<string, string> properties { get; set; }
 
         public static TranscriptionDefinition Create(
             string name,

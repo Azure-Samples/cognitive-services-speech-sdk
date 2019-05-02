@@ -1,22 +1,28 @@
-# Quickstart: Recognize speech in Java on Windows or Linux (Ubuntu 16.04 or 18.04)
+# Quickstart: Recognize speech in Java on Windows, macOS, or Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9)
 
-This sample demonstrates how to recognize speech with the Speech SDK for Java on Windows or Linux (Ubuntu 16.04 or 18.04)
+This sample demonstrates how to recognize speech with the Speech SDK for Java on Windows, macOS or Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9).
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
 
 > **Note:**
-> the Speech SDK for the JRE currently supports only the Windows x64 platform and Linux (Ubuntu 16.04 or 18.04) x64 distribution.
+> the Speech SDK for the JRE currently supports only the Windows x64 platform, macOS 10.13 or later, and Linux (Ubuntu 16.04 x64, Ubuntu 18.04 x64, or Debian 9 x64 distribution).
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows x64, Ubuntu 16.04 or 18.04 x64) capable to run Eclipse, with a working microphone.
+* A PC (Windows x64, Ubuntu 16.04 or 18.04 x64) or Mac (macOS 10.13 or later) capable to run Eclipse, with a working microphone.
 * 64-bit JRE/JDK for Java 8.
 * Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.
 * On Ubuntu 16.04 or 18.04, run the following commands for the installation of required packages:
 
   ```sh
   sudo apt-get update
-  sudo apt-get install libssl1.0.0 libasound2 wget
+  sudo apt-get install libssl1.0.0 libasound2
+  ```
+* On Debian 9, run the following commands for the installation of required packages:
+
+  ```sh
+  sudo apt-get update
+  sudo apt-get install libssl1.0.2 libasound2
   ```
 
 ## Build the sample

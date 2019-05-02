@@ -1,9 +1,9 @@
-# Java Console app for the Java Run-Time Environment (JRE) on Windows or Linux (Ubuntu 16.04 or 18.04)
+# Java Console app for the Java Run-Time Environment (JRE) on Windows or Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9)
 
 This sample demonstrates various forms of speech recognition, intent recognition, and translation using the Speech SDK for Java on Windows or Linux.
 
 > **Note:**
-> the Speech SDK for the JRE currently supports only the Windows x64 platform and Linux (Ubuntu 16.04 or 18.04) x64 distribution.
+> the Speech SDK for the JRE currently supports only the Windows x64 platform and Linux (Ubuntu 16.04 x64, Ubuntu 18.04 x64, Debian 9 x64).
 
 ## Prerequisites
 
@@ -11,11 +11,18 @@ This sample demonstrates various forms of speech recognition, intent recognition
 * A PC (Windows x64, Ubuntu 16.04 or 18.04 x64) capable to run Eclipse, some sample scenarios require a working microphone.
 * 64-bit JRE/JDK for Java 8.
 * Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.
-* On Ubuntu 16.04 or 18.04, run the following commands for the installation of required packages:
+* On Ubuntu, run the following commands for the installation of required packages:
 
   ```sh
   sudo apt-get update
-  sudo apt-get install libssl1.0.0 libasound2 wget
+  sudo apt-get install libssl1.0.0 libasound2
+  ```
+
+* On Debian 9, run the following commands for the installation of required packages:
+
+  ```sh
+  sudo apt-get update
+  sudo apt-get install libssl1.0.2 libasound2
   ```
 
 ## Build the sample
@@ -34,6 +41,9 @@ This sample demonstrates various forms of speech recognition, intent recognition
     * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.
     * `YourLanguageUnderstandingAppId`: replace with the ID of a Language Understanding service application that you want to recognize intents with.
     * `YourLanguageUnderstandingIntentName1`, `YourLanguageUnderstandingIntentName2`, `YourLanguageUnderstandingIntentName3`: replace with names of intents that your Language Understanding service application recognizes.
+  * The following settings apply to keyword-triggered recognition:
+    * `YourKeywordRecognitionModelFile.table`: replace with the location of your keyword recognition model file.
+    * `YourKeyword`: replace with the phrase your keyword recognition model triggers on.
 
 * Save the modified files.
 

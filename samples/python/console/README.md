@@ -9,7 +9,12 @@ This sample demonstrates various forms of speech recognition, intent recognition
 * On Ubuntu 16.04 or 18.04, run the following commands for the installation of required packages:
   ```sh
   sudo apt-get update
-  sudo apt-get install build-essential libssl1.0.0 libasound2 wget
+  sudo apt-get install libssl1.0.0 libasound2
+  ```
+* On Debian 9, run the following commands for the installation of required packages:
+  ```sh
+  sudo apt-get update
+  sudo apt-get install libssl1.0.2 libasound2
   ```
 * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
 
@@ -33,6 +38,9 @@ This sample demonstrates various forms of speech recognition, intent recognition
     * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).
     * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.
     * `YourLanguageUnderstandingAppId`: replace with the ID of a Language Understanding service application that you want to recognize intents with.
+  * The following settings apply to keyword-triggered recognition:
+    * `YourKeywordRecognitionModelFile.table`: replace with the location of your keyword recognition model file.
+    * `YourKeyword`: replace with the phrase your keyword recognition model triggers on.
   * Some samples require audio files to be present. Put appropriate audio files somewhere on your file system and adapt the paths in the Python source files.
 
 ## Run the samples
@@ -53,4 +61,3 @@ Choose the scenarios that you're interested in.
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-python)
 * [Speech SDK API reference for Python](https://aka.ms/csspeech/pythonref)
-

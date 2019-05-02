@@ -11,6 +11,7 @@
     <Compile Include="..\..\..\sharedcontent\console\Program.cs" Link="Program.cs" />
     <Compile Include="..\..\..\sharedcontent\console\speech_recognition_samples.cs" Link="speech_recognition_samples.cs" />
     <Compile Include="..\..\..\sharedcontent\console\speech_recognition_with_token_sample.cs" Link="speech_recognition_with_token_sample.cs" />
+    <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_samples.cs" Link="speech_synthesis_samples.cs" />
     <Compile Include="..\..\..\sharedcontent\console\translation_samples.cs" Link="translation_samples.cs" />
   </ItemGroup>
 
@@ -18,10 +19,14 @@
     <Content Include="..\..\..\sharedcontent\console\whatstheweatherlike.wav" Link="whatstheweatherlike.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\..\..\sharedcontent\console\wreck-a-nice-beach.wav">
+      <Link>wreck-a-nice-beach.wav</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.3.1" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.5.0" />
   </ItemGroup>
 
 </Project>

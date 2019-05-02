@@ -18,12 +18,15 @@ public class Main {
         System.out.println("3. Speech recognition using customized model.");
         System.out.println("4. Speech continuous recognition using events with file.");
         System.out.println("5. Speech recognition with audio stream.");
-        System.out.println("6. Translation with microphone input.");
-        System.out.println("7. Translation with file input.");
-        System.out.println("8. Translation with audio stream.");
+        System.out.println("6. Speech recognition with keyword spotting.");
+        System.out.println("7. Translation with microphone input.");
+        System.out.println("8. Translation with file input.");
+        System.out.println("9. Translation with audio stream.");
         System.out.println("A. Intent recognition with microphone.");
         System.out.println("B. Intent recognition with language.");
         System.out.println("C. Intent continuous recognition using events with file.");
+        System.out.println("D. Speech continuous recognition using events with a PushStream.");
+        System.out.println("E. Speech continuous recognition using events with file and Phrase List.");
 
         System.out.print(prompt);
 
@@ -32,7 +35,7 @@ public class Main {
             do {
                 x = new Scanner(System.in).nextLine();
                 System.out.println("");
-                switch (x) {
+                switch (x.toLowerCase()) {
                 case "1":
                     SpeechRecognitionSamples.recognitionWithMicrophoneAsync();
                     break;
@@ -49,26 +52,31 @@ public class Main {
                     SpeechRecognitionSamples.recognitionWithAudioStreamAsync();
                     break;
                 case "6":
-                    TranslationSamples.translationWithMicrophoneAsync();
+                    SpeechRecognitionSamples.keywordTriggeredSpeechRecognitionWithMicrophone();
                     break;
                 case "7":
-                    TranslationSamples.translationWithFileAsync();
+                    TranslationSamples.translationWithMicrophoneAsync();
                     break;
                 case "8":
+                    TranslationSamples.translationWithFileAsync();
+                    break;
+                case "9":
                     TranslationSamples.translationWithAudioStreamAsync();
                     break;
                 case "a":
-                case "A":
                     IntentRecognitionSamples.intentRecognitionWithMicrophone();
                     break;
                 case "b":
-                case "B":
                     IntentRecognitionSamples.intentRecognitionWithLanguage();
                     break;
                 case "c":
-                case "C":
                     IntentRecognitionSamples.intentContinuousRecognitionWithFile();
                     break;
+                case "d":
+                    SpeechRecognitionSamples.continuousRecognitionWithPushStream();
+                    break;
+                case "e":
+                    SpeechRecognitionSamples.continuousRecognitionWithFileWithPhraseListAsync();
                 case "0":
                     System.out.println("Exiting...");
                     break;

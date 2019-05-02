@@ -321,7 +321,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
                 isChecked = this.immediateResultsCheckBox.IsChecked == true;
             });
 
-            EventHandler<SpeechRecognitionEventArgs> recognizingHandler = (sender, e) => RecognizedEventHandler(e, recoType);
+            EventHandler<SpeechRecognitionEventArgs> recognizingHandler = (sender, e) => RecognizingEventHandler(e, recoType);
             if (isChecked)
             {
                 recognizer.Recognizing += recognizingHandler;
@@ -395,6 +395,10 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             {
                 this.WriteLine(log, e.Result.Text);
             }
+
+            // if access to the JSON is needed it can be obtained from Properties
+            string json = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+
         }
 
         /// <summary>

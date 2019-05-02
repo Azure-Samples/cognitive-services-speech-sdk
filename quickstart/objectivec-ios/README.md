@@ -6,7 +6,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A Mac with XCode 9.4.1 installed as iOS development environment. This tutorial targets iOS versions 11.4.
+* A Mac with Xcode 9.4.1 or later installed as iOS development environment. This tutorial targets iOS versions 9.2 or later.
 
 ## Get the Code for the Sample App
 
@@ -16,12 +16,12 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 
-The Cognitive Services Speech SDK for iOS can be downloaded as a zip-file from https://aka.ms/csspeech/iosbinary. Download and copy the files to the `speechsdk` directory in the directory of this `README.md`, i.e. parallel to the `helloworld` directory that contains the XCode project.
+The Cognitive Services Speech SDK for iOS can be downloaded as a zip-file from https://aka.ms/csspeech/iosbinary. Download and copy the files to the `speechsdk` directory in the directory of this `README.md`, i.e. parallel to the `helloworld` directory that contains the Xcode project.
 
 ## Build the Sample
 
 Open the `helloworld.xcodeproj` from the sample code.
-This loads the project in XCode.
+This loads the project in Xcode.
 Next, add your subscription details to the `helloworld/ViewController.m` file:
 
 1. Replace the string `YourSubscriptionKey` with your subscription key.
