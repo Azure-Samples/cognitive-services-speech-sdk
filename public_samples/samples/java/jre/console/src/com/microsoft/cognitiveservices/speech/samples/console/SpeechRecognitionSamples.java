@@ -442,7 +442,7 @@ public class SpeechRecognitionSamples {
             PhraseListGrammar phraseList = PhraseListGrammar.fromRecognizer(recognizer);
 
             // Add a phrase to assist in recognition.
-            phraseList.addPhrase("Wreck a nice beach.");
+            phraseList.addPhrase("Wreck a nice beach");
 
             // Subscribes to events.
             recognizer.recognizing.addEventListener((s, e) -> {

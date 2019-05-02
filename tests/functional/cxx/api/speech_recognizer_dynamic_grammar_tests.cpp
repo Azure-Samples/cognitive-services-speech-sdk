@@ -19,13 +19,9 @@ using namespace Microsoft::CognitiveServices::Speech;
 
 std::shared_ptr<SpeechConfig> GetDynamicGrammarTestsConfig()
 {
-    auto overrideEndpoint = "wss://speech.platform.bing.com/speech/uswest/recognition/interactive/cognitiveservices/v1?format=detailed&language=en-us";
     return !Config::Endpoint.empty()
-        ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::LUIS)
-        : SpeechConfig::FromEndpoint(overrideEndpoint, Keys::LUIS);
-    // return !Config::Endpoint.empty()
-    //     ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech)
-    //     : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech)
+        : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
 }
 
 TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
@@ -49,6 +45,7 @@ TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
 
     SPXTEST_SECTION("PhraseListGrammar")
     {
+        auto beachHint = "Wreck a nice beach"; // DGI currently doesn't strip away punctuation
         auto correctRecoText = dgiWreckANiceBeach.m_utterance;
         auto defaultRecoText = "Recognize speech.";
         auto unrelatedPhrase1 = "This is a test of the emergency broadcast system.";
@@ -84,21 +81,21 @@ TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
 
             SPXTEST_WHEN("correct phrase added, but then later cleared")
             {
-                phraselist->AddPhrase(correctRecoText);
+                phraselist->AddPhrase(beachHint);
                 phraselist->Clear();
                 recoTextMatches(recognizer, defaultRecoText);
             }
 
             SPXTEST_WHEN("correct phrase added")
             {
-                phraselist->AddPhrase(correctRecoText);
+                phraselist->AddPhrase(beachHint);
                 recoTextMatches(recognizer, correctRecoText);
             }
 
             SPXTEST_WHEN("correct phrase added, after unrelated phrase")
             {
                 phraselist->AddPhrase(unrelatedPhrase1);
-                phraselist->AddPhrase(correctRecoText);
+                phraselist->AddPhrase(beachHint);
                 recoTextMatches(recognizer, correctRecoText);
             }
 
@@ -106,20 +103,20 @@ TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
             {
                 phraselist->AddPhrase(unrelatedPhrase1);
                 phraselist->AddPhrase(unrelatedPhrase2);
-                phraselist->AddPhrase(correctRecoText);
+                phraselist->AddPhrase(beachHint);
                 recoTextMatches(recognizer, correctRecoText);
             }
 
             SPXTEST_WHEN("correct phrase added before unrelated phrase")
             {
-                phraselist->AddPhrase(correctRecoText);
+                phraselist->AddPhrase(beachHint);
                 phraselist->AddPhrase(unrelatedPhrase1);
                 recoTextMatches(recognizer, correctRecoText);
             }
 
             SPXTEST_WHEN("correct phrase added, before multiple unrelated phrases")
             {
-                phraselist->AddPhrase(correctRecoText);
+                phraselist->AddPhrase(beachHint);
                 phraselist->AddPhrase(unrelatedPhrase1);
                 phraselist->AddPhrase(unrelatedPhrase2);
                 recoTextMatches(recognizer, correctRecoText);
@@ -128,7 +125,7 @@ TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
             SPXTEST_WHEN("correct phrase added, between multiple unrelated phrases")
             {
                 phraselist->AddPhrase(unrelatedPhrase1);
-                phraselist->AddPhrase(correctRecoText);
+                phraselist->AddPhrase(beachHint);
                 phraselist->AddPhrase(unrelatedPhrase2);
                 recoTextMatches(recognizer, correctRecoText);
             }

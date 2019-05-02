@@ -41,7 +41,7 @@ import tests.Settings;
 import tests.TestHelper;
 
 public class PhraseListGrammarTests {
-    
+
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         // Override inputs, if necessary
@@ -82,7 +82,6 @@ public class PhraseListGrammarTests {
     }
 
     @Test
-    @Ignore // Until skyman supports DGI.
     public void phraselistAssistsSpeechReco() throws InterruptedException, ExecutionException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
@@ -94,7 +93,7 @@ public class PhraseListGrammarTests {
 
         PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
         assertNotNull(pg);
-        pg.addPhrase("Wreck a nice beach.");
+        pg.addPhrase("Wreck a nice beach");
 
         SpeechRecognitionResult res = r.recognizeOnceAsync().get();
         assertEquals("Wreck a nice beach.", res.getText());
@@ -105,7 +104,6 @@ public class PhraseListGrammarTests {
     }
 
    @Test
-   @Ignore // Until skyman supports DGI.
    public void extraPhrasesDontHurtReco() throws InterruptedException, ExecutionException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
@@ -117,7 +115,7 @@ public class PhraseListGrammarTests {
 
         PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
         assertNotNull(pg);
-        pg.addPhrase("Wreck a nice beach.");
+        pg.addPhrase("Wreck a nice beach");
         pg.addPhrase("No effect");
 
         SpeechRecognitionResult res = r.recognizeOnceAsync().get();
@@ -141,7 +139,7 @@ public class PhraseListGrammarTests {
 
         PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
         assertNotNull(pg);
-        pg.addPhrase("Wreck a nice beach.");
+        pg.addPhrase("Wreck a nice beach");
 
         IntentRecognitionResult res = r.recognizeOnceAsync().get();
         assertEquals(ResultReason.RecognizedSpeech, res.getReason());
@@ -164,7 +162,7 @@ public class PhraseListGrammarTests {
 
         PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
         assertNotNull(pg);
-        pg.addPhrase("Wreck a nice beach.");
+        pg.addPhrase("Wreck a nice beach");
         pg.addPhrase("No effect");
 
         IntentRecognitionResult res = r.recognizeOnceAsync().get();
@@ -188,7 +186,7 @@ public class PhraseListGrammarTests {
 
         PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
         assertNotNull(pg);
-        pg.addPhrase("Wreck a nice beach.");
+        pg.addPhrase("Wreck a nice beach");
         pg.clear();
 
         SpeechRecognitionResult res = r.recognizeOnceAsync().get();

@@ -20,10 +20,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     [TestClass]
     public class SpeechRecognizerDynamicGrammarTests
     {
-        private static string luisRegion, luisKey;
         private static string inputDir;
 
-        private static bool useTrumanUntilSkymanReady = true;
         private static string unifiedRegion, unifiedKey;
 
         private SpeechConfig config;
@@ -31,26 +29,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
-            luisRegion = Config.GetSettingByKey<String>(context, "LanguageUnderstandingServiceRegion");
-            luisKey = Config.GetSettingByKey<String>(context, "LanguageUnderstandingSubscriptionKey");
-
             inputDir = Config.GetSettingByKey<String>(context, "InputDir");
             TestData.AudioDir = Path.Combine(inputDir, "audio");
 
             unifiedRegion = Config.GetSettingByKey<String>(context, "Region");
             unifiedKey = Config.GetSettingByKey<String>(context, "UnifiedSpeechSubscriptionKey");
 
-            Console.WriteLine(useTrumanUntilSkymanReady ? ("luisRegion: " + luisRegion) : ("unifiedRegion: " + unifiedRegion));
+            Console.WriteLine("unifiedRegion: " + unifiedRegion);
             Console.WriteLine("input directory: " + inputDir);
         }
 
         [TestInitialize]
         public void Initialize()
         {
-            var overrideEndpoint = $"wss://speech.platform.bing.com/speech/uswest/recognition/interactive/cognitiveservices/v1?format=detailed&language=en-us";
-            config = useTrumanUntilSkymanReady
-                ? SpeechConfig.FromEndpoint(new Uri(overrideEndpoint), luisKey)
-                : SpeechConfig.FromSubscription(unifiedKey, unifiedRegion);
+            config = SpeechConfig.FromSubscription(unifiedKey, unifiedRegion);
         }
 
         [DataTestMethod]
