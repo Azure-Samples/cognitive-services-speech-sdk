@@ -204,7 +204,7 @@ public:
 
     /// <summary>
     /// Class that represents a JSON object.
-    /// </summary>s
+    /// </summary>
     class JSON
     {
     public:
