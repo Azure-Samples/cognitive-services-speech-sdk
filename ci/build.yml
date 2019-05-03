@@ -1922,7 +1922,7 @@ jobs:
     FrameworkName: MicrosoftCognitiveServicesSpeech
     BuildPlatform: iOS
     BuildConfiguration: Release
-    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Out/$(BuildConfiguration)
     Developer.Dir: /Applications/Xcode_10.1.app/Contents/Developer
     microsoftDevTeamId: UBF8T346G9
   steps:
@@ -1941,9 +1941,8 @@ jobs:
       . ci/functions.sh
       mkdir xcode-build-output
       cd xcode-build-output
-      cp -R $(OutputDirectory)/*.zip .
+      cp -R $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)/*.zip .
       for f in *.zip; do unzip $f; done
-      cd ..
     displayName: "Unpack build artifacts"
   - bash: |
       set -e -o pipefail -x
@@ -2000,11 +1999,19 @@ jobs:
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false)
       patchSamplesFromTestConfig public_samples/samples/objective-c/ios/speech-samples/speech-samples \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
         -D long-running=false
       # run the tests
       ci/apple/multiplatformtests.sh public_samples/samples/objective-c/ios/speech-samples/speech-samples.xcodeproj \
@@ -2019,7 +2026,7 @@ jobs:
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)'
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Out'
       ArtifactName: "$(BuildPlatform)"
       publishLocation: Container
     condition: succeededOrFailed()

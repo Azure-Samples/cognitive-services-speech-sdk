@@ -4,7 +4,7 @@ set -e -u -x -o pipefail
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 XCODE_CONFIGURATION_BUILD_DIR=${PWD}/iostestbuild
 
-USAGE="USAGE: xcodeunittests.sh <projectfile> <xcodescheme> <appname> <logdir> <testname> <device> <os> <opt:--extra-args xcode_extra_args> <opt:--usegui>"
+USAGE="USAGE: xcodeunittests.sh <projectfile> <xcodescheme> <appname> <logdir> <testname> <device> <os> <opt:--extra-args xcode_extra_args> <opt:--usegui> <opt:--redact strings_to_redact>"
 PROJECT="${1?$USAGE}"  # Xcode project file
 SCHEME="${2?$USAGE}"  # Xcode scheme name
 APPNAME="${3?$USAGE}"  # name of the app (without .app extension)
@@ -15,6 +15,7 @@ OS="${7?$USAGE}"  # os to test with
 shift 7
 
 xcodeExtraArgs=()
+redactStrings=
 USEGUI=
 while [[ $# > 0 ]]
 do
@@ -26,6 +27,12 @@ do
         xcodeExtraArgs+=("$2")
         shift
         ;;
+    --redact)
+        [[ -n $2 ]] ||
+            exitWithError "Error: expected argument for %s option\n" "$key"
+        redactStrings="$2"
+        shift
+        ;;
     --usegui)
         USEGUI=1
         ;;
@@ -35,6 +42,11 @@ do
     esac
 shift # past argument or value
 done
+
+function redact {
+  # N.B. receiving stdin as first command in function.
+  perl -MIO::Handle -lpe 'BEGIN { STDOUT->autoflush(1); STDERR->autoflush(1); if (@ARGV) { $re = sprintf "(?:%s)", (join "|", map { quotemeta $_ } splice @ARGV); $re = qr/$re/ } } $re and s/$re/***/gi' $@
+}
 
 run_test() {
     local thistestname simname uid
@@ -72,6 +84,7 @@ run_test() {
         CONFIGURATION_BUILD_DIR=${XCODE_CONFIGURATION_BUILD_DIR} \
         SPEECHSDK_SPEECH_KEY="$SPEECHSDK_SPEECH_KEY" SPEECHSDK_SPEECH_REGION="$SPEECHSDK_SPEECH_REGION" \
         SPEECHSDK_LUIS_KEY="$SPEECHSDK_LUIS_KEY" SPEECHSDK_LUIS_REGION="$SPEECHSDK_LUIS_REGION" 2>&1 |
+          redact $redactStrings |
           tee "${LOGDIR}/xcodebuild-ios-build-${thistestname}.log" |
           xcpretty --report junit --output test-ios-build-${thistestname}.xml
 
@@ -84,6 +97,7 @@ run_test() {
         CONFIGURATION_BUILD_DIR=${XCODE_CONFIGURATION_BUILD_DIR} \
         SPEECHSDK_SPEECH_KEY="$SPEECHSDK_SPEECH_KEY" SPEECHSDK_SPEECH_REGION="$SPEECHSDK_SPEECH_REGION" \
         SPEECHSDK_LUIS_KEY="$SPEECHSDK_LUIS_KEY" SPEECHSDK_LUIS_REGION="$SPEECHSDK_LUIS_REGION" 2>&1 |
+          redact $redactStrings |
           tee "${LOGDIR}/xcodebuild-ios-run-${thistestname}.log" |
           xcpretty --report junit --output test-ios-run-${thistestname}.xml
 }

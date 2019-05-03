@@ -700,6 +700,11 @@
         else
         {
             NSInteger nBytesRead = [buffer frameLength] * bytesPerFrame;
+            if (0 == nBytesRead)
+            {
+                [self->stream close];
+                break;
+            }
 
             NSLog(@"Read %d bytes from file", (int)nBytesRead);
 

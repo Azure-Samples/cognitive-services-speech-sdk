@@ -83,7 +83,7 @@ function runXcodeSuite {
 
   for testCase in "${testCases[@]}"; do
     runTest "$testStateVarPrefix" "$testCase" "$timeoutSeconds" \
-      "${test_command[@]}" $testCase ${USEGUI} || true
+      "${test_command[@]}" $testCase ${USEGUI} --redact "$redactStrings" || true
   done
 
   endSuite "$testStateVarPrefix"
@@ -94,7 +94,7 @@ runXcodeSuite \
   TESTRUNNER \
   xcodeunittests \
   iOS \
-  "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_LUIS_KEY" \
+  "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_LUIS_KEY $SPEECHSDK_BOT_SUBSCRIPTION $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_KEY" \
   xcodeunittests \
   240 \
   --extra-args DEVELOPMENT_TEAM=${DEVTEAMID}
