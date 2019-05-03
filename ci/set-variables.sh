@@ -52,6 +52,7 @@
 #     For prod (release) builds, "WackTest CheckSignatures" are added to the default phases.
 #     Check phase condition in build.yml for valid phase names.
 # * SPEECHSDK_RUN_TESTS - whether to run tests. Can be 'true' (default) or 'false'.
+# * SPEECHSDK_TEST_SET - which test set to run. Can be 'prod', 'int', or 'dev'; defaults to SPEECHSDK_BUILD_TYPE.
 #
 # Override mechanism:
 # Any of the outputs can be overridden. To override output X, specify a
@@ -201,6 +202,7 @@ SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGet
 
 # Running tests is default
 SPEECHSDK_RUN_TESTS=true
+SPEECHSDK_TEST_SET=$SPEECHSDK_BUILD_TYPE
 
 SPEECHSDK_SPECTRE_MITIGATION=true
 
@@ -263,6 +265,7 @@ for var in \
   SPEECHSDK_MAIN_BUILD \
   SPEECHSDK_NUGET_VSTS_PUSH \
   SPEECHSDK_RUN_TESTS \
+  SPEECHSDK_TEST_SET \
   SPEECHSDK_SEMVER2 \
   SPEECHSDK_SEMVER2NOMETA \
   SPEECHSDK_SIGN \

@@ -3,6 +3,7 @@ T="$(basename "$0" .sh)"
 BUILD_DIR="$1"
 PLATFORM="$2"
 BINARY_DIR="$3"
+TESTSET="${4:-dev}"
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
@@ -24,15 +25,21 @@ audioFile="$SPEECHSDK_INPUTDIR/audio/whatstheweatherlike.wav"
 # Using array of pairs for deterministic test order
 
 tests=(
-  "speech base model in interactive mode"   "mode:interactive"
-  "speech base model in conversation mode"  "mode:conversation"
-  "speech base model in dictation mode"     "mode:dictation"
-  "CRIS model in interactive mode"          "mode:interactive model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
-  "CRIS model in conversation mode"         "mode:conversation model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
-  "CRIS model in dictation mode"            "mode:dictation model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
-  "endpoint for speech model"               "url:$speechEndpoint"
-  "endpoint for CRIS model"                 "url:$crisEndpoint"
+  "speech base model in interactive mode" "mode:interactive"
 )
+
+if [[ $TESTSET != dev ]]; then
+  # Additional tests for prod and int builds.
+  tests+=(
+    "speech base model in conversation mode"  "mode:conversation"
+    "speech base model in dictation mode" "mode:dictation"
+    "CRIS model in interactive mode" "mode:interactive model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
+    "CRIS model in conversation mode" "mode:conversation model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
+    "CRIS model in dictation mode" "mode:dictation model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
+    "endpoint for speech model" "url:$speechEndpoint"
+    "endpoint for CRIS model" "url:$crisEndpoint"
+  )
+fi
 
 startTests TESTRUNNER "test-$T-$PLATFORM" "$PLATFORM" "$SPEECHSDK_SPEECH_KEY"
 startSuite TESTRUNNER "$T"

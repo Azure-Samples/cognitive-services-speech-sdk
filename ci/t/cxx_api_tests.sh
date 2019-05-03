@@ -3,7 +3,7 @@ T="$(basename "$0" .sh)"
 BUILD_DIR="$1"
 PLATFORM="$2"
 BINARY_DIR="$3"
-TESTSET="$4"
+TESTSET="${4:-dev}"
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 

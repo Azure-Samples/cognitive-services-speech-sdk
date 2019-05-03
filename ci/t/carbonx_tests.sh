@@ -3,6 +3,7 @@ T="$(basename "$0" .sh)"
 BUILD_DIR="$1"
 PLATFORM="$2"
 BINARY_DIR="$3"
+TESTSET="${4:-dev}"
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
@@ -20,41 +21,33 @@ TEST_CODE="$BINARY_DIR/carbonx"
 speechEndpoint="$(speechWebSocketsEndpoint "$SPEECHSDK_SPEECH_REGION" interactive simple en-us)"
 crisEndpoint="$(crisWebSocketsEndpoint "$SPEECHSDK_SPEECH_REGION" interactive "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS")"
 
-# TODO
-Action=all
-
-# Expand actions if all is specified
-if [[ $Action == all ]]; then
-  Actions="speech intent"
-else
-  Actions="$Action"
-fi
-
-# Validate actions
-for action in $Actions; do
-  case $action in
-    speech|intent)
-      ;;
-    *)
-      echo Unknown action: $action 1>&2
-      exit 1
-  esac
-done
+actions=(speech)
 
 # Using array of pairs for deterministic test order
 
 modes=(
-  "default"        ""
-  "single"         "--single"
-  "continuous:10"  "--continuous:10"
+  "default" ""
 )
 
 targets=(
-  "baseModel"       ""
-  "crisModel"       "--customSpeechModelId:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
-  "speechEndpoint"  "--endpoint:$speechEndpoint"
-  "crisEndpoint"    "--endpoint:$crisEndpoint"
+  "baseModel" ""
 )
+
+if [[ $TESTSET != dev ]]; then
+  # Additional tests for prod and int builds.
+  actions+=(intent)
+
+  modes+=(
+    single "--single"
+    continuous:10  "--continuous:10"
+  )
+
+  targets+=(
+    crisModel "--customSpeechModelId:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
+    speechEndpoint "--endpoint:$speechEndpoint"
+    crisEndpoint "--endpoint:$crisEndpoint"
+  )
+fi
 
 startTests TESTRUNNER "test-$T-$PLATFORM" "$PLATFORM" "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_LUIS_KEY"
 
@@ -63,7 +56,7 @@ startSuite TESTRUNNER "$T"
 # The continuous tests are sampling for 10 seconds. Waiting for 30 seconds should be enough.
 TIMEOUT_SECONDS=30
 
-for action in $Actions; do
+for action in "${actions[@]}"; do
   for ((modeIndex = 0; modeIndex < ${#modes[@]}; modeIndex += 2)); do
     mode="${modes[$modeIndex]}"
     modeArg="${modes[$modeIndex + 1]}"

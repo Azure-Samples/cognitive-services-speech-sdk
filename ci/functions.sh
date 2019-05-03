@@ -254,3 +254,11 @@ function unity_batch() {
 
   return $exit_code
 }
+
+function get_time() {
+  perl -MTime::HiRes=clock_gettime -e 'print clock_gettime()'
+}
+
+function get_seconds_elapsed() {
+  perl -MTime::HiRes=clock_gettime -e 'printf "%0.3f", clock_gettime() - shift' "$1"
+}

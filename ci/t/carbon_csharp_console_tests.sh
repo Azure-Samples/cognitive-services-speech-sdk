@@ -3,6 +3,7 @@ T="$(basename "$0" .sh)"
 BUILD_DIR="$1"
 PLATFORM="$2"
 BINARY_DIR="$3"
+TESTSET="${4:-dev}"
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
@@ -21,45 +22,36 @@ speechEndpoint="$(speechWebSocketsEndpoint "$SPEECHSDK_SPEECH_REGION" interactiv
 crisEndpoint="$(crisWebSocketsEndpoint "$SPEECHSDK_SPEECH_REGION" interactive "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS")"
 audioFile="$SPEECHSDK_INPUTDIR/audio/whatstheweatherlike.wav"
 
-# Expand actions if all is specified
-Action=all
-if [[ $Action == all ]]; then
-  Actions="speech intent translation"
-else
-  Actions="$Action"
-fi
-
-# Validate actions
-for action in $Actions; do
-  case $action in
-    speech|intent|translation)
-      ;;
-    *)
-      echo Unknown action: $action 1>&2
-      exit 1
-  esac
-done
-
 # TODO: skip auth token tests if this step fails
 TOKEN="$(getAuthorizationToken "$SPEECHSDK_SPEECH_KEY" "$SPEECHSDK_SPEECH_REGION")" ||
   die "Error: could not obtain authorization token"
 
+actions=(speech intent translation)
+
 # Using array of pairs for deterministic test order
 
 variants=(
-  "baseModel"               "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_SPEECH_REGION $audioFile"
-  "crisModel"               "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_SPEECH_REGION $audioFile model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
-  "speechEndpoint"          "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_SPEECH_REGION $audioFile endpoint:"$speechEndpoint""
-  "crisEndpoint"            "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_SPEECH_REGION $audioFile endpoint:"$crisEndpoint""
-  "baseModelWithStream"     "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_SPEECH_REGION stream:$audioFile"
+  baseModel "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_SPEECH_REGION $audioFile"
 )
+
+if [[ $TESTSET != dev ]]; then
+  # Additional tests for prod and int builds.
+  actions+=(intent translation)
+
+  variants+=(
+    crisModel "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_SPEECH_REGION $audioFile model:$SPEECHSDK_SPEECH_ENDPOINTID_ENUS"
+    speechEndpoint "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_SPEECH_REGION $audioFile endpoint:"$speechEndpoint""
+    crisEndpoint "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_SPEECH_REGION $audioFile endpoint:"$crisEndpoint""
+    baseModelWithStream "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_SPEECH_REGION stream:$audioFile"
+  )
+fi
 
 startTests TESTRUNNER "test-$T-$PLATFORM" "$PLATFORM" "$SPEECHSDK_SPEECH_KEY $TOKEN"
 startSuite TESTRUNNER "$T"
 
 TIMEOUT_SECONDS=30
 
-for action in $Actions; do
+for action in "${actions[@]}"; do
   for ((variantIndex = 0; variantIndex < ${#variants[@]}; variantIndex += 2)); do
     variant="${variants[$variantIndex]}"
     variantArg="${variants[$variantIndex + 1]}"

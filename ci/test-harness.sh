@@ -125,9 +125,9 @@ function runTest {
     redact ${!redactStringsRef} |
     tee -a "${!outputRef}.out"
 
-  local START_SECONDS EXIT_CODE END_SECONDS TIME_SECONDS TAIL
+  local START_SECONDS EXIT_CODE TIME_SECONDS TAIL
 
-  START_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
+  START_SECONDS=$(get_time)
   (
   set +o pipefail
   $cmdTimeout -k 5s $TIMEOUT_SECONDS ${callStdbuf[@]} "$@" 2>&1 | redact ${!redactStringsRef} |
@@ -137,8 +137,7 @@ function runTest {
   )
   EXIT_CODE=$?
 
-  END_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
-  TIME_SECONDS=$(perl -e "printf '%0.3f', $END_SECONDS - $START_SECONDS")
+  TIME_SECONDS=$(get_seconds_elapsed "$START_SECONDS")
   TAIL="$(tail -20 "${!outputRef}.out")"
 
   print_vars EXIT_CODE TIME_SECONDS = |

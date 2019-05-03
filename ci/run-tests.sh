@@ -7,7 +7,7 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 # Associative array for most options
 declare -A options
 options[timeout]="3600s"
-options[testset]="dev"
+options[test-set]="dev"
 
 # Defines we collect separately in an array
 defines=()
@@ -67,10 +67,10 @@ do
       skips+=("$SCRIPT_DIR/t/$2.sh")
       shift
       ;;
-    --testset)
-      testsetRe="(dev|int|prod)"
-      [[ $2 =~ ^$testsetRe$ ]] ||
-        exitWithError "Error: invalid testset '%s', expected %s.\n" "$2" "$testsetRe"
+    --test-set)
+      testSetRe="(dev|int|prod)"
+      [[ $2 =~ ^$testSetRe$ ]] ||
+        exitWithError "Error: invalid test set '%s', expected %s.\n" "$2" "$testSetRe"
       options[${key:2}]="$2"
       shift
       ;;
@@ -144,15 +144,17 @@ total=0
 for testfile in "${testsToRun[@]}"; do
   T="$(basename "$testfile" .sh)"
   echo Starting $T with timeout ${options[timeout]}
+  START_SECONDS=$(get_time)
   $cmdTimeout -k 5s "${options[timeout]}" ${callStdbuf[@]} \
-  "$testfile" "${options[build-dir]}" "${options[platform]}" "$binaryDir" "${options[testset]}"
+  "$testfile" "${options[build-dir]}" "${options[platform]}" "$binaryDir" "${options[test-set]}"
   exitCode=$?
+  TIME_SECONDS=$(get_seconds_elapsed "$START_SECONDS")
   if [[ $exitCode == 0 ]]; then
     ((pass++))
-    echo Test $T: passed
+    echo Test $T: passed, \($TIME_SECONDS seconds\)
   else
     vsts_logissue error "${options[platform]}: Test $T failed, exit code $exitCode, source $testfile."
-    echo Test $T: failed with error code $exitCode
+    echo Test $T: failed with error code $exitCode, \($TIME_SECONDS seconds\)
   fi
   ((total++))
 done
