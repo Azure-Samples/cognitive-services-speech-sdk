@@ -21,6 +21,10 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Dialog {
 
+/*! \cond PRIVATE */
+
+// Internally used string constants.
+
 namespace Activity
 {
     namespace Fields
@@ -65,6 +69,8 @@ namespace Activity
         }
     }
 }
+
+/*! \endcond */
 
 /// <summary>
 /// Class that represents a bot activity.
