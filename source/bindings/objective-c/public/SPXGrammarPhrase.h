@@ -7,6 +7,7 @@
 
 /**
   * Represents a phrase that may be spoken by the user.
+  * Added in version 1.5.0.
   */
 SPX_EXPORT
 @interface SPXGrammarPhrase : NSObject

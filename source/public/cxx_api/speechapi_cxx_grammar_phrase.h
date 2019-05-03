@@ -19,6 +19,7 @@ namespace Speech {
 
 /// <summary>
 /// Represents a phrase that may be spoken by the user.
+/// Added in version 1.5.0.
 /// </summary>
 class GrammarPhrase
 {

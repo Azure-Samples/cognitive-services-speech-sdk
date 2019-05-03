@@ -15,6 +15,7 @@ namespace Microsoft.CognitiveServices.Speech
 
     /// <summary>
     /// Represents base class grammar for customizing speech recognition.
+    /// Added in version 1.5.0.
     /// </summary>
     public class Grammar
     {

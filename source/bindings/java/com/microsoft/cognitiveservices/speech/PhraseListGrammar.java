@@ -17,7 +17,7 @@ import com.microsoft.cognitiveservices.speech.Recognizer;
  *
  * Phrases added to the recognizer are effective at the start of the next recognition, or the next time the SpeechSDK must reconnect
  * to the speech service.
- * Added in version 1.3.0.
+ * Added in version 1.5.0.
  */
 public final class PhraseListGrammar implements Closeable
 {

@@ -15,6 +15,7 @@ namespace Microsoft.CognitiveServices.Speech
 
     /// <summary>
     /// Represents a phrase that may be spoken by the user.
+    /// Added in version 1.5.0.
     /// </summary>
     public sealed class GrammarPhrase
     {

@@ -17,6 +17,7 @@ namespace Microsoft.CognitiveServices.Speech
 
     /// <summary>
     /// Represents a phrase list grammar for dynamic grammar scenarios.
+    /// Added in version 1.5.0.
     /// </summary>
     public sealed class PhraseListGrammar : Grammar
     {

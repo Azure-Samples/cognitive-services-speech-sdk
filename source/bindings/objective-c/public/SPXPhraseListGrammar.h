@@ -9,6 +9,7 @@
 
 /**
   * Represents a phrase list grammar for dynamic grammar scenarios.
+  * Added in version 1.5.0.
   */
 SPX_EXPORT
 @interface SPXPhraseListGrammar : SPXGrammar
