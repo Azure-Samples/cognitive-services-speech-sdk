@@ -23,6 +23,10 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 
 Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and older releases.
 
+* Speech SDK Release 1.5.0
+
+  Beginning of May 2019 we released version 1.5.0 of the Speech SDK.
+
 * Speech SDK Release 1.4.0
 
   Beginning of April 2019 we released version 1.4.0 of the Speech SDK.
@@ -31,16 +35,12 @@ Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and olde
 
   End of February 2019 we released version 1.3.1 of the Speech SDK.
 
-* Speech SDK Release 1.3.0
-
-  Mid of February 2019 we released version 1.3.0 of the Speech SDK.
-
 ## Features
 
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK (1.3.1) on Windows 10, Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9), Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
+We tested the samples with the latest released version of the SDK (1.5.0) on Windows 10, Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9), Android devices (API 23: Android 6.0 Marshmallow or higher), and iOS 11.4 devices.
 
 ## Getting Started
 
@@ -106,16 +106,6 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart C++ for Linux](./quickstart/text-to-speech/cpp-linux/) | Linux | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C++ for Windows](./quickstart/text-to-speech/cpp-windows/) | Windows  | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C# .NET for Windows](./quickstart/text-to-speech/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech synthesis to the default speaker. |
-
-### Voice-first virtual assistants quickstarts
-
-The following quickstarts demonstrate how to create a custom voice-first virtual assistant (Preview).
-The applications will connect to a previously authored bot configured to use the Direct Line Speech channel, send a voice request, and return a voice response activity (if configured).
-If you want to build these quickstarts from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
-
-| Quickstart | Platform | Description |
-| ---------- | -------- | ----------- |
-| [Quickstart Java JRE](./quickstart/virtual-assistant/java-jre) | Windows, Linux, macOS | Demonstrates speech recognition through the SpeechBotConnector and receiving activity responses. |
 
 ### Samples
 
