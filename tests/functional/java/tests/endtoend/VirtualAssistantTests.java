@@ -13,11 +13,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import tests.Settings;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.*;
 import static tests.Settings.*;
 
@@ -28,6 +28,20 @@ public class VirtualAssistantTests {
     public static final String EN_US = "en-US";
     private SpeechBotConnector botConnector;
     private EventRecord eventRecord;
+
+    private static String readFileAsString(String path) throws IOException
+    {
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
+        String result = "";
+        String line;
+
+        while ((line = br.readLine()) != null)
+        {
+            result += line;
+        }
+        br.close();
+        return result;
+    }
 
     @BeforeClass
     public static void setupBeforeClass() {
@@ -54,7 +68,7 @@ public class VirtualAssistantTests {
     public void testSendActivity() throws IOException {
         assertNotNull(botConnector);
         try {
-            final String activity = new String(Files.readAllBytes(Paths.get(SerializedSpeechActivityFile)), UTF_8);
+            final String activity = readFileAsString(SerializedSpeechActivityFile);
             // Connect to the bot
             botConnector.connectAsync();
             botConnector.sendActivityAsync(BotConnectorActivity.fromSerializedActivity(activity));

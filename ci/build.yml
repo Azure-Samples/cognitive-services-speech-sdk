@@ -1318,11 +1318,13 @@ jobs:
       LuisAppId=$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID
       Keyword=Computer
       KeywordModel=kws-computer.zip
-      SasToken=$(SPEECHSDK_SASTOKEN)
-      SasContainerPrefix=$(SPEECHSDK_TEST_APPCENTERUPLOAD)
       SpeechSubscriptionKeyForVirtualAssistant=$SPEECHSDK_BOT_SUBSCRIPTION
       SpeechRegionForVirtualAssistant=$SPEECHSDK_BOT_REGION
       SpeechChannelSecretForVirtualAssistant=$SPEECHSDK_BOT_FUNCTIONALTESTBOT
+      ConversationTranscriptionEndpoint=$SPEECHSDK_PRINCETON_INROOM_ENDPOINT
+      ConversationTranscriptionKey=$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_KEY
+      SasToken=$(SPEECHSDK_SASTOKEN)
+      SasContainerPrefix=$(SPEECHSDK_TEST_APPCENTERUPLOAD)
       EOF
       cat "$FAKE_BUILD/MainActivity.properties"
       cp --preserve "$DROP_DIR/public/lib/com.microsoft.cognitiveservices.speech.jar" "$FAKE_BUILD/lib"
