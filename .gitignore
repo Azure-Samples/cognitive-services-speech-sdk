@@ -97,3 +97,5 @@ source/bindings/python/src/version.py
 
 # VoiceActivation KWS artifact
 external/KWS/*/
+external/uwp_ssl/*/
+external/android-openssl/*/
