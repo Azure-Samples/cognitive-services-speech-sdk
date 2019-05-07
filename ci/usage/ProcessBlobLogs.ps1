@@ -91,7 +91,7 @@ if ($DownloadRaw) {
 # TODO versioning for our own data ?
 
 # Schema for Azure Blob Storage Logs, version 1.0. See
-# https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format
+# https://docs.microsoft.com/rest/api/storageservices/storage-analytics-log-format
 # for details.
 #
 # Note: we will only accept version-number 1.0 below.

@@ -17,14 +17,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static readonly string DE_DE = "de-DE";
         public static readonly string CA_ES = "ca-ES";
 
-        // List of speech-to-Text codes are copied from https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support [7 dec 2018]
+        // List of speech-to-text codes are copied from https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support [7 dec 2018]
         public static readonly string[] Speech2TextAll =
         {
             "ar-EG", "ca-ES", "da-DK", "de-DE", "en-AU", "en-CA", "en-GB", "en-IN", "en-NZ", "en-US", "es-ES", "es-MX", "fi-FI", "fr-CA", "fr-FR",
             "hi-IN", "it-IT", "ja-JP", "ko-KR", "nb-NO", "nl-NL", "pl-PL", "pt-BR", "pt-PT", "ru-RU", "sv-SE", "zh-CN", "zh-HK", "zh-TW", "th-TH"
         };
 
-        // List of text languages are copied from https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support [7 dec 2018]
+        // List of text languages are copied from https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support [7 dec 2018]
         public static readonly string[] TextLangAll =
         {
             "af", "ar", "bn", "bs", "bg", "yue", "ca", "zh-Hans", "zh-Hant", "hr", "cs", "da", "nl", "en", "et", "fj", "fil", "fi", "fr", "de", "el",

@@ -119,12 +119,16 @@ checkEmptyStdout \
   "Potentially subscription key checked in? Double check, if necessary modify white-list in this script: git grep -i -I -P '[^a-f0-9][a-f0-9]{32}[^a-f0-9]'"
 
 checkEmptyStdout \
-  "git grep -l -i -I carbon $gitTree -- public_samples source/public source/bindings/csharp source/bindings/objective-c ThirdPartyNotices.md REDIST.txt license.md | grep -v -e CMakeLists\.txt$ -e carbon_[a-z]*\.i$ | cut -d: -f2-" \
-  "Remove Carbon in files"
+  "git grep -l -i -I -e carbon -e kona -e princeton $gitTree -- public_samples source/public source/bindings ThirdPartyNotices.md REDIST.txt license.md | grep -v -e CMakeLists\.txt$ -e /carbon_[a-z]*\.i$ -e /speech_py_impl\.i$ -e /SpeechConfig\.java$ | cut -d: -f2-" \
+  "Remove internal code names (Carbon, Princeton, Kona) in files"
 
 checkEmptyStdout \
   "git grep -I -P '///\s*<\w+>' source/bindings/java" \
   "No XMLDoc comment in Java, please change to JavaDoc format"
+
+checkEmptyStdout \
+  "git grep -l -i -I -E '(azure|docs|www)\.microsoft\.com/en-us/' $gitTree | cut -d: -f2-" \
+  "Remove /en-us/ from (azure|docs|www).microsoft.com links as we shouldn't be overriding user (browser) language preference"
 
 if [ $errorCount -ne 0 ]
 then

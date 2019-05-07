@@ -223,7 +223,7 @@ public:
 
     /**
      * Sets the audio response format that will be passed to the service in the X-Output-AudioCodec header.
-     * More info can be found here: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-apis
+     * More info can be found here: https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-apis
      */
     Client& SetAudioResponseFormat(const std::string& format)
     {

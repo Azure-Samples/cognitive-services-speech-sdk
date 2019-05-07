@@ -11,7 +11,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static readonly string FR = "Microsoft Server Speech Text to Speech Voice (fr-CA, Caroline)";
         public static readonly string DE = "Microsoft Server Speech Text to Speech Voice (de-DE, HeddaRUS)";
 
-        // List of voice names are copied from https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support [7 Dec 2018]
+        // List of voice names are copied from https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support [7 Dec 2018]
         public static readonly Dictionary<string, List<string>> All = new Dictionary<string, List<string>>
         {
             ["ar"] = new List<string>{ "Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)", "Microsoft Server Speech Text to Speech Voice (ar-SA, Naayf)" },

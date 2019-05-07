@@ -50,7 +50,7 @@ WebSocket upgrade requests that do not include the *X-ConnectionId*, that do not
 
 #### Authorization
 
-In addition to the standard WebSocket handshake headers, USP requires an *Authorization* header. Connection requests without this header are rejected by the service with a 403 Forbidden HTTP response. Both subscription key and authorization token are supported. See [the page](https://docs.microsoft.com/en-us/azure/cognitive-services/speech/how-to/how-to-authentication?tabs=Powershell) for details.
+In addition to the standard WebSocket handshake headers, USP requires an *Authorization* header. Connection requests without this header are rejected by the service with a 403 Forbidden HTTP response. Both subscription key and authorization token are supported. See [the page](https://docs.microsoft.com/azure/cognitive-services/speech/how-to/how-to-authentication?tabs=Powershell) for details.
 
 #### X-CorrelationId
 
@@ -68,7 +68,7 @@ The X-OsPlatform platform will be removed from the header. Instead, [speech.conf
 
 ## Websocket Messages for Translation Speech Service
 
-WebSocket messages in USP can use either a text or a binary encoding as specified by [IETF RFC 6455](https://tools.ietf.org/html/rfc6455). [This page](https://docs.microsoft.com/en-us/azure/cognitive-services/Speech/api-reference-rest/websocketprotocol#message-types) describes the format of Text WebSocket Messages and Binary WebSocket Messages supported by USP.
+WebSocket messages in USP can use either a text or a binary encoding as specified by [IETF RFC 6455](https://tools.ietf.org/html/rfc6455). [This page](https://docs.microsoft.com/azure/cognitive-services/Speech/api-reference-rest/websocketprotocol#message-types) describes the format of Text WebSocket Messages and Binary WebSocket Messages supported by USP.
 
 ### Client Request Messages
 
@@ -82,7 +82,7 @@ The service uses the first *audio* message that contains a unique request identi
 of a new request/response cycle or *turn*. After receiving an *audio* message with a new request identifier, the service
 discards any queued or unsent messages that are associated with any previous turn.
 
-**NOTE** Different than the messages used by the current translation speech service, all messages in USP have required message headers. The following headers are required for all client-originated USP messages. Detailed information about the header is described [here](https://docs.microsoft.com/en-us/azure/cognitive-services/Speech/api-reference-rest/websocketprotocol#client-originated-messages).
+**NOTE** Different than the messages used by the current translation speech service, all messages in USP have required message headers. The following headers are required for all client-originated USP messages. Detailed information about the header is described [here](https://docs.microsoft.com/azure/cognitive-services/Speech/api-reference-rest/websocketprotocol#client-originated-messages).
 
 The following headers are required for all *audio* messages.
 
@@ -93,7 +93,7 @@ The following headers are required for all *audio* messages.
 | X-Timestamp | Client UTC clock timestamp in ISO 8601 format |
 | Content-Type | The audio content type. Must be one of *audio/x-wav* (PCM) or *audio/silk* (SILK) |
 
-**NOTE** The speech client SDK also sends other messages, for example, speech.config, and telemetry messages to the speech service. Details of these messages are described [here](https://docs.microsoft.com/en-us/azure/cognitive-services/Speech/api-reference-rest/websocketprotocol#client-originated-messages).
+**NOTE** The speech client SDK also sends other messages, for example, speech.config, and telemetry messages to the speech service. Details of these messages are described [here](https://docs.microsoft.com/azure/cognitive-services/Speech/api-reference-rest/websocketprotocol#client-originated-messages).
 
 ### Service Responses Messages
 
@@ -223,7 +223,7 @@ The first `translation.synthesis` message contains a well-formed header that pro
 
 ### Telemetry Messages
 
-The speech USP protocol defines a set of telemetry messages to be exchanged between client and service. See [Telemetry schema](https://docs.microsoft.com/en-us/azure/cognitive-services/speech/api-reference-rest/websocketprotocol#telemetry-schema) details.
+The speech USP protocol defines a set of telemetry messages to be exchanged between client and service. See [Telemetry schema](https://docs.microsoft.com/azure/cognitive-services/speech/api-reference-rest/websocketprotocol#telemetry-schema) details.
 
 **NOTE** Currently, the translation team is working on instrumentation spec for the translation service. Further discussions are need how to define telemetry messages for translation and how to align with the speech telemetry messages.
 
