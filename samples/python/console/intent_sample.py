@@ -119,6 +119,74 @@ def recognize_intent_once_from_file():
     # </IntentRecognitionOnceWithFile>
 
 
+def recognize_intent_once_async_from_mic():
+    """performs one-shot asynchronous intent recognition from input from the default microphone"""
+    # Set up the config for the intent recognizer
+    intent_config = speechsdk.SpeechConfig(subscription=intent_key, region=intent_service_region)
+    audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
+
+    # Set up the intent recognizer
+    intent_recognizer = speechsdk.intent.IntentRecognizer(speech_config=intent_config, audio_config=audio_config)
+
+    # Add callbacks to the recognition events
+
+    # Set up a flag to mark when asynchronous recognition is done
+    done = False
+
+    def recognized_callback(evt):
+        """
+        Callback that is called on successful recognition of a full utterance by both speech
+        processing and intent classification
+        """
+        result = evt.result
+        print("Recognized: \"{}\" with intent id `{}`".format(result.text, result.intent_id))
+        nonlocal done
+        done = True
+
+    def canceled_callback(evt):
+        """Callback that is called on a failure by either speech or language processing"""
+        result = evt.result
+        print("Intent recognition canceled: {}".format(result.cancellation_details.reason))
+        if result.cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(result.cancellation_details.error_details))
+        nonlocal done
+        done = True
+
+    def recognizing_callback(evt):
+        """Callback that is called on intermediate results from speech transcription"""
+        result = evt.result
+        print("Intermediate transcription: \"{}\"".format(result.text))
+
+    # Connect the callbacks
+    intent_recognizer.recognized.connect(recognized_callback)
+    intent_recognizer.canceled.connect(canceled_callback)
+    intent_recognizer.recognizing.connect(recognizing_callback)
+
+    # set up the intents that are to be recognized. These can be a mix of simple phrases and
+    # intents specified through a LanguageUnderstanding Model.
+    model = speechsdk.intent.LanguageUnderstandingModel(app_id=language_understanding_app_id)
+    intents = [
+        (model, "HomeAutomation.TurnOn"),
+        (model, "HomeAutomation.TurnOff"),
+        ("This is a test.", "test"),
+        ("Switch to channel 34.", "34"),
+        ("what's the weather like", "weather"),
+    ]
+    intent_recognizer.add_intents(intents)
+
+    # Starts non-blocking intent recognition and stop after a single utterance has been recognized.
+    # The end of a single utterance is determined by listening for silence at the end or until a
+    # maximum of 15 seconds of audio is processed.
+    # Note: Since recognize_once() stops after a single utterance, it is suitable only for single
+    # shot recognition like command or query. For long-running multi-utterance recognition, use
+    # start_continuous_recognition() instead.
+    intent_recognizer.recognize_once_async()
+
+    # wait until recognition is complete
+    while not done:
+        time.sleep(1)
+
+
 def recognize_intent_continuous():
     """performs one-shot intent recognition from input from an audio file"""
     # <IntentContinuousRecognitionWithFile>
