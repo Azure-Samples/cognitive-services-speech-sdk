@@ -78,7 +78,7 @@ public:
     /// Creates an audio stream format object with the specified PCM waveformat characteristics.
     /// </summary>
     /// <remarks>
-    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
+    /// Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with Conversation Transcription, eight channels are supported.
     /// </remarks>
     /// <param name="samplesPerSecond">Samples per second.</param>
     /// <param name="bitsPerSample">Bits per second.</param>

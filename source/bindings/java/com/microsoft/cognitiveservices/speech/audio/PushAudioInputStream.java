@@ -32,7 +32,7 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
 
     /**
      * Creates a memory backed PushAudioInputStream with the specified audio format.
-     * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with the Conversation Transcription Service, eight channels are supported.
+     * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported. When used with Conversation Transcription, eight channels are supported.
      * @param format The audio data format in which audio will be written to the push audio stream's write() method.
      * @return The push audio input stream being created.
      */
