@@ -95,7 +95,8 @@ SPXAPI bot_connector_create_speech_bot_connector_from_config(SPXRECOHANDLE* ph_b
         auto config_handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
         auto config = (*config_handles)[h_bot_config];
         auto config_property_bag = SpxQueryInterface<ISpxNamedProperties>(config);
-        config_property_bag->SetStringValue(KeywordConfig_EnableKeywordVerification, "true");
+        auto enableKeywordVerification = config_property_bag->GetStringValue(KeywordConfig_EnableKeywordVerification, "true");
+        config_property_bag->SetStringValue(KeywordConfig_EnableKeywordVerification, enableKeywordVerification.c_str());
 
         auto connector = create_from_config(h_bot_config, h_audio_input, &ISpxSpeechApiFactory::CreateSpeechBotConnectorFromConfig);
 

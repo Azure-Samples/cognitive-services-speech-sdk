@@ -385,6 +385,7 @@ endif()
 
 if(EXTENSION_KWS_ENABLED)
   add_subdirectory("${CARBON_EXTENSIONS}/kws")
+  add_definitions(-DSPEECHSDK_KWS_ENABLED)
 endif()
 
 add_subdirectory(${CARBON_BINDINGS})

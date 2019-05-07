@@ -231,7 +231,7 @@ private:
 
     bool ProcessNextAudio();
 
-    void HotSwapToKwsSingleShotWhilePaused();
+    void HotSwapToKwsSingleShotWhilePaused(std::shared_ptr<ISpxRecognitionResult> spottedKeywordResult);
 
     void StartAudioPump(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model);
     void HotSwapAdaptersWhilePaused(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
@@ -385,13 +385,13 @@ private:
         const RecognitionKind m_kind;
         std::promise<std::shared_ptr<ISpxRecognitionResult>> m_promise;
         std::shared_future<std::shared_ptr<ISpxRecognitionResult>> m_future;
+
+        // Details about the spotted keyword to verify.
+        std::shared_ptr<ISpxRecognitionResult> m_spottedKeywordResult;
     };
 
     // Single shot in flight operation.
     std::shared_ptr<Operation> m_singleShotInFlight;
-
-    // Details about the spotted keyword.
-    std::shared_ptr<ISpxRecognitionResult> m_spottedKeywordResult;
 };
 
 

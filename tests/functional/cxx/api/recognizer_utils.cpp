@@ -12,7 +12,6 @@
 
 using namespace Microsoft::CognitiveServices::Speech::USP; // for GetISO8601Time
 
-
 TestData weather {"/audio/whatstheweatherlike.wav", "What's the weather like?" };
 TestData weathermp3{ "/audio/whatstheweatherlike.mp3", "What's the weather like?" };
 TestData weatheropus{ "/audio/whatstheweatherlike.opus", "What's the weather like?" };
@@ -23,7 +22,10 @@ TestData cortana {"/audio/heyCortana.wav", "Hey Cortana," };
 TestData callTheFirstOne{ "/audio/CallTheFirstOne.wav", "Rufe die erste an." };
 TestData turnOnLamp {"/audio/TurnOnTheLamp.wav", "Turn on lamp" };
 TestData dgiWreckANiceBeach {"/audio/wreck-a-nice-beach.wav", "Wreck a nice beach." };
-TestData recordedAudioMessage{ "/audio/RecordedAudioMessages.json", "" };
+TestData recordedAudioMessage { "/audio/RecordedAudioMessages.json", "" };
+TestData kwvAccept { "/kws/kws_whatstheweatherlike.wav", "Computer what's the weather like?" };
+TestData kwvReject { "/kws/kws_whatshouldIcallyou.wav", "Hey Computer what should I call you?" };
+TestData kwvMultiturn { "/kws/kws_whatstheweatherlike_turnontheradio.wav", "Computer what's the weather like? Turn on the radio." };
 
 std::shared_ptr<SpeechConfig> CurrentSpeechConfig()
 {

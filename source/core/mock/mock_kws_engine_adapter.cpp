@@ -10,7 +10,7 @@
 #include "mock_kws_engine_adapter.h"
 #include "service_helpers.h"
 #include "try_catch_helpers.h"
-
+#include "mock_controller.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -121,7 +121,7 @@ void CSpxMockKwsEngineAdapter::FireKeywordDetected(const DataChunkPtr& audioChun
     std::string error;
     SPXAPI_TRY()
     {
-        site->KeywordDetected(this, offset, 5000/*500msec*/, 1.0, "keyword", audioChunk);
+        site->KeywordDetected(this, offset, 5000/*500msec*/, 1.0, SpxGetMockParameterString("CARBON-INTERNAL-MOCK-KWS-Keyword", "keyword"), audioChunk);
     }
     SPXAPI_CATCH_ONLY()
 }

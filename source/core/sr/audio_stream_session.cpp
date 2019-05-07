@@ -151,6 +151,7 @@ void CSpxAudioStreamSession::CancelPendingSingleShot()
             0, 0);
 
         m_singleShotInFlight->m_promise.set_value(result);
+        m_singleShotInFlight->m_spottedKeywordResult = nullptr;
         m_singleShotInFlight = nullptr;
     }
 }
@@ -1111,12 +1112,14 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
     // Keyword verification is part of USP protocol, thus, we have to store the spotted keyword to enable keyword verification.
     // If keyword verification is enabled, fire the keyword result as intermediate result. Otherwise, fire it as intermediate and final result
     // so it's a consistent experience regardless of whether keyword verification is enabled or not.
-    m_spottedKeywordResult = factory->CreateKeywordResult(confidence, offset, duration, PAL::ToWString(keyword).c_str(), ResultReason::RecognizingKeyword);
-    FireResultEvent(GetSessionId(), m_spottedKeywordResult);
+    auto spottedKeywordResult = factory->CreateKeywordResult(confidence, offset, duration, PAL::ToWString(keyword).c_str(), ResultReason::RecognizingKeyword);
+    FireResultEvent(GetSessionId(), spottedKeywordResult);
 
     if (!keywordVerificationEnabled) {
-        m_spottedKeywordResult = factory->CreateKeywordResult(confidence, offset, duration, PAL::ToWString(keyword).c_str(), ResultReason::RecognizedKeyword);
-        FireResultEvent(GetSessionId(), m_spottedKeywordResult);
+        spottedKeywordResult = factory->CreateKeywordResult(confidence, offset, duration, PAL::ToWString(keyword).c_str(), ResultReason::RecognizedKeyword);
+        FireResultEvent(GetSessionId(), spottedKeywordResult);
+        // Set spottedKeywordResult to null since KWV is off and there is no need to verify KWS spotted keyword
+        spottedKeywordResult = nullptr;
     }
 
     if (ChangeState(RecognitionKind::Keyword, SessionState::ProcessingAudio, RecognitionKind::KwsSingleShot, SessionState::HotSwapPaused))
@@ -1125,7 +1128,7 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
         SPX_DBG_TRACE_VERBOSE("%s: Now KwsSingleShot/Paused ...", __FUNCTION__);
 
         m_spottedKeyword = audioChunk;
-        HotSwapToKwsSingleShotWhilePaused();
+        HotSwapToKwsSingleShotWhilePaused(spottedKeywordResult);
     }
 }
 
@@ -1196,7 +1199,7 @@ void CSpxAudioStreamSession::GetIntentInfo(std::string& provider, std::string& i
 
 std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::GetSpottedKeywordResult()
 {
-    return m_spottedKeywordResult;
+    return m_singleShotInFlight != nullptr ? m_singleShotInFlight->m_spottedKeywordResult : nullptr;
 }
 
 void CSpxAudioStreamSession::AdapterStartingTurn(ISpxRecoEngineAdapter* /* adapter */)
@@ -1895,7 +1898,7 @@ void CSpxAudioStreamSession::InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> 
     SPX_IFTRUE_THROW_HR(m_kwsAdapter == nullptr, SPXERR_EXTENSION_LIBRARY_NOT_FOUND);
 }
 
-void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused()
+void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused(std::shared_ptr<ISpxRecognitionResult> spottedKeywordResult)
 {
     // We need to do all this work on a background thread, because we can't guarantee it's safe
     // to spend any significant amount of time blocking this the KWS or Audio threads...
@@ -1913,6 +1916,7 @@ void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused()
         }
 
         auto singleShotInFlight = make_shared<Operation>(RecognitionKind::KwsSingleShot);
+        singleShotInFlight->m_spottedKeywordResult = spottedKeywordResult;
         m_singleShotInFlight = singleShotInFlight;
 
         SPX_DBG_ASSERT(IsKind(RecognitionKind::KwsSingleShot) && IsState(SessionState::HotSwapPaused));

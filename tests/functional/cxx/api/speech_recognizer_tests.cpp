@@ -967,6 +967,9 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
         int gotFinalResult = 0;
         int gotSessionStopped = 0;
+        int gotKeywordRecognizing = 0;
+        int gotKeywordRecognized = 0;
+        int gotKeywordNotRecognized = 0;;
 
         SPXTEST_WHEN("We do a keyword recognition with a speech recognizer")
         {
@@ -976,10 +979,32 @@ TEST_CASE("KWS basics", "[api][cxx]")
             SPXTEST_REQUIRE(recognizer != nullptr);
             SPXTEST_REQUIRE(IsUsingMocks(true));
 
-            recognizer->Recognized += [&](const SpeechRecognitionEventArgs&) {
+            recognizer->Recognizing += [&](const SpeechRecognitionEventArgs& event) {
                 std::unique_lock<std::mutex> lock(mtx);
-                gotFinalResult++;
-                SPX_TRACE_VERBOSE("gotFinalResult=%d", gotFinalResult);
+                if (event.Result->Reason == ResultReason::RecognizingKeyword) {
+                    gotKeywordRecognizing++;
+                    SPX_TRACE_VERBOSE("gotKeywordRecognizing=%d", gotKeywordRecognizing);
+                }
+            };
+
+            recognizer->Recognized += [&](const SpeechRecognitionEventArgs& event) {
+                std::unique_lock<std::mutex> lock(mtx);
+                if (event.Result->Reason == ResultReason::RecognizedKeyword) {
+                    gotKeywordRecognized++;
+                    SPX_TRACE_VERBOSE("gotKeywordRecognized=%d", gotKeywordRecognized);
+                }
+                else if (event.Result->Reason == ResultReason::RecognizedSpeech) {
+                    gotFinalResult++;
+                    SPX_TRACE_VERBOSE("gotFinalResult=%d", gotFinalResult);
+                }
+                else if (event.Result->Reason == ResultReason::NoMatch) {
+                    // With keyword verification turned off, this should never happen
+                    auto details = NoMatchDetails::FromResult(event.Result);
+                    if (details->Reason == NoMatchReason::KeywordNotRecognized) {
+                        gotKeywordNotRecognized++;
+                        SPX_TRACE_VERBOSE("gotKeywordNotRecognized=%d", gotKeywordNotRecognized);
+                    }
+                }
             };
 
             recognizer->SessionStopped += [&](const SessionEventArgs&) {
@@ -998,17 +1023,20 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
                 std::unique_lock<std::mutex> lock(mtx);
                 cv.wait_for(lock, std::chrono::seconds(30), [&] { return gotFinalResult >= 1 && gotSessionStopped >= 1; });
-                lock.unlock();
 
                 recognizer->StopKeywordRecognitionAsync().get();
 
-                THEN("We should see that we got at least 1 Recognized and the same number of SessionStopped events")
+                THEN("We should see that we got at least 1 of each RecognizedSpeech, RecognizingKeyword, RecognizedKeyword, SessionStopped event and 0 KeywordNotRecognized event")
                 {
-                    SPXTEST_REQUIRE(gotFinalResult >= 1);
+                    CHECK(gotFinalResult >= 1);
+                    CHECK(gotKeywordRecognizing >= 1);
+                    CHECK(gotKeywordRecognized >= 1);
+                    CHECK(gotSessionStopped >= 1);
+                    CHECK(gotKeywordNotRecognized == 0);
                 }
-            }
 
-            // std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                lock.unlock();
+            }
         }
 
         UseMocks(false);

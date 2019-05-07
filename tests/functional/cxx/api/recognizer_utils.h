@@ -61,6 +61,9 @@ extern TestData callTheFirstOne;
 extern TestData turnOnLamp;
 extern TestData dgiWreckANiceBeach;
 extern TestData recordedAudioMessage;
+extern TestData kwvAccept;
+extern TestData kwvReject;
+extern TestData kwvMultiturn;
 
 struct RecoPhrase
 {
