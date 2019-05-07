@@ -99,3 +99,9 @@ source/bindings/python/src/version.py
 external/KWS/*/
 external/uwp_ssl/*/
 external/android-openssl/*/
+
+# Ignores for the Java Maven test project
+tests/functional/java/target/
+tests/functional/java/.classpath
+tests/functional/java/.project
+tests/functional/java/.settings/

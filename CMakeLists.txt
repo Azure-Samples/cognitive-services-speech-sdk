@@ -351,9 +351,7 @@ if(SPEECHSDK_TARGET_PLATFORM STREQUAL "Windows-x64")
 endif()
 
 set(TESTS "${CARBON_ROOT}/tests")
-set(JAVA_TESTS "${TESTS}/functional/java")
-
-set(JAVA_SAMPLES "${CARBON_ROOT}/tests/functional/java/console")
+set(JAVA_TESTS "${TESTS}/functional/java/src/test/java")
 
 set(CARBONX "${TESTS}/functional/cxx/carbonx")
 
@@ -405,10 +403,6 @@ if(NOT DEFINED SKBUILD)
   # don't build c++ tests and carbonx with scikit-build based python wheel build
   add_subdirectory(${TESTS})
   add_subdirectory(${CARBONX})
-endif()
-
-if(BUILD_JAVA)
-  add_subdirectory(${JAVA_SAMPLES})
 endif()
 
 # Dummy targets to make API header appear

@@ -31,15 +31,7 @@ import java.util.Properties;
 
 import tests.Settings;
 
-import java.nio.charset.Charset;
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
@@ -134,43 +126,6 @@ public class SpeechSdkInstrumentedTest {
         onView(withText("Speech SDK Test Shell")).check(matches(isDisplayed()));
     }
 
-    protected static String retrieveAuthorizationToken(String speechRegion, String speechSubscriptionKey) {
-        try {
-            URL url = new URL("https://"  + speechRegion + ".api.cognitive.microsoft.com/sts/v1.0/issueToken");
-
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestProperty("Content-Type", "application/json");
-            urlConnection.setRequestProperty("Ocp-Apim-Subscription-Key", speechSubscriptionKey);
-            urlConnection.setDoOutput(true);
-
-            OutputStream out = new BufferedOutputStream(urlConnection.getOutputStream());
-
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
-            writer.write("{}");
-            writer.flush();
-            writer.close();
-            out.close();
-
-            urlConnection.connect();
-
-            InputStreamReader streamReader = new  InputStreamReader(urlConnection.getInputStream());
-            BufferedReader reader = new BufferedReader(streamReader);
-            StringBuilder stringBuilder = new StringBuilder();
-            String inputLine;
-            while ((inputLine = reader.readLine()) != null){
-                stringBuilder.append(inputLine);
-            }
-            reader.close();
-            streamReader.close();
-
-            return stringBuilder.toString();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-
-        return null;
-    }
-
     @NonNull
     private static void prepareTestEnvironment(String filename) {
         String tempDir = System.getProperty("java.io.tmpdir", "/data/local/tmp/");
@@ -237,7 +192,6 @@ public class SpeechSdkInstrumentedTest {
 
         Settings.AudioInputDirectory =  System.getProperty("AudioInputDirectory", tempDir);
         Settings.WavFile = System.getProperty("SampleAudioInput", waveFileDefault);
-        Settings.SpeechAuthorizationToken = retrieveAuthorizationToken(Settings.SpeechRegion, Settings.SpeechSubscriptionKey);
 
         directoryPrefix = System.getProperty("SasContainerPrefix", "unconfigured");
         sasToken = System.getProperty("SasToken", "unconfigured");

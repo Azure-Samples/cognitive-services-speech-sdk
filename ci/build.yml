@@ -538,7 +538,6 @@ jobs:
          -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
          -D long-running=false)
        . ci/functions.sh
-       SPEECHSDK_SPEECH_AUTHTOKEN="$(getAuthorizationToken "$SPEECHSDK_SPEECH_KEY" "$SPEECHSDK_SPEECH_REGION")"
        java \
         -cp $(printf "%s;" \
            "$(MavenPackageDirWindows)/$(ArtifactBasename).jar" \
@@ -554,7 +553,6 @@ jobs:
          -DKeyword=Computer \
          -DKeywordModel=/data/keyword/kws.table \
          -DTestOutputFilename=test-java-unittests-package.xml \
-         -DSpeechAuthorizationToken=$SPEECHSDK_SPEECH_AUTHTOKEN \
          -DSpeechSubscriptionKeyForVirtualAssistant="$SPEECHSDK_BOT_SUBSCRIPTION" \
          -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
          -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
@@ -651,7 +649,6 @@ jobs:
             -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
             -D long-running=false)
           . ci/functions.sh
-          SPEECHSDK_SPEECH_AUTHTOKEN="$(getAuthorizationToken "$SPEECHSDK_SPEECH_KEY" "$SPEECHSDK_SPEECH_REGION")"
           testJarFile="$(Build.ArtifactStagingDirectory)/In/macOS/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar"
           [[ -f ${testJarFile} ]]
           [[ -f $(PathToJar) ]]
@@ -670,7 +667,6 @@ jobs:
             -DKeyword=Computer \
             -DKeywordModel=/data/keyword/kws.table \
             -DTestOutputFilename=test-java-unittests-package.xml \
-            -DSpeechAuthorizationToken=$SPEECHSDK_SPEECH_AUTHTOKEN \
             -DSpeechSubscriptionKeyForVirtualAssistant="$SPEECHSDK_BOT_SUBSCRIPTION" \
             -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
             -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
