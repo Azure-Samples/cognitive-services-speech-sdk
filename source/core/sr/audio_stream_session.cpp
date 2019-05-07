@@ -5,6 +5,7 @@
 // audio_stream_session.cpp: Implementation definitions for CSpxAudioStreamSession C++ class
 //
 
+#define NOMINMAX
 #include "stdafx.h"
 #include <future>
 #include <list>
@@ -413,25 +414,42 @@ void CSpxAudioStreamSession::SlowDownThreadIfNecessary(uint32_t dataSize)
 
     auto buffer = m_audioBuffer;
 
-    if (m_bytesTransited >=  m_maxFastLaneSizeBytes)
+    if (m_bytesTransited >= m_maxFastLaneSizeBytes)
     {
         slowdownRate = SimulateRealtimePercentage;
     }
 
-    if (buffer)
+    if (buffer && buffer->StashedSizeInBytes() > m_maxBufferedSizeBeforeThrottleBytes)
     {
-        if (buffer->StashedSizeInBytes() > m_maxBufferedSizeBeforeThrottleBytes)
-        {
-            slowdownRate += SimulateRealtimePercentage;
-        }
+        slowdownRate += SimulateRealtimePercentage;
     }
 
-    if (slowdownRate)
+    auto currentPacketAudioDelay = std::chrono::milliseconds((dataSize * 1000 / m_avgBytesPerSecond) * slowdownRate / 100);
+
+    // Calculate how long we need to delay the current thread.
+    // This is the delta between the current time, and the previously calculated next audio time if > 0.
+    milliseconds delayInterval;
+    
+    if (!m_useDurationBasedThrottle)
     {
-        // Sleep to slow down pulling.
-        auto sleepPeriod = std::chrono::milliseconds(dataSize * 1000 / m_avgBytesPerSecond * slowdownRate / 100);
-        SPX_DBG_TRACE_VERBOSE("%s - Stashing ... sleeping for %llu ms", __FUNCTION__, sleepPeriod.count());
-        std::this_thread::sleep_for(sleepPeriod);
+        delayInterval = std::max(duration_cast<milliseconds>(m_nextAudioProcessTime - steady_clock::now()),
+            milliseconds(0));
+    }
+    else 
+    {
+        delayInterval = currentPacketAudioDelay;
+    }
+
+    if (delayInterval.count() > 0)
+    {
+        SPX_DBG_TRACE_VERBOSE("%s - Stashing ... sleeping for %llu ms", __FUNCTION__, delayInterval.count());
+        std::this_thread::sleep_for(delayInterval);
+    }
+
+    if (!m_useDurationBasedThrottle)
+    {
+        // The next time we will process an audio packet.
+        m_nextAudioProcessTime = steady_clock::now() + currentPacketAudioDelay;
     }
 }
 
@@ -2108,6 +2126,14 @@ void CSpxAudioStreamSession::SetThrottleVariables(const SPXWAVEFORMATEX* format)
     m_maxBufferedSizeBeforeThrottleBytes = (format->nAvgBytesPerSec / 1000) * MaxBufferedBeforeSimulateRealtime.count();
     m_avgBytesPerSecond = format->nAvgBytesPerSec;
     SPX_DBG_TRACE_VERBOSE("%s: FastLane size %" PRIu64 " MaxBuffered Unthrottled: %" PRIu64, __FUNCTION__, m_maxFastLaneSizeBytes, m_maxBufferedSizeBeforeThrottleBytes);
+
+    // While this could be set once, if logging is enabled in a retail build the constructor isn't logged.
+    if (std::ratio_greater<std::chrono::steady_clock::period, std::milli>::value)
+    {
+        SPX_DBG_TRACE_VERBOSE("%s - steady_clock resolution (%e) insufficient, falling back to duration based throttling.", __FUNCTION__,
+            static_cast<double>(std::chrono::steady_clock::period::num) / static_cast<double>(std::chrono::steady_clock::period::den));
+        m_useDurationBasedThrottle = true;
+    }
 }
 
 void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingFromState)

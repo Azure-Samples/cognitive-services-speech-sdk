@@ -343,6 +343,15 @@ private:
     uint64_t m_maxBufferedSizeBeforeThrottleBytes = 16000;
     uint32_t m_avgBytesPerSecond = 16000 * 2;
 
+    // The minimum time that before the next audio frame should be processed.
+    // This time is calculated as each audio frame is processed, and the processing
+    // of the next frame will delay until this time is reached.
+    std::chrono::steady_clock::time_point m_nextAudioProcessTime = std::chrono::steady_clock::now();
+
+    // In the event the system's steady_clock lacks the precision to throttle properly, fall back
+    // to duration based where we will wait a % of the audio packet length.
+    bool m_useDurationBasedThrottle = false;
+
     static seconds StopRecognitionTimeout;
 
     std::list<std::weak_ptr<ISpxRecognizer>> m_recognizers;
