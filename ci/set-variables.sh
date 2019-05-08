@@ -100,6 +100,8 @@ SPEECHSDK_BUILD_TYPE=dev
 
 IN_VSTS=$([[ -n $SYSTEM_DEFINITIONID && -n $SYSTEM_COLLECTIONID ]] && echo true || echo false)
 
+PR_MARKDOWN_ONLY=false
+
 if $IN_VSTS; then
   # We're running in VSTS
 
@@ -123,6 +125,24 @@ if $IN_VSTS; then
   fi
   if [[ $BUILD_REASON == PullRequest ]]; then
     _BUILD_COMMIT=pr$SYSTEM_PULLREQUEST_PULLREQUESTID
+
+    # $SYSTEM_PULLREQUEST_SOURCEBRANCH wants to merge into $SYSTEM_PULLREQUEST_TARGETBRANCH
+    # $BUILD_SOURCEBRANCH (or HEAD) is the current merge commit.
+    #
+    # Rewrite target branch reference relative to the remove into local
+    # reference. (refs/heads/X -> origin/X)
+    targetBranch="${SYSTEM_PULLREQUEST_TARGETBRANCH/#refs\/heads\//origin\/}"
+
+    # If the change is in Markdown files only, we mark it for a lightweight build.
+    [[ -n $(git diff --name-only "$targetBranch.." -- ':!*.md') ]] || {
+      echo This PR is only touching Markdown files!
+      PR_MARKDOWN_ONLY=true
+    }
+
+    # TODO detect other things for more light-weight build, e.g.,
+    # public_samples/-only changes could skip core tests.
+    # [[ -n $(git diff --name-only "$targetBranch.." -- ':!public_samples/') ]] || ...
+
   else
     _BUILD_COMMIT=
   fi
@@ -197,8 +217,13 @@ else
   fi
 fi
 
-# Build phases to run
-SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild OsxUnitTests IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs UnityBuild "
+# Build phases to run.
+if $PR_MARKDOWN_ONLY; then
+  # Run just Doxygen phase for PRs changing only Markdown.
+  SPEECHSDK_BUILD_PHASES=" Doxygen "
+else
+  SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild OsxUnitTests IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonBuild LinuxPythonOobeTest WindowsPythonBuild OsxPythonBuild BuildPythonDocs UnityBuild "
+fi
 
 # Running tests is default
 SPEECHSDK_RUN_TESTS=true
