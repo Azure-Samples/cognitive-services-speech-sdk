@@ -527,7 +527,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await recognizerComputer.StopKeywordRecognitionAsync().ConfigureAwait(false);
         }
 
-        [Ignore] // KWS model unstable after service timing change
         [TestMethod]
         public async Task TestSpeechKeywordspotterComputerFound2Utterances()
         {
@@ -793,7 +792,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
         }
-        [Ignore]
+
         [TestMethod]
         public async Task TestIntentKeywordspotterComputerFound2DifferentUtterances()
         {
