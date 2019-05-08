@@ -25,6 +25,13 @@ Documentation
 -------------
 
 API documentation for this package can be found `here <https://aka.ms/csspeech/pythonref>`_.
+
+License information
+-------------------
+
+- `Microsoft Software License Terms for the Speech SDK <https://aka.ms/csspeech/license201809/>`_
+- `Third party notices <https://aka.ms/csspeech/toctpn/>`_
+
 """
 
 version = None
