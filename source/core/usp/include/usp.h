@@ -481,7 +481,7 @@ namespace endpoint
 
     namespace conversationTranscriber
     {
-        const std::vector<std::string> queryParameters = { langQueryParam };
+        const std::vector<std::string> queryParameters = { langQueryParam, outputFormatQueryParam };
     }
 }
 }}}}

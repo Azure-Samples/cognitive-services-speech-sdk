@@ -465,6 +465,8 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointTranscriber(const std::shar
 
     UpdateDefaultLanguage(properties, /*consideringCustomModel*/ false);
 
+    UpdateOutputFormatOption(properties);
+
     SetUspQueryParameters(USP::endpoint::conversationTranscriber::queryParameters, properties, client);
 
     return client;

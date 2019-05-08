@@ -383,5 +383,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
             }
         }
+
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        public async Task ConversationDetailedOutput()
+        {
+            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionKey);
+            config.OutputFormat = OutputFormat.Detailed;
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather8Channels.AudioFile);
+            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
+            {
+                conversationTranscriber.ConversationId = "TestCreatingParticipantByUserClass";
+                await helper.CompleteContinuousRecognition(conversationTranscriber);
+                var connectionUrl = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                // Currently we do not have endpoint ready that supports detailed conversation transcription, so we only check connection URL for now. 
+                Assert.IsTrue(connectionUrl.Contains("format=detailed"), "mismatch initialSilencetimeout in " + connectionUrl);
+            }
+        }
     }
 }
