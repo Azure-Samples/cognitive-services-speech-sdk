@@ -40,6 +40,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("M. Speech synthesis to result.");
             Console.WriteLine("N. Speech synthesis to audio data stream.");
             Console.WriteLine("O. Speech synthesis events.");
+            Console.WriteLine("P. Speech Recognition using Phrase Lists");
 
             Console.Write(prompt);
 
@@ -122,6 +123,9 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.O:
                         SpeechSynthesisSamples.SynthesisEventsAsync().Wait();
                         break;
+                    case ConsoleKey.P:
+                        SpeechRecognitionSamples.ContinuousRecognitionWithFileAndPhraseListsAsync().Wait();
+                        break;
                     case ConsoleKey.D0:
                         Console.WriteLine("Exiting...");
                         break;
@@ -129,7 +133,7 @@ namespace MicrosoftSpeechSDKSamples
                         Console.WriteLine("Invalid input.");
                         break;
                 }
-                Console.WriteLine("\nExcution done. " + prompt);
+                Console.WriteLine("\nExecution done. " + prompt);
             } while (x.Key != ConsoleKey.D0);
         }
     }

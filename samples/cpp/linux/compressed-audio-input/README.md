@@ -1,4 +1,4 @@
-# Sample: Recognize speech in C++ for Linux (Ubuntu 16.04 or 18.04) from an MP3/Opus file
+# Sample: Recognize speech in C++ for Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9) from an MP3/Opus file
 
 This sample demonstrates how to recognize speech in compressed audio input stream with C++ using the Speech SDK for Linux.
 The compressed audio input stream should be either in MP3 or Opus format.
@@ -11,12 +11,19 @@ The compressed audio input stream should be either in MP3 or Opus format.
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* An Ubuntu 16.04 or 18.04 PC.
-* Required packages to build and run this sample:
+* An Ubuntu 16.04, Ubuntu 18.04, or Debian 9 PC.
+* On Ubuntu, install these packages to build and run this sample:
 
   ```sh
   sudo apt-get update
   sudo apt-get install build-essential libssl1.0.0 libasound2 wget
+  sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
+  ```
+* On Debian 9, install these packages to build and run this sample:
+
+  ```sh
+  sudo apt-get update
+  sudo apt-get install build-essential libssl1.0.2 libasound2 wget
   sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
   ```
 

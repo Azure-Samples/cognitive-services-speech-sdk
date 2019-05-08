@@ -1,6 +1,6 @@
-# Quickstart: Translate speech in Java on Windows or Linux (Ubuntu 16.04/18.04)
+# Quickstart: Translate speech in Java on Windows or Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9)
 
-This sample demonstrates how to translate speech with the Speech SDK for Java on Windows or Linux (Ubuntu 16.04)
+This sample demonstrates how to translate speech with the Speech SDK for Java on Windows or Linux (Ubuntu 16.04, Ubuntu 18.04, Debian 9)
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-translate-speech-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
 
 ## Prerequisites
@@ -9,11 +9,17 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * A PC (Windows x64, Ubuntu 16.04/18.04 x64) capable to run Eclipse, with a working microphone.
 * 64-bit JRE/JDK for Java 8.
 * Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.
-* On Ubuntu 16.04, run the following commands for the installation of required packages:
+* On Ubuntu, run the following commands for the installation of required packages:
 
   ```sh
   sudo apt-get update
-  sudo apt-get install build-essential libssl1.0.0 libasound2 wget
+  sudo apt-get install libssl1.0.0 libasound2
+  ```
+* On Debian 9, run the following commands for the installation of required packages:
+
+  ```sh
+  sudo apt-get update
+  sudo apt-get install libssl1.0.2 libasound2
   ```
 
 ## Build the sample
