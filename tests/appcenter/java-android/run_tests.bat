@@ -121,4 +121,5 @@ call appcenter test run espresso %APPCENTER_TOKEN_OPTION% ^
         --app-path    "%SPEECHSDK_TEST_ROOT%\app\build\outputs\apk\debug\app-debug.apk" ^
         --test-series %APPCENTER_TESTQUEUE% ^
         --locale      "en_US" ^
+        --test-parameter package=com.microsoft.cognitiveservices.speech.samples.sdsdkstarterapp ^
         --build-dir   "%SPEECHSDK_TEST_ROOT%\app\build\outputs\apk\androidTest\debug"
