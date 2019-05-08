@@ -26,6 +26,7 @@ samples = OrderedDict([
         speech_sample.speech_recognize_keyword_from_microphone,
     ]), (intent_sample, [
         intent_sample.recognize_intent_once_from_mic,
+        intent_sample.recognize_intent_once_async_from_mic,
         intent_sample.recognize_intent_once_from_file,
         intent_sample.recognize_intent_continuous,
     ]), (translation_sample, [
