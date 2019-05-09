@@ -235,8 +235,10 @@ jobs:
   # Currently we do not have TypeScript source in this repository. Keeping the task here with default options.
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-tslint.TSLint@1
     displayName: 'Run TSLint'
+  #temporarily disable this untill Task 1779892 is investigate and PR is in.
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@2
     displayName: 'Run the PREfast SDL Native Rules for MSBuild'
+    enabled: false
   # Checks END
   # Publish artifact and fail the build if necessary
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
