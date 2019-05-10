@@ -143,6 +143,11 @@ DnsCacheHandle DnsCacheCreate()
 {
     DNS_CONTEXT* ctx = (DNS_CONTEXT*)malloc(sizeof(DNS_CONTEXT));
 
+    if (ctx == NULL)
+    {
+        return NULL;
+    }
+
     memset(ctx, 0, sizeof(DNS_CONTEXT));
 
     ctx->entryList = singlylinkedlist_create();
@@ -264,7 +269,7 @@ static DNS_REQUEST* dns_cache_dequeue_context_match(SINGLYLINKEDLIST_HANDLE list
 
 /*
  * Polls for any work that's completed for looking up DNS entries.
- * Worker thread will run through each requested DNS host, look up the address, 
+ * Worker thread will run through each requested DNS host, look up the address,
  * and then post back to the callers thread.
  */
 void DnsCacheDoWork(DnsCacheHandle handle, void* contextToMatch)

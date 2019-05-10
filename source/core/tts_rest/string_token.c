@@ -24,6 +24,12 @@ static size_t* get_delimiters_lengths(const char** delimiters, size_t n_delims)
 {
     size_t* result;
 
+#ifdef _MSC_VER
+    // Avoid false positive -- Buffer overrun while writing to 'result':  the writable size is 'sizeof(size_t)*n_delims' bytes, but '16' bytes might be written.
+    // Caller also must guarantee n_delims != 0.
+    _Analysis_assume_(n_delims > 1);
+#endif
+
     if ((result = malloc(sizeof(size_t) * n_delims)) == NULL)
     {
         LogError("Failed to allocate array for delimiters lengths");

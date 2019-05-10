@@ -988,8 +988,15 @@ static HTTPAPI_RESULT ReceiveContentInfoFromXIO(HTTP_HANDLE_DATA* http_instance,
             else if (InternStrnicmp(buf, TransferEncoding, TransferEncodingSize) == 0)
             {
                 substr = buf + TransferEncodingSize;
-
+#ifdef _MSC_VER
+#pragma warning( push )
+// disable: error 6330:  : 'const char' passed as _Param_(1) when 'unsigned char' is required in call to 'isspace'.
+#pragma warning( disable : 6330 )
+#endif
                 while (isspace(*substr)) substr++;
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
 
                 if (InternStrnicmp(substr, Chunked, ChunkedSize) == 0)
                 {
