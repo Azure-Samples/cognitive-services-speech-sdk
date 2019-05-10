@@ -81,6 +81,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string AudioFile = Path.Combine(AudioDir, "CallTheFirstOne.wav");
                 public static readonly string Utterance = "Rufe die erste an.";
             }
+
+            public static class Profanity
+            {
+                public static readonly string MaskedUtteranceTranslation = "f****";
+                public static readonly string RemovedUtteranceTranslation = ".";
+                public static readonly string RawUtteranceTranslation = "ficken.";
+                public static readonly string TaggedUtteranceTranslation = "<profanity>ficken</profanity>.";
+            }
         }
 
         public static class Chinese
@@ -229,6 +237,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string MaskedUtterance = "**** **** **** **** ****";
                 public static readonly string RemovedUtterance = "";
                 public static readonly string RawUtterance = "Fuck Fuck Fuck Fuck Fuck.";
+                public static readonly string MaskedUtteranceTranslation = "f***.";
+                public static readonly string RemovedUtteranceTranslation = ".";
+                public static readonly string RawUtteranceTranslation = "Fuck.";
+                public static readonly string TaggedUtteranceTranslation = "<profanity>fuck</profanity>.";
             }
 
             public static class Punctuation

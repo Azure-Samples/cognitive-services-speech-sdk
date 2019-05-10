@@ -193,7 +193,7 @@ namespace MicrosoftSpeechSDKSamples
                 }
                 else
                 {
-                    var audioInput = Util.OpenWavFile(fileName);
+                    var audioInput = AudioConfig.FromWavFileInput(fileName);
                     using (var reco = new TranslationRecognizer(config, audioInput))
                     {
                         await DoTranslationAsync(reco, useContinuousRecognition).ConfigureAwait(false);

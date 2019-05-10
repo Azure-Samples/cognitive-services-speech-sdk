@@ -733,5 +733,55 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertDetailedOutput(translationTextResult, true);
             }
         }
+
+        [TestMethod]
+        public async Task ProfanityTranslation()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Profanity.AudioFile);
+            var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
+            config.SpeechRecognitionLanguage = "en-US";
+            config.AddTargetLanguage(Language.DE);
+
+            config.SetProfanity(ProfanityOption.Removed);
+            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                Assert.AreEqual(TestData.English.Profanity.RemovedUtteranceTranslation, result.Text);
+                Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+                AssertMatching(TestData.German.Profanity.RemovedUtteranceTranslation, result.Translations[Language.DE]);
+            }
+
+            config.SetProfanity(ProfanityOption.Masked);
+            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                Assert.AreEqual(TestData.English.Profanity.MaskedUtteranceTranslation, result.Text);
+                Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+                AssertMatching(TestData.German.Profanity.MaskedUtteranceTranslation, result.Translations[Language.DE]);
+            }
+
+            config.SetProfanity(ProfanityOption.Raw);
+            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                AssertMatching(TestData.English.Profanity.RawUtteranceTranslation, result.Text);
+                Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+                AssertMatching(TestData.German.Profanity.RawUtteranceTranslation, result.Translations[Language.DE]);
+            }
+
+            config.SetProfanity(ProfanityOption.Masked);
+            config.SetServiceProperty("profanityMarker", "Tag", ServicePropertyChannel.UriQueryParameter);
+            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                Assert.AreEqual(TestData.English.Profanity.TaggedUtteranceTranslation, result.Text);
+                Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
+                AssertMatching(TestData.German.Profanity.TaggedUtteranceTranslation, result.Translations[Language.DE]);
+            }
+        }
     }
 }

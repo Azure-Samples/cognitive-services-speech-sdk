@@ -1038,17 +1038,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ProfanityRecognizeOnce()
+        public async Task ProfanityMaskedRecognizeOnce()
         {
-            this.defaultConfig.SetProfanity(ProfanityOption.Masked);
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Profanity.AudioFile);
+            this.defaultConfig.SetProfanity(ProfanityOption.Masked);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
                 Assert.AreEqual(TestData.English.Profanity.MaskedUtterance, result.Text);
             }
+        }
 
+        [TestMethod]
+        public async Task ProfanityRemovedRecognizeOnce()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Profanity.AudioFile);
             this.defaultConfig.SetProfanity(ProfanityOption.Removed);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
@@ -1056,7 +1061,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
                 Assert.AreEqual(TestData.English.Profanity.RemovedUtterance, result.Text);
             }
+        }
 
+        [TestMethod]
+        public async Task ProfanityRawRecognizeOnce()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Profanity.AudioFile);
             this.defaultConfig.SetProfanity(ProfanityOption.Raw);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
@@ -1065,6 +1075,5 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertMatching(TestData.English.Profanity.RawUtterance, result.Text);
             }
         }
-
     }
 }
