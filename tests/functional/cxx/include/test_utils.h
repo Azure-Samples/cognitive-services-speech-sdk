@@ -117,7 +117,7 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         ["--OnlineEndpoint"]
     ("The endpoint that on-line tests in intelligent meeting recognizer talks to")
         | Opt(Keys::ConversationTranscriber, "ConversationTranscriber")
-        ["--keyConversationTranscriber"]
+        ["--keyConversationTranscriberPPE"]
     ("The conversation transcriber key")
         | Opt(Config::InputDir, "InputDir")
         ["--inputDir"]

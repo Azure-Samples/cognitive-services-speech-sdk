@@ -24,6 +24,8 @@ public class Settings {
     public static String WavFile = "whatstheweatherlike.wav";
     public static String WavFile8Channels = "whatstheweatherlike_8channels.wav";
     public static String WavFile8ChannelsUtterance = "What's the weather like?";
+    public static String TwoSpeakersAudio = "katiesteve.wav";
+    public static String TwoSpeakersAudioUtterance = "Good morning Katie.";
 
     public static String Keyword = "Computer";
     public static String KeywordModel = "/data/keyword/kws.table";
@@ -34,8 +36,10 @@ public class Settings {
     public static String SpeechChannelSecretForVirtualAssistant = "<<SPEECH_CHANNEL_SECRET>>";
 
     public static String ConversationTranscriptionEndpoint = "<<YOUR_CONVERSATION_TRANSCRIPTION_ENDPOINT>>";
-    public static String ConversationTranscriptionKey = "<<YOUR_CONVERSATION_TRANSCRIPTION_KEY>>";
-
+    public static String ConversationTranscriptionPPEKey = "<<YOUR_CONVERSATION_TRANSCRIPTION_PPE_KEY>>";
+    public static String ConversationTranscriptionPRODKey = "<<YOUR_CONVERSATION_TRANSCRIPTION_PROD_KEY>>";
+    public static String SpeechRegionForConversationTranscription = "centralus";
+    
     private static SpeechConfig config;
 
     private static Boolean isSettingsInitialized = false;
@@ -70,6 +74,7 @@ public class Settings {
 
         WavFile = System.getProperty("WaveFile", AudioInputDirectory + "/" + WavFile);
         WavFile8Channels = System.getProperty("WaveFile8Channels", AudioInputDirectory + "/" + WavFile8Channels);
+        TwoSpeakersAudio = System.getProperty("TwoSpeakersAudio", AudioInputDirectory + "/" + TwoSpeakersAudio);
 
         SerializedSpeechActivityFile = System.getProperty("SerializedSpeechActivityFile", AudioInputDirectory + "/" + SerializedSpeechActivityFile);
 
@@ -78,7 +83,9 @@ public class Settings {
         SpeechChannelSecretForVirtualAssistant = System.getProperty("SpeechChannelSecretForVirtualAssistant", SpeechChannelSecretForVirtualAssistant);
 
         ConversationTranscriptionEndpoint = System.getProperty("ConversationTranscriptionEndpoint", ConversationTranscriptionEndpoint);
-        ConversationTranscriptionKey = System.getProperty("ConversationTranscriptionKey", ConversationTranscriptionKey);
+        ConversationTranscriptionPPEKey = System.getProperty("ConversationTranscriptionPPEKey", ConversationTranscriptionPPEKey);
+        ConversationTranscriptionPRODKey = System.getProperty("ConversationTranscriptionPRODKey", ConversationTranscriptionPRODKey);
+        SpeechRegionForConversationTranscription = System.getProperty("SpeechRegionForConversationTranscription", SpeechRegionForConversationTranscription);
 
         Keyword = System.getProperty("Keyword", Keyword);
         KeywordModel = System.getProperty("KeywordModel", KeywordModel);

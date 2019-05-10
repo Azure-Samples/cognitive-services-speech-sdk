@@ -25,7 +25,8 @@ steps:
       -D virtualassistant-region=$(BotRegion) \
       -D virtualassistant-subscription=$(BotSubscriptionKey) \
       -D virtualassistant-testbot=$(BotFunctionalTest) \
-      -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+      -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+      -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
       -D long-running=false \
       ${{ parameters.runTestArgs }} -- ${{ parameters.testsToRun }}
   env:
@@ -41,7 +42,8 @@ steps:
       -D virtualassistant-region=$(BotRegion) \
       -D virtualassistant-subscription=$(BotSubscriptionKey) \
       -D virtualassistant-testbot=$(BotFunctionalTest) \
-      -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+      -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+      -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
       -D long-running=false
   displayName: Set test variables
 - ${{ parameters.extraTests }}

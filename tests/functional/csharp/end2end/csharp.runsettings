@@ -18,6 +18,8 @@
         <Parameter name="BotSubscriptionKey" value=""/>
         <Parameter name="BotRegion" value="westus2"/>
         <Parameter name="ConversationTranscriptionEndpoint" value=""/>
-        <Parameter name="ConversationTranscriptionKey" value=""/>
+        <Parameter name="ConversationTranscriptionPPEKey" value=""/>
+        <Parameter name="ConversationTranscriptionPRODKey" value=""/>
+        <Parameter name="SpeechRegionForConversationTranscription" value=""/>        
     </TestRunParameters>
 </RunSettings>

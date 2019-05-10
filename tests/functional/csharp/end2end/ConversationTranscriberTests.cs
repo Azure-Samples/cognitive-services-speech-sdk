@@ -20,8 +20,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         private ConversationTranscriberTestsHelper helper;
         private static string conversationTranscriptionMultiAudioEndpoint;
-        // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-        private const string voiceSignature = "{ \"Version\": 0,\"Tag\": \"9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=\",         \"Data\": \"r4tJwSq280QIBWRX8tKcjxYwDySvX6VZFGkqLLroFV3HIlARgA1xXdFcVK9a2xbylLNQUSNwdUUsIpBDB+jlz6W97XgJ9GlBYLf6xVzUmBg1Qhac32DH3c810HDtpwJk3FkEveM7ohLjhvnYKwjBNqbAVGUONyLYpO28kcxRhvSOxe5/2PeVOgpXMGMcBt3IKN3OmNSOokg4QkqoRUNuRMg5jdoq7BraOyr7CEOP2/GsicmUcONNhFaLuEwy97WRUXE0RWTdDxeR9dn2ngSESq+vYiCkudDi/TGh0ZhxABTxU6EiFQl7uiYG28drjosWdrOV5FPGe2pP8omEoBgtc+yOxYa40HG/yQ160Enqv8umCTcTeW6bkA9CZJ7K8740oZkA8pdpsWkurpFJlMDK3e3Y6w/W1/P55gz/jegYTusDDoz5fINcoWj1zbyLMaFgig3PlEDLKG2hb09Jy4OhEeaBgVqEXiUTEX/R44pd7nUK49xrRJ9yM2gfUq8S+229hJ40N5ZMe+9G848jtsGOziPs20KNlqpL6tiXGAeynhclHyt3pITJjOJi9/cYKYbNm3dR+PtxuLL1WAgIuaK65aGhyW0NmFYm/r7hfAK9a2nTNJIgTsFLG32jljkpaurtwvHuAtIhK8KnopeN6OPXjGl2q06bqI2U92eBxKRroeGUEq3PiXHwVk9DOIFzOAdz\"}";
+
+        // Copy the Signature value from the Response body after calling the RESTFUL API at https://signature.centralus.cts.speech.microsoft.com
+        // Voice signature format example: { "Version": <Numeric value>, "Tag": "string", "Data": "string" }
+        private const string voiceSignatureKatie = "{ \"Version\": 0, \"Tag\": \"VtZQ7sJp8np3AxQC+87WYyBHWsZohWFBN0zgWzzOnpw=\", \"Data\": \"BhRRgDCrg6ij5fylg5Jpf5ZW/o/uDWi199DYBbfL1Qdspj77qiuvsVKzG2g5Z9jxKtfdwtkKtaDxog9O6pGD7Ot/8mM1jUtt6LKNz4H9EFvznV/dlFk2Oisg8ZKx/RBlNFMYJkQJnxT/zLfhNWiIF5Y97jH4sgRh2orDg6/567FGktAgcESAbiDx1e7tf0TTLdwijw4p1vJ3qJ2cSCdNbXE9KeUd8sClQLDheCPo+et3rMs5W+Rju3W1SJE6ru9gAoH88CyAfI80+ysAecH3GPJYM+j1uhvmWoKIrSfS40BYOe6AUgLNb3a4Pue4oGAmuAyWfwpP1uezleSanpJc73HT91n2UsaHrQj5eK6uuBCjwmu+JI3FT+Vo6JhAARHecdb70U1wyW9vv5t0Q3tV1WNiN/30qSVydDtyrSVpgBiIwlj41Ua22JJCOMrPl7NKLnFmeZ4Hi4aIKoHAxDvrApteL60sxLX/ADAtYCB3Y6iagDyR1IOsIlbaPhL0rQDnC/0z65k7BDekietFNzvvPVoIwJ26GHrXFYYwZe3alVvCsXTpZGBknvSiaCalrixnyGqYo0nG/cd/LodEEIht/PWoFkNlbABqHMbToeI/6j+ICKuVJgTDtcsDQiWKSvrQp9kTSv+cF3LyPVkbks0JvbQhj4AkAv7Rvymgnsu6o8gGyxTX0kxujqCMPCzgFrVd\"}";
+        private const string voiceSignatureSteve = "{ \"Version\": 0, \"Tag\": \"HbIvzbfAWjeR/3R+WvUEoeid1AbDaHNOMWItgs7mTxc=\", \"Data\": \"DizY04Z7PH/sYu2Yw2EcL4Mvj1GnEDOWJ/DhXHGdQJsQ8/zDc13z1cwllbEo5OSr3oGoKEHLV95OUA6PgksZzvTkf42iOFEv3yifUNfYkZuIzStZoDxWu1H1BoFBejqzSpCYyvqLwilWOyUeMn+z+E4+zXjqHUCyYJ/xf0C3+58kCbmyA55yj7YZ6OtMVyFmfT2GLiXr4YshUB14dgwl3Y08SRNavnG+/QOs+ixf3UoZ6BC1VZcVQnC2tn2FB+8v6ehnIOTQedo++6RWIB0RYmQ8VaEeI0E4hkpA1OxQ9f2gBVtw3KZXWSWBz8sXig2igpwMsQoFRmmIOGsu+p6tM8/OThQpARZ7OyAxsurzmaSGZAaXYt0YwMdIIXKeDBF6/KnUyw+NNzku1875u2Fde/bxgVvCOwhrLPPuu/RZUeAkwVQge7nKYNW5YjDcz8mfg4LfqWEGOVCcmf2IitQtcIEjY3MwLVNvsAB6GT2es1/1QieCfQKy/Tdu8IUfEvekwSCxSlWhfVrLjRhGeWa9idCjsngQbNkqYUNdnIlidkn2DC4BavSTYXR5lVxV4SR/Vvj8h4N5nP/URPDhkzl7n7Tqd4CGFZDzZzAr7yRo3PeUBX0CmdrKLW3+GIXAdvpFAx592pB0ySCv5qBFhJNErEINawfGcmeWZSORxJg1u+agj51zfTdrHZeugFcMs6Be\"}";
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
@@ -79,7 +82,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             bool exception = false;
             try
             {
-                var participant = Participant.From("xyz@example.com", "zh-cn", voiceSignature);
+                var participant = Participant.From("xyz@example.com", "zh-cn", voiceSignatureKatie);
             }
             catch (Exception ex)
             {
@@ -95,7 +98,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             bool exception = false;
             try
             {
-                var participant = Participant.From("xyz@example.com", "", voiceSignature);
+                var participant = Participant.From("xyz@example.com", "", voiceSignatureKatie);
             }
             catch (Exception ex)
             {
@@ -111,7 +114,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             bool exception = false;
             try
             {
-                var participant = Participant.From("xyz@example.com", "invalid", voiceSignature);
+                var participant = Participant.From("xyz@example.com", "invalid", voiceSignatureKatie);
             }
             catch (Exception ex)
             {
@@ -153,13 +156,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual(exception, true);
         }
 
-        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        [TestMethod]
         public async Task ConversationAddParticipant()
         {
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionKey);
-
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather8Channels.AudioFile);
-
+            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {
                 conversationTranscriber.ConversationId = "TestCreatingParticipantByUserClass";
@@ -170,20 +171,44 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 conversationTranscriber.AddParticipant(user);
 
                 // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-                string voice = voiceSignature;
+                string voice = voiceSignatureKatie;
                 var participant = Participant.From("userIdForParticipant", "en-us", voice);
                 conversationTranscriber.AddParticipant(participant);
 
                 var result = await helper.GetFirstRecognizerResult(conversationTranscriber);
-                AssertMatching(TestData.English.Weather8Channels.Utterance, result);
+                AssertMatching(TestData.English.TranscriberAudioData.Utterance, result);
+            }
+        }
+
+        [TestMethod]
+        public async Task ConversationAddParticipantFromSubscription()
+        {
+            var config = SpeechConfig.FromSubscription(conversationTranscriptionPRODKey, speechRegionForConversationTranscription);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
+            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
+            {
+                conversationTranscriber.ConversationId = "TestCreatingParticipantByUserClass";
+
+                conversationTranscriber.AddParticipant("OneUserByUserId");
+
+                var user = User.FromUserId("CreateUserFromId and then add it");
+                conversationTranscriber.AddParticipant(user);
+
+                // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
+                string voice = voiceSignatureKatie;
+                var participant = Participant.From("userIdForParticipant", "en-us", voice);
+                conversationTranscriber.AddParticipant(participant);
+
+                var result = await helper.GetFirstRecognizerResult(conversationTranscriber);
+                AssertMatching(TestData.English.TranscriberAudioData.Utterance, result);
             }
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationRemoveParticipant()
         {
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionKey);
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather8Channels.AudioFile);
+            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {
                 conversationTranscriber.ConversationId = "TestCreatingParticipantByUserClass";
@@ -207,12 +232,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 conversationTranscriber.RemoveParticipant(user);
 
                 // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-                var participant = Participant.From("userIdForParticipant", "en-us", voiceSignature);
+                var participant = Participant.From("userIdForParticipant", "en-us", voiceSignatureKatie);
                 conversationTranscriber.AddParticipant(participant);
                 conversationTranscriber.RemoveParticipant(participant);
 
                 var result = await helper.GetFirstRecognizerResult(conversationTranscriber);
-                AssertMatching(TestData.English.Weather8Channels.Utterance, result);
+                AssertMatching(TestData.English.TranscriberAudioData.Utterance, result);
             }
         }
 
@@ -221,7 +246,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionKey);
+            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
             var stopRecognition = new TaskCompletionSource<int>();
             string recoResult = string.Empty;
 
@@ -316,11 +341,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationPullStream()
         {
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionKey);
+            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
             var stopRecognition = new TaskCompletionSource<int>();
             bool bGotReco = false;
 
-            using (var audioInput = Util.OpenWavFile(TestData.English.Weather8Channels.AudioFile))
+            using (var audioInput = Util.OpenWavFile(TestData.English.TranscriberAudioData.TwoSpeakersAudio))
             {
                 using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
                 {
@@ -387,7 +412,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationDetailedOutput()
         {
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionKey);
+            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
             config.OutputFormat = OutputFormat.Detailed;
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather8Channels.AudioFile);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))

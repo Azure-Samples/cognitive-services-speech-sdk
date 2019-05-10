@@ -535,7 +535,8 @@ jobs:
          -D virtualassistant-region=$(BotRegion) \
          -D virtualassistant-subscription=$(BotSubscriptionKey) \
          -D virtualassistant-testbot=$(BotFunctionalTest) \
-         -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
          -D long-running=false)
        . ci/functions.sh
        java \
@@ -557,7 +558,9 @@ jobs:
          -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
          -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
          -DConversationTranscriptionEndpoint="$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-         -DConversationTranscriptionKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_KEY" \
+         -DConversationTranscriptionPPEKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
+         -DConversationTranscriptionPRODKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+         -DSpeechRegionForConversationTranscription="$SPEECHSDK_PRINCETON_REGION" \
          tests.runner.Runner \
          tests.AllTests
     displayName: Run unit test
@@ -591,7 +594,8 @@ jobs:
             -D virtualassistant-region=$(BotRegion) \
             -D virtualassistant-subscription=$(BotSubscriptionKey) \
             -D virtualassistant-testbot=$(BotFunctionalTest) \
-            -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
             -D long-running=false
           patchSamplesFromTestConfig public_samples/samples/java/jre/console \
             ci/test-config.json \
@@ -600,7 +604,8 @@ jobs:
             -D virtualassistant-region=$(BotRegion) \
             -D virtualassistant-subscription=$(BotSubscriptionKey) \
             -D virtualassistant-testbot=$(BotFunctionalTest) \
-            -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
             -D long-running=false
           ./ci/run-maven.sh public_samples "$(MavenRoot)"
         displayName: Patch and build samples
@@ -646,7 +651,8 @@ jobs:
             -D virtualassistant-region=$(BotRegion) \
             -D virtualassistant-subscription=$(BotSubscriptionKey) \
             -D virtualassistant-testbot=$(BotFunctionalTest) \
-            -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
             -D long-running=false)
           . ci/functions.sh
           testJarFile="$(Build.ArtifactStagingDirectory)/In/macOS/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar"
@@ -671,7 +677,9 @@ jobs:
             -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
             -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
             -DConversationTranscriptionEndpoint="$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-            -DConversationTranscriptionKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_KEY" \
+            -DConversationTranscriptionPPEKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
+            -DConversationTranscriptionPRODKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+            -DSpeechRegionForConversationTranscription="$SPEECHSDK_PRINCETON_REGION" \
             tests.runner.Runner \
             tests.AllTests
         displayName: Run unit test
@@ -921,7 +929,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
       # dotnet test does not allow to supply TestRunParameters from command-line?!
       perl -pi - \
@@ -936,7 +945,9 @@ jobs:
         BotSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
         BotConnectionId "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
         ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-        ConversationTranscriptionKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_KEY" \
+        ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
+        ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+        SpeechRegionForConversationTranscription "$SPEECHSDK_PRINCETON_REGION" \
         tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
         BEGIN {
           %A = splice(@ARGV, 0, $#ARGV);
@@ -952,7 +963,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
       patchSamplesFromTestConfig public_samples/samples/csharp/sharedcontent/console \
         ci/test-config.json \
@@ -961,7 +973,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
       mkdir localnuget
       cp --verbose "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
@@ -1033,7 +1046,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
       # dotnet test does not allow to supply TestRunParameters from command-line?!
       perl -pi - \
@@ -1048,7 +1062,9 @@ jobs:
         BotSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
         BotConnectionId "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
         ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-        ConversationTranscriptionKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_KEY" \
+        ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
+        ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+        SpeechRegionForConversationTranscription "$SPEECHSDK_PRINCETON_REGION" \
         tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
         BEGIN {
           %A = splice(@ARGV, 0, $#ARGV);
@@ -1304,7 +1320,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
       cat > "$FAKE_BUILD/MainActivity.properties" <<EOF
       SpeechSubscriptionKey=$SPEECHSDK_SPEECH_KEY
@@ -1318,7 +1335,9 @@ jobs:
       SpeechRegionForVirtualAssistant=$SPEECHSDK_BOT_REGION
       SpeechChannelSecretForVirtualAssistant=$SPEECHSDK_BOT_FUNCTIONALTESTBOT
       ConversationTranscriptionEndpoint=$SPEECHSDK_PRINCETON_INROOM_ENDPOINT
-      ConversationTranscriptionKey=$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_KEY
+      ConversationTranscriptionPPEKey=$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY
+      ConversationTranscriptionPRODKey=$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY
+      SpeechRegionForConversationTranscription=$SPEECHSDK_PRINCETON_REGION
       SasToken=$(SPEECHSDK_SASTOKEN)
       SasContainerPrefix=$(SPEECHSDK_TEST_APPCENTERUPLOAD)
       EOF
@@ -1581,7 +1600,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
       patchSamplesFromTestConfig public_samples/samples/python/console \
         ci/test-config.json \
@@ -1590,7 +1610,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
@@ -1721,7 +1742,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false &&
       patchSamplesFromTestConfig public_samples/samples/cpp/windows/console \
         ci/test-config.json \
@@ -1730,7 +1752,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
     displayName: Patch quickstart
   - bash: |
@@ -1777,7 +1800,8 @@ jobs:
             -D virtualassistant-region=$(BotRegion) \
             -D virtualassistant-subscription=$(BotSubscriptionKey) \
             -D virtualassistant-testbot=$(BotFunctionalTest) \
-            -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
             -D long-running=false -- cxx_core_tests cxx_api_tests || {
             vsts_logissue error "Running tests for image $i failed."
             ((++ERRORS))
@@ -1951,7 +1975,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
       # run the tests
       ci/apple/multiplatformtests.sh tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
@@ -1971,7 +1996,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
       patchSamplesFromTestConfig public_samples/quickstart/objectivec-ios/helloworld/helloworld \
         ci/test-config.json \
@@ -1980,7 +2006,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
       # run the tests
       ci/apple/multiplatformtests.sh public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
@@ -2000,7 +2027,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
       patchSamplesFromTestConfig public_samples/samples/objective-c/ios/speech-samples/speech-samples \
         ci/test-config.json \
@@ -2009,7 +2037,8 @@ jobs:
         -D virtualassistant-region=$(BotRegion) \
         -D virtualassistant-subscription=$(BotSubscriptionKey) \
         -D virtualassistant-testbot=$(BotFunctionalTest) \
-        -D conversationtranscriber-key=$(KeyPrincetonSouthEastAsia20190417) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
       # run the tests
       ci/apple/multiplatformtests.sh public_samples/samples/objective-c/ios/speech-samples/speech-samples.xcodeproj \

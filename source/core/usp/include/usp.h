@@ -482,6 +482,10 @@ namespace endpoint
     namespace conversationTranscriber
     {
         const std::vector<std::string> queryParameters = { langQueryParam, outputFormatQueryParam };
+        const std::string hostname = ".cts.speech.microsoft.com";
+        const std::string pathPrefix1 = "transcribe.";
+        const std::string pathPrefix2 = "/speech/recognition";
+        const std::string pathSuffixMultiAudio = "/multiaudio";
     }
 }
 }}}}

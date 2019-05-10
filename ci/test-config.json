@@ -17,8 +17,10 @@
     "FUNCTIONALTESTBOT": "${virtualassistant-testbot}"
   },
   "PRINCETON": {
-    "INROOM_ENDPOINT": "wss://its.demo.princeton.customspeech.ai/speech/recognition",
+    "INROOM_ENDPOINT": "wss://transcribe.princetonppe.customspeech.ai/speech/recognition",
     "ONLINE_ENDPOINT": "wss://omf-lb-official-dev.online.princetondev.customspeech.ai/recognition/onlinemeeting/v1",
-    "CONVERSATIONTRANSCRIBER_KEY": "${conversationtranscriber-key}"
+    "CONVERSATIONTRANSCRIBER_PPE_KEY": "${conversationtranscriber-ppe-key}",
+    "CONVERSATIONTRANSCRIBER_PROD_KEY": "${conversationtranscriber-prod-key}",
+    "REGION": "centralus"
   }
 }

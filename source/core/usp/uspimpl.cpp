@@ -253,6 +253,13 @@ string Connection::Impl::ConstructConnectionUrl() const
         case EndpointType::Bot:
             oss << endpoint::bot::url;
             break;
+        case EndpointType::ConversationTranscriptionService:
+            oss << endpoint::conversationTranscriber::pathPrefix1
+                << m_config.m_region
+                << endpoint::conversationTranscriber::hostname
+                << endpoint::conversationTranscriber::pathPrefix2
+                << endpoint::conversationTranscriber::pathSuffixMultiAudio;
+            break;
         default:
             ThrowInvalidArgumentException("Unknown endpoint type.");
         }
