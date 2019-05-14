@@ -64,10 +64,10 @@ jobs:
       runTestArgs: ""
   - ${{ parameters.extraSteps }}
   - task: PublishBuildArtifacts@1
-    displayName: Publish drop
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Out'
       ArtifactName: '$(BuildPlatform)'
       publishLocation: Container
-      condition: succeededOrFailed()
+    displayName: Publish drop
+    condition: succeededOrFailed()
 

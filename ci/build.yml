@@ -2206,6 +2206,7 @@ jobs:
           make SPEECHSDK_ROOT='$(Build.Repository.LocalPath)/xcode-build-output'
           [[ -f helloworld ]]
         displayName: "Build quickstart"
+        condition: succeededOrFailed()
 
 - template: objectivec-unit-tests.yml
   parameters:
