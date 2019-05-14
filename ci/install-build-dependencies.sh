@@ -28,6 +28,8 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
   OSX-x64)
     # log brew-related version information
     brew config
-    brew install swig pkg-config coreutils bash ninja
+    brew install pkg-config coreutils bash ninja
+    # custom-install swig 3.0.12
+    brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/f3544543a3115023fc7ca962c21d14b443f419d0/Formula/swig.rb
     ;;
 esac
