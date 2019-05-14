@@ -412,11 +412,9 @@
     [speechConfig setServicePropertyTo:@"en-us" byName:@"language" usingChannel:SPXServicePropertyChannel_UriQueryParameter];
     SPXSpeechRecognizer* r = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
 
-    [r recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
-        XCTAssertTrue(srresult.reason == SPXResultReason_RecognizedSpeech);
-        XCTAssertTrue([srresult.text isEqualToString:weatherTextEnglish], "Final Result Text does not match");
-    }];
-
+    SPXSpeechRecognitionResult *result = [r recognizeOnce];
+    XCTAssertEqual(result.reason, SPXResultReason_RecognizedSpeech);
+    XCTAssertEqualObjects(result.text, weatherTextEnglish);
 }
 
 - (void)testLogFileExists {
@@ -437,12 +435,9 @@
     SPXSpeechRecognizer* r = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
     XCTAssertNotNil(r);
 
-    __block SPXSpeechRecognitionResult *result;
-    [r recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
-        XCTAssertTrue(srresult.reason == SPXResultReason_RecognizedSpeech);
-        XCTAssertTrue([srresult.text isEqualToString:weatherTextEnglish], "Final Result Text does not match");
-        result = srresult;
-    }];
+    SPXSpeechRecognitionResult *result = [r recognizeOnce];
+    XCTAssertEqual(result.reason, SPXResultReason_RecognizedSpeech);
+    XCTAssertEqualObjects(result.text, weatherTextEnglish);
 
     NSFileManager *fileManager = [NSFileManager defaultManager];
 
