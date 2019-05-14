@@ -42,15 +42,11 @@ import tests.TestHelper;
 public class SpeechRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
     private AtomicInteger eventIdentifier = new AtomicInteger(FIRST_EVENT_ID);
-    private String authorizationToken;
+    private static String authorizationToken;
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         Settings.LoadSettings();
-    }
-
-    @Before
-    public void setUpBefore() throws Exception {
         authorizationToken = TestHelper.getAuthorizationToken(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     }
 

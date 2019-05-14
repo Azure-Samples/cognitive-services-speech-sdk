@@ -47,15 +47,11 @@ import tests.TestHelper;
 @SuppressWarnings({"unused", "resource"})
 public class SpeechConfigTests {
 
-    private String authorizationToken;
+    private static String authorizationToken;
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         Settings.LoadSettings();
-    }
-
-    @Before
-    public void setUpBefore() throws Exception {
         authorizationToken = TestHelper.getAuthorizationToken(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     }
 
