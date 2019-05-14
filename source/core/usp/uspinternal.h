@@ -49,7 +49,6 @@
 #endif
 
 typedef struct _DNS_CONTEXT* DnsCacheHandle;
-typedef struct _TransportRequest* TransportHandle;
 typedef struct TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
 typedef struct HTTP_HEADERS_HANDLE_DATA_TAG* HTTP_HEADERS_HANDLE;
 
@@ -123,7 +122,6 @@ private:
     void Invoke(std::function<void()> callback);
 
     using DnsCachePtr = deleted_unique_ptr<std::remove_pointer<DnsCacheHandle>::type>;
-    using TransportPtr = deleted_unique_ptr<std::remove_pointer<TransportHandle>::type>;
 
     void ScheduleWork();
 
@@ -151,7 +149,7 @@ private:
     size_t m_audioOffset;
     DnsCachePtr m_dnsCache;
     std::unique_ptr<Telemetry> m_telemetry;
-    TransportPtr m_transport;
+    std::unique_ptr<TransportRequest> m_transport;
     const uint64_t m_creationTime;
 
     static void OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId);

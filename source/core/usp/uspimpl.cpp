@@ -446,16 +446,16 @@ void Connection::Impl::Connect()
     }
 #endif
 
-    m_transport = TransportPtr(TransportRequestCreate(
-        m_connectionUrl.c_str(),
+    m_transport = TransportRequestCreate(
+        m_connectionUrl,
         this,
         m_telemetry.get(),
         headersPtr,
-        connectionId.c_str(),
+        connectionId,
         m_config.m_proxyServerInfo.get(),
         disable_default_verify_paths,
         trustedCert,
-        disable_crl_check), TransportRequestDestroy);
+        disable_crl_check);
 
     if (m_transport == nullptr)
     {

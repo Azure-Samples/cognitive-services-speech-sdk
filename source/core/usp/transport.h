@@ -15,86 +15,14 @@
 #include "metrics.h"
 #include "audio_chunk.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "azure_c_shared_utility_includes.h"
 
-#define KEYWORD_PATH "Path"
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace USP {
 
-typedef struct _TransportRequest* TransportHandle;
-
-typedef struct HTTP_HEADERS_HANDLE_DATA_TAG* HTTP_HEADERS_HANDLE;
-
-/**
- * Creates a new transport request.
- * @param host The host name.
- * @param proxyConfig The proxy configuration info.
- * @param context The application defined context that will be passed back during callback.
- * @param telemetry Telemetry handle to record various transport events.
- * @param connectionHeaders A handle to headers that will be used to establish a connection.
- * @param connectionId An identifier of a connection, used for diagnostics of errors on the server side.
- * @param disable_default_verify_paths OpenSSL only: disable the default verify paths
- * @param trustedCert OpenSSL only: single trusted cert
- * @param disable_crl_check OpenSSL only: if true, disable CRL if using single trusted cert.
- * @return A new transport handle.
- */
-TransportHandle TransportRequestCreate(const char* host, void* context, Microsoft::CognitiveServices::Speech::USP::Telemetry* telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId, const ProxyServerInfo* proxyInfo, const bool disable_default_verify_paths, const char *trustedCert, const bool disable_crl_check);
-
-/**
- * Destroys a transport request.
- * @param transportHandle The transport handle representing the request to be destroyed.
- */
-void TransportRequestDestroy(TransportHandle transportHandle);
-
-/**
- * Prepares the start of a new transport request.
- * @param transportHandle The request to prepare.
- * @return A return code or zero if successful.
- */
-int TransportRequestPrepare(TransportHandle transportHandle);
-
-/**
- * Prepares the start of a new transport stream.
- * @param transportHandle The request to prepare.
- * @return A return code or zero if successful.
- */
-int TransportStreamPrepare(TransportHandle transportHandle);
-
-/**
- * Write a text message to the websocket.
- * @param transportHandle The request to prepare.
- * @param path The path to use for message
- * @param buffer The buffer to write to the websocket.
- * @param bufferSize The byte size of the buffer.
- * @param requestId The requestId for the given message.
- * @return A return code or zero if successful.
- */
-int TransportMessageWrite(TransportHandle transportHandle, const std::string& path, const uint8_t* buffer, size_t bufferSize, const char* requestId);
-
-/**
- * Writes to the transport stream.
- * @param transportHandle The request to prepare.
- * @param path The path to use for message.
- * @param buffer The audio chunk to be sent.
- * @param requestId The requestId for the current stream.
- * @return A return code or zero if successful.
- */
-int TransportStreamWrite(TransportHandle transportHandle, const std::string& path, const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char* requestId);
-
-/**
- * Flushes any outstanding I/O on the transport stream.
- * @param transportHandle The request to prepare.
- * @param path The path to use for message.
- * @param requestId The requestId for the current stream.
- * @return A return code or zero if successful.
- */
-int TransportStreamFlush(TransportHandle transportHandle, const std::string& path, const char* requestId);
-
-/**
- * Processes any outstanding operations that need attention.
- * @param transportHandle The request to process.
- */
-void TransportDoWork(TransportHandle transportHandle);
+constexpr auto KEYWORD_PATH = "Path";
 
 /**
  * The TransportOpenedCallback type represents an application-defined
@@ -158,7 +86,7 @@ typedef struct _TransportErrorInfo
 {
     TransportError reason;
     int errorCode;
-    const char *errorString;
+    const char* errorString;
 } TransportErrorInfo;
 
 /**
@@ -184,6 +112,16 @@ typedef struct _TransportResponse
     size_t bufferSize;
 } TransportResponse;
 
+enum class TransportState
+{
+    TRANSPORT_STATE_CLOSED = 0,
+    TRANSPORT_STATE_NETWORK_CHECK,
+    TRANSPORT_STATE_NETWORK_CHECKING,
+    TRANSPORT_STATE_OPENING,
+    TRANSPORT_STATE_CONNECTED,
+    TRANSPORT_STATE_RESETTING // needed for token-based auth (currently not used).
+};
+
 /**
  * The TransportReponseCallback type represents an application-defined
  * status callback function used for signaling when data has been received.
@@ -191,6 +129,133 @@ typedef struct _TransportResponse
  * @param context A pointer to the application-defined callback context.
  */
 typedef void(*TransportResponseCallback)(TransportResponse* response, void* context);
+
+
+struct TransportPacket
+{
+    inline TransportPacket(uint8_t msgtype, unsigned char wstype, size_t buffer_size)
+        : msgtype{ msgtype }, wstype{ wstype }, length{ buffer_size }, buffer{ std::make_unique<uint8_t[]>(buffer_size) }
+    {}
+
+    TransportPacket(const TransportPacket&) = delete;
+    TransportPacket(TransportPacket&&) = default;
+
+    uint8_t                    msgtype;
+    unsigned char              wstype;
+    size_t                     length;
+    std::unique_ptr<uint8_t[]> buffer;
+};
+
+/**
+* The TransportRequest type represents a structure used for all transport
+* related context.
+*/
+struct TransportRequest
+{
+    struct ws
+    {
+        UWS_CLIENT_HANDLE WSHandle;
+        WSIO_CONFIG config;
+        bool chunksent;
+    };
+
+    ~TransportRequest();
+
+    ws ws;
+    TransportResponseCallback    onRecvResponse;
+    TransportErrorCallback       onTransportError;
+    TransportOpenedCallback      onOpenedCallback;
+    TransportClosedCallback      onClosedCallback;
+    HTTP_HEADERS_HANDLE          headersHandle;
+    bool                         isOpen;
+    std::string                  url;
+    /* HACKHACK: Owning strings for azure-c-shared strings */
+    std::string                  resourceName;
+    std::string                  upgradeHeaders;
+    std::string                  proxyHost;
+    std::string                  proxyUser;
+    std::string                  proxyPassword;
+    /* end */
+    void*                        context;
+    std::string                  connectionId;
+    uint32_t                     streamId;
+    bool                         needAuthenticationHeader;
+    TransportState               state;
+    std::queue<std::unique_ptr<TransportPacket>>  queue;
+    DnsCacheHandle               dnsCache;
+    uint64_t                     connectionTime;
+    TokenStore                   tokenStore;
+    Telemetry*                   telemetry;
+};
+
+using TransportHandle = TransportRequest *;
+
+typedef struct HTTP_HEADERS_HANDLE_DATA_TAG* HTTP_HEADERS_HANDLE;
+
+/**
+ * Creates a new transport request.
+ * @param host The host name.
+ * @param proxyConfig The proxy configuration info.
+ * @param context The application defined context that will be passed back during callback.
+ * @param telemetry Telemetry handle to record various transport events.
+ * @param connectionHeaders A handle to headers that will be used to establish a connection.
+ * @param connectionId An identifier of a connection, used for diagnostics of errors on the server side.
+ * @param disable_default_verify_paths OpenSSL only: disable the default verify paths
+ * @param trustedCert OpenSSL only: single trusted cert
+ * @param disable_crl_check OpenSSL only: if true, disable CRL if using single trusted cert.
+ * @return An owning pointer to a new transport.
+ */
+std::unique_ptr<TransportRequest> TransportRequestCreate(const std::string& host, void* context, Microsoft::CognitiveServices::Speech::USP::Telemetry* telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const std::string& connectionId, const ProxyServerInfo* proxyInfo, const bool disable_default_verify_paths, const char* trustedCert, const bool disable_crl_check);
+
+/**
+ * Prepares the start of a new transport request.
+ * @param transportHandle The request to prepare.
+ * @return A return code or zero if successful.
+ */
+int TransportRequestPrepare(TransportHandle transportHandle);
+
+/**
+ * Prepares the start of a new transport stream.
+ * @param transportHandle The request to prepare.
+ * @return A return code or zero if successful.
+ */
+int TransportStreamPrepare(TransportHandle transportHandle);
+
+/**
+ * Write a text message to the websocket.
+ * @param transportHandle The request to prepare.
+ * @param path The path to use for message
+ * @param buffer The buffer to write to the websocket.
+ * @param bufferSize The byte size of the buffer.
+ * @param requestId The requestId for the given message.
+ * @return A return code or zero if successful.
+ */
+int TransportMessageWrite(TransportHandle transportHandle, const std::string& path, const uint8_t* buffer, size_t bufferSize, const char* requestId);
+
+/**
+ * Writes to the transport stream.
+ * @param transportHandle The request to prepare.
+ * @param path The path to use for message.
+ * @param buffer The audio chunk to be sent.
+ * @param requestId The requestId for the current stream.
+ * @return A return code or zero if successful.
+ */
+int TransportStreamWrite(TransportHandle transportHandle, const std::string& path, const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char* requestId);
+
+/**
+ * Flushes any outstanding I/O on the transport stream.
+ * @param transportHandle The request to prepare.
+ * @param path The path to use for message.
+ * @param requestId The requestId for the current stream.
+ * @return A return code or zero if successful.
+ */
+int TransportStreamFlush(TransportHandle transportHandle, const std::string& path, const char* requestId);
+
+/**
+ * Processes any outstanding operations that need attention.
+ * @param transportHandle The request to process.
+ */
+void TransportDoWork(TransportHandle transportHandle);
 
 /**
  * Registers for events from the transport.
@@ -232,7 +297,4 @@ void TransportSetDnsCache(TransportHandle transportHandle, DnsCacheHandle dnsCac
  */
 void TransportWriteTelemetry(TransportHandle transportHandle, const uint8_t* buffer, size_t bytesToWrite, const char *requestId);
 
-#ifdef __cplusplus
-}
-#endif
-
+} } } }

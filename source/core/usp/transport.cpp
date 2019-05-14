@@ -12,18 +12,22 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <regex>
 #include <assert.h>
 #include <stdint.h>
 #include <thread>
 #include <chrono>
 
-#include "azure_c_shared_utility_includes.h"
-
 #include "stdafx.h"
+#include "exception.h"
 #include "metrics.h"
 #include "transport.h"
 
 #define COUNT_OF(a) (sizeof(a) / sizeof((a)[0]))
+
+namespace usp = Microsoft::CognitiveServices::Speech::USP;
+using namespace Microsoft::CognitiveServices::Speech::Impl;
+using namespace usp;
 
 // uncomment the line below to see all non-binary protocol messages in the log
 // #define LOG_TEXT_MESSAGES
@@ -33,8 +37,6 @@ const char g_keywordSpeakerIdName[] = "SpeakerId";
 const char g_KeywordStreamId[]       = "X-StreamId";
 const char g_keywordRequestId[]      = "X-RequestId";
 const char g_keywordContentType[] = "Content-Type";
-const char g_keywordWSS[]            = "wss://";
-const char g_keywordWS[]             = "ws://";
 const char g_messageHeader[]         = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n%s:%s\r\n\r\n";
 const char g_messageHeaderWithoutRequestId[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n\r\n";
 
@@ -57,101 +59,49 @@ static const char g_RPSDelegationHeaderName[] = "X-Search-DelegationRPSToken";
 
 #define ANSWER_TIMEOUT_MS   15000
 
-using namespace Microsoft::CognitiveServices::Speech::USP;
-
 using namespace std::chrono_literals;
 
-typedef struct _TransportPacket
-{
-    struct _TransportPacket*  next;
-    uint8_t                   msgtype;
-    unsigned char             wstype;
-    size_t                    length;
-    uint8_t                   buffer[1]; // must be last
-} TransportPacket;
-
-typedef enum _TRANSPORT_STATE
-{
-    TRANSPORT_STATE_CLOSED = 0,
-    TRANSPORT_STATE_NETWORK_CHECK,
-    TRANSPORT_STATE_NETWORK_CHECKING,
-    TRANSPORT_STATE_OPENING,
-    TRANSPORT_STATE_CONNECTED,
-    TRANSPORT_STATE_RESETTING // needed for token-based auth (currently not used).
-} TransportState;
-
+static void OnWSClosed(void* context);
 
 /**
 * The TransportRequest type represents a structure used for all transport
 * related context.
 */
-typedef struct _TransportRequest
+usp::TransportRequest::~TransportRequest()
 {
-    struct
+    if (dnsCache != nullptr)
     {
-        UWS_CLIENT_HANDLE WSHandle;
-        WSIO_CONFIG config;
-        bool chunksent;
-    } ws;
-    TransportResponseCallback    onRecvResponse;
-    TransportErrorCallback       onTransportError;
-    TransportOpenedCallback      onOpenedCallback;
-    TransportClosedCallback      onClosedCallback;
-    HTTP_HEADERS_HANDLE          headersHandle;
-    bool                         isOpen;
-    char*                        url;
-    void*                        context;
-    char                         connectionId[NO_DASH_UUID_LEN];
-    uint32_t                     streamId;
-    bool                         needAuthenticationHeader;
-    TransportState               state;
-    SINGLYLINKEDLIST_HANDLE      queue;
-    DnsCacheHandle               dnsCache;
-    uint64_t                     connectionTime;
-    TokenStore                   tokenStore;
-    Telemetry*                   telemetry;
-} TransportRequest;
+        DnsCacheRemoveContextMatches(dnsCache, this);
+    }
+
+    if (ws.WSHandle != nullptr)
+    {
+        if (isOpen)
+        {
+            (void)uws_client_close_async(ws.WSHandle, OnWSClosed, this);
+            // TODO ok to ignore return code?
+            while (isOpen)
+            {
+                uws_client_dowork(ws.WSHandle);
+                std::this_thread::sleep_for(100ms);
+            }
+        }
+        uws_client_destroy(ws.WSHandle);
+    }
+
+    MetricsTransportClosed();
+
+    if (headersHandle != nullptr)
+    {
+        HTTPHeaders_Free(headersHandle);
+    }
+}
 
 /*
 *  Helper function.
 */
 int TransportCreateDataHeader(TransportHandle transportHandle, const char* requestId, char* buffer, size_t payloadSize, const std::string& psttimeStamp, const std::string& userId, bool wavHeader);
 
-/*
-* Converts a dashed GUID to a no-dash guid string.
-*/
-void GuidDToNFormat(char *guidString)
-{
-    char *dst = guidString;
-    do
-    {
-        if (*guidString != '-')
-        {
-            *dst = *guidString;
-            dst++;
-        }
-
-        guidString++;
-    } while (dst[-1]);
-}
-
-int hexchar_to_int(char c)
-{
-    if ((c >= 'A') && c <= 'F')
-    {
-        return (int)(c - 'A') + 10;
-    }
-    else if ((c >= 'a') && c <= 'f')
-    {
-        return (int)(c - 'a') + 10;
-    }
-    else if ((c >= '0') && c <= '9')
-    {
-        return (int)(c - '0');
-    }
-
-    return 0;
-}
 
 int ParseHttpHeaders(HTTP_HEADERS_HANDLE headersHandle, const unsigned char* buffer, size_t size)
 {
@@ -210,91 +160,40 @@ int ParseHttpHeaders(HTTP_HEADERS_HANDLE headersHandle, const unsigned char* buf
 }
 
 
-// TODO: temporarily lifted this from httpapi_winhtt, remove after refactoring.
-static char* ConstructHeadersString(HTTP_HEADERS_HANDLE httpHeadersHandle)
+static std::string ConstructHeadersString(const std::string& prefix, HTTP_HEADERS_HANDLE httpHeadersHandle)
 {
-    char* result;
     size_t headersCount;
 
     if (HTTPHeaders_GetHeaderCount(httpHeadersHandle, &headersCount) != HTTP_HEADERS_OK)
     {
-        result = NULL;
         LogError("HTTPHeaders_GetHeaderCount failed.");
+        return std::string{};
     }
-    else
+
+    std::ostringstream oss;
+    oss << prefix;
+    for (size_t i = 0; i < headersCount; i++)
     {
-        size_t i;
-
-        /*the total size of all the headers is given by sumof(lengthof(everyheader)+2)*/
-        size_t toAlloc = 0;
-        for (i = 0; i < headersCount; i++)
+        char *temp;
+        oss << "\r\n";
+        if (HTTPHeaders_GetHeader(httpHeadersHandle, i, &temp) == HTTP_HEADERS_OK)
         {
-            char *temp;
-            if (HTTPHeaders_GetHeader(httpHeadersHandle, i, &temp) == HTTP_HEADERS_OK)
-            {
-                toAlloc += strlen(temp);
-                toAlloc += 2;
-                free(temp);
-            }
-            else
-            {
-                LogError("HTTPHeaders_GetHeader failed");
-                break;
-            }
-        }
-
-        if (i < headersCount)
-        {
-            result = NULL;
+            oss << temp;
+            free(temp);
         }
         else
         {
-            result = (char*)malloc(toAlloc * sizeof(char) + 1);
-
-            if (result == NULL)
-            {
-                LogError("unable to malloc");
-                /*let it be returned*/
-            }
-            else
-            {
-                result[0] = '\0';
-                for (i = 0; i < headersCount; i++)
-                {
-                    char* temp;
-                    if (HTTPHeaders_GetHeader(httpHeadersHandle, i, &temp) != HTTP_HEADERS_OK)
-                    {
-                        LogError("unable to HTTPHeaders_GetHeader");
-                        break;
-                    }
-                    else
-                    {
-                        (void)strcat_s(result, toAlloc+1, temp);
-                        (void)strcat_s(result, toAlloc+1, "\r\n");
-                        free(temp);
-                    }
-                }
-
-                if (i < headersCount)
-                {
-                    free(result);
-                    result = NULL;
-                }
-                else
-                {
-                    /*all is good*/
-                }
-            }
+            LogError("HTTPHeaders_GetHeader failed");
+            return std::string{};
         }
     }
-
-    return result;
+    return oss.str();
 }
 
 static void SetTransportToClosed(TransportRequest* request)
 {
     request->isOpen = false;
-    request->state = TRANSPORT_STATE_CLOSED;
+    request->state = TransportState::TRANSPORT_STATE_CLOSED;
 }
 
 // For websocket requests, the caller must ensure that the wsio instance is not
@@ -302,7 +201,7 @@ static void SetTransportToClosed(TransportRequest* request)
 // wsio instance and we may get stuck retrying the open.
 static void OnTransportError(TransportRequest* request, TransportErrorInfo* errorInfo)
 {
-    if (request->state == TRANSPORT_STATE_RESETTING)
+    if (request->state == TransportState::TRANSPORT_STATE_RESETTING)
     {
         // don't propagate errors during the reset state, these errors are expected.
         return;
@@ -367,11 +266,11 @@ static void OnWSClosed(void* context)
     TransportRequest* request = (TransportRequest*)context;
     if (request)
     {
-        if (request->state == TRANSPORT_STATE_RESETTING)
+        if (request->state == TransportState::TRANSPORT_STATE_RESETTING)
         {
             // Re-open the connection.
             request->isOpen = false;
-            request->state = TRANSPORT_STATE_NETWORK_CHECK;
+            request->state = TransportState::TRANSPORT_STATE_NETWORK_CHECK;
         }
         else
         {
@@ -397,7 +296,7 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detail
     request->isOpen = (open_result == WS_OPEN_OK);
     if (request->isOpen)
     {
-        request->state = TRANSPORT_STATE_CONNECTED;
+        request->state = TransportState::TRANSPORT_STATE_CONNECTED;
         request->connectionTime = telemetry_gettime();
         LogInfo("Opening websocket completed. TransportRequest: 0x%x, wsio handle: 0x%x", request, request->ws.WSHandle);
         MetricsTransportConnected(*request->telemetry, request->connectionId);
@@ -412,7 +311,7 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detail
         // It is safe to transition to TRANSPORT_STATE_CLOSED because the
         // connection is not open.  We must be careful with this state for the
         // reasons described in OnTransportError.
-        request->state = TRANSPORT_STATE_CLOSED;
+        request->state = TransportState::TRANSPORT_STATE_CLOSED;
         MetricsTransportDropped();
 
         LogError("WS open operation failed with result=%d(%s), code=%d[0x%08x]",
@@ -447,16 +346,14 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detail
 static void OnWSFrameSent(void* context, WS_SEND_FRAME_RESULT sendResult)
 {
     (void)sendResult;
-
     // TODO ok to ignore?
 
-    TransportPacket *msg = (TransportPacket*)context;
-    // the first byte is the message type
+    TransportPacket *msg = reinterpret_cast<TransportPacket*>(context);
     if (msg->msgtype != METRIC_MESSAGE_TYPE_INVALID)
     {
         MetricsTransportStateEnd(msg->msgtype);
     }
-    free(msg);
+    delete msg;
 }
 
 ResponseFrameType WSFrameEnumToResponseFrameEnum(WS_FRAME_TYPE frameType)
@@ -537,7 +434,7 @@ static void OnWSFrameReceived(void* context, unsigned char frame_type, const uns
 static void DnsComplete(DnsCacheHandle handle, int error, DNS_RESULT_HANDLE resultHandle, void *context)
 {
     TransportRequest* request = (TransportRequest*)context;
-    assert(request->state == TRANSPORT_STATE_NETWORK_CHECKING);
+    assert(request->state == TransportState::TRANSPORT_STATE_NETWORK_CHECKING);
 
     (void)handle;
     (void)resultHandle;
@@ -563,12 +460,12 @@ static void DnsComplete(DnsCacheHandle handle, int error, DNS_RESULT_HANDLE resu
         else
         {
             LogInfo("Network Check completed");
-            request->state = TRANSPORT_STATE_OPENING;
+            request->state = TransportState::TRANSPORT_STATE_OPENING;
         }
     }
 }
 
-static int ProcessPacket(TransportRequest* request, TransportPacket* packet)
+static int ProcessPacket(TransportRequest* request, std::unique_ptr<TransportPacket> packet)
 {
     int err = 0;
 
@@ -581,52 +478,49 @@ static int ProcessPacket(TransportRequest* request, TransportPacket* packet)
         // Include the first 2 bytes for header length
         offset += 2;
     }
-    memcpy((char*)packet->buffer + offset, timeString, timeStringLength);
+    memcpy(packet->buffer.get() + offset, timeString, timeStringLength);
+
+    auto unmanaged_packet = packet.release();
 
     err = uws_client_send_frame_async(
         request->ws.WSHandle,
-        packet->wstype == WS_FRAME_TYPE_TEXT ? static_cast<uint8_t>(WS_TEXT_FRAME) : static_cast<uint8_t>(WS_BINARY_FRAME),
-        packet->buffer,
-        packet->length,
+        unmanaged_packet->wstype == WS_FRAME_TYPE_TEXT ? static_cast<uint8_t>(WS_TEXT_FRAME) : static_cast<uint8_t>(WS_BINARY_FRAME),
+        unmanaged_packet->buffer.get(),
+        unmanaged_packet->length,
         true, // TODO: check this.
         OnWSFrameSent,
-        packet);
+        unmanaged_packet);
     if (err)
     {
         LogError("WS transfer failed with %d", err);
-        free(packet);
     }
     return err;
 }
 
-static void WsioQueue(TransportRequest* request, TransportPacket* packet)
+static void WsioQueue(TransportRequest* request, std::unique_ptr<TransportPacket> packet)
 {
     if (NULL == request)
     {
-        free(packet);
         return;
     }
 
-    if (request->state == TRANSPORT_STATE_CLOSED)
+    if (request->state == TransportState::TRANSPORT_STATE_CLOSED)
     {
         LogError("Trying to send on a previously closed socket");
         MetricsTransportInvalidStateError();
-        free(packet);
         return;
     }
 #ifdef LOG_TEXT_MESSAGES
     if (packet->wstype == WS_TEXT_FRAME)
     {
-        LogInfo("Message sent:\n>>>>>>>>>>\n%.*s\n>>>>>>>>>>", packet->length, packet->buffer);
+        LogInfo("Message sent:\n>>>>>>>>>>\n%.*s\n>>>>>>>>>>", packet->length, packet->buffer.get());
     }
 #endif
-    (void)singlylinkedlist_add(request->queue, packet);
+    request->queue.push(std::move(packet));
 }
 
-static void PrepareTelemetryPayload(TransportHandle request, const uint8_t* eventBuffer, size_t eventBufferSize, TransportPacket **pPacket, const char *requestId)
+static std::unique_ptr<TransportPacket> PrepareTelemetryPayload(const uint8_t* eventBuffer, size_t eventBufferSize, const std::string& requestId)
 {
-    (void)request;
-
     // serialize headers.
     size_t headerLen;
 
@@ -637,336 +531,171 @@ static void PrepareTelemetryPayload(TransportHandle request, const uint8_t* even
         TIME_STRING_MAX_SIZE +
         eventBufferSize;
 
-    TransportPacket *msg = (TransportPacket*)malloc(sizeof(TransportPacket) + payloadSize);
-    if (msg == nullptr)
-    {
-        // malloc failed, everything is lost
-        return;
-    }
-    msg->msgtype = static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_TELEMETRY);
-    msg->wstype = WS_FRAME_TYPE_TEXT;
+    auto msg = std::make_unique<TransportPacket>(static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_TELEMETRY), static_cast<unsigned char>(WS_FRAME_TYPE_TEXT), payloadSize);
 
     char timeString[TIME_STRING_MAX_SIZE];
     int timeStringLen = GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
     if (timeStringLen < 0)
     {
-        free(msg);
-        return;
+        ThrowRuntimeError("There was a problem getting time string");
     }
 
     // serialize the entire telemetry message.
-    headerLen = sprintf_s((char*)msg->buffer,
+    headerLen = sprintf_s(reinterpret_cast<char*>(msg->buffer.get()),
         payloadSize,
         g_telemetryHeader,
         g_timeStampHeaderName,
         timeString,
         g_keywordRequestId,
-        requestId);
+        requestId.c_str());
 
     msg->length = headerLen;
     // body
-    memcpy(msg->buffer + msg->length, eventBuffer, eventBufferSize);
+    memcpy(msg->buffer.get() + msg->length, eventBuffer, eventBufferSize);
     msg->length += eventBufferSize;
-    *pPacket = msg;
+    return msg;
 }
 
-void TransportWriteTelemetry(TransportHandle handle, const uint8_t* buffer, size_t bytesToWrite, const char *requestId)
+void usp::TransportWriteTelemetry(TransportHandle handle, const uint8_t* buffer, size_t bytesToWrite, const char *requestId)
 {
     if (NULL != handle)
     {
-        TransportPacket *msg = NULL;
-        PrepareTelemetryPayload(handle, buffer, bytesToWrite, &msg, requestId);
-        WsioQueue(handle, msg);
+        auto msg = PrepareTelemetryPayload(buffer, bytesToWrite, requestId);
+        WsioQueue(handle, std::move(msg));
     }
 }
 
-TransportHandle TransportRequestCreate(const char* host, void* context, Telemetry* telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId, const ProxyServerInfo* proxyInfo, const bool disable_default_verify_paths, const char *trustedCert, const bool disable_crl_check)
+std::unique_ptr<TransportRequest> usp::TransportRequestCreate(const std::string& host, void* context, Telemetry* telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const std::string& connectionId, const ProxyServerInfo* proxyInfo, const bool disableDefaultVerifyPaths, const char *trustedCert, const bool disableCrlCheck)
 {
-    TransportRequest *request;
-    int err = -1;
-    const char* src;
-    char* dst;
-    int port = -1;
-    const char* hostName = NULL;
-    size_t hostOffset = 0;
+    constexpr auto protocol_wss = "wss";
 
-    bool use_ssl = false;
+    const std::regex hostRegex{ R"((wss?)://(([A-Za-z0-9-_.]+)(:([0-9]+))?)([/?].*))" };
 
-    if (!host)
+    if (host.empty())
     {
-        return NULL;
+        LogError("Received an empty host. Please provide a valid host.");
+        return nullptr;
     }
 
-    if (strstr(host, g_keywordWSS) == host)
+    if (NO_DASH_UUID_LEN < connectionId.size() + 1)
     {
-        hostOffset = strlen(g_keywordWSS);
+        LogError("Invalid size of connection Id. Please use a valid GUID with dashes removed.");
+        return nullptr;
     }
-    else if(strstr(host, g_keywordWS) == host)
+
+    std::smatch hostMatch;
+    if (!std::regex_match(host, hostMatch, hostRegex))
     {
-        hostOffset = strlen(g_keywordWS);
+        /* No match! */
+        LogError("Invalid host. Please provide a valid host (ws|wss://hostname[:port][/resource][?query_string]).");
+        return nullptr;
+    }
+
+    assert(hostMatch.size() == 7);
+
+    const std::string protocol = hostMatch[1];
+    const std::string hostName = hostMatch[3];
+    const std::string portString = hostMatch[5];
+    const std::string resource = hostMatch[6];
+
+    const bool useSSL = protocol == protocol_wss;
+    const int port = portString.empty() ? -1 : std::stoi(portString);
+    const int defaultPort = useSSL ? 443 : 80;
+
+    auto request = std::make_unique<TransportRequest>();
+    if (nullptr == request)
+    {
+        return nullptr;
+    }
+    request->context = context;
+    request->telemetry = telemetry;
+    request->ws.config.port = port == -1 ? defaultPort : port;
+    request->connectionId = connectionId;
+    HTTPHeaders_ReplaceHeaderNameValuePair(connectionHeaders, "X-ConnectionId", request->connectionId.c_str());
+    // HACKHACK: azure-c-shared doesn't allow to specify connection ("upgrade") headers, using this as a temporary
+    // workaround until we migrate to something more decent.
+    request->upgradeHeaders = ConstructHeadersString("USP", connectionHeaders);
+    request->ws.config.protocol = request->upgradeHeaders.data();
+    request->url = hostName;
+    request->resourceName = resource;
+    /* These are just views */
+    request->ws.config.hostname = request->url.data();
+    request->ws.config.resource_name = request->resourceName.data();
+
+    if (proxyInfo != nullptr)
+    {
+        HTTP_PROXY_IO_CONFIG proxyConfig;
+        proxyConfig.hostname = request->ws.config.hostname;
+        proxyConfig.port = request->ws.config.port;
+        request->proxyHost = proxyInfo->host;
+        proxyConfig.proxy_hostname = request->proxyHost.c_str();
+        proxyConfig.proxy_port = proxyInfo->port;
+        request->proxyUser = proxyInfo->username;
+        proxyConfig.username = request->proxyUser.c_str();
+        request->proxyPassword = proxyInfo->password;
+        proxyConfig.password = request->proxyPassword.c_str();
+        const IO_INTERFACE_DESCRIPTION* underlyingIOInterface = http_proxy_io_get_interface_description();
+        if (underlyingIOInterface == nullptr)
+        {
+            LogError("NULL proxy interface description");
+            return nullptr;
+        }
+        void* underlyingIOParameters = &proxyConfig;
+
+        TLSIO_CONFIG tlsioConfig;
+        if (useSSL == true)
+        {
+            const IO_INTERFACE_DESCRIPTION* tlsioInterface = platform_get_default_tlsio();
+            if (tlsioInterface == nullptr)
+            {
+                LogError("NULL TLSIO interface description");
+                return nullptr;
+            }
+            else
+            {
+                tlsioConfig.hostname = request->ws.config.hostname;
+                tlsioConfig.port = request->ws.config.port;
+                tlsioConfig.underlying_io_interface = underlyingIOInterface;
+                tlsioConfig.underlying_io_parameters = underlyingIOParameters;
+                underlyingIOInterface = tlsioInterface;
+                underlyingIOParameters = &tlsioConfig;
+            }
+        }
+        request->ws.WSHandle = uws_client_create_with_io(underlyingIOInterface, underlyingIOParameters, request->ws.config.hostname, request->ws.config.port, request->ws.config.resource_name, (WS_PROTOCOL*)& request->ws.config.protocol, 1);
     }
     else
     {
-        // Only WebSockets-based transport
-        return NULL;
+        WSIO_CONFIG cfg = request->ws.config;
+        WS_PROTOCOL wsProto;
+        wsProto.protocol = cfg.protocol;
+        request->ws.WSHandle = uws_client_create(cfg.hostname, cfg.port, cfg.resource_name, useSSL, &wsProto, 1);
     }
-
-    // parse port number from host name if it is specified in the url
-
-    hostName = host + hostOffset;
-    const char* front = strchr(hostName, ':');
-    if (front)
-    {
-        const char* back = strchr(front, '/');
-        if (back == NULL)
-        {
-            back = front + strlen(front);
-        }
-        size_t length = back - front;
-        char* portStr = (char*)malloc(length);
-        if (portStr == NULL)
-        {
-            LogError("Failed to allocate memory for port string.");
-            return NULL;
-        }
-        memcpy(portStr, ++front, length);
-        portStr[length - 1] = '\0';
-        port = atoi(portStr);
-        free(portStr);
-        if (port == 0)
-        {
-            LogError("Failed to parse port string.");
-            return NULL;
-        }
-    }
-
-    request = (TransportRequest*)malloc(sizeof(TransportRequest));
-    if (NULL == request)
-    {
-        return NULL;
-    }
-
-    memset(request, 0, sizeof(TransportRequest));
-    request->context = context;
-    request->telemetry = telemetry;
-    // disable by default, usually only websocket request will need it
-    request->queue = singlylinkedlist_create();
-
-    if (strstr(host, g_keywordWSS) == host)
-    {
-        request->ws.config.port = port == -1 ? 443 : port;
-        use_ssl = true;
-    }
-    else if (strstr(host, g_keywordWS) == host)
-    {
-        request->ws.config.port = port == -1 ? 80 : port;
-        use_ssl = false;
-    }
-
-    if (sizeof(request->connectionId) < strlen(connectionId) + 1)
-    {
-        free(request);
-        LogError("Invalid size of connection Id. Please use a valid GUID with dashes removed.");
-        return NULL;
-    }
-
-    strncpy(request->connectionId, connectionId, strlen(connectionId));
-    HTTPHeaders_ReplaceHeaderNameValuePair(connectionHeaders, "X-ConnectionId", request->connectionId);
-    char* headers = ConstructHeadersString(connectionHeaders);
-    const char* proto = "USP\r\n";
-    size_t len = strlen(proto) + strlen(headers) -2 /*(minus extra '\r\n')*/ + 1;
-    char* str = (char*)malloc(len);
-    if (str == NULL)
-    {
-        free(request);
-        free(headers);
-        LogError("Failed to allocate memory for connection headers string.");
-        return NULL;
-    }
-    (void)snprintf(str, len, "%s%s", proto, headers);
-    // HACKHACK: azure-c-shared doesn't allow to specify connection ("upgrade") headers, using this as a temporary
-    // workaround until we migrate to something more decent.
-    request->ws.config.protocol = str;
-
-    len = strlen(host);
-    request->url = (char*)malloc(len + 2); // 2=2 x NULL
-    if (request->url != NULL)
-    {
-        host += strlen(use_ssl ? g_keywordWSS : g_keywordWS);
-        dst = request->url;
-        request->ws.config.hostname = dst;
-
-        // split up host + path
-        src = strchr(host, '/');
-        if (NULL != src)
-        {
-            // Pull out port if it is there.
-            const char *portSpec = strchr(host, ':');
-            size_t copyLen = (portSpec == NULL ? src : portSpec) - host;
-            if (copyLen <= len)
-            {
-                err = 0;
-                memcpy(dst, host, copyLen);
-                *(dst + copyLen) = 0;
-                dst += (src - host) + 1;
-                request->ws.config.resource_name = dst;
-                strcpy_s(dst, len + 2 - (dst - request->url), src);
-
-                if (proxyInfo != NULL)
-                {
-                    HTTP_PROXY_IO_CONFIG proxy_config;
-                    proxy_config.hostname = request->ws.config.hostname;
-                    proxy_config.port = request->ws.config.port;
-                    proxy_config.proxy_hostname = proxyInfo->host.c_str();
-                    proxy_config.proxy_port = proxyInfo->port;
-                    proxy_config.username = proxyInfo->username.c_str();
-                    proxy_config.password = proxyInfo->password.c_str();
-                    const IO_INTERFACE_DESCRIPTION *underlying_io_interface = http_proxy_io_get_interface_description();
-                    if (underlying_io_interface == NULL)
-                    {
-                        LogError("NULL proxy interface description");
-                        free(request->url);
-                        free(request);
-                        free(headers);
-                        free(str);
-                        return NULL;
-                    }
-                    void *underlying_io_parameters = &proxy_config;
-
-                    TLSIO_CONFIG tlsio_config;
-                    if (use_ssl == true)
-                    {
-                        const IO_INTERFACE_DESCRIPTION *tlsio_interface = platform_get_default_tlsio();
-                        if (tlsio_interface == NULL)
-                        {
-                            LogError("NULL TLSIO interface description");
-                            free(request->url);
-                            free(request);
-                            free(headers);
-                            free(str);
-                            return NULL;
-                        }
-                        else
-                        {
-                            tlsio_config.hostname = request->ws.config.hostname;
-                            tlsio_config.port = request->ws.config.port;
-                            tlsio_config.underlying_io_interface = underlying_io_interface;
-                            tlsio_config.underlying_io_parameters = underlying_io_parameters;
-                            underlying_io_interface = tlsio_interface;
-                            underlying_io_parameters = &tlsio_config;
-                        }
-                    }
-
-                    request->ws.WSHandle = uws_client_create_with_io(underlying_io_interface, underlying_io_parameters, request->ws.config.hostname, request->ws.config.port, request->ws.config.resource_name, (WS_PROTOCOL *)&request->ws.config.protocol, 1);
-                }
-                else
-                {
-                    WSIO_CONFIG cfg = request->ws.config;
-                    WS_PROTOCOL ws_proto;
-                    ws_proto.protocol = cfg.protocol;
-                    request->ws.WSHandle = uws_client_create(cfg.hostname, cfg.port, cfg.resource_name, use_ssl, &ws_proto, 1);
-                }
 
 #ifdef SPEECHSDK_USE_OPENSSL
-                int tls_version = OPTION_TLS_VERSION_1_2;
-                uws_client_set_option(request->ws.WSHandle, OPTION_TLS_VERSION, &tls_version);
+    int tls_version = OPTION_TLS_VERSION_1_2;
+    uws_client_set_option(request->ws.WSHandle, OPTION_TLS_VERSION, &tls_version);
 
-                uws_client_set_option(request->ws.WSHandle, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &disable_default_verify_paths);
-                if (trustedCert)
-                {
-                    uws_client_set_option(request->ws.WSHandle, OPTION_TRUSTED_CERT, trustedCert);
-                }
+    uws_client_set_option(request->ws.WSHandle, OPTION_DISABLE_DEFAULT_VERIFY_PATHS, &disableDefaultVerifyPaths);
+    if (trustedCert)
+    {
+        uws_client_set_option(request->ws.WSHandle, OPTION_TRUSTED_CERT, trustedCert);
+    }
 
-                // Note: layers above guarantee that CRL check can only be disabled when using a trusted cert.
-                uws_client_set_option(request->ws.WSHandle, OPTION_DISABLE_CRL_CHECK, &disable_crl_check);
+    // Note: layers above guarantee that CRL check can only be disabled when using a trusted cert.
+    uws_client_set_option(request->ws.WSHandle, OPTION_DISABLE_CRL_CHECK, &disableCrlCheck);
 #else
-                UNUSED(trustedCert);
-                UNUSED(disable_crl_check);
-                UNUSED(disable_default_verify_paths);
+    UNUSED(trustedCert);
+    UNUSED(disableCrlCheck);
+    UNUSED(disableDefaultVerifyPaths);
 #endif
-            }
-        }
 
-        if (err)
-        {
-            free(request->url);
-            free(request);
-            LogError("Invalid URL");
-            // Fall through will clear remaining objects and return NULL
-        }
-    }
-
-    free(headers);
-    free(str);
-
-    if (!err)
+    request->headersHandle = HTTPHeaders_Alloc();
+    if (nullptr != request->headersHandle)
     {
-        request->headersHandle = HTTPHeaders_Alloc();
-        if (NULL != request->headersHandle)
-        {
-            return request;
-        }
+        return request;
     }
 
-    return NULL;
-}
-
-void TransportRequestDestroy(TransportHandle transportHandle)
-{
-    TransportRequest* request = (TransportRequest*)transportHandle;
-
-    if (!request)
-    {
-        return;
-    }
-
-    if (request->dnsCache)
-    {
-        DnsCacheRemoveContextMatches(request->dnsCache, request);
-    }
-
-    if (request->ws.WSHandle)
-    {
-        if (request->isOpen)
-        {
-            (void)uws_client_close_async(request->ws.WSHandle, OnWSClosed, request);
-            // TODO ok to ignore return code?
-            while (request->isOpen)
-            {
-                uws_client_dowork(request->ws.WSHandle);
-                std::this_thread::sleep_for(100ms);
-            }
-        }
-
-        uws_client_destroy(request->ws.WSHandle);
-    }
-
-    MetricsTransportClosed();
-
-    if (request->url)
-    {
-        free(request->url);
-    }
-
-    if (request->headersHandle)
-    {
-        HTTPHeaders_Free(request->headersHandle);
-    }
-
-    if (request->queue)
-    {
-        for (LIST_ITEM_HANDLE list_item = singlylinkedlist_get_head_item(request->queue);
-            list_item != NULL;
-            list_item = singlylinkedlist_get_next_item(list_item))
-        {
-            free((TransportPacket*)singlylinkedlist_item_get_value(list_item));
-        }
-
-        singlylinkedlist_destroy(request->queue);
-        request->queue = NULL;
-    }
-
-    free(request);
+    return nullptr;
 }
 
 static int TransportOpen(TransportRequest* request)
@@ -1038,7 +767,7 @@ static int add_auth_headers(TokenStore tokenStore, HTTP_HEADERS_HANDLE headers, 
     return tokenChanged;
 }
 
-int TransportRequestPrepare(TransportHandle transportHandle)
+int usp::TransportRequestPrepare(TransportHandle transportHandle)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     int err = 0;
@@ -1058,7 +787,7 @@ int TransportRequestPrepare(TransportHandle transportHandle)
         }
 
         if (tokenChanged > 0 &&
-            (request->state == TRANSPORT_STATE_CONNECTED))
+            (request->state == TransportState::TRANSPORT_STATE_CONNECTED))
         {
             // The token is snapped at the time that we are connected.  Reset
             // our connection if the token changes to avoid using a stale token
@@ -1068,7 +797,7 @@ int TransportRequestPrepare(TransportHandle transportHandle)
             // connections are short-lived.
 
             // Set the transport state before calling uws_client_close_async.
-            request->state = TRANSPORT_STATE_RESETTING;
+            request->state = TransportState::TRANSPORT_STATE_RESETTING;
             LogInfo("token changed, resetting connection");
             MetricsTransportReset();
 
@@ -1082,15 +811,15 @@ int TransportRequestPrepare(TransportHandle transportHandle)
         }
     }
 
-    if (request->state == TRANSPORT_STATE_CLOSED)
+    if (request->state == TransportState::TRANSPORT_STATE_CLOSED)
     {
-        request->state = TRANSPORT_STATE_NETWORK_CHECK;
+        request->state = TransportState::TRANSPORT_STATE_NETWORK_CHECK;
     }
 
     return err;
 }
 
-int TransportMessageWrite(TransportHandle transportHandle, const std::string& path, const uint8_t* buffer, size_t bufferSize, const char* requestId)
+int usp::TransportMessageWrite(TransportHandle transportHandle, const std::string& path, const uint8_t* buffer, size_t bufferSize, const char* requestId)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     int ret;
@@ -1100,7 +829,7 @@ int TransportMessageWrite(TransportHandle transportHandle, const std::string& pa
         return -1;
     }
 
-    ret = TransportRequestPrepare(request);
+    ret = usp::TransportRequestPrepare(request);
     if (ret)
     {
         return ret;
@@ -1115,28 +844,19 @@ int TransportMessageWrite(TransportHandle transportHandle, const std::string& pa
                          sizeof(g_timeStampHeaderName) +
                          TIME_STRING_MAX_SIZE +
                          bufferSize;
-    TransportPacket *msg = (TransportPacket *)malloc(sizeof(TransportPacket) + payloadSize);
-    if (msg == nullptr)
-    {
-        /* malloc failed, everything is lost */
-        return -1;
-    }
-
-    msg->msgtype = static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_DEVICECONTEXT);
-    msg->wstype = WS_FRAME_TYPE_TEXT;
+    auto msg = std::make_unique<TransportPacket>(static_cast<uint8_t>(MetricMessageType::METRIC_MESSAGE_TYPE_DEVICECONTEXT), static_cast<unsigned char>(WS_FRAME_TYPE_TEXT), payloadSize);
 
     char timeString[TIME_STRING_MAX_SIZE];
     int timeStringLen = GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
     if (timeStringLen < 0)
     {
-        free(msg);
         return -1;
     }
 
     // add headers
     if (includeRequestId)
     {
-        msg->length = sprintf_s((char *)msg->buffer,
+        msg->length = sprintf_s(reinterpret_cast<char*>(msg->buffer.get()),
                                 payloadSize,
                                 g_messageHeader,
                                 g_timeStampHeaderName,
@@ -1147,7 +867,7 @@ int TransportMessageWrite(TransportHandle transportHandle, const std::string& pa
     }
     else
     {
-        msg->length = sprintf_s((char *)msg->buffer,
+        msg->length = sprintf_s(reinterpret_cast<char*>(msg->buffer.get()),
                                 payloadSize,
                                 g_messageHeaderWithoutRequestId,
                                 g_timeStampHeaderName,
@@ -1156,14 +876,14 @@ int TransportMessageWrite(TransportHandle transportHandle, const std::string& pa
     }
 
     // add body
-    memcpy(msg->buffer + msg->length, buffer, bufferSize);
+    memcpy(msg->buffer.get() + msg->length, buffer, bufferSize);
     msg->length += bufferSize;
 
-    WsioQueue(request, msg);
+    WsioQueue(request, std::move(msg));
     return 0;
 }
 
-int TransportStreamPrepare(TransportHandle transportHandle)
+int usp::TransportStreamPrepare(TransportHandle transportHandle)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     int ret;
@@ -1175,11 +895,11 @@ int TransportStreamPrepare(TransportHandle transportHandle)
 
     request->streamId++;
 
-    ret = TransportRequestPrepare(request);
+    ret = usp::TransportRequestPrepare(request);
     return ret;
 }
 
-int TransportStreamWrite(TransportHandle transportHandle, const std::string& path, const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char* requestId)
+int usp::TransportStreamWrite(TransportHandle transportHandle, const std::string& path, const Microsoft::CognitiveServices::Speech::Impl::DataChunkPtr& audioChunk, const char* requestId)
 {
     size_t bufferSize = (size_t)audioChunk->size;
     auto buffer = audioChunk->data.get();
@@ -1235,33 +955,25 @@ int TransportStreamWrite(TransportHandle transportHandle, const std::string& pat
         userId.length() +
         bufferSize + 2; // 2 = header length
 
-    TransportPacket *msg = (TransportPacket*)malloc(sizeof(TransportPacket) + WS_MESSAGE_HEADER_SIZE + payloadSize);
-    if (msg == nullptr)
-    {
-        /* malloc failed, everything is lost =( */
-        return -1;
-    }
-    msg->msgtype = msgtype;
-    msg->wstype = WS_FRAME_TYPE_BINARY;
+    auto msg = std::make_unique<TransportPacket>(msgtype, static_cast<unsigned char>(WS_FRAME_TYPE_BINARY), payloadSize);
 
     // fill the msg->buffer with the header content
     bool wavheader = audioChunk->isWavHeader;
-    auto headerLen = TransportCreateDataHeader(request, requestId, (char*)msg->buffer, payloadSize, pstTimeStamp, userId, wavheader);
+    auto headerLen = TransportCreateDataHeader(request, requestId, reinterpret_cast<char *>(msg->buffer.get()), payloadSize, pstTimeStamp, userId, wavheader);
     if (headerLen < 0)
     {
-        free(msg);
         return -1;
     }
     // two bytes length
     msg->buffer[0] = (uint8_t)((headerLen >> 8) & 0xff);
     msg->buffer[1] = (uint8_t)((headerLen >> 0) & 0xff);
-    msg->length = WS_MESSAGE_HEADER_SIZE + headerLen;
+    msg->length = headerLen + WS_MESSAGE_HEADER_SIZE;
 
     // body
-    memcpy(msg->buffer + msg->length, buffer, bufferSize);
+    std::memcpy(msg->buffer.get() + msg->length, buffer, bufferSize);
     msg->length += bufferSize;
 
-    WsioQueue(request, msg);
+    WsioQueue(request, std::move(msg));
     return 0;
 }
 
@@ -1285,7 +997,7 @@ int TransportCreateDataHeader(TransportHandle transportHandle, const char* reque
     if (wavheader)
     {
         headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
-            payloadSize,
+            payloadSize - WS_MESSAGE_HEADER_SIZE,
             g_wavheaderFormat,
             g_timeStampHeaderName,
             timeString,
@@ -1300,7 +1012,7 @@ int TransportCreateDataHeader(TransportHandle transportHandle, const char* reque
     else if (psttimeStamp.empty() && userId.empty())
     {
         headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
-        payloadSize,
+        payloadSize - WS_MESSAGE_HEADER_SIZE,
         g_requestFormat,  // "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n";
         g_timeStampHeaderName,  //"X-Timestamp";
             timeString,
@@ -1313,7 +1025,7 @@ int TransportCreateDataHeader(TransportHandle transportHandle, const char* reque
     else if (!psttimeStamp.empty() && userId.empty())
     {
         headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
-            payloadSize,
+            payloadSize - WS_MESSAGE_HEADER_SIZE,
             g_requestFormat2,
             g_timeStampHeaderName,
             timeString,
@@ -1328,7 +1040,7 @@ int TransportCreateDataHeader(TransportHandle transportHandle, const char* reque
     else if (psttimeStamp.empty() && !userId.empty())
     {
         headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
-            payloadSize,
+            payloadSize - WS_MESSAGE_HEADER_SIZE,
             g_requestFormat2,
             g_timeStampHeaderName,
             timeString,
@@ -1344,7 +1056,7 @@ int TransportCreateDataHeader(TransportHandle transportHandle, const char* reque
     else
     {
         headerLen = sprintf_s(buffer + WS_MESSAGE_HEADER_SIZE,
-            payloadSize,
+            payloadSize - WS_MESSAGE_HEADER_SIZE,
             g_requestFormat3,
             g_timeStampHeaderName,
             timeString,
@@ -1362,7 +1074,7 @@ int TransportCreateDataHeader(TransportHandle transportHandle, const char* reque
     return (int)headerLen;
 }
 
-int TransportStreamFlush(TransportHandle transportHandle, const std::string& path, const char* requestId)
+int usp::TransportStreamFlush(TransportHandle transportHandle, const std::string& path, const char* requestId)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     if (NULL == request)
@@ -1379,14 +1091,12 @@ int TransportStreamFlush(TransportHandle transportHandle, const std::string& pat
     // flush is called even before the WS connection is established, in
     // particular if the audio file is very short. Just append the zero-sized
     // buffer as indication of end-of-audio.
-    return TransportStreamWrite(request, path, std::make_shared<Microsoft::CognitiveServices::Speech::Impl::DataChunk>(nullptr, 0), requestId);
+    return usp::TransportStreamWrite(request, path, std::make_shared<Microsoft::CognitiveServices::Speech::Impl::DataChunk>(nullptr, 0), requestId);
 }
 
-void TransportDoWork(TransportHandle transportHandle)
+void usp::TransportDoWork(TransportHandle transportHandle)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
-    TransportPacket*  packet;
-    LIST_ITEM_HANDLE list_item;
 
     if (NULL == transportHandle)
     {
@@ -1395,61 +1105,62 @@ void TransportDoWork(TransportHandle transportHandle)
 
     switch (request->state)
     {
-    case TRANSPORT_STATE_CLOSED:
-        while (NULL != (list_item = singlylinkedlist_get_head_item(request->queue)))
+    case TransportState::TRANSPORT_STATE_CLOSED:
+        while (!request->queue.empty())
         {
-            free((TransportPacket*)singlylinkedlist_item_get_value(list_item));
-            singlylinkedlist_remove(request->queue, list_item);
+            request->queue.pop();
         }
         break;
 
-    case TRANSPORT_STATE_RESETTING:
+    case TransportState::TRANSPORT_STATE_RESETTING:
         // Do nothing -- we're waiting for WSOnCloseForReset to be invoked.
         break;
 
-    case TRANSPORT_STATE_NETWORK_CHECKING:
+    case TransportState::TRANSPORT_STATE_NETWORK_CHECKING:
         DnsCacheDoWork(request->dnsCache, request);
         return;
 
-    case TRANSPORT_STATE_NETWORK_CHECK:
+    case TransportState::TRANSPORT_STATE_NETWORK_CHECK:
         if (NULL == request->dnsCache)
         {
             // skip dns checks
-            request->state = TRANSPORT_STATE_OPENING;
+            request->state = TransportState::TRANSPORT_STATE_OPENING;
         }
         else
         {
-            request->state = TRANSPORT_STATE_NETWORK_CHECKING;
+            request->state = TransportState::TRANSPORT_STATE_NETWORK_CHECKING;
             const char* host = request->ws.config.hostname;
             LogInfo("Start network check %s", host);
             MetricsTransportStateStart(MetricMessageType::METRIC_TRANSPORT_STATE_DNS);
             if (DnsCacheGetAddr(request->dnsCache, host, DnsComplete, request))
             {
                 LogError("DnsCacheGetAddr failed");
-                request->state = TRANSPORT_STATE_OPENING;
+                request->state = TransportState::TRANSPORT_STATE_OPENING;
             }
         }
         if (TransportOpen(request))
         {
-            request->state = TRANSPORT_STATE_CLOSED;
+            request->state = TransportState::TRANSPORT_STATE_CLOSED;
             LogError("Failed to open transport");
             return;
         }
         return;
 
-    case TRANSPORT_STATE_OPENING:
+    case TransportState::TRANSPORT_STATE_OPENING:
         // wait for the "On open" callback
         break;
 
-    case TRANSPORT_STATE_CONNECTED:
-        while (request->isOpen &&  NULL != (list_item = singlylinkedlist_get_head_item(request->queue)))
+    case TransportState::TRANSPORT_STATE_CONNECTED:
+        while (request->isOpen && !request->queue.empty())
         {
-            packet = (TransportPacket*)singlylinkedlist_item_get_value(list_item);
+            auto packet = std::move(request->queue.front());
+            request->queue.pop();
+
             if (packet->msgtype != METRIC_MESSAGE_TYPE_INVALID)
             {
                 MetricsTransportStateStart(packet->msgtype);
             }
-            int res = ProcessPacket(request, packet);
+            int res = ProcessPacket(request, std::move(packet));
             if (res != 0)
             {
                 TransportErrorInfo errorInfo;
@@ -1458,7 +1169,6 @@ void TransportDoWork(TransportHandle transportHandle)
                 errorInfo.errorString = NULL;
                 OnTransportError(request, &errorInfo);
             }
-            singlylinkedlist_remove(request->queue, list_item);
         }
 
         break;
@@ -1467,7 +1177,7 @@ void TransportDoWork(TransportHandle transportHandle)
     uws_client_dowork(request->ws.WSHandle);
 }
 
-int TransportSetCallbacks(TransportHandle transportHandle,
+int usp::TransportSetCallbacks(TransportHandle transportHandle,
     TransportErrorCallback errorCallback,
     TransportResponseCallback recvCallback,
     TransportOpenedCallback openedCallback,
@@ -1499,8 +1209,9 @@ int TransportSetTokenStore(TransportHandle transportHandle, TokenStore tokenStor
     return 0;
 }
 
-void TransportSetDnsCache(TransportHandle transportHandle, DnsCacheHandle dnsCache)
+void usp::TransportSetDnsCache(TransportHandle transportHandle, DnsCacheHandle dnsCache)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     request->dnsCache = dnsCache;
 }
+
