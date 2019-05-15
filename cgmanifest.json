@@ -1,0 +1,172 @@
+{
+  "Registrations": [
+
+    // Location: external/android-openssl; ci/build-android-openssl-curl.yml
+    // Version: 1.1.1b
+    // Tag: OpenSSL_1_1_1b
+    // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=1581773&_a=progress
+    // IP Scan: https://ossmsft.visualstudio.com/DefaultCollection/Reviews/_workitems/edit/24435
+    // Usage: distributed (Android)
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "commitHash": "50eaac9f3337667259de725451f201e784599687",
+          "repositoryUrl": "https://github.com/openssl/openssl.git"
+        }
+      }
+    },
+
+    // Location: external/azure-c-shared-utility; .gitmodules
+    // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=683290&_a=progress
+    // IP Scan: https://ossmsft.visualstudio.com/DefaultCollection/Reviews/_workitems/edit/19247
+    // Usage: distributed
+    // Note: this is a fork of https://github.com/Azure/azure-c-shared-utility.git;
+    //       the commit below was scanned; since then additional changes
+    //       changes authored by the team have been added on top of this.
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "commitHash": "4c1a492088fdd4a20b012462f78c0dd653003ee2",
+          "repositoryUrl": "https://github.com/fmegen/azure-c-shared-utility.git"
+        }
+      }
+    },
+
+    // Location: external/Catch2
+    // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=683285&_a=progress
+    // Tag: v2.2.2
+    // Usage: internal
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "commitHash": "d2d8455b571b6c66c4b7003500a77f9a93ecdc28",
+          "repositoryUrl": "https://github.com/catchorg/Catch2.git"
+        }
+      }
+    },
+
+    // Location: external/gstreamer-android
+    // Usage: internal, with header exemption (GStreamer includes have been
+    //        scanned by CELA to ensure usage is okay)
+    // Related mail thread subjects: CAI-gstreamer mix Apr2019 (CUSTOM), CAI-gstreamer-1.14.4 (custom)
+    // Version: 1.14.4
+    {
+      "component": {
+        "type": "other",
+        "other": {
+          "name": "GStreamer",
+          "version": "1.14.4",
+          "downloadUrl": "https://gstreamer.freedesktop.org/data/pkg/android/1.14.4/gstreamer-1.0-android-universal-1.14.4.tar.bz2"
+        }
+      }
+    },
+
+    // Location: external/ios-cmake, .gitmodules
+    // Usage: internal
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "commitHash": "d9afc8df4ec98682edeaf886bc8ad16a14b99806",
+          "repositoryUrl": "https://github.com/leetal/ios-cmake.git"
+        }
+      }
+    },
+
+    // Location: external/json, .gitmodules
+    // Tag: v3.1.2
+    // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=683287&_a=progress
+    // IP Scan: https://ossmsft.visualstudio.com/DefaultCollection/Reviews/_workitems/edit/17417
+    // Usage: distributed
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "commitHash": "d2dd27dc3b8472dbaa7d66f83619b3ebcd9185fe",
+          "repositoryUrl": "https://github.com/nlohmann/json.git"
+        }
+      }
+    },
+
+    // Note: external/junit/junit-4.12.jar and external/junit/hamcrest-core-1.3.jar
+    //       are automatically registered via tests/functional/java/tests/pom.xml.
+    //       These are used internally for testing.
+
+    // Location: external/uwp_ssl; ci/build-uwp-openssl.yml
+    // Version: 1.0.2r
+    // Tag: OpenSSL_1_0_2_WinRT-stable
+    // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=1595519&_a=progress
+    // IP Scan: https://ossmsft.visualstudio.com/DefaultCollection/Reviews/_workitems/edit/25342
+    // Usage: distributed (Android)
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "commitHash": "92f02f5a311d536b2f7894e46d3b5039ad3568c8",
+          "repositoryUrl": "https://github.com/Microsoft/openssl.git"
+        }
+      }
+    },
+
+    // Location: source/bindings/java/com/microsoft/cognitiveservices/speech/NativeLibraryLoader.java
+    // Note: This originated from CNTK and was since modified:
+    //       https://github.com/microsoft/CNTK/blob/d1925a19d8ddc25202a4a88fb7b2979e445bf6b8/bindings/java/Swig/CNTKNativeUtils.java
+    // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=635403&_a=progress
+    // IP Scan: https://ossmsft.visualstudio.com/DefaultCollection/Reviews/_workitems/edit/19817
+    // Usage: distributed in Java bindings
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "commitHash": "d1925a19d8ddc25202a4a88fb7b2979e445bf6b8",
+          "repositoryUrl": "https://github.com/Microsoft/CNTK.git"
+        }
+      }
+    },
+
+    // Location:
+    //   source/core/audio/android/audio_common.cpp
+    //   source/core/audio/android/audio_common.h
+    //   source/core/audio/android/audio_recorder.cpp
+    //   source/core/audio/android/audio_recorder.h
+    //   source/core/audio/android/debug_utils.cpp
+    //   source/core/audio/android/debug_utils.h
+    // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=683294&_a=progress
+    // IP Scan: scan exemption for AOSP
+    // Usage: distributed (Android)
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "commitHash": "33789f3a04bf6dea13a50506aff2d96fd0bf396f",
+          "repositoryUrl": "https://github.com/googlesamples/android-ndk.git"
+
+        }
+      }
+    },
+
+    // Location:
+    //   public_samples/quickstart/java-android/gradle/wrapper/gradle-wrapper.jar
+    //   public_samples/samples/java/android/sdkdemo/gradle/wrapper/gradle-wrapper.jar
+    // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=683295&_a=progress
+    // IP Scan: https://ossmsft.visualstudio.com/DefaultCollection/Reviews/_workitems?_a=edit&id=19279
+    // Usage: the Gradle _Wrapper_ (and just that) is being distributed as part
+    //        of the samples' repository, and for that usage an IP scan was done, cf.
+    //        https://ossmsft.visualstudio.com/DefaultCollection/Reviews/_workitems/edit/19279
+    //        From a point of view of the Carbon repository, the usage is internal (for testing).
+    {
+      "component": {
+        "type": "other",
+        "other": {
+          "name": "Gradle",
+          "version": "4.4",
+          "downloadUrl": "https://services.gradle.org/distributions/gradle-4.4-all.zip"
+        }
+      }
+    }
+
+  ]
+}
