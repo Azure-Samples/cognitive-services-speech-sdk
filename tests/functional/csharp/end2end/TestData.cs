@@ -297,7 +297,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string[] PossibleUtterances =
                 {
                     "¿Cómo es el clima?",
-                    "¿Cómo es el tiempo?"
+                    "¿Cómo es el tiempo?",
+                    "¿cómo está el tiempo?"
                 };
             }
         }
