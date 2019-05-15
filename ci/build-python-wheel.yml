@@ -3,6 +3,7 @@ parameters:
   wheelParams: ""
   pythonIncludePathSuffix: ""
   postbuildsteps: []
+  continueOnTestFailure: false
 steps:
 - task: UsePythonVersion@0
   inputs:
@@ -41,6 +42,7 @@ steps:
   parameters:
     testsToRun: python_unittests
     runTestArgs: ""
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
 - bash: |
     mkdir -p "$(OutputDirectory)" &&
     cp -v build/*.whl "$(OutputDirectory)"

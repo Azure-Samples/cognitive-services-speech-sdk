@@ -3,6 +3,7 @@ parameters:
   dockerImage: ""
   testsToRun: ""
   runTestArgs: "-s python_unittests -s objectivec_unittests"
+  continueOnTestFailure: false
 steps:
 # If we failed until here, don't try to run tests:
 - bash: . ci/functions.sh && vsts_setvar SPEECHSDK_RUN_TESTS false
@@ -32,6 +33,7 @@ steps:
   env:
     dockerImage: ${{ parameters.dockerImage }}
   condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+  continueOnError: ${{ parameters.continueOnTestFailure }}
   timeoutInMinutes: 60
   displayName: Run tests
 # Note: the following step is only for the convenience of extraTests, of which we currently do not have any.

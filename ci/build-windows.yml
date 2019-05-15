@@ -4,6 +4,7 @@ parameters:
   name: Windows
   kws: true
   suffix: ''
+  continueOnTestFailure: false
 jobs:
 - job: ${{ parameters.name }}Build
   dependsOn: Pre
@@ -88,6 +89,7 @@ jobs:
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - template: test-during-build.yml
     parameters:
+      continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
       extraTests:
         - bash: |
             ./ci/run-tests.sh \
@@ -106,6 +108,7 @@ jobs:
               -- csharp_unit_tests
           displayName: Run LongRunning tests
           condition: and(eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), eq(variables['SPEECHSDK_BUILD_TYPE'], 'int'), eq(variables['BuildPlatform'], 'x64'), eq(variables['BuildConfiguration'], 'Release'))
+          continueOnError: ${{ parameters.continueOnTestFailure }}
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Create drop files
     inputs:

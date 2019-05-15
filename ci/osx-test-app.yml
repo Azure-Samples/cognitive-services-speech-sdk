@@ -1,3 +1,6 @@
+parameters:
+  continueOnTestFailure: false
+
 jobs:
 - job: OsxBuildSampleApp
   dependsOn: [Pre, OsxBuild]
@@ -58,6 +61,7 @@ jobs:
         ENABLE_HARDENED_RUNTIME=YES \
         INJECT_BASE_ENTITLEMENTS=NO
     displayName: Build the sample app
+    continueOnError: ${{ parameters.continueOnTestFailure }}
   - bash: |
       set -u -x -e -o pipefail
       appname=SpeechSDKSample

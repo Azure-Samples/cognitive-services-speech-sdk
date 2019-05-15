@@ -2,6 +2,10 @@
 #   matrix of this job based on build types. Those expressions replicate
 #   existing code in set-variables.sh; both instances should be kept in sync.
 
+parameters:
+  continueOnTestFailure: false
+  buildType: dev
+
 jobs:
 - job: LinuxDockerBuild
   dependsOn: Pre
@@ -28,7 +32,7 @@ jobs:
         SPEECHSDK_BUILD_CONFIGURATION: Debug
         DOCKER_BASE: dev_ubuntu1604_arm32
       # More configurations in 'int' and 'prod' builds (cf. set-variables.sh)
-      ${{ if and(eq(variables['System.CollectionId'], '19422243-19b9-4d85-9ca6-bc961861d287'), eq(variables['System.DefinitionId'], '4833'), or(and(or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')), eq(variables['Build.SourceBranch'], 'refs/heads/master')), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))) }}:
+      ${{ if in(parameters.buildType, 'int', 'prod') }}:
         Linux arm32 Release:
           SPEECHSDK_TARGET_PLATFORM: Linux-arm32
           SPEECHSDK_BUILD_CONFIGURATION: Release
@@ -99,4 +103,5 @@ jobs:
     condition: and(succeeded(), eq(variables['Publish'], 'true'))
   - template: test-during-build.yml
     parameters:
+      continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
       dockerImage: $(DOCKER_IMAGE)

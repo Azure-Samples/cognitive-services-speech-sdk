@@ -1,3 +1,7 @@
+parameters:
+  continueOnTestFailure: false
+  buildType: dev
+
 jobs:
 - job: LinuxPythonBuild
   dependsOn: Pre
@@ -19,7 +23,7 @@ jobs:
       # Python 3.5 and 3.6 we need for end-to-end test on Ubuntu 16.04 and 18.04, respectively.
       # Python 3.6 is also used for docs generation (BuildPythonDocs job).
       # 'int' and 'prod' builds have Python 3.7 in addition:
-      ${{ if and(eq(variables['System.CollectionId'], '19422243-19b9-4d85-9ca6-bc961861d287'), eq(variables['System.DefinitionId'], '4833'), or(and(or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')), eq(variables['Build.SourceBranch'], 'refs/heads/master')), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))) }}:
+      ${{ if in(parameters.buildType, 'int', 'prod') }}:
         Python3.7:
           PythonVersion: 3.7
           pythonIncludePathSuffix: python3.7m
@@ -50,6 +54,7 @@ jobs:
       os: Linux
   - template: build-python-wheel.yml
     parameters:
+      continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
       pythonIncludePathSuffix: $(PythonIncludePathSuffix)
       buildParams: -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
       wheelParams: "--plat-name=manylinux1_x86_64 --python-tag=$(WheelPythonTag)"

@@ -1,0 +1,2438 @@
+#
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+#
+parameters:
+  continueOnTestFailure: false
+  buildType: dev
+
+jobs:
+
+- job: Pre
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 30
+  variables:
+    CG_RAN: false
+  steps:
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+    name: var
+  - bash: |
+      . ci/functions.sh
+      vsts_updatebuildnumber $(SPEECHSDK_SEMVER2NOMETA)
+      vsts_addbuildtag $(SPEECHSDK_BUILD_TYPE)
+    displayName: Set build number and tag
+  - bash: |
+      ./ci/check-git-head.sh &&
+      perl ci/check-docfx-codetags.pl public_samples
+    displayName: Repository checks
+  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+    displayName: 'Component Detection'
+    condition: and(succeeded(), eq(variables['SPEECHSDK_BUILD_TYPE'], 'int'))
+
+- job: WindowsSdlBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsSdlBuild '))
+  pool:
+    name: Hosted VS2017
+  timeoutInMinutes: 120
+  variables:
+    BuildPlatform: x64
+    BuildConfiguration: Release
+    SPEECHSDK_BUILD_PHASES: $[ dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'] ]
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set Windows target platform (Windows-x64)
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        if [[ "$(BuildPlatform)" == Win32 ]]; then
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x86"
+          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
+        else
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x64"
+          vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15 Win64"
+        fi
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - bash: ./ci/install-build-dependencies.sh
+    displayName: Install build dependencies
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
+    inputs:
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - task: CMake@1
+    displayName: Generate solution
+    inputs:
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
+  - task: VSBuild@1
+    displayName: Build solution
+    inputs:
+      solution: 'build/carbon.sln'
+      platform: '$(BuildPlatform)'
+      configuration: '$(BuildConfiguration)'
+      clean: true
+      maximumCpuCount: true
+      # Needed for SDL:
+      createLogFile: true
+  # Checks BEGIN
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
+    displayName: 'Run Roslyn Analyzers'
+    # Note: source/bindings/csharp/CMakeLists.txt (Microsoft.CognitiveServices.Speech.csharp.csproj.template)
+    #       does _not_ pick up on Roslyn analyzers options set here; for now
+    #       these need to be manually kept in sync.
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@3
+    displayName: 'BinSkim (can pass only with Spectre mitigation)'
+    inputs:
+      arguments: 'analyze build/bin/$(BuildConfiguration)/*.dll --recurse'
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-antimalware.AntiMalware@3
+    displayName: 'AntiMalware'
+    inputs:
+      FileDirPath: '.'
+      EnableServices: true
+      SignatureFreshness: ThreeDays
+      TreatStaleSignatureAs: Warning
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-apiscan.APIScan@1
+    displayName: 'APIScan'
+    inputs:
+      softwareName: 'Cognitive Services Speech SDK'
+      softwareVersionNum: 1.0
+      isLargeApp: false
+    enabled: false
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+    displayName: 'CredScan (source-scan, dir: all)'
+    inputs:
+      suppressionsFile: 'ci/sdl/LocalSuppression.json'
+      debugMode: false
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
+    displayName: 'PoliCheck (source-scan, dir: source)'
+    inputs:
+      targetType: F
+      targetArgument: 'source'
+      result: PoliCheckSource.xml
+      optionsFC: 1
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
+    displayName: 'PoliCheck (source-scan, dir: public samples)'
+    inputs:
+      targetType: F
+      targetArgument: 'public_samples'
+      termTypeT: 0001aCustom
+      result: PoliCheckSamples.xml
+      SOMEnabled: true
+      optionsFC: 1
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-fxcop.FxCop@2
+    displayName: 'Run FxCop'
+    inputs:
+      inputType: Basic
+      targets: 'build/bin/$(BuildConfiguration)/net461'
+      disableRules: 'Microsoft.Globalization#CA2101'
+      verbose: true
+  - bash: rm -rf build/source/bindings/java/javadoc
+    displayName: Remove JavaDoc folder
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-moderncop.ModernCop@2
+    displayName: 'ModernCop (managed JS code)'
+    inputs:
+      InputType: Basic
+      OutputFormat: red
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-autoapplicability.AutoApplicability@1
+    displayName: 'Run AutoApplicability'
+    inputs:
+      ApplyRules: All
+      ExternalRelease: true
+  # Currently we do not have TypeScript source in this repository. Keeping the task here with default options.
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-tslint.TSLint@1
+    displayName: 'Run TSLint'
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@2
+    displayName: 'Run the PREfast SDL Native Rules for MSBuild'
+  # Checks END
+  # Publish artifact and fail the build if necessary
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
+    displayName: 'Publish Security Analysis Logs'
+    inputs:
+      AllTools: true
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+    displayName: 'SDL: Post Analysis (w/o TsaUpload)'
+    inputs:
+      AllTools: true
+    continueOnError: false
+    condition: not(contains(variables['SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+    displayName: 'SDL: Post Analysis (w/ TsaUpload)'
+    inputs:
+      AllTools: true
+    continueOnError: true
+    condition: contains(variables['SPEECHSDK_BUILD_PHASES'], ' TsaUpload ')
+
+- job: TsaUpload
+  dependsOn: [Pre, WindowsSdlBuild, WindowsSDLFortifyJava]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
+  pool:
+    name: Carbon
+  timeoutInMinutes: 30
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading CodeAnalysisLogs artifacts'
+    inputs:
+      artifactName: CodeAnalysisLogs
+      downloadPath: $(System.ArtifactsDirectory)/In
+  - powershell: |
+      $logDir = "$(Agent.BuildDirectory)/_sdt/logs"
+      if (Test-Path $logDir) {
+        Remove-Item -Recurse -Force $logDir
+      }
+      if (-not (Test-Path (Split-Path $logDir))) {
+        New-Item -ItemType Directory (Split-Path $logDir)
+      }
+      Move-Item $(System.ArtifactsDirectory)/In/CodeAnalysisLogs $logDir
+    displayName: Move logs to target location
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download FortifySDL logs from artifacts'
+    inputs:
+      artifactName: sca_artifacts
+      downloadPath: '$(System.ArtifactsDirectory)/sca_artifacts'
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
+    displayName: 'TSA upload to Codebase: Carbon_master Stamp: Bing'
+    inputs:
+      tsaStamp: Bing
+      codeBaseName: 'Carbon_master'
+    # TODO or fail on error?
+    continueOnError: true
+    condition: succeededOrFailed()
+
+# This phase is responsible for running CompEval test (Windows C# only)
+# For now, it is triggered by a separate build definition in AzureDevOps: "CompEval Test"
+- job: CompEvalTest
+  dependsOn: [Pre, WindowsBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CompEvalTest '))
+  pool:
+    name: Hosted VS2017
+  timeoutInMinutes: 400
+  steps:
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Windows artifacts'
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)\In
+  - powershell: |
+      $tools = Start-Process -FilePath "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" -Wait -PassThru -NoNewWindow -ArgumentList /Source:https://csspeechtestdata.blob.core.windows.net/tools/NormAndAlign, /Dest:CompEvalRun\, /SourceKey:$(TestDataStorageKey), /S, /Y, /XO
+      $data = Start-Process -FilePath "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" -Wait -PassThru -NoNewWindow -ArgumentList /Source:https://csspeechtestdata.blob.core.windows.net/datasets/CompEval, /Dest:CompEvalRun\, /SourceKey:$(TestDataStorageKey), /S, /Y, /XO
+      if (($tools.ExitCode -ne 0) -or ($data.ExitCode -ne 0)) {
+          throw "an error occurred"
+      }
+    displayName: 'Downloading CompEval data'
+  - powershell: |
+      cd CompEvalRun\CompEval\en-US
+      Remove-Item -Verbose c*.wav,d*.wav,e*.wav,f*.wav
+    displayName: Delete 1/4 of the files
+  - bash: |
+      # --build-dir is used as a drop directory here
+      ./ci/run-tests.sh \
+        --test-configuration ci/test-config-compeval.json \
+        --build-dir "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/In \
+        --platform Windows-x64-Release \
+        --timeout 400m \
+        -D compeval-key="$(NorthEuropeKeySkyman)" \
+        -D input_dir=CompEvalRun \
+        -D output_dir=CompEvalRun -- compeval_tests
+    displayName: 'Transcription'
+
+- template: build-windows.yml
+  parameters:
+    crt: PUBLIC_VCRT
+    name: Windows
+    kws: true
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+
+- template: build-windows.yml
+  parameters:
+    crt: OS_UCRT
+    name: WindowsOS
+    kws: false
+    suffix: .os
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+
+- job: WindowsUwpBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsUwpBuild '))
+  pool:
+    name: Hosted VS2017
+  timeoutInMinutes: 30
+  strategy:
+    maxParallel: 8
+    matrix:
+      arm64_debug:
+        BuildPlatform: ARM64
+        BuildConfiguration: Debug
+      arm64_release:
+        BuildPlatform: ARM64
+        BuildConfiguration: Release
+      arm32_release:
+        BuildPlatform: ARM
+        BuildConfiguration: Release
+      arm32_debug:
+        BuildPlatform: ARM
+        BuildConfiguration: Debug
+      x64_debug:
+        BuildPlatform: x64
+        BuildConfiguration: Debug
+      x64_release:
+        BuildPlatform: x64
+        BuildConfiguration: Release
+      x86_release:
+        BuildPlatform: Win32
+        BuildConfiguration: Release
+      x86_debug:
+        BuildPlatform: Win32
+        BuildConfiguration: Debug
+  steps:
+  - bash: |
+      set -u -e -o pipefail
+      . ci/functions.sh
+      IFS=$' \t\n\r' read build_id should_be_empty < external/uwp_ssl/build_id.txt
+      # checks
+      [[ -z $should_be_empty ]]
+      printf '%d' "$build_id" > /dev/null
+      vsts_setvar SPEECHSDK_UWP_OPENSSL_BUILD_ID "$build_id"
+    displayName: Get UWP OpenSSL build ID
+  - task: DownloadBuildArtifacts@0
+    displayName: Download UWP OpenSSL build artifact
+    inputs:
+      buildType: specific
+      project: 'e71f1362-9c7d-488b-99c7-3376db8d3302' # Skyman
+      pipeline: 8520 # Yml - Carbon UWP openssl
+      buildVersionToDownload: specific
+      buildId: $(SPEECHSDK_UWP_OPENSSL_BUILD_ID)
+      artifactName: speechsdk-static-release
+  - script: |
+      move $(System.ArtifactsDirectory)\speechsdk-static-release\include external\uwp_ssl\include && ^
+      move $(System.ArtifactsDirectory)\speechsdk-static-release\lib external\uwp_ssl\lib && ^
+      dir /s/a/b external\uwp_ssl
+    displayName: Move UWP OpenSSL into appropriate place
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set Windows target platform (Windows-x86 or Windows-x64)
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        if [[ "$(BuildPlatform)" == Win32 ]]; then
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "WindowsUwp-x86"
+        elif [[ "$(BuildPlatform)" == ARM ]]; then
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "WindowsUwp-arm32"
+        elif [[ "$(BuildPlatform)" == ARM64 ]]; then
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "WindowsUwp-arm64"
+        else
+          vsts_setvar SPEECHSDK_TARGET_PLATFORM "WindowsUwp-x64"
+        fi
+        vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+  - bash: . ci/functions.sh && ./ci/set-variables.sh
+  - bash: ./ci/install-build-dependencies.sh
+    displayName: Install build dependencies
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
+    inputs:
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - task: CMake@1
+    displayName: Generate solution
+    inputs:
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -A "$(BuildPlatform)" -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) ..'
+  - task: VSBuild@1
+    displayName: Build solution
+    inputs:
+      solution: 'build/carbon.sln'
+      platform: '$(BuildPlatform)'
+      configuration: '$(BuildConfiguration)'
+      clean: true
+      maximumCpuCount: true
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign Windows C++ and C# binaries'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: 'build/bin/$(BuildConfiguration)'
+      Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_DLL)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Create drop files
+    inputs:
+      type: FilePath
+      scriptPath: './ci/drop/bindrop.sh'
+      args: '$(BuildPlatform) $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration) UWP'
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: WindowsUwp
+      publishLocation: Container
+
+# Note: for now this packages up only {Linux,Windows}-x64-Release
+- job: JavaJrePackage
+  dependsOn: [Pre, LinuxBuild, WindowsBuild, OsxBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JavaJrePackage '))
+  pool:
+    name: Hosted VS2017
+  timeoutInMinutes: 30
+  steps:
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      PublishArtifactName=JavaJrePackage
+      ArtifactOutWindows="$(Build.ArtifactStagingDirectory)/Out/$PublishArtifactName"
+      ArtifactOut="$(cygpath -au "$ArtifactOutWindows")"
+      ArtifactBasename="$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA)"
+      MavenRoot="$ArtifactOut/maven"
+      MavenRootWindows="$ArtifactOutWindows/maven"
+      relativeMavenPackageDir="${SPEECHSDK_MAVEN_GROUP_ID//\./\/}/$SPEECHSDK_MAVEN_ARTIFACT_ID/$SPEECHSDK_SEMVER2NOMETA"
+      MavenPackageDir="$MavenRoot/$relativeMavenPackageDir"
+      MavenPackageDirWindows="$MavenRootWindows/$relativeMavenPackageDir"
+      vsts_setvars_by_ref PublishArtifactName Artifact{Out{,Windows},Basename} Maven{Root,PackageDir}{,Windows}
+    displayName: Set package variables
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Windows artifacts'
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)/In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Linux artifacts'
+    inputs:
+      artifactName: Linux
+      downloadPath: $(System.ArtifactsDirectory)/In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading OSX artifacts'
+    inputs:
+      artifactName: macOS
+      downloadPath: $(System.ArtifactsDirectory)/In
+  - bash: |
+      ./ci/jre/build-jar.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/In
+  # Note: doc says "The file extension should match the selected archive type." - so we are renaming afterwards
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: './ci/jre/jar'
+      includeRootFolder: false
+      archiveType: zip
+      archiveFile: '$(ArtifactOutWindows)/$(ArtifactBasename).zip'
+    displayName: 'Create .zip'
+  - bash: |
+      set -x -e -o pipefail
+      mkdir -p "$(MavenPackageDir)"
+      mv "$(ArtifactOut)/$(ArtifactBasename).zip" "$(MavenPackageDir)/$(ArtifactBasename).jar"
+    displayName: 'Rename .zip -> .jar, place'
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign *.jar'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: '$(MavenRootWindows)'
+      Pattern: '*.jar'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_JAVA)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      set -e -x -o pipefail
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      ./ci/run-maven.sh public_samples "$(MavenRoot)"
+    displayName: Build Maven-based samples
+  - bash: |
+       set -x -e
+       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+         -D luis-key=$(luis-westus-s0-201809-key1) \
+         -D speech-key=$(NorthEuropeKeySkyman) \
+         -D virtualassistant-region=$(BotRegion) \
+         -D virtualassistant-subscription=$(BotSubscriptionKey) \
+         -D virtualassistant-testbot=$(BotFunctionalTest) \
+         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+         -D long-running=false)
+       . ci/functions.sh
+       java \
+        -cp $(printf "%s;" \
+           "$(MavenPackageDirWindows)/$(ArtifactBasename).jar" \
+           "$(Build.ArtifactStagingDirectory)/In/Windows/x64/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" \
+           "external/junit/junit-4.12.jar" \
+           "external/junit/hamcrest-core-1.3.jar") \
+         -DSpeechSubscriptionKey="$SPEECHSDK_SPEECH_KEY" \
+         -DSpeechRegion="$SPEECHSDK_SPEECH_REGION" \
+         -DLuisSubscriptionKey=$(luis-westus-s0-201809-key1) \
+         -DLuisRegion="$SPEECHSDK_LUIS_REGION" \
+         -DAudioInputDirectory=tests/input/audio \
+         -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
+         -DKeyword=Computer \
+         -DKeywordModel=/data/keyword/kws.table \
+         -DTestOutputFilename=test-java-unittests-package.xml \
+         -DSpeechSubscriptionKeyForVirtualAssistant="$SPEECHSDK_BOT_SUBSCRIPTION" \
+         -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
+         -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
+         -DConversationTranscriptionEndpoint="$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
+         -DConversationTranscriptionPPEKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
+         -DConversationTranscriptionPRODKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+         -DSpeechRegionForConversationTranscription="$SPEECHSDK_PRINCETON_REGION" \
+         tests.runner.Runner \
+         tests.AllTests
+    displayName: Run unit test
+    continueOnError: ${{ parameters.continueOnTestFailure }}
+  # TODO more - e.g. POM?
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/test-*.xml'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Out/$(PublishArtifactName)'
+      ArtifactName: $(PublishArtifactName)
+      publishLocation: Container
+    displayName: 'Publish .jar'
+    condition: succeededOrFailed()
+
+- template: java-jre-package-test.yml
+  parameters:
+    name: JavaJrePackageLinuxTest
+    poolName: Hosted Ubuntu 1604
+    extraSteps:
+      - bash: |
+          set -u -e -x -o pipefail
+          . ci/functions.sh
+          perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+          java -version
+          patchSamplesFromTestConfig public_samples/quickstart/java-jre \
+            ci/test-config.json \
+            -D luis-key=$(luis-westus-s0-201809-key1) \
+            -D speech-key=$(NorthEuropeKeySkyman) \
+            -D virtualassistant-region=$(BotRegion) \
+            -D virtualassistant-subscription=$(BotSubscriptionKey) \
+            -D virtualassistant-testbot=$(BotFunctionalTest) \
+            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+            -D long-running=false
+          patchSamplesFromTestConfig public_samples/samples/java/jre/console \
+            ci/test-config.json \
+            -D luis-key=$(luis-westus-s0-201809-key1) \
+            -D speech-key=$(NorthEuropeKeySkyman) \
+            -D virtualassistant-region=$(BotRegion) \
+            -D virtualassistant-subscription=$(BotSubscriptionKey) \
+            -D virtualassistant-testbot=$(BotFunctionalTest) \
+            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+            -D long-running=false
+          ./ci/run-maven.sh public_samples "$(MavenRoot)"
+        displayName: Patch and build samples
+      - template: get-docker-image.yml
+        parameters:
+          imageBase: oobejre_ubuntu1604_x64 oobejre_ubuntu1804_x64 oobejre_debian9_x64
+          outvarImage: DOCKER_IMAGES
+      - bash: |
+          set -u -e -x -o pipefail
+          . ci/functions.sh
+          cp "$(PathToJar)" $(Build.Repository.LocalPath) || exitWithFailure "cp failed"
+          #
+          ERRORS=0
+          for i in $(DOCKER_IMAGES); do
+            ./ci/samples/test-quickstart-java-jre.sh "$i" "$(JarName)" ||
+              { ((++ERRORS)); vsts_logissue error "Running quickstart/java-jre for image $i failed."; }
+            #
+            # Skip other samples on non-Ubuntu 16.04 in dev builds
+            [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
+              ./ci/samples/test-samples-java-jre-console.sh "$i" "$(JarName)" ||
+                { ((++ERRORS)); vsts_logissue error "Running samples/java/jre/console for image $i failed."; }
+          done
+          #
+          [[ $ERRORS == 0 ]] || exitWithError "Not all samples ran successfully."
+        displayName: Test samples
+
+- template: java-jre-package-test.yml
+  parameters:
+    name: JavaJrePackageOsxUnitTest
+    poolName: Hosted macOS Preview
+    extraSteps:
+      - task: DownloadBuildArtifacts@0
+        displayName: 'Downloading macOS Java test'
+        inputs:
+          artifactName: macOS
+          downloadPath: $(Build.ArtifactStagingDirectory)/In
+          Pattern: '*.jar'
+      - bash: |
+          set -x -e
+          eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+            -D luis-key=$(luis-westus-s0-201809-key1) \
+            -D speech-key=$(NorthEuropeKeySkyman) \
+            -D virtualassistant-region=$(BotRegion) \
+            -D virtualassistant-subscription=$(BotSubscriptionKey) \
+            -D virtualassistant-testbot=$(BotFunctionalTest) \
+            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+            -D long-running=false)
+          . ci/functions.sh
+          testJarFile="$(Build.ArtifactStagingDirectory)/In/macOS/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar"
+          [[ -f ${testJarFile} ]]
+          [[ -f $(PathToJar) ]]
+          java \
+            -cp $(printf "%s:" \
+              "$(PathToJar)" \
+              "${testJarFile}" \
+              "external/junit/junit-4.12.jar" \
+              "external/junit/hamcrest-core-1.3.jar") \
+            -DSpeechSubscriptionKey="$SPEECHSDK_SPEECH_KEY" \
+            -DSpeechRegion="$SPEECHSDK_SPEECH_REGION" \
+            -DLuisSubscriptionKey=$(luis-westus-s0-201809-key1) \
+            -DLuisRegion="$SPEECHSDK_LUIS_REGION" \
+            -DAudioInputDirectory=tests/input/audio \
+            -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
+            -DKeyword=Computer \
+            -DKeywordModel=/data/keyword/kws.table \
+            -DTestOutputFilename=test-java-unittests-package.xml \
+            -DSpeechSubscriptionKeyForVirtualAssistant="$SPEECHSDK_BOT_SUBSCRIPTION" \
+            -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
+            -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
+            -DConversationTranscriptionEndpoint="$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
+            -DConversationTranscriptionPPEKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
+            -DConversationTranscriptionPRODKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+            -DSpeechRegionForConversationTranscription="$SPEECHSDK_PRINCETON_REGION" \
+            tests.runner.Runner \
+            tests.AllTests
+        displayName: Run unit test
+        continueOnError: ${{ parameters.continueOnTestFailure }}
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFiles: '**/test-*.xml'
+        condition: succeededOrFailed()
+        displayName: Publish test results
+
+- job: NuGet
+  # Note: NuGet currently does not depend on LinuxDockerBuild (only needs x64 binaries)
+  variables:
+    HAS_OS_BUILD: $[contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild ')]
+  dependsOn: [Pre, LinuxBuild, WindowsBuild, WindowsOSBuild, WindowsUwpBuild, OsxBuild]
+  condition: |
+    and(
+      succeeded('Pre', 'LinuxBuild', 'WindowsBuild', 'WindowsUwpBuild', 'OsxBuild'),
+      xor(
+        succeeded('WindowsOSBuild'),
+        not(contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild '))
+      ),
+      contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGet ')
+    )
+  pool:
+    name: Hosted VS2017
+  timeoutInMinutes: 30
+  steps:
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Windows public artifacts'
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)\In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Windows OS artifacts'
+    inputs:
+      artifactName: WindowsOS
+      downloadPath: $(System.ArtifactsDirectory)\In
+    condition: and(succeeded(), eq(variables['HAS_OS_BUILD'], 'true'))
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Linux artifacts'
+    inputs:
+      artifactName: Linux
+      downloadPath: $(System.ArtifactsDirectory)\In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading WindowsUwp artifacts'
+    inputs:
+      artifactName: WindowsUwp
+      downloadPath: $(System.ArtifactsDirectory)\In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading OSX artifacts'
+    inputs:
+      artifactName: macOS
+      downloadPath: $(System.ArtifactsDirectory)\In
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
+    inputs:
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - bash: |
+      . ci/functions.sh
+      vsts_setvar ZipBasename "SpeechSDK-Samples-$(SPEECHSDK_SEMVER2NOMETA)"
+    displayName: 'Set variables'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    inputs:
+      type: FilePath
+      scriptPath: './ci/nuget/pack.sh'
+      args: './ci/nuget/carbon.nuspec $(Build.Repository.LocalPath) $(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\Windows'
+    displayName: Create public NuGet
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    inputs:
+      type: FilePath
+      scriptPath: './ci/nuget/pack.sh'
+      args: './ci/nuget/carbon_os.nuspec $(Build.Repository.LocalPath) $(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\WindowsOS true'
+    displayName: Create OS NuGet
+    condition: and(succeeded(), eq(variables['HAS_OS_BUILD'], 'true'))
+  # We could / should generate this elsewhere? Doesn't only apply to Windows + NuGet anymore...
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    inputs:
+      type: InlineScript
+      script: |
+         set -e -x -o pipefail
+         # Drop is not needed anymore
+         rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In")"
+         git clean -fdx public_samples
+         perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+         cp --verbose --recursive --preserve public_samples "$(ZipBasename)"
+         NOW=$(date -Iseconds)
+         find "$(ZipBasename)" | xargs touch --date=$NOW
+    displayName: 'Create directory with patched samples'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: $(ZipBasename)
+      includeRootFolder: true
+      archiveType: zip
+      archiveFile: $(Build.ArtifactStagingDirectory)/Windows/$(ZipBasename).zip
+    displayName: 'Create .zip'
+  - bash: |
+      ./ci/nuget/restore-from-local.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)/Windows")" public_samples
+    displayName: 'Test - restore packages'
+  # Note: for now building any platform. In the future, should build all available.
+  - task: VSBuild@1
+    inputs:
+      solution: 'public_samples/**/*.sln'
+      maximumCpuCount: true
+    displayName: 'Test - build solutions'
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: '$(Build.ArtifactStagingDirectory)/Windows'
+      Pattern: '*.nupkg'
+      signConfigType: inlineSignParams
+      inlineOperation: |
+        [
+          {
+            "keyCode": "CP-401405",
+            "operationSetCode": "NuGetSign",
+            "parameters": [ ],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          },
+          {
+            "keyCode": "CP-401405",
+            "operationSetCode": "NuGetVerify",
+            "parameters": [ ],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          }
+        ]
+    condition: eq(variables['SPEECHSDK_SIGN'], 'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    enabled: false
+    inputs:
+      type: InlineScript
+      script: |
+         . ci/functions.sh
+         set -e -o pipefail
+         SHA256_SUM="$(sha256sum "$(cygpath -au "$(Build.ArtifactStagingDirectory)/$(ZipBasename).zip")" | cut -f1 -d' ')"
+         # N.B. two spaces in the next line intentional
+         echo "$SHA256_SUM  $(ZipBasename).zip"
+         vsts_setvar SAMPLES_SHA256SUM "$SHA256_SUM"
+         # checksum is not yet used...
+    displayName: 'Compute SHA256 for .zip'
+  - task: NuGetCommand@2
+    displayName: NuGet push to VSTS feed
+    inputs:
+      command: push
+      publishVstsFeed: $(SPEECHSDK_VSTS_FEED)
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      includeSymbols: true
+    condition: eq(variables['SPEECHSDK_NUGET_VSTS_PUSH'],'true')
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Windows'
+      ArtifactName: Windows
+      publishLocation: Container
+    condition: succeededOrFailed()
+    displayName: 'Publish .zip and .nupkg'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/WindowsOS'
+      ArtifactName: WindowsOS
+      publishLocation: Container
+    condition: and(succeededOrFailed(), eq(variables['HAS_OS_BUILD'], 'true'))
+    displayName: 'Publish OS .nupkg'
+
+- job: WackTest
+  dependsOn: [Pre, NuGet]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WackTest '))
+  pool:
+    name: Hosted VS2017
+  timeoutInMinutes: 30
+  variables:
+    UwpSampleDir: public_samples/quickstart/csharp-uwp
+  steps:
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading NuGet package'
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: '**/*.nupkg'
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
+    inputs:
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - bash: |
+      set -u -e -x -o pipefail
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" "$(UwpSampleDir)"
+      ./ci/nuget/restore-from-local.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)/In/Windows")" "$(UwpSampleDir)"
+    displayName: 'Patch version and restore packages'
+  - powershell: |
+      New-Item -ErrorAction Stop -ItemType Directory "$(Build.ArtifactStagingDirectory)/WACK"
+      ./ci/Invoke-Wack.ps1 `
+        -Solution "$(UwpSampleDir)/helloworld.sln" `
+        -CertPath "$(UwpSampleDir)/helloworld/helloworld_TemporaryKey.pfx" `
+        -Path "$(Build.ArtifactStagingDirectory)/WACK/appcertreport.xml"
+    displayName: Build and run Windows AppCert Kit
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/WACK'
+      ArtifactName: WACK
+      publishLocation: Container
+    condition: succeededOrFailed()
+    displayName: 'Publish WACK report'
+
+- job: NuGetLinuxTest
+  dependsOn: [Pre, NuGet]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetLinuxTest '))
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 210
+  steps:
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Downloading Windows artifacts
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: '**/*.nupkg'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download libraries for running C# unit test'
+    inputs:
+      artifactName: Linux
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: |
+        Linux/Linux-x64/Release/private/lib/libcarbon-mock.so
+        Linux/Linux-x64/Release/private/lib/libcarbon-tts-mock.so
+        Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so
+  - template: get-docker-image.yml
+    parameters:
+      imageBase: oobedevdnc20_ubuntu1604_x64 oobedevdnc21_ubuntu1804_x64 oobedevdnc20_debian9_x64 oobedevdnc21_mcr_x64
+      outvarImage: DOCKER_IMAGES
+  - bash: |
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false)
+      # dotnet test does not allow to supply TestRunParameters from command-line?!
+      perl -pi - \
+        UnifiedSpeechSubscriptionKey "$SPEECHSDK_SPEECH_KEY" \
+        Region "$SPEECHSDK_SPEECH_REGION" \
+        DeploymentId "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS" \
+        InputDir /test/tests/input/ \
+        LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
+        LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
+        LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
+        BotRegion "$SPEECHSDK_BOT_REGION" \
+        BotSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
+        BotConnectionId "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
+        ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
+        ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
+        ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+        SpeechRegionForConversationTranscription "$SPEECHSDK_PRINCETON_REGION" \
+        tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
+        BEGIN {
+          %A = splice(@ARGV, 0, $#ARGV);
+          $keysRe = "(?:\\b" . (join "\\b|\\b", keys %A) . "\\b)";
+          $keysRe = qr/$keysRe/;
+        }
+        s/(<Parameter name="($keysRe)" value=")([^"]*)/$1.$A{$2}/ge
+      SCRIPT
+      patchSamplesFromTestConfig public_samples/quickstart/csharp-dotnetcore \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false
+      patchSamplesFromTestConfig public_samples/samples/csharp/sharedcontent/console \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false
+      mkdir localnuget
+      cp --verbose "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
+
+      # Supply mock and dependencies for running the test suite
+      mkdir private_lib
+      cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/private/lib/libcarbon-mock.so" private_lib
+      cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/private/lib/libcarbon-tts-mock.so" private_lib
+      cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" private_lib
+
+      ERRORS=0
+      for i in $(DOCKER_IMAGES); do
+        # Run the unit tests (skip non-Ubuntu 16.04 in dev builds)
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
+          docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --env LD_LIBRARY_PATH=/test/private_lib --workdir /test "$i" bash - <<SCRIPT || \
+          { ((++ERRORS)); vsts_logissue error "Running tests/functional/csharp/end2end for image $i failed."; }
+            set -e -x -o pipefail
+            if dotnet test --help | grep -q -- --blame; then
+              EXTRA_OPT=--blame
+            fi
+            cd tests/functional/csharp/end2end
+            dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
+            dotnet test \$EXTRA_OPT --verbosity detailed --filter "TestCategory!=LongTest" --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_unit_tests-$(basename "$i").trx"
+      SCRIPT
+
+        ./ci/samples/test-quickstart-csharp-dotnetcore.sh "$i" localnuget ||
+          { ((++ERRORS)); vsts_logissue error "Running quickstart/csharp-dotnetcore for image $i failed."; }
+
+        # Skip other samples on non-Ubuntu 16.04 in dev builds
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
+          ./ci/samples/test-samples-csharp-dotnetcore-console.sh "$i" localnuget ||
+            { ((++ERRORS)); vsts_logissue error "Running samples/csharp/dotnetcore/console for image $i failed."; }
+      done
+      [[ $ERRORS == 0 ]] || exitWithError "Not all samples/tests ran successfully."
+    displayName: Test and samples
+    continueOnError: ${{ parameters.continueOnTestFailure }}
+  - task: PublishTestResults@2
+    inputs:
+      testRunner: VSTest
+      testResultsFiles: '**/test-*.trx'
+    condition: succeededOrFailed()
+
+- job: NuGetOsxTest
+  dependsOn: [Pre, NuGet]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetOsxTest '))
+  pool:
+    name: Hosted macOS Preview
+  timeoutInMinutes: 30
+  steps:
+  - bash: brew config && brew install bash
+    displayName: Install modern bash on macOS
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Downloading Windows artifacts
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: '**/*.nupkg'
+  - bash: |
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false)
+      # dotnet test does not allow to supply TestRunParameters from command-line?!
+      perl -pi - \
+        UnifiedSpeechSubscriptionKey "$SPEECHSDK_SPEECH_KEY" \
+        Region "$SPEECHSDK_SPEECH_REGION" \
+        DeploymentId "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS" \
+        InputDir ${PWD}/tests/input/ \
+        LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
+        LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
+        LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
+        BotRegion "$SPEECHSDK_BOT_REGION" \
+        BotSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
+        BotConnectionId "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
+        ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
+        ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
+        ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+        SpeechRegionForConversationTranscription "$SPEECHSDK_PRINCETON_REGION" \
+        tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
+        BEGIN {
+          %A = splice(@ARGV, 0, $#ARGV);
+          $keysRe = "(?:\\b" . (join "\\b|\\b", keys %A) . "\\b)";
+          $keysRe = qr/$keysRe/;
+        }
+        s/(<Parameter name="($keysRe)" value=")([^"]*)/$1.$A{$2}/ge
+      SCRIPT
+      mkdir localnuget
+      nugetsource=${PWD}/localnuget
+      cp -v "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
+      #
+      cd tests/functional/csharp/end2end
+      dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source ${nugetsource} Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
+      dotnet test --blame --verbosity detailed --filter \
+        "TestCategory!=LongTest&TestCategory!=SpeechSynthesisMockTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests&TestCategory!=CompressedStreamTest" \
+        --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_osx_unit_tests.trx"
+    displayName: Run C# unit tests
+    continueOnError: ${{ parameters.continueOnTestFailure }}
+  - task: PublishTestResults@2
+    inputs:
+      testRunner: VSTest
+      testResultsFiles: '**/test-*.trx'
+    condition: succeededOrFailed()
+
+- job: AndroidBuild
+  variables:
+    ANDROID_NDK: $(System.ArtifactsDirectory)\ndk-r16b
+    ANDROID_GST: $(Build.SourcesDirectory)\external\gstreamer-android
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidBuild '))
+  pool:
+    name: Hosted VS2017
+  timeoutInMinutes: 30
+  strategy:
+    maxParallel: 8
+    matrix:
+      arm32_debug:
+        BuildPlatform: arm32
+        GstBuildPlatform: armv7
+        GstAbiFilter: armeabi-v7a
+        BuildConfiguration: Debug
+      arm32_release:
+        BuildPlatform: arm32
+        GstBuildPlatform: armv7
+        GstAbiFilter: armeabi-v7a
+        BuildConfiguration: Release
+      arm64_debug:
+        BuildPlatform: arm64
+        GstBuildPlatform: arm64
+        GstAbiFilter: arm64-v8a
+        BuildConfiguration: Debug
+      arm64_release:
+        BuildPlatform: arm64
+        GstBuildPlatform: arm64
+        GstAbiFilter: arm64-v8a
+        BuildConfiguration: Release
+      x64_debug:
+        BuildPlatform: x64
+        GstBuildPlatform: x86_64
+        GstAbiFilter: x86_64
+        BuildConfiguration: Debug
+      x64_release:
+        BuildPlatform: x64
+        GstBuildPlatform: x86_64
+        GstAbiFilter: x86_64
+        BuildConfiguration: Release
+      x86_debug:
+        BuildPlatform: x86
+        GstBuildPlatform: x86
+        GstAbiFilter: x86
+        BuildConfiguration: Debug
+      x86_release:
+        BuildPlatform: x86
+        GstBuildPlatform: x86
+        GstAbiFilter: x86
+        BuildConfiguration: Release
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set Android target platform (arm32 or arm64)
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM Android-$(BuildPlatform)
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+        vsts_setvar GST_BUILD_CONFIGURATION "$(ANDROID_GST)\$(GstBuildPlatform)"
+        # Note: KWS currently only for ARM32.
+        if [[ $(BuildPlatform) = arm32 ]]; then
+          # N.B. this is built but not shipped via AAR.
+          vsts_setvar SPEECHSDK_ENABLE_KWS true
+        else
+          vsts_setvar SPEECHSDK_ENABLE_KWS false
+        fi
+        vsts_setvar SPEECHSDK_ENABLE_CODEC true
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - bash: ./ci/install-build-dependencies.sh
+    displayName: Install build dependencies
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Get NDK
+    inputs:
+      type: InlineScript
+      script: |
+        set -u -x -e -o pipefail
+        . ci/functions.sh
+        NDK_VER=r16b
+        NDK_SHA1SUM=f3f1909ed1052e98dda2c79d11c22f3da28daf25
+        NDK_BASE="$(System.ArtifactsDirectory)\ndk-$NDK_VER"
+        NDK_BASE_UNIX="$(cygpath -au "$NDK_BASE")"
+        NDK_ZIP="$NDK_BASE_UNIX.zip"
+        retry 2 curl --http1.1 -C - https://dl.google.com/android/repository/android-ndk-$NDK_VER-windows-x86_64.zip -o "$NDK_ZIP"
+        echo "$NDK_SHA1SUM  $NDK_ZIP" | sha1sum -c --strict -
+        unzip -q -o "$NDK_ZIP" -d "$NDK_BASE_UNIX.tmp"
+        # A single nested directory should be inside
+        existsExactlyOneDir "$NDK_BASE_UNIX.tmp"/*
+        mv "$NDK_BASE_UNIX.tmp"/* "$NDK_BASE_UNIX"
+        rmdir "$NDK_BASE_UNIX.tmp"
+        rm "$NDK_ZIP"
+  - template: get-kws-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_KWS
+      os: Android
+  - bash: |
+      set -u -e -o pipefail
+      . ci/functions.sh
+      IFS=$' \t\n\r' read build_id should_be_empty < external/android-openssl/build_id.txt
+      # checks
+      [[ -z $should_be_empty ]]
+      printf '%d' "$build_id" > /dev/null
+      vsts_setvar __getAndroidSslArtifactInternal_BuildId "$build_id"
+    displayName: Get Android SSL build ID
+  - task: DownloadBuildArtifacts@0
+    displayName: Download Android SSL build artifact
+    inputs:
+      buildType: specific
+      project: 'e71f1362-9c7d-488b-99c7-3376db8d3302' # Skyman
+      pipeline: 7260 # Yml - Carbon Android Dependencies
+      buildVersionToDownload: specific
+      buildId: $(__getAndroidSslArtifactInternal_BuildId)
+      downloadType: specific
+      itemPattern: android-openssl/**
+      downloadPath: external
+    # TODO only download the one we need
+  - bash: |
+      set -u -e -o pipefail
+      . ci/functions.sh
+      IFS=$' \t\n\r' read build_id should_be_empty < external/gstreamer-android/build_id.txt
+      # checks
+      [[ -z $should_be_empty ]]
+      printf '%d' "$build_id" > /dev/null
+      vsts_setvar GSTREAMER_ANDROID_PREBUILT_ARTIFACT_BUILD_ID "$build_id"
+    displayName: Get UWP OpenSSL build ID
+  - task: DownloadBuildArtifacts@0
+    displayName: Download gstreamer-android
+    inputs:
+      buildType: specific
+      project: 'e71f1362-9c7d-488b-99c7-3376db8d3302'
+      pipeline: 9377
+      buildVersionToDownload: specific
+      buildId: $(GSTREAMER_ANDROID_PREBUILT_ARTIFACT_BUILD_ID)
+      downloadType: specific
+      itemPattern: |
+        gstreamer-android/$(GstBuildPlatform)/**
+      downloadPath: external
+  - bash: |
+      set -u -e -o pipefail
+      export PATH=$PATH:$ANDROID_NDK
+      export GSTREAMER_ROOT_ANDROID=$ANDROID_GST
+      export NDK_PROJECT_PATH=$ANDROID_NDK
+      ndk-build.cmd -C ./ci/android/gstreamer "NDK_APPLICATION_MK=Application.mk" APP_ABI=$(GstAbiFilter) NDK_LIBS_OUT=.
+      cp ./ci/android/gstreamer/$(GstAbiFilter)/libgstreamer_android.so "$(ANDROID_GST)\$(GstBuildPlatform)"
+    displayName: Generate gstreamer shared object
+  - task: BatchScript@1
+    displayName: Build
+    inputs:
+      filename: 'ci\android\build-android.bat'
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: Sign com.microsoft.cognitiveservices.speech.jar
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: 'build/lib'
+      Pattern: com.microsoft.cognitiveservices.speech.jar
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_JAVA)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: 'Create artifact: Android'
+    inputs:
+      type: FilePath
+      scriptPath: './ci/drop/bindrop.sh'
+      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Out/Android-$(BuildPlatform)/$(BuildConfiguration) $(SPEECHSDK_TARGET_PLATFORM)'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Android'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Out'
+      ArtifactName: Android
+      publishLocation: Container
+
+- job: AndroidAppcenterTest
+  dependsOn: [Pre, AndroidBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidAppcenterTest '))
+  pool:
+    name: Hosted VS2017
+  timeoutInMinutes: 60
+  variables:
+    SPEECHSDK_TEST_STORAGEACCOUNTNAME: csspeechtestdata
+    SPEECHSDK_TEST_CONTAINERNAME: testout-$(System.CollectionId)-$(System.DefinitionId)
+    SPEECHSDK_TEST_APPCENTERUPLOAD: https://$(SPEECHSDK_TEST_STORAGEACCOUNTNAME).blob.core.windows.net/$(SPEECHSDK_TEST_CONTAINERNAME)/$(Build.BuildId)/android-appcenter/
+    # We use versioned device sets in App Center so we can potentially extend
+    # them w/o breaking historical test.
+    APPCENTER_DEVICESET_VERSION: 1
+  steps:
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - script: npm -g i appcenter-cli@1.1.13
+    displayName: Install AppCenter CLI
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Android artifacts'
+    inputs:
+      artifactName: Android
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: |
+        **/Android-arm32/Release/**/com.microsoft.cognitiveservices.speech.*jar
+        **/Android-arm32/Release/**/libMicrosoft.CognitiveServices.Speech.*.so
+  - bash: |
+      . ci/functions.sh &&
+      vsts_setvar SPEECHSDK_SASTOKENEXPIRYUTC $(date -u -d "2 hours" +"%Y-%m-%dT%H:%M:%SZ")
+    displayName: 'Define expiry time for SAS token (2 hours ahead)'
+  - task: AzureCLI@1
+    displayName: Generate SAS token
+    inputs:
+      azureSubscription: 'Custom Speech Development (3a96ef56-41a9-40a0-b0f3-fb125c2b8798) - RG csspeechsdk-carbon'
+      scriptLocation: inlineScript
+      inlineScript: |
+        @echo off
+        setlocal enabledelayedexpansion
+        @REM create container if it does not exist
+        call az storage container create --name %SPEECHSDK_TEST_CONTAINERNAME% --account-name %SPEECHSDK_TEST_STORAGEACCOUNTNAME% || exit /b 1
+        @REM Generate SAS. Note: no echo
+        set TOKEN=
+        for /f %%i in ('call az storage container generate-sas --name %SPEECHSDK_TEST_CONTAINERNAME% --account-name %SPEECHSDK_TEST_STORAGEACCOUNTNAME% --https-only --expiry %SPEECHSDK_SASTOKENEXPIRYUTC% --permissions dlrw -o tsv') DO set "TOKEN=%%~i"
+        if not defined TOKEN echo Error acquiring token.&exit /b 1
+        echo ##vso[task.setvariable variable=SPEECHSDK_SASTOKEN;issecret=true]!TOKEN!
+        set TOKEN=
+  - bash: |
+      set -u -x -e -o pipefail
+      FAKE_BUILD=buildfromrelease
+      mkdir -p "$FAKE_BUILD"{/bin,/lib}
+      DROP_DIR=$(cygpath -au "$(System.ArtifactsDirectory)/In/Android/Android-arm32/Release")
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false)
+      cat > "$FAKE_BUILD/MainActivity.properties" <<EOF
+      SpeechSubscriptionKey=$SPEECHSDK_SPEECH_KEY
+      SpeechRegion=$SPEECHSDK_SPEECH_REGION
+      LuisSubscriptionKey=$SPEECHSDK_LUIS_KEY
+      LuisRegion=$SPEECHSDK_LUIS_REGION
+      LuisAppId=$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID
+      Keyword=Computer
+      KeywordModel=kws-computer.zip
+      SpeechSubscriptionKeyForVirtualAssistant=$SPEECHSDK_BOT_SUBSCRIPTION
+      SpeechRegionForVirtualAssistant=$SPEECHSDK_BOT_REGION
+      SpeechChannelSecretForVirtualAssistant=$SPEECHSDK_BOT_FUNCTIONALTESTBOT
+      ConversationTranscriptionEndpoint=$SPEECHSDK_PRINCETON_INROOM_ENDPOINT
+      ConversationTranscriptionPPEKey=$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY
+      ConversationTranscriptionPRODKey=$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY
+      SpeechRegionForConversationTranscription=$SPEECHSDK_PRINCETON_REGION
+      SasToken=$(SPEECHSDK_SASTOKEN)
+      SasContainerPrefix=$(SPEECHSDK_TEST_APPCENTERUPLOAD)
+      EOF
+      cat "$FAKE_BUILD/MainActivity.properties"
+      cp --preserve "$DROP_DIR/public/lib/com.microsoft.cognitiveservices.speech.jar" "$FAKE_BUILD/lib"
+      cp --preserve "$DROP_DIR/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" "$FAKE_BUILD/bin"
+      cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" "$FAKE_BUILD/lib"
+      cp --preserve "$DROP_DIR/public/lib/libMicrosoft.CognitiveServices.Speech.java.bindings.so" "$FAKE_BUILD/bin"
+      find "$FAKE_BUILD" -ls
+    displayName: 'Prepare (fake) build dir for kicking off AppCenter tests'
+  - script: |
+      set APPCENTER_USER_ID=Speech-SDK-Test
+      set APPCENTER_TOKEN_OPTION=--token $(AppCenterToken)
+      @REM TODO allow to override when scheduling builds:
+      set APPCENTER_DEVICESET=deviceset-$(SPEECHSDK_BUILD_TYPE):$(APPCENTER_DEVICESET_VERSION)
+      call .\tests\appcenter\java-android\run_tests.bat buildfromrelease
+      @REM Error level will be reported later.
+      echo ##vso[task.setvariable variable=TEST_ERRORLEVEL]%ERRORLEVEL%
+      exit /b 0
+    displayName: Run tests in App Center
+    continueOnError: ${{ parameters.continueOnTestFailure }}
+  - script: |
+      @REM Note: Ignoring errors
+      setlocal enabledelayedexpansion
+      "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" ^
+        /Source:%SPEECHSDK_TEST_APPCENTERUPLOAD% ^
+        /Dest:appcentertestresults ^
+        /SourceSAS:"?!sastoken!" ^
+        /S /Y /MT /XO
+      dir /s/a/b appcentertestresults
+      exit /b 0
+    displayName: Download test results from Azure Blob Storage
+    env:
+      sastoken: $(SPEECHSDK_SASTOKEN)
+  # TODO would be nice to know how many logs to expect. But it seems would have to parse appcenter cli output for this.
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: appcentertestresults/**.xml
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+    displayName: Publish test results
+  # Note: blob storage cleanup is implemented by a separate task (to be implemented).
+  - script: |
+      @echo off
+      if %TEST_ERRORLEVEL% gtr 0 (
+        echo AppCenter test run failed earlier, will return an error.
+        echo For further details, inspect the task log of the earlier ^"Run tests in App Center^" step,
+        echo the test results page of the build in Azure DevOps, or the test run page in App Center.
+      )
+      exit /b %TEST_ERRORLEVEL%
+    displayName: Return test error
+
+- job: AndroidPackage
+  dependsOn: [Pre, AndroidBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidPackage '))
+  pool:
+    name: Hosted VS2017
+  timeoutInMinutes: 30
+  steps:
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      PublishArtifactName=Android
+      ArtifactOutWindows="$(Build.ArtifactStagingDirectory)/Out/$PublishArtifactName"
+      ArtifactOut="$(cygpath -au "$ArtifactOutWindows")"
+      MavenRootWindows="$ArtifactOutWindows/maven"
+      MavenRoot="$ArtifactOut/maven"
+      vsts_setvars_by_ref PublishArtifactName ArtifactOut{,Windows} MavenRoot{,Windows}
+    displayName: Set package variables
+  - task: DownloadBuildArtifacts@0
+    inputs:
+      artifactName: Android
+      downloadPath: $(System.ArtifactsDirectory)/In
+  - bash: |
+      ./ci/android/build-aar.sh "$(SPEECHSDK_SEMVER2NOMETA)" "$(SPEECHSDK_VERSION_CODE)" "$(Build.ArtifactStagingDirectory)/In/Android"
+    displayName: Build AAR content
+  # Note: doc says "The file extension should match the selected archive type." - so we are renaming afterwards
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: './ci/android/aar'
+      includeRootFolder: false
+      archiveType: zip
+      archiveFile: '$(ArtifactOutWindows)/$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA).zip'
+    displayName: 'Create .zip (Release)'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: ./ci/android/aar-nomic
+      includeRootFolder: false
+      archiveType: zip
+      archiveFile: '$(ArtifactOutWindows)/$(SPEECHSDK_MAVEN_ARTIFACT_ID)-nomic-$(SPEECHSDK_SEMVER2NOMETA).zip'
+    displayName: 'Create nomic .zip (Release)'
+  # Just archive the debug version for now
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: './ci/android/aar-debug'
+      includeRootFolder: false
+      archiveType: zip
+      archiveFile: '$(ArtifactOutWindows)/$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA)-debug.zip'
+    displayName: 'Create .zip (Debug)'
+  # TODO if we use the .pom for Android and JRE, should change <packaging/> and <description/>
+  - bash: |
+      set -u -x -e -o pipefail
+      # The debug package is just placed into the top-level artifact folder, it won't be published.
+      mv "$(ArtifactOut)/$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA)-debug".{zip,aar}
+      # For the Relase default and no-microphone packages, create directory hierarchy
+      mavenGroupDir="$(MavenRoot)/${SPEECHSDK_MAVEN_GROUP_ID//\./\/}"
+      mkdir -p "$mavenGroupDir/$(SPEECHSDK_MAVEN_ARTIFACT_ID)"{,-nomic}"/$(SPEECHSDK_SEMVER2NOMETA)"
+      # Then, place the packages and pom into these directories.
+      for artifactId in "$(SPEECHSDK_MAVEN_ARTIFACT_ID)"{,-nomic}; do
+        destName="$mavenGroupDir/$artifactId/$(SPEECHSDK_SEMVER2NOMETA)/$artifactId"
+        mv "$(ArtifactOut)/$artifactId-$(SPEECHSDK_SEMVER2NOMETA).zip" "$destName-$(SPEECHSDK_SEMVER2NOMETA).aar"
+        cat >> "$destName-$(SPEECHSDK_SEMVER2NOMETA).pom" <<POM
+      <?xml version="1.0" encoding="UTF-8"?>
+      <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <modelVersion>4.0.0</modelVersion>
+        <groupId>$(SPEECHSDK_MAVEN_GROUP_ID)</groupId>
+        <artifactId>$artifactId</artifactId>
+        <version>$(SPEECHSDK_SEMVER2NOMETA)</version>
+        <packaging>aar</packaging>
+        <name>Microsoft Cognitive Services Speech SDK for Java</name>
+        <description>
+          This SDK allows you to use the Microsoft Cognitive Speech Service.
+          See https://aka.ms/csspeech for more information.
+        </description>
+        <licenses>
+          <license>
+            <name>Microsoft Software License Terms for Microsoft Cognitive Services Speech SDK</name>
+            <url>https://aka.ms/csspeech/license201809</url>
+          </license>
+        </licenses>
+      </project>
+      POM
+      done
+    displayName: 'Rename .zip -> .aar, place, and create .pom'
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign *.aar (Release)'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: '$(MavenRootWindows)'
+      Pattern: '*.aar'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_JAVA)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      set -e -x -o pipefail
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      ./ci/run-gradle.sh public_samples "$(MavenRoot)"
+    displayName: Build Gradle-based samples
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Out'
+      ArtifactName: '$(PublishArtifactName)'
+      publishLocation: Container
+    displayName: 'Publish'
+    condition: succeededOrFailed()
+
+- job: LinuxBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxBuild '))
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 60
+  strategy:
+    maxParallel: 2
+    matrix:
+      debug:
+        BuildConfiguration: Debug
+        BuildPlatform: x64
+      release:
+        BuildConfiguration: Release
+        BuildPlatform: x64
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set Linux-x64 target platform
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x64
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+        vsts_setvar SPEECHSDK_ENABLE_KWS true
+        vsts_setvar SPEECHSDK_ENABLE_CODEC true
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - bash: ./ci/install-build-dependencies.sh
+    displayName: Install build dependencies
+  - template: get-kws-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_KWS
+      os: Linux
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: C API can be parsed by GCC
+    inputs:
+      type: FilePath
+      scriptPath: './ci/check-gcc-parse.sh'
+  - task: CMake@1
+    displayName: Generate makefiles
+    inputs:
+      cmakeArgs: >-
+        -DCMAKE_BUILD_TYPE=$(BuildConfiguration)
+        -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM)
+        -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE)
+        -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
+        -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
+        -DEXTENSION_CODEC_ENABLED="%SPEECHSDK_ENABLE_CODEC%"
+        ..
+  - task: CMake@1
+    displayName: CMake build
+    inputs:
+      cmakeArgs: '--build . -- -j4'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Create drop files
+    inputs:
+      type: FilePath
+      scriptPath: './ci/drop/bindrop.sh'
+      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Linux-x64/$(BuildConfiguration)'
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: Linux
+      publishLocation: Container
+  - template: test-during-build.yml
+    parameters:
+      continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+
+- template: linux-docker-build.yml
+  parameters:
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+    buildType: ${{ parameters.buildType }}
+
+- template: linux-python-build.yml
+  parameters:
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+    buildType: ${{ parameters.buildType }}
+
+- job: LinuxPythonOobeTest
+  dependsOn: [Pre, LinuxPythonBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxPythonOobeTest '))
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 70
+  steps:
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Downloading PythonBuild artifacts
+    inputs:
+      artifactName: PythonBuild
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: '**/*linux*_x86_64.whl'
+  - template: get-docker-image.yml
+    parameters:
+      imageBase: oobedevpy35_ubuntu1604_x64 oobedevpy36_ubuntu1804_x64 oobedevpy35_debian9_x64 oobedevpy37_debian9py37_x64
+      outvarImage: DOCKER_IMAGES
+  - bash: |
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      cp --recursive --verbose $(System.ArtifactsDirectory)/In/PythonBuild/wheelhouse wheelhouse
+      patchSamplesFromTestConfig public_samples/quickstart/python \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false
+      patchSamplesFromTestConfig public_samples/samples/python/console \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false
+      ERRORS=0
+      for i in $(DOCKER_IMAGES); do
+        # Python 3.7 wheel is not produced in dev builds.
+        ! [[ $SPEECHSDK_BUILD_TYPE = dev && $i = *py37* ]] || continue
+
+        ./ci/samples/test-quickstart-python.sh "$i" wheelhouse ||
+          { ((++ERRORS)); vsts_logissue error "Running quickstart/python for image $i failed."; }
+
+        # Skip other samples on non-Ubuntu 16.04 in dev builds
+        ! [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] || continue
+
+        ./ci/samples/test-quickstart-python-jupyter.sh "$i" wheelhouse ||
+          { ((++ERRORS)); vsts_logissue error "Running quickstart/python (Jupyter notebook) for image $i failed."; }
+        ./ci/samples/test-samples-python-console.sh "$i" wheelhouse ||
+          { ((++ERRORS)); vsts_logissue error "Running samples/python/console for image $i failed."; }
+      done
+      [[ $ERRORS == 0 ]] || exitWithError "Not all samples ran successfully."
+    displayName: Test samples
+
+- job: BuildPythonDocs
+  dependsOn: [Pre, LinuxPythonBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' BuildPythonDocs '))
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 30
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: 3.6
+      addToPath: true
+      architecture: x64
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Downloading PythonBuild artifacts
+    inputs:
+      artifactName: PythonBuild
+      downloadPath: $(System.ArtifactsDirectory)/In
+      itemPattern: '**/*linux*_x86_64.whl'
+  - bash: |
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      cp --recursive --verbose $(System.ArtifactsDirectory)/In/PythonBuild/wheelhouse wheelhouse
+      #
+      VIRTUALENV=pythondocs
+      VIRTUALENV_BINDIR=${PWD}/${VIRTUALENV}/bin
+      python -m pip install --upgrade pip &&
+      pip install virtualenv==16.1.0 &&
+      virtualenv -p python3 ${VIRTUALENV}
+      MAJORMINOR=$("${VIRTUALENV_BINDIR}"/python -c "import sys; print('%s%s' % (sys.version_info[0:2]))")
+      "$VIRTUALENV_BINDIR/pip" install wheelhouse/azure_cognitiveservices_speech-*-cp$MAJORMINOR-*linux*_x86_64.whl
+      #
+      PACKAGE_DIR=$(echo ${PWD}/${VIRTUALENV}/lib/python3.*/site-packages)
+      cp --recursive --verbose source/bindings/python/doc "$PACKAGE_DIR"
+      #
+      "$VIRTUALENV_BINDIR"/pip install sphinx==1.8.2
+      #
+      cd "$PACKAGE_DIR"/azure
+      "$VIRTUALENV_BINDIR"/sphinx-apidoc --module-first --implicit-namespaces --separate --output-dir ../doc . \
+          "${PWD}"/cognitiveservices/speech/speech_py_impl.py \
+          "${PWD}"/cognitiveservices/speech/speech.py \
+          "${PWD}"/cognitiveservices/speech/version.py
+      #
+      cd "$PACKAGE_DIR"/doc
+      "$VIRTUALENV_BINDIR"/sphinx-build . ../build/ -n -W
+      mkdir -p $(Build.ArtifactStagingDirectory)/PythonDocs
+      cp --recursive ../doc ../build $(Build.ArtifactStagingDirectory)/PythonDocs
+      #
+      ERROR=0
+      if grep ':[a-z][a-z]*:' ../build/*.html; then
+        echo "Unrendered restructured text markup leaked into the documentation. Please check."
+        ((ERROR++))
+      fi
+      #
+      if grep -i 'todo|bugbug' ../build/*.html; then
+        echo "Unwanted markup leaked into the documentation. Please check."
+        ((ERROR++))
+      fi
+      #
+      ((ERROR == 0)) || {
+        echo Error\(s\) occurred, stopping.
+        false
+      }
+    displayName: Build python docs
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/PythonDocs
+      ArtifactName: PythonDocs
+      publishLocation: Container
+
+- template: windows-python-build.yml
+  parameters:
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+    buildType: ${{ parameters.buildType }}
+
+- template: osx-python-build.yml
+  parameters:
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+    buildType: ${{ parameters.buildType }}
+
+- job: LinuxDrop
+  dependsOn: [Pre, LinuxBuild, LinuxDockerBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDrop '))
+  pool:
+    name: Hosted Ubuntu 1604
+  timeoutInMinutes: 60
+  steps:
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Download Build Artifacts
+    inputs:
+      artifactName: Linux
+  - bash: |
+      ./ci/drop/linux-reldrop.sh "$(SPEECHSDK_SEMVER2NOMETA)" "$(Build.Repository.LocalPath)" "$(System.ArtifactsDirectory)/Linux" "$(Build.ArtifactStagingDirectory)/Linux/Drop"
+    displayName: Create release drop
+  - template: get-docker-image.yml
+    parameters:
+      imageBase: oobedevcpp_ubuntu1604_x64 oobedevcpp_ubuntu1604_x86 oobedevcpp_ubuntu1804_x64 oobedevcpp_ubuntu1804_x86 oobedevcpp_debian9_x64 oobedevcpp_debian9_x86
+      outvarImage: DOCKER_IMAGES
+  - bash: |
+      . ci/functions.sh &&
+      patchSamplesFromTestConfig public_samples/quickstart/cpp-linux \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false &&
+      patchSamplesFromTestConfig public_samples/samples/cpp/windows/console \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false
+    displayName: Patch quickstart
+  - bash: |
+      set -u -e -x -o pipefail
+      . ci/functions.sh
+      ERRORS=0
+
+      # Prepare binaries / libraries from the drop as the test would expect it.
+      for architecture in x86 x64; do
+        bindir=buildfromdrop$architecture/bin
+        mkdir -p $bindir
+        cp --verbose "$(System.ArtifactsDirectory)/Linux/Linux-$architecture/Release/"{public/lib,private/{bin,lib}}/* $bindir
+        chmod 755 $bindir/*
+      done
+
+      mkdir speechsdk # will fail if existing
+      tar -xzf "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz" --strip-components=1 -C speechsdk
+
+      for i in $(DOCKER_IMAGES); do
+        [[ $i =~ _([^_]*): ]] || exitWithError "Cannot parse out architecture from %s" "$i"
+        architecture="${BASH_REMATCH[1]}"
+
+        # Run samples
+        ./ci/samples/test-quickstart-cpp-linux.sh "$i" speechsdk "$architecture" || {
+          vsts_logissue error "Running quickstart/cpp-linux for image $i failed."
+          ((++ERRORS))
+        }
+
+        # Skip other samples on non-Ubuntu 16.04 in dev builds
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
+          ./ci/samples/test-samples-cpp-console.sh "$i" speechsdk "$architecture" || {
+            vsts_logissue error "Running samples/cpp/windows/console sample for image $i failed."
+            ((++ERRORS))
+          }
+
+        # Run unit tests (skip non-Ubuntu 16.04 in dev builds)
+        [[ $SPEECHSDK_BUILD_TYPE = dev && $i != *_ubuntu1604_* ]] ||
+          docker run --rm --env LD_LIBRARY_PATH=/csspeech/buildfromdrop$architecture/bin --workdir /csspeech --volume "$PWD:/csspeech" "$i" ./ci/run-tests.sh \
+            --test-configuration ci/test-config.json \
+            --build-dir buildfromdrop$architecture \
+            --platform Linux-$architecture-Release \
+            -D luis-key=$(luis-westus-s0-201809-key1) \
+            -D speech-key=$(NorthEuropeKeySkyman) \
+            -D virtualassistant-region=$(BotRegion) \
+            -D virtualassistant-subscription=$(BotSubscriptionKey) \
+            -D virtualassistant-testbot=$(BotFunctionalTest) \
+            -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+            -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+            -D long-running=false -- cxx_core_tests cxx_api_tests || {
+            vsts_logissue error "Running tests for image $i failed."
+            ((++ERRORS))
+          }
+      done
+      [[ $ERRORS == 0 ]] || exitWithError "Not all tests/samples ran successfully."
+    displayName: Build and test quickstarts
+    continueOnError: ${{ parameters.continueOnTestFailure }}
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Linux Release Drop'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Linux'
+      ArtifactName: Linux
+      publishLocation: Container
+    condition: succeededOrFailed()
+
+- job: IosBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosBuild '))
+  pool:
+    name: Hosted macOS Preview
+  timeoutInMinutes: 30
+  strategy:
+    maxParallel: 2
+    matrix:
+      debug:
+        BuildConfiguration: Debug
+      release:
+        BuildConfiguration: Release
+  variables:
+    BuildPlatform: iOS
+    FrameworkName: MicrosoftCognitiveServicesSpeech
+    VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
+    JointCmakeArgs: -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
+    Developer.Dir: /Applications/Xcode_10.1.app/Contents/Developer
+  steps:
+  # Update bash really early so it will be picked up by "bash" steps.
+  - bash: brew config && brew install bash
+    displayName: Install modern bash
+  - bash: |
+      . ci/functions.sh &&
+      vsts_setvar SPEECHSDK_TARGET_PLATFORM IOSSIMULATOR-x64 &&
+      vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+    displayName: Set iOS target platform
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: CMake@1
+    displayName: Generate makefiles for iOS simulator (32bit)
+    inputs:
+      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x86 ..'
+      workingDirectory: 'build_ios_simulator32'
+  - task: CMake@1
+    displayName: CMake build for iOS simulator (32bit)
+    inputs:
+      cmakeArgs: '--build . -- -j4'
+      workingDirectory: build_ios_simulator32
+  - task: CMake@1
+    displayName: Generate makefiles for iOS simulator (64bit)
+    inputs:
+      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x64 ..'
+      workingDirectory: 'build_ios_simulator64'
+  - task: CMake@1
+    displayName: CMake build for iOS simulator (64bit)
+    inputs:
+      cmakeArgs: '--build . -- -j4'
+      workingDirectory: build_ios_simulator64
+  - task: CMake@1
+    displayName: Generate makefiles for iOS device
+    inputs:
+      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-all ..'
+      workingDirectory: build_ios_device
+    condition: succeeded()
+  - task: CMake@1
+    displayName: CMake build for iOS device
+    inputs:
+      cmakeArgs: '--build . -- -j4'
+      workingDirectory: build_ios_device
+  - bash: |
+      . ci/apple/apple-functions.sh
+      build_ios_universal_framework '$(OutputDirectory)' '$(FrameworkName)'
+    displayName: Create universal framework
+  - bash: |
+      . ci/apple/apple-functions.sh
+      build_dsym_bundle "build_ios_device/lib" "$(FrameworkName)"
+      build_dsym_bundle "build_ios_simulator32/lib" "$(FrameworkName)"
+      build_dsym_bundle "build_ios_simulator64/lib" "$(FrameworkName)"
+      combine_dsym_bundles "$(OutputDirectory)" "build_ios_"{device,simulator32,simulator64}"/lib/$(FrameworkName).framework.dSYM" "$(FrameworkName)"
+    condition: and(succeeded(), in(variables['BuildConfiguration'], 'Debug', 'Release'))
+    displayName: Create debug symbols
+  - bash: |
+      cd "$(OutputDirectory)"
+      zip --symlinks -r "$(VersionedFrameworkName).framework.dSYM.zip" "$(FrameworkName).framework.dSYM"
+      rm -rf "$(OutputDirectory)/$(FrameworkName).framework.dSYM"
+    condition: and(succeeded(), in(variables['BuildConfiguration'], 'Debug', 'Release'))
+    displayName: Archive debug symbols
+  - bash: |
+      strip -x "$(OutputDirectory)/$(FrameworkName).framework/$(FrameworkName)"
+    displayName: Strip dynamic library in universal framework for release builds
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+  - bash: |
+      /usr/bin/codesign --force --sign - --timestamp=none "$(OutputDirectory)/$(FrameworkName).framework"
+    displayName: 'Self-Sign iOS framework'
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'false'))
+  - bash: |
+      cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$(OutputDirectory)"
+      cd "$(OutputDirectory)"
+      zip --symlinks -r "$(VersionedFrameworkName).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
+      rm -rf REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
+    displayName: Create archive for signing
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign iOS framework'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: '$(OutputDirectory)'
+      Pattern: $(VersionedFrameworkName).zip
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_IOS)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      ci/apple/unpack_signed_archive.sh $(OutputDirectory) $(FrameworkName) $(VersionedFrameworkName) $(Build.Repository.LocalPath)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+    displayName: Package signed framework
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)'
+      ArtifactName: "$(BuildPlatform)"
+      publishLocation: Container
+    condition: succeededOrFailed()
+
+- job: IosMultiPlatformTests
+  dependsOn: [Pre, IosBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosMultiPlatformTests '))
+  pool:
+    name: Hosted macOS Preview
+  timeoutInMinutes: 60
+  strategy:
+    maxParallel: 2
+  variables:
+    FrameworkName: MicrosoftCognitiveServicesSpeech
+    BuildPlatform: iOS
+    BuildConfiguration: Release
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Out/$(BuildConfiguration)
+    Developer.Dir: /Applications/Xcode_10.1.app/Contents/Developer
+    microsoftDevTeamId: UBF8T346G9
+  steps:
+  # Update bash really early so it will be picked up by "bash" steps.
+  - bash: brew config && brew install bash coreutils
+    displayName: Install modern bash and coreutils
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download iOS Build Artifacts'
+    inputs:
+      artifactName: iOS
+      itemPattern: '**/*.zip'
+  - bash: |
+      set -u -e -o pipefail
+      . ci/functions.sh
+      mkdir xcode-build-output
+      cd xcode-build-output
+      cp -R $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)/*.zip .
+      for f in *.zip; do unzip $f; done
+    displayName: "Unpack build artifacts"
+  - bash: |
+      set -e -o pipefail -x
+      mkdir -p "$(OutputDirectory)/logs"
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false)
+      # run the tests
+      ci/apple/multiplatformtests.sh tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
+        SpeechSDK_iOS SpeechSDK_iOS $(OutputDirectory)/logs unittests $(microsoftDevTeamId)
+    displayName: "Run iOS unit tests"
+    continueOnError: true
+  - bash: |
+      set -u -e -o pipefail -x
+      mkdir -p "$(OutputDirectory)/logs"
+      . ci/functions.sh
+      # set up framework in the correct position - the Xcode project expects the framework here
+      ln -s '$(Build.Repository.LocalPath)/xcode-build-output/$(FrameworkName).framework' public_samples/quickstart/objectivec-ios/
+      # fix the keys
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false)
+      patchSamplesFromTestConfig public_samples/quickstart/objectivec-ios/helloworld/helloworld \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false
+      # run the tests
+      ci/apple/multiplatformtests.sh public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
+        helloworldUITests helloworldUITests-Runner $(OutputDirectory)/logs quickstart $(microsoftDevTeamId) --usegui
+    continueOnError: true
+    displayName: "Run iOS UI test for quickstart"
+  - bash: |
+      set -u -e -o pipefail -x
+      mkdir -p "$(OutputDirectory)/logs"
+      . ci/functions.sh
+      # set up framework in the correct position - the Xcode project expects the framework here
+      ln -s '$(Build.Repository.LocalPath)/xcode-build-output/$(FrameworkName).framework' public_samples/samples/objective-c/ios/
+      # fix the keys
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false)
+      patchSamplesFromTestConfig public_samples/samples/objective-c/ios/speech-samples/speech-samples \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(BotRegion) \
+        -D virtualassistant-subscription=$(BotSubscriptionKey) \
+        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false
+      # run the tests
+      ci/apple/multiplatformtests.sh public_samples/samples/objective-c/ios/speech-samples/speech-samples.xcodeproj \
+        speech-samplesUITests speech-samplesUITests-Runner $(OutputDirectory)/logs speech-samples $(microsoftDevTeamId) --usegui
+    continueOnError: true
+    displayName: "Run iOS UI test for extended samples"
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/test-*.xml'
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+    displayName: Publish test results
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Out'
+      ArtifactName: "$(BuildPlatform)"
+      publishLocation: Container
+    condition: succeededOrFailed()
+
+- job: OsxBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuild '))
+  pool:
+    name: Hosted macOS Preview
+  timeoutInMinutes: 60
+  strategy:
+    maxParallel: 2
+    matrix:
+      debug:
+        BuildConfiguration: Debug
+      release:
+        BuildConfiguration: Release
+  variables:
+    BuildPlatform: macOS
+    FrameworkName: MicrosoftCognitiveServicesSpeech
+    VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
+  steps:
+  # Update bash really early so it will be picked up by "bash" steps.
+  - bash: brew config && brew install bash
+    displayName: Install modern bash
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set OSX-x64 target platform
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM OSX-x64
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - bash: ./ci/install-build-dependencies.sh
+    displayName: Install build dependencies
+  - task: CMake@1
+    displayName: Generate makefiles
+    inputs:
+      cmakeArgs: '-DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) ..'
+  - task: CMake@1
+    displayName: CMake build
+    inputs:
+      cmakeArgs: '--build . -- -j4'
+  - bash: |
+      . ci/apple/apple-functions.sh
+      build_dsym_bundle "build/lib" "$(FrameworkName)"
+    condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
+    displayName: Create debug symbols
+  - bash: |
+      mkdir -p "$(OutputDirectory)"
+      mv "build/lib/$(FrameworkName).framework.dSYM" "$(OutputDirectory)"
+      cd "$(OutputDirectory)"
+      zip --symlinks -r "$(VersionedFrameworkName).framework.dSYM.zip" "$(FrameworkName).framework.dSYM"
+      rm -rf "$(OutputDirectory)/$(FrameworkName).framework.dSYM"
+    condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
+    displayName: Archive debug symbols
+  - bash: |
+      strip -x "build/lib/$(FrameworkName).framework/$(FrameworkName)"
+    displayName: Strip dynamic library in universal framework for release builds
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+  - bash: |
+      cp -R "build/lib/$(FrameworkName).framework" "$(OutputDirectory)"
+      cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$(OutputDirectory)"
+      cd "$(OutputDirectory)"
+      zip --symlinks -r "$(VersionedFrameworkName).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
+      rm -rf REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
+    displayName: Create archive for signing
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign OSX framework'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: '$(OutputDirectory)'
+      Pattern: $(VersionedFrameworkName).zip
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_MACOS)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      ci/apple/unpack_signed_archive.sh $(OutputDirectory) $(FrameworkName) $(VersionedFrameworkName) $(Build.Repository.LocalPath)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+    displayName: Package signed framework
+  - bash: |
+      set -u -x -e -o pipefail
+      dylibname="build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib"
+      jnilibname="build/bin/libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
+      [[ -f ${dylibname} ]]
+      [[ -f ${jnilibname} ]]
+      cp "${dylibname}" "${dylibname%%dylib}"unstripped.dylib
+      cp "${jnilibname}" "${jnilibname%%jnilib}"unstripped.jnilib
+      strip -x "${dylibname}"
+      strip -x "${jnilibname}"
+      if [[ $SPEECHSDK_SIGN == true ]]; then
+        mkdir tosign && zip tosign/libs.zip "${dylibname}" "${jnilibname}"
+      fi
+    displayName: "Strip dylib and create archive for signing dylib if necessary"
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: Sign .dylib (dynamic library)
+    inputs:
+      ConnectedServiceName: Speech SDK ESRP Signing
+      FolderPath: tosign
+      Pattern: '*.zip'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_MACOS)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign Mac .dll for nuget package'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: 'build/bin/$(BuildConfiguration)MacOS/netstandard2.0/'
+      Pattern: 'Microsoft.CognitiveServices.Speech.csharp.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_DLL)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      set -u -x -e -o pipefail
+      archive="tosign/libs.zip"
+      [[ -f ${archive} ]]
+      unzip -o "${archive}"
+      # simple signing check, this will fail if not signed
+      shopt -s extglob
+      ls build/**/libMicrosoft!(*unstripped).{dylib,jnilib} | xargs -n1 codesign --display --verbose=4
+    displayName: "Unpack archive with signed dylib"
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - template: test-during-build.yml
+    parameters:
+      continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+  - bash: |
+      ./ci/drop/bindrop.sh \
+          $(SPEECHSDK_TARGET_PLATFORM) $(BuildConfiguration) "$(OutputDirectory)"
+    displayName: Create drop files
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    condition: succeededOrFailed()
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)'
+      ArtifactName: macOS
+      publishLocation: Container
+
+- template: objectivec-unit-tests.yml
+  parameters:
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+    jobName: "OsxUnitTests"
+    jobDependsOn:
+      - Pre
+      - OsxBuild
+    buildPlatform: macOS
+    extraSteps:
+      - bash: |
+          set -u -x -e -o pipefail
+          cd public_samples/quickstart/cpp-macos
+          make SPEECHSDK_ROOT='$(Build.Repository.LocalPath)/xcode-build-output'
+          [[ -f helloworld ]]
+        displayName: "Build quickstart"
+        condition: succeededOrFailed()
+
+- template: objectivec-unit-tests.yml
+  parameters:
+    jobName: "IosUnitTests"
+    jobDependsOn:
+      - Pre
+      - IosBuild
+    buildPlatform: iOS
+
+# deactivated as long as ESRP signing doesn't support notarization
+# - template: osx-test-app.yml
+#   parameters:
+#     continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+
+- job: Doxygen
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' Doxygen '))
+  pool:
+    name: Hosted macOS Preview
+  timeoutInMinutes: 30
+  variables:
+    ArtifactOut: $(Build.ArtifactStagingDirectory)/Out
+  steps:
+  # Update bash really early so it will be picked up by "bash" steps.
+  - bash: brew config && brew install bash
+    displayName: Install modern bash
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - bash: |
+      set -u -x -e -o pipefail
+      ASTOUT="$(ArtifactOut)/objc/ast"
+      MDOUT="$(ArtifactOut)/objc/md"
+      mkdir -p "$ASTOUT" "$MDOUT"
+      clang --version
+      clang -fsyntax-only -x objective-c -Xclang -ast-dump source/bindings/objective-c/public/SPXSpeechApi.h \
+        2>&1 1> "$ASTOUT/stdout.txt" | tee "$ASTOUT/stderr.txt"
+      cd "$MDOUT"
+      perl "$(Build.Repository.LocalPath)/ci/objc-docs-ast-to-md.pl" "$ASTOUT/stdout.txt"
+    displayName: Create Objective-C reference docs
+    continueOnError: true # TODO needs investigation - #1733600
+  - bash: |
+      set -e -o pipefail
+      # log brew-related version information
+      brew config
+      brew install doxygen
+      cd ci/doxygen
+      mkdir -p "$(ArtifactOut)"
+      rm -f doxygen.log || true
+      touch doxygen.log
+      for lang in c cpp csharp java; do
+        (
+          cat ${lang}_doxygen.txt
+          echo PROJECT_NUMBER=$(SPEECHSDK_SEMVER2)
+          echo 'WARN_FORMAT="##''vso[task.logissue type=warning;sourcepath=$file;linenumber=$line;columnnumber=1]$text"'
+          echo OUTPUT_DIRECTORY="$(ArtifactOut)"
+          echo QUIET=YES
+          echo WARN_AS_ERROR=NO
+        ) | doxygen - 2>&1 | ( grep -v 'Internal inconsistency: member .* does not belong to any container' || true ) | tee -a doxygen.log
+      done
+      [[ -s doxygen.log ]] && {
+        cat <<'HERE'
+      Warnings occurred when running Doxygen. Please address them.
+
+      Note:
+
+      * We typically do not document protected members (Java, C++):
+        Hide them at the source level by enclosing in the following Doxygen mark-up:
+
+          /*! \cond PROTECTED */
+          ...
+          /*! \endcond */
+
+      * Similarly, in C++, a nested class definition may show up as public even
+        if the definition was done under a private qualifier. Hide these
+        classes at the source level by enclosing in the following Doxygen
+        mark-up:
+
+          /*! \cond PRIVATE */
+          ...
+          /*! \endcond */
+
+      * In Java, we also use the following mark-up for public things that really should be internal:
+
+          /*! \cond INTERNAL */
+          ...
+          /*! \endcond */
+
+      * For things you do not know how to resolve contact cfdev.
+      HERE
+        exit 1
+      }
+      git clone https://github.com/sourcey/moxygen.git
+      cd moxygen
+      git checkout c00d16803a6dfc40796cd4b76271c481ed865243
+      git apply ../0001-Provide-shortname-provide-plain.patch
+      npm install
+      cd ..
+      node moxygen/bin/moxygen.js -o cppapi.md -t ./moxygen_template/cpp -a "$(ArtifactOut)/cppxml"
+      powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -NonInteractive doxmox2docs.ps1 \
+        -DoxygenIndexXml "$(ArtifactOut)/cppxml/index.xml" \
+        -MoxygenApiMd cppapi.md \
+        -OutputDir "$(ArtifactOut)/cppmd"
+    displayName: Create documentation artifacts
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: $(ArtifactOut)
+      ArtifactName: Doxygen
+      publishLocation: Container
+
+- job: WindowsSDLFortifyJava
+  dependsOn: [Pre, WindowsBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsSDLFortifyJava '))
+  pool:
+    name: Carbon
+    demands: FORTIFY
+  timeoutInMinutes: 30
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download JAR Build Artifacts'
+    inputs:
+      artifactName: Windows
+      itemPattern: '**/*.jar'
+  - task: PowerShell@2
+    displayName: 'Extract internal classes from JAR SDK Artifacts'
+    inputs:
+      type: FilePath
+      filePath: './ci/sdl/PruneJar.ps1'
+      arguments: '-InputJarName $(System.ArtifactsDirectory)\Windows\x64\Release\public\lib\com.microsoft.cognitiveservices.speech.jar -OutputDir $(Build.BinariesDirectory)\PruneJar'
+  - task: ArchiveFiles@2
+    displayName: 'Create internal.JAR'
+    inputs:
+      rootFolderOrFile: '$(Build.BinariesDirectory)\PruneJar'
+      includeRootFolder: false
+      archiveFile: '$(Build.ArtifactStagingDirectory)/class/internal.jar'
+  - task: fortifyvsts.hpe-security-fortify-vsts.build-task-fortify-sca.FortifySCA@1
+    displayName: 'Run Fortify on JAVA source files'
+    inputs:
+      applicationType: java
+      buildClasspath: '$(Build.ArtifactStagingDirectory)/class/internal.jar'
+      buildSourceVersion: 1.8
+      fortifySourceTranslate: 'source/bindings/java/**/*.java'
+      fortifyBuildId: 1.2.3
+      scaVerbose: true
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts from Fortify'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/sca_artifacts'
+      ArtifactName: sca_artifacts
+      condition: succeededOrFailed()
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+    displayName: 'SDL Fortify Post Analysis'
+    inputs:
+      FortifySCA: true
+      VstsConsole: false
+    # Currently disabled, we know we have false-positives.
+    # Once we can solve the problem of the false-positives we can change this.
+    # In that case we should move this part of the build also into the WindowsSdlBuild phase.
+    enabled: false
+
+- job: CheckSignatures
+  dependsOn: [Pre, NuGet, AndroidPackage, JavaJrePackage, WindowsPythonBuild, UnityBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CheckSignatures '))
+  pool:
+    name: Hosted VS2017
+  timeoutInMinutes: 10
+  steps:
+  - task: NuGetToolInstaller@0
+    displayName: 'NuGet Installer'
+    inputs:
+      versionSpec: 4.6.0
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts PythonBuild'
+    inputs:
+      artifactName: PythonBuild
+      itemPattern: '**/*.whl'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts Windows'
+    inputs:
+      artifactName: Windows
+      itemPattern: '**/*.nupkg'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts Android'
+    inputs:
+      artifactName: Android
+      itemPattern: '**/*.aar'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build JavaJrePackage'
+    inputs:
+      artifactName: JavaJrePackage
+      itemPattern: '**/*.jar'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Unity'
+    inputs:
+      artifactName: Unity
+      itemPattern: '**/*.unitypackage'
+  - task: PowerShell@2
+    displayName: 'Check Signatures'
+    inputs:
+      type: FilePath
+      filePath: './ci/build/sigcheck.ps1'
+      arguments: '-RootDirectory $(System.ArtifactsDirectory)'
+
+- job: UnityBuild
+  dependsOn: [Pre, AndroidBuild, WindowsBuild, WindowsUwpBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' UnityBuild '))
+  pool:
+    # The "Skyman Unity On-Prem" agent pool currently contains a single build
+    # agent called "UnityBuild". It has three licensed Unity versions installed
+    # on it, cf. the build agent's capabilities at
+    # https://msasg.visualstudio.com/_settings/agentpools?_a=agents&poolId=620:
+    #
+    # Unity2017.2.1p2 - c:\program files\unity\editor\unity.exe
+    # Unity2018.1.2f1 - c:\Program Files\Unity2018.1.2f1
+    # Unity2018.3.0f2 - c:\Program Files\Unity2018.3.0f2
+    #
+    # Below we're using the last (newest) of these.
+    #
+    # The agent has been contributed and set up by Nick Horvath - many thanks!
+    name: Skyman Unity On-Prem
+  timeoutInMinutes: 30
+  # Note: since the build agent isn't our "default" hosted agent, we have to
+  # patch up how some things work. Also, be aware that it's persistent (not
+  # restored to clean state after the build). So, be careful with things such
+  # as secrets.
+  # TODO we may need to extend wrt cancellation/process clean-up if we encounter any problems
+  steps:
+  - script: git clean -fdx
+    displayName: Clean working directory
+  - powershell: |
+      Copy-Item -Recurse "$(Agent.HomeDirectory)\externals\git" copiedgit
+      Copy-Item copiedgit\usr\bin\sh.exe copiedgit\usr\bin\bash.exe
+      Write-Output "##vso[task.prependpath]$(Build.Repository.LocalPath)\copiedgit\usr\bin"
+    displayName: Add VSTS Agent Git sh.exe as bash.exe to path
+  # N.B. some things are still missing in the Bash setup, e.g., cygpath
+  - script: where bash
+    displayName: Validate that bash is in path
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Windows artifacts'
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)\In
+      itemPattern: '**/public/lib/**'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Android artifacts'
+    inputs:
+      artifactName: Android
+      downloadPath: $(System.ArtifactsDirectory)\In
+      itemPattern: '**/public/lib/**'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading WindowsUwp artifacts'
+    inputs:
+      artifactName: WindowsUwp
+      downloadPath: $(System.ArtifactsDirectory)\In
+      itemPattern: '**/public/lib/**'
+  - bash: ./ci/unity/build-unity.sh "$(Build.ArtifactStagingDirectory)/In"
+    displayName: Build Unity Plugin content
+  - bash: |
+      . ci/functions.sh &&
+      unity_batch \
+        -projectPath ci/unity/unity \
+        -exportPackage \
+          Assets/SpeechSDK \
+          Microsoft.CognitiveServices.Speech.$(SPEECHSDK_SEMVER2NOMETA).unitypackage
+    displayName: Build Unity package
+  - script: |
+      mkdir "$(Build.ArtifactStagingDirectory)\Unity" && ^
+      move ci\unity\unity\*.unitypackage "$(Build.ArtifactStagingDirectory)\Unity"
+    displayName: Move Unity package into upload folder
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Unity'
+      ArtifactName: Unity
+      publishLocation: Container
+    condition: succeededOrFailed()
+    displayName: Publish Unity package
+
+- job: DocFX
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' DocFX '))
+  pool:
+    name: Hosted VS2017
+  steps:
+  - script: choco install docfx -y
+    displayName: Install DocFX
+  - script: docfx
+    displayName: Run docfx
+    workingDirectory: ci/docfx
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: docfx'
+    inputs:
+      PathtoPublish: 'build/docfx'
+      ArtifactName: docfx

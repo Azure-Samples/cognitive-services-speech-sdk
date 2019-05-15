@@ -1,3 +1,7 @@
+parameters:
+  continueOnTestFailure: false
+  buildType: dev
+
 jobs:
 - job: WindowsPythonBuild
   dependsOn: Pre
@@ -12,8 +16,8 @@ jobs:
         BuildPlatform: x64
         PythonVersion: 3.5
         pythonIncludePathSuffix: python3.5m
-      # More configurations in 'int' and 'prod' builds (cf. set-variables.sh):
-      ${{ if and(eq(variables['System.CollectionId'], '19422243-19b9-4d85-9ca6-bc961861d287'), eq(variables['System.DefinitionId'], '4833'), or(and(or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')), eq(variables['Build.SourceBranch'], 'refs/heads/master')), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))) }}:
+      # More configurations in 'int' and 'prod' builds:
+      ${{ if in(parameters.buildType, 'int', 'prod') }}:
         Python3.7_x64:
           BuildPlatform: x64
           PythonVersion: 3.7
@@ -69,6 +73,7 @@ jobs:
       os: Windows
   - template: build-python-wheel.yml
     parameters:
+      continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
       buildParams: >-
         -DCMAKE_CXX_COMPILER=cl.exe
         -DCMAKE_C_COMPILER=cl.exe

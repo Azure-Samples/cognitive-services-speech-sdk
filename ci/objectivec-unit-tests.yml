@@ -2,6 +2,7 @@ parameters:
   jobName: "OsxUnitTests"
   jobDependsOn: "Pre"
   buildPlatform: macOS
+  continueOnTestFailure: false
   extraSteps: []
 
 jobs:
@@ -60,6 +61,7 @@ jobs:
     displayName: "Prepare for objective-C unit tests"
   - template: test-during-build.yml
     parameters:
+      continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
       testsToRun: objectivec_unittests
       runTestArgs: ""
   - ${{ parameters.extraSteps }}
