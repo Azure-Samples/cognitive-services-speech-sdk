@@ -48,6 +48,8 @@ static_assert((int)NoMatchReason_KeywordNotRecognized == (int)NoMatchReason::Key
 SPXAPI result_get_result_id(SPXRESULTHANDLE hresult, char* pszResultId, uint32_t cchResultId)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchResultId == 0);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pszResultId == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
@@ -111,6 +113,8 @@ SPXAPI result_get_no_match_reason(SPXRESULTHANDLE hresult, Result_NoMatchReason*
 SPXAPI result_get_text(SPXRESULTHANDLE hresult, char* pszText, uint32_t cchText)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchText == 0);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pszText == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();

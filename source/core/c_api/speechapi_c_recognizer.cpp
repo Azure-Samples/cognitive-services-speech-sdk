@@ -93,6 +93,8 @@ SPXAPI recognizer_disable(SPXRECOHANDLE hreco)
 
 SPXAPI recognizer_is_enabled(SPXRECOHANDLE hreco, bool* pfEnabled)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pfEnabled == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
@@ -104,6 +106,8 @@ SPXAPI recognizer_is_enabled(SPXRECOHANDLE hreco, bool* pfEnabled)
 
 SPXAPI recognizer_recognize_once(SPXRECOHANDLE hreco, SPXRESULTHANDLE* phresult)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phresult == nullptr);
+
     SPX_INIT_HR(hr);
     *phresult = SPXHANDLE_INVALID;
 
@@ -133,6 +137,8 @@ SPXAPI recognizer_recognize_once(SPXRECOHANDLE hreco, SPXRESULTHANDLE* phresult)
 
 SPXAPI recognizer_recognize_once_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phasync == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phasync = SPXHANDLE_INVALID;
@@ -151,6 +157,8 @@ SPXAPI recognizer_recognize_once_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phas
 
 SPXAPI recognizer_recognize_once_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds, SPXRESULTHANDLE* phresult)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phresult == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phresult = SPXHANDLE_INVALID;
@@ -209,6 +217,8 @@ SPXAPI recognizer_start_continuous_recognition(SPXRECOHANDLE hreco)
 
 SPXAPI recognizer_start_continuous_recognition_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phasync == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phasync = SPXHANDLE_INVALID;
@@ -273,6 +283,8 @@ SPXAPI recognizer_stop_continuous_recognition(SPXRECOHANDLE hreco)
 
 SPXAPI recognizer_stop_continuous_recognition_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phasync == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phasync = SPXHANDLE_INVALID;
@@ -337,6 +349,8 @@ SPXAPI recognizer_start_keyword_recognition(SPXRECOHANDLE hreco, SPXKEYWORDHANDL
 
 SPXAPI recognizer_start_keyword_recognition_async(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword, SPXASYNCHANDLE* phasync)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phasync == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phasync = SPXHANDLE_INVALID;
@@ -404,6 +418,8 @@ SPXAPI recognizer_stop_keyword_recognition(SPXRECOHANDLE hreco)
 
 SPXAPI recognizer_stop_keyword_recognition_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phasync == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phasync = SPXHANDLE_INVALID;
@@ -475,6 +491,8 @@ SPXAPI recognizer_canceled_set_callback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBA
 
 SPXAPI recognizer_session_event_get_session_id(SPXEVENTHANDLE hevent, char* pszSessionId, uint32_t cchSessionId)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pszSessionId == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recoHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
@@ -503,6 +521,8 @@ SPXAPI recognizer_session_event_get_session_id(SPXEVENTHANDLE hevent, char* pszS
 
 SPXAPI recognizer_recognition_event_get_offset(SPXEVENTHANDLE hevent, uint64_t* offset)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, offset == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         if (offset != nullptr)
@@ -519,6 +539,8 @@ SPXAPI recognizer_recognition_event_get_offset(SPXEVENTHANDLE hevent, uint64_t* 
 
 SPXAPI recognizer_recognition_event_get_result(SPXEVENTHANDLE hevent, SPXRESULTHANDLE* phresult)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phresult == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();

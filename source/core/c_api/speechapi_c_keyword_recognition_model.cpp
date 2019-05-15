@@ -26,8 +26,8 @@ SPXAPI keyword_recognition_model_handle_release(SPXKEYWORDHANDLE hkeyword)
 
 SPXAPI keyword_recognition_model_create_from_file(const char* fileName, SPXKEYWORDHANDLE* phkwmodel)
 {
-    if (fileName == nullptr)
-        return SPXERR_INVALID_ARG;
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phkwmodel == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, fileName == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
     {

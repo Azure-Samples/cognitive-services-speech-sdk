@@ -23,6 +23,8 @@ SPXAPI_(bool) audio_stream_is_handle_valid(SPXAUDIOSTREAMHANDLE haudioStream)
 
 SPXAPI audio_stream_create_push_audio_input_stream(SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioStream == nullptr);
+    
     SPXAPI_INIT_HR_TRY(hr)
     {
         *haudioStream = SPXHANDLE_INVALID;
@@ -39,6 +41,8 @@ SPXAPI audio_stream_create_push_audio_input_stream(SPXAUDIOSTREAMHANDLE* haudioS
 
 SPXAPI audio_stream_create_pull_audio_input_stream(SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioStream == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *haudioStream = SPXHANDLE_INVALID;
@@ -55,6 +59,8 @@ SPXAPI audio_stream_create_pull_audio_input_stream(SPXAUDIOSTREAMHANDLE* haudioS
 
 SPXAPI audio_stream_create_pull_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioStream == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *haudioStream = SPXHANDLE_INVALID;
@@ -71,6 +77,8 @@ SPXAPI audio_stream_create_pull_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudio
 
 SPXAPI audio_stream_create_push_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioStream == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *haudioStream = SPXHANDLE_INVALID;
@@ -139,6 +147,9 @@ SPXAPI push_audio_input_stream_close(SPXAUDIOSTREAMHANDLE haudioStream)
 
 SPXAPI pull_audio_output_stream_read(SPXAUDIOSTREAMHANDLE haudioStream, uint8_t* buffer, uint32_t bufferSize, uint32_t* pfilledSize)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pfilledSize == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, buffer == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto stream = CSpxSharedPtrHandleTableManager::GetPtr<ISpxAudioStream, SPXAUDIOSTREAMHANDLE>(haudioStream);
@@ -168,6 +179,8 @@ SPXAPI_(bool) audio_data_stream_is_handle_valid(SPXAUDIOSTREAMHANDLE haudioStrea
 
 SPXAPI audio_data_stream_create_from_result(SPXAUDIOSTREAMHANDLE* haudioStream, SPXRESULTHANDLE hresult)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioStream == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *haudioStream = SPXHANDLE_INVALID;
@@ -232,6 +245,8 @@ SPXAPI_(bool) audio_data_stream_can_read_data_from_position(SPXAUDIOSTREAMHANDLE
 
 SPXAPI audio_data_stream_read(SPXAUDIOSTREAMHANDLE haudioStream, uint8_t* buffer, uint32_t bufferSize, uint32_t* pfilledSize)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pfilledSize == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto streamhandles = CSpxSharedPtrHandleTableManager::GetPtr<ISpxAudioDataStream, SPXAUDIOSTREAMHANDLE>(haudioStream);
@@ -243,6 +258,9 @@ SPXAPI audio_data_stream_read(SPXAUDIOSTREAMHANDLE haudioStream, uint8_t* buffer
 
 SPXAPI audio_data_stream_read_from_position(SPXAUDIOSTREAMHANDLE haudioStream, uint8_t* buffer, uint32_t bufferSize, uint32_t position, uint32_t* pfilledSize)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pfilledSize == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, buffer == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto streamhandles = CSpxSharedPtrHandleTableManager::GetPtr<ISpxAudioDataStream, SPXAUDIOSTREAMHANDLE>(haudioStream);
@@ -254,6 +272,8 @@ SPXAPI audio_data_stream_read_from_position(SPXAUDIOSTREAMHANDLE haudioStream, u
 
 SPXAPI audio_data_stream_save_to_wave_file(SPXAUDIOSTREAMHANDLE haudioStream, const char* fileName)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, fileName == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto streamhandles = CSpxSharedPtrHandleTableManager::Get<ISpxAudioDataStream, SPXAUDIOSTREAMHANDLE>();
@@ -267,6 +287,7 @@ SPXAPI audio_data_stream_save_to_wave_file(SPXAUDIOSTREAMHANDLE haudioStream, co
 SPXAPI audio_data_stream_get_position(SPXAUDIOSTREAMHANDLE haudioStream, uint32_t* position)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, position == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto streamhandles = CSpxSharedPtrHandleTableManager::Get<ISpxAudioDataStream, SPXAUDIOSTREAMHANDLE>();

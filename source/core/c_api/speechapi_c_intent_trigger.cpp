@@ -18,8 +18,8 @@ SPXAPI_(bool) intent_trigger_handle_is_valid(SPXTRIGGERHANDLE htrigger)
 
 SPXAPI intent_trigger_create_from_phrase(SPXTRIGGERHANDLE* htrigger, const char* phrase)
 {
-    if (phrase == nullptr)
-        return SPXERR_INVALID_ARG;
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phrase == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, htrigger == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -36,6 +36,8 @@ SPXAPI intent_trigger_create_from_phrase(SPXTRIGGERHANDLE* htrigger, const char*
 
 SPXAPI intent_trigger_create_from_language_understanding_model(SPXTRIGGERHANDLE* htrigger, SPXLUMODELHANDLE hlumodel, const char* intentName)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, htrigger == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *htrigger = SPXHANDLE_INVALID;

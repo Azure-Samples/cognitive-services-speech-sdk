@@ -20,17 +20,17 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 using namespace std;
 
 
-SPXAPI participant_create_handle(SPXPARTICIPANTHANDLE * hparticipant, const char* userId, const char* preferred_language, const char* voice_signature)
+SPXAPI participant_create_handle(SPXPARTICIPANTHANDLE* hparticipant, const char* userId, const char* preferred_language, const char* voice_signature)
 {
     // all the arguments after userId can be optional
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, userId == nullptr || !(*userId));
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hparticipant == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
     {
         *hparticipant = SPXHANDLE_INVALID;
 
         auto participant = SpxCreateObjectWithSite<ISpxParticipant>("CSpxParticipant", SpxGetRootSite());
-        SPX_IFTRUE_THROW_HR(participant == nullptr, SPXERR_INVALID_ARG);
 
         auto user = SpxQueryInterface<ISpxUser>(participant);
         SPX_IFTRUE_THROW_HR(user == nullptr, SPXERR_INVALID_ARG);
@@ -69,7 +69,6 @@ SPXAPI participant_set_preferred_langugage(SPXPARTICIPANTHANDLE hparticipant, co
 
         SPX_IFTRUE_THROW_HR(participant_ptr == nullptr, SPXERR_INVALID_ARG);
         auto participant = SpxQueryInterface<ISpxParticipant>(participant_ptr);
-
         if (participant && preferred_language)
         {
             participant->SetPreferredLanguage(preferred_language);
@@ -80,8 +79,7 @@ SPXAPI participant_set_preferred_langugage(SPXPARTICIPANTHANDLE hparticipant, co
 
 SPXAPI participant_set_voice_signature(SPXPARTICIPANTHANDLE hparticipant, const char* voice_signature)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, voice_signature == nullptr);
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !*voice_signature);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, voice_signature == nullptr || !(*voice_signature));
 
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -99,9 +97,10 @@ SPXAPI participant_set_voice_signature(SPXPARTICIPANTHANDLE hparticipant, const 
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI participant_get_property_bag(SPXPARTICIPANTHANDLE hparticipant, SPXPROPERTYBAGHANDLE * hpropbag)
+SPXAPI participant_get_property_bag(SPXPARTICIPANTHANDLE hparticipant, SPXPROPERTYBAGHANDLE* hpropbag)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
+
     *hpropbag = SPXHANDLE_INVALID;
     SPXAPI_INIT_HR_TRY(hr)
     {

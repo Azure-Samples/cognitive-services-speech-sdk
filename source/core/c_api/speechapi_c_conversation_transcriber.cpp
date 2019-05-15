@@ -16,6 +16,8 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 SPXAPI conversation_transcriber_update_participant_by_user_id(SPXRECOHANDLE hreco, bool add, const char* userId)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, userId == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
@@ -31,6 +33,8 @@ SPXAPI conversation_transcriber_update_participant_by_user_id(SPXRECOHANDLE hrec
 
 SPXAPI conversation_transcriber_update_participant_by_user(SPXRECOHANDLE hreco, bool add, SPXUSERHANDLE huser)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, huser == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
@@ -51,6 +55,8 @@ SPXAPI conversation_transcriber_update_participant_by_user(SPXRECOHANDLE hreco, 
 
 SPXAPI conversation_transcriber_update_participant(SPXRECOHANDLE hreco, bool add, SPXPARTICIPANTHANDLE hparticipant)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hparticipant == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
@@ -74,6 +80,8 @@ SPXAPI conversation_transcriber_update_participant(SPXRECOHANDLE hreco, bool add
 
 SPXAPI conversation_transcriber_set_conversation_id(SPXRECOHANDLE hreco, const char* id)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, id == nullptr || !(*id));
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
@@ -82,7 +90,6 @@ SPXAPI conversation_transcriber_set_conversation_id(SPXRECOHANDLE hreco, const c
         auto conversationTranscriber = SpxQueryInterface<ISpxConversationTranscriber>(recognizer);
         SPX_IFTRUE_THROW_HR(conversationTranscriber == nullptr, SPXERR_INVALID_ARG);
 
-        SPX_IFTRUE_THROW_HR((id == nullptr || !(*id)), SPXERR_INVALID_ARG);
         conversationTranscriber->SetConversationId(id);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -90,6 +97,8 @@ SPXAPI conversation_transcriber_set_conversation_id(SPXRECOHANDLE hreco, const c
 
 SPXAPI conversation_transcriber_get_conversation_id(SPXRECOHANDLE hreco, char* id, size_t id_size)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, id == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
@@ -98,7 +107,6 @@ SPXAPI conversation_transcriber_get_conversation_id(SPXRECOHANDLE hreco, char* i
         auto conversationTranscriber = SpxQueryInterface<ISpxConversationTranscriber>(recognizer);
         SPX_IFTRUE_THROW_HR(conversationTranscriber == nullptr, SPXERR_INVALID_ARG);
 
-        SPX_IFTRUE_THROW_HR(id == nullptr, SPXERR_INVALID_ARG);
         std::string idStr;
         conversationTranscriber->GetConversationId(idStr);
         SPX_IFTRUE_THROW_HR(idStr.length() >= id_size, SPXERR_INVALID_ARG);

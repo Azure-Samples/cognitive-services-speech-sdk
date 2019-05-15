@@ -13,6 +13,7 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 SPXAPI conversation_transcription_result_get_user_id(SPXRESULTHANDLE hresult, char* pszUserId, uint32_t cchUserId)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchUserId == 0);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pszUserId == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
     {

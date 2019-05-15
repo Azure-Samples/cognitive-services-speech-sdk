@@ -57,6 +57,7 @@ SPXAPI speech_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* hconfig, co
 
 SPXAPI speech_config_from_endpoint(SPXSPEECHCONFIGHANDLE* hconfig, const char* endpoint, const char* subscription)
 {
+    // subscription can be null.
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, endpoint == nullptr || !(*endpoint));
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hconfig == nullptr);
 
@@ -112,12 +113,12 @@ static_assert((int)SpeechConfig_ServicePropertyChannel_UriQueryParameter == (int
 
 SPXAPI speech_config_set_service_property(SPXSPEECHCONFIGHANDLE configHandle, const char* propertyName, const char* propertyValue, SpeechConfig_ServicePropertyChannel channel)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, propertyName == nullptr || propertyName[0] == '\0');
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, propertyValue == nullptr || propertyValue[0] == '\0');
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, channel != SpeechConfig_ServicePropertyChannel_UriQueryParameter);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
-        SPX_IFTRUE_THROW_HR(propertyName == nullptr || propertyName[0] == '\0', SPXERR_INVALID_ARG);
-        SPX_IFTRUE_THROW_HR(propertyValue == nullptr || propertyValue[0] == '\0', SPXERR_INVALID_ARG);
-        SPX_IFTRUE_THROW_HR(channel != SpeechConfig_ServicePropertyChannel_UriQueryParameter, SPXERR_INVALID_ARG);
-
         auto configs = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
         auto config = (*configs)[configHandle];
         config->SetServiceProperty(propertyName, propertyValue, (ServicePropertyChannel)channel);

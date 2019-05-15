@@ -68,6 +68,8 @@ SPXAPI activity_received_event_release(SPXEVENTHANDLE h_event)
 template<typename Fn, typename... Args>
 void launch_async_op(SPXRECOHANDLE h_connector, SPXASYNCHANDLE *p_async, Fn fn, Args... args)
 {
+    SPX_IFTRUE_THROW_HR(p_async == nullptr, SPXERR_INVALID_ARG);
+
     using async_type = decltype((std::declval<ISpxSpeechBotConnector>().*fn)(std::declval<Args>()...));
 
     *p_async = SPXHANDLE_INVALID;
@@ -144,6 +146,8 @@ SPXAPI bot_connector_connect(SPXRECOHANDLE h_connector)
 
 SPXAPI bot_connector_connect_async(SPXRECOHANDLE h_connector, SPXASYNCHANDLE* p_async)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, p_async == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         launch_async_op(h_connector, p_async, &ISpxSpeechBotConnector::ConnectAsync);
@@ -185,6 +189,8 @@ SPXAPI bot_connector_disconnect(SPXRECOHANDLE h_connector)
 
 SPXAPI bot_connector_disconnect_async(SPXRECOHANDLE h_connector, SPXASYNCHANDLE* p_async)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, p_async == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         launch_async_op(h_connector, p_async, &ISpxSpeechBotConnector::DisconnectAsync);
@@ -203,6 +209,8 @@ SPXAPI bot_connector_disconnect_async_wait_for(SPXASYNCHANDLE h_async, uint32_t 
 
 SPXAPI bot_connector_send_activity(SPXRECOHANDLE h_connector, SPXACTIVITYHANDLE h_activity, char* interaction_id)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, interaction_id == nullptr);
+
     SPX_INIT_HR(hr);
 
     SPXASYNCHANDLE h_async = SPXHANDLE_INVALID;
@@ -226,6 +234,8 @@ SPXAPI bot_connector_send_activity(SPXRECOHANDLE h_connector, SPXACTIVITYHANDLE 
 
 SPXAPI bot_connector_send_activity_async(SPXRECOHANDLE h_connector, SPXACTIVITYHANDLE h_activity, SPXASYNCHANDLE* p_async)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, p_async == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto activity_handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivity, SPXACTIVITYHANDLE>();
@@ -238,6 +248,8 @@ SPXAPI bot_connector_send_activity_async(SPXRECOHANDLE h_connector, SPXACTIVITYH
 
 SPXAPI bot_connector_send_activity_async_wait_for(SPXASYNCHANDLE h_async, uint32_t milliseconds, char* interaction_id)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, interaction_id == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto result = wait_for_async_op<std::string>(h_async, milliseconds);
@@ -274,6 +286,8 @@ SPXAPI bot_connector_start_keyword_recognition(SPXRECOHANDLE h_connector, SPXKEY
 
 SPXAPI bot_connector_start_keyword_recognition_async(SPXRECOHANDLE h_connector, SPXKEYWORDHANDLE h_keyword, SPXASYNCHANDLE* p_async)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, p_async == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto keyword_handles = CSpxSharedPtrHandleTableManager::Get<ISpxKwsModel, SPXKEYWORDHANDLE>();
@@ -317,6 +331,8 @@ SPXAPI bot_connector_stop_keyword_recognition(SPXRECOHANDLE h_connector)
 
 SPXAPI bot_connector_stop_keyword_recognition_async(SPXRECOHANDLE h_connector, SPXASYNCHANDLE* p_async)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, p_async == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         launch_async_op(h_connector, p_async, &ISpxSpeechBotConnector::StopKeywordRecognitionAsync);
@@ -347,6 +363,8 @@ SPXAPI bot_connector_listen_once(SPXRECOHANDLE h_connector)
 
 SPXAPI bot_connector_listen_once_async(SPXRECOHANDLE h_connector, SPXASYNCHANDLE* p_async)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, p_async == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         launch_async_op(h_connector, p_async, &ISpxSpeechBotConnector::ListenOnceAsync);

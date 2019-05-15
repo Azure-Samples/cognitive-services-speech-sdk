@@ -101,6 +101,8 @@ SPXAPI synthesizer_disable(SPXSYNTHHANDLE hsynth)
 
 SPXAPI synthesizer_is_enabled(SPXSYNTHHANDLE hsynth, bool* pfEnabled)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pfEnabled == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
@@ -130,6 +132,9 @@ SPXAPI synthesizer_get_property_bag(SPXSYNTHHANDLE hsynth, SPXPROPERTYBAGHANDLE*
 
 SPXAPI synthesizer_speak_text(SPXSYNTHHANDLE hsynth, const char* text, uint32_t textLength, SPXRESULTHANDLE* phresult)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phresult == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, text == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
@@ -144,6 +149,9 @@ SPXAPI synthesizer_speak_text(SPXSYNTHHANDLE hsynth, const char* text, uint32_t 
 
 SPXAPI synthesizer_speak_ssml(SPXSYNTHHANDLE hsynth, const char* ssml, uint32_t ssmlLength, SPXRESULTHANDLE* phresult)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phresult == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ssml == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
@@ -158,6 +166,9 @@ SPXAPI synthesizer_speak_ssml(SPXSYNTHHANDLE hsynth, const char* ssml, uint32_t 
 
 SPXAPI synthesizer_speak_text_async(SPXSYNTHHANDLE hsynth, const char* text, uint32_t textLength, SPXASYNCHANDLE* phasync)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phasync == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, text == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phasync = SPXHANDLE_INVALID;
@@ -176,6 +187,9 @@ SPXAPI synthesizer_speak_text_async(SPXSYNTHHANDLE hsynth, const char* text, uin
 
 SPXAPI synthesizer_speak_ssml_async(SPXSYNTHHANDLE hsynth, const char* ssml, uint32_t ssmlLength, SPXASYNCHANDLE* phasync)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phasync == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ssml == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phasync = SPXHANDLE_INVALID;
@@ -194,6 +208,9 @@ SPXAPI synthesizer_speak_ssml_async(SPXSYNTHHANDLE hsynth, const char* ssml, uin
 
 SPXAPI synthesizer_start_speaking_text(SPXSYNTHHANDLE hsynth, const char* text, uint32_t textLength, SPXRESULTHANDLE* phresult)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phresult == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, text == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
@@ -208,6 +225,9 @@ SPXAPI synthesizer_start_speaking_text(SPXSYNTHHANDLE hsynth, const char* text, 
 
 SPXAPI synthesizer_start_speaking_ssml(SPXSYNTHHANDLE hsynth, const char* ssml, uint32_t ssmlLength, SPXRESULTHANDLE* phresult)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phresult == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ssml == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
@@ -222,6 +242,9 @@ SPXAPI synthesizer_start_speaking_ssml(SPXSYNTHHANDLE hsynth, const char* ssml, 
 
 SPXAPI synthesizer_start_speaking_text_async(SPXSYNTHHANDLE hsynth, const char* text, uint32_t textLength, SPXASYNCHANDLE* phasync)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phasync == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, text == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phasync = SPXHANDLE_INVALID;
@@ -240,6 +263,9 @@ SPXAPI synthesizer_start_speaking_text_async(SPXSYNTHHANDLE hsynth, const char* 
 
 SPXAPI synthesizer_start_speaking_ssml_async(SPXSYNTHHANDLE hsynth, const char* ssml, uint32_t ssmlLength, SPXASYNCHANDLE* phasync)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phasync == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ssml == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phasync = SPXHANDLE_INVALID;
@@ -258,6 +284,8 @@ SPXAPI synthesizer_start_speaking_ssml_async(SPXSYNTHHANDLE hsynth, const char* 
 
 SPXAPI synthesizer_speak_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds, SPXRESULTHANDLE* phresult)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phresult == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>, SPXASYNCHANDLE>();
@@ -305,6 +333,8 @@ SPXAPI synthesizer_canceled_set_callback(SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLB
 
 SPXAPI synthesizer_synthesis_event_get_result(SPXEVENTHANDLE hevent, SPXRESULTHANDLE* phresult)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phresult == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesisEventArgs, SPXEVENTHANDLE>();

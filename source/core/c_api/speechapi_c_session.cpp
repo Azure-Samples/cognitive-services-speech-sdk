@@ -15,6 +15,8 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 SPXAPI session_from_recognizer(SPXRECOHANDLE hreco, SPXSESSIONHANDLE* phsession)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phsession == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phsession = SPXHANDLE_INVALID;

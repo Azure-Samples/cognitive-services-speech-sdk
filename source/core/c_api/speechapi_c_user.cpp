@@ -20,6 +20,8 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 SPXAPI user_create_from_id(const char* user_id, SPXUSERHANDLE* huser)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, user_id == nullptr || !(*user_id));
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, huser == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *huser = SPXHANDLE_INVALID;
@@ -40,6 +42,8 @@ SPXAPI user_release_handle(SPXUSERHANDLE huser)
 
 SPXAPI user_get_id(SPXUSERHANDLE huser, char* user_id, size_t user_id_size)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, user_id == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto users = CSpxSharedPtrHandleTableManager::Get<ISpxUser, SPXUSERHANDLE>();

@@ -21,8 +21,8 @@ SPXAPI_(bool) language_understanding_model_handle_is_valid(SPXLUMODELHANDLE hlum
 
 SPXAPI language_understanding_model_create_from_uri(SPXLUMODELHANDLE* hlumodel, const char* uri)
 {
-    if (uri == nullptr)
-        return SPXERR_INVALID_ARG;
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hlumodel == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, uri == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -39,8 +39,8 @@ SPXAPI language_understanding_model_create_from_uri(SPXLUMODELHANDLE* hlumodel, 
 
 SPXAPI language_understanding_model_create_from_app_id(SPXLUMODELHANDLE* hlumodel, const char* appId)
 {
-    if (appId == nullptr)
-        return SPXERR_INVALID_ARG;
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hlumodel == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, appId == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -57,14 +57,10 @@ SPXAPI language_understanding_model_create_from_app_id(SPXLUMODELHANDLE* hlumode
 
 SPXAPI language_understanding_model_create_from_subscription(SPXLUMODELHANDLE* hlumodel, const char* subscriptionKey, const char* appId, const char* region)
 {
-    if (subscriptionKey == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    if (appId == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    if (region == nullptr)
-        return SPXERR_INVALID_ARG;
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hlumodel == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, subscriptionKey == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, appId == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, region == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
     {

@@ -36,6 +36,7 @@ template<typename FactoryMethod>
 auto create_from_config(SPXHANDLE config_handle, SPXHANDLE audio_config_handle, FactoryMethod fm)
 {
     auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
+    SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
 
     // get the input parameters from the hspeechconfig
     auto config_handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
@@ -183,6 +184,7 @@ SPXAPI synthesizer_create_speech_synthesizer_from_config(SPXSYNTHHANDLE* phsynth
         auto speechconfig = (*confighandles)[hspeechconfig];
         auto speechconfig_propertybag = SpxQueryInterface<ISpxNamedProperties>(speechconfig);
         auto factory = SpxCreateObjectWithSite<ISpxSpeechSynthesisApiFactory>("CSpxSpeechSynthesisApiFactory", SpxGetRootSite());
+        SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
 
         // copy the properties from the speech config into the factory
         auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
@@ -221,6 +223,7 @@ SPXAPI recognizer_create_conversation_transcriber_from_config(SPXRECOHANDLE* phr
         auto speechconfig = (*confighandles)[hspeechconfig];
         auto speechconfig_propertybag = SpxQueryInterface<ISpxNamedProperties>(speechconfig);
         auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
+        SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
 
         //copy the properties from the speech config into the factory
         auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);

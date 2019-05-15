@@ -20,8 +20,9 @@ std::mutex g_activity_mutex;
 
 SPXAPI bot_activity_create(SPXACTIVITYHANDLE* ph_act)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_act == nullptr);
+
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         *ph_act = SPXHANDLE_INVALID;
@@ -34,8 +35,9 @@ SPXAPI bot_activity_create(SPXACTIVITYHANDLE* ph_act)
 
 SPXAPI bot_activity_from_string(const char* serialized_activity, SPXACTIVITYHANDLE* ph_act)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_act == nullptr);
+
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         *ph_act = SPXHANDLE_INVALID;
@@ -60,8 +62,9 @@ SPXAPI bot_activity_handle_release(SPXACTIVITYHANDLE h_act)
 
 SPXAPI bot_activity_serialized_size(SPXACTIVITYHANDLE h_act, size_t* size)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, size == nullptr);
+
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivity, SPXACTIVITYHANDLE>();
@@ -74,8 +77,9 @@ SPXAPI bot_activity_serialized_size(SPXACTIVITYHANDLE h_act, size_t* size)
 
 SPXAPI bot_activity_serialize(SPXACTIVITYHANDLE h_act, char* buffer, size_t max_size)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, buffer == nullptr);
+
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivity, SPXACTIVITYHANDLE>();
@@ -93,9 +97,10 @@ SPXAPI bot_activity_serialize(SPXACTIVITYHANDLE h_act, char* buffer, size_t max_
 
 SPXAPI bot_activity_property_size(SPXACTIVITYHANDLE h_act, const char* prop_name, size_t* size)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, prop_name == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, size == nullptr);
+
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivity, SPXACTIVITYHANDLE>();
@@ -114,9 +119,10 @@ SPXAPI bot_activity_property_size(SPXACTIVITYHANDLE h_act, const char* prop_name
 
 SPXAPI bot_activity_property_get(SPXACTIVITYHANDLE h_act, const char* prop_name, char* buffer, size_t max_size)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, prop_name == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, buffer == nullptr);
+
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivity, SPXACTIVITYHANDLE>();
@@ -137,9 +143,10 @@ SPXAPI bot_activity_property_get(SPXACTIVITYHANDLE h_act, const char* prop_name,
 
 SPXAPI bot_activity_property_set(SPXACTIVITYHANDLE h_act, const char* prop_name, const char* buffer)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, prop_name == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, buffer == nullptr);
+
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivity, SPXACTIVITYHANDLE>();
@@ -153,9 +160,10 @@ SPXAPI bot_activity_property_set(SPXACTIVITYHANDLE h_act, const char* prop_name,
 
 SPXAPI bot_activity_complex_field_handle(SPXACTIVITYHANDLE h_act, const char* prop_name, SPXACTIVITYJSONHANDLE* ph_json)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, prop_name == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_json == nullptr);
+
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivity, SPXACTIVITYHANDLE>();
@@ -202,9 +210,9 @@ constexpr auto enum_cast(T v)
 
 SPXAPI bot_activity_json_get_type(SPXACTIVITYHANDLE h_json, int* type)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, type == nullptr);
 
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivityJSONAccessor, SPXACTIVITYJSONHANDLE>();
@@ -249,9 +257,10 @@ SPXAPI bot_activity_json_get_type(SPXACTIVITYHANDLE h_json, int* type)
 /* JSON Object */
 SPXAPI bot_activity_json_has_field(SPXACTIVITYJSONHANDLE h_json, const char* field, bool* result)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, field == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, result == nullptr);
 
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         *result = false;
@@ -266,10 +275,10 @@ SPXAPI bot_activity_json_has_field(SPXACTIVITYJSONHANDLE h_json, const char* fie
 
 SPXAPI bot_activity_json_field_handle(SPXACTIVITYJSONHANDLE h_json, const char* field_name, SPXACTIVITYJSONHANDLE* ph_field)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, field_name == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_field == nullptr);
 
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivityJSONAccessor, SPXACTIVITYJSONHANDLE>();
@@ -313,6 +322,8 @@ SPXHR set_json_value(SPXACTIVITYJSONHANDLE handle, T&& value)
 template<typename T>
 SPXHR get_json_value(SPXACTIVITYJSONHANDLE handle, T* value)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, value == nullptr);
+
     std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -348,6 +359,8 @@ SPXAPI bot_activity_json_set_bool(SPXACTIVITYJSONHANDLE h_json, bool val)
 
 SPXAPI bot_activity_json_set_string(SPXACTIVITYJSONHANDLE h_json, const char* val)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, val == nullptr);
+
     return set_json_value(h_json, std::string{ val });
 }
 
@@ -373,6 +386,8 @@ SPXAPI bot_activity_json_get_bool(SPXACTIVITYJSONHANDLE h_json, bool* val)
 
 SPXAPI bot_activity_json_get_string_size(SPXACTIVITYJSONHANDLE h_json, size_t* size)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, size == nullptr);
+
     std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -386,6 +401,8 @@ SPXAPI bot_activity_json_get_string_size(SPXACTIVITYJSONHANDLE h_json, size_t* s
 
 SPXAPI bot_activity_json_get_string(SPXACTIVITYJSONHANDLE h_json, char* buffer, size_t max_size)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, buffer == nullptr);
+
     std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -401,8 +418,9 @@ SPXAPI bot_activity_json_get_string(SPXACTIVITYJSONHANDLE h_json, char* buffer, 
 /* JSON Array */
 SPXAPI bot_activity_json_array_size(SPXACTIVITYJSONHANDLE h_json, size_t* size)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, size == nullptr);
 
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivityJSONAccessor, SPXACTIVITYJSONHANDLE>();
@@ -419,8 +437,9 @@ SPXAPI bot_activity_json_array_size(SPXACTIVITYJSONHANDLE h_json, size_t* size)
 
 SPXAPI bot_activity_json_array_item(SPXACTIVITYJSONHANDLE h_json, size_t index, SPXACTIVITYJSONHANDLE* ph_item)
 {
-    std::lock_guard<std::mutex> lk{ g_activity_mutex };
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_item == nullptr);
 
+    std::lock_guard<std::mutex> lk{ g_activity_mutex };
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivityJSONAccessor, SPXACTIVITYJSONHANDLE>();

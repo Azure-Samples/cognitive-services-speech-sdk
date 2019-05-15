@@ -26,6 +26,9 @@ SPXAPI grammar_handle_release(SPXGRAMMARHANDLE hgrammar)
 
 SPXAPI phrase_list_grammar_from_recognizer_by_name(SPXGRAMMARHANDLE* hgrammar, SPXRECOHANDLE hreco, const char* name)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, name == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hgrammar == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *hgrammar = SPXHANDLE_INVALID;
@@ -41,6 +44,8 @@ SPXAPI phrase_list_grammar_from_recognizer_by_name(SPXGRAMMARHANDLE* hgrammar, S
 
 SPXAPI phrase_list_grammar_add_phrase(SPXGRAMMARHANDLE hgrammar, SPXPHRASEHANDLE hphrase)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hgrammar == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto grammar = CSpxSharedPtrHandleTableManager::GetPtr<ISpxGrammar, SPXGRAMMARHANDLE>(hgrammar);
@@ -75,6 +80,9 @@ SPXAPI grammar_phrase_handle_release(SPXPHRASEHANDLE hphrase)
 
 SPXAPI grammar_phrase_create_from_text(SPXPHRASEHANDLE* hphrase, const char* text)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, text == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hphrase == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *hphrase = SPXHANDLE_INVALID;

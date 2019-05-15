@@ -32,6 +32,8 @@ SPXAPI audio_stream_format_create_from_default_input(SPXAUDIOSTREAMFORMATHANDLE*
 
 SPXAPI audio_stream_format_create_from_waveformat_pcm(SPXAUDIOSTREAMFORMATHANDLE* hformat, uint32_t samplesPerSecond, uint8_t bitsPerSample, uint8_t channels)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hformat == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *hformat = SPXHANDLE_INVALID;
@@ -57,6 +59,8 @@ SPXAPI audio_stream_format_create_from_default_output(SPXAUDIOSTREAMFORMATHANDLE
 
 SPXAPI audio_stream_format_create_from_compressed_format(SPXAUDIOSTREAMFORMATHANDLE* hformat, Audio_Stream_Container_Format compressedFormat)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hformat == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *hformat = SPXHANDLE_INVALID;
