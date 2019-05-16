@@ -10,8 +10,8 @@
 #include <sstream>
 
 #include "stdafx.h"
-#include "string_token.h"
 #include "string_utils.h"
+#include "azure_c_shared_utility_string_token_wrapper.h"
 
 #define HTTP_PROTOCOL "http://"
 #define HTTPS_PROTOCOL "https://"
@@ -26,6 +26,16 @@ namespace Speech {
 namespace Impl {
 
 
+typedef struct HttpUrl_Tag
+{
+    bool secure;
+    std::string host;
+    int port;
+    std::string path;
+    std::string query;
+} HttpUrl;
+
+
 class CSpxRestTtsHelper
 {
 public:
@@ -37,29 +47,24 @@ public:
         return ss.str();
     };
 
-    static void ParseHttpUrl(const char* url, bool* secure, const char** host, size_t* host_length, int* port, const char** path, size_t* path_length, const char** query, size_t* query_length)
+    static HttpUrl ParseHttpUrl(const std::string& urlStr)
     {
-        // Parameter check
-        if (secure == nullptr || host == nullptr || host_length == nullptr || port == nullptr || path == nullptr || path_length == nullptr || query == nullptr || query_length == nullptr)
-        {
-            ThrowRuntimeError("The parameter(s) for receiving URL parsing result shouldn't be null.");
-        }
+        HttpUrl url;
 
-        size_t url_length = strlen(url);
-        if (url_length < MIN_URL_PARSABLE_LENGTH)
+        if (urlStr.length() < MIN_URL_PARSABLE_LENGTH)
         {
             ThrowRuntimeError("Invalid url (unexpected length)");
         }
 
         // If url starts with "http://" (protocol), 'secure' shall be set to false
-        if (PAL::strnicmp(url, HTTP_PROTOCOL, strlen(HTTP_PROTOCOL)) == 0)
+        if (PAL::strnicmp(urlStr.data(), HTTP_PROTOCOL, strlen(HTTP_PROTOCOL)) == 0)
         {
-            *secure = false;
+            url.secure = false;
         }
         // If url starts with "https://" (protocol), 'secure' shall be set to true
-        else if (PAL::strnicmp(url, HTTPS_PROTOCOL, strlen(HTTPS_PROTOCOL)) == 0)
+        else if (PAL::strnicmp(urlStr.data(), HTTPS_PROTOCOL, strlen(HTTPS_PROTOCOL)) == 0)
         {
-            *secure = true;
+            url.secure = true;
         }
         else
         {
@@ -92,9 +97,9 @@ public:
         delimiters1[2] = query_delimiter;
         delimiters2[0] = query_delimiter;
 
-        host_begin = (*secure ? strlen(HTTPS_PROTOCOL) : strlen(HTTP_PROTOCOL));
+        host_begin = (url.secure ? strlen(HTTPS_PROTOCOL) : strlen(HTTP_PROTOCOL));
 
-        token = StringToken_GetFirst(url + host_begin, url_length - host_begin, current_delimiters, delimiter_count);
+        token = StringToken_GetFirst(urlStr.data() + host_begin, urlStr.length() - host_begin, current_delimiters, delimiter_count);
 
         if (token == NULL)
         {
@@ -108,19 +113,20 @@ public:
                 if (previous_delimiter == NULL && !host_parsed && !port_parsed && !path_parsed && !query_parsed)
                 {
                     // The pointer to the token starting right after 'protocol' (in the 'url' string) shall be stored in 'host'
-                    *host = (char*)StringToken_GetValue(token);
+                    auto host = StringToken_GetValue(token);
 
                     // The length from 'host' up to the first occurrence of either ":" ('port_delimiter'), "/" ('path_delimiter'), "?" ('query_delimiter') or '\0' shall be stored in 'host_length'
-                    *host_length = StringToken_GetLength(token);
+                    auto host_length = StringToken_GetLength(token);
 
                     // If 'host' ends up being NULL, the function shall fail
                     // If 'host_length' ends up being zero, the function shall fail
-                    if (*host == NULL || *host_length == 0)
+                    if (host == NULL || host_length == 0)
                     {
                         ThrowRuntimeError("Failed parsing http url host");
                     }
                     else
                     {
+                        url.host = std::string(host, host_length);
                         host_parsed = true;
                     }
                 }
@@ -140,45 +146,47 @@ public:
                         char port_copy[10];
                         (void)memset(port_copy, 0, sizeof(char) * 10);
                         (void)memcpy(port_copy, port_str, port_length);
-                        *port = atoi(port_copy);
+                        url.port = atoi(port_copy);
                         port_parsed = true;
                     }
                 }
                 // If after 'host' or the port number the 'path_delimiter' occurs (not preceeded by 'query_delimiter') the following pointer address shall be stored in 'path'
                 else if (previous_delimiter == path_delimiter && host_parsed && !path_parsed && !query_parsed)
                 {
-                    *path = (char*)StringToken_GetValue(token);
+                    auto path = StringToken_GetValue(token);
 
                     // The length from 'path' up to the first occurrence of either 'query_delimiter' or '\0' shall be stored in 'path_length'
-                    *path_length = StringToken_GetLength(token);
+                    auto path_length = StringToken_GetLength(token);
 
                     // If the path component is present and 'http_url->path' ends up being NULL, the function shall fail
                     // If the path component is present and 'http_url->path_length' ends up being zero, the function shall fail
-                    if (*path == NULL || *path_length == 0)
+                    if (path == NULL || path_length == 0)
                     {
                         ThrowRuntimeError("Failed parsing http url path");
                     }
                     else
                     {
+                        url.path = std::string(path, path_length);
                         path_parsed = true;
                     }
                 }
                 // Next if the 'query_delimiter' occurs the following pointer address shall be stored in 'query'
                 else if (previous_delimiter == query_delimiter && current_delimiter == NULL && host_parsed && !query_parsed)
                 {
-                    *query = (char*)StringToken_GetValue(token);
+                    auto query = StringToken_GetValue(token);
 
                     // The length from 'query' up to '\0' shall be stored in 'query_length'
-                    *query_length = StringToken_GetLength(token);
+                    auto query_length = StringToken_GetLength(token);
 
                     // If the query component is present and 'http_url->query' ends up being NULL, the function shall fail
                     // If the query component is present and 'http_url->query_length' ends up being zero, the function shall fail
-                    if (*query == NULL || *query_length == 0)
+                    if (query == NULL || query_length == 0)
                     {
                         ThrowRuntimeError("Failed parsing http url query");
                     }
                     else
                     {
+                        url.query = std::string(query, query_length);
                         query_parsed = true;
                     }
                 }
@@ -198,6 +206,8 @@ public:
 
             StringToken_Destroy(token);
         }
+
+        return url;
     };
 
     static std::string BuildSsml(const std::string& text, const std::string& language, const std::string& voice)

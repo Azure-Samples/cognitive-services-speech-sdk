@@ -6,9 +6,9 @@
 //
 
 #include "stdafx.h"
-#include "httpapi.h"
 #include "rest_tts_helper.h"
 #include "authenticator.h"
+#include "azure_c_shared_utility_httpapi_wrapper.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
 #define SPX_DBG_TRACE_REST_TTS_AUTHENTICATOR 0
@@ -20,8 +20,10 @@ namespace Speech {
 namespace Impl {
 
 
-CSpxRestTtsAuthenticator::CSpxRestTtsAuthenticator(const std::string& issueTokenUri, const std::string& subscriptionKey) :
-    m_issueTokenUri(issueTokenUri), m_subscriptionKey(subscriptionKey)
+CSpxRestTtsAuthenticator::CSpxRestTtsAuthenticator(const std::string& issueTokenUri, const std::string& subscriptionKey,
+    const std::string& proxyHost, int proxyPort, const std::string& proxyUsername, const std::string& proxyPassword) :
+    m_issueTokenUri(issueTokenUri), m_subscriptionKey(subscriptionKey),
+    m_proxyHost(proxyHost), m_proxyPort(proxyPort), m_proxyUsername(proxyUsername), m_proxyPassword(proxyPassword)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS_AUTHENTICATOR, __FUNCTION__);
     Init();
@@ -65,30 +67,20 @@ void CSpxRestTtsAuthenticator::RenewAccessToken()
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS_AUTHENTICATOR, __FUNCTION__);
 
     std::unique_lock<std::mutex> lock(m_mutex);
-    m_accessToken = HttpPost(m_issueTokenUri, m_subscriptionKey);
+    m_accessToken = HttpPost(m_issueTokenUri, m_subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
 }
 
-std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri, const std::string& subscriptionKey)
+std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri, const std::string& subscriptionKey,
+    const std::string& proxyHost, int proxyPort, const std::string& proxyUsername, const std::string& proxyPassword)
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS_AUTHENTICATOR, __FUNCTION__);
 
-    // Parse host name & path from URL
-    bool secure = false;
-    const char* host = nullptr;
-    size_t host_length = 0;
-    int port = 0;
-    const char* path = nullptr;
-    size_t path_length = 0;
-    const char* query = nullptr;
-    size_t query_length = 0;
-    CSpxRestTtsHelper::ParseHttpUrl(issueTokenUri.data(), &secure, &host, &host_length, &port, &path, &path_length, &query, &query_length);
-
-    std::string host_str = std::string(host, host_length);
-    std::string path_str = std::string("/") + std::string(path, path_length);
-    std::string query_str = std::string("?") + std::string(query, query_length);
+    // Parse URL
+    auto url = CSpxRestTtsHelper::ParseHttpUrl(issueTokenUri);
 
     // Allocate resources
-    HTTP_HANDLE http_connect = HTTPAPI_CreateConnection(host_str.data());
+    HTTP_HANDLE http_connect = HTTPAPI_CreateConnection_With_Proxy(
+        url.host.data(), proxyHost.data(), proxyPort, proxyUsername.data(), proxyPassword.data());
     if (!http_connect)
     {
         throw std::runtime_error("Could not create HTTP connection");
@@ -131,7 +123,7 @@ std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri,
     try
     {
         // Add http headers
-        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Host", host_str.data()) != HTTP_HEADERS_OK)
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Host", url.host.data()) != HTTP_HEADERS_OK)
         {
             throw std::runtime_error("Could not add HTTP request header: Host");
         }
@@ -151,15 +143,13 @@ std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri,
         HTTPAPI_RESULT result = HTTPAPI_ExecuteRequest(
             http_connect,
             HTTPAPI_REQUEST_POST,
-            (path_str + query_str).data(),
+            (std::string("/") + url.path + std::string("?") + url.query).data(),
             httpRequestHeaders,
             nullptr,
             0,
             &statusCode,
             httpResponseHeaders,
-            buffer,
-            nullptr,
-            nullptr);
+            buffer);
 
         // Check result
         if (result != HTTPAPI_OK || statusCode < 200 || statusCode >= 300)

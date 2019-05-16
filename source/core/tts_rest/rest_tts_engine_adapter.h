@@ -14,6 +14,7 @@
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
 #include "property_bag_impl.h"
+#include "azure_c_shared_utility_httpapi_wrapper.h"
 
 #define HTTPS_URL_PREFIX "https://"
 #define ISSUE_TOKEN_HOST_SUFFIX ".api.cognitive.microsoft.com"
@@ -29,6 +30,13 @@ namespace Speech {
 namespace Impl {
 
 
+typedef struct RestTtsResponse_Tag
+{
+    std::vector<uint8_t> body;
+    std::mutex mutex;
+} RestTtsResponse;
+
+
 typedef struct RestTtsRequest_Tag
 {
     std::wstring requestId;
@@ -41,6 +49,7 @@ typedef struct RestTtsRequest_Tag
     bool outputHasHeader;
     ISpxTtsEngineAdapter* adapter;
     std::shared_ptr<ISpxTtsEngineAdapterSite> site;
+    RestTtsResponse response;
 } RestTtsRequest;
 
 
@@ -61,6 +70,7 @@ public:
 
     // --- ISpxObjectInit
     void Init() override;
+    void Term() override;
 
     // --- ISpxTtsEngineAdapter
     void SetOutput(std::shared_ptr<ISpxAudioOutput> output) override;
@@ -87,7 +97,7 @@ private:
     static std::string ParseRegionFromCognitiveServiceEndpoint(const std::string& endpoint);
     static bool IsCustomVoiceEndpoint(const std::string& endpoint);
     static bool IsStandardVoiceEndpoint(const std::string& endpoint);
-    static void PostTtsRequest(RestTtsRequest& request, std::shared_ptr<ISpxSynthesisResultInit> result_init);
+    static void PostTtsRequest(HTTP_HANDLE http_connect, RestTtsRequest& request, std::shared_ptr<ISpxSynthesisResultInit> result_init);
     static void OnChunkReceived(void* context, const unsigned char* buffer, size_t size);
 
 
@@ -96,6 +106,7 @@ private:
     std::string m_endpoint;
     std::shared_ptr<ISpxAudioOutput> m_audioOutput;
     std::shared_ptr<CSpxRestTtsAuthenticator> m_authenticator;
+    HTTP_HANDLE m_httpConnect = nullptr;
 };
 
 

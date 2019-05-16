@@ -115,7 +115,8 @@ class CSpxRestTtsAuthenticator : public ISpxObjectInit
 {
 public:
 
-    CSpxRestTtsAuthenticator(const std::string& issueTokenUri, const std::string& subscriptionKey);
+    CSpxRestTtsAuthenticator(const std::string& issueTokenUri, const std::string& subscriptionKey,
+        const std::string& proxyHost, int proxyPort, const std::string& proxyUsername, const std::string& proxyPassword);
     virtual ~CSpxRestTtsAuthenticator();
 
     SPX_INTERFACE_MAP_BEGIN()
@@ -132,12 +133,17 @@ public:
 private:
 
     void RenewAccessToken();
-    std::string HttpPost(const std::string& issueTokenUri, const std::string& subscriptionKey);
+    std::string HttpPost(const std::string& issueTokenUri, const std::string& subscriptionKey,
+        const std::string& proxyHost, int proxyPort, const std::string& proxyUsername, const std::string& proxyPassword);
 
 private:
 
     std::string m_issueTokenUri;
     std::string m_subscriptionKey;
+    std::string m_proxyHost;
+    int m_proxyPort;
+    std::string m_proxyUsername;
+    std::string m_proxyPassword;
     std::string m_accessToken;
     std::atomic<bool> m_accessTokenInitialized{ false };
     Timer m_accessTokenRenewer;

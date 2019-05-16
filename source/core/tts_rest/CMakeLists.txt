@@ -20,16 +20,12 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/rest_tts_engine_adapter.h"
     "${SRC_DIR}/rest_tts_helper.h"
     "${SRC_DIR}/authenticator.h"
-    "${SRC_DIR}/string_token.h"
-    "${SRC_DIR}/httpapi.h"
     )
 
 set(SOURCES
     "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/rest_tts_engine_adapter.cpp"
     "${SRC_DIR}/authenticator.cpp"
-    "${SRC_DIR}/string_token.c"
-    "${SRC_DIR}/httpapi.c"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})
@@ -40,10 +36,6 @@ add_library(tts_rest STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET tts_rest PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
-endif()
-
-if (UNIX)
-    add_definitions(-Wno-error)
 endif()
 
 set_target_properties (tts_rest PROPERTIES

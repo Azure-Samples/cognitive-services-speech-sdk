@@ -6,7 +6,6 @@
 //
 
 #include "stdafx.h"
-#include "httpapi.h"
 #include "rest_tts_helper.h"
 #include "rest_tts_engine_adapter.h"
 #include "create_object_helpers.h"
@@ -17,7 +16,7 @@
 #include "property_bag_impl.h"
 #include "property_id_2_name_map.h"
 #include "usp.h"
-#include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility_platform_wrapper.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
 #define SPX_DBG_TRACE_REST_TTS 0
@@ -37,15 +36,26 @@ CSpxRestTtsEngineAdapter::CSpxRestTtsEngineAdapter()
 CSpxRestTtsEngineAdapter::~CSpxRestTtsEngineAdapter()
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS, __FUNCTION__);
+    Term();
 }
 
 void CSpxRestTtsEngineAdapter::Init()
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS, __FUNCTION__);
 
+    // Get proxy setting
+    std::string proxyHost = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyHostName), "");
+    int proxyPort = std::stoi(ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPort), "0"));
+    if (proxyPort < 0)
+    {
+        ThrowInvalidArgumentException("Invalid proxy port: %d", proxyPort);
+    }
+
+    std::string proxyUsername = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName), "");
+    std::string proxyPassword = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword), "");
+
     // Initialize websocket platform
-    // Note: proxy properties aren't yet implented here, cf. 1733502.
-    Microsoft::CognitiveServices::Speech::USP::PlatformInit(nullptr, 0, nullptr, nullptr);
+    Microsoft::CognitiveServices::Speech::USP::PlatformInit(proxyHost.data(), proxyPort, proxyUsername.data(), proxyPassword.data());
 
     // Initialize azure-c-shared HTTP API
     HTTPAPI_Init();
@@ -75,7 +85,7 @@ void CSpxRestTtsEngineAdapter::Init()
             ThrowRuntimeError("Subscription key is required for cognitive service TTS custom voice request.");
         }
 
-        m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey);
+        m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, proxyHost, proxyPort, proxyUsername, proxyPassword);
     }
     else if ((endpoint.empty() && !region.empty()) || (!endpoint.empty() && IsStandardVoiceEndpoint(endpoint)))
     {
@@ -100,11 +110,37 @@ void CSpxRestTtsEngineAdapter::Init()
             ThrowRuntimeError("Subscription key is required for cognitive service TTS standard voice request.");
         }
 
-        m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey);
+        m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, proxyHost, proxyPort, proxyUsername, proxyPassword);
     }
     else
     {
         ThrowRuntimeError("Invalid combination of endpoint, region and(or) subscription key.");
+    }
+
+    // Create HTTP connection
+    auto url = CSpxRestTtsHelper::ParseHttpUrl(m_endpoint);
+    m_httpConnect = HTTPAPI_CreateConnection_With_Proxy(url.host.data(), proxyHost.data(), proxyPort, proxyUsername.data(), proxyPassword.data());
+    if (!m_httpConnect)
+    {
+        throw std::runtime_error("Could not create HTTP connection");
+    }
+
+#ifdef SPEECHSDK_USE_OPENSSL
+    int tls_version = OPTION_TLS_VERSION_1_2;
+    if (HTTPAPI_SetOption(m_httpConnect, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
+    {
+        HTTPAPI_CloseConnection(m_httpConnect);
+        throw std::runtime_error("Could not set TLS 1.2 option");
+    }
+#endif
+}
+
+void CSpxRestTtsEngineAdapter::Term()
+{
+    if (m_httpConnect != nullptr)
+    {
+        HTTPAPI_CloseConnection(m_httpConnect);
+        m_httpConnect = nullptr;
     }
 }
 
@@ -155,7 +191,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
         request.adapter = this;
         request.site = p;
 
-        PostTtsRequest(request, resultInit); });
+        PostTtsRequest(m_httpConnect, request, resultInit); });
 
     return result;
 }
@@ -194,53 +230,35 @@ std::string CSpxRestTtsEngineAdapter::GetOutputFormatString(std::shared_ptr<ISpx
 
 std::string CSpxRestTtsEngineAdapter::ParseRegionFromCognitiveServiceEndpoint(const std::string& endpoint)
 {
-    bool secure = false;
-    const char* host = nullptr;
-    size_t host_length = 0;
-    int port = 0;
-    const char* path = nullptr;
-    size_t path_length = 0;
-    const char* query = nullptr;
-    size_t query_length = 0;
-    CSpxRestTtsHelper::ParseHttpUrl(endpoint.data(), &secure, &host, &host_length, &port, &path, &path_length, &query, &query_length);
+    auto url = CSpxRestTtsHelper::ParseHttpUrl(endpoint);
 
-    std::string host_str = std::string(host, host_length);
-    size_t first_dot_pos = host_str.find('.');
+    size_t first_dot_pos = url.host.find('.');
     if (first_dot_pos == size_t(-1))
     {
         ThrowRuntimeError("The given endpoint is not valid TTS cognitive service endpoint. Expected *.tts.speech.microsoft.com or *.voice.speech.microsoft.com");
     }
 
-    std::string host_name_suffix = host_str.substr(first_dot_pos);
+    std::string host_name_suffix = url.host.substr(first_dot_pos);
     if (PAL::stricmp(host_name_suffix.data(), TTS_COGNITIVE_SERVICE_HOST_SUFFIX) != 0 &&
         PAL::stricmp(host_name_suffix.data(), TTS_CUSTOM_VOICE_HOST_SUFFIX) != 0)
     {
         ThrowRuntimeError("The given endpoint is not valid TTS cognitive service endpoint. Expected *.tts.speech.microsoft.com or *.voice.speech.microsoft.com");
     }
 
-    return host_str.substr(0, first_dot_pos);
+    return url.host.substr(0, first_dot_pos);
 }
 
 bool CSpxRestTtsEngineAdapter::IsCustomVoiceEndpoint(const std::string& endpoint)
 {
-    bool secure = false;
-    const char* host = nullptr;
-    size_t host_length = 0;
-    int port = 0;
-    const char* path = nullptr;
-    size_t path_length = 0;
-    const char* query = nullptr;
-    size_t query_length = 0;
-    CSpxRestTtsHelper::ParseHttpUrl(endpoint.data(), &secure, &host, &host_length, &port, &path, &path_length, &query, &query_length);
+    auto url = CSpxRestTtsHelper::ParseHttpUrl(endpoint);
 
-    std::string host_str = std::string(host, host_length);
-    size_t first_dot_pos = host_str.find('.');
+    size_t first_dot_pos = url.host.find('.');
     if (first_dot_pos == size_t(-1))
     {
         return false;
     }
 
-    std::string host_name_suffix = host_str.substr(first_dot_pos);
+    std::string host_name_suffix = url.host.substr(first_dot_pos);
 
     if (PAL::stricmp(host_name_suffix.data(), TTS_CUSTOM_VOICE_HOST_SUFFIX) == 0)
     {
@@ -254,24 +272,15 @@ bool CSpxRestTtsEngineAdapter::IsCustomVoiceEndpoint(const std::string& endpoint
 
 bool CSpxRestTtsEngineAdapter::IsStandardVoiceEndpoint(const std::string& endpoint)
 {
-    bool secure = false;
-    const char* host = nullptr;
-    size_t host_length = 0;
-    int port = 0;
-    const char* path = nullptr;
-    size_t path_length = 0;
-    const char* query = nullptr;
-    size_t query_length = 0;
-    CSpxRestTtsHelper::ParseHttpUrl(endpoint.data(), &secure, &host, &host_length, &port, &path, &path_length, &query, &query_length);
+    auto url = CSpxRestTtsHelper::ParseHttpUrl(endpoint);
 
-    std::string host_str = std::string(host, host_length);
-    size_t first_dot_pos = host_str.find('.');
+    size_t first_dot_pos = url.host.find('.');
     if (first_dot_pos == size_t(-1))
     {
         return false;
     }
 
-    std::string host_name_suffix = host_str.substr(first_dot_pos);
+    std::string host_name_suffix = url.host.substr(first_dot_pos);
 
     if (PAL::stricmp(host_name_suffix.data(), TTS_COGNITIVE_SERVICE_HOST_SUFFIX) == 0)
     {
@@ -283,39 +292,12 @@ bool CSpxRestTtsEngineAdapter::IsStandardVoiceEndpoint(const std::string& endpoi
     }
 }
 
-void CSpxRestTtsEngineAdapter::PostTtsRequest(RestTtsRequest& request, std::shared_ptr<ISpxSynthesisResultInit> result_init)
+void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsRequest& request, std::shared_ptr<ISpxSynthesisResultInit> result_init)
 {
-    // Parse host name & path from URL
-    bool secure = false;
-    const char* host = nullptr;
-    size_t host_length = 0;
-    int port = 0;
-    const char* path = nullptr;
-    size_t path_length = 0;
-    const char* query = nullptr;
-    size_t query_length = 0;
-    CSpxRestTtsHelper::ParseHttpUrl(request.endpoint.data(), &secure, &host, &host_length, &port, &path, &path_length, &query, &query_length);
-
-    std::string host_str = std::string(host, host_length);
-    std::string path_str = std::string("/") + std::string(path, path_length);
-    std::string query_str = std::string("?") + std::string(query, query_length);
+    // Parse URL
+    auto url = CSpxRestTtsHelper::ParseHttpUrl(request.endpoint);
 
     // Allocate resources
-    HTTP_HANDLE http_connect = HTTPAPI_CreateConnection(host_str.data());
-    if (!http_connect)
-    {
-        throw std::runtime_error("Could not create HTTP connection");
-    }
-
-#ifdef SPEECHSDK_USE_OPENSSL
-    int tls_version = OPTION_TLS_VERSION_1_2;
-    if (HTTPAPI_SetOption(http_connect, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
-    {
-        HTTPAPI_CloseConnection(http_connect);
-        throw std::runtime_error("Could not set TLS 1.2 option");
-    }
-#endif
-
     HTTP_HEADERS_HANDLE httpRequestHeaders = HTTPHeaders_Alloc();
     if (!httpRequestHeaders)
     {
@@ -331,6 +313,7 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(RestTtsRequest& request, std::shar
         throw std::runtime_error("Could not allocate HTTP response headers");
     }
 
+#ifdef __MACH__ // There is issue on streaming for IOS/OSX, disable streaming on IOS/OSX for now
     BUFFER_HANDLE buffer = BUFFER_new();
     if (!buffer)
     {
@@ -339,11 +322,12 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(RestTtsRequest& request, std::shar
         HTTPAPI_CloseConnection(http_connect);
         throw std::runtime_error("Could not allocate HTTP data buffer");
     }
+#endif
 
     try
     {
         // Add http headers
-        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Host", host_str.data()) != HTTP_HEADERS_OK)
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Host", url.host.data()) != HTTP_HEADERS_OK)
         {
             throw std::runtime_error("Could not add HTTP request header: Host");
         }
@@ -379,20 +363,27 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(RestTtsRequest& request, std::shar
 
         // Execute http request
         unsigned int statusCode = 0;
+#ifdef __MACH__ // There is issue on streaming for IOS/OSX, disable streaming on IOS/OSX for now
         HTTPAPI_RESULT result = HTTPAPI_ExecuteRequest(
             http_connect,
             HTTPAPI_REQUEST_POST,
-            (path_str + query_str).data(),
+            (std::string("/") + url.path + std::string("?") + url.query).data(),
             httpRequestHeaders,
             (unsigned char *)request.postContent.data(),
             request.postContent.length(),
             &statusCode,
             httpResponseHeaders,
-            buffer,
-#ifdef __MACH__ // There is issue on streaming for IOS/OSX, disable streaming on IOS/OSX for now
-            nullptr,
-            nullptr);
+            buffer);
 #else
+        HTTPAPI_RESULT result = HTTPAPI_ExecuteRequest_With_Streaming(
+            http_connect,
+            HTTPAPI_REQUEST_POST,
+            (std::string("/") + url.path + std::string("?") + url.query).data(),
+            httpRequestHeaders,
+            (unsigned char *)request.postContent.data(),
+            request.postContent.length(),
+            &statusCode,
+            httpResponseHeaders,
             OnChunkReceived,
             &request);
 #endif
@@ -400,17 +391,20 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(RestTtsRequest& request, std::shar
         // Check result
         if (result == HTTPAPI_OK && statusCode >= 200 && statusCode < 300)
         {
-            unsigned char* buffer_content = BUFFER_u_char(buffer);
-            size_t buffer_length = BUFFER_length(buffer);
-
 #ifdef __MACH__ // There is issue on streaming for IOS/OSX, disable streaming on IOS/OSX for now
             // Write audio to site
+            unsigned char* buffer_content = BUFFER_u_char(buffer);
+            size_t buffer_length = BUFFER_length(buffer);
             request.site->Write(request.adapter, request.requestId, buffer_content, (uint32_t)buffer_length);
-#endif
 
             // Write audio to result
             result_init->InitSynthesisResult(request.requestId, ResultReason::SynthesizingAudioCompleted, REASON_CANCELED_NONE,
                 CancellationErrorCode::NoError, buffer_content, buffer_length, request.outputFormat.get(), request.outputHasHeader);
+#else
+            // Write audio to result
+            result_init->InitSynthesisResult(request.requestId, ResultReason::SynthesizingAudioCompleted, REASON_CANCELED_NONE,
+                CancellationErrorCode::NoError, request.response.body.data(), request.response.body.size(), request.outputFormat.get(), request.outputHasHeader);
+#endif
         }
         else
         {
@@ -440,25 +434,33 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(RestTtsRequest& request, std::shar
     catch (...)
     {
         // Release resources
+#ifdef __MACH__ // There is issue on streaming for IOS/OSX, disable streaming on IOS/OSX for now
         BUFFER_delete(buffer);
+#endif
         HTTPHeaders_Free(httpRequestHeaders);
         HTTPHeaders_Free(httpResponseHeaders);
-        HTTPAPI_CloseConnection(http_connect);
 
         throw;
     }
 
     // Release resources
+#ifdef __MACH__ // There is issue on streaming for IOS/OSX, disable streaming on IOS/OSX for now
     BUFFER_delete(buffer);
+#endif
     HTTPHeaders_Free(httpRequestHeaders);
     HTTPHeaders_Free(httpResponseHeaders);
-    HTTPAPI_CloseConnection(http_connect);
 }
 
 void CSpxRestTtsEngineAdapter::OnChunkReceived(void* context, const unsigned char* buffer, size_t size)
 {
     auto request = (RestTtsRequest *)context;
     request->site->Write(request->adapter, request->requestId, (uint8_t *)buffer, (uint32_t)size);
+
+    // Append current chunk to total audio data for use of synthesis result
+    std::unique_lock<std::mutex> lock(request->response.mutex);
+    auto originalSize = request->response.body.size();
+    request->response.body.resize(originalSize + size);
+    memcpy(request->response.body.data(), buffer, size);
 }
 
 
