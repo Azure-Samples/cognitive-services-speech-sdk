@@ -83,7 +83,7 @@ Connection::Impl::Impl(const Client& config)
     : m_config(config),
     m_valid(false),
     m_connected(false),
-    m_sawSpeechContext(false),
+    m_speechContextMessageAllowed(true),
     m_audioOffset(0),
     m_creationTime(telemetry_gettime())
 {
@@ -497,7 +497,7 @@ void Connection::Impl::RegisterRequestId(const string& requestId)
 
 void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size, MessageType messageType)
 {
-    throw_if_null(data, "data");
+    throw_if_null(data, "message payload is null");
 
     if (path.empty())
     {
@@ -506,19 +506,23 @@ void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, siz
 
     if (m_valid)
     {
-        // todo: If the service receives multiple context messages for a single turn,
-        // the service will close the WebSocket connection with an error.
-        // need a better way to throw a logic exception when we are sending speech.context in the middle of a turn by mistakes.
-        if (messageType == MessageType::Context && m_sawSpeechContext == true )
+        // According to USP protocol, speech.context must be sent before any audio in a turn, and
+        // only one speech.context message is allowed in the same turn.
+        if (messageType == MessageType::Context)
         {
-            ThrowLogicError("Error trying to send a context message while in the middle of a speech turn.");
+            // QueueMessage() is serialized by ThreadService, no lock is needed.
+            if (!m_speechContextMessageAllowed)
+            {
+                ThrowLogicError("Error trying to send a context message while in the middle of a speech turn.");
+            }
+            else
+            {
+                // Only one speech.context in the same turn.
+                m_speechContextMessageAllowed = false;
+            }
         }
 
         auto requestId = UpdateRequestId(messageType);
-        if (messageType == MessageType::Context)
-        {
-            m_sawSpeechContext = true;
-        }
 
         (void)TransportMessageWrite(m_transport.get(), path.c_str(), data, size, requestId.c_str());
     }
@@ -535,7 +539,6 @@ string Connection::Impl::UpdateRequestId(const MessageType messageType)
     switch (messageType)
     {
     case MessageType::Config:
-
         break;
 
     case MessageType::AgentContext:
@@ -546,19 +549,41 @@ string Connection::Impl::UpdateRequestId(const MessageType messageType)
     case MessageType::Context:
         if (m_config.m_endpointType == EndpointType::ConversationTranscriptionService)
         {
-            m_speechRequestId = m_speechRequestId.empty() ? CreateRequestId() : m_speechRequestId;
+            // For ConversationTranscription, speech.event might be sent before speech.context, so m_speechRequestId might already be set.
+            // After the Bug 1784130 is fixed, the following code should be removed, i.e. instead of creating requestId, a LogicError should be thrown, 
+            if (m_speechRequestId.empty())
+            {
+                m_speechRequestId = CreateRequestId();
+            }
         }
         else
         {
+            // For other services, speech.event must be associated to an ongoing speech trun. Only speech.context or audio can kick-off a new turn.
+            // And speech.context must be sent before audio, so m_speechRequestId must be empty at this time.
+            if (!m_speechRequestId.empty())
+            {
+                ThrowLogicError("Speech.Context must be the first message in a turn, and m_speechRequestId must be empty.");
+            }
             m_speechRequestId = CreateRequestId();
         }
         requestId = m_speechRequestId;
-
         break;
 
     case MessageType::Event:
-        assert(m_config.m_endpointType == EndpointType::ConversationTranscriptionService);
-        m_speechRequestId = m_speechRequestId.empty() ? CreateRequestId() : m_speechRequestId;
+        //Bug 1784130: according to USP, SpeechEvent is associated with the current speech turn. So m_speechRequestId must be non-empty.
+        //However, the current conversation transcriber will send speech.event either before a turn (before audio/speech.context)
+        //or outside a turn (after turn.end).
+        if (m_config.m_endpointType == EndpointType::ConversationTranscriptionService)
+        {
+            if (m_speechRequestId.empty())
+            {
+                m_speechRequestId = CreateRequestId();
+            }
+        }
+        if (m_speechRequestId.empty())
+        {
+            ThrowLogicError("Speech.event must be associated to the current speech turn, so m_speechRequestId must be non-empty.");
+        }
         requestId = m_speechRequestId;
         break;
 
@@ -591,6 +616,12 @@ void Connection::Impl::QueueAudioSegment(const Microsoft::CognitiveServices::Spe
     if (!m_valid)
     {
         return;
+    }
+
+    // after sending audio message, no speech.context is allowed in the same turn.
+    if (m_speechContextMessageAllowed)
+    {
+        m_speechContextMessageAllowed = false;
     }
 
     MetricsAudioStreamData(size);
@@ -633,6 +664,13 @@ void Connection::Impl::QueueAudioEnd()
     {
         return;
     }
+
+    // no speech.context is allowed after audio.end
+    if (m_speechContextMessageAllowed)
+    {
+        m_speechContextMessageAllowed = false;
+    }
+
     auto ret = TransportStreamFlush(m_transport.get(), path::audio, m_speechRequestId.c_str());
 
     m_audioOffset = 0;
@@ -1028,7 +1066,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             if (requestId == connection->m_speechRequestId)
             {
                 connection->m_speechRequestId.clear();
-                connection->m_sawSpeechContext = false;
+                connection->m_speechContextMessageAllowed = true;
                 connection->Invoke([&] { callbacks->OnTurnEnd({ requestId }); });
             }
             else

@@ -180,10 +180,7 @@ void CSpxUspRecoEngineAdapter::SendSpeechEventMessage(std::string&& message)
         return;
     }
 
-    if (m_endpointType == USP::EndpointType::ConversationTranscriptionService)
-    {
-        UspSendMessage("speech.event", message, USP::MessageType::Event);
-    }
+    UspSendMessage("speech.event", message, USP::MessageType::Event);
 }
 
 void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)

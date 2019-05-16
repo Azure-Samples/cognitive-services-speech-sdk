@@ -144,7 +144,7 @@ private:
     Client m_config;
     bool m_valid;
     bool m_connected;
-    bool m_sawSpeechContext;
+    bool m_speechContextMessageAllowed;
     std::string m_connectionUrl;
     size_t m_audioOffset;
     DnsCachePtr m_dnsCache;
