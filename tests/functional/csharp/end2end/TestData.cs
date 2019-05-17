@@ -29,9 +29,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string ModelFile = Path.Combine(KwsDir, Path.Combine("Computer", "kws.table"));
                 public static readonly string ModelKeyword = "computer";
 
-                public static readonly string AudioFile = Path.Combine(KwsDir, "kws_whatstheweatherlike_howoldareyou.wav");
-                public static readonly string AudioFileIntent = Path.Combine(KwsDir, "kws_whatstheweatherlike_howoldareyou_intent.wav");
-                public static readonly string AudioFileTranslate = Path.Combine(KwsDir, "kws_whatstheweatherlike_howoldareyou_translate.wav");
+                public static readonly string AudioFile1 = Path.Combine(KwsDir, "kws_whatstheweatherlike.wav");
+                public static readonly string AudioFile2 = Path.Combine(KwsDir, "kws_howoldareyou.wav");
                 public static readonly string Utterance1 = "Computer what's the weather like?";
                 public static readonly string Utterance2 = "Computer how old are you?";
             }

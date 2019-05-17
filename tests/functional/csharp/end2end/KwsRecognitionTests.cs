@@ -63,6 +63,84 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
     }
 
+    public class RealTimeMultiFileStream : PullAudioInputStreamCallback
+    {
+        // Default behavior for new streams. true, if realtime,
+        // false, if best effort.
+        public static bool defaultIsRealtime = false;
+
+        FileStream fs;
+        DateTime notBefore;
+        bool currentIsRealtime;
+        string[] fileNames;
+        int currentFile;
+        object fsLock = new object();
+
+        public RealTimeMultiFileStream(params string[] fileNames)
+        {
+            Console.WriteLine("Trying to open " + fileNames[0]);
+            currentFile = 0;
+            this.fileNames = fileNames;
+            fs = File.OpenRead(fileNames[0]);
+            notBefore = DateTime.Now;
+            currentIsRealtime = defaultIsRealtime;
+        }
+
+        public override int Read(byte[] dataBuffer, uint size)
+        {
+            var now = DateTime.Now;
+
+            // calculates the deadline when the next data should arrive assuming
+            // a stream of mono/16bits/16000hz audio input.
+            var newNotBefore = notBefore.AddMilliseconds((1000 * size) / 32000);
+
+            if (currentIsRealtime)
+            {
+                var delay = notBefore - now;
+                if (delay > TimeSpan.Zero)
+                {
+                    Thread.Sleep((int)delay.TotalMilliseconds);
+                }
+            }
+
+            notBefore = newNotBefore;
+            int read = 0;
+
+            lock (fsLock)
+            {
+                // If there isn't a current file to read from, be done.
+                if (fs != null)
+                {
+                    read = fs.Read(dataBuffer, 0, (int)size);
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+
+            // Just return the entire buffer. We either got enough from the file,
+            // or are about to send silence.
+            return dataBuffer.Length;
+
+        }
+
+        public void NextFile()
+        {
+            lock (fsLock)
+            {
+                fs.Dispose();
+                fs = null;
+
+                // If there are more files to read from, move to the next.
+                if (++currentFile < fileNames.Length)
+                {
+                    fs = File.OpenRead(fileNames[currentFile]);
+                }
+            }
+        }
+    }
+
     [TestClass]
     public class KwsRecognitionTests : RecognitionTestBase
     {
@@ -147,11 +225,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                recognizer.Recognizing += (s, e) => {
+                recognizer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -195,11 +275,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                recognizer.Recognizing += (s, e) => {
+                recognizer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -247,7 +329,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                recognizer.Recognizing += (s, e) => {
+                recognizer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizingKeyword)
@@ -257,7 +340,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -298,11 +382,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                recognizer.Recognizing += (s, e) => {
+                recognizer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -343,14 +429,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             bool tcsSecret = false;
             bool tcsComputer = false;
 
-            var audioInputSecret = AudioConfig.FromWavFileInput(TestData.Kws.Secret.AudioFile);
+            var audioInputSecret = AudioConfig.FromStreamInput(PullAudioInputStream.CreatePullStream(new RealTimeMultiFileStream(TestData.Kws.Secret.AudioFile)));
             var recognizerSecret = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInputSecret));
             {
-                recognizerSecret.Recognizing += (s, e) => {
+                recognizerSecret.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
                 };
 
-                recognizerSecret.Recognized += (s, e) => {
+                recognizerSecret.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -360,7 +448,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         Console.WriteLine("Final result EXPECTED(Secret.ModelKeyword): " + e.Result.Text.ToString());
                         tcsSecret = true;
-                        if(tcsSecret && tcsComputer)
+                        if (tcsSecret && tcsComputer)
                         {
                             tcs.TrySetResult(true);
                         }
@@ -378,14 +466,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
             }
 
-            var audioInputComputer = AudioConfig.FromWavFileInput(TestData.Kws.Computer.AudioFile);
+            var audioInputComputer = AudioConfig.FromStreamInput(PullAudioInputStream.CreatePullStream(new RealTimeMultiFileStream(TestData.Kws.Computer.AudioFile)));
             var recognizerComputer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInputComputer));
             {
-                recognizerComputer.Recognizing += (s, e) => {
+                recognizerComputer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
                 };
 
-                recognizerComputer.Recognized += (s, e) => {
+                recognizerComputer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -441,7 +531,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInputSecret = AudioConfig.FromWavFileInput(TestData.Kws.Secret.AudioFile);
             var recognizerSecret = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInputSecret));
             {
-                recognizerSecret.Recognizing += (s, e) => {
+                recognizerSecret.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizingKeyword)
@@ -451,7 +542,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     tcs.TrySetResult(true);
                 };
 
-                recognizerSecret.Recognized += (s, e) => {
+                recognizerSecret.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -474,7 +566,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInputComputer = AudioConfig.FromWavFileInput(TestData.Kws.Computer.AudioFile);
             var recognizerComputer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInputComputer));
             {
-                recognizerComputer.Recognizing += (s, e) => {
+                recognizerComputer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizingKeyword)
@@ -484,7 +577,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     tcs.TrySetResult(true);
                 };
 
-                recognizerComputer.Recognized += (s, e) => {
+                recognizerComputer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -533,16 +627,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var tcs = new TaskCompletionSource<bool>();
             var count = 0;
 
-            var str = TestData.Kws.Computer2.AudioFileTranslate;
-            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
+            var stream = new RealTimeMultiFileStream(TestData.Kws.Computer.AudioFile, TestData.Kws.Computer.AudioFile);
+
+            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(stream));
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                recognizer.Recognizing += (s, e) => {
+                recognizer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -560,9 +657,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         Console.WriteLine("Final result UNEXPECTED : " + e.Result.Text.ToString());
                         tcs.TrySetResult(false);
                     }
+
+                    stream.NextFile();
                 };
 
-                recognizer.Canceled += (s, e) => {
+                recognizer.Canceled += (s, e) =>
+                {
                     Console.WriteLine("Canceled: " + e.ToString());
                 };
 
@@ -584,16 +684,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var count = 0;
             var error = String.Empty;
 
-            var str = TestData.Kws.Computer2.AudioFileTranslate;
-            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
+            var stream = new RealTimeMultiFileStream(TestData.Kws.Computer2.AudioFile1, TestData.Kws.Computer2.AudioFile2);
+
+            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(stream));
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                recognizer.Recognizing += (s, e) => {
+                recognizer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -620,9 +723,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         Console.WriteLine("Final result UNEXPECTED : " + e.Result.Text.ToString());
                         tcs.TrySetResult(false);
                     }
+
+                    stream.NextFile();
                 };
 
-                recognizer.Canceled += (s, e) => {
+                recognizer.Canceled += (s, e) =>
+                {
                     Console.WriteLine(DateTime.Now + "Canceled: " + e.ToString());
                 };
 
@@ -650,7 +756,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                recognizer.Recognizing += (s, e) => {
+                recognizer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizingKeyword)
@@ -659,7 +766,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     tcs.TrySetResult(true);
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -755,7 +863,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Console.WriteLine("SessionId: " + e.SessionId);
                 };
 
-                recognizer.Recognizing += (s, e) => {
+                recognizer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizingKeyword)
@@ -764,7 +873,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     tcs.TrySetResult(true);
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -803,8 +913,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var tcsKeywordRecognized = 0;
             var config = SpeechConfig.FromSubscription(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
 
-            var str = TestData.Kws.Computer2.AudioFileIntent;
-            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
+            var stream = new RealTimeMultiFileStream(TestData.Kws.Computer2.AudioFile1, TestData.Kws.Computer2.AudioFile2);
+
+            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(stream));
 
             using (var recognizer = new IntentRecognizer(config, audioInput))
             {
@@ -816,14 +927,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Console.WriteLine("SessionId: " + e.SessionId);
                 };
 
-                recognizer.Recognizing += (s, e) => {
+                recognizer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizingKeyword)
                         Interlocked.Increment(ref tcsKeywordRecognizing);
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -853,9 +966,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         Console.WriteLine("Final result UNEXPECTED : " + e.Result.Text.ToString() + ", " + e.Result.IntentId);
                         tcs.TrySetResult(false);
                     }
+
+                    stream.NextFile();
                 };
 
-                recognizer.Canceled += (s, e) => {
+                recognizer.Canceled += (s, e) =>
+                {
                     Console.WriteLine("Canceled: " + e.ToString());
                 };
 
@@ -868,7 +984,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(2, tcsKeywordRecognizing, "2x tcsKeywordRecognizing not detected within timeout");
                 Assert.AreEqual(2, tcsKeywordRecognized, "2x tcsKeywordRecognized not detected within timeout");
                 Assert.AreEqual(0, error.Length, error);
-
+                stream.Close();
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
         }
@@ -892,7 +1008,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Console.WriteLine("SessionId: " + e.SessionId);
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -948,7 +1065,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Console.WriteLine("SessionId: " + e.SessionId);
                 };
 
-                recognizer.Recognizing += (s, e) => {
+                recognizer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizingKeyword)
@@ -957,7 +1075,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     tcs.TrySetResult(true);
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -1005,15 +1124,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Console.WriteLine("SessionStarted: " + e.SessionId);
                 };
 
-                recognizer.Recognizing += (s, e) => {
+                recognizer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
                 };
 
-                recognizer.Canceled += (s, e) => {
+                recognizer.Canceled += (s, e) =>
+                {
                     Console.WriteLine("Canceled: " + e.ToString());
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -1049,8 +1171,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var tcs = new TaskCompletionSource<bool>();
             var error = String.Empty;
 
-            var str = TestData.Kws.Computer2.AudioFileTranslate;
-            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
+            var stream = new RealTimeMultiFileStream(TestData.Kws.Computer2.AudioFile1, TestData.Kws.Computer2.AudioFile2);
+
+            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(stream));
 
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
             config.SpeechRecognitionLanguage = "en-US";
@@ -1058,15 +1181,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             using (var recognizer = new TranslationRecognizer(config, audioInput))
             {
-                recognizer.SessionStarted += (s, e) => {
+                recognizer.SessionStarted += (s, e) =>
+                {
                     Console.WriteLine("SessionId: " + e.SessionId);
                 };
 
-                recognizer.Recognizing += (s, e) => {
+                recognizer.Recognizing += (s, e) =>
+                {
                     Console.WriteLine("Intermediate result: " + e.ToString());
                 };
 
-                recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine("Final result: " + e.Result.Reason.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
@@ -1093,9 +1219,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         Console.WriteLine("Final result UNEXPECTED : " + e.Result.Text.ToString());
                         tcs.TrySetResult(false);
                     }
+
+                    stream.NextFile();
                 };
 
-                recognizer.Canceled += (s, e) => {
+                recognizer.Canceled += (s, e) =>
+                {
                     Console.WriteLine("Canceled: " + e.ToString());
                 };
 
