@@ -1274,7 +1274,6 @@ jobs:
       echo ##vso[task.setvariable variable=TEST_ERRORLEVEL]%ERRORLEVEL%
       exit /b 0
     displayName: Run tests in App Center
-    continueOnError: ${{ parameters.continueOnTestFailure }}
   - script: |
       @REM Note: Ignoring errors
       setlocal enabledelayedexpansion
@@ -1304,6 +1303,7 @@ jobs:
       )
       exit /b %TEST_ERRORLEVEL%
     displayName: Return test error
+    continueOnError: ${{ parameters.continueOnTestFailure }}
 
 - job: AndroidPackage
   dependsOn: [Pre, AndroidBuild]
