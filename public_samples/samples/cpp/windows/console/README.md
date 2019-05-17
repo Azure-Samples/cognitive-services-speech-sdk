@@ -1,6 +1,12 @@
 # C++ Console app for Windows
 
-This sample demonstrates various forms of speech recognition, intent recognition, and translation using the Speech SDK for C++ on Windows.
+This sample demonstrates various forms of speech recognition, intent recognition, conversation transcription and translation using the Speech SDK for C++ on Windows.
+
+> **Note:**
+> Conversation Transcription is in [Preview](https://aka.ms/cts/ctsoverview). The
+> ConversationTranscriber APIs are subjected to change. It requires
+> multi-microphone devices that can be paired with [Cognitive Services Speech
+> Device SDK](https://aka.ms/cts/getsdk).
 
 ## Prerequisites
 
