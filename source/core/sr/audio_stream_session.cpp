@@ -300,13 +300,13 @@ void CSpxAudioStreamSession::SetAudioConfigurationInProperties()
 void CSpxAudioStreamSession::WriteTracingEvent()
 {
 #ifdef _WIN32
-    const char * sessionId = PAL::ToString(m_sessionId).c_str();
-    const char * micName = GetStringValue("SPEECH-MicrophoneNiceName", "").c_str();
+    auto sessionId = PAL::ToString(m_sessionId);
+    auto micName = GetStringValue("SPEECH-MicrophoneNiceName", "");
 
     TraceLoggingWrite(tracingEventProvider, "RecognizerCreationEvent",
         TraceLoggingKeyword(MICROSOFT_KEYWORD_MEASURES),
-        TraceLoggingString(sessionId, "SessionId"),
-        TraceLoggingString(micName, "Microphone"));
+        TraceLoggingString(sessionId.c_str(), "SessionId"),
+        TraceLoggingString(micName.c_str(), "Microphone"));
 #endif
 }
 
@@ -430,13 +430,13 @@ void CSpxAudioStreamSession::SlowDownThreadIfNecessary(uint32_t dataSize)
     // Calculate how long we need to delay the current thread.
     // This is the delta between the current time, and the previously calculated next audio time if > 0.
     milliseconds delayInterval;
-    
+
     if (!m_useDurationBasedThrottle)
     {
         delayInterval = std::max(duration_cast<milliseconds>(m_nextAudioProcessTime - steady_clock::now()),
             milliseconds(0));
     }
-    else 
+    else
     {
         delayInterval = currentPacketAudioDelay;
     }
