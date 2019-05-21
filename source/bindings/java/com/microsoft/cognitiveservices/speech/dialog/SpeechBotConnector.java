@@ -44,6 +44,14 @@ public class SpeechBotConnector implements Closeable {
     /*! \endcond */
 
     /**
+     * Builds a SpeechBotConnector with audio from default microphone input
+     * @param config Bot connector configuration.
+     */
+    public SpeechBotConnector(BotConnectorConfig config) {
+        this(config, AudioConfig.fromDefaultMicrophoneInput());
+    }
+
+    /**
      * Builds a SpeechBotConnector
      * @param config Bot connector configuration.
      * @param audioConfig An optional audio input configuration associated with the recognizer
