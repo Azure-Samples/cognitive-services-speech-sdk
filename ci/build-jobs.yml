@@ -1427,6 +1427,8 @@ jobs:
       release:
         BuildConfiguration: Release
         BuildPlatform: x64
+  variables: 
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/Linux-x64/$(BuildConfiguration)
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set Linux-x64 target platform
@@ -1466,6 +1468,7 @@ jobs:
     displayName: CMake build
     inputs:
       cmakeArgs: '--build . -- -j4'
+  - template: build-unix-python-wheels.yml
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Create drop files
     inputs:
@@ -1487,13 +1490,8 @@ jobs:
     continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
     buildType: ${{ parameters.buildType }}
 
-- template: linux-python-build.yml
-  parameters:
-    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
-    buildType: ${{ parameters.buildType }}
-
 - job: LinuxPythonOobeTest
-  dependsOn: [Pre, LinuxPythonBuild]
+  dependsOn: [Pre, LinuxBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxPythonOobeTest '))
   pool:
     name: Hosted Ubuntu 1604
@@ -1505,9 +1503,9 @@ jobs:
       ./ci/set-variables.sh
     displayName: Set variables
   - task: DownloadBuildArtifacts@0
-    displayName: Downloading PythonBuild artifacts
+    displayName: Downloading Python artifacts
     inputs:
-      artifactName: PythonBuild
+      artifactName: Linux
       downloadPath: $(System.ArtifactsDirectory)/In
       itemPattern: '**/*linux*_x86_64.whl'
   - template: get-docker-image.yml
@@ -1517,7 +1515,7 @@ jobs:
   - bash: |
       set -u -e -x -o pipefail
       . ci/functions.sh
-      cp --recursive --verbose $(System.ArtifactsDirectory)/In/PythonBuild/wheelhouse wheelhouse
+      cp --recursive --verbose $(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/wheelhouse wheelhouse
       patchSamplesFromTestConfig public_samples/quickstart/python \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
@@ -1558,7 +1556,7 @@ jobs:
     displayName: Test samples
 
 - job: BuildPythonDocs
-  dependsOn: [Pre, LinuxPythonBuild]
+  dependsOn: [Pre, LinuxBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' BuildPythonDocs '))
   pool:
     name: Hosted Ubuntu 1604
@@ -1575,15 +1573,15 @@ jobs:
       ./ci/set-variables.sh
     displayName: Set variables
   - task: DownloadBuildArtifacts@0
-    displayName: Downloading PythonBuild artifacts
+    displayName: Downloading Python artifacts
     inputs:
-      artifactName: PythonBuild
+      artifactName: Linux
       downloadPath: $(System.ArtifactsDirectory)/In
       itemPattern: '**/*linux*_x86_64.whl'
   - bash: |
       set -u -e -x -o pipefail
       . ci/functions.sh
-      cp --recursive --verbose $(System.ArtifactsDirectory)/In/PythonBuild/wheelhouse wheelhouse
+      cp --recursive --verbose $(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/wheelhouse wheelhouse
       #
       VIRTUALENV=pythondocs
       VIRTUALENV_BINDIR=${PWD}/${VIRTUALENV}/bin
@@ -1630,16 +1628,6 @@ jobs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/PythonDocs
       ArtifactName: PythonDocs
       publishLocation: Container
-
-- template: windows-python-build.yml
-  parameters:
-    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
-    buildType: ${{ parameters.buildType }}
-
-- template: osx-python-build.yml
-  parameters:
-    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
-    buildType: ${{ parameters.buildType }}
 
 - job: LinuxDrop
   dependsOn: [Pre, LinuxBuild, LinuxDockerBuild]
@@ -2022,23 +2010,52 @@ jobs:
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: 3.7
+      addToPath: true
   - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
-  - task: CMake@1
-    displayName: Generate makefiles
-    inputs:
-      cmakeArgs: '-DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) ..'
-  - task: CMake@1
-    displayName: CMake build
-    inputs:
-      cmakeArgs: '--build . -- -j4'
   - bash: |
+      cmake . -Bbuild -DBUILD_PYTHON=OFF -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) \
+        -DCMAKE_BUILD_TYPE=$(BuildConfiguration) \
+        -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) \
+        -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
+    displayName: Generate makefiles
+  - bash: |
+      cmake --build build -j 4
+    displayName: CMake build
+  - template: build-unix-python-wheels.yml
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: Sign .so (dynamic library) in .whl
+    inputs:
+      ConnectedServiceName: Speech SDK ESRP Signing
+      FolderPath: $(OutputDirectory)/wheelhouse
+      Pattern: '*.whl.zip'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_MACOS)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      set -u -x -e -o pipefail
+      for wheel in $(OutputDirectory)/wheelhouse/*.whl.zip; do
+        mv "${wheel}" "${wheel%.zip}"
+        mkdir repack # error out if existing
+        # Not using 'wheel unpack' to avoid error on hash mismatch:
+        unzip -d repack "${wheel%.zip}"
+        find repack -name \*.dylib -or -name \*.so -print0 | xargs -0 -n1 codesign --display --verbose=4
+        python -m wheel pack --dest-dir $(OutputDirectory)/wheelhouse repack
+        rm -rf repack
+      done
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+    displayName: Rename .whl.zip to .whl and repack
+  - bash: |
+      set -u -x -e -o pipefail
       . ci/apple/apple-functions.sh
       build_dsym_bundle "build/lib" "$(FrameworkName)"
     condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
     displayName: Create debug symbols
   - bash: |
-      mkdir -p "$(OutputDirectory)"
+      set -u -x -e -o pipefail
       mv "build/lib/$(FrameworkName).framework.dSYM" "$(OutputDirectory)"
       cd "$(OutputDirectory)"
       zip --symlinks -r "$(VersionedFrameworkName).framework.dSYM.zip" "$(FrameworkName).framework.dSYM"
@@ -2046,10 +2063,12 @@ jobs:
     condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
     displayName: Archive debug symbols
   - bash: |
+      set -u -x -e -o pipefail
       strip -x "build/lib/$(FrameworkName).framework/$(FrameworkName)"
     displayName: Strip dynamic library in universal framework for release builds
     condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
   - bash: |
+      set -u -x -e -o pipefail
       cp -R "build/lib/$(FrameworkName).framework" "$(OutputDirectory)"
       cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$(OutputDirectory)"
       cd "$(OutputDirectory)"
@@ -2302,7 +2321,7 @@ jobs:
     enabled: false
 
 - job: CheckSignatures
-  dependsOn: [Pre, NuGet, AndroidPackage, JavaJrePackage, WindowsPythonBuild, UnityBuild]
+  dependsOn: [Pre, NuGet, AndroidPackage, JavaJrePackage, WindowsBuild, UnityBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CheckSignatures '))
   pool:
     name: Hosted VS2017
@@ -2313,15 +2332,10 @@ jobs:
     inputs:
       versionSpec: 4.6.0
   - task: DownloadBuildArtifacts@0
-    displayName: 'Download Build Artifacts PythonBuild'
-    inputs:
-      artifactName: PythonBuild
-      itemPattern: '**/*.whl'
-  - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts Windows'
     inputs:
       artifactName: Windows
-      itemPattern: '**/*.nupkg'
+      itemPattern: '**/*.nupkg,**/*.whl'
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts Android'
     inputs:

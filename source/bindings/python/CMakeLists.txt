@@ -1,22 +1,17 @@
 project(speech_py_impl)
 
-find_package(PythonInterp 3.5 REQUIRED)
-find_package(PythonLibs 3.5 REQUIRED)
-set(Python3_EXECUTABLE ${PYTHON_EXECUTABLE})
-set(Python3_LIBRARIES ${PYTHON_LIBRARIES})
-set(Python3_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS})
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(python)
 
-if(DEFINED SKBUILD)
-  find_package(PythonExtensions REQUIRED)
-endif()
-
-message(STATUS "Using Python interpreter: " ${Python3_EXECUTABLE})
-message(STATUS "Found Python libs at: " ${Python3_LIBRARIES})
-message(STATUS "Python include path: " ${Python3_INCLUDE_DIRS})
+message(STATUS "Found Python interpreter: ${PYTHON_EXECUTABLE} (found version \"${PYTHON_VERSION_STRING}\")")
+message(STATUS "Found Python libs at: ${PYTHON_LIBRARIES} (found version \"${PYTHONLIBS_VERSION_STRING}\")")
+message(STATUS "Python include path: ${PYTHON_INCLUDE_DIRS}")
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
-set(PYTHON_PACKAGE_NAME azure/cognitiveservices/speech)
+set(PYTHON_PACKAGE_NAME azure-cognitiveservices-speech)
+string(REPLACE - / PYTHON_PACKAGE_REL_PATH ${PYTHON_PACKAGE_NAME})
+string(REPLACE - . PYTHON_DOTTED_NAME ${PYTHON_PACKAGE_NAME})
 
 # Since we're linking  against the release version of python.lib, disable iterator debugging.
 if(MSVC)
@@ -34,6 +29,7 @@ set(swig_include_dirs
     ${CARBON_C_API}
     ${CARBON_CXX_API}
     ${SRC_DIR}/..
+    ${PYTHON_INCLUDE_DIRS}
     )
 
 set_source_files_properties("${SRC_DIR}/src/speech_py_impl.i" PROPERTIES
@@ -49,16 +45,28 @@ if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
    set_source_files_properties(${SWIG_INTERFACE} PROPERTIES SWIG_FLAGS "-D_WIN64")
 endif()
 
-set(SOURCES
+set(SWIG_SOURCES
     "${SRC_DIR}/src/speech_py_impl.i"
 )
+
+#######################
+## Python Packaging  ##
+#######################
+set(MODULE_ROOT "${CMAKE_CURRENT_BINARY_DIR}/../../..")
+set(SPEECH_PY_OUTDIR ${MODULE_ROOT}/${PYTHON_PACKAGE_REL_PATH})
+set(CMAKE_SWIG_OUTDIR "${SPEECH_PY_OUTDIR}")
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SPEECH_PY_OUTDIR})
+foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
+  string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${SPEECH_PY_OUTDIR})
+endforeach()
 
 # ${SWIG_INTERFACE} and ${SWIG_WRAPPERS} point to common interface / header files
 set(SWIG_MODULE_${PROJECT_NAME}_EXTRA_DEPS ${SWIG_INTERFACE} ${SWIG_WRAPPERS})
 
 # UseSwig supports INCLUDE_DIRECTORIES and OUTPUT_DIR properties on source files only since CMake 3.12
 include_directories("${swig_include_dirs}")
-set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_PACKAGE_NAME})
 
 if(WIN32)
   set(SPEECHSDK_ORIGINAL_FILENAME ${PROJECT_NAME})
@@ -74,17 +82,17 @@ endif()
 if("${CMAKE_VERSION}" VERSION_GREATER 3.8)
     swig_add_library(${PROJECT_NAME}
         LANGUAGE python
-        OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_PACKAGE_NAME} # only supported on cmake > 3.11
-        SOURCES ${SOURCES} ${SOURCES_VERSION}
+        OUTPUT_DIR ${SPEECH_PY_OUTDIR} # only supported on cmake > 3.11
+        SOURCES ${SWIG_SOURCES} ${SOURCES_VERSION}
     )
 else()
-    swig_add_module(${PROJECT_NAME} python ${SOURCES} ${SOURCES_VERSION})
+  swig_add_module(${PROJECT_NAME} python ${SWIG_SOURCES} ${SOURCES_VERSION})
 endif()
 
 target_include_directories(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
     PRIVATE ${CARBON_C_API}
     PRIVATE ${CARBON_CXX_API}
-    PRIVATE ${Python3_INCLUDE_DIRS}
+    PRIVATE ${PYTHON_INCLUDE_DIRS}
     PRIVATE "${SRC_DIR}/.."
     )
 
@@ -100,12 +108,12 @@ else()
 endif()
 
 if(APPLE)
-    set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
-    set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
-        PROPERTIES INSTALL_RPATH "@loader_path")
+  set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+  set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
+    PROPERTIES BUILD_RPATH "@loader_path")
 elseif(UNIX)
-    set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
-        PROPERTIES INSTALL_RPATH "$ORIGIN")
+  set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME}
+    PROPERTIES BUILD_RPATH "$ORIGIN")
 endif()
 
 # Copied from https://www.vlam3d.com/2016/09/14/swig-monologues-part-1-getting-started-with-cmake/?lang=en,
@@ -118,29 +126,81 @@ if(MSVC)
      LINK_FLAGS "/DEBUG /OPT:REF /OPT:ICF")
 endif()
 
-if(DEFINED SKBUILD)
-  python_extension_module(${PROJECT_NAME})
-  set(module_dir "${PYTHON_RELATIVE_SITE_PACKAGES_DIR}/${PYTHON_PACKAGE_NAME}")
+# copy the python source files to the staging area for the Python wheel
+foreach(INPUT_FILE IN ITEMS REDIST.txt ThirdPartyNotices.md license.md version.txt)
+  configure_file(../../../${INPUT_FILE} ${SPEECH_PY_OUTDIR}/../../../${INPUT_FILE} COPYONLY)
+endforeach()
 
-  install(TARGETS ${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} DESTINATION ${module_dir})
+foreach(INPUT_FILE IN ITEMS setup.cfg setup.py.in)
+  configure_file(${INPUT_FILE} ${SPEECH_PY_OUTDIR}/../../../${INPUT_FILE} COPYONLY)
+endforeach()
+
+set(PYTHON_SOURCES
+  __init__.py
+  speech.py
+  audio.py
+  translation.py
+  intent.py
+  )
+
+foreach(INPUT_FILE IN ITEMS ${PYTHON_SOURCES})
+  configure_file(src/${INPUT_FILE} ${SPEECH_PY_OUTDIR}/${INPUT_FILE} COPYONLY)
+endforeach()
+
+# set up the core library in the correct place
+add_custom_command(
+  TARGET ${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  "$<TARGET_FILE:${SPEECHSDK_CORE_LIBRARY}>"
+  ${SPEECH_PY_OUTDIR}
+  )
+
+if(EXTENSION_KWS_ENABLED)
   # TODO needs cmake 3.13 for out-of-dir targets:
-  # install(TARGETS "$<TARGET_FILE:${SPEECHSDK_CORE_LIBRARY}>" DESTINATION ${module_dir})
-  install(FILES "$<TARGET_FILE:${SPEECHSDK_CORE_LIBRARY}>" DESTINATION ${module_dir})
-
-  # strip swig-generated type hints. This only works on bash and fails silently otherwise, e.g. when the
-  # build is run from powershell etc.
-  install(CODE "execute_process(COMMAND bash stripscript.sh ${CMAKE_SWIG_OUTDIR}
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})")
-
-  install(FILES ${CMAKE_SWIG_OUTDIR}/speech_py_impl.py DESTINATION ${module_dir} )
-
-  if(EXTENSION_KWS_ENABLED)
-    # TODO needs cmake 3.13 for out-of-dir targets:
-    # install(TARGETS kws_factory DESTINATION ${module_dir})
-    add_dependencies(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} kws_factory)
-    install(FILES "$<TARGET_FILE:kws_factory>" DESTINATION ${module_dir})
-  endif()
+  # install(TARGETS kws_factory DESTINATION ${module_dir})
+  add_dependencies(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} kws_factory)
+  # set up the kws library in the correct place
+  add_custom_command(
+    TARGET ${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "$<TARGET_FILE:kws_factory>"
+    ${SPEECH_PY_OUTDIR}
+    )
 endif()
+
+set(SETUP_PY "${MODULE_ROOT}/setup.py")
+
+add_custom_command(OUTPUT ${SETUP_PY}
+  COMMAND ${CMAKE_COMMAND}
+    -DSETUP_PY=${SETUP_PY}
+    -DPYTHON_DOTTED_NAME=${PYTHON_DOTTED_NAME}
+    -DPYTHON_PACKAGE_NAME=${PYTHON_PACKAGE_NAME}
+    -DPYTHON_PACKAGE_REL_PATH=${PYTHON_PACKAGE_REL_PATH}
+    -DPYTHON_LIBS="$<TARGET_FILE_NAME:${SPEECHSDK_CORE_LIBRARY}>","$<TARGET_FILE_NAME:_speech_py_impl>",$<$<BOOL:${EXTENSION_KWS_ENABLED}>:"$<TARGET_FILE_NAME:$<IF:$<BOOL:${EXTENSION_KWS_ENABLED}>,kws_factory,_speech_py_impl>>">
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_setup_py.cmake
+  DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_setup_py.cmake
+    ${SETUP_PY}.in
+  VERBATIM
+  )
+
+search_python_module(wheel 0.33.1)
+search_python_module(strip_hints 0.1.4)
+
+# strip swig-generated type hints, because they confuse sphinx.
+add_custom_command(
+  TARGET ${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} POST_BUILD
+  COMMAND ${PYTHON_EXECUTABLE} -c \"import strip_hints\; strip_hints.strip_hints_main.process_command_line() \" speech_py_impl.py --to-empty > speech_py_impl_stripped.py
+  COMMAND ${CMAKE_COMMAND} -E rename speech_py_impl_stripped.py speech_py_impl.py
+  WORKING_DIRECTORY ${SPEECH_PY_OUTDIR}
+  )
+
+add_custom_target(bdist ALL
+  DEPENDS ${SETUP_PY}
+  COMMAND ${CMAKE_COMMAND} -E remove_directory dist
+  COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_wheel ${SPEECHSDK_PYTHON_WHEEL_ARGS}
+  WORKING_DIRECTORY ${MODULE_ROOT}
+  )
 
 set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES
     FOLDER bindings/python
@@ -149,5 +209,5 @@ set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES
 set_property(DIRECTORY ${CMAKE_SOURCE_DIR} APPEND PROPERTY
     CMAKE_CONFIGURE_DEPENDS ${SWIG_INTERFACE})
 
-source_group("Source Files" FILES ${SOURCES})
+source_group("Source Files" FILES "${SOURCES}")
 

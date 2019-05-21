@@ -2,13 +2,29 @@ parameters:
   extraTests: []
   dockerImage: ""
   testsToRun: ""
-  runTestArgs: "-s python_unittests -s objectivec_unittests"
+  runTestArgs: "-s objectivec_unittests"
   continueOnTestFailure: false
 steps:
 # If we failed until here, don't try to run tests:
 - bash: . ci/functions.sh && vsts_setvar SPEECHSDK_RUN_TESTS false
   condition: or(failed(), canceled())
   displayName: Skip tests on build failure.
+- bash: |
+    set -u -e -x -o pipefail
+    . ci/functions.sh
+    patchSamplesFromTestConfig public_samples/samples/python/console \
+      ci/test-config.json \
+      -D luis-key=$(luis-westus-s0-201809-key1) \
+      -D speech-key=$(NorthEuropeKeySkyman) \
+      -D virtualassistant-region=$(BotRegion) \
+      -D virtualassistant-subscription=$(BotSubscriptionKey) \
+      -D virtualassistant-testbot=$(BotFunctionalTest) \
+      -D long-running=false \
+      -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+      -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509)
+    cp tests/input/audio/*.wav public_samples/samples/python/console
+  displayName: Prepare Python samples for testing (as part of python_unittests)
+  condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
 - bash: |
     if [[ -n $dockerImage ]]; then
       wrapMe=(docker run --rm --workdir /csspeech --env LD_LIBRARY_PATH=/csspeech/build/lib --volume "$PWD:/csspeech" "$dockerImage")

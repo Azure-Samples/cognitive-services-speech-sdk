@@ -77,11 +77,6 @@ if(ANDROID)
     PRIVATE common
     PRIVATE factory
     PRIVATE z) # libz
-elseif (SKBUILD)
-  target_link_libraries(${PROJECT_NAME}
-    PUBLIC common
-    PUBLIC factory
-    )
 else()
   target_link_libraries(${PROJECT_NAME}
     PRIVATE common

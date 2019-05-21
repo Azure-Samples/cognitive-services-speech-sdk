@@ -5,64 +5,30 @@ set -e -u -o pipefail
 T="$(basename "$0" .sh)"
 BUILD_DIR=`realpath "$1"`
 PLATFORM="$2"
-BINARY_DIR="$3"
+BINARY_DIR="$3" # unused
+TESTSET="${4:-dev}"
 
-SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+# needs to point to <repo root>/ci, will be overwritten by scripts that are sourced below
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"/..
 
-. "$SCRIPT_DIR/../functions.sh" || exit 1
+function runUnitTests {
+  local extra_args
+  # run pytest on test files in the source tree
+  if [[ $PLATFORM == Windows-* ]] || [[ $PLATFORM == Linux* ]]; then
+    extra_args=(--no-use-default-microphone)
+  fi
 
-## assumes that build_dir is one level deeper than source
+  ${VIRTUALENV_PYTHON} -m pytest -v ${SCRIPT_DIR}/../source/bindings/python/test \
+      --inputdir $SPEECHSDK_INPUTDIR/audio \
+      --subscription $SPEECHSDK_SPEECH_KEY \
+      --speech-region $SPEECHSDK_SPEECH_REGION \
+      --luis-subscription $SPEECHSDK_LUIS_KEY \
+      --luis-region $SPEECHSDK_LUIS_REGION \
+      --language-understanding-app-id $SPEECHSDK_LUIS_HOMEAUTOMATION_APPID \
+      --junitxml=test-$T-$PLATFORM-py${MAJORMINOR}.xml \
+      "${extra_args[@]}"
+}
 
-isOneOf "$PLATFORM" {{Windows,Linux,OSX}-x64,Windows-x86}-{Debug,Release} ||
-  exitWithSuccess "Test %s: skip on this platform\n" "$T"
-
-VIRTUALENV_NAME=speechsdktest$$
-
-if [[ $PLATFORM == Windows* ]]; then
-    PYTHON=python
-else
-    PYTHON=python3
-fi
-
-virtualenv -p ${PYTHON} ${VIRTUALENV_NAME}
-
-if [[ $PLATFORM == Windows-* ]]; then
-    VIRTUALENV_PYTHON=${PWD}/${VIRTUALENV_NAME}/Scripts/python.exe
-else
-    VIRTUALENV_PYTHON=${PWD}/${VIRTUALENV_NAME}/bin/python
-fi
-
-# install dependencies inside the virtualenv
-${VIRTUALENV_PYTHON} -m pip install pytest==4.2.0 requests==2.21.0
-
-if ! existsExactlyOneFile ${BUILD_DIR}/*.whl; then
-    exitWithError "there is more than one wheel built, don't know which one to choose\n"
-fi
-
-# try installing the azure-cognitiveservices-speech wheel
-${VIRTUALENV_PYTHON} -m pip install ${BUILD_DIR}/*.whl
-
-# run pytest on test files in the source tree
-if [[ $PLATFORM == Windows-* ]] || [[ $PLATFORM == Linux* ]]; then
-    extra_args=--no-use-default-microphone
-else
-    extra_args=
-fi
-
-UNITTEST_ERROR=false
-${VIRTUALENV_PYTHON} -m pytest -v ${SCRIPT_DIR}/../../source/bindings/python/test \
-    --inputdir $SPEECHSDK_INPUTDIR/audio \
-    --subscription $SPEECHSDK_SPEECH_KEY \
-    --speech-region $SPEECHSDK_SPEECH_REGION \
-    --luis-subscription $SPEECHSDK_LUIS_KEY \
-    --luis-region $SPEECHSDK_LUIS_REGION \
-    --language-understanding-app-id $SPEECHSDK_LUIS_HOMEAUTOMATION_APPID \
-    --junitxml=test-$T-$PLATFORM.xml \
-    $extra_args || UNITTEST_ERROR=true
-
-# run samples as part of unit test
-source $SCRIPT_DIR/../test-harness.sh
-cd ${SCRIPT_DIR}/../public_samples/samples/python/console
 
 function runPythonSampleSuite {
   local usage testStateVarPrefix output platform redactStrings testsuiteName timeoutSeconds testCases
@@ -103,6 +69,7 @@ SCRIPT
 
   # these samples use microphone input
   # "import intent_sample; intent_sample.recognize_intent_once_from_mic()"
+  # "import intent_sample; intent_sample.recognize_intent_once_async_from_mic()"
   # "import translation_sample; translation_sample.translation_once_from_mic()"
   # "import speech_sample; speech_sample.speech_recognize_once_from_mic()"
   # "import speech_sample; speech_recognize_keyword_from_microphone()"
@@ -119,14 +86,109 @@ SCRIPT
   endTests "$testStateVarPrefix"
 }
 
-runPythonSampleSuite \
-  TESTRUNNER \
-  "test-pysamples-$T-$PLATFORM" \
-  "$PLATFORM" \
-  "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_LUIS_KEY" \
-  "pysamples-$T" \
-  240
-# If samples fail, script will stop here.
-# Otherwise, we'll fail the script if the unit tests failed above:
-[[ $UNITTEST_ERROR == false ]] || exitWithError "Python unit tests failed.\n"
+source "$SCRIPT_DIR/functions.sh" || exit 1
+source $SCRIPT_DIR/test-harness.sh
+
+platformParts=(${PLATFORM//-/ })
+os="${platformParts[0]}"
+arch="${platformParts[1]}"
+flavor="${platformParts[2]}"
+
+isOneOf "$PLATFORM" {{Windows,Linux,OSX}-x64,Windows-x86}-{Debug,Release} ||
+  exitWithSuccess "Test %s: skip on this platform\n" "$T"
+[[ ${flavor} == Release ]] || exitWithSuccess "Test %s: run only on Release flavor\n" "$T"
+
+IN_VSTS=$([[ -n ${SYSTEM_DEFINITIONID:-} && -n ${SYSTEM_COLLECTIONID:-} ]] && echo true || echo false)
+
+if [[ $PLATFORM == Windows* ]]; then
+  GLOBALPYTHON=python
+else
+  GLOBALPYTHON=python3
+fi
+
+if [[ ! $IN_VSTS ]]; then
+  echo "Running outside VSTS; using system Python interpreter."
+  PYTHONS=($GLOBALPYTHON)
+  [[ $TESTSET = dev ]] || echo Testset $TESTSET not supported outside of VSTS.
+else
+  echo "Running inside VSTS"
+
+  case $os in
+    Linux)
+      hostedtoolsPath=/opt/hostedtoolcache
+      ;;
+    Windows)
+      hostedtoolsPath=C:/hostedtoolcache/windows
+      ;;
+    OSX)
+      hostedtoolsPath=/Users/vsts/hostedtoolcache
+      ;;
+    *)
+      exitWithError "Unexpected platform: $PLATFORM.\n"
+      ;;
+  esac
+
+  pythonBasePath=${hostedtoolsPath}/Python
+
+  case $TESTSET in
+    prod|int)
+      # Run tests for all Python versions
+      PYTHONS=($(getLatest ${pythonBasePath}/3.5.*)/$arch/python
+        $(getLatest ${pythonBasePath}/3.6.*)/$arch/python
+        $(getLatest ${pythonBasePath}/3.7.*)/$arch/python
+      )
+      ;;
+    dev)
+      # Run tests for only a single Python version
+
+      # defines which python version is used for tests during dev builds on which platform
+      declare -A pythonVersionsByOs=([OSX]=3.5 [Linux]=3.6 [Windows]=3.7)
+
+      PYTHONS=($(getLatest ${pythonBasePath}/${pythonVersionsByOs[$os]}.*)/$arch/python)
+      ;;
+    *)
+      exitWithError "Bad test set definition: $TESTSET.\n"
+  esac
+fi
+
+UNITTEST_ERROR=false
+SAMPLE_ERROR=false
+
+${GLOBALPYTHON} -m pip install virtualenv==16.3.0
+
+for PYTHON in ${PYTHONS[@]}; do
+  MAJORMINOR=$("${PYTHON}" -c "import sys; print('%s%s' % (sys.version_info[0:2]))")
+  VIRTUALENV_NAME=speechsdktest-${MAJORMINOR}-$$
+
+  ${GLOBALPYTHON} -m virtualenv -p ${PYTHON} ${VIRTUALENV_NAME}
+
+  if [[ $PLATFORM == Windows-* ]]; then
+      VIRTUALENV_PYTHON=${PWD}/${VIRTUALENV_NAME}/Scripts/python.exe
+  else
+      VIRTUALENV_PYTHON=${PWD}/${VIRTUALENV_NAME}/bin/python
+  fi
+
+  # install dependencies inside the virtualenv
+  ${VIRTUALENV_PYTHON} -m pip install pytest==4.2.0 requests==2.21.0
+
+  # try installing the azure-cognitiveservices-speech wheel
+  wheel=(${BUILD_DIR}/*cp$MAJORMINOR*.whl)
+  echo "Installing ${wheel}"
+  ${VIRTUALENV_PYTHON} -m pip install ${wheel}
+
+  runUnitTests || UNITTEST_ERROR=true
+
+  # run samples as part of unit test
+  pushd ${SCRIPT_DIR}/../public_samples/samples/python/console
+  runPythonSampleSuite \
+    TESTRUNNER \
+    "test-py${MAJORMINOR}samples-$T-$PLATFORM" \
+    "$PLATFORM" \
+    "$SPEECHSDK_SPEECH_KEY $SPEECHSDK_LUIS_KEY $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+    "py${MAJORMINOR}samples-$T" \
+    240 || SAMPLE_ERROR=true
+  popd
+done
+
+[[ $UNITTEST_ERROR == false ]] && [[ $SAMPLE_ERROR == false ]] || exitWithError "Python unit tests failed.\n"
 

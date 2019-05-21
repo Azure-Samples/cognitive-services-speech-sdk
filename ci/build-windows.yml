@@ -27,6 +27,8 @@ jobs:
       x86_debug:
         BuildPlatform: Win32
         BuildConfiguration: Debug
+  variables:
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set Windows target platform (Windows-x86 or Windows-x64)
@@ -37,9 +39,11 @@ jobs:
         if [[ "$(BuildPlatform)" == Win32 ]]; then
           vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x86"
           vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
+          vsts_setvar SPEECHSDK_PYTHON_PLATFORM "x86"
         else
           vsts_setvar SPEECHSDK_TARGET_PLATFORM "Windows-x64"
           vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15 Win64"
+          vsts_setvar SPEECHSDK_PYTHON_PLATFORM "x64"
         fi
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_KWS ${{ parameters.kws }}
@@ -78,6 +82,84 @@ jobs:
       configuration: '$(BuildConfiguration)'
       clean: true
       maximumCpuCount: true
+  - bash: |
+      set -u -x -e -o pipefail
+      mkdir -p dist repack $(cygpath -au "$(OutputDirectory)\wheelhouse")
+    displayName: Generate output directory
+  - bash: |
+      set -u -x -e -o pipefail
+      . ci/functions.sh
+      pythonMajorMinorVersions=(3.7 3.6 3.5)
+      pythonBasePath=C:/hostedtoolcache/windows/Python
+      coreLib=build/bin/$(BuildConfiguration)/Microsoft.CognitiveServices.Speech.core.pdb
+      coreHash=($(md5sum ${coreLib}))
+      pythonExtension=build/azure/cognitiveservices/speech/_speech_py_impl.pdb # extension is .so on Linux and OSX
+      libs=($coreLib $pythonExtension)
+      if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
+        kwsLib=build/bin/$(BuildConfiguration)/Microsoft.CognitiveServices.Speech.extension.kws.pdb
+        libs+=($kwsLib)
+        kwsHash=($(md5sum ${kwsLib}))
+      fi
+      pdbDir="$(OutputDirectory)/pdb-$(BuildPlatform)-$(BuildConfiguration)-py"
+      mkdir -p "$pdbDir"
+      for lib in ${libs[@]}; do
+        [[ $lib == ${pythonExtension} ]] || cp -p "${lib}" "$pdbDir"
+      done
+      for pythonMajorMinorWithDot in ${pythonMajorMinorVersions[*]}; do
+        thisPythonVersionBasePath=$(getLatest ${pythonBasePath}/${pythonMajorMinorWithDot}.*)
+        wheelPythonVersion=${pythonMajorMinorWithDot//./}
+        # reconfigure for python build
+        cmake . -Bbuild -DBUILD_PYTHON=ON -DBUILD_CSHARP=OFF -DBUILD_JAVA=OFF \
+          -DCMAKE_BUILD_CONFIG=$(BuildConfiguration) \
+          -DPYTHON_EXECUTABLE:FILEPATH="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/python.exe \
+          -DPYTHON_LIBRARY="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/libs/python${wheelPythonVersion}.lib \
+          -DPYTHON_INCLUDE_DIR:PATH="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/include
+        cmake --build build --target bdist -j 4
+        # check that the core & kws lib are identical in all wheels
+        [[ $(md5sum $coreLib) == ${coreHash[0]}* ]] || exitWithError "core lib changed between Python builds"
+        if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
+          [[ $(md5sum $kwsLib) == ${kwsHash[0]}* ]] || exitWithError "kws lib changed between Python builds"
+        fi
+        # archive the pdb for the python bindings lib
+        pdbDirThisPythonVersion="$pdbDir/${wheelPythonVersion}"
+        mkdir -p "$pdbDirThisPythonVersion"
+        cp -v ${pythonExtension} "$pdbDirThisPythonVersion"
+        # copy wheel
+        cp -v build/dist/*.whl dist
+        if [[ $(SPEECHSDK_SIGN) == true ]]; then
+          unzip -d repack/${wheelPythonVersion} dist/*cp${wheelPythonVersion}*.whl
+          # Remove *.dist-info/RECORD, otherwise "wheel pack" seem to pack it
+          # twice on Windows (zipfile.py warns: UserWarning: Duplicate name:
+          # 'azure_cognitiveservices_speech-.../RECORD)
+          rm repack/${wheelPythonVersion}/*.dist-info/RECORD
+        fi
+      done
+      # copy wheels to build/ for tests
+      cp -v dist/*.whl build/
+    displayName: Build Python wheels
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: Sign Python
+    inputs:
+      ConnectedServiceName: Speech SDK ESRP Signing
+      FolderPath: repack
+      Pattern: '*.pyd,Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.extension.kws.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_DLL)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      set -u -x -e -o pipefail
+      python -m pip install wheel==0.33.1
+      mv repack/CodeSignSummary-*.md .
+      for wheelPythonVersion in 35 36 37; do
+        python -m wheel pack --dest-dir $(cygpath -au "$(OutputDirectory)\wheelhouse") repack/${wheelPythonVersion}
+        rm -rf repack/${wheelPythonVersion}
+      done
+    displayName: Repack .whl
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      cp -v dist/*.whl $(cygpath -au "$(OutputDirectory)\wheelhouse")
+    displayName: Archive unsigned wheels
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'false'))
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign Windows C++, C# and Java binaries'
     inputs:

@@ -9,6 +9,7 @@ from typing import Callable
 import azure.cognitiveservices.speech as msspeech
 from .utils import _setup_callbacks
 
+
 def pytest_addoption(parser):
     parser.addoption("--inputdir")
     parser.addoption("--subscription")
@@ -86,7 +87,7 @@ speech_input_data_raw = {'weather':
                            'de': "Wie ist das Wetter?"}
                           ),
                          'lamp': ('TurnOnTheLamp.wav', ["Turn on the lamp."], (3300000, ),
-                             (15700000, ), 'en-US', dict()),
+                                  (15700000, ), 'en-US', dict()),
                          'silence': ('silenceshort.wav', [''], None, None, 'en-US', dict()),
                          'silencehello': ('silencehello.wav', ['Hello.'], None, None, 'en-US', dict()),
                          'batman': ('batman.wav', [
@@ -103,11 +104,17 @@ speech_input_data_raw = {'weather':
                          'beach_nohelp': ('wreck-a-nice-beach.wav', ["Recognize speech."], (1000000,), (17500000,), 'en-us', dict()),
                          'beach_nohelp_truman': ('wreck-a-nice-beach.wav', ["Recognize speech."], (1700000,), (10800000,), 'en-us', dict())}
 
+
 @pytest.fixture
 def speech_input(request):
     inputdir = request.config.getoption("--inputdir")
 
-    filename, *args = speech_input_data_raw[request.param]
+    try:
+        filename, *args = speech_input_data_raw[request.param]
+    except AttributeError:
+        # don't fail if no request is given, so that speech_input can be overridden by kws_input
+        return None
+
     path = os.path.join(inputdir, filename)
     return SpeechInput(path, *args)
 
@@ -134,23 +141,55 @@ def intent_input(request):
     return IntentInput(path, *args)
 
 
+KwsInput = namedtuple('KwsInputData',
+                      ('path', 'transcription', 'offset', 'duration', 'model_file', 'model_keyword'))
+
+kws_input_data_raw = {
+    'computer': ('kws_whatstheweatherlike.wav', [
+        "Computer what's the weather like?"],
+        (None, ),
+        (None, ),
+        ('Computer', 'kws.table'),
+        "",
+    ),
+}
+
+
+@pytest.fixture
+def kws_input(request):
+    inputdir = request.config.getoption("--inputdir")
+
+    try:
+        args = dict(zip(KwsInput._fields, kws_input_data_raw[request.param]))
+    except AttributeError:
+        # don't fail if no request is given, so that kws_input can be empty
+        return None
+
+    audiopath = os.path.join(inputdir, '..', 'kws', args['path'])
+    kwspath = os.path.join(inputdir, '..', 'kws', *args['model_file'])
+    return KwsInput(audiopath, args['transcription'], args['offset'], args['duration'],
+                    kwspath, args['model_keyword'])
+
+
 @pytest.fixture
 def from_file_speech_reco_with_callbacks(subscription: str, speech_input: SpeechInput,
-        speech_region: str):
+                                         speech_region: str, kws_input: KwsInput):
     """
     Fixture to generate a `SpeechRecognizer` setup with audio input from file as defined by
-    `speech_input` and subscription information.
+    `speech_input` or `kws_input` and subscription information.
 
     @return: A function that takes a function `setup_callback_handle` to setup callbacks on the
         recognizer, and key word arguments which override subscription information. It returns a
         tuple `(recognizer, callbacks)`.
     """
+    speech_input = speech_input or kws_input
+
     def build_recognizer(setup_callback_handle: Callable = _setup_callbacks, **kwargs):
         audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
         speech_config = msspeech.SpeechConfig(
-                subscription=kwargs.get('subscription', subscription),
-                region=kwargs.get('speech_region', speech_region),
-                endpoint=kwargs.get('endpoint', None))
+            subscription=kwargs.get('subscription', subscription),
+            region=kwargs.get('speech_region', speech_region),
+            endpoint=kwargs.get('endpoint', None))
 
         reco = msspeech.SpeechRecognizer(speech_config, audio_config)
         callbacks = setup_callback_handle(reco)
@@ -162,7 +201,7 @@ def from_file_speech_reco_with_callbacks(subscription: str, speech_input: Speech
 
 @pytest.fixture
 def from_file_translation_reco_with_callbacks(subscription: str, speech_input: SpeechInput,
-        speech_region: str):
+                                              speech_region: str):
     """
     Fixture to generate a `TranslationRecognizer` setup with audio input from file as defined by
     `speech_input` and subscription information.
@@ -174,9 +213,9 @@ def from_file_translation_reco_with_callbacks(subscription: str, speech_input: S
     def build_recognizer(setup_callback_handle: Callable = _setup_callbacks, **kwargs):
         audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
         translation_config = msspeech.translation.SpeechTranslationConfig(
-                subscription=kwargs.get('subscription', subscription),
-                region=kwargs.get('speech_region', speech_region),
-                endpoint=kwargs.get('endpoint', None))
+            subscription=kwargs.get('subscription', subscription),
+            region=kwargs.get('speech_region', speech_region),
+            endpoint=kwargs.get('endpoint', None))
 
         translation_config.speech_recognition_language = speech_input.input_language
         for language in speech_input.translations:
@@ -194,7 +233,7 @@ def from_file_translation_reco_with_callbacks(subscription: str, speech_input: S
 
 @pytest.fixture
 def from_file_intent_reco_with_callbacks(luis_subscription: str, intent_input: IntentInput,
-        luis_region: str, language_understanding_app_id: str):
+                                         luis_region: str, language_understanding_app_id: str):
     """
     Fixture to generate a `IntentRecognizer` setup with audio input from file as defined by
     `speech_input` and subscription information.
@@ -206,9 +245,9 @@ def from_file_intent_reco_with_callbacks(luis_subscription: str, intent_input: I
     def build_recognizer(setup_callback_handle: Callable = _setup_callbacks, **kwargs):
         audio_config = msspeech.audio.AudioConfig(filename=intent_input.path)
         speech_config = msspeech.SpeechConfig(
-                subscription=kwargs.get('subscription', luis_subscription),
-                region=kwargs.get('luis_region', luis_region),
-                endpoint=kwargs.get('endpoint', None))
+            subscription=kwargs.get('subscription', luis_subscription),
+            region=kwargs.get('luis_region', luis_region),
+            endpoint=kwargs.get('endpoint', None))
 
         reco = msspeech.intent.IntentRecognizer(speech_config, audio_config)
 
@@ -225,4 +264,3 @@ def from_file_intent_reco_with_callbacks(luis_subscription: str, intent_input: I
         return (reco, callbacks)
 
     return build_recognizer
-

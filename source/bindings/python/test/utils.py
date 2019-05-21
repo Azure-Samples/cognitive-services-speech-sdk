@@ -153,9 +153,9 @@ def _check_result_common(result, speech_input, utterance_index, do_check_duratio
         do_check_offset=True):
     assert speech_input.transcription[utterance_index] == result.text
     if do_check_duration:
-        assert speech_input.duration[utterance_index] > 0
+        assert result.duration > 0
     if do_check_offset:
-        assert speech_input.offset[utterance_index] > 0
+        assert result.offset > 0
     assert isinstance(result.result_id, str)
     assert result.result_id
     assert result.cancellation_details is None

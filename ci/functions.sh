@@ -262,3 +262,9 @@ function get_time() {
 function get_seconds_elapsed() {
   perl -MTime::HiRes=clock_gettime -e 'printf "%0.3f", clock_gettime() - shift' "$1"
 }
+
+function getLatest() {
+  local sorted
+  sorted=($(printf '%s\n' "$@" | sort --version-sort))
+  echo ${sorted[-1]}
+}

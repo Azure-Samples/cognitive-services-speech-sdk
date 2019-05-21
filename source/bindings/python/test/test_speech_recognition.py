@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft. All rights reserved.
 # See https://aka.ms/csspeech/license201809 for the full license information.
 
+import sys
 import pytest
 
 import azure.cognitiveservices.speech as msspeech
@@ -377,6 +378,25 @@ def test_keyword_recognition_model_constructor():
 
     with pytest.raises(ValueError, match="filename needs to be provided"):
         model = msspeech.KeywordRecognitionModel()
+
+
+@pytest.mark.skipif(sys.platform == 'darwin', reason="KWS is not available on macOS")
+@pytest.mark.parametrize('kws_input,', ['computer'], indirect=True)
+def test_keyword_recognition_from_wav_file(from_file_speech_reco_with_callbacks, kws_input):
+    reco, callbacks = from_file_speech_reco_with_callbacks()
+    model = msspeech.KeywordRecognitionModel(kws_input.model_file)
+    assert model
+
+    reco.start_keyword_recognition_async(model)
+
+    _wait_for_event(callbacks, 'session_stopped')
+
+    valid_events = [evt for (evt, _) in callbacks['recognized'].events
+            if evt.result.reason == msspeech.ResultReason.RecognizedSpeech]
+
+    assert 1 == len(valid_events)
+    _check_sr_result(valid_events[-1].result, kws_input, 0)
+    assert valid_events[-1].result.text.startswith(kws_input.model_keyword)
 
 
 @pytest.mark.parametrize('speech_input,', ['silence'], indirect=True)

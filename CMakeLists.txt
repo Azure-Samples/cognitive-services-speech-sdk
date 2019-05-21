@@ -17,6 +17,7 @@ include(speechsdk_functions)
 set(SPEECHSDK_BUILD_TYPE "local" CACHE STRING "SDK build type (local, dev, int, prod)")
 get_local_version(_LOCAL_VERSION)
 set(SPEECHSDK_VERSION "${_LOCAL_VERSION}" CACHE STRING "Version to use")
+message(STATUS "Building Speech SDK version ${SPEECHSDK_VERSION}")
 
 parse_version(
   BUILD_TYPE ${SPEECHSDK_BUILD_TYPE}
@@ -161,6 +162,8 @@ message(STATUS "CMake version info: ${CMAKE_VERSION}")
 message(STATUS "BUILD_PYTHON=${BUILD_PYTHON}")
 message(STATUS "BUILD_CSHARP=${BUILD_CSHARP}")
 message(STATUS "BUILD_JAVA=${BUILD_JAVA}")
+
+set(SPEECHSDK_PYTHON_WHEEL_ARGS "" CACHE STRING "Extra arguments to be passed to the wheel command. Must be given as ;-separated list.")
 
 # Configure CCache if available
 find_program(CCACHE_FOUND ccache)
@@ -372,10 +375,7 @@ add_subdirectory(${TTS})
 add_subdirectory(${TTS_MOCK})
 add_subdirectory(${TTS_REST})
 
-if(NOT DEFINED SKBUILD)
-  # don't build mocks with scikit-build based python wheel build
-  add_subdirectory(${MOCK})
-endif()
+add_subdirectory(${MOCK})
 
 add_subdirectory(${LIBCARBON})
 
@@ -400,11 +400,8 @@ if(EXTENSION_CODEC_ENABLED)
   endif()
 endif()
 
-if(NOT DEFINED SKBUILD)
-  # don't build c++ tests and carbonx with scikit-build based python wheel build
-  add_subdirectory(${TESTS})
-  add_subdirectory(${CARBONX})
-endif()
+add_subdirectory(${TESTS})
+add_subdirectory(${CARBONX})
 
 # Dummy targets to make API header appear
 # in the generated VS solution.
@@ -415,3 +412,4 @@ set_target_properties(c_headers PROPERTIES FOLDER api)
 add_custom_target(cxx_headers
   SOURCES ${SPEECH_CXX_API_HEADERS})
 set_target_properties(cxx_headers PROPERTIES FOLDER api)
+

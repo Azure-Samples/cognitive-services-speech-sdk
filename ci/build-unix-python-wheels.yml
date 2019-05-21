@@ -1,0 +1,77 @@
+steps:
+- bash: mkdir -p dist $(OutputDirectory)/wheelhouse
+  displayName: Generate output directory
+- bash: |
+    # stage the wheels in dist/
+    set -u -x -e -o pipefail
+    pythonMajorMinorVersions=(3.7 3.6 3.5)
+    . ci/functions.sh
+    if [[ $(SPEECHSDK_TARGET_PLATFORM) == OSX-x64 ]]; then
+      hostedtoolsPath=/Users/vsts/hostedtoolcache
+      extraCmakeArgs="--plat-name=macosx-10.12-x86_64"
+    else
+      hostedtoolsPath=/opt/hostedtoolcache
+      extraCmakeArgs="--plat-name=manylinux1_x86_64;--python-tag=cp%wheelPythonVersion%"
+    fi
+    for pythonMajorMinorWithDot in ${pythonMajorMinorVersions[*]}; do
+      thisPythonVersionBasePath=$(getLatest ${hostedtoolsPath}/Python/${pythonMajorMinorWithDot}.*)
+      wheelPythonVersion=${pythonMajorMinorWithDot//./}
+      # reconfigure for python build
+      cmake -H. -Bbuild -DBUILD_PYTHON=ON -DBUILD_CSHARP=OFF -DBUILD_JAVA=OFF \
+        -DPYTHON_EXECUTABLE:FILEPATH="${thisPythonVersionBasePath}/x64/python" \
+        -DPYTHON_LIBRARY="${thisPythonVersionBasePath}/x64/lib/libpython${pythonMajorMinorWithDot}m.a" \
+        -DPYTHON_INCLUDE_DIR:PATH="${thisPythonVersionBasePath}/x64/include/python${pythonMajorMinorWithDot}m" \
+        -DSPEECHSDK_PYTHON_WHEEL_ARGS=${extraCmakeArgs//%wheelPythonVersion%/${wheelPythonVersion}}
+      cmake --build build --target bdist -j 4
+      cp -v build/dist/* dist
+    done
+    # copy wheels to build/ for tests
+    cp -v dist/*.whl build
+  displayName: Build Python wheels
+- bash: |
+    set -u -x -e -o pipefail
+    python -m pip install wheel==0.33.1
+    declare -A dylibExtByPlatform=([Linux-x64]="so" [OSX-x64]="dylib")
+    coreLib=repack/azure/cognitiveservices/speech/libMicrosoft.CognitiveServices.Speech.core.${dylibExtByPlatform[$(SPEECHSDK_TARGET_PLATFORM)]}
+    coreHash=($(md5sum ${coreLib//repack/build}))
+    pythonExtension=repack/azure/cognitiveservices/speech/_speech_py_impl.so # extension is .so on Linux and OSX
+    libs=($coreLib $pythonExtension)
+    if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
+      kwsLib=repack/azure/cognitiveservices/speech/libMicrosoft.CognitiveServices.Speech.extension.kws.${dylibExtByPlatform[$(SPEECHSDK_TARGET_PLATFORM)]}
+      libs+=($kwsLib)
+      kwsHash=($(md5sum ${kwsLib//repack/build}))
+    fi
+    unstrippedLibPath="$(OutputDirectory)/libunstripped-$(SPEECHSDK_TARGET_PLATFORM)-$(BuildConfiguration)-py"
+    mkdir -p "$unstrippedLibPath"
+    for lib in ${libs[@]}; do
+      [[ $lib == ${pythonExtension} ]] || cp -p "${lib//repack/build}" "$unstrippedLibPath"
+    done
+    for wheel in dist/*.whl; do
+      if [[ $(BuildConfiguration) == Release ]]; then
+        wheelNameComponents=(${wheel//-/ }) # 2nd element is "cp3n"
+        wheelPythonVersion=${wheelNameComponents[2]:2} # strip away the "cp"
+        mkdir repack # error out if existing
+        unzip -d repack "${wheel}"
+        # check that the core & kws lib are identical in all wheels
+        [[ $(md5sum "$coreLib") == ${coreHash[0]}* ]] || exitWithError "core lib changed between Python builds"
+        if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
+          [[ $(md5sum "$kwsLib") == ${kwsHash[0]}* ]] || exitWithError "kws lib changed between Python builds"
+        fi
+        # archive the unstripped python bindings lib
+        unstrippedLibPathThisPythonVersion="${unstrippedLibPath}/${wheelPythonVersion}"
+        mkdir -p "$unstrippedLibPathThisPythonVersion"
+        cp -p "${pythonExtension}" "${unstrippedLibPathThisPythonVersion}"
+        # strip all libs
+        for lib in ${libs[@]}; do
+          strip -x "${lib}"
+        done
+        python -m wheel pack --dest-dir "$(OutputDirectory)/wheelhouse" repack
+        rm -rf repack
+      else
+        mv ${wheel} "$(OutputDirectory)/wheelhouse/"
+      fi
+      # prepare for signing (OSX only)
+      [[ $(SPEECHSDK_TARGET_PLATFORM) != OSX-x64 || $SPEECHSDK_SIGN != true ]] || mv $(OutputDirectory)/wheelhouse/$(basename "${wheel}"){,.zip}
+    done
+  displayName: Strip and archive debug symbols for Python wheels
+
