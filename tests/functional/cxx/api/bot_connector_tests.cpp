@@ -256,7 +256,7 @@ const auto verifyNotRecognizedKeyword = [](std::ostringstream& oss, const Speech
     return false;
 };
 
-TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector]")
+TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector][!hide]")
 {
     SECTION("Listen Once works")
     {
@@ -379,7 +379,7 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector]")
 // 3) Being able to specify the keyword text in keyword detection (Done)
 // 4) Being able to specify the audio for the latter utterance 
 
-TEST_CASE("Speech Bot Connector KWS basics", "[api][cxx][bot_connector]") {
+TEST_CASE("Speech Bot Connector KWS basics", "[api][cxx][bot_connector][!hide]") {
 
     SECTION("Listen once with KWS only works")
     {
@@ -418,7 +418,7 @@ TEST_CASE("Speech Bot Connector KWS basics", "[api][cxx][bot_connector]") {
     }
 }
 
-TEST_CASE("Speech Bot Connector KWV basics", "[api][cxx][bot_connector]")
+TEST_CASE("Speech Bot Connector KWV basics", "[api][cxx][bot_connector][!hide]")
 {
 
     SECTION("Listen once with KWS + KWV accept works")

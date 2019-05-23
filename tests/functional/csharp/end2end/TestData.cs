@@ -197,6 +197,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "RecordedAudioMessages.json");
                 public static readonly string TwoSpeakersAudio = Path.Combine(AudioDir, "katiesteve.wav");
+                public static readonly string KatieVoice = Path.Combine(AudioDir, "enrollment_audio_katie.wav");
+                public static readonly string SteveVoice = Path.Combine(AudioDir, "enrollment_audio_steve.wav");
                 public static readonly string Utterance = "Good morning Katie.";
             }
 

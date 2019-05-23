@@ -35,7 +35,9 @@ add_dependencies(${PROJECT_NAME} ${CSHARP_LIB} ${NUGET_RESTORE})
 
 set(END2END_TEST_REFERENCES
   System
-  System.Net.Http)
+  System.Net.Http
+  System.Runtime.Serialization
+  Newtonsoft.Json)
 
 set(END2END_TEST_PROJECT_TYPES
   "{3AC096D0-A1C2-E12C-1390-A8335801FDAB}"
