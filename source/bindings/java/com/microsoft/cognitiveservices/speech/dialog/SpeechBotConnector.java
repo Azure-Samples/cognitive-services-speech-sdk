@@ -97,12 +97,11 @@ public class SpeechBotConnector implements Closeable {
      * @param activity Activity to be sent.
      * @return A task representing the asynchronous operation that sends an activity to the bot.
      */
-    public Future<Void> sendActivityAsync(final BotConnectorActivity activity) {
+    public Future<String> sendActivityAsync(final BotConnectorActivity activity) {
         Contracts.throwIfNull(activity, "activity");
-        return executorService.submit(new java.util.concurrent.Callable<Void>() {
-            public Void call() {
-                speechBotConnectorImpl.SendActivityAsync(activity.getImpl()).Get();
-                return null;
+        return executorService.submit(new java.util.concurrent.Callable<String>() {
+            public String call() {
+                return speechBotConnectorImpl.SendActivityAsync(activity.getImpl()).Get();
             }
         });
     }
