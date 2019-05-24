@@ -36,7 +36,12 @@ if(DEFINED APPLE)
         set(FRAMEWORK_MINIMUM_OS_VERSION_VALUE ${IOS_DEPLOYMENT_TARGET})
     else()
         set(FRAMEWORK_MINIMUM_OS_VERSION_KEY "LSMinimumSystemVersion")
-        set(FRAMEWORK_MINIMUM_OS_VERSION_VALUE "10.0")
+        set(FRAMEWORK_MINIMUM_OS_VERSION_VALUE "10.12")
+        set(FRAMEWORK_SUPPORTED_PLATFORMS "  <key>CFBundleSupportedPlatforms</key>
+  <array>
+    <string>MacOsX</string>
+  </array>"
+    )
     endif()
 endif()
 
