@@ -7,15 +7,13 @@
 #include "recognizer_utils.h"
 
 #include <fstream>
+#include <chrono>
 #include "wav_file_reader.h"
 #include "azure_c_shared_utility_includes.h"
-
-using namespace Microsoft::CognitiveServices::Speech::USP; // for GetISO8601Time
 
 TestData weather {"/audio/whatstheweatherlike.wav", "What's the weather like?" };
 TestData weathermp3{ "/audio/whatstheweatherlike.mp3", "What's the weather like?" };
 TestData weatheropus{ "/audio/whatstheweatherlike.opus", "What's the weather like?" };
-TestData weather8Channels {"/audio/whatstheweatherlike_8channels.wav", "What's the weather like?" };
 TestData batman{ "/audio/batman.wav", "" };
 TestData wrongSamplingRateFile {"/audio/11khztest.wav", "" };
 TestData cortana {"/audio/heyCortana.wav", "Hey Cortana," };
@@ -26,6 +24,7 @@ TestData recordedAudioMessage { "/audio/RecordedAudioMessages.json", "" };
 TestData kwvAccept { "/kws/kws_whatstheweatherlike.wav", "Computer what's the weather like?" };
 TestData kwvReject { "/kws/kws_whatshouldIcallyou.wav", "Hey Computer what should I call you?" };
 TestData kwvMultiturn { "/kws/kws_whatstheweatherlike_turnontheradio.wav", "Computer what's the weather like? Turn on the radio." };
+TestData katieSteve{ "/audio/katiesteve.wav", "Good morning Katie." };
 
 std::shared_ptr<SpeechConfig> CurrentSpeechConfig()
 {
@@ -319,20 +318,20 @@ SPXSTRING RecordedDataReader::GetProperty(PropertyId propertyId)
     }
 }
 
-std::shared_ptr<AudioConfig> CreateAudioPushUsingWeatherFile(std::shared_ptr<PushAudioInputStream>& pushAudio)
+std::shared_ptr<AudioConfig> CreateAudioPushUsingKatieSteveFile(std::shared_ptr<PushAudioInputStream>& pushAudio)
 {
-    weather8Channels.UpdateFullFilename(Config::InputDir);
+    katieSteve.UpdateFullFilename(Config::InputDir);
 
     // Create the "audio pull stream" object with C++ lambda callbacks
     pushAudio = AudioInputStream::CreatePushStream(AudioStreamFormat::GetWaveFormatPCM(16000, 16, 8));
     return AudioConfig::FromStreamInput(pushAudio);
 }
 
-std::shared_ptr<AudioConfig> CreateAudioPullUsingWeatherFile(std::shared_ptr<PullAudioInputStream>& pullStream)
+std::shared_ptr<AudioConfig> CreateAudioPullUsingKatieSteveFile(std::shared_ptr<PullAudioInputStream>& pullStream)
 {
-    weather8Channels.UpdateFullFilename(Config::InputDir);
+    katieSteve.UpdateFullFilename(Config::InputDir);
     auto reader = std::make_shared<CSpxWavFileReader>();
-    reader->Open(PAL::ToWString(weather8Channels.m_inputDataFilename).c_str());
+    reader->Open(PAL::ToWString(katieSteve.m_inputDataFilename).c_str());
 
     // Create the "audio pull stream" object with C++ lambda callbacks
     pullStream = AudioInputStream::CreatePullStream(
@@ -342,9 +341,7 @@ std::shared_ptr<AudioConfig> CreateAudioPullUsingWeatherFile(std::shared_ptr<Pul
         [=](PropertyId propertyId) -> SPXSTRING {
         if (propertyId == PropertyId::DataBuffer_TimeStamp)
         {
-            char timeString[TIME_STRING_MAX_SIZE];
-            GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
-            return timeString;
+            return CreateTimestamp();
         }
         else if (propertyId == PropertyId::DataBuffer_UserId)
         {
@@ -373,9 +370,7 @@ std::shared_ptr<AudioConfig> CreateAudioPullSingleChannel(std::shared_ptr<PullAu
         [=](PropertyId propertyId) -> SPXSTRING {
         if (propertyId == PropertyId::DataBuffer_TimeStamp)
         {
-            char timeString[TIME_STRING_MAX_SIZE];
-            GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
-            return timeString;
+            return CreateTimestamp();
         }
         else if (propertyId == PropertyId::DataBuffer_UserId)
         {
@@ -432,6 +427,7 @@ std::shared_ptr<VideoConfig> CreateVideoPush(std::shared_ptr<PushVideoInputStrea
     return VideoConfig::FromStreamInput(pushVideo);
 }
 #endif
+
 void StartMeetingAndVerifyResult(ConversationTranscriber* recognizer, const shared_ptr<Participant>& participant, RecoPhrasesPtr&& result, const string& ref)
 {
     recognizer->SetConversationId("fromStartMeetingAndVerifyResult");
@@ -445,45 +441,28 @@ void StartMeetingAndVerifyResult(ConversationTranscriber* recognizer, const shar
 
     recognizer->StopTranscribingAsync().get();
     SPXTEST_REQUIRE(!result->phrases.empty());
-    SPXTEST_REQUIRE(result->phrases[0].Text == ref);
+    auto text = GetText(result->phrases);
+    INFO(text);
+    SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, ref));
 }
 
-void CreateVoiceSignatures(std::string* voice006, std::string* voice022, std::string* voice042, std::string* voice023)
+void CreateVoiceSignatures(std::string* katieVoiceSignature, std::string* steveVoiceSignature)
 {
-    *voice006 = R"(
-      {
-          "Version": 0,
-          "Tag": "9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=",
-          "Data": "r4tJwSq280QIBWRX8tKcjxYwDySvX6VZFGkqLLroFV3HIlARgA1xXdFcVK9a2xbylLNQUSNwdUUsIpBDB+jlz6W97XgJ9GlBYLf6xVzUmBg1Qhac32DH3c810HDtpwJk3FkEveM7ohLjhvnYKwjBNqbAVGUONyLYpO28kcxRhvSOxe5/2PeVOgpXMGMcBt3IKN3OmNSOokg4QkqoRUNuRMg5jdoq7BraOyr7CEOP2/GsicmUcONNhFaLuEwy97WRUXE0RWTdDxeR9dn2ngSESq+vYiCkudDi/TGh0ZhxABTxU6EiFQl7uiYG28drjosWdrOV5FPGe2pP8omEoBgtc+yOxYa40HG/yQ160Enqv8umCTcTeW6bkA9CZJ7K8740oZkA8pdpsWkurpFJlMDK3e3Y6w/W1/P55gz/jegYTusDDoz5fINcoWj1zbyLMaFgig3PlEDLKG2hb09Jy4OhEeaBgVqEXiUTEX/R44pd7nUK49xrRJ9yM2gfUq8S+229hJ40N5ZMe+9G848jtsGOziPs20KNlqpL6tiXGAeynhclHyt3pITJjOJi9/cYKYbNm3dR+PtxuLL1WAgIuaK65aGhyW0NmFYm/r7hfAK9a2nTNJIgTsFLG32jljkpaurtwvHuAtIhK8KnopeN6OPXjGl2q06bqI2U92eBxKRroeGUEq3PiXHwVk9DOIFzOAdz"
-        }
-     )";
-
-    *voice023 = R"(
-       {
-          "Version": 0,
-          "Tag": "9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=",
-          "Data": "qW513Jnvb5w1k4y/Z9J3jveiE3D42HCQBYCpldleFYRY+aPPTsI0IBMjCBXnStNSd4zWfdoGbzRlxFWz+kdjpzIA+9jM5/Sb1bqMgEcHod2cK/Cr8+uOUfO6KQ/rEg77B/z/ffb0P6wClO2ECw9KoVtLjdGTdFo5AytiFq3ngVADzRX6jtT5bVM4b9XJCg7VTKa9Im7F6yqMqgIgTJP+E8XEjO5cD2QD+Ea+9FyqQ2AOHHqiP2oHxcNYNXkwCO6vh7E2mKo97DekFGrqLLFwn8gczFxM08g/qoccs1SVvbtjpj7mGTNiq18WTuT1G78X7eal9MFMT4NZNiRzK1haSbM4gxt3HxprA3DlvTJnMWBdttzwzS9II1L/UZgEiw4ldJqDBKHogWEuyKej/DRFZMjsRustw0f+ioVADR9uyImA/lINJFgTMgFpqfcHU+bjy7hGz9sGBOopCvNC/pYfCytS1S3tkr8VVhuKHgdK3yDXoOWf57I8DBn1e88FM0SUmpGHLmE4xQreAmwm0dJRHQAIullTlwM54NIEd3CVETOJO5R3bqLbNH9rioStslHB30UAemSN5u21Hz/hLVlPsNRoEZ1kDB7wzwayE5NtXdCz4PSDrEXSBawUH7/xXiaurWgkvqCsDli+tD58RbxlTXxbOJ9caXjwLCRINu4SLLHXbuf3ksSY+XwiS4BznMUJ"
-        }
+    *katieVoiceSignature = R"(
+        {"Version":0,
+         "Tag" : "VtZQ7sJp8np3AxQC+87WYyBHWsZohWFBN0zgWzzOnpw=",
+         "Data" : "rrukpyUGGFGHidLz51PatCKm/jIh4uwtgVKUkAo3tBjQZbvdKdIHRb47nfsk2RycDutA09sb5UtVkYPdwnj/SuamcOJi+sGNczeqvkcF5dQHCnJiPMHl56/rPgJm9gNaxSbvvanthk6h6NFRcpfxw1mrp3bq1BtflduuoVcBrIBuEqE3JlT7P4VuaeSaQ2KHGffIM6xi/4ylqA3FKYyRGJefZnzjGIjGQl6GauV/YwSSDR19n7ovKAJCYuJKfTXG0qgrO0zdSQ5bHiTBTiS52B3WgkYglyn5aDMKlcZjpCyg7xAWcA3lnz2Fsmjjo/e0bz99mARNCHkk4OrwImgNzxpnqPqHi3YLhdSo9W0/sKM+QQ625U2YlD0hASh97YDPenzEGSNnMD8mLn5EJs2Naf8u52yIQO+6SHB3HcmjIJRhaXZXJAznFUQ6+XD3k0uKBNvg8C0kNuUzi77aKqbohO8OS4b2hGbQqSmHep3lCdRr8W2SAf7UzabJq8qxTGb7E/qh9AuOdHI1iqrIHpx3oL68O7FUzSY7sBwVlsPsziPfYu1FAxjuICsqxha6kqyemjiSc3SjzLsHz5V0cz0f3X6K4QQw6TonqICLLRuaTJwhUNnBGlDXi1wc5265TdJi3hEqqVtwjYGeqYAYhSItKbE+h76zsQcNu2qUYeQRCUm30+k2KrqDcgmskAdaV85+"}
         )";
 
-    *voice022 = R"(
-      {
-          "Version": 0,
-          "Tag": "9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=",
-          "Data": "T8JbMJW8OGEhkWEm9Q6+p94LfPrbgyxz5LWs695CPzGPR64TJf3pw5FPqaXR1r0zf0UeckLAnHWzgD7St7aUy+DucbFGekXXMazDHeKs7jgvh4UhRVIvdukcKuNBOR+M1Hcdo4ZGLNACi7HPjSCqpq4x8GVWsBv0olBmv0f9MODmwqLV4ZdigpFRxjqQNLVFX1E7m3mReZj7Dwe1jnGM2IjqCVXLsvO9i218Gm73h2JmcoUbZt/PZQwNwfD3EAN9GbTBMaN/E65Xd/i43Hwhk9GzQufKWzQUW5UB13BIyGfO97z64CaEq4dbFd5pWxk5N9wyDEdEo+PnchqN0FJaPaHjxqv63BN7UdPRYMJ9coMSXFpQRU9t57tNvy77tGrvQ4RufaIYgkTzZvJDN19vEQXlL+oBU30dU+7tFmICRiTCqPRjYYb9Q8O32Sxpr7iIhMwkviUcfo9Y08eqAv9m4aQO6Lhz0cx4vK7UhZShagZ9dqMVA99CGWW4zp4vY7uThPiYMGqAcePA+Sv8fIBR2GB2YG9OZj/Ao80xWMuK6yoEehqOuY1oj07HJ5wHuoy1gL+6AblKNT29Q8i7zKKflW5MimdVby2WvBP59sdaDjZYXYJFFnAV1g63k7Rotvq6OvhytR2hc3rpSAuqs9pmohg8ssKdmG2bBpp5IxS7VRu7uUwOBNWsyMDAs48pPFae"
-        }
-    )";
-
-    *voice042 = R"(
-      {
-          "Version": 0,
-          "Tag": "9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=",
-          "Data": "IlgqQLfiEofDG1asXEAReulsL3GfTNFOFyfRvImCNlzKsPDUz4NycKT6IahqQYptAcjwAKyOq/OL+hxnjXHYvaf4dNUzL7rriG0ezgFdykxgfGM0MLtuS8S+OFHX2JYCpub4gRjbLo+GpNB1Vn+nt8sILVFjwLbQ93WiI2i4ThzV3tsYrBdCGLXeFEQ3QUS1epuVUWFHxKauzc9d97uv6f6BlBqfeR/n9cytAz1zRupeIijFKrW118qyTIewLuqx/HjE3E54Cdxdv7aNz/0xdo16rGk0RwhT4L9zqKqLw0g7vNJ20q3vmEOgWioCWRRM2517cGdzmezanRXXcHeEBNosihUK2TkNbfCRbwXh8UzD1arPfv2eh4GxEB3zC2WUJPM4+hsF8DDjPbc418NFJmVx7FQTjXNe7HHwyGNs18qFiDDilG/m4wA3k+hRRCsuRcHcjaipNBwfuHiwsNv3ZE+Jymtx0lmhlzmP/4uwezI1JuFo4j0d3QdjF68aHj1iEOFWNvSc3xujkZoi5fYvVHPtEuVgb21ZZ/OtiQmgGy6IDDz61sgVX+b8oQkcsKo93Yg3eM0kmOiFW9CVnIs7BKJWegYfT2sCN44ARNSpHTxAjNXEaeoydq6LhAtkDcUtDhiaUgavoSCYZGDv6w3CMZCYBfleWPUEUAQk4bykAGoHY1D1wf3alqYclqPaYKcm"
-        }
+    *steveVoiceSignature = R"(
+    {
+        "Version":0,
+         "Tag" : "HbIvzbfAWjeR/3R+WvUEoeid1AbDaHNOMWItgs7mTxc=",
+         "Data" : "Yuw5OvaCRB+gi74UdCa6N4cHy23c293XwPfj3PDMr2U1S/CWkUIMNSV/GsUTuwDYxn5u0oOfLpLnhy9EIlJbtpvY7GXp6JxDv3PylsZIAPx9uzs8Shc9JvtY3PSmI4IHNRbsa4tg4JLI/C3rxsGA6DNfiVsmhJmgEtX5M12xX7BbzaFE4m4ax+BGYdNNpMMz2EZ0Mmnxyiy1cqkJWGgcOn7rfZYbLVMxsCT55wtB/1vSz4faWMfsfQxoDiEmHCmHTBuUuHZ8B05JAgpfHhSLwCJPVKyndYSxnsV3sWvp1Ou3HrOcz0ug5cjFYl/gR0U8XSwEFOHThNybKgpKAKzQ8mUaElvYcYySpJuHhPOyH21MWtRTS8OmSCDoeP6reTpgeoQnOjxJaojNHVpDDK4mG9u03oT7GnbLD2qlUkAwu/HywplexR9qufa36fqWGesVjjdd6C62PULkgSkhq9zQc3g7L5y0cci5RXgOBdP2KHa85anELGg4fUT05Hf6DDnO72GM8w40p2CQiswNlvcmnlRXD732koBXTzUpYaO1lhikXYpSg+C4bTjww6S0/3u/+A30kq8c4GYw6ngHybNLgDv8Z6ZVt4XiXDRFwpoSVZzrmSeuz4DOLlL+jX8dK8QwRBS92Jkay561tirmDd9fyz76+hljtt72rYKg9KpVAqoausBdGrzy0iEE3LsfXUTH"}
     )";
 }
 
-bool VerifyResult(std::string& text, const std::string& ref)
+bool VerifyText(std::string& text, const std::string& ref)
 {
     auto lowercaseText = text;
     transform(lowercaseText.begin(), lowercaseText.end(), lowercaseText.begin(), [](unsigned char c) ->char { return (char)::tolower(c); });
@@ -519,4 +498,46 @@ std::string GetUserId(const SpeechRecognitionResult* ctr)
 {
     UNUSED(ctr);
     return  string{};
+}
+
+bool VerifyTextAndSpeaker(const RecoResultVector& phrases, const std::string& text, const std::string& speakerId)
+{
+    if (phrases.empty())
+    {
+        return false;
+    }
+    bool found = false;
+    for (const auto& phrase : phrases)
+    {
+        if (phrase.Text == text && phrase.UserId == speakerId)
+        {
+            found = true;
+            break;
+        }
+    }
+    return found;
+}
+
+std::string GetText(const RecoResultVector& phrases)
+{
+    ostringstream os;
+    for (const auto& phrase : phrases)
+    {
+        os << "Recognized Text '" << phrase.Text << "' UserId '" << phrase.UserId << "'" << endl;
+    }
+    return os.str();
+}
+
+std::string CreateTimestamp()
+{
+    auto tm = std::chrono::time_point_cast<My90kHzDuration>(std::chrono::high_resolution_clock::now());
+
+    // according to Jun Zhang, the time interval Princeton expecting is in seconds.
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(tm.time_since_epoch());
+    std::cout << "Creating a timestamp milliseconds: " << duration.count() << std::endl;
+
+    ostringstream os;
+    os << duration.count();
+
+    return os.str();
 }

@@ -5,13 +5,11 @@
 #include "test_utils.h"
 #include "file_utils.h"
 #include "recognizer_utils.h"
-#include "metrics.h"
 
 #include "speechapi_cxx.h"
 #include "wav_file_reader.h"
 
 using namespace std;
-using namespace Microsoft::CognitiveServices::Speech::USP; // for GetISO8601Time
 using namespace Microsoft::CognitiveServices::Speech::Impl; // for CSpxWavFileReader
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
@@ -24,13 +22,12 @@ TEST_CASE("conversation_voice_signature", "[.][int][prod]")
     audioEndpoint += "/multiaudio";
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
 
-    //todo: when service is ready replace it with Speech016_30s_xmos_8ch.
-    weather8Channels.UpdateFullFilename(Config::InputDir);
-    auto audioInput = AudioConfig::FromWavFileInput(weather8Channels.m_inputDataFilename);
+    katieSteve.UpdateFullFilename(Config::InputDir);
+    auto audioInput = AudioConfig::FromWavFileInput(katieSteve.m_inputDataFilename);
     auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
     auto result = make_shared<RecoPhrases>();
     ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
-    auto p = Participant::From("SP006@speechdemo.onmicrosoft.com", "en-us");
+    auto p = Participant::From("katie@example.com", "en-us");
     REQUIRE_THROWS(p->SetVoiceSignature(R"(
     {
         "Version": 0,
@@ -46,28 +43,36 @@ TEST_CASE("conversation_voice_signature", "[.][int][prod]")
         "Tag": "asdfasdf",
         "Data" : "IlgqQLfiEofDG1asXEAReulsL3GfTNF"
     })"));
-    REQUIRE_THROWS(Participant::From("SP006@speechdemo.onmicrosoft.com", "en-us", "asdf"));
+    REQUIRE_THROWS(Participant::From("katie@example.com", "en-us", "asdf"));
     REQUIRE_THROWS(p->SetVoiceSignature("asdf"));
 
-    REQUIRE_NOTHROW(p->SetVoiceSignature(R"(
-         {"Version": 0,
-          "Tag": "9cS5rFEgDkqaXSkFRoI0ab2/SDtqJjFlsRoI2Tht3fg=",
-          "Data": "r4tJwSq280QIBWRX8tKcjxYwDySvX6VZFGkqLLroFV3HIlARgA1xXdFcVK9a2xbylLNQUSNwdUUsIpBDB+jlz6W97XgJ9GlBYLf6xVzUmBg1Qhac32DH3c810HDtpwJk3FkEveM7ohLjhvnYKwjBNqbAVGUONyLYpO28kcxRhvSOxe5/2PeVOgpXMGMcBt3IKN3OmNSOokg4QkqoRUNuRMg5jdoq7BraOyr7CEOP2/GsicmUcONNhFaLuEwy97WRUXE0RWTdDxeR9dn2ngSESq+vYiCkudDi/TGh0ZhxABTxU6EiFQl7uiYG28drjosWdrOV5FPGe2pP8omEoBgtc+yOxYa40HG/yQ160Enqv8umCTcTeW6bkA9CZJ7K8740oZkA8pdpsWkurpFJlMDK3e3Y6w/W1/P55gz/jegYTusDDoz5fINcoWj1zbyLMaFgig3PlEDLKG2hb09Jy4OhEeaBgVqEXiUTEX/R44pd7nUK49xrRJ9yM2gfUq8S+229hJ40N5ZMe+9G848jtsGOziPs20KNlqpL6tiXGAeynhclHyt3pITJjOJi9/cYKYbNm3dR+PtxuLL1WAgIuaK65aGhyW0NmFYm/r7hfAK9a2nTNJIgTsFLG32jljkpaurtwvHuAtIhK8KnopeN6OPXjGl2q06bqI2U92eBxKRroeGUEq3PiXHwVk9DOIFzOAdz"
-        })"));
-    recognizer->SetConversationId("voice_signature_test");
+    std::string katieVoiceSignature, steveVoiceSignature;
+    CreateVoiceSignatures(&katieVoiceSignature, &steveVoiceSignature);
+
+    recognizer->SetConversationId("carbon_voice_signature_test");
+    REQUIRE_NOTHROW(p->SetVoiceSignature(katieVoiceSignature));
     recognizer->AddParticipant(p);
+
+    auto p2 = Participant::From("steve@example.com", "en-us", steveVoiceSignature);
+    recognizer->AddParticipant(p2);
+
     recognizer->StartTranscribingAsync().get();
 
     WaitForResult(result->ready.get_future(), 5min);
     recognizer->StopTranscribingAsync().get();
-    SPXTEST_REQUIRE(result->phrases[0].Text == weather8Channels.m_utterance);
+
+    // info is reported if any of the following requires fail, otherwise not reported.
+    //https://github.com/catchorg/Catch2/blob/master/docs/logging.md
+    INFO(GetText(result->phrases));
+    SPXTEST_REQUIRE(VerifyTextAndSpeaker(result->phrases, "Good morning Katie.", "steve@example.com") == true);
+    SPXTEST_REQUIRE(VerifyTextAndSpeaker(result->phrases, "Good morning Steve.", "katie@example.com") == true);
 }
 
 TEST_CASE("conversation_id", "[.][int][prod]")
 {
     auto config = SpeechConfig::FromEndpoint(Config::InroomEndpoint, Keys::ConversationTranscriber);
-    weather8Channels.UpdateFullFilename(Config::InputDir);
-    auto audioInput = AudioConfig::FromWavFileInput(weather8Channels.m_inputDataFilename);
+    katieSteve.UpdateFullFilename(Config::InputDir);
+    auto audioInput = AudioConfig::FromWavFileInput(katieSteve.m_inputDataFilename);
     auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
     auto myId = "123";
     recognizer->SetConversationId(myId);
@@ -106,8 +111,6 @@ TEST_CASE("conversation_add_while_pumping", "[.][int][prod]")
     auto audioInput = CreateAudioPullFromRecordedFile(pullAudio);
 
     auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
-
-
     auto result = make_shared<RecoPhrases>();
     ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
 
@@ -117,16 +120,19 @@ TEST_CASE("conversation_add_while_pumping", "[.][int][prod]")
     recognizer->AddParticipant("AddParticipantWhileAudioPumping");
     // the recorded audio is really long, intentionally timeout in 5min.
     WaitForResult(result->ready.get_future(), 5min);
-    recognizer->StopTranscribingAsync().get();
-    SPXTEST_REQUIRE(!result->phrases.empty());
+    auto text = GetText(result->phrases);
+    INFO(text);
+    bool res = VerifyTextAndSpeaker(result->phrases, "ABC.", "Unidentified") || VerifyTextAndSpeaker(result->phrases, "ABC", "Unidentified");
+    SPXTEST_REQUIRE(res == true);
 }
+
 TEST_CASE("conversation_bad_connection", "[.][int][prod]")
 {
     auto audioEndpoint = "wrong_endpoint";
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
 
     std::shared_ptr<PullAudioInputStream> pullAudio;
-    auto audioInput = CreateAudioPullUsingWeatherFile(pullAudio);
+    auto audioInput = CreateAudioPullUsingKatieSteveFile(pullAudio);
 
     auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
 
@@ -140,6 +146,7 @@ TEST_CASE("conversation_bad_connection", "[.][int][prod]")
     recognizer->StopTranscribingAsync().get();
     SPXTEST_REQUIRE(result->phrases[0].Text == "Runtime error: Failed to create transport request.");
 }
+
 TEST_CASE("conversation_inroom_8_channel_file", "[.][int][prod]")
 {
     auto audioEndpoint = Config::InroomEndpoint;
@@ -147,13 +154,13 @@ TEST_CASE("conversation_inroom_8_channel_file", "[.][int][prod]")
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
     config->SetProperty("FLAC", "1");
 
-    weather8Channels.UpdateFullFilename(Config::InputDir);
-    auto audioInput = AudioConfig::FromWavFileInput(weather8Channels.m_inputDataFilename);
+    katieSteve.UpdateFullFilename(Config::InputDir);
+    auto audioInput = AudioConfig::FromWavFileInput(katieSteve.m_inputDataFilename);
     auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
     auto result = make_shared<RecoPhrases>();
     ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
     auto p = Participant::From("conversation_inroom_8_channel_file", "en-us");
-    StartMeetingAndVerifyResult(recognizer.get(), p, move(result), weather8Channels.m_utterance);
+    StartMeetingAndVerifyResult(recognizer.get(), p, move(result), katieSteve.m_utterance);
 }
 TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
 {
@@ -162,19 +169,18 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
 
     std::shared_ptr<PullAudioInputStream> pullAudio;
-    auto audioInput = CreateAudioPullUsingWeatherFile(pullAudio);
+    auto audioInput = CreateAudioPullUsingKatieSteveFile(pullAudio);
 
-    string voice006, voice022, voice042, voice023;
-    CreateVoiceSignatures(&voice006, &voice022, &voice042, &voice023);
-    auto a006 = Participant::From("speaker006@microsoft.com", "en-us", voice006);
-
+    string katieVoiceSignature, steveVoiceSignature;
+    CreateVoiceSignatures(&katieVoiceSignature, &steveVoiceSignature);
+    auto katie = Participant::From("katie@example.com", "en-us", katieVoiceSignature);
     auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
 
     SPXTEST_SECTION("AddParticipantByParticipantObj")
     {
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
-        StartMeetingAndVerifyResult(recognizer.get(), a006, move(result), weather8Channels.m_utterance);
+        StartMeetingAndVerifyResult(recognizer.get(), katie, move(result), katieSteve.m_utterance);
     }
     SPXTEST_SECTION("AddParticipantByUserId")
     {
@@ -196,9 +202,12 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
         recognizer->StartTranscribingAsync().get();
         WaitForResult(result->ready.get_future(), 15min);
         recognizer->StopTranscribingAsync().get();
+
+        INFO(GetText(result->phrases));
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(result->phrases[0].Text == weather8Channels.m_utterance);
+        SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, katieSteve.m_utterance));
     }
+
     SPXTEST_SECTION("AddParticipantByUserObject")
     {
         auto result = make_shared<RecoPhrases>();
@@ -213,8 +222,10 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
         recognizer->StartTranscribingAsync().get();
         WaitForResult(result->ready.get_future(), 15min);
         recognizer->StopTranscribingAsync().get();
+
+        INFO(GetText(result->phrases));
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(result->phrases[0].Text == weather8Channels.m_utterance);
+        SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, katieSteve.m_utterance));
     }
     SPXTEST_SECTION("AddParticipantSetters")
     {
@@ -225,7 +236,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
 
         auto p1 = Participant::From("id1");
 
-        REQUIRE_NOTHROW(p1->SetVoiceSignature({ voice006 }));
+        REQUIRE_NOTHROW(p1->SetVoiceSignature({ katieVoiceSignature }));
         REQUIRE_THROWS(p1->SetVoiceSignature(""));
 
         REQUIRE_NOTHROW(p1->SetPreferredLanguage("en-us"));
@@ -236,8 +247,10 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
         recognizer->StartTranscribingAsync().get();
         WaitForResult(result->ready.get_future(), 15min);
         recognizer->StopTranscribingAsync().get();
+
+        INFO(GetText(result->phrases));
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(result->phrases[0].Text == weather8Channels.m_utterance);
+        SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, katieSteve.m_utterance));
     }
     SPXTEST_SECTION("AddParticipants")
     {
@@ -246,16 +259,18 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
 
         recognizer->SetConversationId("Conversation12345");
 
-        auto p1 = Participant::From("id1", "en-us", voice006);
+        auto p1 = Participant::From("katie@example.com", "en-us", katieVoiceSignature);
         recognizer->AddParticipant(p1);
-        auto p2 = Participant::From("id2", "en-us", voice022);
+        auto p2 = Participant::From("steve@example.com", "en-us", steveVoiceSignature);
         recognizer->AddParticipant(p2);
 
         recognizer->StartTranscribingAsync().get();
         WaitForResult(result->ready.get_future(), 15min);
         recognizer->StopTranscribingAsync().get();
+
+        INFO(GetText(result->phrases));
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(result->phrases[0].Text == weather8Channels.m_utterance);
+        SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, katieSteve.m_utterance));
     }
     SPXTEST_SECTION("AddRemoveParticipants")
     {
@@ -264,9 +279,9 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
 
         recognizer->SetConversationId("AddRemoveParticipants");
 
-        auto p1 = Participant::From("id1", "en-us", voice006);
+        auto p1 = Participant::From("id1", "en-us", katieVoiceSignature);
         recognizer->AddParticipant(p1);
-        auto p2 = Participant::From("id2", "en-us", voice022);
+        auto p2 = Participant::From("id2", "en-us", steveVoiceSignature);
         recognizer->AddParticipant(p2);
 
         REQUIRE_NOTHROW(recognizer->RemoveParticipant(p1));
@@ -277,8 +292,10 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
         recognizer->StartTranscribingAsync().get();
         WaitForResult(result->ready.get_future(), 15min);
         recognizer->StopTranscribingAsync().get();
+
+        INFO(GetText(result->phrases));
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(result->phrases[0].Text == weather8Channels.m_utterance);
+        SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, katieSteve.m_utterance));
     }
     // a meeting without participant should still be fine!
     SPXTEST_SECTION("conversation_with_no_participant")
@@ -291,8 +308,10 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
 
         WaitForResult(result->ready.get_future(), 15min);
         recognizer->StopTranscribingAsync().get();
+
+        INFO(GetText(result->phrases));
         SPXTEST_REQUIRE(!result->phrases.empty());
-        SPXTEST_REQUIRE(result->phrases[0].Text == weather8Channels.m_utterance);
+        SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, katieSteve.m_utterance));
     }
 }
 
@@ -303,11 +322,11 @@ TEST_CASE("conversation_inroom_8_channel_audio_push", "[.][int][prod]")
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
 
     std::shared_ptr<PushAudioInputStream> pushAudio;
-    auto audioInput = CreateAudioPushUsingWeatherFile(pushAudio);
+    auto audioInput = CreateAudioPushUsingKatieSteveFile(pushAudio);
 
-    string voice006, voice022, voice042, voice023;
-    CreateVoiceSignatures(&voice006, &voice022, &voice042, &voice023);
-    auto a006 = Participant::From("speaker006@microsoft.com", "en-us", voice006);
+    string katieVoiceSignature, steveVoiceSignature;
+    CreateVoiceSignatures(&katieVoiceSignature, &steveVoiceSignature);
+    auto katie = Participant::From("katie@example.com", "en-us", katieVoiceSignature);
 
     auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
     auto result = make_shared<RecoPhrases>();
@@ -315,13 +334,13 @@ TEST_CASE("conversation_inroom_8_channel_audio_push", "[.][int][prod]")
     recognizer->SetConversationId("Meeting12345");
 
     // add the speaker1 to usp
-    recognizer->AddParticipant(a006);
+    recognizer->AddParticipant(katie);
 
     recognizer->StartTranscribingAsync().get();
 
     auto reader = std::make_shared<CSpxWavFileReader>();
 
-    reader->Open(PAL::ToWString(weather8Channels.m_inputDataFilename).c_str());
+    reader->Open(PAL::ToWString(katieSteve.m_inputDataFilename).c_str());
     SPXWAVEFORMATEX format;
     reader->GetFormat(&format, sizeof(SPXWAVEFORMATEX));
     auto bytesPerSample = format.wBitsPerSample / 8;
@@ -349,14 +368,16 @@ TEST_CASE("conversation_inroom_8_channel_audio_push", "[.][int][prod]")
 
     WaitForResult(result->ready.get_future(), 15min);
     recognizer->StopTranscribingAsync().get();
-    SPXTEST_REQUIRE(result->phrases.size() >= 1);
-    SPXTEST_REQUIRE(result->phrases[0].Text == weather8Channels.m_utterance);
+
+    INFO(GetText(result->phrases));
+    SPXTEST_REQUIRE(!result->phrases.empty());
+    SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, katieSteve.m_utterance));
 }
 TEST_CASE("conversation_online_pull_stream", "[.][int][prod]")
 {
     REQUIRE(!Config::OnlineEndpoint.empty());
-    REQUIRE(!Keys::Speech.empty());
-    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::Speech);
+    REQUIRE(!Keys::ConversationTranscriber.empty());
+    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
 
     weather.UpdateFullFilename(Config::InputDir);
     auto fs = OpenWaveFile(weather.m_inputDataFilename);
@@ -369,9 +390,7 @@ TEST_CASE("conversation_online_pull_stream", "[.][int][prod]")
         [=](PropertyId propertyId) -> SPXSTRING {
         if (propertyId == PropertyId::DataBuffer_TimeStamp)
         {
-            char timeString[TIME_STRING_MAX_SIZE];
-            GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
-            return timeString;
+            return CreateTimestamp();
         }
         else if (propertyId == PropertyId::DataBuffer_UserId)
         {
@@ -403,8 +422,6 @@ TEST_CASE("conversation_online_pull_stream", "[.][int][prod]")
         REQUIRE_NOTHROW(recognizer->SetConversationId(orig_id));
         auto got_id = recognizer->GetConversationId();
         SPXTEST_REQUIRE(orig_id == got_id);
-        // not sure if we should throw for now.
-        //REQUIRE_THROWS(recognizer->SetConversationId("567"));
     }
     SPXTEST_SECTION("all_features")
     {
@@ -435,7 +452,7 @@ TEST_CASE("conversation_online_pull_stream", "[.][int][prod]")
 }
 TEST_CASE("conversation_online_1_channel_file", "[.][int][prod]")
 {
-    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::Speech);
+    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
 
     weather.UpdateFullFilename(Config::InputDir);
     auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
@@ -443,7 +460,7 @@ TEST_CASE("conversation_online_1_channel_file", "[.][int][prod]")
     auto result = make_shared<RecoPhrases>();
     ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
     auto p = Participant::From("conversation_online_1_channel_file", "en-us");
-    StartMeetingAndVerifyResult(recognizer.get(), p, move(result), weather8Channels.m_utterance);
+    StartMeetingAndVerifyResult(recognizer.get(), p, move(result), weather.m_utterance);
 }
 #if 0
 TEST_CASE("conversation_online_microphone", "[api][cxx]")

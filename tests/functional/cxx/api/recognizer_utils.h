@@ -12,7 +12,6 @@
 
 #include "speechapi_cxx.h"
 #include "mock_controller.h"
-#include "metrics.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 using namespace Microsoft::CognitiveServices::Speech;
@@ -64,6 +63,7 @@ extern TestData recordedAudioMessage;
 extern TestData kwvAccept;
 extern TestData kwvReject;
 extern TestData kwvMultiturn;
+extern TestData katieSteve;
 
 struct RecoPhrase
 {
@@ -129,7 +129,7 @@ void ConnectCallbacks(RecogType* recognizer, RecoPhrasesPtr result)
             os << "Text= " << e.Result->Text
                 << " Offset= " << e.Result->Offset()
                 << " Duration= " << e.Result->Duration()
-                << "UserId= " << userId;
+                << " UserId= " << userId;
 
             SPX_TRACE_VERBOSE("RECOGNIZING: %s", os.str().c_str());
         }
@@ -145,7 +145,7 @@ void ConnectCallbacks(RecogType* recognizer, RecoPhrasesPtr result)
             os << "Text= " << e.Result->Text
                 << " Offset= " << e.Result->Offset()
                 << " Duration= " << e.Result->Duration()
-                << "UserId= " << userId;
+                << " UserId= " << userId;
 
             SPX_TRACE_VERBOSE("RECOGNIZED: %s", os.str().c_str());
 
@@ -228,10 +228,14 @@ private:
     std::string m_type;
 };
 
-bool VerifyResult(std::string& text, const std::string& ref = string{});
+bool VerifyText(std::string& text, const std::string& ref = string{});
 std::shared_ptr<AudioConfig> CreateAudioPullSingleChannel(std::shared_ptr<PullAudioInputStream>& pullStream);
-std::shared_ptr<AudioConfig> CreateAudioPushUsingWeatherFile(std::shared_ptr<PushAudioInputStream>& pushAudio);
-std::shared_ptr<AudioConfig> CreateAudioPullUsingWeatherFile(std::shared_ptr<PullAudioInputStream>& pullAudio);
+std::shared_ptr<AudioConfig> CreateAudioPushUsingKatieSteveFile(std::shared_ptr<PushAudioInputStream>& pushAudio);
+std::shared_ptr<AudioConfig> CreateAudioPullUsingKatieSteveFile(std::shared_ptr<PullAudioInputStream>& pullAudio);
 std::shared_ptr<AudioConfig> CreateAudioPullFromRecordedFile(std::shared_ptr<PullAudioInputStream>& pullAudio);
 void StartMeetingAndVerifyResult(ConversationTranscriber* recognizer, const std::shared_ptr<Participant>&  participant, RecoPhrasesPtr&& result, const string& ref = string{});
-void CreateVoiceSignatures(std::string* voice006, std::string* voice022, std::string* voice042, std::string* voice023);
+void CreateVoiceSignatures(std::string* katieVoiceSignature, std::string* steveVoiceSignature);
+bool VerifyTextAndSpeaker(const RecoResultVector& phrases, const std::string& text, const std::string& speakerId);
+std::string GetText(const RecoResultVector& phrases);
+using My90kHzDuration = std::chrono::duration<double, std::ratio<1, 90000>>;
+std::string CreateTimestamp();

@@ -15,7 +15,6 @@
 
 #include "speechapi_cxx.h"
 #include "mock_controller.h"
-#include "metrics.h"
 
 
 #ifdef _MSC_VER
@@ -28,7 +27,6 @@ using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace std;
-using namespace Microsoft::CognitiveServices::Speech::USP; // for GetISO8601Time
 
 
 static std::shared_ptr<SpeechConfig> SpeechConfigForAudioConfigTests()
