@@ -102,22 +102,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// </summary>
         public void Dispose()
         {
-            try
-            {
-                isDisposing = true;
-                lock (botLock)
-                {
-                    if (activeAsyncRecognitionCounter != 0)
-                    {
-                        throw new InvalidOperationException("Cannot dispose a bot connector while async recognition is running. Await async recognitions to avoid unexpected disposals.");
-                    }
-                }
-            }
-            finally
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -140,6 +126,11 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
                 LogErrorIfFail(Internal.SpeechBotConnector.bot_connector_recognizing_set_callback(botConnectorHandle, null, IntPtr.Zero));
                 LogErrorIfFail(Internal.SpeechBotConnector.bot_connector_canceled_set_callback(botConnectorHandle, null, IntPtr.Zero));
                 LogErrorIfFail(Internal.SpeechBotConnector.bot_connector_activity_received_set_callback(botConnectorHandle, null, IntPtr.Zero));
+            }
+
+            // Dispose of managed resources
+            if (disposing)
+            {
                 botConnectorHandle.Dispose();
             }
 
@@ -149,6 +140,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             recognizingCallbackDelegate = null;
             canceledCallbackDelegate = null;
             activityReceivedCallbackDelegate = null;
+
+            // Release any unmanaged resources not wrapped by safe handles
             if (gch.IsAllocated)
             {
                 gch.Free();
@@ -187,8 +180,6 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// botLock is used to synchronize access to objects member variables from multiple threads
         /// </summary>
         private readonly object botLock = new object();
-
-        private int activeAsyncRecognitionCounter = 0;
 
         static SpeechBotConnector GetConnectorFromContext(IntPtr context)
         {
@@ -309,12 +300,22 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             }
         }
 
+        private void AssertNotDisposed()
+        {
+            if (disposed || isDisposing)
+            {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+        }
+
         /// <summary>
         /// Connects with the back end.
         /// </summary>
         /// <returns>An asynchronous operation that starts the connection.</returns>
         public Task ConnectAsync()
         {
+            AssertNotDisposed();
+
             return Task.Run(() =>
             {
                 ThrowIfNull(botConnectorHandle, "Invalid connector handle");
@@ -328,6 +329,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// <returns>An asynchronous operation that starts the disconnection.</returns>
         public Task DisconnectAsync()
         {
+            AssertNotDisposed();
+
             return Task.Run(() =>
             {
                 ThrowIfNull(botConnectorHandle, "Invalid connector handle");
@@ -342,6 +345,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// <returns>An asynchronous operation that starts the operation.</returns>
         public Task<string> SendActivityAsync(string activityJSON)
         {
+            AssertNotDisposed();
+
             return Task.Run(() =>
             {
                 IntPtr activityPtr = IntPtr.Zero;
@@ -362,6 +367,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// <returns>An asynchronous operation that starts the operation.</returns>
         public Task StartKeywordRecognitionAsync(KeywordRecognitionModel model)
         {
+            AssertNotDisposed();
+
             ThrowIfNull(botConnectorHandle, "Invalid connector handle");
             return Task.Run(() =>
             {
@@ -376,6 +383,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// <returns>An asynchronous operation that starts the operation.</returns>
         public Task StopKeywordRecognitionAsync()
         {
+            AssertNotDisposed();
+
             return Task.Run(() =>
             {
                 ThrowIfNull(botConnectorHandle, "Invalid connector handle");
@@ -389,6 +398,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// <returns>An asynchronous operation that starts the operation.</returns>
         public Task ListenOnceAsync()
         {
+            AssertNotDisposed();
+
             return Task.Run(() =>
             {
                 ThrowIfNull(botConnectorHandle, "Invalid connector handle");
