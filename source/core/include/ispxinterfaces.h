@@ -559,6 +559,16 @@ public:
     virtual void LoadJSON(const nlohmann::json& json) = 0;
 };
 
+
+enum class InteractionIdPurpose { Speech = 0, Activity };
+
+class ISpxInteractionIdProvider: public ISpxInterfaceBaseFor<ISpxInteractionIdProvider>
+{
+public:
+    virtual std::string PeekNextInteractionId(InteractionIdPurpose purpose) = 0;
+    virtual std::string GetInteractionId(InteractionIdPurpose purpose) = 0;
+};
+
 class ISpxSpeechBotConnector : public ISpxInterfaceBaseFor<ISpxSpeechBotConnector>
 {
 public:

@@ -915,10 +915,13 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechAgentContext()
     // The Speech Bot Connector is responsible for generating an interaction ID here, so we send it as a speech.agent.context message
     if (m_endpointType == USP::EndpointType::Bot)
     {
+        auto site = GetSite();
+        auto provider = SpxQueryInterface<ISpxInteractionIdProvider>(site);
+        auto interactionId = provider->GetInteractionId(InteractionIdPurpose::Speech);
         json contextJson = {
             {"version", 0.5},
             {"context", {
-                {"interactionId", PAL::ToString(PAL::CreateGuidWithoutDashes())}
+                {"interactionId", interactionId}
             }},
             {"channelData", ""}
         };

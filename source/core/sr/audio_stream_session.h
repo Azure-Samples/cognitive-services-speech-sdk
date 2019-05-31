@@ -36,7 +36,8 @@ class CSpxAudioStreamSession :
     public ISpxRecoEngineAdapterSite,
     public ISpxRecoResultFactory,
     public ISpxEventArgsFactory,
-    public ISpxPropertyBagImpl
+    public ISpxPropertyBagImpl,
+    public ISpxInteractionIdProvider
 {
 public:
 
@@ -59,6 +60,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamSessionInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
+        SPX_INTERFACE_MAP_ENTRY(ISpxInteractionIdProvider)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectInit
@@ -168,6 +170,10 @@ public:
     std::string GetStringValue(const char* name, const char* defaultValue) const override;
     void SetStringValue(const char* name, const char* value) override;
 
+    // --- ISpxInteractionIdProvider
+    std::string PeekNextInteractionId(InteractionIdPurpose purpose) final;
+    std::string GetInteractionId(InteractionIdPurpose purpose) final;
+
 private:
     std::shared_ptr<ISpxThreadService> InternalQueryService(const char* serviceName);
 
@@ -213,7 +219,7 @@ private:
     void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result);
 
     enum EventType { SessionStart, SessionStop, SpeechStart, SpeechEnd, RecoResultEvent, ActivityReceivedEvent, Connected, Disconnected };
-    void FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, wchar_t* sessionId = nullptr, uint64_t offset = 0, std::shared_ptr<ISpxActivity> activity = nullptr, std::shared_ptr<ISpxAudioOutput> audio = nullptr);
+    void FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, const wchar_t* sessionId = nullptr, uint64_t offset = 0, std::shared_ptr<ISpxActivity> activity = nullptr, std::shared_ptr<ISpxAudioOutput> audio = nullptr);
 
 private:
     std::packaged_task<void()> CreateTask(std::function<void()> func, bool catchAll = true);
@@ -392,6 +398,20 @@ private:
 
     // Single shot in flight operation.
     std::shared_ptr<Operation> m_singleShotInFlight;
+
+    struct InteractionId
+    {
+        inline InteractionId(std::string nextSpeech, std::string nextActivity):
+            m_nextSpeech{nextSpeech}, m_nextActivity{nextActivity}
+        {}
+
+        std::string m_nextSpeech;
+        std::string m_nextActivity;
+        std::mutex m_lock;
+    };
+
+    InteractionId m_interactionId;
+
 };
 
 

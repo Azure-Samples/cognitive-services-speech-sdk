@@ -76,7 +76,8 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_isReliableDelivery{ false },
     m_lastErrorGlobalOffset{ 0 },
     m_currentTurnGlobalOffset{ 0 },
-    m_bytesTransited(0)
+    m_bytesTransited(0),
+    m_interactionId{ PAL::CreateGuidWithDashesUTF8(), PAL::CreateGuidWithDashesUTF8() }
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 }
@@ -935,9 +936,15 @@ void CSpxAudioStreamSession::WaitForRecognition_Complete(std::shared_ptr<ISpxRec
 void CSpxAudioStreamSession::FireSessionStartedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
+    std::wstring sessionIdOverride;
+    /* For Speech bot connector, we replace session id with the interaction id that's going to be send in the context message. */
+    if (IsRecognizerType<ISpxSpeechBotConnector>())
+    {
+        sessionIdOverride = PAL::ToWString(PeekNextInteractionId(InteractionIdPurpose::Speech));
+    }
 
     SPX_DBG_TRACE_VERBOSE("Firing SessionStarted event: SessionId: %ls", m_sessionId.c_str());
-    FireEvent(EventType::SessionStart);
+    FireEvent(EventType::SessionStart, nullptr, sessionIdOverride.empty() ? nullptr : sessionIdOverride.c_str());
     m_fireEndOfStreamAtSessionStop = true;
 }
 
@@ -1074,7 +1081,7 @@ void CSpxAudioStreamSession::DispatchEvent(const list<weak_ptr<ISpxRecognizer>>&
     }
 }
 
-void CSpxAudioStreamSession::FireEvent(EventType eventType, shared_ptr<ISpxRecognitionResult> result, wchar_t* eventSessionId, uint64_t offset, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
+void CSpxAudioStreamSession::FireEvent(EventType eventType, shared_ptr<ISpxRecognitionResult> result, const wchar_t* eventSessionId, uint64_t offset, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
 {
     // Make a copy of the recognizers (under lock), to use to send events;
     // otherwise the underlying list could be modified while we're sending events...
@@ -2367,4 +2374,32 @@ bool CSpxAudioStreamSession::IsStreaming()
 {
     return IsState(SessionState::ProcessingAudio) || IsState(SessionState::ProcessingAudioLeftovers);
 }
+
+std::string CSpxAudioStreamSession::PeekNextInteractionId(InteractionIdPurpose purpose)
+{
+    std::lock_guard<std::mutex> lk{ m_interactionId.m_lock };
+    if (purpose == InteractionIdPurpose::Speech)
+    {
+        return m_interactionId.m_nextSpeech;
+    }
+    return m_interactionId.m_nextActivity;
+}
+
+std::string CSpxAudioStreamSession::GetInteractionId(InteractionIdPurpose purpose)
+{
+    std::lock_guard<std::mutex> lk{ m_interactionId.m_lock };
+    /* Select the per-scenario ID to retrieve and return the current value while also updating with a new GUID */
+    auto& iidRef = [&](InteractionIdPurpose purpose) -> std::string&
+    {
+        if (purpose == InteractionIdPurpose::Speech)
+        {
+            return m_interactionId.m_nextSpeech;
+        }
+        return m_interactionId.m_nextActivity;
+    }(purpose);
+    auto interactionId = iidRef;
+    iidRef = PAL::CreateGuidWithDashesUTF8();
+    return interactionId;
+}
+
 } } } } // Microsoft::CognitiveServices::Speech::Impl
