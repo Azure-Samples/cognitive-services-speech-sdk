@@ -62,7 +62,7 @@ if [[ $SPEECHSDK_LONG_RUNNING = true ]]; then
   LOG_FILE_NAME=LogFileName=test-$T-$PLATFORM-long-running.trx
 else
   TEST_CASE_FILTER="TestCategory!=LongTest&TestCategory!=CompressedStreamTest"
-  LOG_FILE_NAME=LogFileName=test-$T-$PLATFORM.trx
+  LOG_FILE_NAME=LogFileName=test-$T-$PLATFORM-$RANDOM.trx
 fi
 
 "$VSTEST" \

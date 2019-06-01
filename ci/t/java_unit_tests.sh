@@ -44,6 +44,6 @@ set -x
 #   -DWaveFile=$SPEECHSDK_INPUTDIR/audio/whatstheweatherlike.wav \
 #   -DKeyword=Computer \
 #   -DKeywordModel=/data/keyword/kws.table \
-#   -DTestOutputFilename=test-$T-$PLATFORM.xml \
+#   -DTestOutputFilename=test-$T-$PLATFORM-$RANDOM.xml \
 #   tests.runner.Runner \
 #   $TESTCLASS

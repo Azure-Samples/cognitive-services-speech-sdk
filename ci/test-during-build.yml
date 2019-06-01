@@ -50,7 +50,7 @@ steps:
     dockerImage: ${{ parameters.dockerImage }}
   condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
   continueOnError: ${{ parameters.continueOnTestFailure }}
-  timeoutInMinutes: 60
+  timeoutInMinutes: 120
   displayName: Run tests
 # Note: the following step is only for the convenience of extraTests, of which we currently do not have any.
 - bash: |

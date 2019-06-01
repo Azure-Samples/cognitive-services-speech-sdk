@@ -19,7 +19,7 @@ TEST_CODE="$BINARY_DIR/core_tests"
 
 runCatchSuite \
   TESTRUNNER \
-  "test-$T-$PLATFORM" \
+  "test-$T-$PLATFORM-$RANDOM" \
   "$PLATFORM" \
   "$SPEECHSDK_SPEECH_KEY" \
   "$T" \

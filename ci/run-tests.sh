@@ -151,12 +151,35 @@ for testfile in "${testsToRun[@]}"; do
   TIME_SECONDS=$(get_seconds_elapsed "$START_SECONDS")
   if [[ $exitCode == 0 ]]; then
     ((pass++))
-    echo Test $T: passed, \($TIME_SECONDS seconds\)
+    echo test suite $T: passed, \($TIME_SECONDS seconds\)
   else
-    vsts_logissue error "${options[platform]}: Test $T failed, exit code $exitCode, source $testfile."
-    echo Test $T: failed with error code $exitCode, \($TIME_SECONDS seconds\)
+      # if the test suite failed, wait two seconds and re-run it up to three times.
+      for retry in {1..3}; do
+        echo "Retry($retry) failed test suite $T with timeout ${options[timeout]}"
+        sleep 2s
+        START_SECONDS=$(get_time)
+        $cmdTimeout -k 5s "${options[timeout]}" ${callStdbuf[@]} \
+        "$testfile" "${options[build-dir]}" "${options[platform]}" "$binaryDir" "${options[test-set]}"
+        exitCode=$?
+        TIME_SECONDS=$(get_seconds_elapsed "$START_SECONDS")
+        if [[ $exitCode == 0 ]]; then
+          ((pass++))
+          echo "Test suite $T: passed after ($retry) retries, \($TIME_SECONDS seconds\)"
+          vsts_logissue warning "${options[platform]}: test suite $T passed after ($retry) retries, source $testfile."
+          break
+        else
+          echo Test suite $T: failed with error code $exitCode, \($TIME_SECONDS seconds\)
+          vsts_logissue warning "${options[platform]}: test suite $T failed, exit code $exitCode, source $testfile."
+        fi
+      done
+
+      if [[ $exitCode != 0 ]]; then
+        echo Test suite $T: failed after multiple reties.
+        vsts_logissue error "${options[platform]}: test suite $T failed, failed after multiple reties with exit code $exitCode, source $testfile."
+      fi
   fi
   ((total++))
 done
 echo Pass '(including skip)' $pass / $total.
 ((pass == total))
+exit $exitCode
