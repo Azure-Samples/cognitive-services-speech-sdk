@@ -35,6 +35,5 @@ It can be used in Xcode projects as a [CocoaPod](https://cocoapods.org/), or dow
 1. After you click the button in the app and say a few words, you should see the text you have spoken on the lower part of the screen. When you run the app for the first time, you should be prompted to give the app access to your computer's microphone.
 
 ## References
-
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-objectivec-macos)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-objective-c-macos)
 * [Speech SDK API reference for Objective-C](https://aka.ms/csspeech/objectivecref)
