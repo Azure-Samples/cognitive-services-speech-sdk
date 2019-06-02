@@ -302,20 +302,20 @@ std::string CSpxConversationTranscriber::CreateSpeechEventPayload(bool atStartAu
     auto cal_uid = properties->GetStringValue("iCalUid");
     if(!cal_uid.empty())
     {
-        speech_event["iCalUid"] = cal_uid;
+        speech_event["meeting"]["iCalUid"] = cal_uid;
     }
     auto call_id = properties->GetStringValue("callId");
     if (!call_id.empty())
     {
-        speech_event["callId"] = call_id;
+        speech_event["meeting"]["callId"] = call_id;
     }
     auto organizer = properties->GetStringValue("organizer");
     if (!organizer.empty())
     {
-        speech_event["organizer"] = organizer;
+        speech_event["meeting"]["organizer"] = organizer;
     }
     auto recording_on = properties->GetStringValue("audiorecording");
-    speech_event["record"] = recording_on.compare("on") == 0 ? "true" : "false";
+    speech_event["meeting"]["record"] = recording_on.compare("on") == 0 ? "true" : "false";
 
     auto flac_encoded = properties->GetStringValue("FLAC");
     if (!flac_encoded.empty())
