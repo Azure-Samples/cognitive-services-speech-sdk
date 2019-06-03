@@ -1,0 +1,15 @@
+{
+  "InRoomEndPoint": "",
+  "OnlineEndPoint": "",
+  "endPoint": "",
+  "inputDir": "",
+  "keyBot": "",
+  "keyConversationTranscriber": "",
+  "keyLUIS": "",
+  "keySpeech": "",
+  "luisAppId": "",
+  "regionIdBot": "",
+  "regionIdLUIS": "",
+  "secretKeyBot": "",
+  "regionId": ""
+}

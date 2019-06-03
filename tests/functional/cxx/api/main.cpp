@@ -36,8 +36,11 @@ int main(int argc, char* argv[])
 
     Catch::Session session; // There must be exactly one instance
 
-                            // Let Catch (using Clara) parse the command line
+    ConfigSettings::LoadFromJsonFile();
+
+    // Let Catch (using Clara) parse the command line
     int returnCode = parse_cli_args(session, argc, argv);
+
     if (returnCode != 0) // Indicates a command line error
         return returnCode;
 

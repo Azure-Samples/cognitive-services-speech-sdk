@@ -25,6 +25,7 @@
 
 #include "string_utils.h"
 #include "debug_utils.h"
+#include "json.h"
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -42,12 +43,15 @@
 #define EXTERN
 #endif
 
+#define TEST_SETTINGS_FILE "test.settings.json"
+#define TEST_SETTINGS_PATH "../../../../../tests/functional/cxx/"
+
 namespace Keys
 {
     EXTERN std::string Speech;
     EXTERN std::string LUIS;
     EXTERN std::string Bot;
-    EXTERN std::string ConversationTranscriber;    
+    EXTERN std::string ConversationTranscriber;
 }
 
 namespace Config
@@ -63,7 +67,6 @@ namespace Config
     EXTERN std::string OnlineEndpoint;
 }
 
-
 inline bool exists(const std::string& name) {
     return std::ifstream(name.c_str()).good();
 }
@@ -72,14 +75,63 @@ inline std::ifstream get_stream(const std::string& name) {
     return std::ifstream(name.c_str(), std::ifstream::binary);
 }
 
+class ConfigSettings {
+private:
+    static std::string buildPath()
+    {
+        std::string path;
+
+        path += TEST_SETTINGS_PATH;
+        path += TEST_SETTINGS_FILE;
+
+        return path;
+    }
+
+    static nlohmann::json getJson()
+    {
+        std::string path = buildPath();
+        nlohmann::json nlohmanJson = nullptr;
+
+        if (exists(path))
+        {
+            std::ifstream testSettingsFile(path);
+            testSettingsFile >> nlohmanJson;
+        }
+
+        return nlohmanJson;
+    }
+
+public:
+    static void LoadFromJsonFile()
+    {
+        nlohmann::json data = getJson();
+
+        if (data != nullptr)
+        {
+            Keys::Speech = data.at("keySpeech").get<std::string>();
+            Keys::LUIS = data.at("keyLUIS").get<std::string>();
+            Keys::Bot = data.at("keyBot").get<std::string>();
+            Keys::ConversationTranscriber = data.at("keyConversationTranscriber").get<std::string>();
+
+            Config::Endpoint = data.at("endPoint").get<std::string>();
+            Config::Region = data.at("regionId").get<std::string>();
+            Config::LuisRegion = data.at("regionIdLUIS").get<std::string>();
+            Config::LuisAppId = data.at("luisAppId").get<std::string>();
+            Config::InputDir = data.at("inputDir").get<std::string>();
+            Config::BotRegion = data.at("regionIdBot").get<std::string>();
+            Config::BotSecret = data.at("secretKeyBot").get<std::string>();
+            Config::InroomEndpoint = data.at("InRoomEndPoint").get<std::string>();
+            Config::OnlineEndpoint = data.at("OnlineEndPoint").get<std::string>();
+        }
+    }
+};
+
 typedef std::linear_congruential_engine<uint_fast32_t, 1664525, 1013904223, UINT_FAST32_MAX> random_engine;
 
 inline void add_signal_handlers()
 {
     Debug::HookSignalHandlers();
 }
-
-
 
 #if defined(CATCH_CONFIG_RUNNER)
 inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
@@ -128,7 +180,7 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Config::BotSecret, "BotSecret")
         ["--secretKeyBot"]
     ("Secret for the functional test bot")
-    ;
+        ;
 
     // Now pass the new composite back to Catch so it uses that
     session.cli(cli);
