@@ -468,7 +468,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
                     Assert.IsTrue(bGotReco);
-                    Assert.IsTrue(speakers[0] == "Katie");
+                    Assert.IsTrue(speakers.Contains("Katie"));
+                    Assert.IsTrue(speakers.Contains("Steve"));
                 }
             }
         }
@@ -503,7 +504,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var client = new HttpClient();
             client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", conversationTranscriptionPPEKey);
             var response = await client.PostAsync($"https://signature.princetonppe.customspeech.ai/api/v1/Signature/GenerateVoiceSignatureFromByteArray", content);
-            var jsonData = await response.Content.ReadAsStringAsync();            
+            Assert.IsTrue(response.IsSuccessStatusCode, $"CreateVoiceSignatureFromVoiceSample failed to get a response from the enrolment service. HTTP_Status={response.StatusCode}");
+            var jsonData = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"CreateVoiceSignatureFromVoiceSample: Service Response jsonData={jsonData}");
             var result = JsonConvert.DeserializeObject<VoiceSignature>(jsonData);
             return result;
         }
