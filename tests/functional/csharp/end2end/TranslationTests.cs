@@ -100,12 +100,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
                 var result = await translationRecognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                Assert.AreEqual(TestData.English.Weather.Utterance, result.Text);
                 var errorDetails = CancellationDetails.FromResult(result);
                 // Only translation error.
-                Assert.AreEqual(CancellationErrorCode.NoError, errorDetails.ErrorCode);
-                Assert.IsTrue(errorDetails.ErrorDetails.Contains("The target language is not valid"), "Actual error:'" + errorDetails.ErrorDetails + "' does not contain expected string.");
+                Assert.IsTrue(errorDetails.ErrorDetails.Contains("Please check the language name and endpoint id"), "Actual error:'" + errorDetails.ErrorDetails + "' does not contain expected string.");
+                Assert.AreEqual(CancellationErrorCode.BadRequest, errorDetails.ErrorCode);
+                Assert.AreEqual(ResultReason.Canceled, result.Reason);
+                Assert.AreEqual("", result.Text);
             }
         }
 
@@ -747,7 +747,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                Assert.AreEqual(TestData.English.Profanity.RemovedUtteranceTranslation, result.Text);
+                Assert.IsFalse(result.Text.Contains(TestData.English.Profanity.RawUtteranceTranslation));
                 Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(TestData.German.Profanity.RemovedUtteranceTranslation, result.Translations[Language.DE]);
             }
@@ -778,7 +778,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                Assert.AreEqual(TestData.English.Profanity.TaggedUtteranceTranslation, result.Text);
+                Assert.AreEqual(TestData.English.Profanity.TaggedUtteranceTranslation.ToLower(), result.Text.ToLower());
                 Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(TestData.German.Profanity.TaggedUtteranceTranslation, result.Translations[Language.DE]);
             }

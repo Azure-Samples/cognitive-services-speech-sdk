@@ -83,7 +83,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             public static class Profanity
             {
-                public static readonly string MaskedUtteranceTranslation = "f****";
+                public static readonly string MaskedUtteranceTranslation = "******.";
                 public static readonly string RemovedUtteranceTranslation = ".";
                 public static readonly string RawUtteranceTranslation = "ficken.";
                 public static readonly string TaggedUtteranceTranslation = "<profanity>ficken</profanity>.";
@@ -240,10 +240,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string MaskedUtterance = "**** **** **** **** ****";
                 public static readonly string RemovedUtterance = "";
                 public static readonly string RawUtterance = "Fuck Fuck Fuck Fuck Fuck.";
-                public static readonly string MaskedUtteranceTranslation = "f***.";
+                public static readonly string MaskedUtteranceTranslation = "****";
                 public static readonly string RemovedUtteranceTranslation = ".";
                 public static readonly string RawUtteranceTranslation = "Fuck.";
-                public static readonly string TaggedUtteranceTranslation = "<profanity>fuck</profanity>.";
+                public static readonly string TaggedUtteranceTranslation = "<profanity>fuck</profanity>";
             }
 
             public static class Punctuation
@@ -327,7 +327,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public static class ExpectedErrorDetails
         {
-            public static string InvalidTargetLanaguageErrorMessage = @"Translation call failed: Bad Request - Unsuccessful call to the translation service: {""error"":{""code"":400036,""message"":""The target language is not valid.""}}";
+            public static string InvalidTargetLanaguageErrorMessage = @"Translation call failed: Response status code does not indicate success: 400 (Bad Request).";
             public static string InvalidVoiceNameErrorMessage = @"Synthesis service failed with code:  - Could not identify the voice 'InvalidVoice' for the text to speech service ";
         }
     }
