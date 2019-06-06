@@ -26,6 +26,8 @@ case $TESTSET in
     ;;
 esac
 
+PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime/native:$PATH"
+
 runCatchSuite \
   TESTRUNNER \
   "test-$T-$PLATFORM-$RANDOM" \

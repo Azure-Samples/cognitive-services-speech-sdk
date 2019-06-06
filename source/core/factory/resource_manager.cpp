@@ -41,6 +41,7 @@ CSpxResourceManager::CSpxResourceManager()
 
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.embedded.sr.so"));
 #elif __MACH__
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.dylib"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-tts-mock.dylib"));
@@ -62,7 +63,7 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.codec.dll"));
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon")); // this is special, internal name, no dll extension!
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-unidec.dll"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.embedded.sr.dll"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-tts-mock.dll"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-tts-local.dll"));
 #endif

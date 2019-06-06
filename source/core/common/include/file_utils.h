@@ -22,4 +22,5 @@ namespace PAL {
     errno_t fopen_s(FILE **file, const char *fileName, const char *mode);
 
     void OpenStream(std::fstream& stream, const std::wstring& filename, bool readonly);
+    std::string AppendPath(const std::string& str1, const std::string& str2);
 } // PAL

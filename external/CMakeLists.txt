@@ -26,3 +26,7 @@ set(AZURE_SHARED_LIB ${AZURE_SHARED_LIB} PARENT_SCOPE)
 if(WIN32 OR ANDROID)
     add_subdirectory(swig EXCLUDE_FROM_ALL)
 endif()
+
+if(BUILD_UNIDEC)
+    add_subdirectory(unidec EXCLUDE_FROM_ALL)
+endif()

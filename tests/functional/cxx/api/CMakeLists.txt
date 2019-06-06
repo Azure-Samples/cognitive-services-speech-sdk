@@ -28,11 +28,17 @@ set(SOURCES
     "${SRC_DIR}/bot_connector_tests.cpp"
     )
 
+if(BUILD_UNIDEC)
+    list(APPEND SOURCES "${SRC_DIR}/speech_recognizer_unidec_tests.cpp")
+endif()
+
 source_group("Source Files" FILES ${SOURCES})
 source_group("Header Files" FILES ${TEST_HEADERS})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
 target_link_libraries(${PROJECT_NAME} common ${SPEECHSDK_CORE_LIBRARY} ${TEST_LIBS})
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE UNIDEC_MODEL_PATH_ROOT="${CARBON_EXTERNAL}/unidec/Unidec.Model/model")
 
 if (NOT WIN32)
     find_package (Threads)

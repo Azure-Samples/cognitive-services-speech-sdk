@@ -11,7 +11,9 @@
 #include "spxcore_common.h"
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
+#include "string_utils.h"
 #include "UnidecRuntime.h"
+#include "AudioEndMetadata.h"
 #include "unidec_config.h"
 
 
@@ -20,6 +22,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+class RingBuffer;
 
 class CSpxUnidecRecoEngineAdapter :
     public ISpxObjectWithSiteInitImpl<ISpxRecoEngineAdapterSite>,
@@ -60,33 +63,34 @@ private:
     bool IsInit() { return m_config.get() != nullptr; };
     bool HasFormat() { return m_format.get() != nullptr; }
 
-    void InitConfig();
-    std::wstring GetBaseModelPath();
+    void InitUnidecConfig();
+    std::string GetBaseModelPath();
 
     void InitFormat(const SPXWAVEFORMATEX* pformat);
     void TermFormat();
 
-    void EnsureEngine();
     void InitEngine();
     void InitSearchGraphs();
 
     void StartEngine();
     void StopEngine();
+    void FlushBuffers();
 
-    static bool __stdcall NextStreamCallback(AudioStreamDescriptor** pAudioStream,  bool* enableSegmentation, void* callbackContext);
-    static void __stdcall IntermediateCallback(const wchar_t* wavId, size_t sentenceIndex, const UnidecFramePosition& framePos, const IUnidecIntermediateResult* intermediateResult, void* callbackContext);
-    static void __stdcall SentenceCallback(const wchar_t* wavId, size_t sentenceIndex, const UnidecFramePosition& framePos, const IUnidecNBestList* nbest, void* callbackContext);
-    static void __stdcall EndCallback(const wchar_t* wavId, UnidecEndReason reason, void* callbackContext);
+    static bool NextStreamCallback(AudioStreamDescriptor** pAudioStream, IUnidecSearchGraphCombo*& pCombo, bool* continuousReco, void* callbackContext);
+    static void IntermediateCallback(const WCHAR* wavId, size_t sentenceIndex, const UnidecFramePosition& framePos, const IUnidecIntermediateResult* intermediateResult, void* callbackContext);
+    static void SentenceCallback(const WCHAR* wavId, size_t sentenceIndex, const UnidecFramePosition& framePos, const IUnidecNBestList* nbest, void* callbackContext);
+    static void EndCallback(const WCHAR* wavId, const AudioEndMetadata& metadata, void* callbackContext);
 
-    static size_t __stdcall AudioStreamReadCallback(AudioStreamDescriptor* pAudioStream, void *pBuffer, size_t maxSize);
-    static bool __stdcall AudioStreamIsEndCallback(AudioStreamDescriptor* pAudioStream);
-    static bool __stdcall AudioStreamIsErrorCallback(AudioStreamDescriptor* pAudioStream);
+    static size_t AudioStreamReadCallback(AudioStreamDescriptor* pAudioStream, void *pBuffer, size_t maxSize);
+    static bool AudioStreamIsEndCallback(AudioStreamDescriptor* pAudioStream);
+    static bool AudioStreamIsErrorCallback(AudioStreamDescriptor* pAudioStream);
 
-    bool NextStream(AudioStreamDescriptor** pAudioStream,  bool* enableSegmentation);
-    bool InitStream(AudioStreamDescriptor** pAudioStream, bool* enableSegmentation);
-    void Intermediate(const wchar_t* wavId, size_t sentenceIndex, const UnidecFramePosition& framePos, const IUnidecIntermediateResult* intermediateResult);
-    void Sentence(const wchar_t* wavId, size_t sentenceIndex, const UnidecFramePosition& framePos, const IUnidecNBestList* nbest);
-    void End(const wchar_t* wavId, UnidecEndReason reason);
+
+    bool NextStream(AudioStreamDescriptor** pAudioStream, IUnidecSearchGraphCombo*& pCombo,  bool* continuousReco);
+    bool InitStream(AudioStreamDescriptor** pAudioStream, IUnidecSearchGraphCombo*& pCombo);
+    void Intermediate(const WCHAR* wavId, size_t sentenceIndex, const UnidecFramePosition& framePos, const IUnidecIntermediateResult* intermediateResult);
+    void Sentence(const WCHAR* wavId, size_t sentenceIndex, const UnidecFramePosition& framePos, const IUnidecNBestList* nbest);
+    void End(const WCHAR* wavId, const AudioEndMetadata& metadata);
 
     size_t AudioStreamRead(AudioStreamDescriptor* pAudioStream, void *pBuffer, size_t maxSize);
     bool AudioStreamIsEnd(AudioStreamDescriptor* pAudioStream);
@@ -95,14 +99,16 @@ private:
     void AudioBufferWrite(std::shared_ptr<uint8_t> buffer, size_t size);
     size_t AudioBufferRead(uint8_t* buffer, size_t maxSize);
 
-    void EnsureAudioBuffer();
-
-    std::wstring TrimWords(std::vector<const wchar_t*>& words, const wchar_t* trim1, const wchar_t* trim2);
-
+    std::wstring TrimWords(std::vector<const WCHAR*>& words, const WCHAR* trim1, const WCHAR* trim2);
+    void SetServiceJsonResultProperties(const std::shared_ptr<ISpxRecognitionResult>& result, uint64_t offset, uint64_t duration, const std::string& text);
 
 private:
 
-    bool m_singleShot = false;
+    std::shared_ptr<RingBuffer> m_ringBuffer;
+    std::vector<unsigned char> m_audioBuffer;
+    
+    bool m_endOfStream = false;
+    bool m_turnStarted = false;
 
     SpxWAVEFORMATEX_Type m_format;
     std::unique_ptr<CSpxUnidecConfig> m_config;
@@ -110,18 +116,11 @@ private:
     std::unique_ptr<IUnidecEngine, std::function<void(IUnidecEngine*)>> m_unidecEngine;
 
     AudioStreamDescriptor m_audioStream;
-    std::wstring m_streamId;
-
-    bool m_sentenceComplete;
-
-    std::shared_ptr<uint8_t> m_buffer;
-    size_t m_bytesLeftInBuffer;
-    uint8_t* m_ptrIntoBuffer;
-
+    wchar_string m_streamId;
+    std::atomic<bool> m_stopImmediately;
+    bool m_sentenceEndDetected;
+    bool m_singleShot = false;
     std::mutex m_mutex;
-    std::condition_variable m_cv;
-    std::queue<std::pair<std::shared_ptr<uint8_t>, size_t>> m_additionalBuffers;
-    bool m_stopImmediately;
 };
 
 

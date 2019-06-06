@@ -54,6 +54,8 @@ add_executable(carbonx
 # common is needed for PAL etc
 target_link_libraries(carbonx common ${SPEECHSDK_CORE_LIBRARY})
 
+target_compile_definitions(carbonx PRIVATE UNIDEC_MODEL_PATH_ROOT="${CARBON_EXTERNAL}/unidec/Unidec.Model/model")
+
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
 if(use_openssl)
     set_target_properties(carbonx PROPERTIES LINK_FLAGS "/ignore:4099")

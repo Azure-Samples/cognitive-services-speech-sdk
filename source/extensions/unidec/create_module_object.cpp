@@ -23,14 +23,14 @@ SPX_EXTERN_C void* Unidec_CreateModuleObject(const char* className, const char* 
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY(CSpxUnidecRecoEngineAdapter, ISpxRecoEngineAdapter);
     SPX_FACTORY_MAP_END();
-};
+}
 
 SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY_FUNC(Unidec_CreateModuleObject);
     SPX_FACTORY_MAP_END();
-};
+}
 
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

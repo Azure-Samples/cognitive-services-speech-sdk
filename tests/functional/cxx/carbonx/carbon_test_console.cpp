@@ -122,6 +122,8 @@ bool CarbonTestConsole::ParseConsoleArgs(const std::vector<std::string>& args, C
         {
             fShowOptions = pconsoleArgs->m_strUseRecoEngineProperty.length() > 0 || fNextArgRequired;
             pconsoleArgs->m_strUseRecoEngineProperty = "CARBON-INTERNAL-UseRecoEngine-Unidec";
+            SpxSetMockParameterString(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelPathRoot)", UNIDEC_MODEL_PATH_ROOT);
+            SpxSetMockParameterString(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage)", "en-US");
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }

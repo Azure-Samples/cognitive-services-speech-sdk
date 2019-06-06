@@ -12,6 +12,9 @@ include_directories("${CARBON_EXTERNAL}/json")
 include_directories("${COMMON}/include")
 include_directories("${SR}")
 include_directories("${TTS}")
+if(BUILD_UNIDEC)
+    include_directories("${UNIDEC}")
+endif()
 
 set(HEADERS
     "${SRC_DIR}/stdafx.h"

@@ -66,4 +66,26 @@ void OpenStream(std::fstream& stream, const std::wstring& filename, bool readonl
 #endif
 }
 
+std::string AppendPath(const std::string& str1, const std::string& str2)
+{
+    std::string appendedPath;
+    char separator = '/';
+    std::string tmp = str1;
+
+#ifdef _WIN32
+    separator = '\\';
+#endif
+
+    if (str1[str1.length()] != separator)
+    {
+        tmp += separator;
+        appendedPath = tmp + str2;
+    }
+    else
+    {
+        appendedPath = str1 + str2;
+    }
+    return appendedPath;
+}
+
 } // PAL

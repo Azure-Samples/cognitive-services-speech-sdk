@@ -59,6 +59,18 @@ int strnicmp(const char *a, const char *b, size_t n)
 #endif
 }
 
+int xcsicmp(const WCHAR* a, const WCHAR* b)
+{
+#if defined(SPX_WCHAR_IS_8)
+    return stricmp(a, b);
+#elif defined(SPX_WCHAR_IS_16)
+    std::u16string cmp1 = std::u16string(a);
+    std::u16string cmp2 = std::u16string(b);
+    return cmp1 == cmp2 ? 0 : 1;
+#else
+    return wcsicmp(a, b);
+#endif
+}
 
 // Similarly to strcpy_s, wcscpy_s functions, dstSize and srcSize are sizes of corresponding
 // arrays in terms of number of elements (in wide characters).
@@ -83,6 +95,32 @@ void strcpy(char *dst, size_t dstSize, const char *src, size_t srcSize, bool tru
     strncpy_s(dst, dstSize, src, toCopy);
 #else
     std::strncpy(dst, src, toCopy);
+#endif
+
+    dst[std::min(toCopy, dstSize-1)] = 0; // make sure the string is null-terminated
+}
+
+void wcscpy(wchar_t *dst, size_t dstSize, const wchar_t *src, size_t srcSize, bool truncate)
+{
+    // TODO (alrezni): throw instead of asserting, 
+    // see https://msdn.microsoft.com/en-us/library/5dae5d43.aspx
+    // and https://msdn.microsoft.com/en-us/library/td1esda9.aspx
+    // for more details on error conditions, add unit tests.
+    assert(src);
+    assert(dst);
+    assert(dstSize != 0);
+
+    auto toCopy = std::min(dstSize, srcSize);
+
+    if (!truncate)
+    {
+        assert(dstSize > toCopy);
+    }
+
+#ifdef _MSC_VER
+    wcsncpy_s(dst, dstSize, src, toCopy);
+#else
+    wcsncpy(dst, src, toCopy);
 #endif
 
     dst[std::min(toCopy, dstSize-1)] = 0; // make sure the string is null-terminated
@@ -131,6 +169,46 @@ vector<string> split(string str, const string& token)
     }
 
     return result;
+}
+
+std::wstring WCHARToWString(const WCHAR* string)
+{
+    std::wstring result;
+#ifdef _MSC_VER
+    result = std::wstring(string);
+#else
+    const WCHAR* pch = string;
+    while (*pch)
+    {
+        result += (wchar_t)((*pch) & 0xffff);
+        pch++;
+    }
+#endif
+    return result;
+}
+
+wchar_string ToWCHARString(const std::wstring& string)
+{
+#ifdef _MSC_VER
+    return string;
+#else
+#if defined(SPX_WCHAR_IS_16)
+    std::u16string result = ToU16String(string);
+    return result;
+#endif
+#endif
+}
+
+std::u16string ToU16String(const std::wstring& string)
+{
+    std::u16string dest;
+    auto *pch = string.c_str();
+    while (*pch)
+    {
+        dest += (uint16_t)((*pch) & 0xffff);
+        pch++;
+    }
+    return dest;
 }
 
 } // PAL

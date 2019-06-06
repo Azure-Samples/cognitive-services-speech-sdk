@@ -1,3 +1,8 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+
 #pragma once
 
 #include <iostream>
@@ -105,6 +110,7 @@ void WaitForResult(future<void>&& f, std::chrono::seconds duration);
 void PushData(PushAudioInputStream* pushStream, const string& filename, bool compressed = false);
 void DoContinuousReco(SpeechRecognizer * recognizer, PushAudioInputStream * pushStream);
 void DoKWS(SpeechRecognizer * recognizer, PushAudioInputStream * pushStream);
+void UseOfflineUnidec(std::shared_ptr<SpeechConfig> config);
 
 enum class Callbacks { final_result, intermediate_result, no_match, session_started, session_stopped, speech_start_detected, speech_end_detected };
 
@@ -122,7 +128,7 @@ void ConnectCallbacks(RecogType* recognizer, RecoPhrasesPtr result)
     recognizer->Recognizing.DisconnectAll();
     recognizer->Recognizing.Connect([result](const EventArgType& e)
     {
-        if (e.Result->Reason == ResultReason::RecognizedSpeech)
+        if (e.Result->Reason == ResultReason::RecognizingSpeech)
         {
             auto userId = GetUserId(e.Result.get());
             ostringstream os;

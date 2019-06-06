@@ -9,16 +9,10 @@ echo ......................................................
 echo .
 echo .  Welcome to Carbon!
 
-rem -- restore nuget packages
-echo -
-echo .  Installing Carbon dependent packages...
-%~dp0\external\nuget\nuget.exe restore %~dp0\source\core\unidec\packages.config -PackagesDirectory %~dp0\packages 
-echo .  Done!
-
 rem -- special handling for Unidec
 echo .
-echo .  Updating Unidec files appropriately:
-call %~dp0\init_unidec.cmd
+echo .  Adding Unidec binaries to path...
+set PATH=%PATH%;%~dp0\external\unidec\Richland.Speech.UnidecRuntime\native
 echo .  Done!
 
 rem -- goodbye message

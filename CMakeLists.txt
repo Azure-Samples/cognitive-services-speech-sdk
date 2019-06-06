@@ -349,9 +349,21 @@ set(C_API "${CARBON_CORE}/c_api")
 set(AUDIO "${CARBON_CORE}/audio")
 set(USP "${CARBON_CORE}/usp")
 set(MOCK "${CARBON_CORE}/mock")
-if(SPEECHSDK_TARGET_PLATFORM STREQUAL "Windows-x64")
-  set(UNIDEC "${CARBON_CORE}/unidec")
+
+# Enable Unidec build with 'cmake -DBUILD_UNIDEC=ON -DVSTS_TOKEN=token'
+if(BUILD_UNIDEC AND
+   ((SPEECHSDK_TARGET_PLATFORM STREQUAL Windows-x64) OR
+    (SPEECHSDK_TARGET_PLATFORM STREQUAL WindowsUwp-x64)))
+  if(NOT DEFINED VSTS_TOKEN)
+    message(FATAL_ERROR "Missing VSTS access token. Use 'cmake -DVSTS_TOKEN=token' to set.")
+  endif()
+  set(BUILD_UNIDEC ON)
+  set(UNIDEC "${CARBON_EXTENSIONS}/unidec")
+else()
+  set(BUILD_UNIDEC OFF)
 endif()
+
+message(STATUS "BUILD_UNIDEC=${BUILD_UNIDEC}")
 
 set(TESTS "${CARBON_ROOT}/tests")
 set(JAVA_TESTS "${TESTS}/functional/java/src/test/java")
@@ -379,7 +391,7 @@ add_subdirectory(${MOCK})
 
 add_subdirectory(${LIBCARBON})
 
-if(SPEECHSDK_TARGET_PLATFORM STREQUAL "Windows-x64")
+if(BUILD_UNIDEC)
   add_subdirectory(${UNIDEC})
 endif()
 

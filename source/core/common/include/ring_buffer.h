@@ -26,6 +26,7 @@ class RingBuffer
 public:
     RingBuffer();
     void AddBuffer(const DataChunkPtr& audioChunk);
+    void ReleaseBuffers();
     uint32_t GetData(uint8_t* buffer, uint32_t bytesToRead);
     uint32_t GetCurrentSize();
 

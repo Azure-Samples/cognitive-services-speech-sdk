@@ -83,4 +83,16 @@ uint32_t RingBuffer::GetData(uint8_t* buffer, uint32_t bytesToRead)
     return amountFilled;
 }
 
+void RingBuffer::ReleaseBuffers()
+{
+    std::unique_lock<std::mutex> lock(m_mtx);
+
+    while (!m_bufferQueue.empty())
+    {
+        m_bufferQueue.pop();
+    }
+    m_currentSize = 0;
+    m_firstBufferStartPosition = 0;
+}
+
 }}}} // Microsoft::CognitiveServices::Speech::Impl

@@ -47,6 +47,7 @@ jobs:
         fi
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_KWS ${{ parameters.kws }}
+        vsts_setvar PAT "$(System.AccessToken)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: . ./ci/functions.sh && vsts_setvar SPEECHSDK_SPECTRE_MITIGATION false
@@ -67,6 +68,8 @@ jobs:
     inputs:
       cmakeArgs: >-
         -G "$(SPEECHSDK_CMAKE_GENERATOR)"
+        -DBUILD_UNIDEC=ON
+        -DVSTS_TOKEN=$(PAT)
         -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM)
         -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE)
         -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
@@ -113,7 +116,9 @@ jobs:
           -DCMAKE_BUILD_CONFIG=$(BuildConfiguration) \
           -DPYTHON_EXECUTABLE:FILEPATH="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/python.exe \
           -DPYTHON_LIBRARY="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/libs/python${wheelPythonVersion}.lib \
-          -DPYTHON_INCLUDE_DIR:PATH="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/include
+          -DPYTHON_INCLUDE_DIR:PATH="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/include \
+          -DBUILD_UNIDEC=ON \
+          -DVSTS_TOKEN=$(PAT)
         cmake --build build --target bdist -j 4
         # check that the core & kws lib are identical in all wheels
         [[ $(md5sum $coreLib) == ${coreHash[0]}* ]] || exitWithError "core lib changed between Python builds"

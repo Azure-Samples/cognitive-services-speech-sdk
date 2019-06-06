@@ -57,6 +57,13 @@ void SetMockRealTimeSpeed(int value)
     SpxSetMockParameterNumber("CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", value);
 }
 
+void UseOfflineUnidec(std::shared_ptr<SpeechConfig> config)
+{
+    config->SetProperty(R"(CARBON-INTERNAL-UseRecoEngine-Unidec)", "true");
+    config->SetProperty(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelPathRoot)", UNIDEC_MODEL_PATH_ROOT);
+    config->SetProperty(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage)", "en-US");
+}
+
 fstream OpenFile(const string& filename)
 {
     if (filename.empty())
