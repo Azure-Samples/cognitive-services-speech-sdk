@@ -65,6 +65,7 @@ namespace Config
     EXTERN std::string BotSecret;
     EXTERN std::string InroomEndpoint;
     EXTERN std::string OnlineEndpoint;
+    EXTERN bool DoDiscover;
 }
 
 inline bool exists(const std::string& name) {
@@ -126,6 +127,19 @@ public:
     }
 };
 
+inline bool checkForDiscovery(int argc, char*argv[])
+{
+    for (int index = 0; index < argc; index++)
+    {
+        if (!strcmp(argv[index], "--discovery"))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 typedef std::linear_congruential_engine<uint_fast32_t, 1664525, 1013904223, UINT_FAST32_MAX> random_engine;
 
 inline void add_signal_handlers()
@@ -180,6 +194,9 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Config::BotSecret, "BotSecret")
         ["--secretKeyBot"]
     ("Secret for the functional test bot")
+        | Opt(Config::DoDiscover)
+        ["--discovery"]
+    ("Perform VS Test Adaptor discovery");
         ;
 
     // Now pass the new composite back to Catch so it uses that

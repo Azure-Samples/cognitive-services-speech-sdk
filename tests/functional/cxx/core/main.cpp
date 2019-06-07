@@ -34,7 +34,11 @@ int main(int argc, char* argv[])
 
     Catch::Session session; // There must be exactly one instance
 
-    ConfigSettings::LoadFromJsonFile();
+     // The catch2 test adapter runs a Discovery phase and we shouldn't attemp io during this phase
+    if (!checkForDiscovery(argc, argv))
+    {
+        ConfigSettings::LoadFromJsonFile();
+    }
 
     // Let Catch (using Clara) parse the command line
     int returnCode = parse_cli_args(session, argc, argv);
