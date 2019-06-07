@@ -1216,6 +1216,11 @@ TEST_CASE("Speech Recognizer SpeechConfig validations", "[api][cxx]")
         CHECK_THROWS(SpeechConfig::FromSubscription("", "illegal-region"));
         CHECK_THROWS(SpeechConfig::FromSubscription("illegal-subscription", ""));
         CHECK_NOTHROW(SpeechConfig::FromSubscription("illegal-subscription", "illegal-region"));
+        auto endpointAsRegion = "wss://westus.stt.speech.microsoft.com/speech/recognition/dictation/cognitiveservices/v1";
+        CHECK_THROWS(SpeechConfig::FromSubscription(Keys::Speech, endpointAsRegion));
+        CHECK_THROWS(SpeechTranslationConfig::FromSubscription(Keys::Speech, endpointAsRegion));
+        CHECK_THROWS(SpeechConfig::FromAuthorizationToken("sometoken", endpointAsRegion));
+        CHECK_THROWS(SpeechTranslationConfig::FromAuthorizationToken("sometoken", endpointAsRegion));
     }
 
     SPXTEST_SECTION("Check that FromAuthorizationToken raises an exception when called with illegal values")

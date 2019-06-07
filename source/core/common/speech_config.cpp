@@ -20,6 +20,7 @@ void CSpxSpeechConfig::InitAuthorizationToken(const char* authToken, const char*
     SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);
     m_init = true;
 
+    CheckRegionString(region);
     SetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), authToken);
     SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), region);
 }
@@ -36,12 +37,12 @@ void CSpxSpeechConfig::InitFromEndpoint(const char* endpoint, const char* subscr
     }
 }
 
-
 void CSpxSpeechConfig::InitFromSubscription(const char* subscription, const char* region)
 {
     SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);
     m_init = true;
 
+    CheckRegionString(region);
     SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), subscription);
     SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), region);
 }
@@ -90,6 +91,20 @@ void CSpxSpeechConfig::SetProfanity(ProfanityOption profanity)
         break;
     }
     SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_ProfanityOption), valueStr.c_str());
+}
+
+void CSpxSpeechConfig::CheckRegionString(const char *region)
+{
+    string regionStr(region);
+    const auto forbiddenInRegion = {":", "//"};
+    for(auto pattern: forbiddenInRegion)
+    {
+        if (regionStr.find(pattern) != string::npos)
+        {
+            SPX_DBG_TRACE_ERROR("Invalid region: %s.", region);
+            SPX_THROW_HR(SPXERR_INVALID_ARG);
+        }
+    }
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -50,6 +50,9 @@ public:
         SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
     SPX_SERVICE_MAP_END()
 
+protected:
+    void CheckRegionString(const char* region);
+
 private:
     bool m_init{ false };
     DISABLE_COPY_AND_MOVE(CSpxSpeechConfig);

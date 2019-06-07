@@ -935,7 +935,7 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
     }
 }
 
-// Callback for data available on tranport
+// Callback for data available on transport
 void Connection::Impl::OnTransportData(TransportResponse *response, void *context)
 {
     throw_if_null(context, "context");
