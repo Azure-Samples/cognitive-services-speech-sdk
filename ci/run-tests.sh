@@ -182,4 +182,4 @@ for testfile in "${testsToRun[@]}"; do
 done
 echo Pass '(including skip)' $pass / $total.
 ((pass == total))
-exit $exitCode
+
