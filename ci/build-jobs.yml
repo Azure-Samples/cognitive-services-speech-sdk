@@ -804,7 +804,7 @@ jobs:
     displayName: 'Publish WACK report'
 
 - job: NuGetLinuxTest
-  dependsOn: [Pre, NuGet]
+  dependsOn: [Pre, NuGet, WindowsBuild, LinuxBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetLinuxTest '))
   pool:
     name: Hosted Ubuntu 1604
@@ -913,7 +913,19 @@ jobs:
             fi
             cd tests/functional/csharp/end2end
             dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
-            dotnet test \$EXTRA_OPT --verbosity detailed --filter "TestCategory!=LongTest" --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_unit_tests-$(basename "$i").trx"
+            for retry in {0..3}; do
+              dotnet test \$EXTRA_OPT --verbosity detailed --filter "TestCategory!=LongTest" --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_unit_tests-$(basename "$i")_\$retry.trx"
+              exitCode=\$?
+              if [[ \$exitCode == 0 ]]; then
+              echo "Test suite passed( \$retry )."
+                break
+              else
+                echo "Test suite failed during retry( \$retry )."
+                vsts_logissue warning "Test suite failed during retry( \$retry )."
+                sleep 2s
+              fi
+            done
+            exit \$exitCode
       SCRIPT
 
         ./ci/samples/test-quickstart-csharp-dotnetcore.sh "$i" localnuget ||
@@ -934,11 +946,11 @@ jobs:
     condition: succeededOrFailed()
 
 - job: NuGetOsxTest
-  dependsOn: [Pre, NuGet]
+  dependsOn: [Pre, NuGet, WindowsBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetOsxTest '))
   pool:
     name: Hosted macOS Preview
-  timeoutInMinutes: 30
+  timeoutInMinutes: 210
   steps:
   - bash: brew config && brew install bash
     displayName: Install modern bash on macOS
@@ -990,15 +1002,28 @@ jobs:
         }
         s/(<Parameter name="($keysRe)" value=")([^"]*)/$1.$A{$2}/ge
       SCRIPT
+      exitCode=0
       mkdir localnuget
       nugetsource=${PWD}/localnuget
       cp -v "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
       #
       cd tests/functional/csharp/end2end
       dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source ${nugetsource} Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
-      dotnet test --blame --verbosity detailed --filter \
-        "TestCategory!=LongTest&TestCategory!=SpeechSynthesisMockTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests&TestCategory!=CompressedStreamTest" \
-        --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_osx_unit_tests.trx"
+      for retry in {0..3}; do
+        dotnet test --blame --verbosity detailed --filter \
+          "TestCategory!=LongTest&TestCategory!=SpeechSynthesisMockTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests&TestCategory!=CompressedStreamTest" \
+          --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_osx_unit_tests_$retry.trx"
+        exitCode=$?
+        if [[ $exitCode == 0 ]]; then
+          echo "Test suite passed, RetryCount( $retry )"
+          break
+        else
+          echo "Test suite failed during retry( $retry )."
+          vsts_logissue warning "Test suite failed during retry( $retry )."
+          sleep 2s
+        fi
+      done
+      exit ${exitCode}
     displayName: Run C# unit tests
     continueOnError: ${{ parameters.continueOnTestFailure }}
   - task: PublishTestResults@2
