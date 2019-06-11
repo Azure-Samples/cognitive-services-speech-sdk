@@ -14,6 +14,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <array>
 #include "audio_sys.h"
 #include "guid_utils.h"
 
@@ -340,7 +341,7 @@ int main(int argc, char* argv[])
     // Set Authentication.
     if (!authData.empty())
     {
-        vector<string> authInfo((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
+        std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authInfo;
         authInfo[(size_t)USP::AuthenticationType::SubscriptionKey] = authData;
 
         client.SetAuthentication(authInfo);

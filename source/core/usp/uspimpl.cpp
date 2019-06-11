@@ -377,7 +377,7 @@ void Connection::Impl::Connect()
     }
 
     // Set authentication headers.
-    auto authStr = m_config.m_authData[(size_t)AuthenticationType::SubscriptionKey];
+    auto& authStr = m_config.m_authData[static_cast<size_t>(AuthenticationType::SubscriptionKey)];
     if (!authStr.empty())
     {
         LogInfo("Adding subscription key headers");
@@ -386,7 +386,7 @@ void Connection::Impl::Connect()
             ThrowRuntimeError("Failed to set authentication using subscription key.");
         }
     }
-    authStr = m_config.m_authData[(size_t)AuthenticationType::AuthorizationToken];
+    authStr = m_config.m_authData[static_cast<size_t>(AuthenticationType::AuthorizationToken)];
     if (!authStr.empty())
     {
         LogInfo("Adding authorization token headers");
@@ -396,7 +396,7 @@ void Connection::Impl::Connect()
             ThrowRuntimeError("Failed to set authentication using authorization token.");
         }
     }
-    authStr = m_config.m_authData[(size_t)AuthenticationType::SearchDelegationRPSToken];
+    authStr = m_config.m_authData[static_cast<size_t>(AuthenticationType::SearchDelegationRPSToken)];
     if (!authStr.empty())
     {
         LogInfo("Adding search delegation RPS token.");
@@ -404,6 +404,16 @@ void Connection::Impl::Connect()
         {
             ThrowRuntimeError("Failed to set authentication using Search-DelegationRPSToken.");
         }
+    }
+    authStr = m_config.m_authData[static_cast<size_t>(AuthenticationType::DirectLineSpeechSecret)];
+    if (!authStr.empty())
+    {
+        LogInfo("Adding DirectLineSpeech secret.");
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::directLineSpeechSecret, authStr.c_str()) != 0)
+        {
+            ThrowRuntimeError("Failed to set authentication using DirectLineSpeech secret.");
+        }
+
     }
 
     if (m_config.m_endpointType == EndpointType::Bot)

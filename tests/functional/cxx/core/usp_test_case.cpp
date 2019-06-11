@@ -35,8 +35,8 @@ public:
     void Init()
     {
         auto region = Config::Region.empty() ? "westus" : Config::Region;
-        vector<string> authData((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
-        authData[(size_t)USP::AuthenticationType::SubscriptionKey] = Keys::Speech;
+        std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
+        authData[static_cast<size_t>(USP::AuthenticationType::SubscriptionKey)] = Keys::Speech;
 
         m_threadService = std::make_shared<CSpxThreadService>();
         m_threadService->Init();
@@ -125,7 +125,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
 
     SECTION("usp can toggled on/off multiple times in a row")
     {
-        for (unsigned int i = 10; i > 0; i--) 
+        for (unsigned int i = 10; i > 0; i--)
         {
             auto client = std::make_shared<UspClient>();
             client->Init();
@@ -200,8 +200,8 @@ TEST_CASE("USP uses TLS12", "[usp]")
     auto service = std::make_shared<CSpxThreadService>();
     service->Init();
     auto callbacks = std::make_shared<TlsCheck>();
-    vector<string> authData((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
-    authData[(size_t)USP::AuthenticationType::SubscriptionKey] = "test";
+    std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
+    authData[static_cast<size_t>(USP::AuthenticationType::SubscriptionKey)] = "test";
     auto client = USP::Client(callbacks, USP::EndpointType::Speech, PAL::CreateGuidWithoutDashes(), service)
         .SetRegion("westus")
         .SetEndpointUrl("wss://www.github.com/")
@@ -231,8 +231,8 @@ TEST_CASE("Port specification", "[usp]")
         auto service = std::make_shared<CSpxThreadService>();
         service->Init();
         auto callbacks = std::make_shared<PortCheck>();
-        vector<string> authData((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
-        authData[(size_t)USP::AuthenticationType::SubscriptionKey] = "test";
+        std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
+        authData[static_cast<size_t>(USP::AuthenticationType::SubscriptionKey)] = "test";
         auto client = USP::Client(callbacks, USP::EndpointType::Speech, PAL::CreateGuidWithoutDashes(), service)
             .SetRegion("westus")
             .SetEndpointUrl("ws://127.0.0.1:12345/mytest")
@@ -251,8 +251,8 @@ TEST_CASE("Port specification", "[usp]")
         auto service = std::make_shared<CSpxThreadService>();
         service->Init();
         auto callbacks = std::make_shared<PortCheck>();
-        vector<string> authData((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
-        authData[(size_t)USP::AuthenticationType::SubscriptionKey] = "test";
+        std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
+        authData[static_cast<size_t>(USP::AuthenticationType::SubscriptionKey)] = "test";
         auto client = USP::Client(callbacks, USP::EndpointType::Speech, PAL::CreateGuidWithoutDashes(), service)
             .SetRegion("westus")
             .SetEndpointUrl("wss://myserver:50/mydir/myapi?foo=bar")
@@ -272,8 +272,8 @@ TEST_CASE("Port specification", "[usp]")
         auto service = std::make_shared<CSpxThreadService>();
         service->Init();
         auto callbacks = std::make_shared<PortCheck>();
-        vector<string> authData((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
-        authData[(size_t)USP::AuthenticationType::SubscriptionKey] = "test";
+        std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
+        authData[static_cast<size_t>(USP::AuthenticationType::SubscriptionKey)] = "test";
         auto client = USP::Client(callbacks, USP::EndpointType::Speech, PAL::CreateGuidWithoutDashes(), service)
             .SetRegion("westus")
             .SetEndpointUrl("ws://127.0.0.1:abc/mytest")  // Invalid port specification, should fail on connect.

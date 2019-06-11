@@ -6,6 +6,7 @@
 //
 
 #include <vector>
+#include <array>
 
 #include "stdafx.h"
 #include "usp_reco_engine_adapter.h"
@@ -653,11 +654,14 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(const std::shared_pt
     auto uspSubscriptionKey = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key));
     auto uspAuthToken = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token));
     auto uspRpsToken = properties->GetStringValue("SPEECH-RpsToken");
-    std::vector<std::string> authData((size_t)USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE);
+    auto uspDLSSecret = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_Secret_Key));
+    std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
 
-    authData[(size_t)USP::AuthenticationType::SubscriptionKey] = uspSubscriptionKey;
-    authData[(size_t)USP::AuthenticationType::AuthorizationToken] = uspAuthToken;
-    authData[(size_t)USP::AuthenticationType::SearchDelegationRPSToken] = uspRpsToken;
+
+    authData[static_cast<size_t>(USP::AuthenticationType::SubscriptionKey)] = std::move(uspSubscriptionKey);
+    authData[static_cast<size_t>(USP::AuthenticationType::AuthorizationToken)] = std::move(uspAuthToken);
+    authData[static_cast<size_t>(USP::AuthenticationType::SearchDelegationRPSToken)] = std::move(uspRpsToken);
+    authData[static_cast<size_t>(USP::AuthenticationType::DirectLineSpeechSecret)] = std::move(uspDLSSecret);
 
     return client.SetAuthentication(authData);
 }

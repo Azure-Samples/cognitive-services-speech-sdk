@@ -11,6 +11,7 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <array>
 
 #include "uspmessages.h"
 #include "ispxinterfaces.h"
@@ -126,7 +127,7 @@ enum class RecognitionMode : unsigned int { Interactive = 0, Conversation = 1, D
 
 enum class OutputFormat : unsigned int { Simple = 0, Detailed = 1 };
 
-enum class AuthenticationType { SubscriptionKey, AuthorizationToken, SearchDelegationRPSToken, SIZE_AUTHENTICATION_TYPE };
+enum class AuthenticationType: size_t { SubscriptionKey = 0, AuthorizationToken, SearchDelegationRPSToken, DirectLineSpeechSecret, SIZE_AUTHENTICATION_TYPE };
 
 enum class MessageType { Config, Context, Agent, AgentContext, Event};
 
@@ -215,7 +216,7 @@ public:
         m_callbacks(callbacks),
         m_endpointType(endpointType),
         m_recoMode(RecognitionMode::Interactive),
-        m_authData((size_t)AuthenticationType::SIZE_AUTHENTICATION_TYPE,""),
+        m_authData{},
         m_connectionId(connectionId),
         m_threadService(threadService)
     {
@@ -318,13 +319,9 @@ public:
      * @param authType The type of authentication to be used.
      * @param authData The authentication data for the specified authentication type.
      */
-    Client& SetAuthentication(const std::vector<std::string>& authData)
+    Client& SetAuthentication(const std::array<std::string, static_cast<size_t>(AuthenticationType::SIZE_AUTHENTICATION_TYPE)>& authData)
     {
-        if (authData.size() != (size_t)AuthenticationType::SIZE_AUTHENTICATION_TYPE)
-        {
-           ::Microsoft::CognitiveServices::Speech::Impl::ThrowLogicError("Incorrect authentication configuration: array size mismatch.");
-        }
-        m_authData = authData;
+        std::copy_n(authData.cbegin(), authData.size(), m_authData.begin());
         return *this;
     }
 
@@ -370,7 +367,7 @@ private:
 
     std::string m_intentRegion;
 
-    std::vector<std::string> m_authData;
+    std::array<std::string, static_cast<size_t>(AuthenticationType::SIZE_AUTHENTICATION_TYPE)> m_authData;
 
     std::wstring m_connectionId;
 
