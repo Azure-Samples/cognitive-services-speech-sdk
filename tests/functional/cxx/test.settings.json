@@ -2,7 +2,7 @@
   "InRoomEndPoint": "",
   "OnlineEndPoint": "",
   "endPoint": "",
-  "inputDir": "",
+  "inputDir": "input",
   "keyBot": "",
   "keyConversationTranscriber": "",
   "keyLUIS": "",

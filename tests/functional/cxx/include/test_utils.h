@@ -9,6 +9,8 @@
 #include <random>
 #include <signal.h>
 #include <fstream>
+#include <algorithm>
+#include <string>
 
 #ifdef _DEBUG
 #define SPX_CONFIG_INCLUDE_ALL_DBG 1
@@ -44,7 +46,6 @@
 #endif
 
 #define TEST_SETTINGS_FILE "test.settings.json"
-#define TEST_SETTINGS_PATH "../../../../../tests/functional/cxx/"
 
 namespace Keys
 {
@@ -78,19 +79,8 @@ inline std::ifstream get_stream(const std::string& name) {
 
 class ConfigSettings {
 private:
-    static std::string buildPath()
+    static nlohmann::json getJson(std::string path)
     {
-        std::string path;
-
-        path += TEST_SETTINGS_PATH;
-        path += TEST_SETTINGS_FILE;
-
-        return path;
-    }
-
-    static nlohmann::json getJson()
-    {
-        std::string path = buildPath();
         nlohmann::json nlohmanJson = nullptr;
 
         if (exists(path))
@@ -103,9 +93,13 @@ private:
     }
 
 public:
-    static void LoadFromJsonFile()
+    static void LoadFromJsonFile(const char* rootPathString)
     {
-        nlohmann::json data = getJson();
+        std::string rootPath(rootPathString);
+        std::replace(rootPath.begin(), rootPath.end(), '\\', '/');
+        std::string rootPathOnly = rootPath.substr(0, rootPath.find_last_of('/') + 1);
+
+        nlohmann::json data = getJson(rootPathOnly + TEST_SETTINGS_FILE);
 
         if (data != nullptr)
         {
@@ -118,11 +112,16 @@ public:
             Config::Region = data.at("regionId").get<std::string>();
             Config::LuisRegion = data.at("regionIdLUIS").get<std::string>();
             Config::LuisAppId = data.at("luisAppId").get<std::string>();
-            Config::InputDir = data.at("inputDir").get<std::string>();
             Config::BotRegion = data.at("regionIdBot").get<std::string>();
             Config::BotSecret = data.at("secretKeyBot").get<std::string>();
             Config::InroomEndpoint = data.at("InRoomEndPoint").get<std::string>();
             Config::OnlineEndpoint = data.at("OnlineEndPoint").get<std::string>();
+
+            Config::InputDir = data.at("inputDir").get<std::string>();
+            if (Config::InputDir.length() != 0)
+            {
+                Config::InputDir = rootPathOnly + Config::InputDir;
+            }
         }
     }
 };

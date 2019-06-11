@@ -415,6 +415,12 @@ endif()
 add_subdirectory(${TESTS})
 add_subdirectory(${CARBONX})
 
+#Since windows might build debug or release version after running cmake, we copy to both just in case
+file(COPY "${TESTS}/functional/cxx/test.settings.json" DESTINATION "${CARBON_ROOT}/build/bin/Debug")
+file(COPY "${TESTS}/input" DESTINATION "${CARBON_ROOT}/build/bin/Debug")
+file(COPY "${TESTS}/functional/cxx/test.settings.json" DESTINATION "${CARBON_ROOT}/build/bin/Release")
+file(COPY "${TESTS}/input" DESTINATION "${CARBON_ROOT}/build/bin/Release")
+
 # Dummy targets to make API header appear
 # in the generated VS solution.
 add_custom_target(c_headers
