@@ -21,6 +21,7 @@ DESCRIPTION = "Simple transcription description"
 LOCALE = "en-US"
 RECORDINGS_BLOB_URI = "<Your SAS Uri to the recording>"
 
+# Set subscription information when doing transcription with custom models
 ADAPTED_ACOUSTIC_ID = None  # guid of a custom acoustic model
 ADAPTED_LANGUAGE_ID = None  # guid of a custom language model
 
@@ -50,15 +51,18 @@ def transcribe():
 
     logging.info("Creating transcriptions.")
 
-    # transcription definition using custom models
+    # Use base models for transcription. Comment this block if you are using a custom model.
     transcription_definition = cris_client.TranscriptionDefinition(
-        name=NAME, description=DESCRIPTION, locale=LOCALE, recordings_url=RECORDINGS_BLOB_URI,
-        models=[cris_client.ModelIdentity(ADAPTED_ACOUSTIC_ID), cris_client.ModelIdentity(ADAPTED_LANGUAGE_ID)]
+        name=NAME, description=DESCRIPTION, locale=LOCALE, recordings_url=RECORDINGS_BLOB_URI
     )
 
-    # comment out the previous statement and uncomment the following to use base models for transcription
+    # Uncomment this block to use custom models for transcription.
+    # Model information (ADAPTED_ACOUSTIC_ID and ADAPTED_LANGUAGE_ID) must be set above.
+    # if ADAPTED_ACOUSTIC_ID is None or ADAPTED_LANGUAGE_ID is None:
+    #     logging.info("Custom model ids must be set to when using custom models")
     # transcription_definition = cris_client.TranscriptionDefinition(
-    #     name=NAME, description=DESCRIPTION, locale=LOCALE, recordings_url=RECORDINGS_BLOB_URI
+    #     name=NAME, description=DESCRIPTION, locale=LOCALE, recordings_url=RECORDINGS_BLOB_URI,
+    #     models=[cris_client.ModelIdentity(ADAPTED_ACOUSTIC_ID), cris_client.ModelIdentity(ADAPTED_LANGUAGE_ID)]
     # )
 
     data, status, headers = transcription_api.create_transcription_with_http_info(transcription_definition)
@@ -67,14 +71,14 @@ def transcribe():
     transcription_location: str = headers["location"]
 
     # get the transcription Id from the location URI
-    created_transcriptions = list()
-    created_transcriptions.append(transcription_location.split('/')[-1])
+    created_transcription: str = transcription_location.split('/')[-1]
 
     logging.info("Checking status.")
 
-    completed, running, not_started = 0, 0, 0
+    completed = False
+    running, not_started = 0, 0
 
-    while completed < 1:
+    while not completed:
         # get all transcriptions for the user
         transcriptions: List[cris_client.Transcription] = transcription_api.get_transcriptions()
 
@@ -82,10 +86,10 @@ def transcribe():
         for transcription in transcriptions:
             if transcription.status == "Failed" or transcription.status == "Succeeded":
                 # we check to see if it was one of the transcriptions we created from this client
-                if transcription.id not in created_transcriptions:
+                if created_transcription != transcription.id:
                     continue
 
-                completed += 1
+                completed = True
 
                 if transcription.status == "Succeeded":
                     results_uri = transcription.results_urls["channel_0"]
@@ -97,16 +101,16 @@ def transcribe():
             elif transcription.status == "NotStarted":
                 not_started += 1
 
-        logging.info(f"Transcriptions status: {completed} completed, {running} running, {not_started} not started yet")
+        logging.info("Transcriptions status: "
+                "completed (this transcription): {}, {} running, {} not started yet".format(
+                    completed, running, not_started))
+
         # wait for 5 seconds
         time.sleep(5)
 
     input("Press any key...")
 
 
-def main():
+if __name__ == "__main__":
     transcribe()
 
-
-if __name__ == "__main__":
-    main()
