@@ -4,7 +4,6 @@
 //
 
 using System;
-using System.Text;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.CognitiveServices.Speech.Internal
@@ -27,31 +26,31 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         // --- grammar C99 APIs ---
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern bool grammar_handle_is_valid(InteropSafeHandle hgrammar);
+        public static extern bool grammar_handle_is_valid(InteropSafeHandle grammar);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR phrase_list_grammar_from_recognizer_by_name(out SPXGRAMMARHANDLE hgrammar, InteropSafeHandle hreco, [MarshalAs(UnmanagedType.LPStr)] string name);
+        public static extern SPXHR phrase_list_grammar_from_recognizer_by_name(out SPXGRAMMARHANDLE grammar, InteropSafeHandle reco, [MarshalAs(UnmanagedType.LPStr)] string name);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR grammar_handle_release(SPXGRAMMARHANDLE hgrammar);
+        public static extern SPXHR grammar_handle_release(SPXGRAMMARHANDLE grammar);
 
         // --- phrase list grammar C99 APIs ---
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR phrase_list_grammar_add_phrase(InteropSafeHandle hgrammar, InteropSafeHandle hphrase);
+        public static extern SPXHR phrase_list_grammar_add_phrase(InteropSafeHandle grammar, InteropSafeHandle phrase);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR phrase_list_grammar_clear(InteropSafeHandle hgrammar);
+        public static extern SPXHR phrase_list_grammar_clear(InteropSafeHandle grammar);
 
         // --- grammar phrase C99 APIs ---
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern bool grammar_phrase_handle_is_valid(InteropSafeHandle hphrase);
+        public static extern bool grammar_phrase_handle_is_valid(InteropSafeHandle phrase);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR grammar_phrase_create_from_text(out SPXPHRASEHANDLE hphrase, [MarshalAs(UnmanagedType.LPStr)] string text);
+        public static extern SPXHR grammar_phrase_create_from_text(out SPXPHRASEHANDLE phrase, IntPtr text);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR grammar_phrase_handle_release(SPXPHRASEHANDLE hphrase);
+        public static extern SPXHR grammar_phrase_handle_release(SPXPHRASEHANDLE phrase);
     }
 }

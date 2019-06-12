@@ -351,7 +351,15 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             {
                 IntPtr activityPtr = IntPtr.Zero;
                 ThrowIfNull(botConnectorHandle, "Invalid connector handle");
-                ThrowIfFail(Internal.BotConnectorActivity.bot_activity_from_string(activityJSON, out activityPtr));
+                IntPtr activityJSONPtr = Utf8StringMarshaler.MarshalManagedToNative(activityJSON);
+                try
+                {
+                    ThrowIfFail(Internal.BotConnectorActivity.bot_activity_from_string(activityJSONPtr, out activityPtr));
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(activityJSONPtr);
+                }
                 const int guidSize = 50;
                 var buffer = new StringBuilder(guidSize);
                 ThrowIfFail(Internal.SpeechBotConnector.bot_connector_send_activity(botConnectorHandle, activityPtr, buffer));

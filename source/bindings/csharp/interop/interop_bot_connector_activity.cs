@@ -15,7 +15,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog.Internal
     internal static class BotConnectorActivity
     {
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-        internal static extern SPXHR bot_activity_from_string([MarshalAs(UnmanagedType.LPStr)] string serializedActivity, out SPXACTIVITYHANDLE activity);
+        internal static extern SPXHR bot_activity_from_string(IntPtr serializedActivity, out SPXACTIVITYHANDLE activity);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         internal static extern SPXHR bot_activity_handle_release(SPXACTIVITYHANDLE activityHandle);

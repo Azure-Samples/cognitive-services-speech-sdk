@@ -4,6 +4,7 @@
 //
 
 using System;
+using System.Runtime.InteropServices;
 using Microsoft.CognitiveServices.Speech.Internal;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
@@ -34,7 +35,15 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         public static AudioConfig FromWavFileInput(string fileName)
         {
             IntPtr audioConfigHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_input_from_wav_file_name(out audioConfigHandle, fileName));
+            IntPtr fileNamePtr = Utf8StringMarshaler.MarshalManagedToNative(fileName);
+            try
+            {
+                ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_input_from_wav_file_name(out audioConfigHandle, fileNamePtr));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(fileNamePtr);
+            }
             return new AudioConfig(audioConfigHandle);
         }
 
@@ -115,7 +124,15 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         public static AudioConfig FromWavFileOutput(string fileName)
         {
             IntPtr audioConfigHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_output_from_wav_file_name(out audioConfigHandle, fileName));
+            IntPtr fileNamePtr = Utf8StringMarshaler.MarshalManagedToNative(fileName);
+            try
+            {
+                ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_output_from_wav_file_name(out audioConfigHandle, fileNamePtr));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(fileNamePtr);
+            }
             return new AudioConfig(audioConfigHandle);
         }
 

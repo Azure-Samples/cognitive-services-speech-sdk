@@ -7,6 +7,7 @@ using System;
 namespace Microsoft.CognitiveServices.Speech
 {
     using Internal;
+    using System.Runtime.InteropServices;
     using static Internal.c_interop;
 
     /*! \cond INTERNAL */
@@ -27,7 +28,15 @@ namespace Microsoft.CognitiveServices.Speech
         public static GrammarPhrase From(string text)
         {
             SPXPHRASEHANDLE hphrase = SPXHANDLE_INVALID;
-            SPX_THROW_ON_FAIL(grammar_phrase_create_from_text(out hphrase, text));
+            IntPtr textPtr = Utf8StringMarshaler.MarshalManagedToNative(text);
+            try
+            {
+                SPX_THROW_ON_FAIL(grammar_phrase_create_from_text(out hphrase, textPtr));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(textPtr);
+            }
             return new GrammarPhrase(hphrase);
         }
 

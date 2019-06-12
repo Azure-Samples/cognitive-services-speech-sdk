@@ -16,6 +16,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static readonly string ZH = "zh-Hans";
         public static readonly string DE_DE = "de-DE";
         public static readonly string CA_ES = "ca-ES";
+        public static readonly string ZH_CN = "zh-CN";
 
         // List of speech-to-text codes are copied from https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support [7 dec 2018]
         public static readonly string[] Speech2TextAll =

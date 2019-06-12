@@ -94,6 +94,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             public static class Weather
             {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "weatherInChinese.wav");
                 public static readonly string Utterance = "天气怎么样？";
             }
         }

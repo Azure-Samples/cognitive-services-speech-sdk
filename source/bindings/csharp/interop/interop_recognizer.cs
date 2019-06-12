@@ -112,7 +112,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR recognizer_canceled_set_callback(InteropSafeHandle recoHandle, CallbackFunctionDelegate callback, IntPtr context);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR intent_recognizer_add_intent(InteropSafeHandle recoHandle, [MarshalAs(UnmanagedType.LPStr)] string intentId,
+        public static extern SPXHR intent_recognizer_add_intent(InteropSafeHandle recoHandle, IntPtr intentId,
             InteropSafeHandle trigger);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]

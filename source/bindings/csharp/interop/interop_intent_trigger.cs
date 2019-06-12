@@ -26,14 +26,22 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static IntentTrigger From(string simplePhrase)
         {
             SPXTRIGGERHANDLE triggerHandle = IntPtr.Zero;
-            ThrowIfFail(intent_trigger_create_from_phrase(out triggerHandle, simplePhrase));
+            IntPtr simplePhrasePtr = Utf8StringMarshaler.MarshalManagedToNative(simplePhrase);
+            try
+            {
+                ThrowIfFail(intent_trigger_create_from_phrase(out triggerHandle, simplePhrasePtr));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(simplePhrasePtr);
+            }
             return new IntentTrigger(triggerHandle);
         }
 
         public static IntentTrigger From(Intent.LanguageUnderstandingModel model)
         {
             SPXTRIGGERHANDLE triggerHandle = IntPtr.Zero;
-            ThrowIfFail(intent_trigger_create_from_language_understanding_model(out triggerHandle, model.luHandle, null));
+            ThrowIfFail(intent_trigger_create_from_language_understanding_model(out triggerHandle, model.luHandle, IntPtr.Zero));
             GC.KeepAlive(model);
             return new IntentTrigger(triggerHandle);
         }
@@ -41,7 +49,15 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static IntentTrigger From(Intent.LanguageUnderstandingModel model, string intentName)
         {
             SPXTRIGGERHANDLE triggerHandle = IntPtr.Zero;
-            ThrowIfFail(intent_trigger_create_from_language_understanding_model(out triggerHandle, model.luHandle, intentName));
+            IntPtr intentNamePtr = Utf8StringMarshaler.MarshalManagedToNative(intentName);
+            try
+            {
+                ThrowIfFail(intent_trigger_create_from_language_understanding_model(out triggerHandle, model.luHandle, intentNamePtr));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(intentNamePtr);
+            }
             GC.KeepAlive(model);
             return new IntentTrigger(triggerHandle);
         }
@@ -50,12 +66,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern bool intent_trigger_handle_is_valid(SPXTRIGGERHANDLE trigger);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR intent_trigger_create_from_phrase(out SPXTRIGGERHANDLE trigger,
-            [MarshalAs(UnmanagedType.LPStr)] string phrase);
+        public static extern SPXHR intent_trigger_create_from_phrase(out SPXTRIGGERHANDLE trigger, IntPtr phrase);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR intent_trigger_create_from_language_understanding_model(out SPXTRIGGERHANDLE trigger, InteropSafeHandle lumodel,
-            [MarshalAs(UnmanagedType.LPStr)] string intentName);
+            IntPtr intentName);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR intent_trigger_handle_release(SPXTRIGGERHANDLE trigger);

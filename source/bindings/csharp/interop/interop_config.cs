@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+using System;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.CognitiveServices.Speech.Internal
@@ -20,7 +21,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR audio_config_create_audio_input_from_default_microphone(out SPXAUDIOCONFIGHANDLE audioConfig);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         public static extern SPXHR audio_config_create_audio_input_from_wav_file_name(out SPXAUDIOCONFIGHANDLE audioConfig,
-            [MarshalAs(UnmanagedType.LPStr)] string fileName);
+            IntPtr fileName);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         public static extern SPXHR audio_config_create_audio_input_from_a_microphone(out SPXAUDIOCONFIGHANDLE audioConfig,
             [MarshalAs(UnmanagedType.LPStr)] string deviceName);
@@ -30,7 +31,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR audio_config_create_audio_output_from_default_speaker(out SPXAUDIOCONFIGHANDLE audioConfig);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         public static extern SPXHR audio_config_create_audio_output_from_wav_file_name(out SPXAUDIOCONFIGHANDLE audioConfig,
-            [MarshalAs(UnmanagedType.LPStr)] string fileName);
+            IntPtr fileName);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR audio_config_create_audio_output_from_stream(out SPXAUDIOCONFIGHANDLE audioConfig, InteropSafeHandle audioStream);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]

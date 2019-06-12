@@ -17,17 +17,17 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern bool property_bag_is_valid(InteropSafeHandle propbag);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR property_bag_set_string(InteropSafeHandle propbag, Int32 id,
-            [MarshalAs(UnmanagedType.LPStr)] string name,
-            [MarshalAs(UnmanagedType.LPStr)] string value);
+            IntPtr name,
+            IntPtr value);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern IntPtr property_bag_get_string(InteropSafeHandle propbag, Int32 id,
-            [MarshalAs(UnmanagedType.LPStr)] string name,
-            [MarshalAs(UnmanagedType.LPStr)] string defaultValue);
+            IntPtr name,
+            IntPtr defaultValue);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR property_bag_free_string(IntPtr ptr);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]

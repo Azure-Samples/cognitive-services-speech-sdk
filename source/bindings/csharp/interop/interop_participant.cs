@@ -26,7 +26,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Auto)]
         public static extern SPXHR participant_create_handle(out SPXPARTICIPANTHANDLE participant,
-            [MarshalAs(UnmanagedType.LPStr)] string userId,
+            IntPtr userId,
             [MarshalAs(UnmanagedType.LPStr)] string preferredLanguage,
             [MarshalAs(UnmanagedType.LPStr)] string voice);
 

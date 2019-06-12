@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 using System;
+using System.Runtime.InteropServices;
 using Microsoft.CognitiveServices.Speech.Internal;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
@@ -83,7 +84,15 @@ namespace Microsoft.CognitiveServices.Speech
         public void SetProperty(PropertyId id, string value)
         {
             ThrowIfNull(propbagHandle);
-            ThrowIfFail(Internal.PropertyCollection.property_bag_set_string(propbagHandle, (int)id, null, value));
+            IntPtr valuePtr = Utf8StringMarshaler.MarshalManagedToNative(value);
+            try
+            {
+                ThrowIfFail(Internal.PropertyCollection.property_bag_set_string(propbagHandle, (int)id, IntPtr.Zero, valuePtr));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(valuePtr);
+            }
         }
 
         /// <summary>
@@ -94,23 +103,43 @@ namespace Microsoft.CognitiveServices.Speech
         public void SetProperty(string propertyName, string value)
         {
             ThrowIfNull(propbagHandle);
-            ThrowIfFail(Internal.PropertyCollection.property_bag_set_string(propbagHandle, -1, propertyName, value));
+            IntPtr valuePtr = Utf8StringMarshaler.MarshalManagedToNative(value);
+            IntPtr propertyNamePtr = Utf8StringMarshaler.MarshalManagedToNative(propertyName);
+            try
+            {
+                ThrowIfFail(Internal.PropertyCollection.property_bag_set_string(propbagHandle, -1, propertyNamePtr, valuePtr));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(valuePtr);
+                Marshal.FreeHGlobal(propertyNamePtr);
+            }
         }
 
         private string GetPropertyString(InteropSafeHandle propHandle, int id, string name, string defaultValue)
         {
             string propertyVal = string.Empty;
-            IntPtr pStr = Internal.PropertyCollection.property_bag_get_string(propHandle, id, name, defaultValue);
-            if (pStr != IntPtr.Zero)
+            IntPtr namePtr = Utf8StringMarshaler.MarshalManagedToNative(name);
+            IntPtr defaultValuePtr = Utf8StringMarshaler.MarshalManagedToNative(defaultValue);
+            try
             {
-                try
+                IntPtr pStr = Internal.PropertyCollection.property_bag_get_string(propHandle, id, namePtr, defaultValuePtr);
+                if (pStr != IntPtr.Zero)
                 {
-                    propertyVal = Utf8StringMarshaler.MarshalNativeToManaged(pStr);
+                    try
+                    {
+                        propertyVal = Utf8StringMarshaler.MarshalNativeToManaged(pStr);
+                    }
+                    finally
+                    {
+                        ThrowIfFail(Internal.PropertyCollection.property_bag_free_string(pStr));
+                    }
                 }
-                finally
-                {
-                    ThrowIfFail(Internal.PropertyCollection.property_bag_free_string(pStr));
-                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(namePtr);
+                Marshal.FreeHGlobal(defaultValuePtr);
             }
             return propertyVal;
         }

@@ -84,5 +84,28 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertMatching(recoTextExpected, result.Text);
             }
         }
+
+        [TestMethod]
+        public async Task TestPhraseListGrammarInChinese()
+        {
+            var recoTextExpected = TestData.Chinese.Weather.Utterance;
+
+            var unrelatedPhrase1 = "你好"; // "Hello"
+            var unrelatedPhrase2 = "键盘"; // "Keyboard"
+
+            config.SpeechRecognitionLanguage = Language.ZH_CN;
+            var audioInput = AudioConfig.FromWavFileInput(TestData.Chinese.Weather.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            {
+                PhraseListGrammar phraselist = PhraseListGrammar.FromRecognizer(recognizer);
+
+                phraselist.AddPhrase(unrelatedPhrase1);
+                phraselist.AddPhrase(unrelatedPhrase2);
+                phraselist.AddPhrase(recoTextExpected);
+
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                AssertMatching(recoTextExpected, result.Text);
+            }
+        }
     }
 }

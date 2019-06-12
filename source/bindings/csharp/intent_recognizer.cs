@@ -251,7 +251,15 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         private void AddIntent(IntentTrigger intentTrigger, string intentId)
         {
             ThrowIfNull(recoHandle, "Invalid recognizer handle");
-            ThrowIfFail(Internal.Recognizer.intent_recognizer_add_intent(recoHandle, intentId, intentTrigger.triggerHandle));
+            IntPtr intentIdPtr = Utf8StringMarshaler.MarshalManagedToNative(intentId);
+            try
+            {
+                ThrowIfFail(Internal.Recognizer.intent_recognizer_add_intent(recoHandle, intentIdPtr, intentTrigger.triggerHandle));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(intentIdPtr);
+            }
             GC.KeepAlive(intentTrigger);
         }
 

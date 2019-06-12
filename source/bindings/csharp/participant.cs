@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
 using System;
-
+using System.Runtime.InteropServices;
 using Microsoft.CognitiveServices.Speech.Internal;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
@@ -26,8 +26,15 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         public static Participant From(string userId, string preferredLanguage, string voiceSignature)
         {
             IntPtr participantPtr = IntPtr.Zero;
-
-            ThrowIfFail(Internal.Participant.participant_create_handle(out participantPtr, userId, preferredLanguage, voiceSignature));
+            IntPtr userIdPtr = Utf8StringMarshaler.MarshalManagedToNative(userId);
+            try
+            {
+                ThrowIfFail(Internal.Participant.participant_create_handle(out participantPtr, userIdPtr, preferredLanguage, voiceSignature));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(userIdPtr);
+            }
             return new Participant(participantPtr);
         }
 
