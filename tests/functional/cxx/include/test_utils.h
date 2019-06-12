@@ -66,6 +66,8 @@ namespace Config
     EXTERN std::string BotSecret;
     EXTERN std::string InroomEndpoint;
     EXTERN std::string OnlineEndpoint;
+    EXTERN std::string OfflineModelPathRoot;
+    EXTERN std::string OfflineModelLanguage;
     EXTERN bool DoDiscover;
 }
 
@@ -193,6 +195,12 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Config::BotSecret, "BotSecret")
         ["--secretKeyBot"]
     ("Secret for the functional test bot")
+        | Opt(Config::OfflineModelPathRoot, "OfflineModelPathRoot")
+        ["--offlineModelPathRoot"]
+    ("The root path under which offline speech recognition models are located.")
+        | Opt(Config::OfflineModelLanguage, "OfflineModelLanguage")
+        ["--offlineModelLanguage"]
+    ("The language code of the offline speech recognition model used in tests.")
         | Opt(Config::DoDiscover)
         ["--discovery"]
     ("Perform VS Test Adaptor discovery");

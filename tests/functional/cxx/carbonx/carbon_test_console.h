@@ -52,6 +52,8 @@ private:
         std::string m_strIntentAppId;
         std::string m_strIntentNames; // comma-separated
         std::string m_strDeviceName;
+        std::string m_strOfflineModelPathRoot;
+        std::string m_strOfflineModelLanguage;
 
         bool m_fRecognizeOnceAsync = false;
 
@@ -249,6 +251,7 @@ private:
 
     void ch9_do_translation();
 
+    std::shared_ptr<SpeechConfig> SpeechRecognizerConfig();
 
 private:
 
@@ -263,6 +266,8 @@ private:
     std::string m_customSpeechModelId;
     std::string m_intentAppId;
     std::vector<std::string> m_intentNames;
+    std::string m_offlineModelPathRoot;
+    std::string m_offlineModelLanguage;
 
     void* m_commandSystem = nullptr;
     std::shared_ptr<PullAudioInputStream> m_pullAudioStream;

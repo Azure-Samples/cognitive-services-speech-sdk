@@ -8,7 +8,7 @@
 #include "recognizer_utils.h"
 
 
-TEST_CASE("Offline continuous recognition using file input", "[api][cxx]")
+TEST_CASE("Offline continuous recognition using file input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -42,7 +42,7 @@ TEST_CASE("Offline continuous recognition using file input", "[api][cxx]")
     }
 }
 
-TEST_CASE("Offline single recognition using file input", "[api][cxx]")
+TEST_CASE("Offline single recognition using file input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -70,7 +70,7 @@ TEST_CASE("Offline single recognition using file input", "[api][cxx]")
     }
 }
 
-TEST_CASE("Offline continuous recognition using push stream input", "[api][cxx]")
+TEST_CASE("Offline continuous recognition using push stream input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -106,7 +106,7 @@ TEST_CASE("Offline continuous recognition using push stream input", "[api][cxx]"
     }
 }
 
-TEST_CASE("Offline single recognition using push stream input", "[api][cxx]")
+TEST_CASE("Offline single recognition using push stream input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -136,7 +136,7 @@ TEST_CASE("Offline single recognition using push stream input", "[api][cxx]")
     }
 }
 
-TEST_CASE("Offline continuous recognition using pull stream input", "[api][cxx]")
+TEST_CASE("Offline continuous recognition using pull stream input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -169,7 +169,7 @@ TEST_CASE("Offline continuous recognition using pull stream input", "[api][cxx]"
     }
 }
 
-TEST_CASE("Offline single recognition using pull stream input", "[api][cxx]")
+TEST_CASE("Offline single recognition using pull stream input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 

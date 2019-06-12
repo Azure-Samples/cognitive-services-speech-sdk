@@ -22,6 +22,16 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
                                gstreamer1.0-plugins-bad \
 
     sudo "$SCRIPT_DIR/install-swig.sh"
+
+    # For Unidec runtime and model packages installation
+    sudo apt-get install --yes nuget
+    
+    # Richland.Speech.UnidecRuntime.linux/native/libSpeechToText.so requires
+    # libstdc++.so.6 with GLIBCXX_3.4.22 which is not available by default in
+    # Ubuntu 16.04 LTS
+    sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+    sudo apt-get update
+    sudo apt-get install --yes libstdc++6
     ;;
   Windows-x64)
     ;;

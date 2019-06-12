@@ -350,10 +350,11 @@ set(AUDIO "${CARBON_CORE}/audio")
 set(USP "${CARBON_CORE}/usp")
 set(MOCK "${CARBON_CORE}/mock")
 
-# Enable Unidec build with 'cmake -DBUILD_UNIDEC=ON -DVSTS_TOKEN=token'
-if(BUILD_UNIDEC AND
+# Enable Unidec build with 'cmake -DEXTENSION_UNIDEC_ENABLED=true -DVSTS_TOKEN=token'
+if(EXTENSION_UNIDEC_ENABLED AND
    ((SPEECHSDK_TARGET_PLATFORM STREQUAL Windows-x64) OR
-    (SPEECHSDK_TARGET_PLATFORM STREQUAL WindowsUwp-x64)))
+    (SPEECHSDK_TARGET_PLATFORM STREQUAL WindowsUwp-x64) OR
+    (SPEECHSDK_TARGET_PLATFORM STREQUAL Linux-x64)))
   if(NOT DEFINED VSTS_TOKEN)
     message(FATAL_ERROR "Missing VSTS access token. Use 'cmake -DVSTS_TOKEN=token' to set.")
   endif()

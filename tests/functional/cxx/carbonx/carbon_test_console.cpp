@@ -118,14 +118,17 @@ bool CarbonTestConsole::ParseConsoleArgs(const std::vector<std::string>& args, C
             pconsoleArgs->m_useMockKws = true;
             fNextArgRequired = false;
         }
-        else if (PAL::stricmp(pszArg, "--unidec") == 0)
+        else if (PAL::strnicmp(pszArg, "--offlineModelPathRoot", strlen("--offlineModelPathRoot")) == 0)
         {
-            fShowOptions = pconsoleArgs->m_strUseRecoEngineProperty.length() > 0 || fNextArgRequired;
-            pconsoleArgs->m_strUseRecoEngineProperty = "CARBON-INTERNAL-UseRecoEngine-Unidec";
-            SpxSetMockParameterString(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelPathRoot)", UNIDEC_MODEL_PATH_ROOT);
-            SpxSetMockParameterString(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage)", "en-US");
-            pstrNextArg = nullptr;
-            fNextArgRequired = false;
+            fShowOptions = pconsoleArgs->m_strOfflineModelPathRoot.length() > 0 || fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_strOfflineModelPathRoot;
+            fNextArgRequired = true;
+        }
+        else if (PAL::strnicmp(pszArg, "--offlineModelLanguage", strlen("--offlineModelLanguage")) == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strOfflineModelLanguage.length() > 0 || fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_strOfflineModelLanguage;
+            fNextArgRequired = true;
         }
         else if (PAL::stricmp(pszArg, "--mockrecoengine") == 0)
         {
@@ -375,6 +378,11 @@ void CarbonTestConsole::DisplayConsoleUsage()
     ConsoleWriteLine("       --subscription:{key}          Use {key} as the subscription key.");
     ConsoleWriteLine("       --region:{region}             Use {region} as the service region.");
     ConsoleWriteLine("       --customSpeechModelId:{id}    Use {id} as the Custom Speech Model ID.");
+    ConsoleWriteLine("");
+    ConsoleWriteLine("     Offline speech recognition:");
+    ConsoleWriteLine("");
+    ConsoleWriteLine("       --offlineModelPathRoot:{path}  Use {path} as the root path for offline models.");
+    ConsoleWriteLine("       --offlineModelLanguage:{lang}  Use {lang} as the language code, for example: en-US");
     ConsoleWriteLine("");
     ConsoleWriteLine("     Additional:");
     ConsoleWriteLine("");
@@ -991,9 +999,7 @@ void CarbonTestConsole::Factory_CreateSpeechRecognizer(const char* psz)
     m_recognizer = nullptr;
     m_session = nullptr;
 
-    auto sc = !m_endpointUri.empty()
-        ? SpeechConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
-        : SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
+    auto sc = SpeechRecognizerConfig();
 
     std::string filename(psz + 1);
     m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(filename));
@@ -1006,6 +1012,42 @@ void CarbonTestConsole::Factory_CreateSpeechRecognizer(const char* psz)
 
     m_recognizer = BaseAsyncRecognizer::FromRecognizer(m_speechRecognizer);
     m_session = Session::FromRecognizer(m_speechRecognizer);
+}
+
+std::shared_ptr<SpeechConfig> CarbonTestConsole::SpeechRecognizerConfig()
+{
+    std::shared_ptr<SpeechConfig> sc = nullptr;
+
+    if (!m_endpointUri.empty())
+    {
+        sc = SpeechConfig::FromEndpoint(m_endpointUri, m_subscriptionKey);
+    }
+    else
+    {
+        sc = SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
+    }
+
+    if (!m_offlineModelPathRoot.empty())
+    {
+        // Test offline speech recognition without public API
+        SpxSetMockParameterString(R"(CARBON-INTERNAL-UseRecoEngine-Unidec)", "true");
+        SpxSetMockParameterString(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelPathRoot)", m_offlineModelPathRoot.c_str());
+        
+        if (!m_offlineModelPathRoot.empty())
+        {
+            SpxSetMockParameterString(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage)", m_offlineModelLanguage.c_str());
+        }
+        else
+        {
+            SpxSetMockParameterString(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage)", "en-US");
+        }
+    }
+    else
+    {
+        SpxSetMockParameterString(R"(CARBON-INTERNAL-UseRecoEngine-Unidec)", "false");
+    }
+
+    return sc;
 }
 
 template <class T>
@@ -1580,6 +1622,16 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
         m_endpointUri = pconsoleArgs->m_strEndpointUri;
     }
 
+    if (!pconsoleArgs->m_strOfflineModelPathRoot.empty())
+    {
+        m_offlineModelPathRoot = pconsoleArgs->m_strOfflineModelPathRoot;
+    }
+
+    if (!pconsoleArgs->m_strOfflineModelLanguage.empty())
+    {
+        m_offlineModelLanguage = pconsoleArgs->m_strOfflineModelLanguage;
+    }
+
     if (!pconsoleArgs->m_strCustomSpeechModelId.empty())
     {
         m_customSpeechModelId = pconsoleArgs->m_strCustomSpeechModelId;
@@ -1672,9 +1724,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
 {
     if (recognizerType == PAL::GetTypeName<SpeechRecognizer>())
     {
-        auto sc = !m_endpointUri.empty()
-            ? SpeechConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
-            : SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
+        auto sc = SpeechRecognizerConfig();
 
         if (deviceName.empty())
         {

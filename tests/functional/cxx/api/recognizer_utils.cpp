@@ -59,9 +59,18 @@ void SetMockRealTimeSpeed(int value)
 
 void UseOfflineUnidec(std::shared_ptr<SpeechConfig> config)
 {
+    // Test offline speech recognition without public API
     config->SetProperty(R"(CARBON-INTERNAL-UseRecoEngine-Unidec)", "true");
-    config->SetProperty(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelPathRoot)", UNIDEC_MODEL_PATH_ROOT);
-    config->SetProperty(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage)", "en-US");
+    config->SetProperty(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelPathRoot)", Config::OfflineModelPathRoot);
+
+    if (!Config::OfflineModelLanguage.empty())
+    {
+        config->SetProperty(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage)", Config::OfflineModelLanguage);
+    }
+    else
+    {
+        config->SetProperty(R"(CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage)", "en-US");
+    }
 }
 
 fstream OpenFile(const string& filename)

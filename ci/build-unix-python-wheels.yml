@@ -13,6 +13,14 @@ steps:
       hostedtoolsPath=/opt/hostedtoolcache
       extraCmakeArgs="--plat-name=manylinux1_x86_64;--python-tag=cp%wheelPythonVersion%"
     fi
+    if [[ $(SPEECHSDK_TARGET_PLATFORM) == Linux-x64 ]]; then
+      # prevent core lib md5sum mismatch
+      enableUnidec=true
+      vstsToken=$(PAT)
+    else
+      enableUnidec=false
+      vstsToken=none
+    fi
     for pythonMajorMinorWithDot in ${pythonMajorMinorVersions[*]}; do
       thisPythonVersionBasePath=$(getLatest ${hostedtoolsPath}/Python/${pythonMajorMinorWithDot}.*)
       wheelPythonVersion=${pythonMajorMinorWithDot//./}
@@ -21,7 +29,9 @@ steps:
         -DPYTHON_EXECUTABLE:FILEPATH="${thisPythonVersionBasePath}/x64/python" \
         -DPYTHON_LIBRARY="${thisPythonVersionBasePath}/x64/lib/libpython${pythonMajorMinorWithDot}m.a" \
         -DPYTHON_INCLUDE_DIR:PATH="${thisPythonVersionBasePath}/x64/include/python${pythonMajorMinorWithDot}m" \
-        -DSPEECHSDK_PYTHON_WHEEL_ARGS=${extraCmakeArgs//%wheelPythonVersion%/${wheelPythonVersion}}
+        -DSPEECHSDK_PYTHON_WHEEL_ARGS=${extraCmakeArgs//%wheelPythonVersion%/${wheelPythonVersion}} \
+        -DEXTENSION_UNIDEC_ENABLED=${enableUnidec} \
+        -DVSTS_TOKEN=${vstsToken}
       cmake --build build --target bdist -j 4
       cp -v build/dist/* dist
     done

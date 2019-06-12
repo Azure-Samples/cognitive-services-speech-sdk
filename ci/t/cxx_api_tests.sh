@@ -26,7 +26,36 @@ case $TESTSET in
     ;;
 esac
 
-PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime/native:$PATH"
+RUN_OFFLINE_UNIDEC_TESTS=false
+case $PLATFORM in
+  Windows-x64*)
+    UNIDEC_RUNTIME_PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime/native"
+    if [[ -d "$UNIDEC_RUNTIME_PATH" ]]; then
+      PATH="${UNIDEC_RUNTIME_PATH}:$PATH"
+      RUN_OFFLINE_UNIDEC_TESTS=true
+    fi
+    ;;
+  Linux-x64*)
+    UNIDEC_RUNTIME_PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime.linux/native"
+    if [[ -d "$UNIDEC_RUNTIME_PATH" ]]; then
+      LD_LIBRARY_PATH="${UNIDEC_RUNTIME_PATH}:$LD_LIBRARY_PATH"
+      RUN_OFFLINE_UNIDEC_TESTS=true
+    fi
+    ;;
+esac
+
+if [[ $RUN_OFFLINE_UNIDEC_TESTS = true ]]; then
+  OFFLINE_MODEL_PATH_ROOT="external/unidec/Unidec.Model/model"
+  OFFLINE_MODEL_LANGUAGE="en-US"
+else
+  if [[ $PATTERN ]]; then
+    PATTERN="~[unidec]$PATTERN"
+  else
+    PATTERN="~[unidec]~[.]"
+  fi
+  OFFLINE_MODEL_PATH_ROOT=""
+  OFFLINE_MODEL_LANGUAGE=""
+fi
 
 runCatchSuite \
   TESTRUNNER \
@@ -49,3 +78,5 @@ runCatchSuite \
     --regionIdBot "$SPEECHSDK_BOT_REGION" \
     --secretKeyBot "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
     --keyConversationTranscriberPPE "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
+    --offlineModelPathRoot="$OFFLINE_MODEL_PATH_ROOT" \
+    --offlineModelLanguage="$OFFLINE_MODEL_LANGUAGE" \
