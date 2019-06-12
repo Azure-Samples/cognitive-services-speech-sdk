@@ -89,7 +89,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void ConversationIdWithChinese()
         {
             var config = SpeechConfig.FromSubscription(subscriptionKey, region);
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather8Channels.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {
                 //the UTF8 decoding of 的 is \xe7\x9a\x84, which will be shown in the debugger in the C++ side.
@@ -104,7 +104,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void ConversationIdWithAnsiOnly()
         {
             var config = SpeechConfig.FromSubscription(subscriptionKey, region);
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather8Channels.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {
                 string myConversationId = "123 456";
@@ -202,7 +202,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual(exception, true);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationAddParticipant()
         {
             var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
@@ -226,7 +226,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationAddParticipantFromSubscription()
         {
             var config = SpeechConfig.FromSubscription(conversationTranscriptionPRODKey, speechRegionForConversationTranscription);
@@ -250,7 +250,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationRemoveParticipant()
         {
             var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
@@ -287,7 +287,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationPushStream()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
@@ -356,7 +356,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         await conversationTranscriber.StartTranscribingAsync().ConfigureAwait(false);
 
                         // open and read the wave file and push the buffers into the recognizer
-                        using (var reader = Util.CreateWavReader(TestData.English.Weather8Channels.AudioFile))
+                        using (var reader = Util.CreateWavReader(TestData.English.TranscriberAudioData.TwoSpeakersAudio))
                         {
                             byte[] buffer = new byte[3200];
                             while (true)
@@ -479,7 +479,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
             config.OutputFormat = OutputFormat.Detailed;
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather8Channels.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {
                 conversationTranscriber.ConversationId = "TestCreatingParticipantByUserClass";
@@ -490,7 +490,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task CreateVoiceSignature()
         {
             var result = await CreateVoiceSignatureFromVoiceSample(TestData.English.TranscriberAudioData.KatieVoice);
