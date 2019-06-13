@@ -115,7 +115,7 @@ checkEmptyStdout \
 # Note: test only lists the files, not the actual matches.
 # Meant to be a cheap check, nothign water-proof (which should be client-side anyway).
 checkEmptyStdout \
-  "git grep -l -i -I -P '[^a-f0-9][a-f0-9]{32}[^a-f0-9]' $gitTree | fgrep -e docs/articles/usp-translation.md -e public_samples/quickstart/csharp-unity/Assets/Scenes/HelloWorld.unity -e public_samples/quickstart/csharp-unity/ProjectSettings/GraphicsSettings.asset -v | cut -d: -f2-" \
+  "git grep -l -i -I -P '[^a-f0-9][a-f0-9]{32}[^a-f0-9]' $gitTree | fgrep -e ci/latency/run-latency-test.py -e docs/articles/usp-translation.md -e public_samples/quickstart/csharp-unity/Assets/Scenes/HelloWorld.unity -e public_samples/quickstart/csharp-unity/ProjectSettings/GraphicsSettings.asset -v | cut -d: -f2-" \
   "Potentially subscription key checked in? Double check, if necessary modify white-list in this script: git grep -i -I -P '[^a-f0-9][a-f0-9]{32}[^a-f0-9]'"
 
 checkEmptyStdout \
