@@ -25,9 +25,8 @@ using namespace Microsoft::CognitiveServices::Speech::Dialog;
 
 using namespace std::chrono_literals;
 
-#define TEST_KWS_KEYWORD "Computer"
-#define TEST_ACTIVITY_TYPE "message"
-
+constexpr auto TEST_KWS_KEYWORD = "Computer";
+constexpr auto TEST_ACTIVITY_TYPE = "message";
 
 std::shared_ptr<BotConnectorConfig> BotConfigForTests()
 {
@@ -37,107 +36,107 @@ std::shared_ptr<BotConnectorConfig> BotConfigForTests()
     return config;
 }
 
+struct scope_exit
+{
+    scope_exit(std::function<void()> fn): m_fn{fn}
+    {}
+
+    ~scope_exit()
+    {
+        m_fn();
+    }
+private:
+    std::function<void()> m_fn;
+};
+
 struct test_runner
 {
     struct event_status
     {
+        event_status(): fired{0}, expected{0}, ok{true}
+        {
+        }
+
+        void reset()
+        {
+            fired = 0;
+            ok = true;
+        }
+
+        uint32_t fired;
+        uint32_t expected;
         bool ok;
-        int fired;
-        int expected;
     };
 
     template<typename T>
     using test_function = std::function<bool(std::ostringstream&, const T&, int)>;
 
-    template<typename T>
-    using filter_function = std::function<bool(const T&)>;
-
-    const filter_function<SpeechRecognitionEventArgs> isRecognizedSpeech = [](const SpeechRecognitionEventArgs& e)
+    static bool isSpeech(const SpeechRecognitionEventArgs& e)
     {
-        return e.Result->Reason == ResultReason::RecognizedSpeech;
+        return e.Result->Reason == ResultReason::RecognizedSpeech ||
+               e.Result->Reason == ResultReason::RecognizingSpeech;
     };
 
-    const filter_function<SpeechRecognitionEventArgs> isRecognizingSpeech = [](const SpeechRecognitionEventArgs& e)
+    static bool isKeyword(const SpeechRecognitionEventArgs& e)
     {
-        return e.Result->Reason == ResultReason::RecognizingSpeech;
+        return e.Result->Reason == ResultReason::RecognizedKeyword ||
+               e.Result->Reason == ResultReason::RecognizingKeyword;
     };
 
-    const filter_function<SpeechRecognitionEventArgs> isRecognizingKeyword = [](const SpeechRecognitionEventArgs& e)
-    {
-        return e.Result->Reason == ResultReason::RecognizingKeyword;
-    };
-
-    const filter_function<SpeechRecognitionEventArgs> isRecognizedKeyword = [](const SpeechRecognitionEventArgs& e)
-    {
-        return e.Result->Reason == ResultReason::RecognizedKeyword;
-    };
-
-    const filter_function<SpeechRecognitionEventArgs> isNotRecognizedKeyword = [](const SpeechRecognitionEventArgs& e)
+    static bool isKeywordNotRecognized(const SpeechRecognitionEventArgs& e)
     {
         return e.Result->Reason == ResultReason::NoMatch && NoMatchDetails::FromResult(e.Result)->Reason == NoMatchReason::KeywordNotRecognized;
     };
 
-    const filter_function<ActivityReceivedEventArgs> isActivityReceived = [](const ActivityReceivedEventArgs&)
-    {
-        return true;
-    };
-
-    const filter_function<SpeechRecognitionCanceledEventArgs> isCanceledSpeech = [](const SpeechRecognitionCanceledEventArgs&)
-    {
-        return true;
-    };
-
-    test_runner(std::shared_ptr<SpeechBotConnector> connector, std::shared_ptr<KeywordRecognitionModel> model = nullptr): m_connector{connector}, m_model{model}
+    test_runner(std::shared_ptr<BotConnectorConfig> config, std::shared_ptr<AudioConfig> audio): m_config{config}, m_audio{audio}
     {};
 
     template<typename T>
-    void wire_event(EventSignal<const T&>& event, event_status& status, test_function<T> test_fn, filter_function<T> filter_fn, int expected)
+    std::function<void(const T&)> wire_event(event_status& status, test_function<T> test_fn, int expected)
     {
-        event += [this, &status, test_fn, filter_fn](const T& e)
-        {
-            if (filter_fn(e)) {
-                status.ok = test_fn(m_message, e, status.fired);
-                status.fired++;
-                m_cond.notify_one();
-            }
-        };
         status.expected = expected;
         status.ok = status.expected == 0;
+        return [this, &status, test_fn](const T& e)
+        {
+            status.ok = test_fn(m_log, e, status.fired);
+            status.fired++;
+            m_cond.notify_one();
+        };
     }
 
     void add_keyword_recognizing_test(test_function<SpeechRecognitionEventArgs> test, int expected = 1)
     {
-        wire_event(m_connector->Recognizing, m_keyword_recognizing, test, isRecognizingKeyword, expected);
+        m_keyword_recognizing_handler = wire_event(m_keyword_recognizing, test, expected);
     }
 
     void add_keyword_recognized_test(test_function<SpeechRecognitionEventArgs> test, int expected = 1)
     {
-        wire_event(m_connector->Recognized, m_keyword_recognized, test, isRecognizedKeyword, expected);
+        m_keyword_recognized_handler = wire_event(m_keyword_recognized, test, expected);
     }
 
     void add_keyword_not_recognized_test(test_function<SpeechRecognitionEventArgs> test, int expected = 0)
     {
-        wire_event(m_connector->Recognized, m_keyword_not_recognized, test, isNotRecognizedKeyword, expected);
+        m_keyword_not_recognized_handler = wire_event(m_keyword_not_recognized, test, expected);
     }
 
     void add_recognized_test(test_function<SpeechRecognitionEventArgs> test, int expected = 1)
     {
-        wire_event(m_connector->Recognized, m_recognized, test, isRecognizedSpeech, expected);
+        m_recognized_handler = wire_event(m_recognized, test, expected);
     }
 
     void add_recognizing_test(test_function<SpeechRecognitionEventArgs> test, int expected = 1)
     {
-        wire_event(m_connector->Recognizing, m_recognizing, test, isRecognizingSpeech, expected);
+        m_recognizing_handler = wire_event(m_recognizing, test, expected);
     }
 
     void add_activity_received_test(test_function<ActivityReceivedEventArgs> test, int expected = 1)
     {
-        wire_event(m_connector->ActivityReceived, m_activity_received, test, isActivityReceived, expected);
+        m_activity_received_handler = wire_event(m_activity_received, test, expected);
     }
 
     void add_canceled_test(test_function<SpeechRecognitionCanceledEventArgs> test, int expected = 0)
     {
-        wire_event(m_connector->Canceled, m_canceled, test, isCanceledSpeech, expected);
+        m_canceled_handler = wire_event(m_canceled, test, expected);
     }
 
     static bool ready(event_status e)
@@ -146,56 +145,129 @@ struct test_runner
     }
 
     template<typename T>
-    std::tuple<bool, std::string> run(std::function<std::future<T>(SpeechBotConnector&, std::shared_ptr<KeywordRecognitionModel>)> scenario, std::chrono::seconds timeout)
+    std::tuple<bool, std::string> run(std::function<std::future<T>(SpeechBotConnector&)> scenario, std::chrono::seconds timeout, uint32_t retries)
     {
-        auto task = scenario(*m_connector, m_model);
-        std::mutex m;
-        std::unique_lock<std::mutex> lk{ m };
-        auto res = m_cond.wait_for(lk, timeout, [&]()
+        for(auto i = 0u; i < retries; i++)
         {
-            if ((m_canceled.fired && !m_canceled.expected ) || (m_keyword_not_recognized.fired && !m_keyword_not_recognized.expected))
+            scope_exit at_exit{[&]()
             {
-                /* Unexpected cancel */
-                return true;
-            }
-            if (ready(m_canceled) && ready(m_recognized) && ready(m_recognizing) && ready(m_activity_received) && ready(m_keyword_not_recognized) && ready(m_keyword_recognized) && ready(m_keyword_recognizing))
+                m_keyword_recognized.reset();
+                m_keyword_recognizing.reset();
+                m_keyword_not_recognized.reset();
+                m_recognized.reset();
+                m_recognizing.reset();
+                m_activity_received.reset();
+                m_canceled.reset();
+            }};
+
+            auto connector = SpeechBotConnector::FromConfig(m_config, m_audio);
+            connector->Recognized += [&](const SpeechRecognitionEventArgs& e)
             {
-                return true;
+                if (isKeyword(e) && m_keyword_recognized_handler)
+                {
+                    return m_keyword_recognized_handler(e);
+                }
+                else if (isKeywordNotRecognized(e) && m_keyword_not_recognized_handler)
+                {
+                    return m_keyword_not_recognized_handler(e);
+                }
+                else if (isSpeech(e) && m_recognized_handler)
+                {
+                    return m_recognized_handler(e);
+                }
+            };
+            connector->Recognizing += [&](const SpeechRecognitionEventArgs& e)
+            {
+                if (isKeyword(e) && m_keyword_recognizing_handler)
+                {
+                    return m_keyword_recognizing_handler(e);
+                }
+                else if (isSpeech(e) && m_recognizing_handler)
+                {
+                    return m_recognizing_handler(e);
+                }
+            };
+            connector->ActivityReceived += [&](const ActivityReceivedEventArgs& e)
+            {
+                if (m_activity_received_handler)
+                {
+                    return m_activity_received_handler(e);
+                }
+            };
+            connector->Canceled += [&](const SpeechRecognitionCanceledEventArgs& e)
+            {
+                if (m_canceled_handler)
+                {
+                    return m_canceled_handler(e);
+                }
+            };
+
+            auto task = scenario(*connector);
+
+            std::mutex m;
+            std::unique_lock<std::mutex> lk{ m };
+
+            auto res = m_cond.wait_for(lk, timeout, [&]()
+            {
+                if ((m_canceled.fired && !m_canceled.expected ) || (m_keyword_not_recognized.fired && !m_keyword_not_recognized.expected))
+                {
+                    /* Unexpected cancel */
+                    return true;
+                }
+                if (ready(m_canceled) && ready(m_recognized) && ready(m_recognizing) && ready(m_activity_received) && ready(m_keyword_not_recognized) && ready(m_keyword_recognized) && ready(m_keyword_recognizing))
+                {
+                    return true;
+                }
+                return false;
+            });
+
+            task.wait();
+
+            if (!res)
+            {
+                m_log << "Attempt " << i << " timed out." << std::endl;
+                continue;
             }
-            return false;
-        });
-        task.wait();
-        if (!res)
-        {
-            return std::make_tuple<bool, std::string>(false, "Test timed out");
+
+            if (m_canceled.ok &&
+                m_recognized.ok &&
+                m_recognizing.ok &&
+                m_activity_received.ok &&
+                m_keyword_not_recognized.ok &&
+                m_keyword_recognized.ok &&
+                m_keyword_recognizing.ok)
+            {
+                return std::make_tuple<bool, std::string>(true, m_log.str());
+            }
+            m_log << "Attempt " << i << " failed." << std::endl;
         }
 
-        if (m_canceled.ok
-            && m_recognized.ok
-            && m_recognizing.ok
-            && m_activity_received.ok
-            && m_keyword_not_recognized.ok
-            && m_keyword_recognized.ok
-            && m_keyword_recognizing.ok)
-        {
-            return std::make_tuple<bool, std::string>(true, "Success");
-        }
-        return std::make_tuple<bool, std::string>(false, m_message.str());
-
+        return std::make_tuple<bool, std::string>(false, m_log.str());
     }
 
 private:
+    std::shared_ptr<BotConnectorConfig> m_config;
+    std::shared_ptr<AudioConfig> m_audio;
+
     std::condition_variable m_cond;
-    std::shared_ptr<SpeechBotConnector> m_connector;
-    std::shared_ptr<KeywordRecognitionModel> m_model;
-    std::ostringstream m_message{};
-    event_status m_keyword_recognized{ true, 0, 0 };
-    event_status m_keyword_recognizing{ true, 0, 0 };
-    event_status m_keyword_not_recognized{ true, 0, 0 };
-    event_status m_recognized{ true, 0, 0 };
-    event_status m_recognizing{ true, 0, 0 };
-    event_status m_activity_received{ true, 0, 0 };
-    event_status m_canceled{ true, 0, 0 };
+
+    std::ostringstream m_log{};
+
+    std::function<void(const SpeechRecognitionEventArgs&)> m_keyword_recognizing_handler;
+    std::function<void(const SpeechRecognitionEventArgs&)> m_keyword_recognized_handler;
+    std::function<void(const SpeechRecognitionEventArgs&)> m_keyword_not_recognized_handler;
+    std::function<void(const SpeechRecognitionEventArgs&)> m_recognized_handler;
+    std::function<void(const SpeechRecognitionEventArgs&)> m_recognizing_handler;
+    std::function<void(const ActivityReceivedEventArgs&)> m_activity_received_handler;
+    std::function<void(const SpeechRecognitionCanceledEventArgs&)> m_canceled_handler;
+
+    event_status m_keyword_recognized;
+    event_status m_keyword_recognizing;
+    event_status m_keyword_not_recognized;
+    event_status m_recognized;
+    event_status m_recognizing;
+    event_status m_activity_received;
+    event_status m_canceled;
 };
 
 // Default verification lambdas
@@ -256,7 +328,7 @@ const auto verifyNotRecognizedKeyword = [](std::ostringstream& oss, const Speech
     return false;
 };
 
-TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector][!hide]")
+TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector]")
 {
     SECTION("Listen Once works")
     {
@@ -265,7 +337,7 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector][!hide]")
         auto config = BotConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
 
-        test_runner runner{ SpeechBotConnector::FromConfig(config, audioConfig) };
+        test_runner runner{ config, audioConfig };
 
         runner.add_recognized_test(verifyRecognizedSpeech);
         runner.add_recognizing_test(verifyRecognizingSpeech);
@@ -273,11 +345,11 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector][!hide]")
         runner.add_canceled_test(verifyCanceledSpeech);
 
         auto result = runner.run<void>(
-            [](SpeechBotConnector& connector, std::shared_ptr<KeywordRecognitionModel>)
+            [](SpeechBotConnector& connector)
             {
                 return connector.ListenOnceAsync();
             },
-            20s);
+            20s, 3u);
 
         bool success = std::get<0>(result);
         if (!success)
@@ -294,7 +366,7 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector][!hide]")
         auto config = BotConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
 
-        test_runner runner{ SpeechBotConnector::FromConfig(config, audioConfig) };
+        test_runner runner{ config, audioConfig };
 ;
         constexpr auto activity_text = "message";
         constexpr auto activity_speak = "Hello world";
@@ -320,7 +392,6 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector][!hide]")
                     success = false;
                 }
 
-#if 0
                 // Disabling as service is not returning audio consistently. bug #1758540
                 if (e.HasAudio())
                 {
@@ -342,7 +413,6 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector][!hide]")
                     oss << "No audio was received" << std::endl;
                     success = false;
                 }
-#endif
 
                 return success;
         });
@@ -350,7 +420,7 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector][!hide]")
         runner.add_canceled_test(verifyCanceledSpeech);
 
         auto result = runner.run<std::string>(
-            [&](SpeechBotConnector& connector, std::shared_ptr<KeywordRecognitionModel>)
+            [&](SpeechBotConnector& connector)
             {
                 auto activity = BotConnectorActivity::Create();
                 activity->Type = TEST_ACTIVITY_TYPE;
@@ -358,7 +428,7 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector][!hide]")
                 activity->Speak = activity_speak;
                 return connector.SendActivityAsync(activity);
             },
-            20s);
+            20s, 3);
 
         bool success = std::get<0>(result);
         if (!success)
@@ -370,16 +440,16 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector][!hide]")
     }
 }
 
-#if defined(SPEECHSDK_KWS_ENABLED)
+#ifdef SPEECHSDK_KWS_ENABLED
 
 // The following tests currently do only work with a real KWS engine (not the
 // KWS mock). Consider extending the mock:
 // 1) Being able to specify a custom number of keyword detection
 // 2) Being able to specify the audio that will be streamed to the service for keyword verification.
 // 3) Being able to specify the keyword text in keyword detection (Done)
-// 4) Being able to specify the audio for the latter utterance 
+// 4) Being able to specify the audio for the latter utterance
 
-TEST_CASE("Speech Bot Connector KWS basics", "[api][cxx][bot_connector][!hide]") {
+TEST_CASE("Speech Bot Connector KWS basics", "[api][cxx][bot_connector]") {
 
     SECTION("Listen once with KWS only works")
     {
@@ -392,7 +462,7 @@ TEST_CASE("Speech Bot Connector KWS basics", "[api][cxx][bot_connector][!hide]")
         auto audioConfig = AudioConfig::FromWavFileInput(kwvAccept.m_inputDataFilename);
         auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
 
-        test_runner runner{ SpeechBotConnector::FromConfig(config, audioConfig), model };
+        test_runner runner{ config, audioConfig };
 
         runner.add_keyword_recognizing_test(verifyRecognizingKeyword);
         runner.add_keyword_recognized_test(verifyRecognizedKeyword);
@@ -403,11 +473,11 @@ TEST_CASE("Speech Bot Connector KWS basics", "[api][cxx][bot_connector][!hide]")
         runner.add_canceled_test(verifyCanceledSpeech);
 
         auto result = runner.run<void>(
-            [](SpeechBotConnector& connector, shared_ptr<KeywordRecognitionModel> model)
+            [model](SpeechBotConnector& connector)
             {
                 return connector.StartKeywordRecognitionAsync(model);
             },
-            60s);
+            60s, 3);
 
         bool success = std::get<0>(result);
         if (!success)
@@ -418,7 +488,7 @@ TEST_CASE("Speech Bot Connector KWS basics", "[api][cxx][bot_connector][!hide]")
     }
 }
 
-TEST_CASE("Speech Bot Connector KWV basics", "[api][cxx][bot_connector][!hide]")
+TEST_CASE("Speech Bot Connector KWV basics", "[api][cxx][bot_connector]")
 {
 
     SECTION("Listen once with KWS + KWV accept works")
@@ -430,7 +500,7 @@ TEST_CASE("Speech Bot Connector KWV basics", "[api][cxx][bot_connector][!hide]")
         auto audioConfig = AudioConfig::FromWavFileInput(kwvAccept.m_inputDataFilename);
         auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
 
-        test_runner runner{ SpeechBotConnector::FromConfig(config, audioConfig), model};
+        test_runner runner{ config, audioConfig };
 
         runner.add_keyword_recognizing_test(verifyRecognizingKeyword);
         runner.add_keyword_recognized_test(verifyRecognizedKeyword);
@@ -441,11 +511,11 @@ TEST_CASE("Speech Bot Connector KWV basics", "[api][cxx][bot_connector][!hide]")
         runner.add_canceled_test(verifyCanceledSpeech);;
 
         auto result = runner.run<void>(
-            [](SpeechBotConnector& connector, shared_ptr<KeywordRecognitionModel> model)
+            [model](SpeechBotConnector& connector)
             {
                 return connector.StartKeywordRecognitionAsync(model);
             },
-            60s);
+            60s, 3);
 
         bool success = std::get<0>(result);
         if (!success)
@@ -464,7 +534,7 @@ TEST_CASE("Speech Bot Connector KWV basics", "[api][cxx][bot_connector][!hide]")
         auto audioConfig = AudioConfig::FromWavFileInput(kwvReject.m_inputDataFilename);
         auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
 
-        test_runner runner{ SpeechBotConnector::FromConfig(config, audioConfig), model };
+        test_runner runner{ config, audioConfig };
 
         runner.add_keyword_recognizing_test(verifyRecognizingKeyword);
         runner.add_canceled_test(verifyCanceledSpeech);
@@ -507,11 +577,11 @@ TEST_CASE("Speech Bot Connector KWV basics", "[api][cxx][bot_connector][!hide]")
             0);
 
         auto result = runner.run<void>(
-            [](SpeechBotConnector& connector, shared_ptr<KeywordRecognitionModel> model)
+            [model](SpeechBotConnector& connector)
             {
                 return connector.StartKeywordRecognitionAsync(model);
             },
-            60s);
+            60s, 3);
 
         bool success = std::get<0>(result);
         if (!success)
