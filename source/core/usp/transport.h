@@ -167,7 +167,7 @@ struct TransportRequest
     TransportOpenedCallback      onOpenedCallback;
     TransportClosedCallback      onClosedCallback;
     HTTP_HEADERS_HANDLE          headersHandle;
-    bool                         isOpen;
+    std::atomic_bool             isOpen;
     std::string                  url;
     /* HACKHACK: Owning strings for azure-c-shared strings */
     std::string                  resourceName;

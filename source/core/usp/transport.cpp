@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// tranpsort.c: handling tranport requests to the service.
+// transport.cpp: handling transport requests to the service.
 //
 
 #ifdef _MSC_VER
@@ -78,14 +78,40 @@ usp::TransportRequest::~TransportRequest()
     {
         if (isOpen)
         {
-            (void)uws_client_close_async(ws.WSHandle, OnWSClosed, this);
-            // TODO ok to ignore return code?
-            while (isOpen)
+            // starts the close handshake.
+            int result;
+            LogInfo("%s: start the close handshake.", __FUNCTION__);
+            result = uws_client_close_handshake_async(ws.WSHandle, 1000 /*normal closure*/, "" /* not used */, OnWSClosed, this);
+            if (result == 0)
             {
-                uws_client_dowork(ws.WSHandle);
-                std::this_thread::sleep_for(100ms);
+                // waits for close.
+                const int max_n_retries = 100;
+                int retries = 0;
+                while (isOpen && retries++ < max_n_retries)
+                {
+                    LogInfo("%s: Continue to pump while waiting for close frame response (%d/%d).", __FUNCTION__, retries, max_n_retries);
+                    uws_client_dowork(ws.WSHandle);
+                    std::this_thread::sleep_for(10ms);
+                }
+                LogInfo("%s: retries %d. isOpen: %s", __FUNCTION__, retries, isOpen ? "true" : "false");
+            }
+
+            if (isOpen)
+            {
+                LogError("%s: force close websocket. (result=%d)", __FUNCTION__, result);
+                // force to close.
+                (void)uws_client_close_async(ws.WSHandle, OnWSClosed, this);
+
+                // wait for force close.
+                while (isOpen)
+                {
+                    uws_client_dowork(ws.WSHandle);
+                    std::this_thread::sleep_for(10ms);
+                }
+                LogInfo("%s: isOpen: %s", __FUNCTION__, isOpen ? "true" : "false");
             }
         }
+        LogInfo("%s: destroying uwsclient.", __FUNCTION__);
         uws_client_destroy(ws.WSHandle);
     }
 
@@ -234,6 +260,7 @@ static void OnWSError(void* context, WS_ERROR errorCode)
 
 static void OnWSPeerClosed(void* context, uint16_t* closeCode, const unsigned char* extraData, size_t extraDataLength)
 {
+    LogInfo("%s: context=%p", __FUNCTION__, context);
     TransportRequest* request = (TransportRequest*)context;
     if (request)
     {
@@ -263,6 +290,7 @@ static void OnWSPeerClosed(void* context, uint16_t* closeCode, const unsigned ch
 
 static void OnWSClosed(void* context)
 {
+    LogInfo("%s: context=%p", __FUNCTION__, context);
     TransportRequest* request = (TransportRequest*)context;
     if (request)
     {
@@ -1138,6 +1166,7 @@ void usp::TransportDoWork(TransportHandle transportHandle)
                 request->state = TransportState::TRANSPORT_STATE_OPENING;
             }
         }
+        LogInfo("%s: open transport.", __FUNCTION__);
         if (TransportOpen(request))
         {
             request->state = TransportState::TRANSPORT_STATE_CLOSED;

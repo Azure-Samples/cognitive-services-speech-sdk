@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// uspimpl.c: implementation of the USP library.
+// uspimpl.cpp: implementation of the USP library.
 //
 
 #ifdef _MSC_VER
@@ -355,6 +355,7 @@ void Connection::Impl::BuildQueryParameters(const vector<string>& parameterList,
 
 void Connection::Impl::Connect()
 {
+    LogInfo("%s: entering...", __FUNCTION__);
     if (m_transport != nullptr || m_valid)
     {
         ThrowLogicError("USP connection already created.");
