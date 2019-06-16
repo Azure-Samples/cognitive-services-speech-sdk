@@ -31,7 +31,7 @@
     timeoutInSeconds = 20.;
     weatherTextEnglish = @"What's the weather like?";
     weatherTextGerman = @"Wie ist das Wetter?";
-    weatherTextChinese =  @"天气怎么样？";
+    weatherTextChinese =  @"天气怎么样?";
     weatherFileName = @"whatstheweatherlike";
     
     self.speechKey = [[[NSProcessInfo processInfo] environment] objectForKey:@"subscriptionKey"] ;
@@ -99,6 +99,8 @@
     translationDictionary = result.translations;
     id germanTranslation = [translationDictionary valueForKey:@"de"];
     id chineseTranslation = [translationDictionary valueForKey:@"zh-Hans"];
+    NSLog(@"German Translation: %@", germanTranslation);
+    NSLog(@"Chinese Translation: %@", chineseTranslation);
 
     XCTAssertTrue([germanTranslation isEqualToString:weatherTextGerman], "German translation does not match");
     XCTAssertTrue([chineseTranslation isEqualToString:weatherTextChinese], "Chinese translation does not match");
@@ -135,6 +137,8 @@
     
     id germanTranslation = [translationDictionary valueForKey:@"de"];
     id chineseTranslation = [translationDictionary valueForKey:@"zh-Hans"];
+    NSLog(@"German Translation: %@", germanTranslation);
+    NSLog(@"Chinese Translation: %@", chineseTranslation);
 
     XCTAssertTrue([germanTranslation isEqualToString:weatherTextGerman], "German translation does not match");
     XCTAssertTrue([chineseTranslation isEqualToString:weatherTextChinese], "Chinese translation does not match");
@@ -159,6 +163,8 @@
         translationDictionary = result.translations;
         id germanTranslation = [translationDictionary valueForKey:@"de"];
         id chineseTranslation = [translationDictionary valueForKey:@"zh-Hans"];
+        NSLog(@"German Translation: %@", germanTranslation);
+        NSLog(@"Chinese Translation: %@", chineseTranslation);
 
         XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%d", connectedEventCount);
         XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount, @"The connected event count (%d) does not match the disconnected event count (%d)", connectedEventCount, disconnectedEventCount);
@@ -277,6 +283,7 @@
     XCTAssertTrue([result.text isEqualToString:weatherTextEnglish], "Final Result Text does not match");
     NSDictionary* translationDictionary = result.translations;
     id germanTranslation = [translationDictionary valueForKey:@"de"];
+    NSLog(@"German Translation: %@", germanTranslation);
     XCTAssertTrue([germanTranslation isEqualToString:weatherTextGerman], "German translation does not match");
 }
 @end

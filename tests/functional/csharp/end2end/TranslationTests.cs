@@ -255,9 +255,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
             Console.WriteLine($"Reason: {result.Reason}, ErrorDetails: {errorDetails}");
 
-            Assert.AreEqual(TestData.English.Weather.Utterance, result.Text);
-            Assert.AreEqual(TestData.German.Weather.Utterance, result.Translations[Language.DE]);
-            Assert.AreEqual(TestData.Chinese.Weather.Utterance, result.Translations[Language.ZH]);
+            AssertMatching(TestData.English.Weather.Utterance, result.Text);
+            AssertMatching(TestData.German.Weather.Utterance, result.Translations[Language.DE]);
+            AssertMatching(TestData.Chinese.Weather.Utterance, result.Translations[Language.ZH]);
+
         }
 
         [TestMethod]
@@ -278,7 +279,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertOneEqual(TestData.Spanish.Weather.PossibleUtterances, result.Translations[Language.ES]);
         }
 
-        [TestMethod]
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task TranslationBatmanEnToDeFinalTextResultContinuous()
         {
             List<string> toLanguages = new List<string>() { Language.DE };
@@ -520,7 +521,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ContinuousValidCustomTranslation()
         {
             var toLanguages = new List<string>() { Language.DE };
-            var actualTranslations = await this.translationHelper.GetTranslationRecognizingContinuous(TestData.English.Weather.AudioFile, "", toLanguages, deploymentId);
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizingContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, deploymentId);
             Assert.AreNotEqual(actualTranslations[ResultType.RecognizedText].Count, 0, "Number of translations should not be zero.");
             AssertMatching(TestData.German.Weather.Utterance, actualTranslations[ResultType.RecognizedText].Last().Result.Translations[Language.DE]);
         }
@@ -629,6 +630,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var configFromEndpoint = SpeechTranslationConfig.FromEndpoint(endpointUrl, subscriptionKey);
             configFromEndpoint.EndpointId = deploymentId;
+            configFromEndpoint.SpeechRecognitionLanguage = Language.EN;
             configFromEndpoint.OutputFormat = OutputFormat.Detailed;
             configFromEndpoint.AddTargetLanguage(Language.FR);
 
@@ -649,6 +651,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task FromEndpointPropertyOverwriteTranslation()
         {
             var endpointWithParameters = endpointInString + "?format=simple&from=de-DE&to=fr&features=texttospeech&voice=Microsoft%20Server%20Speech%20Text%20to%20Speech%20Voice%20(fr-CA,%20Caroline)";
@@ -685,6 +688,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task FromEndpointWithoutSettingFromToProperty()
         {
             var endpointWithParameters = endpointInString + "?from=de-DE&to=fr";

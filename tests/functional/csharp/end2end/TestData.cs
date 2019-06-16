@@ -52,27 +52,27 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 public static readonly string[] Utterances =
                 {
-                    "Fähigkeiten und Fähigkeiten Batman hat keine inhärenten Superkräfte. Er setzt auf seine eigenen wissenschaftlichen Fähigkeiten Detektiv-Fähigkeiten und sportliche Fähigkeiten.",
-                    "In den Erzählungen wird Batman als einer der größten Detektiv der Welt angesehen, wenn nicht der größte Kriminallöser der Welt Batman immer wieder als genies, gleichbleibender Intellekt beschrieben wurde. Einer der größten Kampfkünstler im DC-Universum.",
-                    "Und mit einem Höhepunkt der menschlichen körperlichen Konditionierung Einsatz reiste die Welt und erwarb die Fähigkeiten, die notwendig sind, um seine Cruceta gewährt Kriminalität.",
-                    "Sein Wissen und seine Expertise in fast allen Disziplinen, die dem Menschen bekannt sind, ist von keinem anderen Charakter im Universum beispiellos.",
-                    "Batmans unerschöpflicher Reichtum erlaubt ihm den Zugang zu fortschrittlicher Technologie, da ein kompetenter Wissenschaftler diese Technologien zu seinem Vorteil nutzen und modifizieren kann.",
-                    "Batman beschreibt Superman als den gefährlichsten Mann der Welt, der in der Lage ist, ein Team von supergetriebenen Außerirdischen selbst zu besiegen, um seine inhaftierten Teamkollegen zu retten.",
-                    "In der ersten Storyline Superman hält auch Batman als einer der brillantesten Köpfe auf dem Planeten.",
-                    "Batman hat die Fähigkeit, unter großen körperlichen Schmerzen zu funktionieren und der Gedankenkontrolle standzuhalten. Er ist ein Meister der Verschleierung mehrsprachig und ein Experte für Spionage, der oft Informationen unter verschiedenen Identitäten sammelt.",
-                    "Batman es Karate Judo und Jujitsu Ausbildung hat ihn zu einem Meister der Verstohlenheit und Flucht gemacht, die es ihm ermöglicht, zu erscheinen und nach Belieben zu verschwinden und sich zu befreien.",
+                    "Fähigkeiten und Fähigkeiten Batman hat keine inhärenten Superkräfte. Er verlässt sich auf seine eigenen wissenschaftlichen Fähigkeiten Detektiv Fähigkeiten und sportliche Fähigkeiten.",
+                    "In den Geschichten batman gilt als einer der größten Detektiv der Welt, wenn nicht der größte Krimi-Solver der Welt Batman wurde wiederholt als genial Ebene Intellekt beschrieben. Einer der größten Kampfkünstler im DC-Universum.",
+                    "Und mit Spitzen-Menschen-Konditionierung. Er hat die Welt bereist und die Fähigkeiten erworben, die nötig sind, um seine Cruceta-Stipendien Verbrechen zu unterstützen.",
+                    "Sein Wissen und seine Expertise in fast jeder Disziplin, die dem Menschen bekannt ist, ist fast unvergleichlich für jeden anderen Charakter im Universum.",
+                    "Batmans unerschöpflicher Reichtum ermöglicht es ihm, auf fortschrittliche Technologie zuzugreifen, da ein kompetenter Wissenschaftler diese Technologien zu seinem Vorteil nutzen und modifizieren kann.",
+                    "Batman beschreibt Superman als den gefährlichsten Mann der Welt, der in der Lage ist, ein Team von supermotorisierten Außerirdischen selbst zu besiegen, um seine inhaftierten Teamkollegen zu retten.",
+                    "In der ersten Handlung betrachtet Superman auch Batman als einen der brillantesten Köpfe auf dem Planeten.",
+                    "Batman hat die Fähigkeit, unter großen körperlichen Schmerzen zu funktionieren und der Kontrolle des Geistes standzuhalten. Er ist ein Meister der mehrsprachigen Verkleidung und ein Experte für Spionage, der oft Informationen unter verschiedenen Identitäten sammelt.",
+                    "Batmans Karate-Judo- und Jujitsu-Training hat ihn zu einem Mathe-Meister der Tarnung gemacht und ermöglicht es ihm, nach Belieben zu erscheinen und zu verschwinden und sich zu befreien.",
                     ""
                 };
             }
 
             public static class HowIsYourWork
             {
-                public const string Utterance = "Wie Sie heute mit Arbeitsstücken umgehen";
+                public const string Utterance = "Wie Sie heute mit Arbeitsaufgaben umgehen";
             }
 
             public static class Weather
             {
-                public static readonly string Utterance = "Wie ist das Wetter?";
+                public static readonly string Utterance = "Wie ist das Wetter";
             }
 
             public static class FirstOne
@@ -95,7 +95,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             public static class Weather
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "weatherInChinese.wav");
-                public static readonly string Utterance = "天气怎么样？";
+                public static readonly string Utterance = "天气怎么样";
             }
         }
 
@@ -260,12 +260,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             public static class FirstOne
             {
-                public static readonly string Utterance = "Appelez le premier.";
+                public static readonly string Utterance = "Appelle le premier";
             }
 
             public static class Weather
             {
-                public static readonly string Utterance = "Quel temps fait-il?";
+                public static readonly string Utterance = "Quel temps fait-il";
             }
         }
 
