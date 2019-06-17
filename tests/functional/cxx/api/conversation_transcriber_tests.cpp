@@ -8,6 +8,7 @@
 
 #include "speechapi_cxx.h"
 #include "wav_file_reader.h"
+#include "guid_utils.h"
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech::Impl; // for CSpxWavFileReader
@@ -49,7 +50,9 @@ TEST_CASE("conversation_voice_signature", "[.][int][prod]")
     std::string katieVoiceSignature, steveVoiceSignature;
     CreateVoiceSignatures(&katieVoiceSignature, &steveVoiceSignature);
 
-    recognizer->SetConversationId("carbon_voice_signature_test");
+    auto meeting_id = PAL::CreateGuidWithDashesUTF8();
+    INFO(meeting_id);
+    recognizer->SetConversationId(meeting_id);
     REQUIRE_NOTHROW(p->SetVoiceSignature(katieVoiceSignature));
     recognizer->AddParticipant(p);
 
@@ -74,7 +77,8 @@ TEST_CASE("conversation_id", "[.][int][prod]")
     katieSteve.UpdateFullFilename(Config::InputDir);
     auto audioInput = AudioConfig::FromWavFileInput(katieSteve.m_inputDataFilename);
     auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
-    auto myId = "123";
+    auto myId = PAL::CreateGuidWithDashesUTF8();
+    INFO(myId);
     recognizer->SetConversationId(myId);
     auto gotId = recognizer->GetConversationId();
     SPXTEST_REQUIRE(gotId == myId);
@@ -114,7 +118,9 @@ TEST_CASE("conversation_add_while_pumping", "[.][int][prod]")
     auto result = make_shared<RecoPhrases>();
     ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
 
-    recognizer->SetConversationId("AddParticipantWhileAudioPumping");
+    auto myId = PAL::CreateGuidWithDashesUTF8();
+    INFO(myId);
+    recognizer->SetConversationId(myId);
     recognizer->StartTranscribingAsync().get();
     this_thread::sleep_for(100ms);
     recognizer->AddParticipant("AddParticipantWhileAudioPumping");
@@ -139,7 +145,9 @@ TEST_CASE("conversation_bad_connection", "[.][int][prod]")
     auto result = make_shared<RecoPhrases>();
     ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
 
-    recognizer->SetConversationId("bad_connection");
+    auto myId = PAL::CreateGuidWithDashesUTF8();
+    INFO(myId);
+    recognizer->SetConversationId(myId);
     recognizer->StartTranscribingAsync().get();
 
     WaitForResult(result->ready.get_future(), 5min);
@@ -152,7 +160,6 @@ TEST_CASE("conversation_inroom_8_channel_file", "[.][int][prod]")
     auto audioEndpoint = Config::InroomEndpoint;
     audioEndpoint += "/multiaudio";
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
-    config->SetProperty("FLAC", "1");
 
     katieSteve.UpdateFullFilename(Config::InputDir);
     auto audioInput = AudioConfig::FromWavFileInput(katieSteve.m_inputDataFilename);
@@ -160,6 +167,10 @@ TEST_CASE("conversation_inroom_8_channel_file", "[.][int][prod]")
     auto result = make_shared<RecoPhrases>();
     ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
     auto p = Participant::From("conversation_inroom_8_channel_file", "en-us");
+
+    auto myId = PAL::CreateGuidWithDashesUTF8();
+    INFO(myId);
+    recognizer->SetConversationId(myId);
     StartMeetingAndVerifyResult(recognizer.get(), p, move(result), katieSteve.m_utterance);
 }
 TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
@@ -180,6 +191,10 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
     {
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
+
+        auto myId = PAL::CreateGuidWithDashesUTF8();
+        INFO(myId);
+        recognizer->SetConversationId(myId);
         StartMeetingAndVerifyResult(recognizer.get(), katie, move(result), katieSteve.m_utterance);
     }
     SPXTEST_SECTION("AddParticipantByUserId")
@@ -187,7 +202,9 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
 
-        recognizer->SetConversationId("AddParticipantByUserIdTest");
+        auto myId = PAL::CreateGuidWithDashesUTF8();
+        INFO(myId);
+        recognizer->SetConversationId(myId);
 
         // add by user id
         REQUIRE_NOTHROW(recognizer->AddParticipant("AddParticipantById_1"));
@@ -213,7 +230,9 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
 
-        recognizer->SetConversationId("AddParticipantByUserObject");
+        auto myId = PAL::CreateGuidWithDashesUTF8();
+        INFO(myId);
+        recognizer->SetConversationId(myId);
 
         // create a user object
         auto user = User::FromUserId("CreateUserfromUserId");
@@ -232,7 +251,9 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
 
-        recognizer->SetConversationId("Conversation12345");
+        auto myId = PAL::CreateGuidWithDashesUTF8();
+        INFO(myId);
+        recognizer->SetConversationId(myId);
 
         auto p1 = Participant::From("id1");
 
@@ -257,7 +278,9 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
 
-        recognizer->SetConversationId("Conversation12345");
+        auto myId = PAL::CreateGuidWithDashesUTF8();
+        INFO(myId);
+        recognizer->SetConversationId(myId);
 
         auto p1 = Participant::From("katie@example.com", "en-us", katieVoiceSignature);
         recognizer->AddParticipant(p1);
@@ -277,7 +300,9 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
 
-        recognizer->SetConversationId("AddRemoveParticipants");
+        auto myId = PAL::CreateGuidWithDashesUTF8();
+        INFO(myId);
+        recognizer->SetConversationId(myId);
 
         auto p1 = Participant::From("id1", "en-us", katieVoiceSignature);
         recognizer->AddParticipant(p1);
@@ -303,7 +328,10 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
 
-        recognizer->SetConversationId("ConversationWithNoparticipants");
+        auto myId = PAL::CreateGuidWithDashesUTF8();
+        INFO(myId);
+        recognizer->SetConversationId(myId);
+
         recognizer->StartTranscribingAsync();
 
         WaitForResult(result->ready.get_future(), 15min);
@@ -331,7 +359,10 @@ TEST_CASE("conversation_inroom_8_channel_audio_push", "[.][int][prod]")
     auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
     auto result = make_shared<RecoPhrases>();
     ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
-    recognizer->SetConversationId("Meeting12345");
+
+    auto myId = PAL::CreateGuidWithDashesUTF8();
+    INFO(myId);
+    recognizer->SetConversationId(myId);
 
     // add the speaker1 to usp
     recognizer->AddParticipant(katie);
@@ -411,7 +442,9 @@ TEST_CASE("conversation_online_pull_stream", "[.][int][prod]")
 
     SPXTEST_SECTION("end_conversation")
     {
-        REQUIRE_NOTHROW(recognizer->SetConversationId("Conversation12345"));
+        auto myId = PAL::CreateGuidWithDashesUTF8();
+        INFO(myId);
+        REQUIRE_NOTHROW(recognizer->SetConversationId(myId));
 
         REQUIRE_NOTHROW(recognizer->EndConversationAsync().get());
     }
@@ -425,7 +458,9 @@ TEST_CASE("conversation_online_pull_stream", "[.][int][prod]")
     }
     SPXTEST_SECTION("all_features")
     {
-        recognizer->SetConversationId("Conversation12345");
+        auto myId = PAL::CreateGuidWithDashesUTF8();
+        INFO(myId);
+        recognizer->SetConversationId(myId);
 
         auto participant = Participant::From("SP042@speechdemo.onmicrosoft.com", "en-us");
         recognizer->AddParticipant(participant);
@@ -460,6 +495,11 @@ TEST_CASE("conversation_online_1_channel_file", "[.][int][prod]")
     auto result = make_shared<RecoPhrases>();
     ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
     auto p = Participant::From("conversation_online_1_channel_file", "en-us");
+
+    auto myId = PAL::CreateGuidWithDashesUTF8();
+    INFO(myId);
+    recognizer->SetConversationId(myId);
+
     StartMeetingAndVerifyResult(recognizer.get(), p, move(result), weather.m_utterance);
 }
 #if 0

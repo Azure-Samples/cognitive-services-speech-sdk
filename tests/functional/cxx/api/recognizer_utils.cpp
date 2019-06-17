@@ -446,8 +446,6 @@ std::shared_ptr<VideoConfig> CreateVideoPush(std::shared_ptr<PushVideoInputStrea
 
 void StartMeetingAndVerifyResult(ConversationTranscriber* recognizer, const shared_ptr<Participant>& participant, RecoPhrasesPtr&& result, const string& ref)
 {
-    recognizer->SetConversationId("fromStartMeetingAndVerifyResult");
-
     // add the speaker1 to usp
     recognizer->AddParticipant(participant);
 

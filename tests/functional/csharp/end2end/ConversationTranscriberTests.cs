@@ -206,10 +206,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ConversationAddParticipant()
         {
             var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
+
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {
-                conversationTranscriber.ConversationId = "TestCreatingParticipantByUserClass";
+                conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
 
                 conversationTranscriber.AddParticipant("OneUserByUserId");
 
@@ -233,7 +234,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {
-                conversationTranscriber.ConversationId = "TestCreatingParticipantByUserClass";
+                conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
 
                 conversationTranscriber.AddParticipant("OneUserByUserId");
 
@@ -257,7 +258,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {
-                conversationTranscriber.ConversationId = "TestCreatingParticipantByUserClass";
+                conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
                 bool exception = false;
                 try
                 {
@@ -302,7 +303,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
                     {
-                        conversationTranscriber.ConversationId = "ConversationPushStreamTest";
+                        conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
 
                         conversationTranscriber.AddParticipant("xyz@example.com");
 
@@ -449,7 +450,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     };
 
                     // Sets a conversation Id.
-                    conversationTranscriber.ConversationId = "ConversationBetweenKatieAndSteve";
+                    conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
 
                     // Add participants to the conversation.
                     // Voice signature needs to be in the following format:
@@ -482,10 +483,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {
-                conversationTranscriber.ConversationId = "TestCreatingParticipantByUserClass";
+                conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
                 await helper.CompleteContinuousRecognition(conversationTranscriber);
                 var connectionUrl = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                // Currently we do not have endpoint ready that supports detailed conversation transcription, so we only check connection URL for now. 
+                // Currently we do not have endpoint ready that supports detailed conversation transcription, so we only check connection URL for now.
                 Assert.IsTrue(connectionUrl.Contains("format=detailed"), "mismatch initialSilencetimeout in " + connectionUrl);
             }
         }
