@@ -1780,7 +1780,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosBuild '))
   pool:
     name: Hosted macOS Preview
-  timeoutInMinutes: 40
+  timeoutInMinutes: 60
   strategy:
     maxParallel: 2
     matrix:
