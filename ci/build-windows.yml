@@ -114,13 +114,12 @@ jobs:
         wheelPythonVersion=${pythonMajorMinorWithDot//./}
         # reconfigure for python build
         cmake . -Bbuild -DBUILD_PYTHON=ON -DBUILD_CSHARP=OFF -DBUILD_JAVA=OFF \
-          -DCMAKE_BUILD_CONFIG=$(BuildConfiguration) \
           -DPYTHON_EXECUTABLE:FILEPATH="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/python.exe \
           -DPYTHON_LIBRARY="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/libs/python${wheelPythonVersion}.lib \
           -DPYTHON_INCLUDE_DIR:PATH="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/include \
           -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) \
           -DVSTS_TOKEN=$(PAT)
-        cmake --build build --target bdist -j 4
+        cmake --build build --target bdist -j 4 --config $(BuildConfiguration)
         # check that the core & kws lib are identical in all wheels
         [[ $(md5sum $coreLib) == ${coreHash[0]}* ]] || exitWithError "core lib changed between Python builds"
         if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
