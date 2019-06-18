@@ -13,7 +13,7 @@
 
 - (instancetype)initWithEndpoint:(NSString *)uri
 {
-    auto modelImpl = IntentImpl::LanguageUnderstandingModel::FromEndpoint([uri string]);
+    auto modelImpl = IntentImpl::LanguageUnderstandingModel::FromEndpoint([uri toSpxString]);
     if (modelImpl == nullptr) {
         return nil;
     }
@@ -22,7 +22,7 @@
 
 - (instancetype)initWithAppId:(NSString *)appId
 {
-    auto modelImpl = IntentImpl::LanguageUnderstandingModel::FromAppId([appId string]);
+    auto modelImpl = IntentImpl::LanguageUnderstandingModel::FromAppId([appId toSpxString]);
     if (modelImpl == nullptr) {
         return nil;
     }
@@ -32,7 +32,7 @@
 
 - (instancetype)initWithSubscription:(NSString *)key withAppId:(NSString *)appId andRegion:(NSString *)region
 {
-    auto modelImpl = IntentImpl::LanguageUnderstandingModel::FromSubscription([key string], [appId string], [region string]);
+    auto modelImpl = IntentImpl::LanguageUnderstandingModel::FromSubscription([key toSpxString], [appId toSpxString], [region toSpxString]);
     if (modelImpl == nullptr) {
         return nil;
     }

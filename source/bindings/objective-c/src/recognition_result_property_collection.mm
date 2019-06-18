@@ -21,12 +21,12 @@
 
 -(NSString *)getPropertyByName:(NSString *)name
 {
-    return [NSString StringWithStdString:resultImpl->Properties.GetProperty([name string])];
+    return [NSString StringWithStdString:resultImpl->Properties.GetProperty([name toSpxString])];
 }
 
 -(NSString *)getPropertyByName:(NSString *)name defaultValue:(NSString *)defaultValue
 {
-    return [NSString StringWithStdString:resultImpl->Properties.GetProperty([name string], [defaultValue string])];
+    return [NSString StringWithStdString:resultImpl->Properties.GetProperty([name toSpxString], [defaultValue toSpxString])];
 }
 
 -(NSString *)getPropertyById:(SPXPropertyId)propertyId
@@ -36,7 +36,7 @@
 
 -(NSString *)getPropertyById:(SPXPropertyId)propertyId defaultValue:(NSString *)defaultValue
 {
-    return [NSString StringWithStdString:resultImpl->Properties.GetProperty((SpeechImpl::PropertyId)(int)propertyId, [defaultValue string])];
+    return [NSString StringWithStdString:resultImpl->Properties.GetProperty((SpeechImpl::PropertyId)(int)propertyId, [defaultValue toSpxString])];
 }
 
 @end

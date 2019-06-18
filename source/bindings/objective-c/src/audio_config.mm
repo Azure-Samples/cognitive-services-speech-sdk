@@ -30,7 +30,7 @@
         return [self init];
     }
 
-    self->audioImpl = AudioImpl::AudioConfig::FromMicrophoneInput([deviceName string]);
+    self->audioImpl = AudioImpl::AudioConfig::FromMicrophoneInput([deviceName toSpxString]);
     if (self->audioImpl == nullptr) {
         NSLog(@"Unable to create audio config in core using specified microphone.");
         return nil;
@@ -41,7 +41,7 @@
 - (instancetype)initWithWavFileInput:(NSString *)path
 {
     self = [super init];
-    self->audioImpl = AudioImpl::AudioConfig::FromWavFileInput([path string]);
+    self->audioImpl = AudioImpl::AudioConfig::FromWavFileInput([path toSpxString]);
     if (self->audioImpl == nullptr) {
         NSLog(@"Unable to create audio config in core using wav file input.");
         return nil;

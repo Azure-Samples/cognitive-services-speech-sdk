@@ -7,7 +7,7 @@
 
 @implementation NSString (STL)
 
-- (std::string)string
+- (std::string)toSpxString
 {
     return [self UTF8String];
 }

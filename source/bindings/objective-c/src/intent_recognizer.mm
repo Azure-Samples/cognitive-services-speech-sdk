@@ -155,7 +155,7 @@
 
 - (void)setAuthorizationToken: (NSString *)token
 {
-    intentRecoImpl->SetAuthorizationToken([token string]);
+    intentRecoImpl->SetAuthorizationToken([token toSpxString]);
 }
 
 - (NSString *)authorizationToken
@@ -165,22 +165,22 @@
 
 - (void)addIntentFromPhrase:(NSString *)simplePhrase
 {
-    intentRecoImpl->AddIntent([simplePhrase string]);
+    intentRecoImpl->AddIntent([simplePhrase toSpxString]);
 }
 
 - (void)addIntentFromPhrase:(NSString *)simplePhrase mappingToId:(NSString *)intentId
 {
-    intentRecoImpl->AddIntent([simplePhrase string], [intentId string]);
+    intentRecoImpl->AddIntent([simplePhrase toSpxString], [intentId toSpxString]);
 }
 
 - (void)addIntent: (NSString *)intentName fromModel:(SPXLanguageUnderstandingModel *)model
 {
-    intentRecoImpl->AddIntent([model getModelHandle], [intentName string]);
+    intentRecoImpl->AddIntent([model getModelHandle], [intentName toSpxString]);
 }
 
 - (void)addIntent: (NSString *)intentName fromModel:(SPXLanguageUnderstandingModel *)model mappingToId:(NSString *)intentId
 {
-    intentRecoImpl->AddIntent([model getModelHandle], [intentName string], [intentId string]);
+    intentRecoImpl->AddIntent([model getModelHandle], [intentName toSpxString], [intentId toSpxString]);
 }
 
 - (void)addAllIntentsFromModel:(nonnull SPXLanguageUnderstandingModel *)model
@@ -190,7 +190,7 @@
 
 - (void)addAllIntentsFromModel:(SPXLanguageUnderstandingModel *)model mappingToId:(NSString *)intentId
 {
-    intentRecoImpl->AddAllIntents([model getModelHandle], [intentId string]);
+    intentRecoImpl->AddAllIntents([model getModelHandle], [intentId toSpxString]);
 }
 
 - (SPXIntentRecognitionResult *)recognizeOnce

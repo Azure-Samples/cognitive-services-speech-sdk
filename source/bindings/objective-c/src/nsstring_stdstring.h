@@ -8,7 +8,7 @@
 
 @interface NSString (STL)
 
-- (std::string)string;
+- (std::string)toSpxString;
 + (instancetype)StringWithStdString:(const std::string&)str;
 
 @end

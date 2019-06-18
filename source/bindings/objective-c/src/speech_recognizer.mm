@@ -156,7 +156,7 @@
 
 - (void)setAuthorizationToken: (NSString *)token
 {
-    speechRecoImpl->SetAuthorizationToken([token string]);
+    speechRecoImpl->SetAuthorizationToken([token toSpxString]);
 }
 
 - (NSString *)authorizationToken

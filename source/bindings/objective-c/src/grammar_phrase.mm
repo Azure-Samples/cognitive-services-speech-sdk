@@ -14,7 +14,7 @@
 
 - (instancetype)initWithText:(NSString *)text
 {
-    self->grammarPhraseImpl = SpeechImpl::GrammarPhrase::From([text string]);
+    self->grammarPhraseImpl = SpeechImpl::GrammarPhrase::From([text toSpxString]);
     if (self->grammarPhraseImpl == nullptr)
     {
         NSLog(@"Unable to create the grammar phrase.");

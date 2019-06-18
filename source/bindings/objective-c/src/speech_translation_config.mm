@@ -14,7 +14,7 @@
 - (instancetype)initWithSubscription:(NSString *)subscriptionKey region:(NSString *)region
 {
     try {
-        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromSubscription([subscriptionKey string], [region string]);
+        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromSubscription([subscriptionKey toSpxString], [region toSpxString]);
         if (configImpl == nullptr) {
             return nil;
         }
@@ -63,7 +63,7 @@
 - (instancetype)initWithAuthorizationToken:(NSString *)authToken region:(NSString *)region
 {
     try {
-        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromAuthorizationToken([authToken string], [region string]);
+        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromAuthorizationToken([authToken toSpxString], [region toSpxString]);
         if (configImpl == nullptr)
             return nil;
         return [self initWithImpl:configImpl];
@@ -111,7 +111,7 @@
 - (instancetype)initWithEndpoint:(NSString *)endpointUri subscription:(NSString *)subscriptionKey
 {
     try {
-        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromEndpoint([endpointUri string], [subscriptionKey string]);
+        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromEndpoint([endpointUri toSpxString], [subscriptionKey toSpxString]);
         if (configImpl == nullptr)
             return nil;
         return [self initWithImpl:configImpl];
@@ -160,7 +160,7 @@
 - (instancetype)initWithEndpoint:(NSString *)endpointUri
 {
     try {
-        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromEndpoint([endpointUri string]);
+        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromEndpoint([endpointUri toSpxString]);
         if (configImpl == nullptr)
             return nil;
         return [self initWithImpl:configImpl];
@@ -221,7 +221,7 @@
 
 - (void)addTargetLanguage:(NSString *)lang
 {
-    speechTranslationConfigurationImpl->AddTargetLanguage([lang string]);
+    speechTranslationConfigurationImpl->AddTargetLanguage([lang toSpxString]);
 }
 
 - (NSArray *)targetLanguages
@@ -236,7 +236,7 @@
 
 - (void)setVoiceName:(NSString *)voice
 {
-    speechTranslationConfigurationImpl->SetVoiceName([voice string]);
+    speechTranslationConfigurationImpl->SetVoiceName([voice toSpxString]);
 }
 
 - (NSString *)voiceName

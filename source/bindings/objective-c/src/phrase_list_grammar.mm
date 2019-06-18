@@ -25,7 +25,7 @@
 
 - (void)addPhrase:(nonnull const NSString *)phrase
 {
-    self->grammarImpl->AddPhrase([phrase string]);
+    self->grammarImpl->AddPhrase([phrase toSpxString]);
 }
 
 - (void)clear

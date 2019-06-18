@@ -157,7 +157,7 @@
 
 - (void)setAuthorizationToken: (NSString *)token
 {
-    translationRecoImpl->SetAuthorizationToken([token string]);
+    translationRecoImpl->SetAuthorizationToken([token toSpxString]);
 }
 
 - (NSString *)authorizationToken

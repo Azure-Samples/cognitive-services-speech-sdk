@@ -14,7 +14,7 @@
 - (instancetype)initWithSubscription:(NSString *)subscriptionKey region:(NSString *)region
 {
     try {
-        auto configImpl = SpeechImpl::SpeechConfig::FromSubscription([subscriptionKey string], [region string]);
+        auto configImpl = SpeechImpl::SpeechConfig::FromSubscription([subscriptionKey toSpxString], [region toSpxString]);
         if (configImpl == nullptr)
             return nil;
         return [self initWithImpl:configImpl];
@@ -62,7 +62,7 @@
 - (instancetype)initWithAuthorizationToken:(NSString *)authToken region:(NSString *)region
 {
     try {
-        auto configImpl = SpeechImpl::SpeechConfig::FromAuthorizationToken([authToken string], [region string]);
+        auto configImpl = SpeechImpl::SpeechConfig::FromAuthorizationToken([authToken toSpxString], [region toSpxString]);
         if (configImpl == nullptr)
             return nil;
         return [self initWithImpl:configImpl];
@@ -110,7 +110,7 @@
 - (instancetype)initWithEndpoint:(NSString *)endpointUri subscription:(NSString *)subscriptionKey
 {
     try {
-        auto configImpl = SpeechImpl::SpeechConfig::FromEndpoint([endpointUri string], [subscriptionKey string]);
+        auto configImpl = SpeechImpl::SpeechConfig::FromEndpoint([endpointUri toSpxString], [subscriptionKey toSpxString]);
         if (configImpl == nullptr)
             return nil;
         return [self initWithImpl:configImpl];
@@ -158,7 +158,7 @@
 - (instancetype)initWithEndpoint:(NSString *)endpointUri
 {
     try {
-        auto configImpl = SpeechImpl::SpeechConfig::FromEndpoint([endpointUri string]);
+        auto configImpl = SpeechImpl::SpeechConfig::FromEndpoint([endpointUri toSpxString]);
         if (configImpl == nullptr)
             return nil;
         return [self initWithImpl:configImpl];
@@ -223,7 +223,7 @@
 
 - (void)setSpeechRecognitionLanguage: (NSString *)lang
 {
-    speechConfigImpl->SetSpeechRecognitionLanguage([lang string]);
+    speechConfigImpl->SetSpeechRecognitionLanguage([lang toSpxString]);
 }
 
 - (NSString *)speechRecognitionLanguage
@@ -233,7 +233,7 @@
 
 - (void)setEndpointId: (NSString *)endpointId
 {
-    speechConfigImpl->SetEndpointId([endpointId string]);
+    speechConfigImpl->SetEndpointId([endpointId toSpxString]);
 }
 
 - (NSString *)endpointId
@@ -243,7 +243,7 @@
 
 - (void)setAuthorizationToken: (NSString *)token
 {
-    speechConfigImpl->SetAuthorizationToken([token string]);
+    speechConfigImpl->SetAuthorizationToken([token toSpxString]);
 }
 
 - (NSString *)authorizationToken
@@ -285,7 +285,7 @@
     {
         [NSException raise:@"Invalid proxy user name or password" format:@"Proxy user name or password is null."];
     }
-    speechConfigImpl->SetProxy([proxyHostName string], proxyPort, [proxyUserName string], [proxyPassword string]);
+    speechConfigImpl->SetProxy([proxyHostName toSpxString], proxyPort, [proxyUserName toSpxString], [proxyPassword toSpxString]);
 }
 
 -(BOOL)setProxyUsingHost:(nonnull NSString *)proxyHostName Port:(uint32_t)proxyPort UserName:(nullable NSString *)proxyUserName Password:(nullable NSString *)proxyPassword error:(NSError * _Nullable * _Nullable)outError;
@@ -305,12 +305,12 @@
 
 -(NSString *)getPropertyByName:(NSString *)name
 {
-    return [NSString StringWithStdString:speechConfigImpl->GetProperty([name string])];
+    return [NSString StringWithStdString:speechConfigImpl->GetProperty([name toSpxString])];
 }
 
 -(void)setPropertyTo:(NSString *)value byName:(NSString *)name
 {
-    speechConfigImpl->SetProperty([name string], [value string]);
+    speechConfigImpl->SetProperty([name toSpxString], [value toSpxString]);
 }
 
 -(NSString *)getPropertyById:(SPXPropertyId)propertyId
@@ -320,12 +320,12 @@
 
 -(void)setPropertyTo:(NSString *)value byId:(SPXPropertyId)propertyId
 {
-    speechConfigImpl->SetProperty((SpeechImpl::PropertyId)(int)propertyId, [value string]);
+    speechConfigImpl->SetProperty((SpeechImpl::PropertyId)(int)propertyId, [value toSpxString]);
 }
 
 -(void) setServicePropertyTo:(nonnull NSString *)value byName:(nonnull NSString*)name usingChannel:(SPXServicePropertyChannel)channel
 {
-    speechConfigImpl->SetServiceProperty([name string], [value string], (SpeechImpl::ServicePropertyChannel)(int)channel);
+    speechConfigImpl->SetServiceProperty([name toSpxString], [value toSpxString], (SpeechImpl::ServicePropertyChannel)(int)channel);
 }
 
 -(void)setProfanityOptionTo:(SPXSpeechConfigProfanityOption)profanity
