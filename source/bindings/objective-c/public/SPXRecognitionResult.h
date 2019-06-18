@@ -75,7 +75,17 @@ SPX_EXPORT
   * @param recognitionResult The result that was canceled.
   * @return The cancellation details object being created.
   */
--(nullable instancetype)initFromCanceledRecognitionResult:(nonnull SPXRecognitionResult *)recognitionResult;
+-(nullable instancetype)initFromCanceledRecognitionResult:(nonnull SPXRecognitionResult *)recognitionResult
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+  * Creates an instance of SPXCancellationDetails object for the canceled SPXSpeechRecognitionResult.
+  * @param recognitionResult The result that was canceled.
+  * @param outError error information.
+  * @return The cancellation details object being created.
+  */
+-(nullable instancetype)initFromCanceledRecognitionResult:(nonnull SPXRecognitionResult *)recognitionResult error:(NSError * _Nullable * _Nullable)outError;
+
 @end
 
 
@@ -95,6 +105,15 @@ SPX_EXPORT
   * @param recognitionResult recognition result that has NoMatch returned in Reason.
   * @return an SPXNoMatchDetails instance.
   */
--(nullable instancetype)initFromNoMatchRecognitionResult:(nonnull SPXRecognitionResult *)recognitionResult;
+-(nullable instancetype)initFromNoMatchRecognitionResult:(nonnull SPXRecognitionResult *)recognitionResult
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+  * Initializes an instance of SPXNoMatchDetails object from a NoMatch result.
+  * @param recognitionResult recognition result that has NoMatch returned in Reason.
+  * @param outError error information.
+  * @return an SPXNoMatchDetails instance.
+  */
+-(nullable instancetype)initFromNoMatchRecognitionResult:(nonnull SPXRecognitionResult *)recognitionResult error:(NSError * _Nullable * _Nullable)outError;
 
 @end

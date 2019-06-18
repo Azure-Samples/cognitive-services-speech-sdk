@@ -11,8 +11,4 @@
 
 - (instancetype)initWithImpl:(IntentRecoSharedPtr)recoHandle;
 
-- (void)onRecognizedEvent :(SPXIntentRecognitionEventArgs *)eventArgs;
-- (void)onRecognizingEvent :(SPXIntentRecognitionEventArgs *)eventArgs;
-- (void)onCanceledEvent :(SPXIntentRecognitionCanceledEventArgs *)eventArgs;
-
 @end

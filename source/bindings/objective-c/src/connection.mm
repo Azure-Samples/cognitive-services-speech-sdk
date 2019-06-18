@@ -6,48 +6,9 @@
 #import "speechapi_private.h"
 #import "exception.h"
 
-struct ConnectionEventHandlerHelper
-{
-    SPXConnection *connection;
-    ConnectionSharedPtr connectionImpl;
-
-    ConnectionEventHandlerHelper(SPXConnection *connection, ConnectionSharedPtr connectionHandle)
-    {
-        this->connection = connection;
-        this->connectionImpl = connectionHandle;
-    }
-
-    void addConnectedEventHandler()
-    {
-        LogDebug(@"Add ConnectedEventHandler");
-        connectionImpl->Connected.Connect([this] (const SpeechImpl::ConnectionEventArgs& e)
-            {
-                SPXConnectionEventArgs *eventArgs = [[SPXConnectionEventArgs alloc] init:e];
-                [connection onConnectedEvent: eventArgs];
-            });
-    }
-    
-    void addDisconnectedEventHandler()
-    {
-        LogDebug(@"Add DisconnectedEventHandler");
-        connectionImpl->Disconnected.Connect([this] (const SpeechImpl::ConnectionEventArgs& e)
-            {
-                SPXConnectionEventArgs *eventArgs = [[SPXConnectionEventArgs alloc] init:e];
-                [connection onDisconnectedEvent: eventArgs];
-            });
-    }
-};
-
 @implementation SPXConnection
 {
     ConnectionSharedPtr connectionHandle;
-    dispatch_queue_t dispatchQueue;
-
-    NSMutableArray *connectedEventHandlerList;
-    NSMutableArray *disconnectedEventHandlerList;
-    NSLock *connectionEventArrayLock;
-
-    struct ConnectionEventHandlerHelper *eventImpl;
 }
 
 - (instancetype)initFromRecognizer:(SPXRecognizer *)recognizer {
@@ -55,52 +16,58 @@ struct ConnectionEventHandlerHelper
         auto connectionImpl = SpeechImpl::Connection::FromRecognizer([recognizer getHandle]);
         if (connectionImpl == nullptr)
             return nil;
-        dispatch_queue_t recognizerQueue = [recognizer getDispatchQueue];
-        if (recognizerQueue == nullptr)
-            return nil;
-        return [self initWithImpl:connectionImpl AndDispatchQueue:recognizerQueue];
+        return [self initWithImpl:connectionImpl];
     }
     catch (const std::exception &e) {
-        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception caught in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (const SPXHR &hr) {
         auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception with error code in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (...) {
-        NSLog(@"Exception caught when creating SPXConnection in core.\nNOTE: This will raise an exception in the future!");
+        NSLog(@"Exception caught when creating SPXConnection in core.");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
     }
     return nil;
 }
 
-- (instancetype)initWithImpl:(ConnectionSharedPtr)connectionImpl AndDispatchQueue:(dispatch_queue_t)queue
+- (nullable instancetype)initFromRecognizer:(nonnull SPXRecognizer *)recognizer error:(NSError * _Nullable * _Nullable)outError {
+    try {
+        self = [self initFromRecognizer:recognizer];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]]
+                                               userInfo:errorDict];
+    }
+    return nil;
+}
+
+- (instancetype)initWithImpl:(ConnectionSharedPtr)connectionImpl
 {
     self = [super init];
     self->connectionHandle = connectionImpl;
-    self->dispatchQueue = queue;
-    if (!self || self->connectionHandle == nullptr || self->dispatchQueue == nullptr) {
+    if (!self || self->connectionHandle == nullptr) {
+        NSLog(@"connectionHandle is nil in SPXConnection constructor");
         return nil;
     }
     else
     {
-        connectedEventHandlerList = [NSMutableArray array];
-        disconnectedEventHandlerList = [NSMutableArray array];
-        connectionEventArrayLock = [[NSLock alloc] init];
-
-        eventImpl = new ConnectionEventHandlerHelper(self, self->connectionHandle);
-        eventImpl->addConnectedEventHandler();
-        eventImpl->addDisconnectedEventHandler();
-
         return self;
     }
 }
@@ -109,11 +76,11 @@ struct ConnectionEventHandlerHelper
     LogDebug(@"connection object deallocated.");
     if (!self->connectionHandle)
     {
-        NSLog(@"connectionHandle is nil in speech recognizer destructor");
+        NSLog(@"connectionHandle is nil in SPXConnection destructor");
         return;
     }
-    
-    try 
+
+    try
     {
         connectionHandle->Connected.DisconnectAll();
         connectionHandle->Disconnected.DisconnectAll();
@@ -142,46 +109,20 @@ struct ConnectionEventHandlerHelper
     connectionHandle->Close();
 }
 
-- (void)onConnectedEvent:(SPXConnectionEventArgs *)eventArgs
-{
-    LogDebug(@"OBJC OnConnectedEvent");
-    NSArray* workCopyOfList;
-    [connectionEventArrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:connectedEventHandlerList];
-    [connectionEventArrayLock unlock];
-    for (id handle in workCopyOfList) {
-        dispatch_async(dispatchQueue, ^{
-            ((SPXConnectionEventHandler)handle)(self, eventArgs);
-        });
-    }
-}
-
-- (void)onDisconnectedEvent:(SPXConnectionEventArgs *)eventArgs
-{
-    LogDebug(@"OBJC OnDisconnectedEvent");
-    NSArray* workCopyOfList;
-    [connectionEventArrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:disconnectedEventHandlerList];
-    [connectionEventArrayLock unlock];
-    for (id handle in workCopyOfList) {
-        dispatch_async(dispatchQueue, ^{
-            ((SPXConnectionEventHandler)handle)(self, eventArgs);
-        });
-    }
-}
-
 - (void)addConnectedEventHandler:(SPXConnectionEventHandler)eventHandler
 {
-    [connectionEventArrayLock lock];
-    [connectedEventHandlerList addObject:eventHandler];
-    [connectionEventArrayLock unlock];
+    connectionHandle->Connected.Connect(^(const Microsoft::CognitiveServices::Speech::ConnectionEventArgs & evt) {
+        SPXConnectionEventArgs *eventArgs = [[SPXConnectionEventArgs alloc] init: evt];
+        eventHandler(self, eventArgs);
+    });
 }
 
 - (void)addDisconnectedEventHandler:(SPXConnectionEventHandler)eventHandler
 {
-    [connectionEventArrayLock lock];
-    [disconnectedEventHandlerList addObject:eventHandler];
-    [connectionEventArrayLock unlock];
+    connectionHandle->Disconnected.Connect(^(const Microsoft::CognitiveServices::Speech::ConnectionEventArgs & evt) {
+        SPXConnectionEventArgs *eventArgs = [[SPXConnectionEventArgs alloc] init: evt];
+        eventHandler(self, eventArgs);
+    });
 }
 
 @end

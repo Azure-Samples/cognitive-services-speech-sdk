@@ -9,13 +9,6 @@
 {
     RecognizerSharedPtr recoHandle;
     dispatch_queue_t dispatchQueue;
-    NSMutableArray *sessionStartedEventHandlerList;
-    NSMutableArray *sessionStoppedEventHandlerList;
-    NSLock *sessionEventArrayLock;
-    NSMutableArray *speechStartDetectedEventHandlerList;
-    NSMutableArray *speechEndDetectedEventHandlerList;
-    NSLock *speechDetectionEventArrayLock;
-
 }
 
 - (instancetype)initWith:(RecognizerSharedPtr)recoImpl withParameters:(SpeechImpl::PropertyCollection *)propertiesHandle
@@ -23,13 +16,6 @@
     self = [super init];
     recoHandle = recoImpl;
     _properties = [[RecognizerPropertyCollection alloc] initWithPropertyCollection:propertiesHandle from:recoImpl];
-    sessionStartedEventHandlerList = [NSMutableArray array];
-    sessionStoppedEventHandlerList = [NSMutableArray array];
-    sessionEventArrayLock = [[NSLock alloc] init];
-    speechStartDetectedEventHandlerList = [NSMutableArray array];
-    speechEndDetectedEventHandlerList = [NSMutableArray array];
-    speechDetectionEventArrayLock = [[NSLock alloc] init];
-
     return self;
 }
 
@@ -38,98 +24,20 @@
     return recoHandle;
 }
 
-- (void)setDispatchQueue: (dispatch_queue_t)queue
-{
-    dispatchQueue = queue;
-}
-
-- (dispatch_queue_t)getDispatchQueue
-{
-    return dispatchQueue;
-}
-
-- (void)onSessionStartedEvent:(SPXSessionEventArgs *)eventArgs
-{
-    LogDebug(@"OBJC OnSessionStartedEvent");
-    NSArray* workCopyOfList;
-    [sessionEventArrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:sessionStartedEventHandlerList];
-    [sessionEventArrayLock unlock];
-    for (id handle in workCopyOfList) {
-        dispatch_async(dispatchQueue, ^{
-            ((SPXSessionEventHandler)handle)(self, eventArgs);
-        });
-    }
-}
-
-- (void)onSessionStoppedEvent:(SPXSessionEventArgs *)eventArgs
-{
-    LogDebug(@"OBJC OnSessionStoppedEvent");
-    NSArray* workCopyOfList;
-    [sessionEventArrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:sessionStoppedEventHandlerList];
-    [sessionEventArrayLock unlock];
-    for (id handle in workCopyOfList) {
-        dispatch_async(dispatchQueue, ^{
-            ((SPXSessionEventHandler)handle)(self, eventArgs);
-        });
-    }
-}
-
 - (void)addSessionStartedEventHandler:(SPXSessionEventHandler)eventHandler
 {
-    [sessionEventArrayLock lock];
-    [sessionStartedEventHandlerList addObject:eventHandler];
-    [sessionEventArrayLock unlock];
 }
 
 - (void)addSessionStoppedEventHandler:(SPXSessionEventHandler)eventHandler
 {
-    [sessionEventArrayLock lock];
-    [sessionStoppedEventHandlerList addObject:eventHandler];
-    [sessionEventArrayLock unlock];
-}
-
-- (void)onSpeechStartDetectedEvent:(SPXRecognitionEventArgs *)eventArgs
-{
-    LogDebug(@"OBJC OnSpeechStartDetectedEvent");
-    NSArray* workCopyOfList;
-    [speechDetectionEventArrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:speechStartDetectedEventHandlerList];
-    [speechDetectionEventArrayLock unlock];
-    for (id handle in workCopyOfList) {
-        dispatch_async(dispatchQueue, ^{
-            ((SPXRecognitionEventHandler)handle)(self, eventArgs);
-        });
-    }
-}
-
-- (void)onSpeechEndDetectedEvent:(SPXRecognitionEventArgs *)eventArgs
-{
-    LogDebug(@"OBJC OnSpeechEndDetectedEvent");
-    NSArray* workCopyOfList;
-    [speechDetectionEventArrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:speechEndDetectedEventHandlerList];
-    [speechDetectionEventArrayLock unlock];
-    for (id handle in workCopyOfList) {
-        dispatch_async(dispatchQueue, ^{
-            ((SPXRecognitionEventHandler)handle)(self, eventArgs);
-        });
-    }
 }
 
 - (void)addSpeechStartDetectedEventHandler:(SPXRecognitionEventHandler)eventHandler
 {
-    [speechDetectionEventArrayLock lock];
-    [speechStartDetectedEventHandlerList addObject:eventHandler];
-    [speechDetectionEventArrayLock unlock];
 }
 
 - (void)addSpeechEndDetectedEventHandler:(SPXRecognitionEventHandler)eventHandler
 {
-    [speechDetectionEventArrayLock lock];
-    [speechEndDetectedEventHandlerList addObject:eventHandler];
-    [speechDetectionEventArrayLock unlock];
 }
 
 @end

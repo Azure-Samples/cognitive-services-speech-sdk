@@ -6,101 +6,12 @@
 #import "speechapi_private.h"
 #import "exception.h"
 
-struct SpeechEventHandlerHelper
-{
-    SPXSpeechRecognizer *recognizer;
-    SpeechRecoSharedPtr recoImpl;
-
-    SpeechEventHandlerHelper(SPXSpeechRecognizer *reco, SpeechRecoSharedPtr recoImpl)
-    {
-        recognizer = reco;
-        this->recoImpl = recoImpl;
-    }
-    
-    void addRecognizedEventHandler()
-    {
-        LogDebug(@"Add RecognizedEventHandler");
-        recoImpl->Recognized.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
-            {
-                SPXSpeechRecognitionEventArgs *eventArgs = [[SPXSpeechRecognitionEventArgs alloc] init: e];
-                [recognizer onRecognizedEvent: eventArgs];
-            });
-    }
-    
-    void addRecognizingEventHandler()
-    {
-        LogDebug(@"Add RecognizingEventHandler");
-        recoImpl->Recognizing.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
-            {
-                SPXSpeechRecognitionEventArgs *eventArgs = [[SPXSpeechRecognitionEventArgs alloc] init: e];
-                [recognizer onRecognizingEvent: eventArgs];
-            });
-    }
-
-    void addCanceledEventHandler()
-    {
-        LogDebug(@"Add CanceledEventHandler");
-        recoImpl->Canceled.Connect([this] (const SpeechImpl::SpeechRecognitionCanceledEventArgs& e)
-            {
-                SPXSpeechRecognitionCanceledEventArgs *eventArgs = [[SPXSpeechRecognitionCanceledEventArgs alloc] init:e];
-                [recognizer onCanceledEvent: eventArgs];
-            });
-    }
-
-    void addSessionStartedEventHandler()
-    {
-        LogDebug(@"Add SessionStartedEventHandler");
-        recoImpl->SessionStarted.Connect([this] (const SpeechImpl::SessionEventArgs& e)
-            {
-                SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
-                [recognizer onSessionStartedEvent: eventArgs];
-            });
-    }
-    
-    void addSessionStoppedEventHandler()
-    {
-        LogDebug(@"Add SessionStoppedEventHandler");
-        recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
-            {
-                SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
-                [recognizer onSessionStoppedEvent: eventArgs];
-            });
-    }
-    
-    void addSpeechStartDetectedEventHandler()
-    {
-        LogDebug(@"Add SpeechStartDetectedEventHandler");
-        recoImpl->SpeechStartDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
-            {
-                SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
-                [recognizer onSpeechStartDetectedEvent: eventArgs];
-            });
-    }
-    
-    void addSpeechEndDetectedEventHandler()
-    {
-        LogDebug(@"Add SpeechStopDetectedEventHandler");
-        recoImpl->SpeechEndDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
-            {
-                SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
-                [recognizer onSpeechEndDetectedEvent: eventArgs];
-            });
-    }
-};
 
 @implementation SPXSpeechRecognizer
 {
     SpeechRecoSharedPtr speechRecoImpl;
     dispatch_queue_t dispatchQueue;
-    
-    NSMutableArray *recognizedEventHandlerList;
-    NSLock *recognizedLock;
-    NSMutableArray *recognizingEventHandlerList;
-    NSLock *recognizingLock;
-    NSMutableArray *canceledEventHandlerList;
-    NSLock *canceledLock;
-    struct SpeechEventHandlerHelper *eventImpl;
-    
+
     RecognizerPropertyCollection *propertyCollection;
 }
 
@@ -112,28 +23,44 @@ struct SpeechEventHandlerHelper
         return [self initWithImpl:recoImpl];
     }
     catch (const std::exception &e) {
-        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception caught in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (const SPXHR &hr) {
         auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception with error code in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (...) {
-        NSLog(@"Exception caught when creating SPXSpeechRecognizer in core.\nNOTE: This will raise an exception in the future!");
+        NSLog(@"Exception caught when creating SPXSpeechRecognizer in core.");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
     }
     return nil;
 }
 
+- (nullable instancetype)init:(nonnull SPXSpeechConfiguration *)speechConfiguration error:(NSError * _Nullable * _Nullable)outError
+{
+    try {
+        self = [self init:speechConfiguration];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
 
 - (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration audioConfiguration:(SPXAudioConfiguration *)audioConfiguration {
     try {
@@ -143,24 +70,41 @@ struct SpeechEventHandlerHelper
         return [self initWithImpl:recoImpl];
     }
     catch (const std::exception &e) {
-        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception caught in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (const SPXHR &hr) {
         auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception with error code in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (...) {
-        NSLog(@"Exception caught when creating SPXSpeechRecognizer in core.\nNOTE: This will raise an exception in the future!");
+        NSLog(@"Exception caught when creating SPXSpeechRecognizer in core.");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    return nil;
+}
+
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration error:(NSError * _Nullable * _Nullable)outError
+{
+    try {
+        self = [self initWithSpeechConfiguration:speechConfiguration audioConfiguration:audioConfiguration];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
     }
     return nil;
 }
@@ -175,23 +119,6 @@ struct SpeechEventHandlerHelper
     else
     {
         dispatchQueue = dispatch_queue_create("com.microsoft.cognitiveservices.speech", nil);
-        recognizedEventHandlerList = [NSMutableArray array];
-        recognizingEventHandlerList = [NSMutableArray array];
-        canceledEventHandlerList = [NSMutableArray array];
-        recognizedLock = [[NSLock alloc] init];
-        recognizingLock = [[NSLock alloc] init];
-        canceledLock = [[NSLock alloc] init];
-        
-        eventImpl = new SpeechEventHandlerHelper(self, speechRecoImpl);
-        [super setDispatchQueue: dispatchQueue];
-        eventImpl->addRecognizingEventHandler();
-        eventImpl->addRecognizedEventHandler();
-        eventImpl->addCanceledEventHandler();
-        eventImpl->addSessionStartedEventHandler();
-        eventImpl->addSessionStoppedEventHandler();
-        eventImpl->addSpeechStartDetectedEventHandler();
-        eventImpl->addSpeechEndDetectedEventHandler();
-
         return self;
     }
 }
@@ -203,8 +130,8 @@ struct SpeechEventHandlerHelper
         NSLog(@"speechRecoImpl is nil in speech recognizer destructor");
         return;
     }
-    
-    try 
+
+    try
     {
         self->speechRecoImpl->SessionStarted.DisconnectAll();
         self->speechRecoImpl->SessionStopped.DisconnectAll();
@@ -244,230 +171,300 @@ struct SpeechEventHandlerHelper
 
 - (SPXSpeechRecognitionResult *)recognizeOnce
 {
-    SPXSpeechRecognitionResult *result = nil;
-    
     if (speechRecoImpl == nullptr) {
-        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"SPXRecognizer has been closed."];
-        return result;
+        NSLog(@"SPXRecognizer handle is null");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"SPXRecognizer handle is null"
+                                                       userInfo:nil];
+        [exception raise];
     }
-    
+
     try {
         std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = speechRecoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
-            result = [[SPXSpeechRecognitionResult alloc] initWithError: @"No result available."];
+            NSLog(@"No result available");
+            NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                             reason:@"No result available"
+                                                           userInfo:nil];
+            [exception raise];
         }
         else
         {
-            result = [[SPXSpeechRecognitionResult alloc] init: resultImpl];
+            return [[SPXSpeechRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (const std::exception &e) {
-        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception caught in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
-        // [exception raise];
+        [exception raise];
     }
     catch (const SPXHR &hr) {
         auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception with error code in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
-        // [exception raise];
+        [exception raise];
     }
     catch (...) {
-        NSLog(@"%@: Exception caught\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
-        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        NSLog(@"%@: Exception caught", NSStringFromSelector(_cmd));
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
     }
-    
-    return result;
+    return nil;
 }
 
-- (void)recognizeOnceAsync:(void (^)(SPXSpeechRecognitionResult *))resultReceivedHandler
+- (nullable SPXSpeechRecognitionResult *)recognizeOnce:(NSError * _Nullable * _Nullable)outError
 {
-    SPXSpeechRecognitionResult *result = nil;
+    try {
+        return [self recognizeOnce];
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
+- (void)recognizeOnceAsync:(nonnull void (^)(SPXSpeechRecognitionResult * _Nonnull))resultReceivedHandler;
+{
+    NSException * exception;
     if (speechRecoImpl == nullptr) {
-        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"SPXRecognizer has been closed."];
+        auto result = [[SPXSpeechRecognitionResult alloc] initWithError: @"SPXRecognizer has been closed."];
         dispatch_async(dispatchQueue, ^{
             resultReceivedHandler(result);
         });
-        return;
+        NSLog(@"SPXRecognizer handle is null");
+        exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"SPXRecognizer handle is null"
+                                                       userInfo:nil];
+        [exception raise];
     }
-    
+
     try {
-        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = speechRecoImpl->RecognizeOnceAsync().get();
+        auto future = speechRecoImpl->RecognizeOnceAsync();
+        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = future.get();
         if (resultImpl == nullptr) {
-            result = [[SPXSpeechRecognitionResult alloc] initWithError: @"No result available."];
+            NSLog(@"No result is available");
+            exception = [NSException exceptionWithName:@"SPXException"
+                                                            reason:@"No result available"
+                                                          userInfo:nil];
         }
         else
         {
-            result = [[SPXSpeechRecognitionResult alloc] init: resultImpl];
+            auto result = [[SPXSpeechRecognitionResult alloc] init: resultImpl];
+            dispatch_async(dispatchQueue, ^{
+                resultReceivedHandler(result);
+            });
+            return;
         }
     }
     catch (const std::exception &e) {
-        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
-        NSException *exception = [NSException exceptionWithName:@"SPXException"
+        NSLog(@"Exception caught in core: %s", e.what());
+        exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
-        // [exception raise];
     }
     catch (const SPXHR &hr) {
         auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
-        NSException *exception = [NSException exceptionWithName:@"SPXException"
+        NSLog(@"Exception with error code in core: %s", e.what());
+        exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
-        // [exception raise];
     }
     catch (...) {
-        NSLog(@"%@: Exception caught\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
-        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        NSLog(@"%@: Exception caught", NSStringFromSelector(_cmd));
+        exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime exception"
+                                                       userInfo:nil];
     }
-    
+
+    auto result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
     dispatch_async(dispatchQueue, ^{
         resultReceivedHandler(result);
     });
+    [exception raise];
+}
+
+- (BOOL)recognizeOnceAsync:(nonnull void (^)(SPXSpeechRecognitionResult * _Nonnull))resultReceivedHandler error:(NSError * _Nullable * _Nullable)outError
+{
+    try {
+        [self recognizeOnceAsync:resultReceivedHandler];
+        return TRUE;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return FALSE;
 }
 
 - (void)startContinuousRecognition
 {
     if (speechRecoImpl == nullptr) {
-        // Todo: return error?
-        NSLog(@"SPXRecognizer handle is null\nNOTE: This will raise an exception in the future!");
-        return;
+        NSLog(@"SPXRecognizer handle is null");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"SPXRecognizer handle is null"
+                                                       userInfo:nil];
+        [exception raise];
     }
-    
+
     try {
         speechRecoImpl->StartContinuousRecognitionAsync().get();
     }
     catch (const std::exception &e) {
-        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception caught in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (const SPXHR &hr) {
         auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception with error code in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (...) {
-        NSLog(@"Exception caught in startContinuousRecognition\nNOTE: This will raise an exception in the future!");
+        NSLog(@"Exception caught in startContinuousRecognition");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime exception"
+                                                       userInfo:nil];
+        [exception raise];
     }
+}
+
+- (BOOL)startContinuousRecognition:(NSError * _Nullable * _Nullable)outError
+{
+    try {
+        [self startContinuousRecognition];
+        return TRUE;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return FALSE;
 }
 
 - (void)stopContinuousRecognition
 {
     if (speechRecoImpl == nullptr) {
-        // Todo: return error?
-        NSLog(@"SPXRecognizer handle is null\nNOTE: This will raise an exception in the future!");
-        return;
+        NSLog(@"SPXRecognizer handle is null");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"SPXRecognizer handle is null"
+                                                       userInfo:nil];
+        [exception raise];
     }
-    
+
     try {
         speechRecoImpl->StopContinuousRecognitionAsync().get();
     }
     catch (const std::exception &e) {
-        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception caught in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (const SPXHR &hr) {
         auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception with error code in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (...) {
-        NSLog(@"%@: Exception caught\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
+        NSLog(@"Exception caught in stopContinuousRecognition");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime exception"
+                                                       userInfo:nil];
+        [exception raise];
     }
 }
 
-- (void)onRecognizedEvent:(SPXSpeechRecognitionEventArgs *)eventArgs
+- (BOOL)stopContinuousRecognition:(NSError * _Nullable * _Nullable)outError
 {
-    LogDebug(@"OBJC: onRecognizedEvent");
-    NSArray* workCopyOfList;
-    [recognizedLock lock];
-    workCopyOfList = [NSArray arrayWithArray:recognizedEventHandlerList];
-    [recognizedLock unlock];
-    for (id handle in workCopyOfList) {
-        dispatch_async(dispatchQueue, ^{
-            ((SPXSpeechRecognitionEventHandler)handle)(self, eventArgs);
-        });
+    try {
+        [self stopContinuousRecognition];
+        return TRUE;
     }
-}
-
-- (void)onRecognizingEvent:(SPXSpeechRecognitionEventArgs *)eventArgs
-{
-    LogDebug(@"OBJC: onRecognizingEvent");
-    NSArray* workCopyOfList;
-    [recognizingLock lock];
-    workCopyOfList = [NSArray arrayWithArray:recognizingEventHandlerList];
-    [recognizingLock unlock];
-    for (id handle in workCopyOfList) {
-        dispatch_async(dispatchQueue, ^{
-            ((SPXSpeechRecognitionEventHandler)handle)(self, eventArgs);
-        });
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
     }
-}
-
-- (void)onCanceledEvent:(SPXSpeechRecognitionCanceledEventArgs *)eventArgs
-{
-    LogDebug(@"OBJC: onCanceledEvent");
-    NSArray* workCopyOfList;
-    [canceledLock lock];
-    workCopyOfList = [NSArray arrayWithArray:canceledEventHandlerList];
-    [canceledLock unlock];
-    for (id handle in workCopyOfList) {
-        dispatch_async(dispatchQueue, ^{
-            ((SPXSpeechRecognitionCanceledEventHandler)handle)(self, eventArgs);
-        });
-    }
+    return FALSE;
 }
 
 - (void)addRecognizedEventHandler:(SPXSpeechRecognitionEventHandler)eventHandler
 {
-    [recognizedLock lock];
-    [recognizedEventHandlerList addObject:eventHandler];
-    [recognizedLock unlock];
-    return;
+    speechRecoImpl->Recognized.Connect(^(const Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs & evt) {
+        SPXSpeechRecognitionEventArgs *eventArgs = [[SPXSpeechRecognitionEventArgs alloc] init: evt];
+        eventHandler(self, eventArgs);
+    });
 }
 
 - (void)addRecognizingEventHandler:(SPXSpeechRecognitionEventHandler)eventHandler
 {
-    [recognizingLock lock];
-    [recognizingEventHandlerList addObject:eventHandler];
-    [recognizingLock unlock];
-    return;
+    speechRecoImpl->Recognizing.Connect(^(const Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs & evt) {
+        SPXSpeechRecognitionEventArgs *eventArgs = [[SPXSpeechRecognitionEventArgs alloc] init: evt];
+        eventHandler(self, eventArgs);
+    });
 }
 
 - (void)addCanceledEventHandler:(SPXSpeechRecognitionCanceledEventHandler)eventHandler
 {
-    [canceledLock lock];
-    [canceledEventHandlerList addObject:eventHandler];
-    [canceledLock unlock];
-    return;
+    speechRecoImpl->Canceled.Connect(^(const Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs & evt) {
+        SPXSpeechRecognitionCanceledEventArgs *eventArgs = [[SPXSpeechRecognitionCanceledEventArgs alloc] init: evt];
+        eventHandler(self, eventArgs);
+    });
+}
+
+- (void)addSessionStartedEventHandler:(SPXSessionEventHandler)eventHandler
+{
+    speechRecoImpl->SessionStarted.Connect(^(const Microsoft::CognitiveServices::Speech::SessionEventArgs & evt) {
+        SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init: evt];
+        eventHandler(self, eventArgs);
+    });
+}
+
+- (void)addSessionStoppedEventHandler:(SPXSessionEventHandler)eventHandler
+{
+    speechRecoImpl->SessionStopped.Connect(^(const Microsoft::CognitiveServices::Speech::SessionEventArgs & evt) {
+        SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init: evt];
+        eventHandler(self, eventArgs);
+    });
+}
+
+- (void)addSpeechStartDetectedEventHandler:(SPXRecognitionEventHandler)eventHandler
+{
+    speechRecoImpl->SpeechStartDetected.Connect(^(const Microsoft::CognitiveServices::Speech::RecognitionEventArgs & evt) {
+        SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init: evt];
+        eventHandler(self, eventArgs);
+    });
+}
+
+- (void)addSpeechEndDetectedEventHandler:(SPXRecognitionEventHandler)eventHandler
+{
+    speechRecoImpl->SpeechEndDetected.Connect(^(const Microsoft::CognitiveServices::Speech::RecognitionEventArgs & evt) {
+        SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init: evt];
+        eventHandler(self, eventArgs);
+    });
 }
 
 @end

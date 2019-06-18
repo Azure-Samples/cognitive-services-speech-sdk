@@ -12,6 +12,10 @@
 SPX_EXPORT
 @interface SPXGrammarPhrase : NSObject
 
+/**
+ * Initialize the phrase with a given text.
+ * @param value an utterance.
+ */
 -(nullable instancetype) initWithText:(nonnull NSString*)value;
 
 @end

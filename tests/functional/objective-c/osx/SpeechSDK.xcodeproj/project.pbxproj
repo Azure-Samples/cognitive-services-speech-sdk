@@ -25,6 +25,8 @@
 		DCB563112242AD8000662DC3 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
 		DCB563122242B27800662DC3 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93F62146CB56000C7129 /* whatstheweatherlike.wav */; };
 		DCC36FFC224D71B3009E274B /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C676487214EA6CA00FCB533 /* microphone_test.m */; };
+		DCF107B722A8268C00EF5F80 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DCF107B622A8268C00EF5F80 /* silenceshort.wav */; };
+		DCF107B822A8272200EF5F80 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DCF107B622A8268C00EF5F80 /* silenceshort.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,6 +75,7 @@
 		DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXSpeechRecognitionTest.m; path = ../../shared/testrunners/SPXSpeechRecognitionTest.m; sourceTree = "<group>"; };
 		DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXDummyTestRunner.m; path = ../../shared/testrunners/SPXDummyTestRunner.m; sourceTree = "<group>"; };
 		DCB56301224285E300662DC3 /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXTranslationRecognitionTest.m; path = ../../shared/testrunners/SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
+		DCF107B622A8268C00EF5F80 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +102,7 @@
 		3CBD7EFD211CD69B00F72336 = {
 			isa = PBXGroup;
 			children = (
+				DCF107B622A8268C00EF5F80 /* silenceshort.wav */,
 				DC15EE99226763F500991304 /* wreck-a-nice-beach.wav */,
 				3C5D93F52146CB56000C7129 /* TurnOnTheLamp.wav */,
 				3C5D93F62146CB56000C7129 /* whatstheweatherlike.wav */,
@@ -245,6 +249,7 @@
 				DC15EE9A226763F600991304 /* wreck-a-nice-beach.wav in Resources */,
 				3C5D93F72146CB57000C7129 /* TurnOnTheLamp.wav in Resources */,
 				3CBD7F13211CD69B00F72336 /* Assets.xcassets in Resources */,
+				DCF107B722A8268C00EF5F80 /* silenceshort.wav in Resources */,
 				3C5D93F82146CB57000C7129 /* whatstheweatherlike.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -253,6 +258,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DCF107B822A8272200EF5F80 /* silenceshort.wav in Resources */,
 				DC15EE9B226763F600991304 /* wreck-a-nice-beach.wav in Resources */,
 				DCB563122242B27800662DC3 /* whatstheweatherlike.wav in Resources */,
 			);

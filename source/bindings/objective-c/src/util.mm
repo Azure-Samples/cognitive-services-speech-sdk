@@ -44,7 +44,7 @@
             break;
         default:
             // Todo error handling.
-            NSLog(@"Unknown ResultReason value: %d.\nNOTE: This will raise an exception in the future!", (int)reasonImpl);
+            NSLog(@"Unknown ResultReason value: %d.", (int)reasonImpl);
             reason = SPXResultReason_Canceled;
             break;
     }
@@ -64,7 +64,7 @@
             break;
         default:
             // Todo error handling.
-            NSLog(@"Unknown CancellationReason value: %d.\nNOTE: This will raise an exception in the future!", (int)reasonImpl);
+            NSLog(@"Unknown CancellationReason value: %d.", (int)reasonImpl);
             reason = SPXCancellationReason_Error;
             break;
     }
@@ -108,7 +108,7 @@
             break;
         default:
             // Todo error handling.
-            NSLog(@"Unknown CancellationErrorCode value: %d.\nNOTE: This will raise an exception in the future!", (int)errorCodeImpl);
+            NSLog(@"Unknown CancellationErrorCode value: %d.", (int)errorCodeImpl);
             errorCode = SPXCancellationErrorCode_RuntimeError;
             break;
     }
@@ -134,7 +134,7 @@
             break;
         default:
             // Todo error handling.
-            NSLog(@"Unknown NoMatchReason value: %d.\nNOTE: This will raise an exception in the future!", (int)reasonImpl);
+            NSLog(@"Unknown NoMatchReason value: %d.", (int)reasonImpl);
             reason = SPXNoMatchReason_NotRecognized;
             break;
     }
@@ -154,12 +154,32 @@
             break;
         default:
             // Todo error handling.
-            NSLog(@"Unknown NoMatchReason value: %d.\nNOTE: This will raise an exception in the future!", (int)outputFormatImpl);
+            NSLog(@"Unknown NoMatchReason value: %d.", (int)outputFormatImpl);
             outputFormat = SPXOutputFormat_Simple;
             break;
     }
     return outputFormat;
 }
 
++ (int) getErrorNumberFromExceptionReason:(NSString *)message
+{
+    NSRange  searchedRange = NSMakeRange(0, [message length]);
+    NSString * pattern = @"error code: (0x\\d+)";
+    NSError * error = nil;
+    NSRegularExpression * regex = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:&error];
+    NSArray * matches = [regex matchesInString:message options:0 range:searchedRange];
+
+    int errorNo = -1;
+    for (NSTextCheckingResult * match in matches) {
+        NSString * matchText = [message substringWithRange:[match range]];
+        NSRange group1 = [match rangeAtIndex:1];
+        NSScanner *scanner = [NSScanner scannerWithString:[message substringWithRange:group1]];
+        unsigned int tmp;
+        [scanner scanHexInt:&tmp];
+        errorNo = tmp;
+    }
+
+    return errorNo;
+}
 
 @end

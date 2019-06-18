@@ -20,24 +20,41 @@
         return [self initWithImpl:configImpl];
     }
     catch (const std::exception &e) {
-        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception caught in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (const SPXHR &hr) {
         auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception with error code in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (...) {
-        NSLog(@"%@: Exception caught.\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
+        NSLog(@"%@: Exception caught.", NSStringFromSelector(_cmd));
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    return nil;
+}
+
+- (instancetype)initWithSubscription:(NSString *)subscriptionKey region:(NSString *)region error:(NSError * _Nullable * _Nullable)outError
+{
+    try {
+        self = [self initWithSubscription:subscriptionKey region:region];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
     }
     return nil;
 }
@@ -51,24 +68,41 @@
         return [self initWithImpl:configImpl];
     }
     catch (const std::exception &e) {
-        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception caught in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (const SPXHR &hr) {
         auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception with error code in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (...) {
-        NSLog(@"%@: Exception caught.\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
+        NSLog(@"%@: Exception caught", NSStringFromSelector(_cmd));
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    return nil;
+}
+
+- (nullable instancetype)initWithAuthorizationToken:(nonnull NSString *)authToken region:(nonnull NSString *)region error:(NSError * _Nullable * _Nullable)outError;
+{
+    try {
+        self = [self initWithAuthorizationToken:authToken region:region];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
     }
     return nil;
 }
@@ -82,24 +116,41 @@
         return [self initWithImpl:configImpl];
     }
     catch (const std::exception &e) {
-        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception caught in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (const SPXHR &hr) {
         auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception with error code in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (...) {
-        NSLog(@"%@: Exception caught.\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
+        NSLog(@"%@: Exception caught.", NSStringFromSelector(_cmd));
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    return nil;
+}
+
+- (nullable instancetype)initWithEndpoint:(nonnull NSString *)endpointUri subscription:(nonnull NSString *)subscriptionKey error:(NSError * _Nullable * _Nullable)outError;
+{
+    try {
+        self = [self initWithEndpoint:endpointUri subscription:subscriptionKey];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
     }
     return nil;
 }
@@ -113,24 +164,41 @@
         return [self initWithImpl:configImpl];
     }
     catch (const std::exception &e) {
-        NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception caught in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (const SPXHR &hr) {
         auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-        NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+        NSLog(@"Exception with error code in core: %s", e.what());
         NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                          reason:[NSString StringWithStdString:e.what()]
                                                        userInfo:nil];
-        UNUSED(exception);
-        // [exception raise];
+        [exception raise];
     }
     catch (...) {
-        NSLog(@"%@: Exception caught.\nNOTE: This will raise an exception in the future!", NSStringFromSelector(_cmd));
+        NSLog(@"%@: Exception caught.", NSStringFromSelector(_cmd));
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    return nil;
+}
+
+- (nullable instancetype)initWithEndpoint:(nonnull NSString *)endpointUri error:(NSError * _Nullable * _Nullable)outError;
+{
+    try {
+        self = [self initWithEndpoint:endpointUri];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
     }
     return nil;
 }
@@ -215,9 +283,24 @@
     }
     if ((proxyUserName == NULL) || (proxyPassword == NULL))
     {
-        [NSException raise:@"Invalid proxy user name or password" format:@"Proxy user name or password is empty."];
+        [NSException raise:@"Invalid proxy user name or password" format:@"Proxy user name or password is null."];
     }
     speechConfigImpl->SetProxy([proxyHostName string], proxyPort, [proxyUserName string], [proxyPassword string]);
+}
+
+-(BOOL)setProxyUsingHost:(nonnull NSString *)proxyHostName Port:(uint32_t)proxyPort UserName:(nullable NSString *)proxyUserName Password:(nullable NSString *)proxyPassword error:(NSError * _Nullable * _Nullable)outError;
+{
+    try {
+        [self setProxyUsingHost:proxyHostName Port:proxyPort UserName:proxyUserName Password:proxyPassword];
+        return true;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:0x5 userInfo:errorDict];
+        return false;
+    }
 }
 
 -(NSString *)getPropertyByName:(NSString *)name

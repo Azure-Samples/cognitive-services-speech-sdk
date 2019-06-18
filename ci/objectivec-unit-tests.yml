@@ -59,10 +59,16 @@ jobs:
       mkdir -p build/bin/$(BuildConfiguration)
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     displayName: "Prepare for objective-C unit tests"
+  - ${{ if eq(parameters['jobName'], 'IosUnitTests') }}:
+    - bash: |
+        set -e -o pipefail -x
+        ci/apple/prepare-pods-for-swift-test.sh tests/functional/objective-c/ios/SpeechSDKSwift '$(Build.Repository.LocalPath)/xcode-build-output'
+      condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+      displayName: "Prepare for Swift unit tests"
   - template: test-during-build.yml
     parameters:
       continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
-      testsToRun: objectivec_unittests
+      testsToRun: objectivec_unittests swift_unittests
       runTestArgs: ""
   - ${{ parameters.extraSteps }}
   - task: PublishBuildArtifacts@1

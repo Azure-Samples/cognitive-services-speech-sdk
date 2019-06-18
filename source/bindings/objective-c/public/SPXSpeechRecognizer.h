@@ -37,7 +37,16 @@ typedef void (^SPXSpeechRecognitionCanceledEventHandler)(SPXSpeechRecognizer * _
   * @param speechConfiguration speech recognition configuration.
   * @return an instance of speech recognizer.
   */
-- (nullable instancetype)init:(nonnull SPXSpeechConfiguration *)speechConfiguration;
+- (nullable instancetype)init:(nonnull SPXSpeechConfiguration *)speechConfiguration
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+  * Initializes a new instance of speech recognizer.
+  * @param speechConfiguration speech recognition configuration.
+  * @param outError error information.
+  * @return an instance of speech recognizer.
+  */
+- (nullable instancetype)init:(nonnull SPXSpeechConfiguration *)speechConfiguration error:(NSError * _Nullable * _Nullable)outError;
 
 /**
   * Initializes a new instance of speech recognizer using the specified audio config.
@@ -45,40 +54,91 @@ typedef void (^SPXSpeechRecognitionCanceledEventHandler)(SPXSpeechRecognizer * _
   * @param audioConfiguration audio configuration.
   * @return an instance of speech recognizer.
   */
-- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration;
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+  * Initializes a new instance of speech recognizer using the specified audio config.
+  * @param speechConfiguration speech recognition configuration.
+  * @param audioConfiguration audio configuration.
+  * @param outError error information.
+  * @return an instance of speech recognizer.
+  */
+- (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration error:(NSError * _Nullable * _Nullable)outError;
 
 /**
   * Starts speech recognition, and returns after a single utterance is recognized. The end of a
   * single utterance is determined by listening for silence at the end or until a maximum of 15
-  * seconds of audio is processed.  The task returns the recognition text as result. 
+  * seconds of audio is processed. The task returns the recognition text as result.
   * Note: Since recognizeOnceAsync() returns only a single utterance, it is suitable only for single
-  * shot recognition like command or query. 
+  * shot recognition like command or query.
   * For long-running multi-utterance recognition, use startContinuousRecognition() instead.
   * @return the result of speech recognition.
   */
-- (nonnull SPXSpeechRecognitionResult *)recognizeOnce;
+- (nonnull SPXSpeechRecognitionResult *)recognizeOnce
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
   * Starts speech recognition, and returns after a single utterance is recognized. The end of a
   * single utterance is determined by listening for silence at the end or until a maximum of 15
-  * seconds of audio is processed.  The task returns the recognition text as result. 
+  * seconds of audio is processed. The task returns the recognition text as result.
   * Note: Since recognizeOnceAsync() returns only a single utterance, it is suitable only for single
-  * shot recognition like command or query. 
+  * shot recognition like command or query.
+  * For long-running multi-utterance recognition, use startContinuousRecognition() instead.
+  * @param outError error information.
+  * @return the result of speech recognition.
+  */
+- (nullable SPXSpeechRecognitionResult *)recognizeOnce:(NSError * _Nullable * _Nullable)outError;
+
+/**
+  * Starts speech recognition, and returns after a single utterance is recognized. The end of a
+  * single utterance is determined by listening for silence at the end or until a maximum of 15
+  * seconds of audio is processed. The task returns the recognition text as result.
+  * Note: Since recognizeOnceAsync() returns only a single utterance, it is suitable only for single
+  * shot recognition like command or query.
   * For long-running multi-utterance recognition, use startContinuousRecognition() instead.
   * @param resultReceivedHandler the block function to be called when the first utterance has been recognized.
   */
-- (void)recognizeOnceAsync:(nonnull void (^)(SPXSpeechRecognitionResult * _Nonnull))resultReceivedHandler;
+- (void)recognizeOnceAsync:(nonnull void (^)(SPXSpeechRecognitionResult * _Nonnull))resultReceivedHandler
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+  * Starts speech recognition, and returns after a single utterance is recognized. The end of a
+  * single utterance is determined by listening for silence at the end or until a maximum of 15
+  * seconds of audio is processed. The task returns the recognition text as result.
+  * Note: Since recognizeOnceAsync() returns only a single utterance, it is suitable only for single
+  * shot recognition like command or query.
+  * For long-running multi-utterance recognition, use startContinuousRecognition() instead.
+  * @param resultReceivedHandler the block function to be called when the first utterance has been recognized.
+  * @param outError error information.
+  */
+- (BOOL)recognizeOnceAsync:(nonnull void (^)(SPXSpeechRecognitionResult * _Nonnull))resultReceivedHandler error:(NSError * _Nullable * _Nullable)outError;
 
 /**
   * Starts speech recognition on a continuous audio stream, until stopContinuousRecognition() is called.
   * User must subscribe to events to receive recognition results.
   */
-- (void)startContinuousRecognition;
+- (void)startContinuousRecognition
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+  * Starts speech recognition on a continuous audio stream, until stopContinuousRecognition() is called.
+  * User must subscribe to events to receive recognition results.
+  * @param outError error information.
+  */
+- (BOOL)startContinuousRecognition:(NSError * _Nullable * _Nullable)outError;
 
 /**
   * Stops continuous speech recognition.
   */
-- (void)stopContinuousRecognition;
+- (void)stopContinuousRecognition
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+  * Stops continuous speech recognition.
+  * @param outError error information.
+  */
+- (BOOL)stopContinuousRecognition:(NSError * _Nullable * _Nullable)outError;
 
 /**
   * Subscribes to the Recognized event which indicates that a final result has been recognized.

@@ -22,6 +22,8 @@
 		3CCD06DA2157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DC15EE9D22676E5F00991304 /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */; };
 		DC15EE9E22676E7D00991304 /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */; };
+		DC68200622A960C200AD8EA4 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC68200522A960C200AD8EA4 /* silenceshort.wav */; };
+		DC68200722A960C200AD8EA4 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC68200522A960C200AD8EA4 /* silenceshort.wav */; };
 		F342D645216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */; };
 		F3C06E37216E3AE2003989B2 /* SPXDummyTestRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */; };
 		F3C06E38216E4148003989B2 /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D22157F71E00A348DB /* dummytest.m */; };
@@ -78,6 +80,7 @@
 		3CCD06D32157F71E00A348DB /* dummytest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dummytest.h; path = ../../shared/dummytest.h; sourceTree = "<group>"; };
 		3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
 		DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "wreck-a-nice-beach.wav"; path = "../../../input/audio/wreck-a-nice-beach.wav"; sourceTree = "<group>"; };
+		DC68200522A960C200AD8EA4 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
 		F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
 		F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXDummyTestRunner.m; path = ../../shared/testrunners/SPXDummyTestRunner.m; sourceTree = "<group>"; };
 		F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXTranslationRecognitionTest.m; path = ../../shared/testrunners/SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
@@ -108,6 +111,7 @@
 		3CA6CF7D211F471500CD2768 = {
 			isa = PBXGroup;
 			children = (
+				DC68200522A960C200AD8EA4 /* silenceshort.wav */,
 				DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */,
 				3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */,
 				3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */,
@@ -251,6 +255,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC68200622A960C200AD8EA4 /* silenceshort.wav in Resources */,
 				DC15EE9D22676E5F00991304 /* wreck-a-nice-beach.wav in Resources */,
 				3CC3789C2121CFD600F07A66 /* whatstheweatherlike.wav in Resources */,
 				3CA6CF96211F471600CD2768 /* LaunchScreen.storyboard in Resources */,
@@ -267,6 +272,7 @@
 				DC15EE9E22676E7D00991304 /* wreck-a-nice-beach.wav in Resources */,
 				F3EABAD22163B3E200BA4B2C /* whatstheweatherlike.wav in Resources */,
 				F3C06E3C216E4737003989B2 /* TurnOnTheLamp.wav in Resources */,
+				DC68200722A960C200AD8EA4 /* silenceshort.wav in Resources */,
 				F3EABAD12163AD9900BA4B2C /* MicrosoftCognitiveServicesSpeech.framework in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

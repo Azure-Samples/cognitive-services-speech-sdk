@@ -11,9 +11,4 @@
 
 - (instancetype)initWithImpl:(TranslationRecoSharedPtr)recoHandle;
 
-- (void)onRecognizedEvent:(SPXTranslationRecognitionEventArgs *)eventArgs;
-- (void)onRecognizingEvent:(SPXTranslationRecognitionEventArgs *)eventArgs;
-- (void)onSynthesizingEvent:(SPXTranslationSynthesisEventArgs *)eventArgs;
-- (void)onCanceledEvent:(SPXTranslationRecognitionCanceledEventArgs *)eventArgs;
-
 @end

@@ -1,0 +1,475 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DCB84E2B228C3D2300FE7617 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB84E2A228C3D2300FE7617 /* AppDelegate.swift */; };
+		DCB84E2D228C3D2300FE7617 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB84E2C228C3D2300FE7617 /* ViewController.swift */; };
+		DCB84E32228C3D2600FE7617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCB84E31228C3D2600FE7617 /* Assets.xcassets */; };
+		DCB84E3E228C5A3500FE7617 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = DCB84E3D228C5A3500FE7617 /* whatstheweatherlike.wav */; };
+		DCCDCF3322B27D0D00E00B87 /* IntentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCDCF3022B27D0D00E00B87 /* IntentTests.swift */; };
+		DCCDCF3422B27D0D00E00B87 /* TranslationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCDCF3122B27D0D00E00B87 /* TranslationTests.swift */; };
+		DCCDCF3522B27D0D00E00B87 /* SpeechRecognitionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCDCF3222B27D0D00E00B87 /* SpeechRecognitionTests.swift */; };
+		DCF107B422A7F06A00EF5F80 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DCF107B322A7F06A00EF5F80 /* silenceshort.wav */; };
+		DCF107B522A7F06A00EF5F80 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DCF107B322A7F06A00EF5F80 /* silenceshort.wav */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DCB84E4C228C734F00FE7617 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DCB84E1F228C3D2300FE7617 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DCB84E26228C3D2300FE7617;
+			remoteInfo = SpeechSDKSwift;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		DCB84E27228C3D2300FE7617 /* SpeechSDKSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDKSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCB84E2A228C3D2300FE7617 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		DCB84E2C228C3D2300FE7617 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		DCB84E31228C3D2600FE7617 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DCB84E36228C3D2600FE7617 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DCB84E3D228C5A3500FE7617 /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ../../../../input/audio/whatstheweatherlike.wav; sourceTree = "<group>"; };
+		DCB84E40228C5DDC00FE7617 /* MicrosoftCognitiveServicesSpeech-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MicrosoftCognitiveServicesSpeech-Bridging-Header.h"; sourceTree = "<group>"; };
+		DCB84E47228C734F00FE7617 /* SpeechSDKSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpeechSDKSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCB84E4B228C734F00FE7617 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DCCDCF3022B27D0D00E00B87 /* IntentTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntentTests.swift; sourceTree = "<group>"; };
+		DCCDCF3122B27D0D00E00B87 /* TranslationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TranslationTests.swift; sourceTree = "<group>"; };
+		DCCDCF3222B27D0D00E00B87 /* SpeechRecognitionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeechRecognitionTests.swift; sourceTree = "<group>"; };
+		DCF107B322A7F06A00EF5F80 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DCB84E24228C3D2300FE7617 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DCB84E44228C734F00FE7617 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		48E5C6371853C5D7B5FCDADE /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		DCB84E1E228C3D2300FE7617 = {
+			isa = PBXGroup;
+			children = (
+				DCF107B322A7F06A00EF5F80 /* silenceshort.wav */,
+				DCB84E3D228C5A3500FE7617 /* whatstheweatherlike.wav */,
+				DCB84E29228C3D2300FE7617 /* SpeechSDKSwift */,
+				DCB84E48228C734F00FE7617 /* SpeechSDKSwiftTests */,
+				DCB84E28228C3D2300FE7617 /* Products */,
+				48E5C6371853C5D7B5FCDADE /* Pods */,
+			);
+			sourceTree = "<group>";
+		};
+		DCB84E28228C3D2300FE7617 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DCB84E27228C3D2300FE7617 /* SpeechSDKSwift.app */,
+				DCB84E47228C734F00FE7617 /* SpeechSDKSwiftTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DCB84E29228C3D2300FE7617 /* SpeechSDKSwift */ = {
+			isa = PBXGroup;
+			children = (
+				DCB84E40228C5DDC00FE7617 /* MicrosoftCognitiveServicesSpeech-Bridging-Header.h */,
+				DCB84E2A228C3D2300FE7617 /* AppDelegate.swift */,
+				DCB84E2C228C3D2300FE7617 /* ViewController.swift */,
+				DCB84E31228C3D2600FE7617 /* Assets.xcassets */,
+				DCB84E36228C3D2600FE7617 /* Info.plist */,
+			);
+			path = SpeechSDKSwift;
+			sourceTree = "<group>";
+		};
+		DCB84E48228C734F00FE7617 /* SpeechSDKSwiftTests */ = {
+			isa = PBXGroup;
+			children = (
+				DCCDCF3022B27D0D00E00B87 /* IntentTests.swift */,
+				DCCDCF3222B27D0D00E00B87 /* SpeechRecognitionTests.swift */,
+				DCCDCF3122B27D0D00E00B87 /* TranslationTests.swift */,
+				DCB84E4B228C734F00FE7617 /* Info.plist */,
+			);
+			path = SpeechSDKSwiftTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DCB84E26228C3D2300FE7617 /* SpeechSDKSwift */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DCB84E39228C3D2600FE7617 /* Build configuration list for PBXNativeTarget "SpeechSDKSwift" */;
+			buildPhases = (
+				DCB84E23228C3D2300FE7617 /* Sources */,
+				DCB84E24228C3D2300FE7617 /* Frameworks */,
+				DCB84E25228C3D2300FE7617 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SpeechSDKSwift;
+			productName = SpeechSDKSwift;
+			productReference = DCB84E27228C3D2300FE7617 /* SpeechSDKSwift.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DCB84E46228C734F00FE7617 /* SpeechSDKSwiftTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DCB84E4E228C734F00FE7617 /* Build configuration list for PBXNativeTarget "SpeechSDKSwiftTests" */;
+			buildPhases = (
+				DCB84E43228C734F00FE7617 /* Sources */,
+				DCB84E44228C734F00FE7617 /* Frameworks */,
+				DCB84E45228C734F00FE7617 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DCB84E4D228C734F00FE7617 /* PBXTargetDependency */,
+			);
+			name = SpeechSDKSwiftTests;
+			productName = SpeechSDKSwiftTests;
+			productReference = DCB84E47228C734F00FE7617 /* SpeechSDKSwiftTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DCB84E1F228C3D2300FE7617 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1020;
+				LastUpgradeCheck = 1020;
+				ORGANIZATIONNAME = Microsoft;
+				TargetAttributes = {
+					DCB84E26228C3D2300FE7617 = {
+						CreatedOnToolsVersion = 10.2;
+					};
+					DCB84E46228C734F00FE7617 = {
+						CreatedOnToolsVersion = 10.2;
+						TestTargetID = DCB84E26228C3D2300FE7617;
+					};
+				};
+			};
+			buildConfigurationList = DCB84E22228C3D2300FE7617 /* Build configuration list for PBXProject "SpeechSDKSwift" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DCB84E1E228C3D2300FE7617;
+			productRefGroup = DCB84E28228C3D2300FE7617 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DCB84E26228C3D2300FE7617 /* SpeechSDKSwift */,
+				DCB84E46228C734F00FE7617 /* SpeechSDKSwiftTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DCB84E25228C3D2300FE7617 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCB84E3E228C5A3500FE7617 /* whatstheweatherlike.wav in Resources */,
+				DCB84E32228C3D2600FE7617 /* Assets.xcassets in Resources */,
+				DCF107B422A7F06A00EF5F80 /* silenceshort.wav in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DCB84E45228C734F00FE7617 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCF107B522A7F06A00EF5F80 /* silenceshort.wav in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DCB84E23228C3D2300FE7617 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCB84E2D228C3D2300FE7617 /* ViewController.swift in Sources */,
+				DCB84E2B228C3D2300FE7617 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DCB84E43228C734F00FE7617 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCCDCF3522B27D0D00E00B87 /* SpeechRecognitionTests.swift in Sources */,
+				DCCDCF3322B27D0D00E00B87 /* IntentTests.swift in Sources */,
+				DCCDCF3422B27D0D00E00B87 /* TranslationTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DCB84E4D228C734F00FE7617 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DCB84E26228C3D2300FE7617 /* SpeechSDKSwift */;
+			targetProxy = DCB84E4C228C734F00FE7617 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		DCB84E37228C3D2600FE7617 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		DCB84E38228C3D2600FE7617 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DCB84E3A228C3D2600FE7617 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				INFOPLIST_FILE = SpeechSDKSwift/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitiveservices.SpeechSDKSwift;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SpeechSDKSwift/MicrosoftCognitiveServicesSpeech-Bridging-Header.h";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DCB84E3B228C3D2600FE7617 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				INFOPLIST_FILE = SpeechSDKSwift/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitiveservices.SpeechSDKSwift;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SpeechSDKSwift/MicrosoftCognitiveServicesSpeech-Bridging-Header.h";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		DCB84E4F228C734F00FE7617 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				INFOPLIST_FILE = SpeechSDKSwiftTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitiveservices.SpeechSDKSwiftTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SpeechSDKSwift/MicrosoftCognitiveServicesSpeech-Bridging-Header.h";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SpeechSDKSwift.app/SpeechSDKSwift";
+			};
+			name = Debug;
+		};
+		DCB84E50228C734F00FE7617 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				INFOPLIST_FILE = SpeechSDKSwiftTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitiveservices.SpeechSDKSwiftTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SpeechSDKSwift/MicrosoftCognitiveServicesSpeech-Bridging-Header.h";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SpeechSDKSwift.app/SpeechSDKSwift";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DCB84E22228C3D2300FE7617 /* Build configuration list for PBXProject "SpeechSDKSwift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCB84E37228C3D2600FE7617 /* Debug */,
+				DCB84E38228C3D2600FE7617 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DCB84E39228C3D2600FE7617 /* Build configuration list for PBXNativeTarget "SpeechSDKSwift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCB84E3A228C3D2600FE7617 /* Debug */,
+				DCB84E3B228C3D2600FE7617 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DCB84E4E228C734F00FE7617 /* Build configuration list for PBXNativeTarget "SpeechSDKSwiftTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCB84E4F228C734F00FE7617 /* Debug */,
+				DCB84E50228C734F00FE7617 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DCB84E1F228C3D2300FE7617 /* Project object */;
+}

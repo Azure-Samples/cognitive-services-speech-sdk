@@ -11,6 +11,4 @@
 
 - (instancetype)init :(std::shared_ptr<SpeechImpl::SpeechRecognitionResult>)resultHandle;
 
-- (instancetype)initWithError:(NSString *)message;
-
 @end

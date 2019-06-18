@@ -68,28 +68,45 @@
             return [self initWithImpl: cancellationDetailsImpl];
         }
         catch (const std::exception &e) {
-            NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+            NSLog(@"Exception caught in core: %s", e.what());
             NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                              reason:[NSString StringWithStdString:e.what()]
                                                            userInfo:nil];
-            UNUSED(exception);
-            // [exception raise];
+            [exception raise];
         }
         catch (const SPXHR &hr) {
             auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-            NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+            NSLog(@"Exception with error code in core: %s", e.what());
             NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                              reason:[NSString StringWithStdString:e.what()]
                                                            userInfo:nil];
-            UNUSED(exception);
-            // [exception raise];
+            [exception raise];
         }
         catch (...)
         {
-            NSLog(@"Exception caught when creating SPXCancellationDetails in core. Check to make sure that recognition result has the reason Canceled.\nNOTE: This will raise an exception in the future!");
+            NSLog(@"Exception caught when creating SPXCancellationDetails in core. Check to make sure that recognition result has the reason Canceled.");
+            NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                            reason:@"Runtime Exception"
+                                                        userInfo:nil];
+            [exception raise];
         }
         return nil;
     }
+}
+
+-(nullable instancetype)initFromCanceledRecognitionResult:(nonnull SPXRecognitionResult *)recognitionResult error:(NSError * _Nullable * _Nullable)outError
+{
+    try {
+        self = [self initFromCanceledRecognitionResult:recognitionResult];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
 }
 
 - (instancetype)initWithImpl:(std::shared_ptr<SpeechImpl::CancellationDetails>)handle
@@ -125,26 +142,43 @@
             return [self initWithImpl: noMatchDetailsImpl];
         }
         catch (const std::exception &e) {
-            NSLog(@"Exception caught in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+            NSLog(@"Exception caught in core: %s", e.what());
             NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                              reason:[NSString StringWithStdString:e.what()]
                                                            userInfo:nil];
-            UNUSED(exception);
-            // [exception raise];
+            [exception raise];
         }
         catch (const SPXHR &hr) {
             auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
-            NSLog(@"Exception with error code in core: %s\nNOTE: This will raise an exception in the future!", e.what());
+            NSLog(@"Exception with error code in core: %s", e.what());
             NSException *exception = [NSException exceptionWithName:@"SPXException"
                                                              reason:[NSString StringWithStdString:e.what()]
                                                            userInfo:nil];
-            UNUSED(exception);
-            // [exception raise];
+            [exception raise];
         }
         catch (...)
         {
-            NSLog(@"Exception caught when creating SPXNoMatchDetails in core. Check to make sure that recognition result has the reason NoMatch.\nNOTE: This will raise an exception in the future!");
+            NSLog(@"Exception caught when creating SPXNoMatchDetails in core. Check to make sure that recognition result has the reason NoMatch.");
+            NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                            reason:@"Runtime Exception"
+                                                        userInfo:nil];
+            [exception raise];
         }
+    }
+    return nil;
+}
+
+-(nullable instancetype)initFromNoMatchRecognitionResult:(nonnull SPXRecognitionResult *)recognitionResult error:(NSError * _Nullable * _Nullable)outError;
+{
+    try {
+        self = [self initFromNoMatchRecognitionResult:recognitionResult];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
     }
     return nil;
 }

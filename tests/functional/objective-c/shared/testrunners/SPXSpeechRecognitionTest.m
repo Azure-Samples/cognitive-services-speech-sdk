@@ -97,29 +97,32 @@
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
     [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
 
-    XCTAssertTrue([[self->result valueForKey:@"finalText"] isEqualToString: self->weatherTextEnglish]);
-    XCTAssertTrue([[self->result valueForKey:@"finalResultCount"] isEqualToNumber:@1]);
+    XCTAssertEqualObjects([self->result valueForKey:@"finalText"], self->weatherTextEnglish);
+    XCTAssertEqualObjects([self->result valueForKey:@"finalResultCount"], @1);
     long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
     long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
-    XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%ld", connectedEventCount);
+    XCTAssertGreaterThan(connectedEventCount, 0);
     XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
                   @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
     [self.speechRecognizer stopContinuousRecognition];
 }
 
 - (void)_testRecognizeAsync {
+    __block SPXSpeechRecognitionResult * asyncResult;
     [self.speechRecognizer recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
-        XCTAssertTrue([srresult.text isEqualToString:self->weatherTextEnglish], "Final Result Text does not match");
+        asyncResult = srresult;
     }];
 
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
     [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
 
-    XCTAssertTrue([[self->result valueForKey:@"finalText"] isEqualToString: self->weatherTextEnglish]);
-    XCTAssertTrue([[self->result valueForKey:@"finalResultCount"] isEqualToNumber:@1]);
+    XCTAssertEqualObjects(asyncResult.text, self->weatherTextEnglish);
+
+    XCTAssertEqualObjects([self->result valueForKey:@"finalText"], self->weatherTextEnglish);
+    XCTAssertEqualObjects([self->result valueForKey:@"finalResultCount"], @1);
     long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
     long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
-    XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%ld", connectedEventCount);
+    XCTAssertGreaterThan(connectedEventCount, 0);
     XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
                   @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
 }
@@ -129,11 +132,11 @@
     NSLog(@"recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@",
           result.text, (long)result.reason, result.offset, result.duration, result.resultId);
 
-    XCTAssertTrue([result.text isEqualToString:weatherTextEnglish], "Final Result Text does not match");
-    XCTAssertTrue(result.reason == SPXResultReason_RecognizedSpeech);
-    XCTAssertTrue(result.duration > 0);
-    XCTAssertTrue(result.offset > 0);
-    XCTAssertTrue([result.resultId length] > 0);
+    XCTAssertEqualObjects(result.text, weatherTextEnglish);
+    XCTAssertEqual(result.reason, SPXResultReason_RecognizedSpeech);
+    XCTAssertGreaterThan(result.duration, 0);
+    XCTAssertGreaterThan(result.offset, 0);
+    XCTAssertGreaterThan([result.resultId length], 0);
 }
 
 - (void)_testRecognizerWithMultipleHandlers {
@@ -157,8 +160,8 @@
     [self expectationForPredicate:finalResultCount2Pred evaluatedWithObject:self->result handler:nil];
     [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
 
-    XCTAssertTrue([[self->result valueForKey:@"finalText"] isEqualToString: self->weatherTextEnglish]);
-    XCTAssertTrue([[self->result valueForKey:@"finalResultCount"] isEqualToNumber:@1]);
+    XCTAssertEqualObjects([self->result valueForKey:@"finalText"], self->weatherTextEnglish);
+    XCTAssertEqualObjects([self->result valueForKey:@"finalResultCount"], @1);
 }
 
 - (void)_testContinuousRecognitionWithPreConnection {
@@ -178,11 +181,11 @@
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
     [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
 
-    XCTAssertTrue([[self->result valueForKey:@"finalText"] isEqualToString: self->weatherTextEnglish]);
-    XCTAssertTrue([[self->result valueForKey:@"finalResultCount"] isEqualToNumber:@1]);
+    XCTAssertEqualObjects([self->result valueForKey:@"finalText"], self->weatherTextEnglish);
+    XCTAssertEqualObjects([self->result valueForKey:@"finalResultCount"], @1);
     long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
     long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
-    XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%ld", connectedEventCount);
+    XCTAssertGreaterThan(connectedEventCount, 0);
     XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
                   @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
 
@@ -219,14 +222,13 @@
     // wait for session stopped event result
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
     [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
-    // check result
-    XCTAssertTrue([[self->result valueForKey:@"finalText"] isEqualToString: self->weatherTextEnglish]);
-    XCTAssertTrue([[self->result valueForKey:@"finalResultCount"] compare:@0] == NSOrderedDescending);
 
-    // check event counts
+    // check result
+    XCTAssertEqualObjects([self->result valueForKey:@"finalText"], self->weatherTextEnglish);
+    XCTAssertEqualObjects([self->result valueForKey:@"finalResultCount"], @1);
     long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
     long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
-    XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%ld", connectedEventCount);
+    XCTAssertGreaterThan(connectedEventCount, 0);
     XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
                   @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
 
@@ -282,6 +284,75 @@
 - (void) testRecognizerWithMultipleHandlers {
     [self _testRecognizerWithMultipleHandlers];
 }
+
+- (void)testContinuousRecognitionWithError {
+    NSError * err = nil;
+    BOOL success = [self.speechRecognizer startContinuousRecognition:&err];
+    XCTAssertTrue(success);
+    XCTAssertNil(err);
+
+    [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+
+    XCTAssertEqualObjects([self->result valueForKey:@"finalText"], self->weatherTextEnglish);
+    XCTAssertEqualObjects([self->result valueForKey:@"finalResultCount"], @1);
+    long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
+    long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
+    XCTAssertGreaterThan(connectedEventCount, 0);
+    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
+                  @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
+
+    err = nil;
+    success = [self.speechRecognizer stopContinuousRecognition:&err];
+    XCTAssertTrue(success);
+    XCTAssertNil(err);
+
+}
+
+- (void)testRecognizeAsyncWithError {
+    __block SPXSpeechRecognitionResult * asyncResult;
+    NSError * err = nil;
+    BOOL success = [self.speechRecognizer recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
+        asyncResult = srresult;
+    } error:&err];
+    XCTAssertTrue(success);
+    XCTAssertNil(err);
+
+    [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+
+    XCTAssertEqualObjects(asyncResult.text, self->weatherTextEnglish);
+
+    XCTAssertEqualObjects([self->result valueForKey:@"finalText"], self->weatherTextEnglish);
+    XCTAssertEqualObjects([self->result valueForKey:@"finalResultCount"], @1);
+    long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
+    long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
+    XCTAssertGreaterThan(connectedEventCount, 0);
+    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
+                  @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
+}
+
+- (void)testRecognizeOnceWithError {
+    NSError * err = nil;
+    SPXSpeechRecognitionResult *result = [self.speechRecognizer recognizeOnce:&err];
+    XCTAssertNotNil(result);
+    XCTAssertNil(err);
+
+    NSLog(@"recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@",
+          result.text, (long)result.reason, result.offset, result.duration, result.resultId);
+
+    XCTAssertEqualObjects(result.text, weatherTextEnglish);
+    XCTAssertEqual(result.reason, SPXResultReason_RecognizedSpeech);
+    XCTAssertGreaterThan(result.duration, 0);
+    XCTAssertGreaterThan(result.offset, 0);
+    XCTAssertGreaterThan([result.resultId length], 0);
+
+    err = nil;
+    SPXCancellationDetails * details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:result error:&err];
+    XCTAssertNotNil(details);
+    XCTAssertNil(err);
+}
+
 @end
 
 
@@ -323,6 +394,13 @@
     SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:result];
     NSLog(@"Error Details: %@", details.errorDetails);
 
+    NSError * err = nil;
+    SPXCancellationDetails *details2 = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:result error:&err];
+
+    XCTAssertEqual(details2.reason, SPXCancellationReason_Error);
+    XCTAssertEqualObjects(details2.errorDetails, @"WebSocket Upgrade failed with an authentication error (401). Please check for correct subscription key (or authorization token) and region name.");
+    XCTAssertNil(err);
+
     XCTAssertTrue([result.text isEqualToString:@""], "Final Result Text does not match");
     XCTAssertEqual(details.reason, SPXCancellationReason_Error);
     XCTAssertEqualObjects(details.errorDetails, @"WebSocket Upgrade failed with an authentication error (401). Please check for correct subscription key (or authorization token) and region name.");
@@ -330,7 +408,6 @@
     XCTAssertEqual(result.duration, 0);
     XCTAssertEqual(result.offset, 0);
     XCTAssertGreaterThan([result.resultId length], 0);
-
 }
 
 - (void)testInvalidRegion {
@@ -341,7 +418,8 @@
 
     SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
 
-    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:@"InvalidServiceRegion"];
+    NSError* error = nil;
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:@"InvalidServiceRegion" error:&error];
     XCTAssertNotNil(speechConfig);
 
     // this shouldn't throw, but fail on opening the connection
@@ -365,13 +443,82 @@
 }
 
 - (void)testEmptyRegion {
-    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:@"InvalidSubscriptionKey" region:@""];
+    XCTAssertThrowsSpecificNamed([[SPXSpeechConfiguration alloc] initWithSubscription:@"InvalidSubscriptionKey" region:@""], NSException, @"SPXException");
+}
+
+- (void)testEmptyRegionWithError {
+    NSError * err = nil;
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:@"InvalidSubscriptionKey" region:@"" error:&err];
+    NSLog(@"Received Error: %@", err);
     XCTAssertNil(speechConfig);
+    XCTAssert([err.description containsString:@"SPXERR_INVALID_ARG"]);
+    XCTAssertEqual(err.code, 0x5);
 }
 
 - (void)testEmptyKey {
-    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:@"" region:@"westus"];
+    XCTAssertThrowsSpecificNamed([[SPXSpeechConfiguration alloc] initWithSubscription:@"" region:@"westus"], NSException, @"SPXException");
+}
+
+- (void)testEmptyKeyWithError {
+    NSError * err = nil;
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:@"" region:@"westus" error:&err];
     XCTAssertNil(speechConfig);
+    NSLog(@"Received Error: %@", err);
+    XCTAssert([err.description containsString:@"SPXERR_INVALID_ARG"]);
+    XCTAssertEqual(err.code, 0x5);
+}
+
+- (void)testEmptyEndpoint {
+    XCTAssertThrowsSpecificNamed([[SPXSpeechConfiguration alloc] initWithEndpoint:@""], NSException, @"SPXException");
+    XCTAssertThrowsSpecificNamed([[SPXSpeechConfiguration alloc] initWithEndpoint:@"" subscription:@"InvalidSubscription"], NSException, @"SPXException");
+}
+
+- (void)testEmptyEndpointWithError {
+    NSError * err = nil;
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:@"" error:&err];
+    XCTAssertNil(speechConfig);
+    NSLog(@"Received Error: %@", err);
+    XCTAssert([err.description containsString:@"SPXERR_INVALID_ARG"]);
+    XCTAssertEqual(err.code, 0x5);
+}
+
+- (void)testProxySettings {
+    NSError * err = nil;
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:@"myendpoint" error:&err];
+    XCTAssertNotNil(speechConfig);
+    XCTAssertNil(err);
+
+    [speechConfig setProxyUsingHost:@"proxy.xyz" Port:8080 UserName:@"" Password:@""];
+
+    XCTAssertThrowsSpecificNamed([speechConfig setProxyUsingHost:@"" Port:8080 UserName:nil Password:nil], NSException, @"Invalid proxy host name");
+}
+
+- (void)testProxySettingsWithError {
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:@"myendpoint"];
+    XCTAssertNotNil(speechConfig);
+
+    NSError * err = nil;
+    BOOL success = [speechConfig setProxyUsingHost:@"" Port:8080 UserName:nil Password:nil error:&err];
+    XCTAssertFalse(success);
+    NSLog(@"Error message: %@", err.description);
+    XCTAssert([err.description containsString:@"proxy host name is null or empty."]);
+    XCTAssertEqual(err.code, 0x5);
+
+    err = nil;
+    success = [speechConfig setProxyUsingHost:@"proxy.xyz" Port:8080 UserName:@"" Password:@"" error:&err];
+    XCTAssertTrue(success);
+    XCTAssertNil(err);
+
+    err = nil;
+    success = [speechConfig setProxyUsingHost:@"proxy.xyz" Port:8080 UserName:@"user" Password:@"pass" error:&err];
+    XCTAssertTrue(success);
+    XCTAssertNil(err);
+
+    err = nil;
+    success = [speechConfig setProxyUsingHost:@"proxy.xyz" Port:8080 UserName:nil Password:nil error:&err];
+    XCTAssertFalse(success);
+    XCTAssert([err.description containsString:@"Error: Proxy user name or password is null."]);
+    XCTAssertEqual(err.code, 0x5);
 }
 
 - (void)testInvalidWavefileName {
@@ -380,8 +527,7 @@
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:@"InvalidKey" region:@"westus"];
     XCTAssertNotNil(speechConfig);
 
-    SPXSpeechRecognizer *r = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:invalidAudioSource];
-    XCTAssertNil(r);
+    XCTAssertThrowsSpecificNamed([[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:invalidAudioSource], NSException, @"SPXException");
 }
 
 - (void)testFromEndpointWithoutKeyAndToken {
@@ -538,6 +684,40 @@
     XCTAssertEqualObjects(@"true", [[recognizer properties] getPropertyById:SPXSpeechServiceConnectionEnableAudioLogging]);
     XCTAssertEqualObjects(@"true", [config getPropertyById:SPXSpeechServiceResponseRequestWordLevelTimestamps]);
     XCTAssertEqualObjects(@"true", [[recognizer properties] getPropertyById:SPXSpeechServiceResponseRequestWordLevelTimestamps]);
+}
+
+-(void)testNoMatchResultAndDetails
+{
+    NSString *audioFileName = @"silenceshort";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *audioFile = [bundle pathForResource: audioFileName ofType:@"wav"];
+    XCTAssertNotNil(audioFile);
+    SPXAudioConfiguration* audioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:audioFile];
+    XCTAssertNotNil(audioSource);
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
+    XCTAssertNotNil(speechConfig);
+
+    SPXSpeechRecognizer* recognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:audioSource];
+
+    SPXSpeechRecognitionResult *result = [recognizer recognizeOnce];
+    NSLog(@"recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@",
+          result.text, (long)result.reason, result.offset, result.duration, result.resultId);
+
+    SPXNoMatchDetails * details = [[SPXNoMatchDetails alloc] initFromNoMatchRecognitionResult:result];
+    XCTAssertNotNil(details);
+    XCTAssertEqual(details.reason, SPXNoMatchReason_InitialSilenceTimeout);
+
+    NSError * err = nil;
+    SPXNoMatchDetails * details2 = [[SPXNoMatchDetails alloc] initFromNoMatchRecognitionResult:result error:&err];
+    XCTAssertNotNil(details2);
+    XCTAssertNil(err);
+    XCTAssertEqual(details2.reason, SPXNoMatchReason_InitialSilenceTimeout);
+
+    XCTAssertTrue([result.text isEqualToString:@""], "Final Result Text does not match");
+    XCTAssertEqual(result.reason, SPXResultReason_NoMatch);
+    XCTAssertEqual(result.duration, 0);
+    XCTAssertEqual(result.offset, 10000000);
+    XCTAssertTrue([result.resultId length] > 0);
 }
 @end
 

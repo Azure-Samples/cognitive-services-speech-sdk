@@ -59,6 +59,7 @@ setup.cfg text
 *.sln text
 *.storyboard text
 *.swg text
+*.swift text
 *.targets text
 *.template text
 *.ts text

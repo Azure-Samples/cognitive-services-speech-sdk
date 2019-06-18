@@ -20,11 +20,12 @@ my $verbose = 0;
 $H{hex} = qr/0x[0-9a-f]{1,12}/;
 $H{loc} = qr/line:\d+:\d+/;
 $H{col} = qr/col:\d+/;
-$H{range} = qr/<(?:source.*:\d+:\d+, (?:$H{loc}|$H{col})|$H{col}|$H{col}, $H{loc}|$H{loc}|$H{col}, $H{col}|$H{loc}, $H{col}|$H{loc}, $H{loc})>/;
+$H{range} = qr/<(?:(?:source.*:\d+:\d+, )?(?:$H{loc}|$H{col})|$H{col}|$H{col}, $H{loc}|$H{loc}|$H{col}, $H{col}|$H{loc}, $H{col}|$H{loc}, $H{loc})>/;
 
 # Regular expression for terminal matches. Named captures.
 $RE{_EnumExtensibilityAttr} = qr/EnumExtensibilityAttr/; # ignored
 $RE{_VisibilityAttr} = qr/VisibilityAttr/; # ignored
+$RE{_AvailabilityAttr} = qr/AvailabilityAttr/; # ignored
 $RE{_HTMLEndTagComment} = qr/HTMLEndTagComment $H{hex} $H{range} Name="(?<name>.*?)"\r?$/;
 $RE{_HTMLStartTagComment} = qr/HTMLStartTagComment $H{hex} $H{range} Name="(?<name>\w*?)"(?: Attrs:  "(?<attrs>.*))?\r?$/; # no closing quote, it seems
 $RE{_ParmVarDecl} = qr/ParmVarDecl $H{hex} $H{range} $H{col} (?<name>\w+) '(?<type>.*?)':'(?<basetype>.*?)'\r?$/;
@@ -41,7 +42,7 @@ $RE{ObjCMethodDecl} = qr/
   ObjCMethodDecl
   \s$H{hex}
   \s$H{range}
-  \s$H{col}
+  \s(?:$H{col}|$H{loc})
   \s((?<implicit>implicit)\s)?
   (?<visibility>[+-])
   \s(?<name>\S+)

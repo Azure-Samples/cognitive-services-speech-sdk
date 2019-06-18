@@ -10,8 +10,4 @@
 
 - (instancetype)initWithImpl:(SpeechRecoSharedPtr)recoHandle;
 
-- (void)onRecognizedEvent :(SPXSpeechRecognitionEventArgs *)eventArgs;
-- (void)onRecognizingEvent :(SPXSpeechRecognitionEventArgs *)eventArgs;
-- (void)onCanceledEvent :(SPXSpeechRecognitionCanceledEventArgs *)eventArgs;
-
 @end

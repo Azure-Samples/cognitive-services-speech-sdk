@@ -10,9 +10,6 @@ using ConnectionSharedPtr = std::shared_ptr<SpeechImpl::Connection>;
 
 @interface SPXConnection (Private)
 
-- (instancetype)initWithImpl:(ConnectionSharedPtr)connectionHandle AndDispatchQueue:(dispatch_queue_t)dispatchQueue;
-
-- (void)onConnectedEvent: (SPXConnectionEventArgs *)eventArgs;
-- (void)onDisconnectedEvent: (SPXConnectionEventArgs *)eventArgs;
+- (instancetype)initWithImpl:(ConnectionSharedPtr)connectionHandle;
 
 @end
