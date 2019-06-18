@@ -291,18 +291,28 @@ class ISpxAudioStream : public ISpxInterfaceBaseFor<ISpxAudioStream>
 {
 public:
     virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
-    virtual bool HasHeader() { return false; };
-    virtual std::string GetFormatString() { return std::string(); };
-    virtual std::string GetRawFormatString() { return std::string(); };
 };
 
 class ISpxAudioStreamInitFormat : public ISpxInterfaceBaseFor<ISpxAudioStreamInitFormat>
 {
 public:
     virtual void SetFormat(SPXWAVEFORMATEX* format) = 0;
-    virtual void SetHeader(bool hasHeader) { UNUSED(hasHeader); };
-    virtual void SetFormatString(const std::string& formatString) { UNUSED(formatString); };
-    virtual void SetRawFormatString(const std::string& rawFormatString) { UNUSED(rawFormatString); };
+};
+
+class ISpxAudioOutputFormat : public ISpxInterfaceBaseFor<ISpxAudioOutputFormat>
+{
+public:
+    virtual bool HasHeader() = 0;
+    virtual std::string GetFormatString() = 0;
+    virtual std::string GetRawFormatString() = 0;
+};
+
+class ISpxAudioOutputInitFormat : public ISpxInterfaceBaseFor<ISpxAudioOutputInitFormat>
+{
+public:
+    virtual void SetHeader(bool hasHeader) = 0;
+    virtual void SetFormatString(const std::string& formatString) = 0;
+    virtual void SetRawFormatString(const std::string& rawFormatString) = 0;
 };
 
 class ISpxAudioStreamReaderInitCallbacks : public ISpxInterfaceBaseFor<ISpxAudioStreamReaderInitCallbacks>
@@ -362,6 +372,7 @@ class ISpxAudioOutput : public ISpxInterfaceBaseFor<ISpxAudioOutput>
 {
 public:
     virtual uint32_t Write(uint8_t* buffer, uint32_t size) = 0;
+    virtual void WaitUntilDone() = 0;
     virtual void Close() = 0;
 };
 

@@ -84,6 +84,9 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::Speak(const std::string& t
     // Speak
     auto synthesisDoneResult = m_ttsAdapter->Speak(text, isSsml, requestId);
 
+    // Wait for audio output to be done
+    m_audioOutput->WaitUntilDone();
+
     // Set events
     auto events = this->QueryInterfaceInternal<ISpxSynthesizerEvents>();
     auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(synthesisDoneResult);
@@ -468,7 +471,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::CreateResult(const std::ws
     auto result = SpxCreateObjectWithSite<ISpxSynthesisResult>("CSpxSynthesisResult", SpxSiteFromThis(this));
     auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
     resultInit->InitSynthesisResult(requestId, reason, REASON_CANCELED_NONE, CancellationErrorCode::NoError,
-        audio_buffer, audio_length, format.get(), audioStream->HasHeader());
+        audio_buffer, audio_length, format.get(), SpxQueryInterface<ISpxAudioOutputFormat>(m_audioOutput)->HasHeader());
     auto events = this->QueryInterfaceInternal<ISpxSynthesizerEvents>();
     resultInit->SetEvents(events);
 

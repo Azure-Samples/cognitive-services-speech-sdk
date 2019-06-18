@@ -31,6 +31,8 @@ public:
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitFormat)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStream)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputFormat)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputInitFormat)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutput)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputReader)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
@@ -57,7 +59,7 @@ protected:
 
     uint32_t m_inventorySize = 0;
 
-    bool m_writingEnded;
+    std::atomic<bool> m_writingEnded { false };
 
     std::mutex m_mutex;
     std::condition_variable m_cv;

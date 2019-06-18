@@ -85,14 +85,16 @@ std::shared_ptr<ISpxSynthesizer> CSpxSpeechSynthesisApiFactory::CreateSpeechSynt
     // Set format
     auto formatInit = SpxQueryInterface<ISpxAudioStreamInitFormat>(output);
     formatInit->SetFormat(format.get());
-    formatInit->SetHeader(needHeader);
-    formatInit->SetFormatString(outputFormatStr);
-    formatInit->SetRawFormatString(rawFormatString);
+
+    auto outputFormatInit = SpxQueryInterface<ISpxAudioOutputInitFormat>(output);
+    outputFormatInit->SetHeader(needHeader);
+    outputFormatInit->SetFormatString(outputFormatStr);
+    outputFormatInit->SetRawFormatString(rawFormatString);
 
     if (needHeader && rawFormatString == "raw-16khz-16bit-mono-pcm")
     {
         // In case GetSpeechSynthesisOutputFormatFromString fell back to default
-        formatInit->SetFormatString("riff-16khz-16bit-mono-pcm");
+        outputFormatInit->SetFormatString("riff-16khz-16bit-mono-pcm");
     }
 
     // Set output

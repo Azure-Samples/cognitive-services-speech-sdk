@@ -473,6 +473,26 @@ TEST_CASE("Speak output in streams with all data get on synthesis started result
     DoSomethingWithAudioInDataStream(stream, true); /* the stream should be with AllData status */
 }
 
+TEST_CASE("Result data should be consistent with output stream data", "[api][cxx]")
+{
+    auto config = CurrentSpeechConfig();
+    auto stream = AudioOutputStream::CreatePullStream();
+    auto streamConfig = AudioConfig::FromStreamOutput(stream);
+
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, streamConfig);
+    auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
+
+    auto resultData = std::make_shared<std::vector<uint8_t>>();
+    resultData->resize(result->GetAudioLength());
+    memcpy(resultData->data(), result->GetAudioData()->data(), result->GetAudioLength());
+
+    result = nullptr;
+    synthesizer = nullptr; // destruct synthesizer in order to close output stream
+
+    bool canceled = false;
+    DoSomethingWithAudioInPullStream(stream, canceled, resultData);
+}
+
 TEST_CASE("Defaults - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();

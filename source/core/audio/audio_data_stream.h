@@ -38,6 +38,8 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitFormat)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStream)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputFormat)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputInitFormat)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutput)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputReader)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)

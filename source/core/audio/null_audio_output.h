@@ -17,7 +17,12 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxNullAudioOutput : public ISpxAudioOutput, public ISpxAudioStream, public ISpxAudioStreamInitFormat
+class CSpxNullAudioOutput :
+    public ISpxAudioOutput,
+    public ISpxAudioStream,
+    public ISpxAudioStreamInitFormat,
+    public ISpxAudioOutputFormat,
+    public ISpxAudioOutputInitFormat
 {
 public:
 
@@ -28,11 +33,14 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutput)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStream)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitFormat)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputFormat)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputInitFormat)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioOutput ---
 
     uint32_t Write(uint8_t* buffer, uint32_t size) override;
+    void WaitUntilDone() override;
     void Close() override;
 
     // --- ISpxAudioStream ---

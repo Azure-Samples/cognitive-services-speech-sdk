@@ -222,7 +222,9 @@ void CSpxAudioDataStream::SaveToWaveFile(const wchar_t* fileName)
 
     auto formatInit = SpxQueryInterface<ISpxAudioStreamInitFormat>(waveFileWriter);
     formatInit->SetFormat(m_format.get());
-    formatInit->SetHeader(m_hasHeader);
+
+    auto outputFormatInit = SpxQueryInterface<ISpxAudioOutputInitFormat>(waveFileWriter);
+    outputFormatInit->SetHeader(m_hasHeader);
 
     // Re-use Read method to collect the audio data from audio list to a buffer
     auto buffer = SpxAllocSharedAudioBuffer(m_inventorySize - m_position);
@@ -277,7 +279,6 @@ uint32_t CSpxAudioDataStream::Read(uint8_t* buffer, uint32_t bufferSize, uint32_
 uint32_t CSpxAudioDataStream::Write(uint8_t* buffer, uint32_t size)
 {
     SPX_DBG_TRACE_VERBOSE("CSpxAudioDataStream::Write buffer %p size=%d", (void*)buffer, size);
-    SPX_IFTRUE_THROW_HR(m_writingEnded, SPXERR_UNEXPECTED_EOF);
 
     if (size == 0)
     {
@@ -292,6 +293,7 @@ uint32_t CSpxAudioDataStream::Write(uint8_t* buffer, uint32_t size)
 
     // Store the buffer into our audio list
     std::unique_lock<std::mutex> lock(m_mutex);
+    m_writingEnded = false;
     m_audioList.emplace_back(newBuffer, size);
     m_inventorySize += size;
     m_cv.notify_all();

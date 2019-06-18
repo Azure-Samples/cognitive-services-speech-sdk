@@ -93,6 +93,8 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutput)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStream)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitFormat)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputFormat)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputInitFormat)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioFile
@@ -108,6 +110,7 @@ public:
     // --- ISpxAudioOutput ---
 
     uint32_t Write(uint8_t* buffer, uint32_t size) override;
+    void WaitUntilDone() override;
 
 private:
 

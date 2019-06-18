@@ -54,6 +54,8 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutput)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStream)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitFormat)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputFormat)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioOutputInitFormat)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectInit ---
@@ -70,6 +72,7 @@ public:
     // --- ISpxAudioOutput ---
 
     uint32_t Write(uint8_t* buffer, uint32_t size) override;
+    void WaitUntilDone() override;
     void Close() override;
 
     // --- ISpxAudioStream ---
@@ -90,9 +93,11 @@ private:
     static void BufferUnderRunCallback(void* pContext);
 
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
-    AUDIO_SETTINGS_HANDLE m_hsetting;
-    AUDIO_SYS_HANDLE m_haudio;
-    std::atomic<bool> m_speakCompleted { true };
+    AUDIO_SETTINGS_HANDLE m_hsetting = nullptr;
+    AUDIO_SYS_HANDLE m_haudio = nullptr;
+    std::atomic<bool> m_playing { false };
+    std::mutex m_mutex;
+    std::condition_variable m_cv;
 #endif
 
     bool m_audioInitialized = false;

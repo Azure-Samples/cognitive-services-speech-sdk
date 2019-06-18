@@ -83,7 +83,8 @@ std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri,
         url.host.data(), proxyHost.data(), proxyPort, proxyUsername.data(), proxyPassword.data());
     if (!http_connect)
     {
-        throw std::runtime_error("Could not create HTTP connection");
+        SPX_TRACE_ERROR("Could not create HTTP connection");
+        return std::string();
     }
 
 #ifdef SPEECHSDK_USE_OPENSSL
@@ -91,7 +92,8 @@ std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri,
     if (HTTPAPI_SetOption(http_connect, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
     {
         HTTPAPI_CloseConnection(http_connect);
-        throw std::runtime_error("Could not set TLS 1.2 option");
+        SPX_TRACE_ERROR("Could not set TLS 1.2 option");
+        return std::string();
     }
 #endif
 

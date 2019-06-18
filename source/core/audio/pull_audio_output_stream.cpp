@@ -24,7 +24,6 @@ CSpxPullAudioOutputStream::CSpxPullAudioOutputStream() : m_writingEnded(false)
 uint32_t CSpxPullAudioOutputStream::Write(uint8_t* buffer, uint32_t size)
 {
     SPX_DBG_TRACE_VERBOSE("CSpxPullAudioOutputStream::Write buffer %p size=%d", (void*)buffer, size);
-    SPX_IFTRUE_THROW_HR(m_writingEnded, SPXERR_UNEXPECTED_EOF);
 
     if (size == 0)
     {
@@ -39,6 +38,7 @@ uint32_t CSpxPullAudioOutputStream::Write(uint8_t* buffer, uint32_t size)
 
     // Store the buffer in our queue
     std::unique_lock<std::mutex> lock(m_mutex);
+    m_writingEnded = false;
     m_audioQueue.emplace(newBuffer, size);
     m_inventorySize += size;
     m_cv.notify_all();

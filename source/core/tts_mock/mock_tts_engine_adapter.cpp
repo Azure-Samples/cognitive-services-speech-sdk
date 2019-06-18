@@ -116,7 +116,7 @@ SpxWAVEFORMATEX_Type CSpxMockTtsEngineAdapter::GetOutputFormat(bool* hasHeader)
 
     if (hasHeader != nullptr)
     {
-        *hasHeader = audioStream->HasHeader();
+        *hasHeader = SpxQueryInterface<ISpxAudioOutputFormat>(m_audioOutput)->HasHeader();
     }
 
     return format;

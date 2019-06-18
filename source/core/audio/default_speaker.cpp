@@ -32,7 +32,7 @@ void CSpxDefaultSpeaker::Init()
 void CSpxDefaultSpeaker::Term()
 {
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
-    while (!m_speakCompleted)
+    while (m_playing)
     {
         // Wait until speak complete
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -60,11 +60,11 @@ void CSpxDefaultSpeaker::StartPlayback()
 
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
     // Only make playback when audio device is initialized, in order not to abort the synthesizer when audio device is not available
-    if (m_audioInitialized)
+    if (m_audioInitialized && !m_playing)
     {
         auto result = audio_output_startasync(m_haudio, m_audioFormat.get(), PlayAudioReadCallback, AudioCompleteCallback, BufferUnderRunCallback, this);
         SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT::AUDIO_RESULT_OK, SPXERR_RUNTIME_ERROR);
-        m_speakCompleted = false;
+        m_playing = true;
     }
 #endif
 }
@@ -108,6 +108,22 @@ uint32_t CSpxDefaultSpeaker::Write(uint8_t* buffer, uint32_t size)
     }
 
     return writtenSize;
+}
+
+void CSpxDefaultSpeaker::WaitUntilDone()
+{
+#ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_audioStream->Close();
+#ifdef _DEBUG
+    while (!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&] { return m_playing == false; }))
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: waiting ...", __FUNCTION__);
+    }
+#else
+    m_cv.wait(lock, [&] { return m_playing == false; });
+#endif // _DEBUG
+#endif // AUDIO_OUTPUT_DEVICE_AVAILABLE
 }
 
 void CSpxDefaultSpeaker::Close()
@@ -174,8 +190,9 @@ void CSpxDefaultSpeaker::InitializeAudio()
 
         m_audioInitialized = true;
 
-        StartPlayback();
     }
+
+    StartPlayback();
 #endif
 }
 
@@ -191,7 +208,9 @@ int CSpxDefaultSpeaker::PlayAudioReadCallback(void* pContext, uint8_t* pBuffer, 
 void CSpxDefaultSpeaker::AudioCompleteCallback(void* pContext)
 {
     auto defaultSpeaker = (CSpxDefaultSpeaker*)pContext;
-    defaultSpeaker->m_speakCompleted = true;
+    std::unique_lock<std::mutex> lock(defaultSpeaker->m_mutex);
+    defaultSpeaker->m_playing = false;
+    defaultSpeaker->m_cv.notify_all();
 }
 
 void CSpxDefaultSpeaker::BufferUnderRunCallback(void* pContext)

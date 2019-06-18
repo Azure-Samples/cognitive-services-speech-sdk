@@ -101,6 +101,11 @@ uint32_t CSpxWavFileWriter::Write(uint8_t* buffer, uint32_t size)
     return size;
 }
 
+void CSpxWavFileWriter::WaitUntilDone()
+{
+    m_file->flush();
+}
+
 void CSpxWavFileWriter::EnsureRiffHeader()
 {
     if (m_hasHeader && !m_bHeaderIsWritten)

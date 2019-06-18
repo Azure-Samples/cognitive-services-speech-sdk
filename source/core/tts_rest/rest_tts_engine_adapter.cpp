@@ -44,18 +44,10 @@ void CSpxRestTtsEngineAdapter::Init()
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS, __FUNCTION__);
 
     // Get proxy setting
-    std::string proxyHost = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyHostName), "");
-    int proxyPort = std::stoi(ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPort), "0"));
-    if (proxyPort < 0)
-    {
-        ThrowInvalidArgumentException("Invalid proxy port: %d", proxyPort);
-    }
-
-    std::string proxyUsername = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName), "");
-    std::string proxyPassword = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword), "");
+    GetProxySetting();
 
     // Initialize websocket platform
-    Microsoft::CognitiveServices::Speech::USP::PlatformInit(proxyHost.data(), proxyPort, proxyUsername.data(), proxyPassword.data());
+    Microsoft::CognitiveServices::Speech::USP::PlatformInit(m_proxyHost.data(), m_proxyPort, m_proxyUsername.data(), m_proxyPassword.data());
 
     // Initialize azure-c-shared HTTP API
     HTTPAPI_Init();
@@ -85,7 +77,7 @@ void CSpxRestTtsEngineAdapter::Init()
             ThrowRuntimeError("Subscription key is required for cognitive service TTS custom voice request.");
         }
 
-        m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, proxyHost, proxyPort, proxyUsername, proxyPassword);
+        m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
     }
     else if ((endpoint.empty() && !region.empty()) || (!endpoint.empty() && IsStandardVoiceEndpoint(endpoint)))
     {
@@ -110,29 +102,12 @@ void CSpxRestTtsEngineAdapter::Init()
             ThrowRuntimeError("Subscription key is required for cognitive service TTS standard voice request.");
         }
 
-        m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, proxyHost, proxyPort, proxyUsername, proxyPassword);
+        m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
     }
     else
     {
         ThrowRuntimeError("Invalid combination of endpoint, region and(or) subscription key.");
     }
-
-    // Create HTTP connection
-    auto url = CSpxRestTtsHelper::ParseHttpUrl(m_endpoint);
-    m_httpConnect = HTTPAPI_CreateConnection_With_Proxy(url.host.data(), proxyHost.data(), proxyPort, proxyUsername.data(), proxyPassword.data());
-    if (!m_httpConnect)
-    {
-        throw std::runtime_error("Could not create HTTP connection");
-    }
-
-#ifdef SPEECHSDK_USE_OPENSSL
-    int tls_version = OPTION_TLS_VERSION_1_2;
-    if (HTTPAPI_SetOption(m_httpConnect, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
-    {
-        HTTPAPI_CloseConnection(m_httpConnect);
-        throw std::runtime_error("Could not set TLS 1.2 option");
-    }
-#endif
 }
 
 void CSpxRestTtsEngineAdapter::Term()
@@ -191,7 +166,22 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
         request.adapter = this;
         request.site = p;
 
-        PostTtsRequest(m_httpConnect, request, resultInit); });
+        EnsureHttpConnection();
+        if (m_httpConnect != nullptr)
+        {
+            PostTtsRequest(m_httpConnect, request, resultInit);
+            if (result->GetReason() == ResultReason::Canceled)
+            {
+                // The http connection could be disconnected, release it to make it re-created for next request
+                HTTPAPI_CloseConnection(m_httpConnect);
+                m_httpConnect = nullptr;
+            }
+        }
+        else
+        {
+            resultInit->InitSynthesisResult(request.requestId, ResultReason::Canceled, CancellationReason::Error,
+                CancellationErrorCode::ConnectionFailure, nullptr, 0, request.outputFormat.get(), request.outputHasHeader);
+        }});
 
     return result;
 }
@@ -199,6 +189,46 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
 std::shared_ptr<ISpxNamedProperties> CSpxRestTtsEngineAdapter::GetParentProperties() const
 {
     return SpxQueryService<ISpxNamedProperties>(GetSite());
+}
+
+void CSpxRestTtsEngineAdapter::GetProxySetting()
+{
+    m_proxyHost = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyHostName), "");
+    m_proxyPort = std::stoi(ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPort), "0"));
+    if (m_proxyPort < 0)
+    {
+        ThrowInvalidArgumentException("Invalid proxy port: %d", m_proxyPort);
+    }
+
+    m_proxyUsername = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName), "");
+    m_proxyPassword = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword), "");
+}
+
+void CSpxRestTtsEngineAdapter::EnsureHttpConnection()
+{
+    // If the connection is already setup, skip this
+    if (m_httpConnect != nullptr)
+    {
+        return;
+    }
+
+    // Create the connection
+    auto url = CSpxRestTtsHelper::ParseHttpUrl(m_endpoint);
+    m_httpConnect = HTTPAPI_CreateConnection_With_Proxy(url.host.data(), m_proxyHost.data(), m_proxyPort, m_proxyUsername.data(), m_proxyPassword.data());
+    if (!m_httpConnect)
+    {
+        SPX_TRACE_ERROR("Could not create HTTP connection");
+    }
+
+#ifdef SPEECHSDK_USE_OPENSSL
+    int tls_version = OPTION_TLS_VERSION_1_2;
+    if (HTTPAPI_SetOption(m_httpConnect, OPTION_TLS_VERSION, &tls_version) != HTTPAPI_OK)
+    {
+        HTTPAPI_CloseConnection(m_httpConnect);
+        m_httpConnect = nullptr;
+        SPX_TRACE_ERROR("Could not set TLS 1.2 option");
+    }
+#endif
 }
 
 SpxWAVEFORMATEX_Type CSpxRestTtsEngineAdapter::GetOutputFormat(std::shared_ptr<ISpxAudioOutput> output, bool* hasHeader)
@@ -210,7 +240,7 @@ SpxWAVEFORMATEX_Type CSpxRestTtsEngineAdapter::GetOutputFormat(std::shared_ptr<I
 
     if (hasHeader != nullptr)
     {
-        *hasHeader = audioStream->HasHeader();
+        *hasHeader = SpxQueryInterface<ISpxAudioOutputFormat>(output)->HasHeader();
     }
 
     return format;
@@ -218,11 +248,11 @@ SpxWAVEFORMATEX_Type CSpxRestTtsEngineAdapter::GetOutputFormat(std::shared_ptr<I
 
 std::string CSpxRestTtsEngineAdapter::GetOutputFormatString(std::shared_ptr<ISpxAudioOutput> output)
 {
-    auto audioStream = SpxQueryInterface<ISpxAudioStream>(output);
-    auto formatString = audioStream->GetFormatString();
-    if (audioStream->HasHeader())
+    auto outputFormat = SpxQueryInterface<ISpxAudioOutputFormat>(output);
+    auto formatString = outputFormat->GetFormatString();
+    if (outputFormat->HasHeader())
     {
-        formatString = audioStream->GetRawFormatString();
+        formatString = outputFormat->GetRawFormatString();
     }
 
     return formatString;
@@ -460,7 +490,7 @@ void CSpxRestTtsEngineAdapter::OnChunkReceived(void* context, const unsigned cha
     std::unique_lock<std::mutex> lock(request->response.mutex);
     auto originalSize = request->response.body.size();
     request->response.body.resize(originalSize + size);
-    memcpy(request->response.body.data(), buffer, size);
+    memcpy(request->response.body.data() + originalSize, buffer, size);
 }
 
 

@@ -29,6 +29,10 @@ uint32_t CSpxNullAudioOutput::Write(uint8_t* buffer, uint32_t size)
     return size;
 }
 
+void CSpxNullAudioOutput::WaitUntilDone()
+{
+}
+
 void CSpxNullAudioOutput::Close()
 {
 }

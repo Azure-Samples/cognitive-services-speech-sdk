@@ -91,6 +91,8 @@ private:
 
     CSpxRestTtsEngineAdapter& operator=(const CSpxRestTtsEngineAdapter&) = delete;
 
+    void GetProxySetting();
+    void EnsureHttpConnection();
     SpxWAVEFORMATEX_Type GetOutputFormat(std::shared_ptr<ISpxAudioOutput> output, bool* hasHeader);
     std::string GetOutputFormatString(std::shared_ptr<ISpxAudioOutput> output);
 
@@ -107,6 +109,11 @@ private:
     std::shared_ptr<ISpxAudioOutput> m_audioOutput;
     std::shared_ptr<CSpxRestTtsAuthenticator> m_authenticator;
     HTTP_HANDLE m_httpConnect = nullptr;
+
+    std::string m_proxyHost;
+    int m_proxyPort { 0 };
+    std::string m_proxyUsername;
+    std::string m_proxyPassword;
 };
 
 

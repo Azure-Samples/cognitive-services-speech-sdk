@@ -55,10 +55,6 @@ namespace TTS
         {
             SPXTEST_REQUIRE(totalSize > 0);
         }
-        else
-        {
-            SPXTEST_REQUIRE(totalSize == 0);
-        }
 
         if (expectedData != nullptr)
         {
@@ -129,10 +125,6 @@ namespace TTS
         if (stream->GetStatus() != StreamStatus::Canceled)
         {
             SPXTEST_REQUIRE(totalSize > 0);
-        }
-        else
-        {
-            SPXTEST_REQUIRE(totalSize == 0);
         }
 
         if (stream->GetStatus() == StreamStatus::Canceled) {

@@ -147,8 +147,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             ThrowIfNull(audioStream);
             IntPtr audioConfigHandle = IntPtr.Zero;
             ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_output_from_stream(out audioConfigHandle, audioStream.streamHandle));
-            GC.KeepAlive(audioStream);
-            return new AudioConfig(audioConfigHandle);
+            return new AudioConfig(audioConfigHandle, audioStream, false);
         }
 
         /// <summary>
