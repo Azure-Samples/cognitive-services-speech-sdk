@@ -1006,6 +1006,12 @@ void CSpxAudioStreamSession::EnsureFireResultEvent()
 void CSpxAudioStreamSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
 {
     SPX_DBG_TRACE_FUNCTION();
+
+    if (result->GetReason() == ResultReason::Canceled)
+    {
+        SPX_DBG_TRACE_VERBOSE("Firing RecoResultEvent(Canceled): SessionId: %ls", m_sessionId.c_str());
+    }
+
     FireEvent(EventType::RecoResultEvent, result, const_cast<wchar_t*>(sessionId.c_str()));
 }
 
