@@ -7,7 +7,6 @@ import azure.cognitiveservices.speech as msspeech
 from .conftest import SpeechInput
 from .utils import _check_translation_result
 
-@pytest.mark.skipif(True, reason="Temp disable this test until we can fix the translation base line.")
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_translation_simple(speech_input: SpeechInput, from_file_translation_reco_with_callbacks):
     recognizer, callbacks = from_file_translation_reco_with_callbacks()

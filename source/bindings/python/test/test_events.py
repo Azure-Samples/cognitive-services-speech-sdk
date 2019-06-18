@@ -217,7 +217,6 @@ def test_intent_recognition_events(intent_input: IntentInput, from_file_intent_r
 
     _check_intent_result(recognized_result, intent_input, 0)
 
-@pytest.mark.skipif(True, reason="Temp disable this test until we can fix the translation base line.")
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_translation_recognition_events(speech_input: SpeechInput,
         from_file_translation_reco_with_callbacks):
