@@ -27,6 +27,9 @@ public class VirtualAssistantTests {
     public static final String COMMUNICATION_TYPE_STRING = "Conversation_Communication_Type";
     public static final String AUTO_REPLY_CONNECTION_TYPE = "AutoReply";
     public static final String EN_US = "en-US";
+    public static final int TIMEOUT_IN_MILLIS = 1000;
+    public static final int RETRY_COUNT = 20;
+
     private SpeechBotConnector botConnector;
     private EventRecord eventRecord;
 
@@ -66,7 +69,7 @@ public class VirtualAssistantTests {
 
     @Test
     public void testSendActivity() throws IOException {
-        assertNotNull(botConnector);
+        assertNotNull("BotConnector should not be null.", botConnector);
         try {
             final String activity = readFileAsString(SerializedSpeechActivityFile);
             // Connect to the bot
@@ -74,17 +77,17 @@ public class VirtualAssistantTests {
             botConnector.sendActivityAsync(BotConnectorActivity.fromSerializedActivity(activity));
 
             // Add a sleep for responses to arrive.
-            for (int n = 1; n <= 20; n++) {
+            for (int n = 1; n <= RETRY_COUNT; n++) {
                 try {
-                    assertFalse(eventRecord.cancelledEventReceived);
-                    assertTrue(eventRecord.activityEventReceived);
-                   // assertTrue(eventRecord.eventWithAudioReceived); // Commenting until we fix bug id : 1780943
+                    assertFalse(String.format("Cancelled event received. [%s]", eventRecord.cancellationErrorDetails), eventRecord.cancelledEventReceived);
+                    assertTrue("Activity event not received.", eventRecord.activityEventReceived);
+                    // assertTrue(eventRecord.eventWithAudioReceived); // Commenting until we fix bug id : 1780943
                 } catch (AssertionError e) {
-                    if (n == 20) {
+                    if (n == RETRY_COUNT) {
                         throw e;
                     }
                     try {
-                        Thread.sleep(1000 * n);
+                        Thread.sleep(TIMEOUT_IN_MILLIS);
                     } catch (InterruptedException ignored) {
                     }
                 }
@@ -97,25 +100,26 @@ public class VirtualAssistantTests {
 
     @Test
     public void testListenOnce() {
+        assertNotNull("BotConnector should not be null.", botConnector);
         try {
             // Connect to the bot
             botConnector.connectAsync();
             // Start listening.
             botConnector.listenOnceAsync();
             // Add a sleep for responses to arrive.
-            for (int n = 1; n <= 20; n++) {
+            for (int n = 1; n <= RETRY_COUNT; n++) {
                 try {
-                    assertFalse(eventRecord.cancelledEventReceived);
-                    assertTrue(eventRecord.recognizedEventReceived);
-                    assertTrue(eventRecord.sessionStartedEventReceived);
-                    assertTrue(eventRecord.sessionStoppedEventReceived);
-                    assertTrue(eventRecord.activityEventReceived);
+                    assertFalse(String.format("Cancelled event received. [%s]", eventRecord.cancellationErrorDetails), eventRecord.cancelledEventReceived);
+                    assertTrue("Recognized event not received.", eventRecord.recognizedEventReceived);
+                    assertTrue("Session Started event not received.", eventRecord.sessionStartedEventReceived);
+                    assertTrue("Session Stooped event not received.", eventRecord.sessionStoppedEventReceived);
+                    assertTrue("Activity event not received.", eventRecord.activityEventReceived);
                 } catch (AssertionError e) {
-                    if (n == 20) {
+                    if (n == RETRY_COUNT) {
                         throw e;
                     }
                     try {
-                        Thread.sleep(1000 * n);
+                        Thread.sleep(TIMEOUT_IN_MILLIS);
                     } catch (InterruptedException ignored) {
                     }
                 }
@@ -143,6 +147,7 @@ public class VirtualAssistantTests {
 
         botConnector.canceled.addEventListener((o, canceledEventArgs) -> {
             eventRecord.cancelledEventReceived = true;
+            eventRecord.cancellationErrorDetails = canceledEventArgs.getErrorDetails();
         });
 
         botConnector.activityReceived.addEventListener((o, activityEventArgs) -> {
@@ -158,5 +163,6 @@ public class VirtualAssistantTests {
         boolean cancelledEventReceived;
         boolean activityEventReceived;
         boolean eventWithAudioReceived;
+        String cancellationErrorDetails;
     }
 }
