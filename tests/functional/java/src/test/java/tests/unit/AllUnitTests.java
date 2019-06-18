@@ -23,7 +23,7 @@ import org.junit.runners.Suite.SuiteClasses;
     AudioInputStreamTests.class,
     PropertyCollectionTests.class,
     PhraseListGrammarTests.class,
-    //ConversationTranscriberTests.class,
+    ConversationTranscriberTests.class,
     })
 public class AllUnitTests {
 
