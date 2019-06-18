@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="c5f4aacb-566c-417c-a5a6-0ad2e99d5c5f" Publisher="CN=yinhew" Version="1.0.0.0" />
-  <mp:PhoneIdentity PhoneProductId="c5f4aacb-566c-417c-a5a6-0ad2e99d5c5f" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Identity Name="dedcd508-865f-45f8-ab6b-11791bb550c6" Publisher="CN=yinhew" Version="1.0.0.0" />
+  <mp:PhoneIdentity PhoneProductId="dedcd508-865f-45f8-ab6b-11791bb550c6" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample</DisplayName>
+    <DisplayName>helloworld</DisplayName>
     <PublisherDisplayName>yinhew</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -14,8 +14,8 @@
     <Resource Language="x-generate" />
   </Resources>
   <Applications>
-    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample.App">
-      <uap:VisualElements DisplayName="Speech SDK UWP Speech Synthesis Sample" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="This application contains sample code for using Microsoft.CognitiveServices.Speech speech synthesis under UWP." BackgroundColor="transparent">
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="helloworld.App">
+      <uap:VisualElements DisplayName="helloworld" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="helloworld" BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png">
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
