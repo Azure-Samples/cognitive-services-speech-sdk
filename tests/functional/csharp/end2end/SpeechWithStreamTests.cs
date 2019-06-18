@@ -264,7 +264,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var actual = string.Join(" ", texts.ToArray());
                 actual = Normalize(actual);
                 // don't do a hard string comparison, we allow a small number of word edits (word insert/delete/move)
-                AssertStringWordEditCount(expected, actual, 10);
+                AssertStringWordEditCount(expected, actual, 20);
             }
         }
     }

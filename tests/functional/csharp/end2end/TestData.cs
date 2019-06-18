@@ -130,7 +130,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     "Skills and abilities Batman has no inherent super powers, he relies on his own scientific knowledge detective skills and athletic prowess.",
                     "In the stories Batman is regarded as one of the world's greatest detective if not the world's greatest crime solver. Batman has been repeatedly described as having genius level intellect. One of the greatest martial artists in the DC universe.",
-                    "And having peak human physical conditioning use traveled the world, acquiring the skills needed to aid his cruceta grants crime.",
+                    "And having peak human physical conditioning he has traveled the world, acquiring the skills needed to aid his cruceta grants crime.",
                     "His knowledge and expertise in almost every discipline known to man is nearly unparalleled by any other character in the universe.",
                     "Batman's inexhaustible wealth allows him to access advanced technology as a proficient scientists use able to use and modify those technologies to his advantage.",
                     "Batman describes Superman as the most dangerous man on Earth able to defeat a team of super powered extraterrestrials by himself in order to rescue his imprisoned teammates.",
