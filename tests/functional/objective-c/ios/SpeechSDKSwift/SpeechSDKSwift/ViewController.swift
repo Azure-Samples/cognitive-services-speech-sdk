@@ -114,11 +114,11 @@ class ViewController: UIViewController {
 
     @objc func fromMicButtonClicked() {
         DispatchQueue.global(qos: .userInitiated).async {
-            self.recognizeFromMice()
+            self.recognizeFromMic()
         }
     }
 
-    func recognizeFromMice() {
+    func recognizeFromMic() {
         var speechConfig: SPXSpeechConfiguration?
         do {
             try speechConfig = SPXSpeechConfiguration(subscription: sub, region: region)

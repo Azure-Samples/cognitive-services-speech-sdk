@@ -81,6 +81,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart Node.js](./quickstart/js-node/) | Node.js | Demonstrates one-shot speech recognition from a file. |
 | [Quickstart Python](./quickstart/python/) | Windows, Linux, macOS | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart Objective-C](./quickstart/objectivec-ios/) | iOS | Demonstrates one-shot speech recognition from a file with recorded speech. |
+| [Quickstart Swift](./quickstart/swift-ios/) | iOS | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart Objective-C](./quickstart/objectivec-macos/) | macOS | Demonstrates one-shot speech recognition from a microphone. |
 
 ### Speech translation quickstarts
