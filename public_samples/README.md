@@ -92,7 +92,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | ---------- | -------- | ----------- |
 | [Quickstart C++ for Windows](./quickstart/speech-translation/cpp-windows/) | Windows | Demonstrates one-shot speech translation/transcription from a microphone. |
 | [Quickstart C# .NET Framework for Windows](./quickstart/speech-translation/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech translation/transcription from a microphone. |
-| [Quickstart C# .NET Core ](./quickstart/speech-translation/csharp-dotnetcore/) | Windows, Linux, macOS | Demonstrates one-shot speech translation/transcription from a microphone. |
+| [Quickstart C# .NET Core](./quickstart/speech-translation/csharp-dotnetcore/) | Windows, Linux, macOS | Demonstrates one-shot speech translation/transcription from a microphone. |
 | [Quickstart C# UWP for Windows](./quickstart/speech-translation/csharp-uwp/) | Windows | Demonstrates one-shot speech translation/transcription from a microphone. |
 | [Quickstart Java JRE](./quickstart/speech-translation/java-jre/) | Windows, Linux, macOS | Demonstrates one-shot speech translation/transcription from a microphone. |
 
@@ -106,6 +106,8 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart C++ for Linux](./quickstart/text-to-speech/cpp-linux/) | Linux | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C++ for Windows](./quickstart/text-to-speech/cpp-windows/) | Windows  | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C# .NET for Windows](./quickstart/text-to-speech/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart C# UWP for Windows](./quickstart/text-to-speech/csharp-uwp/) | Windows | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart C# .NET Core](./quickstart/text-to-speech/csharp-dotnetcore/) | Windows, Linux | Demonstrates one-shot speech synthesis to the default speaker. |
 
 ### Voice-first virtual assistants quickstarts
 
@@ -140,6 +142,8 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Speech recognition sample for iOS using a connection object](./samples/objective-c/ios/README.md#connection-object-sample)  | iOS      | Demonstrates speech recognition |
 | [Extended speech recognition sample for iOS](./samples/objective-c/ios/README.md#example-app-with-various-samples)           | iOS      | Demonstrates speech recognition using streams etc.|
 | [C# UWP SpeechBotConnector sample for Windows](./samples/virtual-assistant/csharp-uwp/) | Windows | Demonstrates speech recognition through the SpeechBotConnector and receiving activity responses. |
+| [C# Unity sample for Windows or Android](./samples/unity/speechrecognizer/) | Windows, Android |  Demonstrates speech recognition, intent recognition, and translation for Unity |
+
 
 Samples for using the Speech Service REST API (no Speech SDK installation required):
 

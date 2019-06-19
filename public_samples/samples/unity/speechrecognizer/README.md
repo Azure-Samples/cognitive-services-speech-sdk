@@ -79,7 +79,7 @@ This sample demonstrates how to use the Microsoft Cognitive Service Speech SDK i
 ## SCENE 2: Prepare & run the Intent Recognition sample scene
 
 > Note:
-> this sample scene requires that you first create a new LUIS app for natural language understanding. Get started at [https://www.luis.ai](https://www.luis.ai/) to first familiarize yourself with Cognitive servicesd Language Understanding (LUIS). Also refer to the [LUIS documentation here](https://docs.microsoft.com/azure/cognitive-services/luis/). A sample app definition is included with this sample to easily get you started. Also note that this sample uses credentials for the LUIS service, which are *NOT* the same credentials used in the speech sample above. More details are provided below
+> this sample scene requires that you first create a new LUIS app for natural language understanding. Get started at [https://www.luis.ai/](https://www.luis.ai/) to first familiarize yourself with Cognitive Services Language Understanding (LUIS). Also refer to the [LUIS documentation here](https://docs.microsoft.com/azure/cognitive-services/luis/). A sample app definition is included with this sample to easily get you started. Also note that this sample uses credentials for the LUIS service, which are *NOT* the same credentials used in the speech sample above. More details are provided below.
 
 ### Prepare the LUIS app
 
@@ -132,7 +132,7 @@ Note: the instructions below are the same regardless of the sample scene you wis
 ### Build and run the sample as a stand-alone desktop application
 
 * Open **File** > **Build Settings**.
-* Select the scene to build in the `Scenes in Build` list at the top of the dialog. Note: this sample is designed to only deploy one scene at a time since no scene naviagtion controls are included.
+* Select the scene to build in the `Scenes in Build` list at the top of the dialog. Note: this sample is designed to only deploy one scene at a time since no scene navigation controls are included.
 * Select **PC, Mac & Linux Standalone** as platform.
 * If this wasn't the active platform before, you have to select **Switch Platform** (and wait a bit).
 * Ensure the **Target Platform** field is set to **Windows** and pick the option you need from the **Architecture** field.
@@ -147,7 +147,7 @@ Note: the instructions below are the same regardless of the sample scene you wis
 ### Build and run the sample as Universal Windows Platform application
 
 * Open **File** > **Build Settings**.
-* Select the scene to build in the `Scenes in Build` list at the top of the dialog. Note: this sample is designed to only deploy one scene at a time since no scene naviagtion controls are included.
+* Select the scene to build in the `Scenes in Build` list at the top of the dialog. Note: this sample is designed to only deploy one scene at a time since no scene navigation controls are included.
 * Select **Universal Windows Platform** as platform.
 * If this wasn't the active platform before, you have to select **Switch Platform** (and wait a bit).
 * Ensure that **Target Platform** and **Architecture** are set appropriately.
@@ -170,7 +170,7 @@ Note: the instructions below are the same regardless of the sample scene you wis
 
 * Complete your [Android environment setup in Unity](https://docs.unity3d.com/Manual/android-sdksetup.html), including the Android NDK setup.
 * Open **File** > **Build Settings**.
-* Select the scene to build in the `Scenes in Build` list at the top of the dialog. Note: this sample is designed to only deploy one scene at a time since no scene naviagtion controls are included.
+* Select the scene to build in the `Scenes in Build` list at the top of the dialog. Note: this sample is designed to only deploy one scene at a time since no scene navigation controls are included.
 * Select **Android** as platform.
 * If this wasn't the active platform before, you have to select **Switch Platform** (and wait a bit).
 * Click **Player Settings...** to open them up in the Inspector Window (on the right by default).
