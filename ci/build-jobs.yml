@@ -810,7 +810,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetLinuxTest '))
   pool:
     name: Hosted Ubuntu 1604
-  timeoutInMinutes: 210
+  timeoutInMinutes: 240
   steps:
   - bash: |
       set -x -e -o pipefail
@@ -952,7 +952,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetOsxTest '))
   pool:
     name: Hosted macOS Preview
-  timeoutInMinutes: 210
+  timeoutInMinutes: 240
   steps:
   - bash: brew config && brew install bash
     displayName: Install modern bash on macOS
@@ -1446,7 +1446,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxBuild '))
   pool:
     name: Hosted Ubuntu 1604
-  timeoutInMinutes: 60
+  timeoutInMinutes: 240
   strategy:
     maxParallel: 2
     matrix:
@@ -1456,7 +1456,7 @@ jobs:
       release:
         BuildConfiguration: Release
         BuildPlatform: x64
-  variables: 
+  variables:
     OutputDirectory: $(Build.ArtifactStagingDirectory)/Linux-x64/$(BuildConfiguration)
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
@@ -1521,7 +1521,7 @@ jobs:
   - template: run-latency-test.yml
     parameters:
       speechKey: "$(WestUSLatencyTestSpeechKey)"
-      region: "westus" 
+      region: "westus"
 
 - template: linux-docker-build.yml
   parameters:
@@ -2021,7 +2021,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuild '))
   pool:
     name: Hosted macOS Preview
-  timeoutInMinutes: 60
+  timeoutInMinutes: 240
   strategy:
     maxParallel: 2
     matrix:

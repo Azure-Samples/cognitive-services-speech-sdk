@@ -12,7 +12,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDockerBuild '))
   pool:
     name: Hosted Ubuntu 1604
-  timeoutInMinutes: 80
+  timeoutInMinutes: 240
   variables:
     # Whether to publish binaries for the specific flavor.
     Publish: true
