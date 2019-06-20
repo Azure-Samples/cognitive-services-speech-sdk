@@ -1164,7 +1164,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [TestMethod][Ignore("Temporarily Disabled because of race condition on second keyword detection, see bug #1849546")]
         public async Task TestTranslationKeywordspotterComputerFound2DifferentUtterances()
         {
             var count = 0;
@@ -1183,35 +1183,42 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 recognizer.SessionStarted += (s, e) =>
                 {
-                    Console.WriteLine("SessionId: " + e.SessionId);
+                    Console.WriteLine("SessionStarted with SessionId: " + e.SessionId);
                 };
 
                 recognizer.Recognizing += (s, e) =>
                 {
-                    Console.WriteLine("Intermediate result: " + e.ToString());
+                    Console.WriteLine("Recognizing \"Intermediate\" result: " + e.ToString());
                 };
 
                 recognizer.Recognized += (s, e) =>
                 {
-                    Console.WriteLine("Final result: " + e.Result.Reason.ToString());
+                    Console.WriteLine("Final Result.Reason: " + e.Result.Reason.ToString());
 
                     if (e.Result.Reason == ResultReason.RecognizedKeyword)
-                        return; // ignore keyword events
+                    {
+                        return; // ignore initial keyword detected events.
+                    }
 
+                    Console.WriteLine("Final result.Text.StartsWith() EXPECTED: " + TestData.Kws.Computer.ModelKeyword);
+                    Console.WriteLine("Final result.Text ACTUAL: " + e.Result.Text.ToString());
                     if (e.Result.Text.ToLowerInvariant().StartsWith(TestData.Kws.Computer.ModelKeyword))
                     {
-                        Console.WriteLine("Final result EXPECTED: " + e.Result.Text.ToString());
-
                         if (Interlocked.Increment(ref count) == 2)
                         {
                             if (!e.Result.Text.Contains("old"))
+                            {
                                 error = "text did not contain old - " + e.Result.Text;
+                            }
+
                             tcs.TrySetResult(true);
                         }
                         else
                         {
                             if (!e.Result.Text.Contains("what"))
+                            {
                                 error = "text did not contain what - " + e.Result.Text;
+                            }
                         }
                     }
                     else
@@ -1226,12 +1233,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Canceled += (s, e) =>
                 {
                     Console.WriteLine("Canceled: " + e.ToString());
+                    Console.WriteLine("ErrorDetails: " + e.ErrorDetails);
                 };
 
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
                 await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
 
-                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(90000));
+                var hasCompleted = Task.WaitAny(tcs.Task, Task.Delay(12000));
                 Assert.AreEqual(0, hasCompleted, "keyword not detected within timeout");
                 Assert.AreEqual(true, tcs.Task.Result, "2x keyword not detected within timeout");
                 Assert.AreEqual(0, error.Length, error);
