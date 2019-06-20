@@ -301,7 +301,7 @@ Function main
         Write-Host *** Checking NUPKG files in $directory ***
         CheckWindowsNuget -directory $directory
 
-        $directory = Join-Path $RootDirectory "PythonBuild"
+        $directory = Join-Path $RootDirectory "Windows"
 
         Write-Host *** Checking WHL files in $directory ***
         CheckWindowsWheel -directory $directory
