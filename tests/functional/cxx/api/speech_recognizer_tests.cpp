@@ -1642,3 +1642,49 @@ TEST_CASE("SpeechConfig properties", "[api][cxx]")
         CHECK(connectionUrl.find("stableTranslation=") == string::npos);
     }
 }
+
+TEST_CASE("Dictation Corrections", "[api][cxx]")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    weather.UpdateFullFilename(Config::InputDir);
+    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+
+    auto pushStream = AudioInputStream::CreatePushStream();
+    auto audioInput = AudioConfig::FromStreamInput(pushStream);
+
+    SPXTEST_SECTION("correction_and_left_right_context")
+    {
+        string endpoint{ "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1" };
+
+        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        config->SetServiceProperty("format", "corrections", ServicePropertyChannel::UriQueryParameter);
+        config->EnableDictation();
+
+        //possible options for punctuation are implicit/explicit/intelligent/none.
+        config->SetServiceProperty("punctuation", "none", ServicePropertyChannel::UriQueryParameter);
+
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        recognizer->SetAuthorizationToken("abc");
+        recognizer->Properties.SetProperty("DictationInsertionPointLeft", "This is up to 100 characters of text that precedes the insertion \" \n { ] , point.");
+        recognizer->Properties.SetProperty("DictationInsertionPointRight", "This is up to 100 characters of text that follows the insertion point.");
+
+        auto result = make_shared<RecoPhrases>();
+        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        recognizer->StartContinuousRecognitionAsync().get();
+        PushData(pushStream.get(), weather.m_inputDataFilename);
+        WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+        recognizer->StopContinuousRecognitionAsync().get();
+
+        SPXTEST_REQUIRE(!result->phrases.empty());
+        auto detailedResult = result->phrases[0].Json;
+        SPXTEST_REQUIRE(detailedResult.find("NBest") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("ITN") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("Lexical") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("MaskedITN") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("Display") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("Corrections") != string::npos);
+    }
+
+}

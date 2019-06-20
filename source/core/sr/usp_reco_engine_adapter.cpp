@@ -950,8 +950,10 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
     // Do we expect to receive an intent payload from the service?
     m_expectIntentResponse = !intentJson.empty();
 
+    auto leftAndRight = GetLeftRightContext();
+
     // Take the json payload and the intent payload, and create the speech context json
-    auto speechContext = GetSpeechContextJson(listenForJson, intentJson, keywordDetectionJson);
+    auto speechContext = GetSpeechContextJson(listenForJson, intentJson, keywordDetectionJson, leftAndRight.first, leftAndRight.second);
 
     if (!speechContext.empty())
     {
@@ -1879,11 +1881,11 @@ std::string CSpxUspRecoEngineAdapter::GetKeywordDetectionJson()
     return "";
 }
 
-std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dgiJson, const std::string& intentJson, const std::string& keywordDetectionJson)
+std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dgiJson, const std::string& intentJson, const std::string& keywordDetectionJson, const std::string& insertionPointLeft, const std::string& insertionPointRight)
 {
     std::string contextJson;
 
-    if (!dgiJson.empty() || !intentJson.empty() || !keywordDetectionJson.empty())
+    if (!dgiJson.empty() || !intentJson.empty() || !keywordDetectionJson.empty() || !insertionPointLeft.empty() || !insertionPointRight.empty())
     {
         bool appendComma = false;
         contextJson += "{";
@@ -1911,8 +1913,28 @@ std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dg
             contextJson += ",";
             contextJson += R"("keywordDetection":)";
             contextJson += keywordDetectionJson;
+            appendComma = true;
         }
 
+        if (!insertionPointLeft.empty() || !insertionPointRight.empty())
+        {
+            contextJson += appendComma ? "," : "";
+            contextJson += R"("dictation": { "insertionPoint": { )";
+            appendComma = false;
+            if (!insertionPointLeft.empty())
+            {
+                contextJson += R"("left": )";
+                contextJson += insertionPointLeft;
+                appendComma = true;
+            }
+            if (!insertionPointRight.empty())
+            {
+                contextJson += appendComma ? "," : "";
+                contextJson += R"("right":)";
+                contextJson += insertionPointRight;
+            }
+            contextJson += "} }";
+        }
         contextJson += "}";
     }
 
@@ -2174,5 +2196,16 @@ void CSpxUspRecoEngineAdapter::ResetBeforeFirstAudio()
     UspTerminate();
 }
 
+std::pair<std::string, std::string> CSpxUspRecoEngineAdapter::GetLeftRightContext()
+{
+    // Get dictation left and right context of the insertion point.
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+    json leftContext = properties->GetStringValue("DictationInsertionPointLeft");
+    json rightContext = properties->GetStringValue("DictationInsertionPointRight");
+
+    return {leftContext.dump(), rightContext.dump()};
+}
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

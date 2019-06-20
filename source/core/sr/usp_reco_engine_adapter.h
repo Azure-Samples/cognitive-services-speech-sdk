@@ -196,7 +196,7 @@ private:
 
     void GetIntentInfoFromSite(std::string& provider, std::string& id, std::string& key, std::string& region);
     std::string GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key, const std::string& region);
-    std::string GetSpeechContextJson(const std::string& dgiJson, const std::string& LanguageUnderstandingJson, const std::string& keywordDetectionJson);
+    std::string GetSpeechContextJson(const std::string& dgiJson, const std::string& intentJson, const std::string& keywordDetectionJson, const std::string& insertionPointLeft, const std::string& insertionPointRight);
     std::string GetKeywordDetectionJson();
 
     void FireActivityResult(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio);
@@ -207,6 +207,8 @@ private:
     ResultReason ToReason(USP::RecognitionStatus uspRecognitionStatus);
     CancellationReason ToCancellationReason(USP::RecognitionStatus uspRecognitionStatus);
     NoMatchReason ToNoMatchReason(USP::RecognitionStatus uspRecognitionStatus);
+
+    std::pair<std::string, std::string> GetLeftRightContext();
 
     enum class AudioState { Idle = 0, Ready = 1, Sending = 2, Mute = 9 };
 

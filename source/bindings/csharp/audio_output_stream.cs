@@ -195,6 +195,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     /// Represents audio output stream used for custom audio output configurations.
     /// Added in version 1.4.0
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213", MessageId = "callback", Justification = "callback is passed in by the caller, and should not be disposed as that could cause the owner problems.")]
     public sealed class PushAudioOutputStream : AudioOutputStream
     {
         /// <summary>
@@ -231,7 +232,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             {
                 return;
             }
-
             callback = null;
             streamWriteDelegate = null;
             streamCloseDelegate = null;

@@ -72,21 +72,23 @@ extern TestData katieSteve;
 
 struct RecoPhrase
 {
-    RecoPhrase(const std::string& txt, const std::string& id)
-        : Text{txt}, UserId(id)
+    RecoPhrase(const std::string& txt, const std::string& id, const std::string& json)
+        : Text{ txt }, UserId(id), Json{ json }
     {}
 
     RecoPhrase(const std::string& txt)
-        : Text{ txt }, UserId(string{})
+        : Text{ txt }, UserId{ string{} }, Json{ string{} }
     {}
 
     RecoPhrase()
-        :Text{ string{} }, UserId{ string{} }
+        :Text{ string{} }, UserId{ string{} }, Json{ string{} }
     {}
 
     std::string Text;
     std::string UserId;
+    std::string Json;
 };
+
 
 using RecoResultVector = std::vector<RecoPhrase>;
 struct RecoPhrases
@@ -137,7 +139,7 @@ void ConnectCallbacks(RecogType* recognizer, RecoPhrasesPtr result)
                 << " Duration= " << e.Result->Duration()
                 << " UserId= " << userId;
 
-            SPX_TRACE_VERBOSE("RECOGNIZING: %s", os.str().c_str());
+            SPX_TRACE_VERBOSE("CXX_API_TEST RECOGNIZING: %s", os.str().c_str());
         }
     });
 
@@ -148,18 +150,19 @@ void ConnectCallbacks(RecogType* recognizer, RecoPhrasesPtr result)
         if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
             ostringstream os;
+            auto json = e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
             os << "Text= " << e.Result->Text
                 << " Offset= " << e.Result->Offset()
                 << " Duration= " << e.Result->Duration()
                 << " UserId= " << userId;
 
-            SPX_TRACE_VERBOSE("RECOGNIZED: %s", os.str().c_str());
+            SPX_TRACE_VERBOSE("CXX_API_TEST RECOGNIZED: %s", os.str().c_str());
 
-            result->phrases.push_back(RecoPhrase{ e.Result->Text, userId });
+            result->phrases.push_back(RecoPhrase{ e.Result->Text, userId, json });
         }
         else if (e.Result->Reason == ResultReason::NoMatch)
         {
-            SPX_TRACE_VERBOSE("cxx_api_Test NOMATCH: Speech could not be recognized.");
+            SPX_TRACE_VERBOSE("CXX_API_TEST NOMATCH: Speech could not be recognized.");
             auto nomatch = NoMatchDetails::FromResult(e.Result);
             switch (nomatch->Reason)
             {

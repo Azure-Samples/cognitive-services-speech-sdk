@@ -24,6 +24,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         private SpeechRecognitionTestsHelper helper;
         private static string endpointInString;
         private static Uri endpointUrl;
+        private static string officeEndpointString;
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
@@ -32,6 +33,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             deploymentId = Config.GetSettingByKey<String>(context, "DeploymentId");
             endpointInString = String.Format("wss://{0}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1", region);
             endpointUrl = new Uri(endpointInString);
+            officeEndpointString = "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1";
         }
 
         [TestInitialize]
@@ -1075,5 +1077,70 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertMatching(TestData.English.Profanity.RawUtterance, result.Text);
             }
         }
+
+        [TestMethod]
+        public async Task DictationCorrectionsRecognizeOnce()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var config = SpeechConfig.FromEndpoint(new Uri(officeEndpointString), subscriptionKey);
+            config.SetServiceProperty("format", "corrections", ServicePropertyChannel.UriQueryParameter);
+            config.EnableDictation();
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
+            {
+                recognizer.AuthorizationToken = "abc";
+                // with a . in the end of left context, the first letter of the recognized text is capital case.
+                recognizer.Properties.SetProperty("DictationInsertionPointLeft", "left context.");
+                recognizer.Properties.SetProperty("DictationInsertionPointRight", "right context.");
+
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.IsTrue(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult).Contains("Corrections"));
+                Assert.IsTrue(result.Text.StartsWith("W"));
+            }
+        }
+
+        [TestMethod]
+        public async Task DictationCorrectionsContinuousRecognition()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var config = SpeechConfig.FromEndpoint(new Uri(officeEndpointString), subscriptionKey);
+            config.SetServiceProperty("format", "corrections", ServicePropertyChannel.UriQueryParameter);
+            config.EnableDictation();
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
+            {
+                recognizer.AuthorizationToken = "abc";
+                // without a . in the end of left context, the first letter of the recognized text is lower case.
+                recognizer.Properties.SetProperty("DictationInsertionPointLeft", "left context \" with a quota");
+
+                string json = string.Empty;
+                string text = string.Empty;
+                var taskCompletionSource = new TaskCompletionSource<int>();
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    taskCompletionSource.TrySetResult(0);
+                };
+                string canceled = string.Empty;
+                recognizer.Canceled += (s, e) =>
+                {
+                    canceled = e.ErrorDetails;
+                    taskCompletionSource.TrySetResult(0);
+                };
+                recognizer.Recognized += (s, e) =>
+                {
+                    json = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                    text = e.Result.Text;
+                    taskCompletionSource.TrySetResult(0);
+                };
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                await Task.WhenAny(taskCompletionSource.Task, Task.Delay(TimeSpan.FromMinutes(3)));
+                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                Assert.IsTrue(json.Contains("Corrections"));
+                Assert.IsTrue(text.StartsWith("w"));
+            }
+        }
+
+
     }
 }

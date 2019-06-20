@@ -13,6 +13,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     /// <summary>
     /// Represents audio input configuration used for specifying what type of input to use (microphone, file, stream).
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213", MessageId = "streamKeepAlive", Justification = "The audio stream is sometimes not owned, and should not be disposed.")]
     public sealed class AudioConfig : IDisposable
     {
         /// <summary>
@@ -181,6 +182,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         /// <summary>
         /// Dispose of associated resources.
+        /// We may or may not dispose the audio stream, depending if we are told we own the stream give to us.
         /// </summary>
         public void Dispose()
         {

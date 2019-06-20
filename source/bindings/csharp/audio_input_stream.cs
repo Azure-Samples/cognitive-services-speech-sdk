@@ -237,6 +237,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     /// <summary>
     /// Represents audio input stream used for custom audio input configurations.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213", MessageId = "callback", Justification = "callback is passed in by the caller, and should not be disposed as that could cause the owner problems.")]
     public sealed class PullAudioInputStream : AudioInputStream
     {
         /// <summary>
