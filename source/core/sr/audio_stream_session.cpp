@@ -608,18 +608,29 @@ CSpxAsyncOp<std::string> CSpxAudioStreamSession::SendActivityAsync(std::shared_p
     /* Need to change thread service to support generic tasks */
     std::shared_future<std::string> taskFuture = std::async(std::launch::async, [this, activity, keep_alive]()
     {
-        auto& message_payload = activity->GetJSON();
         auto interaction_id = PAL::CreateGuidWithDashesUTF8();
 
-        nlohmann::json message = {
-            { "version", "0.5"},
-            { "context", {
-                {"interactionId", interaction_id}
-            }},
-            { "messagePayload", message_payload }
-        };
-        auto adapter = EnsureInitRecoEngineAdapter();
-        adapter->SendAgentMessage(message.dump());
+        auto task = CreateTask([&]() {
+            auto& message_payload = activity->GetJSON();
+            nlohmann::json message = {
+                { "version", "0.5"},
+                { "context", {
+                    {"interactionId", interaction_id}
+                }},
+                { "messagePayload", message_payload }
+            };
+            EnsureInitRecoEngineAdapter();
+            m_recoAdapter->SendAgentMessage(message.dump());
+        });
+        std::promise<bool> executed;
+        std::shared_future<bool> executedFuture{ executed.get_future() };
+        m_threadService->ExecuteAsync(move(task), ISpxThreadService::Affinity::Background, std::move(executed));
+        if (!executedFuture.get())
+        {
+            // The task has not been even executed, throwing.
+            SPX_THROW_HR(SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
+        }
+
         return interaction_id;
     });
     return CSpxAsyncOp<std::string>{ taskFuture, AOS_Started};

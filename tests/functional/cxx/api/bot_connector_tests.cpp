@@ -351,12 +351,10 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector]")
             },
             20s, 3u);
 
-        bool success = std::get<0>(result);
-        if (!success)
-        {
-            std::string message = std::move(std::get<1>(result));
-            FAIL(message);
-        }
+        auto success = std::get<0>(result);
+        auto message = std::move(std::get<1>(result));
+        INFO(message);
+        REQUIRE(success);
     }
 
     SECTION("Send/Receive activity works (w/TTS)")
@@ -367,7 +365,7 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector]")
         auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
 
         test_runner runner{ config, audioConfig };
-;
+
         constexpr auto activity_text = "message";
         constexpr auto activity_speak = "Hello world";
 
@@ -430,13 +428,56 @@ TEST_CASE("Speech Bot Connector basics", "[api][cxx][bot_connector]")
             },
             20s, 3);
 
-        bool success = std::get<0>(result);
-        if (!success)
-        {
-            std::string message = std::move(std::get<1>(result));
-            FAIL(message);
-        }
+        auto success = std::get<0>(result);
+        auto message = std::move(std::get<1>(result));
+        INFO(message);
+        REQUIRE(success);
 
+    }
+}
+
+TEST_CASE("Speech Bot Connector extended", "[api][cxx][bot_connector][adv][!hide]")
+{
+    SECTION("Interleaving speech and activities.")
+    {
+        turnOnLamp.UpdateFullFilename(Config::InputDir);
+        REQUIRE(exists(turnOnLamp.m_inputDataFilename));
+        auto config = BotConfigForTests();
+        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
+
+        test_runner runner{ config, audioConfig };
+
+        constexpr auto activity_text = "message";
+
+        runner.add_recognized_test(verifyRecognizedSpeech, 1);
+        runner.add_activity_received_test([](std::ostringstream&, const ActivityReceivedEventArgs&, int)
+        {
+            /* Just check that we are receiving it */
+            return true;
+        }, 2);
+        runner.add_canceled_test(verifyCanceledSpeech);
+
+        auto result = runner.run<void>(
+            [&](SpeechBotConnector& connector)
+            {
+                auto f1 = connector.ListenOnceAsync();
+                auto activity = BotConnectorActivity::Create();
+                activity->Type = TEST_ACTIVITY_TYPE;
+                activity->Text = activity_text;
+                auto f2 = connector.SendActivityAsync(activity);
+                return std::async([f1 = std::move(f1), f2 = std::move(f2)]()
+                {
+                    f1.wait();
+                    f2.wait();
+                    return;
+                });
+            },
+            20s, 3);
+
+        auto success = std::get<0>(result);
+        auto message = std::move(std::get<1>(result));
+        INFO(message);
+        REQUIRE(success);
     }
 }
 
