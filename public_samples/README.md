@@ -144,6 +144,7 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Extended speech recognition sample for iOS](./samples/objective-c/ios/README.md#example-app-with-various-samples)           | iOS      | Demonstrates speech recognition using streams etc.|
 | [C# UWP DialogConnector sample for Windows](./samples/virtual-assistant/csharp-uwp/) | Windows | Demonstrates speech recognition through the DialogConnector and receiving activity responses. |
 | [C# Unity sample for Windows or Android](./samples/unity/speechrecognizer/) | Windows, Android |  Demonstrates speech recognition, intent recognition, and translation for Unity |
+| [C# Unity SpeechBotConnector sample for Windows](./samples/virtual-assistant/csharp-unity/) | Windows, Android | Demonstrates speech recognition through the SpeechBotConnector and receiving activity responses. |
 
 
 Samples for using the Speech Service REST API (no Speech SDK installation required):

@@ -1,0 +1,16 @@
+The following libraries can be redistributed if you are using the Cognitive Services Speech SDK,
+subject to the license (https://aka.ms/csspeech/license201809).
+
+Microsoft.CognitiveServices.Speech.core.dll
+Microsoft.CognitiveServices.Speech.csharp.dll
+Microsoft.CognitiveServices.Speech.csharp.unix.dll
+Microsoft.CognitiveServices.Speech.extension.kws.dll
+MicrosoftCognitiveServicesSpeech.framework/MicrosoftCognitiveServicesSpeech
+client-sdk-<VERSION>.aar (or content derived from it)
+client-sdk-<VERSION>.jar
+libMicrosoft.CognitiveServices.Speech.core.so
+libMicrosoft.CognitiveServices.Speech.extension.kws.so
+libMicrosoft.CognitiveServices.Speech.extension.codec.so
+azure_cognitiveservices_speech-<VERSION>-*.whl, including _speech_py_impl.so and _speech_py_impl.pyd
+
+Depending on your usage, you only need to redistribute a subset of the above.
