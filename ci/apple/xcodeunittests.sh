@@ -14,6 +14,8 @@ DEVICE="${6?$USAGE}"  # device name to test on
 OS="${7?$USAGE}"  # os to test with
 shift 7
 
+source $SCRIPT_DIR/../functions.sh
+
 xcodeExtraArgs=()
 redactStrings=
 USEGUI=
@@ -103,3 +105,4 @@ run_test() {
 }
 
 run_test
+
