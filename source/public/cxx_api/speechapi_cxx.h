@@ -50,7 +50,7 @@
 
 #include <speechapi_cxx_session.h>
 
-#include <speechapi_cxx_speech_bot_connector.h>
+#include <speechapi_cxx_dialog_connector.h>
 
 #include <speechapi_cxx_connection.h>
 #include <speechapi_cxx_connection_eventargs.h>

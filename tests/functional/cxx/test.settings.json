@@ -3,13 +3,13 @@
   "OnlineEndPoint": "",
   "endPoint": "",
   "inputDir": "input",
-  "keyBot": "",
+  "keyDialog": "",
   "keyConversationTranscriber": "",
   "keyLUIS": "",
   "keySpeech": "",
   "luisAppId": "",
-  "regionIdBot": "",
+  "dialogRegionId": "",
   "regionIdLUIS": "",
-  "secretKeyBot": "",
+  "dialogBotSecret": "",
   "regionId": ""
 }

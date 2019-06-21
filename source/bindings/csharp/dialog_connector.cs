@@ -14,10 +14,10 @@ using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 namespace Microsoft.CognitiveServices.Speech.Dialog
 {
     /// <summary>
-    /// Connects to a speech enabled bot.
+    /// Connects to a speech enabled dialog.
     /// Added in version 1.5.0
     /// </summary>
-    public sealed class SpeechBotConnector : IDisposable
+    public sealed class DialogConnector : IDisposable
     {
         /// <summary>
         /// Signal that indicates the start of a listening session.
@@ -45,35 +45,35 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         public event EventHandler<SpeechRecognitionCanceledEventArgs> Canceled;
 
         /// <summary>
-        /// Signal that an activity was received from the bot.
+        /// Signal that an activity was received from the backing dialog.
         /// </summary>
         public event EventHandler<ActivityReceivedEventArgs> ActivityReceived;
 
         /// <summary>
-        /// Creates a speech bot connector using the default microphone input for a specified bot connector configuration.
+        /// Creates a dialog connector using the default microphone input for a specified dialog configuration.
         /// </summary>
-        /// <param name="config">Bot connector config.</param>
-        /// <returns>A speech bot connector instance.</returns>
-        public SpeechBotConnector(BotConnectorConfig config)
-            : this(FromConfig(SpxFactory.bot_connector_create_speech_bot_connector_from_config, config))
+        /// <param name="config">Dialog config.</param>
+        /// <returns>A dialog connector instance.</returns>
+        public DialogConnector(DialogConfig config)
+            : this(FromConfig(SpxFactory.dialog_connector_create_dialog_connector_from_config, config))
         {
         }
 
         /// <summary>
-        /// Creates a speech bot connector using the specified bot connector and audio configuration.
+        /// Creates a dialog connector using the specified dialog and audio configuration.
         /// </summary>
-        /// <param name="config">Bot connector config.</param>
+        /// <param name="config">Dialog config.</param>
         /// <param name="audioConfig">Audio config.</param>
-        /// <returns>A speech bot connector instance.</returns>
-        public SpeechBotConnector(BotConnectorConfig config, Audio.AudioConfig audioConfig)
-            : this(FromConfig(SpxFactory.bot_connector_create_speech_bot_connector_from_config, config, audioConfig))
+        /// <returns>A diallog connector instance.</returns>
+        public DialogConnector(DialogConfig config, Audio.AudioConfig audioConfig)
+            : this(FromConfig(SpxFactory.dialog_connector_create_dialog_connector_from_config, config, audioConfig))
         {
         }
 
-        internal SpeechBotConnector(InteropSafeHandle botPtr)
+        internal DialogConnector(InteropSafeHandle dialogPtr)
         {
-            ThrowIfNull(botPtr);
-            botConnectorHandle = botPtr;
+            ThrowIfNull(dialogPtr);
+            dialogConnectorHandle = dialogPtr;
             gch = GCHandle.Alloc(this, GCHandleType.Weak);
 
             sessionStartedCallbackDelegate = FireEvent_SessionStarted;
@@ -83,15 +83,15 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             canceledCallbackDelegate = FireEvent_Canceled;
             activityReceivedCallbackDelegate = FireEvent_ActivityReceived;
 
-            ThrowIfFail(Internal.SpeechBotConnector.bot_connector_session_started_set_callback(botConnectorHandle, sessionStartedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.SpeechBotConnector.bot_connector_session_stopped_set_callback(botConnectorHandle, sessionStoppedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.SpeechBotConnector.bot_connector_recognized_set_callback(botConnectorHandle, recognizedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.SpeechBotConnector.bot_connector_recognizing_set_callback(botConnectorHandle, recognizingCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.SpeechBotConnector.bot_connector_canceled_set_callback(botConnectorHandle, canceledCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.SpeechBotConnector.bot_connector_activity_received_set_callback(botConnectorHandle, activityReceivedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.DialogConnector.dialog_connector_session_started_set_callback(dialogConnectorHandle, sessionStartedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.DialogConnector.dialog_connector_session_stopped_set_callback(dialogConnectorHandle, sessionStoppedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.DialogConnector.dialog_connector_recognized_set_callback(dialogConnectorHandle, recognizedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.DialogConnector.dialog_connector_recognizing_set_callback(dialogConnectorHandle, recognizingCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.DialogConnector.dialog_connector_canceled_set_callback(dialogConnectorHandle, canceledCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.DialogConnector.dialog_connector_activity_received_set_callback(dialogConnectorHandle, activityReceivedCallbackDelegate, GCHandle.ToIntPtr(gch)));
         }
 
-        ~SpeechBotConnector()
+        ~DialogConnector()
         {
             isDisposing = true;
             Dispose(false);
@@ -118,20 +118,20 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
                 return;
             }
 
-            if (botConnectorHandle != null)
+            if (dialogConnectorHandle != null)
             {
-                LogErrorIfFail(Internal.SpeechBotConnector.bot_connector_session_started_set_callback(botConnectorHandle, null, IntPtr.Zero));
-                LogErrorIfFail(Internal.SpeechBotConnector.bot_connector_session_stopped_set_callback(botConnectorHandle, null, IntPtr.Zero));
-                LogErrorIfFail(Internal.SpeechBotConnector.bot_connector_recognized_set_callback(botConnectorHandle, null, IntPtr.Zero));
-                LogErrorIfFail(Internal.SpeechBotConnector.bot_connector_recognizing_set_callback(botConnectorHandle, null, IntPtr.Zero));
-                LogErrorIfFail(Internal.SpeechBotConnector.bot_connector_canceled_set_callback(botConnectorHandle, null, IntPtr.Zero));
-                LogErrorIfFail(Internal.SpeechBotConnector.bot_connector_activity_received_set_callback(botConnectorHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.DialogConnector.dialog_connector_session_started_set_callback(dialogConnectorHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.DialogConnector.dialog_connector_session_stopped_set_callback(dialogConnectorHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.DialogConnector.dialog_connector_recognized_set_callback(dialogConnectorHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.DialogConnector.dialog_connector_recognizing_set_callback(dialogConnectorHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.DialogConnector.dialog_connector_canceled_set_callback(dialogConnectorHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.DialogConnector.dialog_connector_activity_received_set_callback(dialogConnectorHandle, null, IntPtr.Zero));
             }
 
             // Dispose of managed resources
             if (disposing)
             {
-                botConnectorHandle.Dispose();
+                dialogConnectorHandle.Dispose();
             }
 
             sessionStartedCallbackDelegate = null;
@@ -149,7 +149,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             disposed = true;
         }
 
-        internal InteropSafeHandle botConnectorHandle;
+        internal InteropSafeHandle dialogConnectorHandle;
         private IntPtr asyncStartContinuousHandle = IntPtr.Zero;
         private IntPtr asyncStopContinuousHandle = IntPtr.Zero;
         private IntPtr asyncStartKeywordHandle = IntPtr.Zero;
@@ -176,14 +176,9 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// </summary>
         private volatile bool isDisposing = false;
 
-        /// <summary>
-        /// botLock is used to synchronize access to objects member variables from multiple threads
-        /// </summary>
-        private readonly object botLock = new object();
-
-        static SpeechBotConnector GetConnectorFromContext(IntPtr context)
+        static DialogConnector GetConnectorFromContext(IntPtr context)
         {
-            var connector = InteropSafeHandle.GetObjectFromWeakHandle<SpeechBotConnector>(context);
+            var connector = InteropSafeHandle.GetObjectFromWeakHandle<DialogConnector>(context);
             if (connector == null || connector.isDisposing)
             {
                 return null;
@@ -191,7 +186,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             return connector;
         }
 
-        static void FireEvent<EvtArgs>(EvtArgs eventArgs, SpeechBotConnector connector, EventHandler<EvtArgs> evt)
+        static void FireEvent<EvtArgs>(EvtArgs eventArgs, DialogConnector connector, EventHandler<EvtArgs> evt)
         {
             evt?.Invoke(connector, eventArgs);
         }
@@ -318,8 +313,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
 
             return Task.Run(() =>
             {
-                ThrowIfNull(botConnectorHandle, "Invalid connector handle");
-                ThrowIfFail(Internal.SpeechBotConnector.bot_connector_connect(botConnectorHandle));
+                ThrowIfNull(dialogConnectorHandle, "Invalid connector handle");
+                ThrowIfFail(Internal.DialogConnector.dialog_connector_connect(dialogConnectorHandle));
             });
         }
 
@@ -333,13 +328,13 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
 
             return Task.Run(() =>
             {
-                ThrowIfNull(botConnectorHandle, "Invalid connector handle");
-                ThrowIfFail(Internal.SpeechBotConnector.bot_connector_disconnect(botConnectorHandle));
+                ThrowIfNull(dialogConnectorHandle, "Invalid connector handle");
+                ThrowIfFail(Internal.DialogConnector.dialog_connector_disconnect(dialogConnectorHandle));
             });
         }
 
         /// <summary>
-        /// Sends an activity to the backing bot.
+        /// Sends an activity to the backing dialog.
         /// </summary>
         /// <param name="activityJSON">Activity to send as a serialized JSON</param>
         /// <returns>An asynchronous operation that starts the operation.</returns>
@@ -350,11 +345,11 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             return Task.Run(() =>
             {
                 IntPtr activityPtr = IntPtr.Zero;
-                ThrowIfNull(botConnectorHandle, "Invalid connector handle");
+                ThrowIfNull(dialogConnectorHandle, "Invalid connector handle");
                 IntPtr activityJSONPtr = Utf8StringMarshaler.MarshalManagedToNative(activityJSON);
                 try
                 {
-                    ThrowIfFail(Internal.BotConnectorActivity.bot_activity_from_string(activityJSONPtr, out activityPtr));
+                    ThrowIfFail(Internal.Activity.activity_from_string(activityJSONPtr, out activityPtr));
                 }
                 finally
                 {
@@ -362,8 +357,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
                 }
                 const int guidSize = 50;
                 var buffer = new StringBuilder(guidSize);
-                ThrowIfFail(Internal.SpeechBotConnector.bot_connector_send_activity(botConnectorHandle, activityPtr, buffer));
-                ThrowIfFail(Internal.BotConnectorActivity.bot_activity_handle_release(activityPtr));
+                ThrowIfFail(Internal.DialogConnector.dialog_connector_send_activity(dialogConnectorHandle, activityPtr, buffer));
+                ThrowIfFail(Internal.Activity.activity_handle_release(activityPtr));
                 return buffer.ToString();
             });
         }
@@ -377,11 +372,11 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         {
             AssertNotDisposed();
 
-            ThrowIfNull(botConnectorHandle, "Invalid connector handle");
+            ThrowIfNull(dialogConnectorHandle, "Invalid connector handle");
             return Task.Run(() =>
             {
-                ThrowIfNull(botConnectorHandle, "Invalid connector handle");
-                ThrowIfFail(Internal.SpeechBotConnector.bot_connector_start_keyword_recognition(botConnectorHandle, model.keywordHandle));
+                ThrowIfNull(dialogConnectorHandle, "Invalid connector handle");
+                ThrowIfFail(Internal.DialogConnector.dialog_connector_start_keyword_recognition(dialogConnectorHandle, model.keywordHandle));
             });
         }
 
@@ -395,8 +390,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
 
             return Task.Run(() =>
             {
-                ThrowIfNull(botConnectorHandle, "Invalid connector handle");
-                ThrowIfFail(Internal.SpeechBotConnector.bot_connector_stop_keyword_recognition(botConnectorHandle));
+                ThrowIfNull(dialogConnectorHandle, "Invalid connector handle");
+                ThrowIfFail(Internal.DialogConnector.dialog_connector_stop_keyword_recognition(dialogConnectorHandle));
             });
         }
 
@@ -410,8 +405,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
 
             return Task.Run(() =>
             {
-                ThrowIfNull(botConnectorHandle, "Invalid connector handle");
-                ThrowIfFail(Internal.SpeechBotConnector.bot_connector_listen_once(botConnectorHandle));
+                ThrowIfNull(dialogConnectorHandle, "Invalid connector handle");
+                ThrowIfFail(Internal.DialogConnector.dialog_connector_listen_once(dialogConnectorHandle));
             });
         }
 
@@ -424,7 +419,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
 
             IntPtr recoHandlePtr = IntPtr.Zero;
             ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, audioConfig.configHandle));
-            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.SpeechBotConnector.bot_connector_handle_release);
+            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.DialogConnector.dialog_connector_handle_release);
             GC.KeepAlive(speechConfig);
             GC.KeepAlive(audioConfig);
             return recoHandle;
@@ -438,7 +433,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             IntPtr audioConfigPtr = IntPtr.Zero;
             InteropSafeHandle audioConfigHandle = new InteropSafeHandle(audioConfigPtr, null);
             ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, audioConfigHandle));
-            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.SpeechBotConnector.bot_connector_handle_release);
+            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.DialogConnector.dialog_connector_handle_release);
             GC.KeepAlive(speechConfig);
             return recoHandle;
         }

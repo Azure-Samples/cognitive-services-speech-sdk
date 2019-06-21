@@ -10,18 +10,18 @@ using Microsoft.CognitiveServices.Speech.Dialog;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     [TestClass]
-    public class BotConnectorTestBase
+    public class DialogConnectorTestBase
     {
-        public static string inputDir, subscriptionKey, region, botConnectionId;
-        public BotConnectorConfig botConnectorConfig;
+        public static string inputDir, subscriptionKey, region, botSecret;
+        public DialogConfig dialogConfig;
 
         [ClassInitialize]
         public static void BaseClassInitialize(TestContext context)
         {
             // Ignore for now, using AutoReply
-            botConnectionId = Config.GetSettingByKey<String>(context, "BotConnectionId");
-            subscriptionKey = Config.GetSettingByKey<String>(context, "BotSubscriptionKey");
-            region = Config.GetSettingByKey<String>(context, "BotRegion");
+            botSecret = Config.GetSettingByKey<String>(context, "DialogFunctionalTestBot");
+            subscriptionKey = Config.GetSettingByKey<String>(context, "DialogSubscriptionKey");
+            region = Config.GetSettingByKey<String>(context, "DialogRegion");
             inputDir = Config.GetSettingByKey<String>(context, "InputDir");
 
             TestData.AudioDir = Path.Combine(inputDir, "audio");
@@ -33,9 +33,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestInitialize]
         public void BaseTestInit()
         {
-            botConnectorConfig = BotConnectorConfig.FromSecretKey(botConnectionId, subscriptionKey, region);
-            botConnectorConfig.SpeechRecognitionLanguage = "en-us";
-            botConnectorConfig.SetProperty("Conversation_Communication_Type", "AutoReply");
+            dialogConfig = DialogConfig.FromBotSecret(botSecret, subscriptionKey, region);
+            dialogConfig.SpeechRecognitionLanguage = "en-us";
+            dialogConfig.SetProperty("Conversation_Communication_Type", "AutoReply");
         }
     }
 }

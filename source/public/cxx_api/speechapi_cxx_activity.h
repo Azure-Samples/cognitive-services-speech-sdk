@@ -25,7 +25,7 @@ namespace Dialog {
 
 // Internally used string constants.
 
-namespace Activity
+namespace ActivityFields
 {
     namespace Fields
     {
@@ -73,9 +73,9 @@ namespace Activity
 /*! \endcond */
 
 /// <summary>
-/// Class that represents a bot activity.
+/// Class that represents an activity.
 /// </summary>
-class BotConnectorActivity : public std::enable_shared_from_this<BotConnectorActivity>
+class Activity : public std::enable_shared_from_this<Activity>
 {
 protected:
     /*! \cond PROTECTED */
@@ -187,7 +187,7 @@ public:
             return stream << property.m_cache;
         }
 
-        friend class BotConnectorActivity;
+        friend class Activity;
     private:
         /*! \cond PROTECTED */
         using get_fn = std::function<T()>;
@@ -220,49 +220,49 @@ public:
         /// <returns>Whether the object is null</returns>
         inline bool IsNull() const
         {
-            return check_type<BotActivityJSONType::Null>();
+            return check_type<ActivityJSONType::Null>();
         }
 
         /// <summary>Checks if the JSON is a JSON object</summary>
         /// <returns>Whether the object is an object</returns>
         inline bool IsObject() const
         {
-            return check_type<BotActivityJSONType::Object>();
+            return check_type<ActivityJSONType::Object>();
         }
 
         /// <summary>Checks if the JSON is of the type double</summary>
         /// <returns>Whether the object is a double</returns>
         bool IsDouble() const
         {
-            return check_type<BotActivityJSONType::Double>();
+            return check_type<ActivityJSONType::Double>();
         }
 
         /// <summary>Checks if the JSON is of the type unsigned int</summary>
         /// <returns>Whether the object is an unsigned integer</returns>
         bool IsUInt() const
         {
-            return check_type<BotActivityJSONType::UInt>();
+            return check_type<ActivityJSONType::UInt>();
         }
 
         /// <summary>Checks if the JSON is of the type signed integer</summary>
         /// <returns>Whether the object is a signed integer</returns>
         bool IsInt() const
         {
-            return check_type<BotActivityJSONType::Int>();
+            return check_type<ActivityJSONType::Int>();
         }
 
         /// <summary>Checks if the JSON is of the type string</summary>
         /// <returns>Whether the object is a string</returns>
         bool IsString() const
         {
-            return check_type<BotActivityJSONType::String>();
+            return check_type<ActivityJSONType::String>();
         }
 
         /// <summary>Checks if the JSON corresponds to a JSON array</summary>
         /// <returns>Whether the object is an array</returns>
         bool IsArray() const
         {
-            return check_type<BotActivityJSONType::Array>();
+            return check_type<ActivityJSONType::Array>();
         }
 
         /*! \cond PROTECTED */
@@ -276,7 +276,7 @@ public:
         {
             if (m_handle != SPXHANDLE_INVALID)
             {
-                bot_activity_json_handle_release(m_handle);
+                activity_json_handle_release(m_handle);
             }
         }
         /*! \endcond */
@@ -290,7 +290,7 @@ public:
         bool Has(const std::string& field)
         {
             bool has_field{ false };
-            SPX_THROW_ON_FAIL(bot_activity_json_has_field(m_handle, field.c_str(), &has_field));
+            SPX_THROW_ON_FAIL(activity_json_has_field(m_handle, field.c_str(), &has_field));
             return has_field;
         }
 
@@ -307,7 +307,7 @@ public:
             {
                 /* w007, a new field! */
                 SPXACTIVITYJSONHANDLE h;
-                SPX_THROW_ON_FAIL(bot_activity_json_field_handle(m_handle, field.c_str(), &h));
+                SPX_THROW_ON_FAIL(activity_json_field_handle(m_handle, field.c_str(), &h));
                 auto r = m_fields.insert(std::make_pair(field, JSON{ h }));
                 return r.first->second;
             }
@@ -347,9 +347,9 @@ public:
         {
             /* When C++17 comes this will be nicer, all these Get methods can be merged with constexpr if */
             std::size_t size{ 0 };
-            SPX_THROW_ON_FAIL(bot_activity_json_get_string_size(m_handle, &size));
+            SPX_THROW_ON_FAIL(activity_json_get_string_size(m_handle, &size));
             auto buffer = std::make_unique<char[]>(size + 1);
-            SPX_THROW_ON_FAIL(bot_activity_json_get_string(m_handle, buffer.get(), size + 1));
+            SPX_THROW_ON_FAIL(activity_json_get_string(m_handle, buffer.get(), size + 1));
             return buffer.get();
         }
 
@@ -363,7 +363,7 @@ public:
         T Get() const
         {
             double dbl;
-            SPX_THROW_ON_FAIL(bot_activity_json_get_double(m_handle, &dbl));
+            SPX_THROW_ON_FAIL(activity_json_get_double(m_handle, &dbl));
             return dbl;
         }
 
@@ -377,7 +377,7 @@ public:
         T Get() const
         {
             bool bl;
-            SPX_THROW_ON_FAIL(bot_activity_json_get_bool(m_handle, &bl));
+            SPX_THROW_ON_FAIL(activity_json_get_bool(m_handle, &bl));
             return bl;
         }
 
@@ -391,7 +391,7 @@ public:
         T Get() const
         {
             int64_t i;
-            SPX_THROW_ON_FAIL(bot_activity_json_get_int(m_handle, &i));
+            SPX_THROW_ON_FAIL(activity_json_get_int(m_handle, &i));
             return i;
         }
 
@@ -405,7 +405,7 @@ public:
         T Get() const
         {
             uint64_t ui;
-            SPX_THROW_ON_FAIL(bot_activity_json_get_uint(m_handle, &ui));
+            SPX_THROW_ON_FAIL(activity_json_get_uint(m_handle, &ui));
             return ui;
         }
 
@@ -421,7 +421,7 @@ public:
             {
                 /* Not in cache, fetch of insert */
                 SPXACTIVITYJSONHANDLE h;
-                SPX_THROW_ON_FAIL(bot_activity_json_array_item(m_handle, idx, &h));
+                SPX_THROW_ON_FAIL(activity_json_array_item(m_handle, idx, &h));
                 m_items.push_back(JSON{ h });
             }
             return m_items[idx];
@@ -446,18 +446,18 @@ public:
         std::size_t Size() const
         {
             std::size_t size{};
-            SPX_THROW_ON_FAIL(bot_activity_json_array_size(m_handle, &size));
+            SPX_THROW_ON_FAIL(activity_json_array_size(m_handle, &size));
             return size;
         }
 
-        friend class BotConnectorActivity;
+        friend class Activity;
     private:
         /*! \cond PROTECTED */
-        template<BotActivityJSONType t>
+        template<ActivityJSONType t>
         bool check_type() const
         {
-            BotActivityJSONType type;
-            bot_activity_json_get_type(m_handle, reinterpret_cast<int*>(&type));
+            ActivityJSONType type;
+            activity_json_get_type(m_handle, reinterpret_cast<int*>(&type));
             return t == type;
         }
 
@@ -469,30 +469,30 @@ public:
         template<typename T, std::enable_if_t<std::is_floating_point<T>::value && !std::is_integral<T>::value, int> = 0>
         void SetValue(T val)
         {
-            bot_activity_json_set_double(m_handle, double{ val });
+            activity_json_set_double(m_handle, double{ val });
         }
 
         template<typename T, std::enable_if_t<std::is_same<bool, std::decay_t<T>>::value, int> = 0>
         void SetValue(T val)
         {
-            bot_activity_json_set_bool(m_handle, bool{ val });
+            activity_json_set_bool(m_handle, bool{ val });
         }
 
         template<typename T, std::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value && !std::is_same<bool, std::decay_t<T>>::value, int> = 0>
         void SetValue(T val)
         {
-            bot_activity_json_set_uint(m_handle, uint64_t{ val });
+            activity_json_set_uint(m_handle, uint64_t{ val });
         }
 
         template<typename T, std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value, int> = 0>
         void SetValue(T val)
         {
-            bot_activity_json_set_int(m_handle, int64_t{ val });
+            activity_json_set_int(m_handle, int64_t{ val });
         }
 
         void SetValue(const std::string& val)
         {
-            bot_activity_json_set_string(m_handle, val.c_str());
+            activity_json_set_string(m_handle, val.c_str());
         }
 
         SPXACTIVITYJSONHANDLE m_handle;
@@ -538,7 +538,7 @@ public:
             return m_json.Size();
         }
 
-        friend class BotConnectorActivity;
+        friend class Activity;
     private:
         JSONArray(JSON json) : m_json{ std::move(json) }
         {
@@ -548,7 +548,7 @@ public:
     };
 #endif
 public:
-    friend class SpeechBotConnector;
+    friend class DialogConnector;
     friend class ActivityReceivedEventArgs;
 
 #ifndef SWIG
@@ -556,22 +556,22 @@ public:
     /// Creates an empty activity instance.
     /// </summary>
     /// <returns>Newly created instance.</returns>
-    static inline std::shared_ptr<BotConnectorActivity> Create()
+    static inline std::shared_ptr<Activity> Create()
     {
-        return std::shared_ptr<BotConnectorActivity>(new BotConnectorActivity{});
+        return std::shared_ptr<Activity>(new Activity{});
     }
 #endif
 
     /// <summary>
-    /// Create a bot activity from a serialized activity.
+    /// Create an activity from a serialized activity.
     /// </summary>
     /// <param name="activity">Serialized activity</param>
     /// <returns>Shared pointer to the created activity</returns>
-    static inline std::shared_ptr<BotConnectorActivity> FromSerializedActivity(const std::string& activity)
+    static inline std::shared_ptr<Activity> FromSerializedActivity(const std::string& activity)
     {
         SPXACTIVITYHANDLE h;
-        SPX_THROW_ON_FAIL(bot_activity_from_string(activity.c_str(), &h));
-        return std::shared_ptr<BotConnectorActivity>(new BotConnectorActivity{ h });
+        SPX_THROW_ON_FAIL(activity_from_string(activity.c_str(), &h));
+        return std::shared_ptr<Activity>(new Activity{ h });
     }
 
     /// <summary>
@@ -581,9 +581,9 @@ public:
     inline std::string Serialize()
     {
         std::size_t size{ 0 };
-        SPX_THROW_ON_FAIL(bot_activity_serialized_size(m_handle, &size));
+        SPX_THROW_ON_FAIL(activity_serialized_size(m_handle, &size));
         auto buffer = std::make_unique<char[]>(size + 1);
-        SPX_THROW_ON_FAIL(bot_activity_serialize(m_handle, buffer.get(), size + 1));
+        SPX_THROW_ON_FAIL(activity_serialize(m_handle, buffer.get(), size + 1));
         return std::string{ buffer.get() };
     }
 
@@ -597,29 +597,29 @@ public:
     string_prop Id;
     JSON& From()
     {
-        return complex_field<JSON>(Activity::Fields::Complex::From, m_complex_fields);
+        return complex_field<JSON>(ActivityFields::Fields::Complex::From, m_complex_fields);
     }
 
     JSON& Recipient()
     {
-        return complex_field<JSON>(Activity::Fields::Complex::Recipient, m_complex_fields);
+        return complex_field<JSON>(ActivityFields::Fields::Complex::Recipient, m_complex_fields);
     }
 
     JSON& Conversation()
     {
-        return complex_field<JSON>(Activity::Fields::Complex::Conversation, m_complex_fields);
+        return complex_field<JSON>(ActivityFields::Fields::Complex::Conversation, m_complex_fields);
     }
 
     string_prop ReplyToId;
 
     JSONArray& Entities()
     {
-        return complex_field<JSONArray>(Activity::Fields::List::Entities, m_array_fields);
+        return complex_field<JSONArray>(ActivityFields::Fields::List::Entities, m_array_fields);
     }
 
     JSON& ChannelData()
     {
-        return complex_field<JSON>(Activity::Fields::Complex::ChannelData, m_complex_fields);
+        return complex_field<JSON>(ActivityFields::Fields::Complex::ChannelData, m_complex_fields);
     }
 
     /* This member function provides access to a JSON which fields will be added at the root level of the activity */
@@ -636,18 +636,18 @@ public:
     string_prop InputHint;
     JSONArray& Attachments()
     {
-        return complex_field<JSONArray>(Activity::Fields::List::Attachments, m_array_fields);
+        return complex_field<JSONArray>(ActivityFields::Fields::List::Attachments, m_array_fields);
     }
     string_prop AttachmentLayout;
     string_prop Summary;
     JSON& SuggestedActions()
     {
-        return complex_field<JSON>(Activity::Fields::Complex::SuggestedActions, m_complex_fields);
+        return complex_field<JSON>(ActivityFields::Fields::Complex::SuggestedActions, m_complex_fields);
     }
 
     JSON& Value()
     {
-        return complex_field<JSON>(Activity::Fields::Complex::Value, m_complex_fields);
+        return complex_field<JSON>(ActivityFields::Fields::Complex::Value, m_complex_fields);
     }
 
     string_prop Expiration;
@@ -655,37 +655,37 @@ public:
     string_prop DeliveryMode;
     JSON& SemanticAction()
     {
-        return complex_field<JSON>(Activity::Fields::Complex::SemanticAction, m_complex_fields);
+        return complex_field<JSON>(ActivityFields::Fields::Complex::SemanticAction, m_complex_fields);
     }
 #endif
 private:
     /*! \cond PROTECTED */
 #ifndef SWIG
-    BotConnectorActivity(SPXACTIVITYHANDLE handle) : m_handle{ handle },
-        GetTimestamp{ build_ro_prop(Activity::Fields::ReadOnly::Timestamp) },
-        GetLocalTimestamp{ build_ro_prop(Activity::Fields::ReadOnly::LocalTimestamp) },
-        GetLocalTimezone{ build_ro_prop(Activity::Fields::ReadOnly::LocalTimezone) },
-        GetChannelId{ build_ro_prop(Activity::Fields::ReadOnly::ChannelId) },
-        Type{ build_prop(Activity::Fields::Properties::Type) },
-        Id{ build_prop(Activity::Fields::Properties::Id) },
-        ReplyToId{ build_prop(Activity::Fields::Properties::ReplyToId) },
-        Text{ build_prop(Activity::Fields::Properties::Text) },
-        TextFormat{ build_prop(Activity::Fields::Properties::TextFormat) },
-        Locale{ build_prop(Activity::Fields::Properties::Locale) },
-        Speak{ build_prop(Activity::Fields::Properties::Speak) },
-        InputHint{ build_prop(Activity::Fields::Properties::InputHint) },
-        AttachmentLayout{ build_prop(Activity::Fields::Properties::AttachmentLayout) },
-        Summary{ build_prop(Activity::Fields::Properties::Summary) },
-        Expiration{ build_prop(Activity::Fields::Properties::Expiration) },
-        Importance{ build_prop(Activity::Fields::Properties::Importance) },
-        DeliveryMode{ build_prop(Activity::Fields::Properties::DeliveryMode) }
+    Activity(SPXACTIVITYHANDLE handle) : m_handle{ handle },
+        GetTimestamp{ build_ro_prop(ActivityFields::Fields::ReadOnly::Timestamp) },
+        GetLocalTimestamp{ build_ro_prop(ActivityFields::Fields::ReadOnly::LocalTimestamp) },
+        GetLocalTimezone{ build_ro_prop(ActivityFields::Fields::ReadOnly::LocalTimezone) },
+        GetChannelId{ build_ro_prop(ActivityFields::Fields::ReadOnly::ChannelId) },
+        Type{ build_prop(ActivityFields::Fields::Properties::Type) },
+        Id{ build_prop(ActivityFields::Fields::Properties::Id) },
+        ReplyToId{ build_prop(ActivityFields::Fields::Properties::ReplyToId) },
+        Text{ build_prop(ActivityFields::Fields::Properties::Text) },
+        TextFormat{ build_prop(ActivityFields::Fields::Properties::TextFormat) },
+        Locale{ build_prop(ActivityFields::Fields::Properties::Locale) },
+        Speak{ build_prop(ActivityFields::Fields::Properties::Speak) },
+        InputHint{ build_prop(ActivityFields::Fields::Properties::InputHint) },
+        AttachmentLayout{ build_prop(ActivityFields::Fields::Properties::AttachmentLayout) },
+        Summary{ build_prop(ActivityFields::Fields::Properties::Summary) },
+        Expiration{ build_prop(ActivityFields::Fields::Properties::Expiration) },
+        Importance{ build_prop(ActivityFields::Fields::Properties::Importance) },
+        DeliveryMode{ build_prop(ActivityFields::Fields::Properties::DeliveryMode) }
     {}
 #else
-    BotConnectorActivity(SPXACTIVITYHANDLE handle) : m_handle{ handle }
+    Activity(SPXACTIVITYHANDLE handle) : m_handle{ handle }
     {}
 #endif
 
-    BotConnectorActivity() : BotConnectorActivity{ create_instance() }
+    Activity() : Activity{ create_instance() }
     {}
 
 #ifndef SWIG
@@ -696,7 +696,7 @@ private:
     inline SPXACTIVITYHANDLE create_instance()
     {
         SPXACTIVITYHANDLE h;
-        SPX_THROW_ON_FAIL(bot_activity_create(&h));
+        SPX_THROW_ON_FAIL(activity_create(&h));
         return h;
     }
 
@@ -704,13 +704,13 @@ private:
     inline std::string get_prop(const std::string& prop_name) const
     {
         std::size_t size;
-        SPX_THROW_ON_FAIL(bot_activity_property_size(m_handle, prop_name.c_str(), &size));
+        SPX_THROW_ON_FAIL(activity_property_size(m_handle, prop_name.c_str(), &size));
         if (size == 0)
         {
             return std::string{};
         }
         std::unique_ptr<char[]> buffer = std::make_unique<char[]>(size);
-        SPX_THROW_ON_FAIL(bot_activity_property_get(m_handle, prop_name.c_str(), buffer.get(), size));
+        SPX_THROW_ON_FAIL(activity_property_get(m_handle, prop_name.c_str(), buffer.get(), size));
         return std::string{ buffer.get(), size };
     }
 
@@ -731,7 +731,7 @@ private:
             },
             [this, prop_name](const std::string& v)
             {
-                bot_activity_property_set(m_handle, prop_name.c_str(), v.c_str());
+                activity_property_set(m_handle, prop_name.c_str(), v.c_str());
             }
         };
     }
@@ -743,7 +743,7 @@ private:
         if (search == registry.end())
         {
             SPXACTIVITYJSONHANDLE jhandle;
-            bot_activity_complex_field_handle(m_handle, field_name.c_str(), &jhandle);
+            activity_complex_field_handle(m_handle, field_name.c_str(), &jhandle);
             auto r = registry.insert(std::make_pair(field_name, T{ jhandle }));
             return r.first->second;
         }

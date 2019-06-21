@@ -28,8 +28,8 @@ public class ActivityReceivedEventArgs {
      * Gets the activity received.
      * @return The activity associated with the event.
      */
-    public BotConnectorActivity getActivity() {
-        return new BotConnectorActivity(activityReceivedEventArgs.GetActivity());
+    public Activity getActivity() {
+        return new Activity(activityReceivedEventArgs.GetActivity());
     }
 
     /**

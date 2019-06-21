@@ -20,12 +20,12 @@ import com.microsoft.cognitiveservices.speech.SpeechRecognitionCanceledEventArgs
 import com.microsoft.cognitiveservices.speech.translation.TranslationSynthesisEventArgs;
 
 /**
- * Class that defines a SpeechBotConnector.
+ * Class that defines a DialogConnector.
  */
-public class SpeechBotConnector implements Closeable {
+public class DialogConnector implements Closeable {
 
     /*! \cond PROTECTED */
-    static Class<?> speechBotConnector = null;
+    static Class<?> dialogConnector = null;
     private static ExecutorService executorService;
 
     // load the native library.
@@ -37,31 +37,31 @@ public class SpeechBotConnector implements Closeable {
         catch (ClassNotFoundException ex) {
             throw new IllegalStateException(ex);
         }
-        speechBotConnector = SpeechBotConnector.class;
+        dialogConnector = DialogConnector.class;
         executorService = Executors.newCachedThreadPool();
     }
 
     /*! \endcond */
 
     /**
-     * Builds a SpeechBotConnector with audio from default microphone input
-     * @param config Bot connector configuration.
+     * Builds a DialogConnector with audio from default microphone input
+     * @param config Dialog connector configuration.
      */
-    public SpeechBotConnector(BotConnectorConfig config) {
+    public DialogConnector(DialogConfig config) {
         this(config, AudioConfig.fromDefaultMicrophoneInput());
     }
 
     /**
-     * Builds a SpeechBotConnector
-     * @param config Bot connector configuration.
+     * Builds a DialogConnector
+     * @param config Dialog connector configuration.
      * @param audioConfig An optional audio input configuration associated with the recognizer
      */
-    public SpeechBotConnector(BotConnectorConfig config, AudioConfig audioConfig) {
+    public DialogConnector(DialogConfig config, AudioConfig audioConfig) {
         Contracts.throwIfNull(config, "config");
         if (audioConfig == null) {
-            this.speechBotConnectorImpl = com.microsoft.cognitiveservices.speech.internal.SpeechBotConnector.FromConfig(config.getBotConfigImpl());
+            this.dialogConnectorImpl = com.microsoft.cognitiveservices.speech.internal.DialogConnector.FromConfig(config.getConfigImpl());
         } else {
-            this.speechBotConnectorImpl = com.microsoft.cognitiveservices.speech.internal.SpeechBotConnector.FromConfig(config.getBotConfigImpl(), audioConfig.getConfigImpl());
+            this.dialogConnectorImpl = com.microsoft.cognitiveservices.speech.internal.DialogConnector.FromConfig(config.getConfigImpl(), audioConfig.getConfigImpl());
         }
         initialize();
     }
@@ -73,7 +73,7 @@ public class SpeechBotConnector implements Closeable {
     public Future<Void> connectAsync() {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                speechBotConnectorImpl.ConnectAsync().Get();
+                dialogConnectorImpl.ConnectAsync().Get();
                 return null;
             }
         });
@@ -86,22 +86,22 @@ public class SpeechBotConnector implements Closeable {
     public Future<Void> disconnectAsync() {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                speechBotConnectorImpl.DisconnectAsync().Get();
+                dialogConnectorImpl.DisconnectAsync().Get();
                 return null;
             }
         });
     }
 
     /**
-     * Sends an activity to the backing bot.
+     * Sends an activity to the backing dialog.
      * @param activity Activity to be sent.
-     * @return A task representing the asynchronous operation that sends an activity to the bot.
+     * @return A task representing the asynchronous operation that sends an activity to the backing dialog.
      */
-    public Future<String> sendActivityAsync(final BotConnectorActivity activity) {
+    public Future<String> sendActivityAsync(final Activity activity) {
         Contracts.throwIfNull(activity, "activity");
         return executorService.submit(new java.util.concurrent.Callable<String>() {
             public String call() {
-                return speechBotConnectorImpl.SendActivityAsync(activity.getImpl()).Get();
+                return dialogConnectorImpl.SendActivityAsync(activity.getImpl()).Get();
             }
         });
     }
@@ -113,7 +113,7 @@ public class SpeechBotConnector implements Closeable {
     public Future<Void> listenOnceAsync() {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                speechBotConnectorImpl.ListenOnceAsync().Get();
+                dialogConnectorImpl.ListenOnceAsync().Get();
                 return null;
             }
         });
@@ -127,7 +127,7 @@ public class SpeechBotConnector implements Closeable {
     public Future<Void> startKeywordRecognitionAsync(final KeywordRecognitionModel model) {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                speechBotConnectorImpl.StartKeywordRecognitionAsync(model.getModelImpl()).Get();
+                dialogConnectorImpl.StartKeywordRecognitionAsync(model.getModelImpl()).Get();
                 return null;
             }
         });
@@ -140,7 +140,7 @@ public class SpeechBotConnector implements Closeable {
     public Future<Void> stopKeywordRecognitionAsync() {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                speechBotConnectorImpl.StopKeywordRecognitionAsync().Get();
+                dialogConnectorImpl.StopKeywordRecognitionAsync().Get();
                 return null;
             }
         });
@@ -179,17 +179,17 @@ public class SpeechBotConnector implements Closeable {
     /*! \cond PROTECTED */
     private void initialize() {
         recognizingHandler = new RecoEventHandlerImpl(this, /* isRecognizedHandler */ false);
-        speechBotConnectorImpl.getRecognizing().AddEventListener(recognizingHandler);
+        dialogConnectorImpl.getRecognizing().AddEventListener(recognizingHandler);
         recognizedHandler = new RecoEventHandlerImpl(this, /* isRecognizedHandler */ true);
-        speechBotConnectorImpl.getRecognized().AddEventListener(recognizedHandler);
+        dialogConnectorImpl.getRecognized().AddEventListener(recognizedHandler);
         sessionStartedHandler = new SessionEventHandlerImpl(this, /* isSessionStart */ true);
-        speechBotConnectorImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+        dialogConnectorImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
         sessionStoppedHandler = new SessionEventHandlerImpl(this, /* isSessionStopped */ false);
-        speechBotConnectorImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+        dialogConnectorImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
         canceledHandler = new CanceledEventHandlerImpl(this);
-        speechBotConnectorImpl.getCanceled().AddEventListener(canceledHandler);
+        dialogConnectorImpl.getCanceled().AddEventListener(canceledHandler);
         activityReceivedHandler = new ActivityReceivedEventHandlerImpl(this);
-        speechBotConnectorImpl.getActivityReceived().AddEventListener(activityReceivedHandler);
+        dialogConnectorImpl.getActivityReceived().AddEventListener(activityReceivedHandler);
     }
 
     private RecoEventHandlerImpl recognizingHandler;
@@ -201,7 +201,7 @@ public class SpeechBotConnector implements Closeable {
 
     private class RecoEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventListener {
 
-        RecoEventHandlerImpl(SpeechBotConnector connector, boolean isRecognizedHandler) {
+        RecoEventHandlerImpl(DialogConnector connector, boolean isRecognizedHandler) {
             Contracts.throwIfNull(connector, "connector");
             this.connector = connector;
             this.isRecognizedHandler = isRecognizedHandler;
@@ -220,13 +220,13 @@ public class SpeechBotConnector implements Closeable {
             }
         }
 
-        private SpeechBotConnector connector;
+        private DialogConnector connector;
         private boolean isRecognizedHandler;
     }
 
     private class SessionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SessionEventListener {
 
-        SessionEventHandlerImpl(SpeechBotConnector connector, boolean isSessionStart) {
+        SessionEventHandlerImpl(DialogConnector connector, boolean isSessionStart) {
             Contracts.throwIfNull(connector, "connector");
             this.connector = connector;
             this.isSessionStart = isSessionStart;
@@ -245,13 +245,13 @@ public class SpeechBotConnector implements Closeable {
             }
         }
 
-        private SpeechBotConnector connector;
+        private DialogConnector connector;
         private boolean isSessionStart;
     }
 
     private class CanceledEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventListener {
 
-        CanceledEventHandlerImpl(SpeechBotConnector connector) {
+        CanceledEventHandlerImpl(DialogConnector connector) {
             Contracts.throwIfNull(connector, "connector");
             this.connector = connector;
         }
@@ -269,12 +269,12 @@ public class SpeechBotConnector implements Closeable {
             }
         }
 
-        private SpeechBotConnector connector;
+        private DialogConnector connector;
     }
 
     private class ActivityReceivedEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.ActivityReceivedEventListener {
 
-        ActivityReceivedEventHandlerImpl(SpeechBotConnector connector) {
+        ActivityReceivedEventHandlerImpl(DialogConnector connector) {
             Contracts.throwIfNull(connector, "connector");
             this.connector = connector;
         }
@@ -292,10 +292,10 @@ public class SpeechBotConnector implements Closeable {
             }
         }
 
-        private SpeechBotConnector connector;
+        private DialogConnector connector;
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.SpeechBotConnector speechBotConnectorImpl;
+    private com.microsoft.cognitiveservices.speech.internal.DialogConnector dialogConnectorImpl;
     /*! \endcond */
 
     /**
@@ -314,12 +314,12 @@ public class SpeechBotConnector implements Closeable {
             return;
         }
         if (disposing) {
-            speechBotConnectorImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-            speechBotConnectorImpl.getRecognized().RemoveEventListener(recognizedHandler);
-            speechBotConnectorImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-            speechBotConnectorImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-            speechBotConnectorImpl.getCanceled().RemoveEventListener(canceledHandler);
-            speechBotConnectorImpl.getActivityReceived().RemoveEventListener(activityReceivedHandler);
+            dialogConnectorImpl.getRecognizing().RemoveEventListener(recognizingHandler);
+            dialogConnectorImpl.getRecognized().RemoveEventListener(recognizedHandler);
+            dialogConnectorImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+            dialogConnectorImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+            dialogConnectorImpl.getCanceled().RemoveEventListener(canceledHandler);
+            dialogConnectorImpl.getActivityReceived().RemoveEventListener(activityReceivedHandler);
 
             recognizingHandler.delete();
             recognizedHandler.delete();
@@ -328,7 +328,7 @@ public class SpeechBotConnector implements Closeable {
             canceledHandler.delete();
             activityReceivedHandler.delete();
 
-            speechBotConnectorImpl.delete();
+            dialogConnectorImpl.delete();
         }
         disposed = true;
     }

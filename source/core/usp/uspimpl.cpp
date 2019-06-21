@@ -250,8 +250,8 @@ string Connection::Impl::ConstructConnectionUrl() const
                 << g_recoModeStrings[recoMode]
                 << endpoint::luis::pathSuffix;
             break;
-        case EndpointType::Bot:
-            oss << endpoint::bot::url;
+        case EndpointType::Dialog:
+            oss << endpoint::dialog::url;
             break;
         case EndpointType::ConversationTranscriptionService:
             oss << endpoint::conversationTranscriber::pathPrefix1
@@ -323,8 +323,8 @@ string Connection::Impl::ConstructConnectionUrl() const
         }
         break;
 
-    case EndpointType::Bot:
-        BuildQueryParameters(endpoint::bot::queryParameters, m_config.m_queryParameters, customEndpoint, oss);
+    case EndpointType::Dialog:
+        BuildQueryParameters(endpoint::dialog::queryParameters, m_config.m_queryParameters, customEndpoint, oss);
         break;
     }
 
@@ -406,18 +406,18 @@ void Connection::Impl::Connect()
             ThrowRuntimeError("Failed to set authentication using Search-DelegationRPSToken.");
         }
     }
-    authStr = m_config.m_authData[static_cast<size_t>(AuthenticationType::DirectLineSpeechSecret)];
+    authStr = m_config.m_authData[static_cast<size_t>(AuthenticationType::DialogApplicationId)];
     if (!authStr.empty())
     {
         LogInfo("Adding DirectLineSpeech secret.");
-        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::directLineSpeechSecret, authStr.c_str()) != 0)
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::dialogApplicationId, authStr.c_str()) != 0)
         {
             ThrowRuntimeError("Failed to set authentication using DirectLineSpeech secret.");
         }
 
     }
 
-    if (m_config.m_endpointType == EndpointType::Bot)
+    if (m_config.m_endpointType == EndpointType::Dialog)
     {
         auto& region = m_config.m_region;
         if (!region.empty())
@@ -561,7 +561,7 @@ string Connection::Impl::UpdateRequestId(const MessageType messageType)
         if (m_config.m_endpointType == EndpointType::ConversationTranscriptionService)
         {
             // For ConversationTranscription, speech.event might be sent before speech.context, so m_speechRequestId might already be set.
-            // After the Bug 1784130 is fixed, the following code should be removed, i.e. instead of creating requestId, a LogicError should be thrown, 
+            // After the Bug 1784130 is fixed, the following code should be removed, i.e. instead of creating requestId, a LogicError should be thrown,
             if (m_speechRequestId.empty())
             {
                 m_speechRequestId = CreateRequestId();

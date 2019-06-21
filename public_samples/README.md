@@ -118,8 +118,8 @@ If you want to build these quickstarts from scratch, please follow the articles 
 
 | Quickstart | Platform | Description |
 | ---------- | -------- | ----------- |
-| [Quickstart Java JRE](./quickstart/virtual-assistant/java-jre) | Windows, Linux, macOS | Demonstrates speech recognition through the SpeechBotConnector and receiving activity responses. |
-| [Quickstart C# UWP for Windows](./quickstart/virtual-assistant/csharp-uwp/) | Windows | Demonstrates speech recognition through the SpeechBotConnector and receiving activity responses. |
+| [Quickstart Java JRE](./quickstart/virtual-assistant/java-jre) | Windows, Linux, macOS | Demonstrates speech recognition through the DialogConnector and receiving activity responses. |
+| [Quickstart C# UWP for Windows](./quickstart/virtual-assistant/csharp-uwp/) | Windows | Demonstrates speech recognition through the DialogConnector and receiving activity responses. |
 
 ### Samples
 
@@ -142,7 +142,7 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Speech recognition and translation sample using JavaScript and Node.js](./samples/js/node)                 | Node.js  | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech recognition sample for iOS using a connection object](./samples/objective-c/ios/README.md#connection-object-sample)  | iOS      | Demonstrates speech recognition |
 | [Extended speech recognition sample for iOS](./samples/objective-c/ios/README.md#example-app-with-various-samples)           | iOS      | Demonstrates speech recognition using streams etc.|
-| [C# UWP SpeechBotConnector sample for Windows](./samples/virtual-assistant/csharp-uwp/) | Windows | Demonstrates speech recognition through the SpeechBotConnector and receiving activity responses. |
+| [C# UWP DialogConnector sample for Windows](./samples/virtual-assistant/csharp-uwp/) | Windows | Demonstrates speech recognition through the DialogConnector and receiving activity responses. |
 | [C# Unity sample for Windows or Android](./samples/unity/speechrecognizer/) | Windows, Android |  Demonstrates speech recognition, intent recognition, and translation for Unity |
 
 

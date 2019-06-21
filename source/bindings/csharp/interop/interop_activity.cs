@@ -12,19 +12,19 @@ namespace Microsoft.CognitiveServices.Speech.Dialog.Internal
     using SPXHR = System.IntPtr;
     using SPXACTIVITYHANDLE = System.IntPtr;
 
-    internal static class BotConnectorActivity
+    internal static class Activity
     {
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-        internal static extern SPXHR bot_activity_from_string(IntPtr serializedActivity, out SPXACTIVITYHANDLE activity);
+        internal static extern SPXHR activity_from_string(IntPtr serializedActivity, out SPXACTIVITYHANDLE activity);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        internal static extern SPXHR bot_activity_handle_release(SPXACTIVITYHANDLE activityHandle);
+        internal static extern SPXHR activity_handle_release(SPXACTIVITYHANDLE activityHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        internal static extern SPXHR bot_activity_serialized_size(SPXACTIVITYHANDLE activityHandle, out UInt32 size);
+        internal static extern SPXHR activity_serialized_size(SPXACTIVITYHANDLE activityHandle, out UInt32 size);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-        internal static extern SPXHR bot_activity_serialize(SPXACTIVITYHANDLE activityHandle, StringBuilder serializedActivity, UInt32 max_size);
+        internal static extern SPXHR activity_serialize(SPXACTIVITYHANDLE activityHandle, StringBuilder serializedActivity, UInt32 max_size);
     }
 }
 

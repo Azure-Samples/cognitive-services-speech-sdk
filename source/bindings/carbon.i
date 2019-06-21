@@ -83,9 +83,9 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::AudioDataStream)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechSynthesisCancellationDetails)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechSynthesizer)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::BotConnectorActivity)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::BotConnectorConfig)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::DialogConnector)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::Activity)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::DialogConfig)
 %shared_ptr(std::vector<uint8_t>)
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioConfig)
@@ -151,7 +151,7 @@
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult> IntentRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult> TranslationRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechSynthesisResult> SpeechSynthesisResultPtr;
-    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Dialog::BotConnectorActivity> BotConnectorActivityPtr;
+    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Dialog::Activity> ActivityPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionResult> ConversationTranscriberResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Conversation::Participant> ParticipantPtr;
 %}
@@ -167,7 +167,7 @@
 
 %include <speechapi_cxx_speech_config.h>
 %include <speechapi_cxx_speech_translation_config.h>
-%include <speechapi_cxx_bot_connector_config.h>
+%include <speechapi_cxx_dialog_config.h>
 
 // %extend need to come first, before the %ignore for the same method (RecognizeOnceAsync, etc.)
 %extend Microsoft::CognitiveServices::Speech::SpeechRecognizer {
@@ -359,7 +359,7 @@
     }
 }
 
-%extend Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector {
+%extend Microsoft::CognitiveServices::Speech::Dialog::DialogConnector {
 
     FutureWrapper<void> ConnectAsync()
     {
@@ -373,7 +373,7 @@
         return FutureWrapper<void>(std::move(future));
     }
 
-    FutureWrapper<std::string> SendActivityAsync(BotConnectorActivityPtr activity)
+    FutureWrapper<std::string> SendActivityAsync(ActivityPtr activity)
     {
         auto future = ($self)->SendActivityAsync(activity);
         return FutureWrapper<std::string>(std::move(future));
@@ -492,12 +492,12 @@
 %ignore StartSpeakingSsmlAsync;
 %ignore SaveToWavFileAsync;
 
-%ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::ConnectAsync;
-%ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::DisconnectAsync;
-%ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::SendActivityAsync;
-%ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::ListenOnceAsync;
-%ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::StartKeywordRecognitionAsync;
-%ignore Microsoft::CognitiveServices::Speech::Dialog::SpeechBotConnector::StopKeywordRecognitionAsync;
+%ignore Microsoft::CognitiveServices::Speech::Dialog::DialogConnector::ConnectAsync;
+%ignore Microsoft::CognitiveServices::Speech::Dialog::DialogConnector::DisconnectAsync;
+%ignore Microsoft::CognitiveServices::Speech::Dialog::DialogConnector::SendActivityAsync;
+%ignore Microsoft::CognitiveServices::Speech::Dialog::DialogConnector::ListenOnceAsync;
+%ignore Microsoft::CognitiveServices::Speech::Dialog::DialogConnector::StartKeywordRecognitionAsync;
+%ignore Microsoft::CognitiveServices::Speech::Dialog::DialogConnector::StopKeywordRecognitionAsync;
 
 %ignore StartTranscribingAsync;
 %ignore StopTranscribingAsync;
@@ -629,8 +629,8 @@
 %template(TranslationSynthesisEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisEventArgs&>;
 %template(TranslationRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs>;
 
-%include <speechapi_cxx_bot_connector_activity.h>
-%include <speechapi_cxx_bot_connector_eventargs.h>
+%include <speechapi_cxx_activity.h>
+%include <speechapi_cxx_dialog_connector_eventargs.h>
 
 %template(ActivityReceivedEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Dialog::ActivityReceivedEventArgs&>;
 %template(ActivityReceivedEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Dialog::ActivityReceivedEventArgs&>;
@@ -651,7 +651,7 @@
 
 %include <speechapi_cxx_translation_recognizer.h>
 
-%include <speechapi_cxx_speech_bot_connector.h>
+%include <speechapi_cxx_dialog_connector.h>
 
 %include <speechapi_cxx_session.h>
 

@@ -38,7 +38,7 @@ namespace VirtualAssistantPreview
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        public SpeechBotConnector botConnector;
+        public DialogConnector dialogConnector;
         // The collection of messages to the user from the bot or app
         public ObservableCollection<MessageDisplay> Messages { get; private set; } = new ObservableCollection<MessageDisplay>();
 
@@ -70,38 +70,38 @@ namespace VirtualAssistantPreview
         }
 
         /// <summary>
-        /// Create a SpeechBotConnector from the user-provided input
+        /// Create a DialogConnector from the user-provided input
         /// </summary>
-        public void InitBotConnector()
+        public void InitDialogConnector()
         {
-            BotConnectorConfig botConfig = null;
+            DialogConfig dialogConfig = null;
 
-            botConfig = BotConnectorConfig.FromSecretKey(ConnectionIdTB.Text, SubscriptionTB.Text, RegionTB.Text);
+            dialogConfig = DialogConfig.FromBotSecret(ConnectionIdTB.Text, SubscriptionTB.Text, RegionTB.Text);
 
-            if (botConnector != null)
+            if (dialogConnector != null)
             {
-                botConnector.SessionStarted -= BotConnector_SessionStarted;
-                botConnector.SessionStopped -= BotConnector_SessionStopped;
-                botConnector.Recognizing -= BotConnector_Recognizing;
-                botConnector.Recognized -= BotConnector_Recognized;
-                botConnector.ActivityReceived -= BotConnector_ActivityReceived;
-                botConnector.Canceled -= BotConnector_Canceled;
+                dialogConnector.SessionStarted -= DialogConnector_SessionStarted;
+                dialogConnector.SessionStopped -= DialogConnector_SessionStopped;
+                dialogConnector.Recognizing -= DialogConnector_Recognizing;
+                dialogConnector.Recognized -= DialogConnector_Recognized;
+                dialogConnector.ActivityReceived -= DialogConnector_ActivityReceived;
+                dialogConnector.Canceled -= DialogConnector_Canceled;
             }
 
             var audioConfig = AudioConfig.FromDefaultMicrophoneInput();
-            botConnector = new SpeechBotConnector(botConfig, audioConfig);
-            botConnector.SessionStarted += BotConnector_SessionStarted;
-            botConnector.SessionStopped += BotConnector_SessionStopped;
-            botConnector.Recognizing += BotConnector_Recognizing;
-            botConnector.Recognized += BotConnector_Recognized;
-            botConnector.ActivityReceived += BotConnector_ActivityReceived;
-            botConnector.Canceled += BotConnector_Canceled;
+            dialogConnector = new DialogConnector(dialogConfig, audioConfig);
+            dialogConnector.SessionStarted += DialogConnector_SessionStarted;
+            dialogConnector.SessionStopped += DialogConnector_SessionStopped;
+            dialogConnector.Recognizing += DialogConnector_Recognizing;
+            dialogConnector.Recognized += DialogConnector_Recognized;
+            dialogConnector.ActivityReceived += DialogConnector_ActivityReceived;
+            dialogConnector.Canceled += DialogConnector_Canceled;
 
             SendActivityButton.IsEnabled = true;
             StartButton.IsEnabled = true;
         }
 
-        private void BotConnector_SessionStarted(object sender, SessionEventArgs e)
+        private void DialogConnector_SessionStarted(object sender, SessionEventArgs e)
         {
             UpdateUI(() =>
             {
@@ -109,7 +109,7 @@ namespace VirtualAssistantPreview
             });
         }
 
-        private void BotConnector_SessionStopped(object sender, SessionEventArgs e)
+        private void DialogConnector_SessionStopped(object sender, SessionEventArgs e)
         {
             UpdateUI(() =>
             {
@@ -117,12 +117,12 @@ namespace VirtualAssistantPreview
             });
         }
 
-        private void BotConnector_Recognizing(object sender, SpeechRecognitionEventArgs e)
+        private void DialogConnector_Recognizing(object sender, SpeechRecognitionEventArgs e)
         {
             //throw new NotImplementedException();
         }
 
-        private void BotConnector_Recognized(object sender, SpeechRecognitionEventArgs e)
+        private void DialogConnector_Recognized(object sender, SpeechRecognitionEventArgs e)
         {
             var result = e.Result.Text;
 
@@ -141,7 +141,7 @@ namespace VirtualAssistantPreview
             });
         }
 
-        private async void BotConnector_ActivityReceived(object sender, ActivityReceivedEventArgs e)
+        private async void DialogConnector_ActivityReceived(object sender, ActivityReceivedEventArgs e)
         {
             var json = e.Activity;
             var activity = JsonConvert.DeserializeObject<Activity>(json);
@@ -163,7 +163,7 @@ namespace VirtualAssistantPreview
             });
         }
 
-        private void BotConnector_Canceled(object sender, SpeechRecognitionCanceledEventArgs e)
+        private void DialogConnector_Canceled(object sender, SpeechRecognitionCanceledEventArgs e)
         {
             string cancelText = $"Canceled with reason: {e.Reason}";
 
@@ -181,13 +181,13 @@ namespace VirtualAssistantPreview
 
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
-            botConnector.ListenOnceAsync();
+            dialogConnector.ListenOnceAsync();
         }
 
         private async void ConfigureButton_Click(object sender, RoutedEventArgs e)
         {
             await CheckAndEnableMic();
-            InitBotConnector();
+            InitDialogConnector();
         }
 
         // Check if the app has mic permissions. If not, query user for access
@@ -221,7 +221,7 @@ namespace VirtualAssistantPreview
         private void SendActivity_Click(object sender, RoutedEventArgs e)
         {
             string speakActivity = CustomActivityTextbox.Text;
-            botConnector.SendActivityAsync(speakActivity);
+            dialogConnector.SendActivityAsync(speakActivity);
 
             var activity = JsonConvert.DeserializeObject<Activity>(speakActivity);
             UpdateUI(() =>

@@ -51,7 +51,7 @@ namespace Keys
 {
     EXTERN std::string Speech;
     EXTERN std::string LUIS;
-    EXTERN std::string Bot;
+    EXTERN std::string Dialog;
     EXTERN std::string ConversationTranscriber;
 }
 
@@ -62,8 +62,8 @@ namespace Config
     EXTERN std::string LuisRegion;
     EXTERN std::string LuisAppId;
     EXTERN std::string InputDir;
-    EXTERN std::string BotRegion;
-    EXTERN std::string BotSecret;
+    EXTERN std::string DialogRegion;
+    EXTERN std::string DialogBotSecret;
     EXTERN std::string InroomEndpoint;
     EXTERN std::string OnlineEndpoint;
     EXTERN std::string OfflineModelPathRoot;
@@ -107,15 +107,15 @@ public:
         {
             Keys::Speech = data.at("keySpeech").get<std::string>();
             Keys::LUIS = data.at("keyLUIS").get<std::string>();
-            Keys::Bot = data.at("keyBot").get<std::string>();
+            Keys::Dialog = data.at("keyDialog").get<std::string>();
             Keys::ConversationTranscriber = data.at("keyConversationTranscriber").get<std::string>();
 
             Config::Endpoint = data.at("endPoint").get<std::string>();
             Config::Region = data.at("regionId").get<std::string>();
             Config::LuisRegion = data.at("regionIdLUIS").get<std::string>();
             Config::LuisAppId = data.at("luisAppId").get<std::string>();
-            Config::BotRegion = data.at("regionIdBot").get<std::string>();
-            Config::BotSecret = data.at("secretKeyBot").get<std::string>();
+            Config::DialogRegion = data.at("dialogRegionId").get<std::string>();
+            Config::DialogBotSecret = data.at("dialogBotSecret").get<std::string>();
             Config::InroomEndpoint = data.at("InRoomEndPoint").get<std::string>();
             Config::OnlineEndpoint = data.at("OnlineEndPoint").get<std::string>();
 
@@ -162,8 +162,8 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Keys::LUIS, "LuisSubscriptionKey")
         ["--keyLUIS"]
     ("The subscription key for language understanding")
-        | Opt(Keys::Bot, "keyBot")
-        ["--keyBot"]
+        | Opt(Keys::Dialog, "keyDialog")
+        ["--keyDialog"]
     ("The subscription key for the Speech Channel")
         | Opt(Config::Endpoint, "endpoint")
         ["--endpoint"]
@@ -189,11 +189,11 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Config::InputDir, "InputDir")
         ["--inputDir"]
     ("The directory where test input files are placed")
-        | Opt(Config::BotRegion, "BotRegion")
-        ["--regionIdBot"]
+        | Opt(Config::DialogRegion, "DialogRegion")
+        ["--dialogRegionId"]
     ("The region id to be used for the Speech Channel Service")
-        | Opt(Config::BotSecret, "BotSecret")
-        ["--secretKeyBot"]
+        | Opt(Config::DialogBotSecret, "DialogBotSecret")
+        ["--dialogBotSecret"]
     ("Secret for the functional test bot")
         | Opt(Config::OfflineModelPathRoot, "OfflineModelPathRoot")
         ["--offlineModelPathRoot"]

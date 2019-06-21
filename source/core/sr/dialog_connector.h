@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// bot_connector.h: Implementation declarations for CSpxSpeechBotConnector C++ class.
+// dialog_connector.h: Implementation declarations for CSpxDialogConnector C++ class.
 //
 #pragma once
 
@@ -22,15 +22,15 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxSpeechBotConnector :
+class CSpxDialogConnector :
     public CSpxRecognizer,
-    public ISpxSpeechBotConnector,
-    public ISpxSpeechBotConnectorEvents
+    public ISpxDialogConnector,
+    public ISpxDialogConnectorEvents
 {
 public:
 
-    CSpxSpeechBotConnector();
-    virtual ~CSpxSpeechBotConnector();
+    CSpxDialogConnector();
+    virtual ~CSpxDialogConnector();
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
@@ -38,8 +38,8 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxSessionFromRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerEvents)
-        SPX_INTERFACE_MAP_ENTRY(ISpxSpeechBotConnectorEvents)
-        SPX_INTERFACE_MAP_ENTRY(ISpxSpeechBotConnector)
+        SPX_INTERFACE_MAP_ENTRY(ISpxDialogConnectorEvents)
+        SPX_INTERFACE_MAP_ENTRY(ISpxDialogConnector)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxGrammarList)
@@ -58,7 +58,7 @@ public:
     void Enable() override {};
     void Disable()override {};
 
-    // --- ISpxSpeechBotConnector
+    // --- ISpxDialogConnector
 
     CSpxAsyncOp<void> ConnectAsync() override;
     CSpxAsyncOp<void> DisconnectAsync() override;
@@ -87,7 +87,7 @@ public:
 
     void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
-    // --- ISpxSpeechBotConnectorEvents
+    // --- ISpxDialogConnectorEvents
     void FireActivityReceived(const std::wstring& sessionId, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) final;
 
     // --- IServiceProvider
@@ -109,10 +109,10 @@ protected:
 
 private:
 
-    CSpxSpeechBotConnector(const CSpxSpeechBotConnector&) = delete;
-    CSpxSpeechBotConnector(const CSpxSpeechBotConnector&&) = delete;
+    CSpxDialogConnector(const CSpxDialogConnector&) = delete;
+    CSpxDialogConnector(const CSpxDialogConnector&&) = delete;
 
-    CSpxSpeechBotConnector& operator=(const CSpxSpeechBotConnector&) = delete;
+    CSpxDialogConnector& operator=(const CSpxDialogConnector&) = delete;
 
     std::shared_ptr<ISpxSession> m_defaultSession;
     std::atomic_bool m_fEnabled;

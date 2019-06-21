@@ -6,9 +6,9 @@
 package tests.endtoend;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
-import com.microsoft.cognitiveservices.speech.dialog.BotConnectorActivity;
-import com.microsoft.cognitiveservices.speech.dialog.BotConnectorConfig;
-import com.microsoft.cognitiveservices.speech.dialog.SpeechBotConnector;
+import com.microsoft.cognitiveservices.speech.dialog.Activity;
+import com.microsoft.cognitiveservices.speech.dialog.DialogConfig;
+import com.microsoft.cognitiveservices.speech.dialog.DialogConnector;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,7 +30,7 @@ public class VirtualAssistantTests {
     public static final int TIMEOUT_IN_MILLIS = 1000;
     public static final int RETRY_COUNT = 20;
 
-    private SpeechBotConnector botConnector;
+    private DialogConnector dialogConnector;
     private EventRecord eventRecord;
 
     private static String readFileAsString(String path) throws IOException
@@ -55,26 +55,26 @@ public class VirtualAssistantTests {
     @Before
     public void setUp() {
         // Bot secret is not required when using AutoReply connection type
-        final BotConnectorConfig botConnectorConfig = BotConnectorConfig.fromSecretKey(SpeechChannelSecretForVirtualAssistant, SpeechSubscriptionKeyForVirtualAssistant, SpeechRegionForVirtualAssistant);
-        botConnectorConfig.setProperty(COMMUNICATION_TYPE_STRING, AUTO_REPLY_CONNECTION_TYPE);
-        botConnectorConfig.setSpeechRecognitionLanguage(EN_US);
+        final DialogConfig dialogConfig = DialogConfig.fromBotSecret(SpeechChannelSecretForVirtualAssistant, SpeechSubscriptionKeyForVirtualAssistant, SpeechRegionForVirtualAssistant);
+        dialogConfig.setProperty(COMMUNICATION_TYPE_STRING, AUTO_REPLY_CONNECTION_TYPE);
+        dialogConfig.setSpeechRecognitionLanguage(EN_US);
 
         // For tests we are using the wav file. For manual testing use fromDefaultMicrophone.
         final AudioConfig audioConfig = AudioConfig.fromWavFileInput(WavFile);
 
-        botConnector = new SpeechBotConnector(botConnectorConfig, audioConfig);
-        registerEventHandlers(botConnector);
+        dialogConnector = new DialogConnector(dialogConfig, audioConfig);
+        registerEventHandlers(dialogConnector);
         eventRecord = new EventRecord();
     }
 
     @Test
     public void testSendActivity() throws IOException {
-        assertNotNull("BotConnector should not be null.", botConnector);
+        assertNotNull("dialogConnector should not be null.", dialogConnector);
         try {
             final String activity = readFileAsString(SerializedSpeechActivityFile);
-            // Connect to the bot
-            botConnector.connectAsync();
-            botConnector.sendActivityAsync(BotConnectorActivity.fromSerializedActivity(activity));
+            // Connect to the dialog
+            dialogConnector.connectAsync();
+            dialogConnector.sendActivityAsync(Activity.fromSerializedActivity(activity));
 
             // Add a sleep for responses to arrive.
             for (int n = 1; n <= RETRY_COUNT; n++) {
@@ -93,19 +93,19 @@ public class VirtualAssistantTests {
                 }
             }
         } finally {
-            // disconnect bot.
-            botConnector.disconnectAsync();
+            // disconnect from the backing dialog.
+            dialogConnector.disconnectAsync();
         }
     }
 
     @Test
     public void testListenOnce() {
-        assertNotNull("BotConnector should not be null.", botConnector);
+        assertNotNull("dialogConnector should not be null.", dialogConnector);
         try {
-            // Connect to the bot
-            botConnector.connectAsync();
+            // Connect to the dialog
+            dialogConnector.connectAsync();
             // Start listening.
-            botConnector.listenOnceAsync();
+            dialogConnector.listenOnceAsync();
             // Add a sleep for responses to arrive.
             for (int n = 1; n <= RETRY_COUNT; n++) {
                 try {
@@ -126,31 +126,31 @@ public class VirtualAssistantTests {
             }
 
         } finally {
-            // disconnect bot.
-            botConnector.disconnectAsync();
+            // disconnect backing dialog.
+            dialogConnector.disconnectAsync();
         }
     }
 
-    private void registerEventHandlers(final SpeechBotConnector botConnector) {
+    private void registerEventHandlers(final DialogConnector dialogConnector) {
 
-        botConnector.recognized.addEventListener((o, speechRecognitionResultEventArgs) -> {
+        dialogConnector.recognized.addEventListener((o, speechRecognitionResultEventArgs) -> {
             eventRecord.recognizedEventReceived = true;
         });
 
-        botConnector.sessionStarted.addEventListener((o, sessionEventArgs) -> {
+        dialogConnector.sessionStarted.addEventListener((o, sessionEventArgs) -> {
             eventRecord.sessionStartedEventReceived = true;
         });
 
-        botConnector.sessionStopped.addEventListener((o, sessionEventArgs) -> {
+        dialogConnector.sessionStopped.addEventListener((o, sessionEventArgs) -> {
             eventRecord.sessionStoppedEventReceived = true;
         });
 
-        botConnector.canceled.addEventListener((o, canceledEventArgs) -> {
+        dialogConnector.canceled.addEventListener((o, canceledEventArgs) -> {
             eventRecord.cancelledEventReceived = true;
             eventRecord.cancellationErrorDetails = canceledEventArgs.getErrorDetails();
         });
 
-        botConnector.activityReceived.addEventListener((o, activityEventArgs) -> {
+        dialogConnector.activityReceived.addEventListener((o, activityEventArgs) -> {
             eventRecord.activityEventReceived = true;
             eventRecord.eventWithAudioReceived = activityEventArgs.hasAudio();
         });

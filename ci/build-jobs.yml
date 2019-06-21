@@ -448,9 +448,9 @@ jobs:
        eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
          -D luis-key=$(luis-westus-s0-201809-key1) \
          -D speech-key=$(NorthEuropeKeySkyman) \
-         -D virtualassistant-region=$(BotRegion) \
-         -D virtualassistant-subscription=$(BotSubscriptionKey) \
-         -D virtualassistant-testbot=$(BotFunctionalTest) \
+         -D virtualassistant-region=$(DialogRegion) \
+         -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+         -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
          -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
          -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
          -D long-running=false)
@@ -508,9 +508,9 @@ jobs:
             ci/test-config.json \
             -D luis-key=$(luis-westus-s0-201809-key1) \
             -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(BotRegion) \
-            -D virtualassistant-subscription=$(BotSubscriptionKey) \
-            -D virtualassistant-testbot=$(BotFunctionalTest) \
+            -D virtualassistant-region=$(DialogRegion) \
+            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
             -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
             -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
             -D long-running=false
@@ -518,9 +518,9 @@ jobs:
             ci/test-config.json \
             -D luis-key=$(luis-westus-s0-201809-key1) \
             -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(BotRegion) \
-            -D virtualassistant-subscription=$(BotSubscriptionKey) \
-            -D virtualassistant-testbot=$(BotFunctionalTest) \
+            -D virtualassistant-region=$(DialogRegion) \
+            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
             -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
             -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
             -D long-running=false
@@ -565,9 +565,9 @@ jobs:
           eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
             -D luis-key=$(luis-westus-s0-201809-key1) \
             -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(BotRegion) \
-            -D virtualassistant-subscription=$(BotSubscriptionKey) \
-            -D virtualassistant-testbot=$(BotFunctionalTest) \
+            -D virtualassistant-region=$(DialogRegion) \
+            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
             -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
             -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
             -D long-running=false)
@@ -844,9 +844,9 @@ jobs:
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
@@ -859,9 +859,9 @@ jobs:
         LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
         LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
         LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-        BotRegion "$SPEECHSDK_BOT_REGION" \
-        BotSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
-        BotConnectionId "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
+        DialogRegion "$SPEECHSDK_BOT_REGION" \
+        DialogSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
+        DialogFunctionalTestBot "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
         ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
         ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
         ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
@@ -878,9 +878,9 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
@@ -888,9 +888,9 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
@@ -974,9 +974,9 @@ jobs:
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
@@ -989,9 +989,9 @@ jobs:
         LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
         LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
         LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-        BotRegion "$SPEECHSDK_BOT_REGION" \
-        BotSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
-        BotConnectionId "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
+        DialogRegion "$SPEECHSDK_BOT_REGION" \
+        DialogSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
+        DialogFunctionalTestBot "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
         ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
         ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
         ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
@@ -1262,9 +1262,9 @@ jobs:
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
@@ -1558,9 +1558,9 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
@@ -1568,9 +1568,9 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
@@ -1696,9 +1696,9 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false &&
@@ -1706,9 +1706,9 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
@@ -1754,9 +1754,9 @@ jobs:
             --platform Linux-$architecture-Release \
             -D luis-key=$(luis-westus-s0-201809-key1) \
             -D speech-key=$(NorthEuropeKeySkyman) \
-            -D virtualassistant-region=$(BotRegion) \
-            -D virtualassistant-subscription=$(BotSubscriptionKey) \
-            -D virtualassistant-testbot=$(BotFunctionalTest) \
+            -D virtualassistant-region=$(DialogRegion) \
+            -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+            -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
             -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
             -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
             -D long-running=false -- cxx_core_tests cxx_api_tests || {
@@ -1930,9 +1930,9 @@ jobs:
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
@@ -1951,9 +1951,9 @@ jobs:
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
@@ -1961,9 +1961,9 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false
@@ -1982,9 +1982,9 @@ jobs:
       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
@@ -1992,9 +1992,9 @@ jobs:
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
         -D speech-key=$(NorthEuropeKeySkyman) \
-        -D virtualassistant-region=$(BotRegion) \
-        -D virtualassistant-subscription=$(BotSubscriptionKey) \
-        -D virtualassistant-testbot=$(BotFunctionalTest) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false

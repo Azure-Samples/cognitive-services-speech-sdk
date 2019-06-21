@@ -56,6 +56,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         AudioConfig_AudioSource = 8004,
         Speech_LogFilename = 9001,
         Conversation_Secret_Key = 10000,
+        Conversation_TaskDialogAppId = 10001,
         Conversation_Initial_Silence_Timeout = 10002,
         Conversation_From_Id = 10003,
         DataBuffer_TimeStamp = 11001,

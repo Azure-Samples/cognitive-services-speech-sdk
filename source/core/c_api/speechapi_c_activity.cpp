@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// speechapi_c_activity.cpp: Public API definitions for bot connector activities.
+// speechapi_c_activity.cpp: Public API definitions for dialog connector activities.
 
 #include "stdafx.h"
 #include "handle_helpers.h"
@@ -18,7 +18,7 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 /* Since the activity model relies on references, we need to protect the user from himself */
 std::mutex g_activity_mutex;
 
-SPXAPI bot_activity_create(SPXACTIVITYHANDLE* ph_act)
+SPXAPI activity_create(SPXACTIVITYHANDLE* ph_act)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_act == nullptr);
 
@@ -33,7 +33,7 @@ SPXAPI bot_activity_create(SPXACTIVITYHANDLE* ph_act)
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI bot_activity_from_string(const char* serialized_activity, SPXACTIVITYHANDLE* ph_act)
+SPXAPI activity_from_string(const char* serialized_activity, SPXACTIVITYHANDLE* ph_act)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_act == nullptr);
 
@@ -50,17 +50,17 @@ SPXAPI bot_activity_from_string(const char* serialized_activity, SPXACTIVITYHAND
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) bot_activity_handle_is_valid(SPXACTIVITYHANDLE h_act)
+SPXAPI_(bool) activity_handle_is_valid(SPXACTIVITYHANDLE h_act)
 {
     return Handle_IsValid<SPXACTIVITYHANDLE, ISpxActivity>(h_act);
 }
 
-SPXAPI bot_activity_handle_release(SPXACTIVITYHANDLE h_act)
+SPXAPI activity_handle_release(SPXACTIVITYHANDLE h_act)
 {
     return Handle_Close<SPXACTIVITYHANDLE, ISpxActivity>(h_act);
 }
 
-SPXAPI bot_activity_serialized_size(SPXACTIVITYHANDLE h_act, size_t* size)
+SPXAPI activity_serialized_size(SPXACTIVITYHANDLE h_act, size_t* size)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, size == nullptr);
 
@@ -75,7 +75,7 @@ SPXAPI bot_activity_serialized_size(SPXACTIVITYHANDLE h_act, size_t* size)
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI bot_activity_serialize(SPXACTIVITYHANDLE h_act, char* buffer, size_t max_size)
+SPXAPI activity_serialize(SPXACTIVITYHANDLE h_act, char* buffer, size_t max_size)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, buffer == nullptr);
 
@@ -95,7 +95,7 @@ SPXAPI bot_activity_serialize(SPXACTIVITYHANDLE h_act, char* buffer, size_t max_
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI bot_activity_property_size(SPXACTIVITYHANDLE h_act, const char* prop_name, size_t* size)
+SPXAPI activity_property_size(SPXACTIVITYHANDLE h_act, const char* prop_name, size_t* size)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, prop_name == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, size == nullptr);
@@ -117,7 +117,7 @@ SPXAPI bot_activity_property_size(SPXACTIVITYHANDLE h_act, const char* prop_name
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI bot_activity_property_get(SPXACTIVITYHANDLE h_act, const char* prop_name, char* buffer, size_t max_size)
+SPXAPI activity_property_get(SPXACTIVITYHANDLE h_act, const char* prop_name, char* buffer, size_t max_size)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, prop_name == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, buffer == nullptr);
@@ -141,7 +141,7 @@ SPXAPI bot_activity_property_get(SPXACTIVITYHANDLE h_act, const char* prop_name,
 
 }
 
-SPXAPI bot_activity_property_set(SPXACTIVITYHANDLE h_act, const char* prop_name, const char* buffer)
+SPXAPI activity_property_set(SPXACTIVITYHANDLE h_act, const char* prop_name, const char* buffer)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, prop_name == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, buffer == nullptr);
@@ -158,7 +158,7 @@ SPXAPI bot_activity_property_set(SPXACTIVITYHANDLE h_act, const char* prop_name,
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI bot_activity_complex_field_handle(SPXACTIVITYHANDLE h_act, const char* prop_name, SPXACTIVITYJSONHANDLE* ph_json)
+SPXAPI activity_complex_field_handle(SPXACTIVITYHANDLE h_act, const char* prop_name, SPXACTIVITYJSONHANDLE* ph_json)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, prop_name == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_json == nullptr);
@@ -193,11 +193,11 @@ SPXAPI bot_activity_complex_field_handle(SPXACTIVITYHANDLE h_act, const char* pr
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) bot_activity_json_handle_is_valid(SPXACTIVITYJSONHANDLE h_json)
+SPXAPI_(bool) activity_json_handle_is_valid(SPXACTIVITYJSONHANDLE h_json)
 {
     return Handle_IsValid<SPXACTIVITYJSONHANDLE, ISpxActivityJSONAccessor>(h_json);
 }
-SPXAPI bot_activity_json_handle_release(SPXACTIVITYJSONHANDLE h_json)
+SPXAPI activity_json_handle_release(SPXACTIVITYJSONHANDLE h_json)
 {
     return Handle_Close<SPXACTIVITYHANDLE, ISpxActivityJSONAccessor>(h_json);
 }
@@ -208,7 +208,7 @@ constexpr auto enum_cast(T v)
     return static_cast<std::underlying_type_t<T>>(v);
 }
 
-SPXAPI bot_activity_json_get_type(SPXACTIVITYHANDLE h_json, int* type)
+SPXAPI activity_json_get_type(SPXACTIVITYHANDLE h_json, int* type)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, type == nullptr);
 
@@ -220,42 +220,42 @@ SPXAPI bot_activity_json_get_type(SPXACTIVITYHANDLE h_json, int* type)
         auto& json = act->Get();
         if (json.is_null())
         {
-            *type = enum_cast(BotActivityJSONType::Null);
+            *type = enum_cast(ActivityJSONType::Null);
         }
         else if (json.is_array())
         {
-            *type = enum_cast(BotActivityJSONType::Array);
+            *type = enum_cast(ActivityJSONType::Array);
         }
         else if (json.is_object())
         {
-            *type = enum_cast(BotActivityJSONType::Object);
+            *type = enum_cast(ActivityJSONType::Object);
         }
         else if (json.is_string())
         {
-            *type = enum_cast(BotActivityJSONType::String);
+            *type = enum_cast(ActivityJSONType::String);
         }
         else if (json.is_number_unsigned())
         {
-            *type = enum_cast(BotActivityJSONType::UInt);
+            *type = enum_cast(ActivityJSONType::UInt);
         }
         else if (json.is_number_integer())
         {
-            *type = enum_cast(BotActivityJSONType::Int);
+            *type = enum_cast(ActivityJSONType::Int);
         }
         else if (json.is_number_float())
         {
-            *type = enum_cast(BotActivityJSONType::Double);
+            *type = enum_cast(ActivityJSONType::Double);
         }
         else if (json.is_boolean())
         {
-            *type = enum_cast(BotActivityJSONType::Boolean);
+            *type = enum_cast(ActivityJSONType::Boolean);
         }
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 /* JSON Object */
-SPXAPI bot_activity_json_has_field(SPXACTIVITYJSONHANDLE h_json, const char* field, bool* result)
+SPXAPI activity_json_has_field(SPXACTIVITYJSONHANDLE h_json, const char* field, bool* result)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, field == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, result == nullptr);
@@ -273,7 +273,7 @@ SPXAPI bot_activity_json_has_field(SPXACTIVITYJSONHANDLE h_json, const char* fie
 }
 
 
-SPXAPI bot_activity_json_field_handle(SPXACTIVITYJSONHANDLE h_json, const char* field_name, SPXACTIVITYJSONHANDLE* ph_field)
+SPXAPI activity_json_field_handle(SPXACTIVITYJSONHANDLE h_json, const char* field_name, SPXACTIVITYJSONHANDLE* ph_field)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, field_name == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_field == nullptr);
@@ -337,54 +337,54 @@ SPXHR get_json_value(SPXACTIVITYJSONHANDLE handle, T* value)
 
 
 /* JSON Value */
-SPXAPI bot_activity_json_set_int(SPXACTIVITYJSONHANDLE h_json, int64_t val)
+SPXAPI activity_json_set_int(SPXACTIVITYJSONHANDLE h_json, int64_t val)
 {
     return set_json_value(h_json, val);
 }
 
-SPXAPI bot_activity_json_set_uint(SPXACTIVITYJSONHANDLE h_json, uint64_t val)
+SPXAPI activity_json_set_uint(SPXACTIVITYJSONHANDLE h_json, uint64_t val)
 {
     return set_json_value(h_json, val);
 }
 
-SPXAPI bot_activity_json_set_double(SPXACTIVITYJSONHANDLE h_json, double val)
+SPXAPI activity_json_set_double(SPXACTIVITYJSONHANDLE h_json, double val)
 {
     return set_json_value(h_json, val);
 }
 
-SPXAPI bot_activity_json_set_bool(SPXACTIVITYJSONHANDLE h_json, bool val)
+SPXAPI activity_json_set_bool(SPXACTIVITYJSONHANDLE h_json, bool val)
 {
     return set_json_value(h_json, val);
 }
 
-SPXAPI bot_activity_json_set_string(SPXACTIVITYJSONHANDLE h_json, const char* val)
+SPXAPI activity_json_set_string(SPXACTIVITYJSONHANDLE h_json, const char* val)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, val == nullptr);
 
     return set_json_value(h_json, std::string{ val });
 }
 
-SPXAPI bot_activity_json_get_int(SPXACTIVITYJSONHANDLE h_json, int64_t* val)
+SPXAPI activity_json_get_int(SPXACTIVITYJSONHANDLE h_json, int64_t* val)
 {
     return get_json_value<int64_t>(h_json, val);
 }
 
-SPXAPI bot_activity_json_get_uint(SPXACTIVITYJSONHANDLE h_json, uint64_t* val)
+SPXAPI activity_json_get_uint(SPXACTIVITYJSONHANDLE h_json, uint64_t* val)
 {
     return get_json_value<uint64_t>(h_json, val);
 }
 
-SPXAPI bot_activity_json_get_double(SPXACTIVITYJSONHANDLE h_json, double* val)
+SPXAPI activity_json_get_double(SPXACTIVITYJSONHANDLE h_json, double* val)
 {
     return get_json_value<double>(h_json, val);
 }
 
-SPXAPI bot_activity_json_get_bool(SPXACTIVITYJSONHANDLE h_json, bool* val)
+SPXAPI activity_json_get_bool(SPXACTIVITYJSONHANDLE h_json, bool* val)
 {
     return get_json_value<bool>(h_json, val);
 }
 
-SPXAPI bot_activity_json_get_string_size(SPXACTIVITYJSONHANDLE h_json, size_t* size)
+SPXAPI activity_json_get_string_size(SPXACTIVITYJSONHANDLE h_json, size_t* size)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, size == nullptr);
 
@@ -399,7 +399,7 @@ SPXAPI bot_activity_json_get_string_size(SPXACTIVITYJSONHANDLE h_json, size_t* s
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI bot_activity_json_get_string(SPXACTIVITYJSONHANDLE h_json, char* buffer, size_t max_size)
+SPXAPI activity_json_get_string(SPXACTIVITYJSONHANDLE h_json, char* buffer, size_t max_size)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, buffer == nullptr);
 
@@ -416,7 +416,7 @@ SPXAPI bot_activity_json_get_string(SPXACTIVITYJSONHANDLE h_json, char* buffer, 
 }
 
 /* JSON Array */
-SPXAPI bot_activity_json_array_size(SPXACTIVITYJSONHANDLE h_json, size_t* size)
+SPXAPI activity_json_array_size(SPXACTIVITYJSONHANDLE h_json, size_t* size)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, size == nullptr);
 
@@ -435,7 +435,7 @@ SPXAPI bot_activity_json_array_size(SPXACTIVITYJSONHANDLE h_json, size_t* size)
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI bot_activity_json_array_item(SPXACTIVITYJSONHANDLE h_json, size_t index, SPXACTIVITYJSONHANDLE* ph_item)
+SPXAPI activity_json_array_item(SPXACTIVITYJSONHANDLE h_json, size_t index, SPXACTIVITYJSONHANDLE* ph_item)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_item == nullptr);
 

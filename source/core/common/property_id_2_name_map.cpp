@@ -66,12 +66,13 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::AudioConfig_BitsPerSampleForCapture: return "AudioConfig_BitsPerSampleForCapture";
     case PropertyId::AudioConfig_AudioSource: return "AudioConfig_AudioSource";
     case PropertyId::Speech_LogFilename: return "SPEECH-LogFilename";
-    case PropertyId::Conversation_Secret_Key: return "BOT-SecretKey";
-    case PropertyId::Conversation_Initial_Silence_Timeout: return "BOT-InitialSilenceTimeout";
-    case PropertyId::Conversation_From_Id: return "BOT-FromId";
+    case PropertyId::Conversation_Secret_Key: return "DIALOG-SecretKey";
+    case PropertyId::Conversation_TaskDialogAppId: return "DIALOG-TaskDialogAppId";
+    case PropertyId::Conversation_Initial_Silence_Timeout: return "DIALOG-InitialSilenceTimeout";
+    case PropertyId::Conversation_From_Id: return "DIALOG-FromId";
     case PropertyId::DataBuffer_TimeStamp: return "DataBuffer_TimeStamp";
     case PropertyId::DataBuffer_UserId: return "DataBuffer_UserId";
-    
+
     default:
         LogError("undefined PropertyId of %d", static_cast<int>(id));
         SPX_THROW_ON_FAIL(SPXERR_INVALID_ARG);

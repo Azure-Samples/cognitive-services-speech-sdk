@@ -7,8 +7,8 @@ package com.speechsdk.quickstart;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioOutputStream;
-import com.microsoft.cognitiveservices.speech.dialog.BotConnectorConfig;
-import com.microsoft.cognitiveservices.speech.dialog.SpeechBotConnector;
+import com.microsoft.cognitiveservices.speech.dialog.DialogConfig;
+import com.microsoft.cognitiveservices.speech.dialog.DialogConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,45 +36,45 @@ public class Main {
         assert !subscriptionKey.equals("YourSubscriptionKey") : "Replace the string \"YourSubscriptionKey\" with your speech subscription key.";
         assert !region.equals("YourServiceRegion") : "Replace the string \"YourServiceRegion\" with your service region.";
 
-        // Create a BotConnectorConfig instance from channel secret, subscription key and region
-        final BotConnectorConfig botConnectorConfig = BotConnectorConfig.fromSecretKey(channelSecret, subscriptionKey, region);
-        if (botConnectorConfig == null) {
-            log.error("BotConnectorConfig should not be null");
+        // Create a DialogConfig instance from channel secret, subscription key and region
+        final DialogConfig dialogConfig = DialogConfig.fromBotSecret(channelSecret, subscriptionKey, region);
+        if (dialogConfig == null) {
+            log.error("DialogConfig should not be null");
         }
 
         // Set audio input from microphone.
         final AudioConfig audioConfig = AudioConfig.fromDefaultMicrophoneInput();
 
-        // Create a SpeechBotConnector instance
-        final SpeechBotConnector botConnector = new SpeechBotConnector(botConnectorConfig, audioConfig);
+        // Create a DialogConnector instance
+        final DialogConnector dialogConnector = new DialogConnector(dialogConfig, audioConfig);
 
         // Configure all event listeners.
-        registerEventListeners(botConnector);
+        registerEventListeners(dialogConnector);
 
         try {
-            // Connect to the bot channel.
-            botConnector.connectAsync();
-            log.info("SpeechBotConnector is successfully connected");
+            // Connect to the backing dialog.
+            dialogConnector.connectAsync();
+            log.info("DialogConnector is successfully connected");
 
             // Start listening.
             System.out.println("Say something ...");
-            botConnector.listenOnceAsync();
+            dialogConnector.listenOnceAsync();
         } catch (Exception e) {
-            log.error("Exception thrown when connecting to SpeechBotConnector. ErrorMessage:", e.getMessage(), e);
+            log.error("Exception thrown when connecting to DialogConnector. ErrorMessage:", e.getMessage(), e);
 
-            // Disconnect bot.
-            botConnector.disconnectAsync();
+            // Disconnect from the dialog.
+            dialogConnector.disconnectAsync();
         }
     }
 
-    private static void registerEventListeners(final SpeechBotConnector botConnector) {
+    private static void registerEventListeners(final DialogConnector dialogConnector) {
         // Recognizing will provide the intermediate recognized text while an audio stream is being processed
-        botConnector.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
+        dialogConnector.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
             log.info("Recognizing speech event text: {}", speechRecognitionResultEventArgs.getResult().getText());
         });
 
         // Recognized will provide the final recognized text once audio capture is completed
-        botConnector.recognized.addEventListener((o, speechRecognitionResultEventArgs) -> {
+        dialogConnector.recognized.addEventListener((o, speechRecognitionResultEventArgs) -> {
             if (speechRecognitionResultEventArgs.getResult().getText().trim().equals("")) {
                 log.warn("No speech was recognized. Try running the program again.");
             } else {
@@ -83,23 +83,23 @@ public class Main {
         });
 
         // SessionStarted will notify when audio begins flowing to the service for a turn
-        botConnector.sessionStarted.addEventListener((o, sessionEventArgs) -> {
+        dialogConnector.sessionStarted.addEventListener((o, sessionEventArgs) -> {
             log.info("Session started event. Session id: {} ", sessionEventArgs.getSessionId());
         });
 
         // SessionStopped will notify when a turn is complete
-        botConnector.sessionStopped.addEventListener((o, sessionEventArgs) -> {
+        dialogConnector.sessionStopped.addEventListener((o, sessionEventArgs) -> {
             log.info("Session stopped event. Session id: {}", sessionEventArgs.getSessionId());
         });
 
         // Canceled will be signaled when a turn is aborted or experiences an error condition
-        botConnector.canceled.addEventListener((o, canceledEventArgs) -> {
+        dialogConnector.canceled.addEventListener((o, canceledEventArgs) -> {
             log.info("Canceled event details: {}", canceledEventArgs.getErrorDetails());
-            botConnector.disconnectAsync();
+            dialogConnector.disconnectAsync();
         });
 
         // ActivityReceived is the main way your bot will communicate with the client and uses bot framework activities
-        botConnector.activityReceived.addEventListener((o, activityEventArgs) -> {
+        dialogConnector.activityReceived.addEventListener((o, activityEventArgs) -> {
             final String act = activityEventArgs.getActivity().serialize();
             log.info("Received activity {} audio: {}", activityEventArgs.hasAudio() ? "with" : "without", act);
             if (activityEventArgs.hasAudio()) {

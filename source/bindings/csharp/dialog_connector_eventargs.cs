@@ -24,18 +24,18 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             eventHandle = new I.InteropSafeHandle(eventHandlePtr, Internal.ActivityReceivedEventArgs.activity_received_event_release);
 
             IntPtr activityPtr = IntPtr.Zero;
-            ThrowIfFail(Internal.ActivityReceivedEventArgs.bot_connector_activity_received_event_get_activity(eventHandle, out activityPtr));
+            ThrowIfFail(Internal.ActivityReceivedEventArgs.dialog_connector_activity_received_event_get_activity(eventHandle, out activityPtr));
             uint size = 0;
-            ThrowIfFail(Internal.BotConnectorActivity.bot_activity_serialized_size(activityPtr, out size));
+            ThrowIfFail(Internal.Activity.activity_serialized_size(activityPtr, out size));
             var buffer = new StringBuilder((int)(size + 1));
-            ThrowIfFail(Internal.BotConnectorActivity.bot_activity_serialize(activityPtr, buffer, size + 1));
+            ThrowIfFail(Internal.Activity.activity_serialize(activityPtr, buffer, size + 1));
             Activity = buffer.ToString();
-            ThrowIfFail(Internal.BotConnectorActivity.bot_activity_handle_release(activityPtr));
-            HasAudio = Internal.ActivityReceivedEventArgs.bot_connector_activity_received_event_has_audio(eventHandle);
+            ThrowIfFail(Internal.Activity.activity_handle_release(activityPtr));
+            HasAudio = Internal.ActivityReceivedEventArgs.dialog_connector_activity_received_event_has_audio(eventHandle);
             if (HasAudio)
             {
                 IntPtr audioPtr = IntPtr.Zero;
-                ThrowIfFail(Internal.ActivityReceivedEventArgs.bot_connector_activity_received_event_get_audio(eventHandle, out audioPtr));
+                ThrowIfFail(Internal.ActivityReceivedEventArgs.dialog_connector_activity_received_event_get_audio(eventHandle, out audioPtr));
                 Audio = new PullAudioOutputStream(audioPtr);
             }
         }

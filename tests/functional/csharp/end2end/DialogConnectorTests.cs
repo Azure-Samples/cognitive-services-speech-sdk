@@ -16,12 +16,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using static AssertHelpers;
-    using static BotConnectorTestsHelper;
+    using static DialogConnectorTestsHelper;
 
     [TestClass]
-    public class BotConnectorTests : BotConnectorTestBase
+    public class DialogConnectorTests : DialogConnectorTestBase
     {
-        private BotConnectorTestsHelper helper;
+        private DialogConnectorTestsHelper helper;
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
@@ -32,17 +32,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestInitialize]
         public void Initialize()
         {
-            helper = new BotConnectorTestsHelper();
+            helper = new DialogConnectorTestsHelper();
         }
 
         [Ignore] //Temporarily removing during stand-up, tracked by task 1755114
         [DataTestMethod]
-        public async Task ValidBaselineBotListenOnce()
+        public async Task ValidBaselineListenOnce()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var botConnector = TrackSessionId(new SpeechBotConnector(this.botConnectorConfig, audioInput)))
+            using (var dialogConnector = TrackSessionId(new DialogConnector(this.dialogConfig, audioInput)))
             {
-                await helper.CompleteListenOnceAsync(botConnector).ConfigureAwait(false);
+                await helper.CompleteListenOnceAsync(dialogConnector).ConfigureAwait(false);
             }
         }
 
@@ -51,9 +51,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ValidSendActivity()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var botConnector = TrackSessionId(new SpeechBotConnector(this.botConnectorConfig, audioInput)))
+            using (var dialogConnector = TrackSessionId(new DialogConnector(this.dialogConfig, audioInput)))
             {
-                await helper.CompleteSendActivity(botConnector).ConfigureAwait(false);
+                await helper.CompleteSendActivity(dialogConnector).ConfigureAwait(false);
             }
         }
 

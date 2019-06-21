@@ -948,8 +948,8 @@ void CSpxAudioStreamSession::FireSessionStartedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
     std::wstring sessionIdOverride;
-    /* For Speech bot connector, we replace session id with the interaction id that's going to be send in the context message. */
-    if (IsRecognizerType<ISpxSpeechBotConnector>())
+    /* For dialog connector, we replace session id with the interaction id that's going to be send in the context message. */
+    if (IsRecognizerType<ISpxDialogConnector>())
     {
         sessionIdOverride = PAL::ToWString(PeekNextInteractionId(InteractionIdPurpose::Speech));
     }
@@ -1080,7 +1080,7 @@ void CSpxAudioStreamSession::DispatchEvent(const list<weak_ptr<ISpxRecognizer>>&
 
             case EventType::ActivityReceivedEvent:
             {
-                auto c_events = SpxQueryInterface<ISpxSpeechBotConnectorEvents>(ptr);
+                auto c_events = SpxQueryInterface<ISpxDialogConnectorEvents>(ptr);
                 if (c_events != nullptr)
                 {
                     c_events->FireActivityReceived(sessionId, activity, audio);
@@ -1156,13 +1156,13 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
     }
 }
 
-void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countBot, uint16_t* countTranscriber)
+void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countDialog, uint16_t* countTranscriber)
 {
     unique_lock<mutex> lock(m_recognizersLock);
     if (m_recognizers.empty())
     {
         // we only support 1 recognizer today... but can be deleted if user is killing it right now.
-        *countSpeech = *countIntent = *countTranslation = *countTranscriber = 0;
+        *countSpeech = *countIntent = *countTranslation = *countDialog =  *countTranscriber = 0;
         return;
     }
 
@@ -1170,16 +1170,16 @@ void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* c
     auto recognizer = m_recognizers.front().lock();
     auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer);
     auto translationRecognizer = SpxQueryInterface<ISpxTranslationRecognizer>(recognizer);
-    auto botConnector = SpxQueryInterface<ISpxSpeechBotConnector>(recognizer);
+    auto dialogConnector = SpxQueryInterface<ISpxDialogConnector>(recognizer);
     auto transcriber = SpxQueryInterface<ISpxConversationTranscriber>(recognizer);
 
     *countTranscriber = (transcriber != nullptr) ? 1 : 0;
-    *countBot = (botConnector != nullptr) ? 1 : 0;
+    *countDialog = (dialogConnector != nullptr) ? 1 : 0;
     *countIntent = (intentRecognizer != nullptr) ? 1 : 0;
     *countTranslation = (translationRecognizer != nullptr) ? 1 : 0;
-    *countSpeech = 1 - *countIntent - *countTranslation - *countBot - *countTranscriber;
+    *countSpeech = 1 - *countIntent - *countTranslation - *countDialog - *countTranscriber;
 
-    SPX_DBG_TRACE_VERBOSE("%s: countSpeech=%d; countIntent=%d; countTranslation=%d; countBot=%d, countTranscriber=%d", __FUNCTION__, *countSpeech, *countIntent, *countTranslation, *countBot, *countTranscriber);
+    SPX_DBG_TRACE_VERBOSE("%s: countSpeech=%d; countIntent=%d; countTranslation=%d; countDialog=%d, countTranscriber=%d", __FUNCTION__, *countSpeech, *countIntent, *countTranslation, *countDialog, *countTranscriber);
 }
 
 std::list<std::string> CSpxAudioStreamSession::GetListenForList()
@@ -1645,7 +1645,7 @@ void CSpxAudioStreamSession::CheckError(const string& error)
 
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
-    if (IsState(SessionState::Idle) && !IsRecognizerType<ISpxSpeechBotConnector>())
+    if (IsState(SessionState::Idle) && !IsRecognizerType<ISpxDialogConnector>())
     {
         if (adapter != m_recoAdapter.get())
         {

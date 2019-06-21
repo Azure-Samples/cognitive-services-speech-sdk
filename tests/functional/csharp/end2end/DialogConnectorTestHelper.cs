@@ -13,7 +13,7 @@ using System.IO;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    sealed class BotConnectorTestsHelper
+    sealed class DialogConnectorTestsHelper
     {
         public int ErrorEventCount { get; set; }
 
@@ -34,7 +34,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         private TaskCompletionSource<int> taskCompletionSource;
         private TimeSpan timeout = TimeSpan.FromMinutes(6);
 
-        public BotConnectorTestsHelper()
+        public DialogConnectorTestsHelper()
         {
             ErrorEventCount = 0;
             RecognizingEventCount = 0;
@@ -47,40 +47,40 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             taskCompletionSource = new TaskCompletionSource<int>();
         }
 
-        public async Task CompleteListenOnceAsync(SpeechBotConnector botConnector)
+        public async Task CompleteListenOnceAsync(DialogConnector dialogConnector)
         {
             string activityReceived = null;
             string canceled = string.Empty;
 
-            botConnector.ActivityReceived += (s, e) =>
+            dialogConnector.ActivityReceived += (s, e) =>
             {
                 ActivityReceivedEventCounter(s, e);
                 activityReceived = e.Activity;
                 taskCompletionSource.TrySetResult(0);
             };
-            botConnector.Canceled += (s, e) =>
+            dialogConnector.Canceled += (s, e) =>
             {
                 CanceledEventCounter(s, e);
                 canceled = e.ErrorDetails;
                 taskCompletionSource.TrySetResult(0);
             };
 
-            await botConnector.ConnectAsync().ConfigureAwait(false);
+            await dialogConnector.ConnectAsync().ConfigureAwait(false);
 
-            await botConnector.ListenOnceAsync().ConfigureAwait(false);
+            await dialogConnector.ListenOnceAsync().ConfigureAwait(false);
 
             await Task.WhenAny(taskCompletionSource.Task, Task.Delay(timeout));
 
             Assert.IsTrue(SessionStoppedEventCount == 1 || ErrorEventCount == 1 || ActivityReceivedEventCount == 1);
             if (!string.IsNullOrEmpty(canceled))
             {
-                Assert.Fail($"Bot interaction canceled: {canceled}");
+                Assert.Fail($"Dialog interaction canceled: {canceled}");
             }
 
             Assert.AreNotEqual(activityReceived, string.Empty);
         }
 
-        public async Task CompleteSendActivity(SpeechBotConnector botConnector)
+        public async Task CompleteSendActivity(DialogConnector dialogConnector)
         {
             string activityReceived = null;
             string canceled = string.Empty;
@@ -88,9 +88,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var buffer = new byte[800];
             uint totalAudioBytes = 0;
 
-            SubscribeToCounterEventHandlers(botConnector);
+            SubscribeToCounterEventHandlers(dialogConnector);
 
-            botConnector.ActivityReceived += (s, e) =>
+            dialogConnector.ActivityReceived += (s, e) =>
             {
                 ActivityReceivedEventCounter(s, e);
                 activityReceived = e.Activity;
@@ -110,7 +110,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             string speakActivity = @"{""type"":""message"",""text"":""yo"", ""speak"":""hello"" }";
 
-            await botConnector.SendActivityAsync(speakActivity);
+            await dialogConnector.SendActivityAsync(speakActivity);
 
             await Task.WhenAny(taskCompletionSource.Task, Task.Delay(timeout));
 
@@ -164,33 +164,33 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             DisconnectedEventCount++;
         }
 
-        public static SpeechBotConnector TrackSessionId(SpeechBotConnector botConnector)
+        public static DialogConnector TrackSessionId(DialogConnector dialogConnector)
         {
-            botConnector.SessionStarted += (s, e) =>
+            dialogConnector.SessionStarted += (s, e) =>
             {
                 Console.WriteLine("SessionId: " + e.SessionId);
             };
-            return botConnector;
+            return dialogConnector;
         }
 
-        public void SubscribeToCounterEventHandlers(SpeechBotConnector botConnector)
+        public void SubscribeToCounterEventHandlers(DialogConnector dialogConnector)
         {
-            botConnector.Recognizing += RecognizingEventCounter;
-            botConnector.Recognized += RecognizedEventCounter;
-            botConnector.Canceled += CanceledEventCounter;
-            botConnector.SessionStarted += SessionStartedEventCounter;
-            botConnector.SessionStopped += SessionStoppedEventCounter;
-            botConnector.ActivityReceived += ActivityReceivedEventCounter;
+            dialogConnector.Recognizing += RecognizingEventCounter;
+            dialogConnector.Recognized += RecognizedEventCounter;
+            dialogConnector.Canceled += CanceledEventCounter;
+            dialogConnector.SessionStarted += SessionStartedEventCounter;
+            dialogConnector.SessionStopped += SessionStoppedEventCounter;
+            dialogConnector.ActivityReceived += ActivityReceivedEventCounter;
         }
 
-        public void UnsubscribeFromCounterEventHandlers(SpeechBotConnector botConnector)
+        public void UnsubscribeFromCounterEventHandlers(DialogConnector dialogConnector)
         {
-            botConnector.Recognizing -= RecognizingEventCounter;
-            botConnector.Recognized -= RecognizedEventCounter;
-            botConnector.Canceled -= CanceledEventCounter;
-            botConnector.SessionStarted -= SessionStartedEventCounter;
-            botConnector.SessionStopped -= SessionStoppedEventCounter;
-            botConnector.ActivityReceived -= ActivityReceivedEventCounter;
+            dialogConnector.Recognizing -= RecognizingEventCounter;
+            dialogConnector.Recognized -= RecognizedEventCounter;
+            dialogConnector.Canceled -= CanceledEventCounter;
+            dialogConnector.SessionStarted -= SessionStartedEventCounter;
+            dialogConnector.SessionStopped -= SessionStoppedEventCounter;
+            dialogConnector.ActivityReceived -= ActivityReceivedEventCounter;
         }
     }
 }

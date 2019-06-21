@@ -8,12 +8,12 @@ import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
- * Class that defines a BotConnectorActivity.
+ * Class that defines an Activity.
  */
-public class BotConnectorActivity {
+public class Activity {
 
     /*! \cond PROTECTED */
-    static Class<?> botConnectorActivity = null;
+    static Class<?> activity = null;
 
 
     // load the native library.
@@ -25,23 +25,23 @@ public class BotConnectorActivity {
         catch (ClassNotFoundException ex) {
             throw new IllegalStateException(ex);
         }
-        botConnectorActivity = BotConnectorActivity.class;
+        activity = Activity.class;
     }
 
-    protected BotConnectorActivity(com.microsoft.cognitiveservices.speech.internal.BotConnectorActivity botConnectorActivity) {
-        Contracts.throwIfNull(botConnectorActivity, "botConnectorActivity");
-        this.botConnectorActivityImpl = botConnectorActivity;
+    protected Activity(com.microsoft.cognitiveservices.speech.internal.Activity activity) {
+        Contracts.throwIfNull(activity, "activity");
+        this.activityImpl = activity;
     }
     /*! \endcond */
 
     /**
-     * Create a bot activity from a serialized activity.
+     * Create an activity from a serialized activity.
      * @param activity Serialized activity
      * @return The activity created.
      */
-    public static BotConnectorActivity fromSerializedActivity(String activity) {
+    public static Activity fromSerializedActivity(String activity) {
         Contracts.throwIfNull(activity, "activity");
-        return new BotConnectorActivity(com.microsoft.cognitiveservices.speech.internal.BotConnectorActivity.FromSerializedActivity(activity));
+        return new Activity(com.microsoft.cognitiveservices.speech.internal.Activity.FromSerializedActivity(activity));
     }
 
     /**
@@ -49,18 +49,18 @@ public class BotConnectorActivity {
      * @return The serialized activity.
      */
     public String serialize() {
-        return this.botConnectorActivityImpl.Serialize();
+        return this.activityImpl.Serialize();
     }
 
     /*! \cond PROTECTED */
-    private com.microsoft.cognitiveservices.speech.internal.BotConnectorActivity botConnectorActivityImpl;
+    private com.microsoft.cognitiveservices.speech.internal.Activity activityImpl;
     /*! \endcond */
 
     /**
       * Returns the implementation of the activity.
       * @return The implementation of the activity.
       */
-    public com.microsoft.cognitiveservices.speech.internal.BotConnectorActivity getImpl() {
-        return this.botConnectorActivityImpl;
+    public com.microsoft.cognitiveservices.speech.internal.Activity getImpl() {
+        return this.activityImpl;
     }
 }

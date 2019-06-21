@@ -74,9 +74,9 @@ runCatchSuite \
     --InroomEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
     --OnlineEndpoint "$SPEECHSDK_PRINCETON_ONLINE_ENDPOINT" \
     --inputDir "$SPEECHSDK_INPUTDIR" \
-    --keyBot "$SPEECHSDK_BOT_SUBSCRIPTION" \
-    --regionIdBot "$SPEECHSDK_BOT_REGION" \
-    --secretKeyBot "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
+    --keyDialog "$SPEECHSDK_BOT_SUBSCRIPTION" \
+    --dialogRegionId "$SPEECHSDK_BOT_REGION" \
+    --dialogBotSecret "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
     --keyConversationTranscriberPPE "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
     --offlineModelPathRoot="$OFFLINE_MODEL_PATH_ROOT" \
     --offlineModelLanguage="$OFFLINE_MODEL_LANGUAGE" \

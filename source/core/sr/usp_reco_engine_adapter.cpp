@@ -96,9 +96,9 @@ void CSpxUspRecoEngineAdapter::OpenConnection(bool singleShot)
     std::string recoModeToSet;
 
     // Get recognizer type
-    uint16_t countSpeech, countIntent, countTranslation, countBot, countTranscriber;
-    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation, &countBot, &countTranscriber);
-    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation + countBot + countTranscriber == 1); // currently only support one recognizer
+    uint16_t countSpeech, countIntent, countTranslation, countDialog, countTranscriber;
+    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation, &countDialog, &countTranscriber);
+    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation + countDialog + countTranscriber == 1); // currently only support one recognizer
 
     if (countIntent == 1)
     {
@@ -117,7 +117,7 @@ void CSpxUspRecoEngineAdapter::OpenConnection(bool singleShot)
         // Always use conversation mode for translation recognizer
         recoModeToSet = g_recoModeConversation;
     }
-    else if (countBot == 1)
+    else if (countDialog == 1)
     {
         recoModeToSet = g_recoModeInteractive;
     }
@@ -140,9 +140,9 @@ void CSpxUspRecoEngineAdapter::OpenConnection(bool singleShot)
 void CSpxUspRecoEngineAdapter::UspClearReconnectCache()
 {
     m_reconnectWaitingTimeMs = c_initialReconnectWaitingTimeMs;
-    if (m_endpointType == USP::EndpointType::Bot)
+    if (m_endpointType == USP::EndpointType::Dialog)
     {
-        m_botConversationId.clear();
+        m_dialogConversationId.clear();
     }
 }
 
@@ -151,9 +151,9 @@ void CSpxUspRecoEngineAdapter::CloseConnection()
     SPX_DBG_TRACE_VERBOSE("%s: Close connection.", __FUNCTION__);
 
     // Get recognizer type
-    uint16_t countSpeech, countIntent, countTranslation, countBot, countTranscriber;
-    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation, &countBot, &countTranscriber);
-    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation + countBot + countTranscriber == 1); // currently only support one recognizer
+    uint16_t countSpeech, countIntent, countTranslation, countDialog, countTranscriber;
+    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation, &countDialog, &countTranscriber);
+    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation + countDialog + countTranscriber == 1); // currently only support one recognizer
 
     if (countIntent == 1)
     {
@@ -163,7 +163,7 @@ void CSpxUspRecoEngineAdapter::CloseConnection()
         SPX_THROW_HR(SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
         return;
     }
-    if (countBot == 1)
+    if (countDialog == 1)
     {
         UspClearReconnectCache();
     }
@@ -316,7 +316,7 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
 
     // Construct config message payload
     SetSpeechConfigMessage(*properties);
-    if (m_endpointType == USP::EndpointType::Bot)
+    if (m_endpointType == USP::EndpointType::Dialog)
     {
         SetAgentConfigMessage(*properties);
     }
@@ -356,7 +356,7 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
         properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Url), m_uspConnection->GetConnectionUrl().c_str());
 
         UspSendSpeechConfig();
-        /* This will noop for non bot endpoints */
+        /* This will noop for non dialog endpoints */
         UspSendAgentConfig();
     }
 }
@@ -384,9 +384,9 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(const std::shared_ptr<ISpx
     SPX_DBG_ASSERT(GetSite() != nullptr);
 
     // How many recognizers of each type do we have?
-    uint16_t countSpeech = 0, countIntent = 0, countTranslation = 0, countBot = 0, countTranscriber = 0;
-    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation, &countBot, &countTranscriber);
-    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation + countBot + countTranscriber == 1); // currently only support one recognizer
+    uint16_t countSpeech = 0, countIntent = 0, countTranslation = 0, countDialog = 0, countTranscriber = 0;
+    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation, &countDialog, &countTranscriber);
+    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation + countDialog + countTranscriber == 1); // currently only support one recognizer
 
     // set endpoint url if this is provided.
     auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
@@ -414,9 +414,9 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(const std::shared_ptr<ISpx
     {
         SetUspEndpointTranslation(properties, client);
     }
-    else if (countBot == 1)
+    else if (countDialog == 1)
     {
-        SetUspEndpointBot(properties, client);
+        SetUspEndpointDialog(properties, client);
     }
      else if (countTranscriber == 1)
     {
@@ -470,17 +470,17 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointTranscriber(const std::shar
     return client;
 }
 
-USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointBot(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointDialog(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
-    SPX_DBG_TRACE_VERBOSE("%s: Endpoint type: Bot.", __FUNCTION__);
-    m_endpointType = USP::EndpointType::Bot;
+    SPX_DBG_TRACE_VERBOSE("%s: Endpoint type: Dialog.", __FUNCTION__);
+    m_endpointType = USP::EndpointType::Dialog;
     client.SetEndpointType(m_endpointType);
 
     SetUspRegion(properties, client, /*isIntentRegion=*/ false);
 
     UpdateDefaultLanguage(properties, /*consideringCustomModel*/ false);
 
-    SetUspQueryParameters(USP::endpoint::bot::queryParameters, properties, client);
+    SetUspQueryParameters(USP::endpoint::dialog::queryParameters, properties, client);
 
     return client.SetAudioResponseFormat("raw-16khz-16bit-mono-pcm");
 }
@@ -655,13 +655,16 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(const std::shared_pt
     auto uspAuthToken = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token));
     auto uspRpsToken = properties->GetStringValue("SPEECH-RpsToken");
     auto uspDLSSecret = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_Secret_Key));
+    auto uspSCBAppId = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_TaskDialogAppId));
+    auto uspDialogAppId = !uspDLSSecret.empty() ? uspDLSSecret : uspSCBAppId;
+
     std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
 
 
     authData[static_cast<size_t>(USP::AuthenticationType::SubscriptionKey)] = std::move(uspSubscriptionKey);
     authData[static_cast<size_t>(USP::AuthenticationType::AuthorizationToken)] = std::move(uspAuthToken);
     authData[static_cast<size_t>(USP::AuthenticationType::SearchDelegationRPSToken)] = std::move(uspRpsToken);
-    authData[static_cast<size_t>(USP::AuthenticationType::DirectLineSpeechSecret)] = std::move(uspDLSSecret);
+    authData[static_cast<size_t>(USP::AuthenticationType::DialogApplicationId)] = std::move(uspDialogAppId);
 
     return client.SetAuthentication(authData);
 }
@@ -846,50 +849,59 @@ void CSpxUspRecoEngineAdapter::SetSpeechConfigMessage(const ISpxNamedProperties&
 
 void CSpxUspRecoEngineAdapter::SetAgentConfigMessage(const ISpxNamedProperties& properties)
 {
-    constexpr auto botCommunicationType = "Conversation_Communication_Type";
-    constexpr auto botSecretKey = "BOT-SecretKey";
-    constexpr auto botFromId = "BOT-FromId";
-    constexpr auto botTTSAudioFormat = "SPEECH-SynthOutputFormat";
-    constexpr auto botAuthorizationToken = "BOT-BotAuthorizationToken";
+    constexpr auto dialogCommunicationType = "Conversation_Communication_Type";
+    constexpr auto dialogBotSecret = "DIALOG-SecretKey";
+    constexpr auto dialogTaskDialogAppId  = "DIALOG-TaskDialogAppId";
+    constexpr auto dialogFromId = "DIALOG-FromId";
+    constexpr auto dialogTTSAudioFormat = "SPEECH-SynthOutputFormat";
+    constexpr auto dialogAuthorizationToken = "DIALOG-BotAuthorizationToken";
 
     json agentConfigJson;
     agentConfigJson["version"] = 0.2;
 
-    auto communicationType = properties.GetStringValue(botCommunicationType);
-    if (communicationType.empty())
-    {
-        communicationType = "Default";
-    }
-    agentConfigJson["botInfo"]["commType"] = communicationType;
+    auto botSecret = properties.GetStringValue(dialogBotSecret);
+    auto taskDialogAppId = properties.GetStringValue(dialogTaskDialogAppId);
 
-    auto connectionId = properties.GetStringValue(botSecretKey);
+    if (!botSecret.empty() && !taskDialogAppId.empty())
+    {
+        SPX_THROW_HR(SPXERR_INVALID_ARG);
+    }
+    auto connectionId = !botSecret.empty() ? botSecret : taskDialogAppId;
     if (connectionId.empty())
     {
         SPX_THROW_HR(SPXERR_INVALID_ARG);
     }
     agentConfigJson["botInfo"]["connectionId"] = connectionId;
 
-    auto fromId = properties.GetStringValue(botFromId);
+    std::string appType = !botSecret.empty() ? "Default" : "TaskDialog";
+    auto communicationTypeOverride = properties.GetStringValue(dialogCommunicationType);
+    if (!communicationTypeOverride.empty())
+    {
+        appType = communicationTypeOverride;
+    }
+    agentConfigJson["botInfo"]["commType"] = appType;
+
+    auto fromId = properties.GetStringValue(dialogFromId);
     if (!fromId.empty())
     {
         agentConfigJson["botInfo"]["fromId"] = fromId;
     }
 
-    auto ttsAudioFormat = properties.GetStringValue(botTTSAudioFormat);
+    auto ttsAudioFormat = properties.GetStringValue(dialogTTSAudioFormat);
     if (!ttsAudioFormat.empty())
     {
         agentConfigJson["ttsAudioFormat"] = ttsAudioFormat;
     }
 
-    auto authToken = properties.GetStringValue(botAuthorizationToken);
+    auto authToken = properties.GetStringValue(dialogAuthorizationToken);
     if (!authToken.empty())
     {
         agentConfigJson["botInfo"]["authorization"] = authToken;
     }
 
-    if (!m_botConversationId.empty())
+    if (!m_dialogConversationId.empty())
     {
-        agentConfigJson["botInfo"]["conversationId"] = m_botConversationId;
+        agentConfigJson["botInfo"]["conversationId"] = m_dialogConversationId;
     }
 
     m_agentConfig = agentConfigJson.dump();
@@ -905,8 +917,8 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechConfig()
 void CSpxUspRecoEngineAdapter::UspSendAgentConfig()
 {
     constexpr auto messagePath = "agent.config";
-    /* Only send it for bot endpoint */
-    if (m_endpointType == USP::EndpointType::Bot)
+    /* Only send it for dialog endpoint */
+    if (m_endpointType == USP::EndpointType::Dialog)
     {
         SPX_DBG_TRACE_VERBOSE("%s %s", messagePath, m_agentConfig.c_str());
         UspSendMessage(messagePath, m_agentConfig, USP::MessageType::Config);
@@ -916,8 +928,8 @@ void CSpxUspRecoEngineAdapter::UspSendAgentConfig()
 
 void CSpxUspRecoEngineAdapter::UspSendSpeechAgentContext()
 {
-    // The Speech Bot Connector is responsible for generating an interaction ID here, so we send it as a speech.agent.context message
-    if (m_endpointType == USP::EndpointType::Bot)
+    // The Dialog Connector is responsible for generating an interaction ID here, so we send it as a speech.agent.context message
+    if (m_endpointType == USP::EndpointType::Dialog)
     {
         auto site = GetSite();
         auto provider = SpxQueryInterface<ISpxInteractionIdProvider>(site);
@@ -1449,7 +1461,7 @@ void CSpxUspRecoEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg
 {
     SPX_DBG_TRACE_VERBOSE("Response: Audio output chunk message. Audio data size: %zu\n", message.audioLength);
 
-    if (m_endpointType == USP::EndpointType::Bot)
+    if (m_endpointType == USP::EndpointType::Dialog)
     {
         auto it = m_request_session_map.find(message.requestId);
         if (it != m_request_session_map.end())
@@ -1566,8 +1578,8 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
 
 void CSpxUspRecoEngineAdapter::OnMessageStart(const USP::TurnStartMsg& message)
 {
-    /* For now only handle service generated messages for bot endpoints */
-    if (m_endpointType == USP::EndpointType::Bot)
+    /* For now only handle service generated messages for dialog endpoints */
+    if (m_endpointType == USP::EndpointType::Dialog)
     {
         std::weak_ptr<CSpxUspRecoEngineAdapter> wk{ std::dynamic_pointer_cast<CSpxUspRecoEngineAdapter>(ISpxInterfaceBaseFor<ISpxRecoEngineAdapter>::shared_from_this()) };
         // start the initial state as SessionStart
@@ -1577,8 +1589,8 @@ void CSpxUspRecoEngineAdapter::OnMessageStart(const USP::TurnStartMsg& message)
 
 void CSpxUspRecoEngineAdapter::OnMessageEnd(const USP::TurnEndMsg& message)
 {
-    /* For now only handle service generated messages for bot endpoints */
-    if (m_endpointType == USP::EndpointType::Bot)
+    /* For now only handle service generated messages for dialog endpoints */
+    if (m_endpointType == USP::EndpointType::Dialog)
     {
         auto it = m_request_session_map.find(message.requestId);
         if (it != m_request_session_map.end())
@@ -1594,8 +1606,8 @@ void CSpxUspRecoEngineAdapter::OnError(bool isTransport, USP::ErrorCode errorCod
 {
     SPX_DBG_TRACE_VERBOSE("Response: On Error: Code:%d, Message: %s.\n", errorCode, errorMessage.c_str());
 
-    /* Only try reconnecting for bot endpoints. */
-    if (m_endpointType == USP::EndpointType::Bot)
+    /* Only try reconnecting for dialog endpoints. */
+    if (m_endpointType == USP::EndpointType::Dialog)
     {
         if (errorCode == USP::ErrorCode::ConnectionError && m_audioState != AudioState::Sending && errorMessage.find("Internal error:") != std::string::npos)
         {
@@ -1674,14 +1686,14 @@ void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
             FireFinalResultLater_WaitingForIntentComplete(luisJson);
             ChangeState(UspState::WaitingForIntent2, m_isInteractiveMode ? UspState::WaitingForTurnEnd : UspState::WaitingForPhrase);
         }
-        else if (m_endpointType == USP::EndpointType::Bot)
+        else if (m_endpointType == USP::EndpointType::Dialog)
         {
             std::string message{ reinterpret_cast<const char*>(msg.buffer), msg.size };
             SPX_DBG_TRACE_VERBOSE("USP User Message: response; message='%s'", message.c_str());
             auto responseMessage = json::parse(message);
             if (!responseMessage["botConversationId"].is_null())
             {
-                m_botConversationId = responseMessage["botConversationId"].get<std::string>();
+                m_dialogConversationId = responseMessage["botConversationId"].get<std::string>();
             }
             auto it = m_request_session_map.find(msg.requestId);
             if (it != m_request_session_map.end())

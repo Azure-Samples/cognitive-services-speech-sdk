@@ -186,9 +186,9 @@ jobs:
               --timeout 120m \
               -D luis-key=$(luis-westus-s0-201809-key1) \
               -D speech-key=$(NorthEuropeKeySkyman) \
-              -D virtualassistant-region=$(BotRegion) \
-              -D virtualassistant-subscription=$(BotSubscriptionKey) \
-              -D virtualassistant-testbot=$(BotFunctionalTest) \
+              -D virtualassistant-region=$(DialogRegion) \
+              -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+              -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
               -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
               -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
               -D long-running=true \

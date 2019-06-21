@@ -81,29 +81,29 @@ SPXAPI recognizer_create_speech_recognizer_from_config(SPXRECOHANDLE* phreco, SP
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI bot_connector_create_speech_bot_connector_from_config(SPXRECOHANDLE* ph_bot_connector, SPXSPEECHCONFIGHANDLE h_bot_config, SPXAUDIOCONFIGHANDLE h_audio_input)
+SPXAPI dialog_connector_create_dialog_connector_from_config(SPXRECOHANDLE* ph_dialog_connector, SPXSPEECHCONFIGHANDLE h_dialog_config, SPXAUDIOCONFIGHANDLE h_audio_input)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_bot_connector == nullptr);
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(h_bot_config));
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_dialog_connector == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(h_dialog_config));
 
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        *ph_bot_connector = SPXHANDLE_INVALID;
+        *ph_dialog_connector = SPXHANDLE_INVALID;
 
-        // Enable keyword verification for bot connector by default
+        // Enable keyword verification for dialog connector by default
         auto config_handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
-        auto config = (*config_handles)[h_bot_config];
+        auto config = (*config_handles)[h_dialog_config];
         auto config_property_bag = SpxQueryInterface<ISpxNamedProperties>(config);
         auto enableKeywordVerification = config_property_bag->GetStringValue(KeywordConfig_EnableKeywordVerification, "true");
         config_property_bag->SetStringValue(KeywordConfig_EnableKeywordVerification, enableKeywordVerification.c_str());
 
-        auto connector = create_from_config(h_bot_config, h_audio_input, &ISpxSpeechApiFactory::CreateSpeechBotConnectorFromConfig);
+        auto connector = create_from_config(h_dialog_config, h_audio_input, &ISpxSpeechApiFactory::CreateDialogConnectorFromConfig);
 
         // track the handle
-        auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechBotConnector, SPXRECOHANDLE>();
-        *ph_bot_connector = handles->TrackHandle(connector);
+        auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxDialogConnector, SPXRECOHANDLE>();
+        *ph_dialog_connector = handles->TrackHandle(connector);
 
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);

@@ -14,12 +14,12 @@
         <Parameter name="LanguageUnderstandingSubscriptionKey" value=""/>
         <Parameter name="LanguageUnderstandingServiceRegion" value="westus"/>
         <Parameter name="LanguageUnderstandingHomeAutomationAppId" value=""/>
-        <Parameter name="BotConnectionId" value=""/>
-        <Parameter name="BotSubscriptionKey" value=""/>
-        <Parameter name="BotRegion" value="westus2"/>
+        <Parameter name="DialogFunctionalTestBot" value=""/>
+        <Parameter name="DialogSubscriptionKey" value=""/>
+        <Parameter name="DialogRegion" value="westus2"/>
         <Parameter name="ConversationTranscriptionEndpoint" value=""/>
         <Parameter name="ConversationTranscriptionPPEKey" value=""/>
         <Parameter name="ConversationTranscriptionPRODKey" value=""/>
-        <Parameter name="SpeechRegionForConversationTranscription" value=""/>        
+        <Parameter name="SpeechRegionForConversationTranscription" value=""/>
     </TestRunParameters>
 </RunSettings>

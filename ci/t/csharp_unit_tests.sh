@@ -39,9 +39,9 @@ perl -p - \
   LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
   LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
   LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-  BotRegion "$SPEECHSDK_BOT_REGION" \
-  BotSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
-  BotConnectionId "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
+  DialogRegion "$SPEECHSDK_BOT_REGION" \
+  DialogSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
+  DialogFunctionalTestBot "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
   ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
   ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
   ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \

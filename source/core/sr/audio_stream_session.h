@@ -118,7 +118,7 @@ public:
     void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Keyword); }
 
     // --- ISpxRecoEngineAdapterSite (first part...)
-    void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countBot, uint16_t* countTranscriber) override;
+    void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countDialog, uint16_t* countTranscriber) override;
 
     std::list<std::string> GetListenForList() override;
     void GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region) override;

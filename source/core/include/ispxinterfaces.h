@@ -580,7 +580,7 @@ public:
     virtual std::string GetInteractionId(InteractionIdPurpose purpose) = 0;
 };
 
-class ISpxSpeechBotConnector : public ISpxInterfaceBaseFor<ISpxSpeechBotConnector>
+class ISpxDialogConnector : public ISpxInterfaceBaseFor<ISpxDialogConnector>
 {
 public:
     virtual CSpxAsyncOp<void> ConnectAsync() = 0;
@@ -744,7 +744,7 @@ private:
     ISpxRecognizerEvents() = delete;
 };
 
-class ISpxSpeechBotConnectorEvents : public ISpxInterfaceBaseFor<ISpxSpeechBotConnectorEvents>
+class ISpxDialogConnectorEvents : public ISpxInterfaceBaseFor<ISpxDialogConnectorEvents>
 {
 public:
     using ActivityReceivedEvent_Type = EventSignal<std::shared_ptr<ISpxActivityEventArgs>>;
@@ -755,13 +755,13 @@ public:
 
 protected:
 
-    ISpxSpeechBotConnectorEvents(ActivityReceivedEvent_Type::NotifyCallback_Type connectedCallback, ActivityReceivedEvent_Type::NotifyCallback_Type disconnectedCallback) :
+    ISpxDialogConnectorEvents(ActivityReceivedEvent_Type::NotifyCallback_Type connectedCallback, ActivityReceivedEvent_Type::NotifyCallback_Type disconnectedCallback) :
         ActivityReceived(connectedCallback, disconnectedCallback, true)
     {
     }
 
 private:
-    ISpxSpeechBotConnectorEvents() = delete;
+    ISpxDialogConnectorEvents() = delete;
 
 };
 
@@ -895,7 +895,7 @@ public:
     using AdditionalMessagePayload_Type = void*;
     using ErrorPayload_Type = std::shared_ptr<SpxRecoEngineAdapterError>;
 
-    virtual void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countBot, uint16_t* countTranscriber ) = 0;
+    virtual void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation, uint16_t* countDialog, uint16_t* countTranscriber ) = 0;
 
     virtual std::list<std::string> GetListenForList() = 0;
     virtual void GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region) = 0;
@@ -997,7 +997,7 @@ class ISpxSpeechApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechApiFactory>
 public:
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
-    virtual std::shared_ptr<ISpxSpeechBotConnector> CreateSpeechBotConnectorFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
+    virtual std::shared_ptr<ISpxDialogConnector> CreateDialogConnectorFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateConversationTranscriberFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
 };

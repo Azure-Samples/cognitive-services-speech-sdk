@@ -331,6 +331,12 @@ enum class PropertyId
     Conversation_Secret_Key = 10000,
 
     /// <summary>
+    /// Id of a task dialog application
+    /// Added in version 1.6.0.
+    /// </summary>
+    Conversation_TaskDialogAppId = 10001,
+
+    /// <summary>
     /// Silence timeout for listening
     /// Added in version 1.5.0.
     /// </summary>
@@ -550,7 +556,7 @@ enum class NoMatchReason
 /// Defines the possible types for an activity json value.
 /// Added in version 1.5.0
 /// </summary>
-enum class BotActivityJSONType : int
+enum class ActivityJSONType : int
 {
     Null = 0,
     Object = 1,

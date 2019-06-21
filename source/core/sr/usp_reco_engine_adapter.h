@@ -132,7 +132,7 @@ private:
     USP::Client& SetUspEndpointIntent(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpointTranslation(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpointDefaultSpeechService(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
-    USP::Client& SetUspEndpointBot(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspEndpointDialog(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspEndpointTranscriber(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspRegion(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client, bool isIntentRegion);
     USP::Client& SetUspRecoMode(const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
@@ -288,7 +288,7 @@ private:
 
     constexpr static size_t c_initialReconnectWaitingTimeMs = 10; // 10 milliseconds
     constexpr static  size_t c_reconnectWaitingTimeThreasholdMs = 2000; // 2 sec
-    std::string m_botConversationId;
+    std::string m_dialogConversationId;
     size_t m_reconnectWaitingTimeMs = 10;
 
     std::map<std::string, std::unique_ptr<CSpxActivitySession>> m_request_session_map;

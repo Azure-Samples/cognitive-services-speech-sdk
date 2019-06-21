@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include <speechapi_cxx_bot_connector_activity.h>
+#include <speechapi_cxx_activity.h>
 #include <speechapi_cxx_audio_stream.h>
 
 namespace Microsoft {
@@ -22,24 +22,24 @@ namespace Dialog {
 class ActivityReceivedEventArgs: public std::enable_shared_from_this<ActivityReceivedEventArgs>
 {
 public:
-    friend SpeechBotConnector;
+    friend DialogConnector;
     /// <summary>
     /// Releases the event.
     /// </summary>
     inline ~ActivityReceivedEventArgs()
     {
-        SPX_THROW_ON_FAIL(::activity_received_event_release(m_handle));
+        SPX_THROW_ON_FAIL(::dialog_connector_activity_received_event_release(m_handle));
     }
 
     /// <summary>
     /// Gets the activity associated with the event.
     /// </summary>
     /// <returns>The activity.</returns>
-    inline std::shared_ptr<BotConnectorActivity> GetActivity() const
+    inline std::shared_ptr<Activity> GetActivity() const
     {
         SPXACTIVITYJSONHANDLE h_act{ SPXHANDLE_INVALID };
-        SPX_THROW_ON_FAIL(::bot_connector_activity_received_event_get_activity(m_handle, &h_act));
-        return std::shared_ptr<BotConnectorActivity>{new BotConnectorActivity{ h_act }};
+        SPX_THROW_ON_FAIL(::dialog_connector_activity_received_event_get_activity(m_handle, &h_act));
+        return std::shared_ptr<Activity>{new Activity{ h_act }};
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ public:
     inline std::shared_ptr<Audio::PullAudioOutputStream> GetAudio() const
     {
         SPXAUDIOSTREAMHANDLE h_audio{ SPXHANDLE_INVALID };
-        SPX_THROW_ON_FAIL(::bot_connector_activity_received_event_get_audio(m_handle, &h_audio));
+        SPX_THROW_ON_FAIL(::dialog_connector_activity_received_event_get_audio(m_handle, &h_audio));
         if (h_audio == SPXHANDLE_INVALID)
         {
             return nullptr;
@@ -63,7 +63,7 @@ public:
     /// <returns>True if the event contains audio, false otherwise.</returns>
     inline bool HasAudio() const
     {
-        return ::bot_connector_activity_received_event_has_audio(m_handle);
+        return ::dialog_connector_activity_received_event_has_audio(m_handle);
     }
 private:
     /*! \cond PROTECTED */

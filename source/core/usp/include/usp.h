@@ -121,13 +121,13 @@ struct Callbacks
 
 using CallbacksPtr = std::shared_ptr<Callbacks>;
 
-enum class EndpointType { Speech, Intent, Translation, Bot, ConversationTranscriptionService };
+enum class EndpointType { Speech, Intent, Translation, Dialog, ConversationTranscriptionService };
 
 enum class RecognitionMode : unsigned int { Interactive = 0, Conversation = 1, Dictation = 2 };
 
 enum class OutputFormat : unsigned int { Simple = 0, Detailed = 1 };
 
-enum class AuthenticationType: size_t { SubscriptionKey = 0, AuthorizationToken, SearchDelegationRPSToken, DirectLineSpeechSecret, SIZE_AUTHENTICATION_TYPE };
+enum class AuthenticationType: size_t { SubscriptionKey = 0, AuthorizationToken, SearchDelegationRPSToken, DialogApplicationId, SIZE_AUTHENTICATION_TYPE };
 
 enum class MessageType { Config, Context, Agent, AgentContext, Event};
 
@@ -469,7 +469,7 @@ namespace endpoint
         const std::vector<std::string> queryParameters = { langQueryParam, outputFormatQueryParam };
     }
 
-    namespace bot
+    namespace dialog
     {
         const std::string url = "speech.platform.bing.com/convai/api/v2";
 

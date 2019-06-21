@@ -66,7 +66,7 @@ namespace USP {
         constexpr auto streamId = "X-StreamId";
         constexpr auto requestId = "X-RequestId";
         constexpr auto region = "Ocp-Apim-Subscription-Region";
-        constexpr auto directLineSpeechSecret = "X-DLS-Secret";
+        constexpr auto dialogApplicationId = "X-DLS-Secret";
     }
 
     namespace json_properties {

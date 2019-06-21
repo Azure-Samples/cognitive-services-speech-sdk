@@ -135,11 +135,11 @@ SPXAPI_PRIVATE synthesizer_set_event_callback(std::list<std::pair<void*, std::sh
 }
 
 template<typename EventInterface, typename EventArgs, typename Event>
-SPXHR bot_connector_set_event_callback(Event event, SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void* pv_context)
+SPXHR dialog_connector_set_event_callback(Event event, SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void* pv_context)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechBotConnector, SPXRECOHANDLE>();
+        auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxDialogConnector, SPXRECOHANDLE>();
         auto connector = (*handles)[h_connector];
 
         auto pfn = [=](std::shared_ptr<EventArgs> e) {
@@ -159,19 +159,19 @@ SPXHR bot_connector_set_event_callback(Event event, SPXRECOHANDLE h_connector, P
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_PRIVATE bot_connector_session_set_event_callback(ISpxRecognizerEvents::SessionEvent_Type ISpxRecognizerEvents::*p_session_event, SPXRECOHANDLE h_connector, PSESSION_CALLBACK_FUNC p_callback, void* pv_context)
+SPXAPI_PRIVATE dialog_connector_session_set_event_callback(ISpxRecognizerEvents::SessionEvent_Type ISpxRecognizerEvents::*p_session_event, SPXRECOHANDLE h_connector, PSESSION_CALLBACK_FUNC p_callback, void* pv_context)
 {
-    return bot_connector_set_event_callback<ISpxRecognizerEvents, ISpxSessionEventArgs>(p_session_event, h_connector, p_callback, pv_context);
+    return dialog_connector_set_event_callback<ISpxRecognizerEvents, ISpxSessionEventArgs>(p_session_event, h_connector, p_callback, pv_context);
 }
 
-SPXAPI_PRIVATE bot_connector_recognition_set_event_callback(ISpxRecognizerEvents::RecoEvent_Type ISpxRecognizerEvents::*p_reco_event, SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void* pv_context)
+SPXAPI_PRIVATE dialog_connector_recognition_set_event_callback(ISpxRecognizerEvents::RecoEvent_Type ISpxRecognizerEvents::*p_reco_event, SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void* pv_context)
 {
-    return bot_connector_set_event_callback<ISpxRecognizerEvents, ISpxRecognitionEventArgs>(p_reco_event, h_connector, p_callback, pv_context);
+    return dialog_connector_set_event_callback<ISpxRecognizerEvents, ISpxRecognitionEventArgs>(p_reco_event, h_connector, p_callback, pv_context);
 }
 
-SPXAPI_PRIVATE bot_connector_activity_received_set_event_callback(ISpxSpeechBotConnectorEvents::ActivityReceivedEvent_Type ISpxSpeechBotConnectorEvents::*p_act_event, SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void* pv_context)
+SPXAPI_PRIVATE dialog_connector_activity_received_set_event_callback(ISpxDialogConnectorEvents::ActivityReceivedEvent_Type ISpxDialogConnectorEvents::*p_act_event, SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void* pv_context)
 {
-    return bot_connector_set_event_callback<ISpxSpeechBotConnectorEvents, ISpxActivityEventArgs>(p_act_event, h_connector, p_callback, pv_context);
+    return dialog_connector_set_event_callback<ISpxDialogConnectorEvents, ISpxActivityEventArgs>(p_act_event, h_connector, p_callback, pv_context);
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -279,6 +279,12 @@ namespace Microsoft.CognitiveServices.Speech
         Conversation_Secret_Key = Internal.PropertyId.Conversation_Secret_Key,
 
         /// <summary>
+        /// Id of an task dialog application
+        /// Added in version 1.6.0.
+        /// </summary>
+        Conversation_TaskDialogAppId = Internal.PropertyId.Conversation_TaskDialogAppId,
+
+        /// <summary>
         /// Silence timeout for listening
         /// Added in version 1.5.0.
         /// </summary>
