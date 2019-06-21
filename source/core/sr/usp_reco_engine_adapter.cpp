@@ -973,7 +973,7 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
         std::string messagePath = "speech.context";
         UspSendMessage(messagePath, speechContext, USP::MessageType::Context);
     }
-}
+ }
 
 void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType)
 {
@@ -1936,14 +1936,14 @@ std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dg
             if (!insertionPointLeft.empty())
             {
                 contextJson += R"("left": )";
-                contextJson += insertionPointLeft;
+                contextJson += json(insertionPointLeft).dump();
                 appendComma = true;
             }
             if (!insertionPointRight.empty())
             {
                 contextJson += appendComma ? "," : "";
                 contextJson += R"("right":)";
-                contextJson += insertionPointRight;
+                contextJson += json(insertionPointRight).dump();
             }
             contextJson += "} }";
         }
@@ -2211,13 +2211,13 @@ void CSpxUspRecoEngineAdapter::ResetBeforeFirstAudio()
 std::pair<std::string, std::string> CSpxUspRecoEngineAdapter::GetLeftRightContext()
 {
     // Get dictation left and right context of the insertion point.
-    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
-    json leftContext = properties->GetStringValue("DictationInsertionPointLeft");
-    json rightContext = properties->GetStringValue("DictationInsertionPointRight");
+    auto leftContext = properties->GetStringValue("DictationInsertionPointLeft");
+    auto rightContext = properties->GetStringValue("DictationInsertionPointRight");
 
-    return {leftContext.dump(), rightContext.dump()};
+    return {leftContext, rightContext};
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl
