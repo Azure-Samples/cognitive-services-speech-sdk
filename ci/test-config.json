@@ -18,7 +18,7 @@
   },
   "PRINCETON": {
     "INROOM_ENDPOINT": "wss://transcribe.princetonppe.customspeech.ai/speech/recognition",
-    "ONLINE_ENDPOINT": "wss://omf-lb-official-dev.online.princetondev.customspeech.ai/recognition/onlinemeeting/v1",
+    "ONLINE_ENDPOINT": "wss://westus2.online.princetondev.customspeech.ai/recognition/onlinemeeting/v1",
     "CONVERSATIONTRANSCRIBER_PPE_KEY": "${conversationtranscriber-ppe-key}",
     "CONVERSATIONTRANSCRIBER_PROD_KEY": "${conversationtranscriber-prod-key}",
     "REGION": "centralus"
