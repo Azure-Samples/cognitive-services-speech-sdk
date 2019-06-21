@@ -21,7 +21,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         internal ActivityReceivedEventArgs(IntPtr eventHandlePtr)
         {
             ThrowIfNull(eventHandlePtr);
-            eventHandle = new I.InteropSafeHandle(eventHandlePtr, Internal.ActivityReceivedEventArgs.activity_received_event_release);
+            eventHandle = new I.InteropSafeHandle(eventHandlePtr, Internal.ActivityReceivedEventArgs.dialog_connector_activity_received_event_release);
 
             IntPtr activityPtr = IntPtr.Zero;
             ThrowIfFail(Internal.ActivityReceivedEventArgs.dialog_connector_activity_received_event_get_activity(eventHandle, out activityPtr));

@@ -16,9 +16,9 @@ namespace Microsoft.CognitiveServices.Speech.Dialog.Internal
     internal static class ActivityReceivedEventArgs
     {
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        internal static extern bool activity_received_event_handle_is_valid(SPXEVENTHANDLE eventHandle);
+        internal static extern bool dialog_connector_activity_received_event_handle_is_valid(SPXEVENTHANDLE eventHandle);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        internal static extern SPXHR activity_received_event_release(SPXEVENTHANDLE eventHandle);
+        internal static extern SPXHR dialog_connector_activity_received_event_release(SPXEVENTHANDLE eventHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         internal static extern SPXHR dialog_connector_activity_received_event_get_activity(InteropSafeHandle eventHandle, out SPXACTIVITYHANDLE activityHandle);
