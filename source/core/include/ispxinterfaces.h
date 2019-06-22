@@ -580,7 +580,7 @@ public:
     virtual std::string GetInteractionId(InteractionIdPurpose purpose) = 0;
 };
 
-class ISpxDialogConnector : public ISpxInterfaceBaseFor<ISpxDialogConnector>
+class ISpxDialogServiceConnector : public ISpxInterfaceBaseFor<ISpxDialogServiceConnector>
 {
 public:
     virtual CSpxAsyncOp<void> ConnectAsync() = 0;
@@ -744,7 +744,7 @@ private:
     ISpxRecognizerEvents() = delete;
 };
 
-class ISpxDialogConnectorEvents : public ISpxInterfaceBaseFor<ISpxDialogConnectorEvents>
+class ISpxDialogServiceConnectorEvents : public ISpxInterfaceBaseFor<ISpxDialogServiceConnectorEvents>
 {
 public:
     using ActivityReceivedEvent_Type = EventSignal<std::shared_ptr<ISpxActivityEventArgs>>;
@@ -755,13 +755,13 @@ public:
 
 protected:
 
-    ISpxDialogConnectorEvents(ActivityReceivedEvent_Type::NotifyCallback_Type connectedCallback, ActivityReceivedEvent_Type::NotifyCallback_Type disconnectedCallback) :
+    ISpxDialogServiceConnectorEvents(ActivityReceivedEvent_Type::NotifyCallback_Type connectedCallback, ActivityReceivedEvent_Type::NotifyCallback_Type disconnectedCallback) :
         ActivityReceived(connectedCallback, disconnectedCallback, true)
     {
     }
 
 private:
-    ISpxDialogConnectorEvents() = delete;
+    ISpxDialogServiceConnectorEvents() = delete;
 
 };
 
@@ -997,7 +997,7 @@ class ISpxSpeechApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechApiFactory>
 public:
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
-    virtual std::shared_ptr<ISpxDialogConnector> CreateDialogConnectorFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
+    virtual std::shared_ptr<ISpxDialogServiceConnector> CreateDialogServiceConnectorFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateConversationTranscriberFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
 };

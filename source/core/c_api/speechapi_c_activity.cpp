@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// speechapi_c_activity.cpp: Public API definitions for dialog connector activities.
+// speechapi_c_activity.cpp: Public API definitions for dialog service connector activities.
 
 #include "stdafx.h"
 #include "handle_helpers.h"

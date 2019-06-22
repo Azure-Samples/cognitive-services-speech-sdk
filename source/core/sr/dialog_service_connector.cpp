@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// dialog_connector.cpp: Implementation definitions for CSpxDialogConnector C++ class.
+// dialog_service_connector.cpp: Implementation definitions for CSpxDialogServiceConnector C++ class.
 //
 #include "stdafx.h"
 #include "recognizer.h"
@@ -10,7 +10,7 @@
 #include "service_helpers.h"
 #include "create_object_helpers.h"
 #include "property_id_2_name_map.h"
-#include "dialog_connector.h"
+#include "dialog_service_connector.h"
 #include "file_logger.h"
 
 namespace Microsoft {
@@ -19,20 +19,20 @@ namespace Speech {
 namespace Impl {
 
 
-CSpxDialogConnector::CSpxDialogConnector() :
-    ISpxDialogConnectorEvents(nullptr, nullptr),
+CSpxDialogServiceConnector::CSpxDialogServiceConnector() :
+    ISpxDialogServiceConnectorEvents(nullptr, nullptr),
     m_fEnabled(true)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 }
 
-CSpxDialogConnector::~CSpxDialogConnector()
+CSpxDialogServiceConnector::~CSpxDialogServiceConnector()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     TermDefaultSession();
 }
 
-void CSpxDialogConnector::Init()
+void CSpxDialogServiceConnector::Init()
 {
     SPX_DBG_TRACE_FUNCTION();
     SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
@@ -40,19 +40,19 @@ void CSpxDialogConnector::Init()
     CheckLogFilename();
 }
 
-void CSpxDialogConnector::Term()
+void CSpxDialogServiceConnector::Term()
 {
     SPX_DBG_TRACE_FUNCTION();
 }
 
-void CSpxDialogConnector::SetStringValue(const char* name, const char* value)
+void CSpxDialogServiceConnector::SetStringValue(const char* name, const char* value)
 {
     SetStringValueInProperties(name, value);
 }
 
-CSpxAsyncOp<void> CSpxDialogConnector::ConnectAsync()
+CSpxAsyncOp<void> CSpxDialogServiceConnector::ConnectAsync()
 {
-    auto keep_alive = SpxSharedPtrFromThis<ISpxDialogConnector>(this);
+    auto keep_alive = SpxSharedPtrFromThis<ISpxDialogServiceConnector>(this);
 
     std::shared_future<void> taskFuture = std::async(std::launch::async, [this, keep_alive]()
     {
@@ -61,9 +61,9 @@ CSpxAsyncOp<void> CSpxDialogConnector::ConnectAsync()
     return CSpxAsyncOp<void>{ taskFuture, AOS_Started};
 }
 
-CSpxAsyncOp<void> CSpxDialogConnector::DisconnectAsync()
+CSpxAsyncOp<void> CSpxDialogServiceConnector::DisconnectAsync()
 {
-    auto keep_alive = SpxSharedPtrFromThis<ISpxDialogConnector>(this);
+    auto keep_alive = SpxSharedPtrFromThis<ISpxDialogServiceConnector>(this);
 
     std::shared_future<void> taskFuture = std::async(std::launch::async, [this, keep_alive]()
     {
@@ -72,13 +72,13 @@ CSpxAsyncOp<void> CSpxDialogConnector::DisconnectAsync()
     return CSpxAsyncOp<void>{ taskFuture, AOS_Started};
 }
 
-CSpxAsyncOp<std::string> CSpxDialogConnector::SendActivityAsync(std::shared_ptr<ISpxActivity> activity)
+CSpxAsyncOp<std::string> CSpxDialogServiceConnector::SendActivityAsync(std::shared_ptr<ISpxActivity> activity)
 {
     SetRecoMode(g_recoModeInteractive);
     return m_defaultSession->SendActivityAsync(activity);
 }
 
-void CSpxDialogConnector::SetRecoMode(const char* modeToSet)
+void CSpxDialogServiceConnector::SetRecoMode(const char* modeToSet)
 {
     const char* recoModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
     auto currentRecoMode = GetStringValueFromProperties(recoModePropertyName, "");
@@ -93,30 +93,30 @@ void CSpxDialogConnector::SetRecoMode(const char* modeToSet)
     }
 }
 
-CSpxAsyncOp<void> CSpxDialogConnector::StartContinuousListeningAsync()
+CSpxAsyncOp<void> CSpxDialogServiceConnector::StartContinuousListeningAsync()
 {
     SetRecoMode(g_recoModeInteractive);
     return m_defaultSession->StartContinuousRecognitionAsync();
 }
 
-CSpxAsyncOp<void> CSpxDialogConnector::StopContinuousListeningAsync()
+CSpxAsyncOp<void> CSpxDialogServiceConnector::StopContinuousListeningAsync()
 {
     return m_defaultSession->StopContinuousRecognitionAsync();
 }
 
-CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxDialogConnector::ListenOnceAsync()
+CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxDialogServiceConnector::ListenOnceAsync()
 {
     SetRecoMode(g_recoModeInteractive);
     return m_defaultSession->RecognizeAsync();
 }
 
-std::shared_ptr<ISpxSession> CSpxDialogConnector::GetDefaultSession()
+std::shared_ptr<ISpxSession> CSpxDialogServiceConnector::GetDefaultSession()
 {
     EnsureDefaultSession();
     return SpxQueryInterface<ISpxSession>(m_defaultSession);
 }
 
-void CSpxDialogConnector::FireSessionStarted(const std::wstring& sessionId)
+void CSpxDialogServiceConnector::FireSessionStarted(const std::wstring& sessionId)
 {
     SPX_DBG_ASSERT(GetSite());
     auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
@@ -124,7 +124,7 @@ void CSpxDialogConnector::FireSessionStarted(const std::wstring& sessionId)
     SessionStarted.Signal(sessionEvent);
 }
 
-void CSpxDialogConnector::FireSessionStopped(const std::wstring& sessionId)
+void CSpxDialogServiceConnector::FireSessionStopped(const std::wstring& sessionId)
 {
     SPX_DBG_ASSERT(GetSite());
     auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
@@ -132,17 +132,17 @@ void CSpxDialogConnector::FireSessionStopped(const std::wstring& sessionId)
     SessionStopped.Signal(sessionEvent);
 }
 
-void CSpxDialogConnector::FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset)
+void CSpxDialogServiceConnector::FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset)
 {
     FireRecoEvent(&SpeechStartDetected, sessionId, nullptr, offset);
 }
 
-void CSpxDialogConnector::FireSpeechEndDetected(const std::wstring& sessionId, uint64_t offset)
+void CSpxDialogServiceConnector::FireSpeechEndDetected(const std::wstring& sessionId, uint64_t offset)
 {
     FireRecoEvent(&SpeechEndDetected, sessionId, nullptr, offset);
 }
 
-void CSpxDialogConnector::FireActivityReceived(const std::wstring& sessionId, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
+void CSpxDialogServiceConnector::FireActivityReceived(const std::wstring& sessionId, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
 {
     UNUSED(sessionId);
     SPX_DBG_ASSERT(GetSite());
@@ -151,7 +151,7 @@ void CSpxDialogConnector::FireActivityReceived(const std::wstring& sessionId, st
     ActivityReceived.Signal(activityEvent);
 }
 
-void CSpxDialogConnector::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
+void CSpxDialogServiceConnector::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
@@ -185,7 +185,7 @@ void CSpxDialogConnector::FireResultEvent(const std::wstring& sessionId, std::sh
     FireRecoEvent(event, sessionId, result);
 }
 
-void CSpxDialogConnector::FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* event, const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result, uint64_t offset)
+void CSpxDialogServiceConnector::FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* event, const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result, uint64_t offset)
 {
     if (event != nullptr && event->IsConnected())
     {
@@ -198,7 +198,7 @@ void CSpxDialogConnector::FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* ev
     }
 }
 
-void CSpxDialogConnector::SetStringValueInProperties(const char* name, const char* value)
+void CSpxDialogServiceConnector::SetStringValueInProperties(const char* name, const char* value)
 {
     // For now, we can only have one Recognizer per Session, so, we'll just pass this over to the default session.
     EnsureDefaultSession();
@@ -212,7 +212,7 @@ void CSpxDialogConnector::SetStringValueInProperties(const char* name, const cha
     namedProperties->SetStringValue(name, value);
 }
 
-std::string CSpxDialogConnector::GetStringValueFromProperties(const char* name, const char* defaultValue)
+std::string CSpxDialogServiceConnector::GetStringValueFromProperties(const char* name, const char* defaultValue)
 {
     // For now, we can only have one Recognizer per Session, so, we'll just pass this over to the default session.
     EnsureDefaultSession();
@@ -220,7 +220,7 @@ std::string CSpxDialogConnector::GetStringValueFromProperties(const char* name, 
     return namedProperties->GetStringValue(name, defaultValue);
 }
 
-void CSpxDialogConnector::EnsureDefaultSession()
+void CSpxDialogServiceConnector::EnsureDefaultSession()
 {
     if (m_defaultSession == nullptr)
     {
@@ -229,7 +229,7 @@ void CSpxDialogConnector::EnsureDefaultSession()
     }
 }
 
-void CSpxDialogConnector::TermDefaultSession()
+void CSpxDialogServiceConnector::TermDefaultSession()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     if (m_defaultSession != nullptr)
@@ -239,17 +239,17 @@ void CSpxDialogConnector::TermDefaultSession()
     SpxTermAndClear(m_defaultSession);
 }
 
-void CSpxDialogConnector::OnIsEnabledChanged()
+void CSpxDialogServiceConnector::OnIsEnabledChanged()
 {
     // no op currently
 }
 
-std::shared_ptr<ISpxNamedProperties> CSpxDialogConnector::GetParentProperties() const
+std::shared_ptr<ISpxNamedProperties> CSpxDialogServiceConnector::GetParentProperties() const
 {
     return SpxQueryService<ISpxNamedProperties>(GetSite());
 }
 
-void CSpxDialogConnector::CheckLogFilename()
+void CSpxDialogServiceConnector::CheckLogFilename()
 {
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
     auto filename = namedProperties->GetStringValue(GetPropertyName(PropertyId::Speech_LogFilename), "");
@@ -259,7 +259,7 @@ void CSpxDialogConnector::CheckLogFilename()
     }
 }
 
-CSpxAsyncOp<void> CSpxDialogConnector::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)
+CSpxAsyncOp<void> CSpxDialogServiceConnector::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)
 {
     const char* recoModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
     auto currentRecoMode = GetStringValueFromProperties(recoModePropertyName, "");
@@ -272,7 +272,7 @@ CSpxAsyncOp<void> CSpxDialogConnector::StartKeywordRecognitionAsync(std::shared_
     return m_defaultSession->StartKeywordRecognitionAsync(model);
 }
 
-CSpxAsyncOp<void> CSpxDialogConnector::StopKeywordRecognitionAsync()
+CSpxAsyncOp<void> CSpxDialogServiceConnector::StopKeywordRecognitionAsync()
 {
     return m_defaultSession->StopKeywordRecognitionAsync();
 }

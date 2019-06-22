@@ -10,12 +10,12 @@ import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
- * Class that defines configurations for dialog connector.
+ * Class that defines configurations for dialog service connector.
  */
-public class DialogConfig extends SpeechConfig  {
+public class DialogServiceConfig extends SpeechConfig  {
 
     /*! \cond PROTECTED */
-    static Class<?> dialogConfig = null;
+    static Class<?> dialogServiceConfig = null;
 
     // load the native library.
     static {
@@ -26,40 +26,40 @@ public class DialogConfig extends SpeechConfig  {
         catch (ClassNotFoundException ex) {
             throw new IllegalStateException(ex);
         }
-        dialogConfig = DialogConfig.class;
+        dialogServiceConfig = DialogServiceConfig.class;
     }
 
-    protected DialogConfig(com.microsoft.cognitiveservices.speech.internal.DialogConfig dialogConfigImpl) {
-        super(dialogConfigImpl);
+    protected DialogServiceConfig(com.microsoft.cognitiveservices.speech.internal.DialogServiceConfig dialogServiceConfigImpl) {
+        super(dialogServiceConfigImpl);
     }
     /*! \endcond */
 
     /**
-     * Creates an instance of the dialog config with the specified bot secret key.
+     * Creates an instance of the dialog service config with the specified bot secret key.
      * @param botSecret Speech channel bot secret key.
      * @param subscription Service subscription key.
      * @param region Service region key.
      * @return The created config.
      */
-    public static DialogConfig fromBotSecret(String botSecret, String subscription, String region) {
+    public static DialogServiceConfig fromBotSecret(String botSecret, String subscription, String region) {
         Contracts.throwIfNull(botSecret, "botSecret");
         Contracts.throwIfNull(subscription, "subscription");
         Contracts.throwIfNull(region, "region");
-        return new DialogConfig(com.microsoft.cognitiveservices.speech.internal.DialogConfig.FromBotSecret(botSecret, subscription, region));
+        return new DialogServiceConfig(com.microsoft.cognitiveservices.speech.internal.DialogServiceConfig.FromBotSecret(botSecret, subscription, region));
     }
 
     /**
-     * Creates an instance of the dialog config with the specified Task Dialog Application Id.
+     * Creates an instance of the dialog service config with the specified Task Dialog Application Id.
      * @param appId Task Dialog Application Id.
      * @param subscription Service subscription key.
      * @param region Service region key.
      * @return The created config.
      */
-    public static DialogConfig fromTaskDialogAppId(String appId, String subscription, String region) {
+    public static DialogServiceConfig fromTaskDialogAppId(String appId, String subscription, String region) {
         Contracts.throwIfNull(appId, "appId");
         Contracts.throwIfNull(subscription, "subscription");
         Contracts.throwIfNull(region, "region");
-        return new DialogConfig(com.microsoft.cognitiveservices.speech.internal.DialogConfig.FromTaskDialogAppId(appId, subscription, region));
+        return new DialogServiceConfig(com.microsoft.cognitiveservices.speech.internal.DialogServiceConfig.FromTaskDialogAppId(appId, subscription, region));
     }
 
     /**
@@ -114,10 +114,10 @@ public class DialogConfig extends SpeechConfig  {
     }
 
     /**
-      * Returns the dialog configuration.
+      * Returns the dialog service configuration.
       * @return The implementation of the config.
       */
-    protected com.microsoft.cognitiveservices.speech.internal.DialogConfig getConfigImpl() {
-        return (com.microsoft.cognitiveservices.speech.internal.DialogConfig) getImpl();
+    protected com.microsoft.cognitiveservices.speech.internal.DialogServiceConfig getConfigImpl() {
+        return (com.microsoft.cognitiveservices.speech.internal.DialogServiceConfig) getImpl();
     }
 }

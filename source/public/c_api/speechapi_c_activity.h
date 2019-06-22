@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
-// speechapi_c_activity.h: Public API declarations for dialog connector activities C methods and types.
+// speechapi_c_activity.h: Public API declarations for dialog service connector activities C methods and types.
 //
 #pragma once
 #include <speechapi_c_common.h>

@@ -38,7 +38,7 @@ namespace VirtualAssistantPreview
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        public DialogConnector dialogConnector;
+        public DialogServiceConnector dialogServiceConnector;
         // The collection of messages to the user from the bot or app
         public ObservableCollection<MessageDisplay> Messages { get; private set; } = new ObservableCollection<MessageDisplay>();
 
@@ -70,38 +70,38 @@ namespace VirtualAssistantPreview
         }
 
         /// <summary>
-        /// Create a DialogConnector from the user-provided input
+        /// Create a DialogServiceConnector from the user-provided input
         /// </summary>
-        public void InitDialogConnector()
+        public void InitDialogServiceConnector()
         {
-            DialogConfig dialogConfig = null;
+            DialogServiceConfig dialogServiceConfig = null;
 
-            dialogConfig = DialogConfig.FromBotSecret(ConnectionIdTB.Text, SubscriptionTB.Text, RegionTB.Text);
+            dialogServiceConfig = DialogServiceConfig.FromBotSecret(ConnectionIdTB.Text, SubscriptionTB.Text, RegionTB.Text);
 
-            if (dialogConnector != null)
+            if (dialogServiceConnector != null)
             {
-                dialogConnector.SessionStarted -= DialogConnector_SessionStarted;
-                dialogConnector.SessionStopped -= DialogConnector_SessionStopped;
-                dialogConnector.Recognizing -= DialogConnector_Recognizing;
-                dialogConnector.Recognized -= DialogConnector_Recognized;
-                dialogConnector.ActivityReceived -= DialogConnector_ActivityReceived;
-                dialogConnector.Canceled -= DialogConnector_Canceled;
+                dialogServiceConnector.SessionStarted -= DialogServiceConnector_SessionStarted;
+                dialogServiceConnector.SessionStopped -= DialogServiceConnector_SessionStopped;
+                dialogServiceConnector.Recognizing -= DialogServiceConnector_Recognizing;
+                dialogServiceConnector.Recognized -= DialogServiceConnector_Recognized;
+                dialogServiceConnector.ActivityReceived -= DialogServiceConnector_ActivityReceived;
+                dialogServiceConnector.Canceled -= DialogServiceConnector_Canceled;
             }
 
             var audioConfig = AudioConfig.FromDefaultMicrophoneInput();
-            dialogConnector = new DialogConnector(dialogConfig, audioConfig);
-            dialogConnector.SessionStarted += DialogConnector_SessionStarted;
-            dialogConnector.SessionStopped += DialogConnector_SessionStopped;
-            dialogConnector.Recognizing += DialogConnector_Recognizing;
-            dialogConnector.Recognized += DialogConnector_Recognized;
-            dialogConnector.ActivityReceived += DialogConnector_ActivityReceived;
-            dialogConnector.Canceled += DialogConnector_Canceled;
+            dialogServiceConnector = new DialogServiceConnector(dialogServiceConfig, audioConfig);
+            dialogServiceConnector.SessionStarted += DialogServiceConnector_SessionStarted;
+            dialogServiceConnector.SessionStopped += DialogServiceConnector_SessionStopped;
+            dialogServiceConnector.Recognizing += DialogServiceConnector_Recognizing;
+            dialogServiceConnector.Recognized += DialogServiceConnector_Recognized;
+            dialogServiceConnector.ActivityReceived += DialogServiceConnector_ActivityReceived;
+            dialogServiceConnector.Canceled += DialogServiceConnector_Canceled;
 
             SendActivityButton.IsEnabled = true;
             StartButton.IsEnabled = true;
         }
 
-        private void DialogConnector_SessionStarted(object sender, SessionEventArgs e)
+        private void DialogServiceConnector_SessionStarted(object sender, SessionEventArgs e)
         {
             UpdateUI(() =>
             {
@@ -109,7 +109,7 @@ namespace VirtualAssistantPreview
             });
         }
 
-        private void DialogConnector_SessionStopped(object sender, SessionEventArgs e)
+        private void DialogServiceConnector_SessionStopped(object sender, SessionEventArgs e)
         {
             UpdateUI(() =>
             {
@@ -117,12 +117,12 @@ namespace VirtualAssistantPreview
             });
         }
 
-        private void DialogConnector_Recognizing(object sender, SpeechRecognitionEventArgs e)
+        private void DialogServiceConnector_Recognizing(object sender, SpeechRecognitionEventArgs e)
         {
             //throw new NotImplementedException();
         }
 
-        private void DialogConnector_Recognized(object sender, SpeechRecognitionEventArgs e)
+        private void DialogServiceConnector_Recognized(object sender, SpeechRecognitionEventArgs e)
         {
             var result = e.Result.Text;
 
@@ -141,7 +141,7 @@ namespace VirtualAssistantPreview
             });
         }
 
-        private async void DialogConnector_ActivityReceived(object sender, ActivityReceivedEventArgs e)
+        private async void DialogServiceConnector_ActivityReceived(object sender, ActivityReceivedEventArgs e)
         {
             var json = e.Activity;
             var activity = JsonConvert.DeserializeObject<Activity>(json);
@@ -163,7 +163,7 @@ namespace VirtualAssistantPreview
             });
         }
 
-        private void DialogConnector_Canceled(object sender, SpeechRecognitionCanceledEventArgs e)
+        private void DialogServiceConnector_Canceled(object sender, SpeechRecognitionCanceledEventArgs e)
         {
             string cancelText = $"Canceled with reason: {e.Reason}";
 
@@ -181,13 +181,13 @@ namespace VirtualAssistantPreview
 
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
-            dialogConnector.ListenOnceAsync();
+            dialogServiceConnector.ListenOnceAsync();
         }
 
         private async void ConfigureButton_Click(object sender, RoutedEventArgs e)
         {
             await CheckAndEnableMic();
-            InitDialogConnector();
+            InitDialogServiceConnector();
         }
 
         // Check if the app has mic permissions. If not, query user for access
@@ -221,7 +221,7 @@ namespace VirtualAssistantPreview
         private void SendActivity_Click(object sender, RoutedEventArgs e)
         {
             string speakActivity = CustomActivityTextbox.Text;
-            dialogConnector.SendActivityAsync(speakActivity);
+            dialogServiceConnector.SendActivityAsync(speakActivity);
 
             var activity = JsonConvert.DeserializeObject<Activity>(speakActivity);
             UpdateUI(() =>

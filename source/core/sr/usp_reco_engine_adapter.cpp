@@ -928,7 +928,7 @@ void CSpxUspRecoEngineAdapter::UspSendAgentConfig()
 
 void CSpxUspRecoEngineAdapter::UspSendSpeechAgentContext()
 {
-    // The Dialog Connector is responsible for generating an interaction ID here, so we send it as a speech.agent.context message
+    // The Dialog Service Connector is responsible for generating an interaction ID here, so we send it as a speech.agent.context message
     if (m_endpointType == USP::EndpointType::Dialog)
     {
         auto site = GetSite();

@@ -20,12 +20,12 @@ import com.microsoft.cognitiveservices.speech.SpeechRecognitionCanceledEventArgs
 import com.microsoft.cognitiveservices.speech.translation.TranslationSynthesisEventArgs;
 
 /**
- * Class that defines a DialogConnector.
+ * Class that defines a DialogServiceConnector.
  */
-public class DialogConnector implements Closeable {
+public class DialogServiceConnector implements Closeable {
 
     /*! \cond PROTECTED */
-    static Class<?> dialogConnector = null;
+    static Class<?> dialogServiceConnector = null;
     private static ExecutorService executorService;
 
     // load the native library.
@@ -37,31 +37,31 @@ public class DialogConnector implements Closeable {
         catch (ClassNotFoundException ex) {
             throw new IllegalStateException(ex);
         }
-        dialogConnector = DialogConnector.class;
+        dialogServiceConnector = DialogServiceConnector.class;
         executorService = Executors.newCachedThreadPool();
     }
 
     /*! \endcond */
 
     /**
-     * Builds a DialogConnector with audio from default microphone input
-     * @param config Dialog connector configuration.
+     * Builds a DialogServiceConnector with audio from default microphone input
+     * @param config Dialog service connector configuration.
      */
-    public DialogConnector(DialogConfig config) {
+    public DialogServiceConnector(DialogServiceConfig config) {
         this(config, AudioConfig.fromDefaultMicrophoneInput());
     }
 
     /**
-     * Builds a DialogConnector
-     * @param config Dialog connector configuration.
+     * Builds a DialogServiceConnector
+     * @param config Dialog service connector configuration.
      * @param audioConfig An optional audio input configuration associated with the recognizer
      */
-    public DialogConnector(DialogConfig config, AudioConfig audioConfig) {
+    public DialogServiceConnector(DialogServiceConfig config, AudioConfig audioConfig) {
         Contracts.throwIfNull(config, "config");
         if (audioConfig == null) {
-            this.dialogConnectorImpl = com.microsoft.cognitiveservices.speech.internal.DialogConnector.FromConfig(config.getConfigImpl());
+            this.dialogServiceConnectorImpl = com.microsoft.cognitiveservices.speech.internal.DialogServiceConnector.FromConfig(config.getConfigImpl());
         } else {
-            this.dialogConnectorImpl = com.microsoft.cognitiveservices.speech.internal.DialogConnector.FromConfig(config.getConfigImpl(), audioConfig.getConfigImpl());
+            this.dialogServiceConnectorImpl = com.microsoft.cognitiveservices.speech.internal.DialogServiceConnector.FromConfig(config.getConfigImpl(), audioConfig.getConfigImpl());
         }
         initialize();
     }
@@ -73,7 +73,7 @@ public class DialogConnector implements Closeable {
     public Future<Void> connectAsync() {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                dialogConnectorImpl.ConnectAsync().Get();
+                dialogServiceConnectorImpl.ConnectAsync().Get();
                 return null;
             }
         });
@@ -86,7 +86,7 @@ public class DialogConnector implements Closeable {
     public Future<Void> disconnectAsync() {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                dialogConnectorImpl.DisconnectAsync().Get();
+                dialogServiceConnectorImpl.DisconnectAsync().Get();
                 return null;
             }
         });
@@ -101,7 +101,7 @@ public class DialogConnector implements Closeable {
         Contracts.throwIfNull(activity, "activity");
         return executorService.submit(new java.util.concurrent.Callable<String>() {
             public String call() {
-                return dialogConnectorImpl.SendActivityAsync(activity.getImpl()).Get();
+                return dialogServiceConnectorImpl.SendActivityAsync(activity.getImpl()).Get();
             }
         });
     }
@@ -113,7 +113,7 @@ public class DialogConnector implements Closeable {
     public Future<Void> listenOnceAsync() {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                dialogConnectorImpl.ListenOnceAsync().Get();
+                dialogServiceConnectorImpl.ListenOnceAsync().Get();
                 return null;
             }
         });
@@ -127,7 +127,7 @@ public class DialogConnector implements Closeable {
     public Future<Void> startKeywordRecognitionAsync(final KeywordRecognitionModel model) {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                dialogConnectorImpl.StartKeywordRecognitionAsync(model.getModelImpl()).Get();
+                dialogServiceConnectorImpl.StartKeywordRecognitionAsync(model.getModelImpl()).Get();
                 return null;
             }
         });
@@ -140,7 +140,7 @@ public class DialogConnector implements Closeable {
     public Future<Void> stopKeywordRecognitionAsync() {
         return executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                dialogConnectorImpl.StopKeywordRecognitionAsync().Get();
+                dialogServiceConnectorImpl.StopKeywordRecognitionAsync().Get();
                 return null;
             }
         });
@@ -179,17 +179,17 @@ public class DialogConnector implements Closeable {
     /*! \cond PROTECTED */
     private void initialize() {
         recognizingHandler = new RecoEventHandlerImpl(this, /* isRecognizedHandler */ false);
-        dialogConnectorImpl.getRecognizing().AddEventListener(recognizingHandler);
+        dialogServiceConnectorImpl.getRecognizing().AddEventListener(recognizingHandler);
         recognizedHandler = new RecoEventHandlerImpl(this, /* isRecognizedHandler */ true);
-        dialogConnectorImpl.getRecognized().AddEventListener(recognizedHandler);
+        dialogServiceConnectorImpl.getRecognized().AddEventListener(recognizedHandler);
         sessionStartedHandler = new SessionEventHandlerImpl(this, /* isSessionStart */ true);
-        dialogConnectorImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+        dialogServiceConnectorImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
         sessionStoppedHandler = new SessionEventHandlerImpl(this, /* isSessionStopped */ false);
-        dialogConnectorImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+        dialogServiceConnectorImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
         canceledHandler = new CanceledEventHandlerImpl(this);
-        dialogConnectorImpl.getCanceled().AddEventListener(canceledHandler);
+        dialogServiceConnectorImpl.getCanceled().AddEventListener(canceledHandler);
         activityReceivedHandler = new ActivityReceivedEventHandlerImpl(this);
-        dialogConnectorImpl.getActivityReceived().AddEventListener(activityReceivedHandler);
+        dialogServiceConnectorImpl.getActivityReceived().AddEventListener(activityReceivedHandler);
     }
 
     private RecoEventHandlerImpl recognizingHandler;
@@ -201,7 +201,7 @@ public class DialogConnector implements Closeable {
 
     private class RecoEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventListener {
 
-        RecoEventHandlerImpl(DialogConnector connector, boolean isRecognizedHandler) {
+        RecoEventHandlerImpl(DialogServiceConnector connector, boolean isRecognizedHandler) {
             Contracts.throwIfNull(connector, "connector");
             this.connector = connector;
             this.isRecognizedHandler = isRecognizedHandler;
@@ -220,13 +220,13 @@ public class DialogConnector implements Closeable {
             }
         }
 
-        private DialogConnector connector;
+        private DialogServiceConnector connector;
         private boolean isRecognizedHandler;
     }
 
     private class SessionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SessionEventListener {
 
-        SessionEventHandlerImpl(DialogConnector connector, boolean isSessionStart) {
+        SessionEventHandlerImpl(DialogServiceConnector connector, boolean isSessionStart) {
             Contracts.throwIfNull(connector, "connector");
             this.connector = connector;
             this.isSessionStart = isSessionStart;
@@ -245,13 +245,13 @@ public class DialogConnector implements Closeable {
             }
         }
 
-        private DialogConnector connector;
+        private DialogServiceConnector connector;
         private boolean isSessionStart;
     }
 
     private class CanceledEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventListener {
 
-        CanceledEventHandlerImpl(DialogConnector connector) {
+        CanceledEventHandlerImpl(DialogServiceConnector connector) {
             Contracts.throwIfNull(connector, "connector");
             this.connector = connector;
         }
@@ -269,12 +269,12 @@ public class DialogConnector implements Closeable {
             }
         }
 
-        private DialogConnector connector;
+        private DialogServiceConnector connector;
     }
 
     private class ActivityReceivedEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.ActivityReceivedEventListener {
 
-        ActivityReceivedEventHandlerImpl(DialogConnector connector) {
+        ActivityReceivedEventHandlerImpl(DialogServiceConnector connector) {
             Contracts.throwIfNull(connector, "connector");
             this.connector = connector;
         }
@@ -292,10 +292,10 @@ public class DialogConnector implements Closeable {
             }
         }
 
-        private DialogConnector connector;
+        private DialogServiceConnector connector;
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.DialogConnector dialogConnectorImpl;
+    private com.microsoft.cognitiveservices.speech.internal.DialogServiceConnector dialogServiceConnectorImpl;
     /*! \endcond */
 
     /**
@@ -314,12 +314,12 @@ public class DialogConnector implements Closeable {
             return;
         }
         if (disposing) {
-            dialogConnectorImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-            dialogConnectorImpl.getRecognized().RemoveEventListener(recognizedHandler);
-            dialogConnectorImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-            dialogConnectorImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-            dialogConnectorImpl.getCanceled().RemoveEventListener(canceledHandler);
-            dialogConnectorImpl.getActivityReceived().RemoveEventListener(activityReceivedHandler);
+            dialogServiceConnectorImpl.getRecognizing().RemoveEventListener(recognizingHandler);
+            dialogServiceConnectorImpl.getRecognized().RemoveEventListener(recognizedHandler);
+            dialogServiceConnectorImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+            dialogServiceConnectorImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+            dialogServiceConnectorImpl.getCanceled().RemoveEventListener(canceledHandler);
+            dialogServiceConnectorImpl.getActivityReceived().RemoveEventListener(activityReceivedHandler);
 
             recognizingHandler.delete();
             recognizedHandler.delete();
@@ -328,7 +328,7 @@ public class DialogConnector implements Closeable {
             canceledHandler.delete();
             activityReceivedHandler.delete();
 
-            dialogConnectorImpl.delete();
+            dialogServiceConnectorImpl.delete();
         }
         disposed = true;
     }

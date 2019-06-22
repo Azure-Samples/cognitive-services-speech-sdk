@@ -948,8 +948,8 @@ void CSpxAudioStreamSession::FireSessionStartedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
     std::wstring sessionIdOverride;
-    /* For dialog connector, we replace session id with the interaction id that's going to be send in the context message. */
-    if (IsRecognizerType<ISpxDialogConnector>())
+    /* For dialog service connector, we replace session id with the interaction id that's going to be send in the context message. */
+    if (IsRecognizerType<ISpxDialogServiceConnector>())
     {
         sessionIdOverride = PAL::ToWString(PeekNextInteractionId(InteractionIdPurpose::Speech));
     }
@@ -1080,7 +1080,7 @@ void CSpxAudioStreamSession::DispatchEvent(const list<weak_ptr<ISpxRecognizer>>&
 
             case EventType::ActivityReceivedEvent:
             {
-                auto c_events = SpxQueryInterface<ISpxDialogConnectorEvents>(ptr);
+                auto c_events = SpxQueryInterface<ISpxDialogServiceConnectorEvents>(ptr);
                 if (c_events != nullptr)
                 {
                     c_events->FireActivityReceived(sessionId, activity, audio);
@@ -1170,11 +1170,11 @@ void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* c
     auto recognizer = m_recognizers.front().lock();
     auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer);
     auto translationRecognizer = SpxQueryInterface<ISpxTranslationRecognizer>(recognizer);
-    auto dialogConnector = SpxQueryInterface<ISpxDialogConnector>(recognizer);
+    auto dialogServiceConnector = SpxQueryInterface<ISpxDialogServiceConnector>(recognizer);
     auto transcriber = SpxQueryInterface<ISpxConversationTranscriber>(recognizer);
 
     *countTranscriber = (transcriber != nullptr) ? 1 : 0;
-    *countDialog = (dialogConnector != nullptr) ? 1 : 0;
+    *countDialog = (dialogServiceConnector != nullptr) ? 1 : 0;
     *countIntent = (intentRecognizer != nullptr) ? 1 : 0;
     *countTranslation = (translationRecognizer != nullptr) ? 1 : 0;
     *countSpeech = 1 - *countIntent - *countTranslation - *countDialog - *countTranscriber;
@@ -1645,7 +1645,7 @@ void CSpxAudioStreamSession::CheckError(const string& error)
 
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
-    if (IsState(SessionState::Idle) && !IsRecognizerType<ISpxDialogConnector>())
+    if (IsState(SessionState::Idle) && !IsRecognizerType<ISpxDialogServiceConnector>())
     {
         if (adapter != m_recoAdapter.get())
         {

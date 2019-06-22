@@ -22,13 +22,13 @@ namespace Dialog {
 class ActivityReceivedEventArgs: public std::enable_shared_from_this<ActivityReceivedEventArgs>
 {
 public:
-    friend DialogConnector;
+    friend DialogServiceConnector;
     /// <summary>
     /// Releases the event.
     /// </summary>
     inline ~ActivityReceivedEventArgs()
     {
-        SPX_THROW_ON_FAIL(::dialog_connector_activity_received_event_release(m_handle));
+        SPX_THROW_ON_FAIL(::dialog_service_connector_activity_received_event_release(m_handle));
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public:
     inline std::shared_ptr<Activity> GetActivity() const
     {
         SPXACTIVITYJSONHANDLE h_act{ SPXHANDLE_INVALID };
-        SPX_THROW_ON_FAIL(::dialog_connector_activity_received_event_get_activity(m_handle, &h_act));
+        SPX_THROW_ON_FAIL(::dialog_service_connector_activity_received_event_get_activity(m_handle, &h_act));
         return std::shared_ptr<Activity>{new Activity{ h_act }};
     }
 
@@ -49,7 +49,7 @@ public:
     inline std::shared_ptr<Audio::PullAudioOutputStream> GetAudio() const
     {
         SPXAUDIOSTREAMHANDLE h_audio{ SPXHANDLE_INVALID };
-        SPX_THROW_ON_FAIL(::dialog_connector_activity_received_event_get_audio(m_handle, &h_audio));
+        SPX_THROW_ON_FAIL(::dialog_service_connector_activity_received_event_get_audio(m_handle, &h_audio));
         if (h_audio == SPXHANDLE_INVALID)
         {
             return nullptr;
@@ -63,7 +63,7 @@ public:
     /// <returns>True if the event contains audio, false otherwise.</returns>
     inline bool HasAudio() const
     {
-        return ::dialog_connector_activity_received_event_has_audio(m_handle);
+        return ::dialog_service_connector_activity_received_event_has_audio(m_handle);
     }
 private:
     /*! \cond PROTECTED */

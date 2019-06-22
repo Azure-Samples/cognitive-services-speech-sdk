@@ -23,9 +23,9 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerFrom
     return CreateRecognizerFromConfigInternal("CSpxAudioStreamSession", "CSpxRecognizer", audioInput);
 }
 
-std::shared_ptr<ISpxDialogConnector> CSpxSpeechApiFactory::CreateDialogConnectorFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput)
+std::shared_ptr<ISpxDialogServiceConnector> CSpxSpeechApiFactory::CreateDialogServiceConnectorFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput)
 {
-    return SpxQueryInterface<ISpxDialogConnector>(CreateRecognizerFromConfigInternal("CSpxAudioStreamSession", "CSpxDialogConnector", audioInput));
+    return SpxQueryInterface<ISpxDialogServiceConnector>(CreateRecognizerFromConfigInternal("CSpxAudioStreamSession", "CSpxDialogServiceConnector", audioInput));
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput)

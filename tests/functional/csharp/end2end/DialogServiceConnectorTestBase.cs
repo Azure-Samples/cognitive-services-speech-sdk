@@ -10,10 +10,10 @@ using Microsoft.CognitiveServices.Speech.Dialog;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     [TestClass]
-    public class DialogConnectorTestBase
+    public class DialogServiceConnectorTestBase
     {
         public static string inputDir, subscriptionKey, region, botSecret;
-        public DialogConfig dialogConfig;
+        public DialogServiceConfig dialogServiceConfig;
 
         [ClassInitialize]
         public static void BaseClassInitialize(TestContext context)
@@ -33,9 +33,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestInitialize]
         public void BaseTestInit()
         {
-            dialogConfig = DialogConfig.FromBotSecret(botSecret, subscriptionKey, region);
-            dialogConfig.SpeechRecognitionLanguage = "en-us";
-            dialogConfig.SetProperty("Conversation_Communication_Type", "AutoReply");
+            dialogServiceConfig = DialogServiceConfig.FromBotSecret(botSecret, subscriptionKey, region);
+            dialogServiceConfig.SpeechRecognitionLanguage = "en-us";
+            dialogServiceConfig.SetProperty("Conversation_Communication_Type", "AutoReply");
         }
     }
 }

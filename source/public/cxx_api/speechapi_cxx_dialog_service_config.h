@@ -16,42 +16,42 @@ namespace Speech {
 namespace Dialog {
 
 /// <summary>
-/// Class that defines configurations for the dialog connector object.
+/// Class that defines configurations for the dialog service connector object.
 /// </summary>
-class DialogConfig final: public SpeechConfig
+class DialogServiceConfig final: public SpeechConfig
 {
     /*! \cond PROTECTED */
-    inline explicit DialogConfig(SPXSPEECHCONFIGHANDLE h_config) : SpeechConfig{ h_config }
+    inline explicit DialogServiceConfig(SPXSPEECHCONFIGHANDLE h_config) : SpeechConfig{ h_config }
     {
     }
     /*! \endcond */
 public:
     /// <summary>
-    /// Creates a dialog config instance with the specified bot secret.
+    /// Creates a dialog service config instance with the specified bot secret.
     /// </summary>
     /// <param name="secretKey">Speech channel bot secret key.</param>
     /// <param name="subscription">Subscription key associated with the bot</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-    /// <returns>A shared pointer to the new dialog config.</returns>
-    inline static std::shared_ptr<DialogConfig> FromBotSecret(const SPXSTRING& secretKey, const SPXSTRING& subscription, const SPXSTRING& region)
+    /// <returns>A shared pointer to the new dialog service config.</returns>
+    inline static std::shared_ptr<DialogServiceConfig> FromBotSecret(const SPXSTRING& secretKey, const SPXSTRING& subscription, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(dialog_config_from_bot_secret(&h_config, Utils::ToUTF8(secretKey).c_str(), Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
-        return std::shared_ptr<DialogConfig>{ new DialogConfig(h_config) };
+        SPX_THROW_ON_FAIL(dialog_service_config_from_bot_secret(&h_config, Utils::ToUTF8(secretKey).c_str(), Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
+        return std::shared_ptr<DialogServiceConfig>{ new DialogServiceConfig(h_config) };
     }
 
     /// <summary>
-    /// Creates a dialog config instance with the specified task dialog application id.
+    /// Creates a dialog service config instance with the specified task dialog application id.
     /// </summary>
     /// <param name="appId">Task dialog application id.</param>
     /// <param name="subscription">Subscription key associated with the dialog.</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-    /// <returns>A shared pointer to the new dialog config.</returns>
-    inline static std::shared_ptr<DialogConfig> FromTaskDialogAppId(const SPXSTRING& appId, const SPXSTRING& subscription, const SPXSTRING& region)
+    /// <returns>A shared pointer to the new dialog service config.</returns>
+    inline static std::shared_ptr<DialogServiceConfig> FromTaskDialogAppId(const SPXSTRING& appId, const SPXSTRING& subscription, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(dialog_config_from_task_dialog_app_id(&h_config, Utils::ToUTF8(appId).c_str(), Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
-        return std::shared_ptr<DialogConfig>{ new DialogConfig(h_config) };
+        SPX_THROW_ON_FAIL(dialog_service_config_from_task_dialog_app_id(&h_config, Utils::ToUTF8(appId).c_str(), Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
+        return std::shared_ptr<DialogServiceConfig>{ new DialogServiceConfig(h_config) };
     }
 
     /// <summary>

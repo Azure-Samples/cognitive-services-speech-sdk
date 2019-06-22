@@ -28,11 +28,11 @@ using namespace std::chrono_literals;
 constexpr auto TEST_KWS_KEYWORD = "Computer";
 constexpr auto TEST_ACTIVITY_TYPE = "message";
 
-std::shared_ptr<DialogConfig> DialogConfigForTests(bool isBot = true)
+std::shared_ptr<DialogServiceConfig> DialogServiceConfigForTests(bool isBot = true)
 {
     auto config = isBot ?
-        DialogConfig::FromBotSecret("test", Keys::Dialog, Config::DialogRegion) :
-        DialogConfig::FromTaskDialogAppId("test", Keys::Dialog, Config::DialogRegion);
+        DialogServiceConfig::FromBotSecret("test", Keys::Dialog, Config::DialogRegion) :
+        DialogServiceConfig::FromTaskDialogAppId("test", Keys::Dialog, Config::DialogRegion);
     config->SetSpeechRecognitionLanguage("en-us");
     config->SetProperty("Conversation_Communication_Type", "AutoReply");
     return config;
@@ -90,7 +90,7 @@ struct test_runner
         return e.Result->Reason == ResultReason::NoMatch && NoMatchDetails::FromResult(e.Result)->Reason == NoMatchReason::KeywordNotRecognized;
     };
 
-    test_runner(std::shared_ptr<DialogConfig> config, std::shared_ptr<AudioConfig> audio): m_config{config}, m_audio{audio}
+    test_runner(std::shared_ptr<DialogServiceConfig> config, std::shared_ptr<AudioConfig> audio): m_config{config}, m_audio{audio}
     {};
 
     template<typename T>
@@ -147,7 +147,7 @@ struct test_runner
     }
 
     template<typename T>
-    std::tuple<bool, std::string> run(std::function<std::future<T>(DialogConnector&)> scenario, std::chrono::seconds timeout, uint32_t retries)
+    std::tuple<bool, std::string> run(std::function<std::future<T>(DialogServiceConnector&)> scenario, std::chrono::seconds timeout, uint32_t retries)
     {
         for(auto i = 0u; i < retries; i++)
         {
@@ -162,7 +162,7 @@ struct test_runner
                 m_canceled.reset();
             }};
 
-            auto connector = DialogConnector::FromConfig(m_config, m_audio);
+            auto connector = DialogServiceConnector::FromConfig(m_config, m_audio);
             connector->Recognized += [&](const SpeechRecognitionEventArgs& e)
             {
                 if (isKeyword(e) && m_keyword_recognized_handler)
@@ -248,7 +248,7 @@ struct test_runner
     }
 
 private:
-    std::shared_ptr<DialogConfig> m_config;
+    std::shared_ptr<DialogServiceConfig> m_config;
     std::shared_ptr<AudioConfig> m_audio;
 
     std::condition_variable m_cond;
@@ -330,13 +330,13 @@ const auto verifyNotRecognizedKeyword = [](std::ostringstream& oss, const Speech
     return false;
 };
 
-TEST_CASE("Dialog Connector basics", "[api][cxx][dialog_connector]")
+TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connector]")
 {
     SECTION("Listen Once works")
     {
         turnOnLamp.UpdateFullFilename(Config::InputDir);
         REQUIRE(exists(turnOnLamp.m_inputDataFilename));
-        auto config = DialogConfigForTests();
+        auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
 
         test_runner runner{ config, audioConfig };
@@ -347,7 +347,7 @@ TEST_CASE("Dialog Connector basics", "[api][cxx][dialog_connector]")
         runner.add_canceled_test(verifyCanceledSpeech);
 
         auto result = runner.run<void>(
-            [](DialogConnector& connector)
+            [](DialogServiceConnector& connector)
             {
                 return connector.ListenOnceAsync();
             },
@@ -363,7 +363,7 @@ TEST_CASE("Dialog Connector basics", "[api][cxx][dialog_connector]")
     {
         turnOnLamp.UpdateFullFilename(Config::InputDir);
         REQUIRE(exists(turnOnLamp.m_inputDataFilename));
-        auto config = DialogConfigForTests(false);
+        auto config = DialogServiceConfigForTests(false);
         auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
 
         test_runner runner{ config, audioConfig };
@@ -420,7 +420,7 @@ TEST_CASE("Dialog Connector basics", "[api][cxx][dialog_connector]")
         runner.add_canceled_test(verifyCanceledSpeech);
 
         auto result = runner.run<std::string>(
-            [&](DialogConnector& connector)
+            [&](DialogServiceConnector& connector)
             {
                 auto activity = Activity::Create();
                 activity->Type = TEST_ACTIVITY_TYPE;
@@ -438,13 +438,13 @@ TEST_CASE("Dialog Connector basics", "[api][cxx][dialog_connector]")
     }
 }
 
-TEST_CASE("Dialog Connector extended", "[api][cxx][dialog_connector][adv][!hide]")
+TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connector][adv][!hide]")
 {
     SECTION("Interleaving speech and activities.")
     {
         turnOnLamp.UpdateFullFilename(Config::InputDir);
         REQUIRE(exists(turnOnLamp.m_inputDataFilename));
-        auto config = DialogConfigForTests();
+        auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
 
         test_runner runner{ config, audioConfig };
@@ -460,7 +460,7 @@ TEST_CASE("Dialog Connector extended", "[api][cxx][dialog_connector][adv][!hide]
         runner.add_canceled_test(verifyCanceledSpeech);
 
         auto result = runner.run<void>(
-            [&](DialogConnector& connector)
+            [&](DialogServiceConnector& connector)
             {
                 auto f1 = connector.ListenOnceAsync();
                 auto activity = Activity::Create();
@@ -492,14 +492,14 @@ TEST_CASE("Dialog Connector extended", "[api][cxx][dialog_connector][adv][!hide]
 // 3) Being able to specify the keyword text in keyword detection (Done)
 // 4) Being able to specify the audio for the latter utterance
 
-TEST_CASE("Dialog Connector KWS basics", "[api][cxx][dialog_connector]") {
+TEST_CASE("Dialog Service Connector KWS basics", "[api][cxx][dialog_service_connector]") {
 
     SECTION("Listen once with KWS only works")
     {
         UseMocks(false);
         kwvAccept.UpdateFullFilename(Config::InputDir);
         REQUIRE(exists(kwvAccept.m_inputDataFilename));
-        auto config = DialogConfigForTests();
+        auto config = DialogServiceConfigForTests();
         // Turn off keyword verification
         config->SetProperty("KeywordConfig_EnableKeywordVerification", "false");
         auto audioConfig = AudioConfig::FromWavFileInput(kwvAccept.m_inputDataFilename);
@@ -516,7 +516,7 @@ TEST_CASE("Dialog Connector KWS basics", "[api][cxx][dialog_connector]") {
         runner.add_canceled_test(verifyCanceledSpeech);
 
         auto result = runner.run<void>(
-            [model](DialogConnector& connector)
+            [model](DialogServiceConnector& connector)
             {
                 return connector.StartKeywordRecognitionAsync(model);
             },
@@ -531,7 +531,7 @@ TEST_CASE("Dialog Connector KWS basics", "[api][cxx][dialog_connector]") {
     }
 }
 
-TEST_CASE("Dialog Connector KWV basics", "[api][cxx][dialog_connector]")
+TEST_CASE("Dialog Service Connector KWV basics", "[api][cxx][dialog_service_connector]")
 {
 
     SECTION("Listen once with KWS + KWV accept works")
@@ -539,7 +539,7 @@ TEST_CASE("Dialog Connector KWV basics", "[api][cxx][dialog_connector]")
         UseMocks(false);
         kwvAccept.UpdateFullFilename(Config::InputDir);
         REQUIRE(exists(kwvAccept.m_inputDataFilename));
-        auto config = DialogConfigForTests();
+        auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(kwvAccept.m_inputDataFilename);
         auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
 
@@ -554,7 +554,7 @@ TEST_CASE("Dialog Connector KWV basics", "[api][cxx][dialog_connector]")
         runner.add_canceled_test(verifyCanceledSpeech);;
 
         auto result = runner.run<void>(
-            [model](DialogConnector& connector)
+            [model](DialogServiceConnector& connector)
             {
                 return connector.StartKeywordRecognitionAsync(model);
             },
@@ -573,7 +573,7 @@ TEST_CASE("Dialog Connector KWV basics", "[api][cxx][dialog_connector]")
         UseMocks(false);
         kwvReject.UpdateFullFilename(Config::InputDir);
         REQUIRE(exists(kwvReject.m_inputDataFilename));
-        auto config = DialogConfigForTests();
+        auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(kwvReject.m_inputDataFilename);
         auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
 
@@ -620,7 +620,7 @@ TEST_CASE("Dialog Connector KWV basics", "[api][cxx][dialog_connector]")
             0);
 
         auto result = runner.run<void>(
-            [model](DialogConnector& connector)
+            [model](DialogServiceConnector& connector)
             {
                 return connector.StartKeywordRecognitionAsync(model);
             },
@@ -637,7 +637,7 @@ TEST_CASE("Dialog Connector KWV basics", "[api][cxx][dialog_connector]")
 
 #if 0
 // Disable multi-turn tests for now as we don't have an easy way of loading audio in stages to simulate a microphone scenario
-TEST_CASE("Dialog Connector KWV multi-turn tests", "[api][cxx][dialog_connector]")
+TEST_CASE("Dialog Service Connector KWV multi-turn tests", "[api][cxx][dialog_service_connector]")
 {
 
     SECTION("Later utterances should not be polluted by KWV during multi turn recognition")
@@ -645,11 +645,11 @@ TEST_CASE("Dialog Connector KWV multi-turn tests", "[api][cxx][dialog_connector]
         UseMocks(false);
         kwvMultiturn.UpdateFullFilename(Config::InputDir);
         REQUIRE(exists(kwvMultiturn.m_inputDataFilename));
-        auto config = DialogConfigForTests();
+        auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(kwvMultiturn.m_inputDataFilename);
         auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
 
-        test_runner runner{ DialogConnector::FromConfig(config, audioConfig), model };
+        test_runner runner{ DialogServiceConnector::FromConfig(config, audioConfig), model };
 
         runner.add_keyword_recognizing_test(verifyRecognizingKeyword);
         runner.add_keyword_recognized_test(verifyRecognizedKeyword);
@@ -686,7 +686,7 @@ TEST_CASE("Dialog Connector KWV multi-turn tests", "[api][cxx][dialog_connector]
             2);
 
         auto result = runner.run<void>(
-            [](DialogConnector& connector, shared_ptr<KeywordRecognitionModel> model)
+            [](DialogServiceConnector& connector, shared_ptr<KeywordRecognitionModel> model)
             {
                 connector.StartKeywordRecognitionAsync(model);
                 std::this_thread::sleep_for(5s);

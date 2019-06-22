@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// dialog_connector.h: Implementation declarations for CSpxDialogConnector C++ class.
+// dialog_service_connector.h: Implementation declarations for CSpxDialogServiceConnector C++ class.
 //
 #pragma once
 
@@ -22,15 +22,15 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxDialogConnector :
+class CSpxDialogServiceConnector :
     public CSpxRecognizer,
-    public ISpxDialogConnector,
-    public ISpxDialogConnectorEvents
+    public ISpxDialogServiceConnector,
+    public ISpxDialogServiceConnectorEvents
 {
 public:
 
-    CSpxDialogConnector();
-    virtual ~CSpxDialogConnector();
+    CSpxDialogServiceConnector();
+    virtual ~CSpxDialogServiceConnector();
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
@@ -38,8 +38,8 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxSessionFromRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerEvents)
-        SPX_INTERFACE_MAP_ENTRY(ISpxDialogConnectorEvents)
-        SPX_INTERFACE_MAP_ENTRY(ISpxDialogConnector)
+        SPX_INTERFACE_MAP_ENTRY(ISpxDialogServiceConnectorEvents)
+        SPX_INTERFACE_MAP_ENTRY(ISpxDialogServiceConnector)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxGrammarList)
@@ -58,7 +58,7 @@ public:
     void Enable() override {};
     void Disable()override {};
 
-    // --- ISpxDialogConnector
+    // --- ISpxDialogServiceConnector
 
     CSpxAsyncOp<void> ConnectAsync() override;
     CSpxAsyncOp<void> DisconnectAsync() override;
@@ -87,7 +87,7 @@ public:
 
     void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
-    // --- ISpxDialogConnectorEvents
+    // --- ISpxDialogServiceConnectorEvents
     void FireActivityReceived(const std::wstring& sessionId, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) final;
 
     // --- IServiceProvider
@@ -109,10 +109,10 @@ protected:
 
 private:
 
-    CSpxDialogConnector(const CSpxDialogConnector&) = delete;
-    CSpxDialogConnector(const CSpxDialogConnector&&) = delete;
+    CSpxDialogServiceConnector(const CSpxDialogServiceConnector&) = delete;
+    CSpxDialogServiceConnector(const CSpxDialogServiceConnector&&) = delete;
 
-    CSpxDialogConnector& operator=(const CSpxDialogConnector&) = delete;
+    CSpxDialogServiceConnector& operator=(const CSpxDialogServiceConnector&) = delete;
 
     std::shared_ptr<ISpxSession> m_defaultSession;
     std::atomic_bool m_fEnabled;

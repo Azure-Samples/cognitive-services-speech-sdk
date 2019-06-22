@@ -16,17 +16,17 @@ namespace Microsoft.CognitiveServices.Speech.Dialog.Internal
     internal static class ActivityReceivedEventArgs
     {
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        internal static extern bool dialog_connector_activity_received_event_handle_is_valid(SPXEVENTHANDLE eventHandle);
+        internal static extern bool dialog_service_connector_activity_received_event_handle_is_valid(SPXEVENTHANDLE eventHandle);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        internal static extern SPXHR dialog_connector_activity_received_event_release(SPXEVENTHANDLE eventHandle);
+        internal static extern SPXHR dialog_service_connector_activity_received_event_release(SPXEVENTHANDLE eventHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        internal static extern SPXHR dialog_connector_activity_received_event_get_activity(InteropSafeHandle eventHandle, out SPXACTIVITYHANDLE activityHandle);
+        internal static extern SPXHR dialog_service_connector_activity_received_event_get_activity(InteropSafeHandle eventHandle, out SPXACTIVITYHANDLE activityHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        internal static extern bool dialog_connector_activity_received_event_has_audio(InteropSafeHandle eventHandle);
+        internal static extern bool dialog_service_connector_activity_received_event_has_audio(InteropSafeHandle eventHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        internal static extern SPXHR dialog_connector_activity_received_event_get_audio(InteropSafeHandle eventHandle, out SPXAUDIOHANDLE audioHandle);
+        internal static extern SPXHR dialog_service_connector_activity_received_event_get_audio(InteropSafeHandle eventHandle, out SPXAUDIOHANDLE audioHandle);
     }
 }

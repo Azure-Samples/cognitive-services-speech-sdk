@@ -29,8 +29,8 @@
 #include <speechapi_c_session.h>
 #include <speechapi_c_connection.h>
 #include <speechapi_c_activity.h>
-#include <speechapi_c_dialog_config.h>
-#include <speechapi_c_dialog_connector.h>
+#include <speechapi_c_dialog_service_config.h>
+#include <speechapi_c_dialog_service_connector.h>
 #include <speechapi_c_conversation_transcriber.h>
 #include <speechapi_c_conversation_transcription_result.h>
 #include <speechapi_c_user.h>

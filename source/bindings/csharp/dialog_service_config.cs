@@ -9,41 +9,41 @@ using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 namespace Microsoft.CognitiveServices.Speech.Dialog
 {
     /// <summary>
-    /// Class that defines configurations for dialog connector
+    /// Class that defines configurations for dialog service connector
     /// Added in version 1.5.0
     /// </summary>
-    public sealed class DialogConfig : SpeechConfig
+    public sealed class DialogServiceConfig : SpeechConfig
     {
-        internal DialogConfig(IntPtr handle) : base(handle)
+        internal DialogServiceConfig(IntPtr handle) : base(handle)
         {
         }
 
         /// <summary>
-        /// Creates an instance of the dialog config with the specified Speech Channel Bot secret key.
+        /// Creates an instance of the dialog service config with the specified Speech Channel Bot secret key.
         /// </summary>
         /// <param name="secretKey">Speech Channel Bot secret key.</param>
         /// <param name="subscription">Subscription key associated with the bot</param>
         /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-        /// <returns>A new dialog config.</returns>
-        public static DialogConfig FromBotSecret(string secretKey, string subscription, string region)
+        /// <returns>A new dialog service config.</returns>
+        public static DialogServiceConfig FromBotSecret(string secretKey, string subscription, string region)
         {
             IntPtr configHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.DialogConfig.dialog_config_from_bot_secret(out configHandle, secretKey, subscription, region));
-            return new DialogConfig(configHandle);
+            ThrowIfFail(Internal.DialogServiceConfig.dialog_service_config_from_bot_secret(out configHandle, secretKey, subscription, region));
+            return new DialogServiceConfig(configHandle);
         }
 
         /// <summary>
-        /// Creates an instance of the dialog config with the specified Task Dialog Application id.
+        /// Creates an instance of the dialog service config with the specified Task Dialog Application id.
         /// </summary>
         /// <param name="applicationId">Task dialog application id.</param>
         /// <param name="subscription">Subscription key associated with the bot</param>
         /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-        /// <returns>A new dialog config.</returns>
-        public static DialogConfig FromTaskDialogAppId(string applicationId, string subscription, string region)
+        /// <returns>A new dialog service config.</returns>
+        public static DialogServiceConfig FromTaskDialogAppId(string applicationId, string subscription, string region)
         {
             IntPtr configHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.DialogConfig.dialog_config_from_task_dialog_app_id(out configHandle, applicationId, subscription, region));
-            return new DialogConfig(configHandle);
+            ThrowIfFail(Internal.DialogServiceConfig.dialog_service_config_from_task_dialog_app_id(out configHandle, applicationId, subscription, region));
+            return new DialogServiceConfig(configHandle);
         }
 
         /// <summary>

@@ -108,7 +108,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR synthesizer_create_speech_synthesizer_from_config(out SPXSYNTHHANDLE synthHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioOutput);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR dialog_connector_create_dialog_connector_from_config(out SPXCONNECTORHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
+        public static extern SPXHR dialog_service_connector_create_dialog_service_connector_from_config(out SPXCONNECTORHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR recognizer_create_conversation_transcriber_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);

@@ -548,7 +548,7 @@ public:
     };
 #endif
 public:
-    friend class DialogConnector;
+    friend class DialogServiceConnector;
     friend class ActivityReceivedEventArgs;
 
 #ifndef SWIG

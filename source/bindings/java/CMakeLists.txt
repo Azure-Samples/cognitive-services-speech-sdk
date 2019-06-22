@@ -117,7 +117,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/BaseAsyncRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/BaseRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/Activity.java
-    ${CMAKE_SWIG_OUTDIR}/DialogConfig.java
+    ${CMAKE_SWIG_OUTDIR}/DialogServiceConfig.java
     ${CMAKE_SWIG_OUTDIR}/PropertyId.java
     ${CMAKE_SWIG_OUTDIR}/carbon_java.java
     ${CMAKE_SWIG_OUTDIR}/carbon_javaJNI.java
@@ -167,7 +167,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SessionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventSignal.java
-    ${CMAKE_SWIG_OUTDIR}/DialogConnector.java
+    ${CMAKE_SWIG_OUTDIR}/DialogServiceConnector.java
     ${CMAKE_SWIG_OUTDIR}/Connection.java
     ${CMAKE_SWIG_OUTDIR}/Grammar.java
     ${CMAKE_SWIG_OUTDIR}/PhraseListGrammar.java
@@ -288,8 +288,8 @@ set(JAVA_SOURCES
 
     ${PACKAGE_DIR}/dialog/ActivityReceivedEventArgs.java
     ${PACKAGE_DIR}/dialog/Activity.java
-    ${PACKAGE_DIR}/dialog/DialogConfig.java
-    ${PACKAGE_DIR}/dialog/DialogConnector.java
+    ${PACKAGE_DIR}/dialog/DialogServiceConfig.java
+    ${PACKAGE_DIR}/dialog/DialogServiceConnector.java
 
     ${PACKAGE_DIR}/intent/IntentRecognitionResult.java
     ${PACKAGE_DIR}/intent/IntentRecognitionEventArgs.java

@@ -7,8 +7,8 @@ package com.speechsdk.quickstart;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioOutputStream;
-import com.microsoft.cognitiveservices.speech.dialog.DialogConfig;
-import com.microsoft.cognitiveservices.speech.dialog.DialogConnector;
+import com.microsoft.cognitiveservices.speech.dialog.DialogServiceConfig;
+import com.microsoft.cognitiveservices.speech.dialog.DialogServiceConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,45 +36,45 @@ public class Main {
         assert !subscriptionKey.equals("YourSubscriptionKey") : "Replace the string \"YourSubscriptionKey\" with your speech subscription key.";
         assert !region.equals("YourServiceRegion") : "Replace the string \"YourServiceRegion\" with your service region.";
 
-        // Create a DialogConfig instance from channel secret, subscription key and region
-        final DialogConfig dialogConfig = DialogConfig.fromBotSecret(channelSecret, subscriptionKey, region);
-        if (dialogConfig == null) {
-            log.error("DialogConfig should not be null");
+        // Create a DialogServiceConfig instance from channel secret, subscription key and region
+        final DialogServiceConfig dialogServiceConfig = DialogServiceConfig.fromBotSecret(channelSecret, subscriptionKey, region);
+        if (dialogServiceConfig == null) {
+            log.error("DialogServiceConfig should not be null");
         }
 
         // Set audio input from microphone.
         final AudioConfig audioConfig = AudioConfig.fromDefaultMicrophoneInput();
 
-        // Create a DialogConnector instance
-        final DialogConnector dialogConnector = new DialogConnector(dialogConfig, audioConfig);
+        // Create a DialogServiceConnector instance
+        final DialogServiceConnector dialogServiceConnector = new DialogServiceConnector(dialogServiceConfig, audioConfig);
 
         // Configure all event listeners.
-        registerEventListeners(dialogConnector);
+        registerEventListeners(dialogServiceConnector);
 
         try {
             // Connect to the backing dialog.
-            dialogConnector.connectAsync();
-            log.info("DialogConnector is successfully connected");
+            dialogServiceConnector.connectAsync();
+            log.info("DialogServiceConnector is successfully connected");
 
             // Start listening.
             System.out.println("Say something ...");
-            dialogConnector.listenOnceAsync();
+            dialogServiceConnector.listenOnceAsync();
         } catch (Exception e) {
-            log.error("Exception thrown when connecting to DialogConnector. ErrorMessage:", e.getMessage(), e);
+            log.error("Exception thrown when connecting to DialogServiceConnector. ErrorMessage:", e.getMessage(), e);
 
             // Disconnect from the dialog.
-            dialogConnector.disconnectAsync();
+            dialogServiceConnector.disconnectAsync();
         }
     }
 
-    private static void registerEventListeners(final DialogConnector dialogConnector) {
+    private static void registerEventListeners(final DialogServiceConnector dialogServiceConnector) {
         // Recognizing will provide the intermediate recognized text while an audio stream is being processed
-        dialogConnector.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
+        dialogServiceConnector.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
             log.info("Recognizing speech event text: {}", speechRecognitionResultEventArgs.getResult().getText());
         });
 
         // Recognized will provide the final recognized text once audio capture is completed
-        dialogConnector.recognized.addEventListener((o, speechRecognitionResultEventArgs) -> {
+        dialogServiceConnector.recognized.addEventListener((o, speechRecognitionResultEventArgs) -> {
             if (speechRecognitionResultEventArgs.getResult().getText().trim().equals("")) {
                 log.warn("No speech was recognized. Try running the program again.");
             } else {
@@ -83,23 +83,23 @@ public class Main {
         });
 
         // SessionStarted will notify when audio begins flowing to the service for a turn
-        dialogConnector.sessionStarted.addEventListener((o, sessionEventArgs) -> {
+        dialogServiceConnector.sessionStarted.addEventListener((o, sessionEventArgs) -> {
             log.info("Session started event. Session id: {} ", sessionEventArgs.getSessionId());
         });
 
         // SessionStopped will notify when a turn is complete
-        dialogConnector.sessionStopped.addEventListener((o, sessionEventArgs) -> {
+        dialogServiceConnector.sessionStopped.addEventListener((o, sessionEventArgs) -> {
             log.info("Session stopped event. Session id: {}", sessionEventArgs.getSessionId());
         });
 
         // Canceled will be signaled when a turn is aborted or experiences an error condition
-        dialogConnector.canceled.addEventListener((o, canceledEventArgs) -> {
+        dialogServiceConnector.canceled.addEventListener((o, canceledEventArgs) -> {
             log.info("Canceled event details: {}", canceledEventArgs.getErrorDetails());
-            dialogConnector.disconnectAsync();
+            dialogServiceConnector.disconnectAsync();
         });
 
         // ActivityReceived is the main way your bot will communicate with the client and uses bot framework activities
-        dialogConnector.activityReceived.addEventListener((o, activityEventArgs) -> {
+        dialogServiceConnector.activityReceived.addEventListener((o, activityEventArgs) -> {
             final String act = activityEventArgs.getActivity().serialize();
             log.info("Received activity {} audio: {}", activityEventArgs.hasAudio() ? "with" : "without", act);
             if (activityEventArgs.hasAudio()) {

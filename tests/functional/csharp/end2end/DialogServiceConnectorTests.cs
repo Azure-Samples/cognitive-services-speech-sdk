@@ -16,12 +16,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using static AssertHelpers;
-    using static DialogConnectorTestsHelper;
+    using static DialogServiceConnectorTestsHelper;
 
     [TestClass]
-    public class DialogConnectorTests : DialogConnectorTestBase
+    public class DialogServiceConnectorTests : DialogServiceConnectorTestBase
     {
-        private DialogConnectorTestsHelper helper;
+        private DialogServiceConnectorTestsHelper helper;
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
@@ -32,7 +32,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestInitialize]
         public void Initialize()
         {
-            helper = new DialogConnectorTestsHelper();
+            helper = new DialogServiceConnectorTestsHelper();
         }
 
         [Ignore] //Temporarily removing during stand-up, tracked by task 1755114
@@ -40,9 +40,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ValidBaselineListenOnce()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var dialogConnector = TrackSessionId(new DialogConnector(this.dialogConfig, audioInput)))
+            using (var dialogServiceConnector = TrackSessionId(new DialogServiceConnector(this.dialogServiceConfig, audioInput)))
             {
-                await helper.CompleteListenOnceAsync(dialogConnector).ConfigureAwait(false);
+                await helper.CompleteListenOnceAsync(dialogServiceConnector).ConfigureAwait(false);
             }
         }
 
@@ -51,9 +51,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ValidSendActivity()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var dialogConnector = TrackSessionId(new DialogConnector(this.dialogConfig, audioInput)))
+            using (var dialogServiceConnector = TrackSessionId(new DialogServiceConnector(this.dialogServiceConfig, audioInput)))
             {
-                await helper.CompleteSendActivity(dialogConnector).ConfigureAwait(false);
+                await helper.CompleteSendActivity(dialogServiceConnector).ConfigureAwait(false);
             }
         }
 
