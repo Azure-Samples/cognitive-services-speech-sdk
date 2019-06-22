@@ -49,6 +49,10 @@ public class VirtualAssistantTests {
 
     @BeforeClass
     public static void setupBeforeClass() {
+        String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
+        System.out.println("Current operation system: " + operatingSystem);
+        boolean isMac = operatingSystem.contains("mac") || operatingSystem.contains("darwin"); 
+        org.junit.Assume.assumeFalse(isMac);
         Settings.LoadSettings();
     }
 

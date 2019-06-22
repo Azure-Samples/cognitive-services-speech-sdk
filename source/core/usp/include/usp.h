@@ -471,7 +471,7 @@ namespace endpoint
 
     namespace dialog
     {
-        const std::string url = "speech.platform.bing.com/convai/api/v2";
+        const std::string url = ".convai.speech.microsoft.com/api/v3";
 
         const std::vector<std::string> queryParameters = { langQueryParam };
     }

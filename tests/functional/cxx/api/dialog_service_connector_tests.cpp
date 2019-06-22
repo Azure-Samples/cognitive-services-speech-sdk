@@ -31,8 +31,8 @@ constexpr auto TEST_ACTIVITY_TYPE = "message";
 std::shared_ptr<DialogServiceConfig> DialogServiceConfigForTests(bool isBot = true)
 {
     auto config = isBot ?
-        DialogServiceConfig::FromBotSecret("test", Keys::Dialog, Config::DialogRegion) :
-        DialogServiceConfig::FromTaskDialogAppId("test", Keys::Dialog, Config::DialogRegion);
+        DialogServiceConfig::FromBotSecret(Config::DialogBotSecret, Keys::Dialog, Config::DialogRegion) :
+        DialogServiceConfig::FromTaskDialogAppId(Config::DialogBotSecret, Keys::Dialog, Config::DialogRegion);
     config->SetSpeechRecognitionLanguage("en-us");
     config->SetProperty("Conversation_Communication_Type", "AutoReply");
     return config;

@@ -251,7 +251,8 @@ string Connection::Impl::ConstructConnectionUrl() const
                 << endpoint::luis::pathSuffix;
             break;
         case EndpointType::Dialog:
-            oss << endpoint::dialog::url;
+            oss << m_config.m_region
+                << endpoint::dialog::url;
             break;
         case EndpointType::ConversationTranscriptionService:
             oss << endpoint::conversationTranscriber::pathPrefix1
