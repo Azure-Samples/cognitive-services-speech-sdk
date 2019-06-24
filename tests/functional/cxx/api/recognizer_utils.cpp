@@ -532,6 +532,29 @@ bool VerifyTextAndSpeaker(const RecoResultVector& phrases, const std::string& te
     return found;
 }
 
+bool VerifySpeaker(const RecoResultVector& phrases, const std::string& speakerId)
+{
+    bool found = false;
+    bool allUnidentified = true;
+    for (const auto& phrase : phrases)
+    {
+        auto lowercaseUserId = speakerId;
+        transform(lowercaseUserId.begin(), lowercaseUserId.end(), lowercaseUserId.begin(), [](unsigned char c) ->char { return (char)::tolower(c); });
+
+        if (lowercaseUserId != "unidentified")
+        {
+            allUnidentified = false;
+        }
+        if (phrase.UserId == speakerId)
+        {
+            found = true;
+            break;
+        }
+    }
+
+    return found && allUnidentified == false;
+}
+
 std::string GetText(const RecoResultVector& phrases)
 {
     ostringstream os;

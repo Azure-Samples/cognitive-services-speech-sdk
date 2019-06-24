@@ -248,3 +248,4 @@ bool VerifyTextAndSpeaker(const RecoResultVector& phrases, const std::string& te
 std::string GetText(const RecoResultVector& phrases);
 using My90kHzDuration = std::chrono::duration<double, std::ratio<1, 90000>>;
 std::string CreateTimestamp();
+bool VerifySpeaker(const RecoResultVector& phrases, const std::string& speakerId);

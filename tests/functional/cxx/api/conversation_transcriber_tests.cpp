@@ -67,8 +67,8 @@ TEST_CASE("conversation_voice_signature", "[.][int][prod]")
     // info is reported if any of the following requires fail, otherwise not reported.
     //https://github.com/catchorg/Catch2/blob/master/docs/logging.md
     INFO(GetText(result->phrases));
-    SPXTEST_REQUIRE(VerifyTextAndSpeaker(result->phrases, "Good morning Katie.", "steve@example.com") == true);
-    SPXTEST_REQUIRE(VerifyTextAndSpeaker(result->phrases, "Good morning Steve.", "katie@example.com") == true);
+    SPXTEST_REQUIRE(VerifySpeaker(result->phrases, "steve@example.com") == true);
+    SPXTEST_REQUIRE(VerifySpeaker(result->phrases, "katie@example.com") == true);
 }
 
 TEST_CASE("conversation_id", "[.][int][prod]")
@@ -448,6 +448,8 @@ TEST_CASE("conversation_online_pull_stream", "[.][int][prod]")
 
         REQUIRE_NOTHROW(recognizer->EndConversationAsync().get());
     }
+#if 0
+    // logged #1859511
     SPXTEST_SECTION("conversation_id")
     {
         REQUIRE_THROWS(recognizer->SetConversationId(""));
@@ -456,6 +458,7 @@ TEST_CASE("conversation_online_pull_stream", "[.][int][prod]")
         auto got_id = recognizer->GetConversationId();
         SPXTEST_REQUIRE(orig_id == got_id);
     }
+#endif
     SPXTEST_SECTION("all_features")
     {
         auto myId = PAL::CreateGuidWithDashesUTF8();
