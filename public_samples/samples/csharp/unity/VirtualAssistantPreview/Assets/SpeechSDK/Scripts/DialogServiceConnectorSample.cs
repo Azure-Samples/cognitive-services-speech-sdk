@@ -13,9 +13,9 @@ using Microsoft.CognitiveServices.Speech.Audio;
 using System.Text;
 
 /// <summary>
-/// An example usage of SpeechBotConnector with the Speech SDK Unity plugin.
+/// An example usage of DialogServiceConnector with the Speech SDK Unity plugin.
 /// </summary>
-public class SpeechBotConnectorSample : MonoBehaviour
+public class DialogServiceConnectorSample : MonoBehaviour
 {
     public string subscriptionKey;
     public string region;
@@ -31,8 +31,8 @@ public class SpeechBotConnectorSample : MonoBehaviour
 
     private object threadLocker = new object();
 
-    private SpeechBotConnector botConnector;
-    private BotConnectorConfig botConnectorConfig;
+    private DialogServiceConnector dialogServiceConnector;
+    private DialogServiceConfig dialogServiceConfig;
 
     private WaveAudioData audioData = null;
     private AudioSource ttsAudio;
@@ -45,19 +45,19 @@ public class SpeechBotConnectorSample : MonoBehaviour
     private async void Awake()
     {
         Debug.Log($"Awake enter");
-        if (botConnector == null)
+        if (dialogServiceConnector == null)
         {
-            Debug.Log($"BotConnector is null, creating now");
-            CreateBotConnector();
+            Debug.Log($"DialogServiceConnector is null, creating now");
+            CreateDialogServiceConnector();
         }
-        Debug.Log($"Connecting to Bot", this);
-        await botConnector.ConnectAsync();
+        Debug.Log($"Connecting to DialogService", this);
+        await dialogServiceConnector.ConnectAsync();
 
         Debug.Log($"Awake exit");
     }
 
     /// <summary>
-    /// Explicitly calls ConnectAsync on the BotConnector and begins listening interation
+    /// Explicitly calls ConnectAsync on the DialogServiceConnector and begins listening interation
     /// </summary>
     private void Start()
     {
@@ -110,51 +110,51 @@ public class SpeechBotConnectorSample : MonoBehaviour
     /// <summary>
     /// Uses the provided properties to create a connector from config and register callbacks
     /// </summary>
-    private void CreateBotConnector()
+    private void CreateDialogServiceConnector()
     {
-        Debug.Log($"CreateBotConnector enter");
+        Debug.Log($"CreateDialogServiceConnector enter");
 
-        if (botConnector == null)
+        if (dialogServiceConnector == null)
         {
             if (connectionId == string.Empty || subscriptionKey == string.Empty || region == string.Empty)
             {
                 Debug.Log($"One or more input fields weren't provided. Check the fields in the Canvas object or in the script source");
-                throw new InvalidOperationException("BotConnectorConfig creation failed");
+                throw new InvalidOperationException("DialogServiceConfig creation failed");
             }
 
-            // Creates an instance of a BotConnectorConfig with your bot connection ID, subscription key, and service region.
+            // Creates an instance of a DialogServiceConfig with your bot connection ID, subscription key, and service region.
             // Replace in the editor on the Canvas object OR directly in the code, above in the member declarations
-            botConnectorConfig = BotConnectorConfig.FromSecretKey(connectionId, subscriptionKey, region);
-            if (botConnectorConfig == null)
+            dialogServiceConfig = DialogServiceConfig.FromBotSecret(connectionId, subscriptionKey, region);
+            if (dialogServiceConfig == null)
             {
                 Debug.Log($"One or more input fields weren't provided. Check the fields in the Canvas object or in the script source");
-                throw new InvalidOperationException("BotConnectorConfig creation failed");
+                throw new InvalidOperationException("DialogServiceConfig creation failed");
             }
 
             AudioConfig audioConfig = AudioConfig.FromDefaultMicrophoneInput();
-            botConnector = new SpeechBotConnector(botConnectorConfig, audioConfig);
+            dialogServiceConnector = new DialogServiceConnector(dialogServiceConfig, audioConfig);
 
-            botConnector.ActivityReceived += BotConnector_ActivityReceived;
-            botConnector.Canceled += BotConnector_Canceled;
-            botConnector.Recognized += BotConnector_Recognized;
+            dialogServiceConnector.ActivityReceived += DialogServiceConnector_ActivityReceived;
+            dialogServiceConnector.Canceled += DialogServiceConnector_Canceled;
+            dialogServiceConnector.Recognized += DialogServiceConnector_Recognized;
         }
 
         listenOnceButton.interactable = true;
-        stateIndicatorString = "SpeechBotConnector created";
+        stateIndicatorString = "DialogServiceConnector created";
 
         ttsAudio = GetComponent<AudioSource>();
 
-        Debug.Log($"CreateBotConnector exit");
+        Debug.Log($"CreateDialogServiceConnector exit");
     }
 
     private void OnDisable()
     {
-        if (botConnector != null)
+        if (dialogServiceConnector != null)
         {
-            botConnector.ActivityReceived -= BotConnector_ActivityReceived;
-            botConnector.Canceled -= BotConnector_Canceled;
-            botConnector.Recognized -= BotConnector_Recognized;
-            botConnector.Dispose();
+            dialogServiceConnector.ActivityReceived -= DialogServiceConnector_ActivityReceived;
+            dialogServiceConnector.Canceled -= DialogServiceConnector_Canceled;
+            dialogServiceConnector.Recognized -= DialogServiceConnector_Recognized;
+            dialogServiceConnector.Dispose();
         }
 
         byteStream.Close();
@@ -166,9 +166,9 @@ public class SpeechBotConnectorSample : MonoBehaviour
     /// </summary>
     public bool StartListening()
     {
-        if (botConnector == null)
+        if (dialogServiceConnector == null)
         {
-            throw new InvalidOperationException("BotConnector not initialized prior to starting interaction");
+            throw new InvalidOperationException("DialogServiceConnector not initialized prior to starting interaction");
         }
 
         if (listenStarted)
@@ -177,7 +177,7 @@ public class SpeechBotConnectorSample : MonoBehaviour
             return false;
         }
 
-        botConnector.ListenOnceAsync();
+        dialogServiceConnector.ListenOnceAsync();
         listenStarted = true;
         stateIndicatorString = "Listening...";
 
@@ -188,7 +188,7 @@ public class SpeechBotConnectorSample : MonoBehaviour
     /// <summary>
     /// Processes Recognized events, used here to display final result
     /// </summary>
-    private void BotConnector_Recognized(object sender, SpeechRecognitionEventArgs e)
+    private void DialogServiceConnector_Recognized(object sender, SpeechRecognitionEventArgs e)
     {
         stateIndicatorString = "Final recognition:";
         if (e.Result.Reason == ResultReason.RecognizedSpeech)
@@ -207,7 +207,7 @@ public class SpeechBotConnectorSample : MonoBehaviour
         listenStarted = false;
     }
 
-    private void BotConnector_Canceled(object sender, SpeechRecognitionCanceledEventArgs e)
+    private void DialogServiceConnector_Canceled(object sender, SpeechRecognitionCanceledEventArgs e)
     {
         stateIndicatorString = "Cancellation";
         Debug.LogFormat($"Canceled with reason: {e.Reason}");
@@ -224,7 +224,7 @@ public class SpeechBotConnectorSample : MonoBehaviour
     /// Along with various info that can be found in an event, it also contains
     /// a "HasAudio" flag that can be used to signal audio is present/ready for processing
     /// </summar>
-    private void BotConnector_ActivityReceived(object sender, ActivityReceivedEventArgs e)
+    private void DialogServiceConnector_ActivityReceived(object sender, ActivityReceivedEventArgs e)
     {
         Debug.Log($"Activity received:\r\n {e.Activity} ");
 
