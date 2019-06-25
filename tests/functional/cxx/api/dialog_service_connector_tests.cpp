@@ -531,7 +531,7 @@ TEST_CASE("Dialog Service Connector KWS basics", "[api][cxx][dialog_service_conn
     }
 }
 
-TEST_CASE("Dialog Service Connector KWV basics", "[api][cxx][dialog_service_connector]")
+TEST_CASE("Dialog Service Connector KWV basics", "[api][cxx][dialog_service_connector][!hide]")
 {
 
     SECTION("Listen once with KWS + KWV accept works")
