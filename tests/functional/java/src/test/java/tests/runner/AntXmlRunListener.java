@@ -81,21 +81,28 @@ public class AntXmlRunListener extends RunListener {
     @Override
     public void testFailure(Failure failure) {
         this.numErrors++;
-
         appendFailedTest("failure", failure);
     }
 
     /** {@inheritDoc}. */
     @Override
     public void testAssumptionFailure(Failure failure) {
-        this.numErrors++;
-
-        appendFailedTest("failure", failure);
+        try {
+            appendIgnoreTests(failure.getDescription());
+        }
+        catch (Exception e)
+        {
+            return;
+        }
     }
 
     /** {@inheritDoc}. */
     @Override
     public void testIgnored(Description description) throws Exception {
+        appendIgnoreTests(description);
+    }
+
+    public void appendIgnoreTests(Description description) throws Exception {
         this.numSkipped++;
 
         if (!this.startedTests.containsKey(description)) {
