@@ -4,7 +4,6 @@
 //
 package com.microsoft.cognitiveservices.speech;
 
-import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,9 +11,8 @@ import java.io.FileOutputStream;
 import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
-import java.util.ArrayList;
+import java.nio.file.StandardCopyOption;
 
 /**
  * A helper class for loading native Speech SDK libraries from Java
@@ -28,10 +26,15 @@ import java.util.ArrayList;
  * - On Linux, only the last of these libraries (top dependency) is loaded,
  *   which resolves static dependency via RPATH; dynamic dependencies will be
  *   loaded later, also via RPATH.
+ * - On Windows, optional external native libraries (such as pma extension) are
+ *   also copied from the folder where user's runnable jar is present to a temporary
+ *   folder. If these optional external libraries are not found, no errors are reported
+ *   and no exceptions are thrown.
  */
 class NativeLibraryLoader {
 
     private static String[] nativeList = new String[0];
+    private static String[] externalNativeList = new String[0];
     private static Boolean extractionDone = false;
     private static Boolean loadAll = false;
     private static File tempDir;
@@ -73,7 +76,7 @@ class NativeLibraryLoader {
         }
     }
 
-    private static void extractNativeLibraries() throws IOException {
+    private static void extractNativeLibraries() throws Exception {
         try {
             if (!extractionDone) {
                 nativeList = getResourceLines();
@@ -81,6 +84,24 @@ class NativeLibraryLoader {
                 // Extract all operatingSystem specific native libraries to temporary location
                 for (String libName: nativeList) {
                     extractResourceFromPath(libName, getResourcesPath());
+                }
+
+                externalNativeList = getExternalResourceLines();
+
+                // For Windows, copy external native libraries to temporary location if they exist in current directory
+                if (System.getProperty("os.name").toLowerCase().equals("windows")) {
+                    String path = null;
+                    try {
+                        path = new File(ClassLoader.getSystemClassLoader().getResource(".").getPath()).getAbsolutePath();
+                    }
+                    catch (Exception e) {
+                        // Ignore all exceptions.
+                    }
+                    if (path != null) {
+                        for (String libName: externalNativeList) {
+                            copyLibraryFromPath(libName, path);
+                        }
+                    }
                 }
             }
         }
@@ -125,6 +146,21 @@ class NativeLibraryLoader {
 
         throw new UnsatisfiedLinkError(
                 String.format("The Speech SDK doesn't currently have native support for operating system: %s", operatingSystem));
+    }
+
+    /**
+     * Depending on the OS, return the list of external optional libraries to be copied.
+     */
+    private static String[] getExternalResourceLines() {
+        String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
+
+        if (operatingSystem.contains("windows")) {
+            return new String[] {
+                    "Microsoft.CognitiveServices.Speech.extension.pma.dll"
+            };
+        }
+
+        return new String[0];
     }
 
     private static String getResourcesPath() {
@@ -192,6 +228,20 @@ class NativeLibraryLoader {
             safeClose(outStream);
             safeClose(inStream);
         }
+    }
+
+    private static void copyLibraryFromPath(String libName, String sourcePath) throws Exception {
+        File sourceFile = new File(sourcePath, libName);
+        if (!sourceFile.exists()) {
+            return;
+        }
+
+        File targetFile = new File(tempDir.getCanonicalPath(), libName);
+        if (sourceFile.getCanonicalPath().equals(targetFile.getCanonicalPath())) {
+            return;
+        }
+        targetFile.deleteOnExit();
+        Files.copy(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     private static void safeClose(Closeable is) {
