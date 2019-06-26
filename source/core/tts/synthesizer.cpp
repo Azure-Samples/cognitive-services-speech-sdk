@@ -132,6 +132,9 @@ std::shared_ptr<ISpxSynthesisResult> CSpxSynthesizer::StartSpeaking(const std::s
         // Speak
         auto synthesisDoneResult = m_ttsAdapter->Speak(text, isSsml, requestId);
 
+        // Wait for audio output to be done
+        m_audioOutput->WaitUntilDone();
+
         // Set events
         auto events = this->QueryInterfaceInternal<ISpxSynthesizerEvents>();
         auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(synthesisDoneResult);
