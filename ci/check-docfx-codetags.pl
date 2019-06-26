@@ -79,6 +79,7 @@ BEGIN {
       quickstart/text-to-speech/cpp-windows/helloworld/helloworld.cpp#code
       quickstart/text-to-speech/csharp-dotnet-windows/helloworld/Program.cs#code
       quickstart/text-to-speech/csharp-dotnetcore/helloworld/Program.cs#code
+      quickstart/text-to-speech/csharp-unity/Assets/Scripts/HelloWorld.cs#code
       quickstart/text-to-speech/csharp-uwp/helloworld/MainPage.xaml#StackPanel
       quickstart/text-to-speech/csharp-uwp/helloworld/MainPage.xaml.cs#code
       samples/batch/csharp/program.cs#batchdefinition
