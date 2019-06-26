@@ -18,7 +18,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public const int MockAudioSize = 32000;
         public const int MockAudioChunkSize = 3200;
         public const string SsmlTemplate = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='{0}'><voice name='{1}'>{2}</voice></speak>";
-        public const byte BinaryCompareTolerance = 0;
 
         public static string subscriptionKey, region;
         public SpeechConfig config;
