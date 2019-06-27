@@ -37,7 +37,8 @@ class CSpxAudioStreamSession :
     public ISpxRecoResultFactory,
     public ISpxEventArgsFactory,
     public ISpxPropertyBagImpl,
-    public ISpxInteractionIdProvider
+    public ISpxInteractionIdProvider,
+    public ISpxSpeechEventPayloadProvider
 {
 public:
 
@@ -61,6 +62,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxInteractionIdProvider)
+        SPX_INTERFACE_MAP_ENTRY(ISpxSpeechEventPayloadProvider)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectInit
@@ -174,6 +176,9 @@ public:
     std::string PeekNextInteractionId(InteractionIdPurpose purpose) final;
     std::string GetInteractionId(InteractionIdPurpose purpose) final;
 
+    // --- ISpxSpeechEventPayloadProvider
+    std::string GetSpeechEventPayload(bool startMeeting) override;
+
 private:
     std::shared_ptr<ISpxThreadService> InternalQueryService(const char* serviceName);
 
@@ -281,7 +286,6 @@ private:
     uint64_t GetResultLatencyInMs(const ProcessedAudioTimestampPtr& audiotimestamp) const;
 
     void SetThrottleVariables(const SPXWAVEFORMATEX* format);
-    void PrepareMeeting();
 
 private:
 

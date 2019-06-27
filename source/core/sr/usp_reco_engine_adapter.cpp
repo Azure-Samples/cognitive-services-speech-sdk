@@ -945,6 +945,21 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechAgentContext()
     }
 }
 
+void CSpxUspRecoEngineAdapter::UspSendSpeechEvent()
+{
+    auto site = GetSite();
+    auto provider = SpxQueryInterface<ISpxSpeechEventPayloadProvider>(site);
+    SPX_IFTRUE_THROW_HR(provider == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+    // true for starting streaming audio.
+    auto payload = provider->GetSpeechEventPayload(true);
+
+    if (!payload.empty())
+    {
+        UspSendMessage("speech.event", payload, USP::MessageType::Event);
+    }
+}
+
 void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
 {
     // Get the Dgi json payload
@@ -2155,6 +2170,7 @@ void CSpxUspRecoEngineAdapter::SendPreAudioMessages()
 
     UspSendSpeechContext();
     UspSendSpeechAgentContext();
+    UspSendSpeechEvent();
     UspWriteFormat(m_format.get());
 }
 

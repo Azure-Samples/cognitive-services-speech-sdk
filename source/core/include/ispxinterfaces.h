@@ -1160,6 +1160,12 @@ public:
     virtual std::string GetSpeechEventPayload(bool atStartAudioPumping) = 0;
 };
 
+class ISpxSpeechEventPayloadProvider : public ISpxInterfaceBaseFor<ISpxSpeechEventPayloadProvider>
+{
+public:
+    virtual std::string GetSpeechEventPayload(bool startMeeting) = 0;
+};
+
 class ISpxTranslationRecognizer : public ISpxInterfaceBaseFor<ISpxTranslationRecognizer>
 {
 };

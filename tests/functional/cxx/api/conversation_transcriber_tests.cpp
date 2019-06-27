@@ -73,7 +73,9 @@ TEST_CASE("conversation_voice_signature", "[.][int][prod]")
 
 TEST_CASE("conversation_id", "[.][int][prod]")
 {
-    auto config = SpeechConfig::FromEndpoint(Config::InroomEndpoint, Keys::ConversationTranscriber);
+    auto audioEndpoint = Config::InroomEndpoint;
+    audioEndpoint += "/multiaudio";
+    auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
     katieSteve.UpdateFullFilename(Config::InputDir);
     auto audioInput = AudioConfig::FromWavFileInput(katieSteve.m_inputDataFilename);
     auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);

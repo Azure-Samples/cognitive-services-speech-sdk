@@ -1988,25 +1988,6 @@ void CSpxAudioStreamSession::Ensure16kHzSampleRate()
     }
 }
 
-void CSpxAudioStreamSession::PrepareMeeting()
-{
-    if (IsRecognizerType<ISpxConversationTranscriber>())
-    {
-        std::shared_ptr<ISpxRecognizer> recognizer;
-        {
-            std::unique_lock<std::mutex> lock{ m_recognizersLock };
-            SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
-            recognizer = m_recognizers.front().lock();
-        }
-        auto ct = SpxQueryInterface<ISpxConversationTranscriber>(recognizer);
-        if (ct != nullptr)
-        {
-            auto payload = ct->GetSpeechEventPayload(true); // true for starting audio pumping
-            SendSpeechEventMessage(std::move(payload));
-        }
-    }
-}
-
 void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model)
 {
     SPX_DBG_ASSERT(IsState(SessionState::WaitForPumpSetFormatStart));
@@ -2060,7 +2041,6 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     auto audioPump = m_audioPump;
     if (audioPump)
     {
-        PrepareMeeting();
         audioPump->StartPump(pISpxAudioProcessor);
     }
     // The call to StartPump (immediately above) will initiate calls from the pump to this::SetFormat() and then this::ProcessAudio()...
@@ -2425,6 +2405,27 @@ std::string CSpxAudioStreamSession::GetInteractionId(InteractionIdPurpose purpos
     auto interactionId = iidRef;
     iidRef = PAL::CreateGuidWithDashesUTF8();
     return interactionId;
+}
+
+std::string CSpxAudioStreamSession::GetSpeechEventPayload(bool startMeeting)
+{
+    std::string payload;
+
+    if (IsRecognizerType<ISpxConversationTranscriber>())
+    {
+        std::shared_ptr<ISpxRecognizer> recognizer;
+        {
+            std::unique_lock<std::mutex> lock{ m_recognizersLock };
+            SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
+            recognizer = m_recognizers.front().lock();
+        }
+        auto ct = SpxQueryInterface<ISpxConversationTranscriber>(recognizer);
+        if (ct != nullptr)
+        {
+            payload = ct->GetSpeechEventPayload(startMeeting);
+        }
+    }
+    return payload;
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -152,6 +152,7 @@ private:
     void UspSendSpeechConfig();
     void UspSendAgentConfig();
     void UspSendSpeechContext();
+    void UspSendSpeechEvent();
     void UspSendSpeechAgentContext();
     void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType);
     void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType);

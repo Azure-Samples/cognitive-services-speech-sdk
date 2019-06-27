@@ -571,7 +571,6 @@ std::string CreateTimestamp()
 
     // according to Jun Zhang, the time interval Princeton expecting is in seconds.
     auto duration = std::chrono::duration_cast<std::chrono::seconds>(tm.time_since_epoch());
-    std::cout << "Creating a timestamp milliseconds: " << duration.count() << std::endl;
 
     ostringstream os;
     os << duration.count();
