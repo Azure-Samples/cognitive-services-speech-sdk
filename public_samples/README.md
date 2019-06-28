@@ -27,6 +27,10 @@ Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and olde
 
   June 2019 we released version 1.6.0 of the Speech SDK.
 
+* Speech SDK Release 1.5.1
+
+  Middle of May 2019 we released version 1.5.1 of the Speech SDK.
+
 * Speech SDK Release 1.5.0
 
   Beginning of May 2019 we released version 1.5.0 of the Speech SDK.

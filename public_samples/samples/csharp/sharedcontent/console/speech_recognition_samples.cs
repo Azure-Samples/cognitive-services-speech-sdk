@@ -555,7 +555,7 @@ namespace MicrosoftSpeechSDKSamples
 
                     // Before starting recognition, add a phrase list to help recognition.
                     PhraseListGrammar phraseListGrammar = PhraseListGrammar.FromRecognizer(recognizer);
-                    phraseListGrammar.AddPhrase("Wreck a nice beach.");
+                    phraseListGrammar.AddPhrase("Wreck a nice beach");
 
                     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
