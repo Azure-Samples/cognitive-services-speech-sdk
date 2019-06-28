@@ -24,6 +24,7 @@ proguard-rules.pro text
 *.js text
 *.json text
 *.m text
+*.mat text
 *.md text
 *.meta text
 *.pbxproj text
@@ -36,6 +37,7 @@ proguard-rules.pro text
 *.py text
 *.sln text
 *.storyboard text
+*.swift text
 *.txt text
 *.unity text
 *.vcxproj text

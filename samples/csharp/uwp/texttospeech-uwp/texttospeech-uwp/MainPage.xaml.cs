@@ -248,29 +248,6 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample
             }
         }
 
-        private async void EnableAudioDevice_ButtonClicked(object sender, RoutedEventArgs e)
-        {
-            bool isMicAvailable = true;
-            try
-            {
-                var mediaCapture = new Windows.Media.Capture.MediaCapture();
-                var settings = new Windows.Media.Capture.MediaCaptureInitializationSettings();
-                settings.StreamingCaptureMode = Windows.Media.Capture.StreamingCaptureMode.Audio;
-                await mediaCapture.InitializeAsync(settings);
-            }
-            catch (Exception)
-            {
-                isMicAvailable = false;
-            }
-            if (!isMicAvailable)
-            {
-                await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:privacy-microphone"));
-            }
-            else
-            {
-                NotifyUser("Audio device was enabled", NotifyType.StatusMessage);
-            }
-        }
         private void RegionCombox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.Region = ((ComboBoxItem)RegionComboBox.SelectedItem).Tag.ToString();
