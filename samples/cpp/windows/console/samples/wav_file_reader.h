@@ -16,17 +16,21 @@ public:
     WavFileReader(const std::string& audioFileName)
     {
         if (audioFileName.empty())
+        {
             throw std::invalid_argument("Audio filename is empty");
+        }
 
         std::ios_base::openmode mode = std::ios_base::binary | std::ios_base::in;
         m_fs.open(audioFileName, mode);
         if (!m_fs.good())
+        {
             throw std::invalid_argument("Failed to open the specified audio file.");
+        }
 
         // Get audio format from the file header.
         GetFormatFromWavFile();
     }
-    
+
     int Read(uint8_t* dataBuffer, uint32_t size)
     {
         if (m_fs.eof())
@@ -40,7 +44,7 @@ public:
             // returns the number of bytes that have been read.
             return (int)m_fs.gcount();
     }
-    
+
     void Close()
     {
         m_fs.close();
@@ -68,7 +72,9 @@ private:
             // Checks the RIFF tag
             m_fs.read(tag, tagBufferSize);
             if (memcmp(tag, "RIFF", tagBufferSize) != 0)
+            {
                 throw std::runtime_error("Invalid file header, tag 'RIFF' is expected.");
+            }
 
             // The next is the RIFF chunk size, ignore now.
             m_fs.read(chunkSizeBuffer, chunkSizeBufferSize);
@@ -76,26 +82,44 @@ private:
             // Checks the 'WAVE' tag in the wave header.
             m_fs.read(chunkType, chunkTypeBufferSize);
             if (memcmp(chunkType, "WAVE", chunkTypeBufferSize) != 0)
+            {
                 throw std::runtime_error("Invalid file header, tag 'WAVE' is expected.");
+            }
 
-            // The next chunk must be the 'fmt ' chunk.
-            ReadChunkTypeAndSize(chunkType, &chunkSize);
-            if (memcmp(chunkType, "fmt ", chunkTypeBufferSize) != 0)
-                throw std::runtime_error("Invalid file header, tag 'fmt ' is expected.");
+            bool foundDataChunk = false;
+            while (!foundDataChunk && m_fs.good() && !m_fs.eof())
+            {
+                ReadChunkTypeAndSize(chunkType, &chunkSize);
+                if (memcmp(chunkType, "fmt ", chunkTypeBufferSize) == 0)
+                {
+                    // Reads format data.
+                    m_fs.read((char *)&m_formatHeader, sizeof(m_formatHeader));
 
-            // Reads format data.
-            m_fs.read((char *)&m_formatHeader, sizeof(m_formatHeader));
+                    // Skips the rest of format data.
+                    if (chunkSize > sizeof(m_formatHeader))
+                    {
+                        m_fs.seekg(chunkSize - sizeof(m_formatHeader), std::ios_base::cur);
+                    }
+                }
+                else if (memcmp(chunkType, "data", chunkTypeBufferSize) == 0)
+                {
+                    foundDataChunk = true;
+                    break;
+                }
+                else
+                {
+                    m_fs.seekg(chunkSize, std::ios_base::cur);
+                }
+            }
 
-            // Skips the rest of format data.
-            if (chunkSize > sizeof(m_formatHeader))
-                m_fs.seekg(chunkSize - sizeof(m_formatHeader), std::ios_base::cur);
-
-            // The next must be the 'data' chunk.
-            ReadChunkTypeAndSize(chunkType, &chunkSize);
-            if (memcmp(chunkType, "data", chunkTypeBufferSize) != 0)
-                throw std::runtime_error("Currently the 'data' chunk must directly follow the fmt chunk.");
+            if (!foundDataChunk)
+            {
+                throw std::runtime_error("Did not find data chunk.");
+            }
             if (m_fs.eof() && chunkSize > 0)
+            {
                 throw std::runtime_error("Unexpected end of file, before any audio data can be read.");
+            }
         }
         catch (std::ifstream::failure e)
         {

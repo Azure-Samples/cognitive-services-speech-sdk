@@ -34,6 +34,9 @@ extern void SpeechSynthesisToResult();
 extern void SpeechSynthesisToAudioDataStream();
 extern void SpeechSynthesisEvents();
 
+extern void ConversationWithPullAudioStream();
+extern void ConversationWithPushAudioStream();
+
 void SpeechSamples()
 {
     string input;
@@ -203,6 +206,33 @@ void SpeechSynthesisSamples()
     } while (input[0] != '0');
 }
 
+void ConversationTranscriberSamples()
+{
+    string input;
+    do
+    {
+        cout << "\nConversationTranscriber SAMPLES:\n";
+        cout << "1.) ConversationTranscriber with pull input audio stream.\n";
+        cout << "2.) ConversationTranscriber with push input audio stream.\n";
+        cout << "\nChoice (0 for MAIN MENU): ";
+        cout.flush();
+
+        input.empty();
+        getline(cin, input);
+
+        switch (input[0])
+        {
+        case '1':
+            ConversationWithPullAudioStream();
+            break;
+        case '2':
+            ConversationWithPushAudioStream();
+            break;
+        case '0':
+            break;
+        }
+    } while (input[0] != '0');
+}
 
 #ifdef _WIN32
 int wmain(int argc, wchar_t **argv)
@@ -218,6 +248,7 @@ int main(int argc, char **argv)
         cout << "2.) Intent recognition samples.\n";
         cout << "3.) Translation samples.\n";
         cout << "4.) Speech synthesis samples.\n";
+        cout << "5.) Conversation transcriber samples.\n";
         cout << "\nChoice (0 to Exit): ";
         cout.flush();
 
@@ -237,6 +268,9 @@ int main(int argc, char **argv)
             break;
         case '4':
             SpeechSynthesisSamples();
+            break;
+        case '5':
+            ConversationTranscriberSamples();
             break;
         case '0':
             break;

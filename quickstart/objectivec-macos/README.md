@@ -36,5 +36,5 @@ It can be used in Xcode projects as a [CocoaPod](https://cocoapods.org/), or dow
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-objectivec-macos)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-objective-c-macos)
 * [Speech SDK API reference for Objective-C](https://aka.ms/csspeech/objectivecref)

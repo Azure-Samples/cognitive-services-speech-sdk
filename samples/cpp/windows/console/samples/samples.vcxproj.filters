@@ -44,6 +44,9 @@
     <ClCompile Include="speech_synthesis_samples.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="conversation_transcriber_samples.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="whatstheweatherlike.wav">
