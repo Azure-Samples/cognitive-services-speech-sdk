@@ -22,6 +22,11 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 ## News
 
 Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and older releases.
+
+* Speech SDK Release 1.6.0
+
+  June 2019 we released version 1.6.0 of the Speech SDK.
+
 * Speech SDK Release 1.5.1
 
   Middle of May 2019 we released version 1.5.1 of the Speech SDK.
@@ -33,6 +38,10 @@ Please check [here](https://aka.ms/csspeech/whatsnew) for release notes and olde
 * Speech SDK Release 1.4.0
 
   Beginning of April 2019 we released version 1.4.0 of the Speech SDK.
+
+* Speech SDK Release 1.3.1
+
+  End of February 2019 we released version 1.3.1 of the Speech SDK.
 
 ## Features
 
@@ -80,6 +89,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart Node.js](./quickstart/js-node/) | Node.js | Demonstrates one-shot speech recognition from a file. |
 | [Quickstart Python](./quickstart/python/) | Windows, Linux, macOS | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart Objective-C](./quickstart/objectivec-ios/) | iOS | Demonstrates one-shot speech recognition from a file with recorded speech. |
+| [Quickstart Swift](./quickstart/swift-ios/) | iOS | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart Objective-C](./quickstart/objectivec-macos/) | macOS | Demonstrates one-shot speech recognition from a microphone. |
 
 ### Speech translation quickstarts
@@ -91,7 +101,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | ---------- | -------- | ----------- |
 | [Quickstart C++ for Windows](./quickstart/speech-translation/cpp-windows/) | Windows | Demonstrates one-shot speech translation/transcription from a microphone. |
 | [Quickstart C# .NET Framework for Windows](./quickstart/speech-translation/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech translation/transcription from a microphone. |
-| [Quickstart C# .NET Core ](./quickstart/speech-translation/csharp-dotnetcore/) | Windows, Linux, macOS | Demonstrates one-shot speech translation/transcription from a microphone. |
+| [Quickstart C# .NET Core](./quickstart/speech-translation/csharp-dotnetcore/) | Windows, Linux, macOS | Demonstrates one-shot speech translation/transcription from a microphone. |
 | [Quickstart C# UWP for Windows](./quickstart/speech-translation/csharp-uwp/) | Windows | Demonstrates one-shot speech translation/transcription from a microphone. |
 | [Quickstart Java JRE](./quickstart/speech-translation/java-jre/) | Windows, Linux, macOS | Demonstrates one-shot speech translation/transcription from a microphone. |
 
@@ -105,6 +115,19 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart C++ for Linux](./quickstart/text-to-speech/cpp-linux/) | Linux | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C++ for Windows](./quickstart/text-to-speech/cpp-windows/) | Windows  | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C# .NET for Windows](./quickstart/text-to-speech/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart C# UWP for Windows](./quickstart/text-to-speech/csharp-uwp/) | Windows | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart C# .NET Core](./quickstart/text-to-speech/csharp-dotnetcore/) | Windows, Linux | Demonstrates one-shot speech synthesis to the default speaker. |
+
+### Voice-first virtual assistants quickstarts
+
+The following quickstarts demonstrate how to create a custom voice-first virtual assistant (Preview).
+The applications will connect to a previously authored bot configured to use the Direct Line Speech channel, send a voice request, and return a voice response activity (if configured).
+If you want to build these quickstarts from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
+
+| Quickstart | Platform | Description |
+| ---------- | -------- | ----------- |
+| [Quickstart Java JRE](./quickstart/virtual-assistant/java-jre) | Windows, Linux, macOS | Demonstrates speech recognition through the DialogServiceConnector and receiving activity responses. |
+| [Quickstart C# UWP for Windows](./quickstart/virtual-assistant/csharp-uwp/) | Windows | Demonstrates speech recognition through the DialogServiceConnector and receiving activity responses. |
 
 ### Samples
 
@@ -112,7 +135,7 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 
 | Sample                                                                                                      | Platform | Description                                                          |
 | ---                                                                                                         | ---      | ---                                                                  |
-| [C++ Console app for Windows](./samples/cpp/windows/console)                                                | Windows  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
+| [C++ Console app for Windows](./samples/cpp/windows/console)                                                | Windows  | Demonstrates speech recognition, speech synthesis, intent recognition, conversation transcription and translation |
 | [C++ Speech Recognition from MP3/Opus file (Linux only)](./samples/cpp/linux/compressed-audio-input)        | Linux    | Demonstrates speech recognition from an MP3/Opus file |
 | [C# Console app for .NET Framework on Windows](./samples/csharp/dotnet-windows/console)                     | Windows  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
 | [C# Console app for .NET Core (Windows or Linux)](./samples/csharp/dotnetcore/console)                      | Windows, Linux, macOS  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
@@ -127,6 +150,10 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Speech recognition and translation sample using JavaScript and Node.js](./samples/js/node)                 | Node.js  | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech recognition sample for iOS using a connection object](./samples/objective-c/ios/README.md#connection-object-sample)  | iOS      | Demonstrates speech recognition |
 | [Extended speech recognition sample for iOS](./samples/objective-c/ios/README.md#example-app-with-various-samples)           | iOS      | Demonstrates speech recognition using streams etc.|
+| [C# UWP DialogServiceConnector sample for Windows](./samples/virtual-assistant/csharp-uwp/) | Windows | Demonstrates speech recognition through the DialogServiceConnector and receiving activity responses. |
+| [C# Unity sample for Windows or Android](./samples/unity/speechrecognizer/) | Windows, Android |  Demonstrates speech recognition, intent recognition, and translation for Unity |
+| [C# Unity SpeechBotConnector sample for Windows](./samples/virtual-assistant/csharp-unity/) | Windows, Android | Demonstrates speech recognition through the SpeechBotConnector and receiving activity responses. |
+
 
 Samples for using the Speech Service REST API (no Speech SDK installation required):
 

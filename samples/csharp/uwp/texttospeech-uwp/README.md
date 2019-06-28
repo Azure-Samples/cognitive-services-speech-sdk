@@ -33,8 +33,7 @@ The app displays a graphical user interface (GUI).
 * In the drop-down below, choose the region associated with your subscription.
 * In the drop-down right below the subscription key, choose the synthesis language.
 * In the **Text for Synthesizing** text field below the region drop-down and language drop-down, enter your text to be synthesized to speech.
-* If you'd like to synthesis to the default speaker, you'll need to enable audio device. Select **Enable Audio Device**, which (first time you're clicking it) launches a permission prompt asking for access.
-  Approve it.
+* If you'd like to synthesize to speaker, you can click the **Speech Synthesis to Speaker Output** button.
 * With the other buttons you can launch a specific speech synthesis scenario.
 
 

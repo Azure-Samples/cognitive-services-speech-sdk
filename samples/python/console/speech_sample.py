@@ -385,7 +385,7 @@ def speech_recognition_with_push_stream():
             time.sleep(.1)
     finally:
         # stop recognition and clean up
-        speech_recognizer.stop_continuous_recognition()
         wav_fh.close()
         stream.close()
+        speech_recognizer.stop_continuous_recognition()
 

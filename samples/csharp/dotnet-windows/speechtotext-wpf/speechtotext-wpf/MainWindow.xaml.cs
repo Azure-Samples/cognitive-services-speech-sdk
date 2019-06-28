@@ -627,7 +627,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
 
         private void HelpButton_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start("https://azure.microsoft.com/en-us/services/cognitive-services/");
+            Process.Start("https://azure.microsoft.com/services/cognitive-services/");
         }
 
         private void EnableButtons()
