@@ -293,6 +293,14 @@ private:
     size_t m_reconnectWaitingTimeMs = 10;
 
     std::map<std::string, std::unique_ptr<CSpxActivitySession>> m_request_session_map;
+
+#ifdef _DEBUG
+    FILE* m_audioDumpFile = nullptr;
+    std::string m_audioDumpDir;
+    std::string m_audioDumpInstTag;
+    uint32_t m_audioDumpInstCount = 1;
+    static constexpr auto s_tmpAudioDumpFileName = "tmpaudio.wav";
+#endif
 };
 
 

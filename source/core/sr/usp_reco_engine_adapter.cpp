@@ -1047,12 +1047,38 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(SPXWAVEFORMATEX* pformat)
     auto wavHeaderDataPtr = std::make_shared<DataChunk>(buffer, cbHeader);
     wavHeaderDataPtr->isWavHeader = true;
     UspWrite(wavHeaderDataPtr);
+
+#ifdef _DEBUG
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    auto audioDumpDir = properties->GetStringValue("CARBON-INTERNAL-DumpAudioToDir");
+    SPX_DBG_TRACE_VERBOSE("CARBON-INTERNAL-DumpAudioToDir : %s", audioDumpDir.c_str());
+    if (!audioDumpDir.empty())
+    {
+        m_audioDumpDir = audioDumpDir;
+        auto tmpFilePath = PAL::AppendPath(m_audioDumpDir, s_tmpAudioDumpFileName);
+        auto err = PAL::fopen_s(&m_audioDumpFile, tmpFilePath.c_str(), "wb");
+        if (err != 0)
+        {
+            SPX_DBG_TRACE_WARNING("%s: (0x%8p) FAILED to open audio dump file %s for write (Error=%d)", __FUNCTION__, (void*)this, tmpFilePath.c_str(), err);
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) Writing audio dump to file %s", __FUNCTION__, (void*)this, tmpFilePath.c_str());
+        }
+    }
+#endif
 }
 
 void CSpxUspRecoEngineAdapter::UspWrite(const DataChunkPtr& audioChunk)
 {
     m_uspAudioByteCount += audioChunk->size;
     UspWriteActual(audioChunk);
+#ifdef _DEBUG
+    if (m_audioDumpFile)
+    {
+        fwrite(audioChunk->data.get(), 1, audioChunk->size, m_audioDumpFile);
+    }
+#endif
 }
 
 void CSpxUspRecoEngineAdapter::UspWriteActual(const DataChunkPtr& audioChunk)
@@ -1519,6 +1545,10 @@ void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
     {
         SPX_DBG_TRACE_WARNING("%s: (0x%8p) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
     }
+
+#ifdef _DEBUG
+    m_audioDumpInstTag = message.contextServiceTag;
+#endif
 }
 
 void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
@@ -1588,6 +1618,27 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioMute(true) ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
         site->AdapterRequestingAudioMute(this, true);
     }
+
+#ifdef _DEBUG
+    if (m_audioDumpFile)
+    {
+        fflush(m_audioDumpFile);
+        fclose(m_audioDumpFile);
+        auto oldName = PAL::AppendPath(m_audioDumpDir, s_tmpAudioDumpFileName);
+        auto newName = PAL::AppendPath(m_audioDumpDir, std::to_string(m_audioDumpInstCount) + "_" + m_audioDumpInstTag + ".wav");
+        m_audioDumpInstCount++;
+        m_audioDumpInstTag.clear();
+        if (0 != std::rename(oldName.c_str(), newName.c_str()))
+        {
+            SPX_DBG_TRACE_ERROR("%s: Failed to rename audio dump %s to %s", __FUNCTION__, oldName.c_str(), newName.c_str());
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: Closing audio dump file %s", __FUNCTION__, newName.c_str());
+        }
+        m_audioDumpFile = nullptr;
+    }
+#endif
 }
 
 

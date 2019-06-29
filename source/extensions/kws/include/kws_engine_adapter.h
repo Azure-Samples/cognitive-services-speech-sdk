@@ -57,6 +57,18 @@ private:
     class Impl; // forward declaration
     friend Impl;
     Impl* p_impl;
+
+#ifdef _DEBUG
+    FILE* m_audioDumpFile = nullptr;
+    std::string m_audioDumpDir;
+    uint32_t m_audioDumpInstCount = 0;
+    uint32_t m_audioDumpMaxCount = 5;
+    uint32_t m_audioDumpFileLengthMs = 20 * 1000;
+    uint32_t m_audioDumpBytesWritten = 0;
+    uint32_t m_audioDumpBytesMax = 0;
+    void InitAudioDumpFile();
+    void CycleAudioDumpFile();
+#endif
 };
 
 }}}}

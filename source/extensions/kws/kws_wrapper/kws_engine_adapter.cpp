@@ -8,6 +8,7 @@
 #include "stdafx.h"
 #include "kws_engine.h"
 #include "service_helpers.h"
+#include "file_utils.h"
 
 // private kws artifact headers
 #include <SpeechAPI.h>
@@ -143,11 +144,45 @@ void CSpxSdkKwsEngineAdapter::Init()
         (void*)p_impl);
     SPX_DBG_TRACE_ERROR_IF(ret < 0, "keyword_spotter_setcallbacks FAILED: status %x\n\n", ret);
     SPX_IFTRUE_THROW_HR(ret < 0, SPXERR_INVALID_STATE);
+
+#ifdef _DEBUG
+    // set up audio dump
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    auto audioDumpDir = namedProperties->GetStringValue("CARBON-INTERNAL-KwsDumpAudioToDir");
+    SPX_DBG_TRACE_VERBOSE("CARBON-INTERNAL-KwsDumpAudioToDir : %s", audioDumpDir.c_str());
+    if (!audioDumpDir.empty())
+    {
+        m_audioDumpDir = audioDumpDir;
+        auto audioLength = namedProperties->GetStringValue("CARBON-INTERNAL-KwsDumpAudioCircularFileLengthMs");
+        SPX_DBG_TRACE_VERBOSE("CARBON-INTERNAL-KwsDumpAudioCircularFileLengthMs : %s", audioLength.c_str());
+        auto fileCount = namedProperties->GetStringValue("CARBON-INTERNAL-KwsDumpAudioCircularFileCount");
+        SPX_DBG_TRACE_VERBOSE("CARBON-INTERNAL-KwsDumpAudioCircularFileCount : %s", fileCount.c_str());
+        if (!audioLength.empty())
+        {
+            m_audioDumpFileLengthMs = std::stoul(audioLength);
+        }
+        if (!fileCount.empty())
+        {
+            m_audioDumpMaxCount = std::stoul(fileCount);
+        }
+        InitAudioDumpFile();
+    }
+#endif
 }
 
 void CSpxSdkKwsEngineAdapter::Term()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+#ifdef _DEBUG
+    if (m_audioDumpFile)
+    {
+        SPX_DBG_TRACE_VERBOSE("Closing kws audio dump file");
+        fflush(m_audioDumpFile);
+        fclose(m_audioDumpFile);
+        m_audioDumpFile = nullptr;
+    }
+#endif
 
     if (p_impl->m_speechHandle)
     {
@@ -193,6 +228,13 @@ void CSpxSdkKwsEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
 
         FireDoneProcessingAudioEvent();
     }
+
+#if _DEBUG
+    if (pformat != nullptr)
+    {
+        m_audioDumpBytesMax = uint32_t(((double)m_audioDumpFileLengthMs) * pformat->nAvgBytesPerSec / 1000);
+    }
+#endif
 }
 
 void CSpxSdkKwsEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
@@ -221,6 +263,18 @@ void CSpxSdkKwsEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
 
             FireKeywordDetectedEvent(audioChunk);
         }
+
+#ifdef _DEBUG
+        if (m_audioDumpFile)
+        {
+            fwrite(audioChunk->data.get(), 1, audioChunk->size, m_audioDumpFile);
+            m_audioDumpBytesWritten += audioChunk->size;
+            if (m_audioDumpBytesMax > 0 && m_audioDumpBytesWritten > m_audioDumpBytesMax)
+            {
+                CycleAudioDumpFile();
+            }
+        }
+#endif
 
         p_impl->m_cbAudioProcessed += audioChunk->size;
     }
@@ -274,6 +328,39 @@ void CSpxSdkKwsEngineAdapter::FireKeywordDetectedEvent(const DataChunkPtr& audio
     auto keywordAudio = std::make_shared<DataChunk>(audioData, (uint32_t)size, audioChunk->receivedTime);
     site->KeywordDetected(this, offset, duration, confidence, keyword, keywordAudio);
 }
+
+#ifdef _DEBUG
+void CSpxSdkKwsEngineAdapter::InitAudioDumpFile()
+{
+    if (m_audioDumpDir.empty())
+    {
+        return;
+    }
+    m_audioDumpInstCount %= m_audioDumpMaxCount;
+    std::string fileName = PAL::AppendPath(m_audioDumpDir, "continuous_kws_" + std::to_string(m_audioDumpInstCount) + ".wav");
+    m_audioDumpInstCount++;
+    m_audioDumpBytesWritten = 0;
+    auto err = PAL::fopen_s(&m_audioDumpFile, fileName.c_str(), "wb");
+    if (err != 0)
+    {
+        SPX_DBG_TRACE_WARNING("%s: (0x%8p) FAILED to open audio dump file %s for write (Error=%d)", __FUNCTION__, (void*)this, fileName.c_str(), err);
+    }
+    else
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) Writing audio dump to file %s", __FUNCTION__, (void*)this, fileName.c_str());
+    }
+}
+
+void CSpxSdkKwsEngineAdapter::CycleAudioDumpFile()
+{
+    if (m_audioDumpFile)
+    {
+        fflush(m_audioDumpFile);
+        fclose(m_audioDumpFile);
+    }
+    InitAudioDumpFile();
+}
+#endif
 
 // ***************************************************************************************
 // *** Callback implementations
