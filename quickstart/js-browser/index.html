@@ -26,7 +26,9 @@
       </tr>
       <tr>
         <td></td>
-        <td><button id="startRecognizeOnceAsyncButton">Start recognition</button></td>
+        <td><button id="speechsdkStartContinuousRecognition">startContinuousRecognitionAsync()</button></td>
+        <!--<td><button id="speechsdkStopContinuousRecognition" disabled="disabled">STOP stopContinuousRecognitionAsync()</button></td>-->
+        <!--<td><button id="startRecognizeOnceAsyncButton">Start recognition</button></td>-->
       </tr>
       <tr>
         <td align="right" valign="top">Results</td>
@@ -43,7 +45,7 @@
 
   <!-- <authorizationfunction> -->
   <!-- Speech SDK Authorization token -->
-  <script>
+  <!--<script>
   // Note: Replace the URL with a valid endpoint to retrieve
   //       authorization tokens for your subscription.
   var authorizationEndpoint = "token.php";
@@ -64,7 +66,7 @@
       }
     }
   }
-  </script>
+  </script>-->
   <!-- </authorizationfunction> -->
 
   <!-- <quickstartcode> -->
@@ -72,25 +74,34 @@
   <script>
     // status fields and start button in UI
     var phraseDiv;
-    var startRecognizeOnceAsyncButton;
+    var sdkStartContinousRecognitionBtn, sdkStopContinousRecognitionBtn;
+    //var startRecognizeOnceAsyncButton;
 
     // subscription key and region for speech services.
     var subscriptionKey, serviceRegion;
     var authorizationToken;
+    var inputSource;
     var SpeechSDK;
     var recognizer;
+    var filePicker;
+    var audiofile; 
+    var audioFileValid;
 
     document.addEventListener("DOMContentLoaded", function () {
-      startRecognizeOnceAsyncButton = document.getElementById("startRecognizeOnceAsyncButton");
+      //startRecognizeOnceAsyncButton = document.getElementById("startRecognizeOnceAsyncButton");
+      sdkStartContinousRecognitionBtn = document.getElementById("speechsdkStartContinuousRecognition");
+      sdkStopContinousRecognitionBtn = document.getElementById("speechsdkStopContinuousRecognition");
       subscriptionKey = document.getElementById("subscriptionKey");
       serviceRegion = document.getElementById("serviceRegion");
       phraseDiv = document.getElementById("phraseDiv");
 
-      startRecognizeOnceAsyncButton.addEventListener("click", function () {
-        startRecognizeOnceAsyncButton.disabled = true;
+      //startRecognizeOnceAsyncButton.addEventListener("click", function () {
+      sdkStartContinousRecognitionBtn.addEventListener("click", function () {
+        sdkStartContinousRecognitionBtn = true;
         phraseDiv.innerHTML = "";
-
+        var lastRecognized = "";
         // if we got an authorization token, use the token. Otherwise use the provided subscription key
+        var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
         var speechConfig;
         if (authorizationToken) {
           speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, serviceRegion.value);
@@ -103,9 +114,100 @@
         }
 
         speechConfig.speechRecognitionLanguage = "en-US";
-        var audioConfig  = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
-        recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+        //recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+        reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
 
+        reco.recognizing = function (s, e) {
+            window.console.log(e);
+            statusDiv.innerHTML += "(recognizing) Reason: " + SpeechSDK.ResultReason[e.result.reason] + " Text: " + e.result.text + "\r\n";
+            phraseDiv.innerHTML = lastRecognized + e.result.text;
+        };
+
+        // The event recognized signals that a final recognition result is received.
+        // This is the final event that a phrase has been recognized.
+        // For continuous recognition, you will get one recognized event for each phrase recognized.
+        reco.recognized = function (s, e) {
+            window.console.log(e);
+
+            // Indicates that recognizable speech was not detected, and that recognition is done.
+            if (e.result.reason === SpeechSDK.ResultReason.NoMatch) {
+                var noMatchDetail = SpeechSDK.NoMatchDetails.fromResult(e.result);
+                statusDiv.innerHTML += "(recognized)  Reason: " + SpeechSDK.ResultReason[e.result.reason] + " NoMatchReason: " + SpeechSDK.NoMatchReason[noMatchDetail.reason] + "\r\n";
+            } else {
+                statusDiv.innerHTML += "(recognized)  Reason: " + SpeechSDK.ResultReason[e.result.reason] + " Text: " + e.result.text + "\r\n";
+            }
+            //output manipulation goes here
+            lastRecognized += e.result.text + "\r\n";
+            phraseDiv.innerHTML = lastRecognized;
+        };
+
+        // The event signals that the service has stopped processing speech.
+                // https://docs.microsoft.com/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitioncanceledeventargs?view=azure-node-latest
+                // This can happen for two broad classes of reasons.
+                // 1. An error is encountered.
+                //    In this case the .errorDetails property will contain a textual representation of the error.
+                // 2. Speech was detected to have ended.
+                //    This can be caused by the end of the specified file being reached, or ~20 seconds of silence from a microphone input.
+                reco.canceled = function (s, e) {
+                    window.console.log(e);
+
+                    statusDiv.innerHTML += "(cancel) Reason: " + SpeechSDK.CancellationReason[e.reason];
+                    if (e.reason === SpeechSDK.CancellationReason.Error) {
+                        statusDiv.innerHTML += ": " + e.errorDetails;
+                    }
+                    statusDiv.innerHTML += "\r\n";
+                };
+
+                // Signals that a new session has started with the speech service
+                reco.sessionStarted = function (s, e) {
+                    window.console.log(e);
+                    statusDiv.innerHTML += "(sessionStarted) SessionId: " + e.sessionId + "\r\n";
+                };
+
+                // Signals the end of a session with the speech service.
+                reco.sessionStopped = function (s, e) {
+                    window.console.log(e);
+                    statusDiv.innerHTML += "(sessionStopped) SessionId: " + e.sessionId + "\r\n";
+                    sdkStartContinousRecognitionBtn.disabled = false;
+                    sdkStopContinousRecognitionBtn.disabled = true;
+                };
+
+                // Signals that the speech service has started to detect speech.
+                reco.speechStartDetected = function (s, e) {
+                    window.console.log(e);
+                    statusDiv.innerHTML += "(speechStartDetected) SessionId: " + e.sessionId + "\r\n";
+                };
+
+                // Signals that the speech service has detected that speech has stopped.
+                reco.speechEndDetected = function (s, e) {
+                    window.console.log(e);
+                    statusDiv.innerHTML += "(speechEndDetected) SessionId: " + e.sessionId + "\r\n";
+                };
+
+                // Starts recognition
+                reco.startContinuousRecognitionAsync();
+
+                sdkStartContinousRecognitionBtn.disabled = true;
+                sdkStopContinousRecognitionBtn.disabled = false;
+            });
+
+            // Stops recognition and disposes of resources.
+            sdkStopContinousRecognitionBtn.addEventListener("click", function () {
+                reco.stopContinuousRecognitionAsync(
+                    function () {
+                        reco.close();
+                        reco = undefined;
+                    },
+                    function (err) {
+                        reco.close();
+                        reco = undefined;
+                    });
+
+                sdkStartContinousRecognitionBtn.disabled = false;
+                sdkStopContinousRecognitionBtn.disabled = true;
+            });
+
+        /* This is quickstart code for recognizing an utterance only once
         recognizer.recognizeOnceAsync(
           function (result) {
             startRecognizeOnceAsyncButton.disabled = false;
@@ -122,12 +224,24 @@
 
             recognizer.close();
             recognizer = undefined;
+          });*/
+
+            filePicker.addEventListener("change", function () {
+              audioFile = filePicker.files[0];
           });
-      });
+
+            inputSource.addEventListener("change", function () {
+              audioFileValid = inputSource.value === "File";
+              if (inputSource.value === "File") {
+                filePicker.click();
+                return;
+              }
+            });
+        });
 
       if (!!window.SpeechSDK) {
         SpeechSDK = window.SpeechSDK;
-        startRecognizeOnceAsyncButton.disabled = false;
+        speechsdkStartContinuousRecognition.disabled = false;
 
         document.getElementById('content').style.display = 'block';
         document.getElementById('warning').style.display = 'none';
@@ -136,8 +250,7 @@
         if (typeof RequestAuthorizationToken === "function") {
             RequestAuthorizationToken();
         }
-      }
-    });
+      };
   </script>
   <!-- </quickstartcode> -->
 </body>
