@@ -7,9 +7,10 @@
 #import "SPXSessionEventArgs.h"
 
 /**
-  * Defines the payload for Connected/Disconnected events.
-  * Added in version 1.2.0.
-  */
+ * Defines the payload for Connected/Disconnected events.
+ *
+ * Added in version 1.2.0.
+ */
 SPX_EXPORT
 @interface SPXConnectionEventArgs : SPXSessionEventArgs
 

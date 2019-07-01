@@ -25,24 +25,28 @@ typedef void (^SPXRecognitionEventHandler)(SPXRecognizer * _Nonnull, SPXRecognit
 
 /**
  * Subscribes to the SessionStarted event using the specified handler.
+ *
  * @param eventHandler the handler function for this event.
  */
 - (void)addSessionStartedEventHandler:(nonnull SPXSessionEventHandler)eventHandler;
 
 /**
  * Subscribes to the SessionStopped event using the specified handler.
+ *
  * @param eventHandler the handler function for this event.
  */
 - (void)addSessionStoppedEventHandler:(nonnull SPXSessionEventHandler)eventHandler;
 
 /**
  * Subscribes to the SpeechStartDetected event using the specified handler.
+ *
  * @param eventHandler the handler function for this event.
  */
 - (void)addSpeechStartDetectedEventHandler:(nonnull SPXRecognitionEventHandler)eventHandler;
 
 /**
  * Subscribes to SpeechEndDetected event using the specified handler.
+ *
  * @param eventHandler the handler function for this event.
  */
 - (void)addSpeechEndDetectedEventHandler:(nonnull SPXRecognitionEventHandler)eventHandler;

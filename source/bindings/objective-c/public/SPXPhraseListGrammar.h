@@ -8,28 +8,31 @@
 #import "SPXRecognizer.h"
 
 /**
-  * Represents a phrase list grammar for dynamic grammar scenarios.
-  * Added in version 1.5.0.
-  */
+ * Represents a phrase list grammar for dynamic grammar scenarios.
+ *
+ * Added in version 1.5.0.
+ */
 SPX_EXPORT
 @interface SPXPhraseListGrammar : SPXGrammar
 
 /**
  * Creates a phrase list grammar for the specified recognizer.
+ *
  * @param recognizer The recognizer from which to obtain the phrase list grammar.
  * @return a phrase list grammar instance.
  */
 -(nullable instancetype)initWithRecognizer:(nonnull SPXRecognizer *)recognizer;
 
 /**
-  * Adds a simple phrase that may be spoken by the user.
-  * @param phrase The phrase to be added.
-  */
+ * Adds a simple phrase that may be spoken by the user.
+ *
+ * @param phrase The phrase to be added.
+ */
 -(void)addPhrase:(nonnull NSString *)phrase;
 
 /**
-  * Clears all phrases from the phrase list grammar.
-  */
+ * Clears all phrases from the phrase list grammar.
+ */
 -(void)clear;
 
 @end

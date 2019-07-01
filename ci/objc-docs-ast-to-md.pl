@@ -84,7 +84,11 @@ sub pop1 {
   my $y = pop @data;
 
   if ($x eq "ParagraphComment") {
-    $data[-1]{description} = trim($y->{text});
+    if ($data[-1]{description}) {
+      $data[-1]{description} .= "\n\n" . trim($y->{text});
+    } else {
+      $data[-1]{description} = trim($y->{text});
+    }
   } elsif ($x eq "ObjCMethodDecl") {
     push @{$data[-1]{method}}, $y;
   } elsif ($x eq "EnumDecl") {
@@ -319,7 +323,8 @@ foreach my $e (@enums) {
 
   print $fh section("\n| Name | Description |\n|:-- |:-- |\n", $e->{enumerators}, sub {
       my $x = shift;
-      return sprintf "| %s | %s |\n", $x->{name}, $x->{fullcomment}{description};
+      my ($firstLine) = $x->{fullcomment}{description} =~ m/(.*)/;
+      return sprintf "| %s | %s |\n", $x->{name}, $firstLine;
     });
   close $fh;
 }

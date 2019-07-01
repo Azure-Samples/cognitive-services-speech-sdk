@@ -19,6 +19,7 @@
  * the state of the associated Recognizer. And if the Recognizer needs to connect or disconnect to service, it will
  * setup or shutdown the connection independently. In this case the Connection will be notified by change of connection
  * status via Connected/Disconnected events.
+ *
  * Added in version 1.2.0.
  */
 SPX_EXPORT
@@ -28,6 +29,7 @@ typedef void (^SPXConnectionEventHandler)(SPXConnection* _Nonnull, SPXConnection
 
 /**
  * Gets the Connection instance from the specified recognizer.
+ *
  * @param recognizer The recognizer associated with the connection.
  * @return The Connection instance of the recognizer.
  */
@@ -36,6 +38,9 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
  * Gets the Connection instance from the specified recognizer.
+ *
+ * Added in version 1.6.0.
+ *
  * @param recognizer The recognizer associated with the connection.
  * @return The Connection instance of the recognizer.
  * @param outError error information.
@@ -47,8 +52,10 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * Users can optionally call Open() to manually set up a connection in advance before starting recognition on the
  * Recognizer associated with this Connection. After starting recognition, calling Open() might fail, depending on
  * the process state of the Recognizer. But the failure does not affect the state of the associated Recognizer.
+ *
  * Note: On return, the connection might not be ready yet. Please subscribe to the Connected event to
  * be notfied when the connection is established.
+ *
  * @param forContinuousRecognition indicates whether the connection is used for continuous recognition or single-shot recognition.
  */
 - (void)open:(BOOL)forContinuousRecognition;

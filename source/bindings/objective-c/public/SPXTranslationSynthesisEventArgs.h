@@ -8,14 +8,14 @@
 #import "SPXTranslationSynthesisResult.h"
 
 /**
-  * Defines the payload of the translation synthesis result event.
-  */
+ * Defines the payload of the translation synthesis result event.
+ */
 SPX_EXPORT
 @interface SPXTranslationSynthesisEventArgs : SPXSessionEventArgs
 
 /**
-  * The translation synthesis result.
-  */
+ * The translation synthesis result.
+ */
 @property (readonly, nonnull)SPXTranslationSynthesisResult *result;
 
 @end

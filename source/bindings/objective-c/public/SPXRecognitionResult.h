@@ -8,36 +8,36 @@
 #import "SPXPropertyCollection.h"
 
 /**
-  * Represents the recognition result base class.
-  */
+ * Represents the recognition result base class.
+ */
 SPX_EXPORT
 @interface SPXRecognitionResult : NSObject
 
 /**
-  * The result identifier.
-  */
+ * The result identifier.
+ */
 @property (copy, readonly, nonnull)NSString *resultId;
 
 /**
-  * The reason the result was created.
-  */
+ * The reason the result was created.
+ */
 @property (readonly)SPXResultReason reason;
 
 /**
-  * The recognized text in the result.
-  */
+ * The recognized text in the result.
+ */
 @property (copy, readonly, nullable)NSString *text;
 
 /**
-  * Duration of recognized speech in ticks.
-  * A single tick represents one hundred nanoseconds or one ten-millionth of a second.
-  */
+ * Duration of recognized speech in ticks.
+ * A single tick represents one hundred nanoseconds or one ten-millionth of a second.
+ */
 @property (readonly)uint64_t duration;
 
 /**
-  * Offset of recognized speech in milliseconds.
-  * A single tick represents one hundred nanoseconds or one ten-millionth of a second.
-  */
+ * Offset of recognized speech in milliseconds.
+ * A single tick represents one hundred nanoseconds or one ten-millionth of a second.
+ */
 @property (readonly)uint64_t offset;
 
 /**
@@ -49,71 +49,80 @@ SPX_EXPORT
 
 
 /**
-  * Defines detailed information about why a result was canceled.
-  */
+ * Defines detailed information about why a result was canceled.
+ */
 SPX_EXPORT
 @interface SPXCancellationDetails : NSObject
 
 /**
-  * The reason the recognition was canceled.
-  */
+ * The reason the recognition was canceled.
+ */
 @property (readonly)SPXCancellationReason reason;
 
 /**
-  * The error code in case of an unsuccessful recognition (reason is set to Error).
-  * Added in version 1.1.0.
-  */
+ * The error code in case of an unsuccessful recognition (reason is set to Error).
+ *
+ * Added in version 1.1.0.
+ */
 @property (readonly)SPXCancellationErrorCode errorCode;
 
 /**
-  * The error message in case of an unsuccessful recognition (reason is set to Error).
-  */
+ * The error message in case of an unsuccessful recognition (reason is set to Error).
+ */
 @property (copy, readonly, nullable)NSString *errorDetails;
 
 /**
-  * Creates an instance of SPXCancellationDetails object for the canceled SPXSpeechRecognitionResult.
-  * @param recognitionResult The result that was canceled.
-  * @return The cancellation details object being created.
-  */
+ * Creates an instance of SPXCancellationDetails object for the canceled SPXSpeechRecognitionResult.
+ *
+ * @param recognitionResult The result that was canceled.
+ * @return The cancellation details object being created.
+ */
 -(nullable instancetype)initFromCanceledRecognitionResult:(nonnull SPXRecognitionResult *)recognitionResult
 NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
-  * Creates an instance of SPXCancellationDetails object for the canceled SPXSpeechRecognitionResult.
-  * @param recognitionResult The result that was canceled.
-  * @param outError error information.
-  * @return The cancellation details object being created.
-  */
+ * Creates an instance of SPXCancellationDetails object for the canceled SPXSpeechRecognitionResult.
+ *
+ * Added in version 1.6.0.
+ *
+ * @param recognitionResult The result that was canceled.
+ * @param outError error information.
+ * @return The cancellation details object being created.
+ */
 -(nullable instancetype)initFromCanceledRecognitionResult:(nonnull SPXRecognitionResult *)recognitionResult error:(NSError * _Nullable * _Nullable)outError;
 
 @end
 
 
 /**
-  * Defines detailed information for NoMatch recognition results.
-  */
+ * Defines detailed information for NoMatch recognition results.
+ */
 SPX_EXPORT
 @interface SPXNoMatchDetails : NSObject
 
 /**
-  * The reason why NoMatch is returned.
-  */
+ * The reason why NoMatch is returned.
+ */
 @property (readonly)SPXNoMatchReason reason;
 
 /**
-  * Initializes an instance of SPXNoMatchDetails object from a NoMatch result.
-  * @param recognitionResult recognition result that has NoMatch returned in Reason.
-  * @return an SPXNoMatchDetails instance.
-  */
+ * Initializes an instance of SPXNoMatchDetails object from a NoMatch result.
+ *
+ * @param recognitionResult recognition result that has NoMatch returned in Reason.
+ * @return an SPXNoMatchDetails instance.
+ */
 -(nullable instancetype)initFromNoMatchRecognitionResult:(nonnull SPXRecognitionResult *)recognitionResult
 NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
-  * Initializes an instance of SPXNoMatchDetails object from a NoMatch result.
-  * @param recognitionResult recognition result that has NoMatch returned in Reason.
-  * @param outError error information.
-  * @return an SPXNoMatchDetails instance.
-  */
+ * Initializes an instance of SPXNoMatchDetails object from a NoMatch result.
+ *
+ * Added in version 1.6.0.
+ *
+ * @param recognitionResult recognition result that has NoMatch returned in Reason.
+ * @param outError error information.
+ * @return an SPXNoMatchDetails instance.
+ */
 -(nullable instancetype)initFromNoMatchRecognitionResult:(nonnull SPXRecognitionResult *)recognitionResult error:(NSError * _Nullable * _Nullable)outError;
 
 @end

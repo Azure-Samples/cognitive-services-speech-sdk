@@ -6,9 +6,10 @@
 #import "SPXFoundation.h"
 
 /**
-  * Represents base class grammar for customizing speech recognition.
-  * Added in version 1.5.0.
-  */
+ * Represents base class grammar for customizing speech recognition.
+ *
+ * Added in version 1.5.0.
+ */
 SPX_EXPORT
 @interface SPXGrammar : NSObject
 

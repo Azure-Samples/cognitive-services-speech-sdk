@@ -8,39 +8,40 @@
 #import "SPXSpeechRecognitionResult.h"
 
 /**
-  * Defines the payload of speech recognizing/recognized event.
-  */
+ * Defines the payload of speech recognizing/recognized event.
+ */
 SPX_EXPORT
 @interface SPXSpeechRecognitionEventArgs : SPXRecognitionEventArgs
 
 /**
-  * The recognition result.
-  */
+ * The recognition result.
+ */
 @property (readonly, nonnull)SPXSpeechRecognitionResult *result;
 
 @end
 
 
 /**
-  * Defines the payload of speech recognition canceled events.
-  */
+ * Defines the payload of speech recognition canceled events.
+ */
 SPX_EXPORT
 @interface SPXSpeechRecognitionCanceledEventArgs : SPXSpeechRecognitionEventArgs
 
 /**
-  * The reason why the recognition was canceled.
-  */
+ * The reason why the recognition was canceled.
+ */
 @property (readonly)SPXCancellationReason reason;
 
 /**
-  * The error code in case of an unsuccessful recognition (reason is set to Error).
-  * Added in version 1.1.0.
-  */
+ * The error code in case of an unsuccessful recognition (reason is set to Error).
+ *
+ * Added in version 1.1.0.
+ */
 @property (readonly)SPXCancellationErrorCode errorCode;
 
 /**
-  * The error message in case of an unsuccessful recognition (reason is set to Error).
-  */
+ * The error message in case of an unsuccessful recognition (reason is set to Error).
+ */
 @property (copy, readonly, nullable)NSString *errorDetails;
 
 @end
