@@ -84,7 +84,7 @@ def transcribe():
 
         # for each transcription in the list we check the status
         for transcription in transcriptions:
-            if transcription.status == "Failed" or transcription.status == "Succeeded":
+            if transcription.status in ("Failed", "Succeeded"):
                 # we check to see if it was one of the transcriptions we created from this client
                 if created_transcription != transcription.id:
                     continue
@@ -96,6 +96,8 @@ def transcribe():
                     results = requests.get(results_uri)
                     logging.info("Transcription succeeded. Results: ")
                     logging.info(results.content.decode("utf-8"))
+                else:
+                    logging.info("Transcription failed :{}.".format(transcription.status_message))
             elif transcription.status == "Running":
                 running += 1
             elif transcription.status == "NotStarted":
