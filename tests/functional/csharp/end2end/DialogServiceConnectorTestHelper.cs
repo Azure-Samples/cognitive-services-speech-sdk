@@ -108,7 +108,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 taskCompletionSource.TrySetResult(0);
             };
 
-            string speakActivity = @"{""type"":""message"",""text"":""yo"", ""speak"":""hello"" }";
+            string speakActivity = @"{""type"":""message"",""text"":""This is reply text"", ""speak"":""This is a spoken reply"" }";
 
             await dialogServiceConnector.SendActivityAsync(speakActivity);
 

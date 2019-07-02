@@ -35,7 +35,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             helper = new DialogServiceConnectorTestsHelper();
         }
 
-        [Ignore] //Temporarily removing during stand-up, tracked by task 1755114
         [DataTestMethod]
         public async Task ValidBaselineListenOnce()
         {
@@ -46,7 +45,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore] // Disabling temporarily due to intermitent crash, bug 1758969
         [DataTestMethod]
         public async Task ValidSendActivity()
         {
