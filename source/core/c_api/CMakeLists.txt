@@ -39,6 +39,7 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_result.cpp"
     "${SRC_DIR}/speechapi_c_session.cpp"
     "${SRC_DIR}/speechapi_c_speech_config.cpp"
+    "${SRC_DIR}/speechapi_c_speech_translation_config.cpp"
     "${SRC_DIR}/speechapi_c_property_bag.cpp"
     "${SRC_DIR}/speechapi_c_dialog_service_config.cpp"
     "${SRC_DIR}/speechapi_c_dialog_service_connector.cpp"

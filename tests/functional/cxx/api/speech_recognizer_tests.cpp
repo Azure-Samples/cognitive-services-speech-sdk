@@ -1475,8 +1475,10 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
     SPXTEST_SECTION("SetServiceProperty SpeechTranslationConfig")
     {
         auto config = SpeechTranslationConfig::FromSubscription(Keys::Speech, Config::Region);
+
         config->SetServiceProperty("from", "de-DE", ServicePropertyChannel::UriQueryParameter);
         config->SetServiceProperty("to", "en", ServicePropertyChannel::UriQueryParameter);
+
         auto recognizer = TranslationRecognizer::FromConfig(config, audioInput);
 
         auto result = recognizer->RecognizeOnceAsync().get();

@@ -825,6 +825,8 @@ public:
 
     virtual void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) = 0;
     virtual void SendSpeechEventMessage(std::string&& payload) = 0;
+    virtual void SendEventMessage(std::string&& payload) = 0;
+
 };
 
 class ISpxAudioStreamSessionInit : public ISpxInterfaceBaseFor<ISpxAudioStreamSessionInit>
@@ -853,6 +855,7 @@ public:
 
     virtual void WriteTelemetryLatency(uint64_t, bool) {};
     virtual void SendSpeechEventMessage(std::string&&) {};
+    virtual void SendEventMessage(std::string&&) {};
 };
 
 class SpxRecoEngineAdapterError
@@ -1168,6 +1171,9 @@ public:
 
 class ISpxTranslationRecognizer : public ISpxInterfaceBaseFor<ISpxTranslationRecognizer>
 {
+public:
+    virtual void AddTargetLanguage(const std::string& lang) = 0;
+    virtual void RemoveTargetLanguage(const std::string& lang) = 0;
 };
 
 class ISpxRecognitionResultProcessor : public ISpxInterfaceBaseFor<ISpxRecognitionResultProcessor>
@@ -1194,6 +1200,13 @@ public:
     virtual void InitAuthorizationToken(const char * authToken, const char * region) = 0;
     virtual void SetServiceProperty(std::string name, std::string value, ServicePropertyChannel channel) = 0;
     virtual void SetProfanity(ProfanityOption profanity) = 0;
+};
+
+class ISpxSpeechTranslationConfig : public ISpxInterfaceBaseFor<ISpxSpeechTranslationConfig>
+{
+public:
+    virtual void AddTargetLanguage(const std::string& lang) = 0;
+    virtual void RemoveTargetLanguage(const std::string& lang) = 0;
 };
 
 class ISpxThreadService : public ISpxInterfaceBaseFor<ISpxThreadService>

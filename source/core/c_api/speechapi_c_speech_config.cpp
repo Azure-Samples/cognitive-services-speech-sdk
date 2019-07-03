@@ -12,12 +12,7 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-SPXAPI_(bool) speech_config_is_handle_valid(SPXSPEECHCONFIGHANDLE hconfig)
-{
-    return Handle_IsValid<SPXSPEECHCONFIGHANDLE, ISpxSpeechConfig>(hconfig);
-}
-
-SPXAPI speech_config_from_subscription(SPXSPEECHCONFIGHANDLE* hconfig, const char* subscription, const char* region)
+SPXAPI speech_config_from_subscription_internal(SPXSPEECHCONFIGHANDLE* hconfig, const char* subscription, const char* region, const char* classname)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, subscription == nullptr || !(*subscription));
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, region == nullptr || !(*region));
@@ -27,7 +22,7 @@ SPXAPI speech_config_from_subscription(SPXSPEECHCONFIGHANDLE* hconfig, const cha
     {
         *hconfig = SPXHANDLE_INVALID;
 
-        auto config = SpxCreateObjectWithSite<ISpxSpeechConfig>("CSpxSpeechConfig", SpxGetRootSite());
+        auto config = SpxCreateObjectWithSite<ISpxSpeechConfig>(classname, SpxGetRootSite());
         config->InitFromSubscription(subscription, region);
 
         auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
@@ -36,7 +31,7 @@ SPXAPI speech_config_from_subscription(SPXSPEECHCONFIGHANDLE* hconfig, const cha
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI speech_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* hconfig, const char* authToken, const char* region)
+SPXAPI speech_config_from_authorization_token_internal(SPXSPEECHCONFIGHANDLE* hconfig, const char* authToken, const char* region, const char* classname)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, authToken == nullptr || !(*authToken));
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, region == nullptr || !(*region));
@@ -46,7 +41,7 @@ SPXAPI speech_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* hconfig, co
     {
         *hconfig = SPXHANDLE_INVALID;
 
-        auto config = SpxCreateObjectWithSite<ISpxSpeechConfig>("CSpxSpeechConfig", SpxGetRootSite());
+        auto config = SpxCreateObjectWithSite<ISpxSpeechConfig>(classname, SpxGetRootSite());
         config->InitAuthorizationToken(authToken, region);
 
         auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
@@ -55,7 +50,7 @@ SPXAPI speech_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* hconfig, co
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI speech_config_from_endpoint(SPXSPEECHCONFIGHANDLE* hconfig, const char* endpoint, const char* subscription)
+SPXAPI speech_config_from_endpoint_internal(SPXSPEECHCONFIGHANDLE* hconfig, const char* endpoint, const char* subscription, const char* classname)
 {
     // subscription can be null.
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, endpoint == nullptr || !(*endpoint));
@@ -65,13 +60,33 @@ SPXAPI speech_config_from_endpoint(SPXSPEECHCONFIGHANDLE* hconfig, const char* e
     {
         *hconfig = SPXHANDLE_INVALID;
 
-        auto config = SpxCreateObjectWithSite<ISpxSpeechConfig>("CSpxSpeechConfig", SpxGetRootSite());
+        auto config = SpxCreateObjectWithSite<ISpxSpeechConfig>(classname, SpxGetRootSite());
         config->InitFromEndpoint(endpoint, subscription);
 
         auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
         *hconfig = confighandles->TrackHandle(config);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI_(bool) speech_config_is_handle_valid(SPXSPEECHCONFIGHANDLE hconfig)
+{
+    return Handle_IsValid<SPXSPEECHCONFIGHANDLE, ISpxSpeechConfig>(hconfig);
+}
+
+SPXAPI speech_config_from_subscription(SPXSPEECHCONFIGHANDLE* hconfig, const char* subscription, const char* region)
+{
+    return speech_config_from_subscription_internal(hconfig, subscription, region, "CSpxSpeechConfig");
+}
+
+SPXAPI speech_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* hconfig, const char* authToken, const char* region)
+{
+    return speech_config_from_authorization_token_internal(hconfig, authToken, region, "CSpxSpeechConfig");
+}
+
+SPXAPI speech_config_from_endpoint(SPXSPEECHCONFIGHANDLE* hconfig, const char* endpoint, const char* subscription)
+{
+    return speech_config_from_endpoint_internal(hconfig, endpoint, subscription, "CSpxSpeechConfig");
 }
 
 SPXAPI speech_config_release(SPXSPEECHCONFIGHANDLE hconfig)

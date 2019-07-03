@@ -12,6 +12,7 @@
 #include "azure_c_shared_utility_includes.h"
 
 TestData weather {"/audio/whatstheweatherlike.wav", "What's the weather like?" };
+TestData weatherGerman { "", "Wie ist das Wetter?" };
 TestData weathermp3{ "/audio/whatstheweatherlike.mp3", "What's the weather like?" };
 TestData weatheropus{ "/audio/whatstheweatherlike.opus", "What's the weather like?" };
 TestData batman{ "/audio/batman.wav", "" };
@@ -31,6 +32,13 @@ std::shared_ptr<SpeechConfig> CurrentSpeechConfig()
     return !Config::Endpoint.empty()
         ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech)
         : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+}
+
+std::shared_ptr<SpeechTranslationConfig> CurrentTranslationConfig()
+{
+    return !Config::Endpoint.empty()
+        ? SpeechTranslationConfig::FromEndpoint(Config::Endpoint, Keys::Speech)
+        : SpeechTranslationConfig::FromSubscription(Keys::Speech, Config::Region);
 }
 
 void UseMocks(bool value)

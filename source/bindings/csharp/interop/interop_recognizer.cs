@@ -118,5 +118,10 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR translator_synthesizing_audio_set_callback(InteropSafeHandle recoHandle, CallbackFunctionDelegate callback, IntPtr context);
 
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR translator_add_target_language(InteropSafeHandle recoHandle, [MarshalAs(UnmanagedType.LPStr)] string language);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR translator_remove_target_language(InteropSafeHandle recoHandle, [MarshalAs(UnmanagedType.LPStr)] string language);
     }
 }

@@ -150,6 +150,50 @@ public:
     }
 
     /// <summary>
+    /// Adds a target language for translation.
+    /// Added in version 1.6.0.
+    /// </summary>
+    /// <param name="language">Translation target language to add.</param>
+    void AddTargetLanguage(const SPXSTRING& language)
+    {
+        SPX_IFTRUE_THROW_HR(m_hreco == SPXHANDLE_INVALID, SPXERR_INVALID_HANDLE);
+        SPX_THROW_ON_FAIL(::translator_add_target_language(m_hreco, Utils::ToUTF8(language).c_str()));
+    }
+
+    /// <summary>
+    /// Removes a target language for translation.
+    /// Added in version 1.6.0.
+    /// </summary>
+    /// <param name="language">Translation target language to remove.</param>
+    void RemoveTargetLanguage(const SPXSTRING& language)
+    {
+        SPX_IFTRUE_THROW_HR(m_hreco == SPXHANDLE_INVALID, SPXERR_INVALID_HANDLE);
+        SPX_THROW_ON_FAIL(::translator_remove_target_language(m_hreco, Utils::ToUTF8(language).c_str()));
+    }
+
+    /// <summary>
+    /// Gets target languages for translation.
+    /// Added in version 1.6.0.
+    /// </summary>
+    /// <returns>Vector of translation target languages.</returns>
+    std::vector<SPXSTRING> GetTargetLanguages() const
+    {
+        std::vector<SPXSTRING> result;
+        auto targetLanguages = Utils::ToUTF8(Properties.GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages));
+        if (targetLanguages.empty())
+            return result;
+
+        // Getting languages one by one.
+        std::stringstream languageStream(targetLanguages);
+        std::string token;
+        while (std::getline(languageStream, token, CommaDelim))
+        {
+            result.push_back(Utils::ToSPXString(token));
+        }
+        return result;
+    }
+
+    /// <summary>
     /// The collection or properties and their values defined for this <see cref="TranslationRecognizer"/>.
     /// </summary>
     PropertyCollection& Properties;
@@ -185,6 +229,4 @@ private:
         pThis->Synthesizing.Signal(*recoEvent.get());
     }
 };
-
-
 } } } } // Microsoft::CognitiveServices::Speech::Translation

@@ -109,6 +109,7 @@ public:
     void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) override;
     void SendAgentMessage(const std::string &buffer) final;
     void SendSpeechEventMessage(std::string&& msg) override;
+    void SendEventMessage(std::string&& msg) override;
 
     // --- ISpxAudioProcessor
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;

@@ -224,6 +224,26 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         }
 
         /// <summary>
+        /// Adds a target language for translation.
+        /// Added in version 1.6.0.
+        /// </summary>
+        /// <param name="language">Translation target language to add.</param>
+        public void AddTargetLanguage(string language)
+        {
+            ThrowIfFail(Internal.Recognizer.translator_add_target_language(recoHandle, language));
+        }
+
+        /// <summary>
+        /// Removes a target language for translation.
+        /// Added in version 1.6.0.
+        /// </summary>
+        /// <param name="language">Translation target language to remove.</param>
+        public void RemoveTargetLanguage(string language)
+        {
+            ThrowIfFail(Internal.Recognizer.translator_remove_target_language(recoHandle, language));
+        }
+
+        /// <summary>
         /// Starts speech translation, and returns after a single utterance is recognized. The end of a
         /// single utterance is determined by listening for silence at the end or until a maximum of 15
         /// seconds of audio is processed.  The task returns the recognition text as result.

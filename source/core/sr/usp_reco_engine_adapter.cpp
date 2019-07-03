@@ -175,13 +175,25 @@ void CSpxUspRecoEngineAdapter::SendSpeechEventMessage(std::string&& message)
 {
     // Establish the connection to service.
     EnsureUspInit();
-    // for some reason, no connection is established
-    if (m_uspConnection == nullptr || IsState(UspState::Error))
-    {
-        return;
-    }
+    UspSendMessage("speech.event", message, USP::MessageType::SpeechEvent);
+}
 
-    UspSendMessage("speech.event", message, USP::MessageType::Event);
+void CSpxUspRecoEngineAdapter::SendEventMessage(std::string&& message)
+{
+    // Currently the "event" message is used for sending dynamic language list in translation.
+    // For this purpose, there is no need to send the event message if there is no connection setup yet,
+    // because the language list will be sent to the service as query parameters during connection setup.
+    // If, in future, the "event" message is used for other purposes that could be sent before connection establishment,
+    // EnsureUspInit() should be called to start connection setup if need. However, it should be noted that the reco mode
+    // is required for setting up connection. The reco mode is set either when starting recognition or by Connection object.
+    if (m_uspConnection != nullptr)
+    {
+        UspSendMessage("event", message, USP::MessageType::Event);
+    }
+    else
+    {
+        LogInfo("WARN: event message is sent before connection setup. It is ignored.");
+    }
 }
 
 void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
@@ -999,9 +1011,14 @@ void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, co
 void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType)
 {
     SPX_DBG_ASSERT(m_uspConnection != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
-    if (!IsState(UspState::Terminating) && !IsState(UspState::Zombie) && m_uspConnection != nullptr)
+    if (!IsBadState() && m_uspConnection != nullptr)
     {
         m_uspConnection->SendMessage(messagePath, buffer, size, messageType);
+    }
+    else
+    {
+        SPX_DBG_TRACE_ERROR("no connection established or in bad USP state. m_uspConnection %s nullptr, m_uspState:%d.", m_uspConnection == nullptr ? "is" : "is not", m_uspState);
+        return;
     }
 }
 
@@ -1963,6 +1980,23 @@ std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dg
 {
     std::string contextJson;
 
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+    std::string toLanguages = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
+
+    nlohmann::json toLanguagesPayload;
+    if (!toLanguages.empty())
+    {
+        auto toArray = nlohmann::json::array();
+        auto langVector = PAL::split(toLanguages, CommaDelim);
+        for (auto item : langVector)
+        {
+            toArray.push_back(item);
+        }
+
+        toLanguagesPayload["to"] = toArray;
+    }
+
     if (!dgiJson.empty() || !intentJson.empty() || !keywordDetectionJson.empty() || !insertionPointLeft.empty() || !insertionPointRight.empty())
     {
         bool appendComma = false;
@@ -1991,6 +2025,16 @@ std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dg
             contextJson += ",";
             contextJson += R"("keywordDetection":)";
             contextJson += keywordDetectionJson;
+            appendComma = true;
+        }
+
+        // Todo (Task 1784131): this is the first step to send to languages via speech.context to support dynamic language list.
+        // After service supports event message, this should be removed. (no needs to send to lanugages via speech.context)
+        if (!toLanguages.empty())
+        {
+            contextJson += appendComma ? "," : "";
+            contextJson += R"("translationcontext":)";
+            contextJson += toLanguagesPayload.dump();
             appendComma = true;
         }
 

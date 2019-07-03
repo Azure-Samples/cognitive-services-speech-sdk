@@ -33,7 +33,7 @@ public:
     static std::shared_ptr<SpeechTranslationConfig> FromSubscription(const SPXSTRING& subscription, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_config_from_subscription(&hconfig, Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
+        SPX_THROW_ON_FAIL(speech_translation_config_from_subscription(&hconfig, Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
         return std::shared_ptr<SpeechTranslationConfig>(new SpeechTranslationConfig(hconfig));
     }
 
@@ -46,7 +46,7 @@ public:
     static std::shared_ptr<SpeechTranslationConfig> FromAuthorizationToken(const SPXSTRING& authToken, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_config_from_authorization_token(&hconfig, Utils::ToUTF8(authToken).c_str(), Utils::ToUTF8(region).c_str()));
+        SPX_THROW_ON_FAIL(speech_translation_config_from_authorization_token(&hconfig, Utils::ToUTF8(authToken).c_str(), Utils::ToUTF8(region).c_str()));
         return std::shared_ptr<SpeechTranslationConfig>(new SpeechTranslationConfig(hconfig));
     }
 
@@ -66,7 +66,7 @@ public:
     static std::shared_ptr<SpeechTranslationConfig> FromEndpoint(const SPXSTRING& endpoint, const SPXSTRING& subscription)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_config_from_endpoint(&hconfig, Utils::ToUTF8(endpoint).c_str(), Utils::ToUTF8(subscription).c_str()));
+        SPX_THROW_ON_FAIL(speech_translation_config_from_endpoint(&hconfig, Utils::ToUTF8(endpoint).c_str(), Utils::ToUTF8(subscription).c_str()));
         return std::shared_ptr<SpeechTranslationConfig>(new SpeechTranslationConfig(hconfig));
     }
 
@@ -88,20 +88,27 @@ public:
     static std::shared_ptr<SpeechTranslationConfig> FromEndpoint(const SPXSTRING& endpoint)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_config_from_endpoint(&hconfig, Utils::ToUTF8(endpoint).c_str(), nullptr));
+        SPX_THROW_ON_FAIL(speech_translation_config_from_endpoint(&hconfig, Utils::ToUTF8(endpoint).c_str(), nullptr));
         return std::shared_ptr<SpeechTranslationConfig>(new SpeechTranslationConfig(hconfig));
     }
 
     /// <summary>
-    /// Adds target language for translation.
+    /// Adds a target language for translation.
     /// </summary>
     /// <param name="language">Translation target language to add.</param>
     void AddTargetLanguage(const SPXSTRING& language)
     {
-        if (!m_targetLanguages.empty())
-            m_targetLanguages += ",";
-        m_targetLanguages += Utils::ToUTF8(language);
-        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationToLanguages), nullptr, m_targetLanguages.c_str());
+        SPX_THROW_ON_FAIL(speech_translation_config_add_target_language(m_hconfig, Utils::ToUTF8(language).c_str()));
+    }
+
+    /// <summary>
+    /// Removes a target language for translation.
+    /// Added in release 1.6.0.
+    /// </summary>
+    /// <param name="language">Translation target language to remove.</param>
+    void RemoveTargetLanguage(const SPXSTRING& language)
+    {
+        SPX_THROW_ON_FAIL(speech_translation_config_remove_target_language(m_hconfig, Utils::ToUTF8(language).c_str()));
     }
 
     /// <summary>
@@ -118,7 +125,7 @@ public:
         // Getting languages one by one.
         std::stringstream languageStream(targetLanguages);
         std::string token;
-        while (std::getline(languageStream, token, ','))
+        while (std::getline(languageStream, token, CommaDelim))
         {
             result.push_back(Utils::ToSPXString(token));
         }
@@ -131,7 +138,6 @@ public:
     /// <param name="voice">Voice name to set.</param>
     void SetVoiceName(const SPXSTRING& voice)
     {
-        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationFeatures), nullptr, "textToSpeech");
         property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationVoice), nullptr, Utils::ToUTF8(voice).c_str());
     }
 
@@ -152,7 +158,6 @@ private:
 
     DISABLE_COPY_AND_MOVE(SpeechTranslationConfig);
 
-    std::string m_targetLanguages;
 };
 
 }}}}

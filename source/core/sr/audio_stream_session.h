@@ -113,6 +113,8 @@ public:
     void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) override;
 
     void SendSpeechEventMessage(std::string&& payload) override;
+    void SendEventMessage(std::string&& payload) override;
+
     bool IsStreaming() override;
 
     // --- ISpxKwsEngineAdapterSite

@@ -35,7 +35,6 @@ set(HEADERS
     "${CARBON_INCLUDE}/ispxinterfaces.h"
     "${INC_DIR}/property_id_2_name_map.h"
     "${INC_DIR}/audio_format_id_2_name_map.h"
-    "${INC_DIR}/speech_config.h"
     "${INC_DIR}/try_catch_helpers.h"
     "${INC_DIR}/data_buffer.h"
     "${INC_DIR}/ring_buffer.h"
@@ -65,7 +64,6 @@ set(SOURCES
     "${SRC_DIR}/platform.cpp"
     "${SRC_DIR}/site_helpers.cpp"
     "${SRC_DIR}/property_id_2_name_map.cpp"
-    "${SRC_DIR}/speech_config.cpp"
     "${SRC_DIR}/time_utils.cpp"
     "${SRC_DIR}/ring_buffer.cpp"
     )

@@ -2369,10 +2369,16 @@ void CSpxAudioStreamSession::WriteTelemetryLatency(uint64_t latencyInTicks, bool
     }
 }
 
-void CSpxAudioStreamSession::SendSpeechEventMessage(std::string&& paypload)
+void CSpxAudioStreamSession::SendSpeechEventMessage(std::string&& payload)
 {
     EnsureInitRecoEngineAdapter();
-    m_recoAdapter->SendSpeechEventMessage(std::move(paypload));
+    m_recoAdapter->SendSpeechEventMessage(std::move(payload));
+}
+
+void CSpxAudioStreamSession::SendEventMessage(std::string&& payload)
+{
+    EnsureInitRecoEngineAdapter();
+    m_recoAdapter->SendEventMessage(std::move(payload));
 }
 
 bool CSpxAudioStreamSession::IsStreaming()

@@ -21,6 +21,7 @@
 #include <speechapi_c_audio_stream.h>
 #include <speechapi_c_audio_config.h>
 #include <speechapi_c_speech_config.h>
+#include <speechapi_c_speech_translation_config.h>
 #include <speechapi_c_factory.h>
 #include <speechapi_c_recognizer.h>
 #include <speechapi_c_synthesizer.h>

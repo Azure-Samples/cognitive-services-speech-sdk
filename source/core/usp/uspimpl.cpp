@@ -298,16 +298,11 @@ string Connection::Impl::ConstructConnectionUrl() const
                     // Need to use separate parameter for each target language.
                     if (queryParameterName == endpoint::translation::toQueryParam)
                     {
-                        size_t start = 0;
-                        const char commaDelim = ',';
-                        size_t end = entry->second.find_first_of(commaDelim);
-                        while (end != string::npos)
+                        auto langVector = PAL::split(entry->second, CommaDelim);
+                        for (auto item : langVector)
                         {
-                            oss << queryParameterDelim << endpoint::translation::toQueryParam << EncodeParameterString(entry->second.substr(start, end - start));
-                            start = end + 1;
-                            end = entry->second.find_first_of(commaDelim, start);
+                            oss << queryParameterDelim << endpoint::translation::toQueryParam << EncodeParameterString(item);
                         }
-                        oss << queryParameterDelim << endpoint::translation::toQueryParam << EncodeParameterString(entry->second.substr(start, end));
                     }
                     // Voice need 2 query parameters.
                     else if (queryParameterName == endpoint::translation::voiceQueryParam)
@@ -581,7 +576,7 @@ string Connection::Impl::UpdateRequestId(const MessageType messageType)
         requestId = m_speechRequestId;
         break;
 
-    case MessageType::Event:
+    case MessageType::SpeechEvent:
         //Bug 1784130: according to USP, SpeechEvent is associated with the current speech turn. So m_speechRequestId must be non-empty.
         //However, the current conversation transcriber will send speech.event either before a turn (before audio/speech.context)
         //or outside a turn (after turn.end).
@@ -597,6 +592,10 @@ string Connection::Impl::UpdateRequestId(const MessageType messageType)
             ThrowLogicError("Speech.event must be associated to the current speech turn, so m_speechRequestId must be non-empty.");
         }
         requestId = m_speechRequestId;
+        break;
+
+    case MessageType::Event:
+        requestId = CreateRequestId();
         break;
 
     case MessageType::Agent:

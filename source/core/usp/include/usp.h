@@ -129,7 +129,7 @@ enum class OutputFormat : unsigned int { Simple = 0, Detailed = 1 };
 
 enum class AuthenticationType: size_t { SubscriptionKey = 0, AuthorizationToken, SearchDelegationRPSToken, DialogApplicationId, SIZE_AUTHENTICATION_TYPE };
 
-enum class MessageType { Config, Context, Agent, AgentContext, Event};
+enum class MessageType { Config, Context, Agent, AgentContext, SpeechEvent, Event};
 
 template<typename T>
 using deleted_unique_ptr = std::unique_ptr<T, std::function<void(T*)>>;

@@ -148,25 +148,19 @@ bool ToBool(const std::string& str)
     return stricmp(str.c_str(), "true") == 0;
 }
 
-vector<string> split(string str, const string& token)
+vector<string> split(const string& str, const char delim)
 {
     vector<string> result;
-    while (str.size())
+
+    size_t start = 0;
+    size_t end = str.find(delim);
+    while (end != string::npos)
     {
-        size_t index = str.find(token);
-        if (index != string::npos)
-        {
-            result.push_back(str.substr(0, index));
-            str = str.substr(index + token.size());
-            if (str.size() == 0)
-                result.push_back(str);
-        }
-        else
-        {
-            result.push_back(str);
-            str.clear();
-        }
+        result.push_back(str.substr(start, end - start));
+        start = end + 1;
+        end = str.find(delim, start);
     }
+    result.push_back(str.substr(start));
 
     return result;
 }

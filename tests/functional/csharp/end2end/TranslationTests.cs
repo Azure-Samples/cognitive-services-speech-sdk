@@ -787,5 +787,144 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertMatching(TestData.German.Profanity.TaggedUtteranceTranslation, result.Translations[Language.DE]);
             }
         }
+
+        [TestMethod]
+        public async Task ChangeLanguageOutsideTurn()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
+            config.SpeechRecognitionLanguage = "en-US";
+            config.AddTargetLanguage(Language.DE);
+            var targetLangs = config.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+            Assert.AreEqual(Language.DE, targetLangs);
+
+            config.AddTargetLanguage(Language.FR);
+            targetLangs = config.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+            Assert.AreEqual(Language.DE + "," + Language.FR, targetLangs);
+
+            config.RemoveTargetLanguage(Language.DE);
+            targetLangs = config.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+            Assert.AreEqual(Language.FR, targetLangs);
+
+            config.AddTargetLanguage(Language.DE);
+            targetLangs = config.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+            Assert.AreEqual(Language.FR + "," + Language.DE, targetLangs);
+
+            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
+            {
+                recognizer.AddTargetLanguage(Language.ES);
+                targetLangs = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+                Assert.AreEqual(Language.FR + "," + Language.DE + "," + Language.ES, targetLangs);
+
+                var result = await recognizer.RecognizeOnceAsync();
+                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                Assert.IsTrue(result.Text.Length > 0);
+                Assert.IsTrue(result.Translations[Language.DE].Length > 0);
+                Assert.IsTrue(result.Translations[Language.FR].Length > 0);
+                Assert.IsTrue(result.Translations[Language.ES].Length > 0);
+
+                recognizer.RemoveTargetLanguage(Language.DE);
+                recognizer.RemoveTargetLanguage(Language.ES);
+                targetLangs = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+                Assert.AreEqual(Language.FR, targetLangs);
+
+                recognizer.AddTargetLanguage(Language.ZH);
+                targetLangs = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+                Assert.AreEqual(Language.FR + "," + Language.ZH, targetLangs);
+
+                result = await recognizer.RecognizeOnceAsync();
+                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                Assert.IsTrue(result.Text.Length > 0);
+                Assert.IsTrue(result.Translations[Language.FR].Length > 0);
+                Assert.IsTrue(result.Translations[Language.ZH].Length > 0);
+                Assert.IsFalse(result.Translations.ContainsKey(Language.ES));
+                Assert.IsFalse(result.Translations.ContainsKey(Language.DE));
+            }
+        }
+
+        [TestMethod]
+        public async Task ChangeLanguageInsideTurn()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
+            config.SpeechRecognitionLanguage = "en-US";
+            config.AddTargetLanguage(Language.DE);
+
+            var recognizedResults = new List<string>();
+            var translatedResultsDe = new List<string>();
+            var translatedResultsEs = new List<string>();
+            var translatedResultsFr = new List<string>();
+            var errorResults = new List<string>();
+
+            var tcs = new TaskCompletionSource<bool>();
+
+            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
+            {
+                recognizer.Canceled += (s, e) =>
+                {
+                    if (e.Reason != CancellationReason.EndOfStream)
+                    {
+                        errorResults.Add(string.IsNullOrEmpty(e.ErrorDetails) ? "Errors" : e.ErrorDetails);
+                        Console.WriteLine($"Canceled event. ErrorCode:{e.ErrorCode}, ErrorDetails:{e.ErrorDetails}");
+                        tcs.TrySetResult(false);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Received EndOfStream.");
+                    }
+                };
+
+                recognizer.Recognized += (s, e) =>
+                {
+                    if (e.Result.Reason == ResultReason.TranslatedSpeech)
+                    {
+                        recognizedResults.Add(e.Result.Text);
+                        translatedResultsDe.Add(e.Result.Translations[Language.DE]);
+                        if (e.Result.Translations.ContainsKey(Language.ES))
+                        {
+                            translatedResultsEs.Add(e.Result.Translations[Language.ES]);
+                        }
+                        if (e.Result.Translations.ContainsKey(Language.FR))
+                        {
+                            translatedResultsFr.Add(e.Result.Translations[Language.FR]);
+                        }
+                        else
+                        {
+                            recognizer.AddTargetLanguage(Language.FR);
+                        }
+                    }
+                    else if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                    {
+                        errorResults.Add("Translation Error.");
+                        tcs.TrySetResult(false);
+                    }
+                    else
+                    {
+                        errorResults.Add("Recognized Error.");
+                        tcs.TrySetResult(false);
+                    }
+                };
+
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    Console.WriteLine($"Received stopped session event: {e.ToString()}");
+                    tcs.TrySetResult(true);
+                };
+
+                await recognizer.StartContinuousRecognitionAsync();
+                await Task.Delay(20000).ConfigureAwait(false);
+                recognizer.AddTargetLanguage(Language.ES);
+                await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(300)));
+                await recognizer.StopContinuousRecognitionAsync();
+
+                Assert.IsTrue(recognizedResults.Count > 0);
+                Assert.IsTrue(recognizedResults.Count == translatedResultsDe.Count);
+                Assert.IsTrue(translatedResultsDe.Count > translatedResultsEs.Count);
+                Assert.IsTrue(translatedResultsDe.Count > translatedResultsFr.Count);
+                Assert.IsTrue(translatedResultsFr.Count > 0);
+                Assert.IsTrue(translatedResultsEs.Count > 0);
+                Assert.IsTrue(errorResults.Count == 0);
+            }
+        }
     }
 }

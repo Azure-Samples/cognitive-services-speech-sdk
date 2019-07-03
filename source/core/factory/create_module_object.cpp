@@ -10,7 +10,6 @@
 #include "speech_api_factory.h"
 #include "speech_synthesis_api_factory.h"
 #include "factory_helpers.h"
-#include "speech_config.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -31,7 +30,6 @@ SPX_EXTERN_C void* PrimaryCarbon_CreateModuleObject(const char* className, const
     SPX_FACTORY_MAP_ENTRY_FUNC(TTSLib_CreateModuleObject);
     SPX_FACTORY_MAP_ENTRY(CSpxSpeechApiFactory, ISpxSpeechApiFactory);
     SPX_FACTORY_MAP_ENTRY(CSpxSpeechSynthesisApiFactory, ISpxSpeechSynthesisApiFactory);
-    SPX_FACTORY_MAP_ENTRY(CSpxSpeechConfig, ISpxSpeechConfig);
     SPX_FACTORY_MAP_END();
 }
 

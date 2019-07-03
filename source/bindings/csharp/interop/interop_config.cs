@@ -26,7 +26,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR audio_config_create_audio_input_from_a_microphone(out SPXAUDIOCONFIGHANDLE audioConfig,
             [MarshalAs(UnmanagedType.LPStr)] string deviceName);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR audio_config_create_audio_input_from_stream(out SPXAUDIOCONFIGHANDLE audioConfig, InteropSafeHandle audioStream);        
+        public static extern SPXHR audio_config_create_audio_input_from_stream(out SPXAUDIOCONFIGHANDLE audioConfig, InteropSafeHandle audioStream);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR audio_config_create_audio_output_from_default_speaker(out SPXAUDIOCONFIGHANDLE audioConfig);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
@@ -78,4 +78,31 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             ProfanityOption profanity);
     }
 
+    internal static class SpeechTranslationConfig
+    {
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR speech_translation_config_from_subscription(out SPXSPEECHCONFIGHANDLE config,
+            [MarshalAs(UnmanagedType.LPStr)] string subscriptionKey,
+            [MarshalAs(UnmanagedType.LPStr)] string region);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR speech_translation_config_from_authorization_token(out SPXSPEECHCONFIGHANDLE config,
+            [MarshalAs(UnmanagedType.LPStr)] string authToken,
+            [MarshalAs(UnmanagedType.LPStr)] string region);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR speech_translation_config_from_endpoint(out SPXSPEECHCONFIGHANDLE config,
+            [MarshalAs(UnmanagedType.LPStr)] string endpoint,
+            [MarshalAs(UnmanagedType.LPStr)] string subscription);
+        
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR speech_translation_config_add_target_language(InteropSafeHandle config,
+            [MarshalAs(UnmanagedType.LPStr)] string language);
+
+                 [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR speech_translation_config_remove_target_language(InteropSafeHandle config,
+            [MarshalAs(UnmanagedType.LPStr)] string language);
+
+ 
+    }
 }

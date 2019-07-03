@@ -16,7 +16,6 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public sealed class SpeechTranslationConfig : SpeechConfig
     {
-        private readonly object configLock = new object();
         private string targetLanguages = string.Empty;
 
         internal SpeechTranslationConfig(IntPtr configPtr) : base(configPtr)
@@ -32,7 +31,7 @@ namespace Microsoft.CognitiveServices.Speech
         public new static SpeechTranslationConfig FromSubscription(string subscriptionKey, string region)
         {
             IntPtr config = IntPtr.Zero;
-            ThrowIfFail(Internal.SpeechConfig.speech_config_from_subscription(out config, subscriptionKey, region));
+            ThrowIfFail(Internal.SpeechTranslationConfig.speech_translation_config_from_subscription(out config, subscriptionKey, region));
             return new SpeechTranslationConfig(config);
         }
 
@@ -48,7 +47,7 @@ namespace Microsoft.CognitiveServices.Speech
         public new static SpeechTranslationConfig FromAuthorizationToken(string authorizationToken, string region)
         {
             IntPtr config = IntPtr.Zero;
-            ThrowIfFail(Internal.SpeechConfig.speech_config_from_authorization_token(out config, authorizationToken, region));
+            ThrowIfFail(Internal.SpeechTranslationConfig.speech_translation_config_from_authorization_token(out config, authorizationToken, region));
             return new SpeechTranslationConfig(config);
         }
 
@@ -68,7 +67,7 @@ namespace Microsoft.CognitiveServices.Speech
         public new static SpeechTranslationConfig FromEndpoint(Uri endpoint, string subscriptionKey)
         {
             IntPtr config = IntPtr.Zero;
-            ThrowIfFail(Internal.SpeechConfig.speech_config_from_endpoint(out config, Uri.EscapeUriString(endpoint.ToString()), subscriptionKey));
+            ThrowIfFail(Internal.SpeechTranslationConfig.speech_translation_config_from_endpoint(out config, Uri.EscapeUriString(endpoint.ToString()), subscriptionKey));
             return new SpeechTranslationConfig(config);
         }
 
@@ -90,7 +89,7 @@ namespace Microsoft.CognitiveServices.Speech
         public new static SpeechTranslationConfig FromEndpoint(Uri endpoint)
         {
             IntPtr config = IntPtr.Zero;
-            ThrowIfFail(Internal.SpeechConfig.speech_config_from_endpoint(out config, Uri.EscapeUriString(endpoint.ToString()), null));
+            ThrowIfFail(Internal.SpeechTranslationConfig.speech_translation_config_from_endpoint(out config, Uri.EscapeUriString(endpoint.ToString()), null));
             return new SpeechTranslationConfig(config);
         }
 
@@ -127,15 +126,16 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="language"></param>
         public void AddTargetLanguage(string language)
         {
-            lock (configLock)
-            {
-                if (targetLanguages != string.Empty)
-                {
-                    targetLanguages += ",";
-                }
-                targetLanguages += language;
-            }
-            progBag.SetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages, targetLanguages);
+            ThrowIfFail(Internal.SpeechTranslationConfig.speech_translation_config_add_target_language(configHandle, language));
+        }
+
+        /// <summary>
+        /// Remove a target languages of translation.
+        /// </summary>
+        /// <param name="language"></param>
+        public void RemoveTargetLanguage(string language)
+        {
+            ThrowIfFail(Internal.SpeechTranslationConfig.speech_translation_config_remove_target_language(configHandle, language));
         }
 
         /// <summary>
@@ -145,7 +145,6 @@ namespace Microsoft.CognitiveServices.Speech
         {
             set
             {
-                progBag.SetProperty(PropertyId.SpeechServiceConnection_TranslationFeatures, "textToSpeech");
                 progBag.SetProperty(PropertyId.SpeechServiceConnection_TranslationVoice, value);
             }
             get

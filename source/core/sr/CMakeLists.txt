@@ -46,6 +46,8 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/conversation_transcriber.h"
     "${SRC_DIR}/user.h"
     "${SRC_DIR}/participant.h"
+    "${SRC_DIR}/speech_config.h"
+    "${SRC_DIR}/speech_translation_config.h"
     )
 
 set(SOURCES
@@ -76,7 +78,8 @@ set(SOURCES
     "${SRC_DIR}/conversation_transcriber.cpp"
     "${SRC_DIR}/user.cpp"
     "${SRC_DIR}/participant.cpp"
-
+    "${SRC_DIR}/speech_config.cpp"
+    "${SRC_DIR}/speech_translation_config.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

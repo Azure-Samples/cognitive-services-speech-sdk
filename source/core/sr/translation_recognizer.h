@@ -38,9 +38,15 @@ public:
     SPX_SERVICE_MAP_BEGIN()
         SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
         SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
-    SPX_SERVICE_MAP_END()
+        SPX_SERVICE_MAP_END()
+
+    // --- ISpxTranslationRecognizer ---
+    void AddTargetLanguage(const std::string& lang) override;
+    void RemoveTargetLanguage(const std::string& lang) override;
 
 private:
+
+    void UpdateTargetLanguages(const std::string& targetLanguages);
 
     CSpxTranslationRecognizer(CSpxTranslationRecognizer&&) = delete;
     CSpxTranslationRecognizer(const CSpxTranslationRecognizer&) = delete;

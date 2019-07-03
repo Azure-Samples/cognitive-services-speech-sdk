@@ -46,7 +46,7 @@ std::wstring ToWString(const std::string& string);
 std::string BoolToString(bool b);
 bool ToBool(const std::string& str);
 
-std::vector<std::string> split(std::string str, const std::string& token);
+std::vector<std::string> split(const std::string& str, const char delim);
 std::u16string ToU16String(const std::wstring& wstring);
 std::wstring WCHARToWString(const WCHAR* string);
 wchar_string ToWCHARString(const std::wstring& string);

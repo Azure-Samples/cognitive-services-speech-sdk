@@ -16,6 +16,7 @@ namespace Speech {
 
 constexpr const char* TrueString = "true";
 constexpr const char* FalseString = "false";
+constexpr const char CommaDelim = ',';
 
 /// <summary>
 /// Defines speech property ids.

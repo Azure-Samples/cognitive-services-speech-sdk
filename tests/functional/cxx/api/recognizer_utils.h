@@ -56,6 +56,7 @@ struct TestData
 
 // declare the test data here
 extern TestData weather;
+extern TestData weatherGerman;
 extern TestData weathermp3;
 extern TestData weatheropus;
 extern TestData weather8Channels;
@@ -107,6 +108,7 @@ int ReadBuffer(fstream& fs, uint8_t* dataBuffer, uint32_t size);
 fstream OpenWaveFile(const string& filename);
 fstream OpenFile(const string& filename);
 shared_ptr<SpeechConfig> CurrentSpeechConfig();
+shared_ptr<SpeechTranslationConfig> CurrentTranslationConfig();
 void SetMockRealTimeSpeed(int value);
 void WaitForResult(future<void>&& f, std::chrono::seconds duration);
 void PushData(PushAudioInputStream* pushStream, const string& filename, bool compressed = false);
