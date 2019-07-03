@@ -170,10 +170,10 @@ namespace BatchClient
         {
 
             string res = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+            StringContent sc = new StringContent(res);
+            sc.Headers.ContentType = JsonMediaTypeFormatter.DefaultMediaType;
 
-
-
-            using (var response = await this.client.PostAsJsonAsync(path, payload).ConfigureAwait(false))
+            using (var response = await client.PostAsync(path, sc))
             {
                 return await GetLocationFromPostResponseAsync(response).ConfigureAwait(false);
             }
