@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="8eeb0045-fb89-4b06-914a-33b4ec0f52cb" Publisher="CN=microsoft" Version="1.0.0.0" />
+  <Identity Name="8eeb0045-fb89-4b06-914a-33b4ec0f52cb" Publisher="CN=speechsdksample" Version="1.0.0.0" />
   <mp:PhoneIdentity PhoneProductId="8eeb0045-fb89-4b06-914a-33b4ec0f52cb" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>helloworld</DisplayName>
