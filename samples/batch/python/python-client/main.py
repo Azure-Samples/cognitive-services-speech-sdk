@@ -23,7 +23,7 @@ NAME = "Simple transcription"
 DESCRIPTION = "Simple transcription description"
 
 LOCALE = "en-US"
-RECORDINGS_BLOB_URI = "https://raw.githubusercontent.com/Azure-Samples/cognitive-services-speech-sdk/f9807b1079f3a85f07cbb6d762c6b5449d536027/samples/cpp/windows/console/samples/whatstheweatherlike.wav"
+RECORDINGS_BLOB_URI = "<Your SAS Uri to the recording>"
 
 # Set subscription information when doing transcription with custom models
 ADAPTED_ACOUSTIC_ID = None  # guid of a custom acoustic model
