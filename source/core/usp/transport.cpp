@@ -38,6 +38,7 @@ const char g_KeywordStreamId[]       = "X-StreamId";
 const char g_keywordRequestId[]      = "X-RequestId";
 const char g_keywordContentType[] = "Content-Type";
 const char g_messageHeader[]         = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n%s:%s\r\n\r\n";
+const char g_messageHeaderSsml[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/ssml+xml\r\n%s:%s\r\n\r\n";
 const char g_messageHeaderWithoutRequestId[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n\r\n";
 
 const char g_wavheaderFormat[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n%s:%s\r\n";
@@ -884,14 +885,28 @@ int usp::TransportMessageWrite(TransportHandle transportHandle, const std::strin
     // add headers
     if (includeRequestId)
     {
-        msg->length = sprintf_s(reinterpret_cast<char*>(msg->buffer.get()),
-                                payloadSize,
-                                g_messageHeader,
-                                g_timeStampHeaderName,
-                                timeString,
-                                path.c_str(),
-                                g_keywordRequestId,
-                                requestId);
+        if (0 == strcmp(path.data(), "ssml"))
+        {
+            msg->length = sprintf_s(reinterpret_cast<char*>(msg->buffer.get()),
+                                    payloadSize,
+                                    g_messageHeaderSsml,
+                                    g_timeStampHeaderName,
+                                    timeString,
+                                    path.c_str(),
+                                    g_keywordRequestId,
+                                    requestId);
+        }
+        else
+        {
+            msg->length = sprintf_s(reinterpret_cast<char*>(msg->buffer.get()),
+                                    payloadSize,
+                                    g_messageHeader,
+                                    g_timeStampHeaderName,
+                                    timeString,
+                                    path.c_str(),
+                                    g_keywordRequestId,
+                                    requestId);
+        }
     }
     else
     {

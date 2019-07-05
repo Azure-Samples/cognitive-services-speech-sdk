@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 #include <math.h>
-#include "rest_tts_helper.h"
+#include "synthesis_helper.h"
 #include "mock_tts_engine_adapter.h"
 #include "pull_audio_output_stream.h"
 #include "create_object_helpers.h"
@@ -80,7 +80,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxMockTtsEngineAdapter::Speak(const std::
         {
             auto language = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthLanguage), "");
             auto voice = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthVoice), "");
-            ssml = CSpxRestTtsHelper::BuildSsml(text, language, voice);
+            ssml = CSpxSynthesisHelper::BuildSsml(text, language, voice);
         }
 
         p->Write(this, requestId, (uint8_t *)(ssml.data()), (uint32_t)(ssml.length()));

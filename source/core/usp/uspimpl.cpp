@@ -261,6 +261,11 @@ string Connection::Impl::ConstructConnectionUrl() const
                 << endpoint::conversationTranscriber::pathPrefix2
                 << endpoint::conversationTranscriber::pathSuffixMultiAudio;
             break;
+        case EndpointType::SpeechSynthesis:
+            oss << m_config.m_region
+                << endpoint::speechSynthesis::hostnameSuffix
+                << endpoint::speechSynthesis::path;
+            break;
         default:
             ThrowInvalidArgumentException("Unknown endpoint type.");
         }
@@ -321,6 +326,10 @@ string Connection::Impl::ConstructConnectionUrl() const
 
     case EndpointType::Dialog:
         BuildQueryParameters(endpoint::dialog::queryParameters, m_config.m_queryParameters, customEndpoint, oss);
+        break;
+
+    case EndpointType::SpeechSynthesis:
+        BuildQueryParameters(endpoint::speechSynthesis::queryParameters, m_config.m_queryParameters, customEndpoint, oss);
         break;
     }
 
@@ -600,6 +609,15 @@ string Connection::Impl::UpdateRequestId(const MessageType messageType)
 
     case MessageType::Agent:
         requestId = CreateRequestId();
+        break;
+
+    case MessageType::Ssml:
+        if (m_speechRequestId.empty())
+        {
+            m_speechRequestId = CreateRequestId();
+        }
+
+        requestId = m_speechRequestId;
         break;
 
     default:
@@ -1280,6 +1298,47 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             {
                 connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, failureReason.c_str()); });
             }
+        }
+        else if (path == path::audioMetaData)
+        {
+            AudioOutputMetadataMsg msg;
+            msg.requestId = requestId;
+            msg.size = response->bufferSize;
+
+            auto metadatas = json[json_properties::metadata];
+            if (metadatas.is_array())
+            {
+                auto metadataIterator = metadatas.begin();
+                while (metadataIterator != metadatas.end())
+                {
+                    auto metadata = metadataIterator.value();
+                    auto metadataType = metadata[json_properties::type];
+                    if (metadataType.get<std::string>() == json_properties::wordBoundary)
+                    {
+                        AudioOutputMetadata audioOutputMetadata;
+                        audioOutputMetadata.type = json_properties::wordBoundary;
+
+                        auto metadataData = metadata[json_properties::data];
+                        if (metadataData.is_structured())
+                        {
+                            auto offset = metadataData[json_properties::offset];
+                            audioOutputMetadata.textBoundary.audioOffset = offset.get<OffsetType>();
+
+                            auto text = metadataData[json_properties::lowerText];
+                            if (text.is_structured())
+                            {
+                                audioOutputMetadata.textBoundary.text = PAL::ToWString(text[json_properties::text].get<string>());
+                            }
+                        }
+
+                        msg.metadatas.emplace_back(audioOutputMetadata);
+                    }
+
+                    metadataIterator++;
+                }
+            }
+
+            connection->Invoke([&] { callbacks->OnAudioOutputMetadata(msg); });
         }
         else
         {

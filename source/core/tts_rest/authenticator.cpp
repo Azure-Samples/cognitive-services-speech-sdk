@@ -6,7 +6,7 @@
 //
 
 #include "stdafx.h"
-#include "rest_tts_helper.h"
+#include "synthesis_helper.h"
 #include "authenticator.h"
 #include "azure_c_shared_utility_httpapi_wrapper.h"
 #include "azure_c_shared_utility/shared_util_options.h"
@@ -76,7 +76,7 @@ std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri,
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS_AUTHENTICATOR, __FUNCTION__);
 
     // Parse URL
-    auto url = CSpxRestTtsHelper::ParseHttpUrl(issueTokenUri);
+    auto url = CSpxSynthesisHelper::ParseUrl(issueTokenUri);
 
     // Allocate resources
     HTTP_HANDLE http_connect = HTTPAPI_CreateConnection_With_Proxy(

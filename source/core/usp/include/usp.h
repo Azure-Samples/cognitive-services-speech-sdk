@@ -104,6 +104,11 @@ struct Callbacks
     virtual void OnAudioOutputChunk(const AudioOutputChunkMsg&) {}
 
     /**
+    * A callback function that will be invoked when an audio output metadata message is received from service.
+    */
+    virtual void OnAudioOutputMetadata(const AudioOutputMetadataMsg&) {}
+
+    /**
     * A callback function that will be invoked when a message having a path defined by user is received from service.
     */
     virtual void OnUserMessage(const UserMsg&) {}
@@ -121,7 +126,7 @@ struct Callbacks
 
 using CallbacksPtr = std::shared_ptr<Callbacks>;
 
-enum class EndpointType { Speech, Intent, Translation, Dialog, ConversationTranscriptionService };
+enum class EndpointType { Speech, Intent, Translation, Dialog, ConversationTranscriptionService, SpeechSynthesis };
 
 enum class RecognitionMode : unsigned int { Interactive = 0, Conversation = 1, Dictation = 2 };
 
@@ -129,7 +134,7 @@ enum class OutputFormat : unsigned int { Simple = 0, Detailed = 1 };
 
 enum class AuthenticationType: size_t { SubscriptionKey = 0, AuthorizationToken, SearchDelegationRPSToken, DialogApplicationId, SIZE_AUTHENTICATION_TYPE };
 
-enum class MessageType { Config, Context, Agent, AgentContext, SpeechEvent, Event};
+enum class MessageType { Config, Context, Agent, AgentContext, SpeechEvent, Event, Ssml};
 
 template<typename T>
 using deleted_unique_ptr = std::unique_ptr<T, std::function<void(T*)>>;
@@ -483,6 +488,14 @@ namespace endpoint
         const std::string pathPrefix1 = "transcribe.";
         const std::string pathPrefix2 = "/speech/recognition";
         const std::string pathSuffixMultiAudio = "/multiaudio";
+    }
+
+    namespace speechSynthesis
+    {
+        const std::string hostnameSuffix = ".tts.speech.microsoft.com";
+        const std::string path = "/cognitiveservices/websocket/v1";
+
+        const std::vector<std::string> queryParameters = { };
     }
 }
 }}}}

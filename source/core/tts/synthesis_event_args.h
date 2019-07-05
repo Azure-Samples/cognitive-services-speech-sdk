@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// synthesis_event_args.h: Implementation declarations for CSpxSynthesisEventArgs C++ class
+//
+
 #pragma once
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"

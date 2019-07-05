@@ -637,15 +637,19 @@
 
 %include <speechapi_cxx_speech_synthesis_result.h>
 %include <speechapi_cxx_speech_synthesis_eventargs.h>
+%include <speechapi_cxx_speech_synthesis_word_boundary_eventargs.h>
 
 #ifdef SWIGPYTHON
 #elif defined(SWIGJAVA)
 %template(SpeechSynthesisEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SpeechSynthesisEventArgs&>;
+%template(SpeechSynthesisWordBoundaryEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SpeechSynthesisWordBoundaryEventArgs&>;
 #else
 %template(SpeechSynthesisEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SpeechSynthesisEventArgs&>;
+%template(SpeechSynthesisWordBoundaryEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SpeechSynthesisWordBoundaryEventArgs&>;
 #endif
 
 %template(SpeechSynthesisEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::SpeechSynthesisEventArgs&>;
+%template(SpeechSynthesisWordBoundaryEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::SpeechSynthesisWordBoundaryEventArgs&>;
 
 %include <speechapi_cxx_speech_synthesizer.h>
 

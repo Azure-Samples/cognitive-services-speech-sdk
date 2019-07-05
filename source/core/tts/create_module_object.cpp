@@ -11,7 +11,10 @@
 #include "synthesizer.h"
 #include "synthesis_result.h"
 #include "synthesis_event_args.h"
+#include "word_boundary_event_args.h"
 #include "rest_tts_engine_adapter.h"
+#include "usp_tts_engine_adapter.h"
+#include "thread_service.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -25,7 +28,10 @@ SPX_EXTERN_C void* TTSLib_CreateModuleObject(const char* className, const char* 
     SPX_FACTORY_MAP_ENTRY(CSpxSynthesizer, ISpxSynthesizer);
     SPX_FACTORY_MAP_ENTRY(CSpxSynthesisResult, ISpxSynthesisResult);
     SPX_FACTORY_MAP_ENTRY(CSpxSynthesisEventArgs, ISpxSynthesisEventArgs);
+    SPX_FACTORY_MAP_ENTRY(CSpxWordBoundaryEventArgs, ISpxWordBoundaryEventArgs);
     SPX_FACTORY_MAP_ENTRY(CSpxRestTtsEngineAdapter, ISpxTtsEngineAdapter);
+    SPX_FACTORY_MAP_ENTRY(CSpxUspTtsEngineAdapter, ISpxTtsEngineAdapter);
+    SPX_FACTORY_MAP_ENTRY(CSpxThreadService, ISpxThreadService);
     SPX_FACTORY_MAP_END();
 }
 

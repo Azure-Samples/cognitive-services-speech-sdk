@@ -134,6 +134,33 @@ SPXAPI_PRIVATE synthesizer_set_event_callback(std::list<std::pair<void*, std::sh
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI_PRIVATE synthesizer_word_boundary_set_event_callback(ISpxSynthesizerEvents::WordBoundaryEvent_Type ISpxSynthesizerEvents::*pwordBoundaryEvent, SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
+        auto synthesizer = (*synthhandles)[hsynth];
+
+        auto pfn = [=](std::shared_ptr<ISpxWordBoundaryEventArgs> e) {
+            auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxWordBoundaryEventArgs, SPXEVENTHANDLE>();
+            auto hevent = eventhandles->TrackHandle(e);
+            (*pCallback)(hsynth, hevent, pvContext);
+        };
+
+        auto pISpxSynthesizerEvents = SpxQueryInterface<ISpxSynthesizerEvents>(synthesizer).get();
+
+        // Disconnect pfn first to avoid duplication
+        (pISpxSynthesizerEvents->*pwordBoundaryEvent).Disconnect(pfn);
+
+        // Add pfn
+        if (pCallback != nullptr)
+        {
+            (pISpxSynthesizerEvents->*pwordBoundaryEvent).Connect(pfn);
+        }
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 template<typename EventInterface, typename EventArgs, typename Event>
 SPXHR dialog_service_connector_set_event_callback(Event event, SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void* pv_context)
 {

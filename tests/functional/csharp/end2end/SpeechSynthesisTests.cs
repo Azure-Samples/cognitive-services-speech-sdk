@@ -444,6 +444,486 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
 
         [TestMethod]
+        public async Task DefaultsUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig))
+            {
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
+                {
+                    CheckResult(result1);
+                    CheckResult(result2);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task ExplicitlyUseDefaultSpeakersUsp()
+        {
+            using (var deviceConfig = AudioConfig.FromDefaultSpeakerOutput())
+            {
+                using (var synthesizer = new SpeechSynthesizer(uspConfig, deviceConfig))
+                {
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
+                    {
+                        CheckResult(result1);
+                        CheckResult(result2);
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task PickLanguageUsp()
+        {
+            uspConfig.SpeechSynthesisLanguage = "en-GB";
+            using (var synthesizer = new SpeechSynthesizer(uspConfig))
+            {
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
+                {
+                    CheckResult(result1);
+                    CheckResult(result2);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task PickVoiceUsp()
+        {
+            uspConfig.SpeechSynthesisVoiceName = "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)";
+            using (var synthesizer = new SpeechSynthesizer(uspConfig))
+            {
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
+                {
+                    CheckResult(result1);
+                    CheckResult(result2);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task SynthesizerOutputToFileUsp()
+        {
+            using (var fileConfig = AudioConfig.FromWavFileOutput("wavefile.wav"))
+            {
+                using (var synthesizer = new SpeechSynthesizer(uspConfig, fileConfig))
+                {
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"
+                    {
+                        CheckResult(result1);
+                    }
+                } // "{{{wavefile.wav}}}" is now closed
+
+                var waveSize1 = new FileInfo("wavefile.wav").Length;
+                Assert.IsTrue(waveSize1 > EmptyWaveFileSize, $"The size of output wave file 1 is unexpected. Expected: greater than {EmptyWaveFileSize}, Actual: {waveSize1}");
+
+                // Make a second run with 2 speaks to verify that the audio can be append to the file while speaking
+                using (var synthesizer = new SpeechSynthesizer(uspConfig, fileConfig))
+                {
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}"
+                    {
+                        CheckResult(result1);
+                        CheckResult(result2);
+                    }
+                } // "{{{wavefile.wav}}}" is now closed
+
+                var waveSize2 = new FileInfo("wavefile.wav").Length;
+                Assert.IsTrue(waveSize2 > waveSize1, $"The size of output wave file 1 and wave file 2 are unexpected. Expected: wave size 2 > wave size 1, Actual: wave size 2 = {waveSize2}, wave size 1 = {waveSize1}");
+            }
+        }
+
+        [TestMethod]
+        public async Task SynthesizerOutputToPushStreamUsp()
+        {
+            using (var callback = new PushAudioOutputStreamTestCallback())
+            using (var stream = AudioOutputStream.CreatePushStream(callback))
+            using (var streamConfig = AudioConfig.FromStreamOutput(stream))
+            {
+                using (var synthesizer = new SpeechSynthesizer(uspConfig, streamConfig))
+                {
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pushstream
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pushstream
+                    {
+                        CheckResult(result1);
+                        CheckResult(result2);
+                    }
+
+                    Assert.IsFalse(callback.IsClosed(), "The push audio output stream should be opened until synthesizer is released.");
+                }
+
+                var audioLength = callback.GetAudioLength();
+                Assert.IsTrue(audioLength > 0, $"The collected audio size should be greater than zero, but actually is {audioLength}.");
+                Assert.IsTrue(callback.IsClosed(), "The push audio output stream should be closed after synthesizer is released.");
+            }
+        }
+
+        [TestMethod]
+        public async Task SynthesizerOutputToPullStreamUseAfterSynthesisCompletedUsp()
+        {
+            using (var stream = AudioOutputStream.CreatePullStream())
+            using (var streamConfig = AudioConfig.FromStreamOutput(stream))
+            {
+                using (var synthesizer = new SpeechSynthesizer(uspConfig, streamConfig))
+                {
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
+                    {
+                        CheckResult(result1);
+                        CheckResult(result2);
+                    }
+                }
+
+                DoSomethingWithAudioInPullStream(stream, new bool[] { false });
+            }
+        }
+
+        [TestMethod]
+        public async Task SynthesizerOutputToPullStreamStartUsingBeforeDoneSynthesizingUsp()
+        {
+            using (var stream = AudioOutputStream.CreatePullStream())
+            {
+                var future = DoSomethingWithAudioInPullStreamInBackground(stream, new bool[] { false });
+
+                using (var streamConfig = AudioConfig.FromStreamOutput(stream))
+                using (var synthesizer = new SpeechSynthesizer(uspConfig, streamConfig))
+                {
+                    using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
+                    using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
+                    {
+                        CheckResult(result1);
+                        CheckResult(result2);
+                    }
+                }
+
+                await future;
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeakOutInResultsUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
+            {
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
+                {
+                    CheckResult(result1);
+                    Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
+                    var audioDataSize = result1.AudioData.Length;
+                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                }
+
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
+                {
+                    CheckResult(result2);
+                    Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
+                    var audioDataSize = result2.AudioData.Length;
+                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeakOutputInChunksInEventSynthesizingUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
+            {
+                var resultReasonList = new List<ResultReason>();
+                var audioLengthList = new List<int>();
+                synthesizer.Synthesizing += (s, e) =>
+                {
+                    resultReasonList.Add(e.Result.Reason);
+                    audioLengthList.Add(e.Result.AudioData.Length);
+                };
+
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering
+                {
+                    CheckResult(result1);
+                    CheckResult(result2);
+                }
+
+                foreach (var resultReason in resultReasonList)
+                {
+                    Assert.AreEqual(ResultReason.SynthesizingAudio, resultReason, "The synthesis should be on going now.");
+                }
+
+                foreach (var audioLength in audioLengthList)
+                {
+                    Assert.IsTrue(audioLength > 0, $"The audio chunk size should be greater than zero, but actually it's {audioLength}.");
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeakOutputInStreamsUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
+            {
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
+                {
+                    CheckResult(result1);
+                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
+                    var audioDataSize = result1.AudioData.Length;
+                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+
+                    using (var stream1 = AudioDataStream.FromResult(result1)) // of type AudioDataStream, does not block
+                    {
+                        DoSomethingWithAudioInDataStream(stream1, true);
+                    }
+                }
+
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
+                {
+                    CheckResult(result2);
+                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
+                    var audioDataSize = result2.AudioData.Length;
+                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+
+                    using (var stream2 = AudioDataStream.FromResult(result2)) // of type AudioDataStream, does not block
+                    {
+                        DoSomethingWithAudioInDataStream(stream2, true);
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeakOutputInStreamsBeforeDoneFromEventSynthesisStartedUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
+            {
+                var futureList = new List<Task>();
+                var streamList = new List<AudioDataStream>();
+                var resultReasonList = new List<ResultReason>();
+                var audioLengthList = new List<int>();
+                synthesizer.SynthesisStarted += (s, e) => {
+                    resultReasonList.Add(e.Result.Reason);
+                    audioLengthList.Add(e.Result.AudioData.Length);
+
+                    var stream = AudioDataStream.FromResult(e.Result); // of type AudioDataStream, does not block
+                    futureList.Add(DoSomethingWithAudioInDataStreamInBackground(stream, false));
+                    streamList.Add(stream);
+                };
+
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering
+                {
+                    CheckResult(result1);
+                    CheckResult(result2);
+                }
+
+                var future3 = synthesizer.SpeakTextAsync("{{{text3}}}"); // "{{{text3}}}" synthesis might have started
+                using (var result3 = await future3) // "{{{text3}}}" synthesis has completed
+                {
+                    CheckResult(result3);
+                }
+
+                foreach (var future in futureList)
+                {
+                    await future;
+                }
+
+                foreach (var stream in streamList)
+                {
+                    stream.Dispose();
+                }
+
+                foreach (var resultReason in resultReasonList)
+                {
+                    Assert.AreEqual(ResultReason.SynthesizingAudioStarted, resultReason, "The synthesis should be started at this point.");
+                }
+
+                foreach (var audioLength in audioLengthList)
+                {
+                    Assert.AreEqual(0, audioLength, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingTextAsyncUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
+            {
+                using (var result1 = await synthesizer.StartSpeakingTextAsync("{{{text1}}}")) // "{{{text1}}}" synthesis has started, likely not finished
+                {
+                    CheckResult(result1);
+                    Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result1.Reason, "The synthesis should be started now.");
+                    Assert.AreEqual(0, result1.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+
+                    using (var stream1 = AudioDataStream.FromResult(result1)) // of type AudioDataStream, does not block
+                    {
+                        var future1 = DoSomethingWithAudioInDataStreamInBackground(stream1, false); // does not block, just spins a thread up
+
+                        using (var result2 = await synthesizer.StartSpeakingTextAsync("{{{text2}}}")) // "{{{text2}}}" synthesis has started, likely not finished
+                        {
+                            CheckResult(result2);
+                            Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result2.Reason, "The synthesis should be started now.");
+                            Assert.AreEqual(0, result2.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+
+                            using (var stream2 = AudioDataStream.FromResult(result2)) // of type AudioDataStream, does not block
+                            {
+                                var future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); // does not block, just spins a thread up
+
+                                await future1;
+                                await future2;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeakOutputInStreamsBeforeDoneQueuedUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
+            {
+                int startedRequests = 0;
+                synthesizer.SynthesisStarted += (s, e) =>
+                {
+                    startedRequests++;
+                };
+
+                int completedRequests = 0;
+                int startedRequestsWhenFirstRequestWasCompleted = 0;
+                synthesizer.SynthesisCompleted += (s, e) =>
+                {
+                    completedRequests++;
+                    if (completedRequests == 1)
+                    {
+                        startedRequestsWhenFirstRequestWasCompleted = startedRequests;
+                    }
+                };
+
+                var futureResult1 = synthesizer.StartSpeakingTextAsync("{{{text1}}}"); // "{{{text1}}}" synthesis might have started, likely not finished
+                var futureResult2 = synthesizer.StartSpeakingTextAsync("{{{text2}}}"); // "{{{text2}}}" synthesis might have started (very unlikely)
+
+                var future1 = DoSomethingWithAudioInResultInBackground(futureResult1, false); // does not block, just spins a thread up
+                var future2 = DoSomethingWithAudioInResultInBackground(futureResult2, false); // does not block, just spins a thread up
+
+                await future1;
+                await future2;
+
+                // This is to check the requests is queued
+                // When one request is already completed, the other one is still not started
+                Assert.AreEqual(1, startedRequestsWhenFirstRequestWasCompleted, "When one request is already completed, the other one should still not start yet.");
+            }
+        }
+
+        [TestMethod]
+        public async Task SpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResultUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
+            {
+                using (var result = await synthesizer.StartSpeakingTextAsync("{{{text1}}}"))
+                {
+                    CheckResult(result);
+                    Assert.AreEqual(ResultReason.SynthesizingAudioStarted, result.Reason, "The synthesis should be started now.");
+                    Assert.AreEqual(0, result.AudioData.Length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
+
+                    bool synthesisDone = false;
+                    synthesizer.SynthesisCompleted += (s, e) =>
+                    {
+                        synthesisDone = true;
+                    };
+
+                    synthesizer.SynthesisCanceled += (s, e) =>
+                    {
+                        synthesisDone = true;
+                    };
+
+                    while (!synthesisDone)
+                    {
+                        Thread.Sleep(100); // wait for the synthesis to be done
+                    }
+
+                    using (var stream = AudioDataStream.FromResult(result))
+                    {
+                        DoSomethingWithAudioInDataStream(stream, true);
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task CheckWordBoundaryEventsUsp()
+        {
+            uspConfig.SpeechSynthesisVoiceName = "Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)";
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null))
+            {
+                string plainText = "您好，我是来自Microsoft的中文声音。";
+                string ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>您好，<break time='50ms'/>我是来自Microsoft的中文声音。</voice></speak>";
+
+                UInt64[] expectedAudioOffsets = { 1000000, 7943750, 9675625, 11085000, 15596875, 23424375, 25713125, 29260000 };
+                UInt32[] expectedTextOffsets = { 0, 3, 4, 5, 7, 16, 17, 19 };
+                UInt32[] expectedSsmlOffsets = { 251, 274, 275, 276, 278, 287, 288, 290 };
+                UInt32[] expectedWordLengths = { 2, 1, 1, 2, 9, 1, 2, 2 };
+
+                var actualAudioOffsets = new List<UInt64>();
+                var actualTextOffsets = new List<UInt32>();
+                var actualSsmlOffsets = new List<UInt32>();
+                var actualWordLengths = new List<UInt32>();
+
+                EventHandler<SpeechSynthesisWordBoundaryEventArgs> wordBoundaryEventHandler = (s, e) =>
+                {
+                    actualAudioOffsets.Add(e.AudioOffset);
+                    actualTextOffsets.Add(e.TextOffset);
+                    actualWordLengths.Add(e.WordLength);
+                };
+
+                synthesizer.WordBoundary += wordBoundaryEventHandler;
+
+                using (var result = await synthesizer.SpeakTextAsync(plainText))
+                {
+                    CheckResult(result);
+                }
+
+                Assert.AreEqual(expectedAudioOffsets.Length, actualAudioOffsets.Count, "Incorrect count of word boundary events.");
+                for (var i = 0; i < expectedAudioOffsets.Length; ++i)
+                {
+                    Assert.AreEqual(expectedAudioOffsets[i], actualAudioOffsets[i], $"Audio offset mismatch on word #{i + 1}.");
+                    Assert.AreEqual(expectedTextOffsets[i], actualTextOffsets[i], $"Text offset mismatch on word #{i + 1}.");
+                    Assert.AreEqual(expectedWordLengths[i], actualWordLengths[i], $"Word length mismatch on word #{i + 1}.");
+                }
+
+                synthesizer.WordBoundary -= wordBoundaryEventHandler;
+                actualAudioOffsets.Clear();
+                actualTextOffsets.Clear();
+                actualWordLengths.Clear();
+
+                wordBoundaryEventHandler = (s, e) =>
+                {
+                    actualAudioOffsets.Add(e.AudioOffset);
+                    actualSsmlOffsets.Add(e.TextOffset);
+                    actualWordLengths.Add(e.WordLength);
+                };
+
+                synthesizer.WordBoundary += wordBoundaryEventHandler;
+
+                using (var result = await synthesizer.SpeakSsmlAsync(ssml))
+                {
+                    CheckResult(result);
+                }
+
+                Assert.AreEqual(expectedAudioOffsets.Length, actualAudioOffsets.Count, "Incorrect count of word boundary events.");
+                for (var i = 0; i < expectedAudioOffsets.Length; ++i)
+                {
+                    Assert.IsTrue(actualAudioOffsets[i] > 0, "Audio offset should be greater than zero.");
+                    Assert.AreEqual(expectedSsmlOffsets[i], actualSsmlOffsets[i], $"Ssml offset mismatch on word #{i + 1}.");
+                    Assert.AreEqual(expectedWordLengths[i], actualWordLengths[i], $"Word length mismatch on word #{i + 1}.");
+                }
+            }
+        }
+
+
+        [TestMethod]
         [TestCategory("SpeechSynthesisMockTest")]
         public async Task DefaultsMock()
         {

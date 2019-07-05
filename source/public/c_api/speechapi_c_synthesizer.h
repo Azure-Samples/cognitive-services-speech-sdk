@@ -42,5 +42,7 @@ SPXAPI synthesizer_started_set_callback(SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBA
 SPXAPI synthesizer_synthesizing_set_callback(SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext);
 SPXAPI synthesizer_completed_set_callback(SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext);
 SPXAPI synthesizer_canceled_set_callback(SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext);
+SPXAPI synthesizer_word_boundary_set_callback(SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext);
 
 SPXAPI synthesizer_synthesis_event_get_result(SPXEVENTHANDLE hevent, SPXRESULTHANDLE* phresult);
+SPXAPI synthesizer_word_boundary_event_get_values(SPXEVENTHANDLE hevent, uint64_t* pAudioOffset, uint32_t* pTextOffset, uint32_t* pWordLength);

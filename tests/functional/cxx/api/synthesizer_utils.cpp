@@ -15,6 +15,13 @@ namespace TTS
         return SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
     }
 
+    shared_ptr<SpeechConfig> UspSpeechConfig()
+    {
+        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        config->SetProperty("CARBON-INTERNAL-UseTtsEngine-Usp", "true");
+        return config;
+    }
+
     shared_ptr<SpeechConfig> MockSpeechConfig()
     {
         auto config = SpeechConfig::FromSubscription("None", "None");

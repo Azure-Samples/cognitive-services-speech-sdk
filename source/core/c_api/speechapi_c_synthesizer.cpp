@@ -69,12 +69,20 @@ SPXAPI synthesizer_result_handle_release(SPXRESULTHANDLE hresult)
 
 SPXAPI_(bool) synthesizer_event_handle_is_valid(SPXEVENTHANDLE hevent)
 {
-    return Handle_IsValid<SPXEVENTHANDLE, ISpxSynthesisEventArgs>(hevent);
+    return Handle_IsValid<SPXEVENTHANDLE, ISpxSynthesisEventArgs>(hevent) ||
+        Handle_IsValid<SPXEVENTHANDLE, ISpxWordBoundaryEventArgs>(hevent);
 }
 
 SPXAPI synthesizer_event_handle_release(SPXEVENTHANDLE hevent)
 {
-    return Handle_Close<SPXEVENTHANDLE, ISpxSynthesisEventArgs>(hevent);
+    if (Handle_IsValid<SPXEVENTHANDLE, ISpxSynthesisEventArgs>(hevent))
+    {
+        return Handle_Close<SPXEVENTHANDLE, ISpxSynthesisEventArgs>(hevent);
+    }
+    else
+    {
+        return Handle_Close<SPXEVENTHANDLE, ISpxWordBoundaryEventArgs>(hevent);
+    }
 }
 
 SPXAPI synthesizer_enable(SPXSYNTHHANDLE hsynth)
@@ -331,6 +339,11 @@ SPXAPI synthesizer_canceled_set_callback(SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLB
     return synthesizer_set_event_callback(&ISpxSynthesizerEvents::SynthesisCanceled, hsynth, pCallback, pvContext);
 }
 
+SPXAPI synthesizer_word_boundary_set_callback(SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext)
+{
+    return synthesizer_word_boundary_set_event_callback(&ISpxSynthesizerEvents::WordBoundary, hsynth, pCallback, pvContext);
+}
+
 SPXAPI synthesizer_synthesis_event_get_result(SPXEVENTHANDLE hevent, SPXRESULTHANDLE* phresult)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phresult == nullptr);
@@ -343,6 +356,23 @@ SPXAPI synthesizer_synthesis_event_get_result(SPXEVENTHANDLE hevent, SPXRESULTHA
 
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesisResult, SPXRESULTHANDLE>();
         *phresult = resulthandles->TrackHandle(result);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI synthesizer_word_boundary_event_get_values(SPXEVENTHANDLE hevent, uint64_t* pAudioOffset, uint32_t* pTextOffset, uint32_t* pWordLength)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pAudioOffset == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pTextOffset == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pWordLength == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxWordBoundaryEventArgs, SPXEVENTHANDLE>();
+        auto wordBoundaryEvent = (*eventhandles)[hevent];
+        *pAudioOffset = wordBoundaryEvent->GetAudioOffset();
+        *pTextOffset = wordBoundaryEvent->GetTextOffset();
+        *pWordLength = wordBoundaryEvent->GetWordLength();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

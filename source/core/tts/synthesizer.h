@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// synthesizer.h: Implementation declarations for CSpxSynthesizer C++ class
+//
+
 #pragma once
 #include <queue>
 #include "ispxinterfaces.h"
@@ -68,6 +75,7 @@ public:
     void FireSynthesizing(std::shared_ptr<ISpxSynthesisResult> result) override;
     void FireSynthesisCompleted(std::shared_ptr<ISpxSynthesisResult> result) override;
     void FireSynthesisCanceled(std::shared_ptr<ISpxSynthesisResult> result) override;
+    void FireWordBoundary(uint64_t audioOffset, uint32_t textOffset, uint32_t wordLength) override;
 
 
     // --- ISpxServiceProvider ---
@@ -95,7 +103,7 @@ private:
 
     std::shared_ptr<ISpxSynthesisResult> CreateResult(const std::wstring& requestId, ResultReason reason, uint8_t* audio_buffer, size_t audio_length);
     void FireResultEvent(std::shared_ptr<ISpxSynthesisResult> result);
-    void FireEvent(std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> events, std::shared_ptr<ISpxSynthesisResult> result);
+    void FireSynthesisEvent(std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> events, std::shared_ptr<ISpxSynthesisResult> result);
 
     void EnsureTtsEngineAdapter();
     void InitializeTtsEngineAdapter();

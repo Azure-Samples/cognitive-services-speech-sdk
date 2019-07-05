@@ -6,7 +6,7 @@
 //
 
 #include "stdafx.h"
-#include "rest_tts_helper.h"
+#include "synthesis_helper.h"
 #include "rest_tts_engine_adapter.h"
 #include "create_object_helpers.h"
 #include "guid_utils.h"
@@ -58,16 +58,16 @@ void CSpxRestTtsEngineAdapter::Init()
     std::string region = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), "");
     std::string subscriptionKey = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), "");
 
-    if (!endpoint.empty() && !IsCustomVoiceEndpoint(endpoint) && !IsStandardVoiceEndpoint(endpoint))
+    if (!endpoint.empty() && !CSpxSynthesisHelper::IsCustomVoiceEndpoint(endpoint) && !CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint))
     {
         // Scenario 1, custom endpoint (e.g. on prem), no need issue token
         m_endpoint = endpoint;
     }
-    else if (!endpoint.empty() && IsCustomVoiceEndpoint(endpoint))
+    else if (!endpoint.empty() && CSpxSynthesisHelper::IsCustomVoiceEndpoint(endpoint))
     {
         // Scenario 2, custom voice, need issue token (and therefore need initialize m_authenticator)
         m_endpoint = endpoint;
-        region = ParseRegionFromCognitiveServiceEndpoint(endpoint);
+        region = CSpxSynthesisHelper::ParseRegionFromCognitiveServiceEndpoint(endpoint);
 
         // Construct cognitive service token issue URL based on region
         auto issueTokenUrl = std::string(HTTPS_URL_PREFIX) + region + ISSUE_TOKEN_HOST_SUFFIX + ISSUE_TOKEN_URL_PATH;
@@ -79,7 +79,7 @@ void CSpxRestTtsEngineAdapter::Init()
 
         m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
     }
-    else if ((endpoint.empty() && !region.empty()) || (!endpoint.empty() && IsStandardVoiceEndpoint(endpoint)))
+    else if ((endpoint.empty() && !region.empty()) || (!endpoint.empty() && CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint)))
     {
         // Scenario 3, standard voice, need issue token (and therefore need initialize m_authenticator)
         if (endpoint.empty() && !region.empty())
@@ -88,10 +88,10 @@ void CSpxRestTtsEngineAdapter::Init()
             m_endpoint = std::string(HTTPS_URL_PREFIX) + region + TTS_COGNITIVE_SERVICE_HOST_SUFFIX + TTS_COGNITIVE_SERVICE_URL_PATH;
         }
 
-        if (!endpoint.empty() && IsStandardVoiceEndpoint(endpoint))
+        if (!endpoint.empty() && CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint))
         {
             m_endpoint = endpoint;
-            region = ParseRegionFromCognitiveServiceEndpoint(endpoint);
+            region = CSpxSynthesisHelper::ParseRegionFromCognitiveServiceEndpoint(endpoint);
         }
 
         // Construct cognitive service token issue URL based on region
@@ -134,7 +134,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
     {
         auto language = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthLanguage), "");
         auto voice = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthVoice), "");
-        ssml = CSpxRestTtsHelper::BuildSsml(text, language, voice);
+        ssml = CSpxSynthesisHelper::BuildSsml(text, language, voice);
     }
 
     SPX_DBG_TRACE_VERBOSE("SSML sent to TTS cognitive service: %s", ssml.data());
@@ -213,7 +213,7 @@ void CSpxRestTtsEngineAdapter::EnsureHttpConnection()
     }
 
     // Create the connection
-    auto url = CSpxRestTtsHelper::ParseHttpUrl(m_endpoint);
+    auto url = CSpxSynthesisHelper::ParseUrl(m_endpoint);
     m_httpConnect = HTTPAPI_CreateConnection_With_Proxy(url.host.data(), m_proxyHost.data(), m_proxyPort, m_proxyUsername.data(), m_proxyPassword.data());
     if (!m_httpConnect)
     {
@@ -258,74 +258,10 @@ std::string CSpxRestTtsEngineAdapter::GetOutputFormatString(std::shared_ptr<ISpx
     return formatString;
 }
 
-std::string CSpxRestTtsEngineAdapter::ParseRegionFromCognitiveServiceEndpoint(const std::string& endpoint)
-{
-    auto url = CSpxRestTtsHelper::ParseHttpUrl(endpoint);
-
-    size_t first_dot_pos = url.host.find('.');
-    if (first_dot_pos == size_t(-1))
-    {
-        ThrowRuntimeError("The given endpoint is not valid TTS cognitive service endpoint. Expected *.tts.speech.microsoft.com or *.voice.speech.microsoft.com");
-    }
-
-    std::string host_name_suffix = url.host.substr(first_dot_pos);
-    if (PAL::stricmp(host_name_suffix.data(), TTS_COGNITIVE_SERVICE_HOST_SUFFIX) != 0 &&
-        PAL::stricmp(host_name_suffix.data(), TTS_CUSTOM_VOICE_HOST_SUFFIX) != 0)
-    {
-        ThrowRuntimeError("The given endpoint is not valid TTS cognitive service endpoint. Expected *.tts.speech.microsoft.com or *.voice.speech.microsoft.com");
-    }
-
-    return url.host.substr(0, first_dot_pos);
-}
-
-bool CSpxRestTtsEngineAdapter::IsCustomVoiceEndpoint(const std::string& endpoint)
-{
-    auto url = CSpxRestTtsHelper::ParseHttpUrl(endpoint);
-
-    size_t first_dot_pos = url.host.find('.');
-    if (first_dot_pos == size_t(-1))
-    {
-        return false;
-    }
-
-    std::string host_name_suffix = url.host.substr(first_dot_pos);
-
-    if (PAL::stricmp(host_name_suffix.data(), TTS_CUSTOM_VOICE_HOST_SUFFIX) == 0)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool CSpxRestTtsEngineAdapter::IsStandardVoiceEndpoint(const std::string& endpoint)
-{
-    auto url = CSpxRestTtsHelper::ParseHttpUrl(endpoint);
-
-    size_t first_dot_pos = url.host.find('.');
-    if (first_dot_pos == size_t(-1))
-    {
-        return false;
-    }
-
-    std::string host_name_suffix = url.host.substr(first_dot_pos);
-
-    if (PAL::stricmp(host_name_suffix.data(), TTS_COGNITIVE_SERVICE_HOST_SUFFIX) == 0)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
 void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsRequest& request, std::shared_ptr<ISpxSynthesisResultInit> result_init)
 {
     // Parse URL
-    auto url = CSpxRestTtsHelper::ParseHttpUrl(request.endpoint);
+    auto url = CSpxSynthesisHelper::ParseUrl(request.endpoint);
 
     // Allocate resources
     HTTP_HEADERS_HANDLE httpRequestHeaders = HTTPHeaders_Alloc();
@@ -372,7 +308,7 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
             throw std::runtime_error("Could not add HTTP request header: X-Microsoft-OutputFormat");
         }
 
-        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Content-Length", CSpxRestTtsHelper::itos(request.postContent.length()).data()) != HTTP_HEADERS_OK)
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Content-Length", CSpxSynthesisHelper::itos(request.postContent.length()).data()) != HTTP_HEADERS_OK)
         {
             throw std::runtime_error("Could not add HTTP request header: Content-Length");
         }
@@ -446,7 +382,7 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
             else
             {
                 result_init->InitSynthesisResult(request.requestId, ResultReason::Canceled, CancellationReason::Error,
-                    CSpxRestTtsHelper::HttpStatusCodeToCancellationErrorCode(statusCode), nullptr, 0, request.outputFormat.get(), request.outputHasHeader);
+                    CSpxSynthesisHelper::HttpStatusCodeToCancellationErrorCode(statusCode), nullptr, 0, request.outputFormat.get(), request.outputHasHeader);
             }
 
             // Build error message and set it to error detail string

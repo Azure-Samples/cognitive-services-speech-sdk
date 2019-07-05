@@ -15,7 +15,7 @@ namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Performs speech synthesis to speaker, file, or other audio output streams, and gets synthesized audio as result.
-    /// Added in version 1.4.0
+    /// Updated in version 1.7.0
     /// </summary>
     public sealed class SpeechSynthesizer : IDisposable
     {
@@ -39,12 +39,19 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public event EventHandler<SpeechSynthesisEventArgs> SynthesisCanceled;
 
+        /// <summary>
+        /// The event <see cref="WordBoundary"/> signals that a word boundary was received.
+        /// Added in version 1.7.0
+        /// </summary>
+        public event EventHandler<SpeechSynthesisWordBoundaryEventArgs> WordBoundary;
+
         internal InteropSafeHandle synthHandle;
 
         private TtsCallbackFunctionDelegate synthesisStartedCallbackDelegate;
         private TtsCallbackFunctionDelegate synthesizingCallbackDelegate;
         private TtsCallbackFunctionDelegate synthesisCompletedCallbackDelegate;
         private TtsCallbackFunctionDelegate synthesisCanceledCallbackDelegate;
+        private TtsCallbackFunctionDelegate wordBoundaryCallbackDelegate;
 
         private GCHandle gch;
         private object synthesizerLock = new object();
@@ -79,6 +86,7 @@ namespace Microsoft.CognitiveServices.Speech
             synthesizingCallbackDelegate = FireEvent_Synthesizing;
             synthesisCompletedCallbackDelegate = FireEvent_SynthesisCompleted;
             synthesisCanceledCallbackDelegate = FireEvent_SynthesisCanceled;
+            wordBoundaryCallbackDelegate = FireEvent_WordBoundary;
 
             this.synthHandle = synthHandle;
             gch = GCHandle.Alloc(this, GCHandleType.Weak);
@@ -87,6 +95,7 @@ namespace Microsoft.CognitiveServices.Speech
             ThrowIfFail(Internal.Synthesizer.synthesizer_synthesizing_set_callback(synthHandle, synthesizingCallbackDelegate, GCHandle.ToIntPtr(gch)));
             ThrowIfFail(Internal.Synthesizer.synthesizer_completed_set_callback(synthHandle, synthesisCompletedCallbackDelegate, GCHandle.ToIntPtr(gch)));
             ThrowIfFail(Internal.Synthesizer.synthesizer_canceled_set_callback(synthHandle, synthesisCanceledCallbackDelegate, GCHandle.ToIntPtr(gch)));
+            ThrowIfFail(Internal.Synthesizer.synthesizer_word_boundary_set_callback(synthHandle, wordBoundaryCallbackDelegate, GCHandle.ToIntPtr(gch)));
 
             IntPtr propertyHandle = IntPtr.Zero;
             ThrowIfFail(Internal.Synthesizer.synthesizer_get_property_bag(synthHandle, out propertyHandle));
@@ -342,6 +351,7 @@ namespace Microsoft.CognitiveServices.Speech
                 LogErrorIfFail(Internal.Synthesizer.synthesizer_synthesizing_set_callback(synthHandle, null, IntPtr.Zero));
                 LogErrorIfFail(Internal.Synthesizer.synthesizer_completed_set_callback(synthHandle, null, IntPtr.Zero));
                 LogErrorIfFail(Internal.Synthesizer.synthesizer_canceled_set_callback(synthHandle, null, IntPtr.Zero));
+                LogErrorIfFail(Internal.Synthesizer.synthesizer_word_boundary_set_callback(synthHandle, null, IntPtr.Zero));
                 synthHandle.Dispose();
             }
 
@@ -349,6 +359,7 @@ namespace Microsoft.CognitiveServices.Speech
             synthesizingCallbackDelegate = null;
             synthesisCompletedCallbackDelegate = null;
             synthesisCanceledCallbackDelegate = null;
+            wordBoundaryCallbackDelegate = null;
 
             if (gch.IsAllocated)
             {
@@ -439,6 +450,28 @@ namespace Microsoft.CognitiveServices.Speech
                 using (var resultEventArg = new SpeechSynthesisEventArgs(hevent))
                 {
                     synthesizer.SynthesisCanceled?.Invoke(synthesizer, resultEventArg);
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                LogError(Internal.SpxError.InvalidHandle);
+            }
+        }
+
+        [Internal.MonoPInvokeCallback]
+        private static void FireEvent_WordBoundary(IntPtr hsynth, IntPtr hevent, IntPtr pvContext)
+        {
+            try
+            {
+                var synthesizer = InteropSafeHandle.GetObjectFromWeakHandle<SpeechSynthesizer>(pvContext);
+                if (synthesizer == null || synthesizer.isDisposing)
+                {
+                    return;
+                }
+
+                using (var wordBoundaryEventArg = new SpeechSynthesisWordBoundaryEventArgs(hevent))
+                {
+                    synthesizer.WordBoundary?.Invoke(synthesizer, wordBoundaryEventArg);
                 }
             }
             catch (InvalidOperationException)

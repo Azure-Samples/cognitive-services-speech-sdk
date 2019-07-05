@@ -21,7 +21,7 @@ namespace Speech {
 
 /// <summary>
 /// Class for speech synthesizer.
-/// Added in version 1.4.0
+/// Updated in version 1.7.0
 /// </summary>
 class SpeechSynthesizer : public std::enable_shared_from_this<SpeechSynthesizer>
 {
@@ -297,6 +297,12 @@ public:
     /// </summary>
     EventSignal<const SpeechSynthesisEventArgs&> SynthesisCanceled;
 
+    /// <summary>
+    /// The event signals that a speech synthesis word bounary is received while the synthesis is on going.
+    /// Added in version 1.7.0
+    /// </summary>
+    EventSignal<const SpeechSynthesisWordBoundaryEventArgs&> WordBoundary;
+
 private:
 
     /// <summary>
@@ -310,7 +316,8 @@ private:
         SynthesisStarted(GetSpeechSynthesisEventConnectionsChangedCallback(), GetSpeechSynthesisEventConnectionsChangedCallback(), false),
         Synthesizing(GetSpeechSynthesisEventConnectionsChangedCallback(), GetSpeechSynthesisEventConnectionsChangedCallback(), false),
         SynthesisCompleted(GetSpeechSynthesisEventConnectionsChangedCallback(), GetSpeechSynthesisEventConnectionsChangedCallback(), false),
-        SynthesisCanceled(GetSpeechSynthesisEventConnectionsChangedCallback(), GetSpeechSynthesisEventConnectionsChangedCallback(), false)
+        SynthesisCanceled(GetSpeechSynthesisEventConnectionsChangedCallback(), GetSpeechSynthesisEventConnectionsChangedCallback(), false),
+        WordBoundary(GetWordBoundaryEventConnectionsChangedCallback(), GetWordBoundaryEventConnectionsChangedCallback(), false)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }
@@ -333,6 +340,16 @@ private:
             else if (&eventSignal == &SynthesisCanceled)
             {
                 synthesizer_canceled_set_callback(m_hsynth, SynthesisCanceled.IsConnected() ? FireEvent_SynthesisCanceled : nullptr, this);
+            }
+        };
+    }
+
+    std::function<void(const EventSignal<const SpeechSynthesisWordBoundaryEventArgs&>&)> GetWordBoundaryEventConnectionsChangedCallback()
+    {
+        return [=](const EventSignal<const SpeechSynthesisWordBoundaryEventArgs&>& eventSignal) {
+            if (&eventSignal == &WordBoundary)
+            {
+                synthesizer_word_boundary_set_callback(m_hsynth, WordBoundary.IsConnected() ? FireEvent_WordBoundary : nullptr, this);
             }
         };
     }
@@ -375,6 +392,16 @@ private:
         auto pThis = static_cast<SpeechSynthesizer*>(pvContext);
         auto keepAlive = pThis->shared_from_this();
         pThis->SynthesisCanceled.Signal(*synthEvent.get());
+    }
+
+    static void FireEvent_WordBoundary(SPXRECOHANDLE hsynth, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        UNUSED(hsynth);
+        std::unique_ptr<SpeechSynthesisWordBoundaryEventArgs> wordBoundaryEvent{ new SpeechSynthesisWordBoundaryEventArgs(hevent) };
+
+        auto pThis = static_cast<SpeechSynthesizer*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
+        pThis->WordBoundary.Signal(*wordBoundaryEvent.get());
     }
 };
 

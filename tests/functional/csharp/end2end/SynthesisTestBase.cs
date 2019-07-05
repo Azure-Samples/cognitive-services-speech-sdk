@@ -21,6 +21,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public static string subscriptionKey, region;
         public SpeechConfig config;
+        public SpeechConfig uspConfig;
         public SpeechConfig mockConfig;
 
         public static void BaseClassInit(TestContext context)
@@ -35,6 +36,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void BaseTestInit()
         {
             config = SpeechConfig.FromSubscription(subscriptionKey, region);
+            uspConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
+            uspConfig.SetProperty("CARBON-INTERNAL-UseTtsEngine-Usp", "true");
             mockConfig = SpeechConfig.FromSubscription("None", "None");
             mockConfig.SetProperty("CARBON-INTERNAL-UseTtsEngine-Mock", "true");
         }

@@ -25,5 +25,6 @@ SPXAPI_PRIVATE dialog_service_connector_activity_received_set_event_callback(ISp
 SPXAPI_PRIVATE connection_set_event_callback(ISpxRecognizerEvents::ConnectionEvent_Type ISpxRecognizerEvents::*connectionEvent, SPXCONNECTIONHANDLE connection, CONNECTION_CALLBACK_FUNC callback, void* context);
 
 SPXAPI_PRIVATE synthesizer_set_event_callback(std::list<std::pair<void*, std::shared_ptr<ISpxSynthesizerEvents::SynthEvent_Type>>> ISpxSynthesizerEvents::*psynthEvents, SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext);
+SPXAPI_PRIVATE synthesizer_word_boundary_set_event_callback(ISpxSynthesizerEvents::WordBoundaryEvent_Type ISpxSynthesizerEvents::*pwordBoundaryEvent, SPXSYNTHHANDLE hsynth, PSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext);
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

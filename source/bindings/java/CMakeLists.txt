@@ -39,6 +39,8 @@ elseif(ANDROID)
     # relro makes the relocation section read only after loading preventing attacks on the table
     set(CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} -z nocopyreloc -z relro -z now") # -Wl,-z,relro
     set(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} -z nocopyreloc -z relro -z now") # -Wl,-z,relro
+elseif(MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 endif()
 
 if(WIN32)
@@ -213,6 +215,9 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisEventListener.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisWordBoundaryEventArgs.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisWordBoundaryEventSignal.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisWordBoundaryEventListener.java
     ${CMAKE_SWIG_OUTDIR}/StreamStatus.java
     ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisCancellationDetails.java
     ${CMAKE_SWIG_OUTDIR}/SpeechSynthesisOutputFormat.java

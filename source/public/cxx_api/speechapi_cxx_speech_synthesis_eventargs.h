@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
-// speechapi_cxx_speech_synthesis_eventargs.h: Public API declarations for SessionEventArgs C++ class
+// speechapi_cxx_speech_synthesis_eventargs.h: Public API declarations for SpeechSynthesisEventArgs C++ class
 //
 
 #pragma once

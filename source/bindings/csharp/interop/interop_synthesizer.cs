@@ -72,7 +72,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR synthesizer_canceled_set_callback(InteropSafeHandle synthHandle, TtsCallbackFunctionDelegate callback, IntPtr context);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR synthesizer_word_boundary_set_callback(InteropSafeHandle synthHandle, TtsCallbackFunctionDelegate callback, IntPtr context);
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR synthesizer_synthesis_event_get_result(SPXEVENTHANDLE eventHandle, out SPXRESULTHANDLE resultHandle);
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR synthesizer_word_boundary_event_get_values(SPXEVENTHANDLE eventHandle, out UInt64 audioOffset, out UInt32 textOffset, out UInt32 wordLength);
 
     }
 }

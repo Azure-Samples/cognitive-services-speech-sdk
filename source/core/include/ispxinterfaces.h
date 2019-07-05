@@ -777,10 +777,25 @@ public:
     virtual void Init(std::shared_ptr<ISpxSynthesisResult> result) = 0;
 };
 
+class ISpxWordBoundaryEventArgs : public ISpxInterfaceBaseFor<ISpxWordBoundaryEventArgs>
+{
+public:
+    virtual uint64_t GetAudioOffset() = 0;
+    virtual uint32_t GetTextOffset() = 0;
+    virtual uint32_t GetWordLength() = 0;
+};
+
+class ISpxWordBoundaryEventArgsInit : public ISpxInterfaceBaseFor<ISpxWordBoundaryEventArgsInit>
+{
+public:
+    virtual void Init(uint64_t audioOffset, uint32_t textOffset, uint32_t wordLength) = 0;
+};
+
 class ISpxSynthesizerEvents : public ISpxInterfaceBaseFor<ISpxSynthesizerEvents>
 {
 public:
     using SynthEvent_Type = EventSignal<std::shared_ptr<ISpxSynthesisEventArgs>>;
+    using WordBoundaryEvent_Type = EventSignal<std::shared_ptr<ISpxWordBoundaryEventArgs>>;
     using SynthesisCallbackFunction_Type = std::function<void(std::shared_ptr<ISpxSynthesisEventArgs>)>;
 
     virtual void ConnectSynthesisStartedCallback(void* object, SynthesisCallbackFunction_Type callback) = 0;
@@ -795,11 +810,13 @@ public:
     virtual void FireSynthesizing(std::shared_ptr<ISpxSynthesisResult> result) = 0;
     virtual void FireSynthesisCompleted(std::shared_ptr<ISpxSynthesisResult> result) = 0;
     virtual void FireSynthesisCanceled(std::shared_ptr<ISpxSynthesisResult> result) = 0;
+    virtual void FireWordBoundary(uint64_t audioOffset, uint32_t textOffset, uint32_t wordLength) = 0;
 
     std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> SynthesisStarted;
     std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> Synthesizing;
     std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> SynthesisCompleted;
     std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> SynthesisCanceled;
+    WordBoundaryEvent_Type WordBoundary;
 };
 
 class ISpxSession : public ISpxInterfaceBaseFor<ISpxSession>

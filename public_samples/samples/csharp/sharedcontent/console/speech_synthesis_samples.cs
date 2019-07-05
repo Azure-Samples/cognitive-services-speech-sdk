@@ -547,5 +547,62 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
         }
+
+        // Speech synthesis word boundary event.
+        public static async Task SynthesisWordBoundaryEventAsync()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Set backend protocol to USP (Universal Speech Protocol), on which word boundary is available
+            config.SetProperty("SDK-INTERNAL-UseTtsEngine-Usp", "true");
+
+            // Creates a speech synthesizer with a null output stream.
+            // This means the audio output data will not be written to any stream.
+            // You can just get the audio from the result.
+            using (var synthesizer = new SpeechSynthesizer(config, null))
+            {
+                // Subscribes to word boundary event
+                synthesizer.WordBoundary += (s, e) =>
+                {
+                    // The unit of e.AudioOffset is tick (1 tick = 100 nano seconds), divided by 10000 to be converted to ms
+                    Console.WriteLine($"Word boundary event received. Audio offset: " +
+                        $"{(e.AudioOffset + 5000) / 10000}ms, text offset: {e.TextOffset}, word length: {e.WordLength}.");
+                };
+
+                for (int i = 0; i < 2; ++i)
+                {
+                    // Receives a text from console input and synthesize it to result.
+                    Console.WriteLine("Type some text that you want to synthesize...");
+                    Console.Write("> ");
+                    string text = Console.ReadLine();
+
+                    using (var result = await synthesizer.SpeakTextAsync(text))
+                    {
+                        if (result.Reason == ResultReason.SynthesizingAudioCompleted)
+                        {
+                            Console.WriteLine($"Speech synthesized for text [{text}].");
+                            var audioData = result.AudioData;
+                            Console.WriteLine($"{audioData.Length} bytes of audio data received for text [{text}]");
+                        }
+                        else if (result.Reason == ResultReason.Canceled)
+                        {
+                            var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
+                            Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                            if (cancellation.Reason == CancellationReason.Error)
+                            {
+                                Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                                Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
+                                Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

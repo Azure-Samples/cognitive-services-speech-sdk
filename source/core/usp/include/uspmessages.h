@@ -264,6 +264,34 @@ struct AudioOutputChunkMsg
 };
 
 /**
+* Represents a text boundary for alignment with audio output
+*/
+struct TextBoundary
+{
+    OffsetType audioOffset { 0 };
+    std::wstring text;
+};
+
+/**
+* Represents an audio output metadata
+*/
+struct AudioOutputMetadata
+{
+    std::string type;
+    TextBoundary textBoundary;
+};
+
+/**
+* Represents an audio output metadata message
+*/
+struct AudioOutputMetadataMsg
+{
+    std::string requestId;
+    size_t size;
+    std::list<AudioOutputMetadata> metadatas;
+};
+
+/**
 * Represents a message corresponding to a user defined path.
 */
 struct UserMsg

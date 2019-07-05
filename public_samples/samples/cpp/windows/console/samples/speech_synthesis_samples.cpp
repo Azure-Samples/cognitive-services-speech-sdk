@@ -606,3 +606,63 @@ void SpeechSynthesisEvents()
         }
     }
 }
+
+// Speech synthesis word boundary event.
+void SpeechSynthesisWordBoundaryEvent()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    // Set backend protocol to USP (Universal Speech Protocol), on which word boundary is available
+    config->SetProperty("SDK-INTERNAL-UseTtsEngine-Usp", "true");
+
+    // Creates a speech synthesizer with a null output stream.
+    // This means the audio output data will not be written to any stream.
+    // You can just get the audio from the result.
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+
+    // Subscribes to word boundary event
+    synthesizer->WordBoundary += [](const SpeechSynthesisWordBoundaryEventArgs& e)
+    {
+        cout << "Word boundary event received. "
+            // The unit of e.AudioOffset is tick (1 tick = 100 nano seconds), divided by 10000 to be converted to ms
+            << "Audio offset: " << (e.AudioOffset + 5000) / 10000 << "ms, "
+            << "text offset: " << e.TextOffset << ", "
+            << "word length: " << e.WordLength << "."
+            << endl;
+    };
+
+    for (int i = 0; i < 2; ++i)
+    {
+        // Receives a text from console input and synthesize it to result.
+        cout << "Type some text that you want to synthesize..." << std::endl;
+        cout << "> ";
+        std::string text;
+        getline(cin, text);
+
+        auto result = synthesizer->SpeakTextAsync(text).get();
+
+        // Checks result.
+        if (result->Reason == ResultReason::SynthesizingAudioCompleted)
+        {
+            cout << "Speech synthesized for text [" << text << "]" << std::endl;
+            auto audioData = result->GetAudioData();
+            cout << audioData->size() << " bytes of audio data received for text [" << text << "]" << endl;
+        }
+        else if (result->Reason == ResultReason::Canceled)
+        {
+            auto cancellation = SpeechSynthesisCancellationDetails::FromResult(result);
+            cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+            if (cancellation->Reason == CancellationReason::Error)
+            {
+                cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
+                cout << "CANCELED: ErrorDetails=[" << cancellation->ErrorDetails << "]" << std::endl;
+                cout << "CANCELED: Did you update the subscription info?" << std::endl;
+            }
+
+            break;
+        }
+    }
+}

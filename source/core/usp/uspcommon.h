@@ -54,6 +54,7 @@ namespace USP {
         const std::string translationSynthesis = "translation.synthesis";
         const std::string translationSynthesisEnd = "translation.synthesis.end";
         const std::string audio = "audio";
+        const std::string audioMetaData = "audio.metadata";
     }
 
     namespace headers {
@@ -89,6 +90,12 @@ namespace USP {
         const std::string translations = "Translations";
         const std::string synthesisStatus = "SynthesisStatus";
         const std::string lang = "Language";
+
+        const std::string metadata = "Metadata";
+        const std::string type = "Type";
+        const std::string data = "Data";
+        const std::string wordBoundary = "WordBoundary";
+        const std::string lowerText = "text";
     }
 
 }

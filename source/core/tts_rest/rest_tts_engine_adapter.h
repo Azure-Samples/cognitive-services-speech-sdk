@@ -16,14 +16,6 @@
 #include "property_bag_impl.h"
 #include "azure_c_shared_utility_httpapi_wrapper.h"
 
-#define HTTPS_URL_PREFIX "https://"
-#define ISSUE_TOKEN_HOST_SUFFIX ".api.cognitive.microsoft.com"
-#define ISSUE_TOKEN_URL_PATH "/sts/v1.0/issueToken"
-#define TTS_COGNITIVE_SERVICE_HOST_SUFFIX ".tts.speech.microsoft.com"
-#define TTS_COGNITIVE_SERVICE_URL_PATH "/cognitiveservices/v1"
-#define TTS_CUSTOM_VOICE_HOST_SUFFIX ".voice.speech.microsoft.com"
-#define USER_AGENT "SpeechSDK"
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -96,9 +88,6 @@ private:
     SpxWAVEFORMATEX_Type GetOutputFormat(std::shared_ptr<ISpxAudioOutput> output, bool* hasHeader);
     std::string GetOutputFormatString(std::shared_ptr<ISpxAudioOutput> output);
 
-    static std::string ParseRegionFromCognitiveServiceEndpoint(const std::string& endpoint);
-    static bool IsCustomVoiceEndpoint(const std::string& endpoint);
-    static bool IsStandardVoiceEndpoint(const std::string& endpoint);
     static void PostTtsRequest(HTTP_HANDLE http_connect, RestTtsRequest& request, std::shared_ptr<ISpxSynthesisResultInit> result_init);
     static void OnChunkReceived(void* context, const unsigned char* buffer, size_t size);
 

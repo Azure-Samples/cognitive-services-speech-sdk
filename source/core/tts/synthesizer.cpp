@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// synthesizer.cpp: Implementation definitions for CSpxSynthesizer C++ class
+//
+
 #include "stdafx.h"
 #include "synthesizer.h"
 #include <future>
@@ -392,25 +399,34 @@ void CSpxSynthesizer::DisconnectSynthesisCanceledCallback(void* object, Synthesi
 void CSpxSynthesizer::FireSynthesisStarted(std::shared_ptr<ISpxSynthesisResult> result)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    FireEvent(SynthesisStarted, result);
+    FireSynthesisEvent(SynthesisStarted, result);
 }
 
 void CSpxSynthesizer::FireSynthesizing(std::shared_ptr<ISpxSynthesisResult> result)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    FireEvent(Synthesizing, result);
+    FireSynthesisEvent(Synthesizing, result);
 }
 
 void CSpxSynthesizer::FireSynthesisCompleted(std::shared_ptr<ISpxSynthesisResult> result)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    FireEvent(SynthesisCompleted, result);
+    FireSynthesisEvent(SynthesisCompleted, result);
 }
 
 void CSpxSynthesizer::FireSynthesisCanceled(std::shared_ptr<ISpxSynthesisResult> result)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    FireEvent(SynthesisCanceled, result);
+    FireSynthesisEvent(SynthesisCanceled, result);
+}
+
+void CSpxSynthesizer::FireWordBoundary(uint64_t audioOffset, uint32_t textOffset, uint32_t wordLength)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    auto wordBoundaryEvent = SpxCreateObjectWithSite<ISpxWordBoundaryEventArgs>("CSpxWordBoundaryEventArgs", SpxSiteFromThis(this));
+    auto argsInit = SpxQueryInterface<ISpxWordBoundaryEventArgsInit>(wordBoundaryEvent);
+    argsInit->Init(audioOffset, textOffset, wordLength);
+    WordBoundary.Signal(wordBoundaryEvent);
 }
 
 uint32_t CSpxSynthesizer::Write(ISpxTtsEngineAdapter* adapter, const std::wstring& requestId, uint8_t* buffer, uint32_t size)
@@ -507,7 +523,7 @@ void CSpxSynthesizer::FireResultEvent(std::shared_ptr<ISpxSynthesisResult> resul
     }
 }
 
-void CSpxSynthesizer::FireEvent(std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> events, std::shared_ptr<ISpxSynthesisResult> result)
+void CSpxSynthesizer::FireSynthesisEvent(std::list<std::pair<void*, std::shared_ptr<SynthEvent_Type>>> events, std::shared_ptr<ISpxSynthesisResult> result)
 {
     auto iterator = events.begin();
     while (iterator != events.end())
@@ -537,12 +553,17 @@ void CSpxSynthesizer::EnsureTtsEngineAdapter()
 void CSpxSynthesizer::InitializeTtsEngineAdapter()
 {
     // determine which type (or types) of tts engine adapters we should try creating...
-    bool tryMock = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Mock", PAL::BoolToString(false).c_str()));
-    bool tryRest = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Rest", PAL::BoolToString(false).c_str()));
-    bool tryLocal = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Local", PAL::BoolToString(false).c_str()));
+    bool tryMock = PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Mock", PAL::BoolToString(false).c_str())) ||
+                   PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Mock", PAL::BoolToString(false).c_str()));
+    bool tryRest = PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Rest", PAL::BoolToString(false).c_str())) ||
+                   PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Rest", PAL::BoolToString(false).c_str()));
+    bool tryUsp = PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Usp", PAL::BoolToString(false).c_str())) ||
+                  PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Usp", PAL::BoolToString(false).c_str()));
+    bool tryLocal = PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Local", PAL::BoolToString(false).c_str())) ||
+                    PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Local", PAL::BoolToString(false).c_str()));
 
     // if nobody specified which type(s) of TTS engine adapters this session should use, we'll use the REST
-    if (!tryMock && !tryRest && !tryLocal)
+    if (!tryMock && !tryRest && !tryUsp && !tryLocal)
     {
         tryRest = true;
     }
@@ -551,6 +572,12 @@ void CSpxSynthesizer::InitializeTtsEngineAdapter()
     if (m_ttsAdapter == nullptr && tryRest)
     {
         m_ttsAdapter = SpxCreateObjectWithSite<ISpxTtsEngineAdapter>("CSpxRestTtsEngineAdapter", this);
+    }
+
+    // try to create the USP adapter...
+    if (m_ttsAdapter == nullptr && tryUsp)
+    {
+        m_ttsAdapter = SpxCreateObjectWithSite<ISpxTtsEngineAdapter>("CSpxUspTtsEngineAdapter", this);
     }
 
     // try to create the mock tts engine adapter...

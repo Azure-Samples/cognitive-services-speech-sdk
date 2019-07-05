@@ -15,7 +15,19 @@
 
 #define HTTP_PROTOCOL "http://"
 #define HTTPS_PROTOCOL "https://"
-#define MIN_URL_PARSABLE_LENGTH 8
+#define WS_PROTOCOL "ws://"
+#define WSS_PROTOCOL "wss://"
+#define MIN_URL_PARSABLE_LENGTH 6
+
+#define HTTPS_URL_PREFIX HTTPS_PROTOCOL
+#define WSS_URL_PREFIX WSS_PROTOCOL
+#define ISSUE_TOKEN_HOST_SUFFIX ".api.cognitive.microsoft.com"
+#define ISSUE_TOKEN_URL_PATH "/sts/v1.0/issueToken"
+#define TTS_COGNITIVE_SERVICE_HOST_SUFFIX ".tts.speech.microsoft.com"
+#define TTS_COGNITIVE_SERVICE_URL_PATH "/cognitiveservices/v1"
+#define TTS_COGNITIVE_SERVICE_WSS_URL_PATH "/cognitiveservices/websocket/v1"
+#define TTS_CUSTOM_VOICE_HOST_SUFFIX ".voice.speech.microsoft.com"
+#define USER_AGENT "SpeechSDK"
 
 #define SSML_TEMPLATE "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='%s'><voice name='%s'>%s</voice></speak>"
 #define SSML_BUFFER_SIZE 0x10000
@@ -26,17 +38,24 @@ namespace Speech {
 namespace Impl {
 
 
-typedef struct HttpUrl_Tag
+enum Protocol
 {
+    HTTP = 0,
+    WebSocket = 1
+};
+
+typedef struct Url_Tag
+{
+    Protocol protocol;
     bool secure;
     std::string host;
-    int port;
+    int port { 0 };
     std::string path;
     std::string query;
-} HttpUrl;
+} Url;
 
 
-class CSpxRestTtsHelper
+class CSpxSynthesisHelper
 {
 public:
 
@@ -47,9 +66,9 @@ public:
         return ss.str();
     };
 
-    static HttpUrl ParseHttpUrl(const std::string& urlStr)
+    static Url ParseUrl(const std::string& urlStr)
     {
-        HttpUrl url;
+        Url url;
 
         if (urlStr.length() < MIN_URL_PARSABLE_LENGTH)
         {
@@ -59,11 +78,25 @@ public:
         // If url starts with "http://" (protocol), 'secure' shall be set to false
         if (PAL::strnicmp(urlStr.data(), HTTP_PROTOCOL, strlen(HTTP_PROTOCOL)) == 0)
         {
+            url.protocol = Protocol::HTTP;
             url.secure = false;
         }
         // If url starts with "https://" (protocol), 'secure' shall be set to true
         else if (PAL::strnicmp(urlStr.data(), HTTPS_PROTOCOL, strlen(HTTPS_PROTOCOL)) == 0)
         {
+            url.protocol = Protocol::HTTP;
+            url.secure = true;
+        }
+        // If url starts with "ws://" (protocol), 'secure' shall be set to false
+        else if (PAL::strnicmp(urlStr.data(), WS_PROTOCOL, strlen(WS_PROTOCOL)) == 0)
+        {
+            url.protocol = Protocol::WebSocket;
+            url.secure = false;
+        }
+        // If url starts with "wss://" (protocol), 'secure' shall be set to true
+        else if (PAL::strnicmp(urlStr.data(), WSS_PROTOCOL, strlen(WSS_PROTOCOL)) == 0)
+        {
+            url.protocol = Protocol::WebSocket;
             url.secure = true;
         }
         else
@@ -97,7 +130,7 @@ public:
         delimiters1[2] = query_delimiter;
         delimiters2[0] = query_delimiter;
 
-        host_begin = (url.secure ? strlen(HTTPS_PROTOCOL) : strlen(HTTP_PROTOCOL));
+        host_begin = (url.protocol == Protocol::HTTP ? (url.secure ? strlen(HTTPS_PROTOCOL) : strlen(HTTP_PROTOCOL)) : (url.secure ? strlen(WSS_PROTOCOL) : strlen(WS_PROTOCOL)));
 
         token = StringToken_GetFirst(urlStr.data() + host_begin, urlStr.length() - host_begin, current_delimiters, delimiter_count);
 
@@ -209,6 +242,70 @@ public:
 
         return url;
     };
+
+    static std::string ParseRegionFromCognitiveServiceEndpoint(const std::string& endpoint)
+    {
+        auto url = ParseUrl(endpoint);
+
+        size_t first_dot_pos = url.host.find('.');
+        if (first_dot_pos == size_t(-1))
+        {
+            ThrowRuntimeError("The given endpoint is not valid TTS cognitive service endpoint. Expected *.tts.speech.microsoft.com or *.voice.speech.microsoft.com");
+        }
+
+        std::string host_name_suffix = url.host.substr(first_dot_pos);
+        if (PAL::stricmp(host_name_suffix.data(), TTS_COGNITIVE_SERVICE_HOST_SUFFIX) != 0 &&
+            PAL::stricmp(host_name_suffix.data(), TTS_CUSTOM_VOICE_HOST_SUFFIX) != 0)
+        {
+            ThrowRuntimeError("The given endpoint is not valid TTS cognitive service endpoint. Expected *.tts.speech.microsoft.com or *.voice.speech.microsoft.com");
+        }
+
+        return url.host.substr(0, first_dot_pos);
+    }
+
+    static bool IsCustomVoiceEndpoint(const std::string& endpoint)
+    {
+        auto url = ParseUrl(endpoint);
+
+        size_t first_dot_pos = url.host.find('.');
+        if (first_dot_pos == size_t(-1))
+        {
+            return false;
+        }
+
+        std::string host_name_suffix = url.host.substr(first_dot_pos);
+
+        if (PAL::stricmp(host_name_suffix.data(), TTS_CUSTOM_VOICE_HOST_SUFFIX) == 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    static bool IsStandardVoiceEndpoint(const std::string& endpoint)
+    {
+        auto url = ParseUrl(endpoint);
+
+        size_t first_dot_pos = url.host.find('.');
+        if (first_dot_pos == size_t(-1))
+        {
+            return false;
+        }
+
+        std::string host_name_suffix = url.host.substr(first_dot_pos);
+
+        if (PAL::stricmp(host_name_suffix.data(), TTS_COGNITIVE_SERVICE_HOST_SUFFIX) == 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     static std::string BuildSsml(const std::string& text, const std::string& language, const std::string& voice)
     {
