@@ -26,6 +26,7 @@ namespace Microsoft.CognitiveServices.Speech
 
     /// <summary>
     /// Detailed recognition result.
+    /// Changed in version 1.7.0.
     /// </summary>
     [DataContract]
     public sealed class DetailedSpeechRecognitionResult
@@ -71,5 +72,48 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         [DataMember(Name = "MaskedITN")]
         public string MaskedNormalizedForm { get; private set; }
+
+        /// <summary>
+        /// Word level timing result list
+        /// Added in version 1.7.0.
+        /// </summary>
+        [DataMember(Name = "Words")]
+        public IEnumerable<WordLevelTimingResult> Words {get; private set;}
+    }
+
+    /// <summary>
+    /// Word level timing result.
+    /// Added in version 1.7.0.
+    /// </summary>
+    [DataContract]
+    public sealed class WordLevelTimingResult
+    {
+        internal WordLevelTimingResult()
+        { }
+
+        internal WordLevelTimingResult(int duration, int offset, string word)
+        {
+            this.Duration = duration;
+            this.Offset = offset;
+            this.Word = word;
+        }
+
+        /// <summary>
+        /// Duration in ticks.
+        /// </summary>
+        [DataMember]
+        public int Duration { get; private set; }
+
+        /// <summary>
+        /// Offset in ticks.
+        /// </summary>
+        [DataMember]
+        public int Offset { get; private set; }
+
+        /// <summary>
+        /// Recognized word.
+        /// </summary>
+        [DataMember]
+        public string Word { get; private set; }
     }
 }

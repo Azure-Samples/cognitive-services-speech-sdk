@@ -248,37 +248,6 @@ void CSpxRecognitionResult::InitTranslationSynthesisResult(const uint8_t* audioD
 void CSpxRecognitionResult::SetStringValue(const char* name, const char* value)
 {
     ISpxPropertyBagImpl::SetStringValue(name, value);
-
-    if (PAL::stricmp(name, GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult)) == 0)
-    {
-        InitPropertiesFromJsonResult(value);
-    }
 }
-
-void CSpxRecognitionResult::InitPropertiesFromJsonResult(const char* value)
-{
-    if (value != nullptr && value[0] != '\0')
-    {
-        SPX_DBG_TRACE_VERBOSE("%s: json='%s'", __FUNCTION__, value);
-        auto root = json::parse(value);
-        auto nBest = root["NBest"];
-        if (nBest.is_array())
-        {
-            auto firstBest = nBest[0];
-            auto itn = firstBest["ITN"].get<string>();
-            if (!itn.empty())
-            {
-                SetStringValue("ITN", itn.c_str());
-            }
-
-            auto lexical = firstBest["Lexical"].get<string>();
-            if (!lexical.empty())
-            {
-                SetStringValue("Lexical", lexical.c_str());
-            }
-        }
-    }
-}
-
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

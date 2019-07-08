@@ -55,6 +55,8 @@ using namespace std;
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
+using json = nlohmann::json;
+
 constexpr std::chrono::milliseconds CSpxAudioStreamSession::MaxBufferedBeforeSimulateRealtime;
 seconds CSpxAudioStreamSession::StopRecognitionTimeout = 10s;
 
@@ -1461,7 +1463,7 @@ uint64_t CSpxAudioStreamSession::GetResultLatencyInMs(const ProcessedAudioTimest
     return latencyMs;
 }
 
-void CSpxAudioStreamSession::FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
+void CSpxAudioStreamSession::FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, shared_ptr<ISpxRecognitionResult> result)
 {
     UNUSED(adapter);
     UNUSED(offset);
@@ -1477,6 +1479,7 @@ void CSpxAudioStreamSession::FireAdapterResult_Intermediate(ISpxRecoEngineAdapte
 
     uint64_t offsetInResult = buffer ? buffer->ToAbsolute(offset) : offset;
     result->SetOffset(offsetInResult);
+    UpdateAdapterResult_JsonResult(result);
 
     if (recordHypothesisLatency)
     {
@@ -1527,10 +1530,13 @@ void CSpxAudioStreamSession::FireAdapterResult_KeywordResult(ISpxRecoEngineAdapt
     }
 }
 
-void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
+void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, shared_ptr<ISpxRecognitionResult> result)
 {
     UNUSED(adapter);
     SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::WaitForPumpSetFormatStart), "ERROR! FireAdapterResult_FinalResult was called with SessionState==WaitForPumpSetFormatStart");
+
+    // This must be called before luAdapter processes the result, since ITN and Lexcical properties are needed by ProcessResult.
+    UpdateAdapterResult_JsonResult(result);
 
     // Only try and process the result with the LU Adapter if we have one (we won't have one, if nobody every added an IntentTrigger)
     auto luAdapter = m_luAdapter;
@@ -1577,6 +1583,95 @@ void CSpxAudioStreamSession::FireAdapterResult_TranslationSynthesis(ISpxRecoEngi
 
     FireResultEvent(GetSessionId(), result);
 }
+
+#define JSON_KEY_NBEST  "NBest"
+#define JSON_KEY_WORDS  "Words"
+#define JSON_KEY_OFFSET  "Offset"
+#define JSON_KEY_ITN     "ITN"
+#define JSON_KEY_LEXICAL "Lexical"
+
+void CSpxAudioStreamSession::UpdateAdapterResult_JsonResult(shared_ptr<ISpxRecognitionResult> result)
+{
+    auto buffer = m_audioBuffer;
+    if (buffer == nullptr)
+    {
+        return;
+    }
+
+    auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+    auto jsonResult = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult));
+    if (jsonResult.empty())
+    {
+        return;
+    }
+
+    SPX_DBG_TRACE_VERBOSE("%s: before update: json='%s'", __FUNCTION__, jsonResult.c_str());
+    auto root = json::parse(jsonResult);
+    bool valueChanged = false;
+    uint64_t offset = 0;
+    auto iteratorOffset = root.find(JSON_KEY_OFFSET);
+    if (iteratorOffset != root.end())
+    {
+        uint64_t oldOffset = iteratorOffset->get<uint64_t>();
+        uint64_t newOffset = buffer->ToAbsolute(oldOffset);
+        if (oldOffset != newOffset)
+        {
+            root[JSON_KEY_OFFSET] = newOffset;
+            valueChanged = true;
+        }
+    }
+    auto iteratorNBest = root.find(JSON_KEY_NBEST);
+    if (iteratorNBest != root.end() && iteratorNBest->is_array())
+    {
+        size_t nBestSize = iteratorNBest->size();
+        for (size_t index = 0; index < nBestSize; index++)
+        {
+            auto item = iteratorNBest->at(index);
+            if (index == 0)
+            {
+                auto iteratorItn = item.find(JSON_KEY_ITN);
+                if (iteratorItn != item.end())
+                {
+                    namedProperties->SetStringValue("ITN", iteratorItn->get<string>().c_str());
+                }
+                auto iteratorLexical = item.find(JSON_KEY_LEXICAL);
+                if ( iteratorLexical != item.end())
+                {
+                    namedProperties->SetStringValue("Lexical", iteratorLexical->get<string>().c_str());
+                }
+            }
+            auto iteratorWords = item.find(JSON_KEY_WORDS);
+            if (iteratorWords != item.end() && iteratorWords->is_array())
+            {
+                valueChanged = true;
+                size_t wordListSize = iteratorWords->size();
+                for (size_t wordIndex = 0; wordIndex < wordListSize; wordIndex++)
+                {
+                    auto word = iteratorWords->at(wordIndex);
+                    auto iteratorWordOffset = word.find(JSON_KEY_OFFSET);
+                    if (iteratorWordOffset != word.end())
+                    {
+                        offset = iteratorWordOffset->get<uint64_t>();
+                        root[JSON_KEY_NBEST][index][JSON_KEY_WORDS][wordIndex][JSON_KEY_OFFSET] = buffer->ToAbsolute(offset);
+                    }
+                }
+            }
+        }
+    }
+
+    if (valueChanged)
+    {
+        string updatedJsonStr = root.dump();
+        SPX_DBG_TRACE_VERBOSE("%s: after update: json='%s'", __FUNCTION__, updatedJsonStr.c_str());
+        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), updatedJsonStr.c_str());
+    }
+}
+
+#undef JSON_KEY_NBEST
+#undef JSON_KEY_WORDS
+#undef JSON_KEY_OFFSET
+#undef JSON_KEY_ITN
+#undef JSON_KEY_LEXICAL
 
 void CSpxAudioStreamSession::AdapterRequestingAudioMute(ISpxRecoEngineAdapter* /* adapter */, bool muteAudio)
 {

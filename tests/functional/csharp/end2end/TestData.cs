@@ -197,6 +197,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string Utterance = "Good morning Steve.";
             }
 
+            public static class WeatherMultiTurns
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "whatstheweatherlike-5secsilences.wav");
+                public static readonly string[] Utterances =
+                {
+                    "What's the weather like?",
+                    "What's the weather like?",
+                    "What's the weather like?"
+                };
+            }
+
             public static class Silence
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "silenceshort.wav");

@@ -106,8 +106,6 @@ private:
 
     CSpxRecognitionResult& operator=(const CSpxRecognitionResult&) = delete;
 
-    void InitPropertiesFromJsonResult(const char* value);
-
     std::wstring m_resultId;
     std::wstring m_text;
     ResultReason m_reason;

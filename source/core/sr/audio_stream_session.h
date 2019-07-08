@@ -289,6 +289,8 @@ private:
 
     void SetThrottleVariables(const SPXWAVEFORMATEX* format);
 
+    void UpdateAdapterResult_JsonResult(std::shared_ptr<ISpxRecognitionResult> result);
+
 private:
 
     std::shared_ptr<ISpxGenericSite> m_siteKeepAlive;

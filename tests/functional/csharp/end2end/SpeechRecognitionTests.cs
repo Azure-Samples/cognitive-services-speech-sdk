@@ -1141,6 +1141,101 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [TestMethod]
+        public async Task WordLevelTiming()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, "true");
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, $"Expected status: RecognizedSpeech, actual status: {result.Reason}");
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                var jsonResult = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                foreach (var detailedResult in result.Best())
+                {
+                    Assert.IsTrue(detailedResult.Text.Length > 0, $"Empty Text. Json result: {jsonResult}");
+                    Assert.IsTrue(detailedResult.LexicalForm.Length > 0, $"Empty LexicalForm. Json result: {jsonResult}");
+                    Assert.IsTrue(detailedResult.NormalizedForm.Length > 0, $"Empty NormallizedForm. Json result: {jsonResult}");
+                    Assert.IsTrue(detailedResult.MaskedNormalizedForm.Length > 0, $"Empty MaskedNormalizedForm. Json result: {jsonResult}");
+                    Assert.IsTrue(detailedResult.Words.Count() > 0, $"No words available. Json result: {jsonResult}");
+                    foreach (var word in detailedResult.Words)
+                    {
+                        Assert.IsTrue(word.Offset > 0, $"The word {word.Word} has incorrect offset: {word.Offset}. Json result: {jsonResult}");
+                        Assert.IsTrue(word.Duration > 0, $"The word {word.Word} has incorrect duration: {word.Duration}.Json result: {jsonResult}");
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task WordLevelOffsetInMultiTurn()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.WeatherMultiTurns.AudioFile);
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, "true");
+            this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3000");
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                List<string> recognizedText = new List<string>();
+                List<long> utteranceOffsets = new List<long>();
+                List<long> utteranceDurations = new List<long>();
+                List<string> jsonResult = new List<string>();
+                List<DetailedSpeechRecognitionResult> detailedResults = new List<DetailedSpeechRecognitionResult>();
+                string hypothesisLatencyError = string.Empty;
+                string phraseLatencyError = string.Empty;
+
+                helper.SubscribeToCounterEventHandlers(recognizer);
+                recognizer.Recognized += (s, e) =>
+                {
+                    if (e.Result.Text.Length > 0)
+                    {
+                        recognizedText.Add(e.Result.Text);
+                        utteranceOffsets.Add(e.Result.OffsetInTicks);
+                        utteranceDurations.Add(e.Result.Duration.Ticks);
+                        jsonResult.Add(e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult));
+                    }
+                    if (e.Result.Best().Count() > 0)
+                    {
+                        detailedResults.Add(e.Result.Best().ElementAt(0));
+                    }
+                };
+
+                await helper.CompleteContinuousRecognition(recognizer);
+
+                AssertEqual(3, recognizedText.Count, $"Number of recognized text does not match: {recognizedText.Count}");
+                AssertEqual(3, detailedResults.Count, $"Number of detailed results does not match: {detailedResults.Count}");
+                AssertEqual(3, utteranceOffsets.Count, $"Number of utterance offsets does not match: {detailedResults.Count}");
+
+                long utteranceOffset = 0;
+                long utteranceDuration = 0;
+                long wordOffset = 0;
+                long wordDuration = 0;
+                for (var i = 0; i < recognizedText.Count; i++)
+                {
+                    AssertMatching(TestData.English.WeatherMultiTurns.Utterances[i], recognizedText[i]);
+                    Assert.IsTrue(utteranceOffsets[i] >= utteranceOffset + utteranceDuration, $"Utterance offset must be in ascending order. the previous offset {utteranceOffset}, the previous duration {utteranceDuration}, the current offset {utteranceOffsets[i]}.");
+                    if (i >= 1)
+                    {
+                        Assert.IsTrue(utteranceOffsets[i] - utteranceOffset - utteranceDuration > 3 * 10000000, $"The silence between 2 utterances must be longer than 3s. The previous offset {utteranceOffset}, the previous duration {utteranceDuration}, the current offset {utteranceOffsets[i]}.");
+                    }
+                    utteranceOffset = utteranceOffsets[i];
+                    utteranceDuration = utteranceDurations[i];
+
+                    Assert.IsTrue(detailedResults[i].Text.Length > 0, $"Empty Text in detailed result {i}. Json result: {jsonResult[i]}");
+                    Assert.IsTrue(detailedResults[i].LexicalForm.Length > 0, $"Empty LexicalForm in detailed result {i}. Json result: {jsonResult[i]}");
+                    Assert.IsTrue(detailedResults[i].NormalizedForm.Length > 0, $"Empty NormallizedForm in detailed result {i}. Json result: {jsonResult[i]}");
+                    Assert.IsTrue(detailedResults[i].MaskedNormalizedForm.Length > 0, $"Empty MaskedNormalizedForm in detailed result {i}. Json result: {jsonResult[i]}");
+                    Assert.IsTrue(detailedResults[i].Words.Count() > 0, $"No words available in detailed result {i}. Json result: {jsonResult[i]}");
+                    foreach (var word in detailedResults[i].Words)
+                    {
+                        Assert.IsTrue(word.Offset >= wordOffset + wordDuration, $"The word offset must be in ascending order. the previous offset {wordOffset}, the previous duration {wordDuration}, the current offset {word.Offset}. Json result: {jsonResult[i]}");
+                        Assert.IsTrue(word.Duration > 0, $"The word {word.Word} has incorrect duration: {word.Duration}. Json result: {jsonResult[i]}");
+                        wordOffset = word.Offset;
+                        wordDuration = word.Duration;
+                    }
+                }
+            }
+        }
 
     }
 }
