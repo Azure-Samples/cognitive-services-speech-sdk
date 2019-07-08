@@ -552,7 +552,7 @@ jobs:
 - template: java-jre-package-test.yml
   parameters:
     name: JavaJrePackageOsxUnitTest
-    poolName: Hosted macOS Preview
+    poolName: Hosted macOS
     extraSteps:
       - task: DownloadBuildArtifacts@0
         displayName: 'Downloading macOS Java test'
@@ -951,7 +951,7 @@ jobs:
   dependsOn: [Pre, NuGet, WindowsBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' NuGetOsxTest '))
   pool:
-    name: Hosted macOS Preview
+    name: Hosted macOS
   timeoutInMinutes: 240
   steps:
   - bash: brew config && brew install bash
@@ -1779,7 +1779,7 @@ jobs:
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosBuild '))
   pool:
-    name: Hosted macOS Preview
+    name: Hosted macOS
   timeoutInMinutes: 60
   strategy:
     maxParallel: 2
@@ -1794,11 +1794,13 @@ jobs:
     VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
     JointCmakeArgs: -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
-    Developer.Dir: /Applications/Xcode_10.1.app/Contents/Developer
   steps:
   # Update bash really early so it will be picked up by "bash" steps.
   - bash: brew config && brew install bash
     displayName: Install modern bash
+  - bash: |
+      xcodebuild -version
+    displayName: 'Log Xcode version'
   - bash: |
       . ci/functions.sh &&
       vsts_setvar SPEECHSDK_TARGET_PLATFORM IOSSIMULATOR-x64 &&
@@ -1894,7 +1896,7 @@ jobs:
   dependsOn: [Pre, IosBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosMultiPlatformTests '))
   pool:
-    name: Hosted macOS Preview
+    name: Hosted macOS
   timeoutInMinutes: 60
   strategy:
     maxParallel: 2
@@ -1903,7 +1905,6 @@ jobs:
     BuildPlatform: iOS
     BuildConfiguration: Release
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/Out/$(BuildConfiguration)
-    Developer.Dir: /Applications/Xcode_10.1.app/Contents/Developer
     microsoftDevTeamId: UBF8T346G9
   steps:
   # Update bash really early so it will be picked up by "bash" steps.
@@ -1916,6 +1917,9 @@ jobs:
     inputs:
       artifactName: iOS
       itemPattern: '**/*.zip'
+  - bash: |
+      xcodebuild -version
+    displayName: 'Log Xcode version'
   - bash: |
       set -u -e -o pipefail
       . ci/functions.sh
@@ -2020,7 +2024,7 @@ jobs:
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuild '))
   pool:
-    name: Hosted macOS Preview
+    name: Hosted macOS
   timeoutInMinutes: 240
   strategy:
     maxParallel: 2
@@ -2217,7 +2221,7 @@ jobs:
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' Doxygen '))
   pool:
-    name: Hosted macOS Preview
+    name: Hosted macOS
   timeoutInMinutes: 30
   variables:
     ArtifactOut: $(Build.ArtifactStagingDirectory)/Out

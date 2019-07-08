@@ -58,20 +58,21 @@ function runXcodeSuite {
   xcodeExtraArgs=( ${xcodeExtraArgs[@]/#/"--extra-args "} )
 
   testCases=(
-    "iPhone-X iOS-12-1"
-    "iPhone-6s iOS-10-0"
-    "iPhone-6 iOS-10-2"
-    "iPhone-5 iOS-10-2"
+    "iPhone-X iOS-12-2"
     "iPhone-6 iOS-9-3"
-    "iPhone-5 iOS-9-3 --extra-args ARCHS=\"i386\" --extra-args IPHONEOS_DEPLOYMENT_TARGET=9.2"
-    "iPhone-6 iOS-9-2"
-    "iPhone-5 iOS-9-2 --extra-args ARCHS=\"i386\" --extra-args IPHONEOS_DEPLOYMENT_TARGET=9.2"
   )
 
   # deactivated test cases:
   # iPhone-8 iOS-11-4  # not installed in Xcode 10.1 toolchain
   # iPhone-6 iOS-10-2  # simulator times out, unrelated to test suite
   # iPhone-5 iOS-10-2  # simulator times out, unrelated to test suite
+  # these simulators have been too unstable to run the tests reliably:
+  # "iPhone-5 iOS-9-2 --extra-args ARCHS=\"i386\" --extra-args IPHONEOS_DEPLOYMENT_TARGET=9.2"
+  # "iPhone-5 iOS-9-3 --extra-args ARCHS=\"i386\" --extra-args IPHONEOS_DEPLOYMENT_TARGET=9.2"
+  # "iPhone-6s iOS-10-0"
+  # "iPhone-5 iOS-10-2"
+  # "iPhone-6 iOS-10-2"
+  # "iPhone-6 iOS-9-2"
 
   testCases=( "${testCases[@]/%/" ${xcodeExtraArgs[@]}"}" )
 

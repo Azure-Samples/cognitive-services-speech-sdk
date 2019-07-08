@@ -70,13 +70,14 @@ jobs:
       continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
       testsToRun: objectivec_unittests swift_unittests
       runTestArgs: ""
-  - ${{ if eq(parameters['jobName'], 'IosUnitTests') }}:
-    - bash: |
-        set -e -o pipefail -x
-        ci/samples/build-quickstart-swift.sh '$(Build.Repository.LocalPath)/xcode-build-output' "$(OutputDirectory)/logs"
-      condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
-      displayName: "Test building Swift quickstart"
-      continueOnError: ${{ parameters.continueOnTestFailure }}
+      extraTests:
+        - ${{ if eq(parameters['jobName'], 'IosUnitTests') }}:
+          - bash: |
+              set -e -o pipefail -x
+              ci/samples/build-quickstart-swift.sh '$(Build.Repository.LocalPath)/xcode-build-output' "$(OutputDirectory)/logs"
+            condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+            displayName: "Test building Swift quickstart"
+            continueOnError: ${{ parameters.continueOnTestFailure }}
   - ${{ parameters.extraSteps }}
   - task: PublishBuildArtifacts@1
     inputs:

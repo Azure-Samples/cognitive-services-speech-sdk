@@ -83,6 +83,7 @@
     }];
 
     [self.translationRecognizer addSessionStoppedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {
+        NSLog(@"Received session stopped event. SessionId: %@", eventArgs.sessionId);
         [weakSelf->result setObject:[NSNumber numberWithLong:[[weakSelf->result objectForKey:@"sessionStoppedCount"] integerValue] + 1] forKey:@"sessionStoppedCount"];
     }];
 
@@ -114,12 +115,10 @@
 
 - (void) testContinuousTranslation {
     __block NSDictionary* translationDictionary = nil;
-    __block bool end = false;
 
     [self.translationRecognizer addRecognizedEventHandler: ^ (SPXTranslationRecognizer *recognizer, SPXTranslationRecognitionEventArgs *eventArgs)
      {
          translationDictionary = eventArgs.result.translations;
-         end = true;
      }];
 
     [self.translationRecognizer startContinuousRecognition];
