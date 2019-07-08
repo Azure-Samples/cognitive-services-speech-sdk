@@ -51,7 +51,11 @@ def transcribe():
     # delete all pre-existing completed transcriptions
     # if transcriptions are still running or not started, they will not be deleted
     for transcription in transcriptions:
-        transcription_api.delete_transcription(transcription.id)
+        try:
+            transcription_api.delete_transcription(transcription.id)
+        except ValueError:
+            # ignore swagger error on empty response message body: https://github.com/swagger-api/swagger-core/issues/2446
+            pass
 
     logging.info("Creating transcriptions.")
 
