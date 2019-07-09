@@ -121,7 +121,14 @@ void CSpxAudioStreamSession::Term()
         // We're terminating, and we were still processing audio ... So ... Let's shut down the pump
         SPX_DBG_TRACE_VERBOSE("%s: Now StoppingPump ...", __FUNCTION__);
         if (m_audioPump)
+        {
             m_audioPump->StopPump();
+        }
+
+        if (m_codecAdapter)
+        {
+            m_codecAdapter->Close();
+        }
     }
 
     // Make sure there is nobody waiting on a single shot.
@@ -874,6 +881,11 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
         {
             audioPump->StopPump();
         }
+        if (m_codecAdapter)
+        {
+            m_codecAdapter->Close();
+        }
+
     }
     else if (stopKind == RecognitionKind::Keyword && !IsKind(RecognitionKind::Keyword))
     {
@@ -909,6 +921,11 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
         {
             SPX_DBG_TRACE_VERBOSE("%s: Pump has already been released", __FUNCTION__);
         }
+        if (m_codecAdapter)
+        {
+            m_codecAdapter->Close();
+        }
+
     }
     else if (IsState(SessionState::WaitForAdapterCompletedSetFormatStop))
     {
