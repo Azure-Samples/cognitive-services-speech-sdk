@@ -19,31 +19,127 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public sealed class SpeechSynthesizer : IDisposable
     {
+        private event EventHandler<SpeechSynthesisEventArgs> _SynthesisStarted;
+        private event EventHandler<SpeechSynthesisEventArgs> _Synthesizing;
+        private event EventHandler<SpeechSynthesisEventArgs> _SynthesisCompleted;
+        private event EventHandler<SpeechSynthesisEventArgs> _SynthesisCanceled;
+        private event EventHandler<SpeechSynthesisWordBoundaryEventArgs> _WordBoundary;
+
         /// <summary>
         /// The event <see cref="SynthesisStarted"/> signals that the speech synthesis has started.
         /// </summary>
-        public event EventHandler<SpeechSynthesisEventArgs> SynthesisStarted;
+        public event EventHandler<SpeechSynthesisEventArgs> SynthesisStarted
+        {
+            add
+            {
+                if (this._SynthesisStarted == null)
+                {
+                    ThrowIfFail(Internal.Synthesizer.synthesizer_started_set_callback(synthHandle, synthesisStartedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._SynthesisStarted += value;
+            }
+            remove
+            {
+                this._SynthesisStarted -= value;
+                if (this._SynthesisStarted == null)
+                {
+                    LogErrorIfFail(Internal.Synthesizer.synthesizer_started_set_callback(synthHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// The event <see cref="Synthesizing"/> signals that the speech synthesis is on going.
         /// </summary>
-        public event EventHandler<SpeechSynthesisEventArgs> Synthesizing;
+        public event EventHandler<SpeechSynthesisEventArgs> Synthesizing
+        {
+            add
+            {
+                if (this._Synthesizing == null)
+                {
+                    ThrowIfFail(Internal.Synthesizer.synthesizer_synthesizing_set_callback(synthHandle, synthesizingCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._Synthesizing += value;
+            }
+            remove
+            {
+                this._Synthesizing -= value;
+                if (this._Synthesizing == null)
+                {
+                    LogErrorIfFail(Internal.Synthesizer.synthesizer_synthesizing_set_callback(synthHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// The event <see cref="SynthesisCompleted"/> signals that the speech synthesis has completed.
         /// </summary>
-        public event EventHandler<SpeechSynthesisEventArgs> SynthesisCompleted;
+        public event EventHandler<SpeechSynthesisEventArgs> SynthesisCompleted
+        {
+            add
+            {
+                if (this._SynthesisCompleted == null)
+                {
+                    ThrowIfFail(Internal.Synthesizer.synthesizer_completed_set_callback(synthHandle, synthesisCompletedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._SynthesisCompleted += value;
+            }
+            remove
+            {
+                this._SynthesisCompleted -= value;
+                if (this._SynthesisCompleted == null)
+                {
+                    LogErrorIfFail(Internal.Synthesizer.synthesizer_completed_set_callback(synthHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// The event <see cref="SynthesisCanceled"/> signals that the speech synthesis was canceled.
         /// </summary>
-        public event EventHandler<SpeechSynthesisEventArgs> SynthesisCanceled;
+        public event EventHandler<SpeechSynthesisEventArgs> SynthesisCanceled
+        {
+            add
+            {
+                if (this._SynthesisCanceled == null)
+                {
+                    ThrowIfFail(Internal.Synthesizer.synthesizer_canceled_set_callback(synthHandle, synthesisCanceledCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._SynthesisCanceled += value;
+            }
+            remove
+            {
+                this._SynthesisCanceled -= value;
+                if (this._SynthesisCanceled == null)
+                {
+                    LogErrorIfFail(Internal.Synthesizer.synthesizer_canceled_set_callback(synthHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// The event <see cref="WordBoundary"/> signals that a word boundary was received.
         /// Added in version 1.7.0
         /// </summary>
-        public event EventHandler<SpeechSynthesisWordBoundaryEventArgs> WordBoundary;
+        public event EventHandler<SpeechSynthesisWordBoundaryEventArgs> WordBoundary
+        {
+            add
+            {
+                if (this._WordBoundary == null)
+                {
+                    ThrowIfFail(Internal.Synthesizer.synthesizer_word_boundary_set_callback(synthHandle, wordBoundaryCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._WordBoundary += value;
+            }
+            remove
+            {
+                this._WordBoundary -= value;
+                if (this._WordBoundary == null)
+                {
+                    LogErrorIfFail(Internal.Synthesizer.synthesizer_word_boundary_set_callback(synthHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         internal InteropSafeHandle synthHandle;
 
@@ -90,12 +186,6 @@ namespace Microsoft.CognitiveServices.Speech
 
             this.synthHandle = synthHandle;
             gch = GCHandle.Alloc(this, GCHandleType.Weak);
-
-            ThrowIfFail(Internal.Synthesizer.synthesizer_started_set_callback(synthHandle, synthesisStartedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.Synthesizer.synthesizer_synthesizing_set_callback(synthHandle, synthesizingCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.Synthesizer.synthesizer_completed_set_callback(synthHandle, synthesisCompletedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.Synthesizer.synthesizer_canceled_set_callback(synthHandle, synthesisCanceledCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.Synthesizer.synthesizer_word_boundary_set_callback(synthHandle, wordBoundaryCallbackDelegate, GCHandle.ToIntPtr(gch)));
 
             IntPtr propertyHandle = IntPtr.Zero;
             ThrowIfFail(Internal.Synthesizer.synthesizer_get_property_bag(synthHandle, out propertyHandle));
@@ -383,7 +473,7 @@ namespace Microsoft.CognitiveServices.Speech
 
                 using (var resultEventArg = new SpeechSynthesisEventArgs(hevent))
                 {
-                    synthesizer.SynthesisStarted?.Invoke(synthesizer, resultEventArg);
+                    synthesizer._SynthesisStarted?.Invoke(synthesizer, resultEventArg);
                 }
             }
             catch (InvalidOperationException)
@@ -405,7 +495,7 @@ namespace Microsoft.CognitiveServices.Speech
 
                 using (var resultEventArg = new SpeechSynthesisEventArgs(hevent))
                 {
-                    synthesizer.Synthesizing?.Invoke(synthesizer, resultEventArg);
+                    synthesizer._Synthesizing?.Invoke(synthesizer, resultEventArg);
                 }
             }
             catch (InvalidOperationException)
@@ -427,7 +517,7 @@ namespace Microsoft.CognitiveServices.Speech
 
                 using (var resultEventArg = new SpeechSynthesisEventArgs(hevent))
                 {
-                    synthesizer.SynthesisCompleted?.Invoke(synthesizer, resultEventArg);
+                    synthesizer._SynthesisCompleted?.Invoke(synthesizer, resultEventArg);
                 }
             }
             catch (InvalidOperationException)
@@ -449,7 +539,7 @@ namespace Microsoft.CognitiveServices.Speech
 
                 using (var resultEventArg = new SpeechSynthesisEventArgs(hevent))
                 {
-                    synthesizer.SynthesisCanceled?.Invoke(synthesizer, resultEventArg);
+                    synthesizer._SynthesisCanceled?.Invoke(synthesizer, resultEventArg);
                 }
             }
             catch (InvalidOperationException)
@@ -471,7 +561,7 @@ namespace Microsoft.CognitiveServices.Speech
 
                 using (var wordBoundaryEventArg = new SpeechSynthesisWordBoundaryEventArgs(hevent))
                 {
-                    synthesizer.WordBoundary?.Invoke(synthesizer, wordBoundaryEventArg);
+                    synthesizer._WordBoundary?.Invoke(synthesizer, wordBoundaryEventArg);
                 }
             }
             catch (InvalidOperationException)

@@ -15,25 +15,102 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public class Recognizer : IDisposable
     {
+        private event EventHandler<SessionEventArgs> _SessionStarted;
+        private event EventHandler<SessionEventArgs> _SessionStopped;
+        private event EventHandler<RecognitionEventArgs> _SpeechStartDetected;
+        private event EventHandler<RecognitionEventArgs> _SpeechEndDetected;
+
         /// <summary>
         /// Defines event handler for session started event.
         /// </summary>
-        public event EventHandler<SessionEventArgs> SessionStarted;
+        public event EventHandler<SessionEventArgs> SessionStarted
+        {
+            add
+            {
+                if (this._SessionStarted == null)
+                {
+                    ThrowIfFail(Internal.Recognizer.recognizer_session_started_set_callback(recoHandle, sessionStartedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._SessionStarted += value;
+            }
+            remove
+            {
+                this._SessionStarted -= value;
+                if (this._SessionStarted == null)
+                {
+                    LogErrorIfFail(Internal.Recognizer.recognizer_session_started_set_callback(recoHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// Defines event handler for session stopped event.
         /// </summary>
-        public event EventHandler<SessionEventArgs> SessionStopped;
+        public event EventHandler<SessionEventArgs> SessionStopped
+        {
+            add
+            {
+                if (this._SessionStopped == null)
+                {
+                    ThrowIfFail(Internal.Recognizer.recognizer_session_stopped_set_callback(recoHandle, sessionStoppedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._SessionStopped += value;
+            }
+            remove
+            {
+                this._SessionStopped -= value;
+                if (this._SessionStopped == null)
+                {
+                    LogErrorIfFail(Internal.Recognizer.recognizer_session_stopped_set_callback(recoHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// Defines event handler for speech start detected event.
         /// </summary>
-        public event EventHandler<RecognitionEventArgs> SpeechStartDetected;
+        public event EventHandler<RecognitionEventArgs> SpeechStartDetected
+        {
+            add
+            {
+                if (this._SpeechStartDetected == null)
+                {
+                    ThrowIfFail(Internal.Recognizer.recognizer_speech_start_detected_set_callback(recoHandle, speechStartDetectedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._SpeechStartDetected += value;
+            }
+            remove
+            {
+                this._SpeechStartDetected -= value;
+                if (this._SpeechStartDetected == null)
+                {
+                    LogErrorIfFail(Internal.Recognizer.recognizer_speech_start_detected_set_callback(recoHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// Defines event handler for speech end detected event.
         /// </summary>
-        public event EventHandler<RecognitionEventArgs> SpeechEndDetected;
+        public event EventHandler<RecognitionEventArgs> SpeechEndDetected
+        {
+            add
+            {
+                if (this._SpeechEndDetected == null)
+                {
+                    ThrowIfFail(Internal.Recognizer.recognizer_speech_end_detected_set_callback(recoHandle, speechEndDetectedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._SpeechEndDetected += value;
+            }
+            remove
+            {
+                this._SpeechEndDetected -= value;
+                if (this._SpeechEndDetected == null)
+                {
+                    LogErrorIfFail(Internal.Recognizer.recognizer_speech_end_detected_set_callback(recoHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         internal Recognizer(InteropSafeHandle recoPtr)
         {
@@ -44,11 +121,6 @@ namespace Microsoft.CognitiveServices.Speech
             speechEndDetectedCallbackDelegate = FireEvent_SpeechEndDetected;
             sessionStartedCallbackDelegate = FireEvent_SetSessionStarted;
             sessionStoppedCallbackDelegate = FireEvent_SetSessionStopped;
-
-            ThrowIfFail(Internal.Recognizer.recognizer_speech_start_detected_set_callback(recoHandle, speechStartDetectedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.Recognizer.recognizer_speech_end_detected_set_callback(recoHandle, speechEndDetectedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.Recognizer.recognizer_session_started_set_callback(recoHandle, sessionStartedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.Recognizer.recognizer_session_stopped_set_callback(recoHandle, sessionStoppedCallbackDelegate, GCHandle.ToIntPtr(gch)));
         }
 
         ~Recognizer()
@@ -151,7 +223,7 @@ namespace Microsoft.CognitiveServices.Speech
                     return;
                 }
                 var resultEventArg = new SessionEventArgs(hevent);
-                recognizer.SessionStarted?.Invoke(recognizer, resultEventArg);
+                recognizer._SessionStarted?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -170,7 +242,7 @@ namespace Microsoft.CognitiveServices.Speech
                     return;
                 }
                 var resultEventArg = new SessionEventArgs(hevent);
-                recognizer.SessionStopped?.Invoke(recognizer, resultEventArg);
+                recognizer._SessionStopped?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -189,7 +261,7 @@ namespace Microsoft.CognitiveServices.Speech
                     return;
                 }
                 var resultEventArg = new RecognitionEventArgs(hevent);
-                recognizer.SpeechStartDetected?.Invoke(recognizer, resultEventArg);
+                recognizer._SpeechStartDetected?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -208,7 +280,7 @@ namespace Microsoft.CognitiveServices.Speech
                     return;
                 }
                 var resultEventArg = new RecognitionEventArgs(hevent);
-                recognizer.SpeechEndDetected?.Invoke(recognizer, resultEventArg);
+                recognizer._SpeechEndDetected?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {

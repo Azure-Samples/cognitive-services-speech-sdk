@@ -190,14 +190,22 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
 
         if (disposing)
         {
-            recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-            recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
-            recoImpl.getSynthesizing().RemoveEventListener(synthesisResultHandler);
-            recoImpl.getCanceled().RemoveEventListener(errorHandler);
-            recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-            recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-            recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
-            recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
+            if (this.recognizing.isUpdateNotificationOnConnectedFired())
+                recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
+            if (this.recognized.isUpdateNotificationOnConnectedFired())
+                recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
+            if (this.synthesizing.isUpdateNotificationOnConnectedFired())
+                recoImpl.getSynthesizing().RemoveEventListener(synthesisResultHandler);
+            if (this.canceled.isUpdateNotificationOnConnectedFired())
+                recoImpl.getCanceled().RemoveEventListener(errorHandler);
+            if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
+                recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+            if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
+                recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+            if (this.speechStartDetected.isUpdateNotificationOnConnectedFired())
+                recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
+            if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
+                recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
 
             recognizingHandler.delete();
             recognizedHandler.delete();
@@ -224,21 +232,64 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         super.internalRecognizerImpl = this.recoImpl;
 
         recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
-        recoImpl.getRecognizing().AddEventListener(recognizingHandler);
+        this.recognizing.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                recoImpl.getRecognizing().AddEventListener(recognizingHandler);
+            }
+        });
 
         recognizedHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ true);
-        recoImpl.getRecognized().AddEventListener(recognizedHandler);
+        this.recognized.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                recoImpl.getRecognized().AddEventListener(recognizedHandler);
+            }
+        });
 
         synthesisResultHandler = new SynthesisHandlerImpl(this);
-        recoImpl.getSynthesizing().AddEventListener(synthesisResultHandler);
+        this.synthesizing.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                recoImpl.getSynthesizing().AddEventListener(synthesisResultHandler);
+            }
+        });
 
         errorHandler = new CanceledHandlerImpl(this);
-        recoImpl.getCanceled().AddEventListener(errorHandler);
+        this.canceled.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                recoImpl.getCanceled().AddEventListener(errorHandler);
+            }
+        });
 
-        recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
-        recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
-        recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
-        recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
+        this.sessionStarted.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+            }
+        });
+
+        this.sessionStopped.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+            }
+        });
+
+        this.speechStartDetected.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
+            }
+        });
+
+        this.speechEndDetected.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
+            }
+        });
 
         _Parameters = new PrivatePropertyCollection(recoImpl.getProperties());
     }

@@ -18,20 +18,78 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
     /// </summary>
     public sealed class ConversationTranscriber : Recognizer
     {
+        private event EventHandler<ConversationTranscriptionEventArgs> _Recognizing;
+        private event EventHandler<ConversationTranscriptionEventArgs> _Recognized;
+        private event EventHandler<ConversationTranscriptionCanceledEventArgs> _Canceled;
+
         /// <summary>
         /// The event <see cref="Recognizing"/> signals that an intermediate recognition result is received.
         /// </summary>
-        public event EventHandler<ConversationTranscriptionEventArgs> Recognizing;
+        public event EventHandler<ConversationTranscriptionEventArgs> Recognizing
+        {
+            add
+            {
+                if (this._Recognizing == null)
+                {
+                    ThrowIfFail(Internal.Recognizer.recognizer_recognizing_set_callback(recoHandle, recognizingCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._Recognizing += value;
+            }
+            remove
+            {
+                this._Recognizing -= value;
+                if (this._Recognizing == null)
+                {
+                    LogErrorIfFail(Internal.Recognizer.recognizer_recognizing_set_callback(recoHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// The event <see cref="Recognized"/> signals that a final recognition result is received.
         /// </summary>
-        public event EventHandler<ConversationTranscriptionEventArgs> Recognized;
+        public event EventHandler<ConversationTranscriptionEventArgs> Recognized
+        {
+            add
+            {
+                if (this._Recognized == null)
+                {
+                    ThrowIfFail(Internal.Recognizer.recognizer_recognized_set_callback(recoHandle, recognizedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._Recognized += value;
+            }
+            remove
+            {
+                this._Recognized -= value;
+                if (this._Recognized == null)
+                {
+                    LogErrorIfFail(Internal.Recognizer.recognizer_recognized_set_callback(recoHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// The event <see cref="Canceled"/> signals that the speech recognition was canceled.
         /// </summary>
-        public event EventHandler<ConversationTranscriptionCanceledEventArgs> Canceled;
+        public event EventHandler<ConversationTranscriptionCanceledEventArgs> Canceled
+        {
+            add
+            {
+                if (this._Canceled == null)
+                {
+                    ThrowIfFail(Internal.Recognizer.recognizer_canceled_set_callback(recoHandle, canceledCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._Canceled += value;
+            }
+            remove
+            {
+                this._Canceled -= value;
+                if (this._Canceled == null)
+                {
+                    LogErrorIfFail(Internal.Recognizer.recognizer_canceled_set_callback(recoHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// Creates a new instance of ConversationTranscriber.
@@ -59,9 +117,6 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
             canceledCallbackDelegate = FireEvent_Canceled;
 
             ThrowIfNull(recoHandle, "Invalid ConversationTranscriber handle");
-            ThrowIfFail(Internal.Recognizer.recognizer_recognizing_set_callback(recoHandle, recognizingCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.Recognizer.recognizer_recognized_set_callback(recoHandle, recognizedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.Recognizer.recognizer_canceled_set_callback(recoHandle, canceledCallbackDelegate, GCHandle.ToIntPtr(gch)));
 
             IntPtr propertyHandle = IntPtr.Zero;
             ThrowIfFail(Internal.Recognizer.recognizer_get_property_bag(recoHandle, out propertyHandle));
@@ -309,7 +364,7 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
                     return;
                 }
                 var resultEventArg = new ConversationTranscriptionEventArgs(hevent);
-                recognizer.Recognizing?.Invoke(recognizer, resultEventArg);
+                recognizer._Recognizing?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -328,7 +383,7 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
                     return;
                 }
                 var resultEventArg = new ConversationTranscriptionEventArgs(hevent);
-                recognizer.Recognized?.Invoke(recognizer, resultEventArg);
+                recognizer._Recognized?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -347,7 +402,7 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
                     return;
                 }
                 var resultEventArg = new ConversationTranscriptionCanceledEventArgs(hevent);
-                recognizer.Canceled?.Invoke(recognizer, resultEventArg);
+                recognizer._Canceled?.Invoke(recognizer, resultEventArg);
             }
             catch (InvalidOperationException)
             {

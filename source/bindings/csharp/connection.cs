@@ -69,8 +69,6 @@ namespace Microsoft.CognitiveServices.Speech
             disconnectedCallbackDelegate = FireEvent_Disconnected;
 
             gch = GCHandle.Alloc(this, GCHandleType.Weak);
-            ThrowIfFail(Internal.Connection.connection_connected_set_callback(connectionHandle, connectedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.Connection.connection_disconnected_set_callback(connectionHandle, disconnectedCallbackDelegate, GCHandle.ToIntPtr(gch)));
         }
 
         /// <summary>
@@ -100,19 +98,64 @@ namespace Microsoft.CognitiveServices.Speech
             ThrowIfFail(Internal.Connection.connection_close(connectionHandle));
         }
 
+        private event EventHandler<ConnectionEventArgs> _Connected;
+        private event EventHandler<ConnectionEventArgs> _Disconnected;
+
         /// <summary>
         /// The Connected event to indicate that the recognizer is connected to service.
         /// In order to receive the Connected event after subscribing to it, the Connection object itself needs to be alive.
         /// If the Connection object owning this event is out of its life time, all subscribed events won't be delivered.
         /// </summary>
-        public event EventHandler<ConnectionEventArgs> Connected;
+        public event EventHandler<ConnectionEventArgs> Connected
+        {
+            add
+            {
+                if (this._Connected == null)
+                {
+                    ThrowIfFail(Internal.Connection.connection_connected_set_callback(connectionHandle, connectedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._Connected += value;
+            }
+            remove
+            {
+                this._Connected -= value;
+                if (this._Connected == null)
+                {
+                    if (connectionHandle != null)
+                    {
+                        LogErrorIfFail(Internal.Connection.connection_connected_set_callback(connectionHandle, null, IntPtr.Zero));
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// The Diconnected event to indicate that the recognizer is disconnected from service.
         /// In order to receive the Disconnected event after subscribing to it, the Connection object itself needs to be alive.
         /// If the Connection object owning this event is out of its life time, all subscribed events won't be delivered.
         /// </summary>
-        public event EventHandler<ConnectionEventArgs> Disconnected;
+        public event EventHandler<ConnectionEventArgs> Disconnected
+        {
+            add
+            {
+                if (this._Disconnected == null)
+                {
+                    ThrowIfFail(Internal.Connection.connection_disconnected_set_callback(connectionHandle, disconnectedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._Disconnected += value;
+            }
+            remove
+            {
+                this._Disconnected -= value;
+                if (this._Disconnected == null)
+                {
+                    if (connectionHandle != null)
+                    {
+                        LogErrorIfFail(Internal.Connection.connection_disconnected_set_callback(connectionHandle, null, IntPtr.Zero));
+                    }
+                }
+            }
+        }
 
         private GCHandle gch;
         private InteropSafeHandle connectionHandle;
@@ -134,7 +177,7 @@ namespace Microsoft.CognitiveServices.Speech
                 if (connection == null || connection.inFinalizer)
                     return;
                 var resultEventArg = new ConnectionEventArgs(hevent);
-                connection.Connected?.Invoke(connection, resultEventArg);
+                connection._Connected?.Invoke(connection, resultEventArg);
             }
             catch (InvalidOperationException)
             {
@@ -151,7 +194,7 @@ namespace Microsoft.CognitiveServices.Speech
                 if (connection == null || connection.inFinalizer)
                     return;
                 var resultEventArg = new ConnectionEventArgs(hevent);
-                connection.Disconnected?.Invoke(connection, resultEventArg);
+                connection._Disconnected?.Invoke(connection, resultEventArg);
             }
             catch (InvalidOperationException)
             {

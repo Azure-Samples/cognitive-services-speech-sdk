@@ -244,13 +244,20 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
         }
 
         if (disposing) {
-            transcriberImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-            transcriberImpl.getRecognized().RemoveEventListener(recognizedHandler);
-            transcriberImpl.getCanceled().RemoveEventListener(errorHandler);
-            transcriberImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-            transcriberImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-            transcriberImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
-            transcriberImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
+            if (this.recognizing.isUpdateNotificationOnConnectedFired())
+                transcriberImpl.getRecognizing().RemoveEventListener(recognizingHandler);
+            if (this.recognized.isUpdateNotificationOnConnectedFired())
+                transcriberImpl.getRecognized().RemoveEventListener(recognizedHandler);
+            if (this.canceled.isUpdateNotificationOnConnectedFired())
+                transcriberImpl.getCanceled().RemoveEventListener(errorHandler);
+            if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
+                transcriberImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+            if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
+                transcriberImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+            if (this.speechStartDetected.isUpdateNotificationOnConnectedFired())
+                transcriberImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
+            if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
+                transcriberImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
 
             recognizingHandler.delete();
             recognizedHandler.delete();
@@ -277,18 +284,56 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
         super.internalRecognizerImpl = this.transcriberImpl;
 
         recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
-        transcriberImpl.getRecognizing().AddEventListener(recognizingHandler);
+        this.recognizing.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                transcriberImpl.getRecognizing().AddEventListener(recognizingHandler);
+            }
+        });
 
         recognizedHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ true);
-        transcriberImpl.getRecognized().AddEventListener(recognizedHandler);
+        this.recognized.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                transcriberImpl.getRecognized().AddEventListener(recognizedHandler);
+            }
+        });
 
         errorHandler = new CanceledHandlerImpl(this);
-        transcriberImpl.getCanceled().AddEventListener(errorHandler);
+        this.canceled.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                transcriberImpl.getCanceled().AddEventListener(errorHandler);
+            }
+        });
 
-        transcriberImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
-        transcriberImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
-        transcriberImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
-        transcriberImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
+        this.sessionStarted.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                transcriberImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+            }
+        });
+
+        this.sessionStopped.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                transcriberImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+            }
+        });
+
+        this.speechStartDetected.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                transcriberImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
+            }
+        });
+
+        this.speechEndDetected.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                transcriberImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
+            }
+        });
 
         _Parameters = new PrivatePropertyCollection(transcriberImpl.getProperties());
     }

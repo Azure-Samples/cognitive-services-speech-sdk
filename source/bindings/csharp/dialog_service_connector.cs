@@ -19,35 +19,151 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
     /// </summary>
     public sealed class DialogServiceConnector : IDisposable
     {
+        private event EventHandler<SessionEventArgs> _SessionStarted;
+        private event EventHandler<SessionEventArgs> _SessionStopped;
+        private event EventHandler<SpeechRecognitionEventArgs> _Recognized;
+        private event EventHandler<SpeechRecognitionEventArgs> _Recognizing;
+        private event EventHandler<SpeechRecognitionCanceledEventArgs> _Canceled;
+        private event EventHandler<ActivityReceivedEventArgs> _ActivityReceived;
+
+
         /// <summary>
         /// Signal that indicates the start of a listening session.
         /// </summary>
-        public event EventHandler<SessionEventArgs> SessionStarted;
+        public event EventHandler<SessionEventArgs> SessionStarted
+        {
+            add
+            {
+                if (this._SessionStarted == null)
+                {
+                    ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_session_started_set_callback(dialogServiceConnectorHandle, sessionStartedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._SessionStarted += value;
+            }
+            remove
+            {
+                this._SessionStarted -= value;
+                if (this._SessionStarted == null)
+                {
+                    LogErrorIfFail(Internal.DialogServiceConnector.dialog_service_connector_session_started_set_callback(dialogServiceConnectorHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// Signal that indicates the end of a listening session.
         /// </summary>
-        public event EventHandler<SessionEventArgs> SessionStopped;
+        public event EventHandler<SessionEventArgs> SessionStopped
+        {
+            add
+            {
+                if (this._SessionStopped == null)
+                {
+                    ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_session_stopped_set_callback(dialogServiceConnectorHandle, sessionStoppedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._SessionStopped += value;
+            }
+            remove
+            {
+                this._SessionStopped -= value;
+                if (this._SessionStopped == null)
+                {
+                    LogErrorIfFail(Internal.DialogServiceConnector.dialog_service_connector_session_stopped_set_callback(dialogServiceConnectorHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// Signal for events containing speech recognition results.
         /// </summary>
-        public event EventHandler<SpeechRecognitionEventArgs> Recognized;
+        public event EventHandler<SpeechRecognitionEventArgs> Recognized
+        {
+            add
+            {
+                if (this._Recognized == null)
+                {
+                    ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_recognized_set_callback(dialogServiceConnectorHandle, recognizedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._Recognized += value;
+            }
+            remove
+            {
+                this._Recognized -= value;
+                if (this._Recognized == null)
+                {
+                    LogErrorIfFail(Internal.DialogServiceConnector.dialog_service_connector_recognized_set_callback(dialogServiceConnectorHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// Signal for events containing intermediate recognition results.
         /// </summary>
-        public event EventHandler<SpeechRecognitionEventArgs> Recognizing;
+        public event EventHandler<SpeechRecognitionEventArgs> Recognizing
+        {
+            add
+            {
+                if (this._Recognizing == null)
+                {
+                    ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_recognizing_set_callback(dialogServiceConnectorHandle, recognizingCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._Recognizing += value;
+            }
+            remove
+            {
+                this._Recognizing -= value;
+                if (this._Recognizing == null)
+                {
+                    LogErrorIfFail(Internal.DialogServiceConnector.dialog_service_connector_recognizing_set_callback(dialogServiceConnectorHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// Signal for events relating to the cancellation of an interaction.
         /// </summary>
-        public event EventHandler<SpeechRecognitionCanceledEventArgs> Canceled;
+        public event EventHandler<SpeechRecognitionCanceledEventArgs> Canceled
+        {
+            add
+            {
+                if (this._Canceled == null)
+                {
+                    ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_canceled_set_callback(dialogServiceConnectorHandle, canceledCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._Canceled += value;
+            }
+            remove
+            {
+                this._Canceled -= value;
+                if (this._Canceled == null)
+                {
+                    LogErrorIfFail(Internal.DialogServiceConnector.dialog_service_connector_canceled_set_callback(dialogServiceConnectorHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// Signal that an activity was received from the backing dialog.
         /// </summary>
-        public event EventHandler<ActivityReceivedEventArgs> ActivityReceived;
+        public event EventHandler<ActivityReceivedEventArgs> ActivityReceived
+        {
+            add
+            {
+                if (this._ActivityReceived == null)
+                {
+                    ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_activity_received_set_callback(dialogServiceConnectorHandle, activityReceivedCallbackDelegate, GCHandle.ToIntPtr(gch)));
+                }
+                this._ActivityReceived += value;
+            }
+            remove
+            {
+                this._ActivityReceived -= value;
+                if (this._ActivityReceived == null)
+                {
+                    LogErrorIfFail(Internal.DialogServiceConnector.dialog_service_connector_activity_received_set_callback(dialogServiceConnectorHandle, null, IntPtr.Zero));
+                }
+            }
+        }
 
         /// <summary>
         /// Creates a dialog service connector using the default microphone input for a specified dialog service configuration.
@@ -82,13 +198,6 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             recognizingCallbackDelegate = FireEvent_Recognizing;
             canceledCallbackDelegate = FireEvent_Canceled;
             activityReceivedCallbackDelegate = FireEvent_ActivityReceived;
-
-            ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_session_started_set_callback(dialogServiceConnectorHandle, sessionStartedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_session_stopped_set_callback(dialogServiceConnectorHandle, sessionStoppedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_recognized_set_callback(dialogServiceConnectorHandle, recognizedCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_recognizing_set_callback(dialogServiceConnectorHandle, recognizingCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_canceled_set_callback(dialogServiceConnectorHandle, canceledCallbackDelegate, GCHandle.ToIntPtr(gch)));
-            ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_activity_received_set_callback(dialogServiceConnectorHandle, activityReceivedCallbackDelegate, GCHandle.ToIntPtr(gch)));
         }
 
         ~DialogServiceConnector()
@@ -200,7 +309,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             try
             {
                 var connector = GetConnectorFromContext(context);
-                FireEvent(new SessionEventArgs(eventHandle), connector, connector?.SessionStarted);
+                FireEvent(new SessionEventArgs(eventHandle), connector, connector?._SessionStarted);
             }
             catch (InvalidOperationException)
             {
@@ -217,7 +326,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             try
             {
                 var connector = GetConnectorFromContext(context);
-                FireEvent(new SessionEventArgs(eventHandle), connector, connector?.SessionStopped);
+                FireEvent(new SessionEventArgs(eventHandle), connector, connector?._SessionStopped);
             }
             catch (InvalidOperationException)
             {
@@ -234,7 +343,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             try
             {
                 var connector = GetConnectorFromContext(context);
-                FireEvent(new SpeechRecognitionEventArgs(eventHandle), connector, connector?.Recognizing);
+                FireEvent(new SpeechRecognitionEventArgs(eventHandle), connector, connector?._Recognizing);
             }
             catch (InvalidOperationException)
             {
@@ -251,7 +360,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             try
             {
                 var connector = GetConnectorFromContext(context);
-                FireEvent(new SpeechRecognitionEventArgs(eventHandle), connector, connector?.Recognized);
+                FireEvent(new SpeechRecognitionEventArgs(eventHandle), connector, connector?._Recognized);
             }
             catch (InvalidOperationException)
             {
@@ -269,7 +378,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             try
             {
                 var connector = GetConnectorFromContext(context);
-                FireEvent(new SpeechRecognitionCanceledEventArgs(eventHandle), connector, connector?.Canceled);
+                FireEvent(new SpeechRecognitionCanceledEventArgs(eventHandle), connector, connector?._Canceled);
             }
             catch (InvalidOperationException)
             {
@@ -287,7 +396,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             try
             {
                 var connector = GetConnectorFromContext(context);
-                FireEvent(new ActivityReceivedEventArgs(eventHandle), connector, connector?.ActivityReceived);
+                FireEvent(new ActivityReceivedEventArgs(eventHandle), connector, connector?._ActivityReceived);
             }
             catch (InvalidOperationException)
             {

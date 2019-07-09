@@ -316,6 +316,16 @@ public class SpeechRecognizerTests {
         testRecognizeOnceAsync1(false);
     }
 
+    @Test
+    public void testRecognizeOnceAsyncWithLateSubscribePreConnection() throws InterruptedException, ExecutionException, TimeoutException {
+        testRecognizeOnceAsyncWithLaterSubscribe1(true);
+    }
+
+    @Test
+    public void testRecognizeAsyncWithoutWithLateSubscribePreConnection() throws InterruptedException, ExecutionException, TimeoutException {
+        testRecognizeOnceAsyncWithLaterSubscribe1(false);
+    }
+
     public void testRecognizeOnceAsync1(boolean usingPreConnection) throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
@@ -343,6 +353,64 @@ public class SpeechRecognizerTests {
 
         r.sessionStopped.addEventListener((o, SessionEventArgs) -> {
             sessionStoppedCount.getAndIncrement();
+        });
+
+        Future<SpeechRecognitionResult> future = r.recognizeOnceAsync();
+        assertNotNull(future);
+
+        // Wait for max 30 seconds
+        future.get(30, TimeUnit.SECONDS);
+
+        assertFalse(future.isCancelled());
+        assertTrue(future.isDone());
+
+        SpeechRecognitionResult res = future.get();
+        assertNotNull(res);
+        assertEquals(ResultReason.RecognizedSpeech, res.getReason());
+        assertEquals("What's the weather like?", res.getText());
+
+        // wait until we get the SessionStopped event.
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) && (sessionStoppedCount.get() == 0)) {
+            Thread.sleep(200);
+        }
+
+        // It is not required to explictly close the connection. This is also used to keep the connection object alive.
+        connection.closeConnection();
+
+        TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
+
+        r.close();
+        s.close();
+    }
+
+    public void testRecognizeOnceAsyncWithLaterSubscribe1(boolean usingPreConnection) throws InterruptedException, ExecutionException, TimeoutException {
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        assertNotNull(s);
+
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(r);
+        assertNotNull(r);
+        assertNotNull(r.getRecoImpl());
+        assertTrue(r instanceof Recognizer);
+
+        if (usingPreConnection)
+        {
+            connection.openConnection(false);
+        }
+        AtomicInteger connectedEventCount = new AtomicInteger(0);
+        AtomicInteger disconnectedEventCount = new AtomicInteger(0);
+        AtomicInteger sessionStoppedCount = new AtomicInteger(0);
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+
+            connection.disconnected.addEventListener((o2, e) -> {
+                disconnectedEventCount.getAndIncrement();
+            });
+    
+            r.sessionStopped.addEventListener((o2, e) -> {
+                sessionStoppedCount.getAndIncrement();
+            });    
         });
 
         Future<SpeechRecognitionResult> future = r.recognizeOnceAsync();
@@ -468,6 +536,127 @@ public class SpeechRecognizerTests {
             if (e.getReason() != CancellationReason.EndOfStream) {
                 eventsMap.put("canceled", eventIdentifier.getAndIncrement());
             }
+        });
+
+        r.speechStartDetected.addEventListener((o, e) -> {
+            int now = eventIdentifier.getAndIncrement();
+            eventsMap.put("speechStartDetected-" + System.currentTimeMillis(), now);
+            eventsMap.put("speechStartDetected", now);
+        });
+
+        r.speechEndDetected.addEventListener((o, e) -> {
+            int now = eventIdentifier.getAndIncrement();
+            eventsMap.put("speechEndDetected-" + System.currentTimeMillis(), now);
+            eventsMap.put("speechEndDetected", now);
+        });
+
+        r.sessionStarted.addEventListener((o, e) -> {
+            int now = eventIdentifier.getAndIncrement();
+            eventsMap.put("sessionStarted-" + System.currentTimeMillis(), now);
+            eventsMap.put("sessionStarted", now);
+        });
+
+        r.sessionStopped.addEventListener((o, e) -> {
+            sessionStoppedCount.getAndIncrement();
+            int now = eventIdentifier.getAndIncrement();
+            eventsMap.put("sessionStopped-" + System.currentTimeMillis(), now);
+            eventsMap.put("sessionStopped", now);
+        });
+
+        SpeechRecognitionResult res = r.recognizeOnceAsync().get();
+        assertNotNull(res);
+        assertEquals(ResultReason.RecognizedSpeech, res.getReason());
+        assertEquals("What's the weather like?", res.getText());
+
+        // wait until we get the SessionStopped event.
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) && (sessionStoppedCount.get() == 0)) {
+            Thread.sleep(200);
+        }
+        // It is not required to explictly close the connection. This is also used to keep the connection object alive.
+        connection.closeConnection();
+        TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
+
+        // session events are first and last event
+        final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
+        assertTrue(LAST_RECORDED_EVENT_ID > FIRST_EVENT_ID);
+        assertEquals(FIRST_EVENT_ID, eventsMap.get("sessionStarted"));
+        if(eventsMap.containsKey("sessionStopped"))
+            assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get("sessionStopped"));
+
+        // end events come after start events.
+        if(eventsMap.containsKey("sessionStopped"))
+            assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("sessionStopped"));
+        assertTrue(eventsMap.get("speechStartDetected") < eventsMap.get("speechEndDetected"));
+        assertEquals((Integer)(FIRST_EVENT_ID + 1), eventsMap.get("speechStartDetected"));
+
+        // make sure, first end of speech, then final result
+        assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 2), eventsMap.get("speechEndDetected"));
+        assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 1), eventsMap.get("recognized"));
+
+        // recognition events come after session start but before session end events
+        assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("speechStartDetected"));
+        if(eventsMap.containsKey("sessionStopped"))
+            assertTrue(eventsMap.get("speechEndDetected") < eventsMap.get("sessionStopped"));
+
+        // there is no partial result reported after the final result
+        // (and check that we have intermediate and final results recorded)
+        if(eventsMap.containsKey("recognizing"))
+            assertTrue(eventsMap.get("recognizing") > eventsMap.get("speechStartDetected"));
+        assertTrue(eventsMap.get("recognized") < eventsMap.get("speechEndDetected"));
+        assertTrue(eventsMap.get("recognizing") < eventsMap.get("recognized"));
+
+        // make sure events we don't expect, don't get raised
+        assertFalse(eventsMap.containsKey("canceled"));
+
+        r.close();
+        s.close();
+    }
+
+    @Ignore("TODO why does not get whats the weather like")
+    @Test
+    public void testRecognizeOnceAsyncWithLateSubscription2() throws InterruptedException, ExecutionException {
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        assertNotNull(s);
+
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(r);
+        assertNotNull(r);
+        assertNotNull(r.getRecoImpl());
+        assertTrue(r instanceof Recognizer);
+
+        final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
+
+        AtomicInteger connectedEventCount = new AtomicInteger(0);
+        AtomicInteger disconnectedEventCount = new AtomicInteger(0);
+        AtomicInteger sessionStoppedCount = new AtomicInteger(0);
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+        });
+
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            disconnectedEventCount.getAndIncrement();
+        });
+
+        r.recognizing.addEventListener((o, e) -> {
+            int now = eventIdentifier.getAndIncrement();
+
+            // on first intermediate result, register for the final result.
+            if (!eventsMap.containsKey("recognizing"))
+            {
+                r.recognized.addEventListener((o2, e2) -> {
+                    eventsMap.put("recognized", eventIdentifier.getAndIncrement());
+                });
+
+                r.canceled.addEventListener((o2, e2) -> {
+                    if (e2.getReason() != CancellationReason.EndOfStream) {
+                        eventsMap.put("canceled", eventIdentifier.getAndIncrement());
+                    }
+                });
+            }
+
+            eventsMap.put("recognizing-" + System.currentTimeMillis(), now);
+            eventsMap.put("recognizing" , now);
         });
 
         r.speechStartDetected.addEventListener((o, e) -> {
