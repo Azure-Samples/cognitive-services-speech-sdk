@@ -151,7 +151,7 @@ public:
 
     /// <summary>
     /// Adds a target language for translation.
-    /// Added in version 1.6.0.
+    /// Added in version 1.7.0.
     /// </summary>
     /// <param name="language">Translation target language to add.</param>
     void AddTargetLanguage(const SPXSTRING& language)
@@ -162,7 +162,7 @@ public:
 
     /// <summary>
     /// Removes a target language for translation.
-    /// Added in version 1.6.0.
+    /// Added in version 1.7.0.
     /// </summary>
     /// <param name="language">Translation target language to remove.</param>
     void RemoveTargetLanguage(const SPXSTRING& language)
@@ -173,7 +173,7 @@ public:
 
     /// <summary>
     /// Gets target languages for translation.
-    /// Added in version 1.6.0.
+    /// Added in version 1.7.0.
     /// </summary>
     /// <returns>Vector of translation target languages.</returns>
     std::vector<SPXSTRING> GetTargetLanguages() const

@@ -103,7 +103,7 @@ public:
 
     /// <summary>
     /// Removes a target language for translation.
-    /// Added in release 1.6.0.
+    /// Added in release 1.7.0.
     /// </summary>
     /// <param name="language">Translation target language to remove.</param>
     void RemoveTargetLanguage(const SPXSTRING& language)

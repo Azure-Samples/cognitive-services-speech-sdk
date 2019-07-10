@@ -474,4 +474,23 @@
     });
 }
 
+- (void)addTargetLanguage:(NSString *)lang
+{
+    translationRecoImpl->AddTargetLanguage([lang toSpxString]);
+}
+
+- (void)removeTargetLanguage:(NSString *)lang
+{
+    translationRecoImpl->RemoveTargetLanguage([lang toSpxString]);
+}
+
+- (NSArray *)targetLanguages
+{
+    auto langsVector = translationRecoImpl->GetTargetLanguages();
+    NSMutableArray *mutableArray = [[NSMutableArray alloc] initWithCapacity:langsVector.size()];
+    for (std::vector<std::string>::iterator it = langsVector.begin(); it != langsVector.end(); ++it){
+        [mutableArray addObject:[NSString StringWithStdString:*it]];
+    }
+    return mutableArray;
+}
 @end

@@ -224,6 +224,11 @@
     speechTranslationConfigurationImpl->AddTargetLanguage([lang toSpxString]);
 }
 
+- (void)removeTargetLanguage:(NSString *)lang
+{
+    speechTranslationConfigurationImpl->RemoveTargetLanguage([lang toSpxString]);
+}
+
 - (NSArray *)targetLanguages
 {
     auto langsVector = speechTranslationConfigurationImpl->GetTargetLanguages();

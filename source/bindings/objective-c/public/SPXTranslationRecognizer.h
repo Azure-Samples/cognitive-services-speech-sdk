@@ -31,6 +31,13 @@ typedef void (^SPXTranslationSynthesisEventHandler)(SPXTranslationRecognizer * _
 @property (nonatomic, copy, nullable)NSString *authorizationToken;
 
 /**
+ * All target languages that have been configured for translation.
+ * 
+ * Added in version 1.7.0.
+ */
+@property (nonatomic, copy, readonly, nonnull)NSArray *targetLanguages;
+
+/**
  * Initializes a new instance of translation recognizer.
  *
  * @param translationConfiguration translation recognition configuration.
@@ -183,5 +190,23 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * Subscribes to the Canceled event which indicates that an error occurred during recognition.
  */
 - (void)addCanceledEventHandler:(nonnull SPXTranslationRecognitionCanceledEventHandler)eventHandler;
+
+/**
+ * Adds a target language for translation.
+ * 
+ * Added in version 1.7.0.
+ *
+ * @param lang the language identifier in BCP-47 format.
+ */
+- (void)addTargetLanguage:(nonnull NSString *)lang;
+
+/**
+ * Removes a target language for translation.
+ * 
+ * Added in version 1.7.0.
+ *
+ * @param lang the language identifier in BCP-47 format.
+ */
+- (void)removeTargetLanguage:(nonnull NSString *)lang;
 
 @end

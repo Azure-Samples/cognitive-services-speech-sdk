@@ -669,4 +669,72 @@ public class TranslationRecognizerTests {
         r.close();
         s.close();
     }
+
+    @Test
+    public void testChangeTargetLanguages() throws InterruptedException, ExecutionException, TimeoutException {
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        assertNotNull(s);
+
+        String language = "en-US";
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage("de");
+        String targetLangsFromConfigProperty = s.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+        assertEquals("de", targetLangsFromConfigProperty);
+
+        s.addTargetLanguage("fr");
+        s.addTargetLanguage("es");
+        targetLangsFromConfigProperty = s.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+        assertEquals("de,fr,es", targetLangsFromConfigProperty);
+
+        s.removeTargetLanguage("de");
+        targetLangsFromConfigProperty = s.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+        assertEquals("fr,es", targetLangsFromConfigProperty);
+        ArrayList<String> targetLangListFromConfig = s.getTargetLanguages();
+        assertEquals(2, targetLangListFromConfig.size());
+        assertEquals("fr", targetLangListFromConfig.get(0));
+        assertEquals("es", targetLangListFromConfig.get(1));
+
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        assertNotNull(r);
+        assertNotNull(r.getRecoImpl());
+        assertTrue(r instanceof Recognizer);
+
+        String targetLangsFromRecoProperty = r.getProperties().getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+        assertEquals("fr,es", targetLangsFromRecoProperty);
+        ArrayList<String> targetLangListFromReco = r.getTargetLanguages();
+        assertEquals(2, targetLangListFromReco.size());
+        assertEquals("fr", targetLangListFromReco.get(0));
+        assertEquals("es", targetLangListFromReco.get(1));
+
+        r.addTargetLanguage("nl");
+        r.removeTargetLanguage("es");
+        targetLangsFromRecoProperty = r.getProperties().getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+        assertEquals("fr,nl", targetLangsFromRecoProperty);
+        targetLangListFromReco = r.getTargetLanguages();
+        assertEquals(2, targetLangListFromReco.size());
+        assertEquals("fr", targetLangListFromReco.get(0));
+        assertEquals("nl", targetLangListFromReco.get(1));
+
+        Future<TranslationRecognitionResult> future = r.recognizeOnceAsync();
+        assertNotNull(future);
+
+        // Wait for max 30 seconds
+        future.get(30, TimeUnit.SECONDS);
+
+        assertFalse(future.isCancelled());
+        assertTrue(future.isDone());
+
+        TranslationRecognitionResult res = future.get();
+        assertNotNull(res);
+        assertTrue(ResultReason.TranslatedSpeech == res.getReason());
+        assertEquals(2, res.getTranslations().size());
+        assertTrue(res.getTranslations().get("fr").length() > 0);
+        assertTrue(res.getTranslations().get("nl").length() > 0);
+        assertFalse(res.getTranslations().containsKey("de"));
+        assertFalse(res.getTranslations().containsKey("es"));
+
+        r.close();
+        s.close();
+    }
+
 }

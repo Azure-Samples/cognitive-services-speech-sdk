@@ -359,4 +359,36 @@
     XCTAssertTrue([germanTranslation isEqualToString:weatherTextGerman], "German translation does not match");
 }
 
+- (void)testChangeTargetLanguages {
+    NSString *weatherFileName = @"whatstheweatherlike";
+    NSString *weatherTextEnglish = @"What's the weather like?";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    SPXSpeechTranslationConfiguration *translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
+    [translationConfig setSpeechRecognitionLanguage:@"en-us"];
+    [translationConfig addTargetLanguage:@"de"];
+    [translationConfig removeTargetLanguage:@"de"];
+
+    SPXTranslationRecognizer *translationRecognizer = [[SPXTranslationRecognizer alloc] initWithSpeechTranslationConfiguration:translationConfig audioConfiguration:weatherAudioSource];
+    NSArray *targetLangList = [translationRecognizer targetLanguages];
+    XCTAssertEqual(0, [targetLangList count], @"target language list must be empty.");
+    XCTAssertTrue([[[translationRecognizer properties] getPropertyById:SPXSpeechServiceConnectionTranslationToLanguages] isEqualToString:@""], @"target languages in property should be empty.");
+    [translationRecognizer addTargetLanguage:@"nl"];
+    [translationRecognizer addTargetLanguage:@"fr"];
+    [translationRecognizer removeTargetLanguage:@"nl"];
+    targetLangList = [translationRecognizer targetLanguages];
+    XCTAssertEqual(1, [targetLangList count], @"target language list must have 1 element.");
+    XCTAssertTrue([[targetLangList firstObject] isEqualToString:@"fr"], @"target languages does not match.");
+
+    SPXTranslationRecognitionResult *result = [translationRecognizer recognizeOnce];
+    XCTAssertTrue(result.reason == SPXResultReason_TranslatedSpeech);
+    NSDictionary* translationDictionary = result.translations;
+    id frenchTranslation = [translationDictionary valueForKey:@"fr"];
+    NSLog(@"French Translation: %@", frenchTranslation);
+    XCTAssertTrue([frenchTranslation length] > 0, @"French translation should not be empty");
+    XCTAssertTrue([translationDictionary objectForKey:@"de"] == nil, @"German translation must be empty");
+    XCTAssertEqual(1, [translationDictionary count], @"Number of translations must be 1.");
+}
+
 @end

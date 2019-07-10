@@ -38,6 +38,8 @@ class TranslationEndToEndTests: XCTestCase {
         let translationConfig = try! SPXSpeechTranslationConfiguration(subscription:self.speechKey, region:self.serviceRegion)
         translationConfig.speechRecognitionLanguage = "en-US"
         translationConfig.addTargetLanguage("de");
+        translationConfig.removeTargetLanguage("de");
+        translationConfig.addTargetLanguage("de");
         translationConfig.addTargetLanguage("zh-Hans");
 
         self.reco = try! SPXTranslationRecognizer(speechTranslationConfiguration: translationConfig, audioConfiguration: audioConfig!)
@@ -150,5 +152,24 @@ class TranslationEndToEndTests: XCTestCase {
         self.waitForExpectations(timeout: timeoutInSeconds, handler: nil)
 
         XCTAssertEqual(self.counts["connectedCount"]!, self.counts["disconnectedCount"]!);
+    }
+
+    func testChangingTargetLanuages () {
+        self.reco?.addTargetLanguage("fr")
+        self.reco?.removeTargetLanguage("de")
+
+        try! self.reco?.startContinuousRecognition()
+        self.expectation(for: sessionStoppedCountPred!, evaluatedWith: self, handler: nil)
+        self.waitForExpectations(timeout: timeoutInSeconds, handler: nil)
+        try! self.reco?.stopContinuousRecognition()
+
+        let targetLang = self.reco?.targetLanguages as? [String];
+        XCTAssertEqual(targetLang, ["zh-Hans", "fr"]);
+        let langKeys = translationDictionary.keys;
+        XCTAssertEqual(Array(langKeys), ["zh-Hans", "fr"]);
+        let chineseTranslation = translationDictionary["zh-Hans"];
+        XCTAssertEqual(chineseTranslation, weatherTextChinese);
+        let frenchTranslation = translationDictionary["fr"];
+        XCTAssertTrue(frenchTranslation!.count > 0);
     }
 }

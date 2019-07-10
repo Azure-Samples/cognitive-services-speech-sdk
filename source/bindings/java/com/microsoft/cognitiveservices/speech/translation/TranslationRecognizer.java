@@ -78,15 +78,40 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     }
 
     /**
-     * Gets target languages for translation that were set when the recognizer was created.
-     * The language is specified in BCP-47 format. The translation will provide translated text for each of language.
-     * @return Gets target languages for translation that were set when the recognizer was created.
+     * Adds a target language for translation.
+     * Added in version 1.7.0.
+     * @param value the language identifier in BCP-47 format.
      */
-    public ArrayList<String> getTargetLanguages() {
-        return new ArrayList<String>(_TargetLanguages);
+    public void addTargetLanguage(String value) {
+        Contracts.throwIfNullOrWhitespace(value, "value");
+        recoImpl.AddTargetLanguage(value);
     }
 
-    ArrayList<String> _TargetLanguages = new ArrayList<String>();
+    /**
+     * Removes a target language for translation.
+     * Added in version 1.7.0.
+     * @param value the language identifier in BCP-47 format.
+     */
+    public void removeTargetLanguage(String value) {
+        Contracts.throwIfNullOrWhitespace(value, "value");
+        recoImpl.RemoveTargetLanguage(value);
+    }
+
+    /**
+     * Gets all target languages that have been configured for translation.
+     * @return the list of target languages.
+     */
+    public ArrayList<String> getTargetLanguages() {
+
+        ArrayList<String> result = new ArrayList<String>();
+        com.microsoft.cognitiveservices.speech.internal.StringVector v = recoImpl.GetTargetLanguages();
+        for (int i = 0; i < v.size(); ++i)
+        {
+            result.add(v.get(i));
+        }
+
+        return result;
+    }
 
     /**
      * Gets the name of output voice.

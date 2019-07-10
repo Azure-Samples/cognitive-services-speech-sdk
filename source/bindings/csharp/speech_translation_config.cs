@@ -100,26 +100,13 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                var result = new List<string>();
-
-                string[] targetLanguagesArray = new string[0];
-                var targetLanguages = progBag.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
-                if (targetLanguages != string.Empty)
-                {
-                    targetLanguagesArray = targetLanguages.Split(',');
-                }
-
-                for (int i = 0; i < targetLanguagesArray.Length; ++i)
-                {
-                    result.Add(targetLanguagesArray[i]);
-                }
-
-                return new ReadOnlyCollection<string>(result);
+                var plainStr = progBag.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+                return new ReadOnlyCollection<string>(plainStr.Split(','));
             }
         }
 
         /// <summary>
-        /// Add a target languages of translation.
+        /// Adds a target languages of translation.
         /// In case when speech synthesis is used and several target languages are specified for translation,
         /// the speech will be synthesized only for the first language.
         /// </summary>
@@ -130,7 +117,8 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Remove a target languages of translation.
+        /// Removes a target languages of translation.
+        /// Added in version 1.7.0.
         /// </summary>
         /// <param name="language"></param>
         public void RemoveTargetLanguage(string language)

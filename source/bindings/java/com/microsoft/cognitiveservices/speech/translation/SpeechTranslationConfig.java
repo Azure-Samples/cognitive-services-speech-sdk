@@ -109,7 +109,6 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
         return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromEndpoint(endpoint.toString()));
     }
 
-
     /**
      * Adds a (text) target language for translation.
      * @param value the language identifier in BCP-47 format.
@@ -121,7 +120,18 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     }
 
     /**
-     * Gets all target languages that have been added for translation.
+     * Removes a (text) target language for translation.
+     * Added in version 1.7.0.
+     * @param value the language identifier in BCP-47 format.
+     */
+    public void removeTargetLanguage(String value) {
+        Contracts.throwIfNullOrWhitespace(value, "value");
+
+        translatorConfigImpl.RemoveTargetLanguage(value);
+    }
+
+    /**
+     * Gets all target languages that have been configured for translation.
      * @return the list of target languages.
      */
     public ArrayList<String> getTargetLanguages() {

@@ -12,9 +12,8 @@
 SPX_EXPORT
 @interface SPXSpeechTranslationConfiguration : SPXSpeechConfiguration
 
-
 /**
- * All target languages that have been added for translation.
+ * All target languages that have been configured for translation.
  */
 @property (nonatomic, copy, readonly, nonnull)NSArray *targetLanguages;
 
@@ -160,10 +159,19 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 - (nullable instancetype)initWithEndpoint:(nonnull NSString *)endpointUri error:(NSError * _Nullable * _Nullable)outError;
 
 /**
- * Add a (text) target language for translation.
+ * Adds a target language for translation.
  *
  * @param lang the language identifier in BCP-47 format.
  */
 - (void)addTargetLanguage:(nonnull NSString *)lang;
+
+/**
+ * Removes a target language for translation.
+ * 
+ * Added in version 1.7.0.
+ *
+ * @param lang the language identifier in BCP-47 format.
+ */
+- (void)removeTargetLanguage:(nonnull NSString *)lang;
 
 @end

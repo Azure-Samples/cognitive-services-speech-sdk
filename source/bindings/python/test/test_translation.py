@@ -80,3 +80,22 @@ def test_set_service_property(subscription, speech_input, speech_region):
     translation_recognizer = msspeech.translation.TranslationRecognizer(config, audio_input)
     result = translation_recognizer.recognize_once()
     _check_translation_result(result, speech_input, 0, target_languages=['de'])
+
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_change_target_languages(subscription, speech_input, speech_region):
+    config = msspeech.translation.SpeechTranslationConfig(subscription=subscription, region=speech_region)
+    config.speech_recognition_language = 'en-us'
+    config.add_target_language('fr')
+    config.add_target_language('ja')
+    assert set(config.target_languages) == set(['fr', 'ja'])
+    config.remove_target_language('fr')
+    assert set(config.target_languages) == set(['ja'])
+    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    translation_recognizer = msspeech.translation.TranslationRecognizer(config, audio_input)
+    translation_recognizer.add_target_language('de')
+    assert set(translation_recognizer.target_languages) == set(['ja', 'de'])
+    translation_recognizer.remove_target_language('ja')
+    result = translation_recognizer.recognize_once()
+    assert set(translation_recognizer.target_languages) == set(['de'])
+    assert msspeech.ResultReason.TranslatedSpeech == result.reason
+    assert set(result.translations.keys()) == set(['de'])

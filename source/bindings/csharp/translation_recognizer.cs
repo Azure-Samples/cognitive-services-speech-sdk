@@ -298,7 +298,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
 
         /// <summary>
         /// Adds a target language for translation.
-        /// Added in version 1.6.0.
+        /// Added in version 1.7.0.
         /// </summary>
         /// <param name="language">Translation target language to add.</param>
         public void AddTargetLanguage(string language)
@@ -308,7 +308,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
 
         /// <summary>
         /// Removes a target language for translation.
-        /// Added in version 1.6.0.
+        /// Added in version 1.7.0.
         /// </summary>
         /// <param name="language">Translation target language to remove.</param>
         public void RemoveTargetLanguage(string language)

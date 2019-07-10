@@ -71,6 +71,16 @@ class SpeechTranslationConfig(SpeechConfig):
         """
         impl._speech_py_impl.SpeechTranslationConfig_add_target_language(self._impl, language)
 
+    def remove_target_language(self, language: str):
+        """
+        Remove `language` from the list of target languages for translation.
+
+        .. note::
+          Added in version 1.7.0.
+
+        :param language: The language code to remove.
+        """
+        impl._speech_py_impl.SpeechTranslationConfig_remove_target_language(self._impl, language)
 
 class TranslationRecognitionEventArgs(RecognitionEventArgs):
     """
@@ -282,4 +292,36 @@ class TranslationRecognizer(Recognizer):
         :class:`.TranslationRecognitionCanceledEventArgs`, instance as the single argument.
         """
         return EventSignal(self._impl.canceled, TranslationRecognitionCanceledEventArgs)
+
+    @property
+    def target_languages(self) -> Tuple[str]:
+        """
+        The target languages for translation.
+
+        .. note::
+          Added in version 1.7.0.
+        """
+        return self._impl.get_target_languages()
+
+    def add_target_language(self, language: str):
+        """
+        Add `language` to the list of target languages for translation.
+
+        .. note::
+          Added in version 1.7.0.
+
+        :param language: The language code to add.
+        """
+        self._impl.add_target_language(language)
+
+    def remove_target_language(self, language: str):
+        """
+        Remove `language` from the list of target languages for translation.
+
+        .. note::
+          Added in version 1.7.0.
+
+        :param language: The language code to remove.
+        """
+        self._impl.remove_target_language(language)
 
