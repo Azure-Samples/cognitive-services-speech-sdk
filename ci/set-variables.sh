@@ -75,8 +75,8 @@ case $(uname -a) in
   Linux*x86_64\ GNU/Linux)
     SPEECHSDK_BUILD_AGENT_PLATFORM=Linux-x64
     ;;
-  MINGW64_NT-*x86_64\ Msys|MSYS_NT-10.0-WOW*i686\ Msys)
-    # Note: second pattern matches the architecture of the UnityBuild build agent.
+  MINGW64_NT-*x86_64\ Msys|MSYS_NT-10.0-WOW*i686\ Msys|MSYS_NT-10.0*x86_64\ Msys)
+    # Note: last two patterns matches the architecture of the UnityBuild build agent.
     SPEECHSDK_BUILD_AGENT_PLATFORM=Windows-x64
     ;;
   Darwin*\ x86_64)

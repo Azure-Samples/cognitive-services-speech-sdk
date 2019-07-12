@@ -226,7 +226,7 @@ function unity_batch() {
   log_dir=$HOME/AppData/Local/Unity/Editor
   editor_log=$log_dir/Editor.log
   old_log_dir=${log_dir}/old
-  unity_exe="/c/Program Files/Unity2018.3.0f2/Editor/Unity.exe"
+  unity_exe="/c/Program Files/Unity2018.3.7f1/Editor/Unity.exe"
 
   [[ -x $unity_exe ]] || {
     printf "Error: cannot find Unity here: %s\n" "$unity_exe"

@@ -2407,18 +2407,19 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' UnityBuild '))
   pool:
     # The "Skyman Unity On-Prem" agent pool currently contains a single build
-    # agent called "UnityBuild". It has three licensed Unity versions installed
+    # agent called "Skyman". It has three licensed Unity versions installed
     # on it, cf. the build agent's capabilities at
     # https://msasg.visualstudio.com/_settings/agentpools?_a=agents&poolId=620:
     #
-    # Unity2017.2.1p2 - c:\program files\unity\editor\unity.exe
-    # Unity2018.1.2f1 - c:\Program Files\Unity2018.1.2f1
-    # Unity2018.3.0f2 - c:\Program Files\Unity2018.3.0f2
+    # Unity2018.3.7f1 - c:\Program Files\Unity2018.3.7f1
+    # Unity2018.4.2f1 - c:\Program Files\Unity2018.4.2f1
+    # Unity2019.1.7f1 - c:\Program Files\Unity2019.1.7f1
     #
     # Below we're using the last (newest) of these.
     #
     # The agent has been contributed and set up by Nick Horvath - many thanks!
     name: Skyman Unity On-Prem
+    demands: VS2019 -equals true
   timeoutInMinutes: 30
   # Note: since the build agent isn't our "default" hosted agent, we have to
   # patch up how some things work. Also, be aware that it's persistent (not
