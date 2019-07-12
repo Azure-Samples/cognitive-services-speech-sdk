@@ -356,7 +356,7 @@ jobs:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign Windows C++ and C# binaries'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: 'build/bin/$(BuildConfiguration)'
       Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.dll'
       signConfigType: inlineSignParams
@@ -432,7 +432,7 @@ jobs:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign *.jar'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: '$(MavenRootWindows)'
       Pattern: '*.jar'
       signConfigType: inlineSignParams
@@ -706,7 +706,7 @@ jobs:
     displayName: 'Test - build solutions'
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: '$(Build.ArtifactStagingDirectory)/Windows'
       Pattern: '*.nupkg'
       signConfigType: inlineSignParams
@@ -1189,7 +1189,7 @@ jobs:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: Sign com.microsoft.cognitiveservices.speech.jar
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: 'build/lib'
       Pattern: com.microsoft.cognitiveservices.speech.jar
       signConfigType: inlineSignParams
@@ -1422,7 +1422,7 @@ jobs:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign *.aar (Release)'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: '$(MavenRootWindows)'
       Pattern: '*.aar'
       signConfigType: inlineSignParams
@@ -1908,7 +1908,7 @@ jobs:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign iOS framework'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: '$(OutputDirectory)'
       Pattern: $(VersionedFrameworkName).zip
       signConfigType: inlineSignParams
@@ -2105,7 +2105,7 @@ jobs:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: Sign .so (dynamic library) in .whl
     inputs:
-      ConnectedServiceName: Speech SDK ESRP Signing
+      ConnectedServiceName: Speech SDK ESRP Signing Alternate
       FolderPath: $(OutputDirectory)/wheelhouse
       Pattern: '*.whl.zip'
       signConfigType: inlineSignParams
@@ -2154,7 +2154,7 @@ jobs:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign OSX framework'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: '$(OutputDirectory)'
       Pattern: $(VersionedFrameworkName).zip
       signConfigType: inlineSignParams
@@ -2181,7 +2181,7 @@ jobs:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: Sign .dylib (dynamic library)
     inputs:
-      ConnectedServiceName: Speech SDK ESRP Signing
+      ConnectedServiceName: Speech SDK ESRP Signing Alternate
       FolderPath: tosign
       Pattern: '*.zip'
       signConfigType: inlineSignParams
@@ -2190,7 +2190,7 @@ jobs:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign Mac .dll for nuget package'
     inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
       FolderPath: 'build/bin/$(BuildConfiguration)MacOS/netstandard2.0/'
       Pattern: 'Microsoft.CognitiveServices.Speech.csharp.dll'
       signConfigType: inlineSignParams
