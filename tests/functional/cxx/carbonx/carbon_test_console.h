@@ -52,6 +52,9 @@ private:
         std::string m_strIntentAppId;
         std::string m_strIntentNames; // comma-separated
         std::string m_strDeviceName;
+        std::string m_strProxyHost;
+        std::string m_strProxyPort;
+        std::string m_strPassthroughCertFile;
         std::string m_strOfflineModelPathRoot;
         std::string m_strOfflineModelLanguage;
 
@@ -203,7 +206,7 @@ private:
     void InitCarbon(ConsoleArgs* pconsoleArgs);
     void TermCarbon();
 
-    void InitRecognizer(const std::string& recognizerType, const std::string& wavFileName, const std::string& deviceName);
+    void InitRecognizer(const std::string& recognizerType, const std::string& wavFileName, const std::string& deviceName, const std::string& proxyHost, const std::string& proxyPort, const std::string& passthroughCertFile);
     void InitCommandSystem();
 
     void WaitForDebugger();

@@ -242,7 +242,7 @@ case $SPEECHSDK_BUILD_TYPE in
   int)
     # For Nightly add some additional jobs.
     if [[ $BUILD_REASON == Schedule ]]; then
-      SPEECHSDK_BUILD_PHASES+="TsaUpload WindowsSDLFortifyJava WackTest IosMultiPlatformTests DocFX AndroidAppcenterTest "
+      SPEECHSDK_BUILD_PHASES+="TsaUpload WindowsSDLFortifyJava WackTest IosMultiPlatformTests DocFX AndroidAppcenterTest LinuxProxyTest "
     fi
     PRERELEASE_VERSION=-beta.0.$_BUILD_ID
     META=+$_BUILD_COMMIT
@@ -252,7 +252,7 @@ case $SPEECHSDK_BUILD_TYPE in
     ;;
   prod)
     # Additional jobs for production builds.
-    SPEECHSDK_BUILD_PHASES+="WackTest IosMultiPlatformTests AndroidAppcenterTest "
+    SPEECHSDK_BUILD_PHASES+="WackTest IosMultiPlatformTests AndroidAppcenterTest LinuxProxyTest "
     # Prod builds take exactly the version from version.txt, no extra
     # pre-release or meta.
     PRERELEASE_VERSION=

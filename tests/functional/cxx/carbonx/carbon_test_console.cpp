@@ -235,6 +235,24 @@ bool CarbonTestConsole::ParseConsoleArgs(const std::vector<std::string>& args, C
             pstrNextArg = &pconsoleArgs->m_strDeviceName;
             fNextArgRequired = true;
         }
+        else if (PAL::strnicmp(pszArg, "--proxy-host", strlen("--proxy-host")) == 0)
+        {
+            fShowOptions = fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_strProxyHost;
+            fNextArgRequired = true;
+        }
+        else if (PAL::strnicmp(pszArg, "--proxy-port", strlen("--proxy-port")) == 0)
+        {
+            fShowOptions = fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_strProxyPort;
+            fNextArgRequired = true;
+        }
+        else if (PAL::strnicmp(pszArg, "--passthrough-certfile", strlen("--passthrough-certfile")) == 0)
+        {
+            fShowOptions = fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_strPassthroughCertFile;
+            fNextArgRequired = true;
+        }
         else if (pstrNextArg != NULL)
         {
             fShowOptions = pstrNextArg->length() > 0;
@@ -1679,7 +1697,7 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
 {
     try
     {
-        InitRecognizer(pconsoleArgs->m_strRecognizerType, pconsoleArgs->m_audioInput, pconsoleArgs->m_strDeviceName);
+        InitRecognizer(pconsoleArgs->m_strRecognizerType, pconsoleArgs->m_audioInput, pconsoleArgs->m_strDeviceName, pconsoleArgs->m_strProxyHost, pconsoleArgs->m_strProxyPort, pconsoleArgs->m_strPassthroughCertFile);
         InitCommandSystem();
     }
     catch (std::exception ex)
@@ -1720,12 +1738,27 @@ int CarbonTestConsole::ReadCompressedBinaryData(void *stream, uint8_t *ptr, uint
 }
 
 
-void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::string& wavFileName, const std::string& deviceName)
+void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::string& wavFileName, const std::string& deviceName, const std::string& proxyHost, const std::string& proxyPort, const std::string& passthroughCertFile)
 {
     if (recognizerType == PAL::GetTypeName<SpeechRecognizer>())
     {
         auto sc = SpeechRecognizerConfig();
 
+        if (!proxyHost.empty() && !proxyPort.empty())
+        {
+            sc->SetProxy(proxyHost, std::stoi(proxyPort));
+        }
+
+        if (!passthroughCertFile.empty())
+        {
+            std::ifstream certfile(passthroughCertFile);
+            std::string cert((std::istreambuf_iterator<char>(certfile)),
+                 std::istreambuf_iterator<char>());
+
+            std::cout << "Setting certificate " << cert << "\n";
+            sc->SetProperty("OPENSSL_SINGLE_TRUSTED_CERT", cert);
+            sc->SetProperty("OPENSSL_SINGLE_TRUSTED_CERT_CRL_CHECK", "false");
+        }
         if (deviceName.empty())
         {
             if (wavFileName.find(".mp3") == (wavFileName.size() - 4))

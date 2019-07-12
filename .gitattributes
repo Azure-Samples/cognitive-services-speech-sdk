@@ -21,6 +21,7 @@ setup.cfg text
 *.c text
 *.cmake text
 *.cmd text
+*.conf text
 *.config text
 *.cpp text
 *.cs text

@@ -1523,6 +1523,40 @@ jobs:
       speechKey: "$(WestUSLatencyTestSpeechKey)"
       region: "westus"
 
+- job: LinuxProxyTest
+  dependsOn: [Pre, LinuxBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxProxyTest '))
+  pool:
+    name: Hosted Ubuntu 1604
+  steps:
+  - bash: |
+      set -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Download Linux binary
+    inputs:
+      artifactName: Linux
+      downloadPath: $(System.ArtifactsDirectory)
+  - template: get-docker-image.yml
+    parameters:
+      imageBase: dev_ubuntu1604_x64
+      outvarImage: DOCKER_IMAGES
+  - bash: |
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false)
+      ./ci/build/proxy-test.sh $(System.ArtifactsDirectory)
+    continueOnError: ${{ parameters.continueOnTestFailure }}
+    displayName: Run the proxy test
+
 - template: linux-docker-build.yml
   parameters:
     continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
