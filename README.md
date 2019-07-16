@@ -8,6 +8,7 @@ languages:
 - nodejs
 - objc
 - python
+- swift
 name: Speech SDK Samples
 description: "Learn how to use the Microsoft Cognitive Services Speech SDK to add speech-enabled features to your applications."
 products:
