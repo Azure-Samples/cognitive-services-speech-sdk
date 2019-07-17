@@ -264,6 +264,8 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
             errorHandler.delete();
             transcriberImpl.delete();
             _Parameters.close();
+
+            _conversationTranscriberObjects.remove(this);
             disposed = true;
             super.dispose(disposing);
         }
@@ -278,15 +280,23 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
         return transcriberImpl;
     }
 
+    /**
+     * This is used to keep any instance of this class alive that is subscribed to downstream events.
+     */
+    static java.util.Set<ConversationTranscriber> _conversationTranscriberObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<ConversationTranscriber>());
+
     /*! \endcond */
 
     private void initialize() {
         super.internalRecognizerImpl = this.transcriberImpl;
 
+        final ConversationTranscriber _this = this;
+
         recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
         this.recognizing.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _conversationTranscriberObjects.add(_this);
                 transcriberImpl.getRecognizing().AddEventListener(recognizingHandler);
             }
         });
@@ -295,6 +305,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
         this.recognized.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _conversationTranscriberObjects.add(_this);
                 transcriberImpl.getRecognized().AddEventListener(recognizedHandler);
             }
         });
@@ -303,6 +314,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
         this.canceled.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _conversationTranscriberObjects.add(_this);
                 transcriberImpl.getCanceled().AddEventListener(errorHandler);
             }
         });
@@ -310,6 +322,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
         this.sessionStarted.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _conversationTranscriberObjects.add(_this);
                 transcriberImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
             }
         });
@@ -317,6 +330,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
         this.sessionStopped.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _conversationTranscriberObjects.add(_this);
                 transcriberImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
             }
         });
@@ -324,6 +338,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
         this.speechStartDetected.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _conversationTranscriberObjects.add(_this);
                 transcriberImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
             }
         });
@@ -331,6 +346,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
         this.speechEndDetected.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _conversationTranscriberObjects.add(_this);
                 transcriberImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
             }
         });

@@ -101,18 +101,25 @@ public final class Connection implements Closeable
 
         if (disposing) {
             // disconnect
-            connectionImpl.getConnected().DisconnectAll();
-            connectionImpl.getDisconnected().DisconnectAll();
+            if (this.connected.isUpdateNotificationOnConnectedFired())
+                connectionImpl.getConnected().DisconnectAll();
+            if (this.disconnected.isUpdateNotificationOnConnectedFired())
+                connectionImpl.getDisconnected().DisconnectAll();
 
             connectedHandler.delete();
             disconnectedHandler.delete();
             connectionImpl.delete();
+            _connectionObjects.remove(this);
+            disposed = true;
         }
-
-        disposed = true;
     }
 
     /*! \endcond */
+
+    /**
+     * This is used to keep any instance of this class alive that is subscribed to downstream events.
+     */
+    static java.util.Set<Connection> _connectionObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<Connection>());
 
     private com.microsoft.cognitiveservices.speech.internal.Connection connectionImpl;
     private ConnectionEventHandlerImpl connectedHandler;
@@ -128,10 +135,25 @@ public final class Connection implements Closeable
 
     private void initialize()
     {
+        final Connection _this = this;
+
         this.connectedHandler = new ConnectionEventHandlerImpl(this, true);
+        this.connected.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                _connectionObjects.add(_this);
+                connectionImpl.getConnected().AddEventListener(connectedHandler);
+            }
+        });
+
         this.disconnectedHandler = new ConnectionEventHandlerImpl(this,false);
-        connectionImpl.getConnected().AddEventListener(connectedHandler);
-        connectionImpl.getDisconnected().AddEventListener(disconnectedHandler);
+        this.disconnected.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                _connectionObjects.add(_this);
+                connectionImpl.getDisconnected().AddEventListener(disconnectedHandler);
+            }
+        });
     }
 
     /**

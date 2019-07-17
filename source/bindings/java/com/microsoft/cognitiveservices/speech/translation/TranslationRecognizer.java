@@ -237,6 +237,8 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
             errorHandler.delete();
             recoImpl.delete();
             _Parameters.close();
+
+            _translationRecognizerObjects.remove(this);
             disposed = true;
             super.dispose(disposing);
         }
@@ -245,6 +247,11 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     /*! \endcond */
 
     /*! \cond INTERNAL */
+
+   /**
+     * This is used to keep any instance of this class alive that is subscribed to downstream events.
+     */
+    static java.util.Set<TranslationRecognizer> _translationRecognizerObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<TranslationRecognizer>());
 
     // TODO Remove this... After tests are updated to no longer depend upon this
     public com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer getRecoImpl() {
@@ -256,10 +263,13 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     private void initialize() {
         super.internalRecognizerImpl = this.recoImpl;
 
+        final TranslationRecognizer _this = this;
+
         recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
         this.recognizing.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _translationRecognizerObjects.add(_this);
                 recoImpl.getRecognizing().AddEventListener(recognizingHandler);
             }
         });
@@ -268,6 +278,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         this.recognized.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _translationRecognizerObjects.add(_this);
                 recoImpl.getRecognized().AddEventListener(recognizedHandler);
             }
         });
@@ -276,6 +287,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         this.synthesizing.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _translationRecognizerObjects.add(_this);
                 recoImpl.getSynthesizing().AddEventListener(synthesisResultHandler);
             }
         });
@@ -284,6 +296,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         this.canceled.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _translationRecognizerObjects.add(_this);
                 recoImpl.getCanceled().AddEventListener(errorHandler);
             }
         });
@@ -291,6 +304,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         this.sessionStarted.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _translationRecognizerObjects.add(_this);
                 recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
             }
         });
@@ -298,6 +312,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         this.sessionStopped.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _translationRecognizerObjects.add(_this);
                 recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
             }
         });
@@ -305,6 +320,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         this.speechStartDetected.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _translationRecognizerObjects.add(_this);
                 recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
             }
         });
@@ -312,6 +328,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         this.speechEndDetected.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _translationRecognizerObjects.add(_this);
                 recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
             }
         });

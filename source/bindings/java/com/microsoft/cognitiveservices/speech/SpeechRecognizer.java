@@ -244,6 +244,8 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
             errorHandler.delete();
             recoImpl.delete();
             _Parameters.close();
+
+            _speechRecognizerObjects.remove(this);
             disposed = true;
             super.dispose(disposing);
         }
@@ -252,6 +254,11 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     /*! \endcond */
 
     /*! \cond INTERNAL */
+
+    /**
+     * This is used to keep any instance of this class alive that is subscribed to downstream events.
+     */
+    static java.util.Set<SpeechRecognizer> _speechRecognizerObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<SpeechRecognizer>());
 
     // TODO Remove this... After tests are updated to no longer depend upon this
     public com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer getRecoImpl() {
@@ -263,10 +270,13 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     private void initialize() {
         super.internalRecognizerImpl = this.recoImpl;
 
+        final SpeechRecognizer _this = this;
+
         recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
         this.recognizing.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _speechRecognizerObjects.add(_this);
                 recoImpl.getRecognizing().AddEventListener(recognizingHandler);
             }
         });
@@ -275,6 +285,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         this.recognized.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _speechRecognizerObjects.add(_this);
                 recoImpl.getRecognized().AddEventListener(recognizedHandler);
             }
         });
@@ -283,6 +294,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         this.canceled.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _speechRecognizerObjects.add(_this);
                 recoImpl.getCanceled().AddEventListener(errorHandler);
             }
         });
@@ -290,6 +302,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         this.sessionStarted.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _speechRecognizerObjects.add(_this);
                 recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
             }
         });
@@ -297,6 +310,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         this.sessionStopped.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _speechRecognizerObjects.add(_this);
                 recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
             }
         });
@@ -304,6 +318,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         this.speechStartDetected.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _speechRecognizerObjects.add(_this);
                 recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
             }
         });
@@ -311,6 +326,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         this.speechEndDetected.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
+                _speechRecognizerObjects.add(_this);
                 recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
             }
         });

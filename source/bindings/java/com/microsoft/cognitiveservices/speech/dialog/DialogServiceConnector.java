@@ -178,19 +178,67 @@ public class DialogServiceConnector implements Closeable {
 
     /*! \cond PROTECTED */
     private void initialize() {
+        final DialogServiceConnector _this = this;
+
         recognizingHandler = new RecoEventHandlerImpl(this, /* isRecognizedHandler */ false);
-        dialogServiceConnectorImpl.getRecognizing().AddEventListener(recognizingHandler);
+        this.recognizing.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                _dialogServiceConnectorObjects.add(_this);
+                dialogServiceConnectorImpl.getRecognizing().AddEventListener(recognizingHandler);
+            }
+        });
+
         recognizedHandler = new RecoEventHandlerImpl(this, /* isRecognizedHandler */ true);
-        dialogServiceConnectorImpl.getRecognized().AddEventListener(recognizedHandler);
+        this.recognized.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                _dialogServiceConnectorObjects.add(_this);
+                dialogServiceConnectorImpl.getRecognized().AddEventListener(recognizedHandler);
+            }
+        });
+
         sessionStartedHandler = new SessionEventHandlerImpl(this, /* isSessionStart */ true);
-        dialogServiceConnectorImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+        this.sessionStarted.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                _dialogServiceConnectorObjects.add(_this);
+                dialogServiceConnectorImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+            }
+        });
+
         sessionStoppedHandler = new SessionEventHandlerImpl(this, /* isSessionStopped */ false);
-        dialogServiceConnectorImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+        this.sessionStopped.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                _dialogServiceConnectorObjects.add(_this);
+                dialogServiceConnectorImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+            }
+        });
+
         canceledHandler = new CanceledEventHandlerImpl(this);
-        dialogServiceConnectorImpl.getCanceled().AddEventListener(canceledHandler);
+        this.canceled.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                _dialogServiceConnectorObjects.add(_this);
+                dialogServiceConnectorImpl.getCanceled().AddEventListener(canceledHandler);
+            }
+        });
+
         activityReceivedHandler = new ActivityReceivedEventHandlerImpl(this);
-        dialogServiceConnectorImpl.getActivityReceived().AddEventListener(activityReceivedHandler);
+        this.activityReceived.updateNotificationOnConnected(new Runnable(){
+            @Override
+            public void run() {
+                _dialogServiceConnectorObjects.add(_this);
+                dialogServiceConnectorImpl.getActivityReceived().AddEventListener(activityReceivedHandler);
+            }
+        });
     }
+
+    /**
+     * This is used to keep any instance of this class alive that is subscribed to downstream events.
+     */
+    static java.util.Set<DialogServiceConnector> _dialogServiceConnectorObjects = java.util.Collections.synchronizedSet(new java.util.HashSet<DialogServiceConnector>());
 
     private RecoEventHandlerImpl recognizingHandler;
     private RecoEventHandlerImpl recognizedHandler;
@@ -314,12 +362,18 @@ public class DialogServiceConnector implements Closeable {
             return;
         }
         if (disposing) {
-            dialogServiceConnectorImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-            dialogServiceConnectorImpl.getRecognized().RemoveEventListener(recognizedHandler);
-            dialogServiceConnectorImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-            dialogServiceConnectorImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-            dialogServiceConnectorImpl.getCanceled().RemoveEventListener(canceledHandler);
-            dialogServiceConnectorImpl.getActivityReceived().RemoveEventListener(activityReceivedHandler);
+            if (this.recognizing.isUpdateNotificationOnConnectedFired())
+                dialogServiceConnectorImpl.getRecognizing().RemoveEventListener(recognizingHandler);
+            if (this.recognized.isUpdateNotificationOnConnectedFired())
+                dialogServiceConnectorImpl.getRecognized().RemoveEventListener(recognizedHandler);
+            if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
+                dialogServiceConnectorImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+            if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
+                dialogServiceConnectorImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+            if (this.canceled.isUpdateNotificationOnConnectedFired())
+                dialogServiceConnectorImpl.getCanceled().RemoveEventListener(canceledHandler);
+            if (this.activityReceived.isUpdateNotificationOnConnectedFired())
+                dialogServiceConnectorImpl.getActivityReceived().RemoveEventListener(activityReceivedHandler);
 
             recognizingHandler.delete();
             recognizedHandler.delete();
@@ -329,8 +383,10 @@ public class DialogServiceConnector implements Closeable {
             activityReceivedHandler.delete();
 
             dialogServiceConnectorImpl.delete();
+
+            _dialogServiceConnectorObjects.remove(this);
+            disposed = true;
         }
-        disposed = true;
     }
     /*! \endcond */
 }
