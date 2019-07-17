@@ -22,6 +22,8 @@
 #include <shared_mutex>
 #endif // _MSC_VER
 
+class CSpxUspRecoEngineAdapterTest;
+
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -199,7 +201,7 @@ private:
 
     void GetIntentInfoFromSite(std::string& provider, std::string& id, std::string& key, std::string& region);
     std::string GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key, const std::string& region);
-    std::string GetSpeechContextJson(const std::string& dgiJson, const std::string& intentJson, const std::string& keywordDetectionJson, const std::string& insertionPointLeft, const std::string& insertionPointRight);
+    std::string GetSpeechContextJson();
     std::string GetKeywordDetectionJson();
 
     void FireActivityResult(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio);
@@ -258,6 +260,7 @@ private:
 
 private:
     friend CSpxActivitySession;
+    friend CSpxUspRecoEngineAdapterTest;
 
     static constexpr auto s_defaultRecognitionLanguage = "en-us";
 

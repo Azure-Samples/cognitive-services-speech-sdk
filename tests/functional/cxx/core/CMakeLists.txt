@@ -19,6 +19,7 @@ set(SOURCES
     "${SRC_DIR}/usp_test_case.cpp"
     "${SRC_DIR}/mic_test_case.cpp"
     "${SRC_DIR}/sr_test_case.cpp"
+    "${SRC_DIR}/speech_context_json_test.cpp"
     )
 
 source_group("Source Files" FILES ${SOURCES})

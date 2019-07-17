@@ -974,25 +974,9 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechEvent()
 
 void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
 {
-    // Get the Dgi json payload
-    std::list<std::string> listenForList = GetListenForListFromSite();
-    auto listenForJson = GetDgiJsonFromListenForList(listenForList);
-
-    // Get the intent payload
-    std::string provider, id, key, region;
-    GetIntentInfoFromSite(provider, id, key, region);
-    auto intentJson = GetLanguageUnderstandingJsonFromIntentInfo(provider, id, key, region);
-
-    // Get keyword detection json payload
-    auto keywordDetectionJson = GetKeywordDetectionJson();
-
-    // Do we expect to receive an intent payload from the service?
-    m_expectIntentResponse = !intentJson.empty();
-
-    auto leftAndRight = GetLeftRightContext();
-
+   
     // Take the json payload and the intent payload, and create the speech context json
-    auto speechContext = GetSpeechContextJson(listenForJson, intentJson, keywordDetectionJson, leftAndRight.first, leftAndRight.second);
+    auto speechContext = GetSpeechContextJson();
 
     if (!speechContext.empty())
     {
@@ -1976,8 +1960,27 @@ std::string CSpxUspRecoEngineAdapter::GetKeywordDetectionJson()
     return "";
 }
 
-std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dgiJson, const std::string& intentJson, const std::string& keywordDetectionJson, const std::string& insertionPointLeft, const std::string& insertionPointRight)
+std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson()
 {
+    // Get the Dgi json payload
+    std::list<std::string> listenForList = GetListenForListFromSite();
+    auto dgiJson = GetDgiJsonFromListenForList(listenForList);
+
+    // Get the intent payload
+    std::string provider, id, key, region;
+    GetIntentInfoFromSite(provider, id, key, region);
+    auto intentJson = GetLanguageUnderstandingJsonFromIntentInfo(provider, id, key, region);
+
+    // Get keyword detection json payload
+    auto keywordDetectionJson = GetKeywordDetectionJson();
+
+    // Do we expect to receive an intent payload from the service?
+    m_expectIntentResponse = !intentJson.empty();
+
+    auto leftAndRight = GetLeftRightContext();
+    auto insertionPointLeft = leftAndRight.first;
+    auto insertionPointRight = leftAndRight.second;
+
     std::string contextJson;
 
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
