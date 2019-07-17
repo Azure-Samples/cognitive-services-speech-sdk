@@ -9,7 +9,7 @@ languages:
 - objc
 - python
 - swift
-name: Speech SDK Samples
+name: "Microsoft Cognitive Services Speech SDK Samples"
 description: "Learn how to use the Microsoft Cognitive Services Speech SDK to add speech-enabled features to your apps."
 products:
 - azure
