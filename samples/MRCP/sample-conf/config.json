@@ -1,0 +1,13 @@
+{
+  "speech_configs": {
+    "speech_sdk_region": "YourServiceRegion",
+    "speech_sdk_key": "YourSubscriptionKey",
+    "max_synthesizer":  20,
+    "sr_use_local_container": false,
+    "sr_local_endpoint": "",
+    "sr_local_key": "",
+    "tts_use_local_container": false,
+    "tts_local_endpoint": "",
+    "tts_local_key": ""
+  }
+}
