@@ -12,6 +12,7 @@
 		3CBD7F13211CD69B00F72336 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CBD7F12211CD69B00F72336 /* Assets.xcassets */; };
 		3CBD7F19211CD69C00F72336 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD7F18211CD69C00F72336 /* main.m */; };
 		3CCD06CB2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
+		DC0E471F22E1DA27005012F7 /* SPXTestHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = DC0E471E22E1DA27005012F7 /* SPXTestHelpers.m */; };
 		DC15EE9A226763F600991304 /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC15EE99226763F500991304 /* wreck-a-nice-beach.wav */; };
 		DC15EE9B226763F600991304 /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC15EE99226763F500991304 /* wreck-a-nice-beach.wav */; };
 		DC24739A22552029003FBAE6 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC24739922552029003FBAE6 /* AVFoundation.framework */; };
@@ -69,6 +70,8 @@
 		3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
 		3CCD06CC215798C100A348DB /* dummytest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = dummytest.h; path = ../../shared/dummytest.h; sourceTree = "<group>"; };
 		3CCD06CD215798DC00A348DB /* dummytest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = dummytest.m; path = ../../shared/dummytest.m; sourceTree = "<group>"; };
+		DC0E471D22E1DA27005012F7 /* SPXTestHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SPXTestHelpers.h; path = ../../shared/testrunners/SPXTestHelpers.h; sourceTree = "<group>"; };
+		DC0E471E22E1DA27005012F7 /* SPXTestHelpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXTestHelpers.m; path = ../../shared/testrunners/SPXTestHelpers.m; sourceTree = "<group>"; };
 		DC15EE99226763F500991304 /* wreck-a-nice-beach.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "wreck-a-nice-beach.wav"; path = "../../../input/audio/wreck-a-nice-beach.wav"; sourceTree = "<group>"; };
 		DC24739922552029003FBAE6 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		DC2A2812223FBF4D008CACAC /* SpeechSDK.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SpeechSDK.entitlements; sourceTree = "<group>"; };
@@ -142,6 +145,8 @@
 		3CBD7F21211CD69C00F72336 /* SpeechSDKTests */ = {
 			isa = PBXGroup;
 			children = (
+				DC0E471D22E1DA27005012F7 /* SPXTestHelpers.h */,
+				DC0E471E22E1DA27005012F7 /* SPXTestHelpers.m */,
 				DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */,
 				DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */,
 				DCB56301224285E300662DC3 /* SPXTranslationRecognitionTest.m */,
@@ -282,6 +287,7 @@
 			files = (
 				DCADF54B2245375700DD94FE /* test.m in Sources */,
 				DCB56303224285E300662DC3 /* SPXDummyTestRunner.m in Sources */,
+				DC0E471F22E1DA27005012F7 /* SPXTestHelpers.m in Sources */,
 				DCB56305224285E300662DC3 /* SPXTranslationRecognitionTest.m in Sources */,
 				DCB56302224285E300662DC3 /* SPXSpeechRecognitionTest.m in Sources */,
 				DCB563102242AB2300662DC3 /* dummytest.m in Sources */,

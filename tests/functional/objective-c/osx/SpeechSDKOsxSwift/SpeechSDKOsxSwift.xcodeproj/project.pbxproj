@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DC0E472322E1DD1A005012F7 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0E472222E1DD1A005012F7 /* TestHelpers.swift */; };
 		DC70A97822CA5BC500D051C8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC70A97722CA5BC500D051C8 /* AppDelegate.swift */; };
 		DC70A97A22CA5BC600D051C8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC70A97922CA5BC600D051C8 /* Assets.xcassets */; };
 		DC70A97D22CA5BC600D051C8 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = DC70A97B22CA5BC600D051C8 /* MainMenu.xib */; };
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		DC0E472222E1DD1A005012F7 /* TestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TestHelpers.swift; path = ../../../ios/SpeechSDKSwift/SpeechSDKSwiftTests/TestHelpers.swift; sourceTree = "<group>"; };
 		DC70A97422CA5BC500D051C8 /* SpeechSDKOsxSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDKOsxSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC70A97722CA5BC500D051C8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DC70A97922CA5BC600D051C8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				DC70A99A22CA5F7400D051C8 /* TranslationTests.swift */,
 				DC70A99322CA5C6000D051C8 /* SpeechRecognitionTests.swift */,
 				DC70A98D22CA5C0900D051C8 /* Info.plist */,
+				DC0E472222E1DD1A005012F7 /* TestHelpers.swift */,
 			);
 			path = SpeechSDKOsxSwiftTests;
 			sourceTree = "<group>";
@@ -227,6 +230,7 @@
 				DC70A99D22CA5F7400D051C8 /* IntentTests.swift in Sources */,
 				DC70A99422CA5C6000D051C8 /* SpeechRecognitionTests.swift in Sources */,
 				DC70A99C22CA5F7400D051C8 /* TranslationTests.swift in Sources */,
+				DC0E472322E1DD1A005012F7 /* TestHelpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

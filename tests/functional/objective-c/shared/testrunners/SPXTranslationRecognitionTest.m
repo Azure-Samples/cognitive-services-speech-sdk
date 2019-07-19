@@ -5,12 +5,16 @@
 
 #import <XCTest/XCTest.h>
 #import <MicrosoftCognitiveServicesSpeech/SPXSpeechApi.h>
-
+#import "SPXTestHelpers.h"
 
 @interface SPXTranslationRecognitionEndToEndTest : XCTestCase {
     NSString *weatherTextEnglish;
     NSString *weatherTextGerman;
     NSString *weatherTextChinese;
+    NSString *normalizedWeatherTextEnglish;
+    NSString *normalizedWeatherTextGerman;
+    NSString *normalizedWeatherTextChinese;
+
     NSString *weatherFileName;
     NSMutableDictionary *result;
 
@@ -36,6 +40,11 @@
     weatherTextEnglish = @"What's the weather like?";
     weatherTextGerman = @"Wie ist das Wetter?";
     weatherTextChinese =  @"天气怎么样?";
+    normalizedWeatherTextGerman = [SPXTestHelpers normalizeText:weatherTextGerman];
+    normalizedWeatherTextGerman = [SPXTestHelpers normalizeText:weatherTextGerman];
+    normalizedWeatherTextEnglish = [SPXTestHelpers normalizeText:weatherTextEnglish];
+    normalizedWeatherTextChinese = [SPXTestHelpers normalizeText:weatherTextChinese];
+
     weatherFileName = @"whatstheweatherlike";
     connectedEventCount = 0;
     disconnectedEventCount = 0;
@@ -102,13 +111,15 @@
     SPXTranslationRecognitionResult *result = [self.translationRecognizer recognizeOnce];
 
     translationDictionary = result.translations;
-    id germanTranslation = [translationDictionary valueForKey:@"de"];
-    id chineseTranslation = [translationDictionary valueForKey:@"zh-Hans"];
+
+    id germanTranslation = [SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"de"]];
+    id chineseTranslation = [SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"zh-Hans"]];
+
     NSLog(@"German Translation: %@", germanTranslation);
     NSLog(@"Chinese Translation: %@", chineseTranslation);
 
-    XCTAssertTrue([germanTranslation isEqualToString:weatherTextGerman], "German translation does not match");
-    XCTAssertTrue([chineseTranslation isEqualToString:weatherTextChinese], "Chinese translation does not match");
+    XCTAssertEqualObjects(germanTranslation, normalizedWeatherTextGerman);
+    XCTAssertEqualObjects(chineseTranslation, normalizedWeatherTextChinese);
     XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%d", connectedEventCount);
     XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount, @"The connected event count (%d) does not match the disconnected event count (%d)", connectedEventCount, disconnectedEventCount);
 }
@@ -128,13 +139,13 @@
 
     [self.translationRecognizer stopContinuousRecognition];
 
-    id germanTranslation = [translationDictionary valueForKey:@"de"];
-    id chineseTranslation = [translationDictionary valueForKey:@"zh-Hans"];
+    id germanTranslation = [SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"de"]];
+    id chineseTranslation = [SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"zh-Hans"]];
     NSLog(@"German Translation: %@", germanTranslation);
     NSLog(@"Chinese Translation: %@", chineseTranslation);
 
-    XCTAssertTrue([germanTranslation isEqualToString:weatherTextGerman], "German translation does not match");
-    XCTAssertTrue([chineseTranslation isEqualToString:weatherTextChinese], "Chinese translation does not match");
+    XCTAssertEqualObjects(germanTranslation, normalizedWeatherTextGerman);
+    XCTAssertEqualObjects(chineseTranslation, normalizedWeatherTextChinese);
     XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%d", connectedEventCount);
     XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount, @"The connected event count (%d) does not match the disconnected event count (%d)", connectedEventCount, disconnectedEventCount);
 }
@@ -148,18 +159,26 @@
 
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
     [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
-    id germanTranslation = [asyncResult.translations valueForKey:@"de"];
-    id chineseTranslation = [asyncResult.translations valueForKey:@"zh-Hans"];
+    id germanTranslation = [SPXTestHelpers normalizeText:[asyncResult.translations valueForKey:@"de"]];
+    id chineseTranslation = [SPXTestHelpers normalizeText:[asyncResult.translations valueForKey:@"zh-Hans"]];
     NSLog(@"German Translation: %@", germanTranslation);
     NSLog(@"Chinese Translation: %@", chineseTranslation);
 
+    XCTAssertEqualObjects(germanTranslation, normalizedWeatherTextGerman);
+    XCTAssertEqualObjects(chineseTranslation, normalizedWeatherTextChinese);
+
     XCTAssertTrue(self->connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%d", self->connectedEventCount);
     XCTAssertTrue(self->connectedEventCount == self->disconnectedEventCount + 1 || self->connectedEventCount == self->disconnectedEventCount, @"The connected event count (%d) does not match the disconnected event count (%d)", self->connectedEventCount, self->disconnectedEventCount);
-    XCTAssertEqualObjects(germanTranslation, self->weatherTextGerman);
-    XCTAssertEqualObjects(chineseTranslation, self->weatherTextChinese);
 }
 
-- (void)testContinuousRecognitionWithError {
+- (void)testContinuousTranslationWithError {
+    __block NSDictionary* translationDictionary = nil;
+
+    [self.translationRecognizer addRecognizedEventHandler: ^ (SPXTranslationRecognizer *recognizer, SPXTranslationRecognitionEventArgs *eventArgs)
+     {
+         translationDictionary = eventArgs.result.translations;
+     }];
+
     NSError * err = nil;
     BOOL success = [self.translationRecognizer startContinuousRecognition:&err];
     XCTAssertTrue(success);
@@ -170,6 +189,9 @@
 
     XCTAssertEqualObjects([self->result valueForKey:@"finalText"], self->weatherTextEnglish);
     XCTAssertEqualObjects([self->result valueForKey:@"finalResultCount"], @1);
+
+    XCTAssertEqualObjects([SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"de"]], normalizedWeatherTextGerman);
+    XCTAssertEqualObjects([SPXTestHelpers normalizeText:[translationDictionary valueForKey:@"zh-Hans"]], normalizedWeatherTextChinese);
 
     XCTAssertGreaterThan(connectedEventCount, 0);
     XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
@@ -194,11 +216,11 @@
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
     [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
 
-    id germanTranslation = [asyncResult.translations valueForKey:@"de"];
-    id chineseTranslation = [asyncResult.translations valueForKey:@"zh-Hans"];
+    id germanTranslation = [SPXTestHelpers normalizeText:[asyncResult.translations valueForKey:@"de"]];
+    id chineseTranslation = [SPXTestHelpers normalizeText:[asyncResult.translations valueForKey:@"zh-Hans"]];
 
-    XCTAssertEqualObjects(germanTranslation, weatherTextGerman);
-    XCTAssertEqualObjects(chineseTranslation, weatherTextChinese);
+    XCTAssertEqualObjects(germanTranslation, normalizedWeatherTextGerman);
+    XCTAssertEqualObjects(chineseTranslation, normalizedWeatherTextChinese);
 }
 
 - (void)testRecognizeOnceWithError {
@@ -211,6 +233,8 @@
           result.text, (long)result.reason, result.offset, result.duration, result.resultId);
 
     XCTAssertEqualObjects(result.text, weatherTextEnglish);
+    XCTAssertEqualObjects([SPXTestHelpers normalizeText:[result.translations valueForKey:@"de"]], normalizedWeatherTextGerman);
+    XCTAssertEqualObjects([SPXTestHelpers normalizeText:[result.translations valueForKey:@"zh-Hans"]], normalizedWeatherTextChinese);
     XCTAssertEqual(result.reason, SPXResultReason_TranslatedSpeech);
     XCTAssertGreaterThan(result.duration, 0);
     XCTAssertGreaterThan(result.offset, 0);

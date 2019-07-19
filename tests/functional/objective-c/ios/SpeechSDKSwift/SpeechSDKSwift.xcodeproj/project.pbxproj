@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DC0E472522E1E0B0005012F7 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0E472422E1E0B0005012F7 /* TestHelpers.swift */; };
 		DCB84E2B228C3D2300FE7617 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB84E2A228C3D2300FE7617 /* AppDelegate.swift */; };
 		DCB84E2D228C3D2300FE7617 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB84E2C228C3D2300FE7617 /* ViewController.swift */; };
 		DCB84E32228C3D2600FE7617 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCB84E31228C3D2600FE7617 /* Assets.xcassets */; };
@@ -29,6 +30,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		DC0E472422E1E0B0005012F7 /* TestHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
 		DCB84E27228C3D2300FE7617 /* SpeechSDKSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDKSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCB84E2A228C3D2300FE7617 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DCB84E2C228C3D2300FE7617 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 		DCB84E48228C734F00FE7617 /* SpeechSDKSwiftTests */ = {
 			isa = PBXGroup;
 			children = (
+				DC0E472422E1E0B0005012F7 /* TestHelpers.swift */,
 				DCCDCF3022B27D0D00E00B87 /* IntentTests.swift */,
 				DCCDCF3222B27D0D00E00B87 /* SpeechRecognitionTests.swift */,
 				DCCDCF3122B27D0D00E00B87 /* TranslationTests.swift */,
@@ -227,6 +230,7 @@
 				DCCDCF3522B27D0D00E00B87 /* SpeechRecognitionTests.swift in Sources */,
 				DCCDCF3322B27D0D00E00B87 /* IntentTests.swift in Sources */,
 				DCCDCF3422B27D0D00E00B87 /* TranslationTests.swift in Sources */,
+				DC0E472522E1E0B0005012F7 /* TestHelpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

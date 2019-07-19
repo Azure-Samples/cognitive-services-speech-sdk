@@ -10,9 +10,9 @@ class TranslationEndToEndTests: XCTestCase {
     var serviceRegion: String! = ""
     let timeoutInSeconds = 20.0
     let weatherFileName = "whatstheweatherlike"
-    let weatherTextEnglish = "What's the weather like?"
-    let weatherTextGerman = "Wie ist das Wetter?";
-    let weatherTextChinese =  "天气怎么样?";
+    let weatherTextEnglish = normalizeText(input:"What's the weather like?")
+    let weatherTextGerman = normalizeText(input:"Wie ist das Wetter?");
+    let weatherTextChinese =  normalizeText(input:"天气怎么样?");
 
     var result: [String: String] = ["finalText": ""]
     var counts: [String: Int] = ["connectedCount": 0,
@@ -91,15 +91,15 @@ class TranslationEndToEndTests: XCTestCase {
     func testRecognizeOnce() {
         let translationResult = try? self.reco!.recognizeOnce()
 
-        XCTAssertEqual(translationResult!.text, weatherTextEnglish)
+        XCTAssertEqual(normalizeText(input: translationResult!.text!), weatherTextEnglish)
         XCTAssertEqual(translationResult!.reason, SPXResultReason.translatedSpeech)
         XCTAssertGreaterThan(translationResult!.duration, 0)
         XCTAssertGreaterThan(translationResult!.offset, 0)
         XCTAssertGreaterThan(translationResult!.resultId.count, 0)
 
         let translationDictionary = translationResult!.translations;
-        let germanTranslation = translationDictionary["de"] as! String;
-        let chineseTranslation = translationDictionary["zh-Hans"] as! String;
+        let germanTranslation = normalizeText(input: translationDictionary["de"] as! String);
+        let chineseTranslation = normalizeText(input: translationDictionary["zh-Hans"] as! String);
 
         XCTAssertEqual(germanTranslation, weatherTextGerman);
         XCTAssertEqual(chineseTranslation, weatherTextChinese);
@@ -111,12 +111,12 @@ class TranslationEndToEndTests: XCTestCase {
         self.expectation(for: sessionStoppedCountPred!, evaluatedWith: self, handler: nil)
         self.waitForExpectations(timeout: timeoutInSeconds, handler: nil)
 
-        XCTAssertEqual(self.result["finalText"], self.weatherTextEnglish);
+        XCTAssertEqual(normalizeText(input: self.result["finalText"]!), self.weatherTextEnglish);
         XCTAssertEqual(self.counts["finalResultCount"], 1);
         XCTAssertGreaterThan(self.counts["connectedCount"]!, 0);
 
-        let germanTranslation = translationDictionary["de"];
-        let chineseTranslation = translationDictionary["zh-Hans"];
+        let germanTranslation = normalizeText(input: translationDictionary["de"]!);
+        let chineseTranslation = normalizeText(input: translationDictionary["zh-Hans"]!);
         XCTAssertEqual(germanTranslation, weatherTextGerman);
         XCTAssertEqual(chineseTranslation, weatherTextChinese);
 
@@ -135,12 +135,12 @@ class TranslationEndToEndTests: XCTestCase {
         self.expectation(for: sessionStoppedCountPred!, evaluatedWith: self, handler: nil)
         self.waitForExpectations(timeout: timeoutInSeconds, handler: nil)
 
-        XCTAssertEqual(self.result["finalText"], self.weatherTextEnglish);
+        XCTAssertEqual(normalizeText(input:self.result["finalText"]!), self.weatherTextEnglish);
         XCTAssertEqual(self.counts["finalResultCount"], 1);
         XCTAssertGreaterThan(self.counts["connectedCount"]!, 0);
 
-        let germanTranslation = translationDictionary["de"];
-        let chineseTranslation = translationDictionary["zh-Hans"];
+        let germanTranslation = normalizeText(input: translationDictionary["de"]!);
+        let chineseTranslation = normalizeText(input: translationDictionary["zh-Hans"]!);
         XCTAssertEqual(germanTranslation, weatherTextGerman);
         XCTAssertEqual(chineseTranslation, weatherTextChinese);
 
@@ -166,10 +166,10 @@ class TranslationEndToEndTests: XCTestCase {
         let targetLang = self.reco?.targetLanguages as? [String];
         XCTAssertEqual(targetLang, ["zh-Hans", "fr"]);
         let langKeys = translationDictionary.keys;
-        XCTAssertEqual(Array(langKeys), ["zh-Hans", "fr"]);
-        let chineseTranslation = translationDictionary["zh-Hans"];
+        XCTAssertEqual(Set(langKeys), Set(["zh-Hans", "fr"]));
+        let chineseTranslation = normalizeText(input: translationDictionary["zh-Hans"]!);
         XCTAssertEqual(chineseTranslation, weatherTextChinese);
-        let frenchTranslation = translationDictionary["fr"];
-        XCTAssertTrue(frenchTranslation!.count > 0);
+        let frenchTranslation = normalizeText(input: translationDictionary["fr"]!);
+        XCTAssertTrue(frenchTranslation.count > 0);
     }
 }

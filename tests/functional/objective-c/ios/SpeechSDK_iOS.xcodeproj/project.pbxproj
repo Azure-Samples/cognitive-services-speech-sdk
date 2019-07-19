@@ -24,6 +24,7 @@
 		DC15EE9E22676E7D00991304 /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */; };
 		DC68200622A960C200AD8EA4 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC68200522A960C200AD8EA4 /* silenceshort.wav */; };
 		DC68200722A960C200AD8EA4 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC68200522A960C200AD8EA4 /* silenceshort.wav */; };
+		DCF1E29222E1CC4E00FA9F3E /* SPXTestHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */; };
 		F342D645216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */; };
 		F3C06E37216E3AE2003989B2 /* SPXDummyTestRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */; };
 		F3C06E38216E4148003989B2 /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D22157F71E00A348DB /* dummytest.m */; };
@@ -81,6 +82,8 @@
 		3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
 		DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "wreck-a-nice-beach.wav"; path = "../../../input/audio/wreck-a-nice-beach.wav"; sourceTree = "<group>"; };
 		DC68200522A960C200AD8EA4 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
+		DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXTestHelpers.m; path = ../../shared/testrunners/SPXTestHelpers.m; sourceTree = "<group>"; };
+		DCF1E29322E1CC8100FA9F3E /* SPXTestHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPXTestHelpers.h; path = ../../shared/testrunners/SPXTestHelpers.h; sourceTree = "<group>"; };
 		F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
 		F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXDummyTestRunner.m; path = ../../shared/testrunners/SPXDummyTestRunner.m; sourceTree = "<group>"; };
 		F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXTranslationRecognitionTest.m; path = ../../shared/testrunners/SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
@@ -167,6 +170,8 @@
 			children = (
 				3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */,
 				F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */,
+				DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */,
+				DCF1E29322E1CC8100FA9F3E /* SPXTestHelpers.h */,
 				F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */,
 				F3EABAC721639F5700BA4B2C /* Info.plist */,
 			);
@@ -299,6 +304,7 @@
 			files = (
 				F3C06E37216E3AE2003989B2 /* SPXDummyTestRunner.m in Sources */,
 				F3EABACE21639F6300BA4B2C /* SPXTranslationRecognitionTest.m in Sources */,
+				DCF1E29222E1CC4E00FA9F3E /* SPXTestHelpers.m in Sources */,
 				F3C06E38216E4148003989B2 /* dummytest.m in Sources */,
 				F3EABACD21639F6000BA4B2C /* SPXSpeechRecognitionTest.m in Sources */,
 			);
