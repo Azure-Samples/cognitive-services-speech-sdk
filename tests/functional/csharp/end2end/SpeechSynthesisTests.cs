@@ -444,6 +444,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
 
         [TestMethod]
+        [Ignore]
         public async Task DefaultsUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig))
@@ -458,6 +459,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task ExplicitlyUseDefaultSpeakersUsp()
         {
             using (var deviceConfig = AudioConfig.FromDefaultSpeakerOutput())
@@ -475,6 +477,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task PickLanguageUsp()
         {
             uspConfig.SpeechSynthesisLanguage = "en-GB";
@@ -490,6 +493,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task PickVoiceUsp()
         {
             uspConfig.SpeechSynthesisVoiceName = "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)";
@@ -505,6 +509,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task SynthesizerOutputToFileUsp()
         {
             using (var fileConfig = AudioConfig.FromWavFileOutput("wavefile.wav"))
@@ -537,6 +542,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task SynthesizerOutputToPushStreamUsp()
         {
             using (var callback = new PushAudioOutputStreamTestCallback())
@@ -562,6 +568,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task SynthesizerOutputToPullStreamUseAfterSynthesisCompletedUsp()
         {
             using (var stream = AudioOutputStream.CreatePullStream())
@@ -582,6 +589,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task SynthesizerOutputToPullStreamStartUsingBeforeDoneSynthesizingUsp()
         {
             using (var stream = AudioOutputStream.CreatePullStream())
@@ -604,6 +612,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task SpeakOutInResultsUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -629,6 +638,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task SpeakOutputInChunksInEventSynthesizingUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -661,6 +671,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task SpeakOutputInStreamsUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -694,6 +705,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task SpeakOutputInStreamsBeforeDoneFromEventSynthesisStartedUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -747,6 +759,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task SpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingTextAsyncUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -781,6 +794,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task SpeakOutputInStreamsBeforeDoneQueuedUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -818,6 +832,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task SpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResultUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
