@@ -29,18 +29,42 @@ TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
     dgiWreckANiceBeach.UpdateFullFilename(Config::InputDir);
     REQUIRE(exists(dgiWreckANiceBeach.m_inputDataFilename));
 
-    auto config = GetDynamicGrammarTestsConfig();
-    auto audioConfig = AudioConfig::FromWavFileInput(dgiWreckANiceBeach.m_inputDataFilename);
-    auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
-
-    auto recoTextMatches = [](auto recognizer, const std::string& utterance)
+    auto getRecognizer = []()
     {
-        auto result = recognizer->RecognizeOnceAsync().get();
-        SPXTEST_REQUIRE(result != nullptr);
-        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        auto config = GetDynamicGrammarTestsConfig();
+        auto audioConfig = AudioConfig::FromWavFileInput(dgiWreckANiceBeach.m_inputDataFilename);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
+        return recognizer;
+    };
+    
+    auto recoTextMatches = [](auto getRecognizer, auto modifyPhraseList, const std::string& utterance)
+    {
+        auto triedOnce = false;
 
-        SPXTEST_REQUIRE(!result->Text.empty());
-        SPXTEST_REQUIRE(utterance == result->Text);
+        while (true)
+        {
+            auto recognizer = getRecognizer();
+
+            auto phraselist = PhraseListGrammar::FromRecognizer(recognizer);
+            SPXTEST_REQUIRE(phraselist != nullptr);
+
+            modifyPhraseList(phraselist);
+
+            auto result = recognizer->RecognizeOnceAsync().get();
+            SPXTEST_REQUIRE(result != nullptr);
+            SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+
+            SPXTEST_REQUIRE(!result->Text.empty());
+
+            if (utterance == result->Text || !triedOnce)
+            {
+                SPXTEST_REQUIRE(utterance == result->Text);
+                break;
+            }
+
+            SPX_TRACE_INFO("Utterance failed to match,'%s' != '%s' trying again. %s(%d)", utterance.c_str(), result->Text.c_str(), __FILE__, __LINE__);
+            triedOnce = true;
+        }
     };
 
     SPXTEST_SECTION("PhraseListGrammar")
@@ -51,83 +75,127 @@ TEST_CASE("Dynamic Grammar Basics", "[api][cxx][dgi]")
         auto unrelatedPhrase1 = "This is a test of the emergency broadcast system.";
         auto unrelatedPhrase2 = "This is not the right transcript.";
 
-        SPXTEST_GIVEN("phrase list grammar NOT used")
-        {
-            recoTextMatches(recognizer, defaultRecoText);
-        }
-
         SPXTEST_GIVEN("phrase list grammar used")
-        {
-            auto phraselist = PhraseListGrammar::FromRecognizer(recognizer);
-            SPXTEST_REQUIRE(phraselist != nullptr);
-
+        { 
+           
             SPXTEST_WHEN("no phrases added")
             {
-                recoTextMatches(recognizer, defaultRecoText);
+                recoTextMatches(
+                    getRecognizer,
+                    [](auto phraselist) 
+                    {
+                       if(phraselist){}
+                    },
+                    defaultRecoText);
             }
 
             SPXTEST_WHEN("unrelated phrase added")
             {
-                phraselist->AddPhrase(unrelatedPhrase1);
-                recoTextMatches(recognizer, defaultRecoText);
+                recoTextMatches(
+                    getRecognizer,
+                    [unrelatedPhrase1](auto phraselist)
+                    {
+                        phraselist->AddPhrase(unrelatedPhrase1);
+                    },
+                    defaultRecoText);
             }
 
             SPXTEST_WHEN("multiple unrelated phrases added")
             {
-                phraselist->AddPhrase(unrelatedPhrase1);
-                phraselist->AddPhrase(unrelatedPhrase2);
-                recoTextMatches(recognizer, defaultRecoText);
+                recoTextMatches(
+                    getRecognizer,
+                    [unrelatedPhrase1, unrelatedPhrase2](auto phraselist)
+                    {
+                        phraselist->AddPhrase(unrelatedPhrase1);
+                        phraselist->AddPhrase(unrelatedPhrase2);
+                    },
+                    defaultRecoText);
             }
 
             SPXTEST_WHEN("correct phrase added, but then later cleared")
             {
-                phraselist->AddPhrase(beachHint);
-                phraselist->Clear();
-                recoTextMatches(recognizer, defaultRecoText);
+                recoTextMatches(
+                    getRecognizer,
+                    [beachHint](auto phraselist)
+                    {
+                        phraselist->AddPhrase(beachHint);
+                        phraselist->Clear();
+                    },
+                    defaultRecoText);
             }
 
             SPXTEST_WHEN("correct phrase added")
             {
-                phraselist->AddPhrase(beachHint);
-                recoTextMatches(recognizer, correctRecoText);
+                recoTextMatches(
+                    getRecognizer,
+                    [beachHint](auto phraselist)
+                    {
+                        phraselist->AddPhrase(beachHint);
+                    },
+                    correctRecoText);
             }
 
             SPXTEST_WHEN("correct phrase added, after unrelated phrase")
             {
-                phraselist->AddPhrase(unrelatedPhrase1);
-                phraselist->AddPhrase(beachHint);
-                recoTextMatches(recognizer, correctRecoText);
+                recoTextMatches(
+                    getRecognizer,
+                    [beachHint, unrelatedPhrase1](auto phraselist)
+                    {
+                        phraselist->AddPhrase(unrelatedPhrase1);
+                        phraselist->AddPhrase(beachHint);
+                    },
+                    correctRecoText);
             }
 
             SPXTEST_WHEN("correct phrase added, after multiple unrelated phrases")
             {
-                phraselist->AddPhrase(unrelatedPhrase1);
-                phraselist->AddPhrase(unrelatedPhrase2);
-                phraselist->AddPhrase(beachHint);
-                recoTextMatches(recognizer, correctRecoText);
+                recoTextMatches(
+                    getRecognizer,
+                    [beachHint, unrelatedPhrase1, unrelatedPhrase2](auto phraselist)
+                    {
+                        phraselist->AddPhrase(unrelatedPhrase1);
+                        phraselist->AddPhrase(unrelatedPhrase2);
+                        phraselist->AddPhrase(beachHint);
+                    },
+                    correctRecoText);
             }
 
             SPXTEST_WHEN("correct phrase added before unrelated phrase")
             {
-                phraselist->AddPhrase(beachHint);
-                phraselist->AddPhrase(unrelatedPhrase1);
-                recoTextMatches(recognizer, correctRecoText);
+                recoTextMatches(
+                    getRecognizer,
+                    [beachHint, unrelatedPhrase1](auto phraselist)
+                    {
+                        phraselist->AddPhrase(beachHint);
+                        phraselist->AddPhrase(unrelatedPhrase1);
+                    },
+                    correctRecoText);
             }
 
             SPXTEST_WHEN("correct phrase added, before multiple unrelated phrases")
             {
-                phraselist->AddPhrase(beachHint);
-                phraselist->AddPhrase(unrelatedPhrase1);
-                phraselist->AddPhrase(unrelatedPhrase2);
-                recoTextMatches(recognizer, correctRecoText);
+                recoTextMatches(
+                    getRecognizer,
+                    [beachHint, unrelatedPhrase1, unrelatedPhrase2](auto phraselist)
+                    {
+                        phraselist->AddPhrase(beachHint);
+                        phraselist->AddPhrase(unrelatedPhrase1);
+                        phraselist->AddPhrase(unrelatedPhrase2);
+                    },
+                    correctRecoText);
             }
 
             SPXTEST_WHEN("correct phrase added, between multiple unrelated phrases")
             {
-                phraselist->AddPhrase(unrelatedPhrase1);
-                phraselist->AddPhrase(beachHint);
-                phraselist->AddPhrase(unrelatedPhrase2);
-                recoTextMatches(recognizer, correctRecoText);
+                recoTextMatches(
+                    getRecognizer,
+                    [beachHint, unrelatedPhrase1, unrelatedPhrase2](auto phraselist)
+                    {
+                        phraselist->AddPhrase(unrelatedPhrase1);
+                        phraselist->AddPhrase(beachHint);
+                        phraselist->AddPhrase(unrelatedPhrase2);
+                    },
+                    correctRecoText);
             }
         }
     }

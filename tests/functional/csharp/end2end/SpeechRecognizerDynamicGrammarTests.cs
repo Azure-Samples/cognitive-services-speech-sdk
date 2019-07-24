@@ -65,23 +65,43 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var unrelatedPhrase1 = "This is a test of the emergency broadcast system.";
             var unrelatedPhrase2 = "This is not the right transcript.";
 
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.DgiWreckANiceBeach.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
+            bool triedOnce = false;
+
+            while (true)
             {
-                PhraseListGrammar phraselist = usePhraseList
-                    ? PhraseListGrammar.FromRecognizer(recognizer)
-                    : null;
-
-                for (int i = 1; i <= 3; i++)
+                var audioInput = AudioConfig.FromWavFileInput(TestData.English.DgiWreckANiceBeach.AudioFile);
+                using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
                 {
-                    if (i == addUnrelated1At) phraselist.AddPhrase(unrelatedPhrase1);
-                    if (i == addUnrelated2At) phraselist.AddPhrase(unrelatedPhrase2);
-                    if (i == addCorrectTextAt) phraselist.AddPhrase(correctRecoText);
-                    if (i == clearPhraseListAt) phraselist.Clear();
-                }
+                    PhraseListGrammar phraselist = usePhraseList
+                        ? PhraseListGrammar.FromRecognizer(recognizer)
+                        : null;
 
-                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                AssertMatching(recoTextExpected, result.Text);
+                    for (int i = 1; i <= 3; i++)
+                    {
+                        if (i == addUnrelated1At) phraselist.AddPhrase(unrelatedPhrase1);
+                        if (i == addUnrelated2At) phraselist.AddPhrase(unrelatedPhrase2);
+                        if (i == addCorrectTextAt) phraselist.AddPhrase(correctRecoText);
+                        if (i == clearPhraseListAt) phraselist.Clear();
+                    }
+
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                    try
+                    {
+                        AssertMatching(recoTextExpected, result.Text);
+                        break;
+                    } catch (Exception)
+                    {
+                        // We'll allow a 2nd attempt to work around failures caused by service bug
+                        // https://msasg.visualstudio.com/Skyman/_workitems/edit/1893773
+                        if (recoTextExpected != correctRecoText || triedOnce)
+                        {
+                            throw;
+                        }
+
+                        Console.WriteLine("Re-trying phrase list matching.");
+                        triedOnce = true;
+                    }
+                }
             }
         }
 
