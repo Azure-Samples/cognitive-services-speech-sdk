@@ -18,13 +18,15 @@ static void* OpenCompressedFile(const std::string& compressedFileName)
 
 static void closeStream(void* fp)
 {
-    fclose((FILE*)fp);
+    if (fp != NULL)
+    {
+        fclose((FILE*)fp);
+    }
 }
 
 static int ReadCompressedBinaryData(void *stream, uint8_t *ptr, uint32_t bufSize)
 {
     FILE* compressedStreamfptr = (FILE*)stream;
-
     if (compressedStreamfptr != NULL && !feof(compressedStreamfptr))
     {
         return fread(ptr, 1, bufSize, compressedStreamfptr);
@@ -39,6 +41,14 @@ void recognizeSpeech(const std::string& compressedFileName)
 {
     std::shared_ptr<SpeechRecognizer> recognizer;
     std::shared_ptr<PullAudioInputStream> pullAudioStream;
+
+    void *compressedFilePtr = OpenCompressedFile(compressedFileName);
+
+    if (compressedFilePtr == NULL)
+    {
+        std::cout << "Error: Input file doesn't exist" << std::endl;
+        return;
+    }
 
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
@@ -62,7 +72,7 @@ void recognizeSpeech(const std::string& compressedFileName)
 
     pullAudioStream = AudioInputStream::CreatePullStream(
         AudioStreamFormat::GetCompressedFormat(inputFormat),
-        OpenCompressedFile(compressedFileName),
+        compressedFilePtr,
         ReadCompressedBinaryData,
         closeStream
     );

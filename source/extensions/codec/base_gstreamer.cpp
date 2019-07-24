@@ -171,6 +171,11 @@ bool BaseGstreamer::GetStatus()
             m_bErrorInsideGstreamer = true;
             m_gstErrorString = e.what();
         }
+        catch (...)
+        {
+            m_gstErrorString = "Error: unexpected exception";
+            m_bErrorInsideGstreamer = true;
+        }
 
         if (msg != nullptr)
         {
@@ -242,6 +247,13 @@ GstFlowReturn BaseGstreamer::NewSamples(GstElement *sink, BaseGstreamer *data)
             obj->m_gstErrorString = e.what();
             obj->m_bErrorInsideGstreamer = true;
         }
+        catch (...)
+        {
+            std::unique_lock<std::mutex> lock(obj->m_mtx);
+            obj->m_gstErrorString = "Error: unexpected exception";
+            obj->m_bErrorInsideGstreamer = true;
+        }
+
         if (sample != nullptr)
         {
             gst_sample_unref(sample);
@@ -297,6 +309,12 @@ void BaseGstreamer::PushData(BaseGstreamer *data)
         {
             std::unique_lock<std::mutex> lock(obj->m_mtx);
             obj->m_gstErrorString = e.what();
+            obj->m_bErrorInsideGstreamer = true;
+        }
+        catch (...)
+        {
+            std::unique_lock<std::mutex> lock(obj->m_mtx);
+            obj->m_gstErrorString = "Error: unexpected exception";
             obj->m_bErrorInsideGstreamer = true;
         }
 
