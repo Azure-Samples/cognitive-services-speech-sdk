@@ -83,6 +83,11 @@ public:
         properties->SetStringValue("DictationInsertionPointRight", right.c_str());
     }
 
+    void SetNoIntent() {
+        auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+        properties->SetStringValue("CARBON-INTERNAL-USP-NoIntentJson", "true");
+    }
+
 private:
 
     string m_provider;
@@ -107,7 +112,7 @@ public:
     }
 
 
-    string getSpeechContextJson()
+    json GetSpeechContextJson()
     {
         return m_adapter.GetSpeechContextJson();
     }
@@ -142,22 +147,28 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         expectedJson["intent"]["id"] = id;
         expectedJson["intent"]["key"] = key;
 
-        auto contextJsonStr = adapterTest.getSpeechContextJson();
-        REQUIRE(json::parse(contextJsonStr) == expectedJson);
+        auto contextJson = adapterTest.GetSpeechContextJson();
+        REQUIRE(contextJson == expectedJson);
+
+        session->SetNoIntent();
+        contextJson = adapterTest.GetSpeechContextJson();
+        json emptyJson;
+        REQUIRE(contextJson == emptyJson);
     }
 
     SPXTEST_SECTION("Test DGI Json")
     {
         string intentName = "intent1";
-        string grammar1 = "grammar1";
-        string grammar2 = "grammar2";
-        string id = "randomkey2-xyz";
-        list<string> listenFors
+        vector<string> grammars
         {
-            "{luis:" + id + "-PRODUCTION#" + intentName + "}",
-            grammar1,
-            grammar2
+            "g\\rammar1",
+            R"("gra\mmar2")",
+            "grammar3"
         };
+
+        string id = "randomkey2-xyz";
+        list<string> listenFors(grammars.begin(), grammars.end());
+        listenFors.push_back("{luis:" + id + "-PRODUCTION#" + intentName + "}");
         session->SetListenForList(listenFors);
 
         expectedJson["dgi"]["ReferenceGrammars"] = json::array(
@@ -167,14 +178,14 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         json grammarJson;
         grammarJson["Type"] = "Generic";
         grammarJson["Items"] = json::array();
-        for (auto grammar : { grammar1, grammar2 })
+        for (auto grammar : grammars)
         {
             grammarJson["Items"].push_back({ {"Text", grammar} });
         }
         expectedJson["dgi"]["Groups"] = json::array({ grammarJson });
 
-        auto contextJsonStr = adapterTest.getSpeechContextJson();
-        REQUIRE(json::parse(contextJsonStr) == expectedJson);
+        auto contextJson = adapterTest.GetSpeechContextJson();
+        REQUIRE(contextJson == expectedJson);
     }
 
     SPXTEST_SECTION("Test KeywordResult Json")
@@ -199,8 +210,8 @@ TEST_CASE("Test JSON Generation", "[context_json]")
                    }}
                } };
 
-        auto contextJsonStr = adapterTest.getSpeechContextJson();
-        REQUIRE(json::parse(contextJsonStr) == expectedJson);
+        auto contextJson = adapterTest.GetSpeechContextJson();
+        REQUIRE(contextJson == expectedJson);
     }
 
     SPXTEST_SECTION("Test Dictation and Translationcontext Json")
@@ -213,7 +224,7 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         expectedJson["dictation"]["insertionPoint"]["left"] = "left";
         expectedJson["dictation"]["insertionPoint"]["right"] = "right";
 
-        auto contextJsonStr = adapterTest.getSpeechContextJson();
-        REQUIRE(json::parse(contextJsonStr) == expectedJson);
+        auto contextJson = adapterTest.GetSpeechContextJson();
+        REQUIRE(contextJson == expectedJson);
     }
 }

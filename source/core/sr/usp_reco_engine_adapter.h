@@ -13,6 +13,7 @@
 #include "spxcore_common.h"
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
+#include "json.h"
 #include "recognition_result.h"
 #include "service_helpers.h"
 #include "usp.h"
@@ -197,12 +198,12 @@ private:
     }
 
     std::list<std::string> GetListenForListFromSite();
-    std::string GetDgiJsonFromListenForList(std::list<std::string>& listenForList);
+    nlohmann::json GetDgiJsonFromListenForList(std::list<std::string>& listenForList);
 
     void GetIntentInfoFromSite(std::string& provider, std::string& id, std::string& key, std::string& region);
-    std::string GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key, const std::string& region);
-    std::string GetSpeechContextJson();
-    std::string GetKeywordDetectionJson();
+    nlohmann::json GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key, const std::string& region);
+    nlohmann::json GetSpeechContextJson();
+    nlohmann::json GetKeywordDetectionJson();
 
     void FireActivityResult(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio);
     void FireFinalResultNow(const USP::SpeechPhraseMsg& message, const std::string& luisJson = "");

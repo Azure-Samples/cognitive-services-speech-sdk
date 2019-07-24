@@ -20,7 +20,6 @@
 #include "exception.h"
 #include "property_id_2_name_map.h"
 #include "spx_build_information.h"
-#include "json.h"
 #include "platform.h"
 #include "guid_utils.h"
 
@@ -974,15 +973,13 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechEvent()
 
 void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
 {
-   
-    // Take the json payload and the intent payload, and create the speech context json
+    // create speech context json
     auto speechContext = GetSpeechContextJson();
 
     if (!speechContext.empty())
     {
-        // Since it's not empty, we'll send it (empty means we don't have either dgi or intent payload)
         std::string messagePath = "speech.context";
-        UspSendMessage(messagePath, speechContext, USP::MessageType::Context);
+        UspSendMessage(messagePath, speechContext.dump(), USP::MessageType::Context);
     }
  }
 
@@ -1815,17 +1812,20 @@ std::list<std::string> CSpxUspRecoEngineAdapter::GetListenForListFromSite()
     return GetSite()->GetListenForList();
 }
 
-std::string CSpxUspRecoEngineAdapter::GetDgiJsonFromListenForList(std::list<std::string>& listenForList)
+json CSpxUspRecoEngineAdapter::GetDgiJsonFromListenForList(std::list<std::string>& listenForList)
 {
     SPX_DBG_ASSERT(GetSite() != nullptr);
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     auto noDGI = PAL::ToBool(properties->GetStringValue("CARBON-INTERNAL-USP-NoDGI"));
+    json dgiJson;
 
-    std::string dgiJson;
+    if (noDGI) {
+        return dgiJson;
+    }
+
 
     std::list<std::string> grammars;
     std::list<std::string> genericItems;
-
     for (auto listenFor : listenForList)
     {
         if (listenFor.length() > 3 &&
@@ -1842,56 +1842,27 @@ std::string CSpxUspRecoEngineAdapter::GetDgiJsonFromListenForList(std::list<std:
         }
     }
 
-    if (grammars.size() > 0 || genericItems.size() > 0)
+    if (genericItems.size() > 0)
     {
-        bool appendComma = false;
-
-        dgiJson = "{";  // start object
-
-        if (genericItems.size() > 0)
+        json group;
+        group["Type"] = "Generic";
+        auto grammerArray = json::array();
+        for (auto item : genericItems)
         {
-            dgiJson += R"("Groups": [)";  // start "Group" array
-            dgiJson += R"({"Type":"Generic","Items":[)"; // start Generic Items array
-
-            appendComma = false;
-            for (auto item : genericItems)
-            {
-                dgiJson += appendComma ? "," : "";
-                dgiJson += R"({"Text":")";
-                dgiJson += item;
-                dgiJson += R"("})";
-                appendComma = true;
-            }
-
-            dgiJson += "]}"; // close Generic Items array
-            dgiJson += "]";  // close "Group" array
-
-            appendComma = true;
+            grammerArray.push_back({ {"Text", item} });
         }
-
-        if (grammars.size() > 0)
-        {
-            dgiJson += appendComma ? "," : "";
-            dgiJson += R"("ReferenceGrammars": [)";
-
-            appendComma = false;
-            for (auto grammar : grammars)
-            {
-                // deal with commas
-                dgiJson += appendComma ? "," : "";
-                dgiJson += "\"";
-                dgiJson += grammar;
-                dgiJson += "\"";
-                appendComma = true;
-            }
-
-            dgiJson += "]";
-        }
-
-        dgiJson += "}";  // close object
+        group["Items"] = grammerArray;
+        auto groupsArray = json::array();
+        groupsArray.push_back(std::move(group));
+        dgiJson["Groups"] = groupsArray;
     }
 
-    return noDGI ? "" : dgiJson;
+    if (grammars.size() > 0)
+    {
+        dgiJson["ReferenceGrammars"] = json(grammars);
+    }
+
+    return dgiJson;
 }
 
 void CSpxUspRecoEngineAdapter::GetIntentInfoFromSite(std::string& provider, std::string& id, std::string& key, std::string& region)
@@ -1900,49 +1871,40 @@ void CSpxUspRecoEngineAdapter::GetIntentInfoFromSite(std::string& provider, std:
     GetSite()->GetIntentInfo(provider, id, key, region);
 }
 
-std::string CSpxUspRecoEngineAdapter::GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key, const std::string& region)
+json CSpxUspRecoEngineAdapter::GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key, const std::string& region)
 {
     SPX_DBG_ASSERT(GetSite() != nullptr);
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
     auto noIntentJson = PAL::ToBool(properties->GetStringValue("CARBON-INTERNAL-USP-NoIntentJson"));
 
     UNUSED(region);
-    UNUSED(key);
 
-    std::string intentJson;
-    if (!provider.empty() && !id.empty())
+    json intentJson;
+    if (!noIntentJson && !provider.empty() && !id.empty())
     {
-        intentJson = "{"; // start object
-
-        intentJson += R"("provider":")";
-        intentJson += provider + R"(",)";
-
-        intentJson += R"("id":")";
-        intentJson += id + R"(",)";
-
-        intentJson += R"("key":")";
-        intentJson += key + R"(")";
-
-        intentJson += "}"; // end object
+        intentJson["provider"] = provider;
+        intentJson["id"] = id;
+        intentJson["key"] = key;
     }
 
-    return noIntentJson ? "" : intentJson;
+    return intentJson;
 }
 
 // Construct and return the detected keywords in json format based on USP.
 // If no keyword id detected or keyword verification is turned off, return an empty string.
-std::string CSpxUspRecoEngineAdapter::GetKeywordDetectionJson()
+json CSpxUspRecoEngineAdapter::GetKeywordDetectionJson()
 {
     auto site = GetSite();
     auto properties = SpxQueryService<ISpxNamedProperties>(site);
-
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
     auto keywordVerificationEnabled = PAL::ToBool(properties->GetStringValue(KeywordConfig_EnableKeywordVerification, PAL::BoolToString(false).c_str()));
+    json keywordDetectionJson;
     if (keywordVerificationEnabled)
     {
         auto spottedKeywordResult = site->GetSpottedKeywordResult();
-
         if (spottedKeywordResult != nullptr) {
-            json keywordDetection = {{
+            keywordDetectionJson = { {
                 {"type", "startTrigger"},
                 {"clientDetectedKeywords", {{
                     {"text", PAL::ToString(spottedKeywordResult->GetText())},
@@ -1953,114 +1915,63 @@ std::string CSpxUspRecoEngineAdapter::GetKeywordDetectionJson()
                 {"onReject", {
                     {"action", "EndOfTurn"}
                 }}
-            }};
-            return keywordDetection.dump();
+            } };
         }
     }
-    return "";
+    return keywordDetectionJson;
 }
 
-std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson()
+json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
 {
+    json contextJson;
+
     // Get the Dgi json payload
     std::list<std::string> listenForList = GetListenForListFromSite();
     auto dgiJson = GetDgiJsonFromListenForList(listenForList);
+    if (!dgiJson.empty())
+    {
+        contextJson["dgi"] = dgiJson;
+    }
 
     // Get the intent payload
     std::string provider, id, key, region;
     GetIntentInfoFromSite(provider, id, key, region);
     auto intentJson = GetLanguageUnderstandingJsonFromIntentInfo(provider, id, key, region);
+    m_expectIntentResponse = !intentJson.empty();
+    if (m_expectIntentResponse)
+    {
+        contextJson["intent"] = intentJson;
+    }
 
     // Get keyword detection json payload
     auto keywordDetectionJson = GetKeywordDetectionJson();
-
-    // Do we expect to receive an intent payload from the service?
-    m_expectIntentResponse = !intentJson.empty();
+    if (!keywordDetectionJson.empty())
+    {
+        contextJson["invocationSource"] = "VoiceActivationWithKeyword";
+        contextJson["keywordDetection"] = keywordDetectionJson;
+    }
 
     auto leftAndRight = GetLeftRightContext();
     auto insertionPointLeft = leftAndRight.first;
     auto insertionPointRight = leftAndRight.second;
 
-    std::string contextJson;
+    if (!insertionPointLeft.empty())
+    {
+        contextJson["dictation"]["insertionPoint"]["left"] = json(insertionPointLeft);
+    }
+
+    if (!insertionPointRight.empty())
+    {
+        contextJson["dictation"]["insertionPoint"]["right"] = json(insertionPointRight);
+    }
 
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
     std::string toLanguages = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
-
-    nlohmann::json toLanguagesPayload;
     if (!toLanguages.empty())
     {
-        auto toArray = nlohmann::json::array();
-        auto langVector = PAL::split(toLanguages, CommaDelim);
-        for (auto item : langVector)
-        {
-            toArray.push_back(item);
-        }
-
-        toLanguagesPayload["to"] = toArray;
-    }
-
-    if (!dgiJson.empty() || !intentJson.empty() || !keywordDetectionJson.empty() || !insertionPointLeft.empty() || !insertionPointRight.empty())
-    {
-        bool appendComma = false;
-        contextJson += "{";
-
-        if (!dgiJson.empty())
-        {
-            contextJson += appendComma ? "," : "";
-            contextJson += R"("dgi":)";
-            contextJson += dgiJson;
-            appendComma = true;
-        }
-
-        if (!intentJson.empty())
-        {
-            contextJson += appendComma ? "," : "";
-            contextJson += R"("intent":)";
-            contextJson += intentJson;
-            appendComma = true;
-        }
-
-        if (!keywordDetectionJson.empty())
-        {
-            contextJson += appendComma ? "," : "";
-            contextJson += R"("invocationSource":"VoiceActivationWithKeyword")";
-            contextJson += ",";
-            contextJson += R"("keywordDetection":)";
-            contextJson += keywordDetectionJson;
-            appendComma = true;
-        }
-
-        // Todo (Task 1784131): this is the first step to send to languages via speech.context to support dynamic language list.
-        // After service supports event message, this should be removed. (no needs to send to lanugages via speech.context)
-        if (!toLanguages.empty())
-        {
-            contextJson += appendComma ? "," : "";
-            contextJson += R"("translationcontext":)";
-            contextJson += toLanguagesPayload.dump();
-            appendComma = true;
-        }
-
-        if (!insertionPointLeft.empty() || !insertionPointRight.empty())
-        {
-            contextJson += appendComma ? "," : "";
-            contextJson += R"("dictation": { "insertionPoint": { )";
-            appendComma = false;
-            if (!insertionPointLeft.empty())
-            {
-                contextJson += R"("left": )";
-                contextJson += json(insertionPointLeft).dump();
-                appendComma = true;
-            }
-            if (!insertionPointRight.empty())
-            {
-                contextJson += appendComma ? "," : "";
-                contextJson += R"("right":)";
-                contextJson += json(insertionPointRight).dump();
-            }
-            contextJson += "} }";
-        }
-        contextJson += "}";
+        auto toLangsVector = PAL::split(toLanguages, CommaDelim);
+        contextJson["translationcontext"]["to"] = json(toLangsVector);
     }
 
     return contextJson;
