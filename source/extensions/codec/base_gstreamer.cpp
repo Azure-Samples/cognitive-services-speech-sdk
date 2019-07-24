@@ -133,8 +133,8 @@ bool BaseGstreamer::GetStatus()
                 switch (GST_MESSAGE_TYPE(msg))
                 {
                 case GST_MESSAGE_ERROR:
+                    m_bErrorInsideGstreamer = true;
                     gst_message_parse_error(msg, &err, &debug_info);
-
                     if (msg->src != nullptr)
                     {
                         m_gstErrorString = "Source: " + std::string(GST_OBJECT_NAME(msg->src)) + "\r\n";
