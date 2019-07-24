@@ -147,7 +147,6 @@
         }
       }
     },
-
     // Location:
     //   public_samples/quickstart/java-android/gradle/wrapper/gradle-wrapper.jar
     //   public_samples/samples/java/android/sdkdemo/gradle/wrapper/gradle-wrapper.jar
@@ -156,7 +155,7 @@
     // Usage: the Gradle _Wrapper_ (and just that) is being distributed as part
     //        of the samples' repository, and for that usage an IP scan was done, cf.
     //        https://ossmsft.visualstudio.com/DefaultCollection/Reviews/_workitems/edit/19279
-    //        From a point of view of the Carbon repository, the usage is internal (for testing).
+    //        From a point of view of our GIT repository, the usage is internal (for testing).
     {
       "component": {
         "type": "other",
@@ -166,7 +165,22 @@
           "downloadUrl": "https://services.gradle.org/distributions/gradle-4.4-all.zip"
         }
       }
+    },        
+    // Location:
+    // public_samples/samples/unity/speechrecognizer/Assets/SpeechSDKSample/Scripts/JSONParser.cs
+    // OSS request: https://ossmsft.visualstudio.com/_oss?searchText=zanders3&_a=artifact
+    // IP Scan: TBD...
+    // Usage: TinyJSON is used and shipped as a code snippet in this sample.
+    // It is used to parse the JSON response from the speech service.
+    {
+      "component": {
+        "type": "other",
+        "other": {
+          "name": "Zanders3 TINY JSON",
+          "version": "1.1",
+          "downloadUrl": "https://github.com/zanders3/json"
+        }
+      }
     }
-
   ]
 }

@@ -1094,6 +1094,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Properties.SetProperty("DictationInsertionPointRight", "right context.");
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine("First reco attempt failed (details=%s).", cancellation.ErrorDetails);
+                }
                 Assert.IsTrue(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult).Contains("Corrections"));
                 Assert.IsTrue(result.Text.StartsWith("W"));
             }
@@ -1124,6 +1130,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Canceled += (s, e) =>
                 {
                     canceled = e.ErrorDetails;
+                    Console.WriteLine("Recognition was canceled (details=%s).", canceled);
                     taskCompletionSource.TrySetResult(0);
                 };
                 recognizer.Recognized += (s, e) =>
