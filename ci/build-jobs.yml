@@ -480,6 +480,7 @@ jobs:
          tests.runner.Runner \
          tests.AllTests
     displayName: Run unit test
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     continueOnError: ${{ parameters.continueOnTestFailure }}
   # TODO more - e.g. POM?
   - task: PublishTestResults@2
@@ -547,6 +548,7 @@ jobs:
           done
           #
           [[ $ERRORS == 0 ]] || exitWithError "Not all samples ran successfully."
+        condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
         displayName: Test samples
 
 - template: java-jre-package-test.yml
@@ -600,11 +602,12 @@ jobs:
             tests.runner.Runner \
             tests.AllTests
         displayName: Run unit test
+        condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
         continueOnError: ${{ parameters.continueOnTestFailure }}
       - task: PublishTestResults@2
         inputs:
           testResultsFiles: '**/test-*.xml'
-        condition: succeededOrFailed()
+        condition: and(succeededOrFailed(), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'))
         displayName: Publish test results
 
 - job: NuGet
@@ -940,12 +943,13 @@ jobs:
       done
       [[ $ERRORS == 0 ]] || exitWithError "Not all samples/tests ran successfully."
     displayName: Test and samples
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     continueOnError: ${{ parameters.continueOnTestFailure }}
   - task: PublishTestResults@2
     inputs:
       testRunner: VSTest
       testResultsFiles: '**/test-*.trx'
-    condition: succeededOrFailed()
+    condition: and(succeededOrFailed(), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'))
 
 - job: NuGetOsxTest
   dependsOn: [Pre, NuGet, WindowsBuild]
@@ -1027,12 +1031,13 @@ jobs:
       done
       exit ${exitCode}
     displayName: Run C# unit tests
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     continueOnError: ${{ parameters.continueOnTestFailure }}
   - task: PublishTestResults@2
     inputs:
       testRunner: VSTest
       testResultsFiles: '**/test-*.trx'
-    condition: succeededOrFailed()
+    condition: and(succeededOrFailed(), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'))
 
 - job: AndroidBuild
   variables:
@@ -1800,6 +1805,7 @@ jobs:
       done
       [[ $ERRORS == 0 ]] || exitWithError "Not all tests/samples ran successfully."
     displayName: Build and test quickstarts
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     continueOnError: ${{ parameters.continueOnTestFailure }}
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Linux Release Drop'
@@ -1978,6 +1984,7 @@ jobs:
       ci/apple/multiplatformtests.sh tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj \
         SpeechSDK_iOS SpeechSDK_iOS $(OutputDirectory)/logs unittests $(microsoftDevTeamId)
     displayName: "Run iOS unit tests"
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     continueOnError: true
   - bash: |
       set -u -e -o pipefail -x
@@ -2009,6 +2016,7 @@ jobs:
       ci/apple/multiplatformtests.sh public_samples/quickstart/objectivec-ios/helloworld/helloworld.xcodeproj \
         helloworldUITests helloworldUITests-Runner $(OutputDirectory)/logs quickstart $(microsoftDevTeamId) --usegui
     continueOnError: true
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     displayName: "Run iOS UI test for quickstart"
   - bash: |
       set -u -e -o pipefail -x
@@ -2040,6 +2048,7 @@ jobs:
       ci/apple/multiplatformtests.sh public_samples/samples/objective-c/ios/speech-samples/speech-samples.xcodeproj \
         speech-samplesUITests speech-samplesUITests-Runner $(OutputDirectory)/logs speech-samples $(microsoftDevTeamId) --usegui
     continueOnError: true
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     displayName: "Run iOS UI test for extended samples"
   - task: PublishTestResults@2
     inputs:

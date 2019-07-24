@@ -782,7 +782,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                Assert.AreEqual(TestData.English.Profanity.TaggedUtteranceTranslation.ToLower(), result.Text.ToLower());
+                AssertMatching(TestData.English.Profanity.TaggedUtteranceTranslation.ToLower(), result.Text.ToLower());
                 Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(TestData.German.Profanity.TaggedUtteranceTranslation, result.Translations[Language.DE]);
             }

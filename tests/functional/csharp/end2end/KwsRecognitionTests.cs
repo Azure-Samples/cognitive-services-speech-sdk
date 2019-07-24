@@ -1031,6 +1031,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Canceled += (s, e) =>
                 {
                     Console.WriteLine("Canceled: " + e.ToString());
+                    Console.WriteLine("ErrorDetails: " + e.ErrorDetails);
                 };
 
                 var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);

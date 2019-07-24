@@ -72,45 +72,70 @@ public class PhraseListGrammarTests {
     public void phraselistAssistsSpeechReco() throws InterruptedException, ExecutionException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
+        boolean passed = false;
 
-        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
-        assertNotNull(r);
-        assertNotNull(r.getRecoImpl());
-        assertTrue(r instanceof Recognizer);
+        for(int RetryLimit=10; RetryLimit>0; RetryLimit--) {
 
-        PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
-        assertNotNull(pg);
-        pg.addPhrase("Wreck a nice beach");
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
+            assertNotNull(r);
+            assertNotNull(r.getRecoImpl());
+            assertTrue(r instanceof Recognizer);
 
-        SpeechRecognitionResult res = r.recognizeOnceAsync().get();
-        assertEquals("Wreck a nice beach.", res.getText());
+            PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
+            assertNotNull(pg);
+            pg.addPhrase("Wreck a nice beach");
 
-        pg.close();
-        r.close();
+            SpeechRecognitionResult res = r.recognizeOnceAsync().get();
+
+            if(res.getText().equalsIgnoreCase("Wreck a nice beach.")){
+                passed = true;
+                break;
+            }else
+            {
+                Thread.sleep(200);
+            }
+
+            pg.close();
+            r.close();
+        }
         s.close();
+        assertEquals(passed, true);
+
     }
 
    @Test
    public void extraPhrasesDontHurtReco() throws InterruptedException, ExecutionException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
+        boolean passed = false;
 
-        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
-        assertNotNull(r);
-        assertNotNull(r.getRecoImpl());
-        assertTrue(r instanceof Recognizer);
+        for(int RetryLimit=10; RetryLimit>0; RetryLimit--) {
 
-        PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
-        assertNotNull(pg);
-        pg.addPhrase("Wreck a nice beach");
-        pg.addPhrase("No effect");
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
+            assertNotNull(r);
+            assertNotNull(r.getRecoImpl());
+            assertTrue(r instanceof Recognizer);
 
-        SpeechRecognitionResult res = r.recognizeOnceAsync().get();
-        assertEquals("Wreck a nice beach.", res.getText());
+            PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
+            assertNotNull(pg);
+            pg.addPhrase("Wreck a nice beach");
+            pg.addPhrase("No effect");
 
-        pg.close();
-        r.close();
+            SpeechRecognitionResult res = r.recognizeOnceAsync().get();
+
+            if(res.getText().equalsIgnoreCase("Wreck a nice beach.")){
+                passed = true;
+                break;
+            }else
+            {
+                Thread.sleep(200);
+            }
+
+            pg.close();
+            r.close();
+        }
         s.close();
+        assertEquals(passed, true);
    }
 
 
@@ -118,47 +143,69 @@ public class PhraseListGrammarTests {
    public void phraselistAssistsSpeechRecoIntent() throws InterruptedException, ExecutionException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
         assertNotNull(s);
+        boolean passed = false;
 
-        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
-        assertNotNull(r);
-        assertNotNull(r.getRecoImpl());
-        assertTrue(r instanceof Recognizer);
+        for(int RetryLimit=10; RetryLimit>0; RetryLimit--) {
 
-        PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
-        assertNotNull(pg);
-        pg.addPhrase("Wreck a nice beach");
+            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
+            assertNotNull(r);
+            assertNotNull(r.getRecoImpl());
+            assertTrue(r instanceof Recognizer);
 
-        IntentRecognitionResult res = r.recognizeOnceAsync().get();
-        assertEquals(ResultReason.RecognizedSpeech, res.getReason());
-        assertEquals("Wreck a nice beach.", res.getText());
+            PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
+            assertNotNull(pg);
+            pg.addPhrase("Wreck a nice beach");
 
-        pg.close();
-        r.close();
+            IntentRecognitionResult res = r.recognizeOnceAsync().get();
+            assertEquals(ResultReason.RecognizedSpeech, res.getReason());
+            if(res.getText().equalsIgnoreCase("Wreck a nice beach.")){
+                passed = true;
+                break;
+            }else
+            {
+                Thread.sleep(200);
+            }
+
+            pg.close();
+            r.close();
+        }
         s.close();
+        assertEquals(passed, true);
    }
 
    @Test
    public void extraPhrasesDontHurtRecoIntent() throws InterruptedException, ExecutionException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
         assertNotNull(s);
+        boolean passed = false;
 
-        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
-        assertNotNull(r);
-        assertNotNull(r.getRecoImpl());
-        assertTrue(r instanceof Recognizer);
+        for(int RetryLimit=10; RetryLimit>0; RetryLimit--) {
 
-        PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
-        assertNotNull(pg);
-        pg.addPhrase("Wreck a nice beach");
-        pg.addPhrase("No effect");
+            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.AudioInputDirectory + "/wreck-a-nice-beach.wav"));
+            assertNotNull(r);
+            assertNotNull(r.getRecoImpl());
+            assertTrue(r instanceof Recognizer);
 
-        IntentRecognitionResult res = r.recognizeOnceAsync().get();
-        assertEquals(ResultReason.RecognizedSpeech, res.getReason());
-        assertEquals("Wreck a nice beach.", res.getText());
+            PhraseListGrammar pg = PhraseListGrammar.fromRecognizer(r);
+            assertNotNull(pg);
+            pg.addPhrase("Wreck a nice beach");
+            pg.addPhrase("No effect");
 
-        pg.close();
-        r.close();
+            IntentRecognitionResult res = r.recognizeOnceAsync().get();
+            assertEquals(ResultReason.RecognizedSpeech, res.getReason());
+            if(res.getText().equalsIgnoreCase("Wreck a nice beach.")){
+                passed = true;
+                break;
+            }else
+            {
+                Thread.sleep(200);
+            }
+
+            pg.close();
+            r.close();
+        }
         s.close();
+        assertEquals(passed, true);
    }
 
    @Test

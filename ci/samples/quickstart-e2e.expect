@@ -69,7 +69,7 @@ expect {
 # Exit
 
 expect {
-  "Please press a key to continue." {
+  "Please press <Return> to continue." {
     send "a\r"
     expect {
       timeout {
