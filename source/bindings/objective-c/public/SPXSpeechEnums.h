@@ -356,11 +356,15 @@ typedef NS_ENUM(NSUInteger, SPXCancellationErrorCode)
 {
     /**
      * No error.
+     * If SPXCancellationReason is SPXCancellationReason_EndOfStream, SPXCancellationErrorCode 
+     * is set to SPXCancellationErrorCode_NoError.
      */
     SPXCancellationErrorCode_NoError = 0,
 
     /**
      * Indicates an authentication error.
+     * An authentication error occurs if subscription key or authorization token is invalid, expired, 
+     * or does not match the region being used.
      */
     SPXCancellationErrorCode_AuthenticationFailure = 1,
 

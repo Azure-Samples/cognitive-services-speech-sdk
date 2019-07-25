@@ -26,18 +26,18 @@ public class SampleRecognizeIntentTest {
         Settings.LoadSettings();
     }
 
-    @Ignore("TODO why does that not return the expected result")
     @Test
     public void test() {
         test = new SampleRecognizeIntent();
 
         test.run();
-        TestHelper.AssertConnectionCountMatching(test.getConnectedEventCount(), test.getDisconnectedEventCount());
         assertNotNull(test.getResult()); // we got the final result
-        assertEquals("What's the weather like?", test.getResult().getText());
+        assertEquals(Settings.TurnOnTheLampUtterance, test.getResult().getText());
+        assertEquals("1", test.getIntentId());
+        assertEquals("HomeAutomation.TurnOn", test.getIntentName());
 
         String s = test.getResult().getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
-        assertNotNull(s);
+        System.out.println("LUIS Json result:" + s);
         assertTrue(s.length() > 0);
         assertTrue(s.indexOf("\"topScoringIntent\":") > 0);
         assertTrue(s.indexOf("\"score\":") > 0);

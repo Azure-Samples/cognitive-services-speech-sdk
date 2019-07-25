@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.Ignore;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
+import com.microsoft.cognitiveservices.speech.CancellationDetails;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.ServicePropertyChannel;
@@ -38,7 +39,6 @@ import tests.TestHelper;
 
 public class TranslationRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
-    private AtomicInteger eventIdentifier = new AtomicInteger(FIRST_EVENT_ID);
     private static String authorizationToken;
 
     @BeforeClass
@@ -123,7 +123,6 @@ public class TranslationRecognizerTests {
         s.close();
     }
 
-    @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testGetTargetLanguages() {
         SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -193,7 +192,6 @@ public class TranslationRecognizerTests {
     // ---
     // -----------------------------------------------------------------------
 
-    @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testGetParameters() {
         SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -209,7 +207,6 @@ public class TranslationRecognizerTests {
         assertNotNull(r.getProperties());
         assertEquals(r.getSpeechRecognitionLanguage(), r.getProperties().getProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
 
-        // TODO this cannot be true, right? comparing an array with a string parameter???
         assertEquals(1, r.getTargetLanguages().size());
         assertEquals(r.getTargetLanguages().get(0), r.getProperties().getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages));
 
@@ -221,7 +218,6 @@ public class TranslationRecognizerTests {
     // ---
     // -----------------------------------------------------------------------
 
-    @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testRecognizeOnceAsync1() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -253,24 +249,16 @@ public class TranslationRecognizerTests {
         });
 
         Future<TranslationRecognitionResult> future = r.recognizeOnceAsync();
-        assertNotNull(future);
-
         // Wait for max 30 seconds
-        future.get(30, TimeUnit.SECONDS);
-
-        assertFalse(future.isCancelled());
-        assertTrue(future.isDone());
-
-        TranslationRecognitionResult res = future.get();
+        TranslationRecognitionResult res = future.get(30, TimeUnit.SECONDS);
         assertNotNull(res);
-        assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
-                ResultReason.RecognizedIntent == res.getReason());
+        TestHelper.OutputResult(res);
+        assertTrue(ResultReason.TranslatedSpeech == res.getReason());
         assertEquals("What's the weather like?", res.getText());
 
         assertNotNull(res.getProperties());
-        assertEquals("What's the weather like?", res.getText()); // original text
         assertEquals(1, res.getTranslations().size());
-        assertEquals("What's the weather like?", res.getTranslations().get("en-US")); // translated text
+        assertEquals("What's the weather like?", res.getTranslations().get("en")); // translated text
 
         // wait until we get the SessionStopped event.
         long now = System.currentTimeMillis();
@@ -281,11 +269,11 @@ public class TranslationRecognizerTests {
 
         // It is not required to explictly close the connection. This is also used to keep the connection object alive.
         connection.closeConnection();
+        connection.close();
         r.close();
         s.close();
     }
 
-    @Ignore("TODO why is event order wrong?")
     @Test
     public void testRecognizeOnceAsync2() throws InterruptedException, ExecutionException {
         SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -302,7 +290,7 @@ public class TranslationRecognizerTests {
         assertTrue(r instanceof Recognizer);
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
-
+        AtomicInteger eventIdentifier = new AtomicInteger(FIRST_EVENT_ID);
         AtomicInteger connectedEventCount = new AtomicInteger(0);
         AtomicInteger disconnectedEventCount = new AtomicInteger(0);
         AtomicInteger sessionStoppedCount = new AtomicInteger(0);
@@ -319,9 +307,9 @@ public class TranslationRecognizerTests {
         });
 
         r.recognizing.addEventListener((o, e) -> {
-            int now = eventIdentifier.getAndIncrement();
-            eventsMap.put("recognizing-" + System.currentTimeMillis(), now);
-            eventsMap.put("recognizing" , now);
+            int seqno = eventIdentifier.getAndIncrement();
+            eventsMap.put("recognizing-" + System.currentTimeMillis(), seqno);
+            eventsMap.put("recognizing" , seqno);
         });
 
         r.canceled.addEventListener((o, e) -> {
@@ -331,33 +319,34 @@ public class TranslationRecognizerTests {
         });
 
         r.speechStartDetected.addEventListener((o, e) -> {
-            int now = eventIdentifier.getAndIncrement();
-            eventsMap.put("speechStartDetected-" + System.currentTimeMillis(), now);
-            eventsMap.put("speechStartDetected", now);
+            int seqno = eventIdentifier.getAndIncrement();
+            eventsMap.put("speechStartDetected-" + System.currentTimeMillis(), seqno);
+            eventsMap.put("speechStartDetected", seqno);
         });
 
         r.speechEndDetected.addEventListener((o, e) -> {
-            int now = eventIdentifier.getAndIncrement();
-            eventsMap.put("speechEndDetected-" + System.currentTimeMillis(), now);
-            eventsMap.put("speechEndDetected", now);
+            int seqno = eventIdentifier.getAndIncrement();
+            eventsMap.put("speechEndDetected-" + System.currentTimeMillis(), seqno);
+            eventsMap.put("speechEndDetected", seqno);
         });
 
         r.sessionStarted.addEventListener((o, e) -> {
-            int now = eventIdentifier.getAndIncrement();
-            eventsMap.put("sessionStarted-" + System.currentTimeMillis(), now);
-            eventsMap.put("sessionStarted", now);
+            int seqno = eventIdentifier.getAndIncrement();
+            eventsMap.put("sessionStarted-" + System.currentTimeMillis(), seqno);
+            eventsMap.put("sessionStarted", seqno);
         });
 
         r.sessionStopped.addEventListener((o, e) -> {
             sessionStoppedCount.getAndIncrement();
-            int now = eventIdentifier.getAndIncrement();
-            eventsMap.put("sessionStopped-" + System.currentTimeMillis(), now);
-            eventsMap.put("sessionStopped", now);
+            int seqno = eventIdentifier.getAndIncrement();
+            eventsMap.put("sessionStopped-" + System.currentTimeMillis(), seqno);
+            eventsMap.put("sessionStopped", seqno);
         });
 
         TranslationRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
-        assertTrue(res.getReason() != ResultReason.Canceled);
+        TestHelper.OutputResult(res);
+        assertTrue(res.getReason() == ResultReason.TranslatedSpeech);
         assertEquals("What's the weather like?", res.getText());
 
         // wait until we get the SessionStopped event.
@@ -370,7 +359,12 @@ public class TranslationRecognizerTests {
         TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
         // session events are first and last event
-        final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
+        final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get() - 1;
+        System.out.println("Events received. Last recorded_event_id: "+ LAST_RECORDED_EVENT_ID);
+        for (Map.Entry<String, Integer> entry : eventsMap.entrySet()) {
+            System.out.println(entry.getKey() + ":" + entry.getValue());
+        };
+
         assertTrue(LAST_RECORDED_EVENT_ID > FIRST_EVENT_ID);
         assertEquals(FIRST_EVENT_ID, eventsMap.get("sessionStarted"));
         assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get("sessionStopped"));
@@ -380,6 +374,7 @@ public class TranslationRecognizerTests {
         assertTrue(eventsMap.get("speechStartDetected") < eventsMap.get("speechEndDetected"));
         assertEquals((Integer)(FIRST_EVENT_ID + 1), eventsMap.get("speechStartDetected"));
         assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 1), eventsMap.get("speechEndDetected"));
+        assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 2), eventsMap.get("recognized"));
 
         // recognition events come after session start but before session end events
         assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("speechStartDetected"));
@@ -392,6 +387,7 @@ public class TranslationRecognizerTests {
         // make sure events we don't expect, don't get raised
         assertFalse(eventsMap.containsKey("canceled"));
 
+        connection.close();
         r.close();
         s.close();
     }
@@ -415,13 +411,11 @@ public class TranslationRecognizerTests {
         assertTrue(r instanceof Recognizer);
 
         Future<?> future = r.startContinuousRecognitionAsync();
-        assertNotNull(future);
-
+        assertNotNull("future is null.", future);
         // Wait for max 30 seconds
         future.get(30, TimeUnit.SECONDS);
-
-        assertFalse(future.isCancelled());
-        assertTrue(future.isDone());
+        assertFalse("future is canceled.", future.isCancelled());
+        assertTrue("future is not done.", future.isDone());
 
         r.close();
         s.close();
@@ -442,13 +436,11 @@ public class TranslationRecognizerTests {
         assertTrue(r instanceof Recognizer);
 
         Future<?> future = r.startContinuousRecognitionAsync();
-        assertNotNull(future);
-
+        assertNotNull("future is null.", future);
         // Wait for max 30 seconds
         future.get(30, TimeUnit.SECONDS);
-
-        assertFalse(future.isCancelled());
-        assertTrue(future.isDone());
+        assertFalse("future is canceled.", future.isCancelled());
+        assertTrue("future is not done.", future.isDone());
 
         // just wait ten seconds
         Thread.sleep(10000);
@@ -482,7 +474,6 @@ public class TranslationRecognizerTests {
         assertTrue(r instanceof Recognizer);
 
         final ArrayList<String> rEvents = new ArrayList<>();
-
         final AtomicInteger connectedEventCount = new AtomicInteger(0);;
         final AtomicInteger disconnectedEventCount = new AtomicInteger(0);;
         connection.connected.addEventListener((o, connectionEventArgs) -> {
@@ -498,38 +489,30 @@ public class TranslationRecognizerTests {
         });
 
         Future<?> future = r.startContinuousRecognitionAsync();
-        assertNotNull(future);
-
         // Wait for max 30 seconds
         future.get(30, TimeUnit.SECONDS);
 
-        assertFalse(future.isCancelled());
-        assertTrue(future.isDone());
-
+        System.out.println("Start continuous recognition, waiting for final result.");
         // wait until we get at least on final result
         long now = System.currentTimeMillis();
-        while(((System.currentTimeMillis() - now) < 30000) &&
-                (rEvents.isEmpty())) {
+        while(((System.currentTimeMillis() - now) < 30000) && (rEvents.isEmpty())) {
             Thread.sleep(200);
         }
+        System.out.println("Stop recognition.");
+        future = r.stopContinuousRecognitionAsync();
+        assertNotNull("future is null.", future);
+        // Wait for max 30 seconds
+        future.get(30, TimeUnit.SECONDS);
+        assertFalse("future is canceled.", future.isCancelled());
+        assertTrue("future is not done.", future.isDone());
 
         // test that we got one result
         // TODO multi-phrase test with several phrases in one session
-        assertEquals(1, rEvents.size());
+        assertEquals("wrong number of received results: "+ rEvents.size(), 1, rEvents.size());
 
-        future = r.stopContinuousRecognitionAsync();
-        assertNotNull(future);
-
-        // Wait for max 30 seconds
-        future.get(30, TimeUnit.SECONDS);
-
-        assertFalse(future.isCancelled());
-        assertTrue(future.isDone());
-
+        connection.closeConnection();
         TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
 
-        // It is not required to explictly close the connection. This is also used to keep the connection object alive.
-        connection.closeConnection();
         r.close();
         s.close();
     }
@@ -558,6 +541,7 @@ public class TranslationRecognizerTests {
         while(((System.currentTimeMillis() - now) < 30000) && (sessionStoppedCount.get() == 0)) {
             Thread.sleep(200);
         }
+        TestHelper.OutputResult(res);
         assertEquals(2, synthesizingEventCount.get());
         assertTrue(audioLength.get() > 0);
         assertEquals(1, sessionStoppedCount.get());
@@ -619,13 +603,8 @@ public class TranslationRecognizerTests {
         });
 
         Future<?> future = r.startContinuousRecognitionAsync();
-        assertNotNull(future);
-
         // Wait for max 30 seconds
         future.get(30, TimeUnit.SECONDS);
-
-        assertFalse(future.isCancelled());
-        assertTrue(future.isDone());
 
         // wait until we get at least on final result
         long now = System.currentTimeMillis();
@@ -639,13 +618,12 @@ public class TranslationRecognizerTests {
         assertEquals(1, rEvents.size());
 
         future = r.stopContinuousRecognitionAsync();
-        assertNotNull(future);
+        assertNotNull("future is null.", future);
 
         // Wait for max 30 seconds
         future.get(30, TimeUnit.SECONDS);
-
-        assertFalse(future.isCancelled());
-        assertTrue(future.isDone());
+        assertFalse("future is canceled.", future.isCancelled());
+        assertTrue("future is not done.", future.isDone());
 
         r.close();
         s.close();
@@ -716,16 +694,10 @@ public class TranslationRecognizerTests {
         assertEquals("nl", targetLangListFromReco.get(1));
 
         Future<TranslationRecognitionResult> future = r.recognizeOnceAsync();
-        assertNotNull(future);
 
         // Wait for max 30 seconds
         future.get(30, TimeUnit.SECONDS);
-
-        assertFalse(future.isCancelled());
-        assertTrue(future.isDone());
-
         TranslationRecognitionResult res = future.get();
-        assertNotNull(res);
         assertTrue(ResultReason.TranslatedSpeech == res.getReason());
         assertEquals(2, res.getTranslations().size());
         assertTrue(res.getTranslations().get("fr").length() > 0);
@@ -736,5 +708,4 @@ public class TranslationRecognizerTests {
         r.close();
         s.close();
     }
-
 }

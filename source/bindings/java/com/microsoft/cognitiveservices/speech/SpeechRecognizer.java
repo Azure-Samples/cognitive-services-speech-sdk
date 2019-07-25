@@ -16,6 +16,7 @@ import com.microsoft.cognitiveservices.speech.PropertyCollection;
 
 /**
  * Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
+ * Note: close() must be called in order to relinquish underlying resources held by the object.
  *
  */
 public final class SpeechRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer

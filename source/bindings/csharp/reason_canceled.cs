@@ -29,11 +29,15 @@ namespace Microsoft.CognitiveServices.Speech
     {
         /// <summary>
         /// No error.
+        /// If CancellationReason is EndOfStream, CancellationErrorCode 
+        /// is set to NoError.
         /// </summary>
         NoError = 0,
 
         /// <summary>
         /// Indicates an authentication error.
+        /// An authentication error occurs if subscription key or authorization token is invalid, expired, 
+        /// or does not match the region being used.
         /// </summary>
         AuthenticationFailure = 1,
 

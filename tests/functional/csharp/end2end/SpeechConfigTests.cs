@@ -209,6 +209,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(CancellationReason.Error, cancellation.Reason);
                 Assert.AreEqual(CancellationErrorCode.AuthenticationFailure, cancellation.ErrorCode);
                 AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with an authentication error (401)");
+                AssertHelpers.AssertStringContains(cancellation.ErrorDetails, "SessionId");
             }
         }
 

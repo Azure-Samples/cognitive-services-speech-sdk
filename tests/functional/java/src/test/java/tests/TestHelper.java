@@ -17,6 +17,10 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.microsoft.cognitiveservices.speech.ResultReason;
+import com.microsoft.cognitiveservices.speech.RecognitionResult;
+import com.microsoft.cognitiveservices.speech.CancellationDetails;
+
 public class TestHelper {
 
     public static void AssertConnectionCountMatching(int connectedEventCount, int disconnectedEventCount) {
@@ -60,5 +64,15 @@ public class TestHelper {
         streamReader.close();
 
         return stringBuilder.toString();
+    }
+
+    public static void OutputResult(RecognitionResult res)
+    {
+        System.out.println("Recognition Reason: " + res.getReason() + ". Text:" + res.getText());
+        if (res.getReason() == ResultReason.Canceled)
+        {
+            CancellationDetails details = CancellationDetails.fromResult(res);
+            System.out.println("Cancellation ErrorCode: " + details.getErrorCode() + ". ErrorDetails: " + details.getErrorDetails());
+        }
     }
 }

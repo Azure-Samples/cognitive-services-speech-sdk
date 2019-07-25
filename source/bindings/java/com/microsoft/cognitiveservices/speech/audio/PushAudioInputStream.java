@@ -8,6 +8,7 @@ import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 /**
  * Represents memory backed push audio input stream used for custom audio input configurations.
+ * Note: close() must be called in order to relinquish underlying resources held by the object.
  */
 public final class PushAudioInputStream extends com.microsoft.cognitiveservices.speech.audio.AudioInputStream
 {
@@ -51,6 +52,7 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
 
     /**
      * Closes the stream.
+     * Note: close() must be called in order to relinquish underlying resources held by the object.
      */
     @Override
     public void close() {

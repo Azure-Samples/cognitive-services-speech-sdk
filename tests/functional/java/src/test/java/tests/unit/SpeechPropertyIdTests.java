@@ -59,7 +59,6 @@ public class SpeechPropertyIdTests {
         s.close();
     }
 
-    @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testRecognizerParameterNames3() {
         SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -67,7 +66,7 @@ public class SpeechPropertyIdTests {
 
         s.addTargetLanguage("en-US");
 
-        Recognizer r = new TranslationRecognizer(s);
+        Recognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
 

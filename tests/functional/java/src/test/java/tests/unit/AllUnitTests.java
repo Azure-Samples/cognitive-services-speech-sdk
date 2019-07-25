@@ -12,8 +12,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
     IntentRecognizerTests.class,
-    // Disable for now since it fails other tests.
-    // SpeechConfigTests.class,
+    SpeechConfigTests.class,
     SpeechRecognizerTests.class,
     TranslationRecognizerTests.class,
     KeywordRecognitionModelTests.class,

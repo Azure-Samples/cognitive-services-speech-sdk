@@ -185,7 +185,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 Assert.AreEqual(0, result.Translations.Count, "Unmatched translation results");
                 var errorDetails = CancellationDetails.FromResult(result).ErrorDetails;
-                Assert.AreEqual(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails, "Unmatched error details");
+                AssertMatching(TestData.ExpectedErrorDetails.InvalidTargetLanaguageErrorMessage, errorDetails);
             }
         }
 

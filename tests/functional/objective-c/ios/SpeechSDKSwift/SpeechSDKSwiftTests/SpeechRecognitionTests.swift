@@ -52,7 +52,7 @@ class SpeechRecognitionTests: XCTestCase {
 
         XCTAssertEqual(result.text, "");
         XCTAssertEqual(cancellationDetails.reason, SPXCancellationReason.error);
-        XCTAssertEqual(cancellationDetails.errorDetails, "WebSocket Upgrade failed with an authentication error (401). Please check for correct subscription key (or authorization token) and region name.");
+        XCTAssertTrue(cancellationDetails.errorDetails!.contains("WebSocket Upgrade failed with an authentication error (401)."));
         XCTAssertEqual(result.reason, SPXResultReason.canceled);
         XCTAssertEqual(result.duration, 0);
         XCTAssertEqual(result.offset, 0);
@@ -74,7 +74,7 @@ class SpeechRecognitionTests: XCTestCase {
 
         XCTAssertEqual(result.text, "");
         XCTAssertEqual(cancellationDetails.reason, SPXCancellationReason.error);
-        XCTAssertEqual(cancellationDetails.errorDetails, "Connection failed (no connection to the remote host). Internal error: 11. Error details: 0. Please check network connection, firewall setting, and the region name used to create speech factory.");
+        XCTAssertTrue(cancellationDetails.errorDetails!.contains("Connection failed (no connection to the remote host). Internal error: 11. Error details: 0."));
         XCTAssertEqual(result.reason, SPXResultReason.canceled);
         XCTAssertEqual(result.duration, 0);
         XCTAssertEqual(result.offset, 0);
@@ -169,7 +169,7 @@ class TranslationRecognitionTests: XCTestCase {
 
         XCTAssertEqual(result.text, "");
         XCTAssertEqual(cancellationDetails.reason, SPXCancellationReason.error);
-        XCTAssertEqual(cancellationDetails.errorDetails, "WebSocket Upgrade failed with an authentication error (401). Please check for correct subscription key (or authorization token) and region name.");
+        XCTAssertTrue(cancellationDetails.errorDetails!.contains("WebSocket Upgrade failed with an authentication error (401)."));
         XCTAssertEqual(result.reason, SPXResultReason.canceled);
         XCTAssertEqual(result.duration, 0);
         XCTAssertEqual(result.offset, 0);
@@ -192,7 +192,7 @@ class TranslationRecognitionTests: XCTestCase {
 
         XCTAssertEqual(result.text, "");
         XCTAssertEqual(cancellationDetails.reason, SPXCancellationReason.error);
-        XCTAssertEqual(cancellationDetails.errorDetails, "Connection failed (no connection to the remote host). Internal error: 11. Error details: 0. Please check network connection, firewall setting, and the region name used to create speech factory.");
+        XCTAssertTrue(cancellationDetails.errorDetails!.contains("Connection failed (no connection to the remote host). Internal error: 11. Error details: 0."));
         XCTAssertEqual(result.reason, SPXResultReason.canceled);
         XCTAssertEqual(result.duration, 0);
         XCTAssertEqual(result.offset, 0);

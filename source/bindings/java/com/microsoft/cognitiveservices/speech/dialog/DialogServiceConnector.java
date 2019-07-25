@@ -21,6 +21,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationSynthesisEv
 
 /**
  * Class that defines a DialogServiceConnector.
+ * Note: close() must be called in order to relinquish underlying resources held by the object.
  */
 public class DialogServiceConnector implements Closeable {
 
@@ -348,6 +349,7 @@ public class DialogServiceConnector implements Closeable {
 
     /**
      * Dispose of associated resources.
+     * Note: close() must be called in order to relinquish underlying resources held by the object.
      */
     @Override
     public void close() {

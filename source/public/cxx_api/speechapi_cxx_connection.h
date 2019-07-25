@@ -19,13 +19,13 @@ namespace Speech {
 /// By default, a Recognizer autonomously manages connection to service when needed.
 /// The Connection class provides additional methods for users to explicitly open or close a connection and
 /// to subscribe to connection status changes.
-/// The use of Connection is optional, and mainly for scenarios where fine tuning of application
-/// behavior based on connection status is needed. Users can optionally call Open() to manually set up a connection
-/// in advance before starting recognition on the Recognizer associated with this Connection. After starting recognition,
-/// calling Open() or Close() might fail, depending on the process state of the Recognizer. But this does not affect
-/// the state of the associated Recognizer. And if the Recognizer needs to connect or disconnect to service, it will
-/// setup or shutdown the connection independently. In this case the Connection will be notified by change of connection
-/// status via Connected/Disconnected events.
+/// The use of Connection is optional. It is intended for scenarios where fine tuning of application
+/// behavior based on connection status is needed. Users can optionally call Open() to manually 
+/// initiate a service connection before starting recognition on the Recognizer associated with this Connection. 
+/// After starting a recognition, calling Open() or Close() might fail. This will not impact
+/// the Recognizer or the ongoing recognition. Connection might drop for various reasons, the Recognizer will 
+/// always try to reinstitute the connection as required to guarantee ongoing operations. In all these cases 
+/// Connected/Disconnected events will indicate the change of the connection status.
 /// Added in version 1.2.0.
 /// </summary>
 class Connection : public std::enable_shared_from_this<Connection>

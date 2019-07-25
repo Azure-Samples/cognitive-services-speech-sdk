@@ -15,6 +15,7 @@ import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 
 /**
  * Performs translation on the speech input.
+ * Note: close() must be called in order to relinquish underlying resources held by the object.
  */
 public final class TranslationRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer
 {

@@ -17,6 +17,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
  * Performs intent recognition on the speech input. It returns both recognized text and recognized intent.
+ * Note: close() must be called in order to relinquish underlying resources held by the object.
  */
 public final class IntentRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer {
     /**

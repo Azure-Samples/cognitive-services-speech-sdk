@@ -24,6 +24,8 @@ public class Settings {
     public static String WavFile = "whatstheweatherlike.wav";
     public static String TwoSpeakersAudio = "katiesteve.wav";
     public static String TwoSpeakersAudioUtterance = "Good morning Steve.";
+    public static String TurnOnTheLampAudio = "TurnOnTheLamp.wav";
+    public static String TurnOnTheLampUtterance = "Turn on the lamp.";
 
     public static String Keyword = "Computer";
     public static String KeywordModel = "/data/keyword/kws.table";
@@ -72,6 +74,7 @@ public class Settings {
 
         WavFile = System.getProperty("WaveFile", AudioInputDirectory + "/" + WavFile);
         TwoSpeakersAudio = System.getProperty("TwoSpeakersAudio", AudioInputDirectory + "/" + TwoSpeakersAudio);
+        TurnOnTheLampAudio = System.getProperty("TurnOnTheLampAudio", AudioInputDirectory + "/" + TurnOnTheLampAudio);
 
         SerializedSpeechActivityFile = System.getProperty("SerializedSpeechActivityFile", AudioInputDirectory + "/" + SerializedSpeechActivityFile);
 

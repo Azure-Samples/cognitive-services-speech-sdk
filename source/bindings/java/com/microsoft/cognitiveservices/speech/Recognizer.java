@@ -69,6 +69,7 @@ public class Recognizer implements Closeable
 
     /**
      * Dispose of associated resources.
+     * Note: close() must be called in order to relinquish underlying resources held by the object.
      */
     @Override
     public void close() {

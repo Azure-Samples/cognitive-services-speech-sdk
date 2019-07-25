@@ -465,6 +465,7 @@ jobs:
          -DSpeechRegion="$SPEECHSDK_SPEECH_REGION" \
          -DLuisSubscriptionKey=$(luis-westus-s0-201809-key1) \
          -DLuisRegion="$SPEECHSDK_LUIS_REGION" \
+         -DLuisAppId="$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
          -DAudioInputDirectory=tests/input/audio \
          -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
          -DKeyword=Computer \
@@ -587,6 +588,7 @@ jobs:
             -DSpeechRegion="$SPEECHSDK_SPEECH_REGION" \
             -DLuisSubscriptionKey=$(luis-westus-s0-201809-key1) \
             -DLuisRegion="$SPEECHSDK_LUIS_REGION" \
+            -DLuisAppId="$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
             -DAudioInputDirectory=tests/input/audio \
             -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
             -DKeyword=Computer \

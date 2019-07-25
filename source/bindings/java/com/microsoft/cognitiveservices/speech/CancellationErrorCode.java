@@ -12,11 +12,15 @@ public enum CancellationErrorCode
 {
     /**
      * Indicates that no error occurred during speech recognition.
+     * If CancellationReason is EndOfStream, CancellationErrorCode 
+     * is set to NoError.
      */
     NoError(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.NoError),
 
     /**
      * Indicates an authentication error.
+     * An authentication error occurs if subscription key or authorization token is invalid, expired, 
+     * or does not match the region being used.
      */
     AuthenticationFailure(com.microsoft.cognitiveservices.speech.internal.CancellationErrorCode.AuthenticationFailure),
 

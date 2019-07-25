@@ -72,7 +72,7 @@ public class SpeechConfigTests {
         String errorDetails = res.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonErrorDetails);
         System.out.println("ErroDetails:" + errorDetails);
         assertEquals(ResultReason.RecognizedSpeech, res.getReason());
-        assertTrue("Actual error:'" + errorDetails + "' does not contain expected string.", errorDetails.contains("The target language is not valid"));
+        assertTrue("Actual error:'" + errorDetails + "' does not contain expected string.", errorDetails.contains("400 (Bad Request)"));
     }
 
     // -----------------------------------------------------------------------
@@ -191,21 +191,26 @@ public class SpeechConfigTests {
         // We cannot really test whether recognizer works, since there is no test endpoint available which supports no authentication.
         assertTrue(tr.getProperties().getProperty(PropertyId.SpeechServiceAuthorization_Token).isEmpty());
         assertTrue(tr.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
+        sr.close();
+        tc.close();
     }
 
     @Test(expected = NullPointerException.class)
     public void testFromEndpointNullEndpointNullKey() {
         SpeechConfig s = SpeechConfig.fromEndpoint(null, null);
+        s.close();
     }
 
     @Test(expected = NullPointerException.class)
     public void testFromEndpointNullEndpoint() {
         SpeechConfig s = SpeechConfig.fromEndpoint(null, Settings.SpeechRegion);
+        s.close();
     }
 
     @Test(expected = NullPointerException.class)
     public void testFromEndpointNullKey() {
         SpeechConfig s = SpeechConfig.fromEndpoint(URI.create("http://www.example.com"), null);
+        s.close();
     }
 
     // -----------------------------------------------------------------------
@@ -522,7 +527,7 @@ public class SpeechConfigTests {
         s.setSpeechRecognitionLanguage("en-US");
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         TranslationRecognitionResult res = r.recognizeOnceAsync().get();
-        checkInvalidTargetLanguageResult(res);
+        checkBadRequestResult(res);
         r.close();
         s.close();
     }

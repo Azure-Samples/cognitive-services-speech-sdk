@@ -23,7 +23,6 @@ public class SampleSimpleRecognizeTest {
         Settings.LoadSettings();
     }
 
-    @Ignore("TODO why does that not return the expected result")
     @Test
     public void test() {
         test = new SampleSimpleRecognize();

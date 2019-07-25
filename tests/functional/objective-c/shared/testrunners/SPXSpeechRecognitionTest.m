@@ -398,12 +398,12 @@
     SPXCancellationDetails *details2 = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:result error:&err];
 
     XCTAssertEqual(details2.reason, SPXCancellationReason_Error);
-    XCTAssertEqualObjects(details2.errorDetails, @"WebSocket Upgrade failed with an authentication error (401). Please check for correct subscription key (or authorization token) and region name.");
+    XCTAssertTrue([details2.errorDetails containsString:@"WebSocket Upgrade failed with an authentication error (401)."]);
     XCTAssertNil(err);
 
     XCTAssertTrue([result.text isEqualToString:@""], "Final Result Text does not match");
     XCTAssertEqual(details.reason, SPXCancellationReason_Error);
-    XCTAssertEqualObjects(details.errorDetails, @"WebSocket Upgrade failed with an authentication error (401). Please check for correct subscription key (or authorization token) and region name.");
+    XCTAssertTrue([details.errorDetails containsString:@"WebSocket Upgrade failed with an authentication error (401)."]);
     XCTAssertEqual(result.reason, SPXResultReason_Canceled);
     XCTAssertEqual(result.duration, 0);
     XCTAssertEqual(result.offset, 0);
@@ -435,7 +435,7 @@
 
     XCTAssertTrue([result.text isEqualToString:@""], "Final Result Text does not match");
     XCTAssertEqual(details.reason, SPXCancellationReason_Error);
-    XCTAssertEqualObjects(details.errorDetails, @"Connection failed (no connection to the remote host). Internal error: 11. Error details: 0. Please check network connection, firewall setting, and the region name used to create speech factory.");
+    XCTAssertTrue([details.errorDetails containsString:@"Connection failed (no connection to the remote host). Internal error: 11. Error details: 0."]);
     XCTAssertEqual(result.reason, SPXResultReason_Canceled);
     XCTAssertEqual(result.duration, 0);
     XCTAssertEqual(result.offset, 0);

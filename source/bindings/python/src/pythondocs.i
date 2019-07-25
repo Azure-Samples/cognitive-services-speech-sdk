@@ -617,10 +617,14 @@ DocstringForCancellationErrorCode = """
    .. py:attribute:: NoError
 
       No error.
+      If CancellationReason is EndOfStream, CancellationErrorCode 
+      is set to NoError.
 
    .. py:attribute:: AuthenticationFailure
 
       Indicates an authentication error.
+      An authentication error occurs if subscription key or authorization
+      token is invalid, expired, or does not match the region being used.
 
    .. py:attribute:: BadRequest
 

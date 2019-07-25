@@ -83,6 +83,8 @@ public class SampleSimpleRecognize implements Runnable {
             }
 
             // Note: do not close the config as it is shared between tests.
+            connection.closeConnection();
+            connection.close();
             reco.close();
             audioInput.close();
         } catch (Exception ex) {

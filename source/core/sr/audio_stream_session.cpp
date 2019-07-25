@@ -1037,6 +1037,15 @@ void CSpxAudioStreamSession::FireResultEvent(const std::wstring& sessionId, std:
 {
     SPX_DBG_TRACE_FUNCTION();
 
+    auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+
+    string errorDetails = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails));
+    if (!errorDetails.empty())
+    {
+        errorDetails += " SessionId: " + PAL::ToString(m_sessionId);
+        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
+    }
+
     if (result->GetReason() == ResultReason::Canceled)
     {
         SPX_DBG_TRACE_VERBOSE("Firing RecoResultEvent(Canceled): SessionId: %ls", m_sessionId.c_str());

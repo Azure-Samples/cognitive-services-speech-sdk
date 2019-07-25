@@ -835,15 +835,13 @@ class Connection():
     By default, a :class:`.Recognizer` autonomously manages connection to service when needed. The
     :class:`.Connection` class provides additional methods for users to explicitly open or close a
     connection and to subscribe to connection status changes. The use of :class:`.Connection` is
-    optional, and mainly for scenarios where fine tuning of application behavior based on
-    connection status is needed. Users can optionally call :meth:`.open()` to manually set up a
-    connection in advance before starting recognition on the :class:`.Recognizer` associated with
-    this :class:`.Connection`. After starting recognition, calling :meth:`.open()` or
-    :meth:`close()` might fail, depending on the process state of the :class:`.Recognizer`. But
-    this does not affect the state of the associated :class:`.Recognizer`. And if the
-    :class:`.Recognizer` needs to connect or disconnect to service, it will setup or shutdown the
-    connection independently. In this case the :class:`.Connection` will be notified by change of
-    connection status via the :attr:`.connected`/:attr:`.disconnected` events.
+    optional. It is intended for scenarios where fine tuning of application behavior based on connection 
+    status is needed. Users can optionally call :meth:`.open()` to manually initiate a service connection 
+    before starting recognition on the :class:`.Recognizer` associated with this :class:`.Connection`. 
+    After starting a recognition, calling :meth:`.open()` or :meth:`close()` might fail. This will not impact
+    the Recognizer or the ongoing recognition. Connection might drop for various reasons, the Recognizer will 
+    always try to reinstitute the connection as required to guarantee ongoing operations. In all these cases 
+    :attr:`.connected`/:attr:`.disconnected` events will indicate the change of the connection status.
 
     .. note::
       Added in version 1.2.0.

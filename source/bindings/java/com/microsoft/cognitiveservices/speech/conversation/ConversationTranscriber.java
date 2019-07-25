@@ -18,6 +18,7 @@ import com.microsoft.cognitiveservices.speech.conversation.User;
 
 /**
  * Performs conversation transcribing for audio input streams, and gets transcribed text and user id as a result.
+ * Note: close() must be called in order to relinquish underlying resources held by the object.
  * Added in version 1.5.0
  */
 public final class ConversationTranscriber extends com.microsoft.cognitiveservices.speech.Recognizer

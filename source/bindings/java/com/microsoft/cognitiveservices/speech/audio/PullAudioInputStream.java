@@ -8,6 +8,7 @@ import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 /**
  * Represents audio input stream used for custom audio input configurations.
+ * Note: close() must be called in order to relinquish underlying resources held by the object.
  */
 public final class PullAudioInputStream extends com.microsoft.cognitiveservices.speech.audio.AudioInputStream
 {
@@ -44,6 +45,7 @@ public final class PullAudioInputStream extends com.microsoft.cognitiveservices.
 
     /**
      * Explicitly frees any external resource attached to the object
+     * Note: close() must be called in order to relinquish underlying resources held by the object.
      */
     @Override
     public void close() {

@@ -9,6 +9,7 @@ import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 /**
  * Represents audio output stream used for custom audio output configurations.
+ * Note: close() must be called in order to relinquish underlying resources held by the object.
  * Updated in version 1.7.0
  */
 public class AudioOutputStream
@@ -44,6 +45,7 @@ public class AudioOutputStream
 
     /**
      * Explicitly frees any external resource attached to the object
+     * Note: close() must be called in order to relinquish underlying resources held by the object.
      */
     public void close() {
         if (this._streamImpl != null) {

@@ -70,16 +70,17 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
        error = stringify(ex.GetErrorCode());                \
        error += " ";                                        \
        error += ex.GetCallStack();                          \
-       SPX_TRACE_ERROR("%s", error.c_str());                \
+       SPX_TRACE_ERROR("ExceptionWithCallStack: %s", error.c_str());   \
     }                                                       \
     catch (const std::exception& e)                         \
     {                                                       \
         error = e.what();                                   \
-        SPX_TRACE_ERROR("%s", error.c_str());               \
+        SPX_TRACE_ERROR("Exception: %s", error.c_str());    \
     }                                                       \
     SPXAPI_FORCED_UNWIND_CATCH                              \
     catch (...)                                             \
     {                                                       \
+        SPX_TRACE_ERROR("UNHANDLED Exception.");            \
         SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);     \
         error = "SPXERR_UNHANDLED_EXCEPTION";               \
     }                                                       \
@@ -98,15 +99,16 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
        error = stringify(ex.GetErrorCode());                \
        error += " ";                                        \
        error += ex.GetCallStack();                          \
-       SPX_TRACE_ERROR("%s", error.c_str());                \
+       SPX_TRACE_ERROR("ExceptionWithCallStack: %s", error.c_str());    \
     }                                                       \
     catch (const std::exception& e)                         \
     {                                                       \
         error = e.what();                                   \
-        SPX_TRACE_ERROR("%s", error.c_str());               \
+        SPX_TRACE_ERROR("Exception: %s", error.c_str());    \
     }                                                       \
     catch (...)                                             \
     {                                                       \
+        SPX_TRACE_ERROR("UNHANDLED Exception.");            \
         SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);     \
         error = "SPXERR_UNHANDLED_EXCEPTION";               \
     }                                                       \
