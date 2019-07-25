@@ -36,7 +36,7 @@
 #import "translation_text_result_event_args_private.h"
 #import "translation_synthesis_result_event_args_private.h"
 
-#import "recognizer_property_collection_private.h"
+#import "property_collection_private.h"
 #import "recognizer_private.h"
 #import "speech_recognizer_private.h"
 #import "intent_recognizer_private.h"

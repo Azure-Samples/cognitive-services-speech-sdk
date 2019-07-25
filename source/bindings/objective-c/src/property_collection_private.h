@@ -5,7 +5,13 @@
 
 #import "SPXPropertyCollection.h"
 
-@interface RecognizerPropertyCollection : NSObject <SPXPropertyCollection>
+@interface PropertyCollection : NSObject <SPXPropertyCollection>
+
+-(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle;
+
+@end
+
+@interface RecognizerPropertyCollection : PropertyCollection
 
 -(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle from:(RecognizerSharedPtr)recoHandle;
 

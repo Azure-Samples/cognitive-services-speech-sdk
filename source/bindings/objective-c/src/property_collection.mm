@@ -5,14 +5,12 @@
 
 #import "speechapi_private.h"
 
-@implementation RecognizerPropertyCollection
+@implementation PropertyCollection
 {
-    // We have to keep the recognizer instance alive in order to make sure the propertyHandle is valid
-    RecognizerSharedPtr recognizerImpl;
     SpeechImpl::PropertyCollection *propertiesImpl;
 }
 
--(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle from:(RecognizerSharedPtr)recoHandle
+-(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle
 {
     static_assert((int)SPXSpeechServiceConnectionKey == (int)SpeechImpl::PropertyId::SpeechServiceConnection_Key, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceConnectionEndpoint == (int)SpeechImpl::PropertyId::SpeechServiceConnection_Endpoint, "inconsistent enum definition of property id");
@@ -52,7 +50,6 @@
     static_assert((int)SPXLanguageUnderstandingServiceResponseJsonResult == (int)SpeechImpl::PropertyId::LanguageUnderstandingServiceResponse_JsonResult, "inconsistent enum definition of property id");
 
     self = [super init];
-    recognizerImpl = recoHandle;
     propertiesImpl = propertiesHandle;
     return self;
 }
@@ -87,5 +84,21 @@
     propertiesImpl->SetProperty((SpeechImpl::PropertyId)(int)propertyId, [value toSpxString]);
 }
 
+
+@end
+
+@implementation RecognizerPropertyCollection
+{
+    // We have to keep the recognizer instance alive in order to make sure the propertyHandle is valid
+    RecognizerSharedPtr recognizerImpl;
+}
+
+-(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle from:(RecognizerSharedPtr)recoHandle
+{
+    self = [super initWithPropertyCollection:propertiesHandle];
+    if (self)
+        self->recognizerImpl = recoHandle;
+    return self;
+}
 
 @end
