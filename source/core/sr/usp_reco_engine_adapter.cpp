@@ -1755,9 +1755,9 @@ void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
             std::string message{ reinterpret_cast<const char*>(msg.buffer), msg.size };
             SPX_DBG_TRACE_VERBOSE("USP User Message: response; message='%s'", message.c_str());
             auto responseMessage = json::parse(message);
-            if (!responseMessage["botConversationId"].is_null())
+            if (!responseMessage["conversationId"].is_null())
             {
-                m_dialogConversationId = responseMessage["botConversationId"].get<std::string>();
+                m_dialogConversationId = responseMessage["conversationId"].get<std::string>();
             }
             auto it = m_request_session_map.find(msg.requestId);
             if (it != m_request_session_map.end())
