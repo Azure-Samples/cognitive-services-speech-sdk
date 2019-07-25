@@ -9,6 +9,7 @@ import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 /**
  * Represents audio output stream used for custom audio output configurations.
+ * Updated in version 1.7.0
  */
 public class AudioOutputStream
 {
@@ -32,12 +33,13 @@ public class AudioOutputStream
     }
 
     /**
-     * Creates a memory backed PullAudioOutputStream with the specified audio format.
-     * @param format The audio data format in which audio will be read from the pull audio stream's read() method.
+     * Creates a PushAudioOutputStream that delegates to the specified callback interface for write() and close() methods.
+     * Added in version 1.7.0
+     * @param callback The custom audio output object, derived from PushAudioOutputStreamCallback
      * @return The audio output stream being created.
      */
-    public static PullAudioOutputStream createPullStream(AudioStreamFormat format) {
-        return PullAudioOutputStream.create(format);
+    public static PushAudioOutputStream createPushStream(PushAudioOutputStreamCallback callback) {
+        return PushAudioOutputStream.create(callback);
     }
 
     /**

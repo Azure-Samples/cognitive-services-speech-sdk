@@ -281,15 +281,28 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/conversation/ConversationTranscriber.java
     ${PACKAGE_DIR}/conversation/User.java
 
+    ${PACKAGE_DIR}/AudioDataStream.java
+    ${PACKAGE_DIR}/SpeechSynthesisEventArgs.java
+    ${PACKAGE_DIR}/SpeechSynthesisWordBoundaryEventArgs.java
+    ${PACKAGE_DIR}/SpeechSynthesisResult.java
+    ${PACKAGE_DIR}/SpeechSynthesizer.java
+    ${PACKAGE_DIR}/StreamStatus.java
+    ${PACKAGE_DIR}/SpeechSynthesisCancellationDetails.java
+    ${PACKAGE_DIR}/SpeechSynthesisOutputFormat.java
+
     ${PACKAGE_DIR}/OutputFormat.java
     ${PACKAGE_DIR}/audio/AudioStreamContainerFormat.java
 
     ${PACKAGE_DIR}/audio/AudioConfig.java
     ${PACKAGE_DIR}/audio/AudioInputStream.java
+    ${PACKAGE_DIR}/audio/AudioOutputStream.java
     ${PACKAGE_DIR}/audio/AudioStreamFormat.java
     ${PACKAGE_DIR}/audio/PullAudioInputStream.java
     ${PACKAGE_DIR}/audio/PushAudioInputStream.java
     ${PACKAGE_DIR}/audio/PullAudioInputStreamCallback
+    ${PACKAGE_DIR}/audio/PullAudioOutputStream.java
+    ${PACKAGE_DIR}/audio/PushAudioOutputStream.java
+    ${PACKAGE_DIR}/audio/PushAudioOutputStreamCallback.java
 
     ${PACKAGE_DIR}/dialog/ActivityReceivedEventArgs.java
     ${PACKAGE_DIR}/dialog/Activity.java

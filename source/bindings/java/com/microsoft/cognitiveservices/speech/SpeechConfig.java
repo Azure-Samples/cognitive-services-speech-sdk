@@ -10,6 +10,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
  * Speech configuration.
+ * Changed in version 1.7.0.
  */
 public class SpeechConfig implements Closeable {
 
@@ -238,6 +239,65 @@ public class SpeechConfig implements Closeable {
      */
     public String getEndpointId() {
         return speechConfigImpl.GetEndpointId();
+    }
+
+    /**
+     * Sets the speech synthesis language.
+     * Added in version 1.7.0
+     * @param value the language identifier in BCP-47 format (e.g. en-US).
+     */
+    public void setSpeechSynthesisLanguage(String value) {
+        Contracts.throwIfNullOrWhitespace(value, "value");
+
+        speechConfigImpl.SetSpeechSynthesisLanguage(value);
+    }
+
+    /**
+     * Gets the speech synthesis language.
+     * Added in version 1.7.0
+     * @return Returns the synthesis language.
+     */
+    public String getSpeechSynthesisLanguage() {
+        return speechConfigImpl.GetSpeechSynthesisLanguage();
+    }
+
+    /**
+     * Sets the speech synthesis voice name.
+     * Added in version 1.7.0
+     * @param value The speech synthesis voice name.
+     */
+    public void setSpeechSynthesisVoiceName(String value) {
+        Contracts.throwIfNullOrWhitespace(value, "value");
+
+        speechConfigImpl.SetSpeechSynthesisVoiceName(value);
+    }
+
+    /**
+     * Gets the speech synthesis voice name.
+     * Added in version 1.7.0
+     * @return Returns the synthesis voice name.
+     */
+    public String getSpeechSynthesisVoiceName() {
+        return speechConfigImpl.GetSpeechSynthesisVoiceName();
+    }
+
+    /**
+     * Sets the speech synthesis output format.
+     * Added in version 1.7.0
+     * @param value The synthesis output format ID (e.g. Riff16Khz16BitMonoPcm).
+     */
+    public void setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat value) {
+        com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisOutputFormat format = com.microsoft.cognitiveservices.speech.internal.SpeechSynthesisOutputFormat.swigToEnum(value.ordinal() + 1); // Native SpeechSynthesisOutputFormat enum starts at 1!!
+        speechConfigImpl.SetSpeechSynthesisOutputFormat(format);
+    }
+
+    /**
+     * Gets the speech synthesis output format.
+     * Added in version 1.7.0
+     * @return Returns the synthesis output format.
+     */
+    String getSpeechSynthesisOutputFormat() {
+        return speechConfigImpl.GetSpeechSynthesisOutputFormat();
     }
 
     /**

@@ -6,6 +6,7 @@ package com.microsoft.cognitiveservices.speech;
 
 /**
  * Defines the possible reasons a recognition result might be generated.
+ * Changed in version 1.7.0.
  */
 public enum ResultReason
 {
@@ -72,5 +73,11 @@ public enum ResultReason
      * Indicates that keyword recognition completed recognizing the given keyword.
      * Added in version 1.3.0
      */
-    RecognizedKeyword
+    RecognizedKeyword,
+
+    /**
+     * Indicates the speech synthesis is now started
+     * Added in version 1.7.0
+     */
+    SynthesizingAudioStarted
 }

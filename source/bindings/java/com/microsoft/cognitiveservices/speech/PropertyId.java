@@ -6,7 +6,7 @@ package com.microsoft.cognitiveservices.speech;
 
 /**
  * Defines property ids.
- * Changed in version 1.5.0.
+ * Changed in version 1.7.0.
  */
 public enum PropertyId {
 
@@ -140,6 +140,24 @@ public enum PropertyId {
      * Instead use <see cref="SessionEventArgs.getSessionId"/>.
      */
     Speech_SessionId ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Speech_SessionId),
+
+    /**
+     * The spoken language to be synthesized (e.g. en-US)
+     * Added in version 1.7.0
+     */
+    SpeechServiceConnection_SynthLanguage ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_SynthLanguage),
+
+    /**
+     * The name of the TTS voice to be used for speech synthesis
+     * Added in version 1.7.0
+     */
+    SpeechServiceConnection_SynthVoice ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_SynthVoice),
+
+    /**
+     * The string to specify TTS output audio format (e.g. riff-16khz-16bit-mono-pcm)
+     * Added in version 1.7.0
+     */
+    SpeechServiceConnection_SynthOutputFormat ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_SynthOutputFormat),
 
     /**
      *  The initial silence timeout value (in milliseconds) used by the service.

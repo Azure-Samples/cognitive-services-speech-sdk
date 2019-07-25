@@ -9,6 +9,7 @@ import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 /**
  * Represents audio input configuration used for specifying what type of input to use (microphone, file, stream).
+ * Updated in version 1.7.0
  */
 public final class AudioConfig
 {
@@ -71,6 +72,35 @@ public final class AudioConfig
     }
 
     /**
+     * Creates an AudioConfig object representing the default speaker on the system.
+     * Added in version 1.7.0
+     * @return The audio output configuration being created.
+     */
+    public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromDefaultSpeakerOutput() {
+        return new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromDefaultSpeakerOutput());
+    }
+
+    /**
+     * Creates an AudioConfig object representing the specified file.
+     * Added in version 1.7.0
+     * @param fileName Specifies the audio output file.
+     * @return The audio output configuration being created.
+     */
+    public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromWavFileOutput(String fileName) {
+        return new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromWavFileOutput(fileName));
+    }
+
+    /**
+     * Creates an AudioConfig object representing the specified stream.
+     * Added in version 1.7.0
+     * @param audioStream Specifies the custom audio output stream.
+     * @return The audio output configuration being created.
+     */
+    public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromStreamOutput(AudioOutputStream audioStream) {
+        return new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromStreamOutput(audioStream.getStreamImpl()), audioStream);
+    }
+
+    /**
      * Explicitly frees any external resource attached to the object
      */
     public void close() {
@@ -83,18 +113,26 @@ public final class AudioConfig
     AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig config) {
         Contracts.throwIfNull(config, "config");
         this._configImpl = config;
-        this._streamKeepAlive = null;
+        this._inputStreamKeepAlive = null;
+        this._outputStreamKeepAlive = null;
     }
 
     AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig config, com.microsoft.cognitiveservices.speech.audio.AudioInputStream audioStream) {
         Contracts.throwIfNull(config, "config");
         this._configImpl = config;
-        this._streamKeepAlive = audioStream;
+        this._inputStreamKeepAlive = audioStream;
+    }
+
+    AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig config, com.microsoft.cognitiveservices.speech.audio.AudioOutputStream audioStream) {
+        Contracts.throwIfNull(config, "config");
+        this._configImpl = config;
+        this._outputStreamKeepAlive = audioStream;
     }
 
     private com.microsoft.cognitiveservices.speech.internal.AudioConfig _configImpl;
     @SuppressWarnings("unused")
-    private AudioInputStream _streamKeepAlive;
+    private AudioInputStream _inputStreamKeepAlive;
+    private AudioOutputStream _outputStreamKeepAlive;
 
     /*! \cond INTERNAL */
 

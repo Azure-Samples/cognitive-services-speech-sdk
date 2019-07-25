@@ -15,7 +15,7 @@
 #include "wav_file_writer.h"
 
 
-#define BUFFERWRITE(buf, value) *(decltype(value)*)(buf) = value; (buf) += sizeof(value);
+#define BUFFERWRITE(buf, value) for (size_t i = 0; i < sizeof(value); ++i) { *buf = (uint8_t)((value >> (i * 8)) & 0xff); ++buf; }
 
 namespace Microsoft {
 namespace CognitiveServices {
