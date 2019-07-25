@@ -36,7 +36,8 @@ public:
             return; // timer is currently running, need expire it first
         }
 
-        std::thread([this, intervalInMs, task]() {
+        m_thread = std::thread([this, intervalInMs, task]()
+        {
             task();
 
             int checkTimes = intervalInMs / m_checkIntervalInMs;
@@ -64,13 +65,8 @@ public:
                 }
             }
 
-            // stop task ...
-            {
-                std::lock_guard<std::mutex> locker(m_mutex);
-                m_stopped = true;
-                m_stoppedCondition.notify_one();
-            }
-        }).detach();
+            m_stopped = true;
+        });
 
         m_stopped = false;
     }
@@ -89,13 +85,9 @@ public:
 
         m_tryToStop = true;
 
+        if (m_thread.joinable())
         {
-            std::unique_lock<std::mutex> locker(m_mutex);
-            m_stoppedCondition.wait(locker, [this] { return m_stopped ==  true; });
-            if (m_stopped)
-            {
-                m_tryToStop = false;
-            }
+            m_thread.join();
         }
     }
 
@@ -104,10 +96,9 @@ private:
 
     const int m_checkIntervalInMs = 200; // Check the status every 200ms in case the expire() method need to wait too long
 
+    std::thread m_thread;
     std::atomic<bool> m_stopped;
     std::atomic<bool> m_tryToStop;
-    std::mutex m_mutex;
-    std::condition_variable m_stoppedCondition;
 };
 
 
