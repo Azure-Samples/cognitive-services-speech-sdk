@@ -84,3 +84,7 @@ else()
     )
 endif()
 
+if (EXTENSION_CODEC_ENABLED AND STATIC_CODEC_EXTENSION)
+  target_link_libraries(${PROJECT_NAME} PRIVATE codec)
+endif()
+

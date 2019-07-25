@@ -175,7 +175,7 @@ for testfile in "${testsToRun[@]}"; do
 
       if [[ $exitCode != 0 ]]; then
         echo Test suite $T: failed after multiple reties.
-        vsts_logissue error "${options[platform]}: test suite $T failed, failed after multiple reties with exit code $exitCode, source $testfile."
+        vsts_logissue error "${options[platform]}: test suite $T failed, failed after multiple retries with exit code $exitCode, source $testfile."
       fi
   fi
   ((total++))

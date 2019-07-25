@@ -31,9 +31,9 @@ list(APPEND ALL_FRAMEWORK_HEADERS ${HEADERS} ${SPEECH_C_API_HEADERS} ${SPEECH_CX
 add_library(${PROJECT_NAME} SHARED ${ALL_FRAMEWORK_HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
 
 if(DEFINED APPLE)
-    if (DEFINED IOS_PLATFORM)
+    if (DEFINED PLATFORM)
         set(FRAMEWORK_MINIMUM_OS_VERSION_KEY "MinimumOSVersion")
-        set(FRAMEWORK_MINIMUM_OS_VERSION_VALUE ${IOS_DEPLOYMENT_TARGET})
+        set(FRAMEWORK_MINIMUM_OS_VERSION_VALUE ${DEPLOYMENT_TARGET})
     else()
         set(FRAMEWORK_MINIMUM_OS_VERSION_KEY "LSMinimumSystemVersion")
         set(FRAMEWORK_MINIMUM_OS_VERSION_VALUE "10.12")
@@ -74,11 +74,22 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE sr
-    PRIVATE audio
-    PRIVATE usp
-    PRIVATE common
-    PRIVATE factory)
+  PRIVATE sr
+  PRIVATE audio
+  PRIVATE usp
+  PRIVATE common
+  PRIVATE factory
+  )
+
+if(EXTENSION_CODEC_ENABLED)
+  target_link_libraries(${PROJECT_NAME}
+    PRIVATE codec
+    )
+endif()
+
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES BUILD_RPATH "@loader_path;@executable_path/Frameworks"
+    )
 
 add_custom_target(${PROJECT_NAME}-macos-headers ALL
     COMMAND sed -i \"\" -E "\'s@#include <(((speechapi_.*)|(spxerror)|(spxdebug))\.h)>@#include \"\\1\"@\'" ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${PROJECT_NAME}.framework/Headers/*.h
@@ -86,12 +97,11 @@ add_custom_target(${PROJECT_NAME}-macos-headers ALL
 add_dependencies(${PROJECT_NAME}-macos-headers ${PROJECT_NAME} )
 
 # Install
-
 if (CMAKE_IOS_INSTALL_COMBINED AND CMAKE_OSX_SYSROOT MATCHES "os")
     set_target_properties(${PROJECT_NAME} PROPERTIES
-      XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] i386 x86_64
-      XCODE_ATTRIBUTE_VALID_ARCHS[sdk=iphonesimulator*] i386 x86_64
-  )
+        XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] i386 x86_64
+        XCODE_ATTRIBUTE_VALID_ARCHS[sdk=iphonesimulator*] i386 x86_64
+        )
 endif()
 
 include(GNUInstallDirs)

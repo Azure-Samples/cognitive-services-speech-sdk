@@ -1833,81 +1833,126 @@ jobs:
   variables:
     BuildPlatform: iOS
     FrameworkName: MicrosoftCognitiveServicesSpeech
+    GStreamerWrapper: GStreamerWrapper
+    GStreamerVersion: 1.16.0
     VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
     OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
-    JointCmakeArgs: -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
+    JointCmakeArgs: -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) -DCMAKE_FRAMEWORK_PATH="$(OutputDirectory);${HOME}/Library/Developer/GStreamer/iPhone.sdk/"
   steps:
   # Update bash really early so it will be picked up by "bash" steps.
-  - bash: brew config && brew install bash
-    displayName: Install modern bash
+  - bash: brew config && brew install bash coreutils
+    displayName: Install modern bash and coreutils
   - bash: |
       xcodebuild -version
     displayName: 'Log Xcode version'
   - bash: |
       . ci/functions.sh &&
-      vsts_setvar SPEECHSDK_TARGET_PLATFORM IOSSIMULATOR-x64 &&
+      vsts_setvar SPEECHSDK_TARGET_PLATFORM $(BuildPlatform)-x64 &&
       vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+      vsts_setvar SPEECHSDK_ENABLE_CODEC true
     displayName: Set iOS target platform
   - bash: ./ci/set-variables.sh
     displayName: Set variables
-  - task: CMake@1
-    displayName: Generate makefiles for iOS simulator (32bit)
+  - task: DownloadBuildArtifacts@0
+    displayName: Download GStreamer artifact
     inputs:
-      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x86 ..'
-      workingDirectory: 'build_ios_simulator32'
-  - task: CMake@1
-    displayName: CMake build for iOS simulator (32bit)
-    inputs:
-      cmakeArgs: '--build . -- -j4'
-      workingDirectory: build_ios_simulator32
-  - task: CMake@1
-    displayName: Generate makefiles for iOS simulator (64bit)
-    inputs:
-      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x64 ..'
-      workingDirectory: 'build_ios_simulator64'
-  - task: CMake@1
-    displayName: CMake build for iOS simulator (64bit)
-    inputs:
-      cmakeArgs: '--build . -- -j4'
-      workingDirectory: build_ios_simulator64
-  - task: CMake@1
-    displayName: Generate makefiles for iOS device
-    inputs:
-      cmakeArgs: ' $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-all ..'
-      workingDirectory: build_ios_device
-    condition: succeeded()
-  - task: CMake@1
-    displayName: CMake build for iOS device
-    inputs:
-      cmakeArgs: '--build . -- -j4'
-      workingDirectory: build_ios_device
+      buildType: specific
+      project: 'e71f1362-9c7d-488b-99c7-3376db8d3302' # Skyman
+      pipeline: 9377 # Yml - Carbon Download and Extract
+      buildVersionToDownload: specific
+      buildId: 6045491
+      artifactName: GStreamer-iOS
   - bash: |
+      # set up the GStreamer framework in the same location as the system install
+      set -u -e -o pipefail -x
+      cd $(Build.ArtifactStagingDirectory)/GStreamer-iOS
+      pkgutil --expand  gstreamer-1.0-devel-$(GStreamerVersion)-ios-universal.pkg ./gstreamer
+      cd gstreamer/ios-framework-$(GStreamerVersion)-universal.pkg
+      tar xf Payload
+      mkdir -p ~/Library/Developer/GStreamer/iPhone.sdk
+      mv ./GStreamer.framework ~/Library/Developer/GStreamer/iPhone.sdk/
+      # this link is missing for deployment to device/simulator
+      cd ~/Library/Developer/GStreamer/iPhone.sdk/GStreamer.framework
+      ln -s Resources/Info.plist .
+    displayName: Unpack GStreamer framework
+  - bash: |
+      set -u -e -o pipefail -x
+      if [[ $(SPEECHSDK_ENABLE_CODEC) == true ]]; then
+        mkdir -p build_wrapper
+        xcrun xcodebuild build -project ci/apple/$(GStreamerWrapper)/$(GStreamerWrapper).xcodeproj -scheme $(GStreamerWrapper) \
+          CONFIGURATION_BUILD_DIR=${PWD}/build_wrapper
+        # copy to framework search path
+        cp -R ${PWD}/build_wrapper/$(GStreamerWrapper).framework ${HOME}/Library/Developer/GStreamer/iPhone.sdk/
+        # copy to output directory, for tests
+        mkdir -p $(OutputDirectory)
+        cp -R ${PWD}/build_wrapper/$(GStreamerWrapper).framework $(OutputDirectory)
+      fi
+    displayName: Build GStreamer wrapper
+  - bash: |
+      mkdir build_ios_simulator32 && cd build_ios_simulator32 &&
+      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x86 -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" ..
+    displayName: Generate makefiles for iOS simulator (32bit)
+  - bash: |
+      cd build_ios_simulator32 &&
+      cmake --build . -- -j4
+    displayName: CMake build for iOS simulator (32bit)
+  - bash: |
+      mkdir build_ios_simulator64 && cd build_ios_simulator64 &&
+      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x64 -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" ..
+    displayName: Generate makefiles for iOS simulator (64bit)
+  - bash: |
+      cd build_ios_simulator64 &&
+      cmake --build . -- -j4
+    displayName: CMake build for iOS simulator (64bit)
+  - bash: |
+      mkdir build_ios_device && cd build_ios_device &&
+      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-all -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" ..
+    displayName: Generate makefiles for iOS device
+  - bash: |
+      cd build_ios_device &&
+      cmake --build . -- -j4
+    displayName: CMake build for iOS device
+  - bash: |
+      set -u -e -o pipefail -x
       . ci/apple/apple-functions.sh
-      build_ios_universal_framework '$(OutputDirectory)' '$(FrameworkName)'
+      # create output framework directory
+      mkdir -p $(OutputDirectory)
+      cp -R "build_ios_device/lib/$(FrameworkName).framework" "$(OutputDirectory)"
+      lipo -create -output "$(OutputDirectory)"/$(FrameworkName).framework/$(FrameworkName) \
+        "build_ios_"{device,simulator32,simulator64}"/lib/$(FrameworkName).framework/$(FrameworkName)"
     displayName: Create universal framework
   - bash: |
+      set -u -e -o pipefail -x
       . ci/apple/apple-functions.sh
-      build_dsym_bundle "build_ios_device/lib" "$(FrameworkName)"
-      build_dsym_bundle "build_ios_simulator32/lib" "$(FrameworkName)"
-      build_dsym_bundle "build_ios_simulator64/lib" "$(FrameworkName)"
-      combine_dsym_bundles "$(OutputDirectory)" "build_ios_"{device,simulator32,simulator64}"/lib/$(FrameworkName).framework.dSYM" "$(FrameworkName)"
+      combine_dsym_bundles "$(OutputDirectory)" "build_ios_"{device,simulator32,simulator64}"/lib/$(FrameworkName).framework/$(FrameworkName)"
     condition: and(succeeded(), in(variables['BuildConfiguration'], 'Debug', 'Release'))
     displayName: Create debug symbols
   - bash: |
+      set -u -e -o pipefail -x
       cd "$(OutputDirectory)"
-      zip --symlinks -r "$(VersionedFrameworkName).framework.dSYM.zip" "$(FrameworkName).framework.dSYM"
-      rm -rf "$(OutputDirectory)/$(FrameworkName).framework.dSYM"
+      for lib in *.dSYM; do
+        zip --symlinks -r "${lib}.zip" "${lib}"
+        rm -rf ${lib}
+      done
     condition: and(succeeded(), in(variables['BuildConfiguration'], 'Debug', 'Release'))
     displayName: Archive debug symbols
   - bash: |
       strip -x "$(OutputDirectory)/$(FrameworkName).framework/$(FrameworkName)"
-    displayName: Strip dynamic library in universal framework for release builds
+    displayName: Strip dynamic libraries in universal framework for release builds
     condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
   - bash: |
-      /usr/bin/codesign --force --sign - --timestamp=none "$(OutputDirectory)/$(FrameworkName).framework"
+      set -u -e -x -o pipefail
+      codesign --force --sign - --deep --timestamp=none "$(OutputDirectory)/$(FrameworkName).framework"
+      codesign --deep --display --verbose=4 "$(OutputDirectory)/$(FrameworkName).framework"
+      codesign --display --verbose=4 "$(OutputDirectory)/$(FrameworkName).framework/$(FrameworkName)"
+      if [[ $(SPEECHSDK_ENABLE_CODEC) == true ]]; then
+        codesign --force --sign - --deep --timestamp=none "$(OutputDirectory)/$(GStreamerWrapper).framework/$(GStreamerWrapper)"
+        codesign --display --verbose=4  "$(OutputDirectory)/$(GStreamerWrapper).framework/$(GStreamerWrapper)"
+      fi
     displayName: 'Self-Sign iOS framework'
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'false'))
   - bash: |
+      set -u -e -o pipefail -x
       cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$(OutputDirectory)"
       cd "$(OutputDirectory)"
       zip --symlinks -r "$(VersionedFrameworkName).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
@@ -1923,9 +1968,16 @@ jobs:
       inlineOperation: $(SIGN_PARAMS_IOS)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - bash: |
-      ci/apple/unpack_signed_archive.sh $(OutputDirectory) $(FrameworkName) $(VersionedFrameworkName) $(Build.Repository.LocalPath)
+      ci/apple/unpack_signed_archive.sh "$(OutputDirectory)" $(FrameworkName) $(VersionedFrameworkName) $(Build.Repository.LocalPath)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
     displayName: Package signed framework
+  - bash: |
+      set -u -e -o pipefail
+      cd "$(OutputDirectory)"
+      zip --symlinks -r "$(GStreamerWrapper).zip" "$(GStreamerWrapper).framework"
+      rm -rf "$(GStreamerWrapper).framework"
+    displayName: Archive Gstreamer wrapper (for tests)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_ENABLE_CODEC'], 'true'))
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
@@ -2136,17 +2188,16 @@ jobs:
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
     displayName: Rename .whl.zip to .whl and repack
   - bash: |
-      set -u -x -e -o pipefail
-      . ci/apple/apple-functions.sh
-      build_dsym_bundle "build/lib" "$(FrameworkName)"
+      dsymutil "build/lib/$(FrameworkName).framework/$(FrameworkName)" -o "build/lib/$(FrameworkName).dSYM"
     condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
     displayName: Create debug symbols
   - bash: |
       set -u -x -e -o pipefail
-      mv "build/lib/$(FrameworkName).framework.dSYM" "$(OutputDirectory)"
+      mkdir -p "$(OutputDirectory)"
+      mv "build/lib/$(FrameworkName).dSYM" "$(OutputDirectory)"
       cd "$(OutputDirectory)"
-      zip --symlinks -r "$(VersionedFrameworkName).framework.dSYM.zip" "$(FrameworkName).framework.dSYM"
-      rm -rf "$(OutputDirectory)/$(FrameworkName).framework.dSYM"
+      zip --symlinks -r "$(VersionedFrameworkName).dSYM.zip" "$(FrameworkName).dSYM"
+      rm -rf "$(OutputDirectory)/$(FrameworkName).dSYM"
     condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
     displayName: Archive debug symbols
   - bash: |

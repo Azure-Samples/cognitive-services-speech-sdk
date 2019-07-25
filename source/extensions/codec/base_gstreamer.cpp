@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "base_gstreamer.h"
+#include "gstreamer_modules.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -15,19 +16,7 @@ namespace Impl {
 
 BaseGstreamer::BaseGstreamer(ISpxAudioStreamReaderInitCallbacks::ReadCallbackFunction_Type readCallback)
 {
-// The following list has to be maintained same as the one in $(SourceRoot)/ci/android/gstreamer/Android.mk
-// Please search for base_gstreamer.h or base_gstreamer.cpp
-#if defined(ANDROID) || defined(__ANDROID__)
-    GST_PLUGIN_STATIC_REGISTER(coreelements);
-    GST_PLUGIN_STATIC_REGISTER(app);
-    GST_PLUGIN_STATIC_REGISTER(audioconvert);
-    GST_PLUGIN_STATIC_REGISTER(mpg123);
-    GST_PLUGIN_STATIC_REGISTER(audioresample);
-    GST_PLUGIN_STATIC_REGISTER(audioparsers);
-    GST_PLUGIN_STATIC_REGISTER(ogg);
-    GST_PLUGIN_STATIC_REGISTER(opusparse);
-    GST_PLUGIN_STATIC_REGISTER(opus);
-#endif
+    spx_gst_init();
 
     ThrowAfterClean(readCallback == nullptr, SPXERR_UNINITIALIZED, "Read stream callback is not initialized");
 

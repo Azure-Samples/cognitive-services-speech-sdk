@@ -25,12 +25,14 @@ SPX_EXTERN_C void* Codec_CreateModuleObject(const char* className, const char* i
     SPX_FACTORY_MAP_END();
 }
 
+#ifndef STATIC_CODEC_EXTENSION
 SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY_FUNC(Codec_CreateModuleObject);
     SPX_FACTORY_MAP_END();
 }
+#endif
 
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -35,6 +35,10 @@ void CSpxCodecAdapter::Open(AudioStreamContainerFormat containerFormat)
 {
     SPX_DBG_TRACE_VERBOSE("%s", __FUNCTION__);
 
+    // throw if GStreamer wrapper is not available (weak linking on iOS)
+    auto gst_fun_ptr = &gst_init;
+    SPX_IFTRUE_THROW_HR(NULL == gst_fun_ptr, SPXERR_GSTREAMER_NOT_FOUND_ERROR);
+
     gst_init(NULL, NULL);
     switch (containerFormat)
     {

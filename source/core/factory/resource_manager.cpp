@@ -43,6 +43,7 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.embedded.sr.so"));
 #elif __MACH__
+    // N.B. dynamic loading of libraries during runtime is not allowed for iOS apps by the App Store.
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.dylib"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-tts-mock.dylib"));
 

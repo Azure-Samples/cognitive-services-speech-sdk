@@ -17,6 +17,8 @@
 		DC15EE9B226763F600991304 /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC15EE99226763F500991304 /* wreck-a-nice-beach.wav */; };
 		DC24739A22552029003FBAE6 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC24739922552029003FBAE6 /* AVFoundation.framework */; };
 		DC2A2813223FBFB0008CACAC /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		DC2CB9F1226EEAB6007EB18A /* Margarita-44100.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC2CB9F0226EEAB6007EB18A /* Margarita-44100.wav */; };
+		DC2CB9F2226EEFF3007EB18A /* Margarita-44100.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC2CB9F0226EEAB6007EB18A /* Margarita-44100.wav */; };
 		DCADF54B2245375700DD94FE /* test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93FC2146D410000C7129 /* test.m */; };
 		DCADF54C2245378200DD94FE /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C676487214EA6CA00FCB533 /* microphone_test.m */; };
 		DCB56302224285E300662DC3 /* SPXSpeechRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */; };
@@ -75,10 +77,12 @@
 		DC15EE99226763F500991304 /* wreck-a-nice-beach.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "wreck-a-nice-beach.wav"; path = "../../../input/audio/wreck-a-nice-beach.wav"; sourceTree = "<group>"; };
 		DC24739922552029003FBAE6 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		DC2A2812223FBF4D008CACAC /* SpeechSDK.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SpeechSDK.entitlements; sourceTree = "<group>"; };
+		DC2CB9F0226EEAB6007EB18A /* Margarita-44100.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "Margarita-44100.wav"; path = "../../../input/audio/Margarita-44100.wav"; sourceTree = "<group>"; };
 		DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXSpeechRecognitionTest.m; path = ../../shared/testrunners/SPXSpeechRecognitionTest.m; sourceTree = "<group>"; };
 		DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXDummyTestRunner.m; path = ../../shared/testrunners/SPXDummyTestRunner.m; sourceTree = "<group>"; };
 		DCB56301224285E300662DC3 /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXTranslationRecognitionTest.m; path = ../../shared/testrunners/SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
 		DCF107B622A8268C00EF5F80 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
+		DCBDE1ED225E3F0D00BBA2CE /* SPXSpeechRecognitionEndtoEndTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPXSpeechRecognitionEndtoEndTest.h; path = ../../shared/testrunners/SPXSpeechRecognitionEndtoEndTest.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +111,7 @@
 			children = (
 				DCF107B622A8268C00EF5F80 /* silenceshort.wav */,
 				DC15EE99226763F500991304 /* wreck-a-nice-beach.wav */,
+				DC2CB9F0226EEAB6007EB18A /* Margarita-44100.wav */,
 				3C5D93F52146CB56000C7129 /* TurnOnTheLamp.wav */,
 				3C5D93F62146CB56000C7129 /* whatstheweatherlike.wav */,
 				3CBD7F08211CD69B00F72336 /* SpeechSDK */,
@@ -145,6 +150,7 @@
 		3CBD7F21211CD69C00F72336 /* SpeechSDKTests */ = {
 			isa = PBXGroup;
 			children = (
+				DCBDE1ED225E3F0D00BBA2CE /* SPXSpeechRecognitionEndtoEndTest.h */,
 				DC0E471D22E1DA27005012F7 /* SPXTestHelpers.h */,
 				DC0E471E22E1DA27005012F7 /* SPXTestHelpers.m */,
 				DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */,
@@ -253,6 +259,7 @@
 			files = (
 				DC15EE9A226763F600991304 /* wreck-a-nice-beach.wav in Resources */,
 				3C5D93F72146CB57000C7129 /* TurnOnTheLamp.wav in Resources */,
+				DC2CB9F1226EEAB6007EB18A /* Margarita-44100.wav in Resources */,
 				3CBD7F13211CD69B00F72336 /* Assets.xcassets in Resources */,
 				DCF107B722A8268C00EF5F80 /* silenceshort.wav in Resources */,
 				3C5D93F82146CB57000C7129 /* whatstheweatherlike.wav in Resources */,
@@ -265,6 +272,7 @@
 			files = (
 				DCF107B822A8272200EF5F80 /* silenceshort.wav in Resources */,
 				DC15EE9B226763F600991304 /* wreck-a-nice-beach.wav in Resources */,
+				DC2CB9F2226EEFF3007EB18A /* Margarita-44100.wav in Resources */,
 				DCB563122242B27800662DC3 /* whatstheweatherlike.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

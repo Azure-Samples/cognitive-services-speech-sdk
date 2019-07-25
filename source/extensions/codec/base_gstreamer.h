@@ -15,23 +15,6 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-// The following list has to be maintained same as the one in $(SourceRoot)/ci/android/gstreamer/Android.mk
-// Please search for base_gstreamer.h or base_gstreamer.cpp
-#if defined(ANDROID) || defined(__ANDROID__)
-extern "C"
-{
-    GST_PLUGIN_STATIC_DECLARE(coreelements);
-    GST_PLUGIN_STATIC_DECLARE(app);
-    GST_PLUGIN_STATIC_DECLARE(audioconvert);
-    GST_PLUGIN_STATIC_DECLARE(mpg123);
-    GST_PLUGIN_STATIC_DECLARE(audioresample);
-    GST_PLUGIN_STATIC_DECLARE(audioparsers);
-    GST_PLUGIN_STATIC_DECLARE(ogg);
-    GST_PLUGIN_STATIC_DECLARE(opusparse);
-    GST_PLUGIN_STATIC_DECLARE(opus);
-}
-#endif
-
 enum class ElementType
 {
     Pipeline = 0,

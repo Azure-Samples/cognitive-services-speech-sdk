@@ -19,6 +19,7 @@
         NSLog(@"Unable to create audio stream format in core");
         return nil;
     }
+    audioStreamFormatImpl = impl;
     return self;
 }
 
@@ -31,6 +32,19 @@
         NSLog(@"Unable to create audio stream format in core");
         return nil;
     }
+    audioStreamFormatImpl = impl;
+    return self;
+}
+
+- (nullable instancetype)initUsingCompressedFormat:(SPXAudioStreamContainerFormat)audioStreamContainerFormat
+{
+    self = [super init];
+    auto impl = AudioImpl::AudioStreamFormat::GetCompressedFormat((AudioImpl::AudioStreamContainerFormat)(int)audioStreamContainerFormat);
+    if (impl == nullptr) {
+        NSLog(@"Unable to create audio stream format in core");
+        return nil;
+    }
+    audioStreamFormatImpl = impl;
     return self;
 }
 

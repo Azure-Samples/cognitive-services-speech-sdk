@@ -4,6 +4,30 @@
 //
 
 #import "SPXFoundation.h"
+#import "SPXAudioStreamFormat.h"
+
+/**
+  * Defines supported audio stream container format.
+  * Added in version 1.7.0.
+  * Note: Compressed input is only supported on iOS.
+  */
+typedef NS_ENUM(NSUInteger, SPXAudioStreamContainerFormat)
+{
+    /**
+      * Stream ContainerFormat definition for OGG OPUS.
+      */
+    SPXAudioStreamContainerFormat_OGG_OPUS = 0x101,
+
+    /**
+      * Stream ContainerFormat definition for MP3.
+      */
+    SPXAudioStreamContainerFormat_MP3 = 0x102,
+
+    /**
+      * Stream ContainerFormat definition for FLAC. Not supported yet.
+      */
+    SPXAudioStreamContainerFormat_FLAC = 0x103
+};
 
 /**
  * Represents the audio stream format used for custom audio input configurations.
@@ -29,4 +53,13 @@ SPX_EXPORT
  */
 - (nullable instancetype)initUsingPCMWithSampleRate:(NSUInteger)samplesPerSecond bitsPerSample:(NSUInteger)bitsPerSample channels:(NSUInteger)channels;
 
+/**
+  * Creates an audio stream format object with the specified compressed audio container format, to be used as input format.
+  * Support added in 1.5.0.
+  * Note: Compressed input is only supported on iOS.
+  * @param audioStreamContainerFormat compressed format type.
+  * @return an instance of audio stream format.
+  */
+- (nullable instancetype)initUsingCompressedFormat:(SPXAudioStreamContainerFormat)audioStreamContainerFormat;
 @end
+

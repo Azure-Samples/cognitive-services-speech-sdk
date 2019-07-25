@@ -77,15 +77,19 @@ function redact {
   perl -MIO::Handle -lpe 'BEGIN { STDOUT->autoflush(1); STDERR->autoflush(1); if (@ARGV) { $re = sprintf "(?:%s)", (join "|", map { quotemeta $_ } splice @ARGV); $re = qr/$re/ } } $re and s/$re/***/gi' $@
 }
 
-runObjcTest() {
+runXcodeTest() {
+  local i=0
+  while [[ -f "${OUTPUTDIRECTORY}/logs/${TESTNAME}-${i}.log" ]]; do
+    i=$(( i + 1 ))
+  done
   xcodebuild test "${projectArg[@]}" \
     -scheme ${SCHEME} "${xcodeExtraArgs[@]}" "${destinationSpec[@]}" \
     SPEECHSDK_SPEECH_KEY="$SPEECHSDK_SPEECH_KEY" SPEECHSDK_SPEECH_REGION="$SPEECHSDK_SPEECH_REGION" \
     SPEECHSDK_LUIS_KEY="$SPEECHSDK_LUIS_KEY" SPEECHSDK_LUIS_REGION="$SPEECHSDK_LUIS_REGION" 2>&1 |
       redact "$redactStrings" |
-      tee "${OUTPUTDIRECTORY}/logs/${TESTNAME}.log" |
-      xcpretty --report junit --output ${TESTNAME}.xml
+      tee "${OUTPUTDIRECTORY}/logs/${TESTNAME}-${i}.log" |
+      xcpretty --report junit --output test-${TESTNAME}-${i}.xml
 }
 
-runObjcTest
+runXcodeTest
 

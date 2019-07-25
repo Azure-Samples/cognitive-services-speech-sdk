@@ -40,7 +40,7 @@ function runObjcSuite {
     "${BUILD_DIR}/../tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj SpeechSDK_iOS ${testsuiteName}
         --extra-args DEVELOPMENT_TEAM=${MICROSOFT_DEVELOPMENT_TEAM_ID}"   \
     )
-    deviceSettings=(--device "iPhone 8" --os "12.1")
+    deviceSettings=(--device "iPhone 8" --os "12.2")
   fi
 
   startTests "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
@@ -57,7 +57,7 @@ function runObjcSuite {
 
 runObjcSuite \
   TESTRUNNER \
-  objcunittests-${PLATFORM} \
+  test-objcunittests-${PLATFORM} \
   ${PLATFORM} \
   " $SPEECHSDK_SPEECH_KEY $SPEECHSDK_LUIS_KEY $SPEECHSDK_BOT_SUBSCRIPTION $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
   objcunittests-${PLATFORM} \

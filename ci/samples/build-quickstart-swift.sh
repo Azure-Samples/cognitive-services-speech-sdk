@@ -27,5 +27,5 @@ xcodebuild build -workspace ${PROJECT_DIR}/helloworld.xcworkspace \
     SPEECHSDK_SPEECH_KEY="$SPEECHSDK_SPEECH_KEY" SPEECHSDK_SPEECH_REGION="$SPEECHSDK_SPEECH_REGION" \
     SPEECHSDK_LUIS_KEY="$SPEECHSDK_LUIS_KEY" SPEECHSDK_LUIS_REGION="$SPEECHSDK_LUIS_REGION" 2>&1 |
       tee "${LOGDIR}/xcodebuild-ios-swift-quickstart.log" |
-      xcpretty --report junit --output xcodebuild-ios-swift-quickstart.xml
+      xcpretty --report junit --output test-xcodebuild-ios-swift-quickstart.xml
 

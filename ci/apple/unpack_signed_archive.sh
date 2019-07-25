@@ -39,6 +39,11 @@ fi
 [[ -d "${FrameworkName}.framework/Headers" ]]
 # check existence of code signing metadata for iOS/macOS
 [[ -d "${FrameworkName}.framework/_CodeSignature" ]] || [[ -d "${FrameworkName}.framework/Versions/A/_CodeSignature" ]]
+
+# check code signatures
+codesign --display --verbose=4 --deep "${FrameworkName}.framework"
+codesign --display --verbose=4 "${FrameworkName}.framework/${FrameworkName}"
+
 # Remove original package.
 rm "${OutputDirectory}/${VersionedFrameworkName}.zip"
 zip --symlinks -r "${OutputDirectory}/${VersionedFrameworkName}.zip" .

@@ -37,7 +37,7 @@ function runSwiftSuite {
       --extra-args DEVELOPMENT_TEAM=${MICROSOFT_DEVELOPMENT_TEAM_ID} \
       --extra-args SPEECHSDK_LUIS_APP_ID=${SPEECHSDK_LUIS_HOMEAUTOMATION_APPID}"
   )
-  deviceSettings=(--device "iPhone 8" --os "12.1")
+  deviceSettings=(--device "iPhone 8" --os "12.2")
 
   startTests "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
   startSuite "$testStateVarPrefix" "$testsuiteName"
@@ -53,7 +53,7 @@ function runSwiftSuite {
 
 runSwiftSuite \
   TESTRUNNER \
-  swiftunittests-${PLATFORM} \
+  test-swiftunittests-${PLATFORM} \
   ${PLATFORM} \
   " $SPEECHSDK_SPEECH_KEY $SPEECHSDK_LUIS_KEY $SPEECHSDK_BOT_SUBSCRIPTION $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
   swiftunittests-${PLATFORM} \

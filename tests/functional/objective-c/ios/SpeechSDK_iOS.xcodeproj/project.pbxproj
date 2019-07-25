@@ -19,11 +19,20 @@
 		3CCD06D62157F71E00A348DB /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D12157F71E00A348DB /* microphone_test.m */; };
 		3CCD06D72157F71E00A348DB /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D22157F71E00A348DB /* dummytest.m */; };
 		3CCD06D92157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
-		3CCD06DA2157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		3CCD06DA2157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		DC15EE9D22676E5F00991304 /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */; };
 		DC15EE9E22676E7D00991304 /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */; };
 		DC68200622A960C200AD8EA4 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC68200522A960C200AD8EA4 /* silenceshort.wav */; };
 		DC68200722A960C200AD8EA4 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC68200522A960C200AD8EA4 /* silenceshort.wav */; };
+		DC27A3F72260996200BD9FE0 /* Margarita-44100.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC27A3F62260996200BD9FE0 /* Margarita-44100.wav */; };
+		DC27A3F82260996200BD9FE0 /* Margarita-44100.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC27A3F62260996200BD9FE0 /* Margarita-44100.wav */; };
+		DC419444225B6F2300F95B2F /* CompressedStreamsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DC419443225B6F2300F95B2F /* CompressedStreamsTest.m */; };
+		DC419447225B779C00F95B2F /* whatstheweatherlike.opus in Resources */ = {isa = PBXBuildFile; fileRef = DC419445225B779C00F95B2F /* whatstheweatherlike.opus */; };
+		DC419448225B779C00F95B2F /* whatstheweatherlike.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = DC419446225B779C00F95B2F /* whatstheweatherlike.mp3 */; };
+		DC419449225B77BF00F95B2F /* whatstheweatherlike.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = DC419446225B779C00F95B2F /* whatstheweatherlike.mp3 */; };
+		DC41944A225B77BF00F95B2F /* whatstheweatherlike.opus in Resources */ = {isa = PBXBuildFile; fileRef = DC419445225B779C00F95B2F /* whatstheweatherlike.opus */; };
+		DCC9A0A722672F7D007939A0 /* GStreamerWrapper.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DCC9A0A922672FFE007939A0 /* GStreamerWrapper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */; };
 		DCF1E29222E1CC4E00FA9F3E /* SPXTestHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */; };
 		F342D645216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */; };
 		F3C06E37216E3AE2003989B2 /* SPXDummyTestRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = F3C06E36216E3AE2003989B2 /* SPXDummyTestRunner.m */; };
@@ -31,7 +40,6 @@
 		F3C06E3C216E4737003989B2 /* TurnOnTheLamp.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */; };
 		F3EABACD21639F6000BA4B2C /* SPXSpeechRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */; };
 		F3EABACE21639F6300BA4B2C /* SPXTranslationRecognitionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */; };
-		F3EABAD12163AD9900BA4B2C /* MicrosoftCognitiveServicesSpeech.framework in Resources */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
 		F3EABAD22163B3E200BA4B2C /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */; };
 /* End PBXBuildFile section */
 
@@ -48,11 +56,12 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		3CCD06DB2157F77D00A348DB /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				3CCD06DA2157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */,
+				DC27A3F2225F7F9300BD9FE0 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */,
+				DCC9A0A722672F7D007939A0 /* GStreamerWrapper.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -82,6 +91,12 @@
 		3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
 		DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "wreck-a-nice-beach.wav"; path = "../../../input/audio/wreck-a-nice-beach.wav"; sourceTree = "<group>"; };
 		DC68200522A960C200AD8EA4 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
+		DC27A3F62260996200BD9FE0 /* Margarita-44100.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "Margarita-44100.wav"; path = "../../../../input/audio/Margarita-44100.wav"; sourceTree = "<group>"; };
+		DC419443225B6F2300F95B2F /* CompressedStreamsTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = CompressedStreamsTest.m; path = ../../shared/testrunners/CompressedStreamsTest.m; sourceTree = "<group>"; };
+		DC419445225B779C00F95B2F /* whatstheweatherlike.opus */ = {isa = PBXFileReference; lastKnownFileType = file; name = whatstheweatherlike.opus; path = ../../../input/audio/whatstheweatherlike.opus; sourceTree = "<group>"; };
+		DC419446225B779C00F95B2F /* whatstheweatherlike.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = whatstheweatherlike.mp3; path = ../../../input/audio/whatstheweatherlike.mp3; sourceTree = "<group>"; };
+		DCC1352E225E182E00194047 /* SPXSpeechRecognitionEndtoEndTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPXSpeechRecognitionEndtoEndTest.h; path = ../../shared/testrunners/SPXSpeechRecognitionEndtoEndTest.h; sourceTree = "<group>"; };
+		DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GStreamerWrapper.framework; path = "../../../../xcode-build-output/GStreamerWrapper.framework"; sourceTree = "<group>"; };
 		DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXTestHelpers.m; path = ../../shared/testrunners/SPXTestHelpers.m; sourceTree = "<group>"; };
 		DCF1E29322E1CC8100FA9F3E /* SPXTestHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPXTestHelpers.h; path = ../../shared/testrunners/SPXTestHelpers.h; sourceTree = "<group>"; };
 		F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
@@ -96,7 +111,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3CCD06D92157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
+				DC27A3F5225F881500BD9FE0 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,6 +120,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F342D645216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
+				DCC9A0A922672FFE007939A0 /* GStreamerWrapper.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,6 +135,8 @@
 				3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */,
 				3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */,
 				3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */,
+				DC419446225B779C00F95B2F /* whatstheweatherlike.mp3 */,
+				DC419445225B779C00F95B2F /* whatstheweatherlike.opus */,
 				3CA6CF88211F471500CD2768 /* SpeechSDK_iOS */,
 				F3EABAC421639F5700BA4B2C /* SpeechSDK_iOSUnitTests */,
 				3CA6CF87211F471500CD2768 /* Products */,
@@ -138,6 +156,7 @@
 		3CA6CF88211F471500CD2768 /* SpeechSDK_iOS */ = {
 			isa = PBXGroup;
 			children = (
+				DC27A3F62260996200BD9FE0 /* Margarita-44100.wav */,
 				3CCD06D32157F71E00A348DB /* dummytest.h */,
 				3CCD06D22157F71E00A348DB /* dummytest.m */,
 				3CCD06CF2157F71D00A348DB /* microphone_test.h */,
@@ -160,6 +179,7 @@
 		A2AB0BC02152FB9800171A08 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */,
 				F342D644216794C600B6B2FC /* MicrosoftCognitiveServicesSpeech.framework */,
 			);
 			name = Frameworks;
@@ -168,7 +188,9 @@
 		F3EABAC421639F5700BA4B2C /* SpeechSDK_iOSUnitTests */ = {
 			isa = PBXGroup;
 			children = (
+				DCC1352E225E182E00194047 /* SPXSpeechRecognitionEndtoEndTest.h */,
 				3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */,
+				DC419443225B6F2300F95B2F /* CompressedStreamsTest.m */,
 				F3EABABD2163887500BA4B2C /* SPXTranslationRecognitionTest.m */,
 				DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */,
 				DCF1E29322E1CC8100FA9F3E /* SPXTestHelpers.h */,
@@ -262,9 +284,12 @@
 			files = (
 				DC68200622A960C200AD8EA4 /* silenceshort.wav in Resources */,
 				DC15EE9D22676E5F00991304 /* wreck-a-nice-beach.wav in Resources */,
+				DC419449225B77BF00F95B2F /* whatstheweatherlike.mp3 in Resources */,
+				DC41944A225B77BF00F95B2F /* whatstheweatherlike.opus in Resources */,
 				3CC3789C2121CFD600F07A66 /* whatstheweatherlike.wav in Resources */,
 				3CA6CF96211F471600CD2768 /* LaunchScreen.storyboard in Resources */,
 				3CA6CF93211F471600CD2768 /* Assets.xcassets in Resources */,
+				DC27A3F72260996200BD9FE0 /* Margarita-44100.wav in Resources */,
 				3C5D93EC2146856B000C7129 /* TurnOnTheLamp.wav in Resources */,
 				3CA6CF91211F471500CD2768 /* Main.storyboard in Resources */,
 			);
@@ -278,7 +303,9 @@
 				F3EABAD22163B3E200BA4B2C /* whatstheweatherlike.wav in Resources */,
 				F3C06E3C216E4737003989B2 /* TurnOnTheLamp.wav in Resources */,
 				DC68200722A960C200AD8EA4 /* silenceshort.wav in Resources */,
-				F3EABAD12163AD9900BA4B2C /* MicrosoftCognitiveServicesSpeech.framework in Resources */,
+				DC419447225B779C00F95B2F /* whatstheweatherlike.opus in Resources */,
+				DC419448225B779C00F95B2F /* whatstheweatherlike.mp3 in Resources */,
+				DC27A3F82260996200BD9FE0 /* Margarita-44100.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -303,6 +330,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F3C06E37216E3AE2003989B2 /* SPXDummyTestRunner.m in Sources */,
+				DC419444225B6F2300F95B2F /* CompressedStreamsTest.m in Sources */,
 				F3EABACE21639F6300BA4B2C /* SPXTranslationRecognitionTest.m in Sources */,
 				DCF1E29222E1CC4E00FA9F3E /* SPXTestHelpers.m in Sources */,
 				F3C06E38216E4148003989B2 /* dummytest.m in Sources */,
@@ -396,6 +424,35 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-lresolv",
+					"-liconv",
+					"-lstdc++",
+					"-framework",
+					CoreFoundation,
+					"-framework",
+					Foundation,
+					"-framework",
+					AVFoundation,
+					"-framework",
+					CoreMedia,
+					"-framework",
+					CoreVideo,
+					"-framework",
+					CoreAudio,
+					"-framework",
+					AudioToolbox,
+					"-weak_framework",
+					VideoToolbox,
+					"-framework",
+					OpenGLES,
+					"-framework",
+					AssetsLibrary,
+					"-framework",
+					QuartzCore,
+					"-framework",
+					AssetsLibrary,
+				);
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -449,6 +506,35 @@
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = (
+					"-lresolv",
+					"-liconv",
+					"-lstdc++",
+					"-framework",
+					CoreFoundation,
+					"-framework",
+					Foundation,
+					"-framework",
+					AVFoundation,
+					"-framework",
+					CoreMedia,
+					"-framework",
+					CoreVideo,
+					"-framework",
+					CoreAudio,
+					"-framework",
+					AudioToolbox,
+					"-weak_framework",
+					VideoToolbox,
+					"-framework",
+					OpenGLES,
+					"-framework",
+					AssetsLibrary,
+					"-framework",
+					QuartzCore,
+					"-framework",
+					AssetsLibrary,
+				);
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -529,9 +615,12 @@
 				);
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				INFOPLIST_FILE = SpeechSDK_iOSUnitTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks $(SRCROOT)/../../../../xcode-build-output/";
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "testorg.SpeechSDK-iOSUnitTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -549,9 +638,12 @@
 				);
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/**";
 				INFOPLIST_FILE = SpeechSDK_iOSUnitTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks $(SRCROOT)/../../../../xcode-build-output/";
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "testorg.SpeechSDK-iOSUnitTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";

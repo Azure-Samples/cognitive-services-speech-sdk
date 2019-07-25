@@ -43,3 +43,8 @@ set_target_properties (core_tests PROPERTIES
     FOLDER tests
     OUTPUT_NAME core_tests
 )
+
+if (EXTENSION_CODEC_ENABLED AND STATIC_CODEC_EXTENSION)
+  target_link_libraries(${PROJECT_NAME} codec)
+endif()
+

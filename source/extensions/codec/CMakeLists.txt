@@ -33,6 +33,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/base_gstreamer.h"
     "${SRC_DIR}/mpeg_decoder.h"
     "${SRC_DIR}/opus_decoder.h"
+    "${SRC_DIR}/gstreamer_modules.h"
     )
 
 set(SOURCES
@@ -44,6 +45,13 @@ set(SOURCES
     "${SRC_DIR}/opus_decoder.cpp"
     )
 
+set(STATICLIB_SOURCES
+    "${SRC_DIR}/gstreamer_modules.cpp"
+    )
+
+if (NOT DEFINED APPLE)
+    set(SOURCES ${SOURCES} ${STATICLIB_SOURCES})
+endif()
 
 source_group("Header Files (public)" FILES ${HEADERS})
 source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
@@ -51,23 +59,47 @@ source_group("Source Files" FILES ${SOURCES})
 
 if(SPEECHSDK_OS STREQUAL "Linux")
     set(GST_LIBS ${GSTL_LIBRARIES})
+elseif(APPLE)
+    # !!! GStreamerWrapper.framework MUST NOT BE SHIPPED with the distribution binary. We do not have license to do that. !!!
+    FIND_LIBRARY(GSTREAMER GStreamer)
+    if (NOT GSTREAMER)
+        message(FATAL_ERROR "GSTREAMER not found")
+    endif()
+    FIND_LIBRARY(GSTREAMER_WRAPPER GStreamerWrapper)
+    if (NOT GSTREAMER_WRAPPER)
+        message(FATAL_ERROR "GSTREAMER_WRAPPER not found")
+    endif()
+    get_filename_component(GSTREAMER_WRAPPER_DIR ${GSTREAMER_WRAPPER} DIRECTORY)
+    message(STATUS "GST wrapper " ${GSTREAMER_WRAPPER} " at " ${GSTREAMER_WRAPPER_DIR})
+    set(GST_LIBS ${GSTREAMER} iconv)
+    set(GST_INCLUDE_DIRS ${GSTREAMER}/Headers)
+    message(STATUS "GST libs are " ${GST_LIBS})
 elseif(ANDROID)
-# !!! libgstreamer_android.so MUST NOT BE SHIPPED with the distribution binary. We do not have license to do that. !!!
+    # !!! libgstreamer_android.so MUST NOT BE SHIPPED with the distribution binary. We do not have license to do that. !!!
     set(GST_LIBS "${GSTREAMER_PKG}/libgstreamer_android.so")
 endif()
 
-add_library(codec SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+if(SPEECHSDK_OS MATCHES "^IOS")
+    add_library(codec STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+else()
+    add_library(codec SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+    set_target_properties (codec PROPERTIES
+        DEFINE_SYMBOL "SPX_CONFIG_EXPORTAPIS"
+        OUTPUT_NAME "Microsoft.CognitiveServices.Speech.extension.codec"
+        FOLDER core
+        )
+endif()
 
 if(WIN32 AND SPECTRE_MITIGATION)
     set_property(TARGET codec PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
 endif()
 
-set_target_properties (codec PROPERTIES
-    DEFINE_SYMBOL "SPX_CONFIG_EXPORTAPIS"
-    OUTPUT_NAME "Microsoft.CognitiveServices.Speech.extension.codec"
-    FOLDER core
-)
-
-target_include_directories(codec PRIVATE ${GSTL_INCLUDE_DIRS})
-target_link_libraries(codec PRIVATE ${GST_LIBS} common)
+target_include_directories(codec PRIVATE ${GST_INCLUDE_DIRS})
+if(SPEECHSDK_OS MATCHES "^IOS")
+    target_link_libraries(codec
+        PUBLIC "-weak_framework GStreamerWrapper -F${GSTREAMER_WRAPPER_DIR}"
+        )
+else()
+    target_link_libraries(codec PRIVATE ${GST_LIBS} common)
+endif()
 

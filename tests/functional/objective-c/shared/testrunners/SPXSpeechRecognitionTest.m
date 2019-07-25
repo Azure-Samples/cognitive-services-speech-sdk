@@ -6,25 +6,7 @@
 #import <XCTest/XCTest.h>
 #import <AVFoundation/AVFoundation.h>
 #import <MicrosoftCognitiveServicesSpeech/SPXSpeechApi.h>
-
-@interface SPXSpeechRecognitionEndtoEndTest : XCTestCase {
-    NSString *weatherFileName;
-    NSString *weatherTextEnglish;
-    NSMutableDictionary *result;
-
-    NSPredicate *sessionStoppedCountPred;
-
-    double timeoutInSeconds;
-}
-
-- (void) setAudioSource;
-
-@property (nonatomic, assign) NSString * speechKey;
-@property (nonatomic, assign) NSString * serviceRegion;
-@property (nonatomic, retain) SPXSpeechRecognizer* speechRecognizer;
-@property (nonatomic, retain) SPXAudioConfiguration* audioConfig;
-@property (nonatomic, retain) SPXConnection* connection;
-@end
+#import "SPXSpeechRecognitionEndtoEndTest.h"
 
 
 @implementation SPXSpeechRecognitionEndtoEndTest
@@ -32,9 +14,18 @@
 - (void)setUp {
     [super setUp];
     timeoutInSeconds = 20.;
+    margaritaFileName = @"Margarita-44100";
+    margaritaTextEnglish = @"And.  We all know and Love, a margarita and if you're anything like me, you probably had your fair share and if you have. You've probably noticed that margaritas? Can vary from incredible too. So I'm going to show you? How to make one of those incredibly fresh and Delicious Margaritas. There are 3 key steps you need to follow 1st.";
+
     weatherFileName = @"whatstheweatherlike";
     weatherTextEnglish = @"What's the weather like?";
 
+    // set weather as the default test file, overrwite in test cases as needed
+    targetFileName = weatherFileName;
+    targetTranscription = weatherTextEnglish;
+}
+
+- (void)speechInit {
     self.speechKey = [[[NSProcessInfo processInfo] environment] objectForKey:@"subscriptionKey"];
     self.serviceRegion = [[[NSProcessInfo processInfo] environment] objectForKey:@"serviceRegion"];
 
@@ -66,7 +57,15 @@
     [self.speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
         NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.offset, eventArgs.result.duration, eventArgs.result.resultId);
         NSLog(@"Received JSON: %@", [eventArgs.result.properties getPropertyById:SPXSpeechServiceResponseJsonResult]);
-        [weakSelf->result setObject:eventArgs.result.text forKey: @"finalText"];
+        if ([[weakSelf->result valueForKey:@"finalText"] length] == 0)
+        {
+            [weakSelf->result setObject:eventArgs.result.text forKey: @"finalText"];
+        }
+        else
+        {
+            NSString *concatenatedResults = [NSString stringWithFormat:@"%@ %@", [weakSelf->result valueForKey:@"finalText"], eventArgs.result.text];
+            [weakSelf->result setObject:concatenatedResults forKey: @"finalText"];
+        }
         [weakSelf->result setObject:[NSNumber numberWithLong:[[weakSelf->result objectForKey:@"finalResultCount"] integerValue] + 1] forKey:@"finalResultCount"];
     }];
 
@@ -92,6 +91,7 @@
 }
 
 - (void)_testContinuousRecognition {
+    [self speechInit];
     [self.speechRecognizer startContinuousRecognition];
 
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
@@ -108,6 +108,7 @@
 }
 
 - (void)_testRecognizeAsync {
+    [self speechInit];
     __block SPXSpeechRecognitionResult * asyncResult;
     [self.speechRecognizer recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
         asyncResult = srresult;
@@ -128,6 +129,7 @@
 }
 
 - (void)_testRecognizeOnce {
+    [self speechInit];
     SPXSpeechRecognitionResult *result = [self.speechRecognizer recognizeOnce];
     NSLog(@"recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@",
           result.text, (long)result.reason, result.offset, result.duration, result.resultId);
@@ -140,6 +142,7 @@
 }
 
 - (void)_testRecognizerWithMultipleHandlers {
+    [self speechInit];
     [result setObject:@0 forKey:@"finalResultCount2"];
 
     __unsafe_unretained typeof(self) weakSelf = self;
@@ -153,7 +156,7 @@
     }];
 
     [self.speechRecognizer recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
-        XCTAssertTrue([srresult.text isEqualToString:self->weatherTextEnglish], "Final Result Text does not match");
+        XCTAssertTrue([srresult.text isEqualToString:self->targetTranscription], "Final Result Text does not match");
     }];
 
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:self->result handler:nil];
@@ -165,6 +168,7 @@
 }
 
 - (void)_testContinuousRecognitionWithPreConnection {
+    [self speechInit];
     // open connection
     [self.connection open:YES];
 
@@ -204,6 +208,7 @@
 }
 
 - (void)_testRecognizeAsyncWithPreConnection {
+    [self speechInit];
     [self.connection open:NO];
 
     NSPredicate *connectedCountPred = [NSPredicate predicateWithBlock: ^BOOL (id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings){
@@ -216,7 +221,7 @@
 
     // trigger recognition
     [self.speechRecognizer recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
-        XCTAssertTrue([srresult.text isEqualToString:self->weatherTextEnglish], "Final Result Text does not match");
+        XCTAssertTrue([srresult.text isEqualToString:self->targetTranscription], "Final Result Text does not match");
     }];
 
     // wait for session stopped event result
@@ -256,9 +261,9 @@
 @implementation SPXSpeechRecognitionFromFileEndtoEndTest
 - (void) setAudioSource {
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    NSString *targetFile = [bundle pathForResource: targetFileName ofType:@"wav"];
 
-    self.audioConfig = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    self.audioConfig = [[SPXAudioConfiguration alloc] initWithWavFileInput:targetFile];
 }
 
 - (void) testRecognizeAsyncWithPreConnection {
@@ -286,6 +291,7 @@
 }
 
 - (void)testContinuousRecognitionWithError {
+    [self speechInit];
     NSError * err = nil;
     BOOL success = [self.speechRecognizer startContinuousRecognition:&err];
     XCTAssertTrue(success);
@@ -310,6 +316,7 @@
 }
 
 - (void)testRecognizeAsyncWithError {
+    [self speechInit];
     __block SPXSpeechRecognitionResult * asyncResult;
     NSError * err = nil;
     BOOL success = [self.speechRecognizer recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
@@ -333,6 +340,7 @@
 }
 
 - (void)testRecognizeOnceWithError {
+    [self speechInit];
     NSError * err = nil;
     SPXSpeechRecognitionResult *result = [self.speechRecognizer recognizeOnce:&err];
     XCTAssertNotNil(result);
@@ -357,6 +365,7 @@
 
 
 @interface SPXSpeechRecognitionTest : XCTestCase {
+    NSString *targetFile;
 }
 @property (nonatomic, assign) NSString * speechKey;
 @property (nonatomic, assign) NSString * serviceRegion;
@@ -367,24 +376,22 @@
 
 - (void)setUp {
     [super setUp];
+    NSString *targetFileName = @"whatstheweatherlike";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    targetFile = [bundle pathForResource:targetFileName ofType:@"wav"];
 
     self.speechKey = [[[NSProcessInfo processInfo] environment] objectForKey:@"subscriptionKey"];
     self.serviceRegion = [[[NSProcessInfo processInfo] environment] objectForKey:@"serviceRegion"];
 }
 
 - (void)testInvalidSubscriptionKey {
-    NSString *weatherFileName = @"whatstheweatherlike";
-
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
-
-    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    SPXAudioConfiguration* audioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:targetFile];
 
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:@"InvalidSubscriptionKey" region:@"westus"];
     XCTAssertNotNil(speechConfig);
 
     // this shouldn't throw, but fail on opening the connection
-    SPXSpeechRecognizer *speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+    SPXSpeechRecognizer *speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:audioSource];
     XCTAssertNotNil(speechRecognizer);
 
     SPXSpeechRecognitionResult *result = [speechRecognizer recognizeOnce];
@@ -411,19 +418,14 @@
 }
 
 - (void)testInvalidRegion {
-    NSString *weatherFileName = @"whatstheweatherlike";
-
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
-
-    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    SPXAudioConfiguration* audioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:targetFile];
 
     NSError* error = nil;
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:@"InvalidServiceRegion" error:&error];
     XCTAssertNotNil(speechConfig);
 
     // this shouldn't throw, but fail on opening the connection
-    SPXSpeechRecognizer *speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+    SPXSpeechRecognizer *speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:audioSource];
     XCTAssertNotNil(speechRecognizer);
 
     SPXSpeechRecognitionResult *result = [speechRecognizer recognizeOnce];
@@ -734,11 +736,11 @@
 
 - (void) setAudioSource {
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
-    NSURL *weatherUrl = [NSURL URLWithString:weatherFile];
+    NSString *targetFile = [bundle pathForResource:targetFileName ofType:@"wav"];
+    NSURL *targetUrl = [NSURL URLWithString:targetFile];
 
     NSError *error = nil;
-    AVAudioFile *audioFile = [[AVAudioFile alloc] initForReading:weatherUrl commonFormat:AVAudioPCMFormatInt16 interleaved:NO error:&error];
+    AVAudioFile *audioFile = [[AVAudioFile alloc] initForReading:targetUrl commonFormat:AVAudioPCMFormatInt16 interleaved:NO error:&error];
     const NSInteger bytesPerFrame = audioFile.fileFormat.streamDescription->mBytesPerFrame;
 
     if (error)
@@ -820,21 +822,23 @@
 @interface SPXSpeechRecognitionPushStreamEndtoEndTest : SPXSpeechRecognitionEndtoEndTest {
     AVAudioFile *audioFile;
     SPXPushAudioInputStream* stream;
+    
+    NSUInteger sampleRate;
 }
 
 - (void) setAudioSource;
+- (void)pushStream;
 
 @end
 
 @implementation SPXSpeechRecognitionPushStreamEndtoEndTest
-
 - (void) setAudioSource {
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    NSString *targetFile = [bundle pathForResource:targetFileName ofType:@"wav"];
 
-    NSURL *weatherUrl = [NSURL URLWithString:weatherFile];
+    NSURL *targetUrl = [NSURL URLWithString:targetFile];
     NSError *error = nil;
-    audioFile = [[AVAudioFile alloc] initForReading:weatherUrl commonFormat:AVAudioPCMFormatInt16 interleaved:NO error:&error];
+    audioFile = [[AVAudioFile alloc] initForReading:targetUrl commonFormat:AVAudioPCMFormatInt16 interleaved:NO error:&error];
 
     if (error)
     {
@@ -846,16 +850,31 @@
 
     // check the format of the file
     NSAssert(1 == audioFile.fileFormat.channelCount, @"Bad channel count");
-    NSAssert(16000 == audioFile.fileFormat.sampleRate, @"Unexpected sample rate");
+    NSAssert(self->sampleRate == audioFile.fileFormat.sampleRate, @"Unexpected sample rate");
 
-    self->stream = [[SPXPushAudioInputStream alloc] init];
+    SPXAudioStreamFormat *audioFormat = [[SPXAudioStreamFormat alloc] initUsingPCMWithSampleRate:self->sampleRate bitsPerSample:16 channels:1];
+    self->stream = [[SPXPushAudioInputStream alloc] initWithAudioFormat:audioFormat];
 
     self.audioConfig  = [[SPXAudioConfiguration alloc] initWithStreamInput:self->stream];
 }
 
-- (void)testContinuousRecognition {
+- (void)testContinuousRecognitionWeather {
+    sampleRate = 16000;
+    [self speechInit];
+    [self pushStream];
+}
+
+- (void)testContinuousRecognitionMargarita {
+    targetFileName = margaritaFileName;
+    targetTranscription = margaritaTextEnglish;
+    sampleRate = 44100;
+    [self speechInit];
+    [self pushStream];
+}
+
+- (void)pushStream {
     [self.speechRecognizer startContinuousRecognition];
-    const AVAudioFrameCount nBytesToRead = 3200;
+    const AVAudioFrameCount nBytesToRead = 5000;
     const NSInteger bytesPerFrame = audioFile.fileFormat.streamDescription->mBytesPerFrame;
     AVAudioPCMBuffer *buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:audioFile.fileFormat frameCapacity:nBytesToRead / bytesPerFrame];
 
@@ -890,14 +909,18 @@
             NSLog(@"Wrote %d bytes to stream", (int)[data length]);
         }
 
-        [NSThread sleepForTimeInterval:0.1f];
+        [NSThread sleepForTimeInterval:0.05f];
     }
 
     [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
     [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
 
-    XCTAssertTrue([[self->result valueForKey:@"finalText"] isEqualToString: self->weatherTextEnglish]);
-    XCTAssertTrue([[self->result valueForKey:@"finalResultCount"] isEqualToNumber:@1]);
+    NSString *finalResultText = [[[[self->result valueForKey:@"finalText"] componentsSeparatedByCharactersInSet:[[NSCharacterSet letterCharacterSet] invertedSet]] componentsJoinedByString:@""] lowercaseString];
+    NSString *normalizedDesiredResultText = [[[self->targetTranscription componentsSeparatedByCharactersInSet:[[NSCharacterSet letterCharacterSet] invertedSet]] componentsJoinedByString:@""] lowercaseString];
+
+    NSLog(@"final result: \n%@\ndesired:\n%@", finalResultText, normalizedDesiredResultText);
+    XCTAssertTrue([finalResultText isEqualToString: normalizedDesiredResultText]);
+    XCTAssertTrue([[self->result valueForKey:@"finalResultCount"] compare:@0] == NSOrderedDescending);
     long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
     long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
     XCTAssertTrue(connectedEventCount > 0, @"The connected event count must be greater than 0. connectedEventCount=%ld", connectedEventCount);
