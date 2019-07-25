@@ -213,15 +213,21 @@ function runCatchSuite {
   for testCase in "${testCases[@]}"; do
     ((testCaseIndex++))
     catchOut="catch$output-$testCaseIndex"
-    runTest --output "$catchOut.txt" "$testStateVarPrefix" "$testCase" "$timeoutSeconds" \
-      "$@" --reporter xml --durations yes --out "$catchOut.xml" \
-        "$testCase" || if [[ -s $catchOut.xml ]]; then
-            echo 'Test failed. Potential details here (cf. success="false"), or in the logs included in the test results file:'
-            addToTestOutput "$testStateVarPrefix" cat "$catchOut.xml"
-            if [[ $(uname) = Linux ]] && grep -q -F $'<FatalErrorCondition\n<Exception' "$catchOut.xml"; then
-              addToTestOutput "$testStateVarPrefix" perl "$SCRIPT_DIR/decode-stack.pl" "$catchOut.txt"
+    for i in $(seq 1 3); do
+      runTest --output "$catchOut.txt" "$testStateVarPrefix" "$testCase" "$timeoutSeconds" \
+        "$@" --reporter xml --durations yes --out "$catchOut.xml" \
+          "$testCase" || if [[ -s $catchOut.xml ]]; then
+              if [ "$i" -lt 3 ]; then
+                continue
+              fi
+              echo 'Test failed. Potential details here (cf. success="false"), or in the logs included in the test results file:'
+              addToTestOutput "$testStateVarPrefix" cat "$catchOut.xml"
+              if [[ $(uname) = Linux ]] && grep -q -F $'<FatalErrorCondition\n<Exception' "$catchOut.xml"; then
+                addToTestOutput "$testStateVarPrefix" perl "$SCRIPT_DIR/decode-stack.pl" "$catchOut.txt"
+              fi
             fi
-          fi
+          break
+    done
   done
 
   endSuite "$testStateVarPrefix"
