@@ -32,28 +32,28 @@ using namespace usp;
 // uncomment the line below to see all non-binary protocol messages in the log
 // #define LOG_TEXT_MESSAGES
 
-const char g_keywordPTStimeStampName[] = "PTS";
-const char g_keywordSpeakerIdName[] = "SpeakerId";
-const char g_KeywordStreamId[]       = "X-StreamId";
-const char g_keywordRequestId[]      = "X-RequestId";
-const char g_keywordContentType[] = "Content-Type";
-const char g_messageHeader[]         = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n%s:%s\r\n\r\n";
-const char g_messageHeaderSsml[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/ssml+xml\r\n%s:%s\r\n\r\n";
-const char g_messageHeaderWithoutRequestId[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n\r\n";
+constexpr char g_keywordPTStimeStampName[] = "PTS";
+constexpr char g_keywordSpeakerIdName[] = "SpeakerId";
+constexpr char g_KeywordStreamId[]       = "X-StreamId";
+constexpr char g_keywordRequestId[]      = "X-RequestId";
+constexpr char g_keywordContentType[] = "Content-Type";
+constexpr char g_messageHeader[]         = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n%s:%s\r\n\r\n";
+constexpr char g_messageHeaderSsml[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/ssml+xml\r\n%s:%s\r\n\r\n";
+constexpr char g_messageHeaderWithoutRequestId[] = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n\r\n";
 
-const char g_wavheaderFormat[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n%s:%s\r\n";
+constexpr char g_wavheaderFormat[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n%s:%s\r\n";
 // this is for audio and video data USP message
-const char g_requestFormat[]  = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n";
+constexpr char g_requestFormat[]  = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n";
 // compared to g_requestFormat2, has one more field PTStimestamp or userId
-const char g_requestFormat2[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n%s:%s\r\n";
+constexpr char g_requestFormat2[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n%s:%s\r\n";
 // compared to g_requestFormat3, has two more fields: PTStimestamp and userId
-const char g_requestFormat3[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n%s:%s\r\n%s:%s\r\n";
+constexpr char g_requestFormat3[] = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n%s:%s\r\n%s:%s\r\n";
 
-const char g_telemetryHeader[] = "%s:%s\r\nPath: telemetry\r\nContent-Type: application/json; charset=utf-8\r\n%s:%s\r\n\r\n";
-const char g_timeStampHeaderName[] = "X-Timestamp";
-const char g_audioWavName[] = "audio/x-wav";
+constexpr char g_telemetryHeader[] = "%s:%s\r\nPath: telemetry\r\nContent-Type: application/json; charset=utf-8\r\n%s:%s\r\n\r\n";
+constexpr char g_timeStampHeaderName[] = "X-Timestamp";
+constexpr char g_audioWavName[] = "audio/x-wav";
 
-static const char g_RPSDelegationHeaderName[] = "X-Search-DelegationRPSToken";
+static constexpr char g_RPSDelegationHeaderName[] = "X-Search-DelegationRPSToken";
 
 #define WS_MESSAGE_HEADER_SIZE  2
 #define WS_CONNECTION_TIME_MS   (570 * 1000) // 9.5 minutes
@@ -70,6 +70,7 @@ static void OnWSClosed(void* context);
 */
 usp::TransportRequest::~TransportRequest()
 {
+    state = TransportState::TRANSPORT_STATE_DESTROYING;
     if (dnsCache != nullptr)
     {
         DnsCacheRemoveContextMatches(dnsCache, this);
@@ -228,9 +229,11 @@ static void SetTransportToClosed(TransportRequest* request)
 // wsio instance and we may get stuck retrying the open.
 static void OnTransportError(TransportRequest* request, TransportErrorInfo* errorInfo)
 {
-    if (request->state == TransportState::TRANSPORT_STATE_RESETTING)
+    if (request->state == TransportState::TRANSPORT_STATE_RESETTING || request->state == TransportState::TRANSPORT_STATE_DESTROYING)
     {
         // don't propagate errors during the reset state, these errors are expected.
+        request->isOpen = false;
+        LogInfo("%s: request is in destroying or resetting state, return without invoking callback.", __FUNCTION__);
         return;
     }
 
@@ -301,6 +304,11 @@ static void OnWSClosed(void* context)
             request->isOpen = false;
             request->state = TransportState::TRANSPORT_STATE_NETWORK_CHECK;
         }
+        else if (request->state == TransportState::TRANSPORT_STATE_DESTROYING)
+        {
+            LogInfo("%s: request is in destroying state, ignore OnWSClosed().", __FUNCTION__);
+            request->isOpen = false;
+        }
         else
         {
             MetricsTransportClosed();
@@ -322,6 +330,11 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detail
     WS_OPEN_RESULT open_result = open_result_detailed.result;
     char errorString[32];
 
+    if (request == nullptr || request->state == TransportState::TRANSPORT_STATE_DESTROYING)
+    {
+        LogInfo("%s: request is null or in destroying state, ignore OnWSOpened()", __FUNCTION__);
+        return;
+    }
     request->isOpen = (open_result == WS_OPEN_OK);
     if (request->isOpen)
     {
@@ -405,58 +418,67 @@ static void OnWSFrameReceived(void* context, unsigned char frame_type, const uns
     int offset;
     uint16_t headerSize;
 
-    if (context && request->onRecvResponse)
+    if (context)
     {
-        responseHeadersHandle = HTTPHeaders_Alloc();
-        if (!responseHeadersHandle)
+        if (request->state == TransportState::TRANSPORT_STATE_DESTROYING)
         {
+            LogInfo("%s: request is in destroying state, ignore OnWSFrameReceived().", __FUNCTION__);
+
             return;
         }
-
-        offset = -1;
-
-        switch (frame_type)
+        if (request->onRecvResponse)
         {
-        case WS_FRAME_TYPE_TEXT:
-#ifdef LOG_TEXT_MESSAGES
-            LogInfo("Message received:%.*s", size, buffer);
-#endif
-            offset = ParseHttpHeaders(responseHeadersHandle, buffer, size);
-            break;
-        case WS_FRAME_TYPE_BINARY:
-            if (size < 2)
+            responseHeadersHandle = HTTPHeaders_Alloc();
+            if (!responseHeadersHandle)
             {
-                PROTOCOL_VIOLATION("unable to read binary message length%s", "");
+                return;
+            }
+
+            offset = -1;
+
+            switch (frame_type)
+            {
+            case WS_FRAME_TYPE_TEXT:
+#ifdef LOG_TEXT_MESSAGES
+                LogInfo("Message received:%.*s", size, buffer);
+#endif
+                offset = ParseHttpHeaders(responseHeadersHandle, buffer, size);
+                break;
+            case WS_FRAME_TYPE_BINARY:
+                if (size < 2)
+                {
+                    PROTOCOL_VIOLATION("unable to read binary message length%s", "");
+                    goto Exit;
+                }
+
+                headerSize = (uint16_t)(buffer[0] << 8);
+                headerSize |= (uint16_t)(buffer[1] << 0);
+                offset = ParseHttpHeaders(responseHeadersHandle, buffer + 2, headerSize);
+                if (offset >= 0)
+                {
+                    offset += 2;
+                }
+                break;
+            }
+
+            if (offset < 0)
+            {
+                PROTOCOL_VIOLATION("Unable to parse response headers%s", "");
+                MetricsTransportParsingError();
                 goto Exit;
             }
 
-            headerSize = (uint16_t)(buffer[0] << 8);
-            headerSize |= (uint16_t)(buffer[1] << 0);
-            offset = ParseHttpHeaders(responseHeadersHandle, buffer + 2, headerSize);
-            if (offset >= 0)
-            {
-                offset += 2;
-            }
-            break;
+            TransportResponse response;
+            response.frameType = WSFrameEnumToResponseFrameEnum(static_cast<WS_FRAME_TYPE>(frame_type));
+            response.responseHeader = responseHeadersHandle;
+            response.buffer = buffer + offset;
+            response.bufferSize = size - offset;
+
+            request->onRecvResponse(&response, request->context);
+
+        Exit:
+            HTTPHeaders_Free(responseHeadersHandle);
         }
-
-        if (offset < 0)
-        {
-            PROTOCOL_VIOLATION("Unable to parse response headers%s","");
-            MetricsTransportParsingError();
-            goto Exit;
-        }
-
-        TransportResponse response;
-        response.frameType = WSFrameEnumToResponseFrameEnum(static_cast<WS_FRAME_TYPE>(frame_type));
-        response.responseHeader = responseHeadersHandle;
-        response.buffer = buffer + offset;
-        response.bufferSize = size - offset;
-
-        request->onRecvResponse(&response, request->context);
-
-    Exit:
-        HTTPHeaders_Free(responseHeadersHandle);
     }
 }
 
@@ -1157,6 +1179,10 @@ void usp::TransportDoWork(TransportHandle transportHandle)
 
     case TransportState::TRANSPORT_STATE_RESETTING:
         // Do nothing -- we're waiting for WSOnCloseForReset to be invoked.
+        break;
+
+    case TransportState::TRANSPORT_STATE_DESTROYING:
+        // Do nothing. We are waiting for closing the transport request.
         break;
 
     case TransportState::TRANSPORT_STATE_NETWORK_CHECKING:

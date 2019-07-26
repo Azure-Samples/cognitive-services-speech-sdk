@@ -119,7 +119,8 @@ enum class TransportState
     TRANSPORT_STATE_NETWORK_CHECKING,
     TRANSPORT_STATE_OPENING,
     TRANSPORT_STATE_CONNECTED,
-    TRANSPORT_STATE_RESETTING // needed for token-based auth (currently not used).
+    TRANSPORT_STATE_RESETTING, // needed for token-based auth (currently not used).
+    TRANSPORT_STATE_DESTROYING
 };
 
 /**
