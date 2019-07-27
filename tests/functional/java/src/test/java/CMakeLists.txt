@@ -37,9 +37,12 @@ set(JAVA_SOURCES_TESTS
     tests/unit/SpeechConfigTests.java
     tests/unit/SpeechPropertyIdTests.java
     tests/unit/SpeechRecognizerTests.java
+    tests/unit/SpeechSynthesizerTests.java
     tests/unit/TranslationRecognizerTests.java
     tests/unit/WavFileAudioInputStream.java
 )
+
+set(CMAKE_JAVA_COMPILE_FLAGS ${CMAKE_JAVA_COMPILE_FLAGS} "-encoding" "utf-8")
 
 add_jar(${PROJECT_NAME}
     SOURCES ${JAVA_SOURCES_TESTS}

@@ -14,6 +14,7 @@ import org.junit.runners.Suite.SuiteClasses;
     IntentRecognizerTests.class,
     SpeechConfigTests.class,
     SpeechRecognizerTests.class,
+    SpeechSynthesizerTests.class,
     TranslationRecognizerTests.class,
     KeywordRecognitionModelTests.class,
     LanguageUnderstandingModelTests.class,
