@@ -130,7 +130,7 @@ class ViewController: UIViewController {
 
         let audioConfig = SPXAudioConfiguration()
 
-        let reco = try! SPXSpeechRecognizer(speechConfiguration: speechConfig!, audioConfiguration: audioConfig!)
+        let reco = try! SPXSpeechRecognizer(speechConfiguration: speechConfig!, audioConfiguration: audioConfig)
 
         reco.addRecognizingEventHandler() {reco, evt in
             print("intermediate recognition result: \(evt.result.text ?? "(no result)")")

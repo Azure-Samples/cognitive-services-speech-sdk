@@ -91,7 +91,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @return the result of translation.
  */
 - (nonnull SPXTranslationRecognitionResult *)recognizeOnce
-NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.") NS_RETURNS_RETAINED;
 
 /**
  * Starts speech translation, and returns after a single utterance is recognized. The end of a
@@ -107,7 +107,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param outError error information.
  * @return the result of translation.
  */
-- (nullable SPXTranslationRecognitionResult *)recognizeOnce:(NSError * _Nullable * _Nullable)outError;
+- (nullable SPXTranslationRecognitionResult *)recognizeOnce:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED;
 
 /**
  * Starts translation, and returns after a single utterance is recognized. The end of a

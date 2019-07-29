@@ -91,8 +91,9 @@ set_target_properties(${PROJECT_NAME}
     PROPERTIES BUILD_RPATH "@loader_path;@executable_path/Frameworks"
     )
 
+get_target_property(FRAMEWORK_OUTPUT_DIR ${PROJECT_NAME} LIBRARY_OUTPUT_DIRECTORY)
 add_custom_target(${PROJECT_NAME}-macos-headers ALL
-    COMMAND sed -i \"\" -E "\'s@#include <(((speechapi_.*)|(spxerror)|(spxdebug))\.h)>@#include \"\\1\"@\'" ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${PROJECT_NAME}.framework/Headers/*.h
+    COMMAND sed -i \"\" -E "\'s@#include <(((speechapi_.*)|(spxerror)|(spxdebug))\.h)>@#include \"\\1\"@\'" ${FRAMEWORK_OUTPUT_DIR}/${PROJECT_NAME}.framework/Headers/*.h
 )
 add_dependencies(${PROJECT_NAME}-macos-headers ${PROJECT_NAME} )
 

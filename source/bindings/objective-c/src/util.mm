@@ -174,7 +174,6 @@
 
     int errorNo = -1;
     for (NSTextCheckingResult * match in matches) {
-        NSString * matchText = [message substringWithRange:[match range]];
         NSRange group1 = [match rangeAtIndex:1];
         NSScanner *scanner = [NSScanner scannerWithString:[message substringWithRange:group1]];
         unsigned int tmp;

@@ -17,7 +17,7 @@ SPX_EXPORT
  *
  * @return an instance of audio input configuration.
  */
-- (nullable instancetype)init;
+- (nonnull instancetype)init;
 
 /**
  * Initializes an SPXAudioConfiguration object using the specified audio input of the system.

@@ -31,7 +31,7 @@ SPX_EXPORT
  * Initializes a memory-backed SPXPushAudioInputStream using the default format (16 kHz, 16 bit, mono PCM).
  * @return an instance of push audio input stream.
  */
-- (nullable instancetype)init;
+- (nonnull instancetype)init;
 
 /**
  * Initializes a memory-backed SPXPushAudioInputStream with the specified audio format.

@@ -40,7 +40,7 @@ SPX_EXPORT
  *
  * @return an instance of audio stream format.
  */
-- (nullable instancetype)init;
+- (nonnull instancetype)init;
 
 /**
  * Initialize the audio stream format object with the specified PCM waveformat characteristics.

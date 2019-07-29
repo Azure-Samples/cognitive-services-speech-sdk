@@ -194,6 +194,7 @@
 {
     try {
         self = [self initWithEndpoint:endpointUri];
+        return self;
     }
     catch (NSException *exception) {
         NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];

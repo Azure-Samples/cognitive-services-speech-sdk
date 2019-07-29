@@ -9,7 +9,15 @@
 
 - (std::string)toSpxString
 {
-    return [self UTF8String];
+    const char * s = [self UTF8String];
+    if (s != nullptr)
+    {
+        return [self UTF8String];
+    }
+    else
+    {
+        return std::string();
+    }
 }
 
 + (instancetype)StringWithStdString:(const std::string&)str

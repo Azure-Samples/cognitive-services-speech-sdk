@@ -59,7 +59,6 @@ function runXcodeSuite {
 
   testCases=(
     "iPhone-X iOS-12-2"
-    "iPhone-6 iOS-9-3"
   )
 
   # deactivated test cases:
@@ -73,6 +72,7 @@ function runXcodeSuite {
   # "iPhone-5 iOS-10-2"
   # "iPhone-6 iOS-10-2"
   # "iPhone-6 iOS-9-2"
+  # "iPhone-6 iOS-9-3"
 
   testCases=( "${testCases[@]/%/" ${xcodeExtraArgs[@]}"}" )
 

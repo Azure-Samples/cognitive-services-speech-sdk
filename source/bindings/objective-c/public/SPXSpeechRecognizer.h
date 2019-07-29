@@ -87,7 +87,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @return the result of speech recognition.
  */
 - (nonnull SPXSpeechRecognitionResult *)recognizeOnce
-NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.") NS_RETURNS_RETAINED;
 
 /**
  * Starts speech recognition, and returns after a single utterance is recognized. The end of a
@@ -103,7 +103,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param outError error information.
  * @return the result of speech recognition.
  */
-- (nullable SPXSpeechRecognitionResult *)recognizeOnce:(NSError * _Nullable * _Nullable)outError;
+- (nullable SPXSpeechRecognitionResult *)recognizeOnce:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED;
 
 /**
  * Starts speech recognition, and returns after a single utterance is recognized. The end of a
