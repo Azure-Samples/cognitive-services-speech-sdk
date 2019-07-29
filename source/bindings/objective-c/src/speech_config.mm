@@ -333,6 +333,36 @@
     speechConfigImpl->SetProfanity((SpeechImpl::ProfanityOption)(int)profanity);
 }
 
+-(void)setSpeechSynthesisLanguage:(nonnull NSString *)lang
+{
+    speechConfigImpl->SetSpeechSynthesisLanguage([lang toSpxString]);
+}
+
+-(nullable NSString *)getSpeechSynthesisLanguage
+{
+    return [NSString StringWithStdString:speechConfigImpl->GetSpeechSynthesisLanguage()];
+}
+
+-(void)setSpeechSynthesisVoiceName:(nonnull NSString *)voiceName
+{
+    speechConfigImpl->SetSpeechSynthesisVoiceName([voiceName toSpxString]);
+}
+
+-(nullable NSString *)getSpeechSynthesisVoiceName
+{
+    return [NSString StringWithStdString:speechConfigImpl->GetSpeechSynthesisVoiceName()];
+}
+
+-(void)setSpeechSynthesisOutputFormat:(SPXSpeechSynthesisOutputFormat)formatId
+{
+    speechConfigImpl->SetSpeechSynthesisOutputFormat((SpeechImpl::SpeechSynthesisOutputFormat)(int)formatId);
+}
+
+-(nullable NSString *)getSpeechSynthesisOutputFormat
+{
+    return [NSString StringWithStdString:speechConfigImpl->GetSpeechSynthesisOutputFormat()];
+}
+
 -(void)enableAudioLogging
 {
     speechConfigImpl->EnableAudioLogging();

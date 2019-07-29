@@ -102,3 +102,19 @@
 }
 
 @end
+
+@implementation SpeechSynthesizerPropertyCollection
+{
+    // We have to keep the speech synthesizer instance alive in order to make sure the propertyHandle is valid
+    SpeechSynthSharedPtr speechSynthesizerImpl;
+}
+
+-(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle from:(SpeechSynthSharedPtr)speechSynthHandle
+{
+    self = [super initWithPropertyCollection:propertiesHandle];
+    if (self)
+        self->speechSynthesizerImpl = speechSynthHandle;
+    return self;
+}
+
+@end

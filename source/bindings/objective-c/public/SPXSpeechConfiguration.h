@@ -269,6 +269,60 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 -(void)setProfanityOptionTo:(SPXSpeechConfigProfanityOption)profanity;
 
 /**
+ * Sets the speech synthesis language.
+ * 
+ * Added in version 1.7.0
+ * 
+ * @param lang The speech synthesis language.
+ */
+-(void)setSpeechSynthesisLanguage:(nonnull NSString *)lang;
+
+/**
+ * Gets the speech synthesis language.
+ * 
+ * Added in version 1.7.0
+ * 
+ * @return the speech synthesis language.
+ */
+-(nullable NSString *)getSpeechSynthesisLanguage;
+
+/**
+ * Sets the speech synthesis voice name.
+ * 
+ * Added in version 1.7.0
+ * 
+ * @param voiceName the speech synthesis voice name.
+ */
+-(void)setSpeechSynthesisVoiceName:(nonnull NSString *)voiceName;
+
+/**
+ * Gets the speech synthesis voice name.
+ * 
+ * Added in version 1.7.0
+ * 
+ * @return the speech synthesis voice name.
+ */
+-(nullable NSString *)getSpeechSynthesisVoiceName;
+
+/**
+ * Set the speech synthesis audio output format (e.g. Riff16Khz16BitMonoPcm).
+ * 
+ * Added in version 1.7.0
+ * 
+ * @param formatId output format id.
+ */
+-(void)setSpeechSynthesisOutputFormat:(SPXSpeechSynthesisOutputFormat)formatId;
+
+/**
+ * Gets the speech synthesis output format. 
+ * 
+ * Added in version 1.7.0
+ * 
+ * @return the speech synthesis output format.
+ */
+-(nullable NSString *)getSpeechSynthesisOutputFormat;
+
+/**
  * Enables audio logging in service.
  *
  * Added in version 1.5.0.

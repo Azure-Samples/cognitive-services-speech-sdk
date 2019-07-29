@@ -24,3 +24,22 @@
 - (instancetype)initWithImpl: (std::shared_ptr<AudioImpl::PullAudioInputStream>)handle;
 
 @end
+
+@interface SPXAudioOutputStream (Private)
+
+- (instancetype)init: (std::shared_ptr<AudioImpl::AudioOutputStream>)handle;
+- (std::shared_ptr<AudioImpl::AudioOutputStream>)getHandle;
+
+@end
+
+@interface SPXPullAudioOutputStream (Private)
+
+- (instancetype)initWithImpl: (std::shared_ptr<AudioImpl::PullAudioOutputStream>)handle;
+
+@end
+
+@interface SPXPushAudioOutputStream (Private)
+
+- (instancetype)initWithImpl: (std::shared_ptr<AudioImpl::PushAudioOutputStream>)handle;
+
+@end

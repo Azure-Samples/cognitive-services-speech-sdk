@@ -9,6 +9,9 @@
 typedef NSInteger (^SPXPullAudioInputStreamReadHandler)(NSMutableData * _Nonnull, NSUInteger);
 typedef void (^SPXPullAudioInputStreamCloseHandler)(void);
 
+typedef NSUInteger (^SPXPushAudioOutputStreamWriteHandler)(NSData * _Nonnull);
+typedef void (^SPXPushAudioOutputStreamCloseHandler)(void);
+
 /**
  * Base class representing the audio input stream used for custom audio input configurations.
  * Currently no property and methods defined in the base class.
@@ -79,5 +82,62 @@ SPX_EXPORT
  * @return The audio input stream being created.
  */
 - (nullable instancetype)initWithAudioFormat:(nonnull SPXAudioStreamFormat *)format readHandler:(nonnull SPXPullAudioInputStreamReadHandler)readHandler closeHandler:(nonnull SPXPullAudioInputStreamCloseHandler)closeHandler;
+
+@end
+
+/**
+ * Base class representing the audio output stream used for custom audio output configurations.
+ * Currently no property and methods defined in the base class.
+ * 
+ * Added in version 1.7.0
+ */
+SPX_EXPORT
+@interface SPXAudioOutputStream : NSObject
+
+@end
+
+/**
+ * Represents memory backed pull audio output stream used for custom audio output.
+ * 
+ * Added in version 1.7.0
+ */
+SPX_EXPORT
+@interface SPXPullAudioOutputStream : SPXAudioOutputStream
+
+/**
+ * Creates a memory backed PullAudioOutputStream with the specified audio format.
+ * 
+ * @return An instance of pull audio output stream
+ */
+- (nullable instancetype)init;
+
+/**
+ * Reads a chunk of the audio data and fill it to given buffer
+ * 
+ * @param data a buffer to receive read data.
+ * @param length the length of data to receive.
+ * @return size of data filled to the buffer, 0 means end of stream
+ */
+- (NSUInteger)read:(nonnull NSMutableData *)data length:(NSUInteger) length;
+
+@end
+
+/**
+ * Represents a push audio output stream used for custom audio output configurations.
+ * 
+ * Added in version 1.7.0
+ */
+SPX_EXPORT
+@interface SPXPushAudioOutputStream : SPXAudioOutputStream
+
+/**
+ * Initializes an SPXPushAudioOutputStream that delegates to the specified callback interface for write() and close() methods.
+ *
+ * @param writeHandler Handler which will be called in order to write data synchronously to the data stream.
+ * @param closeHandler Handler which will be called to close the audio stream.
+ * 
+ * @return an instance of push audio output stream.
+ */
+- (nullable instancetype)initWithWriteHandler:(nonnull SPXPushAudioOutputStreamWriteHandler)writeHandler closeHandler:(nonnull SPXPushAudioOutputStreamCloseHandler)closeHandler; 
 
 @end

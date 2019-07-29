@@ -16,3 +16,9 @@
 -(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle from:(RecognizerSharedPtr)recoHandle;
 
 @end
+
+@interface SpeechSynthesizerPropertyCollection : PropertyCollection
+
+-(instancetype)initWithPropertyCollection :(SpeechImpl::PropertyCollection *)propertiesHandle from:(SpeechSynthSharedPtr)speechSynthHandle;
+
+@end

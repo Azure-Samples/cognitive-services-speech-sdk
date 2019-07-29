@@ -42,6 +42,9 @@
         case SpeechImpl::ResultReason::SynthesizingAudioCompleted:
             reason = SPXResultReason_SynthesizingAudioCompleted;
             break;
+        case SpeechImpl::ResultReason::SynthesizingAudioStarted:
+            reason = SPXResultReason_SynthesizingAudioStarted;
+            break;
         default:
             // Todo error handling.
             NSLog(@"Unknown ResultReason value: %d.", (int)reasonImpl);

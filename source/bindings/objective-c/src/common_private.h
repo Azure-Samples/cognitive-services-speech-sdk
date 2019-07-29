@@ -17,5 +17,6 @@ namespace AudioImpl = Microsoft::CognitiveServices::Speech::Audio;
 
 using RecognizerSharedPtr = std::shared_ptr<SpeechImpl::Recognizer>;
 using SpeechRecoSharedPtr = std::shared_ptr<SpeechImpl::SpeechRecognizer>;
+using SpeechSynthSharedPtr = std::shared_ptr<SpeechImpl::SpeechSynthesizer>;
 using TranslationRecoSharedPtr = std::shared_ptr<TranslationImpl::TranslationRecognizer>;
 using IntentRecoSharedPtr = std::shared_ptr<IntentImpl::IntentRecognizer>;

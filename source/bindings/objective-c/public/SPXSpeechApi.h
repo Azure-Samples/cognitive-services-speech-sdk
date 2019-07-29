@@ -4,6 +4,7 @@
 //
 
 #import "SPXAudioConfiguration.h"
+#import "SPXAudioDataStream.h"
 #import "SPXAudioStream.h"
 #import "SPXAudioStreamFormat.h"
 #import "SPXConnection.h"
@@ -24,6 +25,9 @@
 #import "SPXSpeechRecognitionEventArgs.h"
 #import "SPXSpeechRecognitionResult.h"
 #import "SPXSpeechRecognizer.h"
+#import "SPXSpeechSynthesisCancellationDetails.h"
+#import "SPXSpeechSynthesisEventArgs.h"
+#import "SPXSpeechSynthesizer.h"
 #import "SPXSpeechTranslationConfiguration.h"
 #import "SPXTranslationRecognitionEventArgs.h"
 #import "SPXTranslationRecognitionResult.h"

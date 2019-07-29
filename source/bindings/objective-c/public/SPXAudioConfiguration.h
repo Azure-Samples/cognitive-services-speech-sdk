@@ -41,6 +41,28 @@ SPX_EXPORT
 - (nullable instancetype)initWithWavFileInput:(nonnull NSString *)path;
 
 /**
+ * Initializes an SPXAudioConfiguration object using the specified file as output.
+ * 
+ * Added in version 1.7.0
+ * 
+ * @param path path of the audio output file.
+ * @return an instance of audio input configuration.
+ */
+- (nullable instancetype)initWithWavFileOutput:(nonnull NSString *)path
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes an SPXAudioConfiguration object using the specified file as output.
+ * 
+ * Added in version 1.7.0
+ * 
+ * @param path path of the audio output file.
+ * @param outError error information.
+ * @return an instance of audio input configuration.
+ */
+- (nullable instancetype)initWithWavFileOutput:(nonnull NSString *)path error:(NSError * _Nullable * _Nullable)outError;
+
+/**
  * Initializes an SPXAudioConfiguration object using the specified stream as input.
  * Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
  *
@@ -48,5 +70,29 @@ SPX_EXPORT
  * @return an instance of audio input configuration.
 */
 - (nullable instancetype)initWithStreamInput:(nonnull SPXAudioInputStream *)stream;
+
+/**
+ * Initializes an SPXAudioConfiguration object using the specified stream as output.
+ * 
+ * Added in version 1.7.0
+ *
+ * @param stream the custom audio output stream.
+ * @return an instance of audio output configuration.
+*/
+- (nullable instancetype)initWithStreamOutput:(nonnull SPXAudioOutputStream *)stream
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes an SPXAudioConfiguration object using the specified stream as output.
+ * 
+ * Added in version 1.7.0
+ *
+ * @param stream the custom audio output stream.
+ * @param outError error information.
+ * @return an instance of audio output configuration.
+*/
+- (nullable instancetype)initWithStreamOutput:(nonnull SPXAudioOutputStream *)stream error:(NSError * _Nullable * _Nullable)outError;
+
+
 
 @end

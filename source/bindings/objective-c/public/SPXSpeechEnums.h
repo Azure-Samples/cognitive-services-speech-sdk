@@ -144,6 +144,21 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     SPXSpeechSessionId = 3002,
 
     /**
+     * The spoken language to be synthesized (e.g. en-US)
+     */
+    SPXSpeechServiceConnectionSynthesisLanguage = 3100,
+
+    /**
+     * The name of the voice to be used for speech synthesis
+     */
+    SPXSpeechServiceConnectionSynthesisVocie = 3101,
+
+    /**
+     * The string to specify speech synthesis output audio format (e.g. riff-16khz-16bit-mono-pcm)
+     */
+    SPXSpeechServiceConnectionSynthesisOutputFormat = 3102,
+
+    /**
      * The initial silence timeout value (in milliseconds) used by the service.
      * Added in version 1.5.0
      */
@@ -329,7 +344,12 @@ typedef NS_ENUM(NSUInteger, SPXResultReason)
     /**
      * Indicates the synthesized audio is now complete for this phrase.
      */
-    SPXResultReason_SynthesizingAudioCompleted = 9
+    SPXResultReason_SynthesizingAudioCompleted = 9,
+
+    /**
+     * Indicates the speech synthesis is now started.
+     */
+    SPXResultReason_SynthesizingAudioStarted = 12
 };
 
 /**
@@ -470,3 +490,128 @@ typedef NS_ENUM(NSUInteger, SPXSpeechConfigProfanityOption)
     SPXSpeechConfigProfanityOption_ProfanityRaw = 2,
 };
 
+/**
+ * Defines the possible speech synthesis output audio format.
+ * 
+ * Added in version 1.7.0
+ */
+typedef NS_ENUM(NSUInteger, SPXSpeechSynthesisOutputFormat)
+{
+    /**
+     * raw-8khz-8bit-mono-mulaw
+     */
+    SPXSpeechSynthesisOutputFormat_Raw8Khz8BitMonoMULaw = 1,
+
+    /**
+     * riff-16khz-16kbps-mono-siren
+     */
+    SPXSpeechSynthesisOutputFormat_Riff16Khz16KbpsMonoSiren = 2,
+
+    /**
+     * audio-16khz-16kbps-mono-siren
+     */
+    SPXSpeechSynthesisOutputFormat_Audio16Khz16KbpsMonoSiren = 3,
+
+    /**
+     * audio-16khz-32kbitrate-mono-mp3
+     */
+    SPXSpeechSynthesisOutputFormat_Audio16Khz32KBitRateMonoMp3 = 4,
+
+    /**
+     * audio-16khz-128kbitrate-mono-mp3
+     */
+    SPXSpeechSynthesisOutputFormat_Audio16Khz128KBitRateMonoMp3 = 5,
+
+    /**
+     * audio-16khz-64kbitrate-mono-mp3
+     */
+    SPXSpeechSynthesisOutputFormat_Audio16Khz64KBitRateMonoMp3 = 6,
+
+    /**
+     * audio-24khz-48kbitrate-mono-mp3
+     */
+    SPXSpeechSynthesisOutputFormat_Audio24Khz48KBitRateMonoMp3 =7,
+
+    /**
+     * audio-24khz-96kbitrate-mono-mp3
+     */
+    SPXSpeechSynthesisOutputFormat_Audio24Khz96KBitRateMonoMp3 = 8,
+
+    /**
+     * audio-24khz-160kbitrate-mono-mp3
+     */
+    SPXSpeechSynthesisOutputFormat_Audio24Khz160KBitRateMonoMp3 = 9,
+
+    /**
+     * raw-16khz-16bit-mono-truesilk
+     */
+    SPXSpeechSynthesisOutputFormat_Raw16Khz16BitMonoTrueSilk = 10,
+
+    /**
+     * riff-16khz-16bit-mono-pcm
+     */
+    SPXSpeechSynthesisOutputFormat_Riff16Khz16BitMonoPcm = 11,
+
+    /**
+     * riff-8khz-16bit-mono-pcm
+     */
+    SPXSpeechSynthesisOutputFormat_Riff8Khz16BitMonoPcm = 12,
+
+    /**
+     * riff-24khz-16bit-mono-pcm
+     */
+    SPXSpeechSynthesisOutputFormat_Riff24Khz16BitMonoPcm = 13,
+
+    /**
+     * riff-8khz-8bit-mono-mulaw
+     */
+    SPXSpeechSynthesisOutputFormat_Riff8Khz8BitMonoMULaw = 14,
+
+    /**
+     * raw-16khz-16bit-mono-pcm
+     */
+    SPXSpeechSynthesisOutputFormat_Raw16Khz16BitMonoPcm = 15,
+
+    /**
+     * raw-24khz-16bit-mono-pcm
+     */
+    SPXSpeechSynthesisOutputFormat_Raw24Khz16BitMonoPcm = 16,
+
+    /**
+     * raw-8khz-16bit-mono-pcm
+     */
+    SPXSpeechSynthesisOutputFormat_Raw8Khz16BitMonoPcm = 17
+};
+
+/**
+ * Defines the possible status of audio data stream.
+ * 
+ * Added in version 1.7.0
+ */
+typedef NS_ENUM(NSUInteger, SPXStreamStatus)
+{
+    /**
+     * The audio data stream status is unknown
+     */
+    SPXStreamStatus_Unknown = 0,
+
+    /** <summary>
+     * The audio data stream contains no data
+     */
+    SPXStreamStatus_NoData = 1,
+
+    /**
+     * The audio data stream contains partial data of a speak request
+     */
+    SPXStreamStatus_PartialData = 2,
+
+    /**
+     * The audio data stream contains all data of a speak request
+     */
+    SPXStreamStatus_AllData = 3,
+
+    /**
+     * The audio data stream was cancelled
+     */
+    SPXStreamStatus_Canceled = 4
+};
