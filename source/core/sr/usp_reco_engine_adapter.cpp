@@ -1926,7 +1926,7 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
     json contextJson;
 
     // Get the Dgi json payload
-    std::list<std::string> listenForList = GetListenForListFromSite();
+    list<string> listenForList = GetListenForListFromSite();
     auto dgiJson = GetDgiJsonFromListenForList(listenForList);
     if (!dgiJson.empty())
     {
@@ -1934,7 +1934,7 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
     }
 
     // Get the intent payload
-    std::string provider, id, key, region;
+    string provider, id, key, region;
     GetIntentInfoFromSite(provider, id, key, region);
     auto intentJson = GetLanguageUnderstandingJsonFromIntentInfo(provider, id, key, region);
     m_expectIntentResponse = !intentJson.empty();
@@ -1967,11 +1967,45 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
 
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
-    std::string toLanguages = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
+    string toLanguages = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
+    vector<string> toLangsVector;
     if (!toLanguages.empty())
     {
-        auto toLangsVector = PAL::split(toLanguages, CommaDelim);
+        toLangsVector = PAL::split(toLanguages, CommaDelim);
         contextJson["translationcontext"]["to"] = json(toLangsVector);
+    }
+
+    // New translation endpoint will need below json content. If old translation endpoint receives these, they will be discarded.
+    if (m_endpointType == USP::EndpointType::Translation)
+    {
+        string recoMode = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode));
+        unordered_map<string, string> voiceNameMap;
+        if (!toLangsVector.empty())
+        {
+            for (const string& lang : toLangsVector)
+            {
+                string voiceNamePoperty = lang + GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice);
+                auto voiceName = properties->GetStringValue(voiceNamePoperty.c_str());
+                if (!voiceName.empty())
+                {
+                    voiceNameMap[lang] = voiceName;
+                }
+            }
+        }
+
+        bool doSynthesis = !voiceNameMap.empty();
+        auto languageIdJson = GetLanguageIdJson();
+        if (!languageIdJson.empty())
+        {
+            contextJson["languageId"] = languageIdJson;
+        }
+        contextJson["phraseDetection"] = GetPhraseDetectionJson(recoMode);
+        contextJson["phraseOutput"] = GetPhraseOutputJson(recoMode);
+        contextJson["translation"] = GetTranslationJson(move(toLangsVector), doSynthesis);
+        if (doSynthesis)
+        {
+            contextJson["synthesis"] = GetSynthesisJson(move(voiceNameMap));
+        }
     }
 
     return contextJson;
@@ -2245,4 +2279,51 @@ std::pair<std::string, std::string> CSpxUspRecoEngineAdapter::GetLeftRightContex
     return {leftContext, rightContext};
 }
 
+json CSpxUspRecoEngineAdapter::GetLanguageIdJson()
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+    string sourceLanguages = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages));
+    json langDetectionJson;
+    if (!sourceLanguages.empty())
+    {
+        auto langVector = PAL::split(sourceLanguages, CommaDelim);
+        langDetectionJson["languages"] = json(langVector);
+        // TODO: This will be updated to RecognizeWithDefaultLanguage if caller specifies a fallback language
+        langDetectionJson["onUnknown"]["action"] = "None";
+    }
+    return langDetectionJson;
+}
+
+json CSpxUspRecoEngineAdapter::GetPhraseDetectionJson(const string& recoMode)
+{
+    json phraseDetectionJson;
+    phraseDetectionJson["mode"] = recoMode;
+    phraseDetectionJson["onSuccess"]["action"] = "Translate";
+    phraseDetectionJson["onInterim"]["action"] = "Translate";
+    return phraseDetectionJson;
+}
+
+json CSpxUspRecoEngineAdapter::GetPhraseOutputJson(const string& recoMode)
+{
+    json phraseOutputJson;
+    phraseOutputJson["interimResults"][recoMode]["resultType"] = "Auto";
+    return phraseOutputJson;
+}
+
+json CSpxUspRecoEngineAdapter::GetTranslationJson(vector<string>&& targetLangs, bool doSynthesis)
+{
+    json translationJson;
+    translationJson["targetLanguages"] = json(move(targetLangs));
+    translationJson["output"]["interimResults"]["mode"] = "Always";
+    translationJson["onSuccess"]["action"] = doSynthesis ? "Synthesize" : "None";
+    return translationJson;
+}
+
+json CSpxUspRecoEngineAdapter::GetSynthesisJson(unordered_map<string, string>&& voiceNameMap)
+{
+    json synthesisJson;
+    synthesisJson["defaultVoices"] = json(move(voiceNameMap));
+    return synthesisJson;
+}
 } } } } // Microsoft::CognitiveServices::Speech::Impl

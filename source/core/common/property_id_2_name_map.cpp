@@ -32,6 +32,7 @@ const char* GetPropertyName(const PropertyId& id)
     case PropertyId::SpeechServiceConnection_ProxyPassword: return "SPEECH-ProxyPassword";
     case PropertyId::SpeechServiceConnection_Url: return "SPEECH-ConnectionUrl";
     case PropertyId::SpeechServiceConnection_TranslationToLanguages: return "TRANSLATION-ToLanguages";
+    case PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages: return "Auto-Detect-Source-Languages";
     case PropertyId::SpeechServiceConnection_TranslationVoice: return "TRANSLATION-Voice";
     case PropertyId::SpeechServiceConnection_TranslationFeatures: return "TRANSLATION-Features";
     case PropertyId::SpeechServiceConnection_IntentRegion: return "INTENT-region";

@@ -204,6 +204,11 @@ private:
     nlohmann::json GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key, const std::string& region);
     nlohmann::json GetSpeechContextJson();
     nlohmann::json GetKeywordDetectionJson();
+    nlohmann::json GetLanguageIdJson();
+    nlohmann::json GetPhraseDetectionJson(const std::string& recoMode);
+    nlohmann::json GetPhraseOutputJson(const std::string& recoMode);
+    nlohmann::json GetTranslationJson(std::vector<std::string>&& targetLangs, bool synthesis);
+    nlohmann::json GetSynthesisJson(std::unordered_map<std::string, std::string>&& voiceNameMap);
 
     void FireActivityResult(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio);
     void FireFinalResultNow(const USP::SpeechPhraseMsg& message, const std::string& luisJson = "");
