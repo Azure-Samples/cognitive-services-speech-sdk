@@ -109,7 +109,7 @@ SPX_EXPORT
  * 
  * @return An instance of pull audio output stream
  */
-- (nullable instancetype)init;
+- (nonnull instancetype)init;
 
 /**
  * Reads a chunk of the audio data and fill it to given buffer
