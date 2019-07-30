@@ -28,15 +28,14 @@ Note that this tutorial will not work without changes for any version earlier th
 ## Build and Run the Sample
 
 1. Open the `helloworld.xcworkspace` workspace in Xcode.
-1. Make the following changes in the `AppDelegate.m` file:
+1. Make the following changes in the `ViewController.swift` file:
     1. Replace the string `YourSubscriptionKey` with your subscription key.
     1. Replace the string `YourServiceRegion` with the [region](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions) associated with your subscription (for example, `westus` for the free trial subscription).
 1. Make the debug output visible (**View** > **Debug Area** > **Activate Console**).
 1. Build and run the example code by selecting **Product** -> **Run** from the menu or clicking the **Play** button.
-1. After you click the button in the app and say a few words, you should see the text you have spoken on the lower part of the screen. When you run the app for the first time, you should be prompted to give the app access to the used microphone.
+1. After you click the button in the app and say a few words, you should see the text you have spoken on the upper part of the screen. When you run the app for the first time, you should be prompted to give the app access to the used microphone.
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-objectivec-macos)
+* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-swift-ios)
 * [Speech SDK API reference for Objective-C](https://aka.ms/csspeech/objectivecref)
-
