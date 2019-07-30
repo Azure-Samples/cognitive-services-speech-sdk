@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3C5D93EC2146856B000C7129 /* TurnOnTheLamp.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */; };
 		3C5D93FA2146CC61000C7129 /* test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93F92146CC61000C7129 /* test.m */; };
+		3C740C5C22EFDC6A00BA9D95 /* SPXSpeechSynthesisTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C740C5B22EFDC6A00BA9D95 /* SPXSpeechSynthesisTest.m */; };
 		3CA6CF8B211F471500CD2768 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CF8A211F471500CD2768 /* AppDelegate.m */; };
 		3CA6CF8E211F471500CD2768 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CF8D211F471500CD2768 /* ViewController.m */; };
 		3CA6CF91211F471500CD2768 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3CA6CF8F211F471500CD2768 /* Main.storyboard */; };
@@ -72,6 +73,7 @@
 		3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = TurnOnTheLamp.wav; path = ../../../input/audio/TurnOnTheLamp.wav; sourceTree = "<group>"; };
 		3C5D93F92146CC61000C7129 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = test.m; path = ../../shared/test.m; sourceTree = "<group>"; };
 		3C5D93FB2146CD40000C7129 /* test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = test.h; path = ../../shared/test.h; sourceTree = "<group>"; };
+		3C740C5B22EFDC6A00BA9D95 /* SPXSpeechSynthesisTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXSpeechSynthesisTest.m; path = ../../shared/testrunners/SPXSpeechSynthesisTest.m; sourceTree = "<group>"; };
 		3CA6CF86211F471500CD2768 /* SpeechSDK_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDK_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CA6CF89211F471500CD2768 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		3CA6CF8A211F471500CD2768 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -188,6 +190,7 @@
 		F3EABAC421639F5700BA4B2C /* SpeechSDK_iOSUnitTests */ = {
 			isa = PBXGroup;
 			children = (
+				3C740C5B22EFDC6A00BA9D95 /* SPXSpeechSynthesisTest.m */,
 				DCC1352E225E182E00194047 /* SPXSpeechRecognitionEndtoEndTest.h */,
 				3CA6CFA2211F471600CD2768 /* SPXSpeechRecognitionTest.m */,
 				DC419443225B6F2300F95B2F /* CompressedStreamsTest.m */,
@@ -331,6 +334,7 @@
 			files = (
 				F3C06E37216E3AE2003989B2 /* SPXDummyTestRunner.m in Sources */,
 				DC419444225B6F2300F95B2F /* CompressedStreamsTest.m in Sources */,
+				3C740C5C22EFDC6A00BA9D95 /* SPXSpeechSynthesisTest.m in Sources */,
 				F3EABACE21639F6300BA4B2C /* SPXTranslationRecognitionTest.m in Sources */,
 				DCF1E29222E1CC4E00FA9F3E /* SPXTestHelpers.m in Sources */,
 				F3C06E38216E4148003989B2 /* dummytest.m in Sources */,

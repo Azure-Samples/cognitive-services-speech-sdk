@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3C5D93F72146CB57000C7129 /* TurnOnTheLamp.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93F52146CB56000C7129 /* TurnOnTheLamp.wav */; };
 		3C5D93F82146CB57000C7129 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93F62146CB56000C7129 /* whatstheweatherlike.wav */; };
+		3C740C5822EFDB6700BA9D95 /* SPXSpeechSynthesisTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C740C5722EFDB6700BA9D95 /* SPXSpeechSynthesisTest.m */; };
 		3CBD7F13211CD69B00F72336 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CBD7F12211CD69B00F72336 /* Assets.xcassets */; };
 		3CBD7F19211CD69C00F72336 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD7F18211CD69C00F72336 /* main.m */; };
 		3CCD06CB2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
@@ -63,6 +64,7 @@
 		3C5D93FD2146D410000C7129 /* test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test.h; path = ../../shared/test.h; sourceTree = "<group>"; };
 		3C676486214EA6CA00FCB533 /* microphone_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = microphone_test.h; path = ../../shared/microphone_test.h; sourceTree = "<group>"; };
 		3C676487214EA6CA00FCB533 /* microphone_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = microphone_test.m; path = ../../shared/microphone_test.m; sourceTree = "<group>"; };
+		3C740C5722EFDB6700BA9D95 /* SPXSpeechSynthesisTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXSpeechSynthesisTest.m; path = ../../shared/testrunners/SPXSpeechSynthesisTest.m; sourceTree = "<group>"; };
 		3CBD7F06211CD69B00F72336 /* SpeechSDK.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDK.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CBD7F12211CD69B00F72336 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3CBD7F17211CD69B00F72336 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -81,8 +83,8 @@
 		DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXSpeechRecognitionTest.m; path = ../../shared/testrunners/SPXSpeechRecognitionTest.m; sourceTree = "<group>"; };
 		DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXDummyTestRunner.m; path = ../../shared/testrunners/SPXDummyTestRunner.m; sourceTree = "<group>"; };
 		DCB56301224285E300662DC3 /* SPXTranslationRecognitionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPXTranslationRecognitionTest.m; path = ../../shared/testrunners/SPXTranslationRecognitionTest.m; sourceTree = "<group>"; };
-		DCF107B622A8268C00EF5F80 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
 		DCBDE1ED225E3F0D00BBA2CE /* SPXSpeechRecognitionEndtoEndTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPXSpeechRecognitionEndtoEndTest.h; path = ../../shared/testrunners/SPXSpeechRecognitionEndtoEndTest.h; sourceTree = "<group>"; };
+		DCF107B622A8268C00EF5F80 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,13 +152,14 @@
 		3CBD7F21211CD69C00F72336 /* SpeechSDKTests */ = {
 			isa = PBXGroup;
 			children = (
+				3CBD7F24211CD69C00F72336 /* Info.plist */,
+				DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */,
 				DCBDE1ED225E3F0D00BBA2CE /* SPXSpeechRecognitionEndtoEndTest.h */,
+				DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */,
+				3C740C5722EFDB6700BA9D95 /* SPXSpeechSynthesisTest.m */,
 				DC0E471D22E1DA27005012F7 /* SPXTestHelpers.h */,
 				DC0E471E22E1DA27005012F7 /* SPXTestHelpers.m */,
-				DCB562FF224285E300662DC3 /* SPXDummyTestRunner.m */,
-				DCB562FE224285E300662DC3 /* SPXSpeechRecognitionTest.m */,
 				DCB56301224285E300662DC3 /* SPXTranslationRecognitionTest.m */,
-				3CBD7F24211CD69C00F72336 /* Info.plist */,
 			);
 			path = SpeechSDKTests;
 			sourceTree = "<group>";
@@ -293,6 +296,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C740C5822EFDB6700BA9D95 /* SPXSpeechSynthesisTest.m in Sources */,
 				DCADF54B2245375700DD94FE /* test.m in Sources */,
 				DCB56303224285E300662DC3 /* SPXDummyTestRunner.m in Sources */,
 				DC0E471F22E1DA27005012F7 /* SPXTestHelpers.m in Sources */,
