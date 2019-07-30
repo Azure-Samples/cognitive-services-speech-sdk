@@ -26,6 +26,23 @@ class Grammar
 public:
 
     /// <summary>
+    /// Creates a grammar from a storage ID.
+    /// Added in version 1.7.0.
+    /// </summary>
+    /// <param name="storageId)">The persisted storage ID of the language model.</param>
+    /// <returns>The grammar.</returns>
+    /// <remarks>
+    /// Creating a grammar from a storage ID is only usable in specific scenarios and is not generally possible.
+    /// </remarks>
+    static std::shared_ptr<Grammar> FromStorageId(const SPXSTRING& storageId)
+    {
+        SPXGRAMMARHANDLE hgrammar = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(grammar_create_from_storage_id(&hgrammar, Utils::ToUTF8(storageId.c_str())));
+
+        return std::make_shared<Grammar>(hgrammar);
+    }
+
+    /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
     /// <param name="hgrammar">Grammar handle.</param>

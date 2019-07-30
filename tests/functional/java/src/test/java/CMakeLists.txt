@@ -32,6 +32,9 @@ set(JAVA_SOURCES_TESTS
     tests/unit/KeywordRecognitionModelTests.java
     tests/unit/LanguageUnderstandingModelTests.java
     tests/unit/PhraseListGrammarTests.java
+    tests/unit/GrammarTests.java
+    tests/unit/GrammarListTests.java
+    tests/unit/ClassLanguageModelTests.java
     tests/unit/PropertyCollectionTests.java
     tests/unit/RecognizerTests.java
     tests/unit/SpeechConfigTests.java

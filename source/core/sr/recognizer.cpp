@@ -51,11 +51,24 @@ std::shared_ptr<ISpxGrammar> CSpxRecognizer::GetPhraseListGrammar(const wchar_t*
     return SpxQueryInterface<ISpxGrammar>(EnsureDefaultPhraseListGrammar());
 }
 
+void CSpxRecognizer::AddGrammar(std::shared_ptr<ISpxGrammar> grammar)
+{
+    SPX_IFFALSE_THROW_HR(grammar != nullptr, SPXERR_INVALID_ARG);
+
+    m_grammarlist.push_back(grammar);
+}
+
 std::list<std::string> CSpxRecognizer::GetListenForList()
 {
-    return m_phraselist == nullptr
-        ? std::list<std::string>()
-        : m_phraselist->GetListenForList();
+    auto retVal = std::list<std::string>();
+
+    for (auto& grammar : m_grammarlist)
+    {
+        auto grammarListenFor = grammar->GetListenForList();
+        retVal.insert(retVal.end(), grammarListenFor.begin(), grammarListenFor.end());
+    }
+
+    return retVal;
 }
 
 bool CSpxRecognizer::IsEnabled()
@@ -316,6 +329,8 @@ std::shared_ptr<ISpxPhraseList> CSpxRecognizer::EnsureDefaultPhraseListGrammar()
         phraselist->InitPhraseList(L"");
 
         m_phraselist = phraselist;
+
+        AddGrammar(SpxQueryInterface<ISpxGrammar>(m_phraselist));
     }
 
     return m_phraselist;

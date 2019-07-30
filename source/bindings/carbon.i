@@ -38,7 +38,9 @@
 }
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Grammar)
+%shared_ptr(Microsoft::CognitiveServices::Speech::GrammarList)
 %shared_ptr(Microsoft::CognitiveServices::Speech::PhraseListGrammar)
+%shared_ptr(Microsoft::CognitiveServices::Speech::ClassLanguageModel)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Connection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::RecognitionResult, Microsoft::CognitiveServices::Speech::RecognitionEventArgs, Microsoft::CognitiveServices::Speech::RecognitionEventArgs>)
@@ -662,5 +664,10 @@
 %include <speechapi_cxx_connection.h>
 %include <speechapi_cxx_grammar.h>
 %include <speechapi_cxx_phrase_list_grammar.h>
+%include <speechapi_cxx_grammar_list.h>
+%include <speechapi_cxx_class_language_model.h>
 
 %template(FromRecognizer) Microsoft::CognitiveServices::Speech::PhraseListGrammar::FromRecognizer<Microsoft::CognitiveServices::Speech::Recognizer>;
+%template(FromRecognizer) Microsoft::CognitiveServices::Speech::GrammarList::FromRecognizer<Microsoft::CognitiveServices::Speech::Recognizer>;
+%template(Add) Microsoft::CognitiveServices::Speech::GrammarList::Add<Microsoft::CognitiveServices::Speech::Grammar>;
+%template(AssignClass) Microsoft::CognitiveServices::Speech::ClassLanguageModel::AssignClass<Microsoft::CognitiveServices::Speech::Grammar>;

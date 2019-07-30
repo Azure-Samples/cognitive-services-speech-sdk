@@ -19,3 +19,9 @@ SPXAPI phrase_list_grammar_clear(SPXGRAMMARHANDLE hgrammar);
 SPXAPI_(bool) grammar_phrase_handle_is_valid(SPXPHRASEHANDLE hphrase);
 SPXAPI grammar_phrase_create_from_text(SPXPHRASEHANDLE* hphrase, const char* phrase);
 SPXAPI grammar_phrase_handle_release(SPXPHRASEHANDLE hphrase);
+
+SPXAPI grammar_create_from_storage_id(SPXGRAMMARHANDLE *hgrammarlist, const char *id);
+SPXAPI grammar_list_from_recognizer(SPXGRAMMARHANDLE *hgrammarlist, SPXRECOHANDLE hreco);
+SPXAPI grammar_list_add_grammar(SPXGRAMMARHANDLE hgrammarlist, SPXGRAMMARHANDLE hgrammar);
+SPXAPI class_language_model_from_storage_id(SPXGRAMMARHANDLE* hclm, const char *storageid);
+SPXAPI class_language_model_assign_class(SPXGRAMMARHANDLE hclm, const char *classname, SPXGRAMMARHANDLE hgrammar);

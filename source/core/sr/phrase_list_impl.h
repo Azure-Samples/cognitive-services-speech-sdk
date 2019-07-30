@@ -15,7 +15,7 @@ namespace Speech {
 namespace Impl {
 
 
-class ISpxPhraseListImpl : public ISpxPhraseList
+class ISpxPhraseListImpl : public ISpxPhraseList, public ISpxGrammar
 {
 public:
 

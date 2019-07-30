@@ -50,6 +50,7 @@ public:
 
     // --- ISpxGrammarList
     std::shared_ptr<ISpxGrammar> GetPhraseListGrammar(const wchar_t* name) override;
+    void AddGrammar(std::shared_ptr<ISpxGrammar> grammar) override;
     std::list<std::string> GetListenForList() override;
 
     // --- ISpxRecognizer
@@ -97,7 +98,7 @@ protected:
     void TermDefaultSession();
 
     std::shared_ptr<ISpxPhraseList> EnsureDefaultPhraseListGrammar();
-
+    
     void OnIsEnabledChanged();
 
     void CheckLogFilename();
@@ -115,7 +116,11 @@ private:
     std::shared_ptr<ISpxSession> m_defaultSession;
     std::atomic_bool m_fEnabled;
 
+    // Retain a separate pointer to the phrase list for now since it's
+    // a singleton wrt the recognizer.
     std::shared_ptr<ISpxPhraseList> m_phraselist;
+
+    std::list<std::shared_ptr<ISpxGrammar>> m_grammarlist;
 
     void SetStringValueInProperties(const char* name, const char* value);
     std::string GetStringValueFromProperties(const char* name, const char* defaultValue);

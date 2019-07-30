@@ -23,6 +23,9 @@ import org.junit.runners.Suite.SuiteClasses;
     AudioInputStreamTests.class,
     PropertyCollectionTests.class,
     PhraseListGrammarTests.class,
+    GrammarTests.class,
+    GrammarListTests.class,
+    ClassLanguageModelTests.class,
     ConversationTranscriberTests.class,
     })
 public class AllUnitTests {

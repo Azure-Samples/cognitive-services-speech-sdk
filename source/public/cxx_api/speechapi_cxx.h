@@ -47,6 +47,8 @@
 #include <speechapi_cxx_grammar.h>
 #include <speechapi_cxx_grammar_phrase.h>
 #include <speechapi_cxx_phrase_list_grammar.h>
+#include <speechapi_cxx_grammar_list.h>
+#include <speechapi_cxx_class_language_model.h>
 
 #include <speechapi_cxx_session.h>
 

@@ -7,6 +7,7 @@ using System;
 namespace Microsoft.CognitiveServices.Speech
 {
     using Internal;
+    using System.Runtime.InteropServices;
     using static Internal.c_interop;
 
     /*! \cond INTERNAL */
@@ -27,7 +28,32 @@ namespace Microsoft.CognitiveServices.Speech
         {
             m_hgrammar = new InteropSafeHandle(hgrammar, grammar_handle_release);
         }
-        
+
+        /// <summary>
+        /// Creates a Grammar from its storage Id.
+        /// Added in version 1.7.0.
+        /// </summary>
+        /// <param name="storageId">The storage ID for the grammar.</param>
+        /// <returns>A reference to the grammar</returns>
+        /// <remarks>
+        /// Creating a grammar from a storage ID is only usable in specific scenarios and is not generally possible.
+        /// </remarks>
+        public static Grammar FromStorageId(string storageId)
+        {
+            SPXGRAMMARHANDLE hgrammar = SPXHANDLE_INVALID;
+
+            IntPtr textPtr = Utf8StringMarshaler.MarshalManagedToNative(storageId);
+            try
+            {
+                SPX_THROW_ON_FAIL(grammar_create_from_storage_id(out hgrammar, textPtr));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(textPtr);
+            }
+            return new Grammar(hgrammar);
+        }
+
         /// <summary>
         /// Internal native handle property.
         /// </summary>

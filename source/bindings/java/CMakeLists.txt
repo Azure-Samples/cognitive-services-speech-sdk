@@ -86,7 +86,7 @@ swig_link_libraries(${JAVA_BINDINGS} ${SPEECHSDK_CORE_LIBRARY})
 
 if(WIN32)
     # Ensure we build with debug information (TODO global setting does not apply?)
-    set_target_properties(${JAVA_BINDINGS} PROPERTIES LINK_FLAGS "/DEBUG /OPT:REF /OPT:ICF")
+    set_target_properties(${JAVA_BINDINGS} PROPERTIES LINK_FLAGS "/DEBUG /OPT:REF /OPT:ICF" COMPILE_FLAGS "/bigobj")
 elseif(APPLE)
     set_target_properties(${JAVA_BINDINGS}
       PROPERTIES BUILD_RPATH "@loader_path")
@@ -173,6 +173,8 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/Connection.java
     ${CMAKE_SWIG_OUTDIR}/Grammar.java
     ${CMAKE_SWIG_OUTDIR}/PhraseListGrammar.java
+    ${CMAKE_SWIG_OUTDIR}/GrammarList.java
+    ${CMAKE_SWIG_OUTDIR}/ClassLanguageModel.java
     ${CMAKE_SWIG_OUTDIR}/Participant.java
     ${CMAKE_SWIG_OUTDIR}/ConnectionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/ConnectionEventListener.java
@@ -262,6 +264,9 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/NoMatchDetails.java
     ${PACKAGE_DIR}/NoMatchReason.java
     ${PACKAGE_DIR}/Connection.java
+    ${PACKAGE_DIR}/Grammar.java
+    ${PACKAGE_DIR}/GrammarList.java
+    ${PACKAGE_DIR}/ClassLanguageModel.java
     ${PACKAGE_DIR}/PhraseListGrammar.java
     ${PACKAGE_DIR}/Recognizer.java
     ${PACKAGE_DIR}/SessionEventArgs.java
