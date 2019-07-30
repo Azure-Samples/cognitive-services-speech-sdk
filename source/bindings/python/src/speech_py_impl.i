@@ -38,9 +38,15 @@ from typing import Optional
 
 %rename ("recognize_once") Recognize;
 
+// Ignore overloaded methods for python
+%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::AudioDataStream::CanReadData(uint32_t pos, uint32_t bytesRequested);
+%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::AudioDataStream::ReadData(uint32_t pos, uint8_t* buffer, uint32_t bufferSize);
+
 //don't expose all the different methods to create push and pull streams
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Audio::AudioInputStream::CreatePushStream;
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Audio::AudioInputStream::CreatePullStream;
+%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Audio::AudioOutputStream::CreatePushStream;
+%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Audio::AudioOutputStream::CreatePullStream;
 
 // hide constructors for internally used classes
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::RecognitionResult::RecognitionResult;
@@ -49,6 +55,10 @@ from typing import Optional
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs::SpeechRecognitionCanceledEventArgs;
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::SessionEventArgs::SessionEventArgs;
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::SpeechRecognitionResult::SpeechRecognitionResult;
+
+%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::SpeechSynthesisResult::SpeechSynthesisResult;
+%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::SpeechSynthesisEventArgs::SpeechSynthesisEventArgs;
+%rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::SpeechSynthesisWordBoundaryEventArgs::SpeechSynthesisWordBoundaryEventArgs;
 
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult::TranslationRecognitionResult;
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs::TranslationRecognitionEventArgs;
@@ -61,19 +71,28 @@ from typing import Optional
 %rename ("$ignore", fullname=1) Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs::IntentRecognitionEventArgs;
 
 // Release GIL:
-// * when invoking a blocking Recognize.
+// * when invoking a blocking Recognize/Synthesize.
 %threadallow Microsoft::CognitiveServices::Speech::SpeechRecognizer::Recognize;
 %threadallow Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::Recognize;
 %threadallow Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::Recognize;
-// * when invoking a nonblocking Recognize.
+%threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::SpeakText;
+%threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::SpeakSsml;
+%threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::StartSpeakingText;
+%threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::StartSpeakingSsml;
+// * when invoking a nonblocking Recognize/Synthesize.
 %threadallow Microsoft::CognitiveServices::Speech::SpeechRecognizer::RecognizeOnceAsync;
 %threadallow Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::RecognizeOnceAsync;
 %threadallow Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::RecognizeOnceAsync;
-// * when invoking SpeechRecognizer dtor (otherwise there might be a deadlock if a
+%threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::SpeakTextAsync;
+%threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::SpeakSsmlAsync;
+%threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::StartSpeakingTextAsync;
+%threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::StartSpeakingSsmlAsync;
+// * when invoking SpeechRecognizer/SpeechSynthesizer dtor (otherwise there might be a deadlock if a
 //   callback is concurrently invoked from the speech client.)
 %threadallow Microsoft::CognitiveServices::Speech::SpeechRecognizer::~SpeechRecognizer;
 %threadallow Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::~IntentRecognizer;
 %threadallow Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::~TranslationRecognizer;;
+%threadallow Microsoft::CognitiveServices::Speech::SpeechSynthesizer::~SpeechSynthesizer;
 // * when waiting on a future.
 %threadallow FutureWrapper::Get;
 // * when invoking disconnect (which involves acquiring an event signal lock) to
@@ -81,6 +100,9 @@ from typing import Optional
 // the event signal lock).
 %threadallow Microsoft::CognitiveServices::Speech::EventSignal::_Disconnect;
 %threadallow Microsoft::CognitiveServices::Speech::EventSignal::DisconnectAll;
+// * when reading data from stream, which will block until enough data is available
+%threadallow Microsoft::CognitiveServices::Speech::Audio::PullAudioOutputStream::Read;
+%threadallow Microsoft::CognitiveServices::Speech::AudioDataStream::ReadData;
 
 %extend Microsoft::CognitiveServices::Speech::CancellationDetails {
     %pythoncode %{
@@ -118,13 +140,34 @@ from typing import Optional
     %}
 }
 
+%extend Microsoft::CognitiveServices::Speech::SpeechSynthesisResult {
+    %pythoncode %{
+    def __str__(self):
+        return u'{}:(result_id={})'.format(type(self), self.result_id)
+    %}
+}
+
+%extend Microsoft::CognitiveServices::Speech::SpeechSynthesisCancellationDetails {
+    %pythoncode %{
+    def __str__(self):
+        return u'{}(reason={}, error_details="{}")'.format(type(self).__name__,
+            self.reason, self.error_details)
+    %}
+}
+
 // hide factories. %feature("shadow") doesn't work for static methods, so need to
 // rename the original factory to a private one and then extend with the new one.
 %rename ("_from_default_microphone_input") Microsoft::CognitiveServices::Speech::Audio::AudioConfig::FromDefaultMicrophoneInput;
 %rename ("_from_stream_input") Microsoft::CognitiveServices::Speech::Audio::AudioConfig::FromStreamInput;
 %rename ("_from_wav_file_input") Microsoft::CognitiveServices::Speech::Audio::AudioConfig::FromWavFileInput;
 %rename ("_from_microphone_input") Microsoft::CognitiveServices::Speech::Audio::AudioConfig::FromMicrophoneInput;
+%rename ("_from_default_speaker_output") Microsoft::CognitiveServices::Speech::Audio::AudioConfig::FromDefaultSpeakerOutput;
+%rename ("_from_wav_file_output") Microsoft::CognitiveServices::Speech::Audio::AudioConfig::FromWavFileOutput;
+%rename ("_from_stream_output") Microsoft::CognitiveServices::Speech::Audio::AudioConfig::FromStreamOutput;
 %rename ("_from_result") Microsoft::CognitiveServices::Speech::CancellationDetails::FromResult;
+%rename ("_from_result") Microsoft::CognitiveServices::Speech::SpeechSynthesisCancellationDetails::FromResult;
+%rename ("_from_stream") Microsoft::CognitiveServices::Speech::SpeechSynthesisCancellationDetails::FromStream;
+%rename ("_from_result") Microsoft::CognitiveServices::Speech::AudioDataStream::FromResult;
 %rename ("_from_config") Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::FromConfig;
 %rename ("_from_file") Microsoft::CognitiveServices::Speech::KeywordRecognitionModel::FromFile;
 %rename ("_from_app_id") Microsoft::CognitiveServices::Speech::Intent::LanguageUnderstandingModel::FromAppId;
@@ -135,6 +178,7 @@ from typing import Optional
 %rename ("_from_endpoint") Microsoft::CognitiveServices::Speech::SpeechConfig::FromEndpoint;
 %rename ("_from_subscription") Microsoft::CognitiveServices::Speech::SpeechConfig::FromSubscription;
 %rename ("_from_config") Microsoft::CognitiveServices::Speech::SpeechRecognizer::FromConfig;
+%rename ("_from_config") Microsoft::CognitiveServices::Speech::SpeechSynthesizer::FromConfig;
 %rename ("_from_authorization_token") Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig::FromAuthorizationToken;
 %rename ("_from_endpoint") Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig::FromEndpoint;
 %rename ("_from_subscription") Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig::FromSubscription;
@@ -151,6 +195,21 @@ from typing import Optional
         return bytes(_speech_py_impl.TranslationSynthesisResult__audio_get(self))%}
 }
 
+// return TTS synthesized audio as bytes object
+%rename ("_get_audio_data") Microsoft::CognitiveServices::Speech::SpeechSynthesisResult::GetAudioData;
+%extend Microsoft::CognitiveServices::Speech::SpeechSynthesisResult {
+    %pythoncode %{
+    @property
+    def audio_data(self) -> bytes:
+        """The synthesized TTS result as a `bytes` object"""
+        audio_length = _speech_py_impl.SpeechSynthesisResult_get_audio_length(self)
+        if audio_length > 0:
+            return bytes(_speech_py_impl.SpeechSynthesisResult__get_audio_data(self))
+        else:
+            return bytes(0)
+    %}
+}
+
 %feature("director") PullAudioInputStreamCallback;
 %feature("director:except") {
     if ($error != NULL) {
@@ -163,12 +222,26 @@ from typing import Optional
     catch (Swig::DirectorException &e) { SWIG_fail; }
 }
 
-//typemaps for PullAudioStream
+%feature("director") PushAudioOutputStreamCallback;
+%feature("director:except") {
+    if ($error != NULL) {
+        throw Swig::DirectorMethodException();
+    }
+}
+
+%exception Write {
+    try { $action }
+    catch (Swig::DirectorException &e) { SWIG_fail; }
+}
+
+//typemaps for PullAudioStream and AudioDataStream
 namespace Microsoft::CognitiveServices::Speech::Audio {
     %typemap(directorin) (uint8_t* dataBuffer, uint32_t ) {
         // in typemap: convert the C pointer to the buffer into a python `memoryview`
         $input = PyMemoryView_FromMemory((char*) $1, $2, PyBUF_WRITE);
     }
+
+    %typemap(directorin) (uint8_t* buffer, uint32_t) = (uint8_t* dataBuffer, uint32_t);
 
     // view is local to the function. SWIG renames it to view2,
     // presumably because it assigns it to the second argument.
@@ -193,10 +266,15 @@ namespace Microsoft::CognitiveServices::Speech::Audio {
         $1 = ($1_ltype) buf; // dataBuffer
         $2 = ($2_ltype) (sz/sizeof($*1_type)); // size
     }
+
+    %typemap(in) (uint8_t* buffer, uint32_t bufferSize) = (uint8_t* dataBuffer, uint32_t size);
+
     %typemap(freearg) (uint8_t* dataBuffer, uint32_t size) {
         // in typemap(freearg): cleanup the buffer from the typemap above
         PyBuffer_Release(&view2);
         }
+
+    %typemap(freearg) (uint8_t* buffer, uint32_t bufferSize) = (uint8_t* dataBuffer, uint32_t size);
 }
 
 // wrap callbacks in C++, so that callbacks from python do not have to be typed
@@ -378,6 +456,8 @@ class PyCallback
 %py_wrap_callback_connect(RecognitionEventArgs)
 %py_wrap_callback_connect(SpeechRecognitionEventArgs)
 %py_wrap_callback_connect(SpeechRecognitionCanceledEventArgs)
+%py_wrap_callback_connect(SpeechSynthesisEventArgs)
+%py_wrap_callback_connect(SpeechSynthesisWordBoundaryEventArgs)
 %py_wrap_translation_callback_connect(TranslationRecognitionEventArgs)
 %py_wrap_translation_callback_connect(TranslationRecognitionCanceledEventArgs)
 %py_wrap_translation_callback_connect(TranslationSynthesisEventArgs)
@@ -403,7 +483,24 @@ class PyCallback
 %py_wrap_reason(CancellationDetails, CancellationReason, The reason the result was canceled.)
 %py_wrap_reason(NoMatchDetails, NoMatchReason, The reason for the NoMatch result)
 %py_wrap_reason(Translation::TranslationSynthesisResult, ResultReason, The reason for the result)
+%py_wrap_reason(SpeechSynthesisResult, ResultReason, The speech synthesis reason)
+%py_wrap_reason(SpeechSynthesisCancellationDetails, CancellationReason, The reason the synthesis was canceled)
 
+// macro to make stream status properties return Python enums
+%define %py_wrap_status(BaseName, EnumName, Docstring)
+%extend Microsoft::CognitiveServices::Speech:: ## BaseName {
+    %pythoncode %{
+    @property
+    def status(self) -> "EnumName":
+        """
+        Docstring
+        """
+        return EnumName ## (self.get_status())
+    %}
+}
+%enddef
+
+%py_wrap_status(AudioDataStream, StreamStatus, The audio data stream status)
 
 // PROPERTIES
 
@@ -475,6 +572,20 @@ class PyCallback
             return NoMatchDetails._from_result(self) %}
 }
 
+// convenience accessors for SpeechSynthesisResult. We expose the cancellation
+// details on the synthesis result directly, so they don't have to be
+// constructed explicitly.
+%extend Microsoft::CognitiveServices::Speech::SpeechSynthesisResult {
+    %pythoncode %{
+    @property
+    def cancellation_details(self) -> "SpeechSynthesisCancellationDetails":
+        """The reason why speech synthesis was cancelled.
+
+        Returns `None` if there was no cancellation."""
+        if ResultReason.Canceled == self.reason:
+            return SpeechSynthesisCancellationDetails._from_result(self) %}
+}
+
 
 %extend Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult {
     %pythoncode %{
@@ -507,6 +618,8 @@ inject_enum('PropertyId')
 inject_enum('ResultReason')
 inject_enum('ServicePropertyChannel')
 inject_enum('ProfanityOption')
+inject_enum('StreamStatus')
+inject_enum('SpeechSynthesisOutputFormat')
 
 # clean up the exported names
 del inject_enum

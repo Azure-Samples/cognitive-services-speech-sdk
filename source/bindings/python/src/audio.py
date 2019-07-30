@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft. All rights reserved.
 # See https://aka.ms/csspeech/license201809 for the full license information.
 """
-Classes that are concerned with the handling of audio input to the various recognizers.
+Classes that are concerned with the handling of audio input to the various recognizers, and audio output from the speech synthesizer.
 """
 
 from . import speech_py_impl as impl
@@ -41,6 +41,13 @@ class AudioInputStream():
     pass
 
 
+class AudioOutputStream():
+    """
+    Base class for Output Streams
+    """
+    pass
+
+
 class PullAudioInputStreamCallback(impl.PullAudioInputStreamCallback):
     """
     An interface that defines callback methods for an audio input stream.
@@ -58,6 +65,33 @@ class PullAudioInputStreamCallback(impl.PullAudioInputStreamCallback):
         The buffer returned by read() should not contain any audio header.
 
         :param buffer: the buffer that audio data should be passed in.
+        :return: The number of bytes passed into the stream.
+        """
+        return 0
+
+    def close(self) -> None:
+        """
+        The callback that is called when the stream is closed.
+        """
+        pass
+
+
+class PushAudioOutputStreamCallback(impl.PushAudioOutputStreamCallback):
+    """
+    An interface that defines callback methods for an audio output stream.
+
+    Derive from this class and implement its function to provide your own
+    data as an audio output stream.
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    def write(self, audio_buffer: memoryview) -> int:
+        """
+        This function is called to synchronously write data to the audio stream.
+
+        :param audio_buffer: the buffer that audio data should be passed in.
         :return: The number of bytes passed into the stream.
         """
         return 0
@@ -116,6 +150,38 @@ class PushAudioInputStream(AudioInputStream):
         self._impl.close()
 
 
+class PushAudioOutputStream(AudioOutputStream):
+    """
+    Push audio output stream class.
+
+    :param push_stream_callback: The object containing the callback functions for the push stream
+    """
+
+    def __init__(self, push_stream_callback: PushAudioOutputStreamCallback):
+        if push_stream_callback is not None:
+            self._impl = impl.PushAudioOutputStream.create(push_stream_callback)
+
+
+class PullAudioOutputStream(AudioOutputStream):
+    """
+    Represents memory backed pull audio output stream used for custom audio output.
+    """
+
+    def __init__(self):
+        self._impl = impl.PullAudioOutputStream.create()
+
+    def read(self, audio_buffer: bytes) -> int:
+        """
+        Reads the audio data from stream and fill into the given buffer.
+        The maximal number of bytes to be read is determined by the size of audio_buffer.
+        If there is no data immediately available, ReadData() blocks until the next data becomes available.
+
+        :param audio_buffer: The buffer to receive the audio data.
+        :return: The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
+        """
+        return self._impl.read(audio_buffer)
+
+
 class AudioConfig():
     """
     Represents specific audio configuration, such as microphone, file, or custom audio streams
@@ -161,3 +227,40 @@ class AudioConfig():
 
         raise ValueError('cannot construct AudioConfig with the given arguments')
 
+
+class AudioOutputConfig():
+    """
+    Represents specific audio configuration, such as audio output device, file, or custom audio streams
+
+    Generates an audio configuration for the speech synthesizer. Only one argument can be
+    passed at a time.
+
+    :param use_default_speaker: Specifies to use the system default speaker for audio
+        output.
+    :param filename: Specifies an audio output file.
+    :param stream: Creates an AudioOutputConfig object representing the specified stream.
+    """
+
+    def __init__(self, use_default_speaker: bool = False, filename: OptionalStr = None,
+                 stream: Optional[AudioOutputStream] = None):
+        if not isinstance(use_default_speaker, bool):
+            raise ValueError('use_default_speaker must be a bool, is "{}"'.format(
+                use_default_speaker))
+        if filename is None and stream is None:
+            if use_default_speaker:
+                self._impl = impl.AudioConfig._from_default_speaker_output()
+                return
+            else:
+                raise ValueError('default speaker needs to be explicitly activated')
+
+        if filename is not None and stream is not None:
+            raise ValueError('either filename or stream must be given, but not both')
+
+        if filename is not None:
+            self._impl = impl.AudioConfig._from_wav_file_output(filename)
+            return
+        if stream is not None:
+            self._impl = impl.AudioConfig._from_stream_output(stream._impl)
+            return
+
+        raise ValueError('cannot construct AudioOutputConfig with the given arguments')

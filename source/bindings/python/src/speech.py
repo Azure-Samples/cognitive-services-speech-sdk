@@ -1,12 +1,12 @@
 # Copyright (c) Microsoft. All rights reserved.
 # See https://aka.ms/csspeech/license201809 for the full license information.
 """
-Classes related to recognizing text from speech, and general classes used in the various recognizers.
+Classes related to recognizing text from speech, synthesizing speech from text, and general classes used in the various recognizers.
 """
 
 
 from . import speech_py_impl as impl
-from .audio import AudioConfig
+from .audio import AudioConfig, AudioOutputConfig
 
 from .speech_py_impl import (
     CancellationDetails,
@@ -17,6 +17,9 @@ from .speech_py_impl import (
     PropertyId,
     ResultReason,
     ServicePropertyChannel,
+    StreamStatus,
+    SpeechSynthesisCancellationDetails,
+    SpeechSynthesisOutputFormat,
 )
 
 from typing import Optional, Dict, Union, Callable
@@ -25,7 +28,7 @@ OptionalStr = Optional[str]
 
 class SpeechConfig():
     """
-    Class that defines configurations for speech or intent recognition.
+    Class that defines configurations for speech / intent recognition and speech synthesis.
 
     The configuration can be initialized in different ways:
 
@@ -58,6 +61,17 @@ class SpeechConfig():
             raise TypeError('property_id value must be PropertyId instance')
         return impl._speech_py_impl.SpeechConfig_get_property(self._impl, property_id.value)
 
+    def get_property_by_name(self, property_name: str) -> str:
+        """
+        Get a property by name.
+
+        :param property_name: The name of the property to be retrieved.
+        :return: The value of the property.
+        """
+        if not isinstance(property_name, str):
+            raise TypeError('property_name value must be str instance')
+        return impl._speech_py_impl.SpeechConfig_get_property(self._impl, property_name)
+
     def set_property(self, property_id: PropertyId, value: str):
         """
         Set a property by id.
@@ -68,6 +82,17 @@ class SpeechConfig():
         if not isinstance(property_id, PropertyId):
             raise TypeError('property_id value must be PropertyId instance')
         return impl._speech_py_impl.SpeechConfig_set_property(self._impl, property_id.value, value)
+
+    def set_property_by_name(self, property_name: str, value: str):
+        """
+        Set a property by name.
+
+        :param property_name: The name of the property to be set.
+        :param value: The value to be set for the property.
+        """
+        if not isinstance(property_name, str):
+            raise TypeError('property_name value must be str instance')
+        return impl._speech_py_impl.SpeechConfig_set_property(self._impl, property_name, value)
 
     def set_properties(self, properties: Dict[PropertyId, str]):
         """
@@ -80,6 +105,18 @@ class SpeechConfig():
                 raise TypeError('property_id value must be PropertyId instance')
 
             impl._speech_py_impl.SpeechConfig_set_property(self._impl, property_id.value, value)
+
+    def set_properties_by_name(self, properties: Dict[str, str]):
+        """
+        Set multiple properties by name.
+
+        :param properties: A dict mapping property ids to the values to be set.
+        """
+        for property_name, value in properties.items():
+            if not isinstance(property_name, str):
+                raise TypeError('property_name value must be str instance')
+
+            impl._speech_py_impl.SpeechConfig_set_property(self._impl, property_name, value)
 
     @staticmethod
     def _get_impl(config_type, subscription, region, endpoint, auth_token,
@@ -205,6 +242,55 @@ class SpeechConfig():
         :param password: The password of the proxy server.
         """
         self._impl.set_proxy(hostname, port, username, password)
+
+    @property
+    def speech_synthesis_language(self) -> str:
+        """
+        Get speech synthesis language.
+        """
+        return self._impl.get_speech_synthesis_language()
+
+    @speech_synthesis_language.setter
+    def speech_synthesis_language(self, language: str):
+        """
+        Set speech synthesis language.
+
+        :param language: The language for speech synthesis (e.g. en-US).
+        """
+        self._impl.set_speech_synthesis_language(language)
+
+    @property
+    def speech_synthesis_voice_name(self) -> str:
+        """
+        Get speech synthesis voice name.
+        """
+        return self._impl.get_speech_synthesis_voice_name()
+
+    @speech_synthesis_voice_name.setter
+    def speech_synthesis_voice_name(self, voice: str):
+        """
+        Set speech synthesis voice name.
+
+        :param voice: The name of voice for speech synthesis.
+        """
+        self._impl.set_speech_synthesis_voice_name(voice)
+
+    @property
+    def speech_synthesis_output_format_string(self) -> str:
+        """
+        Get speech synthesis output audio format string.
+        """
+        return self._impl.get_speech_synthesis_output_format()
+
+    def set_speech_synthesis_output_format(self, format_id: SpeechSynthesisOutputFormat):
+        """
+        Set speech synthesis output audio format.
+
+        :param format_id: The audio format id, e.g. Riff16Khz16BitMonoPcm.
+        """
+        if not isinstance(format_id, SpeechSynthesisOutputFormat):
+            raise TypeError('wrong type, must be SpeechSynthesisOutputFormat')
+        self._impl.set_speech_synthesis_output_format(format_id.value)
 
     def set_service_property(self, name: str, value: str, channel: ServicePropertyChannel):
         """
@@ -938,3 +1024,386 @@ class PhraseListGrammar():
         """
         self._impl.clear()
 
+
+class SpeechSynthesisResult():
+    """
+    Result of a speech synthesis operation.
+    """
+
+    def __init__(self, impl_result):
+        """
+        Constructor for internal use.
+        """
+        self._impl = impl_result
+        self._cancellation_details = impl_result.cancellation_details
+        self._result_id = impl_result.result_id
+        self._reason = impl_result.reason
+        self._audio_data = impl_result.audio_data
+
+    @property
+    def cancellation_details(self) -> "SpeechSynthesisCancellationDetails":
+        """
+        The reason why speech synthesis was cancelled.
+
+        Returns `None` if there was no cancellation.
+        """
+        return self._cancellation_details
+
+    @property
+    def result_id(self) -> str:
+        """
+        Synthesis result unique ID.
+        """
+        return self._result_id
+
+    @property
+    def reason(self) -> "ResultReason":
+        """
+        Synthesis reason.
+        """
+        return self._reason
+
+    @property
+    def audio_data(self) -> bytes:
+        """
+        The output audio data from the TTS.
+        """
+        return self._audio_data
+
+    def __str__(self):
+        return u'{}(result_id={}, reason={}, audio_length={})'.format(
+            type(self).__name__, self._result_id, self._reason, len(self._audio_data))
+
+
+class SpeechSynthesisEventArgs:
+    """
+    Class for speech synthesis event arguments.
+    """
+
+    def __init__(self, evt_args):
+        """
+        Constructor for internal use.
+        """
+        self._result = SpeechSynthesisResult(evt_args.result)
+
+    @property
+    def result(self) -> "SpeechSynthesisResult":
+        """
+        Speech synthesis event result.
+        """
+        return self._result
+
+    def __str__(self):
+        return u'{}(result=[{}])'.format(type(self).__name__, self._result.__str__())
+
+
+class SpeechSynthesisWordBoundaryEventArgs:
+    """
+    Class for speech synthesis word boundary event arguments.
+    """
+
+    def __init__(self, evt_args):
+        """
+        Constructor for internal use.
+        """
+        self._audio_offset = evt_args.audio_offset
+        self._text_offset = evt_args.text_offset
+        self._word_length = evt_args.word_length
+
+    @property
+    def audio_offset(self) -> int:
+        """
+        Word boundary audio offset in ticks. A single tick represents one hundred
+        nanoseconds or one ten-millionth of a second.
+        """
+        return self._audio_offset
+
+    @property
+    def text_offset(self) -> int:
+        """
+        Word boundary text offset in characters.
+        """
+        return self._text_offset
+
+    @property
+    def word_length(self) -> int:
+        """
+        Word boundary word length in characters.
+        """
+        return self._word_length
+
+    def __str__(self):
+        return u'{}(audio_offset={}, text_offset={}, word_length={})'.format(
+            type(self).__name__, self._audio_offset, self._text_offset, self._word_length)
+
+
+class AudioDataStream():
+    """
+    Represents audio data stream used for operating audio data as a stream.
+
+    Generates an audio data stream from a speech synthesis result (type SpeechSynthesisResult).
+
+    :param result: The speech synthesis result.
+    """
+
+    def __init__(self, result: SpeechSynthesisResult):
+        if result is None:
+            raise ValueError('result must be provided')
+
+        if not isinstance(result, SpeechSynthesisResult):
+            raise ValueError('result must be a SpeechSynthesisResult, is "{}"'.format(result))
+
+        self._impl = impl.AudioDataStream._from_result(result._impl)
+
+    @property
+    def status(self) -> "StreamStatus":
+        """
+        Current status of the audio data stream.
+        """
+        return self._impl.status
+
+    def can_read_data(self, requested_bytes: int, pos: Optional[int] = None) -> bool:
+        """
+        Check whether the stream has enough data to be read,
+        starting from the specified position (if specified).
+
+        :param requested_bytes: The requested data size in bytes.
+        :param pos: The position to start with.
+            Will start from current position if this param is not given.
+        :return: A bool indicating the result
+        """
+        if pos is None:
+            return self._impl.can_read_data(requested_bytes)
+        elif isinstance(pos, int):
+            current_pos = self._impl.get_position()
+            self._impl.set_position(pos)
+            can = self._impl.can_read_data(requested_bytes)
+            self._impl.set_position(current_pos)
+            return can
+        else:
+            raise ValueError('pos must be an int, is "{}"'.format(pos))
+
+    def read_data(self, audio_buffer: bytes, pos: Optional[int] = None) -> int:
+        """
+        Reads the audio data from the audio data stream,
+        starting from the specified position (if specified).
+        The maximal number of bytes to be read is determined by the size of audio_buffer.
+        If there is no data immediately available, read_data() blocks until
+        the next data becomes available.
+
+        :param audio_buffer: The buffer to receive the audio data.
+        :param pos: The position to start with.
+            Will start from current position if this param is not given.
+        :return: The number of bytes filled, or 0 in case the stream hits its end and
+            there is no more data available.
+        """
+        if audio_buffer is None:
+            raise ValueError('audio_buffer must be provided')
+
+        if not isinstance(audio_buffer, bytes):
+            raise ValueError('audio_buffer must be a bytes, is "{}"'.format(audio_buffer))
+
+        if pos is None:
+            return self._impl.read_data(audio_buffer)
+        elif isinstance(pos, int):
+            self._impl.set_position(pos)
+            return self._impl.read_data(audio_buffer)
+        else:
+            raise ValueError('pos must be an int, is "{}"'.format(pos))
+
+    def save_to_wav_file(self, file_name: str):
+        """
+        Save the audio data to a file, synchronously.
+
+        :param file_name: Name of the file to be saved to
+        """
+        if not file_name:
+            raise ValueError('file_name must be provided')
+
+        if not isinstance(file_name, str):
+            raise ValueError('file_name must be a str, is "{}"'.format(file_name))
+
+        self._impl.save_to_wav_file(file_name)
+
+    def save_to_wav_file_async(self, file_name: str):
+        """
+        Save the audio data to a file, asynchronously.
+
+        :param file_name: Name of the file to be saved to
+        :return: An asynchronous operation representing the saving.
+        """
+        if not file_name:
+            raise ValueError('file_name must be provided')
+
+        if not isinstance(file_name, str):
+            raise ValueError('file_name must be a str, is "{}"'.format(file_name))
+
+        return self._impl.save_to_wav_file_async(file_name)
+
+    @property
+    def position(self) -> int:
+        """
+        Current position of the audio data stream.
+        """
+        return self._impl.get_position()
+
+    @position.setter
+    def position(self, pos: int):
+        if pos is None:
+            raise ValueError('pos must be provided')
+
+        if not isinstance(pos, int):
+            raise ValueError('pos must be an int, is "{}"'.format(pos))
+
+        self._impl.set_position(pos)
+
+
+class SpeechSynthesizer:
+    """
+    A speech synthesizer.
+
+    :param speech_config: The config for the speech synthesizer
+    :param audio_config: The config for the audio output.
+        This parameter is optional.
+        If it is not provided, the default speaker device will be used for audio output.
+        If it is None, the output audio will be dropped.
+        None can be used for scenarios like performance test.
+    """
+    def __init__(self, speech_config: SpeechConfig,
+                audio_config: Optional[AudioOutputConfig] = 'None'):
+        if not isinstance(speech_config, SpeechConfig):
+            raise ValueError('speech_config must be a SpeechConfig instance')
+
+        self._impl = self._get_impl(impl.SpeechSynthesizer, speech_config, audio_config)
+
+    def speak_text(self, text: str) -> SpeechSynthesisResult:
+        """
+        Performs synthesis on plain text in a blocking (synchronous) mode.
+
+        :return: A SpeechSynthesisResult.
+        """
+        return SpeechSynthesisResult(self._impl.speak_text(text))
+
+    def speak_ssml(self, ssml: str) -> SpeechSynthesisResult:
+        """
+        Performs synthesis on ssml in a blocking (synchronous) mode.
+
+        :return: A SpeechSynthesisResult.
+        """
+        return SpeechSynthesisResult(self._impl.speak_ssml(ssml))
+
+    def speak_text_async(self, text: str) -> ResultFuture:
+        """
+        Performs synthesis on plain text in a non-blocking (asynchronous) mode.
+
+        :return: A future with SpeechSynthesisResult.
+        """
+        return ResultFuture(self._impl.speak_text_async(text), SpeechSynthesisResult)
+
+    def speak_ssml_async(self, ssml: str) -> ResultFuture:
+        """
+        Performs synthesis on ssml in a non-blocking (asynchronous) mode.
+
+        :return: A future with SpeechSynthesisResult.
+        """
+        return ResultFuture(self._impl.speak_ssml_async(ssml), SpeechSynthesisResult)
+
+    def start_speaking_text(self, text: str) -> SpeechSynthesisResult:
+        """
+        Starts synthesis on plain text in a blocking (synchronous) mode.
+
+        :return: A SpeechSynthesisResult.
+        """
+        return SpeechSynthesisResult(self._impl.start_speaking_text(text))
+
+    def start_speaking_ssml(self, ssml: str) -> SpeechSynthesisResult:
+        """
+        Starts synthesis on ssml in a blocking (synchronous) mode.
+
+        :return: A SpeechSynthesisResult.
+        """
+        return SpeechSynthesisResult(self._impl.start_speaking_ssml(ssml))
+
+    def start_speaking_text_async(self, text: str) -> ResultFuture:
+        """
+        Starts synthesis on plain text in a non-blocking (asynchronous) mode.
+
+        :return: A future with SpeechSynthesisResult.
+        """
+        return ResultFuture(self._impl.start_speaking_text_async(text), SpeechSynthesisResult)
+
+    def start_speaking_ssml_async(self, ssml: str) -> ResultFuture:
+        """
+        Starts synthesis on ssml in a non-blocking (asynchronous) mode.
+
+        :return: A future with SpeechSynthesisResult.
+        """
+        return ResultFuture(self._impl.start_speaking_ssml_async(ssml), SpeechSynthesisResult)
+
+    @staticmethod
+    def _get_impl(synth_type, speech_config, audio_config):
+        if isinstance(audio_config, str) and audio_config == 'None':
+            _impl = synth_type._from_config(speech_config._impl)
+        elif audio_config is None:
+            _impl = synth_type._from_config(speech_config._impl, None)
+        else:
+            _impl = synth_type._from_config(speech_config._impl, audio_config._impl)
+
+        return _impl
+
+    @property
+    def properties(self) -> PropertyCollection:
+        """
+        A collection of properties and their values defined for this SpeechSynthesizer.
+        """
+        return self._impl.properties
+
+    @property
+    def synthesis_started(self) -> EventSignal:
+        """
+        Signal for events indicating synthesis has started.
+
+        Callbacks connected to this signal are called with a :class:`.SpeechSynthesisEventArgs`
+        instance as the single argument.
+        """
+        return EventSignal(self._impl.synthesis_started, SpeechSynthesisEventArgs)
+
+    @property
+    def synthesizing(self) -> EventSignal:
+        """
+        Signal for events indicating synthesis is ongoing.
+
+        Callbacks connected to this signal are called with a :class:`.SpeechSynthesisEventArgs`
+        instance as the single argument.
+        """
+        return EventSignal(self._impl.synthesizing, SpeechSynthesisEventArgs)
+
+    @property
+    def synthesis_completed(self) -> EventSignal:
+        """
+        Signal for events indicating synthesis has completed.
+
+        Callbacks connected to this signal are called with a :class:`.SpeechSynthesisEventArgs`
+        instance as the single argument.
+        """
+        return EventSignal(self._impl.synthesis_completed, SpeechSynthesisEventArgs)
+
+    @property
+    def synthesis_canceled(self) -> EventSignal:
+        """
+        Signal for events indicating synthesis has been canceled.
+
+        Callbacks connected to this signal are called with a :class:`.SpeechSynthesisEventArgs`
+        instance as the single argument.
+        """
+        return EventSignal(self._impl.synthesis_canceled, SpeechSynthesisEventArgs)
+
+    @property
+    def synthesis_word_boundary(self) -> EventSignal:
+        """
+        Signal for events indicating a word boundary.
+
+        Callbacks connected to this signal are called with a :class:`.SpeechSynthesisWordBoundaryEventArgs`
+        instance as the single argument.
+        """
+        return EventSignal(self._impl.word_boundary, SpeechSynthesisWordBoundaryEventArgs)

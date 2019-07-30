@@ -76,6 +76,7 @@ pygments_style = None
 
 nitpick_ignore = [('py:class', 'object'),
         ('py:class', 'azure.cognitiveservices.speech.speech_py_impl.PullAudioInputStreamCallback'),
+        ('py:class', 'azure.cognitiveservices.speech.speech_py_impl.PushAudioOutputStreamCallback'),
         ('py:class', 'enum.Enum'),
         ('py:class', 'typing.Iterable'),
         ('py:class', 'typing.Dict'),

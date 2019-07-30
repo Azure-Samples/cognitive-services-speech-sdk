@@ -396,6 +396,27 @@ DocstringForPropertyId = """
       circumstances, you shouldn't have to use this property directly. Instead
       use :py:attr:`.SessionEventArgs.session_id`.
 
+    .. py:attribute:: SpeechServiceConnection_SynthLanguage
+
+      The spoken language to be synthesized (e.g. en-US)
+
+      .. note::
+        This property id was added in version 1.7.0.
+
+    .. py:attribute:: SpeechServiceConnection_SynthVoice
+
+      The name of the TTS voice to be used for speech synthesis
+
+      .. note::
+        This property id was added in version 1.7.0.
+
+    .. py:attribute:: SpeechServiceConnection_SynthOutputFormat
+
+      The string to specify TTS output audio format
+
+      .. note::
+        This property id was added in version 1.7.0.
+
     .. py:attribute:: SpeechServiceConnection_InitialSilenceTimeoutMs
 
       The initial silence timeout value (in milliseconds) used by the service.
@@ -724,6 +745,13 @@ DocstringForResultReason = """
       Indicates the synthesized audio result contains a non-zero
       amount of audio data
 
+   .. py:attribute:: SynthesizingAudioStarted
+
+      Indicates the synthesis is now started for this phrase.
+
+     .. note::
+       Added in version 1.7.0.
+
    .. py:attribute:: SynthesizingAudioCompleted
 
       Indicates the synthesized audio is now complete for this phrase.
@@ -756,5 +784,110 @@ DocstringForProfanityOption = """
 
    .. py:attribute:: Raw
 
+    """
+DocstringForStreamStatus = """
+   Defines the possible status of audio data stream.
+
+   .. note::
+     Added in version 1.7.0.
+
+   *Values:*
+
+   .. py:attribute:: Unknown
+
+      Indicates the audio data stream status is unknown
+
+   .. py:attribute:: NoData
+
+      Indicates the audio data stream contains no data
+
+   .. py:attribute:: PartialData
+
+      Indicates the audio data stream contains partial data of a speak request
+
+   .. py:attribute:: AllData
+
+      Indicates the audio data stream contains all data of a speak request
+
+   .. py:attribute:: Canceled
+
+      Indicates the audio data stream was cancelled
+    """
+
+DocstringForSpeechSynthesisOutputFormat = """
+   Defines the possible speech synthesis output audio format.
+
+   .. note::
+     Added in version 1.7.0.
+
+   *Values:*
+
+   .. py:attribute:: Raw8Khz8BitMonoMULaw
+
+      raw-8khz-8bit-mono-mulaw
+
+   .. py:attribute:: Riff16Khz16KbpsMonoSiren
+
+      riff-16khz-16kbps-mono-siren
+
+   .. py:attribute:: Audio16Khz16KbpsMonoSiren
+
+      audio-16khz-16kbps-mono-siren
+
+   .. py:attribute:: Audio16Khz32KBitRateMonoMp3
+
+      audio-16khz-32kbitrate-mono-mp3
+
+   .. py:attribute:: Audio16Khz128KBitRateMonoMp3
+
+      audio-16khz-128kbitrate-mono-mp3
+
+   .. py:attribute:: Audio16Khz64KBitRateMonoMp3
+
+      audio-16khz-64kbitrate-mono-mp3
+
+   .. py:attribute:: Audio24Khz48KBitRateMonoMp3
+
+      audio-24khz-48kbitrate-mono-mp3
+
+   .. py:attribute:: Audio24Khz96KBitRateMonoMp3
+
+      audio-24khz-96kbitrate-mono-mp3
+
+   .. py:attribute:: Audio24Khz160KBitRateMonoMp3
+
+      audio-24khz-160kbitrate-mono-mp3
+
+   .. py:attribute:: Raw16Khz16BitMonoTrueSilk
+
+      raw-16khz-16bit-mono-truesilk
+
+   .. py:attribute:: Riff16Khz16BitMonoPcm
+
+      riff-16khz-16bit-mono-pcm
+
+   .. py:attribute:: Riff8Khz16BitMonoPcm
+
+      riff-8khz-16bit-mono-pcm
+
+   .. py:attribute:: Riff24Khz16BitMonoPcm
+
+      riff-24khz-16bit-mono-pcm
+
+   .. py:attribute:: Riff8Khz8BitMonoMULaw
+
+      riff-8khz-8bit-mono-mulaw
+
+   .. py:attribute:: Raw16Khz16BitMonoPcm
+
+      raw-16khz-16bit-mono-pcm
+
+   .. py:attribute:: Raw24Khz16BitMonoPcm
+
+      raw-24khz-16bit-mono-pcm
+
+   .. py:attribute:: Raw8Khz16BitMonoPcm
+
+      raw-8khz-16bit-mono-pcm
     """
 %}

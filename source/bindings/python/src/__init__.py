@@ -57,6 +57,14 @@ for cls in (
     SpeechRecognitionEventArgs,
     SpeechRecognitionResult,
     SpeechRecognizer,
+    SpeechSynthesisResult,
+    SpeechSynthesisEventArgs,
+    SpeechSynthesisWordBoundaryEventArgs,
+    AudioDataStream,
+    StreamStatus,
+    SpeechSynthesizer,
+    SpeechSynthesisCancellationDetails,
+    SpeechSynthesisOutputFormat,
 ):
     cls.__module__ = __name__
 
@@ -85,5 +93,13 @@ __all__ = [
     'SpeechRecognitionEventArgs',
     'SpeechRecognitionResult',
     'SpeechRecognizer',
+    'SpeechSynthesisResult',
+    'SpeechSynthesisEventArgs',
+    'SpeechSynthesisWordBoundaryEventArgs',
+    'AudioDataStream',
+    'StreamStatus',
+    'SpeechSynthesizer',
+    'SpeechSynthesisCancellationDetails',
+    'SpeechSynthesisOutputFormat',
 ]
 
