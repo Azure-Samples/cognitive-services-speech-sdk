@@ -110,7 +110,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var waveSize1 = new FileInfo("wavefile.wav").Length;
                 Assert.IsTrue(waveSize1 > EmptyWaveFileSize, $"The size of output wave file 1 is unexpected. Expected: greater than {EmptyWaveFileSize}, Actual: {waveSize1}");
 
-                // Make a second run with 2 speaks to verify that the audio can be append to the file while speaking
+                // Make a second run with 2 speaks to verify that the audio can be appended to the file while speaking
                 using (var synthesizer = new SpeechSynthesizer(config, fileConfig))
                 {
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"
@@ -525,7 +525,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var waveSize1 = new FileInfo("wavefile.wav").Length;
                 Assert.IsTrue(waveSize1 > EmptyWaveFileSize, $"The size of output wave file 1 is unexpected. Expected: greater than {EmptyWaveFileSize}, Actual: {waveSize1}");
 
-                // Make a second run with 2 speaks to verify that the audio can be append to the file while speaking
+                // Make a second run with 2 speaks to verify that the audio can be appended to the file while speaking
                 using (var synthesizer = new SpeechSynthesizer(uspConfig, fileConfig))
                 {
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"
@@ -1484,7 +1484,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 cancellationDetails = SpeechSynthesisCancellationDetails.FromResult(result).ToString();
             }
 
-            Assert.AreNotEqual(ResultReason.Canceled, result.Reason, $"The synthesis was canceled unexpectly, with cancellation details = [{cancellationDetails}].");
+            Assert.AreNotEqual(ResultReason.Canceled, result.Reason, $"The synthesis was canceled unexpectedly, with cancellation details = [{cancellationDetails}].");
         }
 
         private void DoSomethingWithAudioInPullStream(PullAudioOutputStream stream, bool[] canceled)
