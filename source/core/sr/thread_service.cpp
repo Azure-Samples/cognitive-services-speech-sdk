@@ -59,8 +59,8 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         CheckInitialized();
 
         auto taskId = m_nextTaskId++;
-        auto innerTask = make_shared<Task>(taskId, move(task), move(executed));
-        m_threads[affinity]->Queue(innerTask);
+        auto innerTask = make_shared<Task>(taskId, move(task));
+        m_threads[affinity]->Queue(innerTask, move(executed));
         return taskId;
     }
 
@@ -69,8 +69,8 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         CheckInitialized();
 
         auto taskId = m_nextTaskId++;
-        auto innerTask = make_shared<DelayTask>(taskId, move(task), move(executed), delay);
-        m_threads[affinity]->Queue(innerTask);
+        auto innerTask = make_shared<DelayTask>(taskId, move(task), delay);
+        m_threads[affinity]->Queue(innerTask, move(executed));
         return taskId;
     }
 
@@ -134,37 +134,9 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
 
     void CSpxThreadService::Task::Run()
     {
-        try
-        {
-            m_state = State::Running;
-            m_task();
-            m_state = State::Finished;
-            m_executed.set_value(true);
-        }
-        catch (const exception& e)
-        {
-            UNUSED(e);
-            m_state = State::Failed;
-            SPX_DBG_TRACE_ERROR("Exception happened during task execution: %s", e.what());
-            m_executed.set_exception(current_exception());
-        }
-#ifdef SHOULD_HANDLE_FORCED_UNWIND
-        // Currently Python forcibly kills the thread by throwing __forced_unwind,
-        // taking care we propagate this exception further.
-        catch (abi::__forced_unwind&)
-        {
-            m_state = State::Failed;
-            SPX_DBG_TRACE_ERROR("Caught forced unwind in a thread service task, rethrowing");
-            m_executed.set_exception(make_exception_ptr(runtime_error("Forced unwind")));
-            throw;
-        }
-#endif
-        catch (...)
-        {
-            m_state = State::Failed;
-            SPX_DBG_TRACE_ERROR("Unknown exception happened during task execution");
-            m_executed.set_exception(current_exception());
-        }
+        m_state = State::Running;
+        m_task();
+        m_state = State::Finished;
     }
 
     void CSpxThreadService::Thread::Start()
@@ -205,7 +177,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         CancelAllTasks();
     }
 
-    void CSpxThreadService::Thread::Queue(TaskPtr task)
+    void CSpxThreadService::Thread::Queue(TaskPtr task, promise<bool>&& executed)
     {
         unique_lock<mutex> lock(m_mutex);
         if (m_failed)
@@ -221,11 +193,11 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
             return;
         }
 
-        m_tasks.push_back(task);
+        m_tasks.push_back({ task, move(executed) });
         m_cv.notify_all();
     }
 
-    void CSpxThreadService::Thread::Queue(DelayTaskPtr task)
+    void CSpxThreadService::Thread::Queue(DelayTaskPtr task, promise<bool>&& executed)
     {
         unique_lock<mutex> lock(m_mutex);
         if (m_failed)
@@ -239,7 +211,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
             return;
         }
 
-        AddDelayTaskAtProperPlace(task);
+        AddDelayTaskAtProperPlace(task, move(executed));
         m_cv.notify_all();
     }
 
@@ -277,7 +249,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         m_timerTasks.clear();
     }
 
-    void CSpxThreadService::Thread::AddDelayTaskAtProperPlace(DelayTaskPtr task)
+    void CSpxThreadService::Thread::AddDelayTaskAtProperPlace(DelayTaskPtr task, promise<bool>&& executed)
     {
         if (task->CurrentState() == Task::State::Failed)
         {
@@ -286,18 +258,20 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
         }
 
         task->UpdateWhen();
+        DelayTaskAndPromise value{ task, move(executed) };
+        auto place = upper_bound(m_timerTasks.begin(), m_timerTasks.end(), value,
+            [](const DelayTaskAndPromise& a, const DelayTaskAndPromise& b) { return (a.first)->When() < (b.first)->When(); });
 
-        auto place = upper_bound(m_timerTasks.begin(), m_timerTasks.end(), task,
-            [](const DelayTaskPtr& a, const DelayTaskPtr& b) { return a->When() < b->When(); });
         if (place == m_timerTasks.end())
         {
-            m_timerTasks.push_back(task);
+            m_timerTasks.push_back({ task, move(value.second) });
         }
         else
         {
-            m_timerTasks.insert(place, task);
+            m_timerTasks.insert(place, { task, move(value.second) });
         }
     }
+
 
     void CSpxThreadService::Thread::WorkerLoop(shared_ptr<Thread> self)
     {
@@ -315,11 +289,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
                 int sliceCounter = 0;
                 while (!self->m_tasks.empty() && sliceCounter++ < MaxSlice)
                 {
-                    auto task = self->m_tasks.front();
-                    self->m_tasks.pop_front();
-
-                    lock.unlock();
-                    task->Run();
+                    self->RunTask(lock, self->m_tasks);
 
                     if (self->m_shouldStop)
                         return;
@@ -331,14 +301,10 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
                 // but not more than slice tasks to avoid immediate tasks starvation.
                 sliceCounter = 0;
                 while (!self->m_timerTasks.empty() &&
-                    self->m_timerTasks.front()->When() < system_clock::now() &&
+                    self->m_timerTasks.front().first->When() < system_clock::now() &&
                     sliceCounter++ < MaxSlice)
                 {
-                    auto task = self->m_timerTasks.front();
-                    self->m_timerTasks.pop_front();
-
-                    lock.unlock();
-                    task->Run();
+                    self->RunTask(lock, self->m_timerTasks);
 
                     if (self->m_shouldStop)
                         return;
@@ -350,7 +316,7 @@ namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace
                 if (!self->m_timerTasks.empty())
                 {
                     delay = std::min(duration_cast<milliseconds>(
-                        self->m_timerTasks.front()->When() - system_clock::now()), delay);
+                        self->m_timerTasks.front().first->When() - system_clock::now()), delay);
                 }
 
                 // Continue if there is some delay task that should be executed.

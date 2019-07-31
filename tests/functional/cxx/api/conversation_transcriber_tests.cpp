@@ -406,7 +406,8 @@ TEST_CASE("conversation_inroom_8_channel_audio_push", "[.][int][prod]")
     SPXTEST_REQUIRE(!result->phrases.empty());
     SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, katieSteve.m_utterance));
 }
-TEST_CASE("conversation_online_pull_stream", "[.][int][prod]")
+
+TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
 {
     REQUIRE(!Config::OnlineEndpoint.empty());
     REQUIRE(!Keys::ConversationTranscriber.empty());
@@ -450,8 +451,8 @@ TEST_CASE("conversation_online_pull_stream", "[.][int][prod]")
 
         REQUIRE_NOTHROW(recognizer->EndConversationAsync().get());
     }
-#if 0
-    // logged #1859511
+
+
     SPXTEST_SECTION("conversation_id")
     {
         REQUIRE_THROWS(recognizer->SetConversationId(""));
@@ -460,7 +461,7 @@ TEST_CASE("conversation_online_pull_stream", "[.][int][prod]")
         auto got_id = recognizer->GetConversationId();
         SPXTEST_REQUIRE(orig_id == got_id);
     }
-#endif
+
     SPXTEST_SECTION("all_features")
     {
         auto myId = PAL::CreateGuidWithDashesUTF8();

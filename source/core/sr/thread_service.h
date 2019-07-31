@@ -56,8 +56,8 @@ private:
     class Task
     {
     public:
-        Task(TaskId id, std::packaged_task<void()>&& task, std::promise<bool>&& executed)
-            : m_task(std::move(task)), m_executed(std::move(executed)), m_id(id), m_state(State::New)
+        Task(TaskId id, std::packaged_task<void()>&& task)
+            : m_task(std::move(task)), m_id(id), m_state(State::New)
         {
         }
         virtual ~Task() = default;
@@ -79,13 +79,11 @@ private:
         void MarkCanceled()
         {
             m_state = State::Canceled;
-            m_executed.set_value(false);
         }
 
-        void MarkFailed(const std::exception_ptr& e)
+        void MarkFailed()
         {
             m_state = State::Canceled;
-            m_executed.set_exception(std::make_exception_ptr(e));
         }
 
     protected:
@@ -97,20 +95,19 @@ private:
 
     private:
         std::packaged_task<void()> m_task;
-        std::promise<bool> m_executed;
         TaskId m_id;
         State m_state;
     };
 
     using TaskPtr = std::shared_ptr<Task>;
-
+    using TaskAndPromise = std::pair <TaskPtr, std::promise<bool>>;
     // Represents a timer task.
     class DelayTask : public Task
     {
     public:
-        DelayTask(TaskId id, std::packaged_task<void()>&& task, std::promise<bool>&& executed,
+        DelayTask(TaskId id, std::packaged_task<void()>&& task,
             std::chrono::milliseconds delay)
-            : Task(id, std::move(task), std::move(executed)), m_delay(delay)
+            : Task(id, std::move(task)), m_delay(delay)
         {}
 
         void UpdateWhen()
@@ -139,7 +136,7 @@ private:
     };
 
     using DelayTaskPtr = std::shared_ptr<DelayTask>;
-
+    using DelayTaskAndPromise = std::pair<DelayTaskPtr, std::promise<bool>>;
     // A queue of tasks with an associated thread.
     class Thread : public std::enable_shared_from_this<Thread>
     {
@@ -147,8 +144,8 @@ private:
         void Start();
         void Stop(bool detached = false);
 
-        void Queue(TaskPtr task);
-        void Queue(DelayTaskPtr task);
+        void Queue(TaskPtr task, std::promise<bool>&& executed);
+        void Queue(DelayTaskPtr task, std::promise<bool>&& executed);
 
         bool Cancel(TaskId id);
         void CancelAllTasks();
@@ -161,15 +158,15 @@ private:
     private:
         void MarkFailed(const std::exception_ptr& e);
         void RemoveAllTasks();
-        void AddDelayTaskAtProperPlace(DelayTaskPtr task);
+        void AddDelayTaskAtProperPlace(DelayTaskPtr task, std::promise<bool>&& executed);
 
         template<class T>
         bool CancelTask(std::deque<T>& container, TaskId id)
         {
-            auto found = std::find_if(container.begin(), container.end(), [id](const T& t) { return t->Id() == id; });
+            auto found = std::find_if(container.begin(), container.end(), [id](const T& t) { return (t.first)->Id() == id; });
             if (found != container.end())
             {
-                (*found)->MarkCanceled();
+                (*found).first->MarkCanceled();
                 container.erase(found);
                 return true;
             }
@@ -179,15 +176,64 @@ private:
         template<class T>
         void MarkAllTasksFailed(std::deque<T>& container, const std::exception_ptr& e)
         {
-            for (const auto& t : container)
-                t->MarkFailed(e);
+            for (auto& t : container)
+            {
+                t.second.set_exception(e);
+            }
         }
 
         template<class T>
         void MarkAllTasksCancelled(std::deque<T>& container)
         {
-            for (const auto& t : container)
-                t->MarkCanceled();
+            for (auto& t : container)
+            {
+                (t.first)->MarkCanceled();
+                (t.second).set_value(false);
+            }
+        }
+
+
+        template< class T>
+        void RunTask( std::unique_lock<std::mutex>& lock, std::deque<T>& container)
+        {
+            std::promise<bool> executed = move(container.front().second);
+            std::exception_ptr p = nullptr;
+            try
+            {
+                auto task = move(container.front().first);
+                container.pop_front();
+
+                lock.unlock();
+                task->Run();
+            }
+            catch (const std::exception& e)
+            {
+                SPX_DBG_TRACE_ERROR("Exception happened during task execution: %s", e.what());
+                p = std::current_exception();
+            }
+#ifdef SHOULD_HANDLE_FORCED_UNWIND
+            // Currently Python forcibly kills the thread by throwing __forced_unwind,
+            // taking care we propagate this exception further.
+            catch (abi::__forced_unwind&)
+            {
+                SPX_DBG_TRACE_ERROR("Caught forced unwind in a thread service task, rethrowing");
+                executed.set_exception(make_exception_ptr(std::runtime_error("Forced unwind")));
+                throw;
+            }
+#endif
+            catch (...)
+            {
+                SPX_DBG_TRACE_ERROR("Unknown exception happened during task execution");
+                p = std::current_exception();
+            }
+            if (p == nullptr)
+            {
+                executed.set_value(true);
+            }
+            else
+            {
+                executed.set_exception(p);
+            }
         }
 
         static void WorkerLoop(std::shared_ptr<Thread> self);
@@ -207,8 +253,8 @@ private:
         // Flag indicating whether Start has been called.
         std::atomic<bool> m_started { false };
 
-        std::deque<TaskPtr> m_tasks;
-        std::deque<DelayTaskPtr> m_timerTasks;
+        std::deque<TaskAndPromise> m_tasks;
+        std::deque<DelayTaskAndPromise> m_timerTasks;
         std::atomic<bool> m_failed;
     };
 
