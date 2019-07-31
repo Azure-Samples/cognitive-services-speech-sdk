@@ -82,6 +82,9 @@ BEGIN {
       quickstart/text-to-speech/csharp-unity/Assets/Scripts/HelloWorld.cs#code
       quickstart/text-to-speech/csharp-uwp/helloworld/MainPage.xaml#StackPanel
       quickstart/text-to-speech/csharp-uwp/helloworld/MainPage.xaml.cs#code
+      quickstart/text-to-speech/java-jre/pom.xml#dependencies
+      quickstart/text-to-speech/java-jre/pom.xml#repositories
+      quickstart/text-to-speech/java-jre/src/speechsdk/quickstart/Main.java#code
       samples/batch/csharp/program.cs#batchdefinition
       samples/batch/csharp/program.cs#batchstatus
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentContinuousRecognitionWithFile
