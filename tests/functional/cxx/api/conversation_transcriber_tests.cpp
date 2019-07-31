@@ -154,7 +154,7 @@ TEST_CASE("conversation_bad_connection", "[.][int][prod]")
 
     WaitForResult(result->ready.get_future(), 5min);
     recognizer->StopTranscribingAsync().get();
-    SPXTEST_REQUIRE(result->phrases[0].Text == "Runtime error: Failed to create transport request.");
+    SPXTEST_REQUIRE(result->phrases[0].Text.find("Runtime error: Failed to create transport request.") != string::npos);
 }
 
 TEST_CASE("conversation_inroom_8_channel_file", "[.][int][prod]")
