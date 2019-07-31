@@ -83,6 +83,12 @@ jobs:
             condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
             displayName: "Test building Swift quickstart"
             continueOnError: ${{ parameters.continueOnTestFailure }}
+          - bash: |
+              set -e -o pipefail -x
+              ci/samples/build-quickstart-swift-tts.sh '$(Build.Repository.LocalPath)/xcode-build-output' "$(OutputDirectory)/logs"
+            condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+            displayName: "Test building Swift quickstart - TTS"
+            continueOnError: ${{ parameters.continueOnTestFailure }}
   - ${{ parameters.extraSteps }}
   - task: PublishBuildArtifacts@1
     inputs:
