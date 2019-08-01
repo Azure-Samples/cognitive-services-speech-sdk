@@ -20,7 +20,7 @@
 
 #if defined(ANDROID) || defined(__ANDROID__)
 #define __SPX_DO_TRACE_IMPL __swig_spx_do_trace_message
-void __swig_spx_do_trace_message(int level, const char* pszTitle, bool enableDebugOutput, const char* pszFormat, ...) throw();
+void __swig_spx_do_trace_message(int level, const char* pszTitle, bool enableDebugOutput, const char* fileName, const int lineNumber, const char* pszFormat, ...) throw();
 #endif
 %}
 
@@ -59,6 +59,7 @@ void __swig_spx_do_trace_message(int level, const char* pszTitle, bool enableDeb
 %javamethodmodifiers StdMapStringStringMapIterator::nextImpl "private";
 %inline %{
 #include <map>
+#include <algorithm>
 #include <stdlib.h>
 
 void SetTempDirectory(std::string tmpDir)
@@ -110,7 +111,7 @@ struct StdMapStringStringMapIterator {
 #include <android/log.h>
 #endif
 
-void __swig_spx_do_trace_message(int level, const char* pszTitle, bool enableDebugOutput, const char* pszFormat, ...) throw()
+void __swig_spx_do_trace_message(int level, const char* pszTitle, bool enableDebugOutput, const char* fileName, const int lineNumber, const char* pszFormat, ...) throw()
 {
     if (enableDebugOutput)
     {
@@ -136,6 +137,12 @@ void __swig_spx_do_trace_message(int level, const char* pszTitle, bool enableDeb
                 format += pszTitle;
             }
 
+            std::string fileNameOnly(fileName);
+            std::replace(fileNameOnly.begin(), fileNameOnly.end(), '\\', '/');
+
+            std::string fileNameLineNumber = " " + fileNameOnly.substr(fileNameOnly.find_last_of('/', std::string::npos) + 1) + ":" + std::to_string(lineNumber) + " ";
+
+            format += fileNameLineNumber;
             format += pszFormat;
 
             if (format.length() < 1 || format[format.length() - 1] != '\n')

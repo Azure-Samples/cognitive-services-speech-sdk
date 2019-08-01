@@ -8,6 +8,7 @@
 #pragma once
 #include <inttypes.h>
 #include <spxerror.h>
+#include <algorithm>
 
 #ifndef _MSC_VER
 // macros in this header generate a bunch of
@@ -79,7 +80,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string>
-inline void __spx_do_trace_message(int level, const char* pszTitle, bool enableDebugOutput, const char* pszFormat, ...) throw()
+inline void __spx_do_trace_message(int level, const char* pszTitle, bool enableDebugOutput, const char* fileName, const int lineNumber, const char* pszFormat, ...) throw()
 {
     if (enableDebugOutput)
     {
@@ -104,6 +105,13 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, bool enableD
             {
                 format += pszTitle;
             }
+
+            std::string fileNameOnly(fileName);
+            std::replace(fileNameOnly.begin(), fileNameOnly.end(), '\\', '/');
+
+            std::string fileNameLineNumber = " " + fileNameOnly.substr(fileNameOnly.find_last_of('/', std::string::npos) + 1) + ":" + std::to_string(lineNumber) + " ";
+
+            format += fileNameLineNumber;
 
             format += pszFormat;
 
