@@ -493,6 +493,24 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointDialog(const std::shared_pt
 
     SetUspQueryParameters(USP::endpoint::dialog::queryParameters, properties, client);
 
+    auto dialogType = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_DialogType));
+    USP::Client::DialogBackend dialogBackend{ USP::Client::DialogBackend::NotSet };
+    if (dialogType == g_dialogType_BotFramework)
+    {
+        dialogBackend = USP::Client::DialogBackend::BotFramework;
+    }
+    else if (dialogType == g_dialogType_SpeechCommands)
+    {
+        dialogBackend = USP::Client::DialogBackend::SpeechCommands;
+    }
+    else
+    {
+        /* We shouldn't be here */
+        SPX_THROW_HR(SPXERR_INVALID_ARG);
+    }
+
+    client.SetDialogBackend(dialogBackend);
+
     return client.SetAudioResponseFormat("raw-16khz-16bit-mono-pcm");
 }
 
@@ -665,9 +683,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(const std::shared_pt
     auto uspSubscriptionKey = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key));
     auto uspAuthToken = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token));
     auto uspRpsToken = properties->GetStringValue("SPEECH-RpsToken");
-    auto uspDLSSecret = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_Secret_Key));
-    auto uspSCBAppId = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_TaskDialogAppId));
-    auto uspDialogAppId = !uspDLSSecret.empty() ? uspDLSSecret : uspSCBAppId;
+    auto uspDialogApplicationId = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_ApplicationId));
 
     std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
 
@@ -675,7 +691,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(const std::shared_pt
     authData[static_cast<size_t>(USP::AuthenticationType::SubscriptionKey)] = std::move(uspSubscriptionKey);
     authData[static_cast<size_t>(USP::AuthenticationType::AuthorizationToken)] = std::move(uspAuthToken);
     authData[static_cast<size_t>(USP::AuthenticationType::SearchDelegationRPSToken)] = std::move(uspRpsToken);
-    authData[static_cast<size_t>(USP::AuthenticationType::DialogApplicationId)] = std::move(uspDialogAppId);
+    authData[static_cast<size_t>(USP::AuthenticationType::DialogApplicationId)] = std::move(uspDialogApplicationId);
 
     return client.SetAuthentication(authData);
 }
@@ -683,7 +699,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(const std::shared_pt
 
 void CSpxUspRecoEngineAdapter::UpdateDefaultLanguage(const std::shared_ptr<ISpxNamedProperties>& properties, bool consideringCustomModel)
 {
-    auto languageParameterName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage);
+    constexpr auto languageParameterName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage);
     // if considering custom model, only sets default language when not using custom model and user has not specified language.
     if (properties->GetStringValue(languageParameterName).empty() &&
         (!consideringCustomModel || properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId)).empty()))
@@ -861,42 +877,30 @@ void CSpxUspRecoEngineAdapter::SetSpeechConfigMessage(const ISpxNamedProperties&
 void CSpxUspRecoEngineAdapter::SetAgentConfigMessage(const ISpxNamedProperties& properties)
 {
     constexpr auto dialogCommunicationType = "Conversation_Communication_Type";
-    constexpr auto dialogBotSecret = "DIALOG-SecretKey";
-    constexpr auto dialogTaskDialogAppId  = "DIALOG-TaskDialogAppId";
-    constexpr auto dialogFromId = "DIALOG-FromId";
-    constexpr auto dialogTTSAudioFormat = "SPEECH-SynthOutputFormat";
-    constexpr auto dialogAuthorizationToken = "DIALOG-BotAuthorizationToken";
+    constexpr auto dialogConnectionId = GetPropertyName(PropertyId::Conversation_ApplicationId);
+    constexpr auto dialogFromId = GetPropertyName(PropertyId::Conversation_From_Id);
+    constexpr auto dialogTTSAudioFormat = GetPropertyName(PropertyId::SpeechServiceConnection_SynthOutputFormat);
+    constexpr auto dialogBackendType = GetPropertyName(PropertyId::Conversation_DialogType);
+    constexpr auto recoLanguage = GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage);
 
     json agentConfigJson;
     agentConfigJson["version"] = 0.2;
 
-    auto botSecret = properties.GetStringValue(dialogBotSecret);
-    auto taskDialogAppId = properties.GetStringValue(dialogTaskDialogAppId);
+    auto connectionId = properties.GetStringValue(dialogConnectionId);
 
-    if (!botSecret.empty() && !taskDialogAppId.empty())
-    {
-        SPX_THROW_HR(SPXERR_INVALID_ARG);
-    }
-    auto connectionId = !botSecret.empty() ? botSecret : taskDialogAppId;
     if (connectionId.empty())
     {
         SPX_THROW_HR(SPXERR_INVALID_ARG);
     }
     agentConfigJson["botInfo"]["connectionId"] = connectionId;
 
-    std::string appType = !botSecret.empty() ? "Default" : "TaskDialog";
-    auto communicationTypeOverride = properties.GetStringValue(dialogCommunicationType);
-    if (!communicationTypeOverride.empty())
+    auto communicationType = properties.GetStringValue(dialogCommunicationType);
+    if (communicationType.empty())
     {
-        appType = communicationTypeOverride;
+        communicationType = "Default";
     }
-    agentConfigJson["botInfo"]["commType"] = appType;
 
-    auto fromId = properties.GetStringValue(dialogFromId);
-    if (!fromId.empty())
-    {
-        agentConfigJson["botInfo"]["fromId"] = fromId;
-    }
+    agentConfigJson["botInfo"]["commType"] = communicationType;
 
     auto ttsAudioFormat = properties.GetStringValue(dialogTTSAudioFormat);
     if (!ttsAudioFormat.empty())
@@ -904,15 +908,27 @@ void CSpxUspRecoEngineAdapter::SetAgentConfigMessage(const ISpxNamedProperties& 
         agentConfigJson["ttsAudioFormat"] = ttsAudioFormat;
     }
 
-    auto authToken = properties.GetStringValue(dialogAuthorizationToken);
-    if (!authToken.empty())
-    {
-        agentConfigJson["botInfo"]["authorization"] = authToken;
-    }
-
     if (!m_dialogConversationId.empty())
     {
         agentConfigJson["botInfo"]["conversationId"] = m_dialogConversationId;
+    }
+
+    auto dialogType = properties.GetStringValue(dialogBackendType);
+    if (dialogType == g_dialogType_BotFramework)
+    {
+        auto fromId = properties.GetStringValue(dialogFromId);
+        if (!fromId.empty())
+        {
+            agentConfigJson["botInfo"]["fromId"] = fromId;
+        }
+    }
+    else if (dialogType == g_dialogType_SpeechCommands)
+    {
+        auto language = properties.GetStringValue(recoLanguage);
+        if (!language.empty())
+        {
+            agentConfigJson["botInfo"]["commandsCulture"] = language;
+        }
     }
 
     m_agentConfig = agentConfigJson.dump();

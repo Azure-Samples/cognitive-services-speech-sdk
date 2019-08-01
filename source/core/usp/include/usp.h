@@ -336,13 +336,29 @@ public:
     Client& SetQueryParameter(const std::string& name, const std::string& value);
 
     /**
-    * Sets the polling interval the client will use.
-    */
+     * Sets the polling interval the client will use.
+     */
     Client& SetPollingIntervalms(const std::uint32_t pollingInterval)
     {
         m_pollingIntervalms = pollingInterval;
         return *this;
     }
+
+    enum class DialogBackend
+    {
+        NotSet = 0,
+        BotFramework,
+        SpeechCommands
+    };
+    /**
+     * Sets the dialog backend to connect to.
+     */
+    Client& SetDialogBackend(DialogBackend dialogBackend)
+    {
+        m_dialogBackend = dialogBackend;
+        return *this;
+    }
+
 
      /**
      * Establishes connection to the service.
@@ -381,6 +397,8 @@ private:
     std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> m_threadService;
 
     std::uint32_t m_pollingIntervalms = 10;
+
+    DialogBackend m_dialogBackend = DialogBackend::NotSet;
 };
 
 extern void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword);
@@ -476,7 +494,21 @@ namespace endpoint
 
     namespace dialog
     {
-        const std::string url = ".convai.speech.microsoft.com/api/v3";
+        constexpr auto url = ".convai.speech.microsoft.com";
+
+        namespace resourcePath
+        {
+            constexpr auto botFramework = "";
+            constexpr auto speechCommands = "/commands";
+        }
+
+        constexpr auto suffix = "/api";
+
+        namespace version
+        {
+            constexpr auto botFramework = "/v3";
+            constexpr auto speechCommands = "/v1";
+        }
 
         const std::vector<std::string> queryParameters = { langQueryParam };
     }

@@ -268,10 +268,34 @@ public enum PropertyId {
     LanguageUnderstandingServiceResponse_JsonResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.LanguageUnderstandingServiceResponse_JsonResult),
 
     /**
-    * The file name to write logs.
-    * Added in version 1.4.0.
-    */
+     * The file name to write logs.
+     * Added in version 1.4.0.
+     */
     Speech_LogFilename ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Speech_LogFilename),
+
+    /**
+     * Identifier used to connect to the backend service.
+     * Added in version 1.5.0.
+     */
+    Conversation_ApplicationId ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_ApplicationId),
+
+    /**
+     * Type of dialog backend to connect to.
+     * Added in version 1.7.0.
+     */
+    Conversation_DialogType ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_DialogType),
+
+    /**
+     * Silence timeout for listening
+     * Added in version 1.5.0.
+     */
+    Conversation_Initial_Silence_Timeout ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_Initial_Silence_Timeout),
+
+    /**
+     * From id to be used on speech recognition activities
+     * Added in version 1.5.0.
+     */
+    Conversation_From_Id ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_From_Id),
 
     /**
      * The user id associated to data buffer written by client when using Pull/Push audio mode streams.

@@ -34,14 +34,15 @@ SPXAPI dialog_service_config_from_bot_secret(SPXSPEECHCONFIGHANDLE* ph_dialog_se
 
         auto properties = SpxQueryInterface<ISpxNamedProperties>(config);
 
-        properties->SetStringValue(GetPropertyName(PropertyId::Conversation_Secret_Key), secret_key);
+        properties->SetStringValue(GetPropertyName(PropertyId::Conversation_ApplicationId), secret_key);
+        properties->SetStringValue(GetPropertyName(PropertyId::Conversation_DialogType), g_dialogType_BotFramework);
 
         *ph_dialog_service_config = config_handles->TrackHandle(config);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI dialog_service_config_from_task_dialog_app_id(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char* app_id, const char *subscription, const char* region)
+SPXAPI dialog_service_config_from_speech_commands_app_id(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char* app_id, const char *subscription, const char* region)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_dialog_service_config == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, app_id == nullptr);
@@ -58,7 +59,8 @@ SPXAPI dialog_service_config_from_task_dialog_app_id(SPXSPEECHCONFIGHANDLE* ph_d
 
         auto properties = SpxQueryInterface<ISpxNamedProperties>(config);
 
-        properties->SetStringValue(GetPropertyName(PropertyId::Conversation_TaskDialogAppId), app_id);
+        properties->SetStringValue(GetPropertyName(PropertyId::Conversation_ApplicationId), app_id);
+        properties->SetStringValue(GetPropertyName(PropertyId::Conversation_DialogType), g_dialogType_SpeechCommands);
 
         *ph_dialog_service_config = config_handles->TrackHandle(config);
     }

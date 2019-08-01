@@ -63,7 +63,6 @@ set(SOURCES
     "${SRC_DIR}/guid_utils.cpp"
     "${SRC_DIR}/platform.cpp"
     "${SRC_DIR}/site_helpers.cpp"
-    "${SRC_DIR}/property_id_2_name_map.cpp"
     "${SRC_DIR}/time_utils.cpp"
     "${SRC_DIR}/ring_buffer.cpp"
     )

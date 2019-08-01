@@ -60,6 +60,11 @@ SPXAPI__(const char*) property_bag_get_string(SPXPROPERTYBAGHANDLE hpropbag, int
         auto namedProperties = property_bag_from_handle(hpropbag);
 
         const char* name_in_use = name ? name : GetPropertyName(static_cast<PropertyId>(id));
+        if (name_in_use == nullptr)
+        {
+            LogError("undefined PropertyId of %d", static_cast<int>(id));
+            SPX_THROW_ON_FAIL(SPXERR_INVALID_ARG);            
+        }
         auto tempValue = namedProperties->GetStringValue(name_in_use, defaultValue);
         auto size = tempValue.size() + 1;
 
@@ -83,10 +88,14 @@ SPXAPI property_bag_set_string(SPXPROPERTYBAGHANDLE hpropbag, int id, const char
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, defaultValue == nullptr);
 
-    const char* name_in_use = name ? name : GetPropertyName(static_cast<PropertyId>(id));
-
     SPXAPI_INIT_HR_TRY(hr)
     {
+        const char* name_in_use = name ? name : GetPropertyName(static_cast<PropertyId>(id));
+        if (name_in_use == nullptr)
+        {
+            LogError("undefined PropertyId of %d", static_cast<int>(id));
+            SPX_THROW_ON_FAIL(SPXERR_INVALID_ARG);            
+        }
         auto namedProperties = property_bag_from_handle(hpropbag);
         namedProperties->SetStringValue(name_in_use, defaultValue);
     }

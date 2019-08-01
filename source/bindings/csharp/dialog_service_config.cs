@@ -33,46 +33,31 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         }
 
         /// <summary>
-        /// Creates an instance of the dialog service config with the specified Task Dialog Application id.
+        /// Creates an instance of the dialog service config with the specified Speech Commands Application id.
         /// </summary>
-        /// <param name="applicationId">Task dialog application id.</param>
+        /// <param name="applicationId">Speech Commands application id.</param>
         /// <param name="subscription">Subscription key associated with the bot</param>
         /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
         /// <returns>A new dialog service config.</returns>
-        public static DialogServiceConfig FromTaskDialogAppId(string applicationId, string subscription, string region)
+        public static DialogServiceConfig FromSpeechCommandsAppId(string applicationId, string subscription, string region)
         {
             IntPtr configHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.DialogServiceConfig.dialog_service_config_from_task_dialog_app_id(out configHandle, applicationId, subscription, region));
+            ThrowIfFail(Internal.DialogServiceConfig.dialog_service_config_from_speech_commands_app_id(out configHandle, applicationId, subscription, region));
             return new DialogServiceConfig(configHandle);
         }
 
         /// <summary>
-        /// Speech Channel secret key.
+        /// Identifier used to connect to the backend service.
         /// </summary>
-        public string SecretKey
+        public string ApplicationId
         {
             get
             {
-                return progBag.GetProperty(PropertyId.Conversation_Secret_Key);
+                return progBag.GetProperty(PropertyId.Conversation_ApplicationId);
             }
             set
             {
-                progBag.SetProperty(PropertyId.Conversation_Secret_Key, value);
-            }
-        }
-
-        /// <summary>
-        /// Task Dialog Application Id
-        /// </summary>
-        public string TaskDialogAppId
-        {
-            get
-            {
-                return progBag.GetProperty(PropertyId.Conversation_TaskDialogAppId);
-            }
-            set
-            {
-                progBag.SetProperty(PropertyId.Conversation_TaskDialogAppId, value);
+                progBag.SetProperty(PropertyId.Conversation_ApplicationId, value);
             }
         }
 

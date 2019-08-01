@@ -41,53 +41,35 @@ public:
     }
 
     /// <summary>
-    /// Creates a dialog service config instance with the specified task dialog application id.
+    /// Creates a dialog service config instance with the specified Speech Commands application id.
     /// </summary>
-    /// <param name="appId">Task dialog application id.</param>
+    /// <param name="appId">Speech Commands application id.</param>
     /// <param name="subscription">Subscription key associated with the dialog.</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
     /// <returns>A shared pointer to the new dialog service config.</returns>
-    inline static std::shared_ptr<DialogServiceConfig> FromTaskDialogAppId(const SPXSTRING& appId, const SPXSTRING& subscription, const SPXSTRING& region)
+    inline static std::shared_ptr<DialogServiceConfig> FromSpeechCommandsAppId(const SPXSTRING& appId, const SPXSTRING& subscription, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(dialog_service_config_from_task_dialog_app_id(&h_config, Utils::ToUTF8(appId).c_str(), Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
+        SPX_THROW_ON_FAIL(dialog_service_config_from_speech_commands_app_id(&h_config, Utils::ToUTF8(appId).c_str(), Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
         return std::shared_ptr<DialogServiceConfig>{ new DialogServiceConfig(h_config) };
     }
 
     /// <summary>
-    /// Sets the Speech Channel Secret Key.
+    /// Sets the corresponding backend application identifier.
     /// </summary>
-    /// <param name="secretKey">Speech Channel Secret Key.</param>
-    inline void SetSecretKey(const SPXSTRING& secretKey)
+    /// <param name="applicationId">Application identifier.</param>
+    inline void SetApplicationId(const SPXSTRING& applicationId)
     {
-        SetProperty(PropertyId::Conversation_Secret_Key, secretKey);
+        SetProperty(PropertyId::Conversation_ApplicationId, applicationId);
     }
 
     /// <summary>
-    /// Gets the Speech Channel Secret Key.
+    /// Gets the application identifier.
     /// </summary>
     /// <returns>Speech Channel Secret Key.</returns>
-    inline SPXSTRING GetSecretKey() const
+    inline SPXSTRING GetApplicationId() const
     {
-        return GetProperty(PropertyId::Conversation_Secret_Key);
-    }
-
-    /// <summary>
-    /// Sets the Task Dialog Application Id.
-    /// </summary>
-    /// <param name="appId">Task Dialog Application Id.</param>
-    inline void SetTaskDialogAppId(const SPXSTRING& appId)
-    {
-        SetProperty(PropertyId::Conversation_TaskDialogAppId, appId);
-    }
-
-    /// <summary>
-    /// Gets the Task Dialog Application Id.
-    /// </summary>
-    /// <returns>Task Dialog Application Id.</returns>
-    inline SPXSTRING GetTaskDialogAppId() const
-    {
-        return GetProperty(PropertyId::Conversation_TaskDialogAppId);
+        return GetProperty(PropertyId::Conversation_ApplicationId);
     }
 
     /// <summary>

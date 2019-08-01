@@ -98,22 +98,21 @@ private:
     mutable std::mutex m_mutexProperties;
     std::map<std::string, std::string> m_stringPropertyMap;
 
-    const std::string m_subKeyName = GetPropertyName(PropertyId::SpeechServiceConnection_Key);
-    const std::string m_authTokenName = GetPropertyName(PropertyId::SpeechServiceAuthorization_Token);
-    const std::string m_proxyPassName = GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword);
-    const std::string m_proxyUserName = GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName);
-    const std::string m_conversationSecretKey = GetPropertyName(PropertyId::Conversation_Secret_Key);
-    const std::string m_taskDialogAppId = GetPropertyName(PropertyId::Conversation_TaskDialogAppId);
-
     void LogPropertyAndValue(std::string name, std::string value) const
     {
+        constexpr auto subKeyName = GetPropertyName(PropertyId::SpeechServiceConnection_Key);
+        constexpr auto authTokenName = GetPropertyName(PropertyId::SpeechServiceAuthorization_Token);
+        constexpr auto proxyPassName = GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword);
+        constexpr auto proxyUserName = GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName);
+        constexpr auto applicationId = GetPropertyName(PropertyId::Conversation_ApplicationId);        
+
         // hide property value for: subscription key, authorization token, conversation secret key/dialog id, proxy password and proxy username
-        if (name == m_subKeyName || name == m_authTokenName || name == m_conversationSecretKey || name == m_taskDialogAppId)
+        if (name == subKeyName || name == authTokenName || name == applicationId)
         {
             int l = value.length() > 2 ? 2 : 0;
             value.replace(value.begin(), value.end()-l, value.length()-l, '*');
         }
-        if ((name == m_proxyPassName || name == m_proxyUserName) && !value.empty())
+        if ((name == proxyPassName|| name == proxyUserName) && !value.empty())
         {
             value = std::string("set to non-empty string");
         }

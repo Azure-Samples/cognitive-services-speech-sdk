@@ -273,16 +273,16 @@ namespace Microsoft.CognitiveServices.Speech
         Speech_LogFilename = Internal.PropertyId.Speech_LogFilename,
 
         /// <summary>
-        /// Speech Channel secret key.
+        /// Identifier used to connect to the backend service.
         /// Added in version 1.5.0.
         /// </summary>
-        Conversation_Secret_Key = Internal.PropertyId.Conversation_Secret_Key,
+        Conversation_ApplicationId = Internal.PropertyId.Conversation_ApplicationId,
 
         /// <summary>
-        /// Id of an task dialog application
-        /// Added in version 1.6.0.
+        /// Type of dialog backend to connect to.
+        /// Added in version 1.7.0.
         /// </summary>
-        Conversation_TaskDialogAppId = Internal.PropertyId.Conversation_TaskDialogAppId,
+        Conversation_DialogType = Internal.PropertyId.Conversation_DialogType,
 
         /// <summary>
         /// Silence timeout for listening

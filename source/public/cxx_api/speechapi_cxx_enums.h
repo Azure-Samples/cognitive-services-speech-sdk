@@ -331,16 +331,16 @@ enum class PropertyId
     Speech_LogFilename = 9001,
 
     /// <summary>
-    /// Secret Key for connecting to the dialog service.
+    /// Identifier used to connect to the backend service.
     /// Added in version 1.5.0.
     /// </summary>
-    Conversation_Secret_Key = 10000,
+    Conversation_ApplicationId = 10000,
 
     /// <summary>
-    /// Id of a task dialog application
-    /// Added in version 1.6.0.
+    /// Type of dialog backend to connect to.
+    /// Added in version 1.7.0.
     /// </summary>
-    Conversation_TaskDialogAppId = 10001,
+    Conversation_DialogType = 10001,
 
     /// <summary>
     /// Silence timeout for listening

@@ -32,7 +32,7 @@ std::shared_ptr<DialogServiceConfig> DialogServiceConfigForTests(bool isBot = tr
 {
     auto config = isBot ?
         DialogServiceConfig::FromBotSecret(Config::DialogBotSecret, Keys::Dialog, Config::DialogRegion) :
-        DialogServiceConfig::FromTaskDialogAppId(Config::DialogBotSecret, Keys::Dialog, Config::DialogRegion);
+        DialogServiceConfig::FromSpeechCommandsAppId(Config::DialogBotSecret, Keys::Dialog, Config::DialogRegion);
     config->SetSpeechRecognitionLanguage("en-us");
     config->SetProperty("Conversation_Communication_Type", "AutoReply");
     return config;
@@ -473,6 +473,43 @@ TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connec
                     f2.wait();
                     return;
                 });
+            },
+            20s, 3);
+
+        auto success = std::get<0>(result);
+        auto message = std::move(std::get<1>(result));
+        INFO(message);
+        REQUIRE(success);
+    }
+}
+
+TEST_CASE("Dialog Service Connector SpeechCommands", "[api][cxx][dialog_service_connector][tahiti]")
+{
+    SECTION("Send/receive activities.")
+    {
+        turnOnLamp.UpdateFullFilename(Config::InputDir);
+        REQUIRE(exists(turnOnLamp.m_inputDataFilename));
+        auto config = DialogServiceConfigForTests(false);
+        auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
+
+        test_runner runner{ config, audioConfig };
+
+        constexpr auto activity_text = "message";
+
+        runner.add_activity_received_test([](std::ostringstream&, const ActivityReceivedEventArgs&, int)
+        {
+            /* Just check that we are receiving it */
+            return true;
+        }, 1);
+        runner.add_canceled_test(verifyCanceledSpeech);
+
+        auto result = runner.run<std::string>(
+            [&](DialogServiceConnector& connector)
+            {
+                auto activity = Activity::Create();
+                activity->Type = TEST_ACTIVITY_TYPE;
+                activity->Text = activity_text;
+                return connector.SendActivityAsync(activity);
             },
             20s, 3);
 

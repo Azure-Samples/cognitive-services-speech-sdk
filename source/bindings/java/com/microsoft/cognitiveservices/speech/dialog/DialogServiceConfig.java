@@ -49,51 +49,34 @@ public class DialogServiceConfig extends SpeechConfig  {
     }
 
     /**
-     * Creates an instance of the dialog service config with the specified Task Dialog Application Id.
-     * @param appId Task Dialog Application Id.
+     * Creates an instance of the dialog service config with the specified Speech Commands Application Id.
+     * @param appId Speech Commands Application Id.
      * @param subscription Service subscription key.
      * @param region Service region key.
      * @return The created config.
      */
-    public static DialogServiceConfig fromTaskDialogAppId(String appId, String subscription, String region) {
+    public static DialogServiceConfig fromSpeechCommandsAppId(String appId, String subscription, String region) {
         Contracts.throwIfNull(appId, "appId");
         Contracts.throwIfNull(subscription, "subscription");
         Contracts.throwIfNull(region, "region");
-        return new DialogServiceConfig(com.microsoft.cognitiveservices.speech.internal.DialogServiceConfig.FromTaskDialogAppId(appId, subscription, region));
+        return new DialogServiceConfig(com.microsoft.cognitiveservices.speech.internal.DialogServiceConfig.FromSpeechCommandsAppId(appId, subscription, region));
     }
 
     /**
-     * Sets the Speech channel secret key.
-     * @param value Speech channel bot secret key to set.
+     * Sets the application id.
+     * @param value Identifier used to connect to the backend service.
      */
-    public void setBotSecret(String value) {
+    public void setApplicationId(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
-        getConfigImpl().SetSecretKey(value);
+        getConfigImpl().SetApplicationId(value);
     }
 
     /**
-     * Gets the Speech channel secret key.
-     * @return Speech channel bot secret key.
+     * Gets the application id.
+     * @return Identifier used to connect to the backend service.
      */
-    public String getBotSecret() {
-        return getConfigImpl().GetSecretKey();
-    }
-
-    /**
-     * Sets the Task Dialog Application Id.
-     * @param value Task Dialog Application Id to set.
-     */
-    public void setTaskDialogAppId(String value) {
-        Contracts.throwIfNullOrWhitespace(value, "value");
-        getConfigImpl().SetTaskDialogAppId(value);
-    }
-
-    /**
-     * Gets the Task Dialog Application Id.
-     * @return Task Dialog Application Id.
-     */
-    public String getTaskDialogAppId() {
-        return getConfigImpl().GetTaskDialogAppId();
+    public String getApplicationId() {
+        return getConfigImpl().GetApplicationId();
     }
 
     /**

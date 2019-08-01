@@ -251,9 +251,32 @@ string Connection::Impl::ConstructConnectionUrl() const
                 << endpoint::luis::pathSuffix;
             break;
         case EndpointType::Dialog:
+        {
+            const char* resource = nullptr;
+            const char* version = nullptr;
+            if (m_config.m_dialogBackend == Client::DialogBackend::BotFramework)
+            {
+                resource = endpoint::dialog::resourcePath::botFramework;
+                version = endpoint::dialog::version::botFramework;
+            }
+            else if (m_config.m_dialogBackend == Client::DialogBackend::SpeechCommands)
+            {
+                resource = endpoint::dialog::resourcePath::speechCommands;
+                version = endpoint::dialog::version::speechCommands;
+            }
+            else
+            {
+                ThrowInvalidArgumentException("Invalid dialog backend.");
+            }
+
+            /* This will generate an url of the form wss://<region>.convai.speech.microsoft.com/<backend>/api/<version> */
             oss << m_config.m_region
-                << endpoint::dialog::url;
+                << endpoint::dialog::url
+                << resource
+                << endpoint::dialog::suffix
+                << version;
             break;
+        }
         case EndpointType::ConversationTranscriptionService:
             oss << endpoint::conversationTranscriber::pathPrefix1
                 << m_config.m_region
@@ -414,12 +437,18 @@ void Connection::Impl::Connect()
     authStr = m_config.m_authData[static_cast<size_t>(AuthenticationType::DialogApplicationId)];
     if (!authStr.empty())
     {
-        LogInfo("Adding DirectLineSpeech secret.");
-        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::dialogApplicationId, authStr.c_str()) != 0)
-        {
-            ThrowRuntimeError("Failed to set authentication using DirectLineSpeech secret.");
-        }
+        const char* headerName = m_config.m_dialogBackend == Client::DialogBackend::BotFramework ? headers::dialogDLSSecret :
+                                 m_config.m_dialogBackend == Client::DialogBackend::SpeechCommands ? headers::dialogCommandsAppId :
+                                 nullptr;
 
+        if (headerName != nullptr)
+        {
+            LogInfo("Adding Dialog auth header.");
+            if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headerName, authStr.c_str()) != 0)
+            {
+                ThrowRuntimeError("Failed to set authentication using Dialog auth header.");
+            }
+        }
     }
 
     if (m_config.m_endpointType == EndpointType::Dialog)

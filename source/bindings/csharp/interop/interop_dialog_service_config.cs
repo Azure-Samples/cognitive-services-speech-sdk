@@ -20,7 +20,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog.Internal
             [MarshalAs(UnmanagedType.LPStr)] string region);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-        public static extern SPXHR dialog_service_config_from_task_dialog_app_id(out SPXCONNECTORCONFIGHANDLE config,
+        public static extern SPXHR dialog_service_config_from_speech_commands_app_id(out SPXCONNECTORCONFIGHANDLE config,
             [MarshalAs(UnmanagedType.LPStr)] string app_id,
             [MarshalAs(UnmanagedType.LPStr)] string subscription,
             [MarshalAs(UnmanagedType.LPStr)] string region);
