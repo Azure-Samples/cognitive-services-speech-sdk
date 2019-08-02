@@ -3,7 +3,7 @@ parameters:
   region: "westus"
   usePublicSDK: false
   runLatencyTests: eq(variables['Build.Reason'], 'Schedule')
-  PythonVersion: 3.6.8
+  PythonVersion: 3.6
   Platform: x64
 steps:
 - task: UsePythonVersion@0
