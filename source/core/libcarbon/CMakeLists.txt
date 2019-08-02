@@ -84,6 +84,16 @@ else()
     )
 endif()
 
+if(APPLE)
+  FIND_LIBRARY(CORE_FOUNDATION CoreFoundation)
+  if (NOT CORE_FOUNDATION)
+    message(FATAL_ERROR "CoreFoundation not found")
+  endif()
+  target_link_libraries(${PROJECT_NAME}
+    PRIVATE ${CORE_FOUNDATION}
+    )
+endif()
+
 if (EXTENSION_CODEC_ENABLED AND STATIC_CODEC_EXTENSION)
   target_link_libraries(${PROJECT_NAME} PRIVATE codec)
 endif()

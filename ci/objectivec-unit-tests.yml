@@ -1,5 +1,5 @@
 parameters:
-  jobName: "OsxUnitTests"
+  jobName: "macOSUnitTests"
   jobDependsOn: "Pre"
   buildPlatform: macOS
   continueOnTestFailure: false

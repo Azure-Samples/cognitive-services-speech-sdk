@@ -7,9 +7,9 @@
 #import "SPXRecognitionResult.h"
 
 /**
-  * Defines the result of speech recognition.
-  * Currently no additional properties and methods, besides those from SPXRecognitionResult.
-  */
+ * Defines the result of speech recognition.
+ * Currently no additional properties and methods, besides those from SPXRecognitionResult.
+ */
 SPX_EXPORT
 @interface SPXSpeechRecognitionResult : SPXRecognitionResult
 

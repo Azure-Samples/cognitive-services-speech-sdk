@@ -133,6 +133,9 @@ virtual void OnTranslationPhrase(const USP::TranslationPhraseMsg& message) overr
     }
 }
 
+public:
+    virtual ~UspCallbacks() {};
+
 };
 
 #define AUDIO_BYTES_PER_SECOND (16000*2) // 16 kHz, 16 bit PCM

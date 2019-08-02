@@ -13,6 +13,7 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 set -x -e -o pipefail
 USAGE="Usage: $0 drop-dir"
 DROP_DIR="${1?$USAGE}"
+MAC_ARTIFACT_DIR=${2:-macOS}
 
 # Make absolute
 DROP_DIR="$(readlink -f "$DROP_DIR")"
@@ -67,7 +68,7 @@ for platformString in "${platforms[@]}"; do
       assetDir+=/linux
       ;;
     OSX)
-      dropPrefix+="/macOS/$flavor"
+      dropPrefix+="/${MAC_ARTIFACT_DIR}/$flavor"
       libPrefix=lib
       libSuffix=.dylib
       jnilibSuffix=.jnilib

@@ -1,0 +1,173 @@
+parameters:
+  jobName: "macOSBuild"
+  buildPlatform: macOS
+  continueOnTestFailure: false
+  extraDependencyInstallSteps: []
+  extraCmakeArgs: ""
+
+jobs:
+- job: ${{ parameters.jobName }}
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' ${{ parameters.jobName }} '))
+  pool:
+    name: Hosted macOS
+  timeoutInMinutes: 240
+  strategy:
+    maxParallel: 2
+    matrix:
+      debug:
+        BuildConfiguration: Debug
+      release:
+        BuildConfiguration: Release
+  variables:
+    BuildPlatform: ${{ parameters.buildPlatform }}
+    FrameworkName: MicrosoftCognitiveServicesSpeech
+    VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
+    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
+  steps:
+  # Update bash really early so it will be picked up by "bash" steps.
+  - bash: brew config && brew install bash
+    displayName: Install modern bash
+  - ${{ parameters.extraDependencyInstallSteps }}
+  - bash: |
+      . ci/functions.sh
+      vsts_setvar SPEECHSDK_TARGET_PLATFORM OSX-x64
+      vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+    displayName: Set OSX-x64 target platform
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: 3.7
+      addToPath: true
+  - bash: ./ci/install-build-dependencies.sh
+    displayName: Install build dependencies
+  - bash: |
+      cmake . -Bbuild -DBUILD_PYTHON=OFF -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) \
+        -DCMAKE_BUILD_TYPE=$(BuildConfiguration) \
+        -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) \
+        -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) \
+        ${{ parameters.extraCmakeArgs }}
+    displayName: Generate makefiles
+  - bash: |
+      cmake --build build -j 4
+    displayName: CMake build
+  - template: build-unix-python-wheels.yml
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: Sign .so (dynamic library) in .whl
+    inputs:
+      ConnectedServiceName: Speech SDK ESRP Signing Alternate
+      FolderPath: $(OutputDirectory)/wheelhouse
+      Pattern: '*.whl.zip'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_MACOS)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      set -u -x -e -o pipefail
+      for wheel in $(OutputDirectory)/wheelhouse/*.whl.zip; do
+        mv "${wheel}" "${wheel%.zip}"
+        mkdir repack # error out if existing
+        # Not using 'wheel unpack' to avoid error on hash mismatch:
+        unzip -d repack "${wheel%.zip}"
+        find repack -name \*.dylib -or -name \*.so -print0 | xargs -0 -n1 codesign --display --verbose=4
+        python -m wheel pack --dest-dir $(OutputDirectory)/wheelhouse repack
+        rm -rf repack
+      done
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+    displayName: Rename .whl.zip to .whl and repack
+  - bash: |
+      dsymutil "build/lib/$(FrameworkName).framework/$(FrameworkName)" -o "build/lib/$(FrameworkName).dSYM"
+    condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
+    displayName: Create debug symbols
+  - bash: |
+      set -u -x -e -o pipefail
+      mkdir -p "$(OutputDirectory)"
+      mv "build/lib/$(FrameworkName).dSYM" "$(OutputDirectory)"
+      cd "$(OutputDirectory)"
+      zip --symlinks -r "$(VersionedFrameworkName).dSYM.zip" "$(FrameworkName).dSYM"
+      rm -rf "$(OutputDirectory)/$(FrameworkName).dSYM"
+    condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
+    displayName: Archive debug symbols
+  - bash: |
+      set -u -x -e -o pipefail
+      strip -x "build/lib/$(FrameworkName).framework/$(FrameworkName)"
+    displayName: Strip dynamic library in universal framework for release builds
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+  - bash: |
+      set -u -x -e -o pipefail
+      cp -R "build/lib/$(FrameworkName).framework" "$(OutputDirectory)"
+      cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$(OutputDirectory)"
+      cd "$(OutputDirectory)"
+      zip --symlinks -r "$(VersionedFrameworkName).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
+      rm -rf REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
+    displayName: Create archive for signing
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign OSX framework'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      FolderPath: '$(OutputDirectory)'
+      Pattern: $(VersionedFrameworkName).zip
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_MACOS)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      ci/apple/unpack_signed_archive.sh $(OutputDirectory) $(FrameworkName) $(VersionedFrameworkName) $(Build.Repository.LocalPath)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+    displayName: Package signed framework
+  - bash: |
+      set -u -x -e -o pipefail
+      dylibname="build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib"
+      jnilibname="build/bin/libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
+      [[ -f ${dylibname} ]]
+      [[ -f ${jnilibname} ]]
+      cp "${dylibname}" "${dylibname%%dylib}"unstripped.dylib
+      cp "${jnilibname}" "${jnilibname%%jnilib}"unstripped.jnilib
+      strip -x "${dylibname}"
+      strip -x "${jnilibname}"
+      if [[ $SPEECHSDK_SIGN == true ]]; then
+        mkdir tosign && zip tosign/libs.zip "${dylibname}" "${jnilibname}"
+      fi
+    displayName: "Strip dylib and create archive for signing dylib if necessary"
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: Sign .dylib (dynamic library)
+    inputs:
+      ConnectedServiceName: Speech SDK ESRP Signing Alternate
+      FolderPath: tosign
+      Pattern: '*.zip'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_MACOS)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign Mac .dll for nuget package'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
+      FolderPath: 'build/bin/$(BuildConfiguration)MacOS/netstandard2.0/'
+      Pattern: 'Microsoft.CognitiveServices.Speech.csharp.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_DLL)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      set -u -x -e -o pipefail
+      archive="tosign/libs.zip"
+      [[ -f ${archive} ]]
+      unzip -o "${archive}"
+      # simple signing check, this will fail if not signed
+      shopt -s extglob
+      ls build/**/libMicrosoft!(*unstripped).{dylib,jnilib} | xargs -n1 codesign --display --verbose=4
+    displayName: "Unpack archive with signed dylib"
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - template: test-during-build.yml
+    parameters:
+      continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+  - bash: |
+      ./ci/drop/bindrop.sh \
+          $(SPEECHSDK_TARGET_PLATFORM) $(BuildConfiguration) "$(OutputDirectory)"
+    displayName: Create drop files
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    condition: succeededOrFailed()
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)'
+      ArtifactName: $(BuildPlatform)
+      publishLocation: Container
+

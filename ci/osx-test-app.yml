@@ -2,12 +2,12 @@ parameters:
   continueOnTestFailure: false
 
 jobs:
-- job: OsxBuildSampleApp
-  dependsOn: [Pre, OsxBuild]
+- job: macOSBuildSampleApp
+  dependsOn: [Pre, macOSBuild]
   condition: |
     and(
       succeeded(),
-      contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuildSampleApp '),
+      contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' macOSBuildSampleApp '),
       eq(dependencies.Pre.outputs['var.SPEECHSDK_SIGN'], 'true')
     )
   pool:

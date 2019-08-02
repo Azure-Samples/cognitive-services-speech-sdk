@@ -19,7 +19,10 @@ else
   PACKAGE_PATH=
 fi
 
-readarray -t PROJECTS < <(find "$SAMPLES_DIR" -name pom.xml -printf '%h\n')
+callFind=find
+[[ $(type -t gfind) != file ]] || callFind=gfind
+
+readarray -t PROJECTS < <(${callFind} "$SAMPLES_DIR" -name pom.xml -printf '%h\n')
 
 for dir in "${PROJECTS[@]}"; do
   echo $dir

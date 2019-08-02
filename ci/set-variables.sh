@@ -47,7 +47,7 @@
 #     Defaults to our CarbonPre VSTS feed for 'dev' builds, Carbon otherwise.
 # * SPEECHSDK_BUILD_AGENT_PLATFORM - can be "Windows-x64", "OSX-x64", "Linux-x64"
 # * SPEECHSDK_BUILD_PHASES - space-separated and space-enclosed list of build phases to run
-#     Default: " WindowsBuild WindowsOSBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild OsxUnitTests OsxBuildSampleApp IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonOobeTest BuildPythonDocs "
+#     Default: " WindowsBuild WindowsOSBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop macOSBuild macOSUnitTests macOSBuildSampleApp IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest WindowsSdlBuild LinuxPythonOobeTest BuildPythonDocs "
 #     For int (nightly) builds, "TsaUpload WindowsSDLFortifyJava WackTest CheckSignatures" are added to the default phases.
 #     For prod (release) builds, "WackTest CheckSignatures" are added to the default phases.
 #     Check phase condition in build.yml for valid phase names.
@@ -222,7 +222,7 @@ if $PR_MARKDOWN_ONLY; then
   # Run just Doxygen phase for PRs changing only Markdown.
   SPEECHSDK_BUILD_PHASES=" Doxygen "
 else
-  SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop OsxBuild OsxUnitTests IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest JsBuild WindowsSdlBuild LinuxPythonOobeTest BuildPythonDocs UnityBuild "
+  SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop macOSBuild macOSUnitTests IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest WindowsSdlBuild LinuxPythonOobeTest BuildPythonDocs UnityBuild "
 fi
 
 # Running tests is default
@@ -242,7 +242,7 @@ case $SPEECHSDK_BUILD_TYPE in
   int)
     # For Nightly add some additional jobs.
     if [[ $BUILD_REASON == Schedule ]]; then
-      SPEECHSDK_BUILD_PHASES+="TsaUpload WindowsSDLFortifyJava WackTest IosMultiPlatformTests DocFX AndroidAppcenterTest LinuxProxyTest "
+      SPEECHSDK_BUILD_PHASES+="TsaUpload WindowsSDLFortifyJava WackTest IosMultiPlatformTests DocFX AndroidAppcenterTest LinuxProxyTest macOSProxyBuild JavaJrePackageMacOSProxy macOSProxyTest "
     fi
     PRERELEASE_VERSION=-beta.0.$_BUILD_ID
     META=+$_BUILD_COMMIT

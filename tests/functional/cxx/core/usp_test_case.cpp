@@ -74,6 +74,7 @@ public:
         m_connection->WriteAudio(audioChunk);
     }
 
+    virtual ~UspClient() = default;
 private:
     USP::ConnectionPtr m_connection;
     std::shared_ptr<CSpxThreadService> m_threadService;
@@ -192,6 +193,9 @@ class TlsCheck : public USP::Callbacks
 #pragma warning(pop)
 #endif
     }
+
+public:
+    virtual ~TlsCheck() {};
 };
 
 TEST_CASE("USP uses TLS12", "[usp]")
@@ -222,6 +226,9 @@ class PortCheck : public USP::Callbacks
         REQUIRE(errorCode == USP::ErrorCode::ConnectionError);
         REQUIRE(errorMessage.find("Connection failed") != std::string::npos);
     }
+
+public:
+    virtual ~PortCheck() = default;
 };
 
 TEST_CASE("Port specification", "[usp]")

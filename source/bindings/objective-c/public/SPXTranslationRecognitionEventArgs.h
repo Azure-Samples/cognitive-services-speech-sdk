@@ -34,6 +34,7 @@ SPX_EXPORT
 
 /**
  * The error code in case of an unsuccessful recognition (reason is set to Error).
+ *
  * Added in version 1.1.0.
  */
 @property (readonly)SPXCancellationErrorCode errorCode;

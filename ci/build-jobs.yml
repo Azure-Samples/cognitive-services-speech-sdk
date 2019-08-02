@@ -375,126 +375,16 @@ jobs:
       ArtifactName: WindowsUwp
       publishLocation: Container
 
-# Note: for now this packages up only {Linux,Windows}-x64-Release
-- job: JavaJrePackage
-  dependsOn: [Pre, LinuxBuild, WindowsBuild, OsxBuild]
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JavaJrePackage '))
-  pool:
-    name: Hosted VS2017
-  timeoutInMinutes: 30
-  steps:
-  - bash: ./ci/set-variables.sh
-    displayName: Set variables
-  - bash: |
-      set -x -e -o pipefail
-      . ci/functions.sh
-      PublishArtifactName=JavaJrePackage
-      ArtifactOutWindows="$(Build.ArtifactStagingDirectory)/Out/$PublishArtifactName"
-      ArtifactOut="$(cygpath -au "$ArtifactOutWindows")"
-      ArtifactBasename="$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA)"
-      MavenRoot="$ArtifactOut/maven"
-      MavenRootWindows="$ArtifactOutWindows/maven"
-      relativeMavenPackageDir="${SPEECHSDK_MAVEN_GROUP_ID//\./\/}/$SPEECHSDK_MAVEN_ARTIFACT_ID/$SPEECHSDK_SEMVER2NOMETA"
-      MavenPackageDir="$MavenRoot/$relativeMavenPackageDir"
-      MavenPackageDirWindows="$MavenRootWindows/$relativeMavenPackageDir"
-      vsts_setvars_by_ref PublishArtifactName Artifact{Out{,Windows},Basename} Maven{Root,PackageDir}{,Windows}
-    displayName: Set package variables
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading Windows artifacts'
-    inputs:
-      artifactName: Windows
-      downloadPath: $(System.ArtifactsDirectory)/In
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading Linux artifacts'
-    inputs:
-      artifactName: Linux
-      downloadPath: $(System.ArtifactsDirectory)/In
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading OSX artifacts'
-    inputs:
-      artifactName: macOS
-      downloadPath: $(System.ArtifactsDirectory)/In
-  - bash: |
-      ./ci/jre/build-jar.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/In
-  # Note: doc says "The file extension should match the selected archive type." - so we are renaming afterwards
-  - task: ArchiveFiles@2
-    inputs:
-      rootFolderOrFile: './ci/jre/jar'
-      includeRootFolder: false
-      archiveType: zip
-      archiveFile: '$(ArtifactOutWindows)/$(ArtifactBasename).zip'
-    displayName: 'Create .zip'
-  - bash: |
-      set -x -e -o pipefail
-      mkdir -p "$(MavenPackageDir)"
-      mv "$(ArtifactOut)/$(ArtifactBasename).zip" "$(MavenPackageDir)/$(ArtifactBasename).jar"
-    displayName: 'Rename .zip -> .jar, place'
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-    displayName: 'Sign *.jar'
-    inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
-      FolderPath: '$(MavenRootWindows)'
-      Pattern: '*.jar'
-      signConfigType: inlineSignParams
-      inlineOperation: $(SIGN_PARAMS_JAVA)
-    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-  - bash: |
-      set -e -x -o pipefail
-      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
-      ./ci/run-maven.sh public_samples "$(MavenRoot)"
-    displayName: Build Maven-based samples
-  - bash: |
-       set -x -e
-       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
-         -D luis-key=$(luis-westus-s0-201809-key1) \
-         -D speech-key=$(NorthEuropeKeySkyman) \
-         -D virtualassistant-region=$(DialogRegion) \
-         -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-         -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-         -D long-running=false)
-       . ci/functions.sh
-       java \
-        -cp $(printf "%s;" \
-           "$(MavenPackageDirWindows)/$(ArtifactBasename).jar" \
-           "$(Build.ArtifactStagingDirectory)/In/Windows/x64/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" \
-           "external/junit/junit-4.12.jar" \
-           "external/junit/hamcrest-core-1.3.jar") \
-         -DSpeechSubscriptionKey="$SPEECHSDK_SPEECH_KEY" \
-         -DSpeechRegion="$SPEECHSDK_SPEECH_REGION" \
-         -DLuisSubscriptionKey=$(luis-westus-s0-201809-key1) \
-         -DLuisRegion="$SPEECHSDK_LUIS_REGION" \
-         -DLuisAppId="$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-         -DAudioInputDirectory=tests/input/audio \
-         -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
-         -DKeyword=Computer \
-         -DKeywordModel=/data/keyword/kws.table \
-         -DTestOutputFilename=test-java-unittests-package.xml \
-         -DSpeechSubscriptionKeyForVirtualAssistant="$SPEECHSDK_BOT_SUBSCRIPTION" \
-         -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
-         -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
-         -DConversationTranscriptionEndpoint="$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-         -DConversationTranscriptionPPEKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
-         -DConversationTranscriptionPRODKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
-         -DSpeechRegionForConversationTranscription="$SPEECHSDK_PRINCETON_REGION" \
-         tests.runner.Runner \
-         tests.AllTests
-    displayName: Run unit test
-    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
-    continueOnError: ${{ parameters.continueOnTestFailure }}
-  # TODO more - e.g. POM?
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFiles: '**/test-*.xml'
-    condition: succeededOrFailed()
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Out/$(PublishArtifactName)'
-      ArtifactName: $(PublishArtifactName)
-      publishLocation: Container
-    displayName: 'Publish .jar'
-    condition: succeededOrFailed()
+- template: java-jre-package.yml
+  parameters:
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+    macArtifactName: macOS
+
+- template: java-jre-package.yml
+  parameters:
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+    macArtifactName: macOSProxy
+    javaArtifactSuffix: "MacOSProxy"
 
 - template: java-jre-package-test.yml
   parameters:
@@ -616,10 +506,10 @@ jobs:
   # Note: NuGet currently does not depend on LinuxDockerBuild (only needs x64 binaries)
   variables:
     HAS_OS_BUILD: $[contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild ')]
-  dependsOn: [Pre, LinuxBuild, WindowsBuild, WindowsOSBuild, WindowsUwpBuild, OsxBuild]
+  dependsOn: [Pre, LinuxBuild, WindowsBuild, WindowsOSBuild, WindowsUwpBuild, macOSBuild]
   condition: |
     and(
-      succeeded('Pre', 'LinuxBuild', 'WindowsBuild', 'WindowsUwpBuild', 'OsxBuild'),
+      succeeded('Pre', 'LinuxBuild', 'WindowsBuild', 'WindowsUwpBuild', 'macOSBuild'),
       xor(
         succeeded('WindowsOSBuild'),
         not(contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild '))
@@ -1564,6 +1454,80 @@ jobs:
     continueOnError: ${{ parameters.continueOnTestFailure }}
     displayName: Run the proxy test
 
+- job: macOSProxyTest
+  dependsOn: [Pre, macOSProxyBuild, JavaJrePackageMacOSProxy]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' macOSProxyTest '))
+  pool:
+    name: Hosted macOS
+  variables:
+    BuildPlatform: macOSProxy
+    BuildConfiguration: Release
+  steps:
+  - bash: brew config && brew install bash
+    displayName: Install modern bash
+  - bash: brew install findutils
+    displayName: Install findutils for maven script
+  - bash: |
+      set -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Download macOS artefacts (for carbonx)
+    inputs:
+      artifactName: $(BuildPlatform)
+      downloadPath: $(System.ArtifactsDirectory)
+      itemPattern: '$(BuildPlatform)/$(BuildConfiguration)/**'
+    continueOnError: ${{ parameters.continueOnTestFailure }}
+  - task: DownloadBuildArtifacts@0
+    displayName: Download Java artefacts
+    inputs:
+      artifactName: JavaJrePackageMacOSProxy
+      downloadPath: $(System.ArtifactsDirectory)
+      itemPattern: '**/*.jar'
+    continueOnError: ${{ parameters.continueOnTestFailure }}
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      PublishArtifactName=JavaJrePackageMacOSProxy
+      ArtifactIn="$(Build.ArtifactStagingDirectory)/$PublishArtifactName"
+      MavenRoot="$ArtifactIn/maven"
+      JarName="$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA).jar"
+      relativeMavenPackageDir="${SPEECHSDK_MAVEN_GROUP_ID//\./\/}/$SPEECHSDK_MAVEN_ARTIFACT_ID/$SPEECHSDK_SEMVER2NOMETA"
+      PathToJar="$MavenRoot/$relativeMavenPackageDir/$JarName"
+      vsts_setvars_by_ref PublishArtifactName ArtifactIn MavenRoot JarName PathToJar
+    displayName: Set Java package variables
+    continueOnError: ${{ parameters.continueOnTestFailure }}
+  - bash: |
+      set -u -e -o pipefail
+      . ci/functions.sh
+      perl ci/patch-samples-pkg.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      patchSamplesFromTestConfig public_samples/quickstart/java-jre \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false
+    displayName: Patch Java quickstart
+    continueOnError: ${{ parameters.continueOnTestFailure }}
+  - bash: |
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false)
+      ./ci/build/osx-proxy-test.sh $(System.ArtifactsDirectory) $(PathToJar)
+    displayName: Run proxy tests
+    continueOnError: ${{ parameters.continueOnTestFailure }}
+
 - template: linux-docker-build.yml
   parameters:
     continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
@@ -2147,179 +2111,27 @@ jobs:
       publishLocation: Container
     condition: succeededOrFailed()
 
-- job: OsxBuild
-  dependsOn: Pre
-  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuild '))
-  pool:
-    name: Hosted macOS
-  timeoutInMinutes: 240
-  strategy:
-    maxParallel: 2
-    matrix:
-      debug:
-        BuildConfiguration: Debug
-      release:
-        BuildConfiguration: Release
-  variables:
-    BuildPlatform: macOS
-    FrameworkName: MicrosoftCognitiveServicesSpeech
-    VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
-    OutputDirectory: $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)
-  steps:
-  # Update bash really early so it will be picked up by "bash" steps.
-  - bash: brew config && brew install bash
-    displayName: Install modern bash
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Set OSX-x64 target platform
-    inputs:
-      type: InlineScript
-      script: |
-        . ci/functions.sh
-        vsts_setvar SPEECHSDK_TARGET_PLATFORM OSX-x64
-        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
-  - bash: ./ci/set-variables.sh
-    displayName: Set variables
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: 3.7
-      addToPath: true
-  - bash: ./ci/install-build-dependencies.sh
-    displayName: Install build dependencies
-  - bash: |
-      cmake . -Bbuild -DBUILD_PYTHON=OFF -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) \
-        -DCMAKE_BUILD_TYPE=$(BuildConfiguration) \
-        -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) \
-        -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
-    displayName: Generate makefiles
-  - bash: |
-      cmake --build build -j 4
-    displayName: CMake build
-  - template: build-unix-python-wheels.yml
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-    displayName: Sign .so (dynamic library) in .whl
-    inputs:
-      ConnectedServiceName: Speech SDK ESRP Signing Alternate
-      FolderPath: $(OutputDirectory)/wheelhouse
-      Pattern: '*.whl.zip'
-      signConfigType: inlineSignParams
-      inlineOperation: $(SIGN_PARAMS_MACOS)
-    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-  - bash: |
-      set -u -x -e -o pipefail
-      for wheel in $(OutputDirectory)/wheelhouse/*.whl.zip; do
-        mv "${wheel}" "${wheel%.zip}"
-        mkdir repack # error out if existing
-        # Not using 'wheel unpack' to avoid error on hash mismatch:
-        unzip -d repack "${wheel%.zip}"
-        find repack -name \*.dylib -or -name \*.so -print0 | xargs -0 -n1 codesign --display --verbose=4
-        python -m wheel pack --dest-dir $(OutputDirectory)/wheelhouse repack
-        rm -rf repack
-      done
-    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-    displayName: Rename .whl.zip to .whl and repack
-  - bash: |
-      dsymutil "build/lib/$(FrameworkName).framework/$(FrameworkName)" -o "build/lib/$(FrameworkName).dSYM"
-    condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
-    displayName: Create debug symbols
-  - bash: |
-      set -u -x -e -o pipefail
-      mkdir -p "$(OutputDirectory)"
-      mv "build/lib/$(FrameworkName).dSYM" "$(OutputDirectory)"
-      cd "$(OutputDirectory)"
-      zip --symlinks -r "$(VersionedFrameworkName).dSYM.zip" "$(FrameworkName).dSYM"
-      rm -rf "$(OutputDirectory)/$(FrameworkName).dSYM"
-    condition: and(succeeded(), or(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildConfiguration'], 'Release')))
-    displayName: Archive debug symbols
-  - bash: |
-      set -u -x -e -o pipefail
-      strip -x "build/lib/$(FrameworkName).framework/$(FrameworkName)"
-    displayName: Strip dynamic library in universal framework for release builds
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
-  - bash: |
-      set -u -x -e -o pipefail
-      cp -R "build/lib/$(FrameworkName).framework" "$(OutputDirectory)"
-      cp -p "$(Build.Repository.LocalPath)/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$(OutputDirectory)"
-      cd "$(OutputDirectory)"
-      zip --symlinks -r "$(VersionedFrameworkName).zip" REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
-      rm -rf REDIST.txt license.md ThirdPartyNotices.md "$(FrameworkName).framework"
-    displayName: Create archive for signing
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-    displayName: 'Sign OSX framework'
-    inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
-      FolderPath: '$(OutputDirectory)'
-      Pattern: $(VersionedFrameworkName).zip
-      signConfigType: inlineSignParams
-      inlineOperation: $(SIGN_PARAMS_MACOS)
-    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-  - bash: |
-      ci/apple/unpack_signed_archive.sh $(OutputDirectory) $(FrameworkName) $(VersionedFrameworkName) $(Build.Repository.LocalPath)
-    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-    displayName: Package signed framework
-  - bash: |
-      set -u -x -e -o pipefail
-      dylibname="build/lib/libMicrosoft.CognitiveServices.Speech.core.dylib"
-      jnilibname="build/bin/libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
-      [[ -f ${dylibname} ]]
-      [[ -f ${jnilibname} ]]
-      cp "${dylibname}" "${dylibname%%dylib}"unstripped.dylib
-      cp "${jnilibname}" "${jnilibname%%jnilib}"unstripped.jnilib
-      strip -x "${dylibname}"
-      strip -x "${jnilibname}"
-      if [[ $SPEECHSDK_SIGN == true ]]; then
-        mkdir tosign && zip tosign/libs.zip "${dylibname}" "${jnilibname}"
-      fi
-    displayName: "Strip dylib and create archive for signing dylib if necessary"
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-    displayName: Sign .dylib (dynamic library)
-    inputs:
-      ConnectedServiceName: Speech SDK ESRP Signing Alternate
-      FolderPath: tosign
-      Pattern: '*.zip'
-      signConfigType: inlineSignParams
-      inlineOperation: $(SIGN_PARAMS_MACOS)
-    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-    displayName: 'Sign Mac .dll for nuget package'
-    inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing Alternate'
-      FolderPath: 'build/bin/$(BuildConfiguration)MacOS/netstandard2.0/'
-      Pattern: 'Microsoft.CognitiveServices.Speech.csharp.dll'
-      signConfigType: inlineSignParams
-      inlineOperation: $(SIGN_PARAMS_DLL)
-    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-  - bash: |
-      set -u -x -e -o pipefail
-      archive="tosign/libs.zip"
-      [[ -f ${archive} ]]
-      unzip -o "${archive}"
-      # simple signing check, this will fail if not signed
-      shopt -s extglob
-      ls build/**/libMicrosoft!(*unstripped).{dylib,jnilib} | xargs -n1 codesign --display --verbose=4
-    displayName: "Unpack archive with signed dylib"
-    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-  - template: test-during-build.yml
-    parameters:
-      continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
-  - bash: |
-      ./ci/drop/bindrop.sh \
-          $(SPEECHSDK_TARGET_PLATFORM) $(BuildConfiguration) "$(OutputDirectory)"
-    displayName: Create drop files
-  - task: PublishBuildArtifacts@1
-    displayName: Publish drop
-    condition: succeededOrFailed()
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)'
-      ArtifactName: macOS
-      publishLocation: Container
+- template: macosbuild.yml
+  parameters:
+    jobName: "macOSBuild"
+    buildPlatform: macOS
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+
+- template: macosbuild.yml
+  parameters:
+    continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
+    jobName: "macOSProxyBuild"
+    buildPlatform: macOSProxy
+    extraDependencyInstallSteps: []
+    extraCmakeArgs: "-Duse_openssl=ON -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl"
 
 - template: objectivec-unit-tests.yml
   parameters:
     continueOnTestFailure: ${{ parameters.continueOnTestFailure }}
-    jobName: "OsxUnitTests"
+    jobName: "macOSUnitTests"
     jobDependsOn:
       - Pre
-      - OsxBuild
+      - macOSBuild
     buildPlatform: macOS
     extraSteps:
       - bash: |

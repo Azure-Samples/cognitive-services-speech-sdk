@@ -15,7 +15,7 @@ typedef struct _DNS_CONTEXT* DnsCacheHandle;
 typedef void* DNS_RESULT_HANDLE;
 typedef void(*DNS_CACHE_NAMERESOLVEDCB)(DnsCacheHandle handle, int error, DNS_RESULT_HANDLE result, void *context);
 
-DnsCacheHandle DnsCacheCreate();
+DnsCacheHandle DnsCacheCreate(void);
 
 void DnsCacheDestroy(DnsCacheHandle handle);
 
