@@ -92,6 +92,9 @@ public_samples/**/objd
 # generated pods directory
 tests/functional/objective-c/*/Pods/
 
+# objective-c frameworks
+MicrosoftCognitiveServicesSpeech.framework/
+
 # VoiceActivation KWS artifact
 external/KWS/*/
 external/uwp_ssl/*/

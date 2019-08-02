@@ -1,7 +1,7 @@
 # Additional samples for Objective-C on iOS
 
 Theses samples demonstrate more advanced techniques for speech recognition with the Microsoft Cognitive Services Speech SDK.
-For an introduction to the SDK, please refer to the [quickstart article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-objectivec-ios) on the SDK documentation page for step-by-step instructions.
+For an introduction to the SDK, please refer to the [quickstart articles for speech recognition](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-objectivec-ios) and [speech synthesis](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-objectivec-ios) on the SDK documentation page for step-by-step instructions.
 
 ## Connection object sample
 
@@ -17,14 +17,19 @@ This [sample app](./speech-samples) shows various other techniques that can be u
 - using continuous recognition
 - using push and pull audio streams
 
+The [synthesis sample app](./synthesis-samples) shows various other techniques that can be used with speech synthesizers:
+
+- using push and pull audio streams / audio data stream to fetch the synthesized audio streamingly to lower the latency
+- using event handlers to handle synthesis events
+
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A Mac with Xcode 9.4.1 or later installed as iOS development environment. These samples target iOS versions 9.2 or later.
+- A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+- A Mac with Xcode 9.4.1 or later installed as iOS development environment. These samples target iOS versions 9.2 (12.2 for synthesis samples) or later.
 
 ## Get the code for the samples
 
-* [Download the sample code to your development machine.](../../../README.md#get-the-samples)
+- [Download the sample code to your development machine.](../../../README.md#get-the-samples)
 
 ## Get the Speech SDK for iOS
 
@@ -39,7 +44,7 @@ This loads the project in Xcode.
 Next, add your subscription details to the `<sample name>/ViewController.m` file:
 
 1. Replace the string `YourSubscriptionKey` with your subscription key.
-1. Replace the string `YourServiceRegion` with the [region](regions.md) associated with your subscription (for example, `westus` for the free trial subscription).
+1. Replace the string `YourServiceRegion` with the region associated with your subscription (for example, `westus` for the free trial subscription).
 
 To build the sample app and check if all the paths are set correctly, choose **Product** > **Build** from the menu.
 
@@ -50,6 +55,6 @@ In the simulator window that opens, you can interact with the sample application
 
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-objectivec-ios)
-* [Speech SDK API reference for Objective-C](https://aka.ms/csspeech/objectivecref)
-
+- [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-objectivec-ios)
+- [TTS Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-objectivec-ios)
+- [Speech SDK API reference for Objective-C](https://aka.ms/csspeech/objectivecref)
