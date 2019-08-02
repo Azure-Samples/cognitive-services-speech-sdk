@@ -88,6 +88,7 @@ BEGIN {
       quickstart/text-to-speech/java-jre/pom.xml#dependencies
       quickstart/text-to-speech/java-jre/pom.xml#repositories
       quickstart/text-to-speech/java-jre/src/speechsdk/quickstart/Main.java#code
+      quickstart/text-to-speech/python/quickstart.py#code
       samples/batch/csharp/program.cs#batchdefinition
       samples/batch/csharp/program.cs#batchstatus
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentContinuousRecognitionWithFile

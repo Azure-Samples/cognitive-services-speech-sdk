@@ -50,6 +50,24 @@ def patch(recotype):
     recotype.__init__ = newinit
 SCRIPT
 
+  # mock the user input for sample code which acquires it by input()
+  cat > mock_input.py <<SCRIPT
+import unittest.mock
+class Mock:
+    def __init__(self, mock_input_text = 'Hi there'):
+        self._mock_input_text = mock_input_text
+        self._invoke_count = 0
+    def mock_input(self):
+        if self._invoke_count == 0:
+            self._invoke_count = self._invoke_count + 1
+            return self._mock_input_text
+        else:
+            raise EOFError
+    def run_with_mock_input(self, case):
+        with unittest.mock.patch('builtins.input', self.mock_input):
+            case()
+SCRIPT
+
   sleepCmd="; import time; time.sleep(1.)"
   testCases=(
     "import speech_sample; import monkey; monkey.patch(speech_sample.speechsdk.SpeechRecognizer); speech_sample.speech_recognize_once_from_file()"
@@ -63,6 +81,17 @@ SCRIPT
     "import translation_sample; translation_sample.translation_continuous()"
     "import intent_sample; import monkey; monkey.patch(intent_sample.speechsdk.intent.IntentRecognizer); intent_sample.recognize_intent_once_from_file()"
     "import intent_sample; intent_sample.recognize_intent_continuous()"
+    "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_to_speaker)"
+    "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_with_language)"
+    "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_with_voice)"
+    "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_to_wave_file)"
+    "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_to_mp3_file)"
+    "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_to_pull_audio_output_stream)"
+    "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_to_push_audio_output_stream)"
+    "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_to_result)"
+    "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_to_audio_data_stream)"
+    "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_events)"
+    "import speech_synthesis_sample; import mock_input; mock_input.Mock().run_with_mock_input(speech_synthesis_sample.speech_synthesis_word_boundary_event)"
   )
   # sleep a bit at the end of each sample to make sure the interpreter is still alive during cleanup
   testCases=( "${testCases[@]/%/"${sleepCmd}"}" )

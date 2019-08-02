@@ -1,6 +1,6 @@
 # Python console app
 
-This sample demonstrates various forms of speech recognition, intent recognition, and translation using the Speech SDK for Python.
+This sample demonstrates various forms of speech recognition, intent recognition, speech synthesis, and translation using the Speech SDK for Python.
 
 ## Prerequisites
 
