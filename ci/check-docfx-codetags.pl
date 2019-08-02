@@ -36,6 +36,7 @@ BEGIN {
     quickstart/objectivec-ios/helloworld/helloworld/Base.lproj/Main.storyboard
     quickstart/objectivec-macos/helloworld/Podfile
     quickstart/swift-ios/helloworld/Podfile
+    quickstart/text-to-speech/java-android/app/src/main/res/layout/activity_main.xml
   );
 
   my @expectedTags;
@@ -82,6 +83,8 @@ BEGIN {
       quickstart/text-to-speech/csharp-unity/Assets/Scripts/HelloWorld.cs#code
       quickstart/text-to-speech/csharp-uwp/helloworld/MainPage.xaml#StackPanel
       quickstart/text-to-speech/csharp-uwp/helloworld/MainPage.xaml.cs#code
+      quickstart/text-to-speech/java-android/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
+      quickstart/text-to-speech/java-android/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/SpeakerStream.java#code
       quickstart/text-to-speech/java-jre/pom.xml#dependencies
       quickstart/text-to-speech/java-jre/pom.xml#repositories
       quickstart/text-to-speech/java-jre/src/speechsdk/quickstart/Main.java#code
