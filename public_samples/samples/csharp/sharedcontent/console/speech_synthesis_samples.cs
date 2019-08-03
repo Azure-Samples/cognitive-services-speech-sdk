@@ -23,12 +23,16 @@ namespace MicrosoftSpeechSDKSamples
             // Creates a speech synthesizer using the default speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(config))
             {
-                for (int i = 0; i < 2; ++i)
+                while (true)
                 {
                     // Receives a text from console input and synthesize it to speaker.
-                    Console.WriteLine("Type some text that you want to speak...");
+                    Console.WriteLine("Enter some text that you want to speak, or enter empty text to exit.");
                     Console.Write("> ");
                     string text = Console.ReadLine();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        break;
+                    }
 
                     using (var result = await synthesizer.SpeakTextAsync(text))
                     {
@@ -47,15 +51,9 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
                                 Console.WriteLine($"CANCELED: Did you update the subscription info?");
                             }
-
-                            break;
                         }
                     }
                 }
-
-                // This is to give some time for the speaker to finish playing back the audio
-                Console.WriteLine("Press any key to exit...");
-                Console.ReadKey();
             }
         }
 
@@ -75,12 +73,16 @@ namespace MicrosoftSpeechSDKSamples
             // Creates a speech synthesizer for the specified language, using the default speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(config))
             {
-                for (int i = 0; i < 2; ++i)
+                while (true)
                 {
                     // Receives a text from console input and synthesize it to speaker.
-                    Console.WriteLine("Type some text that you want to speak...");
+                    Console.WriteLine("Enter some text that you want to speak, or enter empty text to exit.");
                     Console.Write("> ");
                     string text = Console.ReadLine();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        break;
+                    }
 
                     using (var result = await synthesizer.SpeakTextAsync(text))
                     {
@@ -99,15 +101,9 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
                                 Console.WriteLine($"CANCELED: Did you update the subscription info?");
                             }
-
-                            break;
                         }
                     }
                 }
-
-                // This is to give some time for the speaker to finish playing back the audio
-                Console.WriteLine("Press any key to exit...");
-                Console.ReadKey();
             }
         }
 
@@ -128,12 +124,16 @@ namespace MicrosoftSpeechSDKSamples
             // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(config))
             {
-                for (int i = 0; i < 2; ++i)
+                while (true)
                 {
                     // Receives a text from console input and synthesize it to speaker.
-                    Console.WriteLine("Type some text that you want to speak...");
+                    Console.WriteLine("Enter some text that you want to speak, or enter empty text to exit.");
                     Console.Write("> ");
                     string text = Console.ReadLine();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        break;
+                    }
 
                     using (var result = await synthesizer.SpeakTextAsync(text))
                     {
@@ -152,15 +152,9 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
                                 Console.WriteLine($"CANCELED: Did you update the subscription info?");
                             }
-
-                            break;
                         }
                     }
                 }
-
-                // This is to give some time for the speaker to finish playing back the audio
-                Console.WriteLine("Press any key to exit...");
-                Console.ReadKey();
             }
         }
 
@@ -178,12 +172,16 @@ namespace MicrosoftSpeechSDKSamples
             using (var fileOutput = AudioConfig.FromWavFileOutput(fileName))
             using (var synthesizer = new SpeechSynthesizer(config, fileOutput))
             {
-                for (int i = 0; i < 2; ++i)
+                while (true)
                 {
                     // Receives a text from console input and synthesize it to wave file.
-                    Console.WriteLine("Type some text that you want to synthesize...");
+                    Console.WriteLine("Enter some text that you want to synthesize, or enter empty text to exit.");
                     Console.Write("> ");
                     string text = Console.ReadLine();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        break;
+                    }
 
                     using (var result = await synthesizer.SpeakTextAsync(text))
                     {
@@ -202,8 +200,6 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
                                 Console.WriteLine($"CANCELED: Did you update the subscription info?");
                             }
-
-                            break;
                         }
                     }
                 }
@@ -229,12 +225,16 @@ namespace MicrosoftSpeechSDKSamples
             using (var fileOutput = AudioConfig.FromWavFileOutput(fileName))
             using (var synthesizer = new SpeechSynthesizer(config, fileOutput))
             {
-                for (int i = 0; i < 2; ++i)
+                while (true)
                 {
                     // Receives a text from console input and synthesize it to mp3 file.
-                    Console.WriteLine("Type some text that you want to synthesize...");
+                    Console.WriteLine("Enter some text that you want to synthesize, or enter empty text to exit.");
                     Console.Write("> ");
                     string text = Console.ReadLine();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        break;
+                    }
 
                     using (var result = await synthesizer.SpeakTextAsync(text))
                     {
@@ -253,8 +253,6 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
                                 Console.WriteLine($"CANCELED: Did you update the subscription info?");
                             }
-
-                            break;
                         }
                     }
                 }
@@ -275,12 +273,16 @@ namespace MicrosoftSpeechSDKSamples
                 using (var streamConfig = AudioConfig.FromStreamOutput(stream))
                 using (var synthesizer = new SpeechSynthesizer(config, streamConfig))
                 {
-                    for (int i = 0; i < 2; ++i)
+                    while (true)
                     {
                         // Receives a text from console input and synthesize it to pull audio output stream.
-                        Console.WriteLine("Type some text that you want to synthesize...");
+                        Console.WriteLine("Enter some text that you want to synthesize, or enter empty text to exit.");
                         Console.Write("> ");
                         string text = Console.ReadLine();
+                        if (string.IsNullOrEmpty(text))
+                        {
+                            break;
+                        }
 
                         using (var result = await synthesizer.SpeakTextAsync(text))
                         {
@@ -299,8 +301,6 @@ namespace MicrosoftSpeechSDKSamples
                                     Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
                                     Console.WriteLine($"CANCELED: Did you update the subscription info?");
                                 }
-
-                                break;
                             }
                         }
                     }
@@ -337,12 +337,16 @@ namespace MicrosoftSpeechSDKSamples
                 using (var streamConfig = AudioConfig.FromStreamOutput(stream))
                 using (var synthesizer = new SpeechSynthesizer(config, streamConfig))
                 {
-                    for (int i = 0; i < 2; ++i)
+                    while (true)
                     {
-                        // Receive a text from console input and synthesize it to push audio output stream.
-                        Console.WriteLine("Type some text that you want to synthesize...");
+                        // Receives a text from console input and synthesize it to push audio output stream.
+                        Console.WriteLine("Enter some text that you want to synthesize, or enter empty text to exit.");
                         Console.Write("> ");
                         string text = Console.ReadLine();
+                        if (string.IsNullOrEmpty(text))
+                        {
+                            break;
+                        }
 
                         using (var result = await synthesizer.SpeakTextAsync(text))
                         {
@@ -361,8 +365,6 @@ namespace MicrosoftSpeechSDKSamples
                                     Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
                                     Console.WriteLine($"CANCELED: Did you update the subscription info?");
                                 }
-
-                                break;
                             }
                         }
                     }
@@ -384,12 +386,16 @@ namespace MicrosoftSpeechSDKSamples
             // You can just get the audio from the result.
             using (var synthesizer = new SpeechSynthesizer(config, null))
             {
-                for (int i = 0; i < 2; ++i)
+                while (true)
                 {
                     // Receives a text from console input and synthesize it to result.
-                    Console.WriteLine("Type some text that you want to synthesize...");
+                    Console.WriteLine("Enter some text that you want to synthesize, or enter empty text to exit.");
                     Console.Write("> ");
                     string text = Console.ReadLine();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        break;
+                    }
 
                     using (var result = await synthesizer.SpeakTextAsync(text))
                     {
@@ -410,8 +416,6 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
                                 Console.WriteLine($"CANCELED: Did you update the subscription info?");
                             }
-
-                            break;
                         }
                     }
                 }
@@ -430,12 +434,16 @@ namespace MicrosoftSpeechSDKSamples
             // You can just get the audio from the result.
             using (var synthesizer = new SpeechSynthesizer(config, null))
             {
-                for (int i = 0; i < 2; ++i)
+                while (true)
                 {
                     // Receives a text from console input and synthesize it to result.
-                    Console.WriteLine("Type some text that you want to synthesize...");
+                    Console.WriteLine("Enter some text that you want to synthesize, or enter empty text to exit.");
                     Console.Write("> ");
                     string text = Console.ReadLine();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        break;
+                    }
 
                     using (var result = await synthesizer.SpeakTextAsync(text))
                     {
@@ -446,7 +454,7 @@ namespace MicrosoftSpeechSDKSamples
                             using (var audioDataStream = AudioDataStream.FromResult(result))
                             {
                                 // You can save all the data in the audio data stream to a file
-                                string fileName = "outputaudio" + (i + 1) + ".wav";
+                                string fileName = "outputaudio.wav";
                                 await audioDataStream.SaveToWaveFileAsync(fileName);
                                 Console.WriteLine($"Audio data for text [{text}] was saved to [{fileName}]");
 
@@ -478,8 +486,6 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
                                 Console.WriteLine($"CANCELED: Did you update the subscription info?");
                             }
-
-                            break;
                         }
                     }
                 }
@@ -514,12 +520,16 @@ namespace MicrosoftSpeechSDKSamples
                     Console.WriteLine("Synthesis completed.");
                 };
 
-                for (int i = 0; i < 2; ++i)
+                while (true)
                 {
                     // Receives a text from console input and synthesize it to result.
-                    Console.WriteLine("Type some text that you want to synthesize...");
+                    Console.WriteLine("Enter some text that you want to synthesize, or enter empty text to exit.");
                     Console.Write("> ");
                     string text = Console.ReadLine();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        break;
+                    }
 
                     using (var result = await synthesizer.SpeakTextAsync(text))
                     {
@@ -540,8 +550,6 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
                                 Console.WriteLine($"CANCELED: Did you update the subscription info?");
                             }
-
-                            break;
                         }
                     }
                 }
@@ -571,12 +579,16 @@ namespace MicrosoftSpeechSDKSamples
                         $"{(e.AudioOffset + 5000) / 10000}ms, text offset: {e.TextOffset}, word length: {e.WordLength}.");
                 };
 
-                for (int i = 0; i < 2; ++i)
+                while (true)
                 {
                     // Receives a text from console input and synthesize it to result.
-                    Console.WriteLine("Type some text that you want to synthesize...");
+                    Console.WriteLine("Enter some text that you want to synthesize, or enter empty text to exit.");
                     Console.Write("> ");
                     string text = Console.ReadLine();
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        break;
+                    }
 
                     using (var result = await synthesizer.SpeakTextAsync(text))
                     {
@@ -597,8 +609,6 @@ namespace MicrosoftSpeechSDKSamples
                                 Console.WriteLine($"CANCELED: ErrorDetails=[{cancellation.ErrorDetails}]");
                                 Console.WriteLine($"CANCELED: Did you update the subscription info?");
                             }
-
-                            break;
                         }
                     }
                 }

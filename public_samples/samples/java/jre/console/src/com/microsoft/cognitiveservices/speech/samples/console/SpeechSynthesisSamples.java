@@ -25,12 +25,16 @@ public class SpeechSynthesisSamples {
         // Creates a speech synthesizer using the default speaker as audio output.
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(config);
         {
-            for (int i = 0; i < 2; ++i)
+            while (true)
             {
                 // Receives a text from console input and synthesize it to speaker.
-                System.out.println("Type some text that you want to speak...");
+                System.out.println("Enter some text that you want to speak, or enter empty text to exit.");
                 System.out.print("> ");
                 String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
 
                 SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
 
@@ -47,9 +51,6 @@ public class SpeechSynthesisSamples {
                         System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                         System.out.println("CANCELED: Did you update the subscription info?");
                     }
-
-                    result.close();
-                    break;
                 }
 
                 result.close();
@@ -76,12 +77,16 @@ public class SpeechSynthesisSamples {
         // Creates a speech synthesizer using the default speaker as audio output.
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(config);
         {
-            for (int i = 0; i < 2; ++i)
+            while (true)
             {
                 // Receives a text from console input and synthesize it to speaker.
-                System.out.println("Type some text that you want to speak...");
+                System.out.println("Enter some text that you want to speak, or enter empty text to exit.");
                 System.out.print("> ");
                 String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
 
                 SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
 
@@ -98,9 +103,6 @@ public class SpeechSynthesisSamples {
                         System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                         System.out.println("CANCELED: Did you update the subscription info?");
                     }
-
-                    result.close();
-                    break;
                 }
 
                 result.close();
@@ -128,12 +130,16 @@ public class SpeechSynthesisSamples {
         // Creates a speech synthesizer using the default speaker as audio output.
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(config);
         {
-            for (int i = 0; i < 2; ++i)
+            while (true)
             {
                 // Receives a text from console input and synthesize it to speaker.
-                System.out.println("Type some text that you want to speak...");
+                System.out.println("Enter some text that you want to speak, or enter empty text to exit.");
                 System.out.print("> ");
                 String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
 
                 SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
 
@@ -150,9 +156,6 @@ public class SpeechSynthesisSamples {
                         System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                         System.out.println("CANCELED: Did you update the subscription info?");
                     }
-
-                    result.close();
-                    break;
                 }
 
                 result.close();
@@ -176,15 +179,19 @@ public class SpeechSynthesisSamples {
         String fileName = "outputaudio.wav";
         AudioConfig fileOutput = AudioConfig.fromWavFileOutput(fileName);
 
-        // Creates a speech synthesizer using the default speaker as audio output.
+        // Creates a speech synthesizer using a wave file as audio output.
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(config, fileOutput);
         {
-            for (int i = 0; i < 2; ++i)
+            while (true)
             {
                 // Receives a text from console input and synthesize it to wave file.
-                System.out.println("Type some text that you want to synthesize...");
+                System.out.println("Enter some text that you want to synthesize, or enter empty text to exit.");
                 System.out.print("> ");
                 String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
 
                 SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
 
@@ -201,9 +208,6 @@ public class SpeechSynthesisSamples {
                         System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                         System.out.println("CANCELED: Did you update the subscription info?");
                     }
-
-                    result.close();
-                    break;
                 }
 
                 result.close();
@@ -233,15 +237,19 @@ public class SpeechSynthesisSamples {
         String fileName = "outputaudio.mp3";
         AudioConfig fileOutput = AudioConfig.fromWavFileOutput(fileName);
 
-        // Creates a speech synthesizer using the default speaker as audio output.
+        // Creates a speech synthesizer using an mp3 file as audio output.
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(config, fileOutput);
         {
-            for (int i = 0; i < 2; ++i)
+            while (true)
             {
                 // Receives a text from console input and synthesize it to mp3 file.
-                System.out.println("Type some text that you want to synthesize...");
+                System.out.println("Enter some text that you want to synthesize, or enter empty text to exit.");
                 System.out.print("> ");
                 String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
 
                 SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
 
@@ -258,9 +266,6 @@ public class SpeechSynthesisSamples {
                         System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                         System.out.println("CANCELED: Did you update the subscription info?");
                     }
-
-                    result.close();
-                    break;
                 }
 
                 result.close();
@@ -287,12 +292,16 @@ public class SpeechSynthesisSamples {
         AudioConfig streamConfig = AudioConfig.fromStreamOutput(stream);
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(config, streamConfig);
         {
-            for (int i = 0; i < 2; ++i)
+            while (true)
             {
                 // Receives a text from console input and synthesize it to pull audio output stream.
-                System.out.println("Type some text that you want to synthesize...");
+                System.out.println("Enter some text that you want to synthesize, or enter empty text to exit.");
                 System.out.print("> ");
                 String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
 
                 SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
 
@@ -309,9 +318,6 @@ public class SpeechSynthesisSamples {
                         System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                         System.out.println("CANCELED: Did you update the subscription info?");
                     }
-
-                    result.close();
-                    break;
                 }
 
                 result.close();
@@ -355,12 +361,16 @@ public class SpeechSynthesisSamples {
         AudioConfig streamConfig = AudioConfig.fromStreamOutput(stream);
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(config, streamConfig);
         {
-            for (int i = 0; i < 2; ++i)
+            while (true)
             {
                 // Receives a text from console input and synthesize it to push audio output stream.
-                System.out.println("Type some text that you want to synthesize...");
+                System.out.println("Enter some text that you want to synthesize, or enter empty text to exit.");
                 System.out.print("> ");
                 String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
 
                 SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
 
@@ -377,9 +387,6 @@ public class SpeechSynthesisSamples {
                         System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                         System.out.println("CANCELED: Did you update the subscription info?");
                     }
-
-                    result.close();
-                    break;
                 }
 
                 result.close();
@@ -408,12 +415,16 @@ public class SpeechSynthesisSamples {
         // You can just get the audio from the result.
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(config, null);
         {
-            for (int i = 0; i < 2; ++i)
+            while (true)
             {
                 // Receives a text from console input and synthesize it to result.
-                System.out.println("Type some text that you want to synthesize...");
+                System.out.println("Enter some text that you want to synthesize, or enter empty text to exit.");
                 System.out.print("> ");
                 String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
 
                 SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
 
@@ -432,9 +443,6 @@ public class SpeechSynthesisSamples {
                         System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                         System.out.println("CANCELED: Did you update the subscription info?");
                     }
-
-                    result.close();
-                    break;
                 }
 
                 result.close();
@@ -458,12 +466,16 @@ public class SpeechSynthesisSamples {
         // You can just get the audio from the result.
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(config, null);
         {
-            for (int i = 0; i < 2; ++i)
+            while (true)
             {
                 // Receives a text from console input and synthesize it to result.
-                System.out.println("Type some text that you want to synthesize...");
+                System.out.println("Enter some text that you want to synthesize, or enter empty text to exit.");
                 System.out.print("> ");
                 String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
 
                 SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
 
@@ -473,7 +485,7 @@ public class SpeechSynthesisSamples {
                     AudioDataStream audioDataStream = AudioDataStream.fromResult(result);
                     
                     // You can save all the data in the audio data stream to a file
-                    String fileName = "outputaudio" + (i + 1) + ".wav";
+                    String fileName = "outputaudio.wav";
                     audioDataStream.saveToWavFileAsync(fileName).get();
                     System.out.println("Audio data for text [" + text + "] was saved to [" + fileName + "].");
                     
@@ -501,9 +513,6 @@ public class SpeechSynthesisSamples {
                         System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                         System.out.println("CANCELED: Did you update the subscription info?");
                     }
-
-                    result.close();
-                    break;
                 }
 
                 result.close();
@@ -540,12 +549,16 @@ public class SpeechSynthesisSamples {
                 System.out.println("Synthesis completed.");
             });
 
-            for (int i = 0; i < 2; ++i)
+            while (true)
             {
                 // Receives a text from console input and synthesize it to result.
-                System.out.println("Type some text that you want to synthesize...");
+                System.out.println("Enter some text that you want to synthesize, or enter empty text to exit.");
                 System.out.print("> ");
                 String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
 
                 SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
 
@@ -564,9 +577,6 @@ public class SpeechSynthesisSamples {
                         System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                         System.out.println("CANCELED: Did you update the subscription info?");
                     }
-
-                    result.close();
-                    break;
                 }
 
                 result.close();
@@ -600,12 +610,16 @@ public class SpeechSynthesisSamples {
                 System.out.println("text offset: " + e.getTextOffset() + ", word length: " + e.getWordLength() + ".");
             });
 
-            for (int i = 0; i < 2; ++i)
+            while (true)
             {
                 // Receives a text from console input and synthesize it to result.
-                System.out.println("Type some text that you want to synthesize...");
+                System.out.println("Enter some text that you want to synthesize, or enter empty text to exit.");
                 System.out.print("> ");
                 String text = new Scanner(System.in).nextLine();
+                if (text.isEmpty())
+                {
+                    break;
+                }
 
                 SpeechSynthesisResult result = synthesizer.SpeakTextAsync(text).get();
 
@@ -624,9 +638,6 @@ public class SpeechSynthesisSamples {
                         System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
                         System.out.println("CANCELED: Did you update the subscription info?");
                     }
-
-                    result.close();
-                    break;
                 }
 
                 result.close();
