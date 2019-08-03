@@ -387,6 +387,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [TestMethod]
+        public async Task RecognizeIntentDefaultLanguage()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TStockValue.AudioFile);
+            using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
+            {
+                var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
+            }
+        }
+
         IntentRecognizer DoAsyncRecognitionNotAwaited(IntentRecognizer rec)
         {
             using (var recognizer = rec)

@@ -502,5 +502,33 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [TestMethod]
+        public async Task DefaultLanguageSpeechReco()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+            }
+        }
+
+        [TestMethod]
+        public async Task DefaultLanguageWithSpeechReco()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+            }
+        }
+
     }
 }

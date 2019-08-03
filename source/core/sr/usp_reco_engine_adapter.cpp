@@ -472,7 +472,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointTranscriber(const std::shar
 
     SetUspRegion(properties, client, /*isIntentRegion=*/ false);
 
-    UpdateDefaultLanguage(properties, /*consideringCustomModel*/ false);
+    UpdateDefaultLanguage(properties);
 
     UpdateOutputFormatOption(properties);
 
@@ -489,7 +489,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointDialog(const std::shared_pt
 
     SetUspRegion(properties, client, /*isIntentRegion=*/ false);
 
-    UpdateDefaultLanguage(properties, /*consideringCustomModel*/ false);
+    UpdateDefaultLanguage(properties);
 
     SetUspQueryParameters(USP::endpoint::dialog::queryParameters, properties, client);
 
@@ -522,7 +522,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointIntent(const std::shared_pt
 
     SetUspRegion(properties, client, /*isIntentRegion=*/ true);
 
-    UpdateDefaultLanguage(properties, /*consideringCustomModel*/ false);
+    UpdateDefaultLanguage(properties);
 
     // For intent, always use detailed output format.
     properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_OutputFormatOption), USP::endpoint::outputFormatDetailed.c_str());
@@ -554,7 +554,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointDefaultSpeechService(const 
 
     SetUspRegion(properties, client, /*isIntentRegion=*/ false);
 
-    UpdateDefaultLanguage(properties, /*consideringCustomModel*/ true);
+    UpdateDefaultLanguage(properties);
 
     UpdateOutputFormatOption(properties);
 
@@ -697,12 +697,17 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(const std::shared_pt
 }
 
 
-void CSpxUspRecoEngineAdapter::UpdateDefaultLanguage(const std::shared_ptr<ISpxNamedProperties>& properties, bool consideringCustomModel)
+void CSpxUspRecoEngineAdapter::UpdateDefaultLanguage(const std::shared_ptr<ISpxNamedProperties>& properties)
 {
     constexpr auto languageParameterName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage);
-    // if considering custom model, only sets default language when not using custom model and user has not specified language.
-    if (properties->GetStringValue(languageParameterName).empty() &&
-        (!consideringCustomModel || properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId)).empty()))
+    // if the language parameter has been set, no needs to set the default language.
+    if (!properties->GetStringValue(languageParameterName).empty())
+    {
+        return;
+    }
+    // If no custom model is used, set the default language.
+    if (properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId)).empty() &&
+        properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint)).find(USP::endpoint::deploymentIdQueryParam) == string::npos)
     {
         properties->SetStringValue(languageParameterName, s_defaultRecognitionLanguage);
     }

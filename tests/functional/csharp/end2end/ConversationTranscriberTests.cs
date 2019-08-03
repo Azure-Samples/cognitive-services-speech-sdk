@@ -476,18 +476,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationDetailedOutput()
+        public async Task ConversationDefaultLanguageAndDetailedOutput()
         {
             var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
             config.OutputFormat = OutputFormat.Detailed;
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {
+                var recoLanguage = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+
                 conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
                 await helper.CompleteContinuousRecognition(conversationTranscriber);
                 var connectionUrl = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 // Currently we do not have endpoint ready that supports detailed conversation transcription, so we only check connection URL for now.
                 Assert.IsTrue(connectionUrl.Contains("format=detailed"), "mismatch initialSilencetimeout in " + connectionUrl);
+                Assert.IsTrue(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
             }
         }
 

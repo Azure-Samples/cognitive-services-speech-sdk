@@ -147,7 +147,7 @@ private:
     USP::Client& SetUspQueryParameters(const std::vector<std::string>& allowedParameterList, const std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
 
     void UpdateOutputFormatOption(const std::shared_ptr<ISpxNamedProperties>& properties);
-    void UpdateDefaultLanguage(const std::shared_ptr<ISpxNamedProperties>& properties, bool consideringCustomModel);
+    void UpdateDefaultLanguage(const std::shared_ptr<ISpxNamedProperties>& properties);
     SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;
 
     void SetSpeechConfigMessage(const ISpxNamedProperties& properties);

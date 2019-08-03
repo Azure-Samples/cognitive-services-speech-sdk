@@ -92,7 +92,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
+                var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
+
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsTrue(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
                 var bestResults = result.Best().ToArray();
@@ -818,6 +824,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
+            }
+        }
+
+        [TestMethod]
+        public async Task FromEndpointDefaultLanguage()
+        {
+            var endpointWithDeploymentId = endpointInString + "?cid=" + deploymentId;
+            var configFromEndpoint = SpeechConfig.FromEndpoint(new Uri(endpointWithDeploymentId), subscriptionKey);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, audioInput)))
+            {
+                var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should be empty. RecoLanguage: " + recoLanguage);
+
+                var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
+                
             }
         }
 
