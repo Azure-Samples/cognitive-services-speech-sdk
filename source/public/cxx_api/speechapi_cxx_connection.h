@@ -160,18 +160,16 @@ private:
 #endif
         catch (...)
         {
-            p = std::current_exception();
-            SPX_DBG_TRACE_ERROR("Caught exception in FireConnectionEvent: %s. Will rethrow later.", firingConnectedEvent ? "Connected" : "Disconnected");
+            if (recognizer_event_handle_is_valid(event)) {
+                recognizer_event_handle_release(event);
+            }
+            SPX_DBG_TRACE_ERROR("Caught exception in FireConnectionEvent(%s). Will rethrow later.", firingConnectedEvent ? "Connected" : "Disconnected");
+            throw;
         }
 
         // ConnectionEventArgs doesn't hold hevent, and thus can't release it properly ... release it here
         SPX_DBG_ASSERT(recognizer_event_handle_is_valid(event));
         recognizer_event_handle_release(event);
-
-        if (p != nullptr)
-        {
-            std::rethrow_exception(p);
-        }
     }
 
     static void FireEvent_Connected(SPXEVENTHANDLE event, void* context)
