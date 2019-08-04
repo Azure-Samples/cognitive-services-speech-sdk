@@ -26,6 +26,15 @@ typedef void (^SPXSpeechSynthesisWordBoundaryEventHandler)(SPXSpeechSynthesizer 
 @property (readonly, nullable)id <SPXPropertyCollection> properties;
 
 /**
+ * Authorization token used to communicate with the speech synthesis service.
+ *
+ * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token expires,
+ * the caller needs to refresh it by calling this setter with a new valid token.
+ * Otherwise, the synthesizer will encounter errors during speech synthesis.
+ */
+@property (nonatomic, copy, nullable)NSString *authorizationToken;
+
+/**
  * Initializes a new instance of speech synthesizer using a speech config.
  *
  * @param speechConfiguration speech recognition configuration.

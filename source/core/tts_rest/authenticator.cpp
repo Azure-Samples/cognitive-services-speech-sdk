@@ -37,6 +37,13 @@ CSpxRestTtsAuthenticator::~CSpxRestTtsAuthenticator()
 
 void CSpxRestTtsAuthenticator::Init()
 {
+    if (m_subscriptionKey.empty())
+    {
+        // Don't start the thread if subscription key is not provided
+        m_accessTokenInitialized = true;
+        return;
+    }
+
     // Access token expires every 10 minutes. Renew it every 9 minutes only
     m_accessTokenRenewer.Start(9 * 60 * 1000, std::bind([this]() {
         RenewAccessToken();

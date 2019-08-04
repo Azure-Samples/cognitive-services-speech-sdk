@@ -1359,6 +1359,22 @@ class SpeechSynthesizer:
         return self._impl.properties
 
     @property
+    def authorization_token(self) -> str:
+        """
+        The authorization token that will be used for connecting to the service.
+
+        .. note::
+          The caller needs to ensure that the authorization token is valid. Before the
+          authorization token expires, the caller needs to refresh it by calling this setter with a
+          new valid token. Otherwise, the synthesizer will encounter errors while speech synthesis.
+        """
+        return self._impl.get_authorization_token()
+
+    @authorization_token.setter
+    def authorization_token(self, authorization_token: str):
+        self._impl.set_authorization_token(authorization_token)
+
+    @property
     def synthesis_started(self) -> EventSignal:
         """
         Signal for events indicating synthesis has started.

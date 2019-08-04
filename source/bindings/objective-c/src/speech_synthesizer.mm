@@ -110,6 +110,16 @@
     return nil;
 }
 
+- (void)setAuthorizationToken: (NSString *)token
+{
+    speechSynthImpl->SetAuthorizationToken([token toSpxString]);
+}
+
+- (NSString *)authorizationToken
+{
+    return [NSString StringWithStdString:speechSynthImpl->GetAuthorizationToken()];
+}
+
 - (SPXSpeechSynthesisResult *)SpeakText:(nonnull NSString*)text NS_RETURNS_RETAINED
 {
     if (speechSynthImpl == nullptr) {

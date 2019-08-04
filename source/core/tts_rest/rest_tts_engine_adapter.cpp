@@ -60,22 +60,17 @@ void CSpxRestTtsEngineAdapter::Init()
 
     if (!endpoint.empty() && !CSpxSynthesisHelper::IsCustomVoiceEndpoint(endpoint) && !CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint))
     {
-        // Scenario 1, custom endpoint (e.g. on prem), no need issue token
+        // Scenario 1, custom endpoint (e.g. on prem), no need authentication
         m_endpoint = endpoint;
     }
     else if (!endpoint.empty() && CSpxSynthesisHelper::IsCustomVoiceEndpoint(endpoint))
     {
-        // Scenario 2, custom voice, need issue token (and therefore need initialize m_authenticator)
+        // Scenario 2, custom voice, need authentication (and therefore need initialize m_authenticator)
         m_endpoint = endpoint;
         region = CSpxSynthesisHelper::ParseRegionFromCognitiveServiceEndpoint(endpoint);
 
         // Construct cognitive service token issue URL based on region
         auto issueTokenUrl = std::string(HTTPS_URL_PREFIX) + region + ISSUE_TOKEN_HOST_SUFFIX + ISSUE_TOKEN_URL_PATH;
-
-        if (subscriptionKey.empty())
-        {
-            ThrowRuntimeError("Subscription key is required for cognitive service TTS custom voice request.");
-        }
 
         m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
     }
@@ -96,11 +91,6 @@ void CSpxRestTtsEngineAdapter::Init()
 
         // Construct cognitive service token issue URL based on region
         auto issueTokenUrl = std::string(HTTPS_URL_PREFIX) + region + ISSUE_TOKEN_HOST_SUFFIX + ISSUE_TOKEN_URL_PATH;
-
-        if (subscriptionKey.empty())
-        {
-            ThrowRuntimeError("Subscription key is required for cognitive service TTS standard voice request.");
-        }
 
         m_authenticator = std::make_shared<CSpxRestTtsAuthenticator>(issueTokenUrl, subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
     }
@@ -152,9 +142,13 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
         EnsureHttpConnection();
 
         std::string token = "";
-        if (m_authenticator.get() != nullptr)
+        if (m_authenticator.get() != nullptr && !m_authenticator->GetAccessToken().empty())
         {
             token = m_authenticator->GetAccessToken();
+        }
+        else
+        {
+            token = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), "");
         }
 
         RestTtsRequest request;

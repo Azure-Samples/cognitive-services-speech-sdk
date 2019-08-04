@@ -3,6 +3,7 @@
 
 import functools
 import os
+import requests
 import time
 
 import azure.cognitiveservices.speech as msspeech
@@ -473,4 +474,39 @@ def test_speech_synthesizer_check_word_boundary_events(subscription, speech_regi
                  'synthesis_word_boundary_check_ssml_callback':
                  synthesis_word_boundary_check_ssml_callback}
     _check_events(callbacks)
+
+
+def get_token(subscription, region):
+    fetch_token_url = "https://{}.api.cognitive.microsoft.com/sts/v1.0/issueToken".format(region)
+    headers = {
+        'Ocp-Apim-Subscription-Key': subscription
+    }
+    response = requests.post(fetch_token_url, headers=headers)
+    return str(response.text)
+
+
+def test_speech_synthesizer_speak_out_with_authorization_token(subscription, speech_region):
+    config = msspeech.SpeechConfig(auth_token="InvalidToken", region=speech_region)
+    # None(null) indicates to do nothing with synthesizer audio by default
+    synthesizer = msspeech.SpeechSynthesizer(config, None)
+    assert "InvalidToken" == synthesizer.authorization_token
+
+    # Set token to the synthesizer
+    synthesizer.authorization_token = get_token(subscription, speech_region)
+
+    result1 = synthesizer.speak_text_async("{{{text1}}}").get()
+    # "{{{text1}}}" has completed rendering, and available in result1
+    assert len(result1.result_id) > 0
+    if result1.reason != msspeech.ResultReason.Canceled:
+        assert msspeech.ResultReason.SynthesizingAudioCompleted == result1.reason
+        audio_data1 = result1.audio_data  # of type bytes
+        _do_something_with_audio_in_vector(audio_data1)
+
+    result2 = synthesizer.speak_text_async("{{{text2}}}").get()
+    # "{{{text2}}}" has completed rendering, and available in result2
+    assert len(result2.result_id) > 0
+    if result2.reason != msspeech.ResultReason.Canceled:
+        assert msspeech.ResultReason.SynthesizingAudioCompleted == result2.reason
+        audio_data2 = result2.audio_data  # of type bytes
+        _do_something_with_audio_in_vector(audio_data2)
 

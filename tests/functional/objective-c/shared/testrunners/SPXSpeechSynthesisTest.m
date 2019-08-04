@@ -405,6 +405,15 @@
     XCTAssertEqual(8, currentIndex, @"Incorrect count of word boundary events.");
 }
 
+- (void)_testAuthorizationToken {
+    SPXSpeechConfiguration* speechConfigWithToken = [[SPXSpeechConfiguration alloc] initWithAuthorizationToken:@"InvalidToken1" region:self.serviceRegion];
+    SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:speechConfigWithToken audioConfiguration:nil];
+    XCTAssertEqualObjects(@"InvalidToken1", synthesizer.authorizationToken);
+
+    synthesizer.authorizationToken = @"InvalidToken2";
+    XCTAssertEqualObjects(@"InvalidToken2", synthesizer.authorizationToken);
+}
+
 @end
 
 @interface SPXSpeechSynthesisEndtoEndTest : SPXSpeechSynthesisEndtoEndTestBase {
@@ -470,6 +479,10 @@
 
 - (void)testSpeakOutputInStreamsBeforeDoneQueued {
     return [self _testSpeakOutputInStreamsBeforeDoneQueued];
+}
+
+- (void)testAuthorizationToken {
+    return [self _testAuthorizationToken];
 }
 
 @end

@@ -287,16 +287,16 @@ public class SpeechSynthesizerTests {
         assertNotNull(synthesizer);
 
         SpeechSynthesisResult result1 = synthesizer.SpeakTextAsync("{{{text1}}}").get(); // "{{{text1}}}" has completed rendering, and available in result1
-        assertTrue(result1.getResultId().length() == GUID_LENGTH);
-        assertTrue(result1.getReason() == ResultReason.SynthesizingAudioCompleted);
+        assertEquals(GUID_LENGTH, (Integer)result1.getResultId().length());
+        assertEquals(ResultReason.SynthesizingAudioCompleted, result1.getReason());
         assertTrue(result1.getAudioLength() > 0);
 
         byte[] audioData1 = result1.getAudioData();
         DoSomethingWithAudioInVector(audioData1, result1.getAudioLength());
 
         SpeechSynthesisResult result2 = synthesizer.SpeakTextAsync("{{{text2}}}").get(); // "{{{text2}}}" has completed rendering, and available in result2
-        assertTrue(result2.getResultId().length() == GUID_LENGTH);
-        assertTrue(result2.getReason() == ResultReason.SynthesizingAudioCompleted);
+        assertEquals(GUID_LENGTH, (Integer)result2.getResultId().length());
+        assertEquals(ResultReason.SynthesizingAudioCompleted, result2.getReason());
         assertTrue(result2.getAudioLength() > 0);
 
         byte[] audioData2 = result2.getAudioData();
@@ -318,7 +318,7 @@ public class SpeechSynthesizerTests {
 
         synthesizer.Synthesizing.addEventListener((o, e) -> {
             ResultReason resultReason = e.getResult().getReason();
-            assertTrue(resultReason == ResultReason.SynthesizingAudio);
+            assertEquals(ResultReason.SynthesizingAudio, resultReason);
 
             long audioLength = e.getResult().getAudioLength();
             assertTrue(audioLength > 0);
@@ -345,14 +345,14 @@ public class SpeechSynthesizerTests {
         assertNotNull(synthesizer);
 
         SpeechSynthesisResult result1 = synthesizer.SpeakTextAsync("{{{text1}}}").get(); // "{{{text1}}}" has completed rendering, and available in result1
-        assertTrue(result1.getReason() == ResultReason.SynthesizingAudioCompleted);
+        assertEquals(ResultReason.SynthesizingAudioCompleted, result1.getReason());
         assertTrue(result1.getAudioLength() > 0);
 
         AudioDataStream stream1 = AudioDataStream.fromResult(result1);
         DoSomethingWithAudioInDataStream(stream1, true);
 
         SpeechSynthesisResult result2 = synthesizer.SpeakTextAsync("{{{text2}}}").get(); // "{{{text2}}}" has completed rendering, and available in result2
-        assertTrue(result2.getReason() == ResultReason.SynthesizingAudioCompleted);
+        assertEquals(ResultReason.SynthesizingAudioCompleted, result2.getReason());
         assertTrue(result2.getAudioLength() > 0);
 
         AudioDataStream stream2 = AudioDataStream.fromResult(result2);
@@ -378,10 +378,10 @@ public class SpeechSynthesizerTests {
         final ArrayList<AudioDataStream> streams = new ArrayList<>();
         synthesizer.SynthesisStarted.addEventListener((o, e) -> {
             ResultReason resultReason = e.getResult().getReason();
-            assertTrue(resultReason == ResultReason.SynthesizingAudioStarted);
+            assertEquals(ResultReason.SynthesizingAudioStarted, resultReason);
 
             long audioLength = e.getResult().getAudioLength();
-            assertTrue(audioLength == 0);
+            assertEquals(0, audioLength);
 
             AudioDataStream stream = AudioDataStream.fromResult(e.getResult());
             streams.add(stream);
@@ -420,15 +420,15 @@ public class SpeechSynthesizerTests {
         assertNotNull(synthesizer);
 
         SpeechSynthesisResult result1 = synthesizer.StartSpeakingTextAsync("{{{text1}}}").get(); // "{{{text1}}}" synthesis has started, likely not finished
-        assertTrue(result1.getReason() == ResultReason.SynthesizingAudioStarted);
-        assertTrue(result1.getAudioLength() == 0);
+        assertEquals(ResultReason.SynthesizingAudioStarted, result1.getReason());
+        assertEquals(0, result1.getAudioLength());
 
         AudioDataStream stream1 = AudioDataStream.fromResult(result1); // of type AudioDataStream, does not block
         Future<Void> future1 = DoSomethingWithAudioInDataStreamInBackground(stream1, false); // does not block, just spins a thread up
 
         SpeechSynthesisResult result2 = synthesizer.StartSpeakingTextAsync("{{{text2}}}").get(); // "{{{text2}}}" synthesis has started, likely not finished
-        assertTrue(result2.getReason() == ResultReason.SynthesizingAudioStarted);
-        assertTrue(result2.getAudioLength() == 0);
+        assertEquals(ResultReason.SynthesizingAudioStarted, result2.getReason());
+        assertEquals(0, result2.getAudioLength());
 
         AudioDataStream stream2 = AudioDataStream.fromResult(result2); // of type AudioDataStream, does not block
         Future<Void> future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); // does not block, just spins a thread up
@@ -468,7 +468,7 @@ public class SpeechSynthesizerTests {
             {
                 // This is to check the requests is queued
                 // When one request is already completed, the other one is still not started
-                assertTrue(startedRequests[0] == 1);
+                assertEquals(1, startedRequests[0]);
             }
         });
 
@@ -494,8 +494,8 @@ public class SpeechSynthesizerTests {
         assertNotNull(synthesizer);
 
         SpeechSynthesisResult result = synthesizer.StartSpeakingTextAsync("{{{text1}}}").get(); // "{{{text1}}}" synthesis has started, likely not finished
-        assertTrue(result.getReason() == ResultReason.SynthesizingAudioStarted);
-        assertTrue(result.getAudioLength() == 0);
+        assertEquals(ResultReason.SynthesizingAudioStarted, result.getReason());
+        assertEquals(0, result.getAudioLength());
 
         final boolean[] SynthesisCompleted = new boolean[1];
         SynthesisCompleted[0] = false;
@@ -542,9 +542,9 @@ public class SpeechSynthesizerTests {
         EventHandler<SpeechSynthesisWordBoundaryEventArgs> wordBoundaryEventHandler = new EventHandler<SpeechSynthesisWordBoundaryEventArgs>() {
             @Override
             public void onEvent(Object o, SpeechSynthesisWordBoundaryEventArgs e) {
-                assertTrue(expectedAudioOffsets[order[0]] == e.getAudioOffset());
-                assertTrue(expectedTextOffsets[order[0]] == e.getTextOffset());
-                assertTrue(expectedWordLengths[order[0]] == e.getWordLength());
+                assertEquals(expectedAudioOffsets[order[0]], e.getAudioOffset());
+                assertEquals(expectedTextOffsets[order[0]], e.getTextOffset());
+                assertEquals(expectedWordLengths[order[0]], e.getWordLength());
                 order[0]++;
             }
         };
@@ -553,7 +553,7 @@ public class SpeechSynthesizerTests {
         SpeechSynthesisResult result = synthesizer.SpeakTextAsync(plainText).get();
         result.close();
 
-        assertTrue(expectedWordCount == order[0]);
+        assertEquals(expectedWordCount, order[0]);
 
         synthesizer.WordBoundary.removeEventListener(wordBoundaryEventHandler);
 
@@ -562,8 +562,8 @@ public class SpeechSynthesizerTests {
             @Override
             public void onEvent(Object o, SpeechSynthesisWordBoundaryEventArgs e) {
                 assertTrue(e.getAudioOffset() > 0);
-                assertTrue(expectedSsmlOffsets[order[0]] == e.getTextOffset());
-                assertTrue(expectedWordLengths[order[0]] == e.getWordLength());
+                assertEquals(expectedSsmlOffsets[order[0]], e.getTextOffset());
+                assertEquals(expectedWordLengths[order[0]], e.getWordLength());
                 order[0]++;
             }
         };
@@ -572,8 +572,42 @@ public class SpeechSynthesizerTests {
         result = synthesizer.SpeakSsmlAsync(ssml).get();
         result.close();
 
-        assertTrue(expectedWordCount == order[0]);
+        assertEquals(expectedWordCount, order[0]);
 
+        synthesizer.close();
+        speechConfig.close();
+    }
+
+    @Test
+    public void testAuthorizationToken() throws InterruptedException, ExecutionException, IOException {
+        SpeechConfig speechConfig = SpeechConfig.fromAuthorizationToken("InvalidToken", Settings.SpeechRegion);
+        assertNotNull(speechConfig);
+
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null); // null indicates to do nothing with synthesizer audio by default
+        assertNotNull(synthesizer);
+        assertEquals("InvalidToken", synthesizer.getAuthorizationToken());
+
+        String authorizationToken = TestHelper.getAuthorizationToken(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        synthesizer.setAuthorizationToken(authorizationToken);
+
+        SpeechSynthesisResult result1 = synthesizer.SpeakTextAsync("{{{text1}}}").get(); // "{{{text1}}}" has completed rendering, and available in result1
+        assertEquals(GUID_LENGTH, (Integer)result1.getResultId().length());
+        assertEquals(ResultReason.SynthesizingAudioCompleted, result1.getReason());
+        assertTrue(result1.getAudioLength() > 0);
+
+        byte[] audioData1 = result1.getAudioData();
+        DoSomethingWithAudioInVector(audioData1, result1.getAudioLength());
+
+        SpeechSynthesisResult result2 = synthesizer.SpeakTextAsync("{{{text2}}}").get(); // "{{{text2}}}" has completed rendering, and available in result2
+        assertEquals(GUID_LENGTH, (Integer)result2.getResultId().length());
+        assertEquals(ResultReason.SynthesizingAudioCompleted, result2.getReason());
+        assertTrue(result2.getAudioLength() > 0);
+
+        byte[] audioData2 = result2.getAudioData();
+        DoSomethingWithAudioInVector(audioData2, result2.getAudioLength());
+
+        result1.close();
+        result2.close();
         synthesizer.close();
         speechConfig.close();
     }
@@ -836,15 +870,15 @@ public class SpeechSynthesizerTests {
         assertNotNull(synthesizer);
 
         SpeechSynthesisResult result1 = synthesizer.SpeakTextAsync("{{{text1}}}").get(); // "{{{text1}}}" has completed rendering, and available in result1
-        assertTrue(result1.getResultId().length() == GUID_LENGTH);
-        assertTrue(result1.getReason() == ResultReason.SynthesizingAudioCompleted);
+        assertEquals(GUID_LENGTH, (Integer)result1.getResultId().length());
+        assertEquals(ResultReason.SynthesizingAudioCompleted, result1.getReason());
 
         byte[] expectedAudioData1 = buildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
         assertTrue(areBinaryEqual(expectedAudioData1, result1.getAudioData()));
 
         SpeechSynthesisResult result2 = synthesizer.SpeakTextAsync("{{{text2}}}").get(); // "{{{text2}}}" has completed rendering, and available in result2
-        assertTrue(result2.getResultId().length() == GUID_LENGTH);
-        assertTrue(result2.getReason() == ResultReason.SynthesizingAudioCompleted);
+        assertEquals(GUID_LENGTH, (Integer)result2.getResultId().length());
+        assertEquals(ResultReason.SynthesizingAudioCompleted, result2.getReason());
 
         byte[] expectedAudioData2 = buildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
         assertTrue(areBinaryEqual(expectedAudioData2, result2.getAudioData()));
@@ -873,7 +907,7 @@ public class SpeechSynthesizerTests {
         offset[0] = 0;
         synthesizer.Synthesizing.addEventListener((o, e) -> {
             ResultReason resultReason = e.getResult().getReason();
-            assertTrue(resultReason == ResultReason.SynthesizingAudio);
+            assertEquals(ResultReason.SynthesizingAudio, resultReason);
 
             int audioLength = (int)(e.getResult().getAudioLength());
             assertTrue(audioLength > 0);
@@ -905,7 +939,7 @@ public class SpeechSynthesizerTests {
         assertNotNull(synthesizer);
 
         SpeechSynthesisResult result1 = synthesizer.SpeakTextAsync("{{{text1}}}").get(); // "{{{text1}}}" has completed rendering, and available in result1
-        assertTrue(result1.getReason() == ResultReason.SynthesizingAudioCompleted);
+        assertEquals(ResultReason.SynthesizingAudioCompleted, result1.getReason());
         assertTrue(result1.getAudioLength() > 0);
 
         AudioDataStream stream1 = AudioDataStream.fromResult(result1);
@@ -913,7 +947,7 @@ public class SpeechSynthesizerTests {
         DoSomethingWithAudioInDataStream(stream1, true, expectedAudioData1);
 
         SpeechSynthesisResult result2 = synthesizer.SpeakTextAsync("{{{text2}}}").get(); // "{{{text2}}}" has completed rendering, and available in result2
-        assertTrue(result2.getReason() == ResultReason.SynthesizingAudioCompleted);
+        assertEquals(ResultReason.SynthesizingAudioCompleted, result2.getReason());
         assertTrue(result2.getAudioLength() > 0);
 
         AudioDataStream stream2 = AudioDataStream.fromResult(result2);
@@ -949,10 +983,10 @@ public class SpeechSynthesizerTests {
         requestOrder[0] = -1;
         synthesizer.SynthesisStarted.addEventListener((o, e) -> {
             ResultReason resultReason = e.getResult().getReason();
-            assertTrue(resultReason == ResultReason.SynthesizingAudioStarted);
+            assertEquals(ResultReason.SynthesizingAudioStarted, resultReason);
 
             long audioLength = e.getResult().getAudioLength();
-            assertTrue(audioLength == 0);
+            assertEquals(0, audioLength);
 
             requestOrder[0]++;
 
@@ -995,16 +1029,16 @@ public class SpeechSynthesizerTests {
         assertNotNull(synthesizer);
 
         SpeechSynthesisResult result1 = synthesizer.StartSpeakingTextAsync("{{{text1}}}").get(); // "{{{text1}}}" synthesis has started, likely not finished
-        assertTrue(result1.getReason() == ResultReason.SynthesizingAudioStarted);
-        assertTrue(result1.getAudioLength() == 0);
+        assertEquals(ResultReason.SynthesizingAudioStarted, result1.getReason());
+        assertEquals(0, result1.getAudioLength());
 
         AudioDataStream stream1 = AudioDataStream.fromResult(result1); // of type AudioDataStream, does not block
         byte[] expectedAudioData1 = buildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
         Future<Void> future1 = DoSomethingWithAudioInDataStreamInBackground(stream1, false, expectedAudioData1); // does not block, just spins a thread up
 
         SpeechSynthesisResult result2 = synthesizer.StartSpeakingTextAsync("{{{text2}}}").get(); // "{{{text2}}}" synthesis has started, likely not finished
-        assertTrue(result2.getReason() == ResultReason.SynthesizingAudioStarted);
-        assertTrue(result2.getAudioLength() == 0);
+        assertEquals(ResultReason.SynthesizingAudioStarted, result2.getReason());
+        assertEquals(0, result2.getAudioLength());
 
         AudioDataStream stream2 = AudioDataStream.fromResult(result2); // of type AudioDataStream, does not block
         byte[] expectedAudioData2 = buildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
@@ -1047,7 +1081,7 @@ public class SpeechSynthesizerTests {
             {
                 // This is to check the requests is queued
                 // When one request is already completed, the other one is still not started
-                assertTrue(startedRequests[0] == 1);
+                assertEquals(1, startedRequests[0]);
             }
         });
 
@@ -1078,8 +1112,8 @@ public class SpeechSynthesizerTests {
         assertNotNull(synthesizer);
 
         SpeechSynthesisResult result = synthesizer.StartSpeakingTextAsync("{{{text1}}}").get(); // "{{{text1}}}" synthesis has started, likely not finished
-        assertTrue(result.getReason() == ResultReason.SynthesizingAudioStarted);
-        assertTrue(result.getAudioLength() == 0);
+        assertEquals(ResultReason.SynthesizingAudioStarted, result.getReason());
+        assertEquals(0, result.getAudioLength());
 
         final boolean[] SynthesisCompleted = new boolean[1];
         SynthesisCompleted[0] = false;
@@ -1128,8 +1162,8 @@ public class SpeechSynthesizerTests {
         });
 
         SpeechSynthesisResult result = synthesizer.SpeakTextAsync("{{{text1}}}").get();
-        assertTrue(result.getReason() == ResultReason.SynthesizingAudioCompleted);
-        assertTrue(stream[0].getStatus() == StreamStatus.PartialData);
+        assertEquals(ResultReason.SynthesizingAudioCompleted, result.getReason());
+        assertEquals(StreamStatus.PartialData, stream[0].getStatus());
 
         byte[] fullAudioData = buildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
         byte[] expectedAudioData = new byte[fullAudioData.length - MOCK_AUDIO_CHUNK_SIZE];
@@ -1188,7 +1222,7 @@ public class SpeechSynthesizerTests {
 
     private void DoSomethingWithAudioInVector(byte[] audioData, long audioLength) {
         assertTrue(audioData.length > 0);
-        assertTrue(audioData.length == audioLength);
+        assertEquals(audioLength, audioData.length);
     }
 
     private void DoSomethingWithAudioInDataStream(AudioDataStream stream, boolean afterSynthesisDone)
@@ -1200,14 +1234,14 @@ public class SpeechSynthesizerTests {
     {
         if (afterSynthesisDone)
         {
-            assertTrue(stream.getStatus() == StreamStatus.AllData);
+            assertEquals(StreamStatus.AllData, stream.getStatus());
         }
 
         CheckAudioInDataStream(stream, expectedData);
 
         if (!afterSynthesisDone)
         {
-            assertTrue(stream.getStatus() == StreamStatus.AllData);
+            assertEquals(StreamStatus.AllData, stream.getStatus());
         }
     }
 
@@ -1235,8 +1269,8 @@ public class SpeechSynthesizerTests {
         if (stream.getStatus() == StreamStatus.Canceled) {
             SpeechSynthesisCancellationDetails cancelDetails = SpeechSynthesisCancellationDetails.fromStream(stream);
             // do something with cancellation details
-            assertTrue(cancelDetails.getReason() == CancellationReason.Error);
-            assertTrue(cancelDetails.getErrorCode() != CancellationErrorCode.NoError);
+            assertEquals(CancellationReason.Error, cancelDetails.getReason());
+            assertEquals(CancellationErrorCode.NoError, cancelDetails.getErrorCode());
         }
         else
         {

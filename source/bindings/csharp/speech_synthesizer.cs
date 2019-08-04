@@ -243,6 +243,31 @@ namespace Microsoft.CognitiveServices.Speech
         public PropertyCollection Properties { get; internal set; }
 
         /// <summary>
+        /// Gets/sets authorization token used to communicate with the service.
+        /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+        /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+        /// Otherwise, the synthesizer will encounter errors while speech synthesis.
+        /// Added in version 1.7.0
+        /// </summary>
+        public string AuthorizationToken
+        {
+            get
+            {
+                return Properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token);
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                Properties.SetProperty(PropertyId.SpeechServiceAuthorization_Token, value);
+            }
+        }
+
+        /// <summary>
         /// Execute the speech synthesis on plain text, asynchronously.
         /// </summary>
         /// <param name="text">The plain text for synthesis.</param>

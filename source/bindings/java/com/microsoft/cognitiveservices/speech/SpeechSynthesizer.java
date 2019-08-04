@@ -226,6 +226,26 @@ public class SpeechSynthesizer implements Closeable
     }
 
     /**
+     * Sets the authorization token used to communicate with the service.
+     * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token expires,
+     * the caller needs to refresh it by calling this setter with a new valid token.
+     * Otherwise, the synthesizer will encounter errors while speech synthesis.
+     * @param token Authorization token.
+     */
+    public void setAuthorizationToken(String token) {
+        Contracts.throwIfNullOrWhitespace(token, "token");
+        synthImpl.SetAuthorizationToken(token);
+    }
+
+    /**
+     * Gets the authorization token used to communicate with the service.
+     * @return Authorization token.
+     */
+    public String getAuthorizationToken() {
+        return synthImpl.GetAuthorizationToken();
+    }
+
+    /**
      * Dispose of associated resources.
      */
     @Override

@@ -444,6 +444,37 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
 
         [TestMethod]
+        public async Task SpeakOutWithAuthorizationToken()
+        {
+            var configWithInvalidToken = SpeechConfig.FromAuthorizationToken("InvalidToken", region);
+            using (var synthesizer = new SpeechSynthesizer(configWithInvalidToken, null)) // null indicates to do nothing with synthesizer audio by default
+            {
+                Assert.AreEqual("InvalidToken", synthesizer.AuthorizationToken);
+
+                synthesizer.AuthorizationToken = await Config.GetToken(subscriptionKey, region);
+
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
+                {
+                    CheckResult(result1);
+                    Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
+                    var audioDataSize = result1.AudioData.Length;
+                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                }
+
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering, and available in result2
+                {
+                    CheckResult(result2);
+                    Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
+                    Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
+                    var audioDataSize = result2.AudioData.Length;
+                    Assert.IsTrue(audioDataSize > 0, $"The audio data size should be greater than zero, but actually it's {audioDataSize}.");
+                }
+            }
+        }
+
+
+        [TestMethod]
         [Ignore]
         public async Task DefaultsUsp()
         {

@@ -264,6 +264,29 @@ public:
     }
 
     /// <summary>
+    /// Sets the authorization token that will be used for connecting to the service.
+    /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+    /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+    /// Otherwise, the synthesizer will encounter errors while speech synthesis.
+    /// Added in version 1.7.0
+    /// </summary>
+    /// <param name="token">The authorization token.</param>
+    void SetAuthorizationToken(const SPXSTRING& token)
+    {
+        Properties.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);
+    }
+
+    /// <summary>
+    /// Gets the authorization token.
+    /// Added in version 1.7.0
+    /// </summary>
+    /// <returns>Authorization token</returns>
+    SPXSTRING GetAuthorizationToken()
+    {
+        return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, SPXSTRING());
+    }
+
+    /// <summary>
     /// Destructor.
     /// </summary>
     ~SpeechSynthesizer()
