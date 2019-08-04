@@ -94,7 +94,7 @@ public:
 
 private:
 
-    const int m_checkIntervalInMs = 200; // Check the status every 200ms in case the expire() method need to wait too long
+    const int m_checkIntervalInMs = 20; // Check the status every 20ms in case the expire() method need to wait too long
 
     std::thread m_thread;
     std::atomic<bool> m_stopped;
@@ -139,6 +139,7 @@ private:
     std::atomic<bool> m_accessTokenInitialized{ false };
     Timer m_accessTokenRenewer;
     std::mutex m_mutex;
+    std::condition_variable m_cv;
 };
 
 

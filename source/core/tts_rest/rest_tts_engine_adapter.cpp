@@ -148,6 +148,9 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
     InvokeOnSite([this, requestId, ssml, outputFormatString, outputFormat, hasHeader, &result](const SitePtr& p) {
         result = SpxCreateObjectWithSite<ISpxSynthesisResult>("CSpxSynthesisResult", p->QueryInterface<ISpxGenericSite>());
         auto resultInit = SpxQueryInterface<ISpxSynthesisResultInit>(result);
+
+        EnsureHttpConnection();
+
         std::string token = "";
         if (m_authenticator.get() != nullptr)
         {
@@ -166,7 +169,6 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
         request.adapter = this;
         request.site = p;
 
-        EnsureHttpConnection();
         if (m_httpConnect != nullptr)
         {
             PostTtsRequest(m_httpConnect, request, resultInit);

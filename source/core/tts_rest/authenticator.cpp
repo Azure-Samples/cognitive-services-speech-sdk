@@ -40,13 +40,7 @@ void CSpxRestTtsAuthenticator::Init()
     // Access token expires every 10 minutes. Renew it every 9 minutes only
     m_accessTokenRenewer.Start(9 * 60 * 1000, std::bind([this]() {
         RenewAccessToken();
-        m_accessTokenInitialized = true;
     }));
-
-    while (!m_accessTokenInitialized)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
 }
 
 void CSpxRestTtsAuthenticator::Term()
@@ -59,6 +53,18 @@ std::string CSpxRestTtsAuthenticator::GetAccessToken()
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS_AUTHENTICATOR, __FUNCTION__);
 
     std::unique_lock<std::mutex> lock(m_mutex);
+    if (!m_accessTokenInitialized)
+    {
+#ifdef _DEBUG
+        while (!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&] { return m_accessTokenInitialized == true; }))
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: waiting ...", __FUNCTION__);
+        }
+#else
+        m_cv.wait(lock, [&] { return m_accessTokenInitialized == true; });
+#endif
+    }
+
     return m_accessToken;
 }
 
@@ -68,6 +74,8 @@ void CSpxRestTtsAuthenticator::RenewAccessToken()
 
     std::unique_lock<std::mutex> lock(m_mutex);
     m_accessToken = HttpPost(m_issueTokenUri, m_subscriptionKey, m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
+    m_accessTokenInitialized = true;
+    m_cv.notify_all();
 }
 
 std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri, const std::string& subscriptionKey,
