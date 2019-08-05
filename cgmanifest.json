@@ -64,13 +64,29 @@
       }
     },
 
+    // Location:
+    // Usage: internal (for iOS build), with header exemption (GStreamer includes have been
+    //        scanned by CELA to ensure usage is okay)
+    // Related mail thread subjects: CAI-gstreamer mix Apr2019 (CUSTOM), CAI-gstreamer-1.14.4 (custom)
+    // Version: 1.16.0
+    {
+      "component": {
+        "type": "other",
+        "other": {
+          "name": "GStreamer",
+          "version": "1.16.0",
+          "downloadUrl": "https://gstreamer.freedesktop.org/data/pkg/ios/1.16.0/gstreamer-1.0-devel-1.16.0-ios-universal.pkg"
+        }
+      }
+    },
+
     // Location: external/ios-cmake, .gitmodules
     // Usage: internal
     {
       "component": {
         "type": "git",
         "git": {
-          "commitHash": "d9afc8df4ec98682edeaf886bc8ad16a14b99806",
+          "commitHash": "7f050db7713ecdb52555ed893092f3f8a6204723",
           "repositoryUrl": "https://github.com/leetal/ios-cmake.git"
         }
       }
