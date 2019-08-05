@@ -534,7 +534,7 @@ public:
     virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize) = 0;
     virtual uint32_t Read(uint8_t* buffer, uint32_t bufferSize, uint32_t pos) = 0;
     virtual void SaveToWaveFile(const wchar_t* fileName) = 0;
-    virtual uint32_t GetPosistion() = 0;
+    virtual uint32_t GetPosition() = 0;
     virtual void SetPosition(uint32_t pos) = 0;
 };
 

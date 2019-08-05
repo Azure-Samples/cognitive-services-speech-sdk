@@ -292,7 +292,7 @@ SPXAPI audio_data_stream_get_position(SPXAUDIOSTREAMHANDLE haudioStream, uint32_
     {
         auto streamhandles = CSpxSharedPtrHandleTableManager::Get<ISpxAudioDataStream, SPXAUDIOSTREAMHANDLE>();
         auto stream = (*streamhandles)[haudioStream];
-        *position = stream->GetPosistion();
+        *position = stream->GetPosition();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

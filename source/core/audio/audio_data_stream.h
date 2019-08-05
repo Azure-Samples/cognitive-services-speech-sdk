@@ -58,7 +58,7 @@ public:
     uint32_t Read(uint8_t* buffer, uint32_t bufferSize) override;
     uint32_t Read(uint8_t* buffer, uint32_t bufferSize, uint32_t pos) override;
     void SaveToWaveFile(const wchar_t* fileName) override;
-    uint32_t GetPosistion() override;
+    uint32_t GetPosition() override;
     void SetPosition(uint32_t pos) override;
 
     // --- CSpxPullAudioOutputStream ---

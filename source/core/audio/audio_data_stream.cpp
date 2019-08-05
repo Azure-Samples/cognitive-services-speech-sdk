@@ -235,7 +235,7 @@ void CSpxAudioDataStream::SaveToWaveFile(const wchar_t* fileName)
     audioOutput->Close();
 }
 
-uint32_t CSpxAudioDataStream::GetPosistion()
+uint32_t CSpxAudioDataStream::GetPosition()
 {
     return m_position;
 }
