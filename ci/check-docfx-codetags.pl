@@ -36,6 +36,7 @@ BEGIN {
     quickstart/objectivec-ios/helloworld/helloworld/Base.lproj/Main.storyboard
     quickstart/objectivec-macos/helloworld/Podfile
     quickstart/swift-ios/helloworld/Podfile
+    quickstart/swift-macos/helloworld/Podfile
     quickstart/text-to-speech/java-android/app/src/main/res/layout/activity_main.xml
   );
 
@@ -73,9 +74,11 @@ BEGIN {
       quickstart/speech-translation/csharp-uwp/helloworld/MainPage.xaml#StackPanel
       quickstart/speech-translation/csharp-uwp/helloworld/MainPage.xaml.cs#code
       quickstart/speech-translation/java-jre/src/speechsdk/quickstart/Main.java#code
-      quickstart/swift-ios/helloworld/helloworld/AppDelegate.m#code
+      quickstart/swift-ios/helloworld/helloworld/AppDelegate.swift#code
       quickstart/swift-ios/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
-      quickstart/swift-ios/helloworld/helloworld/ViewController.m#code
+      quickstart/swift-ios/helloworld/helloworld/ViewController.swift#code
+      quickstart/swift-macos/helloworld/helloworld/AppDelegate.swift#code
+      quickstart/swift-macos/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
       quickstart/text-to-speech/cpp-linux/helloworld.cpp#code
       quickstart/text-to-speech/cpp-windows/helloworld/helloworld.cpp#code
       quickstart/text-to-speech/csharp-dotnet-windows/helloworld/Program.cs#code
