@@ -2040,6 +2040,39 @@ jobs:
       set -u -e -o pipefail -x
       mkdir -p "$(OutputDirectory)/logs"
       . ci/functions.sh
+      PROJECT_DIR=public_samples/quickstart/text-to-speech/objectivec-ios/helloworld/
+      sed -i '' "s/'~> 1.[[:digit:]]'/path: \"{{{PODSPEC_PATH}}}\"/" ${PROJECT_DIR}/Podfile
+      ci/apple/prepare-pods-for-swift-test.sh ${PROJECT_DIR} "$(Build.Repository.LocalPath)/xcode-build-output"
+      # fix the keys
+      eval $(perl ci/evaluate-test-config.pl --verbose --format bash-environment --input ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false)
+      patchSamplesFromTestConfig public_samples/quickstart/text-to-speech/objectivec-ios/helloworld/helloworld \
+        ci/test-config.json \
+        -D luis-key=$(luis-westus-s0-201809-key1) \
+        -D speech-key=$(NorthEuropeKeySkyman) \
+        -D virtualassistant-region=$(DialogRegion) \
+        -D virtualassistant-subscription=$(DialogSubscriptionKey) \
+        -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
+        -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
+        -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
+        -D long-running=false
+      # run the tests
+      ci/apple/multiplatformtests.sh public_samples/quickstart/text-to-speech/objectivec-ios/helloworld/helloworld.xcworkspace \
+        helloworldUITests helloworldUITests-Runner $(OutputDirectory)/logs quickstart-tts $(microsoftDevTeamId) --usegui
+    continueOnError: true
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+    displayName: "Run iOS UI test for TTS quickstart"
+  - bash: |
+      set -u -e -o pipefail -x
+      mkdir -p "$(OutputDirectory)/logs"
+      . ci/functions.sh
       # set up framework in the correct position - the Xcode project expects the framework here
       ln -s '$(Build.Repository.LocalPath)/xcode-build-output/$(FrameworkName).framework' public_samples/samples/objective-c/ios/
       # fix the keys

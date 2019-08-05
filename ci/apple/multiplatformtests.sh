@@ -4,8 +4,8 @@ set -e -u -o pipefail
 APPLE_SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$APPLE_SCRIPT_DIR"/..
 
-USAGE="USAGE: multiplatformtests.sh <projectfile> <xcodescheme> <appname> <logdir> <testname> <devteamid> <opt:--usegui>"
-PROJECT="${1?$USAGE}"  # Xcode project file
+USAGE="USAGE: multiplatformtests.sh <projectfile/workspacefile> <xcodescheme> <appname> <logdir> <testname> <devteamid> <opt:--usegui>"
+PROJECT="${1?$USAGE}"  # Xcode project/workspace file
 SCHEME="${2?$USAGE}"  # Xcode scheme name
 APPNAME="${3?$USAGE}"  # name of the app (without .app extension)
 LOGDIR="${4?$USAGE}"  # path to the directory to store logs in

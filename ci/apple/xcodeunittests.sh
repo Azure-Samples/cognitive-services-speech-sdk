@@ -4,8 +4,8 @@ set -e -u -x -o pipefail
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 XCODE_CONFIGURATION_BUILD_DIR=${PWD}/iostestbuild
 
-USAGE="USAGE: xcodeunittests.sh <projectfile> <xcodescheme> <appname> <logdir> <testname> <device> <os> <opt:--extra-args xcode_extra_args> <opt:--usegui> <opt:--redact strings_to_redact>"
-PROJECT="${1?$USAGE}"  # Xcode project file
+USAGE="USAGE: xcodeunittests.sh <projectfile/workspacefile> <xcodescheme> <appname> <logdir> <testname> <device> <os> <opt:--extra-args xcode_extra_args> <opt:--usegui> <opt:--redact strings_to_redact>"
+PROJECT="${1?$USAGE}"  # Xcode project/workspace file
 SCHEME="${2?$USAGE}"  # Xcode scheme name
 APPNAME="${3?$USAGE}"  # name of the app (without .app extension)
 LOGDIR="${4?$USAGE}"  # path to the directory to store logs in
@@ -65,9 +65,18 @@ run_test() {
     trap "cleanup $simname" EXIT
     thistestname="$TESTNAME-$simname"
 
+    if [[ ${PROJECT} =~ workspace$ ]]; then
+        build_type="workspace"
+    elif [[ ${PROJECT} =~ xcodeproj$ ]]; then
+        build_type="project"
+    else
+        echo "invalid project/workspace file type"
+        exit 1
+    fi
+
     if [[ ! -d ${LOGDIR} ]]; then
         echo "logging directory does not exist"
-        exit
+        exit 1
     fi
     ${SCRIPT_DIR}/ios_simulator_cli.sh ${simname} create "${DEVICE}" "${OS}"
     uid=$(${SCRIPT_DIR}/ios_simulator_cli.sh ${simname} getuid)
@@ -80,7 +89,7 @@ run_test() {
 
     rm -rf ${XCODE_CONFIGURATION_BUILD_DIR}
 
-    xcodebuild build-for-testing -project ${PROJECT} \
+    xcodebuild build-for-testing -${build_type} ${PROJECT} \
         -destination "platform=iOS Simulator,id=${uid}" \
         -scheme ${SCHEME} ${xcodeExtraArgs[@]} \
         CONFIGURATION_BUILD_DIR=${XCODE_CONFIGURATION_BUILD_DIR} \
@@ -93,7 +102,7 @@ run_test() {
     ${SCRIPT_DIR}/ios_simulator_cli.sh ${simname} wait
     xcrun simctl install ${uid} ${XCODE_CONFIGURATION_BUILD_DIR}/${APPNAME}.app/
 
-    xcodebuild test-without-building -project ${PROJECT} ${xcodeExtraArgs[@]} \
+    xcodebuild test-without-building -${build_type} ${PROJECT} ${xcodeExtraArgs[@]} \
         -destination "platform=iOS Simulator,id=${uid}" \
         -scheme ${SCHEME} \
         CONFIGURATION_BUILD_DIR=${XCODE_CONFIGURATION_BUILD_DIR} \

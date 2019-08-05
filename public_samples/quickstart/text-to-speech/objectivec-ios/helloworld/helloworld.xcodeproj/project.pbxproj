@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3C0F500422F45304002F9795 /* helloworldUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0F500322F45304002F9795 /* helloworldUITests.m */; };
 		3C740CE722F149F600BA9D95 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C740CE622F149F600BA9D95 /* AppDelegate.m */; };
 		3C740CEA22F149F600BA9D95 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C740CE922F149F600BA9D95 /* ViewController.m */; };
 		3C740CED22F149F600BA9D95 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3C740CEB22F149F600BA9D95 /* Main.storyboard */; };
@@ -15,7 +16,20 @@
 		3C740CF522F149F600BA9D95 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C740CF422F149F600BA9D95 /* main.m */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		3C0F500622F45304002F9795 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C740CDA22F149F600BA9D95 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3C740CE122F149F600BA9D95;
+			remoteInfo = helloworld;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		3C0F500122F45304002F9795 /* helloworldUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = helloworldUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C0F500322F45304002F9795 /* helloworldUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = helloworldUITests.m; sourceTree = "<group>"; };
+		3C0F500522F45304002F9795 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C740CE222F149F600BA9D95 /* helloworld.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = helloworld.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C740CE522F149F600BA9D95 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		3C740CE622F149F600BA9D95 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -29,6 +43,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		3C0F4FFE22F45304002F9795 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3C740CDF22F149F600BA9D95 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -39,10 +60,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3C0F500222F45304002F9795 /* helloworldUITests */ = {
+			isa = PBXGroup;
+			children = (
+				3C0F500322F45304002F9795 /* helloworldUITests.m */,
+				3C0F500522F45304002F9795 /* Info.plist */,
+			);
+			path = helloworldUITests;
+			sourceTree = "<group>";
+		};
 		3C740CD922F149F600BA9D95 = {
 			isa = PBXGroup;
 			children = (
 				3C740CE422F149F600BA9D95 /* helloworld */,
+				3C0F500222F45304002F9795 /* helloworldUITests */,
 				3C740CE322F149F600BA9D95 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -51,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				3C740CE222F149F600BA9D95 /* helloworld.app */,
+				3C0F500122F45304002F9795 /* helloworldUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,6 +106,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3C0F500022F45304002F9795 /* helloworldUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3C0F500A22F45304002F9795 /* Build configuration list for PBXNativeTarget "helloworldUITests" */;
+			buildPhases = (
+				3C0F4FFD22F45304002F9795 /* Sources */,
+				3C0F4FFE22F45304002F9795 /* Frameworks */,
+				3C0F4FFF22F45304002F9795 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3C0F500722F45304002F9795 /* PBXTargetDependency */,
+			);
+			name = helloworldUITests;
+			productName = helloworldUITests;
+			productReference = 3C0F500122F45304002F9795 /* helloworldUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		3C740CE122F149F600BA9D95 /* helloworld */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3C740CF822F149F600BA9D95 /* Build configuration list for PBXNativeTarget "helloworld" */;
@@ -100,6 +150,10 @@
 				LastUpgradeCheck = 1030;
 				ORGANIZATIONNAME = Microsoft;
 				TargetAttributes = {
+					3C0F500022F45304002F9795 = {
+						CreatedOnToolsVersion = 10.3;
+						TestTargetID = 3C740CE122F149F600BA9D95;
+					};
 					3C740CE122F149F600BA9D95 = {
 						CreatedOnToolsVersion = 10.3;
 					};
@@ -119,11 +173,19 @@
 			projectRoot = "";
 			targets = (
 				3C740CE122F149F600BA9D95 /* helloworld */,
+				3C0F500022F45304002F9795 /* helloworldUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3C0F4FFF22F45304002F9795 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3C740CE022F149F600BA9D95 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,6 +199,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3C0F4FFD22F45304002F9795 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C0F500422F45304002F9795 /* helloworldUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3C740CDE22F149F600BA9D95 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -148,6 +218,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3C0F500722F45304002F9795 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3C740CE122F149F600BA9D95 /* helloworld */;
+			targetProxy = 3C0F500622F45304002F9795 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		3C740CEB22F149F600BA9D95 /* Main.storyboard */ = {
@@ -169,6 +247,40 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		3C0F500822F45304002F9795 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = helloworldUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitiveservices.helloworldUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = helloworld;
+			};
+			name = Debug;
+		};
+		3C0F500922F45304002F9795 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = helloworldUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitiveservices.helloworldUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = helloworld;
+			};
+			name = Release;
+		};
 		3C740CF622F149F600BA9D95 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -220,7 +332,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -273,7 +385,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -316,6 +428,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3C0F500A22F45304002F9795 /* Build configuration list for PBXNativeTarget "helloworldUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C0F500822F45304002F9795 /* Debug */,
+				3C0F500922F45304002F9795 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		3C740CDD22F149F600BA9D95 /* Build configuration list for PBXProject "helloworld" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
