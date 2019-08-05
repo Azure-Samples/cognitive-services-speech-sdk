@@ -171,6 +171,15 @@ std::shared_ptr<ISpxSynthesisResult> CSpxRestTtsEngineAdapter::Speak(const std::
                 // The http connection could be disconnected, release it to make it re-created for next request
                 HTTPAPI_CloseConnection(m_httpConnect);
                 m_httpConnect = nullptr;
+
+                if (result->GetAudioData()->size() == 0 && request.response.body.size() == 0)
+                {
+                    // Re-connect and re-send the request if disconnection happened and no data was received
+                    EnsureHttpConnection();
+                    resultInit->Reset();
+                    SpxQueryInterface<ISpxNamedProperties>(resultInit)->SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), "");
+                    PostTtsRequest(m_httpConnect, request, resultInit);
+                }
             }
         }
         else

@@ -520,6 +520,7 @@ public:
         uint8_t* audio_buffer, size_t audio_length, SPXWAVEFORMATEX* format, bool hasHeader) = 0;
     virtual void SetEvents(const std::shared_ptr<ISpxSynthesizerEvents>& events) = 0;
     virtual void SetFutureResult(std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> futureResult) = 0;
+    virtual void Reset() = 0;
 };
 
 class ISpxAudioDataStream : public ISpxInterfaceBaseFor<ISpxAudioDataStream>

@@ -51,6 +51,7 @@ public:
         uint8_t* audio_buffer, size_t audio_length, SPXWAVEFORMATEX* format, bool hasHeader) override;
     void SetEvents(const std::shared_ptr<ISpxSynthesizerEvents>& events) override;
     void SetFutureResult(std::shared_ptr<CSpxAsyncOp<std::shared_ptr<ISpxSynthesisResult>>> futureResult) override;
+    void Reset() override;
 
     // --- ISpxNamedProperties (overrides)
     void SetStringValue(const char* name, const char* value) override;

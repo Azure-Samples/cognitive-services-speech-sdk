@@ -152,6 +152,20 @@ void CSpxSynthesisResult::SetFutureResult(std::shared_ptr<CSpxAsyncOp<std::share
     m_futureResult = futureResult;
 }
 
+void CSpxSynthesisResult::Reset()
+{
+    m_resultId.clear();
+    m_requestId.clear();
+    m_events = nullptr;
+    m_reason = static_cast<ResultReason>(0);
+    m_cancellationReason = static_cast<CancellationReason>(0);
+    m_cancellationErrorCode = CancellationErrorCode::NoError;
+    m_audiodata.clear();
+    m_audioformat = nullptr;
+    m_hasHeader = true;
+    m_audioStream = nullptr;
+}
+
 void CSpxSynthesisResult::SetStringValue(const char* name, const char* value)
 {
     ISpxPropertyBagImpl::SetStringValue(name, value);
