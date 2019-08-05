@@ -74,6 +74,7 @@ public:
     ~TranslationRecognizer()
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        Synthesizing.DisconnectAll();
         TermRecognizer();
     }
 

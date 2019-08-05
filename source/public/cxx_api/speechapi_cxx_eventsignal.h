@@ -62,9 +62,15 @@ public:
         {
             std::unique_lock<std::recursive_mutex> lock(m_mutex);
             m_connectedCallback = nullptr;
+        }
+
+        // First disconnects callbacks.
+        DisconnectAll();
+
+        {
+            std::unique_lock<std::recursive_mutex> lock(m_mutex);
             m_disconnectedCallback = nullptr;
         }
-        DisconnectAll();
     }
 
     /// <summary>
