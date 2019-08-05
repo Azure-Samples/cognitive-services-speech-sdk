@@ -49,7 +49,7 @@ typedef struct Url_Tag
     Protocol protocol;
     bool secure;
     std::string host;
-    int port { 0 };
+    int port{ -1 };
     std::string path;
     std::string query;
 } Url;
@@ -238,6 +238,11 @@ public:
             } while (StringToken_GetNext(token, current_delimiters, delimiter_count));
 
             StringToken_Destroy(token);
+        }
+
+        if (url.port < 0)
+        {
+            url.port = url.secure ? 443 : 80;
         }
 
         return url;

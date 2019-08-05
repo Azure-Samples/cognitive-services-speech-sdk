@@ -94,8 +94,8 @@ std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri,
     auto url = CSpxSynthesisHelper::ParseUrl(issueTokenUri);
 
     // Allocate resources
-    HTTP_HANDLE http_connect = HTTPAPI_CreateConnection_With_Proxy(
-        url.host.data(), proxyHost.data(), proxyPort, proxyUsername.data(), proxyPassword.data());
+    HTTP_HANDLE http_connect = HTTPAPI_CreateConnection_Advanced(
+        url.host.data(), url.port, url.secure, proxyHost.data(), proxyPort, proxyUsername.data(), proxyPassword.data());
     if (!http_connect)
     {
         SPX_TRACE_ERROR("Could not create HTTP connection");

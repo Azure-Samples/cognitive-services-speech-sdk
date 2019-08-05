@@ -219,7 +219,8 @@ void CSpxRestTtsEngineAdapter::EnsureHttpConnection()
 
     // Create the connection
     auto url = CSpxSynthesisHelper::ParseUrl(m_endpoint);
-    m_httpConnect = HTTPAPI_CreateConnection_With_Proxy(url.host.data(), m_proxyHost.data(), m_proxyPort, m_proxyUsername.data(), m_proxyPassword.data());
+    m_httpConnect = HTTPAPI_CreateConnection_Advanced(url.host.data(), url.port, url.secure,
+        m_proxyHost.data(), m_proxyPort, m_proxyUsername.data(), m_proxyPassword.data());
     if (!m_httpConnect)
     {
         SPX_TRACE_ERROR("Could not create HTTP connection");
