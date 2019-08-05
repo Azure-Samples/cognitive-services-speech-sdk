@@ -24,9 +24,30 @@ typedef NS_ENUM(NSUInteger, SPXAudioStreamContainerFormat)
     SPXAudioStreamContainerFormat_MP3 = 0x102,
 
     /**
-      * Stream ContainerFormat definition for FLAC. Not supported yet.
+      * Stream ContainerFormat definition for FLAC. Added in version 1.7.0.
       */
-    SPXAudioStreamContainerFormat_FLAC = 0x103
+    SPXAudioStreamContainerFormat_FLAC = 0x103,
+
+    /**
+      * Stream ContainerFormat definition for ALAW. Added in version 1.7.0.
+      */
+    SPXAudioStreamContainerFormat_ALAW = 0x104,
+
+    /**
+      * Stream ContainerFormat definition for MULAW. Added in version 1.7.0.
+      */
+    SPXAudioStreamContainerFormat_MULAW = 0x105,
+
+    /**
+      * Stream ContainerFormat definition for AMRNB. Currently not supported.
+      */
+    SPXAudioStreamContainerFormat_AMRNB = 0x106,
+
+    /**
+      * Stream ContainerFormat definition for AMRWB. Currently not supported.
+      */
+    SPXAudioStreamContainerFormat_AMRWB = 0x107
+
 };
 
 /**

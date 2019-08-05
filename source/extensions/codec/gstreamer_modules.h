@@ -12,17 +12,9 @@
 // The following list has to be maintained same as the one in $(SourceRoot)/ci/android/gstreamer/Android.mk
 // Please search for base_gstreamer.h or base_gstreamer.cpp
 
-#if defined(ANDROID) || defined(_ANDROID_)
+#if defined(ANDROID) || defined(__ANDROID__)
 extern "C"
 {
-#if defined(TARGET_OS_IPHONE)
-#define GST_G_IO_MODULE_DECLARE(name) \
-    extern void G_PASTE(g_io_module_, G_PASTE(name, _load_static)) (void)
-
-#define GST_G_IO_MODULE_LOAD(name) \
-    G_PASTE(g_io_module_, G_PASTE(name, _load_static)) ()
-#endif
-
     GST_PLUGIN_STATIC_DECLARE(coreelements);
     GST_PLUGIN_STATIC_DECLARE(app);
     GST_PLUGIN_STATIC_DECLARE(audioconvert);
@@ -32,6 +24,10 @@ extern "C"
     GST_PLUGIN_STATIC_DECLARE(ogg);
     GST_PLUGIN_STATIC_DECLARE(opusparse);
     GST_PLUGIN_STATIC_DECLARE(opus);
+    GST_PLUGIN_STATIC_DECLARE(wavparse);
+    GST_PLUGIN_STATIC_DECLARE(alaw);
+    GST_PLUGIN_STATIC_DECLARE(mulaw);
+    GST_PLUGIN_STATIC_DECLARE(flac);
 }
 #endif
 

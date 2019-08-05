@@ -38,9 +38,29 @@ enum class AudioStreamContainerFormat
     MP3 = 0x102,
 
     /// <summary>
-    /// Stream ContainerFormat definition for FLAC. Not supported yet.
+    /// Stream ContainerFormat definition for FLAC. Added in version 1.7.0.
     /// </summary>
-    FLAC = 0x103
+    FLAC = 0x103,
+
+    /// <summary>
+    /// Stream ContainerFormat definition for ALAW. Added in version 1.7.0. 
+    /// </summary>
+    ALAW = 0x104,
+
+    /// <summary>
+    /// Stream ContainerFormat definition for MULAW. Added in version 1.7.0. 
+    /// </summary>
+    MULAW = 0x105,
+
+    /// <summary>
+    /// Stream ContainerFormat definition for AMRNB. Currently not supported. 
+    /// </summary>
+    AMRNB = 0x106,
+
+    /// <summary>
+    /// Stream ContainerFormat definition for AMRWB. Currently not supported. 
+    /// </summary>
+    AMRWB = 0x107
 };
 
 /// <summary>

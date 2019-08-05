@@ -44,6 +44,24 @@ SPXAudioStreamContainerFormat compressedStreamFormat;
     [self pushFile:@"opus"];
 }
 
+- (void)testContinuousRecognitionFromFlacFileWithPushStream {
+    self->compressedStreamFormat = SPXAudioStreamContainerFormat_FLAC;
+    [self speechInit];
+    [self pushFile:@"flac"];
+}
+
+- (void)testContinuousRecognitionFromAlawFileWithPushStream {
+    self->compressedStreamFormat = SPXAudioStreamContainerFormat_ALAW;
+    [self speechInit];
+    [self pushFile:@"alaw"];
+}
+
+- (void)testContinuousRecognitionFromMulawFileWithPushStream {
+    self->compressedStreamFormat = SPXAudioStreamContainerFormat_MULAW;
+    [self speechInit];
+    [self pushFile:@"mulaw"];
+}
+
 - (void)pushFile:(NSString *)fileExtension {
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:fileExtension];
@@ -137,6 +155,15 @@ SPXAudioStreamContainerFormat compressedStreamFormat;
         case SPXAudioStreamContainerFormat_OGG_OPUS:
             weatherFileExtension = @"opus";
             break;
+        case SPXAudioStreamContainerFormat_FLAC:
+            weatherFileExtension = @"flac";
+            break;
+        case SPXAudioStreamContainerFormat_ALAW:
+            weatherFileExtension = @"alaw";
+            break;
+        case SPXAudioStreamContainerFormat_MULAW:
+            weatherFileExtension = @"mulaw";
+            break;
         default:
             break;
     }
@@ -206,5 +233,24 @@ SPXAudioStreamContainerFormat compressedStreamFormat;
     [self speechInit];
     [self _testRecognizeOnce];
 }
+
+- (void) testRecognizeOnceFLAC {
+    self->compressedStreamFormat = SPXAudioStreamContainerFormat_FLAC;
+    [self speechInit];
+    [self _testRecognizeOnce];
+}
+
+- (void) testRecognizeOnceALAW {
+    self->compressedStreamFormat = SPXAudioStreamContainerFormat_ALAW;
+    [self speechInit];
+    [self _testRecognizeOnce];
+}
+
+- (void) testRecognizeOnceMULAW {
+    self->compressedStreamFormat = SPXAudioStreamContainerFormat_MULAW;
+    [self speechInit];
+    [self _testRecognizeOnce];
+}
+
 
 @end

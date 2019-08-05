@@ -55,6 +55,27 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertMatching(TestData.English.WeatherOPUS.Utterance, result.Text);
         }
 
+        [TestMethod, TestCategory(TestCategory.CompressedStreamTest)]
+        public async Task SimpleRecognitionCompressedFLAC()
+        {
+            var result = await this.speechHelper.GetSpeechFinalRecognitionResultPullStreamWithCompressedFile(this.defaultConfig, TestData.English.WeatherFLAC.AudioFile, AudioStreamContainerFormat.FLAC);
+            AssertMatching(TestData.English.WeatherFLAC.Utterance, result.Text);
+        }
+
+        [TestMethod, TestCategory(TestCategory.CompressedStreamTest)]
+        public async Task SimpleRecognitionCompressedALAW()
+        {
+            var result = await this.speechHelper.GetSpeechFinalRecognitionResultPullStreamWithCompressedFile(this.defaultConfig, TestData.English.WeatherALAW.AudioFile, AudioStreamContainerFormat.ALAW);
+            AssertMatching(TestData.English.WeatherALAW.Utterance, result.Text);
+        }
+
+        [TestMethod, TestCategory(TestCategory.CompressedStreamTest)]
+        public async Task SimpleRecognitionCompressedMULAW()
+        {
+            var result = await this.speechHelper.GetSpeechFinalRecognitionResultPullStreamWithCompressedFile(this.defaultConfig, TestData.English.WeatherMULAW.AudioFile, AudioStreamContainerFormat.MULAW);
+            AssertMatching(TestData.English.WeatherMULAW.Utterance, result.Text);
+        }
+
         [TestMethod]
         public async Task DetailedRecognitionBatman()
         {

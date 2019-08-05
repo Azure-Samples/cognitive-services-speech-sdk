@@ -1730,7 +1730,7 @@ int CarbonTestConsole::ReadCompressedBinaryData(void *stream, uint8_t *ptr, uint
     size_t  ret = 0;
     FILE* localRead = (FILE*)stream;
 
-    if (!feof(localRead))
+    if (localRead != NULL && !feof(localRead))
     {
         ret = fread(ptr, 1, buf_size, localRead);
     }
@@ -1775,6 +1775,36 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
             {
                 m_pullAudioStream = AudioInputStream::CreatePullStream(
                     AudioStreamFormat::GetCompressedFormat(AudioStreamContainerFormat::OGG_OPUS),
+                    OpenCompressedFile(wavFileName),
+                    ReadCompressedBinaryData,
+                    closeStream
+                );
+                m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromStreamInput(m_pullAudioStream));
+            }
+            else if (wavFileName.find(".alaw") == (wavFileName.size() - 5))
+            {
+                m_pullAudioStream = AudioInputStream::CreatePullStream(
+                    AudioStreamFormat::GetCompressedFormat(AudioStreamContainerFormat::ALAW),
+                    OpenCompressedFile(wavFileName),
+                    ReadCompressedBinaryData,
+                    closeStream
+                );
+                m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromStreamInput(m_pullAudioStream));
+            }
+            else if (wavFileName.find(".mulaw") == (wavFileName.size() - 6))
+            {
+                m_pullAudioStream = AudioInputStream::CreatePullStream(
+                    AudioStreamFormat::GetCompressedFormat(AudioStreamContainerFormat::MULAW),
+                    OpenCompressedFile(wavFileName),
+                    ReadCompressedBinaryData,
+                    closeStream
+                );
+                m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromStreamInput(m_pullAudioStream));
+            }
+            else if (wavFileName.find(".flac") == (wavFileName.size() - 5))
+            {
+                m_pullAudioStream = AudioInputStream::CreatePullStream(
+                    AudioStreamFormat::GetCompressedFormat(AudioStreamContainerFormat::FLAC),
                     OpenCompressedFile(wavFileName),
                     ReadCompressedBinaryData,
                     closeStream

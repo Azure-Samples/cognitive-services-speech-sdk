@@ -19,12 +19,8 @@
 		3CC3789C2121CFD600F07A66 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */; };
 		3CCD06D62157F71E00A348DB /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D12157F71E00A348DB /* microphone_test.m */; };
 		3CCD06D72157F71E00A348DB /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06D22157F71E00A348DB /* dummytest.m */; };
-		3CCD06D92157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
-		3CCD06DA2157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		DC15EE9D22676E5F00991304 /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */; };
 		DC15EE9E22676E7D00991304 /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */; };
-		DC68200622A960C200AD8EA4 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC68200522A960C200AD8EA4 /* silenceshort.wav */; };
-		DC68200722A960C200AD8EA4 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC68200522A960C200AD8EA4 /* silenceshort.wav */; };
 		DC27A3F72260996200BD9FE0 /* Margarita-44100.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC27A3F62260996200BD9FE0 /* Margarita-44100.wav */; };
 		DC27A3F82260996200BD9FE0 /* Margarita-44100.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC27A3F62260996200BD9FE0 /* Margarita-44100.wav */; };
 		DC419444225B6F2300F95B2F /* CompressedStreamsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DC419443225B6F2300F95B2F /* CompressedStreamsTest.m */; };
@@ -32,6 +28,14 @@
 		DC419448225B779C00F95B2F /* whatstheweatherlike.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = DC419446225B779C00F95B2F /* whatstheweatherlike.mp3 */; };
 		DC419449225B77BF00F95B2F /* whatstheweatherlike.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = DC419446225B779C00F95B2F /* whatstheweatherlike.mp3 */; };
 		DC41944A225B77BF00F95B2F /* whatstheweatherlike.opus in Resources */ = {isa = PBXBuildFile; fileRef = DC419445225B779C00F95B2F /* whatstheweatherlike.opus */; };
+		DC68200622A960C200AD8EA4 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC68200522A960C200AD8EA4 /* silenceshort.wav */; };
+		DC68200722A960C200AD8EA4 /* silenceshort.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC68200522A960C200AD8EA4 /* silenceshort.wav */; };
+		DC828F5F22F19D16007903CA /* whatstheweatherlike.alaw in Resources */ = {isa = PBXBuildFile; fileRef = DC828F5C22F19D16007903CA /* whatstheweatherlike.alaw */; };
+		DC828F6022F19D16007903CA /* whatstheweatherlike.flac in Resources */ = {isa = PBXBuildFile; fileRef = DC828F5D22F19D16007903CA /* whatstheweatherlike.flac */; };
+		DC828F6122F19D16007903CA /* whatstheweatherlike.mulaw in Resources */ = {isa = PBXBuildFile; fileRef = DC828F5E22F19D16007903CA /* whatstheweatherlike.mulaw */; };
+		DC828F6222F1AE71007903CA /* whatstheweatherlike.alaw in Resources */ = {isa = PBXBuildFile; fileRef = DC828F5C22F19D16007903CA /* whatstheweatherlike.alaw */; };
+		DC828F6322F1AE74007903CA /* whatstheweatherlike.flac in Resources */ = {isa = PBXBuildFile; fileRef = DC828F5D22F19D16007903CA /* whatstheweatherlike.flac */; };
+		DC828F6422F1AE79007903CA /* whatstheweatherlike.mulaw in Resources */ = {isa = PBXBuildFile; fileRef = DC828F5E22F19D16007903CA /* whatstheweatherlike.mulaw */; };
 		DCC9A0A722672F7D007939A0 /* GStreamerWrapper.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		DCC9A0A922672FFE007939A0 /* GStreamerWrapper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */; };
 		DCF1E29222E1CC4E00FA9F3E /* SPXTestHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */; };
@@ -61,7 +65,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				DC27A3F2225F7F9300BD9FE0 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */,
 				DCC9A0A722672F7D007939A0 /* GStreamerWrapper.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -92,11 +95,14 @@
 		3CCD06D32157F71E00A348DB /* dummytest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dummytest.h; path = ../../shared/dummytest.h; sourceTree = "<group>"; };
 		3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
 		DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "wreck-a-nice-beach.wav"; path = "../../../input/audio/wreck-a-nice-beach.wav"; sourceTree = "<group>"; };
-		DC68200522A960C200AD8EA4 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
 		DC27A3F62260996200BD9FE0 /* Margarita-44100.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "Margarita-44100.wav"; path = "../../../../input/audio/Margarita-44100.wav"; sourceTree = "<group>"; };
 		DC419443225B6F2300F95B2F /* CompressedStreamsTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = CompressedStreamsTest.m; path = ../../shared/testrunners/CompressedStreamsTest.m; sourceTree = "<group>"; };
 		DC419445225B779C00F95B2F /* whatstheweatherlike.opus */ = {isa = PBXFileReference; lastKnownFileType = file; name = whatstheweatherlike.opus; path = ../../../input/audio/whatstheweatherlike.opus; sourceTree = "<group>"; };
 		DC419446225B779C00F95B2F /* whatstheweatherlike.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = whatstheweatherlike.mp3; path = ../../../input/audio/whatstheweatherlike.mp3; sourceTree = "<group>"; };
+		DC68200522A960C200AD8EA4 /* silenceshort.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = silenceshort.wav; path = ../../../input/audio/silenceshort.wav; sourceTree = "<group>"; };
+		DC828F5C22F19D16007903CA /* whatstheweatherlike.alaw */ = {isa = PBXFileReference; lastKnownFileType = file; name = whatstheweatherlike.alaw; path = ../../../input/audio/whatstheweatherlike.alaw; sourceTree = "<group>"; };
+		DC828F5D22F19D16007903CA /* whatstheweatherlike.flac */ = {isa = PBXFileReference; lastKnownFileType = file; name = whatstheweatherlike.flac; path = ../../../input/audio/whatstheweatherlike.flac; sourceTree = "<group>"; };
+		DC828F5E22F19D16007903CA /* whatstheweatherlike.mulaw */ = {isa = PBXFileReference; lastKnownFileType = file; name = whatstheweatherlike.mulaw; path = ../../../input/audio/whatstheweatherlike.mulaw; sourceTree = "<group>"; };
 		DCC1352E225E182E00194047 /* SPXSpeechRecognitionEndtoEndTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPXSpeechRecognitionEndtoEndTest.h; path = ../../shared/testrunners/SPXSpeechRecognitionEndtoEndTest.h; sourceTree = "<group>"; };
 		DCC9A0A22267260C007939A0 /* GStreamerWrapper.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GStreamerWrapper.framework; path = "../../../../xcode-build-output/GStreamerWrapper.framework"; sourceTree = "<group>"; };
 		DCF1E29122E1CC4E00FA9F3E /* SPXTestHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SPXTestHelpers.m; path = ../../shared/testrunners/SPXTestHelpers.m; sourceTree = "<group>"; };
@@ -113,7 +119,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DC27A3F5225F881500BD9FE0 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,6 +137,9 @@
 		3CA6CF7D211F471500CD2768 = {
 			isa = PBXGroup;
 			children = (
+				DC828F5C22F19D16007903CA /* whatstheweatherlike.alaw */,
+				DC828F5D22F19D16007903CA /* whatstheweatherlike.flac */,
+				DC828F5E22F19D16007903CA /* whatstheweatherlike.mulaw */,
 				DC68200522A960C200AD8EA4 /* silenceshort.wav */,
 				DC15EE9C22676E5F00991304 /* wreck-a-nice-beach.wav */,
 				3CCD06D82157F77D00A348DB /* MicrosoftCognitiveServicesSpeech.framework */,
@@ -290,8 +298,11 @@
 				DC419449225B77BF00F95B2F /* whatstheweatherlike.mp3 in Resources */,
 				DC41944A225B77BF00F95B2F /* whatstheweatherlike.opus in Resources */,
 				3CC3789C2121CFD600F07A66 /* whatstheweatherlike.wav in Resources */,
+				DC828F6022F19D16007903CA /* whatstheweatherlike.flac in Resources */,
 				3CA6CF96211F471600CD2768 /* LaunchScreen.storyboard in Resources */,
+				DC828F5F22F19D16007903CA /* whatstheweatherlike.alaw in Resources */,
 				3CA6CF93211F471600CD2768 /* Assets.xcassets in Resources */,
+				DC828F6122F19D16007903CA /* whatstheweatherlike.mulaw in Resources */,
 				DC27A3F72260996200BD9FE0 /* Margarita-44100.wav in Resources */,
 				3C5D93EC2146856B000C7129 /* TurnOnTheLamp.wav in Resources */,
 				3CA6CF91211F471500CD2768 /* Main.storyboard in Resources */,
@@ -302,10 +313,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC828F6222F1AE71007903CA /* whatstheweatherlike.alaw in Resources */,
 				DC15EE9E22676E7D00991304 /* wreck-a-nice-beach.wav in Resources */,
+				DC828F6322F1AE74007903CA /* whatstheweatherlike.flac in Resources */,
 				F3EABAD22163B3E200BA4B2C /* whatstheweatherlike.wav in Resources */,
 				F3C06E3C216E4737003989B2 /* TurnOnTheLamp.wav in Resources */,
 				DC68200722A960C200AD8EA4 /* silenceshort.wav in Resources */,
+				DC828F6422F1AE79007903CA /* whatstheweatherlike.mulaw in Resources */,
 				DC419447225B779C00F95B2F /* whatstheweatherlike.opus in Resources */,
 				DC419448225B779C00F95B2F /* whatstheweatherlike.mp3 in Resources */,
 				DC27A3F82260996200BD9FE0 /* Margarita-44100.wav in Resources */,

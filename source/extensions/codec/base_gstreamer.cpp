@@ -52,11 +52,13 @@ void BaseGstreamer::UnrefObject(gpointer *elem)
 {
     if (elem != nullptr && *elem != nullptr)
     {
-        gst_object_unref(*elem);
-        *elem = nullptr;
+        if (gst_element_get_parent(*elem) == nullptr)
+        {
+            gst_object_unref(*elem);
+            *elem = nullptr;
+        }
     }
 }
-
 
 void BaseGstreamer::ThrowAfterClean(bool cond, uint32_t errCode, const char* pszFormat)
 {

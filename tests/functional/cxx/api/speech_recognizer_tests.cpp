@@ -109,6 +109,15 @@ TEST_CASE("compressed stream test", "[api][cxx]")
     weatheropus.UpdateFullFilename(Config::InputDir);
     REQUIRE(exists(weatheropus.m_inputDataFilename));
 
+    weatheralaw.UpdateFullFilename(Config::InputDir);
+    REQUIRE(exists(weatheralaw.m_inputDataFilename));
+
+    weathermulaw.UpdateFullFilename(Config::InputDir);
+    REQUIRE(exists(weathermulaw.m_inputDataFilename));
+
+    weatherflac.UpdateFullFilename(Config::InputDir);
+    REQUIRE(exists(weatherflac.m_inputDataFilename));
+
     SPXTEST_SECTION("push stream works mp3")
     {
         DoRecoFromCompressedPushStream(weathermp3, AudioStreamContainerFormat::MP3);
@@ -117,6 +126,21 @@ TEST_CASE("compressed stream test", "[api][cxx]")
     SPXTEST_SECTION("push stream works opus")
     {
         DoRecoFromCompressedPushStream(weatheropus, AudioStreamContainerFormat::OGG_OPUS);
+    }
+
+    SPXTEST_SECTION("push stream failed with FLAC")
+    {
+        DoRecoFromCompressedPushStream(weatherflac, AudioStreamContainerFormat::FLAC);
+    }
+
+    SPXTEST_SECTION("push stream failed with ALAW")
+    {
+        DoRecoFromCompressedPushStream(weatheralaw, AudioStreamContainerFormat::ALAW);
+    }
+
+    SPXTEST_SECTION("push stream failed with MULAW")
+    {
+        DoRecoFromCompressedPushStream(weathermulaw, AudioStreamContainerFormat::MULAW);
     }
 
     SPXTEST_SECTION("pull stream works mp3")
@@ -131,16 +155,17 @@ TEST_CASE("compressed stream test", "[api][cxx]")
 
     SPXTEST_SECTION("pull stream failed with FLAC")
     {
-        try {
-            DoRecoFromCompressedPullStream(weathermp3, AudioStreamContainerFormat::FLAC);
-        }
-        catch (const std::exception& e)
-        {
-            std::string str(e.what());
-            std::string refException("Exception with an error code: 0x28 (SPXERR_CONTAINER_FORMAT_NOT_SUPPORTED_ERROR)");
-            CAPTURE(e.what());
-            SPXTEST_REQUIRE(str.find(refException) != string::npos);
-        }
+        DoRecoFromCompressedPullStream(weatherflac, AudioStreamContainerFormat::FLAC);
+    }
+
+    SPXTEST_SECTION("pull stream failed with ALAW")
+    {
+        DoRecoFromCompressedPullStream(weatheralaw, AudioStreamContainerFormat::ALAW);
+    }
+
+    SPXTEST_SECTION("pull stream failed with MULAW")
+    {
+        DoRecoFromCompressedPullStream(weathermulaw, AudioStreamContainerFormat::MULAW);
     }
 }
 

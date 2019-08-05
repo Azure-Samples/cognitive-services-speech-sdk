@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 #include "codec_adapter.h"
-#include "mpeg_decoder.h"
+#include "audio_decoder.h"
 #include "opus_decoder.h"
 
 namespace Microsoft {
@@ -47,10 +47,28 @@ void CSpxCodecAdapter::Open(AudioStreamContainerFormat containerFormat)
         break;
 
     case AudioStreamContainerFormat::MP3:
-        m_gstObject = std::make_shared<MpegDecoder>(m_readCallback);
+        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::MP3);
         break;
 
     case AudioStreamContainerFormat::FLAC:
+        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::FLAC);
+        break;
+
+    case AudioStreamContainerFormat::ALAW:
+        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::ALAW);
+        break;
+
+    case AudioStreamContainerFormat::MULAW:
+        m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::MULAW);
+        break;
+
+    case AudioStreamContainerFormat::AMRNB:
+        //m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::AMRNB);
+        SPX_IFTRUE_THROW_HR(true, SPXERR_CONTAINER_FORMAT_NOT_SUPPORTED_ERROR);
+        break;
+
+    case AudioStreamContainerFormat::AMRWB:
+        //m_gstObject = std::make_shared<AudioDecoder>(m_readCallback, CodecsTypeInternal::AMRWB);
         SPX_IFTRUE_THROW_HR(true, SPXERR_CONTAINER_FORMAT_NOT_SUPPORTED_ERROR);
         break;
 
@@ -58,7 +76,6 @@ void CSpxCodecAdapter::Open(AudioStreamContainerFormat containerFormat)
         SPX_IFTRUE_THROW_HR(true, SPXERR_CONTAINER_FORMAT_NOT_SUPPORTED_ERROR);
         break;
     }
-
 }
 
 void CSpxCodecAdapter::SetFormat(SPXWAVEFORMATEX* format)

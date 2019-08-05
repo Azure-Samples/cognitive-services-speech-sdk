@@ -29,6 +29,16 @@ enum class PipelineCurrentState
     GST_PLAYING = 2
 };
 
+enum class CodecsTypeInternal
+{
+    OGG_OPUS = 0x101,
+    MP3 = 0x102,
+    FLAC = 0x103,
+    ALAW = 0x104,
+    MULAW = 0x105,
+    AMRNB = 0x106,
+    AMRWB = 0x107
+};
 
 class BaseGstreamer
 {

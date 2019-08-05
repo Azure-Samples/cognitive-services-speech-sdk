@@ -38,6 +38,6 @@ GSTREAMER_NDK_BUILD_PATH  := $(GSTREAMER_ROOT)/share/gst-android/ndk-build/
 include $(GSTREAMER_NDK_BUILD_PATH)/plugins.mk
 # the following list has to be maintained as the one in the source file $(SourceRoot)/source/extension/codec/base_gstreamer.cpp and 
 # $(SourceRoot)/source/extension/codec/base_gstreamer.h. Search for Android.mk in those files
-GSTREAMER_PLUGINS         :=  coreelements app audioconvert mpg123 audioresample audioparsers ogg opusparse opus
+GSTREAMER_PLUGINS         :=  coreelements app audioconvert mpg123 audioresample audioparsers ogg opusparse opus wavparse alaw mulaw flac amrnb amrwbdec
 GSTREAMER_EXTRA_LIBS      := -liconv
 include $(GSTREAMER_NDK_BUILD_PATH)/gstreamer-1.0.mk

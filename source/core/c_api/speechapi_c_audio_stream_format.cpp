@@ -19,6 +19,10 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 static_assert((int)AudioStreamContainerFormat::MP3 == (int)StreamFormat_Mp3, "AudioStreamContainerFormat should match between C and C++ layers");
 static_assert((int)AudioStreamContainerFormat::OGG_OPUS == (int)StreamFormat_Ogg_Opus, "AudioStreamContainerFormat should match between C and C++ layers");
 static_assert((int)AudioStreamContainerFormat::FLAC == (int)StreamFormat_Flac, "AudioStreamContainerFormat should match between C and C++ layers");
+static_assert((int)AudioStreamContainerFormat::ALAW == (int)StreamFormat_Alaw, "AudioStreamContainerFormat should match between C and C++ layers");
+static_assert((int)AudioStreamContainerFormat::MULAW == (int)StreamFormat_Mulaw, "AudioStreamContainerFormat should match between C and C++ layers");
+static_assert((int)AudioStreamContainerFormat::AMRNB == (int)StreamFormat_Amrnb, "AudioStreamContainerFormat should match between C and C++ layers");
+static_assert((int)AudioStreamContainerFormat::AMRWB == (int)StreamFormat_Amrwb, "AudioStreamContainerFormat should match between C and C++ layers");
 
 SPXAPI_(bool) audio_stream_format_is_handle_valid(SPXAUDIOSTREAMFORMATHANDLE hformat)
 {

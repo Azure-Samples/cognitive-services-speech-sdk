@@ -64,6 +64,18 @@ void recognizeSpeech(const std::string& compressedFileName)
     {
         inputFormat = AudioStreamContainerFormat::OGG_OPUS;
     }
+    else if (compressedFileName.find(".alaw") == (compressedFileName.size() - 5))
+    {
+        inputFormat = AudioStreamContainerFormat::ALAW;
+    }
+    else if (compressedFileName.find(".mulaw") == (compressedFileName.size() - 6))
+    {
+        inputFormat = AudioStreamContainerFormat::MULAW;
+    }
+    else if (compressedFileName.find(".flac") == (compressedFileName.size() - 5))
+    {
+        inputFormat = AudioStreamContainerFormat::FLAC;
+    }
     else
     {
         std::cout << "Only Opus and MP3 input files are currently supported" << std::endl;

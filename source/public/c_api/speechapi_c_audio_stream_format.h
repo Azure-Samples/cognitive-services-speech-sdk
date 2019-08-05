@@ -25,9 +25,29 @@ enum Audio_Stream_Container_Format
     StreamFormat_Mp3 = 0x102,
 
     /// <summary>
-    /// Stream ContainerFormat definition for FLAC. Not supported yet.
+    /// Stream ContainerFormat definition for FLAC. Added in version 1.7.0.
     /// </summary>
-    StreamFormat_Flac = 0x103
+    StreamFormat_Flac = 0x103,
+
+    /// <summary>
+    /// Stream ContainerFormat definition for ALAW. Added in version 1.7.0. 
+    /// </summary>
+    StreamFormat_Alaw = 0x104,
+
+    /// <summary>
+    /// Stream ContainerFormat definition for MULAW. Added in version 1.7.0. 
+    /// </summary>
+    StreamFormat_Mulaw = 0x105,
+
+    /// <summary>
+    /// Stream ContainerFormat definition for AMRNB. Currently not supported. 
+    /// </summary>
+    StreamFormat_Amrnb = 0x106,
+
+    /// <summary>
+    /// Stream ContainerFormat definition for AMRWB. Currently not supported. 
+    /// </summary>
+    StreamFormat_Amrwb = 0x107
 };
 
 typedef enum Audio_Stream_Container_Format Audio_Stream_Container_Format;

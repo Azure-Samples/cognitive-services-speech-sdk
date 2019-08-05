@@ -31,7 +31,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/create_module_object.h"
     "${SRC_DIR}/codec_adapter.h"
     "${SRC_DIR}/base_gstreamer.h"
-    "${SRC_DIR}/mpeg_decoder.h"
+    "${SRC_DIR}/audio_decoder.h"
     "${SRC_DIR}/opus_decoder.h"
     "${SRC_DIR}/gstreamer_modules.h"
     )
@@ -41,7 +41,7 @@ set(SOURCES
     "${SRC_DIR}/codec_adapter.cpp"
     "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/base_gstreamer.cpp"
-    "${SRC_DIR}/mpeg_decoder.cpp"
+    "${SRC_DIR}/audio_decoder.cpp"
     "${SRC_DIR}/opus_decoder.cpp"
     )
 

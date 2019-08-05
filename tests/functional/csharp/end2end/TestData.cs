@@ -188,6 +188,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string Utterance = "What's the weather like?";
             }
 
+            public static class WeatherFLAC
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "whatstheweatherlike.flac");
+                public static readonly string Utterance = "What's the weather like?";
+            }
+
+            public static class WeatherALAW
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "whatstheweatherlike.alaw");
+                public static readonly string Utterance = "What's the weather like?";
+            }
+
+            public static class WeatherMULAW
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "whatstheweatherlike.mulaw");
+                public static readonly string Utterance = "What's the weather like?";
+            }
+
             public static class TranscriberAudioData
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "RecordedAudioMessages.json");

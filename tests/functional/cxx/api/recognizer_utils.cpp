@@ -15,6 +15,9 @@ TestData weather {"/audio/whatstheweatherlike.wav", "What's the weather like?" }
 TestData weatherGerman { "", "Wie ist das Wetter?" };
 TestData weathermp3{ "/audio/whatstheweatherlike.mp3", "What's the weather like?" };
 TestData weatheropus{ "/audio/whatstheweatherlike.opus", "What's the weather like?" };
+TestData weatheralaw{ "/audio/whatstheweatherlike.alaw", "What's the weather like?" };
+TestData weathermulaw{ "/audio/whatstheweatherlike.mulaw", "What's the weather like?" };
+TestData weatherflac{ "/audio/whatstheweatherlike.flac", "What's the weather like?" };
 TestData batman{ "/audio/batman.wav", "" };
 TestData wrongSamplingRateFile {"/audio/11khztest.wav", "" };
 TestData cortana {"/audio/heyCortana.wav", "Hey Cortana," };
