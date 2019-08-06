@@ -162,6 +162,13 @@ private:
 
     uint64_t getTimestamp();
     std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> m_threadService;
+
+    std::unordered_map<std::string, SpeechPhraseMsg> m_id_phrase_msg_map;
+    std::unordered_map<std::string, SpeechHypothesisMsg> m_id_hypothesis_msg_map;
+    void SavePhraseMsg(const nlohmann::json& json, const SpeechPhraseMsg& msg);
+    void SaveHypothesisMsg(const nlohmann::json& json, const SpeechHypothesisMsg& msg);
+
+    std::unordered_map<std::string, TranslationResult> RetrieveTranslationResults(const nlohmann::json& json, const std::string relationPath);
 };
 
 }}}}

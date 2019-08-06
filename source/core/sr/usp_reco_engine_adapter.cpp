@@ -1214,6 +1214,13 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
     {
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
+    else if (m_endpointType == USP::EndpointType::Translation)
+    {
+        // New translator endpoint sends speech hypothesis before translation response
+        // We only fire result when translation response is recieved, so do nothing here.
+        // This is because TranslationRecognizor doesn't have a Translating event.
+        // The Recognizing event is for both recognized and translation text.
+    }
     else if (IsState(UspState::WaitingForPhrase))
     {
         SPX_DBG_TRACE_VERBOSE("%s: site->FireAdapterResult_Intermediate()", __FUNCTION__);
@@ -1332,6 +1339,13 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
     if (IsBadState())
     {
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, (void*)this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
+    }
+    else if (m_endpointType == USP::EndpointType::Translation)
+    {
+        // New translator endpoint sends speech phrase before translation response.
+        // We fire result only when translation response is recieved, so do nothing here.
+        // This is because TranslationRecognizor doesn't have a Translated event.
+        // The Recognized event is  for both recognized and translation text.
     }
     else if (m_expectIntentResponse &&
              message.recognitionStatus == USP::RecognitionStatus::Success &&

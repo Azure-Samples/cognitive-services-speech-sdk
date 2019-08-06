@@ -1163,12 +1163,14 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
 
             if (path == path::speechHypothesis)
             {
+                SpeechHypothesisMsg result(PAL::ToWString(json.dump()),
+                    offset,
+                    duration,
+                    PAL::ToWString(text),
+                    PAL::ToWString(speaker));
+                connection->SaveHypothesisMsg(json, result);
                 connection->Invoke([&] {
-                    callbacks->OnSpeechHypothesis({PAL::ToWString(json.dump()),
-                                                   offset,
-                                                   duration,
-                                                   PAL::ToWString(text),
-                                                   PAL::ToWString(speaker)});
+                    callbacks->OnSpeechHypothesis(result);
                 });
             }
             else
@@ -1213,6 +1215,8 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                         result.displayText = PAL::ToWString(phrases[0].at(json_properties::display).get<string>());
                     }
                 }
+
+                connection->SavePhraseMsg(json, result);
                 connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
                 break;
             case RecognitionStatus::InitialSilenceTimeout:
@@ -1226,6 +1230,8 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 break;
             }
         }
+        // TODO: after new translation endpoint is deployed,  remove translationHypothesis, translationPhrase and translationPhraseEnd path related code
+        // These messages will be replaced by translationResponse message
         else if (path == path::translationHypothesis)
         {
             auto speechResult = RetrieveSpeechResult(json);
@@ -1369,6 +1375,45 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
 
             connection->Invoke([&] { callbacks->OnAudioOutputMetadata(msg); });
         }
+        else if (path == path::translationResponse)
+        {
+            if (json.find(json_properties::interims) != json.end())
+            {
+                LogInfo("Processing interim results for translation response.");
+                auto interimResult = json[json_properties::interims];
+                auto results = connection->RetrieveTranslationResults(interimResult, path::speechHypothesis);
+                for (auto& pair : results)
+                {
+                    auto& hypothesisMsg = connection->m_id_hypothesis_msg_map.at(pair.first);
+                    connection->Invoke([&] {
+                        callbacks->OnTranslationHypothesis({PAL::ToWString(interimResult.dump()),
+                                                            hypothesisMsg.offset,
+                                                            hypothesisMsg.duration,
+                                                            hypothesisMsg.text,
+                                                            pair.second });
+                    });
+                }
+            }            
+            if (json.find(json_properties::phrases) != json.end())
+            {
+                LogInfo("Processing phrase results for translation response.");
+                auto phraseResult = json[json_properties::phrases];
+                auto results = connection->RetrieveTranslationResults(phraseResult, path::speechPhrase);
+                for (auto& pair : results)
+                {
+
+                        auto& phraseMsg = connection->m_id_phrase_msg_map.at(pair.first);
+                        connection->Invoke([&] {
+                            callbacks->OnTranslationPhrase({PAL::ToWString(phraseResult.dump()),
+                                                            phraseMsg.offset,
+                                                            phraseMsg.duration,
+                                                            phraseMsg.displayText,
+                                                            pair.second,
+                                                            phraseMsg.recognitionStatus });
+                        });
+                }
+            }
+        }
         else
         {
             connection->Invoke([&] {
@@ -1429,6 +1474,97 @@ void Connection::Impl::InvokeRecognitionErrorCallback(RecognitionStatus status, 
     }
 
     this->Invoke([&] { callbacks->OnError(false, error, msg.c_str()); });
+}
+
+std::unordered_map<std::string, TranslationResult> Connection::Impl::RetrieveTranslationResults(const nlohmann::json& json, const std::string relationPath)
+{
+    std::unordered_map<std::string, TranslationResult> translationResults;
+    for (const auto& result : json)
+    {
+        std::string id;
+        auto relations = result.at(json_properties::relations);
+        for (const auto& relation : relations)
+        {
+            if (relation.at(json_properties::type) == relationPath)
+            {
+                id = relation.at(json_properties::id).get<string>();
+                break;
+            }
+        }
+
+        if (id.empty())
+        {
+            PROTOCOL_VIOLATION("Translation response doesn't have id for %s", relationPath.c_str());
+            continue;
+        }
+
+        bool idExists = false;
+        if (relationPath == path::speechPhrase) {
+            idExists = m_id_phrase_msg_map.count(id) > 0;
+        }
+        else
+        {
+            idExists = m_id_hypothesis_msg_map.count(id) > 0;
+        }
+        if (!idExists)
+        {
+            PROTOCOL_VIOLATION("%s doesn't correspond to any %s message", id.c_str(), relationPath.c_str());
+            continue;
+        }
+
+        TranslationResult translationResult;
+        // This method is only called to parse results from new translator endopint,
+        // which always incidcates success if there is translation response
+        // It will send error through USP if translation fails
+        translationResult.translationStatus = TranslationStatus::Success;
+
+        auto translations = result.at(json_properties::translations);
+        for (const auto& translation : translations)
+        {
+            auto lang = translation.at(json_properties::lang).get<string>();
+            auto txt = translation.at(json_properties::displayText).get<string>();
+            if (lang.empty() && txt.empty())
+            {
+                PROTOCOL_VIOLATION("Emtpy language and text field in translations text. lang=%s, text=%s.", lang.c_str(), txt.c_str());
+                continue;
+            }
+            translationResult.translations[PAL::ToWString(lang)] = PAL::ToWString(txt);
+        }
+        if (!translationResult.translations.size())
+        {
+            PROTOCOL_VIOLATION("No Translations text block in the message for %s id %s. Response text: %s", relationPath.c_str(), id.c_str(), json.dump().c_str());
+            continue;
+        }
+        translationResults[id] = move(translationResult);
+    }
+
+    return translationResults;
+}
+
+void Connection::Impl::SavePhraseMsg(const nlohmann::json& json, const SpeechPhraseMsg& msg)
+{
+    if (json.find(json_properties::id) != json.end())
+    {
+        auto id = json[json_properties::id].get<string>();
+        LogInfo("Saved speech phrase message with id %s.", id.c_str());
+        if (m_id_phrase_msg_map.count(id) == 0)
+        {
+            m_id_phrase_msg_map[id] = msg;
+        }
+    }
+}
+
+void Connection::Impl::SaveHypothesisMsg(const nlohmann::json& json, const SpeechHypothesisMsg& msg)
+{
+    if (json.find(json_properties::id) != json.end())
+    {
+        auto id = json[json_properties::id].get<string>();
+        LogInfo("Saved speech hypothesis message with id %s.", id.c_str());
+        if (m_id_hypothesis_msg_map.count(id) == 0)
+        {
+            m_id_hypothesis_msg_map[id] = msg;
+        }
+    }
 }
 
 void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword)
