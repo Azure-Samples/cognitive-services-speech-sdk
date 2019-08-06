@@ -18,11 +18,25 @@
             <artifactId>client-sdk</artifactId>
             <version>1.6.0</version> 
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.bot.builder</groupId>
+            <artifactId>botbuilder</artifactId>
+            <version>4.0.0-a0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.8.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+            <version>2.8.3</version>
         </dependency>
     </dependencies>
     <build>

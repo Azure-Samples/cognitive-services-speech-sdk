@@ -51,7 +51,7 @@ public class VirtualAssistantTests {
     public static void setupBeforeClass() {
         String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
         System.out.println("Current operation system: " + operatingSystem);
-        boolean isMac = operatingSystem.contains("mac") || operatingSystem.contains("darwin"); 
+        boolean isMac = operatingSystem.contains("mac") || operatingSystem.contains("darwin");
         org.junit.Assume.assumeFalse(isMac);
         Settings.LoadSettings();
     }
@@ -98,7 +98,7 @@ public class VirtualAssistantTests {
             }
         } finally {
             // disconnect from the backing dialog.
-            dialogServiceConnector.disconnectAsync();
+            dialogServiceConnector.close();
         }
     }
 
@@ -131,7 +131,7 @@ public class VirtualAssistantTests {
 
         } finally {
             // disconnect backing dialog.
-            dialogServiceConnector.disconnectAsync();
+            dialogServiceConnector.close();
         }
     }
 

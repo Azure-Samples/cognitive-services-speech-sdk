@@ -8,6 +8,7 @@ import java.io.Closeable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
@@ -27,7 +28,7 @@ public class DialogServiceConnector implements Closeable {
 
     /*! \cond PROTECTED */
     static Class<?> dialogServiceConnector = null;
-    private static ExecutorService executorService;
+    private ExecutorService executorService;
 
     // load the native library.
     static {
@@ -39,7 +40,6 @@ public class DialogServiceConnector implements Closeable {
             throw new IllegalStateException(ex);
         }
         dialogServiceConnector = DialogServiceConnector.class;
-        executorService = Executors.newCachedThreadPool();
     }
 
     /*! \endcond */
@@ -64,6 +64,7 @@ public class DialogServiceConnector implements Closeable {
         } else {
             this.dialogServiceConnectorImpl = com.microsoft.cognitiveservices.speech.internal.DialogServiceConnector.FromConfig(config.getConfigImpl(), audioConfig.getConfigImpl());
         }
+
         initialize();
     }
 
@@ -180,6 +181,8 @@ public class DialogServiceConnector implements Closeable {
     /*! \cond PROTECTED */
     private void initialize() {
         final DialogServiceConnector _this = this;
+
+        executorService = Executors.newCachedThreadPool();
 
         recognizingHandler = new RecoEventHandlerImpl(this, /* isRecognizedHandler */ false);
         this.recognizing.updateNotificationOnConnected(new Runnable(){
@@ -364,18 +367,28 @@ public class DialogServiceConnector implements Closeable {
             return;
         }
         if (disposing) {
-            if (this.recognizing.isUpdateNotificationOnConnectedFired())
+
+            // Trigger graceful shutdown of executor service
+            executorService.shutdown();
+
+            if (this.recognizing.isUpdateNotificationOnConnectedFired()) {
                 dialogServiceConnectorImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-            if (this.recognized.isUpdateNotificationOnConnectedFired())
+            }
+            if (this.recognized.isUpdateNotificationOnConnectedFired()) {
                 dialogServiceConnectorImpl.getRecognized().RemoveEventListener(recognizedHandler);
-            if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
+            }
+            if (this.sessionStarted.isUpdateNotificationOnConnectedFired()) {
                 dialogServiceConnectorImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
-            if (this.sessionStopped.isUpdateNotificationOnConnectedFired())
+            }
+            if (this.sessionStopped.isUpdateNotificationOnConnectedFired()) {
                 dialogServiceConnectorImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-            if (this.canceled.isUpdateNotificationOnConnectedFired())
+            }
+            if (this.canceled.isUpdateNotificationOnConnectedFired()) {
                 dialogServiceConnectorImpl.getCanceled().RemoveEventListener(canceledHandler);
-            if (this.activityReceived.isUpdateNotificationOnConnectedFired())
+            }
+            if (this.activityReceived.isUpdateNotificationOnConnectedFired()) {
                 dialogServiceConnectorImpl.getActivityReceived().RemoveEventListener(activityReceivedHandler);
+            }
 
             recognizingHandler.delete();
             recognizedHandler.delete();
@@ -383,10 +396,13 @@ public class DialogServiceConnector implements Closeable {
             sessionStoppedHandler.delete();
             canceledHandler.delete();
             activityReceivedHandler.delete();
-
             dialogServiceConnectorImpl.delete();
-
             _dialogServiceConnectorObjects.remove(this);
+
+            // If the executor service has not been shut down, force shut down
+            if (!executorService.isShutdown()) {
+                executorService.shutdownNow();
+            }
             disposed = true;
         }
     }
