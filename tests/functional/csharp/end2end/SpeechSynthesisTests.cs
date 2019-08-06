@@ -981,8 +981,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     CheckResult(result1);
                     CheckResult(result2);
 
-                    var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
-                    var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
+                    var expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DefaultLanguage, DefaultVoice);
+                    var expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DefaultLanguage, DefaultVoice);
 
                     CheckBinaryEqual(expectedAudioData1, result1.AudioData);
                     CheckBinaryEqual(expectedAudioData2, result2.AudioData);
@@ -1004,8 +1004,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         CheckResult(result1);
                         CheckResult(result2);
 
-                        var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
-                        var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
+                        var expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DefaultLanguage, DefaultVoice);
+                        var expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DefaultLanguage, DefaultVoice);
 
                         CheckBinaryEqual(expectedAudioData1, result1.AudioData);
                         CheckBinaryEqual(expectedAudioData2, result2.AudioData);
@@ -1027,8 +1027,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     CheckResult(result1);
                     CheckResult(result2);
 
-                    var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
-                    var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
+                    var expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
+                    var expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
 
                     CheckBinaryEqual(expectedAudioData1, result1.AudioData);
                     CheckBinaryEqual(expectedAudioData2, result2.AudioData);
@@ -1049,8 +1049,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     CheckResult(result1);
                     CheckResult(result2);
 
-                    var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
-                    var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
+                    var expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DefaultLanguage, "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
+                    var expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DefaultLanguage, "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
 
                     CheckBinaryEqual(expectedAudioData1, result1.AudioData);
                     CheckBinaryEqual(expectedAudioData2, result2.AudioData);
@@ -1192,7 +1192,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Assert.AreEqual(GuidLength, result1.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result1.Reason, "The synthesis should be completed now.");
 
-                    var expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice);
+                    var expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DefaultLanguage, DefaultVoice);
                     CheckBinaryEqual(expectedAudioData1, result1.AudioData);
                 }
 
@@ -1202,7 +1202,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Assert.AreEqual(GuidLength, result2.ResultId.Length, "The length of result ID should be the length of a GUID (32).");
                     Assert.AreEqual(ResultReason.SynthesizingAudioCompleted, result2.Reason, "The synthesis should be completed now.");
 
-                    var expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice);
+                    var expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DefaultLanguage, DefaultVoice);
                     CheckBinaryEqual(expectedAudioData2, result2.AudioData);
                 }
             }
@@ -1228,15 +1228,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     resultReasonList.Add(e.Result.Reason);
 
                     var audioLength = e.Result.AudioData.Length;
-                    audioLengthList.Add(audioLength);
+                    audioLengthList.Add(audioLength - (int)EmptyWaveFileSize);
 
-                    byte[] expectedAudioChunk = new byte[audioLength];
-                    Array.Copy(expectedAudioData12, offset, expectedAudioChunk, 0, audioLength);
+                    byte[] expectedAudioChunk = new byte[audioLength - EmptyWaveFileSize];
+                    Array.Copy(expectedAudioData12, offset, expectedAudioChunk, 0, audioLength - EmptyWaveFileSize);
                     expectedAudioChunkList.Add(expectedAudioChunk);
 
-                    audioChunkList.Add(e.Result.AudioData);
+                    byte[] rawAudioData = new byte[audioLength - EmptyWaveFileSize];
+                    Array.Copy(e.Result.AudioData, EmptyWaveFileSize, rawAudioData, 0, rawAudioData.Length);
+                    audioChunkList.Add(rawAudioData);
 
-                    offset += audioLength;
+                    offset += rawAudioData.Length;
                 };
 
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering
@@ -1663,6 +1665,48 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        private byte[] BuildRiffHeader(int dataSize)
+        {
+            var isFloatingPoint = false;
+            ushort channelCount = 1; 
+            ushort bitDepth = 16;
+            int sampleRate = 16000;
+
+            MemoryStream stream = new MemoryStream {Position = 0};
+            // RIFF header.
+            // Chunk ID.
+            stream.Write(Encoding.ASCII.GetBytes("RIFF"), 0, 4);
+            // Chunk size.
+            stream.Write(BitConverter.GetBytes(dataSize + 38), 0, 4);
+            // Format.
+            stream.Write(Encoding.ASCII.GetBytes("WAVE"), 0, 4);
+            // Sub-chunk 1.
+            // Sub-chunk 1 ID.
+            stream.Write(Encoding.ASCII.GetBytes("fmt "), 0, 4);
+            // Sub-chunk 1 size.
+            stream.Write(BitConverter.GetBytes(18), 0, 4);
+            // Audio format (floating point (3) or PCM (1)). Any other format indicates compression.
+            stream.Write(BitConverter.GetBytes((ushort)(isFloatingPoint ? 3 : 1)), 0, 2);
+            // Channels.
+            stream.Write(BitConverter.GetBytes(channelCount), 0, 2);
+            // Sample rate.
+            stream.Write(BitConverter.GetBytes(sampleRate), 0, 4);
+            // Bytes rate.
+            stream.Write(BitConverter.GetBytes(sampleRate * channelCount * (bitDepth / 8)), 0, 4);
+            // Block align.
+            stream.Write(BitConverter.GetBytes((ushort)channelCount * (bitDepth / 8)), 0, 2);
+            // Bits per sample.
+            stream.Write(BitConverter.GetBytes(bitDepth), 0, 2);
+            // cbSize
+            stream.Write(BitConverter.GetBytes(0), 0, 2);
+            // Sub-chunk 2.
+            // Sub-chunk 2 ID.
+            stream.Write(Encoding.ASCII.GetBytes("data"), 0, 4);
+            // Sub-chunk 2 size.
+            stream.Write(BitConverter.GetBytes(dataSize), 0, 4);
+
+            return stream.ToArray();
+        }
         private byte[] BuildMockSynthesizedAudio(string text, string language, string voice)
         {
             var ssml = BuildSsml(text, language, voice);
@@ -1677,12 +1721,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 audio[i * 2 + 1] = (byte)((ushort)(y * 16384) / 256);
             }
 
-            for (int i = 0; i < ssmlBytes.Length; ++i)
-            {
-                audio[MockAudioSize + i] = ssmlBytes[i];
-            }
+            Array.Copy(ssmlBytes, 0, audio, MockAudioSize, ssmlBytes.Length);
 
             return audio;
+        }
+
+        private byte[] BuildMockSynthesizedAudioWithHeader(string text, string language, string voice)
+        {
+            var data = BuildMockSynthesizedAudio(text, language, voice);
+            return MergeBinary(BuildRiffHeader(data.Length), data);
         }
 
         private byte[] MergeBinary(byte[] binary1, byte[] binary2)

@@ -11,6 +11,7 @@
 #include "create_object_helpers.h"
 #include "property_id_2_name_map.h"
 #include "guid_utils.h"
+#include "synthesis_helper.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -73,6 +74,18 @@ std::shared_ptr<std::vector<uint8_t>> CSpxSynthesisResult::GetAudioData()
     return std::make_shared<std::vector<uint8_t>>(m_audiodata);
 }
 
+std::shared_ptr<std::vector<uint8_t>> CSpxSynthesisResult::GetRawAudioData()
+{
+    if (HasHeader())
+    {
+        return std::make_shared<std::vector<uint8_t>>(m_audiodata.begin() + m_headerLength, m_audiodata.end());
+    }
+    else
+    {
+        return GetAudioData();
+    }
+}
+
 std::shared_ptr<ISpxAudioDataStream> CSpxSynthesisResult::GetAudioDataStream()
 {
     return m_audioStream;
@@ -116,13 +129,6 @@ void CSpxSynthesisResult::InitSynthesisResult(const std::wstring& requestId, Res
     m_cancellationReason = cancellation;
     m_cancellationErrorCode = errorCode;
 
-    // Set audio data
-    if (audio_length > 0)
-    {
-        m_audiodata.resize(audio_length);
-        memcpy(m_audiodata.data(), audio_buffer, audio_length);
-    }
-
     // Set audio format
     if (format != nullptr)
     {
@@ -132,6 +138,25 @@ void CSpxSynthesisResult::InitSynthesisResult(const std::wstring& requestId, Res
 
         // Copy the format
         memcpy(m_audioformat.get(), format, formatSize);
+    }
+
+    // Set audio data
+    if (audio_length > 0)
+    {
+        m_headerLength = 0;
+        if (hasHeader)
+        {
+            auto headerVector = CSpxSynthesisHelper::BuildRiffHeader((uint32_t)audio_length, 0, m_audioformat);
+            m_headerLength = (uint32_t)headerVector->size();
+            m_audiodata.resize(m_headerLength + audio_length);
+            memcpy(m_audiodata.data(), headerVector->data(), m_headerLength);
+        }
+        else
+        {
+            m_audiodata.resize(audio_length);
+        }
+
+        memcpy(m_audiodata.data() + m_headerLength, audio_buffer, audio_length);
     }
 
     m_hasHeader = hasHeader;
@@ -163,6 +188,7 @@ void CSpxSynthesisResult::Reset()
     m_audiodata.clear();
     m_audioformat = nullptr;
     m_hasHeader = true;
+    m_headerLength = 0;
     m_audioStream = nullptr;
 }
 

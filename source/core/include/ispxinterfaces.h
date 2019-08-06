@@ -507,6 +507,7 @@ public:
     virtual CancellationErrorCode GetCancellationErrorCode() = 0;
     virtual uint32_t GetAudioLength() = 0;
     virtual std::shared_ptr<std::vector<uint8_t>> GetAudioData() = 0;
+    virtual std::shared_ptr<std::vector<uint8_t>> GetRawAudioData() = 0;
     virtual std::shared_ptr<ISpxAudioDataStream> GetAudioDataStream() = 0;
     virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
     virtual bool HasHeader() = 0;

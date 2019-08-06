@@ -13,9 +13,7 @@
 #include "platform.h"
 #include "file_utils.h"
 #include "wav_file_writer.h"
-
-
-#define BUFFERWRITE(buf, value) for (size_t i = 0; i < sizeof(value); ++i) { *buf = (uint8_t)((value >> (i * 8)) & 0xff); ++buf; }
+#include "synthesis_helper.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -85,7 +83,7 @@ uint32_t CSpxWavFileWriter::Write(uint8_t* buffer, uint32_t size)
 
     EnsureRiffHeader(); // Make sure the wave header is written to the file
 
-    m_file->seekg(0, WavFile_Type::end); // Seek to end of file
+    m_file->seekp(0, WavFile_Type::end); // Seek to end of file
     m_file->write((const char *)buffer, size); // Write the audio data
 
     m_nWrittenBytes += size;
@@ -119,67 +117,10 @@ void CSpxWavFileWriter::WriteRiffHeader(uint32_t cData, uint32_t cEventData)
 {
     SPX_IFTRUE_THROW_HR(!IsOpen(), SPXERR_UNINITIALIZED);
 
-    RIFFHDR riff(0);
-    BLOCKHDR block(0);
-    DATAHDR dataHdr(0);
+    auto headerVector = CSpxSynthesisHelper::BuildRiffHeader(cData, cEventData, m_format);
 
-    uint32_t cRiff = sizeof(riff);
-    uint32_t cBlock = sizeof(block);
-    uint32_t cWaveEx = 18 + m_format->cbSize; // use 18 for actual size to avoid compiler alignment difference.
-    uint32_t cDataHdr = sizeof(dataHdr);
-
-    uint32_t total = cRiff + cBlock + cWaveEx + cDataHdr;
-    if (m_format->wFormatTag == WAVE_FORMAT_SIREN)
-    {
-        total += 12;
-    }
-
-    if (cEventData > 0)
-    {
-        total += (8 + cEventData);
-    }
-
-    uint8_t tmpBuf[128];
-    uint8_t* p = tmpBuf;
-    // Write the RIFF section
-    riff._len = total + cData - 8/* - cRiff*/; // for the "WAVE" 4 characters
-    BUFFERWRITE(p, riff._id);
-    BUFFERWRITE(p, riff._len);
-    BUFFERWRITE(p, riff._type);
-
-    // Write the wave header section
-    block._len = cWaveEx;
-    BUFFERWRITE(p, block._id);
-    BUFFERWRITE(p, block._len);
-
-    // Write the FormatEx structure
-    BUFFERWRITE(p, m_format->wFormatTag);
-    BUFFERWRITE(p, m_format->nChannels);
-    BUFFERWRITE(p, m_format->nSamplesPerSec);
-    BUFFERWRITE(p, m_format->nAvgBytesPerSec);
-    BUFFERWRITE(p, m_format->nBlockAlign);
-    BUFFERWRITE(p, m_format->wBitsPerSample);
-    BUFFERWRITE(p, m_format->cbSize);
-
-    if (m_format->wFormatTag == WAVE_FORMAT_SIREN)
-    {
-        BUFFERWRITE(p, (uint16_t)320);
-        BUFFERWRITE(p, 'f');
-        BUFFERWRITE(p, 'a');
-        BUFFERWRITE(p, 'c');
-        BUFFERWRITE(p, 't');
-        BUFFERWRITE(p, (uint32_t)4);
-        uint32_t factSize = (cData * 320) / m_format->nBlockAlign;
-        BUFFERWRITE(p, factSize);
-    }
-
-    // Write the data section
-    dataHdr._len = cData;
-    BUFFERWRITE(p, dataHdr._id);
-    BUFFERWRITE(p, dataHdr._len);
-
-    m_file->seekg(0, WavFile_Type::beg);
-    m_file->write((const char *)tmpBuf, p - tmpBuf);
+    m_file->seekp(0, WavFile_Type::beg);
+    m_file->write((const char *)&headerVector->front(), headerVector->size());
 }
 
 void CSpxWavFileWriter::UpdateWaveBodySize(uint32_t size)
@@ -189,7 +130,7 @@ void CSpxWavFileWriter::UpdateWaveBodySize(uint32_t size)
     if (m_hasHeader)
     {
         WriteRiffHeader(size, 0);
-        m_file->seekg(0, WavFile_Type::end);
+        m_file->seekp(0, WavFile_Type::end);
     }
 }
 

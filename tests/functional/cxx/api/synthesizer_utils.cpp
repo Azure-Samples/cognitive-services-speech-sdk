@@ -217,6 +217,29 @@ namespace TTS
         return audioData;
     }
 
+    std::shared_ptr<std::vector<uint8_t>> BuildMockSynthesizedAudioWithHeader(const std::string& text, const std::string& language, const std::string& voice)
+    {
+        auto rawData = BuildMockSynthesizedAudio(text, language, voice);
+
+        uint8_t header[EMPTY_WAVE_FILE_SIZE] = { 82, 73, 70, 70, 0, 0, 0, 0, 87, 65, 86, 69, 102, 109, 116, 32, 18, 0, 0, 0, 1, 0, 1, 0, 128, 62, 0, 0, 0, 125, 0, 0, 2, 0, 16, 0, 0, 0, 100, 97, 116, 97, 0, 0, 0, 0 };
+        auto cData = (uint32_t)(rawData->size());
+        for (size_t i = 0; i < sizeof(cData); ++i)
+        {
+            *(header + 42 + i) = (uint8_t)((cData >> (i * 8)) & 0xff);
+        }
+        cData += 38;
+        for (size_t i = 0; i < sizeof(cData); ++i)
+        {
+            *(header + 4 + i) = (uint8_t)((cData >> (i * 8)) & 0xff);
+        }
+
+        auto audioData = std::make_shared<std::vector<uint8_t>>();
+        audioData->resize(EMPTY_WAVE_FILE_SIZE + rawData->size());
+        memcpy(audioData->data(), header, EMPTY_WAVE_FILE_SIZE);
+        memcpy(audioData->data() + EMPTY_WAVE_FILE_SIZE, rawData->data(), rawData->size());
+        return audioData;
+    }
+
     std::shared_ptr<std::vector<uint8_t>> MergeBinary(std::shared_ptr<std::vector<uint8_t>> binary1, std::shared_ptr<std::vector<uint8_t>> binary2)
     {
         auto mergedBinary = std::make_shared<std::vector<uint8_t>>();

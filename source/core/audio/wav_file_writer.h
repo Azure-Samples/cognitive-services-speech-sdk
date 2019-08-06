@@ -11,65 +11,6 @@
 #include "interface_helpers.h"
 
 
-typedef uint32_t UINT32;
-
-const UINT32 RIFF_MARKER = 0x46464952;
-const UINT32 WAVE_MARKER = 0x45564157;
-const UINT32 FMT_MARKER = 0x20746d66;
-const UINT32 DATA_MARKER = 0x61746164;
-const UINT32 EVNT_MARKER = 0x544e5645;
-
-struct RIFFHDR
-{
-    UINT32 _id;
-    UINT32 _len;              /* file length less header */
-    UINT32 _type;            /* should be "WAVE" */
-
-    RIFFHDR(UINT32 length)
-    {
-        _id = RIFF_MARKER;
-        _type = WAVE_MARKER;
-        _len = length;
-    }
-};
-
-struct BLOCKHDR
-{
-    UINT32 _id;              /* should be "fmt " or "data" */
-    UINT32 _len;              /* block size less header */
-
-    BLOCKHDR(int length)
-    {
-        _id = FMT_MARKER;
-        _len = length;
-    }
-};
-
-struct DATAHDR
-{
-    UINT32 _id;               /* should be "fmt " or "data" */
-    UINT32 _len;              /* block size less header */
-
-    DATAHDR(UINT32 length)
-    {
-        _id = DATA_MARKER;
-        _len = length;
-    }
-};
-
-struct EVNTHDR
-{
-    UINT32 _id;               /* should be "EVNT" */
-    UINT32 _len;              /* block size less header */
-
-    EVNTHDR(UINT32 length)
-    {
-        _id = EVNT_MARKER;
-        _len = length;
-    }
-};
-
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {

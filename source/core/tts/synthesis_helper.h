@@ -32,6 +32,67 @@
 #define SSML_TEMPLATE "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='%s'><voice name='%s'>%s</voice></speak>"
 #define SSML_BUFFER_SIZE 0x10000
 
+#define BUFFERWRITE(buf, value) for (size_t i = 0; i < sizeof(value); ++i) { *buf = (uint8_t)((value >> (i * 8)) & 0xff); ++buf; }
+
+typedef uint32_t UINT32;
+
+const UINT32 RIFF_MARKER = 0x46464952;
+const UINT32 WAVE_MARKER = 0x45564157;
+const UINT32 FMT_MARKER = 0x20746d66;
+const UINT32 DATA_MARKER = 0x61746164;
+const UINT32 EVNT_MARKER = 0x544e5645;
+
+struct RIFFHDR
+{
+    UINT32 _id;
+    UINT32 _len;              /* file length less header */
+    UINT32 _type;            /* should be "WAVE" */
+
+    RIFFHDR(UINT32 length)
+    {
+        _id = RIFF_MARKER;
+        _type = WAVE_MARKER;
+        _len = length;
+    }
+};
+
+struct BLOCKHDR
+{
+    UINT32 _id;              /* should be "fmt " or "data" */
+    UINT32 _len;              /* block size less header */
+
+    BLOCKHDR(int length)
+    {
+        _id = FMT_MARKER;
+        _len = length;
+    }
+};
+
+struct DATAHDR
+{
+    UINT32 _id;               /* should be "fmt " or "data" */
+    UINT32 _len;              /* block size less header */
+
+    DATAHDR(UINT32 length)
+    {
+        _id = DATA_MARKER;
+        _len = length;
+    }
+};
+
+struct EVNTHDR
+{
+    UINT32 _id;               /* should be "EVNT" */
+    UINT32 _len;              /* block size less header */
+
+    EVNTHDR(UINT32 length)
+    {
+        _id = EVNT_MARKER;
+        _len = length;
+    }
+};
+
+
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -485,6 +546,70 @@ public:
         }
 
         return errorCode;
+    }
+
+    static std::shared_ptr<std::vector<uint8_t>> BuildRiffHeader(uint32_t cData, uint32_t cEventData, SpxWAVEFORMATEX_Type audioFormat)
+    {
+        RIFFHDR riff(0);
+        BLOCKHDR block(0);
+        DATAHDR dataHdr(0);
+
+        uint32_t cRiff = sizeof(riff);
+        uint32_t cBlock = sizeof(block);
+        uint32_t cWaveEx = 18 + audioFormat->cbSize; // use 18 for actual size to avoid compiler alignment difference.
+        uint32_t cDataHdr = sizeof(dataHdr);
+
+        uint32_t total = cRiff + cBlock + cWaveEx + cDataHdr;
+        if (audioFormat->wFormatTag == WAVE_FORMAT_SIREN)
+        {
+            total += 12;
+        }
+
+        if (cEventData > 0)
+        {
+            total += (8 + cEventData);
+        }
+
+        uint8_t tmpBuf[128];
+        uint8_t* p = tmpBuf;
+        // Write the RIFF section
+        riff._len = total + cData - 8/* - cRiff*/; // for the "WAVE" 4 characters
+        BUFFERWRITE(p, riff._id);
+        BUFFERWRITE(p, riff._len);
+        BUFFERWRITE(p, riff._type);
+
+        // Write the wave header section
+        block._len = cWaveEx;
+        BUFFERWRITE(p, block._id);
+        BUFFERWRITE(p, block._len);
+
+        // Write the FormatEx structure
+        BUFFERWRITE(p, audioFormat->wFormatTag);
+        BUFFERWRITE(p, audioFormat->nChannels);
+        BUFFERWRITE(p, audioFormat->nSamplesPerSec);
+        BUFFERWRITE(p, audioFormat->nAvgBytesPerSec);
+        BUFFERWRITE(p, audioFormat->nBlockAlign);
+        BUFFERWRITE(p, audioFormat->wBitsPerSample);
+        BUFFERWRITE(p, audioFormat->cbSize);
+
+        if (audioFormat->wFormatTag == WAVE_FORMAT_SIREN)
+        {
+            BUFFERWRITE(p, (uint16_t)320);
+            BUFFERWRITE(p, 'f');
+            BUFFERWRITE(p, 'a');
+            BUFFERWRITE(p, 'c');
+            BUFFERWRITE(p, 't');
+            BUFFERWRITE(p, (uint32_t)4);
+            uint32_t factSize = (cData * 320) / audioFormat->nBlockAlign;
+            BUFFERWRITE(p, factSize);
+        }
+
+        // Write the data section
+        dataHdr._len = cData;
+        BUFFERWRITE(p, dataHdr._id);
+        BUFFERWRITE(p, dataHdr._len);
+
+        return std::make_shared<std::vector<uint8_t>>(tmpBuf, p);
     }
 };
 

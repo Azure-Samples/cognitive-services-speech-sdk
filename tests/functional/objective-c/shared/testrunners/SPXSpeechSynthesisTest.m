@@ -226,7 +226,7 @@
         audioLengthInDataStream += readSize;
         XCTAssertEqual(readSize, data.length, @"The returned length and buffer length should be equal.");
     }
-    XCTAssertEqual(audioLength, audioLengthInDataStream);
+    XCTAssertEqual(audioLength - emptyWaveFileSize, audioLengthInDataStream); // audio data in SPXSpeechSynthesisResult has a header while data in stream doesn't
 
     SPXSpeechSynthesisResult* result2 = [synthesizer SpeakText:@"{{{text2}}}"];
     [self checkResult:result2];
@@ -243,7 +243,7 @@
         audioLengthInDataStream += readSize;
         XCTAssertEqual(readSize, data.length, @"The returned length and buffer length should be equal.");
     }
-    XCTAssertEqual(audioLength, audioLengthInDataStream);
+    XCTAssertEqual(audioLength - emptyWaveFileSize, audioLengthInDataStream);
 }
 
 - (void)_testSpeakOutputInStreamsBeforeDoneFromEventSynthesisStarted {

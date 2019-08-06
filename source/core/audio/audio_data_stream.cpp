@@ -54,8 +54,8 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
     {
         // Shouldn't set for synthesizing event
         // Since the synthesizing event for current chunk will be fired immediately after this stream is created
-        auto audioData = result->GetAudioData();
-        Write(audioData->data(), (uint32_t)(audioData->size()));
+        auto audioData = result->GetRawAudioData();
+        Write(audioData->data(), (uint32_t)audioData->size());
     }
 
     if (result->GetReason() == ResultReason::SynthesizingAudioCompleted || result->GetReason() == ResultReason::Canceled)
@@ -89,10 +89,8 @@ void CSpxAudioDataStream::InitFromSynthesisResult(std::shared_ptr<ISpxSynthesisR
         // Update reason
         m_latestReason = result->GetReason();
 
-        auto audioData = result->GetAudioData();
-        auto data = audioData->data();
-        auto audioLength = (uint32_t)(e->GetResult()->GetAudioLength());
-        Write(data, audioLength);
+        auto audioData = result->GetRawAudioData();
+        Write(audioData->data(), (uint32_t)audioData->size());
     };
 
     m_pfnSynthesisStopped = [this](std::shared_ptr<ISpxSynthesisEventArgs> e) {

@@ -41,6 +41,7 @@ public:
     CancellationErrorCode GetCancellationErrorCode() override;
     uint32_t GetAudioLength() override;
     std::shared_ptr<std::vector<uint8_t>> GetAudioData() override;
+    std::shared_ptr<std::vector<uint8_t>> GetRawAudioData() override;
     std::shared_ptr<ISpxAudioDataStream> GetAudioDataStream() override;
     uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) override;
     bool HasHeader() override;
@@ -74,6 +75,7 @@ private:
     std::vector<uint8_t> m_audiodata;
     SpxWAVEFORMATEX_Type m_audioformat;
     bool m_hasHeader = true;
+    uint32_t m_headerLength = 0;
 
     std::shared_ptr<ISpxAudioDataStream> m_audioStream;
 };

@@ -187,6 +187,14 @@ TEST_CASE("Synthesizer output to file", "[api][cxx]")
     if (result1->Reason != ResultReason::Canceled)
     {
         SPXTEST_REQUIRE(waveSize1 > EMPTY_WAVE_FILE_SIZE);
+        ifstream file("wavefile.wav", ios::in | ios::binary | ios::ate);
+        SPXTEST_REQUIRE(file.is_open());
+
+        char headerBlock[EMPTY_WAVE_FILE_SIZE];
+        file.seekg(0, ios::beg);
+        file.read(headerBlock, EMPTY_WAVE_FILE_SIZE);
+        file.close();
+        SPXTEST_REQUIRE(0 == std::memcmp(headerBlock, "RIFF", 4));
     }
 
     synthesizer = SpeechSynthesizer::FromConfig(config, fileConfig);
@@ -283,7 +291,9 @@ TEST_CASE("Speak out in results", "[api][cxx]")
     if (result1->Reason != ResultReason::Canceled)
     {
         SPXTEST_REQUIRE(result1->Reason == ResultReason::SynthesizingAudioCompleted);
-        SPXTEST_REQUIRE(result1->GetAudioLength() > 0);
+        auto audioData = result1->GetAudioData();
+        SPXTEST_REQUIRE(audioData->size() > EMPTY_WAVE_FILE_SIZE);
+        SPXTEST_REQUIRE(0 == std::memcmp(&audioData->front(), "RIFF", 4));
     }
 
     auto audioData1 = result1->GetAudioData(); /* of type std::shared_ptr<std::vector<uint8_t>> */
@@ -483,14 +493,32 @@ TEST_CASE("Result data should be consistent with output stream data", "[api][cxx
     auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
 
     auto resultData = std::make_shared<std::vector<uint8_t>>();
-    resultData->resize(result->GetAudioLength());
-    memcpy(resultData->data(), result->GetAudioData()->data(), result->GetAudioLength());
+    // The audio data in result has a riff header while data in output stream dosen't
+    resultData->resize(result->GetAudioLength() - EMPTY_WAVE_FILE_SIZE);
+    memcpy(resultData->data(), result->GetAudioData()->data() + EMPTY_WAVE_FILE_SIZE, result->GetAudioLength() - EMPTY_WAVE_FILE_SIZE);
 
     result = nullptr;
     synthesizer = nullptr; // destruct synthesizer in order to close output stream
 
     bool canceled = false;
     DoSomethingWithAudioInPullStream(stream, canceled, resultData);
+}
+
+TEST_CASE("Synthesis with invalide subscription key", "[api][cxx]")
+{
+    auto config = SpeechConfig::FromSubscription("InvalidKey", Config::Region);
+
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+    bool synthesisCanceled = false;
+    synthesizer->SynthesisCanceled += [&synthesisCanceled](const SpeechSynthesisEventArgs& e) {
+        SPXTEST_REQUIRE(ResultReason::Canceled == e.Result->Reason);
+        SPXTEST_REQUIRE(0 == e.Result->GetAudioData()->size());
+        synthesisCanceled = true;
+    };
+    auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
+    SPXTEST_REQUIRE(ResultReason::Canceled == result->Reason);
+    SPXTEST_REQUIRE(0 == result->GetAudioData()->size());
+    SPXTEST_REQUIRE(synthesisCanceled);
 }
 
 TEST_CASE("Defaults - USP", "[api][cxx]")
@@ -878,8 +906,8 @@ TEST_CASE("Defaults - Mock", "[api][cxx]")
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has now completed rendering to default speakers */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has now completed rendering to default speakers */
 
-    auto expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
-    auto expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
+    auto expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
+    auto expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
 
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData1, result1->GetAudioData()));
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData2, result2->GetAudioData()));
@@ -894,8 +922,8 @@ TEST_CASE("Explicitly use default speakers - Mock", "[api][cxx]")
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has now completed rendering to default speakers */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has now completed rendering to default speakers */
 
-    auto expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
-    auto expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
+    auto expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
+    auto expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
 
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData1, result1->GetAudioData()));
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData2, result2->GetAudioData()));
@@ -910,8 +938,8 @@ TEST_CASE("Pick language - Mock", "[api][cxx]")
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has now completed rendering to default speakers */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has now completed rendering to default speakers */
 
-    auto expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
-    auto expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
+    auto expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
+    auto expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", "en-GB", "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
 
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData1, result1->GetAudioData()));
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData2, result2->GetAudioData()));
@@ -926,8 +954,8 @@ TEST_CASE("Pick voice - Mock", "[api][cxx]")
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has now completed rendering to default speakers */
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has now completed rendering to default speakers */
 
-    auto expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
-    auto expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
+    auto expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DEFAULT_LANGUAGE, "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
+    auto expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DEFAULT_LANGUAGE, "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
 
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData1, result1->GetAudioData()));
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData2, result2->GetAudioData()));
@@ -1040,13 +1068,13 @@ TEST_CASE("Speak out in results - Mock", "[api][cxx]")
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has completed rendering, and available in result1 */
     SPXTEST_REQUIRE(result1->ResultId.length() == GUID_LENGTH);
     SPXTEST_REQUIRE(result1->Reason == ResultReason::SynthesizingAudioCompleted);
-    auto expectedAudioData1 = BuildMockSynthesizedAudio("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
+    auto expectedAudioData1 = BuildMockSynthesizedAudioWithHeader("{{{text1}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData1, result1->GetAudioData()));
 
     auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has completed rendering, and available in result2 */
     SPXTEST_REQUIRE(result2->ResultId.length() == GUID_LENGTH);
     SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioCompleted);
-    auto expectedAudioData2 = BuildMockSynthesizedAudio("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
+    auto expectedAudioData2 = BuildMockSynthesizedAudioWithHeader("{{{text2}}}", DEFAULT_LANGUAGE, DEFAULT_VOICE);
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData2, result2->GetAudioData()));
 }
 
@@ -1065,9 +1093,9 @@ TEST_CASE("Speak output in chunks in event synthesizing - Mock", "[api][cxx]")
         auto resultReason = e.Result->Reason;
         SPXTEST_REQUIRE(resultReason == ResultReason::SynthesizingAudio);
 
-        auto audioLength = e.Result->GetAudioLength();
+        auto audioLength = e.Result->GetAudioLength() - EMPTY_WAVE_FILE_SIZE;
         auto audioData = e.Result->GetAudioData();
-        auto binaryEqual = AreBinaryEqual(expectedAudioData12->data() + offset, audioLength, audioData->data(), audioLength);
+        auto binaryEqual = AreBinaryEqual(expectedAudioData12->data() + offset, audioLength, audioData->data() + EMPTY_WAVE_FILE_SIZE, audioLength);
         SPXTEST_REQUIRE(binaryEqual == true);
 
         offset += audioLength;

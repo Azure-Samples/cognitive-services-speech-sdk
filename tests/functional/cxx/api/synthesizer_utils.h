@@ -68,6 +68,8 @@ namespace TTS
 
     std::shared_ptr<std::vector<uint8_t>> BuildMockSynthesizedAudio(const std::string& text, const std::string& language, const std::string& voice);
 
+    std::shared_ptr<std::vector<uint8_t>> BuildMockSynthesizedAudioWithHeader(const std::string& text, const std::string& language, const std::string& voice);
+
     std::shared_ptr<std::vector<uint8_t>> MergeBinary(std::shared_ptr<std::vector<uint8_t>> binary1, std::shared_ptr<std::vector<uint8_t>> binary2);
 
     std::shared_ptr<std::vector<uint8_t>> LoadWaveFileData(const std::string& waveFile);
