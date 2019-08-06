@@ -25,7 +25,7 @@ The [synthesis sample app](./synthesis-samples) shows various other techniques t
 ## Prerequisites
 
 - A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-- A Mac with Xcode 9.4.1 or later installed as iOS development environment. These samples target iOS versions 9.2 (12.2 for synthesis samples) or later.
+- A Mac with Xcode 9.4.1 or later installed as iOS development environment. These samples target iOS versions 9.3 or later.
 
 ## Get the code for the samples
 
@@ -44,7 +44,7 @@ This loads the project in Xcode.
 Next, add your subscription details to the `<sample name>/ViewController.m` file:
 
 1. Replace the string `YourSubscriptionKey` with your subscription key.
-1. Replace the string `YourServiceRegion` with the region associated with your subscription (for example, `westus` for the free trial subscription).
+2. Replace the string `YourServiceRegion` with the region associated with your subscription (for example, `westus` for the free trial subscription).
 
 To build the sample app and check if all the paths are set correctly, choose **Product** > **Build** from the menu.
 

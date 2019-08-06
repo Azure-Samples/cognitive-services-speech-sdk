@@ -5,7 +5,7 @@ This sample demonstrates how to create a iOS app in Objective-C using the Cognit
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A Mac with [Xcode](https://geo.itunes.apple.com/us/app/xcode/id497799835?mt=12) version 9.4.1 or later installed as iOS development environment. This tutorial targets iOS versions 12.2 or later.
+* A Mac with [Xcode](https://geo.itunes.apple.com/us/app/xcode/id497799835?mt=12) version 9.4.1 or later installed as iOS development environment. This tutorial targets iOS versions 9.3 or later.
 
 ## Get the Code for the Sample App
 
