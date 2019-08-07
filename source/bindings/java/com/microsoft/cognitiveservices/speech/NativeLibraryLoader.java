@@ -89,7 +89,8 @@ class NativeLibraryLoader {
                 externalNativeList = getExternalResourceLines();
 
                 // For Windows, copy external native libraries to temporary location if they exist in current directory
-                if (System.getProperty("os.name").toLowerCase().equals("windows")) {
+                String osName = System.getProperty("os.name");
+                if (osName != null && osName.toLowerCase().equals("windows")) {
                     String path = null;
                     try {
                         path = new File(ClassLoader.getSystemClassLoader().getResource(".").getPath()).getAbsolutePath();
