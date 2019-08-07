@@ -810,6 +810,8 @@ jobs:
             fi
             cd tests/functional/csharp/end2end
             dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
+            # set +e to allow captureing exit codes and retry loop, rather than blindly exiting the bash shell on error.
+            set +e
             for retry in {0..3}; do
               dotnet test \$EXTRA_OPT --verbosity detailed --filter "TestCategory!=LongTest" --framework netcoreapp2.0 --settings csharp.runsettings --logger "trx;LogFileName=test-csharp_unit_tests-$(basename "$i")_\$retry.trx"
               exitCode=\$?
@@ -822,6 +824,7 @@ jobs:
                 sleep 2s
               fi
             done
+            set -e
             exit \$exitCode
       SCRIPT
 
@@ -907,6 +910,8 @@ jobs:
       #
       cd tests/functional/csharp/end2end
       dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source ${nugetsource} Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
+      # set +e to allow captureing exit codes and retry loop, rather than blindly exiting the bash shell on error.
+      set +e
       for retry in {0..3}; do
         dotnet test --blame --verbosity detailed --filter \
           "TestCategory!=LongTest&TestCategory!=SpeechSynthesisMockTest&ClassName!=Microsoft.CognitiveServices.Speech.Tests.EndToEnd.KwsRecognitionTests&TestCategory!=CompressedStreamTest" \
@@ -921,6 +926,7 @@ jobs:
           sleep 2s
         fi
       done
+      set -e
       exit ${exitCode}
     displayName: Run C# unit tests
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
