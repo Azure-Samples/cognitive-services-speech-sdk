@@ -15,6 +15,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -538,6 +539,154 @@ public class IntentRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
+
+        r.close();
+        s.close();
+    }
+
+     @Test
+    public void testExceptionsDuringEventsRecognizeOnce() throws InterruptedException, ExecutionException {
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
+        assertNotNull(s);
+
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(r);
+        assertNotNull(r);
+        assertNotNull(r.getRecoImpl());
+        assertTrue(r instanceof Recognizer);
+
+       AtomicBoolean sessionStopped = new AtomicBoolean(false);
+
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            System.out.println("Now Connected. preparing throw exception");
+            throw new IllegalArgumentException("Connected");
+        });
+
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            System.out.println("Now Disconnected. preparing throw exception");
+            throw new IllegalArgumentException("disconnected");
+        });
+
+        r.recognized.addEventListener((o, e) -> {
+            System.out.println("Now Recognized. preparing throw exception");
+            throw new IllegalArgumentException("Recognized");
+        });
+
+        r.recognizing.addEventListener((o, e) -> {
+            System.out.println("Now recognizing. preparing throw exception");
+            throw new IllegalArgumentException("recognizing");
+        });
+
+        r.canceled.addEventListener((o, e) -> {
+            System.out.println("Now Canceled. preparing throw exception");
+            throw new IllegalArgumentException("canceled");
+        });
+
+        r.speechStartDetected.addEventListener((o, e) -> {
+            System.out.println("Now SpeechStartDetected. preparing throw exception");
+            throw new IllegalArgumentException("SpeechStartDetected");
+        });
+
+        r.speechEndDetected.addEventListener((o, e) -> {
+            System.out.println("Now speechEndDetected. preparing throw exception");
+            throw new IllegalArgumentException("speechEndDetected");
+        });
+
+        r.sessionStarted.addEventListener((o, e) -> {
+            System.out.println("Now sessionStarted. preparing throw exception");
+            throw new IllegalArgumentException("sessionStarted");
+        });
+
+        r.sessionStopped.addEventListener((o, e) -> {
+            sessionStopped.set(true);
+            System.out.println("Now SessionStopped. preparing throw exception");
+            throw new IllegalArgumentException("sessionStopped");
+        });
+
+        IntentRecognitionResult res = r.recognizeOnceAsync().get();
+        assertNotNull(res);
+        TestHelper.OutputResult(res);
+        assertEquals(ResultReason.RecognizedSpeech, res.getReason());
+        assertEquals("What's the weather like?", res.getText());
+
+        // wait until we get the SessionStopped event.
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) && (sessionStopped.get() == true)) {
+            Thread.sleep(200);
+        }
+        
+        r.close();
+        s.close();
+    }
+
+    @Test
+    public void testExceptionsDuringEventsContinuousRecognition() throws InterruptedException, ExecutionException {
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
+        assertNotNull(s);
+
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(r);
+        assertNotNull(r);
+        assertNotNull(r.getRecoImpl());
+        assertTrue(r instanceof Recognizer);
+
+        AtomicBoolean sessionStopped = new AtomicBoolean(false);
+
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            System.out.println("Now Connected. preparing throw exception");
+            throw new IllegalArgumentException("Connected");
+        });
+
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            System.out.println("Now Disconnected. preparing throw exception");
+            throw new IllegalArgumentException("disconnected");
+        });
+
+        r.recognized.addEventListener((o, e) -> {
+            System.out.println("Now Recognized. preparing throw exception");
+            throw new IllegalArgumentException("Recognized");
+        });
+
+        r.recognizing.addEventListener((o, e) -> {
+            System.out.println("Now recognizing. preparing throw exception");
+            throw new IllegalArgumentException("recognizing");
+        });
+
+        r.canceled.addEventListener((o, e) -> {
+            System.out.println("Now Canceled. preparing throw exception");
+            throw new IllegalArgumentException("canceled");
+        });
+
+        r.speechStartDetected.addEventListener((o, e) -> {
+            System.out.println("Now SpeechStartDetected. preparing throw exception");
+            throw new IllegalArgumentException("SpeechStartDetected");
+        });
+
+        r.speechEndDetected.addEventListener((o, e) -> {
+            System.out.println("Now speechEndDetected. preparing throw exception");
+            throw new IllegalArgumentException("speechEndDetected");
+        });
+
+        r.sessionStarted.addEventListener((o, e) -> {
+            System.out.println("Now sessionStarted. preparing throw exception");
+            throw new IllegalArgumentException("sessionStarted");
+        });
+
+        r.sessionStopped.addEventListener((o, e) -> {
+            sessionStopped.set(true);
+            System.out.println("Now SessionStopped. preparing throw exception");
+            throw new IllegalArgumentException("sessionStopped");
+        });
+
+        r.startContinuousRecognitionAsync().get();
+        
+        // wait until we get the SessionStopped event.
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) && (sessionStopped.get() == true)) {
+            Thread.sleep(200);
+        }
+
+        r.stopContinuousRecognitionAsync().get();
 
         r.close();
         s.close();
