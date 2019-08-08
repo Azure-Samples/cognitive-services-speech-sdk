@@ -1492,7 +1492,6 @@ uint64_t CSpxAudioStreamSession::GetResultLatencyInMs(const ProcessedAudioTimest
 void CSpxAudioStreamSession::FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, shared_ptr<ISpxRecognitionResult> result)
 {
     UNUSED(adapter);
-    UNUSED(offset);
     SPX_DBG_ASSERT(!IsState(SessionState::WaitForPumpSetFormatStart));
 
     bool recordHypothesisLatency = m_expectFirstHypothesis;

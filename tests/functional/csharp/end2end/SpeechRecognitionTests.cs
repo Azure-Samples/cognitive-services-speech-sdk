@@ -398,7 +398,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         if (!string.IsNullOrEmpty(latencyString))
                         {
-                            hypothesisLatencyError += $"({e.Result.ResultId}, lantecy in non-first hypothesis: {latencyString})";
+                            hypothesisLatencyError += $"({e.Result.ResultId}, latency in non-first hypothesis: {latencyString})";
                         }
                     }
                 };
