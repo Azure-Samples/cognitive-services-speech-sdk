@@ -11,7 +11,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' ${{ parameters.name }}Build '))
   pool:
     name: Hosted VS2017
-  timeoutInMinutes: 240
+  timeoutInMinutes: 360
   strategy:
     maxParallel: 4
     matrix:
