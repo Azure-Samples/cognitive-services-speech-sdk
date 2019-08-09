@@ -235,6 +235,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {
                 conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
+                string meetingID = conversationTranscriber.ConversationId;
 
                 conversationTranscriber.AddParticipant("OneUserByUserId");
 
@@ -247,7 +248,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 conversationTranscriber.AddParticipant(participant);
 
                 var result = await helper.GetFirstRecognizerResult(conversationTranscriber);
-                Assert.IsTrue(result != string.Empty);
+                Assert.IsTrue(result != string.Empty, "Result object was empty for MeetingID=" + meetingID);
             }
         }
 

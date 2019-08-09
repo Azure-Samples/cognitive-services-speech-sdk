@@ -47,7 +47,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             if (!string.IsNullOrEmpty(canceled))
             {
-                Assert.Fail($"Recognition Canceled: {canceled}");
+                Assert.Fail($"Recognition Canceled(meetingID={recognizer.ConversationId}): {canceled}");
             }
         }
 
