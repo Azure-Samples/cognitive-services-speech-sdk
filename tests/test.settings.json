@@ -1,0 +1,20 @@
+{
+  "InRoomAudioEndPoint": "",
+  "OnlineAudioEndPoint": "",
+  "InputDir": "",
+  "Region": "",
+  "EndPoint": "",
+  "ConversationTranscriptionSubscriptionKey": "",
+  "SpeechRegionForConversationTranscription": "",
+  "ConversationTranscriptionEndpoint": "",
+  "ConversationTranscriptionPPEKey": "",
+  "ConversationTranscriptionPRODKey": "",
+  "DeploymentId": "",
+  "UnifiedSpeechSubscriptionKey": "",
+  "LanguageUnderstandingSubscriptionKey": "",
+  "LanguageUnderstandingHomeAutomationAppId": "",
+  "LanguageUnderstandingServiceRegion": "",
+  "DialogSubscriptionKey": "",
+  "DialogFunctionalTestBot": "",
+  "DialogRegion": ""
+}

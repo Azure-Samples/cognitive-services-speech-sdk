@@ -105,21 +105,21 @@ public:
 
         if (data != nullptr)
         {
-            Keys::Speech = data.at("keySpeech").get<std::string>();
-            Keys::LUIS = data.at("keyLUIS").get<std::string>();
-            Keys::Dialog = data.at("keyDialog").get<std::string>();
-            Keys::ConversationTranscriber = data.at("keyConversationTranscriber").get<std::string>();
+            Keys::Speech = data.at("UnifiedSpeechSubscriptionKey").get<std::string>();
+            Keys::LUIS = data.at("LanguageUnderstandingSubscriptionKey").get<std::string>();
+            Keys::Dialog = data.at("DialogSubscriptionKey").get<std::string>();
+            Keys::ConversationTranscriber = data.at("ConversationTranscriptionSubscriptionKey").get<std::string>();
 
-            Config::Endpoint = data.at("endPoint").get<std::string>();
-            Config::Region = data.at("regionId").get<std::string>();
-            Config::LuisRegion = data.at("regionIdLUIS").get<std::string>();
-            Config::LuisAppId = data.at("luisAppId").get<std::string>();
-            Config::DialogRegion = data.at("dialogRegionId").get<std::string>();
-            Config::DialogBotSecret = data.at("dialogBotSecret").get<std::string>();
-            Config::InroomEndpoint = data.at("InRoomEndPoint").get<std::string>();
-            Config::OnlineEndpoint = data.at("OnlineEndPoint").get<std::string>();
+            Config::Endpoint = data.at("EndPoint").get<std::string>();
+            Config::Region = data.at("Region").get<std::string>();
+            Config::LuisRegion = data.at("LanguageUnderstandingServiceRegion").get<std::string>();
+            Config::LuisAppId = data.at("LanguageUnderstandingHomeAutomationAppId").get<std::string>();
+            Config::DialogRegion = data.at("SpeechRegionForConversationTranscription").get<std::string>();
+            Config::InroomEndpoint = data.at("InRoomAudioEndPoint").get<std::string>();
+            Config::OnlineEndpoint = data.at("OnlineAudioEndPoint").get<std::string>();
 
-            Config::InputDir = data.at("inputDir").get<std::string>();
+            Config::InputDir = data.at("InputDir").get<std::string>();
+
             if (Config::InputDir.length() != 0)
             {
                 Config::InputDir = rootPathOnly + Config::InputDir;
@@ -168,8 +168,8 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Config::Endpoint, "endpoint")
         ["--endpoint"]
     ("The endpoint url to test against.")
-        | Opt(Config::Region, "RegionId")
-        ["--regionId"]
+        | Opt(Config::Region, "Region")
+        ["--region"]
     ("The region id to be used for subscription and authorization requests")
         | Opt(Config::LuisRegion, "LuisRegionId")
         ["--regionIdLUIS"]

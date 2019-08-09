@@ -24,10 +24,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public SpeechConfig uspConfig;
         public SpeechConfig mockConfig;
 
+        private static Config _config;
+
         public static void BaseClassInit(TestContext context)
         {
-            subscriptionKey = Config.GetSettingByKey<String>(context, "UnifiedSpeechSubscriptionKey");
-            region = Config.GetSettingByKey<String>(context, "Region");
+            _config = new Config(context);
+
+            subscriptionKey = Config.UnifiedSpeechSubscriptionKey;
+            region = Config.Region;
 
             Console.WriteLine("region: " + region);
         }

@@ -19,10 +19,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static void BaseClassInitialize(TestContext context)
         {
             // Ignore for now, using AutoReply
-            botSecret = Config.GetSettingByKey<String>(context, "DialogFunctionalTestBot");
-            subscriptionKey = Config.GetSettingByKey<String>(context, "DialogSubscriptionKey");
-            region = Config.GetSettingByKey<String>(context, "DialogRegion");
-            inputDir = Config.GetSettingByKey<String>(context, "InputDir");
+            botSecret = Config.DialogFunctionalTestBot;
+            subscriptionKey = Config.DialogSubscriptionKey;
+            region = Config.DialogRegion;
+            inputDir = Config.InputDir;
 
             TestData.AudioDir = Path.Combine(inputDir, "audio");
 

@@ -1042,7 +1042,7 @@ std::shared_ptr<SpeechConfig> CarbonTestConsole::SpeechRecognizerConfig()
     }
     else
     {
-        sc = SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
+        sc = SpeechConfig::FromSubscription(m_subscriptionKey, m_region);
     }
 
     if (!m_offlineModelPathRoot.empty())
@@ -1597,7 +1597,7 @@ std::string CarbonTestConsole::ToString(const TranslationSynthesisEventArgs& e)
 
 void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
 {
-    m_regionId = R"(westus)";
+    m_region = R"(westus)";
 
     if (pconsoleArgs->m_useMockMicrophone)
     {
@@ -1632,7 +1632,7 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
 
     if (!pconsoleArgs->m_strRegion.empty())
     {
-        m_regionId = pconsoleArgs->m_strRegion;
+        m_region = pconsoleArgs->m_strRegion;
     }
 
     if (!pconsoleArgs->m_strEndpointUri.empty())
@@ -1838,7 +1838,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
     {
         auto sc = !m_endpointUri.empty()
             ? SpeechTranslationConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
-            : SpeechTranslationConfig::FromSubscription(m_subscriptionKey, m_regionId);
+            : SpeechTranslationConfig::FromSubscription(m_subscriptionKey, m_region);
 
         sc->SetSpeechRecognitionLanguage("en-US");
         sc->AddTargetLanguage("de");
@@ -1863,7 +1863,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
     {
         auto sc = !m_endpointUri.empty()
             ? SpeechConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
-            : SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
+            : SpeechConfig::FromSubscription(m_subscriptionKey, m_region);
         sc->SetSpeechRecognitionLanguage("en-US");
 
         m_intentRecognizer = IntentRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(wavFileName));

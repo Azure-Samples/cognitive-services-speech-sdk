@@ -29,20 +29,23 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         private static string languageUnderstandingHomeAutomationAppId;
         private static string endpointInString;
         private static Uri endpointUrl;
+        private static Config _config;
 
         private SpeechConfig config;
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
-            languageUnderstandingSubscriptionKey = Config.GetSettingByKey<String>(context, "LanguageUnderstandingSubscriptionKey");
-            languageUnderstandingServiceRegion = Config.GetSettingByKey<String>(context, "LanguageUnderstandingServiceRegion");
-            languageUnderstandingHomeAutomationAppId = Config.GetSettingByKey<String>(context, "LanguageUnderstandingHomeAutomationAppId");
+            _config = new Config(context);
+
+            languageUnderstandingSubscriptionKey = Config.LanguageUnderstandingSubscriptionKey;
+            languageUnderstandingServiceRegion = Config.LanguageUnderstandingServiceRegion;
+            languageUnderstandingHomeAutomationAppId = Config.LanguageUnderstandingHomeAutomationAppId;
             var intentRegionInUrl = MapToIntentServiceRegion(languageUnderstandingServiceRegion);
             endpointInString = String.Format("wss://speech.platform.bing.com/speech/{0}/recognition/interactive/cognitiveservices/v1", intentRegionInUrl);
             endpointUrl = new Uri(endpointInString);
 
-            var inputDir = Config.GetSettingByKey<String>(context, "InputDir");
+            var inputDir = Config.InputDir;
             TestData.AudioDir = Path.Combine(inputDir, "audio");
             TestData.KwsDir = Path.Combine(inputDir, "kws");
         }

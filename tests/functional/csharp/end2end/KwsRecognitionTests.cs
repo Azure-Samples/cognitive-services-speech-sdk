@@ -155,11 +155,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static void TestClassinitialize(TestContext context)
         {
             BaseClassInit(context);
-            deploymentId = Config.GetSettingByKey<String>(context, "DeploymentId");
+            deploymentId = Config.DeploymentId;
 
-            languageUnderstandingSubscriptionKey = Config.GetSettingByKey<String>(context, "LanguageUnderstandingSubscriptionKey");
-            languageUnderstandingServiceRegion = Config.GetSettingByKey<String>(context, "LanguageUnderstandingServiceRegion");
-            languageUnderstandingHomeAutomationAppId = Config.GetSettingByKey<String>(context, "LanguageUnderstandingHomeAutomationAppId");
+            languageUnderstandingSubscriptionKey = Config.LanguageUnderstandingSubscriptionKey;
+            languageUnderstandingServiceRegion = Config.LanguageUnderstandingServiceRegion;
+            languageUnderstandingHomeAutomationAppId = Config.LanguageUnderstandingHomeAutomationAppId;
         }
 
         [TestInitialize]

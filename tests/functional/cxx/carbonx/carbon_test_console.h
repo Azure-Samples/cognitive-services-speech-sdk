@@ -264,7 +264,7 @@ private:
     std::shared_ptr<IntentRecognizer> m_intentRecognizer;
     std::shared_ptr<Session> m_session;
     std::string m_subscriptionKey;
-    std::string m_regionId;
+    std::string m_region;
     std::string m_endpointUri;
     std::string m_customSpeechModelId;
     std::string m_intentAppId;

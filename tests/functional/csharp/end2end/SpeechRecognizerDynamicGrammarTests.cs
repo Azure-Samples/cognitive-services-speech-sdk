@@ -25,15 +25,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         private static string unifiedRegion, unifiedKey;
 
         private SpeechConfig config;
+        private static Config _config;
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
-            inputDir = Config.GetSettingByKey<String>(context, "InputDir");
+            _config = new Config(context);
+
+            inputDir = Config.InputDir;
             TestData.AudioDir = Path.Combine(inputDir, "audio");
 
-            unifiedRegion = Config.GetSettingByKey<String>(context, "Region");
-            unifiedKey = Config.GetSettingByKey<String>(context, "UnifiedSpeechSubscriptionKey");
+            unifiedRegion = Config.Region;
+            unifiedKey = Config.UnifiedSpeechSubscriptionKey;
 
             Console.WriteLine("unifiedRegion: " + unifiedRegion);
             Console.WriteLine("input directory: " + inputDir);

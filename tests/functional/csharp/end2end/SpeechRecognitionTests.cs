@@ -30,7 +30,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static void TestClassinitialize(TestContext context)
         {
             BaseClassInit(context);
-            deploymentId = Config.GetSettingByKey<String>(context, "DeploymentId");
+            deploymentId = Config.DeploymentId;
             endpointInString = String.Format("wss://{0}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1", region);
             endpointUrl = new Uri(endpointInString);
             officeEndpointString = "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1";

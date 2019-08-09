@@ -67,7 +67,7 @@ runCatchSuite \
   "$PATTERN" \
   "$TEST_CODE" \
     --keySpeech "$SPEECHSDK_SPEECH_KEY" \
-    --regionId "$SPEECHSDK_SPEECH_REGION" \
+    --region "$SPEECHSDK_SPEECH_REGION" \
     --keyLUIS "$SPEECHSDK_LUIS_KEY" \
     --regionIdLUIS "$SPEECHSDK_LUIS_REGION" \
     --luisAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \

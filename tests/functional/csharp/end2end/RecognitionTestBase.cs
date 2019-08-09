@@ -13,16 +13,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         public static string inputDir, subscriptionKey, region, conversationTranscriptionEndpoint, conversationTranscriptionPPEKey, conversationTranscriptionPRODKey, speechRegionForConversationTranscription;
         public SpeechConfig defaultConfig;
+        private static Config _config;
 
         public static void BaseClassInit(TestContext context)
         {
-            subscriptionKey = Config.GetSettingByKey<String>(context, "UnifiedSpeechSubscriptionKey");
-            region = Config.GetSettingByKey<String>(context, "Region");
-            inputDir = Config.GetSettingByKey<String>(context, "InputDir");
-            conversationTranscriptionEndpoint = Config.GetSettingByKey<String>(context, "ConversationTranscriptionEndpoint");
-            conversationTranscriptionPPEKey = Config.GetSettingByKey<String>(context, "ConversationTranscriptionPPEKey");
-            conversationTranscriptionPRODKey = Config.GetSettingByKey<String>(context, "ConversationTranscriptionPRODKey");
-            speechRegionForConversationTranscription = Config.GetSettingByKey<String>(context, "SpeechRegionForConversationTranscription");
+            _config = new Config(context);
+
+            subscriptionKey = Config.UnifiedSpeechSubscriptionKey;
+            region = Config.Region;
+            inputDir = Config.InputDir;
+            conversationTranscriptionEndpoint = Config.ConversationTranscriptionEndpoint;
+            conversationTranscriptionPPEKey = Config.ConversationTranscriptionPPEKey;
+            conversationTranscriptionPRODKey = Config.ConversationTranscriptionPRODKey;
+            speechRegionForConversationTranscription = Config.SpeechRegionForConversationTranscription;
 
             TestData.AudioDir = Path.Combine(inputDir, "audio");
             TestData.KwsDir = Path.Combine(inputDir, "kws");

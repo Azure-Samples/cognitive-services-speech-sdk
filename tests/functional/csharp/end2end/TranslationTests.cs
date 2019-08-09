@@ -32,7 +32,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             BaseClassInit(context);
             synthesisDir = Path.Combine(inputDir, "synthesis");
-            deploymentId = Config.GetSettingByKey<String>(context, "DeploymentId");
+            deploymentId = Config.DeploymentId;
             endpointInString = String.Format("wss://{0}.s2s.speech.microsoft.com/speech/translation/cognitiveservices/v1", region);
             endpointUrl = new Uri(endpointInString);
         }

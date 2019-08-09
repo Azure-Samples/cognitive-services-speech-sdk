@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RunSettings>
+    <MSTestV2>
+        <TestTimeout>1200000</TestTimeout>
+        <Parallelize>
+            <Workers>1</Workers>
+            <Scope>MethodLevel</Scope>
+        </Parallelize>
+    </MSTestV2>
+    <Catch2Adapter>
+        <DiscoverCommandLine>--discovery --verbosity high --list-tests *</DiscoverCommandLine>
+        <WorkingDirectory>..\..\tests\functional\cxx\api</WorkingDirectory>
+        <WorkingDirectoryRoot>Executable</WorkingDirectoryRoot>
+        <FilenameFilter>_tests</FilenameFilter>
+        <DiscoverTimet>0</DiscoverTimet>
+    </Catch2Adapter>
+    <TestRunParameters>
+        <Parameter name="UnifiedSpeechSubscriptionKey" value=""/>
+        <Parameter name="Region" value="westus"/>
+        <Parameter name="DeploymentId" value=""/>
+        <Parameter name="InputDir" value="..\..\..\tests\input\"/>
+        <Parameter name="LanguageUnderstandingSubscriptionKey" value=""/>
+        <Parameter name="LanguageUnderstandingServiceRegion" value="westus"/>
+        <Parameter name="LanguageUnderstandingHomeAutomationAppId" value=""/>
+        <Parameter name="DialogFunctionalTestBot" value=""/>
+        <Parameter name="DialogSubscriptionKey" value=""/>
+        <Parameter name="DialogRegion" value="westus2"/>
+        <Parameter name="ConversationTranscriptionEndpoint" value=""/>
+        <Parameter name="ConversationTranscriptionPPEKey" value=""/>
+        <Parameter name="ConversationTranscriptionPRODKey" value=""/>
+        <Parameter name="SpeechRegionForConversationTranscription" value=""/>
+    </TestRunParameters>
+</RunSettings>
