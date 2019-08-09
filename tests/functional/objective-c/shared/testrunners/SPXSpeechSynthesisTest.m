@@ -497,8 +497,7 @@
 @implementation SPXSpeechSynthesisEndtoEndTestUsp
 
 - (void)setSpeechConfig {
-    self.speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
-    [self.speechConfig setPropertyTo:@"true" byName:@"CARBON-INTERNAL-UseTtsEngine-Usp"];
+    self.speechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:[NSString stringWithFormat:@"wss://%@.tts.speech.microsoft.com/cognitiveservices/websocket/v1", self.serviceRegion] subscription:self.speechKey];
 }
 
 - (void)testDefaultSynthesis {

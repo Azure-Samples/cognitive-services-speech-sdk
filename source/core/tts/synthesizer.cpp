@@ -12,6 +12,7 @@
 #include "site_helpers.h"
 #include "service_helpers.h"
 #include "create_object_helpers.h"
+#include "synthesis_helper.h"
 #include "property_id_2_name_map.h"
 #include "guid_utils.h"
 
@@ -553,11 +554,26 @@ void CSpxSynthesizer::EnsureTtsEngineAdapter()
 void CSpxSynthesizer::InitializeTtsEngineAdapter()
 {
     // determine which type (or types) of tts engine adapters we should try creating...
+    bool tryRest = false, tryUsp = false;
+    std::string endpoint = GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
+    if (!endpoint.empty())
+    {
+        auto url = CSpxSynthesisHelper::ParseUrl(endpoint);
+        if (Protocol::HTTP == url.protocol)
+        {
+            tryRest = true;
+        }
+        else if (Protocol::WebSocket == url.protocol)
+        {
+            tryUsp = true;
+        }
+    }
+    
     bool tryMock = PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Mock", PAL::BoolToString(false).c_str())) ||
                    PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Mock", PAL::BoolToString(false).c_str()));
-    bool tryRest = PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Rest", PAL::BoolToString(false).c_str())) ||
+    tryRest = tryRest || PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Rest", PAL::BoolToString(false).c_str())) ||
                    PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Rest", PAL::BoolToString(false).c_str()));
-    bool tryUsp = PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Usp", PAL::BoolToString(false).c_str())) ||
+    tryUsp = tryUsp || PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Usp", PAL::BoolToString(false).c_str())) ||
                   PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Usp", PAL::BoolToString(false).c_str()));
     bool tryLocal = PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Local", PAL::BoolToString(false).c_str())) ||
                     PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Local", PAL::BoolToString(false).c_str()));

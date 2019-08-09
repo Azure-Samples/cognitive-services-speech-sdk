@@ -17,8 +17,8 @@ namespace TTS
 
     shared_ptr<SpeechConfig> UspSpeechConfig()
     {
-        auto config = SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
-        config->SetProperty("CARBON-INTERNAL-UseTtsEngine-Usp", "true");
+        const auto endpoint = "wss://" + Config::Region + ".tts.speech.microsoft.com/cognitiveservices/websocket/v1";
+        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
         return config;
     }
 

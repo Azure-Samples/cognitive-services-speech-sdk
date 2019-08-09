@@ -519,10 +519,10 @@ public class SpeechSynthesizerTests {
 
     @Test
     public void testSpeakOutputWithWordBoundaryEvents() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        String endpoint = String.format("wss://%s.tts.speech.microsoft.com/cognitiveservices/websocket/v1", Settings.SpeechRegion);
+        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(URI.create(endpoint), Settings.SpeechSubscriptionKey);
         assertNotNull(speechConfig);
 
-        speechConfig.setProperty("CARBON-INTERNAL-UseTtsEngine-Usp", "true");
         speechConfig.setSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null); // null indicates to do nothing with synthesizer audio by default
