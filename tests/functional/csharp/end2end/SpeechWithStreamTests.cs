@@ -127,7 +127,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore]
+        //[Ignore]
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
