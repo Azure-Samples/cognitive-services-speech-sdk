@@ -48,12 +48,11 @@ namespace helloworld
                         {
                             NotifyUser($"Speech Synthesis Succeeded.", NotifyType.StatusMessage);
 
-                            // Since native playback is not yet supported on UWP yet (currently only supported on Windows/Linux Desktop),
+                            // Since native playback is not yet supported on UWP (currently only supported on Windows/Linux Desktop),
                             // use the WinRT API to play audio here as a short term solution.
-                            // Native playback support will be added in the future release.
                             using (var audioStream = AudioDataStream.FromResult(result))
                             {
-                                // Save synthesized audio data as a wave file and user MediaPlayer to play it
+                                // Save synthesized audio data as a wave file and use MediaPlayer to play it
                                 var filePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, "outputaudio.wav");
                                 await audioStream.SaveToWaveFileAsync(filePath);
                                 mediaPlayer.Source = MediaSource.CreateFromStorageFile(await StorageFile.GetFileFromPathAsync(filePath));
