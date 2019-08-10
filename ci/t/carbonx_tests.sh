@@ -9,7 +9,7 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 . "$SCRIPT_DIR/../functions.sh" || exit 1
 
-isOneOf "$PLATFORM" {{Windows,Linux}-{x86,x64},Linux-arm32,OSX-x64}-{Debug,Release} ||
+isOneOf "$PLATFORM" {{Windows,Linux}-{x86,x64},Linux-{arm32,arm64},OSX-x64}-{Debug,Release} ||
   exitWithSuccess "Test %s: skip on this platform\n" "$T"
 
 TEST_CODE="$BINARY_DIR/carbonx"

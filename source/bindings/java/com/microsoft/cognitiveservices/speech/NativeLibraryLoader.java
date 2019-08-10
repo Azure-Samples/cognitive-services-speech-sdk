@@ -182,7 +182,13 @@ class NativeLibraryLoader {
         }
 
         if (operatingSystem.contains("linux")) {
-            return String.format(speechPrefix, "linux", dataModelSize);
+            String osArchitecture = System.getProperty("os.arch");
+            if (osArchitecture.contains("aarch64")) {
+                return String.format(speechPrefix, "linux-arm", dataModelSize);
+            }
+            else if (osArchitecture.contains("amd64") || osArchitecture.contains("x86_64")) {
+                return String.format(speechPrefix, "linux-x", dataModelSize);
+            }
         }
         else if (operatingSystem.contains("windows")) {
             loadAll = true; // signal to load all libraries
@@ -191,10 +197,9 @@ class NativeLibraryLoader {
         else if (operatingSystem.contains("mac")|| operatingSystem.contains("darwin")) {
             return String.format(speechPrefix, "mac", dataModelSize);
         }
-        else {
-            throw new UnsatisfiedLinkError(
-                    String.format("The Speech SDK doesn't currently have native support for operating system: %s data model size %s", operatingSystem, dataModelSize));
-        }
+
+        throw new UnsatisfiedLinkError(
+                String.format("The Speech SDK doesn't currently have native support for operating system: %s data model size %s", operatingSystem, dataModelSize));
     }
 
     private static void extractResourceFromPath(String libName, String prefix) throws IOException {

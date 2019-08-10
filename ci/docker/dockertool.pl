@@ -115,6 +115,19 @@ my %images = (
         aptInstallWith(qw/devcore_ubuntu1604_deps devjava_ubuntu1604_deps/),
         'builduser'],
   },
+  dev_ubuntu1604_arm64 => {
+    version => 1,
+    urls => [qw(https://github.com/multiarch/qemu-user-static/releases/download/v4.0.0/qemu-aarch64-static.tar.gz)],
+    spec => [
+        # Stage 0
+        qw/from-ubuntu1604-arm64v8 stage_cmake_fromsource_ubuntu1604/,
+        # Stage 1
+        qw/from-ubuntu1604-arm64v8 stage_swig_ubuntu1604/,
+        # Image
+        qw/from-ubuntu1604-arm64v8 copy-layer-01-usr-local/,
+        aptInstallWith(qw/devcore_ubuntu1604_deps devjava_ubuntu1604_deps/),
+        'builduser'],
+  },
   oobedevcpp_ubuntu1804_x64 => {
     version => 3,
     spec => ['from-ubuntu1804-x64', aptInstallWith(qw/oobedevcpp_ubuntu1604_deps oobe_ubuntu1604_deps oobe_ubuntu_gstreamer_deps test_deps_ubuntu1804/), 'builduser'],

@@ -34,15 +34,18 @@ tar \
   --owner root \
   --group root  \
   --mtime=now \
-  --transform "s:^Linux-\(x86\|x64\)/Release/public/include/:$BASE_NAME/include/:" \
-  --transform "s:^Linux-\(x86\|x64\)/Release/public/lib/:$BASE_NAME/lib/\1/:" \
+  --transform "s:^Linux-\(x86\|x64\|arm64\)/Release/public/include/:$BASE_NAME/include/:" \
+  --transform "s:^Linux-\(x86\|x64\|arm64\)/Release/public/lib/:$BASE_NAME/lib/\1/:" \
   -cvzf "$OUTPUT_DIR/$BASE_NAME.tar.gz" \
   "$BASE_NAME" \
   Linux-x86/Release/public/include/* \
   Linux-x*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so \
   Linux-x*/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.codec.so \
-  Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so
-  # KWS only ships for Linux-x64 currently
+  Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so \
+  Linux-arm64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so \
+  Linux-arm64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.codec.so \
+  Linux-arm64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so
+  # KWS does not ship for Linux-x86 currently
 
 SHA256_SUM="$(sha256sum "$OUTPUT_DIR/$BASE_NAME.tar.gz" | cut -f1 -d' ')"
 

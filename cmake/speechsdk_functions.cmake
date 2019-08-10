@@ -166,6 +166,7 @@ function(PARSE_PLATFORM)
     Linux-x86
     Linux-x64
     Linux-arm32
+    Linux-arm64
     OSX-x64
     Android-x86
     Android-x64

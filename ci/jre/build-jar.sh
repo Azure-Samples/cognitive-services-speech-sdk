@@ -41,7 +41,7 @@ unzip -q -o "$BASE_JAR" -d "$JAR_DIR"
 NOW=$(date -Iseconds)
 
 # (Shipping) platform list
-platforms=({Linux,Windows,OSX}-x64-Release)
+platforms=(Linux-{arm64,x64}-Release OSX-x64-Release Windows-x64-Release)
 
 # Will need extension to support more archs / debug flavor (in sync with NativeLibraryLoader.java).
 for platformString in "${platforms[@]}"; do
@@ -59,13 +59,15 @@ for platformString in "${platforms[@]}"; do
       libSuffix=.dll
       jnilibSuffix=.dll
       assetDir+=/windows
+      bitness="$([[ $arch == x86 ]] && echo 32 || echo 64)"
+      assetDir+="$bitness"
       ;;
     Linux)
       dropPrefix+="/$os/$os-$arch/$flavor"
       libPrefix=lib
       libSuffix=.so
       jnilibSuffix=.so
-      assetDir+=/linux
+      assetDir+=/linux-$arch
       ;;
     OSX)
       dropPrefix+="/${MAC_ARTIFACT_DIR}/$flavor"
@@ -73,13 +75,12 @@ for platformString in "${platforms[@]}"; do
       libSuffix=.dylib
       jnilibSuffix=.jnilib
       assetDir+=/mac
+      bitness="$([[ $arch == x86 ]] && echo 32 || echo 64)"
+      assetDir+="$bitness"
       ;;
   esac
 
   dropPrefix+=/public/lib
-
-  bitness="$([[ $arch == x86 ]] && echo 32 || echo 64)"
-  assetDir+="$bitness"
 
   mkdir -p "$JAR_DIR/$assetDir"
   if [[ $os == "Windows" ]] || [[ $os == "Linux" ]] || [[ $os == "OSX" ]]; then

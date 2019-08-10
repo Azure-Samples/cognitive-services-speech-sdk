@@ -244,7 +244,7 @@ void CSpxSdkKwsEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
     SPX_IFTRUE_THROW_HR(!p_impl->m_speechHandle, SPXERR_UNINITIALIZED);
     SPX_IFTRUE_THROW_HR(p_impl->m_keywordDetectedInProgress == true, SPXERR_INVALID_STATE);
 
-    SPX_DBG_TRACE_INFO("data %p, size %d\n\n", (void*)audioChunk->data.get(), audioChunk->size);
+    SPX_DBG_TRACE_INFO("%s: data %p, size %d\n\n", __FUNCTION__, (void*)audioChunk->data.get(), audioChunk->size);
 
     if (p_impl->m_keywordDetectedEnabled == true)
     {
@@ -287,6 +287,7 @@ void CSpxSdkKwsEngineAdapter::ProcessAudio(const DataChunkPtr& audioChunk)
 
 void CSpxSdkKwsEngineAdapter::FireDoneProcessingAudioEvent()
 {
+    SPX_DBG_TRACE_FUNCTION();
     SPX_DBG_ASSERT(GetSite());
     GetSite()->AdapterCompletedSetFormatStop(this);
 }

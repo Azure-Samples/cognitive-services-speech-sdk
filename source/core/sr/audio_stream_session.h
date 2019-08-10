@@ -338,6 +338,7 @@ private:
     bool m_expectAdapterStoppedTurn;
     bool m_expectFirstHypothesis;
     bool m_adapterAudioMuted;
+    bool m_audioPumpStoppedBeforeHotSwap;
     RecognitionKind m_turnEndStopKind;
 
     // In order to reliably deliver audio, we always swap audio processor

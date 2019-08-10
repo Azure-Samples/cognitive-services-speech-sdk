@@ -3,12 +3,13 @@ parameters:
   macArtifactName: macOS
   javaArtifactSuffix: ""
 
-# Note: for now this packages up only {Linux,Windows,macOS}-x64-Release
+# Note: for now this packages up only {Linux,Windows,macOS}-x64-Release and Linux-arm64-Release
 jobs:
 - job: ${{ format('JavaJrePackage{0}', parameters.javaArtifactSuffix) }}
   dependsOn:
     - Pre
     - LinuxBuild
+    - LinuxDockerBuild
     - WindowsBuild
     - ${{ format('{0}Build', parameters.macArtifactName) }}
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JavaJrePackage '))

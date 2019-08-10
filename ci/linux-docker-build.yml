@@ -17,7 +17,7 @@ jobs:
     # Whether to publish binaries for the specific flavor.
     Publish: true
   strategy:
-    maxParallel: 4
+    maxParallel: 7
     matrix:
       Linux x86 Release:
         SPEECHSDK_TARGET_PLATFORM: Linux-x86
@@ -31,6 +31,14 @@ jobs:
         SPEECHSDK_TARGET_PLATFORM: Linux-arm32
         SPEECHSDK_BUILD_CONFIGURATION: Debug
         DOCKER_BASE: dev_ubuntu1604_arm32
+      Linux arm64 Release:
+        SPEECHSDK_TARGET_PLATFORM: Linux-arm64
+        SPEECHSDK_BUILD_CONFIGURATION: Release
+        DOCKER_BASE: dev_ubuntu1604_arm64
+      Linux arm64 Debug:
+        SPEECHSDK_TARGET_PLATFORM: Linux-arm64
+        SPEECHSDK_BUILD_CONFIGURATION: Debug
+        DOCKER_BASE: dev_ubuntu1604_arm64
       # More configurations in 'int' and 'prod' builds (cf. set-variables.sh)
       ${{ if in(parameters.buildType, 'int', 'prod') }}:
         Linux arm32 Release:
@@ -54,8 +62,8 @@ jobs:
       }
       . ci/functions.sh
       ./ci/set-variables.sh
-      if [[ $SPEECHSDK_TARGET_PLATFORM = Linux-x86 ]]; then
-        # N.B. this is built but not shipped in LinuxDrop.
+      if [[ $SPEECHSDK_TARGET_PLATFORM =~ Linux-(x86|arm64) ]]; then
+        # N.B. this is built but not shipped for Linux-x86 in LinuxDrop.
         vsts_setvar SPEECHSDK_ENABLE_KWS true
       else
         vsts_setvar SPEECHSDK_ENABLE_KWS false

@@ -503,13 +503,12 @@ jobs:
         displayName: Publish test results
 
 - job: NuGet
-  # Note: NuGet currently does not depend on LinuxDockerBuild (only needs x64 binaries)
   variables:
     HAS_OS_BUILD: $[contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild ')]
-  dependsOn: [Pre, LinuxBuild, WindowsBuild, WindowsOSBuild, WindowsUwpBuild, macOSBuild]
+  dependsOn: [Pre, LinuxBuild, LinuxDockerBuild, WindowsBuild, WindowsOSBuild, WindowsUwpBuild, macOSBuild]
   condition: |
     and(
-      succeeded('Pre', 'LinuxBuild', 'WindowsBuild', 'WindowsUwpBuild', 'macOSBuild'),
+      succeeded('Pre', 'LinuxBuild', 'LinuxDockerBuild', 'WindowsBuild', 'WindowsUwpBuild', 'macOSBuild'),
       xor(
         succeeded('WindowsOSBuild'),
         not(contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild '))
