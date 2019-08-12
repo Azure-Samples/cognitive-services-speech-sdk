@@ -94,6 +94,7 @@ protected:
 
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
 
+    void CheckLogFilename();
 
 private:
 

@@ -15,6 +15,7 @@
 #include "synthesis_helper.h"
 #include "property_id_2_name_map.h"
 #include "guid_utils.h"
+#include "file_logger.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -42,6 +43,8 @@ void CSpxSynthesizer::Init()
     // dev user at or above the CAPI. Thus ... we must hold it alive in order for the properties to be
     // obtainable via the standard ISpxNamedProperties mechanisms... It will be released in ::Term()
     m_siteKeepAlive = GetSite();
+    
+    CheckLogFilename();
 
     EnsureTtsEngineAdapter();
 }
@@ -445,6 +448,15 @@ uint32_t CSpxSynthesizer::Write(ISpxTtsEngineAdapter* adapter, const std::wstrin
 std::shared_ptr<ISpxNamedProperties> CSpxSynthesizer::GetParentProperties() const
 {
     return SpxQueryService<ISpxNamedProperties>(GetSite());
+}
+
+void CSpxSynthesizer::CheckLogFilename()
+{
+    auto filename = GetStringValue(GetPropertyName(PropertyId::Speech_LogFilename), "");
+    if (!filename.empty())
+    {
+        FileLogger::Instance().SetFilename(std::move(filename));
+    }
 }
 
 void CSpxSynthesizer::PushRequestIntoQueue(const std::wstring requestId)
