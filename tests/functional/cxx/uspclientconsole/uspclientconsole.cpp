@@ -57,6 +57,15 @@ map<USP::RecognitionStatus, string> recognitionStatusToText =
 };
 
 class UspCallbacks : public USP::Callbacks {
+private :
+    using funct = std::function<void()>;
+    funct f;
+
+public:
+    void SetSpeechEndDetectedCallback(funct fptr)
+    {
+        f = fptr;
+    }
 
 protected:
 
@@ -71,6 +80,7 @@ virtual void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg&) override
 {
     // offset not supported yet.
     printf("Response: Speech.EndDetected message.\n");
+    f();
     // printf("Response: Speech.EndDetected message. Speech ends at offset %" PRIu64 "\n", message->offset);
 }
 
@@ -410,6 +420,15 @@ int main(int argc, char* argv[])
     // Connect to service
     auto connection = client.Connect();
 
+    testCallbacks->SetSpeechEndDetectedCallback([&]()
+        {
+            if (connection != nullptr)
+            {
+                connection->FlushAudio();
+            }
+        }
+    );
+
     size_t totalBytesWritten{ 0 };
     input.seekg(0L, input.end);
     size_t fileSize = static_cast<size_t>(input.tellg());
@@ -432,12 +451,6 @@ int main(int argc, char* argv[])
             totalBytesWritten += (size_t) bytesToWrite;
             // Sleep to simulate real-time traffic
             this_thread::sleep_for(chrono::milliseconds(200));
-        }
-
-        // Send End of Audio to service to close the session.
-        if (input.eof())
-        {
-            connection->FlushAudio();
         }
     }
     else
