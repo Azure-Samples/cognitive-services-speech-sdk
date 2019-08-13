@@ -120,7 +120,7 @@
     return [NSString StringWithStdString:speechSynthImpl->GetAuthorizationToken()];
 }
 
-- (SPXSpeechSynthesisResult *)SpeakText:(nonnull NSString*)text NS_RETURNS_RETAINED
+- (SPXSpeechSynthesisResult *)speakText:(nonnull NSString*)text NS_RETURNS_RETAINED
 {
     if (speechSynthImpl == nullptr) {
         NSLog(@"SPXSynthesizer handle is null");
@@ -169,10 +169,10 @@
     return nil;
 }
 
-- (nullable SPXSpeechSynthesisResult *)SpeakText:(nonnull NSString*)text error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED
+- (nullable SPXSpeechSynthesisResult *)speakText:(nonnull NSString*)text error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED
 {
     try {
-        return [self SpeakText:text];
+        return [self speakText:text];
     }
     catch (NSException *exception) {
         NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
@@ -183,7 +183,7 @@
     return nil;
 }
 
-- (SPXSpeechSynthesisResult *)SpeakSsml:(nonnull NSString*)ssml NS_RETURNS_RETAINED
+- (SPXSpeechSynthesisResult *)speakSsml:(nonnull NSString*)ssml NS_RETURNS_RETAINED
 {
     if (speechSynthImpl == nullptr) {
         NSLog(@"SPXSynthesizer handle is null");
@@ -232,10 +232,10 @@
     return nil;
 }
 
-- (nullable SPXSpeechSynthesisResult *)SpeakSsml:(nonnull NSString*)ssml error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED
+- (nullable SPXSpeechSynthesisResult *)speakSsml:(nonnull NSString*)ssml error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED
 {
     try {
-        return [self SpeakSsml:ssml];
+        return [self speakSsml:ssml];
     }
     catch (NSException *exception) {
         NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
@@ -246,7 +246,7 @@
     return nil;
 }
 
-- (SPXSpeechSynthesisResult *)StartSpeakingText:(nonnull NSString*)text NS_RETURNS_RETAINED
+- (SPXSpeechSynthesisResult *)startSpeakingText:(nonnull NSString*)text NS_RETURNS_RETAINED
 {
     if (speechSynthImpl == nullptr) {
         NSLog(@"SPXSynthesizer handle is null");
@@ -295,10 +295,10 @@
     return nil;
 }
 
-- (nullable SPXSpeechSynthesisResult *)StartSpeakingText:(nonnull NSString*)text error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED
+- (nullable SPXSpeechSynthesisResult *)startSpeakingText:(nonnull NSString*)text error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED
 {
     try {
-        return [self StartSpeakingText:text];
+        return [self startSpeakingText:text];
     }
     catch (NSException *exception) {
         NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
@@ -309,7 +309,7 @@
     return nil;
 }
 
-- (SPXSpeechSynthesisResult *)StartSpeakingSsml:(nonnull NSString*)ssml NS_RETURNS_RETAINED
+- (SPXSpeechSynthesisResult *)startSpeakingSsml:(nonnull NSString*)ssml NS_RETURNS_RETAINED
 {
     if (speechSynthImpl == nullptr) {
         NSLog(@"SPXSynthesizer handle is null");
@@ -358,10 +358,10 @@
     return nil;
 }
 
-- (nullable SPXSpeechSynthesisResult *)StartSpeakingSsml:(nonnull NSString*)ssml error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED
+- (nullable SPXSpeechSynthesisResult *)startSpeakingSsml:(nonnull NSString*)ssml error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED
 {
     try {
-        return [self StartSpeakingSsml:ssml];
+        return [self startSpeakingSsml:ssml];
     }
     catch (NSException *exception) {
         NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];

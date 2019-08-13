@@ -78,7 +78,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param text the plain text for synthesis.
  * @return the result of speech synthesis.
  */
-- (nonnull SPXSpeechSynthesisResult *)SpeakText:(nonnull NSString*)text NS_RETURNS_RETAINED
+- (nonnull SPXSpeechSynthesisResult *)speakText:(nonnull NSString*)text NS_RETURNS_RETAINED
 NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
@@ -88,7 +88,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param outError error information.
  * @return the result of speech synthesis.
  */
-- (nullable SPXSpeechSynthesisResult *)SpeakText:(nonnull NSString*)text error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED;
+- (nullable SPXSpeechSynthesisResult *)speakText:(nonnull NSString*)text error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED;
 
 /**
  * Execute the speech synthesis on SSML.
@@ -96,7 +96,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param ssml the SSML for synthesis.
  * @return the result of speech synthesis.
  */
-- (nonnull SPXSpeechSynthesisResult *)SpeakSsml:(nonnull NSString*)ssml NS_RETURNS_RETAINED
+- (nonnull SPXSpeechSynthesisResult *)speakSsml:(nonnull NSString*)ssml NS_RETURNS_RETAINED
 NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
@@ -106,7 +106,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param outError error information.
  * @return the result of speech synthesis.
  */
-- (nullable SPXSpeechSynthesisResult *)SpeakSsml:(nonnull NSString*)ssml error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED;
+- (nullable SPXSpeechSynthesisResult *)speakSsml:(nonnull NSString*)ssml error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED;
 
 /**
  * Start the speech synthesis on plain text.
@@ -114,7 +114,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param text the plain the for synthesis.
  * @return the result of speech synthesis.
  */
-- (nonnull SPXSpeechSynthesisResult *)StartSpeakingText:(nonnull NSString*)text NS_RETURNS_RETAINED
+- (nonnull SPXSpeechSynthesisResult *)startSpeakingText:(nonnull NSString*)text NS_RETURNS_RETAINED
 NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
@@ -124,7 +124,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param outError error information.
  * @return the result of speech synthesis.
  */
-- (nullable SPXSpeechSynthesisResult *)StartSpeakingText:(nonnull NSString*)text error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED;
+- (nullable SPXSpeechSynthesisResult *)startSpeakingText:(nonnull NSString*)text error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED;
 
 /**
  * Start the speech synthesis on SSML.
@@ -132,7 +132,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param ssml the SSML for synthesis.
  * @return the result of speech synthesis.
  */
-- (nonnull SPXSpeechSynthesisResult *)StartSpeakingSsml:(nonnull NSString*)ssml NS_RETURNS_RETAINED
+- (nonnull SPXSpeechSynthesisResult *)startSpeakingSsml:(nonnull NSString*)ssml NS_RETURNS_RETAINED
 NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
@@ -142,7 +142,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param outError error information.
  * @return the result of speech synthesis.
  */
-- (nullable SPXSpeechSynthesisResult *)StartSpeakingSsml:(nonnull NSString*)ssml error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED;
+- (nullable SPXSpeechSynthesisResult *)startSpeakingSsml:(nonnull NSString*)ssml error:(NSError * _Nullable * _Nullable)outError NS_RETURNS_RETAINED;
 
 /**
  * Subscribes to the SynthesisStarted event which indicates that the synthesis just started.

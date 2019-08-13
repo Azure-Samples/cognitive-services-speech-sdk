@@ -71,7 +71,7 @@
     NSLog(@"Start synthesizing...");
     [self updateText:@"Start synthesizing..." color:UIColor.grayColor];
     
-    SPXSpeechSynthesisResult *speechResult = [speechSynthesizer SpeakText:inputText];
+    SPXSpeechSynthesisResult *speechResult = [speechSynthesizer speakText:inputText];
     
     // Checks result.
     if (SPXResultReason_Canceled == speechResult.reason) {

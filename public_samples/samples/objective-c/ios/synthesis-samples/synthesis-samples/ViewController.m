@@ -169,7 +169,7 @@
         return;
     }
     
-    SPXSpeechSynthesisResult *speechResult = [synthesizer SpeakText:inputText];
+    SPXSpeechSynthesisResult *speechResult = [synthesizer speakText:inputText];
     
     // Checks result.
     if (SPXResultReason_Canceled == speechResult.reason) {
@@ -220,7 +220,7 @@
         return;
     }
     
-    SPXSpeechSynthesisResult *speechResult = [synthesizer SpeakText:inputText];
+    SPXSpeechSynthesisResult *speechResult = [synthesizer speakText:inputText];
     
     // Checks result.
     if (SPXResultReason_Canceled == speechResult.reason) {
@@ -266,7 +266,7 @@
         return;
     }
     
-    SPXSpeechSynthesisResult *speechResult = [synthesizer SpeakText:inputText];
+    SPXSpeechSynthesisResult *speechResult = [synthesizer speakText:inputText];
     
     // Checks result.
     if (SPXResultReason_Canceled == speechResult.reason) {
@@ -343,7 +343,7 @@
         return;
     }
     
-    SPXSpeechSynthesisResult *speechResult = [synthesizer SpeakText:inputText];
+    SPXSpeechSynthesisResult *speechResult = [synthesizer speakText:inputText];
     
     // Checks result.
     if (SPXResultReason_Canceled == speechResult.reason) {
@@ -381,7 +381,7 @@
         return;
     }
     
-    SPXSpeechSynthesisResult *speechResult = [synthesizer StartSpeakingText:inputText];
+    SPXSpeechSynthesisResult *speechResult = [synthesizer startSpeakingText:inputText];
     SPXAudioDataStream *stream = [[SPXAudioDataStream alloc] initFromSynthesisResult:speechResult];
 
     // create file
@@ -440,7 +440,7 @@
         [self updateErrorText:([NSString stringWithFormat:@"Canceled: %@", details.errorDetails])];
     }];
     
-    [synthesizer StartSpeakingText:inputText];
+    [synthesizer startSpeakingText:inputText];
 }
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {;

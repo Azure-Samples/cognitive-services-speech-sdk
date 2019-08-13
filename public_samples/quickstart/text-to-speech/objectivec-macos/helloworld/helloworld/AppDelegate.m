@@ -40,7 +40,7 @@
     
     NSLog(@"Start synthesizing...");
     
-    SPXSpeechSynthesisResult *speechResult = [speechSynthesizer SpeakText:[self.textField stringValue]];
+    SPXSpeechSynthesisResult *speechResult = [speechSynthesizer speakText:[self.textField stringValue]];
     
     // Checks result.
     if (SPXResultReason_Canceled == speechResult.reason) {

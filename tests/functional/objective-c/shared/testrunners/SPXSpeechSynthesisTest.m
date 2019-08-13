@@ -58,8 +58,8 @@
 
 - (void)_testDefaultSynthesis{
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]init:self.speechConfig];
-    SPXSpeechSynthesisResult* result1 = [synthesizer SpeakText:@"{{{text1}}}"];
-    SPXSpeechSynthesisResult* result2 = [synthesizer SpeakText:@"{{{text2}}}"];
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"{{{text2}}}"];
     [self checkResult:result1];
     [self checkResult:result2];
 }
@@ -69,8 +69,8 @@
     NSString *lang = [self.speechConfig getSpeechSynthesisLanguage];
     XCTAssertEqualObjects(lang, @"en-GB");
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]init:self.speechConfig];
-    SPXSpeechSynthesisResult* result1 = [synthesizer SpeakText:@"{{{text1}}}"];
-    SPXSpeechSynthesisResult* result2 = [synthesizer SpeakText:@"{{{text2}}}"];
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"{{{text2}}}"];
     [self checkResult:result1];
     [self checkResult:result2];
 }
@@ -81,8 +81,8 @@
     NSString *getVoiceName = [self.speechConfig getSpeechSynthesisVoiceName];
     XCTAssertEqualObjects(setVoiceName, getVoiceName);
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]init:self.speechConfig];
-    SPXSpeechSynthesisResult* result1 = [synthesizer SpeakText:@"{{{text1}}}"];
-    SPXSpeechSynthesisResult* result2 = [synthesizer SpeakText:@"{{{text2}}}"];
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"{{{text2}}}"];
     [self checkResult:result1];
     [self checkResult:result2];
 }
@@ -91,7 +91,7 @@
     NSString* fileName = @"wavefile.wav";
     SPXAudioConfiguration* fileConfig = [[SPXAudioConfiguration alloc] initWithWavFileInput:fileName];
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:fileConfig];
-    SPXSpeechSynthesisResult* result1 = [synthesizer SpeakText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
     [self checkResult:result1];
     NSUInteger fileSize = [[[NSFileManager defaultManager] attributesOfItemAtPath:fileName error:nil] fileSize];
     XCTAssertGreaterThan(fileSize, emptyWaveFileSize, @"The size of output wave file 1 is unexpected. Expected: greater than %lu, Actual: %lu", emptyWaveFileSize, fileSize);
@@ -101,8 +101,8 @@
 
     // Make a second run with 2 speaks to verify that the audio can be append to the file while speaking
     synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:fileConfig];
-    result1 = [synthesizer SpeakText:@"{{{text1}}}"];
-    SPXSpeechSynthesisResult* result2 = [synthesizer SpeakSsml:ssml];
+    result1 = [synthesizer speakText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result2 = [synthesizer speakSsml:ssml];
     [self checkResult:result1];
     [self checkResult:result2];
     NSUInteger fileSize2 = [[[NSFileManager defaultManager] attributesOfItemAtPath:fileName error:nil] fileSize];
@@ -123,8 +123,8 @@
                                         }];
     SPXAudioConfiguration* streamConfig = [[SPXAudioConfiguration alloc] initWithStreamOutput:stream];
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:streamConfig];
-    SPXSpeechSynthesisResult* result1 = [synthesizer SpeakText:@"{{{text1}}}"];
-    SPXSpeechSynthesisResult* result2 = [synthesizer SpeakSsml:ssml];
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result2 = [synthesizer speakSsml:ssml];
     [self checkResult:result1];
     [self checkResult:result2];
     result1 = nil;
@@ -137,8 +137,8 @@
     SPXPullAudioOutputStream* stream = [[SPXPullAudioOutputStream alloc] init];
     SPXAudioConfiguration* streamConfig = [[SPXAudioConfiguration alloc] initWithStreamOutput:stream];
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:streamConfig];
-    SPXSpeechSynthesisResult* result1 = [synthesizer SpeakText:@"{{{text1}}}"];
-    SPXSpeechSynthesisResult* result2 = [synthesizer SpeakText:@"{{{text2}}}"];
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"{{{text2}}}"];
     [self checkResult:result1];
     [self checkResult:result2];
     result1 = nil;
@@ -168,8 +168,8 @@
 
     SPXAudioConfiguration* streamConfig = [[SPXAudioConfiguration alloc] initWithStreamOutput:stream];
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:streamConfig];
-    SPXSpeechSynthesisResult* result1 = [synthesizer SpeakText:@"{{{text1}}}"];
-    SPXSpeechSynthesisResult* result2 = [synthesizer SpeakText:@"{{{text2}}}"];
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"{{{text2}}}"];
     [self checkResult:result1];
     [self checkResult:result2];
     result1 = nil;
@@ -181,13 +181,13 @@
 
 - (void)_testSpeakOutInResults {
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:nil];
-    SPXSpeechSynthesisResult* result1 = [synthesizer SpeakText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
     [self checkResult:result1];
     XCTAssertEqualWithAccuracy(guidLength, result1.resultId.length, 0.01, @"The length of result ID should be the length of a GUID (32).");
     XCTAssertEqual(SPXResultReason_SynthesizingAudioCompleted, result1.reason, @"The synthesis should be completed now.");
     NSUInteger audioLength = result1.audioData.length;
     XCTAssertGreaterThan(audioLength, emptyWaveFileSize, @"The audio data size should be greater than %lu, but actually it's %lu.", emptyWaveFileSize, audioLength);
-    SPXSpeechSynthesisResult* result2 = [synthesizer SpeakText:@"{{{text2}}}"];
+    SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"{{{text2}}}"];
     [self checkResult:result2];
     XCTAssertEqualWithAccuracy(guidLength, result2.resultId.length, 0.01, @"The length of result ID should be the length of a GUID (32).");
     XCTAssertEqual(SPXResultReason_SynthesizingAudioCompleted, result2.reason, @"The synthesis should be completed now.");
@@ -201,15 +201,15 @@
         XCTAssertEqual(SPXResultReason_SynthesizingAudio, eventArgs.result.reason, @"The synthesis should be on going now.");
         XCTAssertGreaterThan(eventArgs.result.audioData.length, 0, @"The audio chunk size should be greater than zero");
     }];
-    SPXSpeechSynthesisResult* result1 = [synthesizer SpeakText:@"{{{text1}}}"];
-    SPXSpeechSynthesisResult* result2 = [synthesizer SpeakText:@"{{{text2}}}"];
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"{{{text2}}}"];
     [self checkResult:result1];
     [self checkResult:result2];
 }
 
 - (void)_testSpeakOutputInStreams {
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:nil];
-    SPXSpeechSynthesisResult* result1 = [synthesizer SpeakText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
     [self checkResult:result1];
     XCTAssertEqual(SPXResultReason_SynthesizingAudioCompleted, result1.reason, @"The synthesis should be completed now.");
     NSUInteger audioLength = result1.audioData.length;
@@ -228,7 +228,7 @@
     }
     XCTAssertEqual(audioLength - emptyWaveFileSize, audioLengthInDataStream); // audio data in SPXSpeechSynthesisResult has a header while data in stream doesn't
 
-    SPXSpeechSynthesisResult* result2 = [synthesizer SpeakText:@"{{{text2}}}"];
+    SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"{{{text2}}}"];
     [self checkResult:result2];
     XCTAssertEqual(SPXResultReason_SynthesizingAudioCompleted, result2.reason, @"The synthesis should be completed now.");
     audioLength = result2.audioData.length;
@@ -264,20 +264,20 @@
             dispatch_semaphore_signal(semaphore);
         });
     }];
-    SPXSpeechSynthesisResult* result1 = [synthesizer SpeakText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
     [self checkResult:result1];
     result1 = nil;
     synthesizer = nil;
     dispatch_semaphore_wait(semaphore,DISPATCH_TIME_FOREVER);
 }
 
-- (void)_testSpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingText {
+- (void)_testSpeakOutputInStreamsBeforeDoneFromMethodstartSpeakingText {
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:nil];
-    SPXSpeechSynthesisResult* result1 = [synthesizer StartSpeakingText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result1 = [synthesizer startSpeakingText:@"{{{text1}}}"];
     [self checkResult:result1];
     XCTAssertEqual(SPXResultReason_SynthesizingAudioStarted, result1.reason, @"The synthesis should be started now.");
     XCTAssertEqual(0, result1.audioData.length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
-    SPXSpeechSynthesisResult* result2 = [synthesizer StartSpeakingText:@"{{{text2}}}"];
+    SPXSpeechSynthesisResult* result2 = [synthesizer startSpeakingText:@"{{{text2}}}"];
     [self checkResult:result2];
     XCTAssertEqual(SPXResultReason_SynthesizingAudioStarted, result2.reason, @"The synthesis should be started now.");
     XCTAssertEqual(0, result2.audioData.length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
@@ -332,11 +332,11 @@
         canceledRequests++;
     }];
 
-    SPXSpeechSynthesisResult* result1 = [synthesizer StartSpeakingText:@"{{{text1}}}"];
+    SPXSpeechSynthesisResult* result1 = [synthesizer startSpeakingText:@"{{{text1}}}"];
     [self checkResult:result1];
     XCTAssertEqual(SPXResultReason_SynthesizingAudioStarted, result1.reason, @"The synthesis should be started now.");
     XCTAssertEqual(0, result1.audioData.length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
-    SPXSpeechSynthesisResult* result2 = [synthesizer StartSpeakingSsml:ssml];
+    SPXSpeechSynthesisResult* result2 = [synthesizer startSpeakingSsml:ssml];
     [self checkResult:result2];
     XCTAssertEqual(SPXResultReason_SynthesizingAudioStarted, result2.reason, @"The synthesis should be started now.");
     XCTAssertEqual(0, result2.audioData.length, "The synthesized audio should still be zero at this point, since the synthesis just started, and no audio chunk has been synthesized yet.");
@@ -388,7 +388,7 @@
         XCTAssertEqualWithAccuracy(expectedWordLengthsPtr[currentIndex], eventArgs.wordLength, 0.1, @"Word length mismatch on word #%lu.", currentIndex + 1);
         currentIndex++;
     }];
-    SPXSpeechSynthesisResult* result1 = [synthesizer SpeakText:plainText];
+    SPXSpeechSynthesisResult* result1 = [synthesizer speakText:plainText];
     [self checkResult:result1];
     XCTAssertEqual(8, currentIndex, @"Incorrect count of word boundary events.");
     for (int i = 1; i < 8; i++) {
@@ -400,7 +400,7 @@
     expectedAudioOffsets[7] = 29029375;
     expectedTextOffsets[0] = 251;
     currentIndex = 0;
-    SPXSpeechSynthesisResult* result2 = [synthesizer SpeakSsml:ssml];
+    SPXSpeechSynthesisResult* result2 = [synthesizer speakSsml:ssml];
     [self checkResult:result2];
     XCTAssertEqual(8, currentIndex, @"Incorrect count of word boundary events.");
 }
@@ -473,8 +473,8 @@
     return [self _testSpeakOutputInStreamsBeforeDoneFromEventSynthesisStarted];
 }
 
-- (void)testSpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingText {
-    return [self _testSpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingText];
+- (void)testSpeakOutputInStreamsBeforeDoneFromMethodstartSpeakingText {
+    return [self _testSpeakOutputInStreamsBeforeDoneFromMethodstartSpeakingText];
 }
 
 - (void)testSpeakOutputInStreamsBeforeDoneQueued {
