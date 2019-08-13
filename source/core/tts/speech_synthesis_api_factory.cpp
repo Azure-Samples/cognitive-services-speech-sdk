@@ -18,7 +18,7 @@ namespace Speech {
 namespace Impl {
 
 
-std::shared_ptr<ISpxSynthesizer> CSpxSpeechSynthesisApiFactory::CreateSpeechSynthesizerFromConfig(const char* language, const char* voice, const char* outputFormat, std::shared_ptr<ISpxAudioConfig> audioConfig)
+std::shared_ptr<ISpxSynthesizer> CSpxSpeechSynthesisApiFactory::CreateSpeechSynthesizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioConfig)
 {
     auto factoryAsSite = SpxSiteFromThis(this);
 
@@ -27,18 +27,6 @@ std::shared_ptr<ISpxSynthesizer> CSpxSpeechSynthesisApiFactory::CreateSpeechSynt
 
     // Set the synthesizer properties
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(synthesizer);
-
-    // Set the synthesis language
-    if (language != nullptr)
-    {
-        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthLanguage), language);
-    }
-
-    // Set the synthesis voice
-    if (voice != nullptr)
-    {
-        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthVoice), voice);
-    }
 
     std::shared_ptr<ISpxAudioOutput> output = nullptr;
 
@@ -73,7 +61,7 @@ std::shared_ptr<ISpxSynthesizer> CSpxSpeechSynthesisApiFactory::CreateSpeechSynt
     }
 
     // Get audio output format string
-    auto outputFormatStr = std::string(outputFormat);
+    auto outputFormatStr = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthOutputFormat));
 
     // Get audio output format
     auto requiredFormatSize = GetSpeechSynthesisOutputFormatFromString(outputFormatStr, nullptr, 0, nullptr, nullptr);

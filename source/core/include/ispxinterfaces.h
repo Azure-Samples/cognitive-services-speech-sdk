@@ -1027,7 +1027,7 @@ public:
 class ISpxSpeechSynthesisApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechSynthesisApiFactory>
 {
 public:
-    virtual std::shared_ptr<ISpxSynthesizer> CreateSpeechSynthesizerFromConfig(const char* language, const char* voice, const char* outputFormat, std::shared_ptr<ISpxAudioConfig> audioConfig) = 0;
+    virtual std::shared_ptr<ISpxSynthesizer> CreateSpeechSynthesizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioConfig) = 0;
 };
 
 class ISpxNamedProperties : public ISpxInterfaceBaseFor<ISpxNamedProperties>

@@ -47,7 +47,7 @@ public:
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxSpeechSynthesisApiFactory
-    std::shared_ptr<ISpxSynthesizer> CreateSpeechSynthesizerFromConfig(const char* language, const char* voice, const char* outputFormat, std::shared_ptr<ISpxAudioConfig> audioConfig) override;
+    std::shared_ptr<ISpxSynthesizer> CreateSpeechSynthesizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioConfig) override;
 
     // --- IServiceProvider
     SPX_SERVICE_MAP_BEGIN()

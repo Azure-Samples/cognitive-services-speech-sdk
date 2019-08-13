@@ -190,14 +190,9 @@ SPXAPI synthesizer_create_speech_synthesizer_from_config(SPXSYNTHHANDLE* phsynth
         auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
         fbag->Copy(speechconfig_propertybag.get());
 
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
-        auto synthLanguage = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthLanguage));
-        auto synthVoice = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthVoice));
-        auto synthOutputFormat = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_SynthOutputFormat));
-
         auto audioOutput = AudioConfigFromHandleOrEmptyIfInvalid(haudioconfig);
 
-        auto synthesizer = factory->CreateSpeechSynthesizerFromConfig(synthLanguage.c_str(), synthVoice.c_str(), synthOutputFormat.c_str(), audioOutput);
+        auto synthesizer = factory->CreateSpeechSynthesizerFromConfig(audioOutput);
 
         // track the synth handle
         auto synthhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSynthesizer, SPXSYNTHHANDLE>();
