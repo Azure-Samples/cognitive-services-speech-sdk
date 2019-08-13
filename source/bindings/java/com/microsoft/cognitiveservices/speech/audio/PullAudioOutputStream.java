@@ -23,20 +23,11 @@ public final class PullAudioOutputStream extends com.microsoft.cognitiveservices
     }
 
     /**
-     * Creates a memory backed PullAudioOutputStream using the default format (16 kHz, 16 bit, mono PCM).
+     * Creates a memory backed PullAudioOutputStream.
      * @return The pull audio output stream being created.
      */
     public static PullAudioOutputStream create() {
         return new PullAudioOutputStream(com.microsoft.cognitiveservices.speech.internal.AudioOutputStream.CreatePullStream());
-    }
-
-    /**
-     * Creates a memory backed PullAudioOutputStream with the specified audio format.
-     * @param format The audio data format in which audio will be read from the pull audio stream's read() method.
-     * @return The pull audio output stream being created.
-     */
-    public static PullAudioOutputStream create(AudioStreamFormat format) {
-        return new PullAudioOutputStream(com.microsoft.cognitiveservices.speech.internal.AudioOutputStream.CreatePullStream(format.getFormatImpl()));
     }
 
     /**

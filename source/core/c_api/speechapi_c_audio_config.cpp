@@ -167,19 +167,6 @@ SPXAPI audio_config_create_audio_output_from_stream(SPXAUDIOCONFIGHANDLE* haudio
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI audio_config_create_push_audio_output_stream(SPXAUDIOCONFIGHANDLE* haudioConfig, SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat)
-{
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioConfig == nullptr);
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioStream == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        SPX_THROW_ON_FAIL(audio_stream_create_push_audio_output_stream(haudioStream, hformat));
-        SPX_THROW_ON_FAIL(audio_config_create_audio_output_from_stream(haudioConfig, *haudioStream));
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
 SPXAPI audio_config_release(SPXAUDIOCONFIGHANDLE haudioConfig)
 {
     return Handle_Close<SPXAUDIOCONFIGHANDLE, ISpxAudioConfig>(haudioConfig);

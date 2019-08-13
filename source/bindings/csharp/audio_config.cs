@@ -166,21 +166,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         }
 
         /// <summary>
-        /// Creates an AudioConfig object representing the specified stream.
-        /// Added in version 1.4.0
-        /// </summary>
-        /// <param name="callback">Specifies the push audio output stream callback.</param>
-        /// <param name="format">The audio data format in which audio will be sent to the push audio stream's write() method.</param>
-        /// <returns>The audio input configuration being created.</returns>
-        public static AudioConfig FromStreamOutput(PushAudioOutputStreamCallback callback, AudioStreamFormat format)
-        {
-            PushAudioOutputStream pushStream = new PushAudioOutputStream(callback, format);
-            IntPtr audioConfigHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.AudioConfig.audio_config_create_audio_output_from_stream(out audioConfigHandle, pushStream.streamHandle));
-            return new AudioConfig(audioConfigHandle, pushStream, true);
-        }
-
-        /// <summary>
         /// Dispose of associated resources.
         /// We may or may not dispose the audio stream, depending if we are told we own the stream give to us.
         /// </summary>

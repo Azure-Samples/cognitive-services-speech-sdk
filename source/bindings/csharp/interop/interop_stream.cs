@@ -99,7 +99,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     internal static class PullAudioOutputStream
     {
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR audio_stream_create_pull_audio_output_stream(out SPXAUDIOSTREAMHANDLE audioStream, InteropSafeHandle format);
+        public static extern SPXHR audio_stream_create_pull_audio_output_stream(out SPXAUDIOSTREAMHANDLE audioStream);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR pull_audio_output_stream_read(InteropSafeHandle audioStream, IntPtr buffer, UInt32 bufferSize, out UInt32 filledSize);
     }
@@ -134,7 +134,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     internal static class PushAudioOutputStream
     {
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR audio_stream_create_push_audio_output_stream(out SPXAUDIOSTREAMHANDLE audioStream, InteropSafeHandle format);
+        public static extern SPXHR audio_stream_create_push_audio_output_stream(out SPXAUDIOSTREAMHANDLE audioStream);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR push_audio_output_stream_set_callbacks(InteropSafeHandle audioStream, IntPtr context, PushAudioStreamWriteDelegate writeCallback, PushAudioStreamCloseDelegate closeCallback);

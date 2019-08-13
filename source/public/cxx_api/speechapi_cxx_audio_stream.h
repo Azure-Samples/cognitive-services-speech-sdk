@@ -704,7 +704,7 @@ inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(
 
 /// <summary>
 /// Represents audio output stream used for custom audio output configurations.
-/// Added in version 1.4.0
+/// Updated in version 1.7.0
 /// </summary>
 class AudioOutputStream
 {
@@ -721,21 +721,14 @@ public:
     explicit operator SPXAUDIOSTREAMHANDLE() const { return m_haudioStream.get(); }
 
     /// <summary>
-    /// Creates a memory backed PullAudioOutputStream using the default format (16 kHz, 16 bit, mono PCM).
+    /// Creates a memory backed PullAudioOutputStream.
     /// </summary>
     /// <returns>A shared pointer to PullAudioOutputStream</returns>
     static std::shared_ptr<PullAudioOutputStream> CreatePullStream();
 
-    /// <summary>
-    /// Creates a memory backed PullAudioOutputStream with the specified audio format.
-    /// </summary>
-    /// <param name="format">Audio stream format.</param>
-    /// <returns>A shared pointer to PullAudioOutputStream</returns>
-    static std::shared_ptr<PullAudioOutputStream> CreatePullStream(std::shared_ptr<AudioStreamFormat> format);
-
 #if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     /// <summary>
-    /// Creates a PushAudioOutputStream that delegates to the specified callback functions for Write() and Close() methods, using the default format (16 kHz, 16 bit, mono PCM).
+    /// Creates a PushAudioOutputStream that delegates to the specified callback functions for Write() and Close() methods.
     /// </summary>
     /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
     /// <param name="writeCallback">Write callback.</param>
@@ -744,7 +737,7 @@ public:
     static std::shared_ptr<PushAudioOutputStream> CreatePushStream(void* pvContext, CUSTOM_AUDIO_PUSH_STREAM_WRITE_CALLBACK writeCallback, CUSTOM_AUDIO_PUSH_STREAM_CLOSE_CALLBACK closeCallback = nullptr);
 
     /// <summary>
-    /// Creates a PushAudioOutputStream that delegates to the specified callback functions for Write() and Close() methods, using the default format (16 kHz, 16 bit, mono PCM).
+    /// Creates a PushAudioOutputStream that delegates to the specified callback functions for Write() and Close() methods.
     /// </summary>
     /// <param name="writeCallback">Write callback.</param>
     /// <param name="closeCallback">Close callback.</param>
@@ -753,40 +746,11 @@ public:
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
-    /// Creates a PushAudioOutputStream that delegates to the specified callback interface for Write() and Close() methods, using the default format (16 kHz, 16 bit, mono PCM).
+    /// Creates a PushAudioOutputStream that delegates to the specified callback interface for Write() and Close() methods.
     /// </summary>
     /// <param name="callback">Shared pointer to PushAudioOutputStreamCallback instance.</param>
     /// <returns>A shared pointer to PushAudioOutputStream</returns>
     static std::shared_ptr<PushAudioOutputStream> CreatePushStream(std::shared_ptr<PushAudioOutputStreamCallback> callback);
-
-#if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
-    /// <summary>
-    /// Creates a PushAudioOutputStream that delegates to the specified callback functions for Write() and Close() methods.
-    /// </summary>
-    /// <param name="format">Audio stream format.</param>
-    /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
-    /// <param name="writeCallback">Write callback.</param>
-    /// <param name="closeCallback">Close callback.</param>
-    /// <returns>A shared pointer to PushAudioOutputStream</returns>
-    static std::shared_ptr<PushAudioOutputStream> CreatePushStream(std::shared_ptr<AudioStreamFormat> format, void* pvContext, CUSTOM_AUDIO_PUSH_STREAM_WRITE_CALLBACK writeCallback, CUSTOM_AUDIO_PUSH_STREAM_CLOSE_CALLBACK closeCallback = nullptr);
-
-    /// <summary>
-    /// Creates a PushAudioOutputStream that delegates to the specified callback functions for Write() and Close() methods.
-    /// </summary>
-    /// <param name="format">Audio stream format.</param>
-    /// <param name="writeCallback">Write callback.</param>
-    /// <param name="closeCallback">Close callback.</param>
-    /// <returns>A shared pointer to PushAudioOutputStream</returns>
-    static std::shared_ptr<PushAudioOutputStream> CreatePushStream(std::shared_ptr<AudioStreamFormat> format, WriteCallbackFunction_Type writeCallback, CloseCallbackFunction_Type closeCallback = nullptr);
-#endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
-
-    /// <summary>
-    /// Creates a PushAudioOutputStream that delegates to the specified callback interface for Write() and Close() methods, using the specified format.
-    /// </summary>
-    /// <param name="format">Audio stream format.</param>
-    /// <param name="callback">Shared pointer to PushAudioOutputStreamCallback instance.</param>
-    /// <returns>A shared pointer to PushAudioOutputStream</returns>
-    static std::shared_ptr<PushAudioOutputStream> CreatePushStream(std::shared_ptr<AudioStreamFormat> format, std::shared_ptr<PushAudioOutputStreamCallback> callback);
 
 protected:
 
@@ -803,16 +767,6 @@ protected:
     virtual ~AudioOutputStream() {}
 
     /// <summary>
-    /// Internal helper method to get the default format if the specified format is nullptr.
-    /// </summary>
-    static std::shared_ptr<AudioStreamFormat> UseDefaultFormatIfNull(std::shared_ptr<AudioStreamFormat> format) { return format != nullptr ? format : AudioStreamFormat::GetDefaultInputFormat(); }
-
-    /// <summary>
-    /// Internal helper method to get the audio stream format handle.
-    /// </summary>
-    static SPXAUDIOSTREAMFORMATHANDLE GetFormatHandle(std::shared_ptr<AudioStreamFormat> format) { return (SPXAUDIOSTREAMFORMATHANDLE)(*format.get()); }
-
-    /// <summary>
     /// Internal member variable that holds the smart handle.
     /// </summary>
     SmartHandle<SPXAUDIOSTREAMHANDLE, &audio_stream_release> m_haudioStream;
@@ -827,7 +781,7 @@ private:
 
 /// <summary>
 /// Represents memory backed pull audio output stream used for custom audio output.
-/// Added in version 1.4.0
+/// Updated in version 1.7.0
 /// </summary>
 class PullAudioOutputStream : public AudioOutputStream
 {
@@ -835,25 +789,13 @@ public:
     friend class Dialog::ActivityReceivedEventArgs;
 
     /// <summary>
-    /// Creates a memory backed PullAudioOutputStream using the default format (16 kHz, 16 bit, mono PCM).
+    /// Creates a memory backed PullAudioOutputStream.
     /// </summary>
     /// <returns>A shared pointer to PullAudioOutputStream</returns>
     static std::shared_ptr<PullAudioOutputStream> Create()
     {
-        return Create(nullptr);
-    }
-
-    /// <summary>
-    /// Creates a memory backed PullAudioOutputStream with the specified audio format.
-    /// </summary>
-    /// <param name="format">Audio stream format.</param>
-    /// <returns>A shared pointer to PullAudioOutputStream</returns>
-    static std::shared_ptr<PullAudioOutputStream> Create(std::shared_ptr<AudioStreamFormat> format)
-    {
-        format = UseDefaultFormatIfNull(format);
-
         SPXAUDIOSTREAMHANDLE haudioStream = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(audio_stream_create_pull_audio_output_stream(&haudioStream, GetFormatHandle(format)));
+        SPX_THROW_ON_FAIL(audio_stream_create_pull_audio_output_stream(&haudioStream));
 
         auto stream = new PullAudioOutputStream(haudioStream);
         return std::shared_ptr<PullAudioOutputStream>(stream);
@@ -909,7 +851,7 @@ private:
 
 /// <summary>
 /// An interface that defines callback methods for an audio output stream.
-/// Added in version 1.4.0
+/// Updated in version 1.7.0
 /// </summary>
 /// <remarks>
 /// Derive from this class and implement its function to provide your own
@@ -972,7 +914,9 @@ public:
     /// <returns>A shared pointer to PushAudioOutputStream</returns>
     static std::shared_ptr<PushAudioOutputStream> Create(void* pvContext, CUSTOM_AUDIO_PUSH_STREAM_WRITE_CALLBACK writeCallback, CUSTOM_AUDIO_PUSH_STREAM_CLOSE_CALLBACK closeCallback = nullptr)
     {
-        return Create(nullptr, pvContext, writeCallback, closeCallback);
+        return Create(
+            [=](uint8_t* buffer, uint32_t size) -> int { return writeCallback(pvContext, buffer, size); },
+            [=]() { if (closeCallback != nullptr) { closeCallback(pvContext); } });
     }
 
     /// <summary>
@@ -983,7 +927,8 @@ public:
     /// <returns>A shared pointer to PushAudioOutputStream</returns>
     static std::shared_ptr<PushAudioOutputStream> Create(WriteCallbackFunction_Type writeCallback, CloseCallbackFunction_Type closeCallback = nullptr)
     {
-        return Create(nullptr, writeCallback, closeCallback);
+        auto wrapper = std::make_shared<FunctionCallbackWrapper>(writeCallback, closeCallback);
+        return Create(wrapper);
     }
 #endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
@@ -994,51 +939,8 @@ public:
     /// <returns>A shared pointer to PushAudioOutputStream</returns>
     static std::shared_ptr<PushAudioOutputStream> Create(std::shared_ptr<PushAudioOutputStreamCallback> callback)
     {
-        return Create(nullptr, callback);
-    }
-
-#if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
-    /// <summary>
-    /// Creates a PushAudioOutputStream utilizing the specified Write() and Close() "C" callback functions pointers
-    /// </summary>
-    /// <param name="format">Audio stream format.</param>
-    /// <param name="pvContext">Context pointer to use when invoking the callbacks.</param>
-    /// <param name="writeCallback">Write callback.</param>
-    /// <param name="closeCallback">Close callback.</param>
-    /// <returns>A shared pointer to PushAudioOutputStream</returns>
-    static std::shared_ptr<PushAudioOutputStream> Create(std::shared_ptr<AudioStreamFormat> format, void* pvContext, CUSTOM_AUDIO_PUSH_STREAM_WRITE_CALLBACK writeCallback, CUSTOM_AUDIO_PUSH_STREAM_CLOSE_CALLBACK closeCallback = nullptr)
-    {
-        return Create(format,
-            [=](uint8_t* buffer, uint32_t size) -> int { return writeCallback(pvContext, buffer, size); },
-            [=]() { if (closeCallback != nullptr) { closeCallback(pvContext); } });
-    }
-
-    /// <summary>
-    /// Creates a PushAudioOutputStream utilizing the specified Write() and Close() callback functions.
-    /// </summary>
-    /// <param name="format">Audio stream format.</param>
-    /// <param name="writeCallback">Write callback.</param>
-    /// <param name="closeCallback">Close callback.</param>
-    /// <returns>A shared pointer to PushAudioOutputStream</returns>
-    static std::shared_ptr<PushAudioOutputStream> Create(std::shared_ptr<AudioStreamFormat> format, WriteCallbackFunction_Type writeCallback, CloseCallbackFunction_Type closeCallback = nullptr)
-    {
-        auto wrapper = std::make_shared<FunctionCallbackWrapper>(writeCallback, closeCallback);
-        return Create(format, wrapper);
-    }
-#endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
-
-    /// <summary>
-    /// Creates a PushAudioOutputStream utilizing the specified Write() and Close() callback functions.
-    /// </summary>
-    /// <param name="format">Audio stream format.</param>
-    /// <param name="callback">Shared pointer to PushAudioOutputStreamCallback instance.</param>
-    /// <returns>A shared pointer to PushAudioOutputStream</returns>
-    static std::shared_ptr<PushAudioOutputStream> Create(std::shared_ptr<AudioStreamFormat> format, std::shared_ptr<PushAudioOutputStreamCallback> callback)
-    {
-        format = UseDefaultFormatIfNull(format);
-
         SPXAUDIOSTREAMHANDLE haudioStream = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(audio_stream_create_push_audio_output_stream(&haudioStream, GetFormatHandle(format)));
+        SPX_THROW_ON_FAIL(audio_stream_create_push_audio_output_stream(&haudioStream));
 
         auto stream = new PushAudioOutputStream(haudioStream);
         SPX_THROW_ON_FAIL(push_audio_output_stream_set_callbacks(haudioStream, stream, WriteCallbackWrapper, CloseCallbackWrapper));
@@ -1107,11 +1009,6 @@ inline std::shared_ptr<PullAudioOutputStream> AudioOutputStream::CreatePullStrea
     return PullAudioOutputStream::Create();
 }
 
-inline std::shared_ptr<PullAudioOutputStream> AudioOutputStream::CreatePullStream(std::shared_ptr<AudioStreamFormat> format)
-{
-    return PullAudioOutputStream::Create(format);
-}
-
 #if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 inline std::shared_ptr<PushAudioOutputStream> AudioOutputStream::CreatePushStream(void* pvContext, CUSTOM_AUDIO_PUSH_STREAM_WRITE_CALLBACK writeCallback, CUSTOM_AUDIO_PUSH_STREAM_CLOSE_CALLBACK closeCallback)
 {
@@ -1127,23 +1024,6 @@ inline std::shared_ptr<PushAudioOutputStream> AudioOutputStream::CreatePushStrea
 inline std::shared_ptr<PushAudioOutputStream> AudioOutputStream::CreatePushStream(std::shared_ptr<PushAudioOutputStreamCallback> callback)
 {
     return PushAudioOutputStream::Create(callback);
-}
-
-#if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
-inline std::shared_ptr<PushAudioOutputStream> AudioOutputStream::CreatePushStream(std::shared_ptr<AudioStreamFormat> format, void* pvContext, CUSTOM_AUDIO_PUSH_STREAM_WRITE_CALLBACK writeCallback, CUSTOM_AUDIO_PUSH_STREAM_CLOSE_CALLBACK closeCallback)
-{
-    return PushAudioOutputStream::Create(format, pvContext, writeCallback, closeCallback);
-}
-
-inline std::shared_ptr<PushAudioOutputStream> AudioOutputStream::CreatePushStream(std::shared_ptr<AudioStreamFormat> format, WriteCallbackFunction_Type writeCallback, CloseCallbackFunction_Type closeCallback)
-{
-    return PushAudioOutputStream::Create(format, writeCallback, closeCallback);
-}
-#endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
-
-inline std::shared_ptr<PushAudioOutputStream> AudioOutputStream::CreatePushStream(std::shared_ptr<AudioStreamFormat> format, std::shared_ptr<PushAudioOutputStreamCallback> callback)
-{
-    return PushAudioOutputStream::Create(format, callback);
 }
 
 

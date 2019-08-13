@@ -57,7 +57,7 @@ SPXAPI audio_stream_create_pull_audio_input_stream(SPXAUDIOSTREAMHANDLE* haudioS
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI audio_stream_create_pull_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat)
+SPXAPI audio_stream_create_pull_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudioStream)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioStream == nullptr);
 
@@ -65,17 +65,14 @@ SPXAPI audio_stream_create_pull_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudio
     {
         *haudioStream = SPXHANDLE_INVALID;
 
-        auto format = CSpxSharedPtrHandleTableManager::GetPtr<SPXWAVEFORMATEX, SPXAUDIOSTREAMFORMATHANDLE>(hformat);
         auto initFormat = SpxCreateObjectWithSite<ISpxAudioStreamInitFormat>("CSpxPullAudioOutputStream", SpxGetRootSite());
-        initFormat->SetFormat(format.get());
-
         auto stream = SpxQueryInterface<ISpxAudioStream>(initFormat);
         *haudioStream = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxAudioStream, SPXAUDIOSTREAMHANDLE>(stream);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI audio_stream_create_push_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat)
+SPXAPI audio_stream_create_push_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudioStream)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, haudioStream == nullptr);
 
@@ -83,10 +80,7 @@ SPXAPI audio_stream_create_push_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudio
     {
         *haudioStream = SPXHANDLE_INVALID;
 
-        auto format = CSpxSharedPtrHandleTableManager::GetPtr<SPXWAVEFORMATEX, SPXAUDIOSTREAMFORMATHANDLE>(hformat);
         auto initFormat = SpxCreateObjectWithSite<ISpxAudioStreamInitFormat>("CSpxPushAudioOutputStream", SpxGetRootSite());
-        initFormat->SetFormat(format.get());
-
         auto stream = SpxQueryInterface<ISpxAudioStream>(initFormat);
         *haudioStream = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxAudioStream, SPXAUDIOSTREAMHANDLE>(stream);
     }

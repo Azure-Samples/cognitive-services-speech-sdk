@@ -12,12 +12,12 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 {
     /// <summary>
     /// Represents audio output stream used for custom audio output configurations.
-    /// Added in version 1.4.0
+    /// Updated in version 1.7.0
     /// </summary>
     public class AudioOutputStream : IDisposable
     {
         /// <summary>
-        /// Creates a memory backed PullAudioOutputStream using the default format (16 kHz, 16 bit, mono PCM).
+        /// Creates a memory backed PullAudioOutputStream.
         /// </summary>
         /// <returns>The pull audio output stream being created.</returns>
         public static PullAudioOutputStream CreatePullStream()
@@ -26,34 +26,13 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         }
 
         /// <summary>
-        /// Creates a memory backed PullAudioOutputStream with the specified audio format.
-        /// </summary>
-        /// <param name="format">The audio data format in which audio will be read from the pull audio stream's read() method.</param>
-        /// <returns>The pull audio output stream being created.</returns>
-        public static PullAudioOutputStream CreatePullStream(AudioStreamFormat format)
-        {
-            return new PullAudioOutputStream(format);
-        }
-
-        /// <summary>
-        /// Creates a PushAudioOutputStream that delegates to the specified callback interface for write() and close() methods, using the default format (16 kHz, 16 bit, mono PCM).
+        /// Creates a PushAudioOutputStream that delegates to the specified callback interface for write() and close() methods.
         /// </summary>
         /// <param name="callback">The custom audio output object, derived from PushAudioOutputStreamCallback</param>
         /// <returns>The push audio output stream being created.</returns>
         public static PushAudioOutputStream CreatePushStream(PushAudioOutputStreamCallback callback)
         {
             return new PushAudioOutputStream(callback);
-        }
-
-        /// <summary>
-        /// Creates a PushAudioOutputStream that delegates to the specified callback interface for write() and close() methods.
-        /// </summary>
-        /// <param name="callback">The custom audio output object, derived from PushAudioOutputStreamCallback.</param>
-        /// <param name="format">The audio data format in which audio will be sent to the callback's write() method.</param>
-        /// <returns>The push audio output stream being created.</returns>
-        public static PushAudioOutputStream CreatePushStream(PushAudioOutputStreamCallback callback, AudioStreamFormat format)
-        {
-            return new PushAudioOutputStream(callback, format);
         }
 
         /// <summary>
@@ -103,27 +82,17 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
     /// <summary>
     /// Represents memory backed pull audio output stream used for custom audio output configurations.
-    /// Added in version 1.4.0
+    /// Updated in version 1.7.0
     /// </summary>
     public sealed class PullAudioOutputStream : AudioOutputStream
     {
 
         /// <summary>
-        /// Creates a memory backed PullAudioOutputStream using the default format (16 kHz, 16 bit, mono PCM).
+        /// Creates a memory backed PullAudioOutputStream.
         /// </summary>
         public PullAudioOutputStream() :
-            this(CreateStreamHandle(AudioInputStream.UseDefaultFormatIfNull(null)))
+            this(CreateStreamHandle())
         {
-        }
-
-        /// <summary>
-        /// Creates a memory backed PullAudioOutputStream with the specified audio format.
-        /// </summary>
-        /// <param name="format">The audio data format in which audio will be read from the pull audio stream's read() method.</param>
-        public PullAudioOutputStream(AudioStreamFormat format) :
-            this(CreateStreamHandle(AudioInputStream.UseDefaultFormatIfNull(format)))
-        {
-            GC.KeepAlive(format);
         }
 
         /// <summary>
@@ -175,12 +144,10 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         private bool disposed = false;
 
-        private static IntPtr CreateStreamHandle(AudioStreamFormat streamFormat)
+        private static IntPtr CreateStreamHandle()
         {
-            ThrowIfNull(streamFormat);
             IntPtr audioStreamHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.PullAudioOutputStream.audio_stream_create_pull_audio_output_stream(out audioStreamHandle, streamFormat.FormatHandle));
-            GC.KeepAlive(streamFormat);
+            ThrowIfFail(Internal.PullAudioOutputStream.audio_stream_create_pull_audio_output_stream(out audioStreamHandle));
             return audioStreamHandle;
         }
 
@@ -193,31 +160,19 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
     /// <summary>
     /// Represents audio output stream used for custom audio output configurations.
-    /// Added in version 1.4.0
+    /// Updated in version 1.7.0
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213", MessageId = "callback", Justification = "callback is passed in by the caller, and should not be disposed as that could cause the owner problems.")]
     public sealed class PushAudioOutputStream : AudioOutputStream
     {
         /// <summary>
-        /// Creates a PushAudioOutputStream that delegates to the specified callback interface for write() and close() methods using the default format (16 kHz, 16 bit, mono PCM).
+        /// Creates a PushAudioOutputStream that delegates to the specified callback interface for write() and close() methods.
         /// </summary>
         /// <param name="callback">The custom audio output object, derived from PushAudioOutputStreamCallback.</param>
         /// <returns>The push audio output stream being created.</returns>
         public PushAudioOutputStream(PushAudioOutputStreamCallback callback) :
-            this(Create(AudioInputStream.UseDefaultFormatIfNull(null)), callback)
+            this(Create(), callback)
         {
-        }
-
-        /// <summary>
-        /// Creates a PushAudioOutputStream that delegates to the specified callback interface for write() and close() methods.
-        /// </summary>
-        /// <param name="callback">The custom audio output object, derived from PushAudioOutputStreamCallback.</param>
-        /// <param name="format">The audio data format in which audio will be sent to the callback's write() method.</param>
-        /// <returns>The push audio output stream being created.</returns>
-        public PushAudioOutputStream(PushAudioOutputStreamCallback callback, AudioStreamFormat format) :
-            this(Create(AudioInputStream.UseDefaultFormatIfNull(format)), callback)
-        {
-            GC.KeepAlive(format);
         }
 
         /// <summary>
@@ -246,12 +201,10 @@ namespace Microsoft.CognitiveServices.Speech.Audio
 
         private bool disposed = false;
 
-        private static IntPtr Create(AudioStreamFormat streamFormat)
+        private static IntPtr Create()
         {
-            ThrowIfNull(streamFormat);
             IntPtr audioStreamHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.PushAudioOutputStream.audio_stream_create_push_audio_output_stream(out audioStreamHandle, streamFormat.FormatHandle));
-            GC.KeepAlive(streamFormat);
+            ThrowIfFail(Internal.PushAudioOutputStream.audio_stream_create_push_audio_output_stream(out audioStreamHandle));
             return audioStreamHandle;
         }
 
@@ -338,8 +291,8 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// <summary>
         /// Writes binary data to the stream.
         /// </summary>
-        /// <param name="dataBuffer">The buffer containing the data to be writen</param>
-        /// <returns>The number of bytes writen.</returns>
+        /// <param name="dataBuffer">The buffer containing the data to be written</param>
+        /// <returns>The number of bytes written.</returns>
         abstract public uint Write(byte[] dataBuffer);
 
         /// <summary>

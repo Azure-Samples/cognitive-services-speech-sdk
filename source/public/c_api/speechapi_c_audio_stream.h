@@ -22,8 +22,8 @@ typedef enum
 SPXAPI_(bool) audio_stream_is_handle_valid(SPXAUDIOSTREAMHANDLE haudioStream);
 SPXAPI audio_stream_create_push_audio_input_stream(SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat);
 SPXAPI audio_stream_create_pull_audio_input_stream(SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat);
-SPXAPI audio_stream_create_pull_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat);
-SPXAPI audio_stream_create_push_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudioStream, SPXAUDIOSTREAMFORMATHANDLE hformat);
+SPXAPI audio_stream_create_pull_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudioStream);
+SPXAPI audio_stream_create_push_audio_output_stream(SPXAUDIOSTREAMHANDLE* haudioStream);
 SPXAPI audio_stream_release(SPXAUDIOSTREAMHANDLE haudioStream);
 
 // pull_audio_input_stream

@@ -46,6 +46,9 @@ public:
     // --- ISpxAudioStream ---
 
     uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) override;
+
+    // --- ISpxAudioOutputFormat ---
+
     bool HasHeader() override;
     std::string GetFormatString() override;
     std::string GetRawFormatString() override;
@@ -53,6 +56,9 @@ public:
     // --- ISpxAudioStreamInitFormat ---
 
     void SetFormat(SPXWAVEFORMATEX* pformat) override;
+
+    // --- ISpxAudioOutputInitFormat ---
+
     void SetHeader(bool hasHeader) override;
     void SetFormatString(const std::string& formatString) override;
     void SetRawFormatString(const std::string& rawFormatString) override;

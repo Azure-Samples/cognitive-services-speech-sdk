@@ -360,7 +360,7 @@ void CSpxUspTtsEngineAdapter::UspTerminate()
 void CSpxUspTtsEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 {
     UNUSED(message);
-    std::unique_lock<std::mutex> lokc(m_mutex);
+    std::unique_lock<std::mutex> lock(m_mutex);
     m_uspState = UspState::Receiving;
     m_currentReceivedData.clear();
 }
@@ -414,7 +414,7 @@ void CSpxUspTtsEngineAdapter::OnAudioOutputMetadata(const USP::AudioOutputMetada
 void CSpxUspTtsEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
 {
     UNUSED(message);
-    std::unique_lock<std::mutex> lokc(m_mutex);
+    std::unique_lock<std::mutex> lock(m_mutex);
     m_uspState = UspState::Idle;
     m_cv.notify_all();
 }
@@ -423,7 +423,7 @@ void CSpxUspTtsEngineAdapter::OnError(bool transport, USP::ErrorCode errorCode, 
 {
     UNUSED(transport);
     SPX_DBG_TRACE_VERBOSE("Response: On Error: Code:%d, Message: %s.\n", errorCode, errorMessage.c_str());
-    std::unique_lock<std::mutex> lokc(m_mutex);
+    std::unique_lock<std::mutex> lock(m_mutex);
     m_currentErrorCode = errorCode;
     m_currentErrorMessage = errorMessage;
     m_currentErrorMessage += ". USP state: " + CSpxSynthesisHelper::itos((int)(UspState)m_uspState) + ".";
