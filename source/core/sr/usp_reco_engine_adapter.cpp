@@ -2335,7 +2335,8 @@ json CSpxUspRecoEngineAdapter::GetLanguageIdJson()
 json CSpxUspRecoEngineAdapter::GetPhraseDetectionJson(const string& recoMode)
 {
     json phraseDetectionJson;
-    phraseDetectionJson["mode"] = recoMode;
+    SPX_DBG_ASSERT(!recoMode.empty());
+    phraseDetectionJson["mode"] = recoMode.c_str();
     phraseDetectionJson["onSuccess"]["action"] = "Translate";
     phraseDetectionJson["onInterim"]["action"] = "Translate";
     return phraseDetectionJson;
@@ -2344,7 +2345,8 @@ json CSpxUspRecoEngineAdapter::GetPhraseDetectionJson(const string& recoMode)
 json CSpxUspRecoEngineAdapter::GetPhraseOutputJson(const string& recoMode)
 {
     json phraseOutputJson;
-    phraseOutputJson["interimResults"][recoMode]["resultType"] = "Auto";
+    SPX_DBG_ASSERT(!recoMode.empty());
+    phraseOutputJson["interimResults"][recoMode.c_str()]["resultType"] = "Auto";
     return phraseOutputJson;
 }
 
