@@ -2010,8 +2010,10 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
         contextJson["translationcontext"]["to"] = json(toLangsVector);
     }
 
-    // New translation endpoint will need below json content. If old translation endpoint receives these, they will be discarded.
-    if (m_endpointType == USP::EndpointType::Translation)
+    // New translation endpoint will need below json content.
+    // Currently it is only used for language id feature
+    if (m_endpointType == USP::EndpointType::Translation
+        && properties->HasStringValue("Auto-Detect-Source-Languages"))
     {
         string recoMode = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode));
         unordered_map<string, string> voiceNameMap;
@@ -2318,13 +2320,13 @@ json CSpxUspRecoEngineAdapter::GetLanguageIdJson()
 {
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
-    string sourceLanguages = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages));
+    string sourceLanguages = properties->GetStringValue("Auto-Detect-Source-Languages");
     json langDetectionJson;
     if (!sourceLanguages.empty())
     {
         auto langVector = PAL::split(sourceLanguages, CommaDelim);
         langDetectionJson["languages"] = json(langVector);
-        // TODO: This will be updated to RecognizeWithDefaultLanguage if caller specifies a fallback language
+        langDetectionJson["onSuccess"]["action"] = "Recognize";
         langDetectionJson["onUnknown"]["action"] = "None";
     }
     return langDetectionJson;

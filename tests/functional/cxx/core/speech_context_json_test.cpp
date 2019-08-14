@@ -270,6 +270,16 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         auto properties = session->GetPropertiesPtr();
         auto recoMode = g_recoModeConversation;
         properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), recoMode);
+
+        vector<string> autoDetectSourceLangs{ "en-us", "zh-CN" };
+        string sourceLangStr = adapterTest.Join(autoDetectSourceLangs);
+        properties->SetStringValue("Auto-Detect-Source-Languages", sourceLangStr.c_str());
+        json languageIdJson;
+        languageIdJson["languages"] = json(autoDetectSourceLangs);
+        languageIdJson["onUnknown"]["action"] = "None";
+        languageIdJson["onSuccess"]["action"] = "Recognize";
+        expectedJson["languageId"] = languageIdJson;
+
         unordered_map<string, string> voiceNameMap
         {
                {"de-DE", "Microsoft Server Speech Text to Speech Voice(de - DE, Hedda)" },
@@ -297,36 +307,17 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         expectedJson["translation"] = translationJson;
         expectedJson["translationcontext"]["to"] = json(toLangs);
 
-        SPXTEST_SECTION("Only speech reco language is set")
-        {
-            string sourceLang = "fr-fr";
-            properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), sourceLang.c_str());
-            auto contextJson = adapterTest.GetSpeechContextJson();
-            REQUIRE(contextJson == expectedJson);
-        }
+        auto contextJson = adapterTest.GetSpeechContextJson();
+        REQUIRE(contextJson == expectedJson);
 
-        SPXTEST_SECTION("Mulitple source languages is set as auto detect source")
+        for (auto& pair : voiceNameMap)
         {
-            vector<string> autoDetectSourceLangs{ "en-us", "zh-CN" };
-            string sourceLangStr = adapterTest.Join(autoDetectSourceLangs);
-            properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), sourceLangStr.c_str());
-            expectedJson["languageId"]["languages"] = json(autoDetectSourceLangs);
-            expectedJson["languageId"]["onUnknown"]["action"] = "None";
-            auto contextJson = adapterTest.GetSpeechContextJson();
-            REQUIRE(contextJson == expectedJson);
-
-            SPXTEST_SECTION("sythesis settings")
-            {
-                for (auto& pair : voiceNameMap)
-                {
-                    string voiceNameProperty = pair.first + GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice);
-                    properties->SetStringValue(voiceNameProperty.c_str(), pair.second.c_str());
-                }
-                expectedJson["translation"]["onSuccess"]["action"] = "Synthesize";
-                expectedJson["synthesis"]["defaultVoices"] = json(std::move(voiceNameMap));
-                contextJson = adapterTest.GetSpeechContextJson();
-                REQUIRE(contextJson == expectedJson);
-            }
+            string voiceNameProperty = pair.first + GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice);
+            properties->SetStringValue(voiceNameProperty.c_str(), pair.second.c_str());
         }
+        expectedJson["translation"]["onSuccess"]["action"] = "Synthesize";
+        expectedJson["synthesis"]["defaultVoices"] = json(std::move(voiceNameMap));
+        contextJson = adapterTest.GetSpeechContextJson();
+        REQUIRE(contextJson == expectedJson);
     }
 }

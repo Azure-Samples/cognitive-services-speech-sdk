@@ -135,11 +135,6 @@ enum class PropertyId
     SpeechServiceConnection_IntentRegion = 2003,
 
     /// <summary>
-    /// The list of comma separated languages used as possible source languages. Added in version 1.7.0
-    /// </summary>
-    SpeechServiceConnection_AutoDetectSourceLanguages = 2004,
-
-    /// <summary>
     /// The Cognitive Services Speech Service recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
     /// This property is intended to be read-only. The SDK is using it internally.
     /// </summary>
