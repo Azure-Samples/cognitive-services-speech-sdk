@@ -74,6 +74,7 @@ enum IncomingMsgType
     translationSynthesis,
     translationSynthesisEnd,
     audio,
+    audioMetadata,
     response,
     countOfMsgTypes
 };
@@ -209,6 +210,7 @@ namespace event
         namespace received
         {
             static const std::string Audio = "audio";
+            static const std::string AudioMetadata = "audio.metadata";
             static const std::string Response = "response";
         }
 
