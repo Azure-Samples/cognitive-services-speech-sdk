@@ -78,7 +78,6 @@ class ViewController: UIViewController, UITextFieldDelegate, AVAudioPlayerDelega
             print("error \(error) happened")
             player = nil
         }
-        player?.delegate = self
         player?.play()
     }
 }

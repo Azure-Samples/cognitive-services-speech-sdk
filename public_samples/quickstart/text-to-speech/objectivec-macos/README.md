@@ -1,6 +1,6 @@
 # Quickstart: Synthesize audio in Objective-C on macOS using the Speech SDK
 
-This sample demonstrates how to create a macOS app in Objective-C using the Cognitive Services Speech SDK to synthesize audio from the input text.
+This sample demonstrates how to create a macOS app in Objective-C using the Cognitive Services Speech SDK to synthesize audio from text input.
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@ It can be used in Xcode projects as a [CocoaPod](https://cocoapods.org/), or dow
     1. Replace the string `YourServiceRegion` with the [region](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions) associated with your subscription (for example, `westus` for the free trial subscription).
 1. Make the debug output visible (**View** > **Debug Area** > **Activate Console**).
 1. Build and run the example code by selecting **Product** -> **Run** from the menu or clicking the **Play** button.
-1. After you input a text and click the button in the app, you should hear the synthesized audio played.
+1. After you input some text and click the button in the app, you should hear the synthesized audio played.
 
 ## References
 

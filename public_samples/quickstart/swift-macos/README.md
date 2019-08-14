@@ -28,7 +28,7 @@ Note that this tutorial will not work without changes for any version earlier th
 ## Build and Run the Sample
 
 1. Open the `helloworld.xcworkspace` workspace in Xcode.
-1. Make the following changes in the `AppDelegate.m` file:
+1. Make the following changes in the `AppDelegate.swift` file:
     1. Replace the string `YourSubscriptionKey` with your subscription key.
     1. Replace the string `YourServiceRegion` with the [region](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions) associated with your subscription (for example, `westus` for the free trial subscription).
 1. Make the debug output visible (**View** > **Debug Area** > **Activate Console**).
@@ -39,4 +39,3 @@ Note that this tutorial will not work without changes for any version earlier th
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-swift-macos)
 * [Speech SDK API reference for Objective-C](https://aka.ms/csspeech/objectivecref)
-

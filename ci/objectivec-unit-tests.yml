@@ -99,6 +99,13 @@ jobs:
             condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
             displayName: "Test building STT Swift quickstart on macOS"
             continueOnError: ${{ parameters.continueOnTestFailure }}
+          - bash: |
+              set -e -o pipefail -x
+              PROJECT_DIR=public_samples/quickstart/text-to-speech/swift-macos/helloworld/
+              ci/samples/build-quickstart-swift.sh "${PROJECT_DIR}" '$(Build.Repository.LocalPath)/xcode-build-output' "$(OutputDirectory)/logs" ios-swift-tts-quickstart $(BuildPlatform)
+            condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+            displayName: "Test building TTS Swift quickstart on macOS"
+            continueOnError: ${{ parameters.continueOnTestFailure }}
   - ${{ parameters.extraSteps }}
   - task: PublishBuildArtifacts@1
     inputs:

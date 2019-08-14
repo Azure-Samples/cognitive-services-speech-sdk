@@ -38,6 +38,10 @@ BEGIN {
     quickstart/swift-ios/helloworld/Podfile
     quickstart/swift-macos/helloworld/Podfile
     quickstart/text-to-speech/java-android/app/src/main/res/layout/activity_main.xml
+    quickstart/text-to-speech/objectivec-ios/helloworld/Podfile
+    quickstart/text-to-speech/objectivec-macos/helloworld/Podfile
+    quickstart/text-to-speech/swift-ios/helloworld/Podfile
+    quickstart/text-to-speech/swift-macos/helloworld/Podfile
   );
 
   my @expectedTags;
@@ -91,7 +95,15 @@ BEGIN {
       quickstart/text-to-speech/java-jre/pom.xml#dependencies
       quickstart/text-to-speech/java-jre/pom.xml#repositories
       quickstart/text-to-speech/java-jre/src/speechsdk/quickstart/Main.java#code
+      quickstart/text-to-speech/objectivec-ios/helloworld/helloworld/AppDelegate.m#code
+      quickstart/text-to-speech/objectivec-ios/helloworld/helloworld/ViewController.m#code
+      quickstart/text-to-speech/objectivec-macos/helloworld/helloworld/AppDelegate.m#code
       quickstart/text-to-speech/python/quickstart.py#code
+      quickstart/text-to-speech/swift-ios/helloworld/helloworld/AppDelegate.swift#code
+      quickstart/text-to-speech/swift-ios/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
+      quickstart/text-to-speech/swift-ios/helloworld/helloworld/ViewController.swift#code
+      quickstart/text-to-speech/swift-macos/helloworld/helloworld/AppDelegate.swift#code
+      quickstart/text-to-speech/swift-macos/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
       samples/batch/csharp/program.cs#batchdefinition
       samples/batch/csharp/program.cs#batchstatus
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentContinuousRecognitionWithFile
