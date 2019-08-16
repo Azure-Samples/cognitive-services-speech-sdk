@@ -166,7 +166,6 @@ struct SpeechHypothesisMsg : public SpeechMsg
         text(std::move(text))
     {}
 
-    SpeechHypothesisMsg() {}
     std::wstring text;
 };
 
@@ -236,10 +235,6 @@ struct TranslationHypothesisMsg : public SpeechHypothesisMsg
         SpeechHypothesisMsg(std::move(content), offset, duration, std::move(text)),
         translation(translation)
     {}
-    TranslationHypothesisMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring text, const TranslationResult& translation) :
-        SpeechHypothesisMsg(std::move(content), offset, duration, std::move(text)),
-        translation(translation)
-    {}
 
     TranslationResult translation;
 };
@@ -253,11 +248,6 @@ struct TranslationPhraseMsg : public TranslationHypothesisMsg
         TranslationHypothesisMsg(std::move(content), offset, duration, std::move(text), std::move(translation)),
         recognitionStatus(status)
     {}
-    TranslationPhraseMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring text, const TranslationResult& translation, RecognitionStatus status) :
-        TranslationHypothesisMsg(std::move(content), offset, duration, std::move(text), std::move(translation)),
-        recognitionStatus(status)
-    {}
-
 
     RecognitionStatus recognitionStatus;
 };
