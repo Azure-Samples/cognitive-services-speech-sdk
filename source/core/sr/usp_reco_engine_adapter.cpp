@@ -1019,6 +1019,11 @@ void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, co
     }
     else
     {
+        /* Notify user there was an error */
+        InvokeOnSite([this](const SitePtr& p)
+        {
+            p->Error(this, std::make_shared<SpxRecoEngineAdapterError>(true, CancellationReason::Error, CancellationErrorCode::ConnectionFailure, "Connection is in a bad state."));
+        });
         SPX_DBG_TRACE_ERROR("no connection established or in bad USP state. m_uspConnection %s nullptr, m_uspState:%d.", m_uspConnection == nullptr ? "is" : "is not", m_uspState);
         return;
     }
