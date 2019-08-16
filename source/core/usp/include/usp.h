@@ -167,8 +167,9 @@ public:
     *              You must send at most one context message for each turn.
     *  3. Agent:   Agent messages are meant for communicating with a back end agent.
     *              Each message represents the start of a new request.
+    * @param requestId The request ID for this turn.
     */
-    void SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType);
+    void SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, MessageType messageType, const std::string& requestId="");
 
     /**
     * Writes the latency value into telemetry data.

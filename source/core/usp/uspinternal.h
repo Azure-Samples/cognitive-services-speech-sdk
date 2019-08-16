@@ -92,8 +92,9 @@ public:
     * @param data The message payload.
     * @param size The length of the message in bytes.
     * @param messageType The type of message to be sent.
+    * @param requestId The request ID of this turn.
     */
-    void QueueMessage(const std::string& path, const uint8_t* data, size_t size, MessageType messageType);
+    void QueueMessage(const std::string& path, const uint8_t* data, size_t size, MessageType messageType, const std::string& requestId);
 
     /**
     * Writes latency value into telemetry data.

@@ -324,6 +324,11 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
             throw std::runtime_error("Could not add HTTP request header: Content-Type");
         }
 
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "X-FD-ImpressionGUID", PAL::ToString(request.requestId).c_str()) != HTTP_HEADERS_OK)
+        {
+            throw std::runtime_error("Could not add HTTP request header: X-FD-ImpressionGUID");
+        }
+
         if (!request.accessToken.empty())
         {
             // This is not always required, e.g. not required for on prem service

@@ -540,7 +540,7 @@ void Connection::Impl::RegisterRequestId(const string& requestId)
     m_activeRequestIds.insert(requestId);
 }
 
-void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size, MessageType messageType)
+void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size, MessageType messageType, const string& requestId)
 {
     throw_if_null(data, "message payload is null");
 
@@ -566,10 +566,12 @@ void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, siz
                 m_speechContextMessageAllowed = false;
             }
         }
-
-        auto requestId = UpdateRequestId(messageType);
-
-        (void)TransportMessageWrite(m_transport.get(), path.c_str(), data, size, requestId.c_str());
+        if (!requestId.empty() && path == "synthesis.context")
+        {
+            m_speechRequestId = requestId;
+        }
+        auto usedRequestId = requestId.empty() ? UpdateRequestId(messageType) : requestId;
+        (void)TransportMessageWrite(m_transport.get(), path.c_str(), data, size, usedRequestId.c_str());
     }
 
     ScheduleWork();
@@ -643,7 +645,7 @@ string Connection::Impl::UpdateRequestId(const MessageType messageType)
     case MessageType::Ssml:
         if (m_speechRequestId.empty())
         {
-            m_speechRequestId = CreateRequestId();
+            ThrowLogicError("Request ID is required for speech.synthesis request, so m_speechRequestId must be non-empty when sending SSML request.");
         }
 
         requestId = m_speechRequestId;

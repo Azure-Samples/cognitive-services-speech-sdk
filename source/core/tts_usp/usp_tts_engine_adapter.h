@@ -78,10 +78,10 @@ private:
 
     void SetSpeechConfigMessage();
     void UspSendSpeechConfig();
-    void UspSendSynthesisContext();
-    void UspSendSsml(const std::string& ssml);
-    void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType);
-    void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType);
+    void UspSendSynthesisContext(const std::string& requestId);
+    void UspSendSsml(const std::string& ssml, const std::string& requestId);
+    void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType, const std::string& requestId="");
+    void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType, const std::string& requestId);
 
     void EnsureUspConnection();
     void UspInitialize();

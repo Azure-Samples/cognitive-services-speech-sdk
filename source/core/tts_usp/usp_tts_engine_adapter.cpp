@@ -138,8 +138,8 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
 
     // Send request
     m_uspState = UspState::Sending;
-    UspSendSynthesisContext();
-    UspSendSsml(ssml);
+    UspSendSynthesisContext(PAL::ToString(requestId));
+    UspSendSsml(ssml, PAL::ToString(requestId));
 
     std::unique_lock<std::mutex> lock(m_mutex);
 #ifdef _DEBUG
@@ -217,7 +217,7 @@ void CSpxUspTtsEngineAdapter::UspSendSpeechConfig()
     UspSendMessage(messagePath, m_speechConfig, USP::MessageType::Config);
 }
 
-void CSpxUspTtsEngineAdapter::UspSendSynthesisContext()
+void CSpxUspTtsEngineAdapter::UspSendSynthesisContext(const std::string& requestId)
 {
     constexpr auto messagePath = "synthesis.context";
 
@@ -227,28 +227,28 @@ void CSpxUspTtsEngineAdapter::UspSendSynthesisContext()
     synthesisContext["synthesis"]["audio"]["metadataOptions"]["wordBoundaryEnabled"] = ISpxPropertyBagImpl::GetStringValue("SpeechServiceResponse_Synthesis_WordBoundaryEnabled", "true");
     synthesisContext["synthesis"]["audio"]["metadataOptions"]["sentenceBoundaryEnabled"] = ISpxPropertyBagImpl::GetStringValue("SpeechServiceResponse_Synthesis_SentenceBoundaryEnabled", "false");
 
-    UspSendMessage(messagePath, synthesisContext.dump(), USP::MessageType::Context);
+    UspSendMessage(messagePath, synthesisContext.dump(), USP::MessageType::Context, requestId);
 }
 
-void CSpxUspTtsEngineAdapter::UspSendSsml(const std::string& ssml)
+void CSpxUspTtsEngineAdapter::UspSendSsml(const std::string& ssml, const std::string& requestId)
 {
     constexpr auto messagePath = "ssml";
     SPX_DBG_TRACE_VERBOSE("%s %s", messagePath, ssml.c_str());
-    UspSendMessage(messagePath, ssml, USP::MessageType::Ssml);
+    UspSendMessage(messagePath, ssml, USP::MessageType::Ssml, requestId);
 }
 
-void CSpxUspTtsEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType)
+void CSpxUspTtsEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType, const std::string& requestId)
 {
     SPX_DBG_TRACE_VERBOSE("%s='%s'", messagePath.c_str(), buffer.c_str());
-    UspSendMessage(messagePath, (const uint8_t*)buffer.c_str(), buffer.length(), messageType);
+    UspSendMessage(messagePath, (const uint8_t*)buffer.c_str(), buffer.length(), messageType, requestId);
 }
 
-void CSpxUspTtsEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType)
+void CSpxUspTtsEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType, const std::string& requestId)
 {
     SPX_DBG_ASSERT(m_uspConnection != nullptr);
     if (m_uspConnection != nullptr)
     {
-        m_uspConnection->SendMessage(messagePath, buffer, size, messageType);
+        m_uspConnection->SendMessage(messagePath, buffer, size, messageType, requestId);
     }
 }
 

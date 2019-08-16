@@ -1517,7 +1517,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 cancellationDetails = SpeechSynthesisCancellationDetails.FromResult(result).ToString();
             }
 
-            Assert.AreNotEqual(ResultReason.Canceled, result.Reason, $"The synthesis was canceled unexpectedly, with cancellation details = [{cancellationDetails}].");
+            Assert.AreNotEqual(ResultReason.Canceled, result.Reason, $"The synthesis was canceled unexpectedly, with request id = [{result.ResultId}], cancellation details = [{cancellationDetails}].");
         }
 
         private void DoSomethingWithAudioInPullStream(PullAudioOutputStream stream, bool[] canceled)

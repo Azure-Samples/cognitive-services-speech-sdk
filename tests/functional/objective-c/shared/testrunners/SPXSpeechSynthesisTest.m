@@ -49,7 +49,7 @@
     {
         cancellationDetails = [[[SPXSpeechSynthesisCancellationDetails alloc] initFromCanceledSynthesisResult:result] errorDetails];
     }
-    XCTAssertNotEqual([result reason], SPXResultReason_Canceled, @"The synthesis was canceled unexpectedly, with cancellation details=[%@].", cancellationDetails);
+    XCTAssertNotEqual([result reason], SPXResultReason_Canceled, @"The synthesis was canceled unexpectedly, with result id = [%@] cancellation details=[%@].", [result resultId], cancellationDetails);
 }
 
 - (void)tearDown {
