@@ -887,7 +887,7 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx]")
     synthesizer->WordBoundary.DisconnectAll();
 
     order = 0;
-    synthesizer->WordBoundary += [&order, expectedAudioOffsets, expectedSsmlOffsets, expectedWordLengths](const SpeechSynthesisWordBoundaryEventArgs& e) {
+    synthesizer->WordBoundary += [&order, expectedSsmlOffsets, expectedWordLengths](const SpeechSynthesisWordBoundaryEventArgs& e) {
         SPXTEST_REQUIRE(e.AudioOffset > 0);
         SPXTEST_REQUIRE(expectedSsmlOffsets[order] == e.TextOffset);
         SPXTEST_REQUIRE(expectedWordLengths[order] == e.WordLength);
