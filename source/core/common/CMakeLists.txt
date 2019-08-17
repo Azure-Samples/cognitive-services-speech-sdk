@@ -41,6 +41,10 @@ set(HEADERS
     "${INC_DIR}/audio_chunk.h"
     "${INC_DIR}/time_utils.h"
     "${INC_DIR}/file_logger.h"
+    "${INC_DIR}/httpapi_platform_proxy.h"
+    "${INC_DIR}/http_exception.h"
+    "${INC_DIR}/http_request.h"
+    "${INC_DIR}/http_response.h"
     )
 
 set(HEADERS_PRIVATE
@@ -65,6 +69,10 @@ set(SOURCES
     "${SRC_DIR}/site_helpers.cpp"
     "${SRC_DIR}/time_utils.cpp"
     "${SRC_DIR}/ring_buffer.cpp"
+    "${SRC_DIR}/httpapi_platform_proxy.c"
+    "${SRC_DIR}/http_exception.cpp"
+    "${SRC_DIR}/http_request.cpp"
+    "${SRC_DIR}/http_response.cpp"
     )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
