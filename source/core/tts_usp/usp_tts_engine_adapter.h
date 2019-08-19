@@ -81,7 +81,7 @@ private:
     void UspSendSynthesisContext(const std::string& requestId);
     void UspSendSsml(const std::string& ssml, const std::string& requestId);
     void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType, const std::string& requestId="");
-    void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType, const std::string& requestId);
+    void DoSendMessageWork(std::weak_ptr<USP::Connection> connectionPtr, const std::string& messagePath, const std::string& buffer, USP::MessageType messageType, const std::string& requestId);
 
     void EnsureUspConnection();
     void UspInitialize();

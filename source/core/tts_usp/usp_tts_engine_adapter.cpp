@@ -240,15 +240,17 @@ void CSpxUspTtsEngineAdapter::UspSendSsml(const std::string& ssml, const std::st
 void CSpxUspTtsEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType, const std::string& requestId)
 {
     SPX_DBG_TRACE_VERBOSE("%s='%s'", messagePath.c_str(), buffer.c_str());
-    UspSendMessage(messagePath, (const uint8_t*)buffer.c_str(), buffer.length(), messageType, requestId);
+    std::packaged_task<void()> task([=]() { DoSendMessageWork(m_uspConnection, messagePath, buffer, messageType, requestId); });
+    m_threadService->ExecuteAsync(move(task));
 }
 
-void CSpxUspTtsEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size, USP::MessageType messageType, const std::string& requestId)
+void CSpxUspTtsEngineAdapter::DoSendMessageWork(std::weak_ptr<USP::Connection> connectionPtr, const std::string& messagePath, const std::string& buffer, USP::MessageType messageType, const std::string& requestId)
 {
-    SPX_DBG_ASSERT(m_uspConnection != nullptr);
-    if (m_uspConnection != nullptr)
+    auto connection = connectionPtr.lock();
+    SPX_DBG_ASSERT(connection != nullptr);
+    if (connection != nullptr)
     {
-        m_uspConnection->SendMessage(messagePath, buffer, size, messageType, requestId);
+        connection->SendMessage(messagePath, (const uint8_t*)buffer.c_str(), buffer.length(), messageType, requestId);
     }
 }
 
