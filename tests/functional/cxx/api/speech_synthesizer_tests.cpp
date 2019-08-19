@@ -493,7 +493,7 @@ TEST_CASE("Result data should be consistent with output stream data", "[api][cxx
     auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
 
     auto resultData = std::make_shared<std::vector<uint8_t>>();
-    // The audio data in result has a riff header while data in output stream dosen't
+    // The audio data in result has a riff header while data in output stream doesn't
     resultData->resize(result->GetAudioLength() - EMPTY_WAVE_FILE_SIZE);
     memcpy(resultData->data(), result->GetAudioData()->data() + EMPTY_WAVE_FILE_SIZE, result->GetAudioLength() - EMPTY_WAVE_FILE_SIZE);
 
@@ -504,7 +504,7 @@ TEST_CASE("Result data should be consistent with output stream data", "[api][cxx
     DoSomethingWithAudioInPullStream(stream, canceled, resultData);
 }
 
-TEST_CASE("Synthesis with invalide subscription key", "[api][cxx]")
+TEST_CASE("Synthesis with invalid subscription key", "[api][cxx]")
 {
     auto config = SpeechConfig::FromSubscription("InvalidKey", Config::Region);
 
@@ -517,6 +517,28 @@ TEST_CASE("Synthesis with invalide subscription key", "[api][cxx]")
     };
     auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
     SPXTEST_REQUIRE(ResultReason::Canceled == result->Reason);
+    SPXTEST_REQUIRE(0 == result->GetAudioData()->size());
+    SPXTEST_REQUIRE(synthesisCanceled);
+}
+
+TEST_CASE("Synthesis with invalid voice", "[api][cxx]")
+{
+    auto config = CurrentSpeechConfig();
+    config->SetSpeechSynthesisVoiceName("InvalidVoiceName");
+
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+    bool synthesisCanceled = false;
+    synthesizer->SynthesisCanceled += [&synthesisCanceled](const SpeechSynthesisEventArgs& e) {
+        SPXTEST_REQUIRE(ResultReason::Canceled == e.Result->Reason);
+        SPXTEST_REQUIRE(0 == e.Result->GetAudioData()->size());
+        synthesisCanceled = true;
+        auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(e.Result);
+        SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Unsupported voice"));
+    };
+    auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
+    SPXTEST_REQUIRE(ResultReason::Canceled == result->Reason);
+    auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(result);
+    SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Unsupported voice"));
     SPXTEST_REQUIRE(0 == result->GetAudioData()->size());
     SPXTEST_REQUIRE(synthesisCanceled);
 }
@@ -896,6 +918,28 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx]")
 
     synthesizer->SpeakSsmlAsync(ssml);
     SPXTEST_REQUIRE(8 == order);
+}
+
+TEST_CASE("Synthesis with invalid voice - USP", "[api][cxx]")
+{
+    auto config = UspSpeechConfig();
+    config->SetSpeechSynthesisVoiceName("InvalidVoiceName");
+
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+    bool synthesisCanceled = false;
+    synthesizer->SynthesisCanceled += [&synthesisCanceled](const SpeechSynthesisEventArgs& e) {
+        SPXTEST_REQUIRE(ResultReason::Canceled == e.Result->Reason);
+        SPXTEST_REQUIRE(0 == e.Result->GetAudioData()->size());
+        synthesisCanceled = true;
+        auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(e.Result);
+        SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Unsupported voice"));
+    };
+    auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
+    SPXTEST_REQUIRE(ResultReason::Canceled == result->Reason);
+    auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(result);
+    SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Unsupported voice"));
+    SPXTEST_REQUIRE(0 == result->GetAudioData()->size());
+    SPXTEST_REQUIRE(synthesisCanceled);
 }
 
 TEST_CASE("Defaults - Mock", "[api][cxx]")

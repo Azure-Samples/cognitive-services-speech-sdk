@@ -340,8 +340,11 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
 
         // Execute http request
         unsigned int statusCode = 0;
+        const size_t reasonPhraseSize = 1024;
+        char reasonPhrase[reasonPhraseSize];
+        reasonPhrase[0] = '\0';
 #ifdef __MACH__ // There is issue on streaming for IOS/OSX, disable streaming on IOS/OSX for now
-        HTTPAPI_RESULT result = HTTPAPI_ExecuteRequest(
+        HTTPAPI_RESULT result = HTTPAPI_ExecuteRequest_With_Reason_Phrase(
             http_connect,
             HTTPAPI_REQUEST_POST,
             (std::string("/") + url.path + std::string("?") + url.query).data(),
@@ -349,6 +352,8 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
             (unsigned char *)request.postContent.data(),
             request.postContent.length(),
             &statusCode,
+            reasonPhrase,
+            reasonPhraseSize,
             httpResponseHeaders,
             buffer);
 #else
@@ -360,6 +365,8 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
             (unsigned char *)request.postContent.data(),
             request.postContent.length(),
             &statusCode,
+            reasonPhrase,
+            reasonPhraseSize,
             httpResponseHeaders,
             OnChunkReceived,
             &request);
@@ -401,7 +408,7 @@ void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsR
             errorMessage << "HTTPAPI result code = " << ENUM_TO_STRING(HTTPAPI_RESULT, result) << ".";
             if (result == HTTPAPI_OK)
             {
-                errorMessage << " HTTP status code = " << statusCode << ".";
+                errorMessage << " HTTP status code = " << statusCode << ". Reason: " << reasonPhrase << ".";
             }
 
             auto properties = SpxQueryInterface<ISpxNamedProperties>(result_init);
