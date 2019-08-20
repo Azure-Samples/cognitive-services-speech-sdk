@@ -68,12 +68,24 @@ jobs:
       else
         vsts_setvar SPEECHSDK_ENABLE_KWS false
       fi
+      if [[ $SPEECHSDK_TARGET_PLATFORM == Linux-arm64 ]]; then
+        vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
+        vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
+      else
+        vsts_setvar SPEECHSDK_ENABLE_UNIDEC false
+      fi
       vsts_setvar SPEECHSDK_ENABLE_CODEC true
     displayName: Set variables
+  - bash: ./ci/install-build-dependencies.sh
+    displayName: Install build dependencies
   - template: get-kws-artifact.yml
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
       os: Linux
+  - template: get-unidec-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_UNIDEC
+      os: linux
   - template: get-docker-image.yml
     parameters:
       imageBase: $(DOCKER_BASE)
@@ -90,6 +102,7 @@ jobs:
           -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) \
           -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS) \
           -DEXTENSION_CODEC_ENABLED="%SPEECHSDK_ENABLE_CODEC%" \
+          -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) \
           ..
         cmake --build . -- -j$(nproc)
       SCRIPT

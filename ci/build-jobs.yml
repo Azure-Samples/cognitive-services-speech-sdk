@@ -57,19 +57,19 @@ jobs:
         fi
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
-        vsts_setvar PAT "$(System.AccessToken)"
+        vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
-  - bash: ./ci/install-build-dependencies.sh
-    displayName: Install build dependencies
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
       versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - bash: ./ci/install-build-dependencies.sh
+    displayName: Install build dependencies
   - task: CMake@1
     displayName: Generate solution
     inputs:
-      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) -DVSTS_TOKEN=$(PAT) -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ..'
   - task: VSBuild@1
     displayName: Build solution
     inputs:
@@ -333,18 +333,18 @@ jobs:
         vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
-        vsts_setvar PAT "$(System.AccessToken)"
+        vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
   - bash: . ci/functions.sh && ./ci/set-variables.sh
-  - bash: ./ci/install-build-dependencies.sh
-    displayName: Install build dependencies
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
       versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - bash: ./ci/install-build-dependencies.sh
+    displayName: Install build dependencies
   - task: CMake@1
     displayName: Generate solution
     inputs:
-      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -A "$(BuildPlatform)" -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) -DVSTS_TOKEN=$(PAT) -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) ..'
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -A "$(BuildPlatform)" -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) ..'
   - task: VSBuild@1
     displayName: Build solution
     inputs:
@@ -1372,7 +1372,7 @@ jobs:
         vsts_setvar SPEECHSDK_ENABLE_KWS true
         vsts_setvar SPEECHSDK_ENABLE_CODEC true
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
-        vsts_setvar PAT "$(System.AccessToken)"
+        vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: ./ci/install-build-dependencies.sh
@@ -1381,6 +1381,10 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
       os: Linux
+  - template: get-unidec-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_UNIDEC
+      os: linux
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: C API can be parsed by GCC
     inputs:
@@ -1397,7 +1401,6 @@ jobs:
         -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
         -DEXTENSION_CODEC_ENABLED="%SPEECHSDK_ENABLE_CODEC%"
         -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC)
-        -DVSTS_TOKEN=$(PAT)
         ..
   - task: CMake@1
     displayName: CMake build

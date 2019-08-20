@@ -16,10 +16,8 @@ steps:
     if [[ $(SPEECHSDK_TARGET_PLATFORM) == Linux-x64 ]]; then
       # prevent core lib md5sum mismatch
       enableUnidec=true
-      vstsToken=$(PAT)
     else
       enableUnidec=false
-      vstsToken=none
     fi
     for pythonMajorMinorWithDot in ${pythonMajorMinorVersions[*]}; do
       thisPythonVersionBasePath=$(getLatest ${hostedtoolsPath}/Python/${pythonMajorMinorWithDot}.*)
@@ -30,8 +28,7 @@ steps:
         -DPYTHON_LIBRARY="${thisPythonVersionBasePath}/x64/lib/libpython${pythonMajorMinorWithDot}m.a" \
         -DPYTHON_INCLUDE_DIR:PATH="${thisPythonVersionBasePath}/x64/include/python${pythonMajorMinorWithDot}m" \
         -DSPEECHSDK_PYTHON_WHEEL_ARGS=${extraCmakeArgs//%wheelPythonVersion%/${wheelPythonVersion}} \
-        -DEXTENSION_UNIDEC_ENABLED=${enableUnidec} \
-        -DVSTS_TOKEN=${vstsToken}
+        -DEXTENSION_UNIDEC_ENABLED=${enableUnidec}
       cmake --build build --target bdist -j 4
       cp -v build/dist/* dist
     done

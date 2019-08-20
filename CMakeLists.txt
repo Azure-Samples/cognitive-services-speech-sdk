@@ -28,6 +28,7 @@ parse_version(
 get_local_platform(_LOCAL_PLATFORM)
 set(SPEECHSDK_TARGET_PLATFORM "${_LOCAL_PLATFORM}" CACHE STRING
   "SDK target platform ({Windows,WindowsUwp,Linux,OSX,Android,IOS,IOSSIMULATOR}-{x86,x64,arm32,arm64}; not all combinations are supported)")
+message(STATUS "SPEECHSDK_TARGET_PLATFORM=${SPEECHSDK_TARGET_PLATFORM}")
 
 parse_platform(TARGET_PLATFORM ${SPEECHSDK_TARGET_PLATFORM} PREFIX SPEECHSDK)
 
@@ -360,14 +361,12 @@ set(AUDIO "${CARBON_CORE}/audio")
 set(USP "${CARBON_CORE}/usp")
 set(MOCK "${CARBON_CORE}/mock")
 
-# Enable Unidec build with 'cmake -DEXTENSION_UNIDEC_ENABLED=true -DVSTS_TOKEN=token'
+# Enable Unidec build with 'cmake -DEXTENSION_UNIDEC_ENABLED=true'
 if(EXTENSION_UNIDEC_ENABLED AND
-   ((SPEECHSDK_TARGET_PLATFORM STREQUAL Windows-x64) OR
-    (SPEECHSDK_TARGET_PLATFORM STREQUAL WindowsUwp-x64) OR
-    (SPEECHSDK_TARGET_PLATFORM STREQUAL Linux-x64)))
-  if(NOT DEFINED VSTS_TOKEN)
-    message(FATAL_ERROR "Missing VSTS access token. Use 'cmake -DVSTS_TOKEN=token' to set.")
-  endif()
+   ((SPEECHSDK_TARGET_PLATFORM STREQUAL Linux-arm64) OR
+    (SPEECHSDK_TARGET_PLATFORM STREQUAL Linux-x64) OR
+    (SPEECHSDK_TARGET_PLATFORM STREQUAL Windows-x64) OR
+    (SPEECHSDK_TARGET_PLATFORM STREQUAL WindowsUwp-x64)))
   set(BUILD_UNIDEC ON)
   set(UNIDEC "${CARBON_EXTENSIONS}/unidec")
 else()

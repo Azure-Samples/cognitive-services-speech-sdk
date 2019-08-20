@@ -353,9 +353,9 @@ bool CSpxUnidecRecoEngineAdapter::InitStream(AudioStreamDescriptor** pAudioStrea
     m_audioStream.SilenceThreshold = 300; // ms
     m_audioStream.WordCountThreshold = 5; // words
     m_audioStream.AudioLengthThreshold = 5000; // ms
-    m_audioStream.PrefxKeywords = nullptr;
+    m_audioStream.PrefixKeywords = nullptr;
     m_audioStream.PrefixKeywordsCount = 0;
-    m_audioStream.PrefxKeywordSilenceThreshold = 0;
+    m_audioStream.PrefixKeywordSilenceThreshold = 0;
 
     m_audioStream.CallbackContext = static_cast<void*>(this);
     m_audioStream.ReadCallback = CSpxUnidecRecoEngineAdapter::AudioStreamReadCallback;

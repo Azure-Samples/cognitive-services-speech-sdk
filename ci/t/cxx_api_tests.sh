@@ -28,17 +28,24 @@ esac
 
 RUN_OFFLINE_UNIDEC_TESTS=false
 case $PLATFORM in
-  Windows-x64*)
-    UNIDEC_RUNTIME_PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime/native"
+  Linux-arm64*)
+    UNIDEC_RUNTIME_PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime/linux-aarch64-platforms/lib"
     if [[ -d "$UNIDEC_RUNTIME_PATH" ]]; then
-      PATH="${UNIDEC_RUNTIME_PATH}:$PATH"
+      LD_LIBRARY_PATH="${UNIDEC_RUNTIME_PATH}:$LD_LIBRARY_PATH"
       RUN_OFFLINE_UNIDEC_TESTS=true
     fi
     ;;
   Linux-x64*)
-    UNIDEC_RUNTIME_PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime.linux/native"
+    UNIDEC_RUNTIME_PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime/linux-amd64-platform/lib"
     if [[ -d "$UNIDEC_RUNTIME_PATH" ]]; then
       LD_LIBRARY_PATH="${UNIDEC_RUNTIME_PATH}:$LD_LIBRARY_PATH"
+      RUN_OFFLINE_UNIDEC_TESTS=true
+    fi
+    ;;
+  Windows-x64*)
+    UNIDEC_RUNTIME_PATH="$SCRIPT_DIR/../external/unidec/Richland.Speech.UnidecRuntime/native"
+    if [[ -d "$UNIDEC_RUNTIME_PATH" ]]; then
+      PATH="${UNIDEC_RUNTIME_PATH}:$PATH"
       RUN_OFFLINE_UNIDEC_TESTS=true
     fi
     ;;

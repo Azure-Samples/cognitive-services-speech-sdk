@@ -10,15 +10,7 @@ include_directories(${CARBON_INCLUDE})
 include_directories(${INC_DIR})
 include_directories("${COMMON}/include")
 include_directories("${CARBON_EXTERNAL}/json")
-
-if((SPEECHSDK_TARGET_PLATFORM STREQUAL Windows-x64) OR
-   (SPEECHSDK_TARGET_PLATFORM STREQUAL WindowsUwp-x64))
-    include_directories("${CARBON_EXTERNAL}/unidec/Richland.Speech.UnidecRuntime/native")
-elseif(SPEECHSDK_TARGET_PLATFORM STREQUAL Android-arm64)
-    include_directories("${CARBON_EXTERNAL}/unidec/Richland.Speech.UnidecRuntime.android/native")
-elseif(SPEECHSDK_TARGET_PLATFORM STREQUAL Linux-x64)
-    include_directories("${CARBON_EXTERNAL}/unidec/Richland.Speech.UnidecRuntime.linux/native")
-endif()
+include_directories("${CARBON_EXTERNAL}/unidec/Richland.Speech.UnidecRuntime/native")
 
 set(HEADERS)
 
@@ -38,16 +30,16 @@ source_group("Header Files (public)" FILES ${HEADERS})
 source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
-if((SPEECHSDK_TARGET_PLATFORM STREQUAL Windows-x64) OR
-   (SPEECHSDK_TARGET_PLATFORM STREQUAL WindowsUwp-x64))
-    set(UNIDEC_LIBS "${CARBON_EXTERNAL}/unidec/Richland.Speech.UnidecRuntime/native/unidecruntime.lib")
-    list(APPEND UNIDEC_LIBS rpcrt4.lib)
-elseif(SPEECHSDK_TARGET_PLATFORM STREQUAL Android-arm64)
+if(SPEECHSDK_TARGET_PLATFORM STREQUAL Linux-arm64)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DXPLATFORM")
-    set(UNIDEC_LIBS "${CARBON_EXTERNAL}/unidec/Richland.Speech.UnidecRuntime.android/native/libSpeechToText.so")
+    set(UNIDEC_LIBS "${CARBON_EXTERNAL}/unidec/Richland.Speech.UnidecRuntime/linux-aarch64-platforms/lib/libSpeechToText.so")
 elseif(SPEECHSDK_TARGET_PLATFORM STREQUAL Linux-x64)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DXPLATFORM")
-    set(UNIDEC_LIBS "${CARBON_EXTERNAL}/unidec/Richland.Speech.UnidecRuntime.linux/native/libSpeechToText.so")
+    set(UNIDEC_LIBS "${CARBON_EXTERNAL}/unidec/Richland.Speech.UnidecRuntime/linux-amd64-platform/lib/libSpeechToText.so")
+elseif((SPEECHSDK_TARGET_PLATFORM STREQUAL Windows-x64) OR
+       (SPEECHSDK_TARGET_PLATFORM STREQUAL WindowsUwp-x64))
+    set(UNIDEC_LIBS "${CARBON_EXTERNAL}/unidec/Richland.Speech.UnidecRuntime/native/UnidecRuntime.lib")
+    list(APPEND UNIDEC_LIBS rpcrt4.lib)
 endif()
 
 add_library(unidec SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})

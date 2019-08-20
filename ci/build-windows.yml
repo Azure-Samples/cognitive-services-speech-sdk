@@ -48,7 +48,7 @@ jobs:
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar SPEECHSDK_ENABLE_KWS ${{ parameters.kws }}
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
-        vsts_setvar PAT "$(System.AccessToken)"
+        vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: . ./ci/functions.sh && vsts_setvar SPEECHSDK_SPECTRE_MITIGATION false
@@ -58,12 +58,12 @@ jobs:
     parameters:
       enableVariable: SPEECHSDK_ENABLE_KWS
       os: Windows
-  - bash: ./ci/install-build-dependencies.sh
-    displayName: Install build dependencies
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
       versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - bash: ./ci/install-build-dependencies.sh
+    displayName: Install build dependencies
   - task: CMake@1
     displayName: Generate solution
     inputs:
@@ -76,7 +76,6 @@ jobs:
         -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
         -DSPEECHSDK_CRT="${{ parameters.crt }}"
         -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC)
-        -DVSTS_TOKEN=$(PAT)
         ..
   - task: VSBuild@1
     displayName: Build solution
@@ -117,8 +116,7 @@ jobs:
           -DPYTHON_EXECUTABLE:FILEPATH="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/python.exe \
           -DPYTHON_LIBRARY="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/libs/python${wheelPythonVersion}.lib \
           -DPYTHON_INCLUDE_DIR:PATH="${thisPythonVersionBasePath}"/$(SPEECHSDK_PYTHON_PLATFORM)/include \
-          -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) \
-          -DVSTS_TOKEN=$(PAT)
+          -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC)
         cmake --build build --target bdist -j 4 --config $(BuildConfiguration)
         # check that the core & kws lib are identical in all wheels
         [[ $(md5sum $coreLib) == ${coreHash[0]}* ]] || exitWithError "core lib changed between Python builds"

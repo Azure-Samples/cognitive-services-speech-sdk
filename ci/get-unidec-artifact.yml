@@ -1,0 +1,29 @@
+# Adapted from get-kws-artifact.yml
+# Must be run only after install-build-dependencies.sh so
+# that Richland.Speech.UnidecRuntime directory is present.
+parameters:
+  enableVariable: ""
+  os: ""
+steps:
+- bash: |
+    set -u -e -o pipefail
+    . ci/functions.sh
+    IFS=$' \t\n\r' read build_id should_be_empty < external/unidec/build_id.txt
+    # checks
+    [[ -z $should_be_empty ]]
+    printf '%d' "$build_id" > /dev/null
+    vsts_setvar __getUnidecArtifactInternal_BuildId "$build_id"
+  displayName: Get Unidec Linux/Android build ID
+  condition: and(succeeded(), eq(variables['${{ parameters.enableVariable }}'], 'true'))
+- task: DownloadBuildArtifacts@0
+  displayName: Download Unidec Linux/Android build artifacts
+  inputs:
+    buildType: specific
+    project: '6947a002-6fb8-401b-8847-88b6c0f65482' # Bing_and_IPG
+    pipeline: 6702 # Richland-Linux-Android-Build-Release
+    buildVersionToDownload: specific
+    buildId: $(__getUnidecArtifactInternal_BuildId)
+    downloadType: specific
+    itemPattern: ${{ parameters.os }}-*platform*/**
+    downloadPath: external/unidec/Richland.Speech.UnidecRuntime
+  condition: and(succeeded(), eq(variables['${{ parameters.enableVariable }}'], 'true'))
