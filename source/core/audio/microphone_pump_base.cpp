@@ -84,6 +84,8 @@ AUDIO_SETTINGS_HANDLE CSpxMicrophonePumpBase::SetOptionsBeforeCreateAudioHandle(
     format->nBlockAlign = m_format.nBlockAlign;
     format->wBitsPerSample = m_format.wBitsPerSample;
 
+    format->eDataFlow = AUDIO_CAPTURE;
+
     auto deviceName = GetDeviceNameFromConfig();
     STRING_copy(format->hDeviceName, deviceName.c_str());
 

@@ -178,6 +178,7 @@ void CSpxDefaultSpeaker::InitializeAudio()
         }
 
         memcpy(m_hsetting, m_audioFormat.get(), sizeof(AUDIO_WAVEFORMAT));
+        m_hsetting->eDataFlow = AUDIO_RENDER;
 
         // If the audio format is not PCM, this will fail with internal error code 0x88890008
         m_haudio = audio_create_with_parameters(m_hsetting);

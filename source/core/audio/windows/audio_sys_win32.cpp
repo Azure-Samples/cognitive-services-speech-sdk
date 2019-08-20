@@ -350,7 +350,7 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 
     std::shared_ptr<IMMDeviceEnumerator> pEnumerator(nullptr);
     std::shared_ptr<IMMDevice> pDevice(nullptr);
-    std::wstring mic_name {};
+    std::wstring device_name {};
     std::string nice_name;
 
     REFERENCE_TIME      hnsRequestedDuration = REFTIMES_PER_SEC;
@@ -377,63 +377,80 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
         pEnumerator.reset(pEnumeratorRaw, Deleter<IMMDeviceEnumerator>());
     }
 
-    mic_name = PAL::ToWString(std::string(STRING_c_str(format->hDeviceName)));
+    device_name = PAL::ToWString(std::string(STRING_c_str(format->hDeviceName)));
 
-    if (L"" == mic_name)
+    if (L"" == device_name)
     {
-        // Initialize Audio Input from default device, throw exception when no mic.
+        // Initialize Audio Input/Output from default device, throw exception when no device.
         IMMDevice * pDeviceRaw = nullptr;
-        HRESULT hrlocal = pEnumerator->GetDefaultAudioEndpoint(eCapture, eConsole, &pDeviceRaw);
-        LogInfo("default microphone init: hrlocal is 0x%x", hrlocal);
+        HRESULT hrlocal = S_OK;
+        switch (format->eDataFlow)
+        {
+        case AUDIO_CAPTURE:
+            hrlocal = pEnumerator->GetDefaultAudioEndpoint(eCapture, eConsole, &pDeviceRaw);
+            break;
+
+        case AUDIO_RENDER:
+            hrlocal = pEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &pDeviceRaw);
+            break;
+
+        default:
+            hrlocal = E_INVALIDARG;
+            break;
+        }
+        LogInfo("default audio device init: hrlocal is 0x%x", hrlocal);
         EXIT_ON_ERROR_IF(E_FAIL, pDeviceRaw == nullptr || hrlocal != S_OK );
         pDevice.reset(pDeviceRaw, Deleter<IMMDevice>());
     }
     else
     {
-        // Initialize Audio Input from specified device, throw exception when no mic.
+        // Initialize Audio Input/Output from specified device, throw exception when no device.
         IMMDevice * pDeviceRaw = nullptr;
-        HRESULT hrlocal = pEnumerator->GetDevice(mic_name.c_str(), &pDeviceRaw);
-        LogInfo("custom microphone (%ls) init: is 0x%x", mic_name.c_str(), hrlocal);
+        HRESULT hrlocal = pEnumerator->GetDevice(device_name.c_str(), &pDeviceRaw);
+        LogInfo("custom audio device (%ls) init: is 0x%x", device_name.c_str(), hrlocal);
         EXIT_ON_ERROR_IF(E_FAIL, pDeviceRaw == nullptr || hrlocal != S_OK);
         pDevice.reset(pDeviceRaw, Deleter<IMMDevice>());
     }
 
-    // get microphone nice name here
-    nice_name = get_nice_name_from_endpoint(pDevice);
-    audio_set_options(result, AUDIO_OPTION_DEVICE_LONGNAME, nice_name.c_str());
-
-    hr = pDevice->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&result->pAudioInputClient);
-    EXIT_ON_ERROR(hr);
-
-    // Set the audio stream category for speech recognition
-    hr = SetAudioStreamCategory(result->pAudioInputClient, AudioCategory_Speech);
-    EXIT_ON_ERROR(hr);
-
-    result->audioInFormat.wFormatTag = format->wFormatTag;
-    result->audioInFormat.wBitsPerSample = format->wBitsPerSample;
-    result->audioInFormat.nChannels = format->nChannels;
-    result->audioInFormat.nSamplesPerSec = format->nSamplesPerSec;
-    result->audioInFormat.nAvgBytesPerSec = format->nAvgBytesPerSec;
-    result->audioInFormat.nBlockAlign = format->nBlockAlign;
-    result->audioInFormat.cbSize = 0;
-
-    audio_set_options(result, AUDIO_OPTION_DEVICENAME, STRING_c_str(format->hDeviceName));
-
-    hr = result->pAudioInputClient->Initialize(
-        AUDCLNT_SHAREMODE_SHARED,
-        AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM,
-        hnsRequestedDuration,
-        0,
-        &result->audioInFormat,
-        nullptr);
-    EXIT_ON_ERROR(hr);
-
-
-    //Initialize Audio Output, ignoring failures in order to support systems that do not have speakers hooked up
-    hr = pEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &result->pAudioOutputDevice);
-    if (FAILED(hr))
+    // Activate audio input device here
+    if (format->eDataFlow == AUDIO_CAPTURE)
     {
-        LogError("can't open default output device hr = 0x%x", hr);
+        // get microphone nice name here
+        nice_name = get_nice_name_from_endpoint(pDevice);
+        audio_set_options(result, AUDIO_OPTION_DEVICE_LONGNAME, nice_name.c_str());
+
+        hr = pDevice->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&result->pAudioInputClient);
+        EXIT_ON_ERROR(hr);
+
+        // Set the audio stream category for speech recognition
+        hr = SetAudioStreamCategory(result->pAudioInputClient, AudioCategory_Speech);
+        EXIT_ON_ERROR(hr);
+
+        result->audioInFormat.wFormatTag = format->wFormatTag;
+        result->audioInFormat.wBitsPerSample = format->wBitsPerSample;
+        result->audioInFormat.nChannels = format->nChannels;
+        result->audioInFormat.nSamplesPerSec = format->nSamplesPerSec;
+        result->audioInFormat.nAvgBytesPerSec = format->nAvgBytesPerSec;
+        result->audioInFormat.nBlockAlign = format->nBlockAlign;
+        result->audioInFormat.cbSize = 0;
+
+        audio_set_options(result, AUDIO_OPTION_DEVICENAME, STRING_c_str(format->hDeviceName));
+
+        hr = result->pAudioInputClient->Initialize(
+            AUDCLNT_SHAREMODE_SHARED,
+            AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM,
+            hnsRequestedDuration,
+            0,
+            &result->audioInFormat,
+            nullptr);
+        EXIT_ON_ERROR(hr);
+    }
+
+    // Attach audio output device to result, to make it returned with the result
+    if (format->eDataFlow == AUDIO_RENDER)
+    {
+        result->pAudioOutputDevice = pDevice.get();
+        result->pAudioOutputDevice->AddRef();
     }
 
     hr = audio_create_events(result);
@@ -523,7 +540,10 @@ HRESULT audio_create_events(AUDIO_SYS_DATA * const audioData)
     audioData->hRenderThreadDidExit = CreateEvent(0, FALSE, TRUE, nullptr);
     EXIT_ON_ERROR_IF(E_FAIL, NULL == audioData->hRenderThreadDidExit);
 
-    hr = audioData->pAudioInputClient->SetEventHandle(audioData->hBufferReady);
+    if (audioData->pAudioInputClient != nullptr)
+    {
+        hr = audioData->pAudioInputClient->SetEventHandle(audioData->hBufferReady);
+    }
 
 Exit:
     if (FAILED(hr))

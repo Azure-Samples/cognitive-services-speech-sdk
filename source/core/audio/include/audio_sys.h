@@ -41,6 +41,12 @@ DEFINE_ENUM(AUDIO_STATE, AUDIO_STATE_VALUES)
 
 DEFINE_ENUM(AUDIO_ERROR, AUDIO_ERROR_VALUES)
 
+#define AUDIO_DATA_FLOW_VALUES  \
+    AUDIO_CAPTURE,                \
+    AUDIO_RENDER                  \
+
+DEFINE_ENUM(AUDIO_DATA_FLOW, AUDIO_DATA_FLOW_VALUES)
+
 typedef struct AUDIO_SYS_DATA_TAG* AUDIO_SYS_HANDLE;
 
 typedef void* AUDIO_BUFFER;
@@ -54,6 +60,7 @@ typedef struct _AUDIO_SETTINGS
     uint16_t  nBlockAlign;
     uint16_t  wBitsPerSample;
     STRING_HANDLE hDeviceName;
+    AUDIO_DATA_FLOW eDataFlow;
 } AUDIO_SETTINGS;
 
 typedef struct _AUDIO_WAVEFORMAT
