@@ -162,6 +162,8 @@ private:
     void InvokeRecognitionErrorCallback(RecognitionStatus status, const std::string& response);
 
     uint64_t getTimestamp();
+    SpeechPhraseMsg RetrieveSpeechPhraseResult(const nlohmann::json& json);
+    bool isErrorRecognitionStatus(RecognitionStatus status);
     std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> m_threadService;
 };
 

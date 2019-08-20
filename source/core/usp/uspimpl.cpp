@@ -1186,46 +1186,14 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
         }
         else if (path == path::speechPhrase)
         {
-            SpeechPhraseMsg result;
-            result.json = PAL::ToWString(json.dump());
-            result.offset = json[json_properties::offset].get<OffsetType>();
-            result.duration = json[json_properties::duration].get<DurationType>();
-            result.recognitionStatus = ToRecognitionStatus(json[json_properties::recoStatus].get<string>());
-            if (json.find(json_properties::speaker) != json.end())
+            SpeechPhraseMsg result = connection->RetrieveSpeechPhraseResult(json);
+            if (connection->isErrorRecognitionStatus(result.recognitionStatus))
             {
-                result.speaker = PAL::ToWString(json[json_properties::speaker].get<string>());
-            }
-
-            switch (result.recognitionStatus)
-            {
-            case RecognitionStatus::Success:
-                if (json.find(json_properties::displayText) != json.end())
-                {
-                    // The DisplayText field will be present only if the RecognitionStatus field has the value Success.
-                    // and the format output is simple
-                    result.displayText = PAL::ToWString(json[json_properties::displayText].get<string>());
-                }
-                else // Detailed
-                {
-                    // The service returns sorted n-best results and the first result is the best one.
-                    // Use the first one as the default text, irrespective of the confidence value.
-                    auto phrases = json.at(json_properties::nbest);
-                    if (!phrases.empty())
-                    {
-                        result.displayText = PAL::ToWString(phrases[0].at(json_properties::display).get<string>());
-                    }
-                }
-                connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
-                break;
-            case RecognitionStatus::InitialSilenceTimeout:
-            case RecognitionStatus::InitialBabbleTimeout:
-            case RecognitionStatus::NoMatch:
-            case RecognitionStatus::EndOfDictation:
-                connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
-                break;
-            default:
                 connection->InvokeRecognitionErrorCallback(result.recognitionStatus, json.dump());
-                break;
+            }
+            else
+            {
+                connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
             }
         }
         else if (path == path::translationHypothesis)
@@ -1246,33 +1214,23 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
         else if (path == path::translationPhrase)
         {
             auto status = ToRecognitionStatus(json.at(json_properties::recoStatus));
-            auto speechResult = RetrieveSpeechResult(json);
-            bool isErrorStatus = false;
-
-            TranslationResult translationResult;
-            switch (status)
-            {
-            case RecognitionStatus::Success:
-                translationResult = RetrieveTranslationResult(json, true);
-                break;
-            case RecognitionStatus::InitialSilenceTimeout:
-            case RecognitionStatus::InitialBabbleTimeout:
-            case RecognitionStatus::NoMatch:
-            case RecognitionStatus::EndOfDictation:
-                translationResult.translationStatus = TranslationStatus::Success;
-                break;
-            default:
-                isErrorStatus = true;
-                break;
-            }
-
-            if (isErrorStatus)
+            if (connection->isErrorRecognitionStatus(status))
             {
                 // There is an error in speech recognition, fire an error event.
                 connection->InvokeRecognitionErrorCallback(status, json.dump());
             }
             else
             {
+                auto speechResult = RetrieveSpeechResult(json);
+                TranslationResult translationResult;
+                if (status == RecognitionStatus::Success)
+                {
+                    translationResult = RetrieveTranslationResult(json, true);
+                }
+                else
+                {
+                    translationResult.translationStatus = TranslationStatus::Success;
+                }
                 // There is no speech recognition error, we fire a translation phrase event.
                 connection->Invoke([&] {
                     callbacks->OnTranslationPhrase({move(speechResult.json),
@@ -1431,6 +1389,55 @@ void Connection::Impl::InvokeRecognitionErrorCallback(RecognitionStatus status, 
     }
 
     this->Invoke([&] { callbacks->OnError(false, error, msg.c_str()); });
+}
+
+SpeechPhraseMsg Connection::Impl::RetrieveSpeechPhraseResult(const nlohmann::json& json)
+{
+    SpeechPhraseMsg result;
+    result.json = PAL::ToWString(json.dump());
+    result.offset = json[json_properties::offset].get<OffsetType>();
+    result.duration = json[json_properties::duration].get<DurationType>();
+    result.recognitionStatus = ToRecognitionStatus(json[json_properties::recoStatus].get<string>());
+    if (json.find(json_properties::speaker) != json.end())
+    {
+        result.speaker = PAL::ToWString(json[json_properties::speaker].get<string>());
+    }
+
+    if (result.recognitionStatus == RecognitionStatus::Success)
+    {
+        if (json.find(json_properties::displayText) != json.end())
+        {
+            // The DisplayText field will be present only if the RecognitionStatus field has the value Success.
+            // and the format output is simple
+            result.displayText = PAL::ToWString(json[json_properties::displayText].get<string>());
+        }
+        else // Detailed
+        {
+            // The service returns sorted n-best results and the first result is the best one.
+            // Use the first one as the default text, irrespective of the confidence value.
+            auto phrases = json.at(json_properties::nbest);
+            if (!phrases.empty())
+            {
+                result.displayText = PAL::ToWString(phrases[0].at(json_properties::display).get<string>());
+            }
+        }
+    }
+    return result;
+}
+
+bool Connection::Impl::isErrorRecognitionStatus(RecognitionStatus status)
+{
+    switch(status)
+    {
+    case RecognitionStatus::Success:
+    case RecognitionStatus::InitialSilenceTimeout:
+    case RecognitionStatus::InitialBabbleTimeout:
+    case RecognitionStatus::NoMatch:
+    case RecognitionStatus::EndOfDictation:
+        return false;
+    default:
+        return true;
+    }
 }
 
 void PlatformInit(const char* proxyHost, int proxyPort, const char* proxyUsername, const char* proxyPassword)

@@ -2028,7 +2028,7 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
             contextJson["languageId"] = languageIdJson;
         }
         contextJson["phraseDetection"] = GetPhraseDetectionJson(recoMode);
-        contextJson["phraseOutput"] = GetPhraseOutputJson(recoMode);
+        contextJson["phraseOutput"] = GetPhraseOutputJson(recoMode, false);
         contextJson["translation"] = GetTranslationJson(move(toLangsVector), doSynthesis);
         if (doSynthesis)
         {
@@ -2333,11 +2333,13 @@ json CSpxUspRecoEngineAdapter::GetPhraseDetectionJson(const string& recoMode)
     return phraseDetectionJson;
 }
 
-json CSpxUspRecoEngineAdapter::GetPhraseOutputJson(const string& recoMode)
+json CSpxUspRecoEngineAdapter::GetPhraseOutputJson(const string& recoMode, bool needSpeechMessages)
 {
     json phraseOutputJson;
     SPX_DBG_ASSERT(!recoMode.empty());
-    phraseOutputJson["interimResults"][recoMode.c_str()]["resultType"] = "Auto";
+    auto recModeCStr = recoMode.c_str();
+    phraseOutputJson["interimResults"][recModeCStr]["resultType"] = needSpeechMessages ? "Auto" : "None";
+    phraseOutputJson["phraseResults"][recModeCStr]["resultType"] = needSpeechMessages ? "Always" : "None";
     return phraseOutputJson;
 }
 

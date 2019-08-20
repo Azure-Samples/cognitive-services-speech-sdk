@@ -298,7 +298,8 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         phraseDetectionJson["onSuccess"]["action"] = "Translate";
         phraseDetectionJson["onInterim"]["action"] = "Translate";
         expectedJson["phraseDetection"] = phraseDetectionJson;
-        expectedJson["phraseOutput"]["interimResults"][recoMode]["resultType"] = "Auto";
+        expectedJson["phraseOutput"]["interimResults"][recoMode]["resultType"] = "None";
+        expectedJson["phraseOutput"]["phraseResults"][recoMode]["resultType"] = "None";
 
         json translationJson;
         translationJson["targetLanguages"] = json(toLangs);
