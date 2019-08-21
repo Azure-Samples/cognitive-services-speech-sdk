@@ -17,7 +17,7 @@ using namespace Microsoft::CognitiveServices::Speech::Audio;
 
 #define SPX_CONFIG_TRACE_INTERFACE_MAP
 
-TEST_CASE("conversation_voice_signature", "[.][int][prod]")
+TEST_CASE("conversation_voice_signature", "[api][cxx]")
 {
     auto audioEndpoint = Config::InroomEndpoint;
     audioEndpoint += "/multiaudio";
@@ -53,9 +53,12 @@ TEST_CASE("conversation_voice_signature", "[.][int][prod]")
     auto meeting_id = PAL::CreateGuidWithDashesUTF8();
     INFO(meeting_id);
     recognizer->SetConversationId(meeting_id);
+    string msg = "katieVoiceSignature " + katieVoiceSignature;
+    INFO(msg);
     REQUIRE_NOTHROW(p->SetVoiceSignature(katieVoiceSignature));
     recognizer->AddParticipant(p);
-
+    msg = "after AddParticipant katieVoiceSignature " + katieVoiceSignature;
+    INFO(msg);
     auto p2 = Participant::From("steve@example.com", "en-us", steveVoiceSignature);
     recognizer->AddParticipant(p2);
 
@@ -67,11 +70,14 @@ TEST_CASE("conversation_voice_signature", "[.][int][prod]")
     // info is reported if any of the following requires fail, otherwise not reported.
     //https://github.com/catchorg/Catch2/blob/master/docs/logging.md
     INFO(GetText(result->phrases));
-    SPXTEST_REQUIRE(VerifySpeaker(result->phrases, "steve@example.com") == true);
-    SPXTEST_REQUIRE(VerifySpeaker(result->phrases, "katie@example.com") == true);
+    auto steveOffset = VerifySpeaker(result->phrases, L"steve@example.com");
+    SPXTEST_REQUIRE(steveOffset != 0);
+
+    auto katieOffset = VerifySpeaker(result->phrases, L"katie@example.com");
+    SPXTEST_REQUIRE(katieOffset != 0);
 }
 
-TEST_CASE("conversation_id", "[.][int][prod]")
+TEST_CASE("conversation_id", "[api][cxx]")
 {
     auto audioEndpoint = Config::InroomEndpoint;
     audioEndpoint += "/multiaudio";
@@ -92,14 +98,14 @@ TEST_CASE("conversation_id", "[.][int][prod]")
     SPXTEST_REQUIRE((PAL::stricmp(reinterpret_cast<char*>(s), gotId.c_str())) == 0);
 }
 
-TEST_CASE("conversation_create_users", "[.][int][prod]")
+TEST_CASE("conversation_create_users", "[api][cxx]")
 {
     auto myId = "emailOfSomeUser";
     auto user = User::FromUserId(myId);
     SPXTEST_REQUIRE(user->GetId() == myId);
 }
 
-TEST_CASE("conversation_create_participant", "[.][int][prod]")
+TEST_CASE("conversation_create_participant", "[api][cxx]")
 {
     REQUIRE_THROWS(Participant::From(""));
     REQUIRE_NOTHROW(Participant::From("secondparticipant"));
@@ -107,7 +113,7 @@ TEST_CASE("conversation_create_participant", "[.][int][prod]")
     REQUIRE_THROWS(Participant::From("secondparticipant", "en-us", "voiceSignature"));
 }
 
-TEST_CASE("conversation_add_while_pumping", "[.][int][prod]")
+TEST_CASE("conversation_add_while_pumping", "[api][cxx]")
 {
     auto audioEndpoint = Config::InroomEndpoint;
     audioEndpoint += "/multiaudio";
@@ -127,14 +133,14 @@ TEST_CASE("conversation_add_while_pumping", "[.][int][prod]")
     this_thread::sleep_for(100ms);
     recognizer->AddParticipant("AddParticipantWhileAudioPumping");
     // the recorded audio is really long, intentionally timeout in 5min.
-    WaitForResult(result->ready.get_future(), 5min);
+    WaitForResult(result->ready.get_future(), 15min);
     auto text = GetText(result->phrases);
     INFO(text);
     bool res = VerifyTextAndSpeaker(result->phrases, "ABC.", "Unidentified") || VerifyTextAndSpeaker(result->phrases, "ABC", "Unidentified");
     SPXTEST_REQUIRE(res == true);
 }
 
-TEST_CASE("conversation_bad_connection", "[.][int][prod]")
+TEST_CASE("conversation_bad_connection", "[api][cxx]")
 {
     auto audioEndpoint = "wrong_endpoint";
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
@@ -157,7 +163,7 @@ TEST_CASE("conversation_bad_connection", "[.][int][prod]")
     SPXTEST_REQUIRE(result->phrases[0].Text.find("Runtime error: Failed to create transport request.") != string::npos);
 }
 
-TEST_CASE("conversation_inroom_8_channel_file", "[.][int][prod]")
+TEST_CASE("conversation_inroom_8_channel_file", "[api][cxx]")
 {
     auto audioEndpoint = Config::InroomEndpoint;
     audioEndpoint += "/multiaudio";
@@ -175,7 +181,7 @@ TEST_CASE("conversation_inroom_8_channel_file", "[.][int][prod]")
     recognizer->SetConversationId(myId);
     StartMeetingAndVerifyResult(recognizer.get(), p, move(result), katieSteve.m_utterance);
 }
-TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
+TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
 {
     auto audioEndpoint = Config::InroomEndpoint;
     audioEndpoint += "/multiaudio";
@@ -345,7 +351,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[.][int][prod]")
     }
 }
 
-TEST_CASE("conversation_inroom_8_channel_audio_push", "[.][int][prod]")
+TEST_CASE("conversation_inroom_8_channel_audio_push", "[api][cxx]")
 {
     auto audioEndpoint = Config::InroomEndpoint;
     audioEndpoint += "/multiaudio";
@@ -491,7 +497,7 @@ TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
         SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
     }
 }
-TEST_CASE("conversation_online_1_channel_file", "[.][int][prod]")
+TEST_CASE("conversation_online_1_channel_file", "[api][cxx]")
 {
     auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
 

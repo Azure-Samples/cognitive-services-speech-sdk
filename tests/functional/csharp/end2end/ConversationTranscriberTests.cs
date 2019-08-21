@@ -230,7 +230,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationAddParticipantFromSubscription()
         {
-            var config = SpeechConfig.FromSubscription(conversationTranscriptionPRODKey, speechRegionForConversationTranscription);
+            //var config = SpeechConfig.FromSubscription(conversationTranscriptionPRODKey, speechRegionForConversationTranscription);
+            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
+            config.SetProperty(PropertyId.Speech_LogFilename, "carbon.log");
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
             {

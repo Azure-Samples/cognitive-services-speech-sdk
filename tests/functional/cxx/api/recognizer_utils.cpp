@@ -534,7 +534,7 @@ bool VerifyTextAndSpeaker(const RecoResultVector& phrases, const std::string& te
     bool found = false;
     for (const auto& phrase : phrases)
     {
-        if (phrase.Text == text && phrase.UserId == speakerId)
+        if ( phrase.Text.find(text) != string::npos && phrase.UserId == speakerId)
         {
             found = true;
             break;
@@ -543,27 +543,24 @@ bool VerifyTextAndSpeaker(const RecoResultVector& phrases, const std::string& te
     return found;
 }
 
-bool VerifySpeaker(const RecoResultVector& phrases, const std::string& speakerId)
+uint64_t VerifySpeaker(const RecoResultVector& phrases_in, const std::wstring& wantedSpeaker)
 {
-    bool found = false;
-    bool allUnidentified = true;
+    uint64_t offset = 0;
+    auto phrases = phrases_in;
+    sort(begin(phrases), end(phrases), [](const RecoPhrase& lhs, const RecoPhrase& rhs) { return lhs.Offset < rhs.Offset; });
     for (const auto& phrase : phrases)
     {
-        auto lowercaseUserId = speakerId;
-        transform(lowercaseUserId.begin(), lowercaseUserId.end(), lowercaseUserId.begin(), [](unsigned char c) ->char { return (char)::tolower(c); });
+        wstring lowercaseUserId = PAL::ToWString(phrase.UserId);
+        transform(lowercaseUserId.begin(), lowercaseUserId.end(), lowercaseUserId.begin(), [](wchar_t c) ->wchar_t { return std::tolower(c, std::locale("")); } );
 
-        if (lowercaseUserId != "unidentified")
+        if (lowercaseUserId == wantedSpeaker)
         {
-            allUnidentified = false;
-        }
-        if (phrase.UserId == speakerId)
-        {
-            found = true;
+            offset = phrase.Offset;
             break;
         }
     }
 
-    return found && allUnidentified == false;
+    return offset;
 }
 
 std::string GetText(const RecoResultVector& phrases)

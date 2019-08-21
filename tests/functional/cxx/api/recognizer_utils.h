@@ -76,21 +76,22 @@ extern TestData katieSteve;
 
 struct RecoPhrase
 {
-    RecoPhrase(const std::string& txt, const std::string& id, const std::string& json)
-        : Text{ txt }, UserId(id), Json{ json }
+    RecoPhrase(const std::string& txt, const std::string& id, const std::string& json, uint64_t offset)
+        : Text{ txt }, UserId(id), Json{ json }, Offset(offset)
     {}
 
     RecoPhrase(const std::string& txt)
-        : Text{ txt }, UserId{ string{} }, Json{ string{} }
+        : Text{ txt }, UserId{ string{} }, Json{ string{} }, Offset{0}
     {}
 
     RecoPhrase()
-        :Text{ string{} }, UserId{ string{} }, Json{ string{} }
+        :Text{ string{} }, UserId{ string{} }, Json{ string{} }, Offset{0}
     {}
 
     std::string Text;
     std::string UserId;
     std::string Json;
+    uint64_t Offset;
 };
 
 
@@ -163,7 +164,7 @@ void ConnectCallbacks(RecogType* recognizer, RecoPhrasesPtr result)
 
             SPX_TRACE_VERBOSE("CXX_API_TEST RECOGNIZED: %s", os.str().c_str());
 
-            result->phrases.push_back(RecoPhrase{ e.Result->Text, userId, json });
+            result->phrases.push_back(RecoPhrase{ e.Result->Text, userId, json, e.Result->Offset() });
         }
         else if (e.Result->Reason == ResultReason::NoMatch)
         {
@@ -253,4 +254,4 @@ bool VerifyTextAndSpeaker(const RecoResultVector& phrases, const std::string& te
 std::string GetText(const RecoResultVector& phrases);
 using My90kHzDuration = std::chrono::duration<double, std::ratio<1, 90000>>;
 std::string CreateTimestamp();
-bool VerifySpeaker(const RecoResultVector& phrases, const std::string& speakerId);
+uint64_t VerifySpeaker(const RecoResultVector& phrases, const std::wstring& speakerId);
