@@ -960,7 +960,7 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
             result.failureReason = L"Status is missing in the protocol message. Response text:" + PAL::ToWString(json.dump());
         }
 
-        auto failure = translation.find(json_properties::translationFailureReason);
+        auto failure = translation.find(json_properties::failureReason);
         if (failure != translation.end())
         {
             result.failureReason += PAL::ToWString(failure->get<string>());
@@ -1070,7 +1070,10 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             auto streamId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::streamId);
 
             AudioOutputChunkMsg msg;
-            msg.streamId = streamId == nullptr ? -1 : atoi(streamId);
+            if (pathStr == path::audio && connection->m_streamIdLangMap.size() > 0)
+            {
+                connection->FillLanguageForAudioOutputChunkMsg(streamId, path, msg);
+            }
             msg.requestId = requestId;
             msg.audioBuffer = (uint8_t *)response->buffer;
             msg.audioLength = response->bufferSize;
@@ -1117,6 +1120,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
         {
             {
                 connection->m_activeRequestIds.erase(requestId);
+                connection->m_streamIdLangMap.clear();
             }
 
             // flush the telemetry before invoking the onTurnEnd callback.
@@ -1264,7 +1268,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 failureReason = "No synthesis status in synthesis.end message.";
             }
 
-            auto failureHandle = json.find(json_properties::translationFailureReason);
+            auto failureHandle = json.find(json_properties::failureReason);
             if (failureHandle != json.end())
             {
                 if (synthesisSuccess)
@@ -1277,7 +1281,6 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             if (synthesisSuccess)
             {
                 AudioOutputChunkMsg msg;
-                msg.streamId = -1;
                 msg.audioBuffer = NULL;
                 msg.audioLength = 0;
                 msg.requestId = requestId;
@@ -1328,6 +1331,62 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             }
 
             connection->Invoke([&] { callbacks->OnAudioOutputMetadata(msg); });
+        }
+        else if (path == path::audioStart)
+        {
+            auto streamId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::streamId);
+            if (streamId == nullptr)
+            {
+                 PROTOCOL_VIOLATION("No stream id in %s header", path);
+            }
+            else if (json.find(json_properties::translationLanguage) == json.end())
+            {
+                // TODO: in future, audio.start may be used in other scenario,  this validation logic need to update accordingly.
+                PROTOCOL_VIOLATION("Cannot find TranslationLanguage in audio.start message. Json=%s", json.dump().c_str());
+            }
+            else
+            {
+                auto language = json[json_properties::translationLanguage].get<string>();
+                LogInfo("Got streamId %s to language %s map.  current m_streamIdLangMap size = %d", streamId, language.c_str(), connection->m_streamIdLangMap.size());
+                // This is a protoeciton logic to avoid memory usage increases due to service error.
+                // So far we haven't any scenario that needs more than 10 synthesising languages
+                // TODO: remove this protection code after the new service endpoint is stable
+                const int MaxLanguages = 10;
+                if (connection->m_streamIdLangMap.size() > MaxLanguages)
+                {
+                    PROTOCOL_VIOLATION("We have got more than % audio.start messages for different languges, service is sending too many such messages.", MaxLanguages);
+                }
+                else
+                {
+                    connection->m_streamIdLangMap[streamId] = language;
+                }
+            }
+        }
+        else if (path == path::audioEnd)
+        {
+            string failureReason;
+            auto status = json[json_properties::status].get<string>();
+            if (status != "Success" && status != "Error")
+            {
+                failureReason = "Invalid status in audio.end message.";
+                PROTOCOL_VIOLATION("%s Json=%s", failureReason.c_str(), json.dump().c_str());
+            }
+            bool isSuccess = status == "Success";
+            if (isSuccess)
+            {
+                AudioOutputChunkMsg msg;
+                msg.audioBuffer = NULL;
+                msg.audioLength = 0;
+                msg.requestId = requestId;
+                auto streamId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::streamId);
+                connection->FillLanguageForAudioOutputChunkMsg(streamId, path, msg);
+                connection->Invoke([&] { callbacks->OnAudioOutputChunk(msg); });
+            }
+            else
+            {
+                failureReason = failureReason + json[json_properties::failureReason].get<string>();
+                connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, failureReason.c_str()); });
+            }
         }
         else
         {
@@ -1427,7 +1486,7 @@ SpeechPhraseMsg Connection::Impl::RetrieveSpeechPhraseResult(const nlohmann::jso
 
 bool Connection::Impl::isErrorRecognitionStatus(RecognitionStatus status)
 {
-    switch(status)
+    switch (status)
     {
     case RecognitionStatus::Success:
     case RecognitionStatus::InitialSilenceTimeout:
@@ -1437,6 +1496,29 @@ bool Connection::Impl::isErrorRecognitionStatus(RecognitionStatus status)
         return false;
     default:
         return true;
+    }
+}
+
+void Connection::Impl::FillLanguageForAudioOutputChunkMsg(const char* streamId, const std::string& messagePath, AudioOutputChunkMsg& msg)
+{
+    if (streamId == nullptr)
+    {
+        PROTOCOL_VIOLATION("%s message is recieved but doesn't have streamId in header.", messagePath.c_str());
+    }
+    else if (m_streamIdLangMap.count(streamId) == 0)
+    {
+        PROTOCOL_VIOLATION(
+            "%s message is recieved but cannot find streamId %s from streamId to language map, may be caused by audio.start message not being receieved before this message.",
+            messagePath.c_str(),
+            streamId);
+    }
+    else
+    {
+        msg.language = m_streamIdLangMap.at(streamId);
+        if (messagePath == path::audioEnd)
+        {
+            m_streamIdLangMap.erase(streamId);
+        }
     }
 }
 

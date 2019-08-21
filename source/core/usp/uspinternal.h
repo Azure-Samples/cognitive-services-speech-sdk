@@ -165,6 +165,9 @@ private:
     SpeechPhraseMsg RetrieveSpeechPhraseResult(const nlohmann::json& json);
     bool isErrorRecognitionStatus(RecognitionStatus status);
     std::shared_ptr<Microsoft::CognitiveServices::Speech::Impl::ISpxThreadService> m_threadService;
+
+    void FillLanguageForAudioOutputChunkMsg(const char* streamId, const std::string& messagePath, AudioOutputChunkMsg& msg);
+    std::unordered_map<std::string, std::string> m_streamIdLangMap;
 };
 
 }}}}

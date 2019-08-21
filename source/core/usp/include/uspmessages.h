@@ -257,7 +257,7 @@ struct TranslationPhraseMsg : public TranslationHypothesisMsg
 */
 struct AudioOutputChunkMsg
 {
-    int streamId { -1 };
+    std::string language;
     std::string requestId;
     const uint8_t* audioBuffer { nullptr };
     size_t audioLength { 0 };

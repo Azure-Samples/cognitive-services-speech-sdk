@@ -40,7 +40,9 @@ const std::array<std::tuple<IncomingMsgType, const std::string*>, static_cast<si
     std::make_tuple(translationSynthesisEnd, &path::translationSynthesisEnd),
     std::make_tuple(audio, &event::keys::received::Audio),
     std::make_tuple(audioMetadata, &event::keys::received::AudioMetadata),
-    std::make_tuple(response, &event::keys::received::Response)
+    std::make_tuple(response, &event::keys::received::Response),
+    std::make_tuple(audioStart, &path::audioStart),
+    std::make_tuple(audioEnd, &path::audioEnd)
 } };
 
 const std::string* get_message_name(const IncomingMsgType type)

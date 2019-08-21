@@ -76,6 +76,8 @@ enum IncomingMsgType
     audio,
     audioMetadata,
     response,
+    audioStart,
+    audioEnd,
     countOfMsgTypes
 };
 
