@@ -164,8 +164,6 @@ private:
     void UspWriteFormat(SPXWAVEFORMATEX* pformat);
     void UspWriteActual(const DataChunkPtr& audioChunk);
     void UspWriteFlush();
-    void UspResetConnection();
-    void UspClearReconnectCache();
 
     void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg&) override;
     void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg&) override;
@@ -298,10 +296,7 @@ private:
     bool m_expectIntentResponse = false;
     USP::SpeechPhraseMsg m_finalResultMessageToFireLater;
 
-    constexpr static size_t c_initialReconnectWaitingTimeMs = 10; // 10 milliseconds
-    constexpr static  size_t c_reconnectWaitingTimeThreasholdMs = 2000; // 2 sec
     std::string m_dialogConversationId;
-    size_t m_reconnectWaitingTimeMs = 10;
 
     std::map<std::string, std::unique_ptr<CSpxActivitySession>> m_request_session_map;
 

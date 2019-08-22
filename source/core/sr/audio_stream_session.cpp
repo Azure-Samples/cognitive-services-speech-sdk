@@ -1786,7 +1786,7 @@ void CSpxAudioStreamSession::CheckError(const string& error)
 
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
-    if (IsState(SessionState::Idle) && !IsRecognizerType<ISpxDialogServiceConnector>())
+    if (IsState(SessionState::Idle))
     {
         if (adapter != m_recoAdapter.get())
         {

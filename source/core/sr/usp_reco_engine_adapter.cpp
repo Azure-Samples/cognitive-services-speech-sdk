@@ -136,15 +136,6 @@ void CSpxUspRecoEngineAdapter::OpenConnection(bool singleShot)
     EnsureUspInit();
 }
 
-void CSpxUspRecoEngineAdapter::UspClearReconnectCache()
-{
-    m_reconnectWaitingTimeMs = c_initialReconnectWaitingTimeMs;
-    if (m_endpointType == USP::EndpointType::Dialog)
-    {
-        m_dialogConversationId.clear();
-    }
-}
-
 void CSpxUspRecoEngineAdapter::CloseConnection()
 {
     SPX_DBG_TRACE_VERBOSE("%s: Close connection.", __FUNCTION__);
@@ -161,10 +152,6 @@ void CSpxUspRecoEngineAdapter::CloseConnection()
         SPX_DBG_TRACE_INFO("%s: Skip setting up connection in advance for intent recognizer.", __FUNCTION__);
         SPX_THROW_HR(SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
         return;
-    }
-    if (countDialog == 1)
-    {
-        UspClearReconnectCache();
     }
     // Terminate the connection to service.
     UspTerminate();
@@ -1129,19 +1116,6 @@ void CSpxUspRecoEngineAdapter::UspWriteFlush()
     }
 }
 
-void CSpxUspRecoEngineAdapter::UspResetConnection()
-{
-    SPX_DBG_TRACE_VERBOSE("%s: Reconnecting....", __FUNCTION__);
-    std::weak_ptr<ISpxRecoEngineAdapter> wk{ ISpxInterfaceBaseFor<ISpxRecoEngineAdapter>::shared_from_this() };
-    std::this_thread::sleep_for(std::chrono::milliseconds((m_reconnectWaitingTimeMs)));
-
-    if (auto keep_alive = wk.lock())
-    {
-        UspTerminate();
-        EnsureUspInit();
-    }
-}
-
 void CSpxUspRecoEngineAdapter::WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency)
 {
     SPX_DBG_ASSERT(m_uspConnection != nullptr);
@@ -1696,24 +1670,6 @@ void CSpxUspRecoEngineAdapter::OnError(bool isTransport, USP::ErrorCode errorCod
 {
     SPX_DBG_TRACE_VERBOSE("Response: On Error: Code:%d, Message: %s.\n", errorCode, errorMessage.c_str());
 
-    /* Only try reconnecting for dialog endpoints. */
-    if (m_endpointType == USP::EndpointType::Dialog)
-    {
-        if (errorCode == USP::ErrorCode::ConnectionError && m_audioState != AudioState::Sending && errorMessage.find("Internal error:") != std::string::npos)
-        {
-            /* Increment first so  we sleep at most ~c_reconnectWaitingTimeThreasholdMs */
-            m_reconnectWaitingTimeMs = m_reconnectWaitingTimeMs * 2;
-            if (m_reconnectWaitingTimeMs < c_reconnectWaitingTimeThreasholdMs)
-            {
-                UspResetConnection();
-                return;
-            }
-            else
-            {
-                UspClearReconnectCache();
-            }
-        }
-    }
 
     if (IsBadState())
     {
@@ -1803,8 +1759,6 @@ void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
 
 void CSpxUspRecoEngineAdapter::OnConnected()
 {
-    /* In case of a successful connection, we reset the exponential back off */
-    m_reconnectWaitingTimeMs = c_initialReconnectWaitingTimeMs;
     InvokeOnSite([](const SitePtr& p) { p->FireConnectedEvent(); });
 }
 
