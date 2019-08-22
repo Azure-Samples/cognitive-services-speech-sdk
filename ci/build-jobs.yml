@@ -468,31 +468,46 @@ jobs:
           testJarFile="$(Build.ArtifactStagingDirectory)/In/macOS/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar"
           [[ -f ${testJarFile} ]]
           [[ -f $(PathToJar) ]]
-          java \
-            -cp $(printf "%s:" \
-              "$(PathToJar)" \
-              "${testJarFile}" \
-              "external/junit/junit-4.12.jar" \
-              "external/junit/hamcrest-core-1.3.jar") \
-            -DSpeechSubscriptionKey="$SPEECHSDK_SPEECH_KEY" \
-            -DSpeechRegion="$SPEECHSDK_SPEECH_REGION" \
-            -DLuisSubscriptionKey=$(luis-westus-s0-201809-key1) \
-            -DLuisRegion="$SPEECHSDK_LUIS_REGION" \
-            -DLuisAppId="$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-            -DAudioInputDirectory=tests/input/audio \
-            -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
-            -DKeyword=Computer \
-            -DKeywordModel=/data/keyword/kws.table \
-            -DTestOutputFilename=test-java-unittests-package.xml \
-            -DSpeechSubscriptionKeyForVirtualAssistant="$SPEECHSDK_BOT_SUBSCRIPTION" \
-            -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
-            -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
-            -DConversationTranscriptionEndpoint="$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-            -DConversationTranscriptionPPEKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
-            -DConversationTranscriptionPRODKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
-            -DSpeechRegionForConversationTranscription="$SPEECHSDK_PRINCETON_REGION" \
-            tests.runner.Runner \
-            tests.AllTests
+          # set +e to allow capturing exit codes
+          set +e
+          for retry in {0..3}; do
+            java \
+              -cp $(printf "%s:" \
+                "$(PathToJar)" \
+                "${testJarFile}" \
+                "external/junit/junit-4.12.jar" \
+                "external/junit/hamcrest-core-1.3.jar") \
+              -DSpeechSubscriptionKey="$SPEECHSDK_SPEECH_KEY" \
+              -DSpeechRegion="$SPEECHSDK_SPEECH_REGION" \
+              -DLuisSubscriptionKey=$(luis-westus-s0-201809-key1) \
+              -DLuisRegion="$SPEECHSDK_LUIS_REGION" \
+              -DLuisAppId="$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
+              -DAudioInputDirectory=tests/input/audio \
+              -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
+              -DKeyword=Computer \
+              -DKeywordModel=/data/keyword/kws.table \
+              -DTestOutputFilename=test-java-unittests-package.xml \
+              -DSpeechSubscriptionKeyForVirtualAssistant="$SPEECHSDK_BOT_SUBSCRIPTION" \
+              -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
+              -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
+              -DConversationTranscriptionEndpoint="$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
+              -DConversationTranscriptionPPEKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
+              -DConversationTranscriptionPRODKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+              -DSpeechRegionForConversationTranscription="$SPEECHSDK_PRINCETON_REGION" \
+              tests.runner.Runner \
+              tests.AllTests
+            exitCode=$?
+            if [[ $exitCode == 0 ]]; then
+              echo "Test suite passed, RetryCount( $retry )"
+              break
+            else
+              echo "Test suite failed during retry( $retry )."
+              vsts_logissue warning "Test suite failed during retry( $retry )."
+              sleep 2s
+            fi
+          done
+          set -e
+          exit ${exitCode}
         displayName: Run unit test
         condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
         continueOnError: ${{ parameters.continueOnTestFailure }}
