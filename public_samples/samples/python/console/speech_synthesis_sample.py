@@ -400,15 +400,14 @@ def speech_synthesis_word_boundary_event():
     """performs speech synthesis and shows the word boundary event."""
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
-    # Set backend protocol to USP (Universal Speech Protocol), on which word boundary is available
-    speech_config.set_property_by_name("SDK-INTERNAL-UseTtsEngine-Usp", "true");
+
     # Creates a speech synthesizer with a null output stream.
     # This means the audio output data will not be written to any output channel.
     # You can just get the audio from the result.
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
 
-    # Subscribes to word boundar event
-    # The unit of evt.audio_offset is tick (1 tick = 100 nano seconds), divid it by 10000 to convert to ms
+    # Subscribes to word boundary event
+    # The unit of evt.audio_offset is tick (1 tick = 100 nanoseconds), divide it by 10000 to convert to ms
     speech_synthesizer.synthesis_word_boundary.connect(lambda evt: print(
         "Word boundary event received: {}, audio offset in ms: {}ms".format(evt, evt.audio_offset / 10000)))
 

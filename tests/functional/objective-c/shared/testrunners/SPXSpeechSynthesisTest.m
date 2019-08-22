@@ -416,14 +416,45 @@
 
 @end
 
-@interface SPXSpeechSynthesisEndtoEndTest : SPXSpeechSynthesisEndtoEndTestBase {
+@interface SPXSpeechSynthesisEndtoEndTestRest : SPXSpeechSynthesisEndtoEndTestBase {
 }
 
 - (void)setSpeechConfig;
 
 @end
 
-@implementation SPXSpeechSynthesisEndtoEndTest
+@implementation SPXSpeechSynthesisEndtoEndTestRest
+
+- (void)setSpeechConfig {
+    self.speechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:[NSString stringWithFormat:@"https://%@.tts.speech.microsoft.com/cognitiveservices/v1", self.serviceRegion] subscription:self.speechKey];
+}
+
+- (void)testDefaultSynthesis {
+    return [self _testDefaultSynthesis];
+}
+
+- (void)testSynthesisOutputToFile {
+    return [self _testSynthesisOutputToFile];
+}
+
+- (void)testSynthesisOutputToPushStream {
+    return [self _testSynthesisOutputToPushStream];
+}
+
+- (void)testSpeakOutInResults {
+    return [self _testSpeakOutInResults];
+}
+
+@end
+
+@interface SPXSpeechSynthesisEndtoEndTestUsp : SPXSpeechSynthesisEndtoEndTestBase {
+}
+
+- (void)setSpeechConfig;
+
+@end
+
+@implementation SPXSpeechSynthesisEndtoEndTestUsp
 
 - (void)setSpeechConfig {
     self.speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
@@ -483,37 +514,6 @@
 
 - (void)testAuthorizationToken {
     return [self _testAuthorizationToken];
-}
-
-@end
-
-@interface SPXSpeechSynthesisEndtoEndTestUsp : SPXSpeechSynthesisEndtoEndTestBase {
-}
-
-- (void)setSpeechConfig;
-
-@end
-
-@implementation SPXSpeechSynthesisEndtoEndTestUsp
-
-- (void)setSpeechConfig {
-    self.speechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:[NSString stringWithFormat:@"wss://%@.tts.speech.microsoft.com/cognitiveservices/websocket/v1", self.serviceRegion] subscription:self.speechKey];
-}
-
-- (void)testDefaultSynthesis {
-    return [self _testDefaultSynthesis];
-}
-
-- (void)testSynthesisOutputToFile {
-    return [self _testSynthesisOutputToFile];
-}
-
-- (void)testSynthesisOutputToPushStream {
-    return [self _testSynthesisOutputToPushStream];
-}
-
-- (void)testSpeakOutInResults {
-    return [self _testSpeakOutInResults];
 }
 
 - (void)testCheckWordBoundaryEvents {

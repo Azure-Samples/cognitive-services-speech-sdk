@@ -34,9 +34,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task Defaults()
+        public async Task SynthesisDefaultsREST()
         {
-            using (var synthesizer = new SpeechSynthesizer(config))
+            using (var synthesizer = new SpeechSynthesizer(restConfig))
             {
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
@@ -48,11 +48,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ExplicitlyUseDefaultSpeakers()
+        public async Task ExplicitlyUseDefaultSpeakersREST()
         {
             using (var deviceConfig = AudioConfig.FromDefaultSpeakerOutput())
             {
-                using (var synthesizer = new SpeechSynthesizer(config, deviceConfig))
+                using (var synthesizer = new SpeechSynthesizer(restConfig, deviceConfig))
                 {
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
@@ -65,10 +65,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task PickLanguage()
+        public async Task PickLanguageREST()
         {
-            config.SpeechSynthesisLanguage = "en-GB";
-            using (var synthesizer = new SpeechSynthesizer(config))
+            restConfig.SpeechSynthesisLanguage = "en-GB";
+            using (var synthesizer = new SpeechSynthesizer(restConfig))
             {
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
@@ -80,10 +80,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task PickVoice()
+        public async Task PickVoiceREST()
         {
-            config.SpeechSynthesisVoiceName = "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)";
-            using (var synthesizer = new SpeechSynthesizer(config))
+            restConfig.SpeechSynthesisVoiceName = "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)";
+            using (var synthesizer = new SpeechSynthesizer(restConfig))
             {
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
                 using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
@@ -95,11 +95,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task SynthesizerOutputToFile()
+        public async Task SynthesizerOutputToFileREST()
         {
             using (var fileConfig = AudioConfig.FromWavFileOutput("wavefile.wav"))
             {
-                using (var synthesizer = new SpeechSynthesizer(config, fileConfig))
+                using (var synthesizer = new SpeechSynthesizer(restConfig, fileConfig))
                 {
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"
                     {
@@ -111,7 +111,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.IsTrue(waveSize1 > EmptyWaveFileSize, $"The size of output wave file 1 is unexpected. Expected: greater than {EmptyWaveFileSize}, Actual: {waveSize1}");
 
                 // Make a second run with 2 speaks to verify that the audio can be appended to the file while speaking
-                using (var synthesizer = new SpeechSynthesizer(config, fileConfig))
+                using (var synthesizer = new SpeechSynthesizer(restConfig, fileConfig))
                 {
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}"
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{wavefile.wav}}}" now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}"
@@ -127,13 +127,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task SynthesizerOutputToPushStream()
+        public async Task SynthesizerOutputToPushStreamREST()
         {
             using (var callback = new PushAudioOutputStreamTestCallback())
             using (var stream = AudioOutputStream.CreatePushStream(callback))
             using (var streamConfig = AudioConfig.FromStreamOutput(stream))
             {
-                using (var synthesizer = new SpeechSynthesizer(config, streamConfig))
+                using (var synthesizer = new SpeechSynthesizer(restConfig, streamConfig))
                 {
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pushstream
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pushstream
@@ -152,12 +152,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task SynthesizerOutputToPullStreamUseAfterSynthesisCompleted()
+        public async Task SynthesizerOutputToPullStreamUseAfterSynthesisCompletedREST()
         {
             using (var stream = AudioOutputStream.CreatePullStream())
             using (var streamConfig = AudioConfig.FromStreamOutput(stream))
             {
-                using (var synthesizer = new SpeechSynthesizer(config, streamConfig))
+                using (var synthesizer = new SpeechSynthesizer(restConfig, streamConfig))
                 {
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
@@ -172,14 +172,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task SynthesizerOutputToPullStreamStartUsingBeforeDoneSynthesizing()
+        public async Task SynthesizerOutputToPullStreamStartUsingBeforeDoneSynthesizingREST()
         {
             using (var stream = AudioOutputStream.CreatePullStream())
             {
                 var future = DoSomethingWithAudioInPullStreamInBackground(stream, new bool[] { false });
 
                 using (var streamConfig = AudioConfig.FromStreamOutput(stream))
-                using (var synthesizer = new SpeechSynthesizer(config, streamConfig))
+                using (var synthesizer = new SpeechSynthesizer(restConfig, streamConfig))
                 {
                     using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pullstream
                     using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has completed rendering to pullstream
@@ -194,9 +194,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task SpeakOutInResults()
+        public async Task SpeakOutInResultsREST()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
+            using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
@@ -219,9 +219,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task SpeakOutputInChunksInEventSynthesizing()
+        public async Task SpeakOutputInChunksInEventSynthesizingREST()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
+            using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 var resultReasonList = new List<ResultReason>();
                 var audioLengthList = new List<int>();
@@ -251,9 +251,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task SpeakOutputInStreams()
+        public async Task SpeakOutputInStreamsREST()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
+            using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
@@ -284,9 +284,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task SpeakOutputInStreamsBeforeDoneFromEventSynthesisStarted()
+        public async Task SpeakOutputInStreamsBeforeDoneFromEventSynthesisStartedREST()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
+            using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 var futureList = new List<Task>();
                 var streamList = new List<AudioDataStream>();
@@ -337,9 +337,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task SpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingTextAsync()
+        public async Task SpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingTextAsyncREST()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
+            using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 using (var result1 = await synthesizer.StartSpeakingTextAsync("{{{text1}}}")) // "{{{text1}}}" synthesis has started, likely not finished
                 {
@@ -371,9 +371,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task SpeakOutputInStreamsBeforeDoneQueued()
+        public async Task SpeakOutputInStreamsBeforeDoneQueuedREST()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
+            using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 int startedRequests = 0;
                 synthesizer.SynthesisStarted += (s, e) =>
@@ -408,9 +408,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task SpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResult()
+        public async Task SpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResultREST()
         {
-            using (var synthesizer = new SpeechSynthesizer(config, null)) // null indicates to do nothing with synthesizer audio by default
+            using (var synthesizer = new SpeechSynthesizer(restConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
                 using (var result = await synthesizer.StartSpeakingTextAsync("{{{text1}}}"))
                 {
@@ -444,7 +444,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
 
         [TestMethod]
-        public async Task SpeakOutWithAuthorizationToken()
+        public async Task SpeakOutWithAuthorizationTokenREST()
         {
             var configWithInvalidToken = SpeechConfig.FromAuthorizationToken("InvalidToken", region);
             using (var synthesizer = new SpeechSynthesizer(configWithInvalidToken, null)) // null indicates to do nothing with synthesizer audio by default
@@ -475,7 +475,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
 
         [TestMethod]
-        [Ignore]
         public async Task DefaultsUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig))
@@ -490,7 +489,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task ExplicitlyUseDefaultSpeakersUsp()
         {
             using (var deviceConfig = AudioConfig.FromDefaultSpeakerOutput())
@@ -508,7 +506,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task PickLanguageUsp()
         {
             uspConfig.SpeechSynthesisLanguage = "en-GB";
@@ -524,7 +521,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task PickVoiceUsp()
         {
             uspConfig.SpeechSynthesisVoiceName = "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)";
@@ -540,7 +536,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task SynthesizerOutputToFileUsp()
         {
             using (var fileConfig = AudioConfig.FromWavFileOutput("wavefile.wav"))
@@ -573,7 +568,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task SynthesizerOutputToPushStreamUsp()
         {
             using (var callback = new PushAudioOutputStreamTestCallback())
@@ -599,7 +593,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task SynthesizerOutputToPullStreamUseAfterSynthesisCompletedUsp()
         {
             using (var stream = AudioOutputStream.CreatePullStream())
@@ -620,7 +613,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task SynthesizerOutputToPullStreamStartUsingBeforeDoneSynthesizingUsp()
         {
             using (var stream = AudioOutputStream.CreatePullStream())
@@ -643,7 +635,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task SpeakOutInResultsUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -669,7 +660,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task SpeakOutputInChunksInEventSynthesizingUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -702,7 +692,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task SpeakOutputInStreamsUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -736,7 +725,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task SpeakOutputInStreamsBeforeDoneFromEventSynthesisStartedUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -790,7 +778,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task SpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingTextAsyncUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -825,7 +812,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task SpeakOutputInStreamsBeforeDoneQueuedUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default
@@ -863,7 +849,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task SpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResultUsp()
         {
             using (var synthesizer = new SpeechSynthesizer(uspConfig, null)) // null indicates to do nothing with synthesizer audio by default

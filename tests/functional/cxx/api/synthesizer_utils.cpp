@@ -12,14 +12,19 @@ namespace TTS
 {
     std::shared_ptr<SpeechConfig> CurrentSpeechConfig()
     {
-        return SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        return RestSpeechConfig();
+    }
+
+    std::shared_ptr<SpeechConfig> RestSpeechConfig()
+    {
+        const auto endpoint = "https://" + Config::Region + ".tts.speech.microsoft.com/cognitiveservices/v1";
+        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        return config;
     }
 
     shared_ptr<SpeechConfig> UspSpeechConfig()
     {
-        const auto endpoint = "wss://" + Config::Region + ".tts.speech.microsoft.com/cognitiveservices/websocket/v1";
-        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
-        return config;
+        return SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
     }
 
     shared_ptr<SpeechConfig> MockSpeechConfig()

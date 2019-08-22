@@ -135,18 +135,18 @@ using namespace TTS;
 
 /* Test cases based on cognitive service TTS, without output audio content check */
 
-TEST_CASE("Defaults", "[api][cxx]")
+TEST_CASE("Synthesis Defaults - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
     synthesizer->SpeakTextAsync("{{{text1}}}"); /* "{{{text1}}}" has now completed rendering to default speakers */
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
 }
 
-TEST_CASE("Explicitly use default speakers", "[api][cxx]")
+TEST_CASE("Explicitly use default speakers - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto deviceConfig = AudioConfig::FromDefaultSpeakerOutput();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, deviceConfig);
 
@@ -154,9 +154,9 @@ TEST_CASE("Explicitly use default speakers", "[api][cxx]")
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
 }
 
-TEST_CASE("Pick language", "[api][cxx]")
+TEST_CASE("Pick language - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     config->SetSpeechSynthesisLanguage("en-GB");
     auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
@@ -164,9 +164,9 @@ TEST_CASE("Pick language", "[api][cxx]")
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
 }
 
-TEST_CASE("Pick voice", "[api][cxx]")
+TEST_CASE("Pick voice - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
     auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
@@ -174,9 +174,9 @@ TEST_CASE("Pick voice", "[api][cxx]")
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
 }
 
-TEST_CASE("Synthesizer output to file", "[api][cxx]")
+TEST_CASE("Synthesizer output to file - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto fileConfig = AudioConfig::FromWavFileOutput("wavefile.wav");
 
     auto synthesizer = SpeechSynthesizer::FromConfig(config, fileConfig);
@@ -209,9 +209,9 @@ TEST_CASE("Synthesizer output to file", "[api][cxx]")
     }
 }
 
-TEST_CASE("Synthesizer output to push stream", "[api][cxx]")
+TEST_CASE("Synthesizer output to push stream - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
 
     auto callback = std::make_shared<PushAudioOutputStreamTestCallback>();
     auto stream = AudioOutputStream::CreatePushStream(callback);
@@ -240,9 +240,9 @@ TEST_CASE("Synthesizer output to push stream", "[api][cxx]")
     }
 }
 
-TEST_CASE("Synthesizer output to pull stream use after synthesis completed", "[api][cxx]")
+TEST_CASE("Synthesizer output to pull stream use after synthesis completed - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto stream = AudioOutputStream::CreatePullStream();
     auto streamConfig = AudioConfig::FromStreamOutput(stream);
     auto synthesizer = SpeechSynthesizer::FromConfig(config, streamConfig);
@@ -259,9 +259,9 @@ TEST_CASE("Synthesizer output to pull stream use after synthesis completed", "[a
     DoSomethingWithAudioInPullStream(stream, canceled);
 }
 
-TEST_CASE("Synthesizer output to pull stream start using before done synthesizing", "[api][cxx]")
+TEST_CASE("Synthesizer output to pull stream start using before done synthesizing - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto stream = AudioOutputStream::CreatePullStream();
 
     bool canceled = false;
@@ -280,9 +280,9 @@ TEST_CASE("Synthesizer output to pull stream start using before done synthesizin
     synthesizer = nullptr;
 }
 
-TEST_CASE("Speak out in results", "[api][cxx]")
+TEST_CASE("Speak out in results - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
                                                                        /* NOTE: FYI ... all non-nullptr "config" scenarios work independently from audio in result scenarios */
 
@@ -311,9 +311,9 @@ TEST_CASE("Speak out in results", "[api][cxx]")
     DoSomethingWithAudioInVector(audioData2, result2->GetAudioLength());
 }
 
-TEST_CASE("Speak output in chunks in event synthesizing", "[api][cxx]")
+TEST_CASE("Speak output in chunks in event synthesizing - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
 
     synthesizer->Synthesizing += [](const SpeechSynthesisEventArgs& e) {
@@ -332,9 +332,9 @@ TEST_CASE("Speak output in chunks in event synthesizing", "[api][cxx]")
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has completed rendering */
 }
 
-TEST_CASE("Speak output in streams", "[api][cxx]")
+TEST_CASE("Speak output in streams - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
 
     auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has completed rendering, and available in result1 */
@@ -361,9 +361,9 @@ TEST_CASE("Speak output in streams", "[api][cxx]")
     DoSomethingWithAudioInDataStream(stream1, true); /* re-check stream1 to make sure it's not impacted by stream2 */
 }
 
-TEST_CASE("Speak output in streams before done from event synthesis started", "[api][cxx]")
+TEST_CASE("Speak output in streams before done from event synthesis started - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
 
     // hook the future here to make sure the callback below is not blocked by DoSomethingWithAudioInDataStreamInBackground
@@ -389,9 +389,9 @@ TEST_CASE("Speak output in streams before done from event synthesis started", "[
     auto result3 = future3.get(); /* "{{{text3}}}" synthesis has completed */
 }
 
-TEST_CASE("Speak output in streams before done from method start speaking text async", "[api][cxx]")
+TEST_CASE("Speak output in streams before done from method start speaking text async - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
 
     auto result1 = synthesizer->StartSpeakingTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" synthesis has started, likely not finished */
@@ -409,9 +409,9 @@ TEST_CASE("Speak output in streams before done from method start speaking text a
     auto future2 = DoSomethingWithAudioInDataStreamInBackground(stream2, false); /* does not block, just spins a thread up */
 }
 
-TEST_CASE("Speak output in streams before done queued", "[api][cxx]")
+TEST_CASE("Speak output in streams before done queued - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); // nullptr indicates to do nothing with synthesizer audio by default
 
     int startedRequests = 0;
@@ -454,9 +454,9 @@ TEST_CASE("Speak output in streams before done queued", "[api][cxx]")
     future2.wait();
 }
 
-TEST_CASE("Speak output in streams with all data get on synthesis started result", "[api][cxx]")
+TEST_CASE("Speak output in streams with all data get on synthesis started result - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */
 
     auto result = synthesizer->StartSpeakingTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" synthesis has started, likely not finished */
@@ -483,9 +483,9 @@ TEST_CASE("Speak output in streams with all data get on synthesis started result
     DoSomethingWithAudioInDataStream(stream, true); /* the stream should be with AllData status */
 }
 
-TEST_CASE("Result data should be consistent with output stream data", "[api][cxx]")
+TEST_CASE("Result data should be consistent with output stream data - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     auto stream = AudioOutputStream::CreatePullStream();
     auto streamConfig = AudioConfig::FromStreamOutput(stream);
 
@@ -521,9 +521,9 @@ TEST_CASE("Synthesis with invalid subscription key", "[api][cxx]")
     SPXTEST_REQUIRE(synthesisCanceled);
 }
 
-TEST_CASE("Synthesis with invalid voice", "[api][cxx]")
+TEST_CASE("Synthesis with invalid voice - REST", "[api][cxx]")
 {
-    auto config = CurrentSpeechConfig();
+    auto config = RestSpeechConfig();
     config->SetSpeechSynthesisVoiceName("InvalidVoiceName");
 
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
@@ -543,7 +543,7 @@ TEST_CASE("Synthesis with invalid voice", "[api][cxx]")
     SPXTEST_REQUIRE(synthesisCanceled);
 }
 
-TEST_CASE("Defaults - USP", "[api][cxx]")
+TEST_CASE("Synthesis Defaults - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config);
@@ -942,7 +942,7 @@ TEST_CASE("Synthesis with invalid voice - USP", "[api][cxx]")
     SPXTEST_REQUIRE(synthesisCanceled);
 }
 
-TEST_CASE("Defaults - Mock", "[api][cxx]")
+TEST_CASE("Synthesis Defaults - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config);

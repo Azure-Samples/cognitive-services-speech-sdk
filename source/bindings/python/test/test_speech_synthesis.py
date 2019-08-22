@@ -428,7 +428,7 @@ def test_speech_synthesizer_speak_output_in_streams_with_all_data_get_on_synthes
 
 
 def test_speech_synthesizer_check_word_boundary_events(subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, endpoint="wss://{}.tts.speech.microsoft.com/cognitiveservices/websocket/v1".format(speech_region))
+    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
     config.speech_synthesis_voice_name = "Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)"
     # None(null) indicates to do nothing with synthesizer audio by default
     synthesizer = msspeech.SpeechSynthesizer(config, None)

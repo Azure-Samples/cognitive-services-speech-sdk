@@ -590,22 +590,22 @@ void CSpxSynthesizer::InitializeTtsEngineAdapter()
     bool tryLocal = PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Local", PAL::BoolToString(false).c_str())) ||
                     PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Local", PAL::BoolToString(false).c_str()));
 
-    // if nobody specified which type(s) of TTS engine adapters this session should use, we'll use the REST
+    // if nobody specified which type(s) of TTS engine adapters this session should use, we'll use the USP
     if (!tryMock && !tryRest && !tryUsp && !tryLocal)
     {
-        tryRest = true;
-    }
-
-    // try to create the REST API adapter...
-    if (m_ttsAdapter == nullptr && tryRest)
-    {
-        m_ttsAdapter = SpxCreateObjectWithSite<ISpxTtsEngineAdapter>("CSpxRestTtsEngineAdapter", this);
+        tryUsp = true;
     }
 
     // try to create the USP adapter...
     if (m_ttsAdapter == nullptr && tryUsp)
     {
         m_ttsAdapter = SpxCreateObjectWithSite<ISpxTtsEngineAdapter>("CSpxUspTtsEngineAdapter", this);
+    }
+
+    // try to create the REST API adapter...
+    if (m_ttsAdapter == nullptr && tryRest)
+    {
+        m_ttsAdapter = SpxCreateObjectWithSite<ISpxTtsEngineAdapter>("CSpxRestTtsEngineAdapter", this);
     }
 
     // try to create the mock tts engine adapter...

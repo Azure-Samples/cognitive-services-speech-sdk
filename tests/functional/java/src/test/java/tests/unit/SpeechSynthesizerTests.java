@@ -89,7 +89,7 @@ public class SpeechSynthesizerTests {
     // -----------------------------------------------------------------------
 
     @Test
-    public void testDefaults() throws InterruptedException, ExecutionException {
+    public void testSynthesisDefaults() throws InterruptedException, ExecutionException {
         SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(speechConfig);
 
@@ -519,8 +519,7 @@ public class SpeechSynthesizerTests {
 
     @Test
     public void testSpeakOutputWithWordBoundaryEvents() throws InterruptedException, ExecutionException {
-        String endpoint = String.format("wss://%s.tts.speech.microsoft.com/cognitiveservices/websocket/v1", Settings.SpeechRegion);
-        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(URI.create(endpoint), Settings.SpeechSubscriptionKey);
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(speechConfig);
 
         speechConfig.setSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");

@@ -622,9 +622,6 @@ void SpeechSynthesisWordBoundaryEvent()
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Set backend protocol to USP (Universal Speech Protocol), on which word boundary is available
-    config->SetProperty("SDK-INTERNAL-UseTtsEngine-Usp", "true");
-
     // Creates a speech synthesizer with a null output stream.
     // This means the audio output data will not be written to any stream.
     // You can just get the audio from the result.

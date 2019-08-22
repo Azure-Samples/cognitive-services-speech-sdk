@@ -32,6 +32,8 @@ namespace TTS
 {
     shared_ptr<SpeechConfig> CurrentSpeechConfig();
 
+    shared_ptr<SpeechConfig> RestSpeechConfig();
+
     shared_ptr<SpeechConfig> UspSpeechConfig();
 
     shared_ptr<SpeechConfig> MockSpeechConfig();

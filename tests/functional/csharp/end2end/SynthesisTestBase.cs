@@ -20,7 +20,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public const string SsmlTemplate = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='{0}'><voice name='{1}'>{2}</voice></speak>";
 
         public static string subscriptionKey, region;
-        public SpeechConfig config;
+        public SpeechConfig restConfig;
         public SpeechConfig uspConfig;
         public SpeechConfig mockConfig;
 
@@ -39,9 +39,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestInitialize]
         public void BaseTestInit()
         {
-            config = SpeechConfig.FromSubscription(subscriptionKey, region);
-            var endpoint = $"wss://{region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1";
-            uspConfig = SpeechConfig.FromEndpoint(new Uri(endpoint), subscriptionKey);
+            var endpoint = $"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1";
+            restConfig = SpeechConfig.FromEndpoint(new Uri(endpoint), subscriptionKey);
+            uspConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
             mockConfig = SpeechConfig.FromSubscription("None", "None");
             mockConfig.SetProperty("CARBON-INTERNAL-UseTtsEngine-Mock", "true");
         }
