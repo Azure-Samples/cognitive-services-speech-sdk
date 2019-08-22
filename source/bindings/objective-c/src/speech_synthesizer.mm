@@ -426,6 +426,7 @@
         self->speechSynthImpl->Synthesizing.DisconnectAll();
         self->speechSynthImpl->SynthesisCompleted.DisconnectAll();
         self->speechSynthImpl->SynthesisCanceled.DisconnectAll();
+        self->speechSynthImpl->WordBoundary.DisconnectAll();
         self->speechSynthImpl.reset();
     }
     catch (const std::exception &e) {

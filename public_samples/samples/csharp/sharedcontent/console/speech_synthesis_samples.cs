@@ -571,7 +571,7 @@ namespace MicrosoftSpeechSDKSamples
                 // Subscribes to word boundary event
                 synthesizer.WordBoundary += (s, e) =>
                 {
-                    // The unit of e.AudioOffset is tick (1 tick = 100 nano seconds), divided by 10000 to be converted to ms
+                    // The unit of e.AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to convert to microseconds.
                     Console.WriteLine($"Word boundary event received. Audio offset: " +
                         $"{(e.AudioOffset + 5000) / 10000}ms, text offset: {e.TextOffset}, word length: {e.WordLength}.");
                 };
