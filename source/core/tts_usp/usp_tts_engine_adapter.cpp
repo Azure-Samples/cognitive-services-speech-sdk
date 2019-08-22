@@ -22,6 +22,13 @@
 
 #define SPX_DBG_TRACE_USP_TTS 0
 
+#define MAX_RETRY 1
+
+#define WAIT_FOR_FIRST_CHUNK_TIMEOUT 10 // in seconds
+#define RECEIVE_ALL_CHUNKS_TIMEOUT 30   // in seconds
+#ifdef _DEBUG
+#define DEBUG_WAIT_INTERVAL 100         // in milliseconds
+#endif
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -116,6 +123,30 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_USP_TTS, __FUNCTION__);
     SPX_DBG_ASSERT(UspState::Idle == m_uspState || UspState::Error == m_uspState);
 
+    auto currentRequestId = requestId;
+    std::shared_ptr<ISpxSynthesisResult> result;
+    for (auto tryCount = 0; tryCount <= MAX_RETRY; ++tryCount)
+    {
+        result = SpeakInternal(text, isSsml, currentRequestId);
+        if (ResultReason::SynthesizingAudioCompleted == result->GetReason())
+        {
+            break;
+        }
+        else if (ResultReason::Canceled == result->GetReason() && result->GetAudioData()->size())
+        {
+            LogError("Synthesis cancelled with partial data received, cannot retry.");
+            break;
+        }
+
+        currentRequestId = PAL::CreateGuidWithoutDashes();
+        LogError("Synthesis cancelled without data received, retrying.");
+    }
+
+    return result;
+}
+
+std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(const std::string& text, bool isSsml, const std::wstring& requestId)
+{
     auto ssml = text;
     if (!isSsml)
     {
@@ -128,27 +159,54 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
 
     EnsureUspConnection();
 
-    // Set initial values for current utterance
-    m_currentRequestId = requestId;
-    m_currentText = PAL::ToWString(text);
-    m_currentTextIsSsml = isSsml;
-    m_currentTextOffset = 0;
-    m_currentErrorCode = static_cast<USP::ErrorCode>(0);
-    m_currentErrorMessage = std::string();
+    if (UspState::Error != m_uspState)
+    {
+        // Set initial values for current utterance
+        m_currentRequestId = requestId;
+        m_currentText = PAL::ToWString(text);
+        m_currentTextIsSsml = isSsml;
+        m_currentTextOffset = 0;
+        m_currentErrorCode = static_cast<USP::ErrorCode>(0);
+        m_currentErrorMessage = std::string();
 
-    // Send request
-    m_uspState = UspState::Sending;
-    UspSendSynthesisContext(PAL::ToString(requestId));
-    UspSendSsml(ssml, PAL::ToString(requestId));
+        // Send request
+        m_uspState = UspState::Sending;
+        m_currentReceivedData.clear();
+        UspSendSynthesisContext(PAL::ToString(requestId));
+        UspSendSsml(ssml, PAL::ToString(requestId));
+    }
 
     std::unique_lock<std::mutex> lock(m_mutex);
+
+    // wait to get the first audio chunk
 #ifdef _DEBUG
-    while (!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&] { return m_uspState == UspState::Idle || m_uspState == UspState::Error; }))
+    auto remainingTime = WAIT_FOR_FIRST_CHUNK_TIMEOUT * 1e6;
+    while (!m_cv.wait_for(lock, std::chrono::milliseconds(DEBUG_WAIT_INTERVAL), [&] { return m_uspState == UspState::ReceivingData || m_uspState == UspState::Idle || m_uspState == UspState::Error; }) && remainingTime > 0)
     {
-        SPX_DBG_TRACE_VERBOSE("%s: waiting for USP to finish receiving data ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("%s: waiting for USP to get first audio chunk ...", __FUNCTION__);
+        remainingTime -= DEBUG_WAIT_INTERVAL;
     }
 #else
-    m_cv.wait(lock, [&] { return m_uspState == UspState::Idle || m_uspState == UspState::Error; });
+    m_cv.wait_for(lock, std::chrono::seconds(WAIT_FOR_FIRST_CHUNK_TIMEOUT), [&] { return m_uspState == UspState::ReceivingData || m_uspState == UspState::Idle || m_uspState == UspState::Error; });
+#endif
+
+    if (m_uspState == UspState::Sending || m_uspState == UspState::TurnStarted)
+    {
+        LogError("USP error, timeout to get the first audio chunk.");
+        m_currentErrorMessage = "USP error, timeout to get the first audio chunk.";
+        m_uspState = UspState::Error;
+    }
+
+    // wait to receive all audio data
+#ifdef _DEBUG
+    remainingTime = RECEIVE_ALL_CHUNKS_TIMEOUT * 1e6;
+    while (!m_cv.wait_for(lock, std::chrono::milliseconds(DEBUG_WAIT_INTERVAL), [&] { return m_uspState == UspState::Idle || m_uspState == UspState::Error; }) && remainingTime > 0)
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: waiting for USP to finish receiving data ...", __FUNCTION__);
+        remainingTime -= DEBUG_WAIT_INTERVAL;
+    }
+#else
+    m_cv.wait_for(lock, std::chrono::seconds(RECEIVE_ALL_CHUNKS_TIMEOUT), [&] { return m_uspState == UspState::Idle || m_uspState == UspState::Error; });
 #endif
 
     bool hasHeader = false;
@@ -256,6 +314,7 @@ void CSpxUspTtsEngineAdapter::DoSendMessageWork(std::weak_ptr<USP::Connection> c
 
 void CSpxUspTtsEngineAdapter::EnsureUspConnection()
 {
+    m_uspState = UspState::Connecting;
     if (m_uspConnection == nullptr)
     {
         UspInitialize();
@@ -363,8 +422,9 @@ void CSpxUspTtsEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 {
     UNUSED(message);
     std::unique_lock<std::mutex> lock(m_mutex);
-    m_uspState = UspState::Receiving;
+    m_uspState = UspState::TurnStarted;
     m_currentReceivedData.clear();
+    m_cv.notify_all();
 }
 
 void CSpxUspTtsEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg& message)
@@ -377,9 +437,11 @@ void CSpxUspTtsEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg&
     });
 
     std::unique_lock<std::mutex> lock(m_mutex);
+    m_uspState = UspState::ReceivingData;    
     auto originalSize = m_currentReceivedData.size();
     m_currentReceivedData.resize(originalSize + message.audioLength);
     memcpy(m_currentReceivedData.data() + originalSize, message.audioBuffer, message.audioLength);
+    m_cv.notify_all();
 }
 
 void CSpxUspTtsEngineAdapter::OnAudioOutputMetadata(const USP::AudioOutputMetadataMsg& message)
@@ -426,12 +488,15 @@ void CSpxUspTtsEngineAdapter::OnError(bool transport, USP::ErrorCode errorCode, 
     UNUSED(transport);
     SPX_DBG_TRACE_VERBOSE("Response: On Error: Code:%d, Message: %s.\n", errorCode, errorMessage.c_str());
     std::unique_lock<std::mutex> lock(m_mutex);
-    m_currentErrorCode = errorCode;
-    m_currentErrorMessage = errorMessage;
-    m_currentErrorMessage += ". USP state: " + CSpxSynthesisHelper::itos((int)(UspState)m_uspState) + ".";
-    m_currentErrorMessage += " Received audio size: " + CSpxSynthesisHelper::itos(m_currentReceivedData.size()) + "bytes.";
-    m_uspState = UspState::Error;
-    m_cv.notify_all();
+    if (m_uspState != UspState::Idle) // no need to raise an error if synthesis is already done.
+    {
+        m_currentErrorCode = errorCode;
+        m_currentErrorMessage = errorMessage;
+        m_currentErrorMessage += ". USP state: " + CSpxSynthesisHelper::itos((int)(UspState)m_uspState) + ".";
+        m_currentErrorMessage += " Received audio size: " + CSpxSynthesisHelper::itos(m_currentReceivedData.size()) + "bytes.";
+        m_uspState = UspState::Error;
+        m_cv.notify_all();
+    }
 }
 
 SpxWAVEFORMATEX_Type CSpxUspTtsEngineAdapter::GetOutputFormat(std::shared_ptr<ISpxAudioOutput> output, bool* hasHeader)

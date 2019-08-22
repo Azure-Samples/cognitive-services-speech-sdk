@@ -76,6 +76,8 @@ private:
 
     void GetProxySetting();
 
+    std::shared_ptr<ISpxSynthesisResult> SpeakInternal(const std::string& text, bool isSsml, const std::wstring& requestId);
+
     void SetSpeechConfigMessage();
     void UspSendSpeechConfig();
     void UspSendSynthesisContext(const std::string& requestId);
@@ -104,8 +106,10 @@ private:
     enum class UspState {
         Error = -1,
         Idle = 0,
-        Sending = 1,
-        Receiving = 2
+        Connecting = 1,     // from trying to connect to request sent
+        Sending = 2,
+        TurnStarted = 3,    // from turn.start received to first audio message received
+        ReceivingData = 4   // from first audio message received to turn.end received
     };
 
     std::string m_endpoint;
