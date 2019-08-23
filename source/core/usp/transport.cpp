@@ -975,6 +975,12 @@ int usp::TransportStreamWrite(TransportHandle transportHandle, const std::string
         return -1;
     }
 
+    if (NULL == requestId || requestId[0] == '\0')
+    {
+        LogError("requestId is null or empty.");
+        return -1;
+    }
+
     uint8_t msgtype = METRIC_MESSAGE_TYPE_INVALID;
     if (bufferSize == 0)
     {
