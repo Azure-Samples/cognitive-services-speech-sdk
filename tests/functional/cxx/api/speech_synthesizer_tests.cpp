@@ -512,12 +512,12 @@ TEST_CASE("Synthesis with invalid subscription key", "[api][cxx]")
     bool synthesisCanceled = false;
     synthesizer->SynthesisCanceled += [&synthesisCanceled](const SpeechSynthesisEventArgs& e) {
         SPXTEST_REQUIRE(ResultReason::Canceled == e.Result->Reason);
-        SPXTEST_REQUIRE(0 == e.Result->GetAudioData()->size());
+        SPXTEST_REQUIRE(e.Result->GetAudioData()->empty());
         synthesisCanceled = true;
     };
     auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
     SPXTEST_REQUIRE(ResultReason::Canceled == result->Reason);
-    SPXTEST_REQUIRE(0 == result->GetAudioData()->size());
+    SPXTEST_REQUIRE(result->GetAudioData()->empty());
     SPXTEST_REQUIRE(synthesisCanceled);
 }
 
@@ -530,7 +530,7 @@ TEST_CASE("Synthesis with invalid voice - REST", "[api][cxx]")
     bool synthesisCanceled = false;
     synthesizer->SynthesisCanceled += [&synthesisCanceled](const SpeechSynthesisEventArgs& e) {
         SPXTEST_REQUIRE(ResultReason::Canceled == e.Result->Reason);
-        SPXTEST_REQUIRE(0 == e.Result->GetAudioData()->size());
+        SPXTEST_REQUIRE(e.Result->GetAudioData()->empty());
         synthesisCanceled = true;
         auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(e.Result);
         SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Unsupported voice"));
@@ -539,7 +539,7 @@ TEST_CASE("Synthesis with invalid voice - REST", "[api][cxx]")
     SPXTEST_REQUIRE(ResultReason::Canceled == result->Reason);
     auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(result);
     SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Unsupported voice"));
-    SPXTEST_REQUIRE(0 == result->GetAudioData()->size());
+    SPXTEST_REQUIRE(result->GetAudioData()->empty());
     SPXTEST_REQUIRE(synthesisCanceled);
 }
 
@@ -929,7 +929,7 @@ TEST_CASE("Synthesis with invalid voice - USP", "[api][cxx]")
     bool synthesisCanceled = false;
     synthesizer->SynthesisCanceled += [&synthesisCanceled](const SpeechSynthesisEventArgs& e) {
         SPXTEST_REQUIRE(ResultReason::Canceled == e.Result->Reason);
-        SPXTEST_REQUIRE(0 == e.Result->GetAudioData()->size());
+        SPXTEST_REQUIRE(e.Result->GetAudioData()->empty());
         synthesisCanceled = true;
         auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(e.Result);
         SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Unsupported voice"));
@@ -938,7 +938,7 @@ TEST_CASE("Synthesis with invalid voice - USP", "[api][cxx]")
     SPXTEST_REQUIRE(ResultReason::Canceled == result->Reason);
     auto cancellationDetail = SpeechSynthesisCancellationDetails::FromResult(result);
     SPXTEST_REQUIRE(std::string::npos != cancellationDetail->ErrorDetails.find("Unsupported voice"));
-    SPXTEST_REQUIRE(0 == result->GetAudioData()->size());
+    SPXTEST_REQUIRE(result->GetAudioData()->empty());
     SPXTEST_REQUIRE(synthesisCanceled);
 }
 
