@@ -70,6 +70,18 @@ enum class ErrorCode : int
     RuntimeError
 };
 
+/**
+* Represents the confidence level of language detection result
+*/
+enum class ConfidenceLevel : int
+{
+    Unknown = 1,
+    Low,
+    Medium,
+    High,
+    InvalidMessage
+};
+
 struct JsonMsg
 {
 
@@ -161,12 +173,20 @@ struct SpeechMsg : public JsonMsg
  */
 struct SpeechHypothesisMsg : public SpeechMsg
 {
-    SpeechHypothesisMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& text, std::wstring&& speaker = L"") :
+    SpeechHypothesisMsg(
+        std::wstring&& content,
+        OffsetType offset,
+        DurationType duration,
+        std::wstring&& text,
+        std::wstring&& speaker = L"",
+        std::string&& language = "") :
         SpeechMsg(std::move(content), offset, duration, std::move(speaker)),
-        text(std::move(text))
+        text(std::move(text)),
+        language(std::move(language))
     {}
 
     std::wstring text;
+    std::string language;
 };
 
 /**
@@ -213,6 +233,8 @@ struct SpeechPhraseMsg : public SpeechMsg
 
     RecognitionStatus recognitionStatus { RecognitionStatus::Error };
     std::wstring displayText;
+    std::string language;
+    ConfidenceLevel languageDetectionConfidence{ ConfidenceLevel::InvalidMessage };
 };
 
 /**
@@ -231,8 +253,14 @@ struct TranslationResult
 */
 struct TranslationHypothesisMsg : public SpeechHypothesisMsg
 {
-    TranslationHypothesisMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& text, TranslationResult&& translation) :
-        SpeechHypothesisMsg(std::move(content), offset, duration, std::move(text)),
+    TranslationHypothesisMsg(
+        std::wstring&& content,
+        OffsetType offset,
+        DurationType duration,
+        std::wstring&& text,
+        TranslationResult&& translation,
+        std::string&& language = "") :
+        SpeechHypothesisMsg(std::move(content), offset, duration, std::move(text), L"", std::move(language)),
         translation(translation)
     {}
 
@@ -244,12 +272,22 @@ struct TranslationHypothesisMsg : public SpeechHypothesisMsg
 */
 struct TranslationPhraseMsg : public TranslationHypothesisMsg
 {
-    TranslationPhraseMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& text, TranslationResult&& translation, RecognitionStatus status) :
-        TranslationHypothesisMsg(std::move(content), offset, duration, std::move(text), std::move(translation)),
-        recognitionStatus(status)
+    TranslationPhraseMsg(
+        std::wstring&& content,
+        OffsetType offset,
+        DurationType duration,
+        std::wstring&& text,
+        TranslationResult&& translation,
+        RecognitionStatus status,
+        std::string&& language = "",
+        ConfidenceLevel confidence = ConfidenceLevel::InvalidMessage) :
+        TranslationHypothesisMsg(std::move(content), offset, duration, std::move(text), std::move(translation), std::move(language)),
+        recognitionStatus(status),
+        languageDetectionConfidence(confidence)
     {}
 
     RecognitionStatus recognitionStatus;
+    ConfidenceLevel languageDetectionConfidence;
 };
 
 /**

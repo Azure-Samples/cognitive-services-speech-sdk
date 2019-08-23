@@ -928,6 +928,16 @@ static TranslationStatus ToTranslationStatus(const string& str)
     return TranslationStatus::InvalidMessage;
 }
 
+static ConfidenceLevel ToConfidenceLevel(const string& str)
+{
+    if (0 == str.compare("Unknown")) return  ConfidenceLevel::Unknown;
+    if (0 == str.compare("Low")) return  ConfidenceLevel::Low;
+    if (0 == str.compare("Medium")) return  ConfidenceLevel::Medium;
+    if (0 == str.compare("High")) return  ConfidenceLevel::High;
+    PROTOCOL_VIOLATION("Invalid ConfidenceLevel: %s", str.c_str());
+    return ConfidenceLevel::InvalidMessage;
+}
+
 static SpeechHypothesisMsg RetrieveSpeechResult(const nlohmann::json& json)
 {
     auto offset = json.at(json_properties::offset).get<OffsetType>();
@@ -938,30 +948,42 @@ static SpeechHypothesisMsg RetrieveSpeechResult(const nlohmann::json& json)
     {
         text = json.at(json_properties::text).get<string>();
     }
-    return SpeechHypothesisMsg(PAL::ToWString(json.dump()), offset, duration, PAL::ToWString(text));
+    string language;
+    auto primaryLanguageJson = json.find(json_properties::primaryLanguage);
+    if (primaryLanguageJson != json.end())
+    {
+        language = primaryLanguageJson->at(json_properties::lang).get<string>();
+        if (language.empty())
+        {
+            PROTOCOL_VIOLATION("Invalid speech hypothesis message, with primaryLanguage section but no language value. json = %s.", primaryLanguageJson->dump().c_str());
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("Got language %s from speech hypothesis message.", language.c_str());
+        }
+    }
+    return SpeechHypothesisMsg(PAL::ToWString(json.dump()), offset, duration, PAL::ToWString(text), L"", move(language));
 }
 
-static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, bool expectStatus)
+static TranslationResult RetrieveTranslationResult(const nlohmann::json& translationJson, bool expectStatus)
 {
-    auto translation = json[json_properties::translation];
-
     TranslationResult result;
     if (expectStatus)
     {
-        auto status = translation.find(json_properties::translationStatus);
-        if (status != translation.end())
+        auto status = translationJson.find(json_properties::translationStatus);
+        if (status != translationJson.end())
         {
             result.translationStatus = ToTranslationStatus(status->get<string>());
         }
         else
         {
-            PROTOCOL_VIOLATION("No TranslationStatus is provided. Json: %s", translation.dump().c_str());
+            PROTOCOL_VIOLATION("No TranslationStatus is provided. Json: %s", translationJson.dump().c_str());
             result.translationStatus = TranslationStatus::InvalidMessage;
-            result.failureReason = L"Status is missing in the protocol message. Response text:" + PAL::ToWString(json.dump());
+            result.failureReason = L"Status is missing in the protocol message. Response text:" + PAL::ToWString(translationJson.dump());
         }
 
-        auto failure = translation.find(json_properties::failureReason);
-        if (failure != translation.end())
+        auto failure = translationJson.find(json_properties::failureReason);
+        if (failure != translationJson.end())
         {
             result.failureReason += PAL::ToWString(failure->get<string>());
         }
@@ -973,14 +995,23 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
     }
     else
     {
-        auto translations = translation.at(json_properties::translations);
+        auto translations = translationJson.at(json_properties::translations);
         for (const auto& object : translations)
         {
             auto lang = object.at(json_properties::lang).get<string>();
-            auto txt = object.at(json_properties::text).get<string>();
+            std::string txt;
+            if (object.find(json_properties::text) != object.end())
+            {
+                txt = object.at(json_properties::text).get<string>();
+            }
+            else if (object.find(json_properties::displayText) != object.end())
+            {
+                txt = object.at(json_properties::displayText).get<string>();
+            }
+
             if (lang.empty() && txt.empty())
             {
-                PROTOCOL_VIOLATION("emtpy language and text field in translations text. lang=%s, text=%s.", lang.c_str(), txt.c_str());
+                PROTOCOL_VIOLATION("empty language and text field in translations text. lang=%s, text=%s. json=%s", lang.c_str(), txt.c_str(), object.dump().c_str());
                 continue;
             }
 
@@ -989,7 +1020,7 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
 
         if (!result.translations.size())
         {
-            PROTOCOL_VIOLATION("No Translations text block in the message. Response text:", json.dump().c_str());
+            PROTOCOL_VIOLATION("No Translations text block in the message. Response text:", translationJson.dump().c_str());
         }
         return result;
     }
@@ -1072,6 +1103,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             AudioOutputChunkMsg msg;
             if (pathStr == path::audio && connection->m_streamIdLangMap.size() > 0)
             {
+                SPX_DBG_TRACE_VERBOSE("m_streamIdLangMap has data, will FillLanguageForAudioOutputChunkMsg");
                 connection->FillLanguageForAudioOutputChunkMsg(streamId, path, msg);
             }
             msg.requestId = requestId;
@@ -1120,6 +1152,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
         {
             {
                 connection->m_activeRequestIds.erase(requestId);
+                SPX_DBG_TRACE_VERBOSE("Got turn end, clear m_streamIdLangMap.");
                 connection->m_streamIdLangMap.clear();
             }
 
@@ -1166,7 +1199,6 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             {
                 speaker = json[json_properties::speaker].get<string>();
             }
-
             if (path == path::speechHypothesis)
             {
                 connection->Invoke([&] {
@@ -1203,7 +1235,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
         else if (path == path::translationHypothesis)
         {
             auto speechResult = RetrieveSpeechResult(json);
-            auto translationResult = RetrieveTranslationResult(json, false);
+            auto translationResult = RetrieveTranslationResult(json[json_properties::translation], false);
             // TranslationStatus is always success for translation.hypothesis
             translationResult.translationStatus = TranslationStatus::Success;
 
@@ -1229,7 +1261,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 TranslationResult translationResult;
                 if (status == RecognitionStatus::Success)
                 {
-                    translationResult = RetrieveTranslationResult(json, true);
+                    translationResult = RetrieveTranslationResult(json[json_properties::translation], true);
                 }
                 else
                 {
@@ -1291,6 +1323,73 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 connection->Invoke([&] { callbacks->OnError(false, ErrorCode::ServiceError, failureReason.c_str()); });
             }
         }
+        else if (path == path::translationResponse)
+        {
+            if (json.find(json_properties::speechHypothesis) != json.end())
+            {
+                SPX_DBG_TRACE_INFO("Got translation response for %s.", json_properties::speechHypothesis.c_str());
+                auto speechHypothesisJson = json[json_properties::speechHypothesis];
+                auto speechHypothesisMsg = RetrieveSpeechResult(speechHypothesisJson);
+                auto translationResult = RetrieveTranslationResult(json, true);
+                if (translationResult.translationStatus != TranslationStatus::Success)
+                {
+                    PROTOCOL_VIOLATION("Translation result for hypothesis should always have success status, otherwise, service shouldn't have sent it. Json=%s", json.dump().c_str());
+                }
+                else
+                {
+                    connection->Invoke([&] {
+                        callbacks->OnTranslationHypothesis({PAL::ToWString(json.dump()),
+                                                            speechHypothesisMsg.offset,
+                                                            speechHypothesisMsg.duration,
+                                                            move(speechHypothesisMsg.text),
+                                                            move(translationResult),
+                                                            move(speechHypothesisMsg.language)});
+                    });
+                }
+            }
+            else if (json.find(json_properties::speechPhrase) != json.end())
+            {
+                SPX_DBG_TRACE_INFO("Got translation response for %s.", json_properties::speechPhrase.c_str());
+                auto speechPhraseJson = json[json_properties::speechPhrase];
+                auto status = ToRecognitionStatus(speechPhraseJson.at(json_properties::recoStatus));
+                if (connection->isErrorRecognitionStatus(status))
+                {
+                    // There is an error in speech recognition, fire an error event.
+                    connection->InvokeRecognitionErrorCallback(status, json.dump());
+                }
+                else
+                {
+                    auto speechPhraseMsg = connection->RetrieveSpeechPhraseResult(speechPhraseJson);
+                    TranslationResult translationResult;
+                    if (status == RecognitionStatus::Success)
+                    {
+                        translationResult = RetrieveTranslationResult(json, true);
+                    }
+                    else
+                    {
+                        translationResult.translationStatus = TranslationStatus::Success;
+                    }
+                    // There is no speech recognition error, we fire a translation phrase event.
+                    connection->Invoke([&] {
+                        callbacks->OnTranslationPhrase({PAL::ToWString(json.dump()),
+                                                        speechPhraseMsg.offset,
+                                                        speechPhraseMsg.duration,
+                                                        move(speechPhraseMsg.displayText),
+                                                        move(translationResult),
+                                                        status,
+                                                        move(speechPhraseMsg.language),
+                                                        speechPhraseMsg.languageDetectionConfidence});
+                    });
+                }
+            }
+            else
+            {
+                 PROTOCOL_VIOLATION("Invalid translation response, no %s or %s data. Json=%s",
+                     json_properties::speechPhrase.c_str(),
+                     json_properties::speechHypothesis.c_str(),
+                     json.dump().c_str());
+            }
+        }
         else if (path == path::audioMetaData)
         {
             AudioOutputMetadataMsg msg;
@@ -1348,7 +1447,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             {
                 auto language = json[json_properties::translationLanguage].get<string>();
                 LogInfo("Got streamId %s to language %s map.  current m_streamIdLangMap size = %d", streamId, language.c_str(), connection->m_streamIdLangMap.size());
-                // This is a protoeciton logic to avoid memory usage increases due to service error.
+                // This is a protection logic to avoid memory usage increases due to service error.
                 // So far we haven't any scenario that needs more than 10 synthesising languages
                 // TODO: remove this protection code after the new service endpoint is stable
                 const int MaxLanguages = 10;
@@ -1481,6 +1580,25 @@ SpeechPhraseMsg Connection::Impl::RetrieveSpeechPhraseResult(const nlohmann::jso
             }
         }
     }
+
+    auto primaryLanguageJson = json.find(json_properties::primaryLanguage);
+    if (primaryLanguageJson != json.end())
+    {
+        result.language = primaryLanguageJson->at(json_properties::lang).get<string>();
+        auto confidence = primaryLanguageJson->at(json_properties::confidence).get<string>();
+        if (result.language.empty() || confidence.empty())
+        {
+            PROTOCOL_VIOLATION("Invalid language detection response. language = %s and confidence = %s should both have values. Json = %s",
+                result.language.c_str(),
+                confidence.c_str(),
+                primaryLanguageJson->dump().c_str());
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("Got language %s and confidence %s from speech phrase message.", result.language.c_str(), confidence.c_str());
+            result.languageDetectionConfidence = ToConfidenceLevel(confidence);
+        }
+    }
     return result;
 }
 
@@ -1517,6 +1635,7 @@ void Connection::Impl::FillLanguageForAudioOutputChunkMsg(const char* streamId, 
         msg.language = m_streamIdLangMap.at(streamId);
         if (messagePath == path::audioEnd)
         {
+            SPX_DBG_TRACE_VERBOSE("Got audio end, remove %s from m_streamIdLangMap.", streamId);
             m_streamIdLangMap.erase(streamId);
         }
     }

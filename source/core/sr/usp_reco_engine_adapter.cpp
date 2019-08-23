@@ -1409,6 +1409,10 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
 
                 auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
                 namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
+                if (!message.language.empty())
+                {
+                    namedProperties->SetStringValue("AutoDetectedSrcLanguage", message.language.c_str());
+                }
 
                 // Update our result to be a "TranslationText" result.
                 auto initTranslationResult = SpxQueryInterface<ISpxTranslationRecognitionResultInit>(result);
@@ -1478,6 +1482,10 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
 
                 auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
                 namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
+                if (!message.language.empty())
+                {
+                    namedProperties->SetStringValue("AutoDetectedSrcLanguage", message.language.c_str());
+                }
 
                 // Update our result to be an "TranslationText" result.
                 auto initTranslationResult = SpxQueryInterface<ISpxTranslationRecognitionResultInit>(result);
@@ -1988,6 +1996,8 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
         {
             contextJson["synthesis"] = GetSynthesisJson(move(voiceNameMap));
         }
+
+        SPX_DBG_TRACE_VERBOSE("Speech context with LID scenario %s.", contextJson.dump().c_str());
     }
 
     return contextJson;

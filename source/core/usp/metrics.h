@@ -78,6 +78,7 @@ enum IncomingMsgType
     response,
     audioStart,
     audioEnd,
+    translationResponse,
     countOfMsgTypes
 };
 

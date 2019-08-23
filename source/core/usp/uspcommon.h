@@ -53,6 +53,7 @@ namespace USP {
         const std::string translationPhrase = "translation.phrase";
         const std::string translationSynthesis = "translation.synthesis";
         const std::string translationSynthesisEnd = "translation.synthesis.end";
+        const std::string translationResponse = "translation.response";
         const std::string audio = "audio";
         const std::string audioMetaData = "audio.metadata";
         const std::string audioStart = "audio.start";
@@ -100,6 +101,10 @@ namespace USP {
         const std::string data = "Data";
         const std::string wordBoundary = "WordBoundary";
         const std::string lowerText = "text";
+
+        const std::string primaryLanguage = "PrimaryLanguage";
+        const std::string speechHypothesis = "SpeechHypothesis";
+        const std::string speechPhrase = "SpeechPhrase";
     }
 
 }
