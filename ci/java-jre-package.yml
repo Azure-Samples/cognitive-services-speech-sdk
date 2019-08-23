@@ -107,7 +107,7 @@ jobs:
            -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
            -DKeyword=Computer \
            -DKeywordModel=/data/keyword/kws.table \
-           -DTestOutputFilename=test-java-unittests-package.xml \
+           -DTestOutputFilename=test-java-unittests-package-$retry.xml \
            -DSpeechSubscriptionKeyForVirtualAssistant="$SPEECHSDK_BOT_SUBSCRIPTION" \
            -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
            -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
