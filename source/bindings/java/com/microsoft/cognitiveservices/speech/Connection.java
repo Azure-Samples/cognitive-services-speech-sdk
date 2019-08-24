@@ -7,6 +7,7 @@ package com.microsoft.cognitiveservices.speech;
 import java.io.Closeable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
@@ -18,17 +19,23 @@ import com.microsoft.cognitiveservices.speech.Recognizer;
  * The Connection class provides additional methods for users to explicitly open or close a connection and
  * to subscribe to connection status changes.
  * The use of Connection is optional. It is intended for scenarios where fine tuning of application
- * behavior based on connection status is needed. Users can optionally call openConnection() to manually 
- * initiate a service connection before starting recognition on the Recognizer associated with this Connection. 
+ * behavior based on connection status is needed. Users can optionally call openConnection() to manually
+ * initiate a service connection before starting recognition on the Recognizer associated with this Connection.
  * After starting a recognition, calling openConnection() or closeConnection() might fail. This will not impact
- * the Recognizer or the ongoing recognition. Connection might drop for various reasons, the Recognizer will 
- * always try to reinstitute the connection as required to guarantee ongoing operations. In all these cases 
+ * the Recognizer or the ongoing recognition. Connection might drop for various reasons, the Recognizer will
+ * always try to reinstitute the connection as required to guarantee ongoing operations. In all these cases
  * Connected/Disconnected events will indicate the change of the connection status.
  * Note: close() must be called in order to relinquish underlying resources held by the object.
  * Added in version 1.2.0.
  */
 public final class Connection implements Closeable
 {
+    private static ExecutorService s_executorService;
+
+    static {
+        s_executorService = Executors.newCachedThreadPool();
+    }
+
     /**
      * Gets the Connection instance from the specified recognizer.
      * @param recognizer The recognizer associated with the connection.
@@ -66,6 +73,54 @@ public final class Connection implements Closeable
     }
 
     /**
+     * Sends a message to service.
+     * Added in version 1.7.0.
+     * @param path The message path.
+     * @param payload The message payload.
+     * @return a future representing the asynchronous operation that sends the message.
+     */
+    public Future<Void> sendMessageAsync(String path, String payload) {
+        final Connection thisConnection = this;
+        final String finalPath = path;
+        final String finalPayload = payload;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { connectionImpl.SendMessageAsync(finalPath, finalPayload); }};
+                thisConnection.doAsyncConnectionAction(runnable);
+                return null;
+        }});
+    }
+
+    /**
+     * Appends a parameter in a message to service.
+     * Added in version 1.7.0.
+     * @param path The message path.
+     * @param parameterName The parameter name that you want to set.
+     * @param parameterValue The value of the parameter that you want to set.
+     */
+    public void setMessageParameter(String path, String parameterName, String parameterValue) {
+        connectionImpl.SetMessageParameter(path, parameterName, parameterValue);
+    }
+
+    private void doAsyncConnectionAction(Runnable connectionImplAction) {
+        synchronized (connectionLock) {
+            activeAsyncConnectionCounter++;
+        }
+        if (disposed) {
+            throw new IllegalStateException(this.getClass().getName());
+        }
+        try {
+            connectionImplAction.run();
+        } finally {
+            synchronized (connectionLock) {
+                activeAsyncConnectionCounter--;
+            }
+        }
+    }
+
+    /**
      * The Connected event to indicate that the recognizer is connected to service.
      * In order to receive the connected event after subscribing to it, the Connection object itself needs to be alive.
      * If the Connection object owning this event is out of its life time, all subscribed events won't be delivered.
@@ -85,7 +140,12 @@ public final class Connection implements Closeable
      */
     @Override
     public void close() {
-        dispose(true);
+        synchronized (connectionLock) {
+            if (activeAsyncConnectionCounter != 0) {
+              throw new IllegalStateException("Cannot dispose a connection while async method is running. Await async method to avoid unexpected disposals.");
+            }
+            dispose(true);
+        }
     }
 
     /*! \cond PROTECTED */
@@ -127,6 +187,8 @@ public final class Connection implements Closeable
     private ConnectionEventHandlerImpl connectedHandler;
     private ConnectionEventHandlerImpl disconnectedHandler;
     private boolean disposed = false;
+    private final Object connectionLock = new Object();
+    private int activeAsyncConnectionCounter = 0;
 
     private Connection(com.microsoft.cognitiveservices.speech.internal.Connection connectionImpl)
     {

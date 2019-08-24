@@ -18,6 +18,7 @@
 #include "service_helpers.h"
 #include "usp.h"
 #include "activity_session.h"
+#include "json.h"
 
 #ifdef _MSC_VER
 #include <shared_mutex>
@@ -113,7 +114,7 @@ public:
     void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) override;
     void SendAgentMessage(const std::string &buffer) final;
     void SendSpeechEventMessage(std::string&& msg) override;
-    void SendEventMessage(std::string&& msg) override;
+    void SendNetworkMessage(std::string&& path, std::string&& msg) override;
 
     // --- ISpxAudioProcessor
     void SetFormat(const SPXWAVEFORMATEX* pformat) override;
@@ -218,6 +219,7 @@ private:
     NoMatchReason ToNoMatchReason(USP::RecognitionStatus uspRecognitionStatus);
 
     std::pair<std::string, std::string> GetLeftRightContext();
+    std::pair<std::string, std::string> GetAnySpeechContext();
 
     enum class AudioState { Idle = 0, Ready = 1, Sending = 2, Mute = 9 };
 
@@ -262,6 +264,10 @@ private:
 
     void CreateConversationResult(std::shared_ptr<ISpxRecognitionResult>& result, const std::wstring& userId);
 
+    CSpxStringMap GetParametersFromUser(std::string&& path);
+
+    USP::MessageType GetMessageType(std::string&& path);
+
 private:
     friend CSpxActivitySession;
     friend CSpxUspRecoEngineAdapterTest;
@@ -299,6 +305,8 @@ private:
     std::string m_dialogConversationId;
 
     std::map<std::string, std::unique_ptr<CSpxActivitySession>> m_request_session_map;
+
+    std::unordered_map<std::string, Microsoft::CognitiveServices::Speech::USP::MessageType> m_message_name_to_type_map;
 
 #ifdef _DEBUG
     FILE* m_audioDumpFile = nullptr;

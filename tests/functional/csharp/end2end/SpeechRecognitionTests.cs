@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -114,17 +115,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(false);
-                }
+                    if (usingPreConnection)
+                    {
+                        connection.Open(false);
+                    }
 
-                var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
-                AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
-                Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "Duration == 0");
-                Assert.IsTrue(100000 < result.OffsetInTicks && result.OffsetInTicks < 500000, "Offset value seems incorrect");
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                    var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
+                    AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
+                    Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "Duration == 0");
+                    Assert.IsTrue(100000 < result.OffsetInTicks && result.OffsetInTicks < 500000, "Offset value seems incorrect");
+                    AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                }
             }
         }
 
@@ -136,14 +139,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(true);
+                    if (usingPreConnection)
+                    {
+                        connection.Open(true);
+                    }
+                    AssertMatching(
+                        TestData.English.Weather.Utterance,
+                        await helper.GetFirstRecognizerResult(recognizer));
                 }
-                AssertMatching(
-                    TestData.English.Weather.Utterance,
-                    await helper.GetFirstRecognizerResult(recognizer));
             }
         }
 
@@ -158,16 +163,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
                 Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should be empty. RecoLanguage: " + recoLanguage);
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(false);
+                    if (usingPreConnection)
+                    {
+                        connection.Open(false);
+                    }
+                    var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
+                    AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                    AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
+                    var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                    Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
                 }
-                var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
-                AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
-                var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
             }
         }
 
@@ -180,13 +187,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(true);
+                    if (usingPreConnection)
+                    {
+                        connection.Open(true);
+                    }
+                    AssertMatching(TestData.English.Weather.Utterance,
+                        await helper.GetFirstRecognizerResult(recognizer));
                 }
-                AssertMatching(TestData.English.Weather.Utterance,
-                    await helper.GetFirstRecognizerResult(recognizer));
             }
         }
 
@@ -247,10 +256,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                connection.Open(false);
-                var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.StartContinuousRecognitionAsync());
-                AssertStringContains(ex.Message, "Exception with an error code: 0x1e");
+                using (var connection = Connection.FromRecognizer(recognizer))
+                {
+                    connection.Open(false);
+                    var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.StartContinuousRecognitionAsync());
+                    AssertStringContains(ex.Message, "Exception with an error code: 0x1e");
+                }
             }
         }
 
@@ -260,10 +271,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                connection.Open(true);
-                var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.RecognizeOnceAsync());
-                AssertStringContains(ex.Message, "Exception with an error code: 0x1e");
+                using (var connection = Connection.FromRecognizer(recognizer))
+                {
+                    connection.Open(true);
+                    var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.RecognizeOnceAsync());
+                    AssertStringContains(ex.Message, "Exception with an error code: 0x1e");
+                }
             }
         }
 
@@ -276,35 +289,37 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                var taskCompletionSource = new TaskCompletionSource<int>();
-                bool expectedExceptionCaught = false;
-                recognizer.SpeechStartDetected += (s, e) =>
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    try
+                    var taskCompletionSource = new TaskCompletionSource<int>();
+                    bool expectedExceptionCaught = false;
+                    recognizer.SpeechStartDetected += (s, e) =>
                     {
-                        if (testingOpen)
+                        try
                         {
-                            connection.Open(true);
+                            if (testingOpen)
+                            {
+                                connection.Open(true);
+                            }
+                            else
+                            {
+                                connection.Close();
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            connection.Close();
+                            if (ex.Message.Contains("Exception with an error code: 0x1f"))
+                            {
+                                expectedExceptionCaught = true;
+                            }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        if (ex.Message.Contains("Exception with an error code: 0x1f"))
-                        {
-                            expectedExceptionCaught = true;
-                        }
-                    }
-                    taskCompletionSource.TrySetResult(0);
-                };
-                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
-                await Task.WhenAny(taskCompletionSource.Task, Task.Delay(TimeSpan.FromMinutes(1)));
-                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-                Assert.IsTrue(expectedExceptionCaught, "No expected exception is caught in connection.Open().");
+                        taskCompletionSource.TrySetResult(0);
+                    };
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                    await Task.WhenAny(taskCompletionSource.Task, Task.Delay(TimeSpan.FromMinutes(1)));
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    Assert.IsTrue(expectedExceptionCaught, "No expected exception is caught in connection.Open().");
+                }
             }
         }
 
@@ -314,9 +329,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                connection.Close();
+                using (var connection = Connection.FromRecognizer(recognizer))
+                {
+                    await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                    connection.Close();
+                }
             }
         }
 
@@ -328,14 +345,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             this.defaultConfig.SpeechRecognitionLanguage = Language.DE_DE;
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(false);
+                    if (usingPreConnection)
+                    {
+                        connection.Open(false);
+                    }
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                    Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                    AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
                 }
-                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
             }
         }
 
@@ -348,13 +367,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(true);
+                    if (usingPreConnection)
+                    {
+                        connection.Open(true);
+                    }
+                    var result = await helper.GetFirstRecognizerResult(recognizer);
+                    AssertMatching(TestData.German.FirstOne.Utterance, result);
                 }
-                var result = await helper.GetFirstRecognizerResult(recognizer);
-                AssertMatching(TestData.German.FirstOne.Utterance, result);
             }
         }
 
@@ -366,77 +387,79 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(true);
+                    if (usingPreConnection)
+                    {
+                        connection.Open(true);
+                    }
+
+                    List<string> recognizedText = new List<string>();
+                    bool expectFirstRecognizingResult = true;
+                    long firstHypothesisLatency = 0;
+                    string hypothesisLatencyError = string.Empty;
+                    string phraseLatencyError = string.Empty;
+
+                    helper.SubscribeToCounterEventHandlers(recognizer, connection);
+                    recognizer.Recognizing += (s, e) =>
+                    {
+                        var latencyString = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatencyMs);
+                        if (expectFirstRecognizingResult)
+                        {
+                            if (!string.IsNullOrEmpty(latencyString))
+                            {
+                                firstHypothesisLatency = Convert.ToInt64(latencyString);
+                            }
+                            if (firstHypothesisLatency <= 0)
+                            {
+                                hypothesisLatencyError += $"({e.Result.ResultId}, invalid latency {firstHypothesisLatency})";
+                            }
+                            expectFirstRecognizingResult = false;
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrEmpty(latencyString))
+                            {
+                                hypothesisLatencyError += $"({e.Result.ResultId}, latency in non-first hypothesis: {latencyString})";
+                            }
+                        }
+                    };
+                    recognizer.Recognized += (s, e) =>
+                    {
+                        if (e.Result.Text.Length > 0)
+                        {
+                            recognizedText.Add(e.Result.Text);
+                        }
+                        var latencyString = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatencyMs);
+                        long val = 0;
+                        if (!string.IsNullOrEmpty(latencyString))
+                        {
+                            val = Convert.ToInt64(latencyString);
+                        }
+                        if (val <= 0)
+                        {
+                            phraseLatencyError += $"({e.Result.ResultId}, invalid latency {val})";
+                        }
+                        expectFirstRecognizingResult = true;
+                        firstHypothesisLatency = 0;
+                    };
+
+                    await helper.CompleteContinuousRecognition(recognizer);
+
+                    AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
+                    Assert.IsTrue(helper.RecognizedEventCount > 0, $"Invalid number of final result events {helper.RecognizedEventCount}");
+                    AssertEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
+                    AssertEqual(1, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
+                    Assert.IsTrue(recognizedText.Count > 0, $"Invalid number of text messages {recognizedText.Count}");
+
+                    AssertMatching(TestData.English.Batman.Utterances[0], recognizedText[0]);
+                    AssertMatching(TestData.English.Batman.Utterances.Last(), recognizedText.Last());
+
+                    Assert.IsTrue(string.IsNullOrEmpty(hypothesisLatencyError), $"hypothesisLatencyError: {hypothesisLatencyError}");
+                    Assert.IsTrue(string.IsNullOrEmpty(phraseLatencyError), $"phraseLatencyError: {phraseLatencyError}");
+
+                    GC.KeepAlive(connection);
                 }
-
-                List<string> recognizedText = new List<string>();
-                bool expectFirstRecognizingResult = true;
-                long firstHypothesisLatency = 0;
-                string hypothesisLatencyError = string.Empty;
-                string phraseLatencyError = string.Empty;
-
-                helper.SubscribeToCounterEventHandlers(recognizer, connection);
-                recognizer.Recognizing += (s, e) =>
-                {
-                    var latencyString = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatencyMs);
-                    if (expectFirstRecognizingResult)
-                    {
-                        if (!string.IsNullOrEmpty(latencyString))
-                        {
-                            firstHypothesisLatency = Convert.ToInt64(latencyString);
-                        }
-                        if (firstHypothesisLatency <= 0)
-                        {
-                            hypothesisLatencyError += $"({e.Result.ResultId}, invalid latency {firstHypothesisLatency})";
-                        }
-                        expectFirstRecognizingResult = false;
-                    }
-                    else
-                    {
-                        if (!string.IsNullOrEmpty(latencyString))
-                        {
-                            hypothesisLatencyError += $"({e.Result.ResultId}, latency in non-first hypothesis: {latencyString})";
-                        }
-                    }
-                };
-                recognizer.Recognized += (s, e) =>
-                {
-                    if (e.Result.Text.Length > 0)
-                    {
-                        recognizedText.Add(e.Result.Text);
-                    }
-                    var latencyString = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_RecognitionLatencyMs);
-                    long val = 0;
-                    if (!string.IsNullOrEmpty(latencyString))
-                    {
-                        val = Convert.ToInt64(latencyString);
-                    }
-                    if (val <= 0)
-                    {
-                        phraseLatencyError += $"({e.Result.ResultId}, invalid latency {val})";
-                    }
-                    expectFirstRecognizingResult = true;
-                    firstHypothesisLatency = 0;
-                };
-
-                await helper.CompleteContinuousRecognition(recognizer);
-
-                AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
-                Assert.IsTrue(helper.RecognizedEventCount > 0, $"Invalid number of final result events {helper.RecognizedEventCount}");
-                AssertEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
-                AssertEqual(1, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                Assert.IsTrue(recognizedText.Count > 0, $"Invalid number of text messages {recognizedText.Count}");
-
-                AssertMatching(TestData.English.Batman.Utterances[0], recognizedText[0]);
-                AssertMatching(TestData.English.Batman.Utterances.Last(), recognizedText.Last());
-
-                Assert.IsTrue(string.IsNullOrEmpty(hypothesisLatencyError), $"hypothesisLatencyError: {hypothesisLatencyError}");
-                Assert.IsTrue(string.IsNullOrEmpty(phraseLatencyError), $"phraseLatencyError: {phraseLatencyError}");
-
-                GC.KeepAlive(connection);
             }
         }
 
@@ -448,22 +471,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(true);
-                }
-                const int numLoops = 7;
-                for (int i = 0; i < numLoops; i++)
-                {
-                    helper.SubscribeToCounterEventHandlers(recognizer);
-                }
-                await helper.CompleteContinuousRecognition(recognizer);
+                    if (usingPreConnection)
+                    {
+                        connection.Open(true);
+                    }
+                    const int numLoops = 7;
+                    for (int i = 0; i < numLoops; i++)
+                    {
+                        helper.SubscribeToCounterEventHandlers(recognizer);
+                    }
+                    await helper.CompleteContinuousRecognition(recognizer);
 
-                AssertEqual(numLoops, helper.RecognizedEventCount, AssertOutput.WrongFinalResultCount);
-                AssertEqual(numLoops, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                AssertEqual(numLoops, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
-                AssertEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
+                    AssertEqual(numLoops, helper.RecognizedEventCount, AssertOutput.WrongFinalResultCount);
+                    AssertEqual(numLoops, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
+                    AssertEqual(numLoops, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
+                    AssertEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
+                }
             }
         }
 
@@ -475,22 +500,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(true);
+                    if (usingPreConnection)
+                    {
+                        connection.Open(true);
+                    }
+                    helper.SubscribeToCounterEventHandlers(recognizer, connection);
+                    helper.UnsubscribeFromCounterEventHandlers(recognizer, connection);
+
+                    await helper.CompleteContinuousRecognition(recognizer);
+
+                    AssertEqual(0, helper.ConnectedEventCount, AssertOutput.WrongConnectedEventCount);
+                    AssertEqual(0, helper.DisconnectedEventCount, AssertOutput.WrongDisconnectedEventCount);
+                    AssertEqual(0, helper.RecognizedEventCount, AssertOutput.WrongFinalResultCount);
+                    AssertEqual(0, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
+                    AssertEqual(0, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
+                    AssertEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
                 }
-                helper.SubscribeToCounterEventHandlers(recognizer, connection);
-                helper.UnsubscribeFromCounterEventHandlers(recognizer, connection);
-
-                await helper.CompleteContinuousRecognition(recognizer);
-
-                AssertEqual(0, helper.ConnectedEventCount, AssertOutput.WrongConnectedEventCount);
-                AssertEqual(0, helper.DisconnectedEventCount, AssertOutput.WrongDisconnectedEventCount);
-                AssertEqual(0, helper.RecognizedEventCount, AssertOutput.WrongFinalResultCount);
-                AssertEqual(0, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                AssertEqual(0, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
-                AssertEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
             }
         }
 
@@ -502,36 +529,38 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(true);
+                    if (usingPreConnection)
+                    {
+                        connection.Open(true);
+                    }
+                    const int numSubscriptions = 3;
+                    const int numUnsubscriptions = 2;
+                    const int diff = numSubscriptions - numUnsubscriptions + numSubscriptions;
+
+                    for (int i = 0; i < numSubscriptions; i++)
+                    {
+                        helper.SubscribeToCounterEventHandlers(recognizer);
+                    }
+
+                    for (int i = 0; i < numUnsubscriptions; i++)
+                    {
+                        helper.UnsubscribeFromCounterEventHandlers(recognizer);
+                    }
+
+                    for (int i = 0; i < numSubscriptions; i++)
+                    {
+                        helper.SubscribeToCounterEventHandlers(recognizer);
+                    }
+
+                    await helper.CompleteContinuousRecognition(recognizer);
+
+                    AssertEqual(diff, helper.RecognizedEventCount, AssertOutput.WrongFinalResultCount);
+                    AssertEqual(diff, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
+                    AssertEqual(diff, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
+                    AssertEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
                 }
-                const int numSubscriptions = 3;
-                const int numUnsubscriptions = 2;
-                const int diff = numSubscriptions - numUnsubscriptions + numSubscriptions;
-
-                for (int i = 0; i < numSubscriptions; i++)
-                {
-                    helper.SubscribeToCounterEventHandlers(recognizer);
-                }
-
-                for (int i = 0; i < numUnsubscriptions; i++)
-                {
-                    helper.UnsubscribeFromCounterEventHandlers(recognizer);
-                }
-
-                for (int i = 0; i < numSubscriptions; i++)
-                {
-                    helper.SubscribeToCounterEventHandlers(recognizer);
-                }
-
-                await helper.CompleteContinuousRecognition(recognizer);
-
-                AssertEqual(diff, helper.RecognizedEventCount, AssertOutput.WrongFinalResultCount);
-                AssertEqual(diff, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                AssertEqual(diff, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
-                AssertEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
             }
         }
 
@@ -543,22 +572,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(true);
-                }
-                helper.SubscribeToCounterEventHandlers(recognizer);
-                recognizer.SessionStarted += (s, e) =>
-                {
-                    helper.UnsubscribeFromCounterEventHandlers(recognizer);
-                };
+                    if (usingPreConnection)
+                    {
+                        connection.Open(true);
+                    }
+                    helper.SubscribeToCounterEventHandlers(recognizer);
+                    recognizer.SessionStarted += (s, e) =>
+                    {
+                        helper.UnsubscribeFromCounterEventHandlers(recognizer);
+                    };
 
-                await helper.CompleteContinuousRecognition(recognizer);
-                AssertEqual(1, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
-                AssertEqual(0, helper.RecognizedEventCount, AssertOutput.WrongFinalResultCount);
-                AssertEqual(0, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                AssertEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
+                    await helper.CompleteContinuousRecognition(recognizer);
+                    AssertEqual(1, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
+                    AssertEqual(0, helper.RecognizedEventCount, AssertOutput.WrongFinalResultCount);
+                    AssertEqual(0, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
+                    AssertEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
+                }
             }
         }
 
@@ -688,21 +719,23 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(true);
-                }
-                string canceled = string.Empty;
-                recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
-                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
-                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
-                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    if (usingPreConnection)
+                    {
+                        connection.Open(true);
+                    }
+                    string canceled = string.Empty;
+                    recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
 
-                if (!string.IsNullOrEmpty(canceled))
-                {
-                    Assert.Fail($"Recognition Canceled: {canceled}");
+                    if (!string.IsNullOrEmpty(canceled))
+                    {
+                        Assert.Fail($"Recognition Canceled: {canceled}");
+                    }
                 }
             }
         }
@@ -715,18 +748,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Silence.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(false);
-                }
-                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(ResultReason.NoMatch, result.Reason);
-                Assert.IsTrue(result.OffsetInTicks > 0, $"Bad offset: {result.OffsetInTicks}");
-                Assert.IsTrue(string.IsNullOrEmpty(result.Text), $"Bad result text: {result.Text}");
+                    if (usingPreConnection)
+                    {
+                        connection.Open(false);
+                    }
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                    Assert.AreEqual(ResultReason.NoMatch, result.Reason);
+                    Assert.IsTrue(result.OffsetInTicks > 0, $"Bad offset: {result.OffsetInTicks}");
+                    Assert.IsTrue(string.IsNullOrEmpty(result.Text), $"Bad result text: {result.Text}");
 
-                var noMatch = NoMatchDetails.FromResult(result);
-                Assert.AreEqual(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
+                    var noMatch = NoMatchDetails.FromResult(result);
+                    Assert.AreEqual(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
+                }
             }
         }
 
@@ -770,9 +805,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             this.defaultConfig.SpeechRecognitionLanguage = Language.DE_DE;
             var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
             var recognizer = new SpeechRecognizer(this.defaultConfig, audioInput);
-            var connection = Connection.FromRecognizer(recognizer);
-            // Close the connection without opening it.
-            connection.Close();
+            using (var connection = Connection.FromRecognizer(recognizer))
+            {
+                // Close the connection without opening it.
+                connection.Close();
+            }
         }
 
         [TestMethod]
@@ -843,7 +880,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
-                
+
             }
         }
 
@@ -1101,6 +1138,72 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
                 AssertMatching(TestData.English.Profanity.RawUtterance, result.Text);
+            }
+        }
+
+        [TestMethod]
+        public async Task DictationCorrectionsSetParameter()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var config = SpeechConfig.FromEndpoint(new Uri(officeEndpointString), subscriptionKey);
+            config.SetServiceProperty("format", "corrections", ServicePropertyChannel.UriQueryParameter);
+            config.EnableDictation();
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
+            {
+                using (var connection = Connection.FromRecognizer(recognizer))
+                {
+                    recognizer.AuthorizationToken = "abc";
+
+                    var phraseDetectionPayload = "{\"mode\": \"dictation\", \"grammarScenario\": \"Dictation_Office\",\"initialSilenceTimeout\": 2000,\"trailingSilenceTimeout\": 2000}";
+                    connection.SetMessageParameter("speech.context", "phraseDetection", phraseDetectionPayload);
+
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                    Assert.IsTrue(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult).Contains("Corrections"));
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task DictationSendMessage()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var config = SpeechConfig.FromEndpoint(new Uri(officeEndpointString), subscriptionKey);
+            config.SetServiceProperty("format", "corrections", ServicePropertyChannel.UriQueryParameter);
+            config.EnableDictation();
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
+            {
+                using (var connection = Connection.FromRecognizer(recognizer))
+                {
+                    recognizer.AuthorizationToken = "abc";
+
+                    string payload = @"{
+                ""Id"": ""Corrections"",
+                ""Name"": ""Telemetry"",
+                ""ClientSessionId"": ""DADAAAC4-019C-4D23-9301-7FD619BE68AB"",
+                ""CorrectionEvents"": [
+                    {
+                        ""PhraseId"": ""AEDC2194-019C-4D23-9301-7FD619BE68A9"",
+                        ""CorrectionId"": 0,
+                        ""AlternateId"": 1,
+                        ""TreatedInUX"": ""true"",
+                        ""TriggerType"": ""click"",
+                        ""EditType"": ""alternate""
+                    },
+                    {
+                        ""PhraseId"": ""BEDC2194-019C-4D23-9301-7FD619BE68AA"",
+                        ""CorrectionId"": 0,
+                        ""AlternateId"": 2,
+                        ""TriggerType"": ""hover"",
+                        ""TreatedInUX"": ""false"",
+                        ""EditType"": ""alternate""
+                    }]}";
+                    await connection.SendMessageAsync("event", payload);
+
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                    Assert.IsTrue(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult).Contains("Corrections"));
+                }
             }
         }
 

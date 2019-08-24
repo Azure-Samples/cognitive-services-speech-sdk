@@ -436,6 +436,15 @@
     }
 }
 
+%extend Microsoft::CognitiveServices::Speech::Connection {
+
+    FutureWrapper<void> SendMessageAsync(std::string path, std::string payload)
+    {
+        auto future = ($self)->SendMessageAsync(path, payload);
+        return FutureWrapper<void>(std::move(future));
+    }
+}
+
 #ifndef SWIGPYTHON
 %feature("director") CallbackWrapper;
 
@@ -493,6 +502,7 @@
 %ignore StartSpeakingTextAsync;
 %ignore StartSpeakingSsmlAsync;
 %ignore SaveToWavFileAsync;
+%ignore SendMessageAsync;
 
 %ignore Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConnector::ConnectAsync;
 %ignore Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConnector::DisconnectAsync;

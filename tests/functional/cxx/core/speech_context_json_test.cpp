@@ -93,6 +93,14 @@ public:
         properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages), toLanguages.c_str());
     }
 
+    // The data in speech context and speech config that could be set from user is being passed via a recognizer.
+    // The speech_context_json_test.cpp does not have a recognizer. So, override it with empty data
+    CSpxStringMap GetParametersFromUser(std::string&& path) override
+    {
+        UNUSED(path);
+        return {};
+    }
+
 private:
 
     string m_provider;

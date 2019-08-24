@@ -397,10 +397,10 @@ public class SpeechRecognizerTests {
             connection.disconnected.addEventListener((o2, e) -> {
                 disconnectedEventCount.getAndIncrement();
             });
-    
+
             r.sessionStopped.addEventListener((o2, e) -> {
                 sessionStoppedCount.getAndIncrement();
-            });    
+            });
         });
 
         Future<SpeechRecognitionResult> future = r.recognizeOnceAsync();
@@ -673,7 +673,7 @@ public class SpeechRecognizerTests {
         });
 
         SpeechRecognitionResult res = r.recognizeOnceAsync().get();
-        
+
         TestHelper.OutputResult(res);
         assertEquals(ResultReason.RecognizedSpeech, res.getReason());
         assertEquals("What's the weather like?", res.getText());
@@ -801,7 +801,7 @@ public class SpeechRecognizerTests {
         assertFalse("future is canceled.", future.isCancelled());
         assertTrue("future is not done.", future.isDone());
 
-        // Not calling connection.closeConnection() or connection.close() by purpose, in order to 
+        // Not calling connection.closeConnection() or connection.close() by purpose, in order to
         // test that no JVM crash happens even the connection object might be garbage collected.
         r.close();
         s.close();
@@ -1177,7 +1177,7 @@ public class SpeechRecognizerTests {
             System.out.println("Now Disconnected. preparing throw exception");
             throw new IllegalArgumentException("disconnected");
         });
-    
+
         r.recognized.addEventListener((o, e) -> {
             System.out.println("Now Recognized. preparing throw exception");
             throw new IllegalArgumentException("Recognized");
@@ -1254,7 +1254,7 @@ public class SpeechRecognizerTests {
             System.out.println("Now Disconnected. preparing throw exception");
             throw new IllegalArgumentException("disconnected");
         });
-  
+
         r.recognized.addEventListener((o, e) -> {
             System.out.println("Now Recognized. preparing throw exception");
             throw new IllegalArgumentException("Recognized");
@@ -1292,7 +1292,7 @@ public class SpeechRecognizerTests {
         });
 
         r.startContinuousRecognitionAsync().get();
-        
+
         // wait until we get the SessionStopped event.
         long now = System.currentTimeMillis();
         while(((System.currentTimeMillis() - now) < 30000) && (sessionStopped.get() == true)) {
@@ -1302,6 +1302,69 @@ public class SpeechRecognizerTests {
         r.stopContinuousRecognitionAsync().get();
 
         // It is not required to explictly close the connection. This is also used to keep the connection object alive.
+        connection.closeConnection();
+
+        r.close();
+        s.close();
+    }
+
+    @Test
+    public void DictationCorrections() throws InterruptedException, ExecutionException, TimeoutException {
+
+        String endpoint = "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1";
+        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(endpoint));
+        assertNotNull(s);
+        s.enableDictation();
+        s.setServiceProperty("format", "corrections", ServicePropertyChannel.UriQueryParameter);
+
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        r.setAuthorizationToken("abc");
+        Connection connection = Connection.fromRecognizer(r);
+        assertNotNull(r);
+        assertNotNull(r.getRecoImpl());
+        assertTrue(r instanceof Recognizer);
+
+        connection.openConnection(false);
+
+        AtomicInteger connectedEventCount = new AtomicInteger(0);
+        AtomicInteger disconnectedEventCount = new AtomicInteger(0);
+        AtomicInteger sessionStoppedCount = new AtomicInteger(0);
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+        });
+
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            disconnectedEventCount.getAndIncrement();
+        });
+
+        r.sessionStopped.addEventListener((o, SessionEventArgs) -> {
+            sessionStoppedCount.getAndIncrement();
+        });
+
+        String data = "{\"Id\": \"Corrections\",\"Name\": \"Telemetry\",\"ClientSessionId\": \"DADAAAC4-019C-4D23-9301-7FD619BE68AB\",\"CorrectionEvents\": [{\"PhraseId\": \"AEDC2194-019C-4D23-9301-7FD619BE68A9\",\"CorrectionId\": 0,\"AlternateId\": 1,\"TreatedInUX\": \"true\",\"TriggerType\": \"click\",\"EditType\": \"alternate\"},{\"PhraseId\": \"BEDC2194-019C-4D23-9301-7FD619BE68AA\",\"CorrectionId\": 0,\"AlternateId\": 2,\"TriggerType\": \"hover\",\"TreatedInUX\": \"false\",\"EditType\": \"alternate\"}] }";
+        Future<?> messageFuture = connection.sendMessageAsync("event", data);
+        assertNotNull("future is null.", messageFuture);
+
+        // Wait for max 30 seconds
+        messageFuture.get(30, TimeUnit.SECONDS);
+
+        Future<SpeechRecognitionResult> future = r.recognizeOnceAsync();
+
+        // Wait for max 30 seconds
+        SpeechRecognitionResult res = future.get(30, TimeUnit.SECONDS);
+
+        assertFalse("future is canceled.", future.isCancelled());
+        assertTrue("future is not done.", future.isDone());
+        assertNotNull("future is null.", future);
+
+        assertNotNull(res);
+        TestHelper.OutputResult(res);
+        assertEquals(ResultReason.RecognizedSpeech, res.getReason());
+
+        String detailedResult = res.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult);
+        assertTrue(detailedResult.contains("Corrections"));
+        System.out.println("DictationCorrections: detailed result: " + detailedResult);
+
         connection.closeConnection();
 
         r.close();

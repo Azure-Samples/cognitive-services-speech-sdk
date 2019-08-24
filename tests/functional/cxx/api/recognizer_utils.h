@@ -216,6 +216,12 @@ void ConnectCallbacks(RecogType* recognizer, RecoPhrasesPtr result)
         SPX_TRACE_VERBOSE("CXX_API_TEST SessionStopped: session id %s", e.SessionId.c_str());
         result->ready.set_value();
     });
+
+    recognizer->SessionStarted.DisconnectAll();
+    recognizer->SessionStarted.Connect([result](const SessionEventArgs& e)
+    {
+        SPX_TRACE_VERBOSE("CXX_API_TEST SessionStarted: session id %s", e.SessionId.c_str());
+    });
 }
 
 class RecordedDataReader

@@ -58,6 +58,9 @@ void CSpxUspRecoEngineAdapter::Init()
     SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
     SPX_IFTRUE_THROW_HR(m_uspConnection != nullptr, SPXERR_ALREADY_INITIALIZED);
     SPX_IFTRUE_THROW_HR(m_uspCallbacks != nullptr, SPXERR_ALREADY_INITIALIZED);
+    m_message_name_to_type_map =
+    { {"speech.event", USP::MessageType::SpeechEvent}, {"event", USP::MessageType::Event}, {"speech.context", USP::MessageType::Context}, {"speech.config", USP::MessageType::Config}, {"speech.agent", USP::MessageType::Agent}, {"speech.agentcontext", USP::MessageType::AgentContext}, {"ssml", USP::MessageType::Ssml} };
+
     SPX_DBG_ASSERT(IsState(AudioState::Idle) && IsState(UspState::Idle));
 }
 
@@ -164,22 +167,21 @@ void CSpxUspRecoEngineAdapter::SendSpeechEventMessage(std::string&& message)
     UspSendMessage("speech.event", message, USP::MessageType::SpeechEvent);
 }
 
-void CSpxUspRecoEngineAdapter::SendEventMessage(std::string&& message)
+USP::MessageType CSpxUspRecoEngineAdapter::GetMessageType(std::string&& path)
 {
-    // Currently the "event" message is used for sending dynamic language list in translation.
-    // For this purpose, there is no need to send the event message if there is no connection setup yet,
-    // because the language list will be sent to the service as query parameters during connection setup.
-    // If, in future, the "event" message is used for other purposes that could be sent before connection establishment,
-    // EnsureUspInit() should be called to start connection setup if need. However, it should be noted that the reco mode
-    // is required for setting up connection. The reco mode is set either when starting recognition or by Connection object.
-    if (m_uspConnection != nullptr)
+    return m_message_name_to_type_map.find(path) == m_message_name_to_type_map.end() ? USP::MessageType::Unknown : m_message_name_to_type_map[path];
+}
+
+void CSpxUspRecoEngineAdapter::SendNetworkMessage(std::string&& path, std::string&& payload)
+{
+    // Establish the connection to service.
+    EnsureUspInit();
+    // for some reason, no connection is established
+    if (m_uspConnection == nullptr || IsState(UspState::Error))
     {
-        UspSendMessage("event", message, USP::MessageType::Event);
+        return;
     }
-    else
-    {
-        LogInfo("WARN: event message is sent before connection setup. It is ignored.");
-    }
+    UspSendMessage(path, payload, GetMessageType(std::move(path)));
 }
 
 void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
@@ -863,6 +865,15 @@ void CSpxUspRecoEngineAdapter::SetSpeechConfigMessage(const ISpxNamedProperties&
     speechConfig["context"]["audio"]["source"]["bitspersample"] = properties.GetStringValue(GetPropertyName(PropertyId::AudioConfig_BitsPerSampleForCapture));
     speechConfig["context"]["audio"]["source"]["channelcount"] = properties.GetStringValue(GetPropertyName(PropertyId::AudioConfig_NumberOfChannelsForCapture));
 
+    auto userDefinedParams = GetParametersFromUser("speech.config");
+    for (const auto& item : userDefinedParams)
+    {
+        if (item.second.empty())
+        {
+            ThrowInvalidArgumentException("User provided an empty value in a speech.config field");
+        }
+        speechConfig["context"][item.first] = json::parse(item.second);
+    }
     m_speechConfig = speechConfig.dump();
 }
 
@@ -975,7 +986,7 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechEvent()
 
     if (!payload.empty())
     {
-        UspSendMessage("speech.event", payload, USP::MessageType::Event);
+        UspSendMessage("speech.event", payload, USP::MessageType::SpeechEvent);
     }
 }
 
@@ -2000,6 +2011,19 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
         SPX_DBG_TRACE_VERBOSE("Speech context with LID scenario %s.", contextJson.dump().c_str());
     }
 
+    auto userParams = GetParametersFromUser("speech.context");
+    if (!userParams.empty())
+    {
+        for (const auto& param : userParams)
+        {
+            if (param.second.empty())
+            {
+                ThrowInvalidArgumentException("User provided an empty value in a speech.context field");
+            }
+            contextJson[param.first] = json::parse(param.second);
+        }
+    }
+
     return contextJson;
 }
 
@@ -2262,7 +2286,7 @@ void CSpxUspRecoEngineAdapter::ResetBeforeFirstAudio()
 std::pair<std::string, std::string> CSpxUspRecoEngineAdapter::GetLeftRightContext()
 {
     // Get dictation left and right context of the insertion point.
-     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     auto leftContext = properties->GetStringValue("DictationInsertionPointLeft");
@@ -2322,4 +2346,13 @@ json CSpxUspRecoEngineAdapter::GetSynthesisJson(unordered_map<string, string>&& 
     synthesisJson["defaultVoices"] = json(move(voiceNameMap));
     return synthesisJson;
 }
+
+CSpxStringMap CSpxUspRecoEngineAdapter::GetParametersFromUser(std::string&& path)
+{
+    auto getter = SpxQueryInterface<ISpxGetUspMessageParamsFromUser>(GetSite());
+    SPX_IFTRUE_THROW_HR(getter == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+    return getter->GetParametersFromUser(move(path));
+}
+
 } } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -11,7 +11,8 @@ namespace Impl {
 
 class CSpxConnection :
     public ISpxConnection,
-    public ISpxConnectionInit
+    public ISpxConnectionInit,
+    public ISpxMessageParamFromUser
 {
 public:
 
@@ -21,6 +22,7 @@ public:
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxConnection)
         SPX_INTERFACE_MAP_ENTRY(ISpxConnectionInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxMessageParamFromUser)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxConnection
@@ -29,7 +31,11 @@ public:
     std::shared_ptr<ISpxRecognizer> GetRecognizer() override;
 
     // -- ISpxConnectionInit
-    void Init(std::weak_ptr<ISpxRecognizer> recognizer) override;
+    void Init(std::weak_ptr<ISpxRecognizer> recognizer, std::weak_ptr<ISpxMessageParamFromUser> setter) override;
+
+    // --- ISpxUspMessageParamFromUser
+    void SetParameter(std::string&& path, std::string&& name, std::string&& value) override;
+    void SendNetworkMessage(std::string&& path, std::string&& payload) override;
 
 private:
 
@@ -39,6 +45,7 @@ private:
     CSpxConnection& operator=(const CSpxConnection&) = delete;
 
     std::weak_ptr<ISpxRecognizer> m_recognizer;
+    std::weak_ptr<ISpxMessageParamFromUser> m_setMessageParamFromUser;
 };
 
 

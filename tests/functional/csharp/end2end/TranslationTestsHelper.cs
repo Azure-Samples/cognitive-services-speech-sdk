@@ -7,7 +7,7 @@ using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MicrosoftSpeechSDKSamples;
 using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -77,25 +77,28 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Console.WriteLine("Canceled: " + e.SessionId);
                     tcs.TrySetResult(0);
                 };
-                var connection = Connection.FromRecognizer(recognizer);
-                int connectedEventCount = 0;
-                int disconnectedEventCount = 0;
-                connection.Connected += (s, e) =>
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connectedEventCount++;
-                };
-                connection.Disconnected += (s, e) =>
-                {
-                    disconnectedEventCount++;
-                };
 
-                TranslationRecognitionResult result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                await Task.WhenAny(tcs.Task, Task.Delay(timeout));
-                SpeechRecognitionTestsHelper.AssertConnectionCountMatching(connectedEventCount, disconnectedEventCount);
-                // It is not required to close the conneciton explictly. But it is also used to keep the connection object alive to ensure that
-                // connected and disconencted events can be received.
-                connection.Close();
-                return result;
+                    int connectedEventCount = 0;
+                    int disconnectedEventCount = 0;
+                    connection.Connected += (s, e) =>
+                    {
+                        connectedEventCount++;
+                    };
+                    connection.Disconnected += (s, e) =>
+                    {
+                        disconnectedEventCount++;
+                    };
+
+                    TranslationRecognitionResult result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                    await Task.WhenAny(tcs.Task, Task.Delay(timeout));
+                    SpeechRecognitionTestsHelper.AssertConnectionCountMatching(connectedEventCount, disconnectedEventCount);
+                    // It is not required to close the conneciton explictly. But it is also used to keep the connection object alive to ensure that
+                    // connected and disconencted events can be received.
+                    connection.Close();
+                    return result;
+                }
             }
         }
 
@@ -109,32 +112,37 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<Dictionary<ResultType, List<EventArgs>>> DoTranslationAsync(TranslationRecognizer recognizer, bool requireTranslatedSpeech)
         {
-            var connection = Connection.FromRecognizer(recognizer);
-            var tcs = new TaskCompletionSource<bool>();
-            var receivedRecognizedEvents = new Dictionary<ResultType, List<EventArgs>>(); ;
-            var textResultEvents = new List<EventArgs>();
-            var synthesisResultEvents = new List<EventArgs>();
-            bool synthesisFailed = false;
+            using (var connection = Connection.FromRecognizer(recognizer))
+            {
+                var tcs = new TaskCompletionSource<bool>();
+                var receivedRecognizedEvents = new Dictionary<ResultType, List<EventArgs>>(); ;
+                var textResultEvents = new List<EventArgs>();
+                var synthesisResultEvents = new List<EventArgs>();
+                bool synthesisFailed = false;
 
-            int connectedEventCount = 0;
-            int disconnectedEventCount = 0;
-            connection.Connected += (s, e) => {
+                int connectedEventCount = 0;
+                int disconnectedEventCount = 0;
+                connection.Connected += (s, e) =>
+                {
                     connectedEventCount++;
                 };
-            connection.Disconnected += (s, e) => {
+                connection.Disconnected += (s, e) =>
+                {
                     disconnectedEventCount++;
                 };
 
-            string canceled = string.Empty;
-            recognizer.Canceled += (s, e) => {
-                if (e.Reason != CancellationReason.EndOfStream)
+                string canceled = string.Empty;
+                recognizer.Canceled += (s, e) =>
                 {
-                    canceled = e.ErrorDetails;
-                    tcs.TrySetResult(false);
-                }
-            };
+                    if (e.Reason != CancellationReason.EndOfStream)
+                    {
+                        canceled = e.ErrorDetails;
+                        tcs.TrySetResult(false);
+                    }
+                };
 
-            recognizer.Recognized += (s, e) => {
+                recognizer.Recognized += (s, e) =>
+                {
                     Console.WriteLine($"Received final result event: {e.ToString()}");
                     if (!requireTranslatedSpeech || e.Result.Reason == ResultReason.TranslatedSpeech)
                     {
@@ -142,7 +150,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
-            recognizer.Synthesizing += (s, e) => {
+                recognizer.Synthesizing += (s, e) =>
+                {
                     Console.WriteLine($"Received synthesis event: {e.ToString()}");
                     if (e.Result.GetAudio().Length > 0)
                     {
@@ -155,32 +164,34 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
-            recognizer.SessionStopped += (s, e) => {
+                recognizer.SessionStopped += (s, e) =>
+                {
                     Console.WriteLine($"Received stopped session event: {e.ToString()}");
                     tcs.TrySetResult(true);
                 };
 
-            await recognizer.StartContinuousRecognitionAsync();
-            await Task.WhenAny(tcs.Task, Task.Delay(timeout));
-            await recognizer.StopContinuousRecognitionAsync();
+                await recognizer.StartContinuousRecognitionAsync();
+                await Task.WhenAny(tcs.Task, Task.Delay(timeout));
+                await recognizer.StopContinuousRecognitionAsync();
 
-            GC.KeepAlive(connection);
+                GC.KeepAlive(connection);
 
-            if (!string.IsNullOrEmpty(canceled))
-            {
-                Assert.Fail($"Recognition Canceled: {canceled}");
+                if (!string.IsNullOrEmpty(canceled))
+                {
+                    Assert.Fail($"Recognition Canceled: {canceled}");
+                }
+
+                SpeechRecognitionTestsHelper.AssertConnectionCountMatching(connectedEventCount, disconnectedEventCount);
+
+                if (synthesisFailed)
+                {
+                    Assert.Fail($"Synthesis failed.");
+                }
+
+                receivedRecognizedEvents.Add(ResultType.RecognizedText, textResultEvents);
+                receivedRecognizedEvents.Add(ResultType.Synthesis, synthesisResultEvents);
+                return receivedRecognizedEvents;
             }
-
-            SpeechRecognitionTestsHelper.AssertConnectionCountMatching(connectedEventCount, disconnectedEventCount);
-
-            if (synthesisFailed)
-            {
-                Assert.Fail($"Synthesis failed.");
-            }
-
-            receivedRecognizedEvents.Add(ResultType.RecognizedText, textResultEvents);
-            receivedRecognizedEvents.Add(ResultType.Synthesis, synthesisResultEvents);
-            return receivedRecognizedEvents;
         }
 
         public async Task<Dictionary<ResultType, List<TranslationRecognitionEventArgs>>> GetTranslationRecognizingContinuous(string path, string fromLanguage, List<string> toLanguages, string endpointId = null, bool allowErrors = false)
@@ -234,7 +245,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 return receivedEvents;
             }
         }
-        
+
         public async Task<Tuple<List<TranslationSynthesisEventArgs>, TranslationRecognitionResult>> GetTranslationSynthesisAndFinalResult(string path, string fromLanguage, List<string> toLanguages, string voice)
         {
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages, voice)))

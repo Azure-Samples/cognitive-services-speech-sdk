@@ -191,23 +191,25 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine("Canceled: " + e.SessionId);
                 tcs.TrySetResult(0);
             };
-            var connection = Connection.FromRecognizer(recognizer);
-            int connectedEventCount = 0;
-            int disconnectedEventCount = 0;
-            connection.Connected += (s, e) =>
+            using (var connection = Connection.FromRecognizer(recognizer))
             {
-                connectedEventCount++;
-                connectedEventArgs.Add(e);
-            };
-            connection.Disconnected += (s, e) =>
-            {
-                disconnectedEventCount++;
-            };
+                int connectedEventCount = 0;
+                int disconnectedEventCount = 0;
+                connection.Connected += (s, e) =>
+                {
+                    connectedEventCount++;
+                    connectedEventArgs.Add(e);
+                };
+                connection.Disconnected += (s, e) =>
+                {
+                    disconnectedEventCount++;
+                };
 
-            SpeechRecognitionResult result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-            await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromMinutes(6)));
-            GC.KeepAlive(connection);
-            return result;
+                SpeechRecognitionResult result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromMinutes(6)));
+                GC.KeepAlive(connection);
+                return result;
+            }
         }
 
         public static async Task<SpeechRecognitionResult> SpeechRecoDisposeMemoryLeakTestHelper(string subkey, string region, string audioFile, string recoLanguage, bool useStream)

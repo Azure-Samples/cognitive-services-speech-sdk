@@ -22,4 +22,5 @@ namespace Impl {
     static constexpr unsigned short BLOCK_ALIGN = (BITS_PER_SAMPLE >> 3)*CHANNELS;
     static constexpr unsigned short AVG_BYTES_PER_SECOND = BLOCK_ALIGN * SAMPLES_PER_SECOND;
 
+    static constexpr int MAX_JSON_PAYLOAD_FROM_USER = 52428800;
 } } } } // Microsoft::CognitiveServices::Speech::Impl

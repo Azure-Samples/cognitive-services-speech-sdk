@@ -80,3 +80,43 @@ SPXAPI connection_close(SPXCONNECTIONHANDLE handle)
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
+
+SPXAPI connection_set_message_parameter(SPXCONNECTIONHANDLE handle, const char* path, const char* name, const char* value)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, handle == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, name == nullptr || !(*name));
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, name == nullptr || !(*path));
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, value == nullptr || !(*value));
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto handleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnection, SPXCONNECTIONHANDLE>();
+        auto connection = (*handleTable)[handle];
+        SPX_IFTRUE_THROW_HR(connection == nullptr, SPXERR_INVALID_HANDLE);
+
+        auto setter = SpxQueryInterface<ISpxMessageParamFromUser>(connection);
+        SPX_IFTRUE_THROW_HR(setter == nullptr, SPXERR_INVALID_ARG);
+
+        setter->SetParameter(path, name, value);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI connection_send_message(SPXCONNECTIONHANDLE handle, const char* path, const char* payload)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, handle == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, payload == nullptr || !(*payload));
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, path == nullptr || !(*path));
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto handleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnection, SPXCONNECTIONHANDLE>();
+        auto connection = (*handleTable)[handle];
+
+        auto setter = SpxQueryInterface<ISpxMessageParamFromUser>(connection);
+        SPX_IFTRUE_THROW_HR(setter == nullptr, SPXERR_INVALID_ARG);
+
+        setter->SendNetworkMessage(path, payload);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}

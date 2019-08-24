@@ -85,6 +85,8 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxConnectionFromRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxGrammarList)
+        SPX_INTERFACE_MAP_ENTRY(ISpxMessageParamFromUser)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGetUspMessageParamsFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxConversationTranscriber)
     SPX_INTERFACE_MAP_END()
 

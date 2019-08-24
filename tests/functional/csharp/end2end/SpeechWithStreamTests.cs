@@ -138,27 +138,29 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = Util.OpenWavFile(TestData.English.Batman.AudioFile);
             var results = new List<SpeechRecognitionResult>();
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
-            { 
-                var connection = Connection.FromRecognizer(recognizer);
-                if (usingPreConnection)
+            {
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    connection.Open(false);
-                }
-                while (true)
-                {
-                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                    if (result.Reason == ResultReason.Canceled)
+                    if (usingPreConnection)
                     {
-                        break;
+                        connection.Open(false);
                     }
-                    Console.WriteLine(result.Text);
-                    Console.WriteLine($"Result OffsetInTicks {result.OffsetInTicks.ToString()}");
-                    Console.WriteLine($"Result Duration {result.Duration.Ticks.ToString()}\n");
-                    results.Add(result);
-                }
+                    while (true)
+                    {
+                        var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                        if (result.Reason == ResultReason.Canceled)
+                        {
+                            break;
+                        }
+                        Console.WriteLine(result.Text);
+                        Console.WriteLine($"Result OffsetInTicks {result.OffsetInTicks.ToString()}");
+                        Console.WriteLine($"Result Duration {result.Duration.Ticks.ToString()}\n");
+                        results.Add(result);
+                    }
 
-                var texts = results.Select(r => r.Text).Where(t => !string.IsNullOrEmpty(t)).ToArray();
-                AssertFuzzyMatching(TestData.English.Batman.UtterancesInteractive, texts, 5);
+                    var texts = results.Select(r => r.Text).Where(t => !string.IsNullOrEmpty(t)).ToArray();
+                    AssertFuzzyMatching(TestData.English.Batman.UtterancesInteractive, texts, 5);
+                }
             }
         }
 
@@ -171,7 +173,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var taskSource = new TaskCompletionSource<bool>();
             this.defaultConfig.SpeechRecognitionLanguage = Language.EN;
             using (var recognizer = new SpeechRecognizer(this.defaultConfig, audioInput))
-            { 
+            {
                 recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Result recognized {e.ToString()}");
@@ -224,7 +226,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     // make sure the next offset increases at least by the current duration
                     if (i < offsets.Count-1) {
-                        Assert.IsTrue(offsets[i+1].Item1 >= offsets[i].Item1 + offsets[i].Item2, 
+                        Assert.IsTrue(offsets[i+1].Item1 >= offsets[i].Item1 + offsets[i].Item2,
                             $"Duration not increasing sufficient: index {i}, offset: {offsets[i].Item1}, duration: {offsets[i].Item2}, next offset: {offsets[i+1].Item1}");
                     }
                 }

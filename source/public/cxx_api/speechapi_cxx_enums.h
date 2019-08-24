@@ -477,14 +477,14 @@ enum class CancellationErrorCode
 {
     /// <summary>
     /// No error.
-    /// If CancellationReason is EndOfStream, CancellationErrorCode 
+    /// If CancellationReason is EndOfStream, CancellationErrorCode
     /// is set to NoError.
     /// </summary>
     NoError = 0,
 
     /// <summary>
     /// Indicates an authentication error.
-    /// An authentication error occurs if subscription key or authorization token is invalid, expired, 
+    /// An authentication error occurs if subscription key or authorization token is invalid, expired,
     /// or does not match the region being used.
     /// </summary>
     AuthenticationFailure = 1,
@@ -575,7 +575,7 @@ enum class ActivityJSONType : int
 
 
 /// <summary>
-/// Defines the possible speech synthesis output audio format.
+/// Defines the possible speech synthesis output audio formats.
 /// Added in version 1.4.0
 /// </summary>
 enum class SpeechSynthesisOutputFormat
@@ -693,7 +693,7 @@ enum class StreamStatus
     AllData = 3,
 
     /// <summary>
-    /// The audio data stream was cancelled
+    /// The audio data stream was canceled
     /// </summary>
     Canceled = 4
 };

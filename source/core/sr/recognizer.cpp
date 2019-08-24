@@ -8,6 +8,8 @@
 #include "property_id_2_name_map.h"
 #include "file_logger.h"
 
+#include "iostream"
+
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -345,6 +347,7 @@ void CSpxRecognizer::CheckLogFilename()
 {
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
     auto filename = namedProperties->GetStringValue(GetPropertyName(PropertyId::Speech_LogFilename), "");
+    // Note: file logger is static. If a previous recognizer has turned in file logging, this will throw an exception.
     if (!filename.empty())
     {
         FileLogger::Instance().SetFilename(std::move(filename));
@@ -362,9 +365,87 @@ std::shared_ptr<ISpxConnection> CSpxRecognizer::GetConnection()
     auto connection = SpxCreateObjectWithSite<ISpxConnection>("CSpxConnection", recognizerAsSite);
 
     auto initConnection = SpxQueryInterface<ISpxConnectionInit>(connection);
-    initConnection->Init(SpxSharedPtrFromThis<ISpxRecognizer>(this));
+    initConnection->Init(SpxSharedPtrFromThis<ISpxRecognizer>(this), SpxSharedPtrFromThis<ISpxMessageParamFromUser>(this));
 
     return connection;
+}
+
+void CSpxRecognizer::SetParameter(std::string&& path, std::string&& name, std::string&& value)
+{
+    if (value.length() > MAX_JSON_PAYLOAD_FROM_USER)
+    {
+        ThrowInvalidArgumentException("The value for SpeechContext exceed 50 MBytes!");
+    }
+
+    try
+    {
+        auto j = nlohmann::json::parse(value);
+    }
+    catch (nlohmann::json::parse_error& e)
+    {
+        UNUSED(e);
+        std::stringstream ss;
+        ss << "The user specified path: ";
+        ss << path;
+        ss << "  parameter name: ";
+        ss << name;
+        ss << " parameter value: ";
+        ss << value;
+        ss << " has invalid json string.";
+        ThrowInvalidArgumentException(ss.str());
+    }
+
+    transform(path.begin(), path.end(), path.begin(), [](unsigned char c) ->char { return (char)::tolower(c); });
+    {
+        std::unique_lock<std::mutex> lock{ m_uspParameterLock };
+
+        auto existing = m_uspParametersFromUser.find(path);
+        if (existing == end(m_uspParametersFromUser))
+        {
+            m_uspParametersFromUser[path] = { {move(name), move(value)} };
+        }
+        else
+        {
+            existing->second.insert({ {name,value} });
+        }
+    }
+}
+
+CSpxStringMap CSpxRecognizer::GetParametersFromUser(std::string&& path)
+{
+    CSpxStringMap result;
+    {
+        std::unique_lock<std::mutex> lock{ m_uspParameterLock };
+
+        auto search = m_uspParametersFromUser.find(path);
+        if (search != end(m_uspParametersFromUser))
+        {
+            result = search->second;
+        }
+
+    }
+    return result;
+}
+
+void CSpxRecognizer::SendNetworkMessage(std::string&& path, std::string&& payload)
+{
+    if (payload.length() > MAX_JSON_PAYLOAD_FROM_USER)
+    {
+        ThrowInvalidArgumentException("The value for SpeechEvent exceed 50 MBytes!");
+    }
+
+    try
+    {
+        auto j = nlohmann::json::parse(payload);
+    }
+    catch (nlohmann::json::parse_error& e)
+    {
+        std::string message = "The payload of speech event is invalid, " + std::string(e.what());
+        ThrowInvalidArgumentException(message);
+    }
+
+    SPX_IFTRUE_THROW_HR(m_defaultSession == nullptr, SPXERR_INVALID_ARG);
+    m_defaultSession->SendNetworkMessage(std::move(path), std::move(payload));
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

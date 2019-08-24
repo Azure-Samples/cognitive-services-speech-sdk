@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <chrono>
 #include <json.h>
 #include "spxcore_common.h"
@@ -616,6 +617,20 @@ public:
     virtual void Close() = 0;
 };
 
+class ISpxMessageParamFromUser : public ISpxInterfaceBaseFor<ISpxMessageParamFromUser>
+{
+public:
+    virtual void SetParameter(std::string&& path, std::string&& name, std::string&& value) = 0;
+    virtual void SendNetworkMessage(std::string&& path, std::string&& payload) = 0;
+};
+
+using CSpxStringMap = std::unordered_map<std::string, std::string>;
+class ISpxGetUspMessageParamsFromUser : public ISpxInterfaceBaseFor<ISpxGetUspMessageParamsFromUser>
+{
+public:
+    virtual CSpxStringMap GetParametersFromUser(std::string&& path) = 0;
+};
+
 class ISpxConnection : public ISpxInterfaceBaseFor<ISpxConnection>
 {
 public:
@@ -627,7 +642,7 @@ public:
 class ISpxConnectionInit : public ISpxInterfaceBaseFor<ISpxConnectionInit>
 {
 public:
-    virtual void Init(std::weak_ptr<ISpxRecognizer> recognizer) = 0;
+    virtual void Init(std::weak_ptr<ISpxRecognizer> recognizer, std::weak_ptr<ISpxMessageParamFromUser> setter) = 0;
 };
 
 class ISpxConnectionFromRecognizer : public ISpxInterfaceBaseFor<ISpxConnectionFromRecognizer>
@@ -844,7 +859,7 @@ public:
 
     virtual void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) = 0;
     virtual void SendSpeechEventMessage(std::string&& payload) = 0;
-    virtual void SendEventMessage(std::string&& payload) = 0;
+    virtual void SendNetworkMessage(std::string&& path, std::string&& payload) = 0;
 
 };
 
@@ -874,7 +889,7 @@ public:
 
     virtual void WriteTelemetryLatency(uint64_t, bool) {};
     virtual void SendSpeechEventMessage(std::string&&) {};
-    virtual void SendEventMessage(std::string&&) {};
+    virtual void SendNetworkMessage(std::string&&, std::string&&) {};
 };
 
 class SpxRecoEngineAdapterError

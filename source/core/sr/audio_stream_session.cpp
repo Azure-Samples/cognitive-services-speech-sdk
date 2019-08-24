@@ -2554,10 +2554,16 @@ void CSpxAudioStreamSession::SendSpeechEventMessage(std::string&& payload)
     m_recoAdapter->SendSpeechEventMessage(std::move(payload));
 }
 
-void CSpxAudioStreamSession::SendEventMessage(std::string&& payload)
+void CSpxAudioStreamSession::SendNetworkMessage(std::string&& path, std::string&& payload)
 {
-    EnsureInitRecoEngineAdapter();
-    m_recoAdapter->SendEventMessage(std::move(payload));
+    SPX_DBG_TRACE_FUNCTION();
+    auto keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
+    auto task = CreateTask([this, keepAlive, path, payload] () mutable {
+        EnsureInitRecoEngineAdapter();
+        m_recoAdapter->SendNetworkMessage(std::move(path), std::move(payload));
+    });
+
+    m_threadService->ExecuteAsync(move(task));
 }
 
 bool CSpxAudioStreamSession::IsStreaming()
@@ -2611,6 +2617,23 @@ std::string CSpxAudioStreamSession::GetSpeechEventPayload(bool startMeeting)
         }
     }
     return payload;
+}
+
+CSpxStringMap CSpxAudioStreamSession::GetParametersFromUser(std::string&& path)
+{
+    CSpxStringMap parametersFromUser;
+    std::shared_ptr<ISpxRecognizer> recognizer;
+    {
+        std::unique_lock<std::mutex> lock{ m_recognizersLock };
+        SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
+        recognizer = m_recognizers.front().lock();
+    }
+    auto ct = SpxQueryInterface<ISpxGetUspMessageParamsFromUser>(recognizer);
+    if (ct != nullptr)
+    {
+        parametersFromUser = ct->GetParametersFromUser(move(path));
+    }
+    return parametersFromUser;
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

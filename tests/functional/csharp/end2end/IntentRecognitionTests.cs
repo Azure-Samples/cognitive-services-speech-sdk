@@ -240,35 +240,37 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             };
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
-                recognizer.AddIntent(model, "HomeAutomation.TurnOn", "my-custom-intent-id-string");
-
-                var tcs = new TaskCompletionSource<int>();
-                recognizer.SessionStopped += (s, e) =>
+                using (var connection = Connection.FromRecognizer(recognizer))
                 {
-                    tcs.TrySetResult(0);
-                };
-                recognizer.Canceled += (s, e) =>
-                {
-                    Console.WriteLine("Canceled: " + e.SessionId);
-                    tcs.TrySetResult(0);
-                };
-                connection.Connected += myConnectedHandler;
-                connection.Disconnected += myDisconnectedHandler;
+                    var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
+                    recognizer.AddIntent(model, "HomeAutomation.TurnOn", "my-custom-intent-id-string");
 
-                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromMinutes(2)));
+                    var tcs = new TaskCompletionSource<int>();
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        tcs.TrySetResult(0);
+                    };
+                    recognizer.Canceled += (s, e) =>
+                    {
+                        Console.WriteLine("Canceled: " + e.SessionId);
+                        tcs.TrySetResult(0);
+                    };
+                    connection.Connected += myConnectedHandler;
+                    connection.Disconnected += myDisconnectedHandler;
 
-                connection.Connected -= myConnectedHandler;
-                connection.Disconnected -= myDisconnectedHandler;
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                    await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromMinutes(2)));
 
-                Console.WriteLine($"ConnectedEventCount: {connectedEventCount}, DisconnectedEventCount: {disconnectedEventCount}");
-                Assert.IsTrue(connectedEventCount > 0, AssertOutput.ConnectedEventCountMustNotBeZero);
-                Assert.IsTrue(connectedEventCount == disconnectedEventCount || connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
+                    connection.Connected -= myConnectedHandler;
+                    connection.Disconnected -= myDisconnectedHandler;
 
-                Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
-            }
+                    Console.WriteLine($"ConnectedEventCount: {connectedEventCount}, DisconnectedEventCount: {disconnectedEventCount}");
+                    Assert.IsTrue(connectedEventCount > 0, AssertOutput.ConnectedEventCountMustNotBeZero);
+                    Assert.IsTrue(connectedEventCount == disconnectedEventCount || connectedEventCount == disconnectedEventCount + 1, AssertOutput.ConnectedDisconnectedEventUnmatch);
+
+                    Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
+                }
+                }
         }
 
         [TestMethod]
@@ -277,9 +279,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
-                var connection = Connection.FromRecognizer(recognizer);
-                var ex = Assert.ThrowsException<ApplicationException>(() => connection.Open(false));
-                AssertStringContains(ex.Message, "Exception with an error code: 0x1f");
+                using (var connection = Connection.FromRecognizer(recognizer))
+                {
+                    var ex = Assert.ThrowsException<ApplicationException>(() => connection.Open(false));
+                    AssertStringContains(ex.Message, "Exception with an error code: 0x1f");
+                }
             }
         }
 

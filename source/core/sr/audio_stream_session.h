@@ -16,6 +16,7 @@
 #include "thread_service.h"
 
 #include <shared_mutex>
+#include <unordered_map>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -38,7 +39,8 @@ class CSpxAudioStreamSession :
     public ISpxEventArgsFactory,
     public ISpxPropertyBagImpl,
     public ISpxInteractionIdProvider,
-    public ISpxSpeechEventPayloadProvider
+    public ISpxSpeechEventPayloadProvider,
+    public ISpxGetUspMessageParamsFromUser
 {
 public:
 
@@ -63,6 +65,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxInteractionIdProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxSpeechEventPayloadProvider)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGetUspMessageParamsFromUser)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectInit
@@ -113,7 +116,7 @@ public:
     void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) override;
 
     void SendSpeechEventMessage(std::string&& payload) override;
-    void SendEventMessage(std::string&& payload) override;
+    void SendNetworkMessage(std::string&& path, std::string&& payload) override;
 
     bool IsStreaming() override;
 
@@ -180,6 +183,9 @@ public:
 
     // --- ISpxSpeechEventPayloadProvider
     std::string GetSpeechEventPayload(bool startMeeting) override;
+
+    // --- ISpxGetUspMessageParamsFromUser
+    CSpxStringMap GetParametersFromUser(std::string&& path) override;
 
 private:
     std::shared_ptr<ISpxThreadService> InternalQueryService(const char* serviceName);

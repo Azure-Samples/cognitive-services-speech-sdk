@@ -1679,11 +1679,99 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
 
     auto pushStream = AudioInputStream::CreatePushStream();
     auto audioInput = AudioConfig::FromStreamInput(pushStream);
+    string endpoint{ "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1" };
 
+    SPXTEST_SECTION("send_event")
+    {
+        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        config->SetServiceProperty("format", "corrections", ServicePropertyChannel::UriQueryParameter);
+        config->EnableDictation();
+
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+        recognizer->SetAuthorizationToken("abc");
+        string data = R"(
+                       {
+                "Id": "Corrections",
+                "Name": "Telemetry",
+                "ClientSessionId": "DADAAAC4-019C-4D23-9301-7FD619BE68AB",
+                "CorrectionEvents": [
+                    {
+                        "PhraseId": "AEDC2194-019C-4D23-9301-7FD619BE68A9",
+                        "CorrectionId": 0,
+                        "AlternateId": 1,
+                        "TreatedInUX": "true",
+                        "TriggerType": "click",
+                        "EditType": "alternate"
+                    },
+                    {
+                        "PhraseId": "BEDC2194-019C-4D23-9301-7FD619BE68AA",
+                        "CorrectionId": 0,
+                        "AlternateId": 2,
+                        "TriggerType": "hover",
+                        "TreatedInUX": "false",
+                        "EditType": "alternate"
+                    }
+                    ] } )";
+        auto connection = Connection::FromRecognizer(recognizer);
+        REQUIRE_THROWS(connection->SendMessageAsync("event", "asdf\" qweqr").get());
+
+        connection->SendMessageAsync("event", data).get();
+
+        auto result = make_shared<RecoPhrases>();
+        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        recognizer->StartContinuousRecognitionAsync().get();
+        PushData(pushStream.get(), weather.m_inputDataFilename);
+        WaitForResult(result->ready.get_future(), 60s);
+        recognizer->StopContinuousRecognitionAsync().get();
+
+        SPXTEST_REQUIRE(!result->phrases.empty());
+        auto detailedResult = result->phrases[0].Json;
+        SPXTEST_REQUIRE(detailedResult.find("NBest") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("Corrections") != string::npos);
+    }
+
+    SPXTEST_SECTION("set_parameters_in_speech_context_and_config")
+    {
+        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        config->SetServiceProperty("format", "corrections", ServicePropertyChannel::UriQueryParameter);
+        config->EnableDictation();
+
+        //possible options for punctuation are implicit/explicit/intelligent/none.
+        config->SetServiceProperty("punctuation", "none", ServicePropertyChannel::UriQueryParameter);
+
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        recognizer->SetAuthorizationToken("abc");
+        auto connection = Connection::FromRecognizer(recognizer);
+
+        string phraseDetectionPayload = R"( {"mode": "dictation",
+                                              "grammarScenario": "Dictation_Office",
+                                              "initialSilenceTimeout": 2000,
+                                              "trailingSilenceTimeout": 2000} )";
+        // The specification of speech.context.phraseDetection is at https://speechwiki.azurewebsites.net/partners/protocol-phrase-detection.html
+        connection->SetMessageParameter("Speech.context", "phraseDetection", phraseDetectionPayload);
+
+        string data = R"({"mode": "MicrosoftEyesOn"})";
+        //The spec of dataCollection in speech.config is at https://speechwiki.azurewebsites.net/partners/speechsdk.html#datacollection-element
+        connection->SetMessageParameter("speech.config", "dataCollection", data);
+
+        data = R"({"name":"Carbonx","version":"12.01"})";
+        connection->SetMessageParameter("speech.config", "application", data);
+
+        auto result = make_shared<RecoPhrases>();
+        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        recognizer->StartContinuousRecognitionAsync().get();
+        PushData(pushStream.get(), weather.m_inputDataFilename);
+        WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
+        recognizer->StopContinuousRecognitionAsync().get();
+
+        SPXTEST_REQUIRE(!result->phrases.empty());
+        auto detailedResult = result->phrases[0].Json;
+        SPXTEST_REQUIRE(detailedResult.find("NBest") != string::npos);
+        SPXTEST_REQUIRE(detailedResult.find("Corrections") != string::npos);
+    }
     SPXTEST_SECTION("correction_and_left_right_context")
     {
-        string endpoint{ "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1" };
-
         auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
         config->SetServiceProperty("format", "corrections", ServicePropertyChannel::UriQueryParameter);
         config->EnableDictation();
@@ -1713,11 +1801,8 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
         SPXTEST_REQUIRE(detailedResult.find("Display") != string::npos);
         SPXTEST_REQUIRE(detailedResult.find("Corrections") != string::npos);
     }
-
     SPXTEST_SECTION("empty_left_right_context")
     {
-        string endpoint{ "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1" };
-
         auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
         config->SetServiceProperty("format", "corrections", ServicePropertyChannel::UriQueryParameter);
         config->EnableDictation();

@@ -21,6 +21,8 @@ class CSpxRecognizer :
     public ISpxObjectWithSiteInitImpl<ISpxRecognizerSite>,
     public ISpxPropertyBagImpl,
     public ISpxGrammarList,
+    public ISpxMessageParamFromUser,
+    public ISpxGetUspMessageParamsFromUser,
     public ISpxConnectionFromRecognizer,
     public ISpxGenericSite
 {
@@ -38,6 +40,8 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxGrammarList)
+        SPX_INTERFACE_MAP_ENTRY(ISpxMessageParamFromUser)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGetUspMessageParamsFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxConnectionFromRecognizer)
     SPX_INTERFACE_MAP_END()
 
@@ -92,13 +96,20 @@ public:
     // --- ISpxConnectionFromRecognizer
     std::shared_ptr<ISpxConnection> GetConnection() override;
 
+    // --- ISpxSetUspMessageParamFromUser
+    void SetParameter(std::string&& path, std::string&& name, std::string&& value) override;
+    void SendNetworkMessage(std::string&& path, std::string&& payload) override;
+
+    // --- ISpxGetUspMessageParamsFromUser
+    CSpxStringMap GetParametersFromUser(std::string&& path) override;
+
 protected:
 
     void EnsureDefaultSession();
     void TermDefaultSession();
 
     std::shared_ptr<ISpxPhraseList> EnsureDefaultPhraseListGrammar();
-    
+
     void OnIsEnabledChanged();
 
     void CheckLogFilename();
@@ -128,6 +139,9 @@ private:
     std::shared_ptr<ISpxEventArgsFactory> GetEventArgsFactory();
     std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId);
     std::shared_ptr<ISpxConnectionEventArgs> CreateConnectionEventArgs(const std::wstring& sessionId);
+
+    std::unordered_map<std::string, CSpxStringMap> m_uspParametersFromUser;
+    std::mutex m_uspParameterLock;
 };
 
 

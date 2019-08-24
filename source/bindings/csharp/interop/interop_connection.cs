@@ -40,5 +40,15 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR connection_disconnected_set_callback(InteropSafeHandle connection, ConnectionCallbackFunctionDelegate Callback, IntPtr context);
 
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR connection_set_message_parameter(InteropSafeHandle connection,
+                                                                       [MarshalAs(UnmanagedType.LPStr)] string path,
+                                                                       [MarshalAs(UnmanagedType.LPStr)] string name,
+                                                                       [MarshalAs(UnmanagedType.LPStr)] string value);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR connection_send_message(InteropSafeHandle connection,
+                                                                       [MarshalAs(UnmanagedType.LPStr)] string path,
+                                                                       IntPtr payload);
     }
 }

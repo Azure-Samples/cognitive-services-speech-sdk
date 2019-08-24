@@ -20,11 +20,11 @@ namespace Speech {
 /// The Connection class provides additional methods for users to explicitly open or close a connection and
 /// to subscribe to connection status changes.
 /// The use of Connection is optional. It is intended for scenarios where fine tuning of application
-/// behavior based on connection status is needed. Users can optionally call Open() to manually 
-/// initiate a service connection before starting recognition on the Recognizer associated with this Connection. 
+/// behavior based on connection status is needed. Users can optionally call Open() to manually
+/// initiate a service connection before starting recognition on the Recognizer associated with this Connection.
 /// After starting a recognition, calling Open() or Close() might fail. This will not impact
-/// the Recognizer or the ongoing recognition. Connection might drop for various reasons, the Recognizer will 
-/// always try to reinstitute the connection as required to guarantee ongoing operations. In all these cases 
+/// the Recognizer or the ongoing recognition. Connection might drop for various reasons, the Recognizer will
+/// always try to reinstitute the connection as required to guarantee ongoing operations. In all these cases
 /// Connected/Disconnected events will indicate the change of the connection status.
 /// Added in version 1.2.0.
 /// </summary>
@@ -54,7 +54,7 @@ public:
     /// Recognizer associated with this Connection. After starting recognition, calling Open() might fail, depending on
     /// the process state of the Recognizer. But the failure does not affect the state of the associated Recognizer.
     /// Note: On return, the connection might not be ready yet. Please subscribe to the Connected event to
-    /// be notfied when the connection is established.
+    /// be notified when the connection is established.
     /// </summary>
     /// <param name="forContinuousRecognition">Indicates whether the connection is used for continuous recognition or single-shot recognition.</param>
     void Open(bool forContinuousRecognition)
@@ -73,6 +73,37 @@ public:
     {
         SPX_IFTRUE_THROW_HR(m_connectionHandle == SPXHANDLE_INVALID, SPXERR_INVALID_HANDLE);
         SPX_THROW_ON_FAIL(::connection_close(m_connectionHandle));
+    }
+
+    /// <summary>
+    /// Appends a parameter in a message to service.
+    /// Added in version 1.7.0.
+    /// </summary>
+    /// <param name="path">the message path.</param>
+    /// <param name="parameterName">Name of the parameter.</param>
+    /// <param name="parameterValue">Value of the parameter. This is a json string.</param>
+    /// <returns>void.</returns>
+    void SetMessageParameter(const SPXSTRING& path, const SPXSTRING& parameterName, const SPXSTRING& parameterValue)
+    {
+            SPX_IFTRUE_THROW_HR(m_connectionHandle == SPXHANDLE_INVALID, SPXERR_INVALID_HANDLE);
+            SPX_THROW_ON_FAIL(::connection_set_message_parameter(m_connectionHandle, Utils::ToUTF8(path).c_str(), Utils::ToUTF8(parameterName).c_str(), Utils::ToUTF8(parameterValue).c_str()));
+    }
+
+    /// <summary>
+    /// Send a message to service.
+    /// Added in version 1.7.0.
+    /// </summary>
+    /// <param name="path">the message path.</param>
+    /// <param name="payload">payload of the message. This is a json string.</param>
+    /// <returns>An empty future.</returns>
+    std::future<void> SendMessageAsync(const SPXSTRING& path, const SPXSTRING& payload)
+    {
+        auto keep_alive = this->shared_from_this();
+        auto future = std::async(std::launch::async, [keep_alive, this, path, payload]() -> void {
+            SPX_IFTRUE_THROW_HR(m_connectionHandle == SPXHANDLE_INVALID, SPXERR_INVALID_HANDLE);
+            SPX_THROW_ON_FAIL(::connection_send_message(m_connectionHandle, Utils::ToUTF8(path.c_str()), Utils::ToUTF8(payload.c_str())));
+        });
+        return future;
     }
 
     /// <summary>

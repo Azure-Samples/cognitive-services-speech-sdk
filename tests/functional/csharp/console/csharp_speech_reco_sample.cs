@@ -195,78 +195,81 @@ namespace MicrosoftSpeechSDKSamples
         private static async Task SingleShotRecognitionAsync(SpeechRecognizer reco)
         {
             Console.WriteLine("Single-shot recognition.");
-            var connection = Connection.FromRecognizer(reco);
+            using (var connection = Connection.FromRecognizer(reco))
+            {
+                // Subscribes to events.
+                connection.Connected += MyConnectedEventHandler;
+                connection.Disconnected += MyDisconnectedEventHandler;
+                reco.Recognizing += MyRecognizingEventHandler;
+                reco.Recognized += MyRecognizedEventHandler;
+                reco.Canceled += MyCanceledEventHandler;
+                reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
+                reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
+                reco.SessionStarted += MySessionStartedEventHandler;
+                reco.SessionStopped += MySessionStoppedEventHandler;
 
-            // Subscribes to events.
-            connection.Connected += MyConnectedEventHandler;
-            connection.Disconnected += MyDisconnectedEventHandler;
-            reco.Recognizing += MyRecognizingEventHandler;
-            reco.Recognized += MyRecognizedEventHandler;
-            reco.Canceled += MyCanceledEventHandler;
-            reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
-            reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
-            reco.SessionStarted += MySessionStartedEventHandler;
-            reco.SessionStopped += MySessionStoppedEventHandler;
+                // Starts recognition.
+                Console.WriteLine($"({Util.GetCurrentTime()}): Single-shot recognition starts.");
+                var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
+                Console.WriteLine($"({Util.GetCurrentTime()}): Single-shot recognition completes.");
 
-            // Starts recognition.
-            Console.WriteLine($"({Util.GetCurrentTime()}): Single-shot recognition starts.");
-            var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
-            Console.WriteLine($"({Util.GetCurrentTime()}): Single-shot recognition completes.");
+                Console.WriteLine("Speech Recognition: Recognition result: " + result);
 
-            Console.WriteLine("Speech Recognition: Recognition result: " + result);
-
-            // Unsubscribe to events.
-            connection.Connected -= MyConnectedEventHandler;
-            connection.Disconnected -= MyDisconnectedEventHandler;
-            reco.Recognizing -= MyRecognizingEventHandler;
-            reco.Recognized -= MyRecognizedEventHandler;
-            reco.Canceled -= MyCanceledEventHandler;
-            reco.SpeechStartDetected -= MySpeechStartDetectedEventHandler;
-            reco.SpeechEndDetected -= MySpeechEndDetectedEventHandler;
-            reco.SessionStarted -= MySessionStartedEventHandler;
-            reco.SessionStopped -= MySessionStoppedEventHandler;
+                // Unsubscribe to events.
+                connection.Connected -= MyConnectedEventHandler;
+                connection.Disconnected -= MyDisconnectedEventHandler;
+                reco.Recognizing -= MyRecognizingEventHandler;
+                reco.Recognized -= MyRecognizedEventHandler;
+                reco.Canceled -= MyCanceledEventHandler;
+                reco.SpeechStartDetected -= MySpeechStartDetectedEventHandler;
+                reco.SpeechEndDetected -= MySpeechEndDetectedEventHandler;
+                reco.SessionStarted -= MySessionStartedEventHandler;
+                reco.SessionStopped -= MySessionStoppedEventHandler;
+            }
         }
 
         private static async Task ContinuousRecognitionAsync(SpeechRecognizer reco)
         {
             Console.WriteLine("Continuous recognition.");
             var tcsLocal = new TaskCompletionSource<int>();
-            var connection = Connection.FromRecognizer(reco);
-            connection.Connected += MyConnectedEventHandler;
-            connection.Disconnected += MyDisconnectedEventHandler;
-            reco.Recognizing += MyRecognizingEventHandler;
-            reco.Recognized += MyRecognizedEventHandler;
-            reco.Canceled += MyCanceledEventHandler;
-            reco.SessionStarted += MySessionStartedEventHandler;
-            reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
-            reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
-            reco.SessionStopped += (s, e) =>
+            using (var connection = Connection.FromRecognizer(reco))
             {
-                MySessionStoppedEventHandler(s, e);
-                Console.WriteLine($"Session Stop detected. Stop the recognition.");
-                tcsLocal.TrySetResult(0);
-            };
+                connection.Connected += MyConnectedEventHandler;
+                connection.Disconnected += MyDisconnectedEventHandler;
+                reco.Recognizing += MyRecognizingEventHandler;
+                reco.Recognized += MyRecognizedEventHandler;
+                reco.Canceled += MyCanceledEventHandler;
+                reco.SessionStarted += MySessionStartedEventHandler;
+                reco.SpeechStartDetected += MySpeechStartDetectedEventHandler;
+                reco.SpeechEndDetected += MySpeechEndDetectedEventHandler;
+                reco.SessionStopped += (s, e) =>
+                {
+                    MySessionStoppedEventHandler(s, e);
+                    Console.WriteLine($"Session Stop detected. Stop the recognition.");
+                    tcsLocal.TrySetResult(0);
+                };
 
-            // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-            Console.WriteLine($"({Util.GetCurrentTime()}): Continuous recognition starts.");
-            await reco.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                Console.WriteLine($"({Util.GetCurrentTime()}): Continuous recognition starts.");
+                await reco.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-            // Waits for completion.
-            // Use Task.WaitAny to make sure that the task is rooted.
-            Task.WaitAny(new[] { tcsLocal.Task });
+                // Waits for completion.
+                // Use Task.WaitAny to make sure that the task is rooted.
+                Task.WaitAny(new[] { tcsLocal.Task });
 
-            // Stops translation.
-            await reco.StopContinuousRecognitionAsync().ConfigureAwait(false);
-            Console.WriteLine($"({Util.GetCurrentTime()}): Continuous recognition completes.");
+                // Stops translation.
+                await reco.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                Console.WriteLine($"({Util.GetCurrentTime()}): Continuous recognition completes.");
 
-            connection.Connected -= MyConnectedEventHandler;
-            connection.Disconnected -= MyDisconnectedEventHandler;
-            reco.Recognizing -= MyRecognizingEventHandler;
-            reco.Recognized -= MyRecognizedEventHandler;
-            reco.Canceled -= MyCanceledEventHandler;
-            reco.SpeechStartDetected -= MySpeechStartDetectedEventHandler;
-            reco.SpeechEndDetected -= MySpeechEndDetectedEventHandler;
-            reco.SessionStarted -= MySessionStartedEventHandler;
+                connection.Connected -= MyConnectedEventHandler;
+                connection.Disconnected -= MyDisconnectedEventHandler;
+                reco.Recognizing -= MyRecognizingEventHandler;
+                reco.Recognized -= MyRecognizedEventHandler;
+                reco.Canceled -= MyCanceledEventHandler;
+                reco.SpeechStartDetected -= MySpeechStartDetectedEventHandler;
+                reco.SpeechEndDetected -= MySpeechEndDetectedEventHandler;
+                reco.SessionStarted -= MySessionStartedEventHandler;
+            }
         }
     }
 }
