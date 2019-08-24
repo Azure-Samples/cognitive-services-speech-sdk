@@ -2383,7 +2383,7 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
         SPX_DBG_TRACE_VERBOSE("Previous Adapter is done processing audio ... resuming Processing with the new adapter...");
         SPX_DBG_TRACE_VERBOSE("%s: Now ProcessingAudio ...", __FUNCTION__);
 
-        if (doneAdapter == AdapterDoneProcessingAudio::Keyword && IsKind(RecognitionKind::KwsSingleShot))
+        if (doneAdapter == AdapterDoneProcessingAudio::Keyword && (IsKind(RecognitionKind::KwsSingleShot) || IsKind(RecognitionKind::SingleShot)))
         {
             FireSessionStartedEvent();
         }
