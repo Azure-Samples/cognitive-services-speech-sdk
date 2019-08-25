@@ -4,7 +4,6 @@
 //
 
 // <code>
-#include "pch.h"
 #include <iostream>
 #include <vector>
 #include <speechapi_cxx.h>
