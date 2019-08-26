@@ -18,7 +18,7 @@ namespace BatchClient
         // <batchdefinition>
         // Replace with your subscription key
         private const string SubscriptionKey = "<YourSubscriptionKey>";
-  
+
         // Update with your service region
         private const string HostName = "<YourServiceRegion>.cris.ai";
         private const int Port = 443;
@@ -26,7 +26,6 @@ namespace BatchClient
         // recordings and locale
         private const string Locale = "en-US";
         private const string RecordingsBlobUri = "<SAS URI pointing to an audio file stored in Azure Blob Storage>";
-       
 
         // For usage of baseline models, no acoustic and language model needs to be specified.
         private static Guid[] modelList = new Guid[0];
@@ -99,11 +98,11 @@ namespace BatchClient
                             }
                             completed++;
 
-                            // if the transcription was successfull, check the results
+                            // if the transcription was successful, check the results
                             if (transcription.Status == "Succeeded")
                             {
                                 var resultsUri0 = transcription.ResultsUrls["channel_0"];
-                     
+
                                 WebClient webClient = new WebClient();
 
                                 var filename = Path.GetTempFileName();
@@ -111,9 +110,13 @@ namespace BatchClient
                                 var results0 = File.ReadAllText(filename);
                                 var resultObject0 = JsonConvert.DeserializeObject<RootObject>(results0);
                                 Console.WriteLine(results0);
-                                
+
                                 Console.WriteLine("Transcription succeeded. Results: ");
                                 Console.WriteLine(results0);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Transcription failed. Status: {0}", transcription.StatusMessage);
                             }
                             break;
 
