@@ -208,6 +208,11 @@ void CSpxUspRecoEngineAdapter::SetFormat(const SPXWAVEFORMATEX* pformat)
     {
         // In case of error there still can be some calls to SetFormat in flight.
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8p) IGNORING... (audioState/uspState=%d/%d)", __FUNCTION__, (void*)this, m_audioState, m_uspState);
+        if (pformat == nullptr)
+        {
+            /* We still need to do this in order for the session to not go into a non recoverable state */
+            InvokeOnSite([this](const SitePtr& p) { p->AdapterCompletedSetFormatStop(this); });
+        }
     }
     else if (pformat != nullptr && IsState(UspState::Idle) && ChangeState(AudioState::Idle, AudioState::Ready))
     {

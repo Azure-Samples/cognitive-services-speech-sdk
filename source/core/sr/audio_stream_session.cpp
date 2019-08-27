@@ -1817,6 +1817,13 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
         auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
         auto error = factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, payload->Reason(), payload->ErrorCode(), PAL::ToWString(payload->Info()).c_str(), 0, 0);
         WaitForRecognition_Complete(error);
+        if (IsRecognizerType<ISpxDialogServiceConnector>() && IsState(SessionState::ProcessingAudio))
+        {
+            /* For a DialogServiceConnector we raise a cancellation error but we set the session so we can keep using it. */
+            m_resetRecoAdapter = m_recoAdapter;
+            /* We drop the audio, this is the point that we would need to play with if we were to recover the lost turn */
+            m_audioBuffer->Drop();
+        }
         //Bug 1757042  weixu todo sessionstate should go back to idle.
     }
 }
