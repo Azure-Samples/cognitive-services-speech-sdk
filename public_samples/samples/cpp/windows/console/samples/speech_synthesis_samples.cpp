@@ -631,7 +631,7 @@ void SpeechSynthesisWordBoundaryEvent()
     synthesizer->WordBoundary += [](const SpeechSynthesisWordBoundaryEventArgs& e)
     {
         cout << "Word boundary event received. "
-            // The unit of e.AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to convert to microseconds.
+            // The unit of e.AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to convert to milliseconds.
             << "Audio offset: " << (e.AudioOffset + 5000) / 10000 << "ms, "
             << "text offset: " << e.TextOffset << ", "
             << "word length: " << e.WordLength << "."

@@ -407,7 +407,7 @@ def speech_synthesis_word_boundary_event():
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
 
     # Subscribes to word boundary event
-    # The unit of evt.audio_offset is tick (1 tick = 100 nanoseconds), divide it by 10,000 to convert to microseconds.
+    # The unit of evt.audio_offset is tick (1 tick = 100 nanoseconds), divide it by 10,000 to convert to milliseconds.
     speech_synthesizer.synthesis_word_boundary.connect(lambda evt: print(
         "Word boundary event received: {}, audio offset in ms: {}ms".format(evt, evt.audio_offset / 10000)))
 

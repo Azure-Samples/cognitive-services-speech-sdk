@@ -180,7 +180,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
 
     // wait to get the first audio chunk
 #ifdef _DEBUG
-    auto remainingTime = WAIT_FOR_FIRST_CHUNK_TIMEOUT * 1e6;
+    auto remainingTime = WAIT_FOR_FIRST_CHUNK_TIMEOUT * 1000;
     while (!m_cv.wait_for(lock, std::chrono::milliseconds(DEBUG_WAIT_INTERVAL), [&] { return m_uspState == UspState::ReceivingData || m_uspState == UspState::Idle || m_uspState == UspState::Error; }) && remainingTime > 0)
     {
         SPX_DBG_TRACE_VERBOSE("%s: waiting for USP to get first audio chunk ...", __FUNCTION__);
@@ -199,7 +199,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
 
     // wait to receive all audio data
 #ifdef _DEBUG
-    remainingTime = RECEIVE_ALL_CHUNKS_TIMEOUT * 1e6;
+    remainingTime = RECEIVE_ALL_CHUNKS_TIMEOUT * 1000;
     while (!m_cv.wait_for(lock, std::chrono::milliseconds(DEBUG_WAIT_INTERVAL), [&] { return m_uspState == UspState::Idle || m_uspState == UspState::Error; }) && remainingTime > 0)
     {
         SPX_DBG_TRACE_VERBOSE("%s: waiting for USP to finish receiving data ...", __FUNCTION__);

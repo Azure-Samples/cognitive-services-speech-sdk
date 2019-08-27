@@ -441,7 +441,7 @@
     }];
     
     [synthesizer addSynthesisWordBoundaryEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisWordBoundaryEventArgs *eventArgs) {
-        // The unit of AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to converted to microseconds.
+        // The unit of AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to converted to milliseconds.
         NSLog(@"Word boundary event received. Audio offset: %fms, text offset %lu, word length: %lu.", eventArgs.audioOffset/10000., eventArgs.textOffset, eventArgs.wordLength);
         [self updateStatusText:[NSString stringWithFormat:@"Word boundary event received. Audio offset: %fms, text offset %lu, word length: %lu.", eventArgs.audioOffset/10000., eventArgs.textOffset, eventArgs.wordLength]];
     }];

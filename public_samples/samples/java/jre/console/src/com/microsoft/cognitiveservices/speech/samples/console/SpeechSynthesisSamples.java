@@ -602,7 +602,7 @@ public class SpeechSynthesisSamples {
         {
             // Subscribes to word boundary event
             synthesizer.WordBoundary.addEventListener((o, e) -> {
-                // The unit of e.AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to convert to microseconds.
+                // The unit of e.AudioOffset is tick (1 tick = 100 nanoseconds), divide by 10,000 to convert to milliseconds.
                 System.out.print("Word boundary event received. Audio offset: " + (e.getAudioOffset() + 5000) / 10000 + "ms, ");
                 System.out.println("text offset: " + e.getTextOffset() + ", word length: " + e.getWordLength() + ".");
             });
