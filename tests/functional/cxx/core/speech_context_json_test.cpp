@@ -280,8 +280,8 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), recoMode);
 
         vector<string> autoDetectSourceLangs{ "en-us", "zh-CN" };
-        string sourceLangStr = adapterTest.Join(autoDetectSourceLangs);
-        properties->SetStringValue("Auto-Detect-Source-Languages", sourceLangStr.c_str());
+        // Added some spaces and tabs in source languages, to verify our code can remove them correctly
+        properties->SetStringValue("Auto-Detect-Source-Languages", "    en-  us    ,    zh- CN    ");
         json languageIdJson;
         languageIdJson["languages"] = json(autoDetectSourceLangs);
         languageIdJson["onUnknown"]["action"] = "None";

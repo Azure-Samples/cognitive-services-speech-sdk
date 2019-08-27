@@ -2305,6 +2305,9 @@ json CSpxUspRecoEngineAdapter::GetLanguageIdJson()
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
     string sourceLanguages = properties->GetStringValue("Auto-Detect-Source-Languages");
+    // remove spaces in the string
+    // cannot use remove_if as build failure in Android
+    sourceLanguages.erase(remove(sourceLanguages.begin(), sourceLanguages.end(), ' '), sourceLanguages.end());
     json langDetectionJson;
     if (!sourceLanguages.empty())
     {
