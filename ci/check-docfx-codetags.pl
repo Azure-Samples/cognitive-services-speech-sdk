@@ -104,6 +104,9 @@ BEGIN {
       quickstart/text-to-speech/swift-ios/helloworld/helloworld/ViewController.swift#code
       quickstart/text-to-speech/swift-macos/helloworld/helloworld/AppDelegate.swift#code
       quickstart/text-to-speech/swift-macos/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
+      quickstart/virtual-assistant/java-jre/pom.xml#dependencies
+      quickstart/virtual-assistant/java-jre/src/com/speechsdk/quickstart/ActivityAudioStream.java#code
+      quickstart/virtual-assistant/java-jre/src/com/speechsdk/quickstart/Main.java#code
       samples/batch/csharp/program.cs#batchdefinition
       samples/batch/csharp/program.cs#batchstatus
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentContinuousRecognitionWithFile

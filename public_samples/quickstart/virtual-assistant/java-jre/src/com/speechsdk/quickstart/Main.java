@@ -2,7 +2,7 @@
  * Copyright (c) Microsoft. All rights reserved. Licensed under the MIT license.
  * See LICENSE.md file in the project root for full license information.
  */
-
+// <code>
 package com.speechsdk.quickstart;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -202,3 +202,4 @@ public class Main {
         stream.close();
     }
 }
+// </code>
