@@ -717,8 +717,7 @@
 
     XCTAssertTrue([result.text isEqualToString:@""], "Final Result Text does not match");
     XCTAssertEqual(result.reason, SPXResultReason_NoMatch);
-    XCTAssertEqual(result.duration, 0);
-    XCTAssertEqual(result.offset, 10000000);
+    XCTAssertTrue((result.duration) > 0 || (result.offset > 0));
     XCTAssertTrue([result.resultId length] > 0);
 }
 @end

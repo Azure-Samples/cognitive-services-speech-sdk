@@ -185,10 +185,11 @@ def test_speech_recognition_events(speech_input: SpeechInput, from_file_speech_r
 
     _wait_for_event(callbacks, 'session_stopped')
     _check_bad_callback(callbacks)
-    _check_callbacks(callbacks)
+    _check_callbacks(callbacks, check_num_recognized=False)
     _check_events(callbacks)
 
-    recognized_events = [evt for (evt, _) in callbacks['recognized'].events]
+    recognized_events = [evt for (evt, _) in callbacks['recognized'].events if
+            evt.result.reason == msspeech.ResultReason.RecognizedSpeech]
     assert 1 == len(recognized_events)
     recognized_result = recognized_events[-1].result
 

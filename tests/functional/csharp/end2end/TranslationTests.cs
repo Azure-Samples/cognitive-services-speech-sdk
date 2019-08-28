@@ -406,7 +406,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
             Console.WriteLine($"Reason: {result.Reason}, ErrorDetails: {errorDetails}");
+
             Assert.AreEqual(ResultReason.NoMatch, result.Reason);
+            Assert.IsTrue(result.OffsetInTicks > 0 || result.Duration.Ticks > 0, $"Bad offset: {result.OffsetInTicks} or duration: {result.Duration}");
+            Assert.IsTrue(string.IsNullOrEmpty(result.Text), $"Bad result text: {result.Text}");
+
             var noMatch = NoMatchDetails.FromResult(result);
             Assert.AreEqual(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
         }

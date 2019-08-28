@@ -46,12 +46,18 @@ def test_recognize_async(from_file_speech_reco_with_callbacks, speech_input):
 
 
 @pytest.mark.parametrize('speech_input,', ['silencehello'], indirect=True)
-def test_speech_recognition_with_custom_endpoint(subscription, speech_input, speech_region):
+def test_speech_recognition_with_custom_endpoint(speech_input, default_speech_auth, speech_region):
     initial_silence_timeout_ms = 1 * 1e3
-    template = "wss://{}.stt.speech.microsoft.com/speech/recognition" \
-            "/conversation/cognitiveservices/v1?initialSilenceTimeoutMs={:d}"
-    speech_config = msspeech.SpeechConfig(subscription=subscription,
-            endpoint=template.format(speech_region, int(initial_silence_timeout_ms)))
+    # use endpoint if it has been specified
+    endpoint = default_speech_auth['endpoint'] or "wss://{}.stt.speech.microsoft.com/speech/" \
+            "recognition/interactive/cognitiveservices/v1".format(speech_region)
+
+    used_endpoint = "{}{}initialSilenceTimeoutMs={:d}".format(endpoint,
+            '?' if '?' not in endpoint else '&',
+            int(initial_silence_timeout_ms))
+
+    speech_config = msspeech.SpeechConfig(subscription=default_speech_auth['subscription'],
+            endpoint=used_endpoint)
 
     audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
     # Creates a speech recognizer using a file as audio input.
@@ -249,13 +255,15 @@ def test_no_match_result(from_file_speech_reco_with_callbacks, speech_input):
     assert "NoMatchDetails(reason=NoMatchReason.InitialSilenceTimeout)" == str(result.no_match_details)
 
 
-def test_speech_config_properties(subscription, speech_region):
-    speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+def test_speech_config_properties():
+    subscription = "somesubscription"
+    region = "someregion"
+    speech_config = msspeech.SpeechConfig(subscription=subscription, region=region)
 
     assert subscription == speech_config.subscription_key
     assert "" == speech_config.authorization_token
     assert "" == speech_config.endpoint_id
-    assert speech_region == speech_config.region
+    assert region == speech_config.region
     assert "" == speech_config.speech_recognition_language
 
     assert isinstance(speech_config.output_format, msspeech.OutputFormat)
@@ -477,9 +485,9 @@ def test_set_authorization_token_on_recognizer(subscription, speech_input, speec
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
-def test_subscription_key_and_invalid_auth_token(subscription, speech_input, speech_region):
+def test_subscription_key_and_invalid_auth_token(speech_input, default_speech_auth):
     invalid_token = "InvalidToken"
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = msspeech.SpeechConfig(**default_speech_auth)
 
     audio_input = msspeech.AudioConfig(filename=speech_input.path)
     speech_recognizer = msspeech.SpeechRecognizer(config, audio_input)
@@ -503,9 +511,9 @@ def test_subscription_key_and_valid_auth_token(subscription, speech_input, speec
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
-def test_subscription_key_and_expired_auth_token(subscription, speech_input, speech_region):
+def test_subscription_key_and_expired_auth_token(speech_input, default_speech_auth):
     expired_token = "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1cm46bXMuY29nbml0aXZlc2VydmljZXMiLCJleHAiOiIxNTU0MzE1Nzk5IiwicmVnaW9uIjoibm9ydGhldXJvcGUiLCJzdWJzY3JpcHRpb24taWQiOiIwNmZlNjU2MWVkZTM0NDdiYTg2NDY5Njc4YTIwNTNkYiIsInByb2R1Y3QtaWQiOiJTcGVlY2hTZXJ2aWNlcy5TMCIsImNvZ25pdGl2ZS1zZXJ2aWNlcy1lbmRwb2ludCI6Imh0dHBzOi8vYXBpLmNvZ25pdGl2ZS5taWNyb3NvZnQuY29tL2ludGVybmFsL3YxLjAvIiwiYXp1cmUtcmVzb3VyY2UtaWQiOiIvc3Vic2NyaXB0aW9ucy8zYTk2ZWY1Ni00MWE5LTQwYTAtYjBmMy1mYjEyNWMyYjg3OTgvcmVzb3VyY2VHcm91cHMvY3NzcGVlY2hzZGstY2FyYm9uL3Byb3ZpZGVycy9NaWNyb3NvZnQuQ29nbml0aXZlU2VydmljZXMvYWNjb3VudHMvc3BlZWNoc2Rrbm9ydGhldXJvcGUiLCJzY29wZSI6InNwZWVjaHNlcnZpY2VzIiwiYXVkIjoidXJuOm1zLnNwZWVjaHNlcnZpY2VzLm5vcnRoZXVyb3BlIn0.hVAWT2YHjknFI6qLhnjmjzoNgOgxKWguuFhJLlyDxLU"
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = msspeech.SpeechConfig(**default_speech_auth)
     config.authorization_token = expired_token
 
     audio_input = msspeech.AudioConfig(filename=speech_input.path)
@@ -517,8 +525,8 @@ def test_subscription_key_and_expired_auth_token(subscription, speech_input, spe
 
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
-def test_set_service_property(subscription, speech_input, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+def test_set_service_property(speech_input, default_speech_auth):
+    config = msspeech.SpeechConfig(**default_speech_auth)
     config.speech_recognition_language = 'invalid'
     config.set_service_property(name='language', value='en-us', channel=msspeech.ServicePropertyChannel.UriQueryParameter)
     audio_input = msspeech.AudioConfig(filename=speech_input.path)

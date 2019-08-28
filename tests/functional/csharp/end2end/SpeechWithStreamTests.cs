@@ -95,7 +95,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task SimpleRecognitionBatmanContinuous()
         {
             var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(this.defaultConfig, TestData.English.Batman.AudioFile);
-            Assert.AreEqual(TestData.English.Batman.Utterances.Length, result.Count, "Unexpected number of utterances.");
+            Assert.AreEqual(TestData.English.Batman.Utterances.Length, result.Count, "Unexpected number of nonempty utterances.");
 
             string[] resultUtterances = result.Select(r => r.Result.Text).ToArray();
             AssertFuzzyMatching(resultUtterances, TestData.English.Batman.Utterances, 5);
@@ -118,7 +118,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertFuzzyMatching(normalizedFormResultUtterances, TestData.English.Batman.Utterances, 3);
             AssertFuzzyMatching(lexicalFormResultUtterances, TestData.English.Batman.Utterances, 3);
 
-            Assert.AreEqual(TestData.English.Batman.Utterances.Length, result.Count, "Unexpected number of utterances");
+            Assert.AreEqual(TestData.English.Batman.Utterances.Length, result.Count, "Unexpected number of nonempty utterances");
             var actualRecognitionTextResults = result.Select(t => t.Result.Text).ToArray();
             for (var i = 0; i < result.Count; i++)
             {

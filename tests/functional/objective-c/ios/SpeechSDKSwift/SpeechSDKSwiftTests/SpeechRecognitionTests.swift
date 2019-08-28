@@ -74,7 +74,9 @@ class SpeechRecognitionTests: XCTestCase {
 
         XCTAssertEqual(result.text, "");
         XCTAssertEqual(cancellationDetails.reason, SPXCancellationReason.error);
-        XCTAssertTrue(cancellationDetails.errorDetails!.contains("Connection failed (no connection to the remote host). Internal error: 11. Error details: 0."));
+        XCTAssertTrue(cancellationDetails.errorDetails!.contains(
+            "Connection failed (no connection to the remote host)."),
+                      cancellationDetails.errorDetails!);
         XCTAssertEqual(result.reason, SPXResultReason.canceled);
         XCTAssertEqual(result.duration, 0);
         XCTAssertEqual(result.offset, 0);
@@ -105,8 +107,7 @@ class SpeechRecognitionTests: XCTestCase {
         XCTAssertEqual(result.text, "");
         XCTAssertEqual(nomatchDetails.reason, SPXNoMatchReason.initialSilenceTimeout);
         XCTAssertEqual(result.reason, SPXResultReason.noMatch);
-        XCTAssertEqual(result.duration, 0);
-        XCTAssertEqual(result.offset, 10000000);
+        XCTAssertTrue(result.duration > 0 || result.offset > 0, "offset: \(result.offset), duration: \(result.duration)");
         XCTAssertGreaterThan(result.resultId.count, 0);
     }
 
@@ -192,7 +193,9 @@ class TranslationRecognitionTests: XCTestCase {
 
         XCTAssertEqual(result.text, "");
         XCTAssertEqual(cancellationDetails.reason, SPXCancellationReason.error);
-        XCTAssertTrue(cancellationDetails.errorDetails!.contains("Connection failed (no connection to the remote host). Internal error: 11. Error details: 0."));
+        XCTAssertTrue(cancellationDetails.errorDetails!.contains(
+            "Connection failed (no connection to the remote host)."),
+                      cancellationDetails.errorDetails!);
         XCTAssertEqual(result.reason, SPXResultReason.canceled);
         XCTAssertEqual(result.duration, 0);
         XCTAssertEqual(result.offset, 0);
@@ -226,8 +229,7 @@ class TranslationRecognitionTests: XCTestCase {
         XCTAssertEqual(result.text, "");
         XCTAssertEqual(nomatchDetails.reason, SPXNoMatchReason.initialSilenceTimeout);
         XCTAssertEqual(result.reason, SPXResultReason.noMatch);
-        XCTAssertEqual(result.duration, 0);
-        XCTAssertEqual(result.offset, 10000000);
+        XCTAssertTrue(result.duration > 0 || result.offset > 0, "offset: \(result.offset), duration: \(result.duration)");
         XCTAssertGreaterThan(result.resultId.count, 0);
     }
 }

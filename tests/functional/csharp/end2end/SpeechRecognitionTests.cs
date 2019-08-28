@@ -125,7 +125,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
                     AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
                     Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "Duration == 0");
-                    Assert.IsTrue(100000 < result.OffsetInTicks && result.OffsetInTicks < 500000, "Offset value seems incorrect");
+                    Assert.IsTrue(100000 < result.OffsetInTicks && result.OffsetInTicks < 700000, $"Offset value ${result.OffsetInTicks} seems incorrect");
                     AssertMatching(TestData.English.Weather.Utterance, result.Text);
                 }
             }
@@ -756,7 +756,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                     Assert.AreEqual(ResultReason.NoMatch, result.Reason);
-                    Assert.IsTrue(result.OffsetInTicks > 0, $"Bad offset: {result.OffsetInTicks}");
+                    Assert.IsTrue(result.OffsetInTicks > 0 || result.Duration.Ticks > 0, $"Bad offset: {result.OffsetInTicks} or duration: {result.Duration}");
                     Assert.IsTrue(string.IsNullOrEmpty(result.Text), $"Bad result text: {result.Text}");
 
                     var noMatch = NoMatchDetails.FromResult(result);

@@ -16,7 +16,7 @@ def pytest_addoption(parser):
     parser.addoption("--speech-region")
     parser.addoption("--luis-subscription")
     parser.addoption("--luis-region")
-    parser.addoption("--endpoint")
+    parser.addoption("--endpoint", help="Specify an endpoint. Currently only used for speech reco.")
     parser.addoption("--language-understanding-app-id")
     parser.addoption('--no-use-default-microphone', action='store_true', dest="no_use_default_microphone",
                      default=False, help="disable tests that require a default microphone")
@@ -34,17 +34,28 @@ def luis_subscription(request):
 
 @pytest.fixture
 def speech_region(request):
-    return request.config.getoption("--speech-region", default="westus")
+    return request.config.getoption("--speech-region")
 
 
 @pytest.fixture
 def luis_region(request):
-    return request.config.getoption("--luis-region", default="westus")
+    return request.config.getoption("--luis-region")
 
 
 @pytest.fixture
 def endpoint(request):
+    """specify an endpoint. If given, it overrides the region settings for speech recognizers."""
     return request.config.getoption("--endpoint")
+
+
+@pytest.fixture
+def default_speech_auth(subscription, speech_region, endpoint):
+    # if an endpoint is given, it overrides the set region
+    region = speech_region if not endpoint else None
+
+    return {'endpoint': endpoint,
+            'subscription': subscription,
+            'region': region}
 
 
 @pytest.fixture
@@ -172,8 +183,8 @@ def kws_input(request):
 
 
 @pytest.fixture
-def from_file_speech_reco_with_callbacks(subscription: str, speech_input: SpeechInput,
-                                         speech_region: str, kws_input: KwsInput):
+def from_file_speech_reco_with_callbacks(speech_input: SpeechInput, kws_input: KwsInput,
+        default_speech_auth):
     """
     Fixture to generate a `SpeechRecognizer` setup with audio input from file as defined by
     `speech_input` or `kws_input` and subscription information.
@@ -187,9 +198,9 @@ def from_file_speech_reco_with_callbacks(subscription: str, speech_input: Speech
     def build_recognizer(setup_callback_handle: Callable = _setup_callbacks, **kwargs):
         audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
         speech_config = msspeech.SpeechConfig(
-            subscription=kwargs.get('subscription', subscription),
-            region=kwargs.get('speech_region', speech_region),
-            endpoint=kwargs.get('endpoint', None))
+            subscription=kwargs.get('subscription', default_speech_auth['subscription']),
+            region=kwargs.get('speech_region', default_speech_auth['region']),
+            endpoint=kwargs.get('endpoint', default_speech_auth['endpoint']))
 
         reco = msspeech.SpeechRecognizer(speech_config, audio_config)
         callbacks = setup_callback_handle(reco)
@@ -264,3 +275,4 @@ def from_file_intent_reco_with_callbacks(luis_subscription: str, intent_input: I
         return (reco, callbacks)
 
     return build_recognizer
+

@@ -137,7 +137,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     "In the 1st storyline, Superman also considers Batman to be one of the most brilliant minds on the planet.",
                     "Batman has the ability to function under great physical pain and withstand mind control. He is a master of disguise multilingual and an expert in espionage, often gathering information under different identity's.",
                     "Batman's Karate Judo and jujitsu training has made him a math are master of stealth an escape, allowing allowing him to appear and disappear at Will and to break free.",
-                    ""
                 };
 
                 public static readonly string[] UtterancesInteractive =
@@ -151,7 +150,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     "In the first storyline, Superman also considers Batman to be one of the most brilliant minds on the planet.",
                     "Batman has the ability to function under great physical pain and withstand mind control. He is a master of disguise multilingual and an expert in espionage, often gathering information under different identity's.",
                     "Batman's Karate Judo and jujitsu training has made him a math are master of stealth an escape, allowing allowing him to appear and disappear at Will and to break free.",
-                    ""
                 };
 
                 // Normalization for translation may be different.
@@ -166,7 +164,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     "In the first storyline superman also considers batman to be one of the most brilliant minds on the planet.",
                     "Batman has the ability to function under great physical pain and withstand mind control. He is a master of disguise multilingual and an expert in espionage often gathering information under different identity's.",
                     "Batman's karate judo and jujitsu training has made him a math are master of stealth an escape allowing him to appear and disappear at will and to break free.",
-                    ""
                 };
             }
 
@@ -261,7 +258,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             public static class Profanity
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "profanity.wav");
-                public static readonly string MaskedUtterance = "**** **** **** **** ****";
+                public static readonly string MaskedUtterance = "**** **** **** **** ****.";
                 public static readonly string RemovedUtterance = "";
                 public static readonly string RawUtterance = "Fuck Fuck Fuck Fuck Fuck.";
                 public static readonly string MaskedUtteranceTranslation = "****";

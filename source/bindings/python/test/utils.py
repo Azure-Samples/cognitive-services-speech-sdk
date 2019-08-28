@@ -146,7 +146,7 @@ def _check_callbacks(callbacks, check_num_recognized=True):
     assert callbacks['session_stopped'].num_calls == 1
     assert callbacks['recognizing'].num_calls >= 1
     if check_num_recognized:
-        assert callbacks['recognized'].num_calls == 1, callbacks['recognized'].num_calls
+        assert callbacks['recognized'].num_calls == 1
 
 
 def _check_result_common(result, speech_input, utterance_index, do_check_duration=True,

@@ -80,7 +80,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Received result {e.Result.ToString()}");
-                    if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                    if (e.Result.Reason == ResultReason.RecognizedSpeech && !string.IsNullOrEmpty(e.Result.Text))
                     {
                         textResultEvents.Add(e);
                     }

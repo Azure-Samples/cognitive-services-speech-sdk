@@ -46,8 +46,8 @@ class WavFileReaderCallback(msspeech.audio.PullAudioInputStreamCallback):
 
 @pytest.mark.parametrize("use_default_wave_format", (False, True))
 @pytest.mark.parametrize('speech_input,', ['weather', 'lamp'], indirect=True)
-def test_pull_audio_input_stream_callback(speech_input: SpeechInput, subscription: str,
-        speech_region: str, use_default_wave_format: bool):
+def test_pull_audio_input_stream_callback(speech_input: SpeechInput, use_default_wave_format: bool,
+        default_speech_auth):
     callback = WavFileReaderCallback(speech_input.path)
     if use_default_wave_format:
         stream = msspeech.audio.PullAudioInputStream(pull_stream_callback=callback)
@@ -59,7 +59,7 @@ def test_pull_audio_input_stream_callback(speech_input: SpeechInput, subscriptio
         wave_format = msspeech.audio.AudioStreamFormat(samples_per_second, bits_per_sample, channels)
         stream = msspeech.audio.PullAudioInputStream(stream_format=wave_format, pull_stream_callback=callback)
 
-    speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    speech_config = msspeech.SpeechConfig(**default_speech_auth)
     audio_config = msspeech.AudioConfig(stream=stream)
 
     reco = msspeech.SpeechRecognizer(speech_config, audio_config)
@@ -81,9 +81,9 @@ def test_pull_audio_input_stream_callback(speech_input: SpeechInput, subscriptio
 
 @pytest.mark.parametrize("use_default_wave_format", (False, True))
 @pytest.mark.parametrize('speech_input,', ['weather', 'lamp'], indirect=True)
-def test_push_audio_input_stream(speech_input: SpeechInput, subscription: str, speech_region: str,
-        use_default_wave_format: bool):
-    speech_config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+def test_push_audio_input_stream(speech_input: SpeechInput, use_default_wave_format: bool,
+        default_speech_auth):
+    speech_config = msspeech.SpeechConfig(**default_speech_auth)
 
     if use_default_wave_format:
         stream = msspeech.audio.PushAudioInputStream()
