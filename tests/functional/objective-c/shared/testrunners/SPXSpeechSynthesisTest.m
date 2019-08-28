@@ -429,9 +429,11 @@
     self.speechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:[NSString stringWithFormat:@"https://%@.tts.speech.microsoft.com/cognitiveservices/v1", self.serviceRegion] subscription:self.speechKey];
 }
 
+#if !TARGET_OS_IPHONE // ignore speaker related test on iOS
 - (void)testDefaultSynthesis {
     return [self _testDefaultSynthesis];
 }
+#endif
 
 - (void)testSynthesisOutputToFile {
     return [self _testSynthesisOutputToFile];
@@ -460,6 +462,7 @@
     self.speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
 }
 
+#if !TARGET_OS_IPHONE // ignore speaker related test on iOS
 - (void)testDefaultSynthesis {
     return [self _testDefaultSynthesis];
 }
@@ -471,6 +474,7 @@
 - (void)testPickVoice {
     return [self _testPickVoice];
 }
+#endif
 
 - (void)testSynthesisOutputToFile {
     return [self _testSynthesisOutputToFile];

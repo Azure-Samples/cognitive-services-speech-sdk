@@ -36,6 +36,8 @@ typedef void (^SPXSpeechSynthesisWordBoundaryEventHandler)(SPXSpeechSynthesizer 
 
 /**
  * Initializes a new instance of speech synthesizer using a speech config.
+ * This synthesizer will output the audio to default speaker, which will throw an exception if the speaker is not available.
+ * Please use initWithSpeechConfiguration(speechConfiguration, nil) if you just need the SPXSynthesisResult or SPXAudioDataStream.
  *
  * @param speechConfiguration speech recognition configuration.
  * @return an instance of speech recognizer.
@@ -45,6 +47,8 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
  * Initializes a new instance of speech synthesizer using a speech config.
+ * This synthesizer will output the audio to default speaker, which will throw an exception if the speaker is not available.
+ * Please use initWithSpeechConfiguration(speechConfiguration, nil) if you just need the SPXSynthesisResult or SPXAudioDataStream.
  *
  * @param speechConfiguration speech recognition configuration.
  * @param outError error information.

@@ -27,6 +27,8 @@ DEFINE_ENUM(AUDIO_RESULT, AUDIO_RESULT_VALUES)
 #define AUDIO_STATE_VALUES  \
     AUDIO_STATE_STARTING,   \
     AUDIO_STATE_RUNNING,    \
+    AUDIO_STATE_PAUSED,     \
+    AUDIO_STATE_STOPPING, /* indicates the state when the stop signal is sent, the audio will stop after finishing the queued buffer.*/   \
     AUDIO_STATE_STOPPED,    \
     AUDIO_STATE_CLOSED      \
 

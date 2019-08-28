@@ -41,7 +41,29 @@ SPX_EXPORT
 - (nullable instancetype)initWithWavFileInput:(nonnull NSString *)path;
 
 /**
+ * Initializes an SPXAudioConfiguration object using the default audio output device (speaker) on the system as output.
+ * 
+ * Added in version 1.7.0
+ * 
+ * @return an instance of audio input configuration.
+ */
+- (nullable instancetype)initWithDefaultSpeakerOutput
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes an SPXAudioConfiguration object using the default audio output device (speaker) on the system as output.
+ * Please ensure that the speaker is available before using this method.
+ * 
+ * Added in version 1.7.0
+ * 
+ * @param outError error information.
+ * @return an instance of audio input configuration.
+ */
+- (nullable instancetype)initWithDefaultSpeakerOutput:(NSError * _Nullable * _Nullable)outError;
+
+/**
  * Initializes an SPXAudioConfiguration object using the specified file as output.
+ * Please ensure that the speaker is available before using this method.
  * 
  * Added in version 1.7.0
  * 

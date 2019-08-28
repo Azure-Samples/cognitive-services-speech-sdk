@@ -26,6 +26,8 @@
 #endif
 #elif defined(__linux__) && !defined(ANDROID) && !defined(__ANDROID__) // Linux
 #define AUDIO_OUTPUT_DEVICE_AVAILABLE
+#elif defined(__MACH__) // macOS and iOS
+#define AUDIO_OUTPUT_DEVICE_AVAILABLE
 #endif
 
 
@@ -93,10 +95,18 @@ private:
     static void BufferUnderRunCallback(void* pContext);
 
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
+
+    enum class PlayState {
+        Stopped,
+        Playing,
+        Paused
+    };
+    
+    std::atomic<PlayState> m_playState { PlayState::Stopped };
     AUDIO_SETTINGS_HANDLE m_hsetting = nullptr;
     AUDIO_SYS_HANDLE m_haudio = nullptr;
-    std::atomic<bool> m_playing { false };
-    std::mutex m_mutex;
+    
+    std::mutex m_playMutex;
     std::condition_variable m_cv;
 #endif
 

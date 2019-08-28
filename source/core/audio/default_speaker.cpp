@@ -32,7 +32,7 @@ void CSpxDefaultSpeaker::Init()
 void CSpxDefaultSpeaker::Term()
 {
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
-    while (m_playing)
+    while (PlayState::Playing == m_playState)
     {
         // Wait until speak complete
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -60,11 +60,12 @@ void CSpxDefaultSpeaker::StartPlayback()
 
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
     // Only make playback when audio device is initialized, in order not to abort the synthesizer when audio device is not available
-    if (m_audioInitialized && !m_playing)
+    if (m_audioInitialized && PlayState::Stopped == m_playState)
     {
         auto result = audio_output_startasync(m_haudio, m_audioFormat.get(), PlayAudioReadCallback, AudioCompleteCallback, BufferUnderRunCallback, this);
+        // Throw error if start failed. Users should ensure that the speaker is available.
         SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT::AUDIO_RESULT_OK, SPXERR_RUNTIME_ERROR);
-        m_playing = true;
+        m_playState = PlayState::Playing;
     }
 #endif
 }
@@ -73,7 +74,7 @@ void CSpxDefaultSpeaker::PausePlayback()
 {
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
     // Only make the operation when audio device is initialized, in order not to abort the synthesizer when audio device is not available
-    if (m_audioInitialized)
+    if (m_audioInitialized && PlayState::Playing == m_playState)
     {
         auto result = audio_output_pause(m_haudio);
         SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT::AUDIO_RESULT_OK, SPXERR_RUNTIME_ERROR);
@@ -85,7 +86,7 @@ void CSpxDefaultSpeaker::StopPlayback()
 {
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
     // Only make the operation when audio device is initialized, in order not to abort the synthesizer when audio device is not available
-    if (m_audioInitialized)
+    if (m_audioInitialized && (PlayState::Playing == m_playState || PlayState::Paused == m_playState))
     {
         auto result = audio_output_stop(m_haudio); // This will wait 5s for the remaining rendering to complete
         SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT::AUDIO_RESULT_OK, SPXERR_RUNTIME_ERROR);
@@ -98,7 +99,7 @@ uint32_t CSpxDefaultSpeaker::Write(uint8_t* buffer, uint32_t size)
     SPX_IFTRUE_THROW_HR(m_audioFormat.get() == nullptr, SPXERR_UNINITIALIZED);
 
     // Initialize audio device when data is received for the first time
-    InitializeAudio();
+    InitializeAudio();   
 
     uint32_t writtenSize = size;
     // Only send the data when audio device is initialized
@@ -107,21 +108,23 @@ uint32_t CSpxDefaultSpeaker::Write(uint8_t* buffer, uint32_t size)
         writtenSize = m_audioStream->Write(buffer, size);
     }
 
+    StartPlayback();
+
     return writtenSize;
 }
 
 void CSpxDefaultSpeaker::WaitUntilDone()
 {
 #ifdef AUDIO_OUTPUT_DEVICE_AVAILABLE
-    std::unique_lock<std::mutex> lock(m_mutex);
+    std::unique_lock<std::mutex> lock(m_playMutex);
     m_audioStream->Close();
 #ifdef _DEBUG
-    while (!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&] { return m_playing == false; }))
+    while (!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&] { return PlayState::Stopped == m_playState; }))
     {
         SPX_DBG_TRACE_VERBOSE("%s: waiting ...", __FUNCTION__);
     }
 #else
-    m_cv.wait(lock, [&] { return m_playing == false; });
+    m_cv.wait(lock, [&] { return PlayState::Stopped == m_playState; });
 #endif // _DEBUG
 #endif // AUDIO_OUTPUT_DEVICE_AVAILABLE
 }
@@ -192,8 +195,6 @@ void CSpxDefaultSpeaker::InitializeAudio()
         m_audioInitialized = true;
 
     }
-
-    StartPlayback();
 #endif
 }
 
@@ -209,8 +210,8 @@ int CSpxDefaultSpeaker::PlayAudioReadCallback(void* pContext, uint8_t* pBuffer, 
 void CSpxDefaultSpeaker::AudioCompleteCallback(void* pContext)
 {
     auto defaultSpeaker = (CSpxDefaultSpeaker*)pContext;
-    std::unique_lock<std::mutex> lock(defaultSpeaker->m_mutex);
-    defaultSpeaker->m_playing = false;
+    std::unique_lock<std::mutex> lock(defaultSpeaker->m_playMutex);
+    defaultSpeaker->m_playState = PlayState::Stopped;
     defaultSpeaker->m_cv.notify_all();
 }
 
