@@ -5,7 +5,6 @@
 
 // <code>
 #import "AppDelegate.h"
-#import <AVFoundation/AVFoundation.h>
 #import <MicrosoftCognitiveServicesSpeech/SPXSpeechApi.h>
 
 @interface AppDelegate ()
@@ -13,7 +12,6 @@
 @property (weak) IBOutlet NSWindow *window;
 @property (weak) NSButton *button;
 @property (strong) NSTextField *textField;
-@property (nonatomic, strong) AVAudioPlayer *player;
 @end
 
 @implementation AppDelegate
@@ -36,8 +34,7 @@
     NSString *serviceRegion = @"YourServiceRegion";
     
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
-    [speechConfig setSpeechSynthesisOutputFormat:SPXSpeechSynthesisOutputFormat_Audio16Khz32KBitRateMonoMp3];
-    SPXSpeechSynthesizer *speechSynthesizer = [[SPXSpeechSynthesizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:nil];
+    SPXSpeechSynthesizer *speechSynthesizer = [[SPXSpeechSynthesizer alloc] init:speechConfig];
     
     NSLog(@"Start synthesizing...");
     
@@ -49,10 +46,6 @@
         NSLog(@"Speech synthesis was canceled: %@. Did you pass the correct key/region combination?", details.errorDetails);
     } else if (SPXResultReason_SynthesizingAudioCompleted == speechResult.reason) {
         NSLog(@"Speech synthesis was completed");
-        // Play audio.
-        self.player = [[AVAudioPlayer alloc] initWithData:[speechResult audioData] error:nil];
-        [self.player prepareToPlay];
-        [self.player play];
     } else {
         NSLog(@"There was an error.");
     }

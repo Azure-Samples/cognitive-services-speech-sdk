@@ -124,9 +124,9 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart Java JRE](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/java-jre/) | Windows, Linux | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart Python](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/python/) | Windows, Linux | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart Objective-C](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/objectivec-ios/) | iOS | Demonstrates one-shot speech synthesis to a synthesis result and then rendering to the default speaker. |
-| [Quickstart Swift](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/swift-ios/) | iOS | Demonstrates one-shot speech synthesis to a synthesis result and then rendering to the default speaker. |
-| [Quickstart Objective-C](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/objectivec-macos/) | macOS | Demonstrates one-shot speech synthesis to a synthesis result and then rendering to the default speaker. |
-| [Quickstart Swift](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/swift-macos/) | macOS | Demonstrates one-shot speech synthesis to a synthesis result and then rendering to the default speaker. |
+| [Quickstart Swift](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/swift-ios/) | iOS | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart Objective-C](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/objectivec-macos/) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart Swift](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/swift-macos/) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
 
 ### Voice-first virtual assistants quickstarts
 

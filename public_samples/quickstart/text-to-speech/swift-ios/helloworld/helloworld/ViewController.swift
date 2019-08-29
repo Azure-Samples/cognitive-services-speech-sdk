@@ -5,11 +5,8 @@
 
 // <code>
 import UIKit
-import AVFoundation
 
-var player: AVAudioPlayer?
-
-class ViewController: UIViewController, UITextFieldDelegate, AVAudioPlayerDelegate{
+class ViewController: UIViewController, UITextFieldDelegate{
     var textField: UITextField!
     var synthesisButton: UIButton!
     
@@ -64,21 +61,16 @@ class ViewController: UIViewController, UITextFieldDelegate, AVAudioPlayerDelega
             print("error \(error) happened")
             speechConfig = nil
         }
-        speechConfig?.setSpeechSynthesisOutputFormat( SPXSpeechSynthesisOutputFormat.audio16Khz32KBitRateMonoMp3)
-        let synthesizer = try! SPXSpeechSynthesizer(speechConfiguration: speechConfig!, audioConfiguration: nil)
+        let synthesizer = try! SPXSpeechSynthesizer(speechConfig!)
         if inputText.isEmpty {
             return
         }
         let result = try! synthesizer.speakText(inputText)
-        do {
-            try player = AVAudioPlayer(data: result.audioData!)
-            player?.delegate = self
-            player?.prepareToPlay()
-        } catch {
-            print("error \(error) happened")
-            player = nil
+        if result.reason == SPXResultReason.canceled
+        {
+            let cancellationDetails = try! SPXSpeechSynthesisCancellationDetails(fromCanceledSynthesisResult: result)
+            print("cancelled, detail: \(cancellationDetails.errorDetails!) ")
         }
-        player?.play()
     }
 }
 // </code>

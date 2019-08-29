@@ -492,7 +492,7 @@ void CSpxUspTtsEngineAdapter::OnError(bool transport, USP::ErrorCode errorCode, 
     {
         m_currentErrorCode = errorCode;
         m_currentErrorMessage = errorMessage;
-        m_currentErrorMessage += ". USP state: " + CSpxSynthesisHelper::itos((int)(UspState)m_uspState) + ".";
+        m_currentErrorMessage += " USP state: " + CSpxSynthesisHelper::itos((int)(UspState)m_uspState) + ".";
         m_currentErrorMessage += " Received audio size: " + CSpxSynthesisHelper::itos(m_currentReceivedData.size()) + "bytes.";
         m_uspState = UspState::Error;
         m_cv.notify_all();

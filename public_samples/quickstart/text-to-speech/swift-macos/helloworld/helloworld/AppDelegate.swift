@@ -5,10 +5,9 @@
 
 // <code>
 import Cocoa
-import AVFoundation
 
 @NSApplicationMain
-class AppDelegate: NSObject, NSApplicationDelegate, NSTextFieldDelegate, AVAudioPlayerDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSTextFieldDelegate {
     var textField: NSTextField!
     var synthesisButton: NSButton!
     
@@ -16,8 +15,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTextFieldDelegate, AVAudio
     
     var sub: String!
     var region: String!
-    
-    var player: AVAudioPlayer?
 
     @IBOutlet weak var window: NSWindow!
 
@@ -59,24 +56,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSTextFieldDelegate, AVAudio
             print("error \(error) happened")
             speechConfig = nil
         }
-        speechConfig?.setSpeechSynthesisOutputFormat( SPXSpeechSynthesisOutputFormat.audio16Khz32KBitRateMonoMp3)
-        let synthesizer = try! SPXSpeechSynthesizer(speechConfiguration: speechConfig!, audioConfiguration: nil)
+        let synthesizer = try! SPXSpeechSynthesizer(speechConfig!)
         let result = try! synthesizer.speakText(inputText)
         if result.reason == SPXResultReason.canceled
         {
             let cancellationDetails = try! SPXSpeechSynthesisCancellationDetails(fromCanceledSynthesisResult: result)
-            print("cancelled, error code: \(cancellationDetails.errorCode) detail: \(String(describing: cancellationDetails.errorDetails)) ")
+            print("cancelled, error code: \(cancellationDetails.errorCode) detail: \(cancellationDetails.errorDetails!) ")
             return
         }
-        do {
-            try player = AVAudioPlayer(data: result.audioData!)
-            player?.delegate = self
-            player?.prepareToPlay()
-        } catch {
-            print("error \(error) happened")
-            player = nil
-        }
-        player?.play()
     }
     
     func controlTextDidChange(_ obj: Notification) {

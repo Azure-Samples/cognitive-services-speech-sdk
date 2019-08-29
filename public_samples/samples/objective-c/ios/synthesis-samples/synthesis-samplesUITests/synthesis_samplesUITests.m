@@ -38,30 +38,6 @@
     // Put teardown code here. This method is called after the invocation of each test method in the class.
 }
 
-- (void)testSynthesisDefault {
-    // sleep to make sure elements are there
-    [NSThread sleepForTimeInterval:1];
-    
-    XCUIElement *inputTextField = app.textFields[@"input_text_field"];
-    XCTAssert(inputTextField.exists);
-    [inputTextField tap];
-    [inputTextField typeText:inputText];
-
-    XCUIElement *synthButton = app.buttons[@"synthesis_default_button"];
-    XCTAssert(synthButton.exists);
-
-    XCUIElement *resultLabel = app.staticTexts[@"result_label"];
-    XCTAssert(resultLabel.exists);
-
-    NSPredicate *pred = [NSPredicate predicateWithFormat:@"label == %@", resultText];
-
-    [self expectationForPredicate:pred evaluatedWithObject:resultLabel handler:nil];
-
-    [synthButton tap];
-
-    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
-}
-
 - (void)testSynthesisToFile {
     // sleep to make sure elements are there
     [NSThread sleepForTimeInterval:1];

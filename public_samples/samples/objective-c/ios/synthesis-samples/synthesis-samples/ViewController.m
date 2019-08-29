@@ -4,7 +4,6 @@
 //
 
 #import "ViewController.h"
-#import <AVFoundation/AVFoundation.h>
 #import <MicrosoftCognitiveServicesSpeech/SPXSpeechApi.h>
 
 @interface ViewController () {
@@ -13,8 +12,6 @@
     
     NSString *inputText;
 }
-
-@property (strong, nonatomic) AVAudioPlayer *player;
 
 @property (strong, nonatomic) IBOutlet UITextField *inputField;
 
@@ -158,11 +155,11 @@
     // Sets the synthesis output format.
     // The full list of supported format can be found here:
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
-    [speechConfig setSpeechSynthesisOutputFormat:SPXSpeechSynthesisOutputFormat_Audio16Khz32KBitRateMonoMp3];
+    [speechConfig setSpeechSynthesisOutputFormat:SPXSpeechSynthesisOutputFormat_Riff16Khz16BitMonoPcm];
     
     [self updateStatusText:(@"Synthesizing...")];
     
-    SPXSpeechSynthesizer *synthesizer = [[SPXSpeechSynthesizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:nil];
+    SPXSpeechSynthesizer *synthesizer = [[SPXSpeechSynthesizer alloc] init:speechConfig];
     if (!synthesizer) {
         NSLog(@"Could not create speech synthesizer");
         [self updateResultText:(@"Speech Synthesis Error")];
@@ -179,10 +176,6 @@
     } else if (SPXResultReason_SynthesizingAudioCompleted == speechResult.reason) {
         NSLog(@"Speech synthesis was completed");
         [self updateResultText:@"Speech synthesis was completed."];
-        // Play audio.
-        self.player = [[AVAudioPlayer alloc] initWithData:[speechResult audioData] error:nil];
-        [self.player prepareToPlay];
-        [self.player play];
     } else {
         NSLog(@"There was an error.");
         [self updateErrorText:(@"Speech synthesis error.")];
