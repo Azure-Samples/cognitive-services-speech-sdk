@@ -145,13 +145,13 @@
     }
     // Sets the synthesis language.
     // The full list of supported language can be found here:
-    // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
-    [speechConfig setSpeechSynthesisLanguage:@"en-GB"];
+    // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
+    speechConfig.speechSynthesisLanguage = @"en-GB";
     // Sets the voice name
     // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)"
     // The full list of supported voices can be found here:
-    // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
-    [speechConfig setSpeechSynthesisVoiceName:@"Microsoft Server Speech Text to Speech Voice (en-GB, George, Apollo)"];
+    // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
+    speechConfig.speechSynthesisVoiceName = @"Microsoft Server Speech Text to Speech Voice (en-GB, George, Apollo)";
     // Sets the synthesis output format.
     // The full list of supported format can be found here:
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs

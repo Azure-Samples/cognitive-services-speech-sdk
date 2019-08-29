@@ -30,6 +30,9 @@
     static_assert((int)SPXSpeechServiceConnectionRecognitionMode == (int)SpeechImpl::PropertyId::SpeechServiceConnection_RecoMode, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceConnectionRecognitionLanguage == (int)SpeechImpl::PropertyId::SpeechServiceConnection_RecoLanguage, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechSessionId == (int)SpeechImpl::PropertyId::Speech_SessionId, "inconsistent enum definition of property id");
+    static_assert((int)SPXSpeechServiceConnectionSynthesisLanguage == (int)SpeechImpl::PropertyId::SpeechServiceConnection_SynthLanguage, "inconsistent enum definition of property id");
+    static_assert((int)SPXSpeechServiceConnectionSynthesisVocie == (int)SpeechImpl::PropertyId::SpeechServiceConnection_SynthVoice, "inconsistent enum definition of property id");
+    static_assert((int)SPXSpeechServiceConnectionSynthesisOutputFormat == (int)SpeechImpl::PropertyId::SpeechServiceConnection_SynthOutputFormat, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceConnectionInitialSilenceTimeoutMs == (int)SpeechImpl::PropertyId::SpeechServiceConnection_InitialSilenceTimeoutMs, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceConnectionEndSilenceTimeoutMs == (int)SpeechImpl::PropertyId::SpeechServiceConnection_EndSilenceTimeoutMs, "inconsistent enum definition of property id");
     static_assert((int)SPXSpeechServiceConnectionEnableAudioLogging == (int)SpeechImpl::PropertyId::SpeechServiceConnection_EnableAudioLogging, "inconsistent enum definition of property id");
@@ -48,6 +51,7 @@
     static_assert((int)SPXCancellationDetailsReasonText == (int)SpeechImpl::PropertyId::CancellationDetails_ReasonText, "inconsistent enum definition of property id");
     static_assert((int)SPXCancellationDetailsReasonDetailedText == (int)SpeechImpl::PropertyId::CancellationDetails_ReasonDetailedText, "inconsistent enum definition of property id");
     static_assert((int)SPXLanguageUnderstandingServiceResponseJsonResult == (int)SpeechImpl::PropertyId::LanguageUnderstandingServiceResponse_JsonResult, "inconsistent enum definition of property id");
+    static_assert((int)SPXSpeechLogFilename == (int)SpeechImpl::PropertyId::Speech_LogFilename, "inconsistent enum definition of property id");
 
     self = [super init];
     propertiesImpl = propertiesHandle;

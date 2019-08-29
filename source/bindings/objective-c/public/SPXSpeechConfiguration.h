@@ -49,6 +49,27 @@ SPX_EXPORT
 @property (nonatomic, copy, readonly, nullable)NSString *region;
 
 /**
+ * Speech synthesis language.
+ * 
+ * Added in version 1.7.0
+ */
+@property (nonatomic, copy, nullable)NSString *speechSynthesisLanguage;
+
+/**
+ * Speech synthesis voice.
+ * 
+ * Added in version 1.7.0
+ */
+@property (nonatomic, copy, nullable)NSString *speechSynthesisVoiceName;
+
+/**
+ * Speech synthesis optput format.
+ * 
+ * Added in version 1.7.0
+ */
+@property (nonatomic, copy, readonly, nullable)NSString* speechSynthesisOutputFormat;
+
+/**
  * Initializes an instance of a speech configuration with the specified subscription key and service region.
  *
  * Added in version 1.6.0.
@@ -269,42 +290,6 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 -(void)setProfanityOptionTo:(SPXSpeechConfigProfanityOption)profanity;
 
 /**
- * Sets the speech synthesis language.
- * 
- * Added in version 1.7.0
- * 
- * @param lang The speech synthesis language.
- */
--(void)setSpeechSynthesisLanguage:(nonnull NSString *)lang;
-
-/**
- * Gets the speech synthesis language.
- * 
- * Added in version 1.7.0
- * 
- * @return the speech synthesis language.
- */
--(nullable NSString *)getSpeechSynthesisLanguage;
-
-/**
- * Sets the speech synthesis voice name.
- * 
- * Added in version 1.7.0
- * 
- * @param voiceName the speech synthesis voice name.
- */
--(void)setSpeechSynthesisVoiceName:(nonnull NSString *)voiceName;
-
-/**
- * Gets the speech synthesis voice name.
- * 
- * Added in version 1.7.0
- * 
- * @return the speech synthesis voice name.
- */
--(nullable NSString *)getSpeechSynthesisVoiceName;
-
-/**
  * Set the speech synthesis audio output format (e.g. Riff16Khz16BitMonoPcm).
  * 
  * Added in version 1.7.0
@@ -312,15 +297,6 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  * @param formatId output format id.
  */
 -(void)setSpeechSynthesisOutputFormat:(SPXSpeechSynthesisOutputFormat)formatId;
-
-/**
- * Gets the speech synthesis output format. 
- * 
- * Added in version 1.7.0
- * 
- * @return the speech synthesis output format.
- */
--(nullable NSString *)getSpeechSynthesisOutputFormat;
 
 /**
  * Enables audio logging in service.

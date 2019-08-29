@@ -65,9 +65,8 @@
 }
 
 - (void)_testPickLanguage{
-    [self.speechConfig setSpeechSynthesisLanguage:@"en-GB"];
-    NSString *lang = [self.speechConfig getSpeechSynthesisLanguage];
-    XCTAssertEqualObjects(lang, @"en-GB");
+    self.speechConfig.speechSynthesisLanguage = @"en-GB";
+    XCTAssertEqualObjects(self.speechConfig.speechSynthesisLanguage, @"en-GB");
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]init:self.speechConfig];
     SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
     SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"{{{text2}}}"];
@@ -77,9 +76,8 @@
 
 - (void)_testPickVoice{
     NSString *setVoiceName = @"Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)";
-    [self.speechConfig setSpeechSynthesisVoiceName:setVoiceName];
-    NSString *getVoiceName = [self.speechConfig getSpeechSynthesisVoiceName];
-    XCTAssertEqualObjects(setVoiceName, getVoiceName);
+    self.speechConfig.speechSynthesisVoiceName = setVoiceName;
+    XCTAssertEqualObjects(setVoiceName, self.speechConfig.speechSynthesisVoiceName);
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]init:self.speechConfig];
     SPXSpeechSynthesisResult* result1 = [synthesizer speakText:@"{{{text1}}}"];
     SPXSpeechSynthesisResult* result2 = [synthesizer speakText:@"{{{text2}}}"];
@@ -369,7 +367,7 @@
 }
 
 - (void)_testCheckWordBoundaryEvents {
-    [self.speechConfig setSpeechSynthesisVoiceName:@"Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)"];
+    self.speechConfig.speechSynthesisVoiceName = @"Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)";
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:nil];
     NSString* plainText = @"您好，我是来自Microsoft的中文声音。";
     NSString* ssml = @"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>您好，<break time='50ms'/>我是来自Microsoft的中文声音。</voice></speak>";

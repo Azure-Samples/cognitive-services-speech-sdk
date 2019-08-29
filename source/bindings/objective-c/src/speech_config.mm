@@ -333,22 +333,22 @@
     speechConfigImpl->SetProfanity((SpeechImpl::ProfanityOption)(int)profanity);
 }
 
--(void)setSpeechSynthesisLanguage:(nonnull NSString *)lang
+-(void)setSpeechSynthesisLanguage:(NSString *)language
 {
-    speechConfigImpl->SetSpeechSynthesisLanguage([lang toSpxString]);
+    speechConfigImpl->SetSpeechSynthesisLanguage([language toSpxString]);
 }
 
--(nullable NSString *)getSpeechSynthesisLanguage
+-(NSString *)speechSynthesisLanguage
 {
     return [NSString StringWithStdString:speechConfigImpl->GetSpeechSynthesisLanguage()];
 }
 
--(void)setSpeechSynthesisVoiceName:(nonnull NSString *)voiceName
+-(void)setSpeechSynthesisVoiceName:(NSString *)voiceName
 {
     speechConfigImpl->SetSpeechSynthesisVoiceName([voiceName toSpxString]);
 }
 
--(nullable NSString *)getSpeechSynthesisVoiceName
+-(NSString *)speechSynthesisVoiceName
 {
     return [NSString StringWithStdString:speechConfigImpl->GetSpeechSynthesisVoiceName()];
 }
@@ -358,7 +358,7 @@
     speechConfigImpl->SetSpeechSynthesisOutputFormat((SpeechImpl::SpeechSynthesisOutputFormat)(int)formatId);
 }
 
--(nullable NSString *)getSpeechSynthesisOutputFormat
+-(NSString *)speechSynthesisOutputFormat
 {
     return [NSString StringWithStdString:speechConfigImpl->GetSpeechSynthesisOutputFormat()];
 }
