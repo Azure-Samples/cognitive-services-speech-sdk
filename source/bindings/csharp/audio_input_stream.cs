@@ -244,7 +244,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods using the default format (16 kHz, 16 bit, mono PCM).
         /// </summary>
         /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
-        /// <returns>The pull audio input stream being created.</returns>
         public PullAudioInputStream(PullAudioInputStreamCallback callback) :
             this(Create(UseDefaultFormatIfNull(null)), callback)
         {
@@ -256,7 +255,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// </summary>
         /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
         /// <param name="format">The audio data format in which audio will be returned from the callback's read() method.</param>
-        /// <returns>The pull audio input stream being created.</returns>
         public PullAudioInputStream(PullAudioInputStreamCallback callback, AudioStreamFormat format) :
             this(Create(UseDefaultFormatIfNull(format)), callback)
         {

@@ -50,6 +50,7 @@ public:
     /// <summary>
     /// Internal. Explicit conversion operator.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXUSERHANDLE() const { return m_huser; }
 
     /// <summary>

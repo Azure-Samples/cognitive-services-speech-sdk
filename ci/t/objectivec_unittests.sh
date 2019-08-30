@@ -40,7 +40,7 @@ function runObjcSuite {
     "${BUILD_DIR}/../tests/functional/objective-c/ios/SpeechSDK_iOS.xcodeproj SpeechSDK_iOS ${testsuiteName}
         --extra-args DEVELOPMENT_TEAM=${MICROSOFT_DEVELOPMENT_TEAM_ID}"   \
     )
-    deviceSettings=(--device "iPhone 8" --os "12.2")
+    deviceSettings=(--device "iPhone 8" --os "12.4")
   fi
 
   startTests "$testStateVarPrefix" "$output" "$platform" "$redactStrings"

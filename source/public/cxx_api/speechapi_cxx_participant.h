@@ -78,6 +78,7 @@ public:
     /// <summary>
     /// Internal operator used to get underlying handle value.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXPARTICIPANTHANDLE() const { return m_hparticipant; }
 
     /// <summary>

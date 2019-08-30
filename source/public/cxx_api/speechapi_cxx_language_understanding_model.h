@@ -66,7 +66,7 @@ public:
     /// </summary>
     /// <param name="hlumodel">Language understanding model handle.</param>
     explicit LanguageUnderstandingModel(SPXLUMODELHANDLE hlumodel = SPXHANDLE_INVALID) : m_hlumodel(hlumodel) { }
-    
+
     /// <summary>
     /// Virtual destructor.
     /// </summary>
@@ -75,6 +75,7 @@ public:
     /// <summary>
     /// Internal. Explicit conversion operator.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXLUMODELHANDLE() { return m_hlumodel; }
 
 private:

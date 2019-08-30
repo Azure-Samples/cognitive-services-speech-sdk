@@ -26,6 +26,7 @@ public:
     /// <summary>
     /// Internal operator used to get underlying handle value.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXSPEECHCONFIGHANDLE() const { return m_hconfig; }
     
     /// <summary>

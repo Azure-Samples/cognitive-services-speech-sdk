@@ -57,6 +57,7 @@ public:
     /// <summary>
     /// Internal operator used to get underlying handle value.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXAUDIOSTREAMHANDLE() const { return m_haudioStream.get(); }
 
     /// <summary>
@@ -718,6 +719,7 @@ public:
     /// <summary>
     /// Internal operator used to get underlying handle value.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXAUDIOSTREAMHANDLE() const { return m_haudioStream.get(); }
 
     /// <summary>

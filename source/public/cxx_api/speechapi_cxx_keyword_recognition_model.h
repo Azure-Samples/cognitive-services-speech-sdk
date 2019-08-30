@@ -49,6 +49,7 @@ public:
     /// <summary>
     /// Internal. Explicit conversion operator.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXKEYWORDHANDLE() { return m_hkwmodel; }
 
 private:

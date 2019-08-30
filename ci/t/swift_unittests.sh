@@ -37,7 +37,7 @@ function runSwiftSuite {
       --extra-args DEVELOPMENT_TEAM=${MICROSOFT_DEVELOPMENT_TEAM_ID} \
       --extra-args SPEECHSDK_LUIS_APP_ID=${SPEECHSDK_LUIS_HOMEAUTOMATION_APPID}"
   )
-  deviceSettings=(--device "iPhone 8" --os "12.2")
+  deviceSettings=(--device "iPhone 8" --os "12.4")
 
   startTests "$testStateVarPrefix" "$output" "$platform" "$redactStrings"
   startSuite "$testStateVarPrefix" "$testsuiteName"

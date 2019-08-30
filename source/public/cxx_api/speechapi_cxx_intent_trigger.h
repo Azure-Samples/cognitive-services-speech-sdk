@@ -74,6 +74,7 @@ public:
     /// <summary>
     /// Internal. Explicit conversion operator.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXTRIGGERHANDLE() { return m_htrigger; }
 
 private:

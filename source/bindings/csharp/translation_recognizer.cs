@@ -198,7 +198,6 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// Creates a translation recognizer using the default microphone input for a specified translation configuration.
         /// </summary>
         /// <param name="config">Translation config.</param>
-        /// <returns>A translation recognizer instance.</returns>
         public TranslationRecognizer(SpeechTranslationConfig config)
             : this(FromConfig(SpxFactory.recognizer_create_translation_recognizer_from_config, config))
         {
@@ -209,7 +208,6 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// </summary>
         /// <param name="config">Translation config.</param>
         /// <param name="audioConfig">Audio config.</param>
-        /// <returns>A translation recognizer instance.</returns>
         public TranslationRecognizer(SpeechTranslationConfig config, Audio.AudioConfig audioConfig)
             : this(FromConfig(SpxFactory.recognizer_create_translation_recognizer_from_config, config, audioConfig))
         {

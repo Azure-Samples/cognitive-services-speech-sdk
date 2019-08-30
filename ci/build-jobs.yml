@@ -2246,6 +2246,7 @@ jobs:
       mkdir -p "$(ArtifactOut)"
       rm -f doxygen.log || true
       touch doxygen.log
+      # disabling the warning for 'documented empty return type' because of doxygen issue https://github.com/doxygen/doxygen/issues/7212
       for lang in c cpp csharp java; do
         (
           cat ${lang}_doxygen.txt
@@ -2254,7 +2255,7 @@ jobs:
           echo OUTPUT_DIRECTORY="$(ArtifactOut)"
           echo QUIET=YES
           echo WARN_AS_ERROR=NO
-        ) | doxygen - 2>&1 | ( grep -v 'Internal inconsistency: member .* does not belong to any container' || true ) | tee -a doxygen.log
+        ) | doxygen - 2>&1 | ( grep -v -e 'Internal inconsistency: member .* does not belong to any container' -or -e 'warning: documented empty return type of .*' || true ) | tee -a doxygen.log
       done
       [[ -s doxygen.log ]] && {
         cat <<'HERE'

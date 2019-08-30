@@ -1111,7 +1111,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                Assert.AreEqual(TestData.English.Profanity.MaskedUtterance, result.Text);
+                Assert.AreEqual(SpeechRecognitionTestsHelper.StripPunctuationForProfanity(TestData.English.Profanity.MaskedUtterance),
+                    SpeechRecognitionTestsHelper.StripPunctuationForProfanity(result.Text));
             }
         }
 
@@ -1292,7 +1293,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     Assert.IsTrue(detailedResult.Text.Length > 0, $"Empty Text. Json result: {jsonResult}");
                     Assert.IsTrue(detailedResult.LexicalForm.Length > 0, $"Empty LexicalForm. Json result: {jsonResult}");
-                    Assert.IsTrue(detailedResult.NormalizedForm.Length > 0, $"Empty NormallizedForm. Json result: {jsonResult}");
+                    Assert.IsTrue(detailedResult.NormalizedForm.Length > 0, $"Empty NormalizedForm. Json result: {jsonResult}");
                     Assert.IsTrue(detailedResult.MaskedNormalizedForm.Length > 0, $"Empty MaskedNormalizedForm. Json result: {jsonResult}");
                     Assert.IsTrue(detailedResult.Words.Count() > 0, $"No words available. Json result: {jsonResult}");
                     foreach (var word in detailedResult.Words)

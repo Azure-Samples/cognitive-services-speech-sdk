@@ -51,6 +51,7 @@ public:
     /// <summary>
     /// Internal. Explicit conversion operator.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXPHRASEHANDLE() { return m_hphrase; }
 
 private:

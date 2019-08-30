@@ -169,7 +169,6 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// Creates a dialog service connector using the default microphone input for a specified dialog service configuration.
         /// </summary>
         /// <param name="config">Dialog service config.</param>
-        /// <returns>A dialog service connector instance.</returns>
         public DialogServiceConnector(DialogServiceConfig config)
             : this(FromConfig(SpxFactory.dialog_service_connector_create_dialog_service_connector_from_config, config))
         {
@@ -180,7 +179,6 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// </summary>
         /// <param name="config">Dialog service config.</param>
         /// <param name="audioConfig">Audio config.</param>
-        /// <returns>A diallog connector instance.</returns>
         public DialogServiceConnector(DialogServiceConfig config, Audio.AudioConfig audioConfig)
             : this(FromConfig(SpxFactory.dialog_service_connector_create_dialog_service_connector_from_config, config, audioConfig))
         {

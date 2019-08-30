@@ -120,6 +120,7 @@ public:
     /// <summary>
     /// Explicit conversion operator.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXRESULTHANDLE() { return m_hresult; }
 
     /// <summary>
@@ -344,6 +345,7 @@ public:
     /// <summary>
     /// Explicit conversion operator.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXAUDIOSTREAMHANDLE() { return m_haudioStream; }
 
     /// <summary>

@@ -33,6 +33,7 @@ public:
     /// <summary>
     /// Internal operator used to get underlying handle value.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXAUDIOCONFIGHANDLE() const { return m_haudioConfig.get(); }
 
     /// <summary>

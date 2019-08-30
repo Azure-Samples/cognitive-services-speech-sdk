@@ -56,6 +56,7 @@ public:
     /// <summary>
     /// Internal. Explicit conversion operator.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXGRAMMARHANDLE() { return m_hgrammar; }
 
 protected:

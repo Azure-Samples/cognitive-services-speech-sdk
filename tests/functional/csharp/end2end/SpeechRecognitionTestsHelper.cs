@@ -280,6 +280,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return Regex.Replace(str, @"\s+", " ", RegexOptions.Compiled);
         }
 
+        public static string StripPunctuationForProfanity(string str)
+        {
+            str = str.ToLower();
+            // strip all punctuation except *, which is used to mask profanity
+            str = Regex.Replace(str, @"[!'#$%&'()+,-./:;<=>?@\[/\]^_{|}~]+", "", RegexOptions.Compiled);
+            return Regex.Replace(str, @"\s+", " ", RegexOptions.Compiled);
+        }
+
         public static void AssertConnectionCountMatching(int connectedEventCount, int disconnectedEventCount)
         {
             Console.WriteLine($"ConnectedEventCount: {connectedEventCount}, DisconnectedEventCount: {disconnectedEventCount}");

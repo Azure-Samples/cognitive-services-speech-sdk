@@ -262,7 +262,6 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         /// Add a participant to a conversation using the User object.
         /// </summary>
         /// <param name="user">A User object.</param>
-        /// <returns>void.</returns>
         public void AddParticipant(User user)
         {
             ThrowIfNull(recoHandle);
@@ -273,7 +272,6 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         /// Add a participant to a conversation using the Participant object
         /// </summary>
         /// <param name="participant">A Participant object.</param>
-        /// <returns>void.</returns>
         public void AddParticipant(Participant participant)
         {
             ThrowIfNull(recoHandle);
@@ -284,7 +282,6 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         /// Remove a participant in a conversation using the Participant object
         /// </summary>
         /// <param name="participant">A Participant object.</param>
-        /// <returns>void.</returns>
         public void RemoveParticipant(Participant participant)
         {
             ThrowIfNull(recoHandle);
@@ -295,7 +292,6 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         /// Remove a participant in a conversation using the User object
         /// </summary>
         /// <param name="user">A User object.</param>
-        /// <returns>void.</returns>
         public void RemoveParticipant(User user)
         {
             ThrowIfNull(recoHandle);
@@ -306,7 +302,6 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         /// Remove a participant from a conversation using a user id object
         /// </summary>
         /// <param name="userId">A user id.</param>
-        /// <returns>void.</returns>
         public void RemoveParticipant(string userId)
         {
             ThrowIfNull(recoHandle);

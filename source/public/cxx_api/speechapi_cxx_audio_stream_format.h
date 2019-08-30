@@ -79,6 +79,7 @@ public:
     /// <summary>
     /// Internal operator used to get underlying handle value.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXAUDIOSTREAMFORMATHANDLE() const { return m_hformat.get(); }
 
     /// <summary>

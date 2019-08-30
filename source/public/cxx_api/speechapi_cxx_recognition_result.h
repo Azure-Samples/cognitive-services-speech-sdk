@@ -94,6 +94,7 @@ public:
     /// <summary>
     /// Internal. Explicit conversion operator.
     /// </summary>
+    /// <returns>A handle.</returns>
     explicit operator SPXRESULTHANDLE() { return m_hresult; }
 
 

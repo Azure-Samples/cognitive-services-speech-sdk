@@ -169,7 +169,6 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// Creates a PushAudioOutputStream that delegates to the specified callback interface for write() and close() methods.
         /// </summary>
         /// <param name="callback">The custom audio output object, derived from PushAudioOutputStreamCallback.</param>
-        /// <returns>The push audio output stream being created.</returns>
         public PushAudioOutputStream(PushAudioOutputStreamCallback callback) :
             this(Create(), callback)
         {
