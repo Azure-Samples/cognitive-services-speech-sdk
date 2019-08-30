@@ -1,3 +1,9 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+//
+
 #include "stdafx.h"
 #include "handle_table.h"
 #include "platform.h"
@@ -15,10 +21,10 @@ std::mutex CSpxSharedPtrHandleTableManager::s_mutex;
 
 std::unique_ptr<typeMap> CSpxSharedPtrHandleTableManager::s_tables = std::make_unique<typeMap>();
 
-// On linux, this static member is destroyed before LibUnload (marked as __attribute__((destructor))). 
+// On linux, this static member is destroyed before LibUnload (marked as __attribute__((destructor))).
 // Using a deleter instead to clean everything up before shutting down.
 CSpxSharedPtrHandleTableManager::deleted_unique_ptr<termFnList> CSpxSharedPtrHandleTableManager::s_termFns(new termFnList(), [] (termFnList* list) {
-    CSpxSharedPtrHandleTableManager::Term(); 
+    CSpxSharedPtrHandleTableManager::Term();
     delete list;
 });
 

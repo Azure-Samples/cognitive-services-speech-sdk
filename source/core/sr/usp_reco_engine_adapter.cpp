@@ -873,11 +873,15 @@ void CSpxUspRecoEngineAdapter::SetSpeechConfigMessage(const ISpxNamedProperties&
     auto userDefinedParams = GetParametersFromUser("speech.config");
     for (const auto& item : userDefinedParams)
     {
-        if (item.second.empty())
+        const auto& name = item.first;
+        const auto& value = item.second;
+
+        if (value.length()<1)
         {
-            ThrowInvalidArgumentException("User provided an empty value in a speech.config field");
+            ThrowInvalidArgumentException("User must provide non-empty value for a speech.config field.");
         }
-        speechConfig["context"][item.first] = json::parse(item.second);
+        speechConfig["context"][name.c_str()] = json::parse(value.c_str());
+        SPX_DBG_TRACE_VERBOSE("Set '%s' as '%s' in speech.config.", name.c_str(), value.c_str());
     }
     m_speechConfig = speechConfig.dump();
 }
@@ -2017,16 +2021,17 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
     }
 
     auto userParams = GetParametersFromUser("speech.context");
-    if (!userParams.empty())
+    for (const auto& it : userParams)
     {
-        for (const auto& param : userParams)
+        const auto& name = it.first;
+        const auto& value = it.second;
+
+        if (value.size() < 1 || name.empty())
         {
-            if (param.second.empty())
-            {
-                ThrowInvalidArgumentException("User provided an empty value in a speech.context field");
-            }
-            contextJson[param.first] = json::parse(param.second);
+            ThrowInvalidArgumentException("User provided an empty name or value in a speech.context field");
         }
+        contextJson[name.c_str()] = json::parse(value);
+        SPX_DBG_TRACE_VERBOSE("Set '%s' as '%s' in speech.context", name.c_str(), value.c_str());
     }
 
     return contextJson;
