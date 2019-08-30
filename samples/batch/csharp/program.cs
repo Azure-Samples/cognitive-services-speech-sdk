@@ -77,7 +77,7 @@ namespace BatchClient
 
             Console.WriteLine("Checking status.");
 
-            // check for the status of our transcriptions every 5 sec. (can also be 1, 2, 5 min depending on usage)
+            // check for the status of our transcriptions periodically
             int completed = 0, running = 0, notStarted = 0;
             while (completed < 1)
             {
@@ -131,6 +131,7 @@ namespace BatchClient
                 // </batchstatus>
 
                 Console.WriteLine(string.Format("Transcriptions status: {0} completed, {1} running, {2} not started yet", completed, running, notStarted));
+                // check again after 5 seconds (can also be 1, 2, 5 min depending on usage).
                 await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             }
 
