@@ -16,8 +16,8 @@ import swagger_client as cris_client
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format="%(message)s")
 
 # Your subscription key and region for the speech service
-SUBSCRIPTION_KEY = "<your subscription key>"
-SERVICE_REGION = "<the region for your subscription>"
+SUBSCRIPTION_KEY = "YourSubscriptionKey"
+SERVICE_REGION = "YourServiceRegion"
 
 NAME = "Simple transcription"
 DESCRIPTION = "Simple transcription description"
