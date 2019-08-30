@@ -17,10 +17,10 @@ namespace BatchClient
     {
         // <batchdefinition>
         // Replace with your subscription key
-        private const string SubscriptionKey = "<YourSubscriptionKey>";
+        private const string SubscriptionKey = "YourSubscriptionKey";
 
         // Update with your service region
-        private const string HostName = "<YourServiceRegion>.cris.ai";
+        private const string Region = "YourServiceRegion";
         private const int Port = 443;
 
         // recordings and locale
@@ -52,7 +52,7 @@ namespace BatchClient
             Console.WriteLine("Starting transcriptions client...");
 
             // create the client object and authenticate
-            var client = BatchClient.CreateApiV2Client(SubscriptionKey, HostName, Port);
+            var client = BatchClient.CreateApiV2Client(SubscriptionKey, $"{Region}.cris.ai", Port);
 
             // get all transcriptions for the subscription
             var transcriptions = await client.GetTranscriptionsAsync().ConfigureAwait(false);
@@ -65,16 +65,18 @@ namespace BatchClient
                 await client.DeleteTranscriptionAsync(item.Id).ConfigureAwait(false);
             }
 
-            Console.WriteLine("Creating transcriptions.");
             var transcriptionLocation = await client.PostTranscriptionAsync(Name, Description, Locale, new Uri(RecordingsBlobUri), modelList).ConfigureAwait(false);
+            var thisTranscriptionGuid = new Guid(transcriptionLocation.ToString().Split('/').LastOrDefault());
 
             // get the transcription Id from the location URI
             var createdTranscriptions = new List<Guid>();
-            createdTranscriptions.Add(new Guid(transcriptionLocation.ToString().Split('/').LastOrDefault()));
+            createdTranscriptions.Add(thisTranscriptionGuid);
+
+            Console.WriteLine($"Created transcription with id {thisTranscriptionGuid}.");
 
             Console.WriteLine("Checking status.");
 
-            // check for the status of our transcriptions every 30 sec. (can also be 1, 2, 5 min depending on usage)
+            // check for the status of our transcriptions periodically
             int completed = 0, running = 0, notStarted = 0;
             while (completed < 1)
             {
@@ -132,6 +134,7 @@ namespace BatchClient
                 // </batchstatus>
 
                 Console.WriteLine(string.Format("Transcriptions status: {0} completed, {1} running, {2} not started yet", completed, running, notStarted));
+                // check again after 5 seconds (can also be 1, 2, 5 min depending on usage).
                 await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             }
 

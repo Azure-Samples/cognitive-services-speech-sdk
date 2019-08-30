@@ -15,9 +15,9 @@ import swagger_client as cris_client
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format="%(message)s")
 
-# The subscription key must be for the region that you generated the Swagger
-# client library for (see ../README.md for detailed instructions).
-SUBSCRIPTION_KEY = "<your subscription key>"
+# Your subscription key and region for the speech service
+SUBSCRIPTION_KEY = "YourSubscriptionKey"
+SERVICE_REGION = "YourServiceRegion"
 
 NAME = "Simple transcription"
 DESCRIPTION = "Simple transcription description"
@@ -36,6 +36,7 @@ def transcribe():
     # configure API key authorization: subscription_key
     configuration = cris_client.Configuration()
     configuration.api_key['Ocp-Apim-Subscription-Key'] = SUBSCRIPTION_KEY
+    configuration.host = "https://{}.cris.ai".format(SERVICE_REGION)
 
     # create the client object and authenticate
     client = cris_client.ApiClient(configuration)
@@ -56,8 +57,6 @@ def transcribe():
         except ValueError:
             # ignore swagger error on empty response message body: https://github.com/swagger-api/swagger-core/issues/2446
             pass
-
-    logging.info("Creating transcriptions.")
 
     # Use base models for transcription. Comment this block if you are using a custom model.
     # Note: you can specify additional transcription properties by passing a
@@ -85,6 +84,8 @@ def transcribe():
     # get the transcription Id from the location URI
     created_transcription: str = transcription_location.split('/')[-1]
 
+    logging.info("Created new transcription with id {}".format(created_transcription))
+
     logging.info("Checking status.")
 
     completed = False
@@ -98,7 +99,7 @@ def transcribe():
         # for each transcription in the list we check the status
         for transcription in transcriptions:
             if transcription.status in ("Failed", "Succeeded"):
-                # we check to see if it was one of the transcriptions we created from this client
+                # we check to see if it was the transcription we created from this client
                 if created_transcription != transcription.id:
                     continue
 
@@ -111,6 +112,8 @@ def transcribe():
                     logging.info(results.content.decode("utf-8"))
                 else:
                     logging.info("Transcription failed :{}.".format(transcription.status_message))
+
+                break
             elif transcription.status == "Running":
                 running += 1
             elif transcription.status == "NotStarted":
