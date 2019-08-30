@@ -41,7 +41,7 @@ def select():
     print('select sample module, {} to abort'.format(eofkey))
     modules = list(samples.keys())
     for i, module in enumerate(modules):
-        print(i, module.__name__)
+        print("{}: {}\n\t{}".format(i, module.__name__, module.__doc__.strip()))
 
     try:
         num = int(input())
@@ -54,7 +54,7 @@ def select():
 
     print('select sample function, {} to abort'.format(eofkey))
     for i, fun in enumerate(samples[selected_module]):
-        print(i, fun.__name__)
+        print("{}: {}\n\t{}".format(i, fun.__name__, fun.__doc__))
 
     try:
         num = int(input())
