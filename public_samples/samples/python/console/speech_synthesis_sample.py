@@ -24,14 +24,13 @@ speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 
 def speech_synthesis_to_speaker():
     """performs speech synthesis to the default speaker"""
-    """this sample currently only works on Windows and Linux. MacOS is not supported yet"""
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     # Creates a speech synthesizer using the default speaker as audio output.
     # The default spoken language is "en-us".
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
 
-    # Receives a text from console input and synthesize it to speaker.
+    # Receives a text from console input and synthesizes it to speaker.
     while True:
         print("Enter some text that you want to speak, Ctrl-Z to exit")
         try:
@@ -51,19 +50,18 @@ def speech_synthesis_to_speaker():
 
 def speech_synthesis_with_language():
     """performs speech synthesis to the default speaker with specified spoken language"""
-    """this sample currently only works on Windows and Linux. MacOS is not supported yet"""
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     # Sets the synthesis language.
     # The full list of supported languages can be found here:
-    # https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
+    # https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
     language = "de-DE";
     speech_config.speech_synthesis_language = language
     # Creates a speech synthesizer for the specified language,
     # using the default speaker as audio output.
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
 
-    # Receives a text from console input and synthesize it to speaker.
+    # Receives a text from console input and synthesizes it to speaker.
     while True:
         print("Enter some text that you want to speak, Ctrl-Z to exit")
         try:
@@ -83,19 +81,18 @@ def speech_synthesis_with_language():
 
 def speech_synthesis_with_voice():
     """performs speech synthesis to the default speaker with specified voice"""
-    """this sample currently only works on Windows and Linux. MacOS is not supported yet"""
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     # Sets the synthesis voice name.
     # The full list of supported voices can be found here:
-    # https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
+    # https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
     voice = "Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)"
     speech_config.speech_synthesis_voice_name = voice
     # Creates a speech synthesizer for the specified voice,
     # using the default speaker as audio output.
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
 
-    # Receives a text from console input and synthesize it to speaker.
+    # Receives a text from console input and synthesizes it to speaker.
     while True:
         print("Enter some text that you want to speak, Ctrl-Z to exit")
         try:
@@ -123,7 +120,7 @@ def speech_synthesis_to_wave_file():
     file_config = speechsdk.audio.AudioOutputConfig(filename=file_name)
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=file_config)
 
-    # Receives a text from console input and synthesize it to wave file.
+    # Receives a text from console input and synthesizes it to wave file.
     while True:
         print("Enter some text that you want to synthesize, Ctrl-Z to exit")
         try:
@@ -155,7 +152,7 @@ def speech_synthesis_to_mp3_file():
     file_config = speechsdk.audio.AudioOutputConfig(filename=file_name)
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=file_config)
 
-    # Receives a text from console input and synthesize it to mp3 file.
+    # Receives a text from console input and synthesizes it to mp3 file.
     while True:
         print("Enter some text that you want to synthesize, Ctrl-Z to exit")
         try:
@@ -183,7 +180,7 @@ def speech_synthesis_to_pull_audio_output_stream():
     stream_config = speechsdk.audio.AudioOutputConfig(stream=pull_stream)
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=stream_config)
 
-    # Receives a text from console input and synthesize it to stream output.
+    # Receives a text from console input and synthesizes it to stream output.
     while True:
         print("Enter some text that you want to synthesize, Ctrl-Z to exit")
         try:
@@ -261,7 +258,7 @@ def speech_synthesis_to_push_audio_output_stream():
     stream_config = speechsdk.audio.AudioOutputConfig(stream=push_stream)
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=stream_config)
 
-    # Receives a text from console input and synthesize it to stream output.
+    # Receives a text from console input and synthesizes it to stream output.
     while True:
         print("Enter some text that you want to synthesize, Ctrl-Z to exit")
         try:
@@ -295,7 +292,7 @@ def speech_synthesis_to_result():
     # You can just get the audio from the result.
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
 
-    # Receives a text from console input and synthesize it to result.
+    # Receives a text from console input and synthesizes it to result.
     while True:
         print("Enter some text that you want to synthesize, Ctrl-Z to exit")
         try:
@@ -324,7 +321,7 @@ def speech_synthesis_to_audio_data_stream():
     # You can just get the audio from the result.
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
 
-    # Receives a text from console input and synthesize it to result.
+    # Receives a text from console input and synthesizes it to result.
     while True:
         print("Enter some text that you want to synthesize, Ctrl-Z to exit")
         try:
@@ -376,7 +373,7 @@ def speech_synthesis_events():
     speech_synthesizer.synthesizing.connect(lambda evt: print("Synthesis ongoing, audio chunk received: {}".format(evt)))
     speech_synthesizer.synthesis_completed.connect(lambda evt: print("Synthesis completed: {}".format(evt)))
 
-    # Receives a text from console input and synthesize it to result.
+    # Receives a text from console input and synthesizes it to result.
     while True:
         print("Enter some text that you want to synthesize, Ctrl-Z to exit")
         try:
@@ -411,7 +408,7 @@ def speech_synthesis_word_boundary_event():
     speech_synthesizer.synthesis_word_boundary.connect(lambda evt: print(
         "Word boundary event received: {}, audio offset in ms: {}ms".format(evt, evt.audio_offset / 10000)))
 
-    # Receives a text from console input and synthesize it to result.
+    # Receives a text from console input and synthesizes it to result.
     while True:
         print("Enter some text that you want to synthesize, Ctrl-Z to exit")
         try:
