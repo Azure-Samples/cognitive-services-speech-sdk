@@ -321,7 +321,7 @@ public:
     EventSignal<const SpeechSynthesisEventArgs&> SynthesisCanceled;
 
     /// <summary>
-    /// The event signals that a speech synthesis word bounary is received while the synthesis is on going.
+    /// The event signals that a speech synthesis word boundary is received while the synthesis is on going.
     /// Added in version 1.7.0
     /// </summary>
     EventSignal<const SpeechSynthesisWordBoundaryEventArgs&> WordBoundary;

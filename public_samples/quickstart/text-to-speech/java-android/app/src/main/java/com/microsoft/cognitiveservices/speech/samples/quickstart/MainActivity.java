@@ -13,17 +13,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
-import com.microsoft.cognitiveservices.speech.audio.AudioOutputStream;
-import com.microsoft.cognitiveservices.speech.audio.PushAudioOutputStream;
-import com.microsoft.cognitiveservices.speech.audio.PushAudioOutputStreamCallback;
 import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails;
 import com.microsoft.cognitiveservices.speech.SpeechSynthesisResult;
 import com.microsoft.cognitiveservices.speech.SpeechSynthesizer;
-
-import java.util.concurrent.Future;
 
 import static android.Manifest.permission.*;
 
@@ -35,9 +29,6 @@ public class MainActivity extends AppCompatActivity {
     private static String serviceRegion = "YourServiceRegion";
 
     private SpeechConfig speechConfig;
-    private PushAudioOutputStreamCallback speakerStream;
-    private PushAudioOutputStream outputStream;
-    private AudioConfig audioConfig;
     private SpeechSynthesizer synthesizer;
 
     @Override
@@ -53,12 +44,7 @@ public class MainActivity extends AppCompatActivity {
         speechConfig = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
         assert(speechConfig != null);
 
-        speakerStream = new SpeakerStream();
-        outputStream = AudioOutputStream.createPushStream(speakerStream);
-        assert(outputStream != null);
-
-        audioConfig = AudioConfig.fromStreamOutput(outputStream);
-        synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
+        synthesizer = new SpeechSynthesizer(speechConfig);
         assert(synthesizer != null);
     }
 
@@ -68,23 +54,16 @@ public class MainActivity extends AppCompatActivity {
 
         // Release speech synthesizer and its dependencies
         synthesizer.close();
-        audioConfig.close();
-        outputStream.close();
-        speakerStream.close();
         speechConfig.close();
     }
 
     public void onSpeechButtonClicked(View v) {
-        TextView outputMessage = (TextView) this.findViewById(R.id.outputMessage);
+        TextView outputMessage = this.findViewById(R.id.outputMessage);
         EditText speakText = this.findViewById(R.id.speakText);
 
         try {
-            Future<SpeechSynthesisResult> task = synthesizer.SpeakTextAsync(speakText.getText().toString());
-            assert(task != null);
-
-            // Note: this will block the UI thread, so eventually, you want to
-            //        register for the event (see full samples)
-            SpeechSynthesisResult result = task.get();
+            // Note: this will block the UI thread, so eventually, you want to register for the event 
+            SpeechSynthesisResult result = synthesizer.SpeakText(speakText.getText().toString());
             assert(result != null);
 
             if (result.getReason() == ResultReason.SynthesizingAudioCompleted) {

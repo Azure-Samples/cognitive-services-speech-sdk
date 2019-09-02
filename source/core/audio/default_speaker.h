@@ -24,7 +24,9 @@
 #if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP) // Desktop
 #define AUDIO_OUTPUT_DEVICE_AVAILABLE
 #endif
-#elif defined(__linux__) && !defined(ANDROID) && !defined(__ANDROID__) // Linux
+#elif defined(__linux__) // Linux
+#define AUDIO_OUTPUT_DEVICE_AVAILABLE
+#elif defined(ANDROID) || defined(__ANDROID__) // Android
 #define AUDIO_OUTPUT_DEVICE_AVAILABLE
 #elif defined(__MACH__) // macOS and iOS
 #define AUDIO_OUTPUT_DEVICE_AVAILABLE

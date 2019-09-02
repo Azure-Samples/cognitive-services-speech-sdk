@@ -96,6 +96,7 @@ void CSpxDefaultSpeaker::StopPlayback()
 
 uint32_t CSpxDefaultSpeaker::Write(uint8_t* buffer, uint32_t size)
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPX_IFTRUE_THROW_HR(m_audioFormat.get() == nullptr, SPXERR_UNINITIALIZED);
 
     // Initialize audio device when data is received for the first time

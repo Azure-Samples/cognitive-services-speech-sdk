@@ -1185,7 +1185,7 @@ static int ProcessAudio(void *p)
     {
         while (sem_wait(&audioData->audioFrameAvailable) < 0)
         {
-            // if a signal interruped the wait, continue waiting
+            // if a signal interrupted the wait, continue waiting
             if (errno != EINTR)
             {
                 ret = -1;

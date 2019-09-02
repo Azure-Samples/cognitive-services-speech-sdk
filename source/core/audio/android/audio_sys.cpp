@@ -14,6 +14,7 @@
 #include <sched.h>
 #include <linux/sched.h>
 #include <assert.h>
+#include "spx_namespace.h"
 #include "audio_sys.h"
 #include "audio_recorder.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -43,6 +44,10 @@
 #define SND_PCM_STREAM_PLAYBACK 2
 typedef int snd_pcm_stream_t;
 
+typedef std::shared_ptr<std::vector<uint8_t>> Buffer;
+
+#define N_PLAYBACK_BUFFERS 3
+
 using Microsoft::CognitiveServices::Speech::Impl::DataBuffer;
 typedef struct AUDIO_SYS_DATA_TAG
 {
@@ -50,6 +55,7 @@ typedef struct AUDIO_SYS_DATA_TAG
     ON_AUDIOOUTPUT_STATE_CALLBACK outputStateCallback;
     ON_AUDIOINPUT_STATE_CALLBACK  inputStateCallback;
     AUDIOINPUT_WRITE              audioWriteCallback;
+    AUDIOCOMPLETE_CALLBACK        audioCompleteCallback;
     void* userWriteContext;
     void* userOutputContext;
     void* userInputContext;
@@ -84,6 +90,18 @@ typedef struct AUDIO_SYS_DATA_TAG
     SLObjectItf slEngineObject;
     SLEngineItf slEngineInterface;
 
+    SLObjectItf outputMixObjectItf;
+    SLObjectItf playerObjectItf;
+    SLPlayItf playItf;
+    SLAndroidSimpleBufferQueueItf playBufferQueueItf;
+    // keep the enqueued buffer, so we can reuse them instead of re-allocating new buffers.
+    Buffer bufferStack[N_PLAYBACK_BUFFERS];
+    int curretBufferStackIndex;
+    std::atomic<int> nEnqueuedBuffers;
+
+    // used when stopping/desposing SLAndroidSimpleBufferQueue
+    LOCK_HANDLE stopLock;
+
 } AUDIO_SYS_DATA;
 
 
@@ -101,7 +119,8 @@ static bool audio_recorder_engine_service(void *ctx, uint32_t msg, void *data);
 static int open_wave_data(AUDIO_SYS_DATA* audioData, snd_pcm_stream_t streamType);
 static int output_async_read(void* userContext, uint8_t* pBuffer, uint32_t size);
 static int output_async(void *p);
-static int output_write_async(void *p);
+
+static void on_audio_buffer_played_callback(SLAndroidSimpleBufferQueueItf bufferQueue, void* pContext);
 
 static AUDIO_RESULT write_audio_stream(AUDIO_SYS_DATA*audioData, const AUDIO_WAVEFORMAT* outputWaveFmt, AUDIOINPUT_WRITE readCallback, AUDIOCOMPLETE_CALLBACK completedCallback, AUDIO_BUFFERUNDERRUN_CALLBACK bufferUnderrunCallback, void* userContext);
 
@@ -120,7 +139,7 @@ struct _ASYNCAUDIO
     THREAD_HANDLE          outputThread;
 };
 
-AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
+AUDIO_SYS_HANDLE audio_input_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 {
     AUDIO_SYS_DATA* result;
 
@@ -145,11 +164,190 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
     return result;
 }
 
+AUDIO_SYS_HANDLE audio_output_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
+{
+    SPX_DBG_TRACE_VERBOSE("setting up playback audioData");
+
+    // In OpenSL ES for Android, PCM is the only data format you can use with buffer queues.
+    // https://developer.android.com/ndk/guides/audio/opensl/opensl-for-android#pcm-data-format
+    if (Microsoft::CognitiveServices::Speech::Impl::WAVE_FORMAT_PCM != format->wFormatTag)
+    {
+        LogError("Unsupported audio format for playing");
+        return nullptr;
+    }
+
+    AUDIO_SYS_DATA* audioData;
+
+    audioData = (AUDIO_SYS_DATA*)malloc(sizeof(AUDIO_SYS_DATA));
+    if (audioData != NULL)
+    {
+        auto setup_ok = true;
+        memset(audioData, 0, sizeof(AUDIO_SYS_DATA));
+
+        audioData->channels = format->nChannels;
+        audioData->sampleRate = format->nSamplesPerSec;
+        audioData->bitsPerSample = format->wBitsPerSample;
+
+        audioData->currentOutputState = AUDIO_STATE_STOPPED;
+        audioData->currentInputState = AUDIO_STATE_STOPPED;
+
+        create_sl_engine(audioData);
+
+        // create the output mix
+        auto result = (*audioData->slEngineInterface)->CreateOutputMix(audioData->slEngineInterface, &audioData->outputMixObjectItf, 0, NULL, NULL);
+        if (SL_RESULT_SUCCESS != result) {
+            LogError("%s, creating output mix failed.", __FUNCTION__);
+            setup_ok = false;
+        }
+
+        if (setup_ok) {
+            // realize the output mix
+            result = (*audioData->outputMixObjectItf)->Realize(audioData->outputMixObjectItf, SL_BOOLEAN_FALSE);
+            if (SL_RESULT_SUCCESS != result) {
+                LogError("%s, realizing output mix failed.", __FUNCTION__);
+                setup_ok = false;
+            }
+        }
+
+        if (setup_ok) {
+            // configure audio source
+            SLDataLocator_AndroidSimpleBufferQueue loc_bufq = 
+            {
+                SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 
+                N_PLAYBACK_BUFFERS + 1
+            };
+
+            SLAndroidDataFormat_PCM_EX format_pcm;
+            memset(&format_pcm, 0, sizeof(format_pcm));
+            format_pcm.formatType = SL_DATAFORMAT_PCM;
+            // Only support 2 channels
+            // For channelMask, refer to wilhelm/src/android/channels.c for details
+            if (audioData->channels <= 1) {
+                format_pcm.numChannels = 1;
+                format_pcm.channelMask = SL_SPEAKER_FRONT_LEFT;
+            } else {
+                format_pcm.numChannels = 2;
+                format_pcm.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+            }
+            format_pcm.sampleRate = audioData->sampleRate * 1000;  // in units of milliHz
+            format_pcm.bitsPerSample = format_pcm.containerSize = static_cast<uint16_t>(audioData->bitsPerSample);
+            format_pcm.endianness = SL_BYTEORDER_LITTLEENDIAN;
+            SLDataSource audioSrc = {&loc_bufq, &format_pcm};
+
+            // configure audio sink
+            SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, audioData->outputMixObjectItf};
+            SLDataSink audioSnk = {&loc_outmix, NULL};
+            /*
+            * create fast path audio player: SL_IID_BUFFERQUEUE and SL_IID_VOLUME
+            * and other non-signal processing interfaces are ok.
+            */
+            SLInterfaceID ids[2] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME};
+            SLboolean req[2] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+            result = (*audioData->slEngineInterface)->CreateAudioPlayer(
+                audioData->slEngineInterface, &audioData->playerObjectItf, &audioSrc, &audioSnk,
+                sizeof(ids) / sizeof(ids[0]), ids, req);
+            if (SL_RESULT_SUCCESS != result) {
+                LogError("%s, creating audio player failed.", __FUNCTION__);
+                setup_ok = false;
+            }
+        }
+        
+        if (setup_ok) {
+            // realize the player
+            result = (*audioData->playerObjectItf)->Realize(audioData->playerObjectItf, SL_BOOLEAN_FALSE);
+            if (SL_RESULT_SUCCESS != result) {
+                LogError("%s, realizing player failed.", __FUNCTION__);
+                setup_ok = false;
+            }
+        }       
+
+        if (setup_ok) {
+            // get the play interface
+            result = (*audioData->playerObjectItf)
+                        ->GetInterface(audioData->playerObjectItf, SL_IID_PLAY, &audioData->playItf);
+            if (SL_RESULT_SUCCESS != result) {
+                LogError("%s, getting play interface failed.", __FUNCTION__);
+                setup_ok = false;
+            }
+        }        
+
+        if (setup_ok) {
+            // get the buffer queue interface
+            result = (*audioData->playerObjectItf)
+                        ->GetInterface(audioData->playerObjectItf, SL_IID_BUFFERQUEUE, &audioData->playBufferQueueItf);
+            if (SL_RESULT_SUCCESS != result) {
+                LogError("%s, getting buffer queue interface failed.", __FUNCTION__);
+                setup_ok = false;
+            }
+        }
+
+        if (setup_ok) {
+            // register callback on the buffer queue
+            result = (*audioData->playBufferQueueItf)
+                        ->RegisterCallback(audioData->playBufferQueueItf, on_audio_buffer_played_callback, audioData);
+            if (SL_RESULT_SUCCESS != result) {
+                LogError("%s, registering callback failed.", __FUNCTION__);
+                setup_ok = false;
+            }
+        }
+        
+        if (setup_ok) {
+            result = (*audioData->playItf)->SetPlayState(audioData->playItf, SL_PLAYSTATE_STOPPED);
+            if (SL_RESULT_SUCCESS != result) {
+                LogError("%s, setting play state failed.", __FUNCTION__);
+                setup_ok = false;
+            }
+        }        
+
+        if (setup_ok) {
+            audioData->stopLock = Lock_Init();
+        } else {
+            free(audioData);
+            audioData = nullptr;
+        }        
+    }
+
+    return audioData;
+}
+
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
+{
+    SPX_DBG_TRACE_VERBOSE("setting up AudioQueue");
+
+     switch (format->eDataFlow)
+        {
+        case AUDIO_CAPTURE:
+            return audio_input_create_with_parameters(format);
+            break;
+
+        case AUDIO_RENDER:
+            return audio_output_create_with_parameters(format);
+            break;
+
+        default:
+            LogError("Unknown audio data flow");
+            break;
+        }
+}
+
 void audio_destroy(AUDIO_SYS_HANDLE handle)
 {
     if (handle != nullptr)
     {
         AUDIO_SYS_DATA* audioData = reinterpret_cast<AUDIO_SYS_DATA*>(handle);
+
+        // check if the audio is stopped
+        if (AUDIO_STATE_STOPPED != audioData->currentOutputState)
+        {
+            LOGW("audio destroyed before stopping.");
+            audio_output_stop(handle);
+        }
+
+        if (audioData->stopLock != nullptr)
+        {
+            Lock(audioData->stopLock);
+        }
+
         if (audioData->pcmHandle != nullptr)
         {
             delete_audio_recorder(audioData);
@@ -164,6 +362,33 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
         Lock_Deinit(audioData->audioBufferLock);
         sem_destroy(&audioData->audioFramesAvailable);
         delete_sl_engine(audioData);
+
+        // destroy buffer queue audio player object, and invalidate all associated interfaces
+        if (audioData->playerObjectItf != nullptr) {
+            (*audioData->playerObjectItf)->Destroy(audioData->playerObjectItf);
+            audioData->playerObjectItf = nullptr;
+            audioData->playItf = nullptr;
+            audioData->playBufferQueueItf = nullptr;
+        }
+
+        // Consume all non-completed audio buffers
+        for (auto i = 0; i < N_PLAYBACK_BUFFERS; ++i)
+        {
+            audioData->bufferStack[i].reset();
+        }
+
+        // destroy output mix object, and invalidate all associated interfaces
+        if (audioData->outputMixObjectItf) {
+            (*audioData->outputMixObjectItf)->Destroy(audioData->outputMixObjectItf);
+            audioData->outputMixObjectItf = nullptr;
+        }
+
+        if (audioData->stopLock != nullptr)
+        {
+            Unlock(audioData->stopLock);
+        }
+        Lock_Deinit(audioData->stopLock);
+
         free(audioData);
     }
 }
@@ -234,39 +459,43 @@ AUDIO_RESULT audio_output_restart(AUDIO_SYS_HANDLE handle)
 
 AUDIO_RESULT audio_output_stop(AUDIO_SYS_HANDLE handle)
 {
-    AUDIO_SYS_DATA* audioData = reinterpret_cast<AUDIO_SYS_DATA*>(handle);
-    AUDIO_RESULT result = AUDIO_RESULT_INVALID_ARG;
-    AUDIO_STATE currentOutputState;
-
     if (handle != nullptr)
     {
-        do
-        {
-            // copy out the thread to cancel any outstanding work.
-            Lock(audioData->outputCanceledLock);
+        AUDIO_SYS_DATA* audioData = reinterpret_cast<AUDIO_SYS_DATA*>(handle);
+        if (AUDIO_STATE_STOPPED == audioData->currentOutputState) {
+            SPX_DBG_TRACE_VERBOSE("audio playback already stopped.");
+            return AUDIO_RESULT_OK;
+        }
+        SLuint32 state;
+        auto result = (*audioData->playItf)->GetPlayState(audioData->playItf, &state);
+        if (SL_RESULT_SUCCESS != result) {
+            LogError("%s, getting play state failed.", __FUNCTION__);
+            return AUDIO_RESULT_ERROR;
+        }
+        if (state == SL_PLAYSTATE_STOPPED) {
+            LOGW("Audio state in AUDIO_SYS_HANDLE is STOPPED, while the audio player is not.");
+            audioData->currentOutputState = AUDIO_STATE_STOPPED;
+            return AUDIO_RESULT_OK;
+        }
+        Lock(audioData->stopLock);
 
-            audioData->outputCanceled = true;
-            currentOutputState = audioData->currentOutputState;
+        auto audioResult = AUDIO_RESULT_OK;
+        result = (*audioData->playItf)->SetPlayState(audioData->playItf, SL_PLAYSTATE_STOPPED);
+        if (SL_RESULT_SUCCESS != result) {
+            LogError("%s, setting play state failed.", __FUNCTION__);
+            audioResult = AUDIO_RESULT_ERROR;
+        } else {
+            (*audioData->playBufferQueueItf)->Clear(audioData->playBufferQueueItf);
+            audioData->currentOutputState = AUDIO_STATE_STOPPED;
+        }
 
-            Unlock(audioData->outputCanceledLock);
-
-            // set result only once.
-            if (result == AUDIO_RESULT_INVALID_ARG)
-            {
-                if (currentOutputState != AUDIO_STATE_RUNNING)
-                {
-                    result = AUDIO_RESULT_INVALID_STATE;
-                }
-                else
-                {
-                    result = AUDIO_RESULT_OK;
-                }
-            }
-
-            // continue until the state has been reset.
-        } while (currentOutputState == AUDIO_STATE_RUNNING);
+        Unlock(audioData->stopLock);
+        return audioResult;
     }
-    return result;
+    else
+    {
+        return AUDIO_RESULT_INVALID_ARG;
+    }
 }
 
 STRING_HANDLE audio_output_get_name(AUDIO_SYS_HANDLE handle)
@@ -297,44 +526,79 @@ AUDIO_RESULT  audio_output_startasync(
     AUDIO_BUFFERUNDERRUN_CALLBACK bufferUnderrunCallback,
     void* userContext)
 {
-    AUDIO_RESULT ret = AUDIO_RESULT_ERROR;
-    struct _ASYNCAUDIO *async;
-
     if (!handle || !format || !readCallback || !completedCallback)
     {
-        return ret;
+        return AUDIO_RESULT_INVALID_ARG;
     }
 
-    if (handle->waveDataDirty)
+    AUDIO_SYS_DATA* audioData = reinterpret_cast<AUDIO_SYS_DATA*>(handle);
+
+    if (AUDIO_STATE_RUNNING == audioData->currentOutputState || AUDIO_STATE_STARTING == audioData->currentOutputState)
     {
-        if (open_wave_data(handle, SND_PCM_STREAM_PLAYBACK) != 0)
+        SPX_DBG_TRACE_VERBOSE("%s: the audio is starting or running, do nothing.", __FUNCTION__);
+        return AUDIO_RESULT_OK;
+    }
+    if (AUDIO_STATE_STOPPED != audioData->currentOutputState)
+    {
+        return AUDIO_RESULT_INVALID_STATE;
+    }
+
+    audioData->audioWriteCallback = readCallback;
+    audioData->userWriteContext = userContext;
+    audioData->audioCompleteCallback = completedCallback;
+    UNUSED(bufferUnderrunCallback);
+
+        auto result = (*audioData->playItf)->SetPlayState(audioData->playItf, SL_PLAYSTATE_STOPPED);
+    if (SL_RESULT_SUCCESS != result) {
+        LogError("%s, setting play state failed.", __FUNCTION__);
+        return AUDIO_RESULT_ERROR;
+    }
+
+    audioData->currentOutputState = AUDIO_STATE_STARTING;
+    auto audioResult = AUDIO_RESULT_OK;
+
+    // Allocate and enqueue buffers
+    int bufferByteSize = audioData->sampleRate * audioData->bitsPerSample * audioData->channels / 8 / 20; // 50ms buffer length
+    audioData->nEnqueuedBuffers = 0;
+    for (auto bufferIndex = 0; bufferIndex < N_PLAYBACK_BUFFERS; ++bufferIndex)
+    {
+        if (audioData->bufferStack[bufferIndex] == nullptr)
         {
-            LogError("open_wave_data");
-            return ret;
+            audioData->bufferStack[bufferIndex] = std::make_shared<std::vector<uint8_t>>(bufferByteSize, 0);
+        }
+        auto buffer = audioData->bufferStack[bufferIndex];
+        buffer->resize(bufferByteSize);
+
+        // TODO: update this when CanRead method in PullAudioOutputStream is available
+        int write_size = audioData->audioWriteCallback(audioData->userWriteContext, reinterpret_cast<uint8_t*>(buffer->data()), 512);
+        if (!write_size) {
+            LogError("The synthesized audio is too short to play.");
+        }
+        audioData->bufferStack[bufferIndex] = buffer;
+        result = (*audioData->playBufferQueueItf)->Enqueue(audioData->playBufferQueueItf, buffer->data(), write_size);
+        if (SL_RESULT_SUCCESS != result) {
+            LogError("%s, enqueue buffer failed.", __FUNCTION__);
+            audioResult = AUDIO_RESULT_ERROR;
+            break;
+        }
+        ++audioData->nEnqueuedBuffers;
+    }
+
+    if (AUDIO_RESULT_OK != audioResult) {
+        result = (*audioData->playItf)->SetPlayState(audioData->playItf, SL_PLAYSTATE_PLAYING);
+        if (SL_RESULT_SUCCESS != result) {
+            LogError("%s, setting play state failed.", __FUNCTION__);
+            audioResult = AUDIO_RESULT_ERROR;
         }
     }
 
-    async = (struct _ASYNCAUDIO *)malloc(sizeof(struct _ASYNCAUDIO));
-    if (!async)
-    {
-        return ret;
+    if (AUDIO_RESULT_OK == audioResult) {
+        audioData->currentOutputState = AUDIO_STATE_RUNNING;
+    } else {
+        audioData->currentOutputState = AUDIO_STATE_STOPPED;
     }
 
-    async->audioData = (AUDIO_SYS_DATA*)handle;
-    async->fp = nullptr;
-    async->format = *format;
-    async->readCallback = readCallback;
-    async->completedCallback = completedCallback;
-    async->bufferUnderrunCallback = bufferUnderrunCallback;
-    async->userContext = userContext;
-    ret = (AUDIO_RESULT)ThreadAPI_Create(&async->outputThread, output_write_async, async);
-
-    if (ret)
-    {
-        free(async);
-    }
-
-    return ret;
+    return audioResult;
 }
 
 AUDIO_RESULT audio_input_start(AUDIO_SYS_HANDLE handle)
@@ -818,21 +1082,6 @@ static int output_async_read(void* userContext, uint8_t* pBuffer, uint32_t size)
     return (int)size;
 }
 
-static int output_write_async(void *p)
-{
-    struct _ASYNCAUDIO *async = (struct _ASYNCAUDIO *)p;
-    write_audio_stream(
-        async->audioData,
-        &async->format,
-        async->readCallback,
-        async->completedCallback,
-        async->bufferUnderrunCallback,
-        async->userContext);
-    ThreadAPI_Join(async->outputThread, nullptr);
-    free(async);
-    return 0;
-}
-
 STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE handle)
 {
     auto audioData = reinterpret_cast<AUDIO_SYS_DATA*>(handle);
@@ -843,4 +1092,45 @@ STRING_HANDLE get_input_device_nice_name(AUDIO_SYS_HANDLE handle)
     }
 
     return nullptr;
+}
+
+static void on_audio_buffer_played_callback(SLAndroidSimpleBufferQueueItf bufferQueue, void* pContext)
+{
+    AUDIO_SYS_DATA* audioData = reinterpret_cast<AUDIO_SYS_DATA*>(pContext);
+
+    Lock(audioData->stopLock);
+
+    auto currentBuffer = audioData->bufferStack[audioData->curretBufferStackIndex];
+    audioData->curretBufferStackIndex = (audioData->curretBufferStackIndex + 1) % N_PLAYBACK_BUFFERS;
+
+    if (currentBuffer->size() > 0)
+    {
+        // call the read audio buffer callback
+        int write_size = audioData->audioWriteCallback(audioData->userWriteContext, reinterpret_cast<uint8_t*>(currentBuffer->data()), currentBuffer->size());
+        if (write_size > 0) {
+            // Re-enqueue used buffer
+            auto result = (*bufferQueue)->Enqueue(bufferQueue, currentBuffer->data(), write_size);
+            if (SL_RESULT_SUCCESS != result) {
+                audioData->currentOutputState = AUDIO_STATE_STOPPED;
+
+                    LogError("%s, enqueue failed.", __FUNCTION__);
+
+                    // call audio complete callback
+                    audioData->audioCompleteCallback(audioData->userWriteContext);
+            }
+        }
+        else {
+            // all audio data is read.
+            --audioData->nEnqueuedBuffers;
+            if (0 == audioData->nEnqueuedBuffers) // all audio buffers are played
+            {
+                // stop the audio
+                auto result = (*audioData->playItf)->SetPlayState(audioData->playItf, SL_PLAYSTATE_STOPPED);
+                SLASSERT(result);
+                audioData->currentOutputState = AUDIO_STATE_STOPPED;
+                audioData->audioCompleteCallback(audioData->userWriteContext);
+            }
+        }
+    }
+    Unlock(audioData->stopLock);
 }
