@@ -58,7 +58,7 @@ function runXcodeSuite {
   xcodeExtraArgs=( ${xcodeExtraArgs[@]/#/"--extra-args "} )
 
   testCases=(
-    "iPhone-X iOS-12-2"
+    "iPhone-X iOS-12-4"
   )
 
   # deactivated test cases:
