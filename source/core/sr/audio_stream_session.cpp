@@ -564,7 +564,7 @@ void CSpxAudioStreamSession::RemoveRecognizer(ISpxRecognizer* recognizer)
 void CSpxAudioStreamSession::OpenConnection(bool forContinuousRecognition)
 {
     auto task = CreateTask([=]() {
-        SPX_IFTRUE_THROW_HR(!IsState(SessionState::Idle), SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
+        SPX_IFTRUE_THROW_HR(!IsState(SessionState::Idle) && !IsKind(RecognitionKind::Keyword), SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
         EnsureInitRecoEngineAdapter();
         m_recoAdapter->OpenConnection(forContinuousRecognition ? false : true);
     }, false);
@@ -582,7 +582,7 @@ void CSpxAudioStreamSession::OpenConnection(bool forContinuousRecognition)
 void CSpxAudioStreamSession::CloseConnection()
 {
     auto task = CreateTask([=]() {
-        SPX_IFTRUE_THROW_HR(!IsState(SessionState::Idle), SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
+        SPX_IFTRUE_THROW_HR(!IsState(SessionState::Idle) && !IsKind(RecognitionKind::Keyword), SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
         if (m_recoAdapter != nullptr)
         {
             m_recoAdapter->CloseConnection();
@@ -802,6 +802,12 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StopRecognitionAsync(RecognitionKind s
 void CSpxAudioStreamSession::StartRecognizing(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    if (startKind == RecognitionKind::Keyword && IsKind(RecognitionKind::Keyword) && (model->GetFileName() == m_kwsModel->GetFileName()))
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: Already recognizing keyword, ignoring call...", __FUNCTION__);
+        return;
+    }
 
     if (startKind == RecognitionKind::Keyword)
     {
