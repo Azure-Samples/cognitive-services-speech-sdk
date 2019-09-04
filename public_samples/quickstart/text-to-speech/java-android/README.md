@@ -11,8 +11,8 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A PC (Windows, Linux, Mac) capable to run Android Studio.
-* Version 3.1 of [Android Studio](https://developer.android.com/studio/).
-* An ARM-based Android device (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working speaker.
+* Version 3.5 of [Android Studio](https://developer.android.com/studio/).
+* An ARM-based Android device (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working speaker, or an [Android emulator](https://developer.android.com/studio/run/emulator).
 
 ## Build the sample
 
@@ -24,12 +24,12 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * Edit the `MainActivity` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
+    For example, replace with `westus` if you are using the free trial subscription.
 * Press Ctrl+F9, or select **Build** \> **Make Project**.
 
 ## Run the sample
 
-* Connect your Android device to your development PC.
+* Connect your Android device to your development PC, or create an Android emulator.
 * Press Shift+F10, or select **Run** \> **Run 'app'**.
 * In the deployment target windows that comes up, pick your Android device.
 
