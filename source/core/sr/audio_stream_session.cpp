@@ -604,7 +604,11 @@ void CSpxAudioStreamSession::WaitForIdle(std::chrono::milliseconds timeout)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     unique_lock<mutex> lock(m_stateMutex);
-    if (!m_cv.wait_for(lock, timeout, [&] { return IsState(SessionState::Idle); }))
+    auto success = m_cv.wait_for(lock, timeout, [&]
+    {
+        return IsState(SessionState::Idle) || (IsKind(RecognitionKind::Keyword) && (IsState(SessionState::ProcessingAudio)));
+    });
+    if (!success)
     {
         SPX_DBG_TRACE_WARNING("%s: Timeout happened during waiting for Idle", __FUNCTION__);
     }
