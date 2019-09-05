@@ -13,7 +13,6 @@
 #include <speechapi_c.h>
 #include <speechapi_cxx_properties.h>
 #include <speechapi_cxx_speech_config.h>
-#include <speechapi_cxx_audio_stream.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -69,7 +68,7 @@ public:
         SPXSPEECHCONFIGHANDLE hspeechconfig = SPXHANDLE_INVALID;
         if (speechconfig != nullptr)
         {
-            hspeechconfig = (SPXSPEECHCONFIGHANDLE)(*speechconfig.get());
+            hspeechconfig = static_cast<SPXSPEECHCONFIGHANDLE>(*speechconfig.get());
         }
 
         // Use default speaker as default audio output
@@ -97,13 +96,13 @@ public:
         SPXSPEECHCONFIGHANDLE hspeechconfig = SPXHANDLE_INVALID;
         if (speechconfig != nullptr)
         {
-            hspeechconfig = (SPXSPEECHCONFIGHANDLE)(*speechconfig.get());
+            hspeechconfig = static_cast<SPXSPEECHCONFIGHANDLE>(*speechconfig.get());
         }
 
         SPXAUDIOCONFIGHANDLE haudioconfig = SPXHANDLE_INVALID;
         if (audioconfig != nullptr)
         {
-            haudioconfig = (SPXAUDIOCONFIGHANDLE)(*audioconfig.get());
+            haudioconfig = static_cast<SPXAUDIOCONFIGHANDLE>(*audioconfig.get());
         }
 
         SPX_THROW_ON_FAIL(::synthesizer_create_speech_synthesizer_from_config(&hsynth, hspeechconfig, haudioconfig));
@@ -119,7 +118,7 @@ public:
     std::shared_ptr<SpeechSynthesisResult> SpeakText(const std::string& text)
     {
         SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(::synthesizer_speak_text(m_hsynth, text.data(), (uint32_t)(text.length()), &hresult));
+        SPX_THROW_ON_FAIL(::synthesizer_speak_text(m_hsynth, text.data(), static_cast<uint32_t>(text.length()), &hresult));
 
         return std::make_shared<SpeechSynthesisResult>(hresult);
     }
@@ -132,7 +131,7 @@ public:
     std::shared_ptr<SpeechSynthesisResult> SpeakSsml(const std::string& ssml)
     {
         SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(::synthesizer_speak_ssml(m_hsynth, ssml.data(), (uint32_t)(ssml.length()), &hresult));
+        SPX_THROW_ON_FAIL(::synthesizer_speak_ssml(m_hsynth, ssml.data(), static_cast<uint32_t>(ssml.length()), &hresult));
 
         return std::make_shared<SpeechSynthesisResult>(hresult);
     }
@@ -149,7 +148,7 @@ public:
         auto future = std::async(std::launch::async, [keepAlive, this, text]() -> std::shared_ptr<SpeechSynthesisResult> {
             SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
             SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
-            SPX_THROW_ON_FAIL(::synthesizer_speak_text_async(m_hsynth, text.data(), (uint32_t)(text.length()), &hasync));
+            SPX_THROW_ON_FAIL(::synthesizer_speak_text_async(m_hsynth, text.data(), static_cast<uint32_t>(text.length()), &hasync));
             SPX_EXITFN_ON_FAIL(::synthesizer_speak_async_wait_for(hasync, UINT32_MAX, &hresult));
 
         SPX_EXITFN_CLEANUP:
@@ -174,7 +173,7 @@ public:
         auto future = std::async(std::launch::async, [keepAlive, this, ssml]() -> std::shared_ptr<SpeechSynthesisResult> {
             SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
             SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
-            SPX_THROW_ON_FAIL(::synthesizer_speak_ssml_async(m_hsynth, ssml.data(), (uint32_t)(ssml.length()), &hasync));
+            SPX_THROW_ON_FAIL(::synthesizer_speak_ssml_async(m_hsynth, ssml.data(), static_cast<uint32_t>(ssml.length()), &hasync));
             SPX_EXITFN_ON_FAIL(::synthesizer_speak_async_wait_for(hasync, UINT32_MAX, &hresult));
 
         SPX_EXITFN_CLEANUP:
@@ -195,7 +194,7 @@ public:
     std::shared_ptr<SpeechSynthesisResult> StartSpeakingText(const std::string& text)
     {
         SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(::synthesizer_start_speaking_text(m_hsynth, text.data(), (uint32_t)(text.length()), &hresult));
+        SPX_THROW_ON_FAIL(::synthesizer_start_speaking_text(m_hsynth, text.data(), static_cast<uint32_t>(text.length()), &hresult));
 
         return std::make_shared<SpeechSynthesisResult>(hresult);
     }
@@ -208,7 +207,7 @@ public:
     std::shared_ptr<SpeechSynthesisResult> StartSpeakingSsml(const std::string& ssml)
     {
         SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(::synthesizer_start_speaking_ssml(m_hsynth, ssml.data(), (uint32_t)(ssml.length()), &hresult));
+        SPX_THROW_ON_FAIL(::synthesizer_start_speaking_ssml(m_hsynth, ssml.data(), static_cast<uint32_t>(ssml.length()), &hresult));
 
         return std::make_shared<SpeechSynthesisResult>(hresult);
     }
@@ -225,7 +224,7 @@ public:
         auto future = std::async(std::launch::async, [keepAlive, this, text]() -> std::shared_ptr<SpeechSynthesisResult> {
             SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
             SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
-            SPX_THROW_ON_FAIL(::synthesizer_start_speaking_text_async(m_hsynth, text.data(), (uint32_t)(text.length()), &hasync));
+            SPX_THROW_ON_FAIL(::synthesizer_start_speaking_text_async(m_hsynth, text.data(), static_cast<uint32_t>(text.length()), &hasync));
             SPX_EXITFN_ON_FAIL(::synthesizer_speak_async_wait_for(hasync, UINT32_MAX, &hresult));
 
         SPX_EXITFN_CLEANUP:
@@ -250,7 +249,7 @@ public:
         auto future = std::async(std::launch::async, [keepAlive, this, ssml]() -> std::shared_ptr<SpeechSynthesisResult> {
             SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
             SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
-            SPX_THROW_ON_FAIL(::synthesizer_start_speaking_ssml_async(m_hsynth, ssml.data(), (uint32_t)(ssml.length()), &hasync));
+            SPX_THROW_ON_FAIL(::synthesizer_start_speaking_ssml_async(m_hsynth, ssml.data(), static_cast<uint32_t>(ssml.length()), &hasync));
             SPX_EXITFN_ON_FAIL(::synthesizer_speak_async_wait_for(hasync, UINT32_MAX, &hresult));
 
         SPX_EXITFN_CLEANUP:
@@ -281,7 +280,7 @@ public:
     /// Added in version 1.7.0
     /// </summary>
     /// <returns>Authorization token</returns>
-    SPXSTRING GetAuthorizationToken()
+    SPXSTRING GetAuthorizationToken() const
     {
         return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, SPXSTRING());
     }
@@ -292,6 +291,14 @@ public:
     ~SpeechSynthesizer()
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+        // Disconnect the event signals in reverse construction order
+        WordBoundary.DisconnectAll();
+        SynthesisCanceled.DisconnectAll();
+        SynthesisCompleted.DisconnectAll();
+        Synthesizing.DisconnectAll();
+        SynthesisStarted.DisconnectAll();
+
         synthesizer_handle_release(m_hsynth);
     }
 
