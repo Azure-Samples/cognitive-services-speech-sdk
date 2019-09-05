@@ -211,9 +211,9 @@ AUDIO_SYS_HANDLE audio_output_create_with_parameters(AUDIO_SETTINGS_HANDLE forma
 
         if (setup_ok) {
             // configure audio source
-            SLDataLocator_AndroidSimpleBufferQueue loc_bufq = 
+            SLDataLocator_AndroidSimpleBufferQueue loc_bufq =
             {
-                SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 
+                SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,
                 N_PLAYBACK_BUFFERS + 1
             };
 
@@ -251,7 +251,7 @@ AUDIO_SYS_HANDLE audio_output_create_with_parameters(AUDIO_SETTINGS_HANDLE forma
                 setup_ok = false;
             }
         }
-        
+
         if (setup_ok) {
             // realize the player
             result = (*audioData->playerObjectItf)->Realize(audioData->playerObjectItf, SL_BOOLEAN_FALSE);
@@ -259,7 +259,7 @@ AUDIO_SYS_HANDLE audio_output_create_with_parameters(AUDIO_SETTINGS_HANDLE forma
                 LogError("%s, realizing player failed.", __FUNCTION__);
                 setup_ok = false;
             }
-        }       
+        }
 
         if (setup_ok) {
             // get the play interface
@@ -269,7 +269,7 @@ AUDIO_SYS_HANDLE audio_output_create_with_parameters(AUDIO_SETTINGS_HANDLE forma
                 LogError("%s, getting play interface failed.", __FUNCTION__);
                 setup_ok = false;
             }
-        }        
+        }
 
         if (setup_ok) {
             // get the buffer queue interface
@@ -290,21 +290,21 @@ AUDIO_SYS_HANDLE audio_output_create_with_parameters(AUDIO_SETTINGS_HANDLE forma
                 setup_ok = false;
             }
         }
-        
+
         if (setup_ok) {
             result = (*audioData->playItf)->SetPlayState(audioData->playItf, SL_PLAYSTATE_STOPPED);
             if (SL_RESULT_SUCCESS != result) {
                 LogError("%s, setting play state failed.", __FUNCTION__);
                 setup_ok = false;
             }
-        }        
+        }
 
         if (setup_ok) {
             audioData->stopLock = Lock_Init();
         } else {
             free(audioData);
             audioData = nullptr;
-        }        
+        }
     }
 
     return audioData;
@@ -548,7 +548,7 @@ AUDIO_RESULT  audio_output_startasync(
     audioData->audioCompleteCallback = completedCallback;
     UNUSED(bufferUnderrunCallback);
 
-        auto result = (*audioData->playItf)->SetPlayState(audioData->playItf, SL_PLAYSTATE_STOPPED);
+    auto result = (*audioData->playItf)->SetPlayState(audioData->playItf, SL_PLAYSTATE_STOPPED);
     if (SL_RESULT_SUCCESS != result) {
         LogError("%s, setting play state failed.", __FUNCTION__);
         return AUDIO_RESULT_ERROR;
@@ -584,7 +584,7 @@ AUDIO_RESULT  audio_output_startasync(
         ++audioData->nEnqueuedBuffers;
     }
 
-    if (AUDIO_RESULT_OK != audioResult) {
+    if (AUDIO_RESULT_OK == audioResult) {
         result = (*audioData->playItf)->SetPlayState(audioData->playItf, SL_PLAYSTATE_PLAYING);
         if (SL_RESULT_SUCCESS != result) {
             LogError("%s, setting play state failed.", __FUNCTION__);
