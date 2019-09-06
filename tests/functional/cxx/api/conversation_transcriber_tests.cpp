@@ -205,6 +205,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
         recognizer->SetConversationId(myId);
         StartMeetingAndVerifyResult(recognizer.get(), katie, move(result), katieSteve.m_utterance);
     }
+
     SPXTEST_SECTION("AddParticipantByUserId")
     {
         auto result = make_shared<RecoPhrases>();
@@ -213,6 +214,12 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
         auto myId = PAL::CreateGuidWithDashesUTF8();
         INFO(myId);
         recognizer->SetConversationId(myId);
+
+        //Verify maximum number of participants
+        int max_expected = 10;
+        recognizer->Properties.SetProperty("Conversation-MaximumAllowedParticipants", std::to_string(max_expected));
+        auto maxInAudioConfig = std::stoi(recognizer->Properties.GetProperty("Conversation-MaximumAllowedParticipants"), nullptr, 10);
+        REQUIRE(max_expected == maxInAudioConfig);
 
         // add by user id
         REQUIRE_NOTHROW(recognizer->AddParticipant("AddParticipantById_1"));

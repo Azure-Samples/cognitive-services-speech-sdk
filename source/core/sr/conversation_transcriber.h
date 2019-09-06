@@ -130,6 +130,7 @@ private:
     void DoneUpdateParticipants();
 
     void SetRecoMode();
+    int GetMaxAllowedParticipants();
 
 private:
 

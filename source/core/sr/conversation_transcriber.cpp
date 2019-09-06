@@ -244,13 +244,43 @@ void CSpxConversationTranscriber::SanityCheckParticipants(const std::string& id,
     }
 
     // check if we exceed the max limit
-    auto total_participants = m_participants_so_far.size() + m_current_participants.size();
-    if (total_participants >= m_max_number_of_participants)
+    auto total_participants = (int)(m_participants_so_far.size() + m_current_participants.size());
+    int max_allowed_participants = GetMaxAllowedParticipants();
+
+    if (total_participants >= max_allowed_participants)
     {
         std::ostringstream os;
-        os << "The number of participants in the conversation '" << m_conversation_id << "' is " << total_participants << ". Max allowed is " << m_max_number_of_participants;
+        os << "The number of participants in the conversation '" << m_conversation_id << "' is " << total_participants << ". Max allowed is " << max_allowed_participants;
         ThrowInvalidArgumentException(os.str());
     }
+}
+
+int CSpxConversationTranscriber::GetMaxAllowedParticipants()
+{
+    int max_allowed_participants = -1;
+
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+
+    auto max_participants_set_by_client = properties->GetStringValue("Conversation-MaximumAllowedParticipants");
+
+    if (!max_participants_set_by_client.empty())
+    {
+        try
+        {
+            max_allowed_participants = std::stoi(max_participants_set_by_client, nullptr, 10);
+        }
+        catch (const std::invalid_argument& ia)
+        {
+            UNUSED(ia);
+            SPX_TRACE_WARNING("Invalid maximum number of participants set. Defaulting to %d", m_max_number_of_participants);
+        }
+    }
+    //Incase of any error in parsing max allowed participants, We are defaulting to m_max_number_of_participants which is 50
+    if (max_allowed_participants <= 0)
+    {
+        max_allowed_participants = m_max_number_of_participants;
+    }
+    return max_allowed_participants;
 }
 
 void to_json(json& j, const CSpxConversationTranscriber::CSpxVoiceSignature& voice)
