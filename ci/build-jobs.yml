@@ -195,15 +195,6 @@ jobs:
        New-Item -ItemType Directory (Split-Path $logDir)
      }
      Move-Item $(System.ArtifactsDirectory)/In/CodeAnalysisLogs $logDir -verbose -force
-   
-     <#
-       not required - from the logs it looks like TSA V2 is doing this copy operation automatically
-   
-       New-Item  -ItemType Directory $logDir/FortifySCA
-       New-Item  -ItemType Directory $logDir/FortifySCA/HPEFortifySCALogs
-   
-       Copy-Item $(System.ArtifactsDirectory)/sca_artifacts/1.2.3.fpr $logDir/FortifySCA/HPEFortifySCALogs/1.2.3.FortifySCA.fpr -verbose -force
-     #>
     errorActionPreference: continue
     displayName: 'Move logs to target location'
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
@@ -212,7 +203,7 @@ jobs:
       tsaVersion: TsaV2
       codebase: NewOrUpdate
       codeBaseName: 'Carbon_master'
-      notificationAlias: 'speechsdkbuildadmins@microsoft.com'
+      notificationAlias: 'cdev@microsoft.com'
       codeBaseAdmins: 'REDMOND\cbasoglu;REDMOND\brianem'
       instanceUrlForTsaV2: MSASG
       projectNameMSASG: 'Bing_and_IPG'
