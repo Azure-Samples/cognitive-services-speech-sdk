@@ -93,15 +93,15 @@
     },
 
     // Location: external/json, .gitmodules
-    // Tag: v3.1.2
-    // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=683287&_a=progress
-    // IP Scan: https://ossmsft.visualstudio.com/DefaultCollection/Reviews/_workitems/edit/17417
+    // Tag: v3.7.0
+    // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=1729456&_a=progress
+    // IP Scan: https://ossmsft.visualstudio.com/DefaultCollection/Reviews/_workitems/edit/29667
     // Usage: distributed
     {
       "component": {
         "type": "git",
         "git": {
-          "commitHash": "d2dd27dc3b8472dbaa7d66f83619b3ebcd9185fe",
+          "commitHash": "53c3eefa2cf790a7130fed3e13a3be35c2f2ace2",
           "repositoryUrl": "https://github.com/nlohmann/json.git"
         }
       }
@@ -181,11 +181,11 @@
           "downloadUrl": "https://services.gradle.org/distributions/gradle-4.4-all.zip"
         }
       }
-    },        
+    },
     // Location:
     // public_samples/samples/unity/speechrecognizer/Assets/SpeechSDKSample/Scripts/JSONParser.cs
-    // OSS request: https://ossmsft.visualstudio.com/_oss?searchText=zanders3&_a=artifact
-    // IP Scan: TBD...
+    // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=1727486&_a=progress
+    // IP Scan: https://dev.azure.com/ossmsft/Reviews/_workitems/edit/29672
     // Usage: TinyJSON is used and shipped as a code snippet in this sample.
     // It is used to parse the JSON response from the speech service.
     {

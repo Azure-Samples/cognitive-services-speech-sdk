@@ -14,6 +14,7 @@
 #include <chrono>
 #include <stdio.h>
 #include <stdarg.h>
+#include <sstream>
 
 // Note: in case of android, log to logcat
 #if defined(ANDROID) || defined(__ANDROID__)

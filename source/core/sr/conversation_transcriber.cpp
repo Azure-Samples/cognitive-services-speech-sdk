@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "json.h"
+#include <sstream>
 #include "conversation_transcriber.h"
 
 namespace Microsoft {

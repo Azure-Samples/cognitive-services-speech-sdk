@@ -18,15 +18,7 @@
 #include "property_id_2_name_map.h"
 #include "file_utils.h"
 
-#ifdef _MSC_VER
-#pragma warning( push )
-// disable: (8300,27): error 28020:  : The expression '0&lt;=_Param_(1)&amp;&amp;_Param_(1)&lt;=64-1' is not true at this call.
-#pragma warning( disable : 28020 )
-#include "json.hpp"
-#pragma warning( pop )
-#else
-#include "json.hpp"
-#endif
+#include "json.h"
 
 #define SPX_DBG_TRACE_UNIDEC_AUDIO 0
 

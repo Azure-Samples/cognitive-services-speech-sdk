@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "recognizer.h"
 #include <future>
+#include <sstream>
 #include "handle_table.h"
 #include "site_helpers.h"
 #include "service_helpers.h"

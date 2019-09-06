@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <thread>
 #include <chrono>
+#include <sstream>
 
 #include "stdafx.h"
 #include "exception.h"

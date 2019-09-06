@@ -7,6 +7,7 @@
 #include "speech_translation_config.h"
 #include "property_id_2_name_map.h"
 #include "usp.h"
+#include <sstream>
 
 namespace Microsoft {
 namespace CognitiveServices {

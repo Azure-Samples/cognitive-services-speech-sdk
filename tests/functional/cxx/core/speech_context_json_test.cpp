@@ -7,6 +7,7 @@
 #include <thread>
 #include <random>
 #include <string>
+#include <sstream>
 
 #include "exception.h"
 #define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)

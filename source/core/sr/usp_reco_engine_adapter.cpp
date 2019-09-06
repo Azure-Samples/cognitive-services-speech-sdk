@@ -880,7 +880,7 @@ void CSpxUspRecoEngineAdapter::SetSpeechConfigMessage(const ISpxNamedProperties&
         {
             ThrowInvalidArgumentException("User must provide non-empty value for a speech.config field.");
         }
-        speechConfig["context"][name.c_str()] = json::parse(value.c_str());
+        speechConfig["context"][name] = json::parse(value);
         SPX_DBG_TRACE_VERBOSE("Set '%s' as '%s' in speech.config.", name.c_str(), value.c_str());
     }
     m_speechConfig = speechConfig.dump();
@@ -2030,7 +2030,7 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
         {
             ThrowInvalidArgumentException("User provided an empty name or value in a speech.context field");
         }
-        contextJson[name.c_str()] = json::parse(value);
+        contextJson[name] = json::parse(value);
         SPX_DBG_TRACE_VERBOSE("Set '%s' as '%s' in speech.context", name.c_str(), value.c_str());
     }
 
@@ -2328,7 +2328,7 @@ json CSpxUspRecoEngineAdapter::GetPhraseDetectionJson(const string& recoMode)
 {
     json phraseDetectionJson;
     SPX_DBG_ASSERT(!recoMode.empty());
-    phraseDetectionJson["mode"] = recoMode.c_str();
+    phraseDetectionJson["mode"] = recoMode;
     phraseDetectionJson["onSuccess"]["action"] = "Translate";
     phraseDetectionJson["onInterim"]["action"] = "Translate";
     return phraseDetectionJson;
@@ -2338,9 +2338,8 @@ json CSpxUspRecoEngineAdapter::GetPhraseOutputJson(const string& recoMode, bool 
 {
     json phraseOutputJson;
     SPX_DBG_ASSERT(!recoMode.empty());
-    auto recModeCStr = recoMode.c_str();
-    phraseOutputJson["interimResults"][recModeCStr]["resultType"] = needSpeechMessages ? "Auto" : "None";
-    phraseOutputJson["phraseResults"][recModeCStr]["resultType"] = needSpeechMessages ? "Always" : "None";
+    phraseOutputJson["interimResults"][recoMode]["resultType"] = needSpeechMessages ? "Auto" : "None";
+    phraseOutputJson["phraseResults"][recoMode]["resultType"] = needSpeechMessages ? "Always" : "None";
     return phraseOutputJson;
 }
 
