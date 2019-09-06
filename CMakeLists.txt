@@ -126,7 +126,7 @@ elseif(SPEECHSDK_OS STREQUAL "Android")
   option(BUILD_CSHARP "Build C# module" OFF)
   option(BUILD_JAVA "Build Java/Android SWIG module" ON)
   set(use_default_uuid ON CACHE BOOL "")
-  add_compile_definitions("USING_DEFAULT_UUID")
+  add_compile_definitions("ANDROID_UUID")
   set(CMAKE_SYSTEM_NAME Android)
   set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION clang)
   # Note: the API levels below are also matched in the Android OpenSSL build,

@@ -11,7 +11,9 @@
 #include "guid_utils.h"
 #include "azure_c_shared_utility_uniqueid_wrapper.h"
 
-#ifdef USING_DEFAULT_UUID
+#if defined(ANDROID_UUID)
+#include <fstream>
+#elif defined(USING_DEFAULT_UUID)
 #include <random>
 #include <array>
 #endif
@@ -23,6 +25,12 @@ namespace PAL
 
     std::string generate_uuid()
     {
+#ifdef ANDROID_UUID
+        std::ifstream uuid_file{ "/proc/sys/kernel/random/uuid" };
+        std::string uuid;
+        uuid_file >> uuid;
+        return uuid;
+#else
         std::string uuidStr(UUID_LENGTH, char{ 0 });
 #ifdef USING_DEFAULT_UUID
         /* HACKHACK: This is to mitigate a problem that exists with the stubbed implementation of guids in azure_c_shared_utilities, work item #1944478 tracks the proper fix */
@@ -34,6 +42,7 @@ namespace PAL
         auto result = UniqueId_Generate(&uuidStr[0], UUID_LENGTH + 1);
         SPX_IFTRUE_THROW_HR(result != UNIQUEID_OK, SPXERR_UUID_CREATE_FAILED);
         return uuidStr;
+#endif
     }
 
 
@@ -70,7 +79,7 @@ namespace PAL
 
         if (!uuidStrValid)
         {
-#if defined(ANDROID) ||defined(_ANDROID_)
+#if defined(ANDROID) || defined(_ANDROID_)
             FILE *fp = fopen("/data/sdk-device-uuid.bin", "r");
             if (fp)
             {
@@ -83,10 +92,9 @@ namespace PAL
 
             if (!uuidStrValid)
             {
-                auto result = UniqueId_Generate(&uuidStr[0], UUID_LENGTH + 1);
-                SPX_IFTRUE_THROW_HR(result != UNIQUEID_OK, SPXERR_UUID_CREATE_FAILED);
+                uuidStr = generate_uuid();
 
-#if defined(ANDROID) ||defined(_ANDROID_)
+#if defined(ANDROID) || defined(_ANDROID_)
                 fp = fopen("/data/sdk-device-uuid.bin", "w+");
                 if (fp)
                 {
