@@ -168,41 +168,59 @@ jobs:
     continueOnError: true
     condition: contains(variables['SPEECHSDK_BUILD_PHASES'], ' TsaUpload ')
 
+# Phase responsible to upload to TSA database
 - job: TsaUpload
   dependsOn: [Pre, WindowsSdlBuild, WindowsSDLFortifyJava]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
   pool:
-    name: Carbon
+    name: Hosted VS2017
   timeoutInMinutes: 30
   steps:
   - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading CodeAnalysisLogs artifacts'
+    displayName: 'Downloading CodeAnalysisLogs Artifacts'
     inputs:
       artifactName: CodeAnalysisLogs
       downloadPath: $(System.ArtifactsDirectory)/In
-  - powershell: |
-      $logDir = "$(Agent.BuildDirectory)/_sdt/logs"
-      if (Test-Path $logDir) {
-        Remove-Item -Recurse -Force $logDir
-      }
-      if (-not (Test-Path (Split-Path $logDir))) {
-        New-Item -ItemType Directory (Split-Path $logDir)
-      }
-      Move-Item $(System.ArtifactsDirectory)/In/CodeAnalysisLogs $logDir
-    displayName: Move logs to target location
   - task: DownloadBuildArtifacts@0
-    displayName: 'Download FortifySDL logs from artifacts'
+    displayName: 'Download FortifySDL logs Artifacts'
     inputs:
-      artifactName: sca_artifacts
-      downloadPath: '$(System.ArtifactsDirectory)/sca_artifacts'
+      artifactName: 'sca_artifacts'
+      downloadPath: '$(System.ArtifactsDirectory)'      
+  - powershell: |
+     $logDir = "$(Agent.BuildDirectory)/_sdt/logs"
+     if (Test-Path $logDir) {
+       Remove-Item -Recurse -Force $logDir
+     }
+     if (-not (Test-Path (Split-Path $logDir))) {
+       New-Item -ItemType Directory (Split-Path $logDir)
+     }
+     Move-Item $(System.ArtifactsDirectory)/In/CodeAnalysisLogs $logDir -verbose -force
+   
+     <#
+       not required - from the logs it looks like TSA V2 is doing this copy operation automatically
+   
+       New-Item  -ItemType Directory $logDir/FortifySCA
+       New-Item  -ItemType Directory $logDir/FortifySCA/HPEFortifySCALogs
+   
+       Copy-Item $(System.ArtifactsDirectory)/sca_artifacts/1.2.3.fpr $logDir/FortifySCA/HPEFortifySCALogs/1.2.3.FortifySCA.fpr -verbose -force
+     #>
+    errorActionPreference: continue
+    displayName: 'Move logs to target location'
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
-    displayName: 'TSA upload to Codebase: Carbon_master Stamp: Bing'
+    displayName: 'TSA upload to Codebase: Carbon_master Version: TsaV2'
     inputs:
-      tsaStamp: Bing
+      tsaVersion: TsaV2
+      codebase: NewOrUpdate
       codeBaseName: 'Carbon_master'
-    # TODO or fail on error?
+      notificationAlias: 'speechsdkbuildadmins@microsoft.com'
+      codeBaseAdmins: 'REDMOND\cbasoglu;REDMOND\brianem'
+      instanceUrlForTsaV2: MSASG
+      projectNameMSASG: 'Bing_and_IPG'
+      areaPath: 'Bing_and_IPG\Speech\Service\Client\SpeechSDK'
+      iterationPath: 'Bing_and_IPG\Backlog'
+      uploadAPIScan: false
     continueOnError: true
-    condition: succeededOrFailed()
+    condition: always()
 
 # This phase is responsible for running CompEval test (Windows C# only)
 # For now, it is triggered by a separate build definition in AzureDevOps: "CompEval Test"
