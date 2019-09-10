@@ -456,16 +456,6 @@ TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
     auto result = make_shared<RecoPhrases>();
     ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
 
-    SPXTEST_SECTION("end_conversation")
-    {
-        auto myId = PAL::CreateGuidWithDashesUTF8();
-        INFO(myId);
-        REQUIRE_NOTHROW(recognizer->SetConversationId(myId));
-
-        REQUIRE_NOTHROW(recognizer->EndConversationAsync().get());
-    }
-
-
     SPXTEST_SECTION("conversation_id")
     {
         REQUIRE_THROWS(recognizer->SetConversationId(""));
@@ -504,6 +494,7 @@ TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
         SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
     }
 }
+
 TEST_CASE("conversation_online_1_channel_file", "[api][cxx]")
 {
     auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
@@ -520,6 +511,35 @@ TEST_CASE("conversation_online_1_channel_file", "[api][cxx]")
     recognizer->SetConversationId(myId);
 
     StartMeetingAndVerifyResult(recognizer.get(), p, move(result), weather.m_utterance);
+}
+
+TEST_CASE("conversation_online_end_meeting", "[api][cxx]")
+{
+    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
+
+    weather.UpdateFullFilename(Config::InputDir);
+    auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
+    // set iCalUid
+    recognizer->Properties.SetProperty("iCalUid", "040000008200E00074C5B7101A82E008000000001003D722197CD4010000000000000000100000009E970FDF583F9D4FB999E607891A2F66");
+
+    // set callId
+    recognizer->Properties.SetProperty("callId", PAL::CreateGuidWithDashesUTF8());
+
+    // set organizer
+    recognizer->Properties.SetProperty("organizer", "SP049@somedomain.com");
+
+    auto result = make_shared<RecoPhrases>();
+    ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
+    auto p = Participant::From("one@example.com", "en-us");
+
+    auto myId = PAL::CreateGuidWithDashesUTF8();
+    INFO(myId);
+    recognizer->SetConversationId(myId);
+
+    StartMeetingAndVerifyResult(recognizer.get(), p, move(result), weather.m_utterance);
+
+    REQUIRE_NOTHROW(recognizer->EndConversationAsync().get());
 }
 #if 0
 TEST_CASE("conversation_online_microphone", "[api][cxx]")

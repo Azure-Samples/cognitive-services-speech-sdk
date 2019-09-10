@@ -43,7 +43,7 @@ void CSpxSynthesizer::Init()
     // dev user at or above the CAPI. Thus ... we must hold it alive in order for the properties to be
     // obtainable via the standard ISpxNamedProperties mechanisms... It will be released in ::Term()
     m_siteKeepAlive = GetSite();
-    
+
     CheckLogFilename();
 
     EnsureTtsEngineAdapter();
@@ -570,7 +570,7 @@ void CSpxSynthesizer::InitializeTtsEngineAdapter()
     std::string endpoint = GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
     if (!endpoint.empty())
     {
-        auto url = CSpxSynthesisHelper::ParseUrl(endpoint);
+        auto url = HttpUtils::ParseUrl(endpoint);
         if (Protocol::HTTP == url.protocol)
         {
             tryRest = true;
@@ -580,7 +580,7 @@ void CSpxSynthesizer::InitializeTtsEngineAdapter()
             tryUsp = true;
         }
     }
-    
+
     bool tryMock = PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Mock", PAL::BoolToString(false).c_str())) ||
                    PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseTtsEngine-Mock", PAL::BoolToString(false).c_str()));
     tryRest = tryRest || PAL::ToBool(GetStringValue("SDK-INTERNAL-UseTtsEngine-Rest", PAL::BoolToString(false).c_str())) ||

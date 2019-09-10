@@ -7,7 +7,7 @@
 
 #include <map>
 #include <string>
-#include <azure_c_shared_utility/httpapi.h>
+#include <azure_c_shared_utility_httpapi_wrapper.h>
 #include "http_exception.h"
 
 namespace Microsoft {

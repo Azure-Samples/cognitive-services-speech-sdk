@@ -91,7 +91,7 @@ std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri,
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_REST_TTS_AUTHENTICATOR, __FUNCTION__);
 
     // Parse URL
-    auto url = CSpxSynthesisHelper::ParseUrl(issueTokenUri);
+    auto url = HttpUtils::ParseUrl(issueTokenUri);
 
     // Allocate resources
     HTTP_HANDLE http_connect = HTTPAPI_CreateConnection_Advanced(
@@ -145,7 +145,7 @@ std::string CSpxRestTtsAuthenticator::HttpPost(const std::string& issueTokenUri,
             throw std::runtime_error("Could not add HTTP request header: Host");
         }
 
-        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, "Ocp-Apim-Subscription-Key", subscriptionKey.data()) != HTTP_HEADERS_OK)
+        if (HTTPHeaders_AddHeaderNameValuePair(httpRequestHeaders, SUBSCRIPTION_KEY_NAME, subscriptionKey.data()) != HTTP_HEADERS_OK)
         {
             throw std::runtime_error("Could not add HTTP request header: Ocp-Apim-Subscription-Key");
         }

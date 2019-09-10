@@ -9,6 +9,11 @@
 #include "json.h"
 #include <sstream>
 #include "conversation_transcriber.h"
+#include "spx_namespace.h"
+#include "usp.h"
+#include "http_utils.h"
+#include "http_request.h"
+#include "http_response.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -40,6 +45,15 @@ void CSpxConversationTranscriber::Init()
     m_threadService = SpxQueryService<ISpxThreadService>(GetSite());
     SPX_IFTRUE_THROW_HR(m_threadService == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
 
+    // Initialize websocket platform
+    Microsoft::CognitiveServices::Speech::USP::PlatformInit(nullptr, 0, nullptr, nullptr);
+
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
+
+    m_subscriptionKey = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), "");
+    m_endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
+
     SetRecoMode();
 }
 
@@ -66,10 +80,7 @@ void CSpxConversationTranscriber::EndConversation()
 {
     auto keepAlive = SpxSharedPtrFromThis<ISpxConversationTranscriber>(this);
     std::packaged_task<void()> task([=]() {
-
-        //todo: need a way to verify whether the conversation has started or not.
-        m_action = ActionType::END_CONVERSATION;
-        SendSpeehEventMessageInternal();
+        HttpSendEndMeetingRequest();
     });
     m_threadService->ExecuteSync(move(task));
 }
@@ -357,5 +368,89 @@ std::string CSpxConversationTranscriber::CreateSpeechEventPayload(bool atStartAu
     return speech_event.dump();
 }
 
+void CSpxConversationTranscriber::HttpAddHeaders(HttpRequest& request)
+{
+    // we use either subscription key or auth token.
+    bool done = false;
+    if (!m_subscriptionKey.empty())
+    {
+        request.SetRequestHeader(SUBSCRIPTION_KEY_NAME, m_subscriptionKey);
+        done = true;
+    }
+    else
+    {
+        auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+        SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
+
+        auto authorizationToken = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), "");
+        SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
+        if (authorizationToken.empty())
+        {
+            ThrowRuntimeError("The authorization token is empty");
+        }
+        request.SetRequestHeader(AUTHORIZATION_TOKEN_KEY_NAME, (std::string("Bearer ") + authorizationToken).data());
+        done = true;
+    }
+
+    if (!done)
+    {
+        ThrowRuntimeError("A valid subscription key or an authorization token is needed in a HTTP request.");
+    }
+}
+
+void CSpxConversationTranscriber::HttpAddQueryParams(HttpRequest& request)
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
+
+    auto cal_uid = properties->GetStringValue(m_iCalUid);
+    auto call_id = properties->GetStringValue(m_callId);
+
+    bool hasId = false;
+    // we need to add both if we have them.
+    if (!cal_uid.empty())
+    {
+        request.AddQueryParameter(m_iCalUid, cal_uid);
+        hasId = true;
+    }
+    if (!call_id.empty())
+    {
+        request.AddQueryParameter(m_callId, call_id);
+        hasId = true;
+    }
+    // it is an error, if we have none.
+    if (!hasId)
+    {
+        ThrowRuntimeError("iCalUid or callId must be provided in sending an end meeting request.");
+    }
+}
+
+void CSpxConversationTranscriber::HttpSendEndMeetingRequest()
+{
+    try
+    {
+        // the host name and path are parsed from the endpoint. The path has /meetings appended to it.
+        auto url = HttpUtils::ParseUrl(m_endpoint);
+        HttpRequest  request(url.host);
+        auto pathStartWithForwardSlash = "/" + url.path + "/meetings";
+        request.SetPath(pathStartWithForwardSlash);
+
+        HttpAddHeaders(request);
+        HttpAddQueryParams(request);
+        std::unique_ptr<HttpResponse> response = request.SendRequest(HTTPAPI_REQUEST_DELETE);
+        // throws HttpException in the case of errors. You can also use IsSuccess(), or GetStatusCode() if you don't want exceptions
+        response->EnsureSuccess();
+        std::string json = response->ReadContentAsString();
+    }
+    catch (HttpException& e)
+    {
+        std::string message = "Error in send end meeting request." + std::to_string(e.statusCode());
+        ThrowRuntimeError(message);
+    }
+    catch (...)
+    {
+        throw;
+    }
+}
 
 }}}} // Microsoft::CognitiveServices::Speech::Impl

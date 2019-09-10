@@ -10,6 +10,7 @@
 #include "rest_tts_engine_adapter.h"
 #include "create_object_helpers.h"
 #include "guid_utils.h"
+#include "http_utils.h"
 #include "handle_table.h"
 #include "service_helpers.h"
 #include "shared_ptr_helpers.h"
@@ -218,7 +219,7 @@ void CSpxRestTtsEngineAdapter::EnsureHttpConnection()
     }
 
     // Create the connection
-    auto url = CSpxSynthesisHelper::ParseUrl(m_endpoint);
+    auto url = HttpUtils::ParseUrl(m_endpoint);
     m_httpConnect = HTTPAPI_CreateConnection_Advanced(url.host.data(), url.port, url.secure,
         m_proxyHost.data(), m_proxyPort, m_proxyUsername.data(), m_proxyPassword.data());
     if (!m_httpConnect)
@@ -267,7 +268,7 @@ std::string CSpxRestTtsEngineAdapter::GetOutputFormatString(std::shared_ptr<ISpx
 void CSpxRestTtsEngineAdapter::PostTtsRequest(HTTP_HANDLE http_connect, RestTtsRequest& request, std::shared_ptr<ISpxSynthesisResultInit> result_init)
 {
     // Parse URL
-    auto url = CSpxSynthesisHelper::ParseUrl(request.endpoint);
+    auto url = HttpUtils::ParseUrl(request.endpoint);
 
     // Allocate resources
     HTTP_HEADERS_HANDLE httpRequestHeaders = HTTPHeaders_Alloc();

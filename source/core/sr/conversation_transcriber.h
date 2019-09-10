@@ -14,6 +14,9 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+class HttpResponse;
+class HttpRequest;
+
 class CSpxConversationTranscriber :
     public CSpxRecognizer,
     public ISpxConversationTranscriber
@@ -132,6 +135,10 @@ private:
     void SetRecoMode();
     int GetMaxAllowedParticipants();
 
+    void HttpSendEndMeetingRequest();
+    void HttpAddQueryParams(HttpRequest& request);
+    void HttpAddHeaders(HttpRequest& request);
+
 private:
 
     std::vector<Participant> m_current_participants;
@@ -140,6 +147,11 @@ private:
     ActionType m_action;
 
     std::shared_ptr<ISpxThreadService>  m_threadService;
+    std::string m_subscriptionKey;
+    std::string m_endpoint;
+
+    static auto constexpr m_iCalUid = "iCalUid";
+    static auto constexpr m_callId = "callId";
 
     DISABLE_COPY_AND_MOVE(CSpxConversationTranscriber);
 };

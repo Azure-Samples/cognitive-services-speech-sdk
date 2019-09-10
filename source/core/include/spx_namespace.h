@@ -23,4 +23,8 @@ namespace Impl {
     static constexpr unsigned short AVG_BYTES_PER_SECOND = BLOCK_ALIGN * SAMPLES_PER_SECOND;
 
     static constexpr int MAX_JSON_PAYLOAD_FROM_USER = 52428800;
+
+    static constexpr auto SUBSCRIPTION_KEY_NAME = "Ocp-Apim-Subscription-Key";
+    static constexpr auto AUTHORIZATION_TOKEN_KEY_NAME = "Authorization";
+
 } } } } // Microsoft::CognitiveServices::Speech::Impl
