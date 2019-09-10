@@ -11,11 +11,8 @@
 #include "guid_utils.h"
 #include "azure_c_shared_utility_uniqueid_wrapper.h"
 
-#if defined(ANDROID_UUID)
-#include <fstream>
-#elif defined(USING_DEFAULT_UUID)
+#ifdef USING_DEFAULT_UUID
 #include <random>
-#include <array>
 #endif
 
 #define UUID_LENGTH 36
@@ -25,24 +22,18 @@ namespace PAL
 
     std::string generate_uuid()
     {
-#ifdef ANDROID_UUID
-        std::ifstream uuid_file{ "/proc/sys/kernel/random/uuid" };
-        std::string uuid;
-        uuid_file >> uuid;
-        return uuid;
-#else
         std::string uuidStr(UUID_LENGTH, char{ 0 });
 #ifdef USING_DEFAULT_UUID
         /* HACKHACK: This is to mitigate a problem that exists with the stubbed implementation of guids in azure_c_shared_utilities, work item #1944478 tracks the proper fix */
         std::random_device rd;
+        std::mt19937 gen(rd());
         std::uniform_int_distribution<unsigned int> dist(std::numeric_limits<unsigned int>::min(), std::numeric_limits<unsigned int>::max());
-        srand(dist(rd));
+        srand(dist(gen));
 #endif
         /* In c++17 we have non-const string::data(), maybe we change this in the future */
         auto result = UniqueId_Generate(&uuidStr[0], UUID_LENGTH + 1);
         SPX_IFTRUE_THROW_HR(result != UNIQUEID_OK, SPXERR_UUID_CREATE_FAILED);
         return uuidStr;
-#endif
     }
 
 
