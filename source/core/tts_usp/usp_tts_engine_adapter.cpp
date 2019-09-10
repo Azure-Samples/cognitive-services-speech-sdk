@@ -6,14 +6,12 @@
 //
 
 #include "stdafx.h"
-#include <math.h>
 #include "synthesis_helper.h"
 #include "usp_tts_engine_adapter.h"
 #include "create_object_helpers.h"
 #include "guid_utils.h"
 #include "handle_table.h"
 #include "service_helpers.h"
-#include "shared_ptr_helpers.h"
 #include "property_bag_impl.h"
 #include "property_id_2_name_map.h"
 #include "json.h"
@@ -44,7 +42,7 @@ CSpxUspTtsEngineAdapter::CSpxUspTtsEngineAdapter()
 CSpxUspTtsEngineAdapter::~CSpxUspTtsEngineAdapter()
 {
     SPX_DBG_TRACE_VERBOSE_IF(SPX_DBG_TRACE_USP_TTS, __FUNCTION__);
-    Term();
+    CSpxUspTtsEngineAdapter::Term();
 }
 
 void CSpxUspTtsEngineAdapter::Init()
@@ -132,7 +130,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::Speak(const std::s
         {
             break;
         }
-        else if (ResultReason::Canceled == result->GetReason() && result->GetAudioData()->size())
+        else if (ResultReason::Canceled == result->GetReason() && !result->GetAudioData()->empty())
         {
             LogError("Synthesis cancelled with partial data received, cannot retry.");
             break;
@@ -209,6 +207,14 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
     m_cv.wait_for(lock, std::chrono::seconds(RECEIVE_ALL_CHUNKS_TIMEOUT), [&] { return m_uspState == UspState::Idle || m_uspState == UspState::Error; });
 #endif
 
+    if (m_uspState == UspState::ReceivingData)
+    {
+        LogError("USP error, timeout to get all audio data.");
+        m_currentErrorMessage = "USP error, timeout to get all audio data.";
+        m_currentErrorMessage += " Received audio size: " + CSpxSynthesisHelper::itos(m_currentReceivedData.size()) + "bytes.";
+        m_uspState = UspState::Error;
+    }
+
     bool hasHeader = false;
     auto outputFormat = GetOutputFormat(m_audioOutput, &hasHeader);
 
@@ -218,7 +224,7 @@ std::shared_ptr<ISpxSynthesisResult> CSpxUspTtsEngineAdapter::SpeakInternal(cons
     {
         resultInit->InitSynthesisResult(requestId, ResultReason::Canceled,
             CancellationReason::Error, UspErrorCodeToCancellationErrorCode(m_currentErrorCode),
-            nullptr, 0, outputFormat.get(), hasHeader);
+            m_currentReceivedData.data(), m_currentReceivedData.size(), outputFormat.get(), hasHeader);
         SpxQueryInterface<ISpxNamedProperties>(resultInit)->SetStringValue(GetPropertyName(PropertyId::CancellationDetails_ReasonDetailedText), m_currentErrorMessage.data());
     }
     else
@@ -308,7 +314,7 @@ void CSpxUspTtsEngineAdapter::DoSendMessageWork(std::weak_ptr<USP::Connection> c
     SPX_DBG_ASSERT(connection != nullptr);
     if (connection != nullptr)
     {
-        connection->SendMessage(messagePath, (const uint8_t*)buffer.c_str(), buffer.length(), messageType, requestId);
+        connection->SendMessage(messagePath, reinterpret_cast<const uint8_t*>(buffer.c_str()), buffer.length(), messageType, requestId);
     }
 }
 
@@ -342,7 +348,7 @@ void CSpxUspTtsEngineAdapter::UspInitialize()
 
     // Fill authorization token
     std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
-    if (m_authenticator.get() != nullptr && !m_authenticator->GetAccessToken().empty())
+    if (m_authenticator != nullptr && !m_authenticator->GetAccessToken().empty())
     {
         authData[static_cast<size_t>(USP::AuthenticationType::AuthorizationToken)] = m_authenticator->GetAccessToken();
     }
@@ -448,30 +454,27 @@ void CSpxUspTtsEngineAdapter::OnAudioOutputMetadata(const USP::AudioOutputMetada
 {
     auto synthesizerEvents = SpxQueryInterface<ISpxSynthesizerEvents>(GetSite());
 
-    auto iterator = message.metadatas.begin();
-    while (iterator != message.metadatas.end())
+    for (auto iterator = message.metadatas.begin(); iterator != message.metadatas.end(); ++iterator)
     {
         if (PAL::stricmp(iterator->type.data(), METADATA_TYPE_WORD_BOUNDARY) == 0)
         {
             auto wordBoundary = iterator->textBoundary;
-            auto textOffset = m_currentText.find(wordBoundary.text.data(), m_currentTextOffset);
+            auto textOffset = m_currentText.find(wordBoundary.text, m_currentTextOffset);
 
             if (m_currentTextIsSsml)
             {
                 while (textOffset != std::string::npos && InSsmlTag(textOffset, m_currentText, m_currentTextOffset))
                 {
-                    textOffset = m_currentText.find(wordBoundary.text.data(), m_currentTextOffset);
+                    textOffset = m_currentText.find(wordBoundary.text, textOffset + wordBoundary.text.length());
                 }
             }
 
             if (textOffset != std::string::npos)
             {
-                m_currentTextOffset = (uint32_t)textOffset + (uint32_t)wordBoundary.text.length();
-                synthesizerEvents->FireWordBoundary(wordBoundary.audioOffset, (uint32_t)textOffset, (uint32_t)wordBoundary.text.length());
+                m_currentTextOffset = static_cast<uint32_t>(textOffset + wordBoundary.text.length());
+                synthesizerEvents->FireWordBoundary(wordBoundary.audioOffset, static_cast<uint32_t>(textOffset), static_cast<uint32_t>(wordBoundary.text.length()));
             }
         }
-
-        iterator++;
     }
 }
 
@@ -534,7 +537,7 @@ bool CSpxUspTtsEngineAdapter::InSsmlTag(size_t currentPos, const std::wstring& s
     }
 
     auto pos = currentPos;
-    while (pos > beginningPos)
+    while (pos >= beginningPos)
     {
         if (*(ssml.data() + pos) == '>')
         {

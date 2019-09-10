@@ -40,7 +40,7 @@ void CSpxNullAudioOutput::Close()
 uint16_t CSpxNullAudioOutput::GetFormat(SPXWAVEFORMATEX* formatBuffer, uint16_t formatSize)
 {
     uint16_t formatSizeRequired = sizeof(SPXWAVEFORMATEX) + m_format->cbSize;
-    SPX_DBG_TRACE_VERBOSE("CSpxNullAudioOuput::GetFormat is called formatBuffer is %s formatSize=%d", formatBuffer ? "not null" : "null", formatSize);
+    SPX_DBG_TRACE_VERBOSE("%s is called formatBuffer is %s formatSize=%d", __FUNCTION__, formatBuffer ? "not null" : "null", formatSize);
 
     if (formatBuffer != nullptr)
     {
@@ -73,7 +73,7 @@ void CSpxNullAudioOutput::SetFormat(SPXWAVEFORMATEX* pformat)
     // Allocate the buffer for the format
     auto formatSize = sizeof(SPXWAVEFORMATEX) + pformat->cbSize;
     m_format = SpxAllocWAVEFORMATEX(formatSize);
-    SPX_DBG_TRACE_VERBOSE("CSpxNullAudioOuput::SetFormat is called with format 0x%p", (void*)pformat);
+    SPX_DBG_TRACE_VERBOSE("%s is called with format 0x%p", __FUNCTION__, (void*)pformat);
 
     // Copy the format
     memcpy(m_format.get(), pformat, formatSize);

@@ -83,7 +83,7 @@ private:
     void UspSendSynthesisContext(const std::string& requestId);
     void UspSendSsml(const std::string& ssml, const std::string& requestId);
     void UspSendMessage(const std::string& messagePath, const std::string &buffer, USP::MessageType messageType, const std::string& requestId="");
-    void DoSendMessageWork(std::weak_ptr<USP::Connection> connectionPtr, const std::string& messagePath, const std::string& buffer, USP::MessageType messageType, const std::string& requestId);
+    static void DoSendMessageWork(std::weak_ptr<USP::Connection> connectionPtr, const std::string& messagePath, const std::string& buffer, USP::MessageType messageType, const std::string& requestId);
 
     void EnsureUspConnection();
     void UspInitialize();
@@ -97,8 +97,8 @@ private:
 
     SpxWAVEFORMATEX_Type GetOutputFormat(std::shared_ptr<ISpxAudioOutput> output, bool* hasHeader);
     std::string GetOutputFormatString(std::shared_ptr<ISpxAudioOutput> output);
-    bool InSsmlTag(size_t currentPos, const std::wstring& ssml, size_t beginningPos);
-    CancellationErrorCode UspErrorCodeToCancellationErrorCode(USP::ErrorCode uspErrorCode);
+    static bool InSsmlTag(size_t currentPos, const std::wstring& ssml, size_t beginningPos);
+    static CancellationErrorCode UspErrorCodeToCancellationErrorCode(USP::ErrorCode uspErrorCode);
 
 
 private:

@@ -918,6 +918,18 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx]")
 
     synthesizer->SpeakSsmlAsync(ssml);
     SPXTEST_REQUIRE(8 == order);
+
+    synthesizer->WordBoundary.DisconnectAll();
+
+    ssml = "<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xmlns:mstts='https://www.w3.org/2001/mstts' xml:lang='zh-CN'><voice xml:lang='zh-CN' xml:gender='Female' name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)' xmlns=''><mstts:express-as type='normal'>1.导入微信文档可以选择多个文件，并且可多次选择上传文件</mstts:express-as></voice></speak>";
+    order = 0;
+    synthesizer->WordBoundary += [&order](const SpeechSynthesisWordBoundaryEventArgs& e) {
+        SPXTEST_REQUIRE(e.TextOffset > 280);
+        ++order;
+    };
+
+    synthesizer->SpeakSsmlAsync(ssml);
+    SPXTEST_REQUIRE(order > 0);
 }
 
 // currently disable the check for "Unsupported voice“ #1981079
