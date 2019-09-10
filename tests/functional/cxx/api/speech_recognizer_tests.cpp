@@ -39,7 +39,7 @@ static void DoRecoFromCompressedPushStream(TestData fileName, AudioStreamContain
         auto pushStream = AudioInputStream::CreatePushStream(AudioStreamFormat::GetCompressedFormat(containerType));
         auto audioConfig = AudioConfig::FromStreamInput(pushStream);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
-        DoRecoFromCompressedPushStreamHelper(fileName,recognizer, pushStream);
+        DoRecoFromCompressedPushStreamHelper(fileName, recognizer, pushStream);
 #ifndef __linux__
     }
     catch (const std::exception& e)
@@ -340,9 +340,9 @@ TEST_CASE("Single trusted root", "[.][int][prod]")
         "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\n"
         "-----END CERTIFICATE-----\n";
 
-     // ISRG Root X1 (https://letsencrypt.org/certificates/)
-     // Validity: Not After: Jun 4 11:04:38 2035 GMT
-     static char isrgRootX1[] =
+    // ISRG Root X1 (https://letsencrypt.org/certificates/)
+    // Validity: Not After: Jun 4 11:04:38 2035 GMT
+    static char isrgRootX1[] =
         "-----BEGIN CERTIFICATE-----\n"
         "MIIFazCCA1OgAwIBAgIRAIIQz7DSQONZRGPgu2OCiwAwDQYJKoZIhvcNAQELBQAw\n"
         "TzELMAkGA1UEBhMCVVMxKTAnBgNVBAoTIEludGVybmV0IFNlY3VyaXR5IFJlc2Vh\n"
@@ -842,7 +842,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
     }
 
     SPXTEST_SECTION("Canceled/EndOfStream works")
@@ -1422,7 +1422,7 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
     }
 
     SPXTEST_SECTION("SetServiceProperty property overwrite")
@@ -1435,7 +1435,7 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
     }
 
     SPXTEST_SECTION("SetServiceProperty 2 properties")
@@ -1448,7 +1448,7 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
         auto detailedResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
         SPXTEST_REQUIRE(detailedResult.find("NBest") != string::npos);
         SPXTEST_REQUIRE(detailedResult.find("ITN") != string::npos);
@@ -1467,7 +1467,7 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
     }
 
     SPXTEST_SECTION("SetServiceProperty FromEndpoint with parameters")
@@ -1480,7 +1480,7 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
         auto detailedResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
         SPXTEST_REQUIRE(detailedResult.find("NBest") != string::npos);
         SPXTEST_REQUIRE(detailedResult.find("ITN") != string::npos);
@@ -1509,7 +1509,7 @@ TEST_CASE("SetServiceProperty", "[api][cxx]")
         auto result = recognizer->RecognizeOnceAsync().get();
         SPXTEST_REQUIRE(result != nullptr);
         SPXTEST_REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
-        SPXTEST_REQUIRE(!result->Text.compare(callTheFirstOne.m_utterance));
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
         SPXTEST_REQUIRE(!result->Translations.at("en").compare("Call the first one."));
     }
 }
@@ -1613,7 +1613,7 @@ TEST_CASE("SpeechConfig properties", "[api][cxx]")
         CAPTURE(connectionUrl);
 
         CHECK(ResultReason::RecognizedSpeech == result->Reason);
-        CHECK(callTheFirstOne.m_utterance.compare(result->Text) == 0);
+        CHECK(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
         // Check no word-level timestamps included, but only detailed output.
         string jsonResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
         CAPTURE(jsonResult);
@@ -1647,7 +1647,7 @@ TEST_CASE("SpeechConfig properties", "[api][cxx]")
         CAPTURE(connectionUrl);
 
         CHECK(ResultReason::RecognizedSpeech == result->Reason);
-        CHECK(callTheFirstOne.m_utterance.compare(result->Text) == 0);
+        CHECK(StringComparisions::AssertFuzzyMatch(result->Text, callTheFirstOne.m_utterance));
         // Check word-level timestamps included, but only detailed output.
         string jsonResult = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
         CAPTURE(jsonResult);
@@ -1655,7 +1655,7 @@ TEST_CASE("SpeechConfig properties", "[api][cxx]")
         CHECK(jsonResult.find("Lexical") != string::npos);
 
         CHECK(connectionUrl.find("speech/recognition/dictation/cognitiveservices") != string::npos);
-         // Word-level timestamps will set format to detailed.
+        // Word-level timestamps will set format to detailed.
         CHECK(connectionUrl.find("format=detailed") != string::npos);
         CHECK(connectionUrl.find("profanity=raw") != string::npos);
         CHECK(connectionUrl.find("storeAudio=true") != string::npos);

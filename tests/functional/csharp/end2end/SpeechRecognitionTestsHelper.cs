@@ -263,6 +263,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             AssertStringWordEditPercentage(expected, actual, tolerance);
         }
 
+        public static void AssertFuzzyMatching(string expectedUtterance, string actualUtterance, int tolerance = 10)
+        {
+            AssertFuzzyMatching(new string[] { expectedUtterance }, new string[] { actualUtterance }, tolerance);
+        }
+
         public SpeechRecognizer GetSpeechRecognizingAsyncNotAwaited(SpeechRecognizer recognizer)
         {
             using (var rec = recognizer)
@@ -316,18 +321,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        static public void AssertStringWordEditPercentage(string expectedString, string comparisonString, int deltaPercentage, int absoluteAllowedErrorCount = 0)
-        // Using standard implementation for Levenshtein distance. Caveat: not optimized for memory consumption
-        //   but sufficient for our test case and the string length we are expecting (less 10000 words)
-        // 
-        // expectedString - normalized expected string
-        // comparisonString - the normalized comparison string
-        // deltaPercentage - how many word operations are allowed to change the input string into the comparison string
-        //   expressed as a percentage of words
-        //   Example: if input string contains 200 words, deltaPercantage is 5, 10 edit operations would be allowed
-        // absoluteAllowedErrorCount - an absolute lower limit on the number of allowed errors.
-        //
-        // The actual number of allowed errors is the higher number of the relative or the absolute counts.
+        /// <summary>
+        /// Using standard implementation for Levenshtein distance. Caveat: not optimized for memory consumption
+        /// but sufficient for our test case and the string length we are expecting (less 10000 words)
+        /// </summary>
+        /// <param name="expectedString">normalized expected string</param>
+        /// <param name="comparisonString">the normalized comparison string</param>
+        /// <param name="deltaPercentage">how many word operations are allowed to change the input string into the comparison string
+        /// expressed as a percentage of words. Example: if input string contains 200 words, deltaPercantage is 5, 10 edit operations would be allowed</param>
+        /// <param name="absoluteAllowedErrorCount">an absolute lower limit on the number of allowed errors</param>
+        /// <remarks>The actual number of allowed errors is the higher number of the relative or the absolute counts.</remarks>
+        static public void AssertStringWordEditPercentage(string expectedString, string comparisonString, int deltaPercentage, int absoluteAllowedErrorCount = 1)
+
         {
             String[] wordsExpected = expectedString.Split(' ');
             String[] wordsComparison = comparisonString.Split(' ');

@@ -373,7 +373,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
                 // Check word-level timestamps as well as best results are included.
                 var jsonResult = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
                 Assert.IsTrue(jsonResult.Contains("Words"), "No word-level timestamps. Returned JSON: " + jsonResult);

@@ -351,7 +351,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 // TODO cannot enable below assertion yet, RecognizedIntent is not returned - VSO:1594523
                 // Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                Assert.AreEqual(phrase, result.Text);
+                AssertFuzzyMatching(phrase, result.Text);
                 Assert.AreEqual(phrase, result.IntentId, $"Unexpected intent ID: actual: {result.IntentId}, expected {phrase}");
 
                 var json = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);

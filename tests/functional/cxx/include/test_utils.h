@@ -79,6 +79,47 @@ inline std::ifstream get_stream(const std::string& name) {
     return std::ifstream(name.c_str(), std::ifstream::binary);
 }
 
+class StringComparisions {
+public:
+    static bool AssertFuzzyMatch(const std::string recieved, const std::string expected, size_t deltaPercentage = 10, size_t minAllowedMismatchCount = 1) {
+        size_t errors, totalWords;
+
+        CalculateWordErrorRate(recieved, expected, &errors, &totalWords);
+
+        // Find the max number of errors to allow.
+        size_t allowedEdits = std::max(minAllowedMismatchCount, (deltaPercentage * totalWords) / 100);
+
+        return (allowedEdits >= errors);
+    }
+
+private:
+    template <class T>
+    static unsigned int Levenshtein(const T& s1, const T& s2)
+    {
+        const std::size_t l1 = s1.size(), l2 = s2.size();
+        std::vector<unsigned int> d1(l2 + 1), d2(l2 + 1);
+
+        for (unsigned int i = 0; i < d2.size(); i++) d2[i] = i;
+        for (unsigned int i = 0; i < l1; i++) {
+            d1[0] = i + 1;
+            for (unsigned int j = 0; j < l2; j++) {
+                d1[j + 1] = std::min({ d2[1 + j] + 1, d1[j] + 1, d2[j] + (s1[i] == s2[j] ? 0 : 1) });
+            }
+            d1.swap(d2);
+        }
+        return d2[l2];
+    }
+
+    static void CalculateWordErrorRate(const std::string& text1, const std::string& text2, size_t* errors, size_t* words)
+    {
+        auto words1 = PAL::split(text1, ' ');
+        auto words2 = PAL::split(text2, ' ');
+
+        *errors = Levenshtein(words1, words2);
+        *words = words1.size();
+       }
+};
+
 class ConfigSettings {
 private:
     static nlohmann::json getJson(std::string path)
@@ -204,7 +245,7 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Config::DoDiscover)
         ["--discovery"]
     ("Perform VS Test Adaptor discovery");
-        ;
+    ;
 
     // Now pass the new composite back to Catch so it uses that
     session.cli(cli);

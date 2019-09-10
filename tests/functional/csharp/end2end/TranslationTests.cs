@@ -313,7 +313,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var actualTranslationRecognition = (TranslationRecognitionEventArgs)actualTranslations[ResultType.RecognizedText].Single();
 
             Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
-            AssertMatching(TestData.German.FirstOne.Utterance, actualTranslationRecognition.Result.Text);
+            AssertFuzzyMatching(TestData.German.FirstOne.Utterance, actualTranslationRecognition.Result.Text);
 
             AssertMatching(TestData.French.FirstOne.Utterance, actualTranslationRecognition.Result.Translations[Language.FR]);
             AssertOneEqual(TestData.Spanish.FirstOne.PossibleUtterances, actualTranslationRecognition.Result.Translations[Language.ES]);
@@ -613,7 +613,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResultEvents[ResultType.RecognizedText].Single();
                 var translationTextResult = translationTextEvent.Result;
                 Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, translationTextResult.Text);
+                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, translationTextResult.Text);
                 Assert.AreEqual(2, translationTextResult.Translations.Count, "Bad count of translation utterances");
                 AssertMatching(TestData.French.FirstOne.Utterance, translationTextResult.Translations[Language.FR]);
                 AssertOneEqual(TestData.Spanish.FirstOne.PossibleUtterances, translationTextResult.Translations[Language.ES]);
@@ -674,7 +674,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResultEvents[ResultType.RecognizedText].Single();
                 var translationTextResult = translationTextEvent.Result;
                 Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, translationTextResult.Text);
+                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, translationTextResult.Text);
                 Assert.AreEqual(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(TestData.French.FirstOne.Utterance, translationTextResult.Translations[Language.FR]);
 
@@ -709,7 +709,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var translationTextEvent = (TranslationRecognitionEventArgs)allResultEvents[ResultType.RecognizedText].Single();
                 var translationTextResult = translationTextEvent.Result;
                 Assert.AreEqual(ResultReason.TranslatedSpeech, translationTextResult.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, translationTextResult.Text);
+                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, translationTextResult.Text);
                 Assert.AreEqual(1, translationTextResult.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(TestData.French.FirstOne.Utterance, translationTextResult.Translations[Language.FR]);
 

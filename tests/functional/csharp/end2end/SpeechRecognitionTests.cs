@@ -353,7 +353,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                     Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                    AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                    AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
                 }
             }
         }
@@ -374,7 +374,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         connection.Open(true);
                     }
                     var result = await helper.GetFirstRecognizerResult(recognizer);
-                    AssertMatching(TestData.German.FirstOne.Utterance, result);
+                    AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result);
                 }
             }
         }
@@ -842,7 +842,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
             }
         }
 
@@ -909,7 +909,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
             }
         }
 
@@ -952,7 +952,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
             }
         }
 
@@ -965,7 +965,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
             }
         }
 
@@ -978,7 +978,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
                 AssertDetailedResult(result);
             }
         }
@@ -992,7 +992,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
             }
         }
 
@@ -1007,7 +1007,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
                 AssertDetailedResult(result);
             }
         }

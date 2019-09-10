@@ -342,7 +342,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             public static class FirstOne
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "CallTheFirstOne.wav");
-                public static readonly string Utterance = "Rufe die erste an.";
+                public static readonly string Utterance = "Rufe die 1 an.";
             }
         }
 
