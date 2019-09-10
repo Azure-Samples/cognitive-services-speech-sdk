@@ -83,7 +83,7 @@ public final class AudioConfig
     /**
      * Creates an AudioConfig object representing the specified file.
      * Added in version 1.7.0
-     * @param fileName Specifies the audio output file.
+     * @param fileName Specifies the audio output file. The parent directory must already exist.
      * @return The audio output configuration being created.
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromWavFileOutput(String fileName) {

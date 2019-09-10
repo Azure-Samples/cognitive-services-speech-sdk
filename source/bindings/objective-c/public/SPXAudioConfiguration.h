@@ -42,9 +42,10 @@ SPX_EXPORT
 
 /**
  * Initializes an SPXAudioConfiguration object using the default audio output device (speaker) on the system as output.
- * 
+ * Please ensure that the speaker is available before using this method.
+ *
  * Added in version 1.7.0
- * 
+ *
  * @return an instance of audio input configuration.
  */
 - (nullable instancetype)initWithDefaultSpeakerOutput
@@ -53,9 +54,9 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 /**
  * Initializes an SPXAudioConfiguration object using the default audio output device (speaker) on the system as output.
  * Please ensure that the speaker is available before using this method.
- * 
+ *
  * Added in version 1.7.0
- * 
+ *
  * @param outError error information.
  * @return an instance of audio input configuration.
  */
@@ -63,11 +64,10 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
  * Initializes an SPXAudioConfiguration object using the specified file as output.
- * Please ensure that the speaker is available before using this method.
- * 
+ *
  * Added in version 1.7.0
- * 
- * @param path path of the audio output file.
+ *
+ * @param path path of the audio output file. The parent directory must already exist.
  * @return an instance of audio input configuration.
  */
 - (nullable instancetype)initWithWavFileOutput:(nonnull NSString *)path
@@ -75,10 +75,10 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
  * Initializes an SPXAudioConfiguration object using the specified file as output.
- * 
+ *
  * Added in version 1.7.0
- * 
- * @param path path of the audio output file.
+ *
+ * @param path path of the audio output file. The parent directory must already exist.
  * @param outError error information.
  * @return an instance of audio input configuration.
  */
@@ -95,7 +95,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
  * Initializes an SPXAudioConfiguration object using the specified stream as output.
- * 
+ *
  * Added in version 1.7.0
  *
  * @param stream the custom audio output stream.
@@ -106,7 +106,7 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 
 /**
  * Initializes an SPXAudioConfiguration object using the specified stream as output.
- * 
+ *
  * Added in version 1.7.0
  *
  * @param stream the custom audio output stream.

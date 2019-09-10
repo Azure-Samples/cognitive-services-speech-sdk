@@ -570,6 +570,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public void SynthesizerOutputToInvalidFileUsp()
+        {
+            var fileConfig = AudioConfig.FromWavFileOutput(Path.Combine("NonexistentDir", "InvalidFile"));
+            Assert.ThrowsException<ApplicationException>(() => new SpeechSynthesizer(uspConfig, fileConfig));
+        }
+
+        [TestMethod]
         public async Task SynthesizerOutputToPushStreamUsp()
         {
             using (var callback = new PushAudioOutputStreamTestCallback())
@@ -1685,7 +1692,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         private byte[] BuildRiffHeader(int dataSize)
         {
             var isFloatingPoint = false;
-            ushort channelCount = 1; 
+            ushort channelCount = 1;
             ushort bitDepth = 16;
             int sampleRate = 16000;
 

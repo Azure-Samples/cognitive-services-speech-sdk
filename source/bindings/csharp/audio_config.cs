@@ -120,7 +120,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
         /// Creates an AudioConfig object representing the specified file.
         /// Added in version 1.4.0
         /// </summary>
-        /// <param name="fileName">Specifies the audio output file.</param>
+        /// <param name="fileName">Specifies the audio output file. The parent directory must already exist.</param>
         /// <returns>The audio output configuration being created.</returns>
         public static AudioConfig FromWavFileOutput(string fileName)
         {

@@ -52,7 +52,11 @@ void CSpxSynthesizer::Init()
 void CSpxSynthesizer::Term()
 {
     ReleaseTtsEngineAdapter();
-    m_audioOutput->Close();
+    if (m_audioOutput)
+    {
+        m_audioOutput->Close();
+    }
+
     SpxTermAndClear(m_siteKeepAlive);
 }
 

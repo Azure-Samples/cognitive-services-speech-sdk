@@ -237,7 +237,7 @@ class AudioOutputConfig():
 
     :param use_default_speaker: Specifies to use the system default speaker for audio
         output.
-    :param filename: Specifies an audio output file.
+    :param filename: Specifies an audio output file. The parent directory must already exist.
     :param stream: Creates an AudioOutputConfig object representing the specified stream.
     """
 

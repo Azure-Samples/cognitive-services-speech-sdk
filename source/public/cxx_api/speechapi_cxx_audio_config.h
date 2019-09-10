@@ -112,7 +112,7 @@ public:
     /// Creates an AudioConfig object representing the specified file for audio output.
     /// Added in version 1.4.0
     /// </summary>
-    /// <param name="fileName">Specifies the audio output file.</param>
+    /// <param name="fileName">Specifies the audio output file. The parent directory must already exist.</param>
     /// <returns>A shared pointer to the AudioConfig object</returns>
     static std::shared_ptr<AudioConfig> FromWavFileOutput(const SPXSTRING& fileName)
     {
