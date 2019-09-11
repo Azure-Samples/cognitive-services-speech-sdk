@@ -74,7 +74,15 @@ for flavor in Release; do # no Debug for now
 
   cp --verbose --preserve \
     "$DROP_DIR"/Windows/x64/$flavor/public/lib/UnixOS/netstandard2.0/Microsoft.CognitiveServices.Speech.csharp.dll \
-    "$UNITY_DIR"/Assets/SpeechSDK/Plugins/x86_64/Microsoft.CognitiveServices.Speech.csharp.unix.dll
+    "$UNITY_DIR"/Assets/SpeechSDK/Plugins/Android/libs/Microsoft.CognitiveServices.Speech.csharp.dll
+
+  cp --verbose --preserve \
+    "$DROP_DIR"/iOS/$flavor/libMicrosoft.CognitiveServices.Speech.core.a \
+    "$UNITY_DIR"/Assets/SpeechSDK/Plugins/iOS/libMicrosoft.CognitiveServices.Speech.core.a
+
+  cp --verbose --preserve \
+    "$DROP_DIR"/Windows/x64/$flavor/public/lib/IOS/netstandard2.0/Microsoft.CognitiveServices.Speech.csharp.dll \
+    "$UNITY_DIR"/Assets/SpeechSDK/Plugins/iOS/Microsoft.CognitiveServices.Speech.csharp.dll
 
   cp --verbose "$SCRIPT_DIR/../../"{license.md,ThirdPartyNotices.md,REDIST.txt} "$UNITY_DIR"/Assets/SpeechSDK
 

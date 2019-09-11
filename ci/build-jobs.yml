@@ -2427,7 +2427,7 @@ jobs:
       arguments: '-RootDirectory $(System.ArtifactsDirectory)'
 
 - job: UnityBuild
-  dependsOn: [Pre, AndroidBuild, WindowsBuild, WindowsUwpBuild]
+  dependsOn: [Pre, AndroidBuild, WindowsBuild, WindowsUwpBuild, IosBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' UnityBuild '))
   pool:
     # The "Skyman Unity On-Prem" agent pool currently contains a single build
@@ -2481,6 +2481,11 @@ jobs:
       artifactName: WindowsUwp
       downloadPath: $(System.ArtifactsDirectory)\In
       itemPattern: '**/public/lib/**'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading IOS artifacts'
+    inputs:
+      artifactName: IOS
+      downloadPath: $(System.ArtifactsDirectory)\In
   - bash: ./ci/unity/build-unity.sh "$(Build.ArtifactStagingDirectory)/In"
     displayName: Build Unity Plugin content
   - bash: |

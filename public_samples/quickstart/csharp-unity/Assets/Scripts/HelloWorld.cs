@@ -9,6 +9,10 @@ using Microsoft.CognitiveServices.Speech;
 #if PLATFORM_ANDROID
 using UnityEngine.Android;
 #endif
+#if PLATFORM_IOS
+using UnityEngine.iOS;
+using System.Collections;
+#endif
 
 public class HelloWorld : MonoBehaviour
 {
@@ -22,7 +26,7 @@ public class HelloWorld : MonoBehaviour
 
     private bool micPermissionGranted = false;
 
-#if PLATFORM_ANDROID
+#if PLATFORM_ANDROID || PLATFORM_IOS
     // Required to manifest microphone permission, cf.
     // https://docs.unity3d.com/Manual/android-manifest.html
     private Microphone mic;
@@ -88,7 +92,6 @@ public class HelloWorld : MonoBehaviour
         else
         {
             // Continue with normal initialization, Text and Button objects are present.
-
 #if PLATFORM_ANDROID
             // Request to use the microphone, cf.
             // https://docs.unity3d.com/Manual/android-RequestingPermissions.html
@@ -96,6 +99,11 @@ public class HelloWorld : MonoBehaviour
             if (!Permission.HasUserAuthorizedPermission(Permission.Microphone))
             {
                 Permission.RequestUserPermission(Permission.Microphone);
+            }
+#elif PLATFORM_IOS
+            if (!Application.HasUserAuthorization(UserAuthorization.Microphone))
+            {
+                Application.RequestUserAuthorization(UserAuthorization.Microphone);
             }
 #else
             micPermissionGranted = true;
@@ -109,6 +117,12 @@ public class HelloWorld : MonoBehaviour
     {
 #if PLATFORM_ANDROID
         if (!micPermissionGranted && Permission.HasUserAuthorizedPermission(Permission.Microphone))
+        {
+            micPermissionGranted = true;
+            message = "Click button to recognize speech";
+        }
+#elif PLATFORM_IOS
+        if (!micPermissionGranted && Application.HasUserAuthorization(UserAuthorization.Microphone))
         {
             micPermissionGranted = true;
             message = "Click button to recognize speech";
