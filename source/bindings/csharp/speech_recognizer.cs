@@ -405,7 +405,7 @@ namespace Microsoft.CognitiveServices.Speech
         private readonly Audio.AudioConfig audioConfig;
 
         // Defines private methods to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_Recognizing(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -424,7 +424,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_Recognized(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -443,7 +443,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_Canceled(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try

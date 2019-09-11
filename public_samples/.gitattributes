@@ -10,6 +10,7 @@ proguard-rules.pro text
 
 *.appxmanifest text
 *.asset text
+*.axml text
 *.bat text
 *.config text
 *.cpp text

@@ -212,7 +212,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// Define a private methods which raise a C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
         ///
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_SetSessionStarted(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -231,7 +231,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_SetSessionStopped(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -250,7 +250,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_SpeechStartDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -269,7 +269,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_SpeechEndDetected(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
         {
             try

@@ -485,7 +485,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         // Defines private methods to raise a C# event for speech synthesis result when a corresponding callback is invoked by the native layer.
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(TtsCallbackFunctionDelegate))]
         private static void FireEvent_SynthesisStarted(IntPtr hsynth, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -507,7 +507,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(TtsCallbackFunctionDelegate))]
         private static void FireEvent_Synthesizing(IntPtr hsynth, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -529,7 +529,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(TtsCallbackFunctionDelegate))]
         private static void FireEvent_SynthesisCompleted(IntPtr hsynth, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -551,7 +551,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(TtsCallbackFunctionDelegate))]
         private static void FireEvent_SynthesisCanceled(IntPtr hsynth, IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -573,7 +573,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(TtsCallbackFunctionDelegate))]
         private static void FireEvent_WordBoundary(IntPtr hsynth, IntPtr hevent, IntPtr pvContext)
         {
             try

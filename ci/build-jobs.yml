@@ -529,10 +529,10 @@ jobs:
 - job: NuGet
   variables:
     HAS_OS_BUILD: $[contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild ')]
-  dependsOn: [Pre, LinuxBuild, LinuxDockerBuild, WindowsBuild, WindowsOSBuild, WindowsUwpBuild, macOSBuild]
+  dependsOn: [Pre, LinuxBuild, LinuxDockerBuild, WindowsBuild, WindowsOSBuild, WindowsUwpBuild, macOSBuild, AndroidBuild, IosBuild]
   condition: |
     and(
-      succeeded('Pre', 'LinuxBuild', 'LinuxDockerBuild', 'WindowsBuild', 'WindowsUwpBuild', 'macOSBuild'),
+      succeeded('Pre', 'LinuxBuild', 'LinuxDockerBuild', 'WindowsBuild', 'WindowsUwpBuild', 'macOSBuild', 'AndroidBuild', 'IosBuild'),
       xor(
         succeeded('WindowsOSBuild'),
         not(contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsOSBuild '))
@@ -570,6 +570,16 @@ jobs:
     displayName: 'Downloading OSX artifacts'
     inputs:
       artifactName: macOS
+      downloadPath: $(System.ArtifactsDirectory)\In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Android artifacts'
+    inputs:
+      artifactName: Android
+      downloadPath: $(System.ArtifactsDirectory)\In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading IOS artifacts'
+    inputs:
+      artifactName: IOS
       downloadPath: $(System.ArtifactsDirectory)\In
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
@@ -1829,6 +1839,7 @@ jobs:
   variables:
     BuildPlatform: iOS
     FrameworkName: MicrosoftCognitiveServicesSpeech
+    StaticLibraryName: libMicrosoft.CognitiveServices.Speech.core
     GStreamerWrapper: GStreamerWrapper
     GStreamerVersion: 1.16.0
     VersionedFrameworkName: $(FrameworkName)-$(BuildPlatform)-$(SPEECHSDK_SEMVER2NOMETA)
@@ -1916,6 +1927,14 @@ jobs:
       cp -R "build_ios_device/lib/$(FrameworkName).framework" "$(OutputDirectory)"
       lipo -create -output "$(OutputDirectory)"/$(FrameworkName).framework/$(FrameworkName) \
         "build_ios_"{device,simulator32,simulator64}"/lib/$(FrameworkName).framework/$(FrameworkName)"
+      # create output static library with bitcode stripped out.
+      link_ios_static_library "$(OutputDirectory)" "build_ios_device/lib" "$(StaticLibraryName)_device.a"
+      link_ios_static_library "$(OutputDirectory)" "build_ios_simulator64/lib" "$(StaticLibraryName)_sim64.a"
+      lipo -create -output "$(OutputDirectory)"/$(StaticLibraryName).bitcode.a \
+        $(OutputDirectory)/$(StaticLibraryName)_device.a $(OutputDirectory)/$(StaticLibraryName)_sim64.a
+      bitcode_strip_path=`xcrun -sdk iphoneos --find bitcode_strip`
+      echo $bitcode_strip_path
+      eval $bitcode_strip_path $(OutputDirectory)"/$(StaticLibraryName).bitcode.a -r -o $(OutputDirectory)"/$(StaticLibraryName).a
     displayName: Create universal framework
   - bash: |
       set -u -e -o pipefail -x
@@ -1934,7 +1953,8 @@ jobs:
     displayName: Archive debug symbols
   - bash: |
       strip -x "$(OutputDirectory)/$(FrameworkName).framework/$(FrameworkName)"
-    displayName: Strip dynamic libraries in universal framework for release builds
+      strip -x "$(OutputDirectory)/$(StaticLibraryName).a"
+    displayName: Strip dynamic and static libraries in universal framework for release builds
     condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
   - bash: |
       set -u -e -x -o pipefail

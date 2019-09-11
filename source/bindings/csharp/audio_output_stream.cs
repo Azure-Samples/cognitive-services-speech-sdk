@@ -217,7 +217,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             ThrowIfFail(Internal.PushAudioOutputStream.push_audio_output_stream_set_callbacks(streamHandle, GCHandle.ToIntPtr(gch), streamWriteDelegate, streamCloseDelegate));
         }
 
-        [MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(PushAudioStreamWriteDelegate))]
         private static uint StreamWriteCallback(IntPtr context, IntPtr buffer, uint size)
         {
             uint result = 0;
@@ -251,7 +251,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             return result;
         }
 
-        [MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(PushAudioStreamCloseDelegate))]
         private static void StreamCloseCallback(IntPtr context)
         {
             try

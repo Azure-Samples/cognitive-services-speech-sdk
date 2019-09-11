@@ -11,7 +11,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <Configurations>Debug;Release;DebugUnixOS;ReleaseUnixOS</Configurations>
+    <Configurations>Debug;Release;UnixOS;IOS</Configurations>
     <NoWarn>1701;1702;1705;1591</NoWarn>
     <Version>@SPEECHSDK_MAJOR@.@SPEECHSDK_MINOR@.@SPEECHSDK_PATCH@.@SPEECHSDK_VTAG@</Version>
     <DebugSymbols>true</DebugSymbols>
@@ -45,6 +45,10 @@
   <PropertyGroup Condition="$(Configuration.Contains('UnixOS'))">
     <DefineConstants>UNIX</DefineConstants>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('IOS'))">
+    <DefineConstants>IOS</DefineConstants>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Condition="'@OS_BUILD@' == 'OS_BUILD'">
     <DefineConstants>OS_BUILD</DefineConstants>

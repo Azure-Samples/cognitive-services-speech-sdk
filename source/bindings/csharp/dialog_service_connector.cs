@@ -301,7 +301,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// <summary>
         /// Method to raise a SessionStarted C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
-        [MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_SessionStarted(IntPtr handle, IntPtr eventHandle, IntPtr context)
         {
             try
@@ -318,7 +318,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// <summary>
         /// Method to raise a SessionStopped C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
-        [MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_SessionStopped(IntPtr handle, IntPtr eventHandle, IntPtr context)
         {
             try
@@ -335,7 +335,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// <summary>
         /// Method to raise a Recognizing C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
-        [MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_Recognizing(IntPtr handle, IntPtr eventHandle, IntPtr context)
         {
             try
@@ -352,7 +352,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// <summary>
         /// Method to raise a Recognized C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
-        [MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_Recognized(IntPtr handle, IntPtr eventHandle, IntPtr context)
         {
             try
@@ -370,7 +370,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// <summary>
         /// Method to raise a Canceled C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
-        [MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_Canceled(IntPtr handle, IntPtr eventHandle, IntPtr context)
         {
             try
@@ -388,7 +388,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// <summary>
         /// Method to raise a ActivityReceived C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
-        [MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_ActivityReceived(IntPtr handle, IntPtr eventHandle, IntPtr context)
         {
             try

@@ -11,12 +11,12 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+    VirtualAssistantTests.class,
     SampleRecognizeIntentTest.class,
     SampleRecognizeWithIntermediateResultsTest.class,
     SampleSimpleRecognizeTest.class,
     WavFileAudioInputStreamTest.class,
-    RecognizerTests.class,
-    VirtualAssistantTests.class
+    RecognizerTests.class
     })
 public class AllEnd2EndTests {
 

@@ -239,7 +239,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         ///
 
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(ConnectionCallbackFunctionDelegate))]
         private static void FireEvent_Connected(IntPtr hevent, IntPtr pvContext)
         {
             try
@@ -256,7 +256,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        [Internal.MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(ConnectionCallbackFunctionDelegate))]
         private static void FireEvent_Disconnected(IntPtr hevent, IntPtr pvContext)
         {
             try

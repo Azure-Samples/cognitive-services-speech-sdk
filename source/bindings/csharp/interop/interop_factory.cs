@@ -17,20 +17,26 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
     internal static class Import
     {
-#if OSX
+#if IOS
+        public const string NativeDllName = "__Internal";
+#elif OSX
         public const string NativeDllName = "libMicrosoft.CognitiveServices.Speech.core.dylib";
-#elif !UNIX && !OS_BUILD
-        public const string NativeDllName = "Microsoft.CognitiveServices.Speech.core.dll";
-#elif !UNIX && OS_BUILD
+#elif UNIX
+        public const string NativeDllName = "libMicrosoft.CognitiveServices.Speech.core.so";
+#else
+#if OS_BUILD
         public const string NativeDllName = "Microsoft.CognitiveServices.Speech.core.os.dll";
 #else
-        public const string NativeDllName = "libMicrosoft.CognitiveServices.Speech.core.so";
+        public const string NativeDllName = "Microsoft.CognitiveServices.Speech.core.dll";
+#endif
 #endif
     }
 
+    [AttributeUsage(AttributeTargets.Method)]
     internal class MonoPInvokeCallbackAttribute : Attribute
     {
-        public MonoPInvokeCallbackAttribute() { }
+        private Type type;
+        public MonoPInvokeCallbackAttribute(Type t) { type = t; }
     }
 
     internal delegate IntPtr HandleRelease(IntPtr hresult);

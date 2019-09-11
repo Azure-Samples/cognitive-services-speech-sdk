@@ -1,0 +1,16 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\libs\arm64-v8a\libMicrosoft.CognitiveServices.Speech.core.so">
+      <Abi>arm64-v8a</Abi>
+      <Link>libs\arm64-v8a\libMicrosoft.CognitiveServices.Speech.core.so</Link>
+    </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\libs\armeabi-v7a\libMicrosoft.CognitiveServices.Speech.core.so">
+      <Abi>armeabi-v7a</Abi>
+      <Link>libs\armeabi-v7a\libMicrosoft.CognitiveServices.Speech.core.so</Link>
+    </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\libs\x86\libMicrosoft.CognitiveServices.Speech.core.so">
+      <Abi>x86</Abi>
+      <Link>libs\x86\libMicrosoft.CognitiveServices.Speech.core.so</Link>
+    </AndroidNativeLibrary>
+  </ItemGroup>
+</Project>

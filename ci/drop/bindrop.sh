@@ -102,6 +102,7 @@ DESTPUBLIB="$DEST/public/lib"
 DESTPUBLIBNET461="$DEST/public/lib/net461"
 DESTPUBLIBNETSTANDARD20="$DEST/public/lib/netstandard2.0"
 DESTPUBLIBUNIXOSNETSTANDARD20="$DEST/public/lib/UnixOS/netstandard2.0"
+DESTPUBLIBIOSNETSTANDARD20="$DEST/public/lib/IOS/netstandard2.0"
 DESTPUBINC="$DEST/public/include"
 DESTPRIVLIB="$DEST/private/lib"
 DESTPRIVLIBUNSTRIPPED="$DEST/private/libunstripped"
@@ -113,7 +114,7 @@ DESTPRIVINCJSON="$DEST/private/external.json"
 printf "\nCopying files to drop location\n"
 
 # N.B. no long option for -p (parents) on OSX.
-mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBLIBUNIXOSNETSTANDARD20" "$DESTPUBINC" "$DESTPRIVLIB" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")" "$(dirname "$DESTPRIVINCJSON")"  "$DESTPUBLIB"
+mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBLIBUNIXOSNETSTANDARD20" "$DESTPUBLIBIOSNETSTANDARD20" "$DESTPUBINC" "$DESTPRIVLIB" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")" "$(dirname "$DESTPRIVINCJSON")"  "$DESTPUBLIB"
 
 # N.B. no long option for -v (verbose) and -p (preserve) on OSX.
 CPOPT="-v -p"
@@ -134,6 +135,7 @@ if [[ $OS = "Windows_NT" ]]; then
     cp $CPOPT "$SRCDYNLIB"/net461/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNET461"
     cp $CPOPT "$SRCDYNLIB"/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNETSTANDARD20"
     cp $CPOPT "$SRCDYNLIB"UnixOS/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBUNIXOSNETSTANDARD20"
+    cp $CPOPT "$SRCDYNLIB"IOS/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBIOSNETSTANDARD20"    
   fi
 fi
 

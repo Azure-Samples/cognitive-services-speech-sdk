@@ -47,6 +47,7 @@ source_group("Source Files" FILES ${SOURCES})
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
 
 if(APPLE)
+  add_library(${PROJECT_NAME}_static STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
   set_target_properties(${PROJECT_NAME}
     PROPERTIES BUILD_RPATH "@loader_path")
 elseif(UNIX)

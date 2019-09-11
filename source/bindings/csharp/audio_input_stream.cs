@@ -315,7 +315,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             ThrowIfFail(Internal.PullAudioInputStream.pull_audio_input_stream_set_getproperty_callback(StreamHandle, GCHandle.ToIntPtr(gch), streamGetPropertyDelegate));
         }
 
-        [MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(PullAudioStreamReadDelegate))]
         private static int StreamReadCallback(IntPtr context, IntPtr buffer, uint size)
         {
             int result = 0;
@@ -353,7 +353,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             return result;
         }
 
-        [MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(PullAudioStreamCloseDelegate))]        
         private static void StreamCloseCallback(IntPtr context)
         {
             try
@@ -379,7 +379,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             }
         }
 
-        [MonoPInvokeCallback]
+        [MonoPInvokeCallback(typeof(PullAudioStreamGetPropertyDelegate))]
         private static void StreamGetPropertyCallback(IntPtr context, Internal.PropertyId id, IntPtr buffer, uint size)
         {
             IntPtr rePtr = IntPtr.Zero;

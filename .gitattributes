@@ -16,6 +16,7 @@ setup.cfg text
 
 *.appxmanifest text
 *.asset text
+*.axml text
 *.bat text
 *.bats text
 *.c text

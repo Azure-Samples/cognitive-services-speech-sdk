@@ -27,6 +27,7 @@ if (WIN32)
       COMMAND ${CMAKE_MAKE_PROGRAM} /t:Restore "${CSHARP_PROJECT_PATH}.csproj"
       COMMAND ${CMAKE_MAKE_PROGRAM} /p:Configuration=$<CONFIGURATION> "${CSHARP_PROJECT_PATH}.csproj"
       COMMAND ${CMAKE_MAKE_PROGRAM} /p:Configuration=$<CONFIGURATION>UnixOS "${CSHARP_PROJECT_PATH}.csproj"
+      COMMAND ${CMAKE_MAKE_PROGRAM} /p:Configuration=$<CONFIGURATION>IOS "${CSHARP_PROJECT_PATH}.csproj"
       COMMAND del /S /Q obj
       COMMENT "Building external C# project")
     add_dependencies(${CSHARP_LIB_CUSTOM} ${SPEECHSDK_CORE_LIBRARY}) 

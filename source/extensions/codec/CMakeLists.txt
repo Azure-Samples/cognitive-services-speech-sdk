@@ -36,6 +36,11 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/gstreamer_modules.h"
     )
 
+set(HEADERS_PRIVATE_STUB
+    "${SRC_DIR}/stdafx.h"
+    "${SRC_DIR}/create_module_object.h"
+    )
+
 set(SOURCES
     "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/codec_adapter.cpp"
@@ -43,6 +48,11 @@ set(SOURCES
     "${SRC_DIR}/base_gstreamer.cpp"
     "${SRC_DIR}/audio_decoder.cpp"
     "${SRC_DIR}/opus_decoder.cpp"
+    )
+
+set(SOURCES_STUB
+    "${SRC_DIR}/create_module_object.cpp"
+    "${SRC_DIR}/stdafx.cpp"
     )
 
 set(STATICLIB_SOURCES
@@ -81,6 +91,10 @@ endif()
 
 if(SPEECHSDK_OS MATCHES "^IOS")
     add_library(codec STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+    add_library(codec_stub STATIC ${HEADERS} ${HEADERS_PRIVATE_STUB} ${SOURCES_STUB})
+    target_compile_definitions(codec_stub
+      PRIVATE -DCODEC_STUB=1
+      )
 else()
     add_library(codec SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
     set_target_properties (codec PROPERTIES

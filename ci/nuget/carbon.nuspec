@@ -24,6 +24,8 @@
     <!-- target and property files -->
     <file src="build\native\Microsoft.CognitiveServices.Speech.targets" target="build\native\Microsoft.CognitiveServices.Speech.targets" />
     <file src="build\net461\Microsoft.CognitiveServices.Speech.targets" target="build\net461\Microsoft.CognitiveServices.Speech.targets" />
+    <file src="build\monoandroid\Microsoft.CognitiveServices.Speech.targets" target="build\monoandroid\Microsoft.CognitiveServices.Speech.targets" />
+    <file src="build\Xamarin.iOS\Microsoft.CognitiveServices.Speech.targets" target="build\Xamarin.iOS\Microsoft.CognitiveServices.Speech.targets" />
     <file src="build\Microsoft.CognitiveServices.Speech.props" target="build\Microsoft.CognitiveServices.Speech.props" />
 
     <!-- C++ header files -->
@@ -65,6 +67,10 @@
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
 
+    <!-- .NET standard dlls, built on Windows, used on Xamarin Android -->
+    <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\monoandroid\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\monoandroid\Microsoft.CognitiveServices.Speech.csharp.xml" />
+
     <!-- .NET standard Linux native dlls -->
     <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.kws.so" target="runtimes\linux-x64\native\libMicrosoft.CognitiveServices.Speech.extension.kws.so" />
     <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.codec.so" target="runtimes\linux-x64\native\libMicrosoft.CognitiveServices.Speech.extension.codec.so" />
@@ -77,8 +83,20 @@
     <file src="$OSXDropDir$\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\osx-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
     <file src="$OSXDropDir$\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="runtimes\osx-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
 
+    <!-- .NET standard dlls for iOS -->
+    <file src="$WindowsDropDir$\x64\Release\public\lib\IOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\Xamarin.iOS\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\IOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\Xamarin.iOS\Microsoft.CognitiveServices.Speech.csharp.xml" />
+
     <!-- .NET standard macOS native dlls -->
     <file src="$OSXDropDir$\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.dylib" target="runtimes\osx-x64\native\libMicrosoft.CognitiveServices.Speech.core.dylib" />
+
+    <!-- Android native dlls for Xamarin -->
+    <file src="$AndroidDropDir$\Android-arm64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="build\monoandroid\libs\arm64-v8a\libMicrosoft.CognitiveServices.Speech.core.so" />
+    <file src="$AndroidDropDir$\Android-arm32\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="build\monoandroid\libs\armeabi-v7a\libMicrosoft.CognitiveServices.Speech.core.so" />
+    <file src="$AndroidDropDir$\Android-x86\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="build\monoandroid\libs\x86\libMicrosoft.CognitiveServices.Speech.core.so" />
+
+    <!-- iOS native library for Xamarin -->
+    <file src="$iOSDropDir$\Release\libMicrosoft.CognitiveServices.Speech.core.a" target="build\Xamarin.iOS\libMicrosoft.CognitiveServices.Speech.core.a" />
 
     <!-- Redistributable notice -->
     <file src="$RedistDir$\REDIST.txt" target="build\REDIST.txt" />

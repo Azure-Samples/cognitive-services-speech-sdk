@@ -7,10 +7,11 @@
 
 #include "stdafx.h"
 #include "create_module_object.h"
+#ifndef CODEC_STUB
 #include "create_object_helpers.h"
 #include "factory_helpers.h"
 #include "codec_adapter.h"
-
+#endif
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -20,9 +21,13 @@ namespace Impl {
 
 SPX_EXTERN_C void* Codec_CreateModuleObject(const char* className, const char* interfaceName)
 {
+#ifndef CODEC_STUB
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY(CSpxCodecAdapter, ISpxAudioStreamReader);
     SPX_FACTORY_MAP_END();
+#else
+    return NULL;
+#endif
 }
 
 #ifndef STATIC_CODEC_EXTENSION
