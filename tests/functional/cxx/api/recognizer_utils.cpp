@@ -18,6 +18,7 @@ TestData weatheropus{ "/audio/whatstheweatherlike.opus", "What's the weather lik
 TestData weatheralaw{ "/audio/whatstheweatherlike.alaw", "What's the weather like?" };
 TestData weathermulaw{ "/audio/whatstheweatherlike.mulaw", "What's the weather like?" };
 TestData weatherflac{ "/audio/whatstheweatherlike.flac", "What's the weather like?" };
+TestData weather3x{ "/audio/whatstheweatherlike-5secsilences.wav", "What's the weather like?" };
 TestData batman{ "/audio/batman.wav", "" };
 TestData wrongSamplingRateFile {"/audio/11khztest.wav", "" };
 TestData cortana {"/audio/heyCortana.wav", "Hey Cortana," };
@@ -26,6 +27,7 @@ TestData turnOnLamp {"/audio/TurnOnTheLamp.wav", "Turn on lamp" };
 TestData dgiWreckANiceBeach {"/audio/wreck-a-nice-beach.wav", "Wreck a nice beach." };
 TestData recordedAudioMessage { "/audio/RecordedAudioMessages.json", "" };
 TestData kwvAccept { "/kws/kws_whatstheweatherlike.wav", "Computer what's the weather like?" };
+TestData kwvAccept2x { "/kws/kws_whatstheweatherlike_x2.wav", "Computer what's the weather like?" };
 TestData kwvReject { "/kws/kws_whatshouldIcallyou.wav", "Hey Computer what should I call you?" };
 TestData kwvMultiturn { "/kws/kws_whatstheweatherlike_turnontheradio.wav", "Computer what's the weather like? Turn on the radio." };
 TestData katieSteve{ "/audio/katiesteve.wav", "Good morning Katie." };

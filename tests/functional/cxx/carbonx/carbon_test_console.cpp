@@ -112,6 +112,12 @@ bool CarbonTestConsole::ParseConsoleArgs(const std::vector<std::string>& args, C
             pstrNextArg = &pconsoleArgs->m_mockWavFileName;
             fNextArgRequired = true;
         }
+        else if (PAL::strnicmp(pszArg, "--kwsTable", strlen("--kwsTable")) == 0)
+        {
+            fShowOptions = pconsoleArgs->m_kwsTable.length() > 0 || fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_kwsTable;
+            fNextArgRequired = true;
+        }
         else if (PAL::stricmp(pszArg, "--mockkws") == 0)
         {
             fShowOptions = pconsoleArgs->m_useMockKws || fNextArgRequired;
@@ -313,6 +319,12 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
         fValid = false;
     }
 
+    if (!pconsoleArgs->m_kwsTable.empty() && PAL::access(pconsoleArgs->m_kwsTable.c_str(), 0) != 0)
+    {
+        SPX_DBG_TRACE_ERROR("File does not exist: %s", pconsoleArgs->m_kwsTable.c_str());
+        fValid = false;
+    }
+
     if (pconsoleArgs->m_fContinuousRecognition && pconsoleArgs->m_strContinuousRecognitionSeconds.length() > 0)
     {
         auto seconds = std::stoi(pconsoleArgs->m_strContinuousRecognitionSeconds.c_str());
@@ -407,6 +419,8 @@ void CarbonTestConsole::DisplayConsoleUsage()
     ConsoleWriteLine("       --single                Use RecognizeOnceAsync for a single utterance.");
     ConsoleWriteLine("       --continuous:{seconds}  Use [Start/Stop]ContinuousRecognition, waiting");
     ConsoleWriteLine("                               {seconds} in between starting and stopping.");
+    ConsoleWriteLine("");
+    ConsoleWriteLine("       --kwsTable:{fileName}   Use KWS table {fileName}.");
     ConsoleWriteLine("");
     ConsoleWriteLine("       --sample:{sampleName}   Run the sample named {sampleName}.");
     ConsoleWriteLine("");
@@ -1206,7 +1220,7 @@ void CarbonTestConsole::recognizer_start_keyword_recognition(std::shared_ptr<T>&
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWriteLine("\nStartKeywordRecognitionAsync %s...", name.c_str());
 
-    auto model = KeywordRecognitionModel::FromFile("kws.table");
+    auto model = KeywordRecognitionModel::FromFile(m_kwsTable);
     auto future = recognizer->StartKeywordRecognitionAsync(model);
 
     ConsoleWriteLine("StartKeywordRecognitionAsync %s... Waiting...", name.c_str());
@@ -1367,6 +1381,9 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
     static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
     static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
     static_assert(9 == (int)ResultReason::SynthesizingAudioCompleted, "ResultReason::* enum values changed!");
+    static_assert(10 == (int)ResultReason::RecognizingKeyword, "ResultReason::* enum values changed!");
+    static_assert(11 == (int)ResultReason::RecognizedKeyword, "ResultReason::* enum values changed!");
+    static_assert(12 == (int)ResultReason::SynthesizingAudioStarted, "ResultReason::* enum values changed!");
 
     static_assert(1 == (int)CancellationReason::Error, "CancellationReason::* enum values changed!");
     static_assert(2 == (int)CancellationReason::EndOfStream, "CancellationReason::* enum values changed!");
@@ -1385,6 +1402,7 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
     static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
     static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
     static_assert(3 == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason::* enum values changed!");
+    static_assert(4 == (int)NoMatchReason::KeywordNotRecognized, "NoMatchReason::* enum values changed!");
 
     std::string reasons[] = {
         "NoMatch",
@@ -1396,7 +1414,10 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
         "TranslatingSpeech",
         "TranslatedSpeech",
         "SynthesizingAudio",
-        "SynthesizingAudioCompleted"
+        "SynthesizingAudioCompleted",
+        "RecognizingKeyword",
+        "RecognizedKeyword",
+        "SynthesizingAudioStarted"
     };
 
     std::string reasonsCanceled[] = {
@@ -1410,6 +1431,7 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
         "NotRecognized",
         "InitialSilenceTimeout",
         "InitialBabbleTimeout",
+        "KeywordNotRecognized"
     };
 
     std::string str;
@@ -1451,10 +1473,14 @@ std::string CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
     static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
     static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
     static_assert(9 == (int)ResultReason::SynthesizingAudioCompleted, "ResultReason::* enum values changed!");
+    static_assert(10 == (int)ResultReason::RecognizingKeyword, "ResultReason::* enum values changed!");
+    static_assert(11 == (int)ResultReason::RecognizedKeyword, "ResultReason::* enum values changed!");
+    static_assert(12 == (int)ResultReason::SynthesizingAudioStarted, "ResultReason::* enum values changed!");
 
     static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
     static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
     static_assert(3 == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason::* enum values changed!");
+    static_assert(4 == (int)NoMatchReason::KeywordNotRecognized, "NoMatchReason::* enum values changed!");
 
     std::string reasons[] = {
         "NoMatch",
@@ -1466,7 +1492,10 @@ std::string CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
         "TranslatingSpeech",
         "TranslatedSpeech",
         "SynthesizingAudio",
-        "SynthesizingAudioCompleted"
+        "SynthesizingAudioCompleted",
+        "RecognizingKeyword",
+        "RecognizedKeyword",
+        "SynthesizingAudioStarted"
     };
 
     std::string reasonsCanceled[] = {
@@ -1480,6 +1509,7 @@ std::string CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
         "NotRecognized",
         "InitialSilenceTimeout",
         "InitialBabbleTimeout",
+        "KeywordNotRecognized"
     };
 
     std::string str;
@@ -1521,10 +1551,14 @@ std::string CarbonTestConsole::ToString(const TranslationRecognitionEventArgs& e
     static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
     static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
     static_assert(9 == (int)ResultReason::SynthesizingAudioCompleted, "ResultReason::* enum values changed!");
+    static_assert(10 == (int)ResultReason::RecognizingKeyword, "ResultReason::* enum values changed!");
+    static_assert(11 == (int)ResultReason::RecognizedKeyword, "ResultReason::* enum values changed!");
+    static_assert(12 == (int)ResultReason::SynthesizingAudioStarted, "ResultReason::* enum values changed!");
 
     static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
     static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
     static_assert(3 == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason::* enum values changed!");
+    static_assert(4 == (int)NoMatchReason::KeywordNotRecognized, "NoMatchReason::* enum values changed!");
 
     std::string reasons[] = {
         "NoMatch",
@@ -1536,7 +1570,10 @@ std::string CarbonTestConsole::ToString(const TranslationRecognitionEventArgs& e
         "TranslatingSpeech",
         "TranslatedSpeech",
         "SynthesizingAudio",
-        "SynthesizingAudioCompleted"
+        "SynthesizingAudioCompleted",
+        "RecognizingKeyword",
+        "RecognizedKeyword",
+        "SynthesizingAudioStarted"
     };
     std::string reasonsCanceled[] = {
         "",
@@ -1549,6 +1586,7 @@ std::string CarbonTestConsole::ToString(const TranslationRecognitionEventArgs& e
         "NotRecognized",
         "InitialSilenceTimeout",
         "InitialBabbleTimeout",
+        "KeywordNotRecognized"
     };
 
     std::string str;
@@ -1598,6 +1636,7 @@ std::string CarbonTestConsole::ToString(const TranslationSynthesisEventArgs& e)
 void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
 {
     m_region = R"(westus)";
+    m_kwsTable = "kws.table";
 
     if (pconsoleArgs->m_useMockMicrophone)
     {
@@ -1648,6 +1687,11 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
     if (!pconsoleArgs->m_strOfflineModelLanguage.empty())
     {
         m_offlineModelLanguage = pconsoleArgs->m_strOfflineModelLanguage;
+    }
+
+    if (!pconsoleArgs->m_kwsTable.empty())
+    {
+        m_kwsTable = pconsoleArgs->m_kwsTable;
     }
 
     if (!pconsoleArgs->m_strCustomSpeechModelId.empty())

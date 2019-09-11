@@ -139,6 +139,16 @@ namespace MicrosoftSpeechSDKSamples
             await RecognizeAsync(config, fileName, useStream, useContinuousRecognition, deviceName).ConfigureAwait(false);
         }
 
+        public static async Task SpeechRecognitionOfflineUnidecAsync(string key, string region, string lang, string fileName, bool useStream, bool useToken, bool useContinuousRecognition, string deviceName = null)
+        {
+            Console.WriteLine("Speech Recognition using offline Unidec.");
+            SpeechConfig config = SpeechConfig.FromSubscription(key, region);
+            config.SetProperty("CARBON-INTERNAL-UseRecoEngine-Unidec", "true");
+            config.SetProperty("CARBON-INTERNAL-SPEECH-RecoLocalModelPathRoot", "external/unidec/Unidec.Model/model");
+            config.SetProperty("CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage", "en-US");
+            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition, deviceName).ConfigureAwait(false);
+        }
+
         public static async Task RecognizeAsync(SpeechConfig config, string fileName, bool useStream, bool useContinuousRecognition, string deviceName = null)
         {
             config.SetProperty(PropertyId.Speech_LogFilename, "logfile-"+ DateTime.Now.ToString("HH-mm-ss") + ".txt");

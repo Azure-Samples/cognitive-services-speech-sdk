@@ -2216,6 +2216,14 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     m_audioBuffer->NewTurn();
     m_currentTurnGlobalOffset = m_audioBuffer->GetAbsoluteOffset();
 
+    // Prevent an invalid state transition during continuous recognitions
+    // with offline Unidec. A better fix will need some refactoring.
+    // Bug 2003347 Offline Unidec invalid state transition with KWS or Continuous reco
+    bool useRecoEngineUnidec = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Unidec", PAL::BoolToString(false).c_str()));
+    if (m_recoAdapter && useRecoEngineUnidec && (startKind != RecognitionKind::Keyword))
+    {
+        m_resetRecoAdapter = m_recoAdapter;
+    }
     // Depending on the startKind, we'll either switch to the Kws Engine Adapter or the Reco Engine Adapter
     m_audioProcessor = startKind == RecognitionKind::Keyword
         ? SpxQueryInterface<ISpxAudioProcessor>(EnsureInitKwsEngineAdapter(model))
@@ -2260,6 +2268,14 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
     }
     else
     {
+        // Prevent an invalid state transition during continuous recognitions
+        // with offline Unidec. A better fix will need some refactoring.
+        // Bug 2003347 Offline Unidec invalid state transition with KWS or Continuous reco
+        bool useRecoEngineUnidec = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Unidec", PAL::BoolToString(false).c_str()));
+        if (m_recoAdapter && useRecoEngineUnidec)
+        {
+            m_resetRecoAdapter = m_recoAdapter;
+        }
         m_audioProcessor = SpxQueryInterface<ISpxAudioProcessor>(EnsureInitRecoEngineAdapter());
         m_isKwsProcessor = false;
         if (m_spottedKeyword)

@@ -12,7 +12,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     public class RecognitionTestBase
     {
         public static string inputDir, subscriptionKey, region, conversationTranscriptionEndpoint, conversationTranscriptionPPEKey, conversationTranscriptionPRODKey, speechRegionForConversationTranscription;
-        public SpeechConfig defaultConfig;
+        public SpeechConfig defaultConfig, offlineConfig;
         private static Config _config;
 
         public static void BaseClassInit(TestContext context)
@@ -38,6 +38,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void BaseTestInit()
         {
             defaultConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
+
+            offlineConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
+            offlineConfig.SetProperty("CARBON-INTERNAL-UseRecoEngine-Unidec", "true");
+            offlineConfig.SetProperty("CARBON-INTERNAL-SPEECH-RecoLocalModelPathRoot", TestData.OfflineUnidec.LocalModelPathRoot);
+            offlineConfig.SetProperty("CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage", TestData.OfflineUnidec.LocalModelLanguage);
+            // Uncomment below to enable logs
+            //offlineConfig.SetProperty(PropertyId.Speech_LogFilename, "logfile-" + DateTime.Now.ToString("HH-mm-ss") + ".txt");
         }
     }
 }

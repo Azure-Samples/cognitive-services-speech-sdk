@@ -37,6 +37,7 @@ namespace MicrosoftSpeechSDKSamples
             string endpoint = null;
             bool useStream = false;
             bool useContinuousRecognition = false;
+            bool useOfflineUnidec = false;
 
             if (args.Length >= 2)
             {
@@ -215,6 +216,14 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
 
+            if (args.Length >= 6)
+            {
+                if (string.Compare(args[5], "unidec", true) == 0)
+                {
+                    useOfflineUnidec = true;
+                }
+            }
+
             if (isMemoryLeakTest)
             {
                 MemoryLeakTests.MemoryLeakTest(subKey, region, fileName, memoryLeakTestKind).Wait();
@@ -228,6 +237,12 @@ namespace MicrosoftSpeechSDKSamples
                 }
                 else
                 {
+                    if (useOfflineUnidec)
+                    {
+                        Console.WriteLine("=============== Run speech recognition samples using offline Unidec. ===============");
+                        SpeechRecognitionSamples.SpeechRecognitionOfflineUnidecAsync(subKey, region: region, lang: lang, fileName: fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition, deviceName: deviceName).Wait();
+                    }
+                    else
                     if (useBaseModel)
                     {
                         Console.WriteLine("=============== Run speech recognition samples using base model. ===============");

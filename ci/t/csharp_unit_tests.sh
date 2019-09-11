@@ -56,12 +56,30 @@ perl -p - \
   s/(<Parameter name="($keysRe)" value=")([^"]*)/$1.$A{$2}/ge
 SCRIPT
 
+RUN_OFFLINE_UNIDEC_TESTS=false
+case $PLATFORM in
+  Windows-x64*)
+    UNIDEC_RUNTIME_PATH="$SOURCE_ROOT/external/unidec/Richland.Speech.UnidecRuntime/native"
+    if [[ -d "$UNIDEC_RUNTIME_PATH" ]]; then
+      PATH="$(cygpath -aw "$UNIDEC_RUNTIME_PATH"):$PATH"
+      RUN_OFFLINE_UNIDEC_TESTS=true
+    fi
+    ;;
+  # Skip on other platforms for now
+esac
+
+if [[ $RUN_OFFLINE_UNIDEC_TESTS = true ]]; then
+  OFFLINE_UNIDEC_FILTER=""
+else
+  OFFLINE_UNIDEC_FILTER="&TestCategory!=OfflineUnidec"
+fi
+
 set -x
 if [[ $SPEECHSDK_LONG_RUNNING = true ]]; then
-  TEST_CASE_FILTER="TestCategory=LongTest&TestCategory!=CompressedStreamTest"
+  TEST_CASE_FILTER="TestCategory=LongTest&TestCategory!=CompressedStreamTest${OFFLINE_UNIDEC_FILTER}"
   LOG_FILE_NAME=LogFileName=test-$T-$PLATFORM-long-running.trx
 else
-  TEST_CASE_FILTER="TestCategory!=LongTest&TestCategory!=CompressedStreamTest"
+  TEST_CASE_FILTER="TestCategory!=LongTest&TestCategory!=CompressedStreamTest${OFFLINE_UNIDEC_FILTER}"
   LOG_FILE_NAME=LogFileName=test-$T-$PLATFORM-$RANDOM.trx
 fi
 

@@ -351,5 +351,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             public static string InvalidTargetLanaguageErrorMessage = @"Translation call failed: Response status code does not indicate success: 400 (Bad Request).";
             public static string InvalidVoiceNameErrorMessage = @"Synthesis service failed with code:  - Could not identify the voice 'InvalidVoice' for the text to speech service ";
         }
+
+        public static class OfflineUnidec
+        {
+            public static string LocalModelPathRoot = Path.Combine(AudioDir, "../../../external/unidec/Unidec.Model/model");
+            public static string LocalModelLanguage = "en-US";
+        }
     }
 }

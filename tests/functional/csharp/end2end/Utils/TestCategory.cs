@@ -9,5 +9,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
        public const string LongRunning = "LongTest";
 
        public const string CompressedStreamTest = "CompressedStreamTest";
+
+       public const string OfflineUnidec = "OfflineUnidec";
     }
 }

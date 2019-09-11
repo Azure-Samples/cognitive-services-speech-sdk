@@ -38,6 +38,7 @@ private:
         bool m_useInteractiveMicrophone = false;
         bool m_useMockMicrophone = false;
 
+        std::string m_kwsTable;
         bool m_useMockKws = false;
 
         std::string m_strMockMicrophoneRealTimePercentage;
@@ -271,6 +272,7 @@ private:
     std::vector<std::string> m_intentNames;
     std::string m_offlineModelPathRoot;
     std::string m_offlineModelLanguage;
+    std::string m_kwsTable;
 
     void* m_commandSystem = nullptr;
     std::shared_ptr<PullAudioInputStream> m_pullAudioStream;
