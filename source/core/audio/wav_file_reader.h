@@ -59,6 +59,8 @@ private:
     void EnsureDataChunk();
     uint32_t ReadFromDataChunk(uint8_t** ppbuffer, uint32_t* pcbBuffer);
 
+    std::streamoff GetFileEndPos();
+
     using WavFile_Type = std::fstream;
 
     static const uint16_t cbTag = 4;
@@ -80,6 +82,7 @@ private:
                                                   // This is used by the mock microphone.
 
     std::streamoff m_firstSeekDataChunkPos;
+    std::streamoff m_lastDataChunkDataEndPos;
 
     uint32_t m_dataChunkBytesLeft;
 };

@@ -241,17 +241,32 @@ void CSpxWavFileReader::EnsureDataChunk()
     uint8_t chunkType[cbChunkType];
     uint32_t chunkSize = 0;
 
+    auto fileEndPos = GetFileEndPos();
     while (!m_file->eof() && m_dataChunkBytesLeft == 0)
     {
         if (ReadChunkTypeAndSize(chunkType, &chunkSize))
         {
-            if (0 == std::memcmp(chunkType, "data", cbChunkSize))
+            auto currentPos = m_file->tellg();
+            auto chunkEndPos = currentPos + (std::streamoff)chunkSize;
+
+            if (0 == std::memcmp(chunkType, "data", cbChunkType))
             {
+                SPX_TRACE_INFO("AUDIO Data Chunk @%u length=%u", (uint32_t)currentPos, chunkSize);
                 m_dataChunkBytesLeft = chunkSize;
+                m_lastDataChunkDataEndPos = chunkEndPos;
             }
-            else
+            else if (chunkEndPos <= fileEndPos)
             {
+                SPX_TRACE_INFO("OTHER Data Chunk @%u length=%u; SKIPPING...", (uint32_t)currentPos, chunkSize);
                 m_file->seekg(chunkSize, WavFile_Type::cur);
+            }
+            else if (m_lastDataChunkDataEndPos < fileEndPos)
+            {
+                SPX_TRACE_WARNING("OTHER Data Chunk @%u length=%u; CAN'T SKIP ... Rewind to end of last data chunk and assume all remainder of file is actually part of that DATA CHUNK...", (uint32_t)currentPos, chunkSize);
+                m_file->seekg(m_lastDataChunkDataEndPos, WavFile_Type::beg);
+                m_dataChunkBytesLeft = (uint32_t)(fileEndPos - m_lastDataChunkDataEndPos);
+                m_lastDataChunkDataEndPos += m_dataChunkBytesLeft;
+                SPX_TRACE_WARNING("INCREASED Data Chunk size by %u byte(s)", (uint32_t)m_dataChunkBytesLeft);
             }
         }
         else if (m_file->eof() && m_continuousAudioLoop)
@@ -266,7 +281,12 @@ void CSpxWavFileReader::EnsureDataChunk()
 uint32_t CSpxWavFileReader::ReadFromDataChunk(uint8_t** ppbuffer, uint32_t* pcbBuffer)
 {
     auto cbRead = std::min(*pcbBuffer, m_dataChunkBytesLeft);
-    SPX_IFTRUE_THROW_HR(cbRead > 0 && !m_file->read((char*)*ppbuffer, cbRead), SPXERR_UNEXPECTED_EOF);
+    if (cbRead > 0 && !m_file->read((char*)*ppbuffer, cbRead))
+    {
+        SPX_TRACE_WARNING("AUDIO Data chunk read failed!!");
+        SPX_IFTRUE_THROW_HR(cbRead == 0, SPXERR_UNEXPECTED_EOF);
+        cbRead = (uint32_t)m_file->gcount();
+    }
 
     *ppbuffer += cbRead; // move the buffer forward
     *pcbBuffer -= cbRead; // reduce the count of bytes left to read
@@ -274,6 +294,17 @@ uint32_t CSpxWavFileReader::ReadFromDataChunk(uint8_t** ppbuffer, uint32_t* pcbB
     m_dataChunkBytesLeft -= cbRead;
 
     return cbRead;
+}
+
+std::streamoff CSpxWavFileReader::GetFileEndPos()
+{
+    auto currentPos = m_file->tellg();
+    m_file->seekg(0, WavFile_Type::end);
+
+    auto fileEndPos = m_file->tellg();
+    m_file->seekg(currentPos, WavFile_Type::beg);
+
+    return fileEndPos;
 }
 
 
