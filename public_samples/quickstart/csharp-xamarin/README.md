@@ -8,6 +8,7 @@ This sample demonstrates how to use Speech SDK for Universal Windows Platform (U
 
 ## Prerequisites
 
+* Speech SDK version 1.7.0 or later.
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working microphone.
 * [Microsoft Visual Studio 2019](https://www.visualstudio.com/), Community Edition or higher is preferred.
 * [Xamarin installation to Visual Studio](https://docs.microsoft.com/xamarin/get-started/installation/?pivots=windows).
@@ -58,8 +59,14 @@ This sample demonstrates how to use Speech SDK for Universal Windows Platform (U
 * Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
   * Choose `iPhone` as active solution platform when you want to launch app on iPhone device.
   * Choose `iPhoneSimulator` as active solution platform when you want to launch app on iPhone simulator.
+* Set the startup projects to `helloworld.iOS`
+* Plug an iPhone device into your PC or use iPhoneSimulator of your choice.
+* For iPhone device, open Info.plist file under `helloworld.iOS` project and make sure **Application** > **Bundle Identifier** in that file matches to your apple device provisioning profile.
+* For iPhone device, open `Helloworld.iOS` project properties, select **iOS Bundle Signing** and under that select **Manual Provisioning** as a scheme. Under **Manual Provisioning** section, select your iPhone device **Signing Identity** > **Iphone Developer: Your email address (ID)**. After that select **Provisioning Profile** > **iOS Team Provisioning Profile `Your app's Bundle Identifier`**.
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
-* To run the sample app, make sure your iPhone device or simulator has been setup and set the target device accordingly and press F5 or use **Debug** \> **Start Debugging**. To run the app without debugging, press Ctrl+F5 or use **Debug** \> **Start Without Debugging**.
+> Note:
+> If you get build warning `MSB3341: Could not resolve reference "libMicrosoft.CognitiveServices.Speech.core.a". If this reference is required by your code, you may get compilation errors`, that is not probably a real issue and just continue forward.
+* To run the sample app, make sure your iPhone device or iPhoneSimulator has been setup and set the target device accordingly and press F5 or use **Debug** \> **Start Debugging**. To run the app without debugging, press Ctrl+F5 or use **Debug** \> **Start Without Debugging**.
 * When you see the `Enable microphone` button, click it to give microphone access for the app.
 * Then select the `Start speech recognition` button and start speaking. The next (up to) 15 seconds of English speech will be sent to the Speech service and transcribed.
 
