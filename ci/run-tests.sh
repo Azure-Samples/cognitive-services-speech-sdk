@@ -170,6 +170,11 @@ for testfile in "${testsToRun[@]}"; do
         else
           echo Test suite $T: failed with error code $exitCode, \($TIME_SECONDS seconds\)
           vsts_logissue warning "${options[platform]}: test suite $T failed, exit code $exitCode, source $testfile."
+
+          # Since internally the test harness for cxx tests retries failed tests up to 3 times, we don't attempt to rerun the test suite thrice
+          if [[$testfile ~= "cxx"]]; then
+            break;
+          fi
         fi
       done
 
