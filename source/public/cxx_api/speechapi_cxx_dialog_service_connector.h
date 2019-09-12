@@ -44,6 +44,14 @@ public:
     /// </summary>
     virtual ~DialogServiceConnector()
     {
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+        if (m_handle != SPXHANDLE_INVALID)
+        {
+            ::dialog_service_connector_handle_release(m_handle);
+            SPX_DBG_TRACE_VERBOSE("%s: m_handle=0x%8p", __FUNCTION__, (void*)m_handle);
+            m_handle = SPXHANDLE_INVALID;
+        }
     }
 
     /// <summary>

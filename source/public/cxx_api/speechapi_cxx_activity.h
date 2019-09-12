@@ -82,6 +82,18 @@ protected:
     SPXACTIVITYHANDLE m_handle;
     /*! \endcond */
 public:
+    virtual ~Activity()
+    {
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+        if (m_handle != SPXHANDLE_INVALID)
+        {
+            ::activity_handle_release(m_handle);
+            SPX_DBG_TRACE_VERBOSE("%s: m_handle=0x%8p", __FUNCTION__, (void*)m_handle);
+            m_handle = SPXHANDLE_INVALID;
+        }
+    }
+
 #ifndef SWIG
     /// <summary>
     /// Class that represents an activity property.
