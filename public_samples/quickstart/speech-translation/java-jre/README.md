@@ -6,9 +6,9 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows x64, Ubuntu 16.04/18.04 x64) capable to run Eclipse, with a working microphone.
+* A PC (Windows x64, Ubuntu 16.04/18.04 on x64 or ARM64) capable to run Eclipse,[<sup>[1]</sup>](#footnote1) with a working microphone.
 * 64-bit JRE/JDK for Java 8.
-* Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.
+* Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.[<sup>[1]</sup>](#footnote1)
 * On Ubuntu, run the following commands for the installation of required packages:
 
   ```sh
@@ -21,6 +21,8 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
   sudo apt-get update
   sudo apt-get install libssl1.0.2 libasound2
   ```
+
+<small><a name="footnote1">1</a>. This sample has not been verified with Eclipse on ARM64.</small>
 
 ## Build the sample
 
