@@ -90,6 +90,7 @@ setup.cfg text
 *.exe binary
 *.jar binary
 *.lib binary
+*.mp3 binary
 *.pfx binary
 *.png binary
 *.snk binary

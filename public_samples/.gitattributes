@@ -53,6 +53,7 @@ proguard-rules.pro text
 
 # Binary extensions:
 *.jar binary
+*.mp3 binary
 *.pfx binary
 *.png binary
 *.wav binary

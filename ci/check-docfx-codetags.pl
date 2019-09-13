@@ -140,6 +140,8 @@ BEGIN {
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/TranslationSamples.java#TranslationWithFileAsync
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/TranslationSamples.java#TranslationWithMicrophoneAsync
       samples/java/jre/console/src/com/microsoft/cognitiveservices/speech/samples/console/TranslationSamples.java#toplevel
+      samples/objective-c/ios/compressed-streams/CompressedStreamsSample/CompressedStreamsSample/ViewController.m#setup-stream
+      samples/objective-c/ios/compressed-streams/CompressedStreamsSample/CompressedStreamsSample/ViewController.m#push-compressed-stream
       samples/python/console/intent_sample.py#IntentContinuousRecognitionWithFile
       samples/python/console/intent_sample.py#IntentRecognitionOnceWithFile
       samples/python/console/intent_sample.py#IntentRecognitionOnceWithMic

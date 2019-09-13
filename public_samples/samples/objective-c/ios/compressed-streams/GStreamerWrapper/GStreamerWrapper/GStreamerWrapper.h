@@ -1,9 +1,8 @@
 //
-//  GStreamerWrapper.h
-//  GStreamerWrapper
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-//  Created by Christian Landsiedel on 23.04.19.
-//  Copyright © 2019 Microsoft. All rights reserved.
+//  GStreamerWrapper.h
 //
 
 #import <UIKit/UIKit.h>

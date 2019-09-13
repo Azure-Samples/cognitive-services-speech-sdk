@@ -1,8 +1,8 @@
 //
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// gstreamer_modules.h
+// gstreamer_modules.cpp
 //
 
 #include "gstreamer_modules.h"

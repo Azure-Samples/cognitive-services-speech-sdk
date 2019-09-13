@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) Microsoft. All rights reserved.
+# Copyright (c) Microsoft.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 #
 # Script that creates the Microsoft Cognitive Services Speech Universal Framework for iOS.

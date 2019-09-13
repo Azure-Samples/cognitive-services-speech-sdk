@@ -1886,7 +1886,7 @@ jobs:
       set -u -e -o pipefail -x
       if [[ $(SPEECHSDK_ENABLE_CODEC) == true ]]; then
         mkdir -p build_wrapper
-        xcrun xcodebuild build -project ci/apple/$(GStreamerWrapper)/$(GStreamerWrapper).xcodeproj -scheme $(GStreamerWrapper) \
+        xcrun xcodebuild build -project public_samples/samples/objective-c/ios/compressed-streams/$(GStreamerWrapper)/$(GStreamerWrapper).xcodeproj -scheme $(GStreamerWrapper) \
           CONFIGURATION_BUILD_DIR=${PWD}/build_wrapper
         # copy to framework search path
         cp -R ${PWD}/build_wrapper/$(GStreamerWrapper).framework ${HOME}/Library/Developer/GStreamer/iPhone.sdk/
