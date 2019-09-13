@@ -1090,18 +1090,17 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
 
     LogInfo("TS:%" PRIu64 " Response Message: path: %s, size: %zu.", connection->getTimestamp(), path, response->bufferSize);
 
-    string pathStr(path);
     auto callbacks = connection->m_config.m_callbacks;
 
     if (response->frameType == FRAME_TYPE_BINARY)
     {
-        if (pathStr == path::translationSynthesis || pathStr == path::audio)
+        if (path == path::translationSynthesis || path == path::audio)
         {
             // streamId is optional
             auto streamId = HTTPHeaders_FindHeaderValue(response->responseHeader, headers::streamId);
 
             AudioOutputChunkMsg msg;
-            if (pathStr == path::audio && connection->m_streamIdLangMap.size() > 0)
+            if (path == path::audio && connection->m_streamIdLangMap.size() > 0)
             {
                 SPX_DBG_TRACE_VERBOSE("m_streamIdLangMap has data, will FillLanguageForAudioOutputChunkMsg");
                 connection->FillLanguageForAudioOutputChunkMsg(streamId, path, msg);
@@ -1113,13 +1112,13 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
         }
         else
         {
-            PROTOCOL_VIOLATION("Binary frame received with unexpected path: %s", pathStr.c_str());
+            PROTOCOL_VIOLATION("Binary frame received with unexpected path: %s", path);
         }
     }
     else if (response->frameType == FRAME_TYPE_TEXT)
     {
         auto json = (response->bufferSize > 0) ? nlohmann::json::parse(response->buffer, response->buffer + response->bufferSize) : nlohmann::json();
-        if (pathStr == path::speechStartDetected || path == path::speechEndDetected)
+        if (path == path::speechStartDetected || path == path::speechEndDetected)
         {
             auto offsetObj = json[json_properties::offset];
             // For whatever reason, offset is sometimes missing on the end detected message.
@@ -1134,7 +1133,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 connection->Invoke([&] { callbacks->OnSpeechEndDetected({PAL::ToWString(json.dump()), offset}); });
             }
         }
-        else if (pathStr == path::turnStart)
+        else if (path == path::turnStart)
         {
             auto tag = json[json_properties::context][json_properties::tag].get<string>();
             if (requestId == connection->m_speechRequestId)
@@ -1148,7 +1147,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                 connection->Invoke([&] { callbacks->OnMessageStart({ PAL::ToWString(json.dump()), tag, requestId }); });
             }
         }
-        else if (pathStr == path::turnEnd)
+        else if (path == path::turnEnd)
         {
             {
                 connection->m_activeRequestIds.erase(requestId);
@@ -1490,7 +1489,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
         else
         {
             connection->Invoke([&] {
-                callbacks->OnUserMessage({pathStr,
+                callbacks->OnUserMessage({string(path),
                                           string(contentType == nullptr ? "" : contentType),
                                           requestId,
                                           response->buffer,
