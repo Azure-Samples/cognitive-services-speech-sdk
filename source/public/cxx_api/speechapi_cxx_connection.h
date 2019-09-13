@@ -80,13 +80,13 @@ public:
     /// Added in version 1.7.0.
     /// </summary>
     /// <param name="path">the message path.</param>
-    /// <param name="parameterName">Name of the parameter.</param>
-    /// <param name="parameterValue">Value of the parameter. This is a json string.</param>
+    /// <param name="propertyName">Name of the property.</param>
+    /// <param name="propertyValue">Value of the property. This is a json string.</param>
     /// <returns>void.</returns>
-    void SetMessageParameter(const SPXSTRING& path, const SPXSTRING& parameterName, const SPXSTRING& parameterValue)
+    void SetMessageProperty(const SPXSTRING& path, const SPXSTRING& propertyName, const SPXSTRING& propertyValue)
     {
             SPX_IFTRUE_THROW_HR(m_connectionHandle == SPXHANDLE_INVALID, SPXERR_INVALID_HANDLE);
-            SPX_THROW_ON_FAIL(::connection_set_message_parameter(m_connectionHandle, Utils::ToUTF8(path).c_str(), Utils::ToUTF8(parameterName).c_str(), Utils::ToUTF8(parameterValue).c_str()));
+            SPX_THROW_ON_FAIL(::connection_set_message_property(m_connectionHandle, Utils::ToUTF8(path).c_str(), Utils::ToUTF8(propertyName).c_str(), Utils::ToUTF8(propertyValue).c_str()));
     }
 
     /// <summary>

@@ -1749,14 +1749,14 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
                                               "initialSilenceTimeout": 2000,
                                               "trailingSilenceTimeout": 2000} )";
         // The specification of speech.context.phraseDetection is at https://speechwiki.azurewebsites.net/partners/protocol-phrase-detection.html
-        connection->SetMessageParameter("Speech.context", "phraseDetection", phraseDetectionPayload);
+        connection->SetMessageProperty("Speech.context", "phraseDetection", phraseDetectionPayload);
 
         string data = R"({"mode": "MicrosoftEyesOn"})";
         //The spec of dataCollection in speech.config is at https://speechwiki.azurewebsites.net/partners/speechsdk.html#datacollection-element
-        connection->SetMessageParameter("speech.config", "dataCollection", data);
+        connection->SetMessageProperty("speech.config", "dataCollection", data);
 
         data = R"({"name":"Carbonx","version":"12.01"})";
-        connection->SetMessageParameter("speech.config", "application", data);
+        connection->SetMessageProperty("speech.config", "application", data);
 
         auto result = make_shared<RecoPhrases>();
         ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);

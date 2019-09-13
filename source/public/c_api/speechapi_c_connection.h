@@ -13,7 +13,7 @@ SPXAPI connection_handle_release(SPXCONNECTIONHANDLE handle);
 
 SPXAPI connection_open(SPXCONNECTIONHANDLE handle, bool forContinuousRecognition);
 SPXAPI connection_close(SPXCONNECTIONHANDLE handle);
-SPXAPI connection_set_message_parameter(SPXCONNECTIONHANDLE handle, const char* path, const char* name, const char* value);
+SPXAPI connection_set_message_property(SPXCONNECTIONHANDLE handle, const char* path, const char* name, const char* value);
 SPXAPI connection_send_message(SPXCONNECTIONHANDLE handle, const char* path, const char* payload);
 
 typedef void(*CONNECTION_CALLBACK_FUNC)(SPXEVENTHANDLE event, void* context);

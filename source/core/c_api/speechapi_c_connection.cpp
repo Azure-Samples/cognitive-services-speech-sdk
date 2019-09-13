@@ -81,7 +81,7 @@ SPXAPI connection_close(SPXCONNECTIONHANDLE handle)
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI connection_set_message_parameter(SPXCONNECTIONHANDLE handle, const char* path, const char* name, const char* value)
+SPXAPI connection_set_message_property(SPXCONNECTIONHANDLE handle, const char* path, const char* name, const char* value)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, handle == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, name == nullptr || !(*name));

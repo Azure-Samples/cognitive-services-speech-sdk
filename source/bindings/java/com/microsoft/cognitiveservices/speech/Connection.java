@@ -74,7 +74,7 @@ public final class Connection implements Closeable
 
     /**
      * Sends a message to service.
-     * Added in version 1.7.0.
+     * Added in version 1.7.0
      * @param path The message path.
      * @param payload The message payload.
      * @return a future representing the asynchronous operation that sends the message.
@@ -95,13 +95,13 @@ public final class Connection implements Closeable
 
     /**
      * Appends a parameter in a message to service.
-     * Added in version 1.7.0.
+     * Added in version 1.7.0
      * @param path The message path.
-     * @param parameterName The parameter name that you want to set.
-     * @param parameterValue The value of the parameter that you want to set.
+     * @param propertyName The property name that you want to set.
+     * @param propertyValue The value of the property that you want to set.
      */
-    public void setMessageParameter(String path, String parameterName, String parameterValue) {
-        connectionImpl.SetMessageParameter(path, parameterName, parameterValue);
+    public void setMessageProperty(String path, String propertyName, String propertyValue) {
+        connectionImpl.SetMessageProperty(path, propertyName, propertyValue);
     }
 
     private void doAsyncConnectionAction(Runnable connectionImplAction) {

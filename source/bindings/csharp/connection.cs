@@ -158,12 +158,12 @@ namespace Microsoft.CognitiveServices.Speech
         /// Added in version 1.7.0.
         /// </summary>
         /// <param name="path">The path of the network message.</param>
-        /// <param name="parameterName">Name of the parameter.</param>
-        /// <param name="parameterValue">Value of the parameter. This is a json string.</param>
-        public void SetMessageParameter(string path, string parameterName, string parameterValue)
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="propertyValue">Value of the property. This is a json string.</param>
+        public void SetMessageProperty(string path, string propertyName, string propertyValue)
         {
            ThrowIfFail(connectionHandle != null, SpxError.InvalidHandle.ToInt32());
-           ThrowIfFail(Internal.Connection.connection_set_message_parameter(connectionHandle, path, parameterName, parameterValue));
+           ThrowIfFail(Internal.Connection.connection_set_message_property(connectionHandle, path, propertyName, propertyValue));
         }
 
         private event EventHandler<ConnectionEventArgs> _Connected;

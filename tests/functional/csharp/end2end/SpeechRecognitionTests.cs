@@ -1157,7 +1157,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     recognizer.AuthorizationToken = "abc";
 
                     var phraseDetectionPayload = "{\"mode\": \"dictation\", \"grammarScenario\": \"Dictation_Office\",\"initialSilenceTimeout\": 2000,\"trailingSilenceTimeout\": 2000}";
-                    connection.SetMessageParameter("speech.context", "phraseDetection", phraseDetectionPayload);
+                    connection.SetMessageProperty("speech.context", "phraseDetection", phraseDetectionPayload);
 
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                     Assert.IsTrue(result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult).Contains("Corrections"));
