@@ -89,7 +89,8 @@ CSpxModuleFactory::PCREATE_MODULE_OBJECT_FUNC CSpxModuleFactory::GetCreateModule
 #if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP)
     HMODULE handle = LoadLibraryA(fullPath.c_str());
 #else // Windows Store WinRT app
-    HMODULE handle = LoadPackagedLibrary(PAL::ToWString(fullPath).c_str(), 0);
+    auto wideFilename = PAL::ToWString(filename);
+    HMODULE handle = LoadPackagedLibrary(wideFilename.c_str(), 0);
 #endif
     if (handle != NULL)
     {

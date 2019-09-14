@@ -1,6 +1,17 @@
 project(speechsdk_kws)
 
-set(SDKKWS_SUPPORTED_TARGETS "Android-arm32" "Linux-arm64" "Linux-x86" "Linux-x64" "Windows-x86" "Windows-x64")
+set(SDKKWS_SUPPORTED_TARGETS
+  "Android-arm32"
+  "Linux-arm64"
+  "Linux-x86"
+  "Linux-x64"
+  "Windows-x86"
+  "Windows-x64"
+  "WindowsUwp-arm32"
+  "WindowsUwp-arm64"
+  "WindowsUwp-x64"
+  "WindowsUwp-x86"
+  )
 if(NOT SPEECHSDK_TARGET_PLATFORM IN_LIST SDKKWS_SUPPORTED_TARGETS)
   message(FATAL_ERROR "Unsupported target for KWS '${SPEECHSDK_TARGET_PLATFORM}', must be one of these: ${SDKKWS_SUPPORTED_TARGETS}")
 endif()

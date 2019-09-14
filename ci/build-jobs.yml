@@ -185,7 +185,7 @@ jobs:
     displayName: 'Download FortifySDL logs Artifacts'
     inputs:
       artifactName: 'sca_artifacts'
-      downloadPath: '$(System.ArtifactsDirectory)'      
+      downloadPath: '$(System.ArtifactsDirectory)'
   - powershell: |
      $logDir = "$(Agent.BuildDirectory)/_sdt/logs"
      if (Test-Path $logDir) {
@@ -341,6 +341,7 @@ jobs:
         fi
         vsts_setvar SPEECHSDK_CMAKE_GENERATOR "Visual Studio 15"
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+        vsts_setvar SPEECHSDK_ENABLE_KWS true
         vsts_setvar SPEECHSDK_ENABLE_UNIDEC true
         vsts_setvar VSTS_TOKEN "$(System.AccessToken)"
   - bash: . ci/functions.sh && ./ci/set-variables.sh
@@ -350,10 +351,21 @@ jobs:
       versionSpec: $(SPEECHSDK_NUGET_VERSION)
   - bash: ./ci/install-build-dependencies.sh
     displayName: Install build dependencies
+  - template: get-kws-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_KWS
+      os: Windows
   - task: CMake@1
     displayName: Generate solution
     inputs:
-      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -A "$(BuildPlatform)" -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC) -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM) -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE) -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA) ..'
+      cmakeArgs: >-
+        -G "$(SPEECHSDK_CMAKE_GENERATOR)" -A "$(BuildPlatform)"
+        -DSPEECHSDK_TARGET_PLATFORM=$(SPEECHSDK_TARGET_PLATFORM)
+        -DSPEECHSDK_BUILD_TYPE=$(SPEECHSDK_BUILD_TYPE)
+        -DSPEECHSDK_VERSION=$(SPEECHSDK_SEMVER2NOMETA)
+        -DEXTENSION_KWS_ENABLED=$(SPEECHSDK_ENABLE_KWS)
+        -DEXTENSION_UNIDEC_ENABLED=$(SPEECHSDK_ENABLE_UNIDEC)
+        ..
   - task: VSBuild@1
     displayName: Build solution
     inputs:
