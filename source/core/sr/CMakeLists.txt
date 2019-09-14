@@ -18,7 +18,6 @@ set(HEADERS
 
 set(HEADERS_PRIVATE
     "${SRC_DIR}/stdafx.h"
-    "${SRC_DIR}/activity.h"
     "${SRC_DIR}/activity_event_args.h"
     "${SRC_DIR}/activity_session.h"
     "${SRC_DIR}/audio_stream_session.h"
@@ -53,7 +52,6 @@ set(HEADERS_PRIVATE
     )
 
 set(SOURCES
-    "${SRC_DIR}/activity.cpp"
     "${SRC_DIR}/activity_event_args.cpp"
     "${SRC_DIR}/activity_session.cpp"
     "${SRC_DIR}/audio_stream_session.cpp"

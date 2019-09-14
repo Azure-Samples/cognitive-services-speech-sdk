@@ -20,7 +20,7 @@ namespace ExpectedDataStreamType
     constexpr uint32_t TextToSpeechAudio = 1;
 }
 
-CSpxActivitySession::CSpxActivitySession(std::weak_ptr<CSpxUspRecoEngineAdapter> adapter) : m_adapter{ adapter }, m_activity{ nullptr }, m_output_stream{ nullptr }
+CSpxActivitySession::CSpxActivitySession(std::weak_ptr<CSpxUspRecoEngineAdapter> adapter) : m_adapter{ adapter }, m_activity{}, m_output_stream{ nullptr }
 {
     m_state_machine =
     {
@@ -86,9 +86,7 @@ void CSpxActivitySession::BuildActivityMsg(const std::string* activityMsg)
 {
     auto messageJSON = nlohmann::json::parse(*activityMsg);
     /* We first build the activity */
-    auto activityJSON = messageJSON["messagePayload"];
-    m_activity = SpxCreateObjectWithSite<ISpxActivity>("CSpxActivity", SpxGetRootSite());
-    m_activity->LoadJSON(activityJSON);
+    m_activity = messageJSON["messagePayload"].dump();    
     /* We now check if there is a stream associated */
     if (messageJSON["messageDataStreamType"].is_number_unsigned())
     {

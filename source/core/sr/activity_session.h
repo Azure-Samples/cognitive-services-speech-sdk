@@ -47,7 +47,7 @@ private:
         std::weak_ptr<CSpxUspRecoEngineAdapter> m_adapter;
         machine_t m_state_machine;
 
-        std::shared_ptr<ISpxActivity> m_activity;
+        std::string m_activity;
         std::shared_ptr<ISpxAudioOutput> m_output_stream;
 
         void BuildActivityMsg(const std::string* activityMsg);

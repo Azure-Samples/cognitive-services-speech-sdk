@@ -19,6 +19,8 @@
 
 #include "speechapi_cxx.h"
 
+#include <json.hpp>
+
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Dialog;
@@ -292,8 +294,9 @@ const auto verifyRecognizingSpeech = [](std::ostringstream&, const SpeechRecogni
 
 const auto verifyActivityReceived = [](std::ostringstream&, const ActivityReceivedEventArgs& e, int)
 {
-    auto activity = e.GetActivity();
-    return activity->Type == TEST_ACTIVITY_TYPE;
+    auto activityStr = e.GetActivity();
+    auto activity = nlohmann::json::parse(activityStr);
+    return activity["type"].get<std::string>() == TEST_ACTIVITY_TYPE;
 };
 
 const auto verifyCanceledSpeech = [](std::ostringstream& oss, const SpeechRecognitionCanceledEventArgs& e, int)
@@ -374,21 +377,22 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
         runner.add_activity_received_test(
             [&](std::ostringstream& oss, const ActivityReceivedEventArgs& e, int)
             {
-                auto activity = e.GetActivity();
+                auto activityStr = e.GetActivity();
+                auto activity = nlohmann::json::parse(activityStr);
                 bool success{ true };
-                if (activity->Type != TEST_ACTIVITY_TYPE)
+                if (activity["type"].get<std::string>() != TEST_ACTIVITY_TYPE)
                 {
-                    oss << "activity->Type -> " << activity->Type << " != " << TEST_ACTIVITY_TYPE << std::endl;
+                    oss << "activity[\"type\"] -> " << activity["type"] << " != " << TEST_ACTIVITY_TYPE << std::endl;
                     success = false;
                 }
-                if (activity->Text != activity_text)
+                if (activity["text"] != activity_text)
                 {
-                    oss << "activity->Text -> " << activity->Text << " != " << activity_text << std::endl;
+                    oss << "activity[\"text\"] -> " << activity["text"] << " != " << activity_text << std::endl;
                     success = false;
                 }
-                if (activity->Speak != activity_speak)
+                if (activity["speak"] != activity_speak)
                 {
-                    oss << "activity->Speak -> " << activity->Speak << " != " << activity_speak << std::endl;
+                    oss << "activity[\"speak\"] -> " << activity["speak"] << " != " << activity_speak << std::endl;
                     success = false;
                 }
 
@@ -422,10 +426,12 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
         auto result = runner.run<std::string>(
             [&](DialogServiceConnector& connector)
             {
-                auto activity = Activity::Create();
-                activity->Type = TEST_ACTIVITY_TYPE;
-                activity->Text = activity_text;
-                activity->Speak = activity_speak;
+                nlohmann::json act{
+                    { "type", TEST_ACTIVITY_TYPE },
+                    { "text", activity_text },
+                    { "speak", activity_speak }
+                };
+                auto activity = act.dump();
                 return connector.SendActivityAsync(activity);
             },
             20s, 3);
@@ -463,9 +469,11 @@ TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connec
             [&](DialogServiceConnector& connector)
             {
                 auto f1 = connector.ListenOnceAsync();
-                auto activity = Activity::Create();
-                activity->Type = TEST_ACTIVITY_TYPE;
-                activity->Text = activity_text;
+                nlohmann::json act{
+                    { "type", TEST_ACTIVITY_TYPE },
+                    { "text", activity_text }
+                };
+                auto activity = act.dump();                
                 auto f2 = connector.SendActivityAsync(activity);
                 return std::async([f1 = std::move(f1), f2 = std::move(f2)]()
                 {
@@ -506,9 +514,11 @@ TEST_CASE("Dialog Service Connector SpeechCommands", "[api][cxx][dialog_service_
         auto result = runner.run<std::string>(
             [&](DialogServiceConnector& connector)
             {
-                auto activity = Activity::Create();
-                activity->Type = TEST_ACTIVITY_TYPE;
-                activity->Text = activity_text;
+                nlohmann::json act{
+                        { "type", TEST_ACTIVITY_TYPE },
+                        { "text", activity_text }
+                };
+                auto activity = act.dump();                
                 return connector.SendActivityAsync(activity);
             },
             20s, 3);

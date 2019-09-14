@@ -142,7 +142,7 @@ public class Main {
 
         // ActivityReceived is the main way your bot will communicate with the client and uses bot framework activities
         dialogServiceConnector.activityReceived.addEventListener((o, activityEventArgs) -> {
-            final String act = activityEventArgs.getActivity().serialize();
+            final String act = activityEventArgs.getActivity();
             log.info("Received activity {} audio: {}", activityEventArgs.hasAudio() ? "with" : "without", act);
 
             try {

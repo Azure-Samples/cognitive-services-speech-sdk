@@ -451,22 +451,20 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
 
             return Task.Run(() =>
             {
-                IntPtr activityPtr = IntPtr.Zero;
                 ThrowIfNull(dialogServiceConnectorHandle, "Invalid connector handle");
                 IntPtr activityJSONPtr = Utf8StringMarshaler.MarshalManagedToNative(activityJSON);
                 try
                 {
-                    ThrowIfFail(Internal.Activity.activity_from_string(activityJSONPtr, out activityPtr));
+                    const int guidSize = 50;
+                    var buffer = new StringBuilder(guidSize);
+                    ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_send_activity(dialogServiceConnectorHandle, activityJSONPtr, buffer));
+                    return buffer.ToString();
                 }
                 finally
                 {
                     Marshal.FreeHGlobal(activityJSONPtr);
                 }
-                const int guidSize = 50;
-                var buffer = new StringBuilder(guidSize);
-                ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_send_activity(dialogServiceConnectorHandle, activityPtr, buffer));
-                ThrowIfFail(Internal.Activity.activity_handle_release(activityPtr));
-                return buffer.ToString();
+
             });
         }
 

@@ -6,7 +6,6 @@
 package tests.endtoend;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
-import com.microsoft.cognitiveservices.speech.dialog.Activity;
 import com.microsoft.cognitiveservices.speech.dialog.DialogServiceConfig;
 import com.microsoft.cognitiveservices.speech.dialog.DialogServiceConnector;
 import org.junit.Before;
@@ -78,7 +77,7 @@ public class VirtualAssistantTests {
             final String activity = readFileAsString(SerializedSpeechActivityFile);
             // Connect to the dialog
             dialogServiceConnector.connectAsync();
-            dialogServiceConnector.sendActivityAsync(Activity.fromSerializedActivity(activity));
+            dialogServiceConnector.sendActivityAsync(activity);
 
             // Add a sleep for responses to arrive.
             for (int n = 1; n <= RETRY_COUNT; n++) {

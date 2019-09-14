@@ -28,8 +28,8 @@ public class ActivityReceivedEventArgs {
      * Gets the activity received.
      * @return The activity associated with the event.
      */
-    public Activity getActivity() {
-        return new Activity(activityReceivedEventArgs.GetActivity());
+    public String getActivity() {
+        return activityReceivedEventArgs.GetActivity();
     }
 
     /**

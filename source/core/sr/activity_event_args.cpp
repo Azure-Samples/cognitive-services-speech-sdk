@@ -16,9 +16,9 @@ CSpxActivityEventArgs::CSpxActivityEventArgs()
 {
 }
 
-std::shared_ptr<ISpxActivity> CSpxActivityEventArgs::GetActivity() const
+const std::string& CSpxActivityEventArgs::GetActivity() const
 {
-    SPX_IFTRUE_THROW_HR(m_activity == nullptr, SPXERR_UNINITIALIZED);
+    SPX_IFTRUE_THROW_HR(m_activity.empty(), SPXERR_UNINITIALIZED);
     return m_activity;
 }
 
@@ -32,16 +32,16 @@ std::shared_ptr<ISpxAudioOutput> CSpxActivityEventArgs::GetAudio() const
     return m_audio;
 }
 
-void CSpxActivityEventArgs::Init(std::shared_ptr<ISpxActivity> activity)
+void CSpxActivityEventArgs::Init(std::string activity)
 {
-    SPX_IFTRUE_THROW_HR(m_activity != nullptr, SPXERR_ALREADY_INITIALIZED);
-    m_activity = activity;
+    SPX_IFTRUE_THROW_HR(!m_activity.empty(), SPXERR_ALREADY_INITIALIZED);
+    m_activity = std::move(activity);
 }
 
-void CSpxActivityEventArgs::Init(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
+void CSpxActivityEventArgs::Init(std::string activity, std::shared_ptr<ISpxAudioOutput> audio)
 {
-    SPX_IFTRUE_THROW_HR(m_activity != nullptr, SPXERR_ALREADY_INITIALIZED);
-    m_activity = activity;
+    SPX_IFTRUE_THROW_HR(!m_activity.empty(), SPXERR_ALREADY_INITIALIZED);
+    m_activity = std::move(activity);
     m_audio = audio;
 }
 

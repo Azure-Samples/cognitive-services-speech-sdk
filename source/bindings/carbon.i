@@ -86,7 +86,6 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechSynthesisCancellationDetails)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechSynthesizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConnector)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::Activity)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConfig)
 %shared_ptr(std::vector<uint8_t>)
 
@@ -153,7 +152,6 @@
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult> IntentRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult> TranslationRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechSynthesisResult> SpeechSynthesisResultPtr;
-    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Dialog::Activity> ActivityPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionResult> ConversationTranscriberResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Conversation::Participant> ParticipantPtr;
 %}
@@ -375,9 +373,9 @@
         return FutureWrapper<void>(std::move(future));
     }
 
-    FutureWrapper<std::string> SendActivityAsync(ActivityPtr activity)
+    FutureWrapper<std::string> SendActivityAsync(std::string activity)
     {
-        auto future = ($self)->SendActivityAsync(activity);
+        auto future = ($self)->SendActivityAsync(std::move(activity));
         return FutureWrapper<std::string>(std::move(future));
     }
 
@@ -641,7 +639,6 @@
 %template(TranslationSynthesisEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisEventArgs&>;
 %template(TranslationRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs>;
 
-%include <speechapi_cxx_activity.h>
 %include <speechapi_cxx_dialog_service_connector_eventargs.h>
 
 %template(ActivityReceivedEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Dialog::ActivityReceivedEventArgs&>;

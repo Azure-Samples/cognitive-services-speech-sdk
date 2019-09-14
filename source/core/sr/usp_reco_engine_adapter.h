@@ -209,7 +209,7 @@ private:
     nlohmann::json GetTranslationJson(std::vector<std::string>&& targetLangs, bool synthesis);
     nlohmann::json GetSynthesisJson(std::unordered_map<std::string, std::string>&& voiceNameMap);
 
-    void FireActivityResult(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio);
+    void FireActivityResult(std::string activity, std::shared_ptr<ISpxAudioOutput> audio);
     void FireFinalResultNow(const USP::SpeechPhraseMsg& message, const std::string& luisJson = "");
     void FireFinalResultLater(const USP::SpeechPhraseMsg& message);
     void FireFinalResultLater_WaitingForIntentComplete(const std::  string& luisJson = "");

@@ -207,14 +207,14 @@ SPXAPI dialog_service_connector_disconnect_async_wait_for(SPXASYNCHANDLE h_async
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI dialog_service_connector_send_activity(SPXRECOHANDLE h_connector, SPXACTIVITYHANDLE h_activity, char* interaction_id)
+SPXAPI dialog_service_connector_send_activity(SPXRECOHANDLE h_connector, const char* activity, char* interaction_id)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, interaction_id == nullptr);
 
     SPX_INIT_HR(hr);
 
     SPXASYNCHANDLE h_async = SPXHANDLE_INVALID;
-    hr = dialog_service_connector_send_activity_async(h_connector, h_activity, &h_async);
+    hr = dialog_service_connector_send_activity_async(h_connector, activity, &h_async);
     SPX_REPORT_ON_FAIL(hr);
 
     if (SPX_SUCCEEDED(hr))
@@ -232,15 +232,28 @@ SPXAPI dialog_service_connector_send_activity(SPXRECOHANDLE h_connector, SPXACTI
     SPX_RETURN_HR(hr);
 }
 
-SPXAPI dialog_service_connector_send_activity_async(SPXRECOHANDLE h_connector, SPXACTIVITYHANDLE h_activity, SPXASYNCHANDLE* p_async)
+SPXAPI dialog_service_connector_send_activity_async(SPXRECOHANDLE h_connector, const char* activity, SPXASYNCHANDLE* p_async)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, p_async == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto activity_handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivity, SPXACTIVITYHANDLE>();
-        auto activity = (*activity_handles)[h_activity];
-        launch_async_op(h_connector, p_async, &ISpxDialogServiceConnector::SendActivityAsync, activity);
+        std::string activity_str{ activity };
+        try
+        {
+            auto json = nlohmann::json::parse(activity_str);
+            if (!json.is_object())
+            {
+                return SPXERR_INVALID_ARG;
+            }
+        }
+        catch (const std::exception& ex)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: Parsing received activity failed (what=%s)", __FUNCTION__, ex.what());
+            return SPXERR_INVALID_ARG;
+        }
+
+        launch_async_op(h_connector, p_async, &ISpxDialogServiceConnector::SendActivityAsync, std::move(activity_str));
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 
@@ -417,16 +430,33 @@ SPXAPI dialog_service_connector_synthesizing_audio_set_callback(SPXRECOHANDLE h_
     return dialog_service_connector_recognition_set_event_callback(&ISpxRecognizerEvents::TranslationSynthesisResult, h_connector, p_callback, pv_context);
 }
 
-SPXAPI dialog_service_connector_activity_received_event_get_activity(SPXEVENTHANDLE h_event, SPXACTIVITYHANDLE* ph_activity)
+SPXAPI dialog_service_connector_activity_received_event_get_activity_size(SPXEVENTHANDLE h_event, size_t* size)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_activity == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, size == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivityEventArgs, SPXEVENTHANDLE>();
         auto event = (*handles)[h_event];
-        auto activity = event->GetActivity();
-        auto activityTable = CSpxSharedPtrHandleTableManager::Get<ISpxActivity, SPXACTIVITYHANDLE>();
-        *ph_activity = activityTable->TrackHandle(activity);
+        auto& activity_str = event->GetActivity();
+        *size = activity_str.size();
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI dialog_service_connector_activity_received_event_get_activity(SPXEVENTHANDLE h_event, char* activity, size_t size)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, activity == nullptr);
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxActivityEventArgs, SPXEVENTHANDLE>();
+        auto event = (*handles)[h_event];
+        auto activity_str = event->GetActivity();
+        if (size < (activity_str.size() + 1))
+        {
+            return SPXERR_BUFFER_TOO_SMALL;
+        }
+        std::copy(activity_str.begin(), activity_str.end(), activity);
+        activity[activity_str.size()] = 0;
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

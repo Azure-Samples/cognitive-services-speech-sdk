@@ -19,7 +19,6 @@ set(HEADERS_PRIVATE
 
 set(SOURCES
     "${SRC_DIR}/event_helpers.cpp"
-    "${SRC_DIR}/speechapi_c_activity.cpp"
     "${SRC_DIR}/speechapi_c_audio_config.cpp"
     "${SRC_DIR}/speechapi_c_audio_stream.cpp"
     "${SRC_DIR}/speechapi_c_audio_stream_format.cpp"

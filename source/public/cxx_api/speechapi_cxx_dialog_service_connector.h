@@ -22,7 +22,6 @@
 #include <speechapi_cxx_session_eventargs.h>
 #include <speechapi_cxx_speech_recognition_result.h>
 #include <speechapi_cxx_speech_recognition_eventargs.h>
-#include <speechapi_cxx_activity.h>
 #include <speechapi_cxx_dialog_service_connector_eventargs.h>
 #include <speechapi_cxx_dialog_service_config.h>
 #include <speechapi_cxx_translation_eventargs.h>
@@ -103,14 +102,13 @@ public:
     /// </summary>
     /// <param name="activity">Activity to send</param>
     /// <returns>An asynchronous operation that starts the operation.</returns>
-    std::future<std::string> SendActivityAsync(std::shared_ptr<Activity> activity)
+    std::future<std::string> SendActivityAsync(const std::string& activity)
     {
         auto keep_alive = this->shared_from_this();
         return std::async(std::launch::async, [keep_alive, activity, this]()
         {
-            auto h = activity->m_handle;
             std::array<char, 50> buffer;
-            SPX_THROW_ON_FAIL(::dialog_service_connector_send_activity(m_handle, h, buffer.data()));
+            SPX_THROW_ON_FAIL(::dialog_service_connector_send_activity(m_handle, activity.c_str(), buffer.data()));
             return std::string{ buffer.data() };
         });
     }

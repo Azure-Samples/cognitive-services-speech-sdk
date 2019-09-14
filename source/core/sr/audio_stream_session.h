@@ -109,7 +109,7 @@ public:
     CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) override;
     CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
 
-    CSpxAsyncOp<std::string> SendActivityAsync(std::shared_ptr<ISpxActivity> activity) final;
+    CSpxAsyncOp<std::string> SendActivityAsync(std::string activity) final;
 
     void OpenConnection(bool forContinuousRecognition) override;
     void CloseConnection() override;
@@ -145,7 +145,7 @@ public:
     std::shared_ptr<ISpxConnectionEventArgs> CreateConnectionEventArgs(const std::wstring& sessionId) override;
     std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, uint64_t offset) override;
     std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
-    std::shared_ptr<ISpxActivityEventArgs> CreateActivityEventArgs(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) final;
+    std::shared_ptr<ISpxActivityEventArgs> CreateActivityEventArgs(std::string activity, std::shared_ptr<ISpxAudioOutput> audio) final;
 
     // --- ISpxRecoResultFactory
     std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
@@ -156,7 +156,7 @@ public:
     void FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
     void FireAdapterResult_KeywordResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result, bool isAccepted) override;
     void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
-    void FireAdapterResult_ActivityReceived(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) final;
+    void FireAdapterResult_ActivityReceived(ISpxRecoEngineAdapter* adapter, std::string activity, std::shared_ptr<ISpxAudioOutput> audio) final;
     void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result) override;
     void FireConnectedEvent() override;
     void FireDisconnectedEvent() override;
@@ -232,7 +232,7 @@ private:
     void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result);
 
     enum EventType { SessionStart, SessionStop, SpeechStart, SpeechEnd, RecoResultEvent, ActivityReceivedEvent, Connected, Disconnected };
-    void FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, const wchar_t* sessionId = nullptr, uint64_t offset = 0, std::shared_ptr<ISpxActivity> activity = nullptr, std::shared_ptr<ISpxAudioOutput> audio = nullptr);
+    void FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, const wchar_t* sessionId = nullptr, uint64_t offset = 0, std::string activity = std::string{}, std::shared_ptr<ISpxAudioOutput> audio = nullptr);
 
 private:
     std::packaged_task<void()> CreateTask(std::function<void()> func, bool catchAll = true);
@@ -284,7 +284,7 @@ private:
     void DispatchEvent(const std::list<std::weak_ptr<ISpxRecognizer>>& weakRecognizers,
                        const std::wstring& sessionId, EventType sessionType, uint64_t offset,
                        std::shared_ptr<ISpxRecognitionResult> result,
-                       std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio);
+                       std::string activity, std::shared_ptr<ISpxAudioOutput> audio);
 
     struct Operation;
     void RecognizeOnceAsync(const std::shared_ptr<Operation>& singleShot);

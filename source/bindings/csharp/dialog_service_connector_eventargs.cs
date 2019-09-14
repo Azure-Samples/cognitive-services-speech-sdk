@@ -23,14 +23,12 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             ThrowIfNull(eventHandlePtr);
             eventHandle = new I.InteropSafeHandle(eventHandlePtr, Internal.ActivityReceivedEventArgs.dialog_service_connector_activity_received_event_release);
 
-            IntPtr activityPtr = IntPtr.Zero;
-            ThrowIfFail(Internal.ActivityReceivedEventArgs.dialog_service_connector_activity_received_event_get_activity(eventHandle, out activityPtr));
             uint size = 0;
-            ThrowIfFail(Internal.Activity.activity_serialized_size(activityPtr, out size));
+            ThrowIfFail(Internal.ActivityReceivedEventArgs.dialog_service_connector_activity_received_event_get_activity_size(eventHandle, out size));
             var buffer = new StringBuilder((int)(size + 1));
-            ThrowIfFail(Internal.Activity.activity_serialize(activityPtr, buffer, size + 1));
+            ThrowIfFail(Internal.ActivityReceivedEventArgs.dialog_service_connector_activity_received_event_get_activity(eventHandle, buffer, size + 1));
             Activity = buffer.ToString();
-            ThrowIfFail(Internal.Activity.activity_handle_release(activityPtr));
+
             HasAudio = Internal.ActivityReceivedEventArgs.dialog_service_connector_activity_received_event_has_audio(eventHandle);
             if (HasAudio)
             {

@@ -628,19 +628,19 @@ bool CSpxAudioStreamSession::IsRecognizerType() const noexcept
     return ispxrecognizer != nullptr;
 }
 
-CSpxAsyncOp<std::string> CSpxAudioStreamSession::SendActivityAsync(std::shared_ptr<ISpxActivity> activity)
+CSpxAsyncOp<std::string> CSpxAudioStreamSession::SendActivityAsync(std::string activity)
 {
     SPX_DBG_TRACE_FUNCTION();
 
     auto keep_alive = SpxSharedPtrFromThis<ISpxSession>(this);
 
     /* Need to change thread service to support generic tasks */
-    std::shared_future<std::string> taskFuture = std::async(std::launch::async, [this, activity, keep_alive]()
+    std::shared_future<std::string> taskFuture = std::async(std::launch::async, [this, activity{ std::move(activity) }, keep_alive]()
     {
         auto interaction_id = PAL::CreateGuidWithDashesUTF8();
 
         auto task = CreateTask([&]() {
-            auto& message_payload = activity->GetJSON();
+            auto message_payload = nlohmann::json::parse(activity);            
             nlohmann::json message = {
                 { "version", "0.5"},
                 { "context", {
@@ -1088,7 +1088,7 @@ void CSpxAudioStreamSession::FireResultEvent(const std::wstring& sessionId, std:
 void CSpxAudioStreamSession::DispatchEvent(const list<weak_ptr<ISpxRecognizer>>& weakRecognizers,
     const wstring& sessionId, EventType sessionType, uint64_t offset,
     std::shared_ptr<ISpxRecognitionResult> result,
-    std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
+    std::string activity, std::shared_ptr<ISpxAudioOutput> audio)
 {
     for (auto weakRecognizer : weakRecognizers)
     {
@@ -1142,7 +1142,7 @@ void CSpxAudioStreamSession::DispatchEvent(const list<weak_ptr<ISpxRecognizer>>&
                 auto c_events = SpxQueryInterface<ISpxDialogServiceConnectorEvents>(ptr);
                 if (c_events != nullptr)
                 {
-                    c_events->FireActivityReceived(sessionId, activity, audio);
+                    c_events->FireActivityReceived(sessionId, std::move(activity), audio);
                 }
                 break;
             }
@@ -1157,7 +1157,7 @@ void CSpxAudioStreamSession::DispatchEvent(const list<weak_ptr<ISpxRecognizer>>&
     }
 }
 
-void CSpxAudioStreamSession::FireEvent(EventType eventType, shared_ptr<ISpxRecognitionResult> result, const wchar_t* eventSessionId, uint64_t offset, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
+void CSpxAudioStreamSession::FireEvent(EventType eventType, shared_ptr<ISpxRecognitionResult> result, const wchar_t* eventSessionId, uint64_t offset, std::string activity, std::shared_ptr<ISpxAudioOutput> audio)
 {
     // Make a copy of the recognizers (under lock), to use to send events;
     // otherwise the underlying list could be modified while we're sending events...
@@ -1173,9 +1173,9 @@ void CSpxAudioStreamSession::FireEvent(EventType eventType, shared_ptr<ISpxRecog
     // Schedule event dispatch on the user facing thread.
     // DispatchEvent is exception safe in order not to cause livelock of failed messages.
     // i.e. if some events cannot be delivered to the user, we do not try to deliver events about failed events...
-    auto task = CreateTask([=]()
+    auto task = CreateTask([this, weakRecognizers, sessionId, eventType, offset, result, activity{ std::move(activity) }, audio]()
     {
-        DispatchEvent(weakRecognizers, sessionId, eventType, offset, result, activity, audio);
+        DispatchEvent(weakRecognizers, sessionId, eventType, offset, result, std::move(activity), audio);
     }, false);
     m_threadService->ExecuteAsync(move(task), ISpxThreadService::Affinity::User);
 }
@@ -1428,7 +1428,7 @@ std::shared_ptr<ISpxSessionEventArgs> CSpxAudioStreamSession::CreateSessionEvent
     return sessionEvent;
 }
 
-std::shared_ptr<ISpxActivityEventArgs> CSpxAudioStreamSession::CreateActivityEventArgs(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
+std::shared_ptr<ISpxActivityEventArgs> CSpxAudioStreamSession::CreateActivityEventArgs(std::string activity, std::shared_ptr<ISpxAudioOutput> audio)
 {
     auto activityAudioEvent = SpxCreateObjectWithSite<ISpxActivityEventArgs>("CSpxActivityEventArgs", this);
 
@@ -1627,9 +1627,9 @@ void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter
     WaitForRecognition_Complete(result);
 }
 
-void CSpxAudioStreamSession::FireAdapterResult_ActivityReceived(ISpxRecoEngineAdapter*, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
+void CSpxAudioStreamSession::FireAdapterResult_ActivityReceived(ISpxRecoEngineAdapter*, std::string activity, std::shared_ptr<ISpxAudioOutput> audio)
 {
-    FireEvent(EventType::ActivityReceivedEvent, nullptr, const_cast<wchar_t*>(GetSessionId().c_str()), 0, activity, audio);
+    FireEvent(EventType::ActivityReceivedEvent, nullptr, const_cast<wchar_t*>(GetSessionId().c_str()), 0, std::move(activity), audio);
 }
 
 void CSpxAudioStreamSession::FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result)

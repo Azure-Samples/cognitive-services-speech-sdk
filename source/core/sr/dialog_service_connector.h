@@ -65,7 +65,7 @@ public:
     CSpxAsyncOp<void> ConnectAsync() override;
     CSpxAsyncOp<void> DisconnectAsync() override;
 
-    CSpxAsyncOp<std::string> SendActivityAsync(std::shared_ptr<ISpxActivity> activity) final;
+    CSpxAsyncOp<std::string> SendActivityAsync(std::string activity) final;
 
     CSpxAsyncOp<void> StartContinuousListeningAsync() override;
     CSpxAsyncOp<void> StopContinuousListeningAsync() override;
@@ -90,7 +90,7 @@ public:
     void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
     // --- ISpxDialogServiceConnectorEvents
-    void FireActivityReceived(const std::wstring& sessionId, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) final;
+    void FireActivityReceived(const std::wstring& sessionId, std::string activity, std::shared_ptr<ISpxAudioOutput> audio) final;
 
     // --- IServiceProvider
     SPX_SERVICE_MAP_BEGIN()

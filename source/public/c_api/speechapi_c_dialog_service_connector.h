@@ -31,8 +31,8 @@ SPXAPI dialog_service_connector_disconnect(SPXRECOHANDLE h_connector);
 SPXAPI dialog_service_connector_disconnect_async(SPXRECOHANDLE h_connector, SPXASYNCHANDLE* p_async);
 SPXAPI dialog_service_connector_disconnect_async_wait_for(SPXASYNCHANDLE h_async, uint32_t milliseconds);
 
-SPXAPI dialog_service_connector_send_activity(SPXRECOHANDLE h_connector, SPXACTIVITYHANDLE h_activity, char* interaction_id);
-SPXAPI dialog_service_connector_send_activity_async(SPXRECOHANDLE h_connector, SPXACTIVITYHANDLE h_activity, SPXASYNCHANDLE* p_async);
+SPXAPI dialog_service_connector_send_activity(SPXRECOHANDLE h_connector, const char* activity, char* interaction_id);
+SPXAPI dialog_service_connector_send_activity_async(SPXRECOHANDLE h_connector, const char* activity, SPXASYNCHANDLE* p_async);
 SPXAPI dialog_service_connector_send_activity_async_wait_for(SPXASYNCHANDLE h_async, uint32_t milliseconds, char* interaction_id);
 
 SPXAPI dialog_service_connector_start_keyword_recognition(SPXRECOHANDLE h_connector, SPXKEYWORDHANDLE h_keyword);
@@ -59,7 +59,8 @@ SPXAPI dialog_service_connector_recognizing_set_callback(SPXRECOHANDLE h_connect
 SPXAPI dialog_service_connector_canceled_set_callback(SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void *pv_context);
 SPXAPI dialog_service_connector_activity_received_set_callback(SPXRECOHANDLE h_connector, PRECOGNITION_CALLBACK_FUNC p_callback, void *pv_context);
 
-SPXAPI dialog_service_connector_activity_received_event_get_activity(SPXEVENTHANDLE h_event, SPXACTIVITYHANDLE* p_activity);
+SPXAPI dialog_service_connector_activity_received_event_get_activity_size(SPXEVENTHANDLE h_event, size_t* size);
+SPXAPI dialog_service_connector_activity_received_event_get_activity(SPXEVENTHANDLE h_event, char* p_activity, size_t size);
 SPXAPI_(bool) dialog_service_connector_activity_received_event_has_audio(SPXEVENTHANDLE h_event);
 SPXAPI dialog_service_connector_activity_received_event_get_audio(SPXEVENTHANDLE h_event, SPXAUDIOSTREAMHANDLE* p_audio);
 SPXAPI dialog_service_connector_recognized_size(SPXEVENTHANDLE h_event, uint32_t* size);

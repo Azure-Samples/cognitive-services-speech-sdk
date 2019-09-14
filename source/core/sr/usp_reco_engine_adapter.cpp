@@ -2118,13 +2118,13 @@ NoMatchReason CSpxUspRecoEngineAdapter::ToNoMatchReason(USP::RecognitionStatus u
     }
 }
 
-void CSpxUspRecoEngineAdapter::FireActivityResult(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
+void CSpxUspRecoEngineAdapter::FireActivityResult(std::string activity, std::shared_ptr<ISpxAudioOutput> audio)
 {
     SPX_DBG_TRACE_SCOPE("FireActivityAndAudioResult: Creating Result", "FireActivityAndAudioResult: GetSite()->FireAdapterResult_ActivityAudioReceived()  complete!");
 
-    InvokeOnSite([&](const SitePtr& site)
+    InvokeOnSite([this, activity{std::move(activity)}, audio](const SitePtr& site)
     {
-        site->FireAdapterResult_ActivityReceived(this, activity, audio);
+        site->FireAdapterResult_ActivityReceived(this, std::move(activity), audio);
     });
 }
 

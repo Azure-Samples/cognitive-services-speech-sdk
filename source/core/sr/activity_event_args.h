@@ -31,13 +31,13 @@ public:
 
     // --- ISpxActivityEventArgs
 
-    virtual std::shared_ptr<ISpxActivity> GetActivity() const final;
+    virtual const std::string& GetActivity() const final;
     bool HasAudio() const final;
     virtual std::shared_ptr<ISpxAudioOutput> GetAudio() const final;
 
     // --- ISpxActivityEventArgsInit
-    virtual void Init(std::shared_ptr<ISpxActivity> activity) final;
-    virtual void Init(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) final;
+    virtual void Init(std::string activity) final;
+    virtual void Init(std::string activity, std::shared_ptr<ISpxAudioOutput> audio) final;
 private:
 
     CSpxActivityEventArgs(const CSpxActivityEventArgs&) = delete;
@@ -45,7 +45,7 @@ private:
 
     CSpxActivityEventArgs& operator=(const CSpxActivityEventArgs&) = delete;
 
-    std::shared_ptr<ISpxActivity> m_activity;
+    std::string m_activity;
     std::shared_ptr<ISpxAudioOutput> m_audio;
 };
 

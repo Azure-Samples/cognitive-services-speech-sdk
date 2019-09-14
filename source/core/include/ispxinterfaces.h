@@ -559,21 +559,6 @@ public:
     virtual void CloseConnection() = 0;
 };
 
-class ISpxActivityJSONAccessor: public ISpxInterfaceBaseFor<ISpxActivityJSONAccessor>
-{
-public:
-    virtual void SetAccessor(std::function<nlohmann::json&()>) = 0;
-    virtual nlohmann::json& Get() = 0;
-};
-
-class ISpxActivity : public ISpxInterfaceBaseFor<ISpxActivity>
-{
-public:
-    virtual nlohmann::json& GetJSON() = 0;
-    virtual void LoadJSON(const nlohmann::json& json) = 0;
-};
-
-
 enum class InteractionIdPurpose { Speech = 0, Activity };
 
 class ISpxInteractionIdProvider: public ISpxInterfaceBaseFor<ISpxInteractionIdProvider>
@@ -589,7 +574,7 @@ public:
     virtual CSpxAsyncOp<void> ConnectAsync() = 0;
     virtual CSpxAsyncOp<void> DisconnectAsync() = 0;
 
-    virtual CSpxAsyncOp<std::string> SendActivityAsync(std::shared_ptr<ISpxActivity> activity) = 0;
+    virtual CSpxAsyncOp<std::string> SendActivityAsync(std::string activity) = 0;
 
     virtual CSpxAsyncOp<void> StartContinuousListeningAsync() = 0;
     virtual CSpxAsyncOp<void> StopContinuousListeningAsync() = 0;
@@ -667,8 +652,8 @@ class ISpxActivityEventArgsInit : public ISpxInterfaceBaseFor<ISpxActivityEventA
 {
 public:
 
-    virtual void Init(std::shared_ptr<ISpxActivity> activity) = 0;
-    virtual void Init(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) = 0;
+    virtual void Init(std::string activity) = 0;
+    virtual void Init(std::string activity, std::shared_ptr<ISpxAudioOutput> audio) = 0;
 };
 
 class ISpxConnectionEventArgs :
@@ -697,7 +682,7 @@ class ISpxActivityEventArgs :
 {
 public:
 
-    virtual std::shared_ptr<ISpxActivity> GetActivity() const = 0;
+    virtual const std::string& GetActivity() const = 0;
     virtual bool HasAudio() const = 0;
     virtual std::shared_ptr<ISpxAudioOutput> GetAudio() const = 0;
 };
@@ -768,7 +753,7 @@ public:
 
     ActivityReceivedEvent_Type ActivityReceived;
 
-    virtual void FireActivityReceived(const std::wstring& sessionId, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) = 0;
+    virtual void FireActivityReceived(const std::wstring& sessionId, std::string activity, std::shared_ptr<ISpxAudioOutput> audio) = 0;
 
 protected:
 
@@ -855,7 +840,7 @@ public:
     virtual void OpenConnection(bool forContinuousRecognition) = 0;
     virtual void CloseConnection() = 0;
 
-    virtual CSpxAsyncOp<std::string> SendActivityAsync(std::shared_ptr<ISpxActivity> activity) = 0;
+    virtual CSpxAsyncOp<std::string> SendActivityAsync(std::string activity) = 0;
 
     virtual void WriteTelemetryLatency(uint64_t latencyInTicks, bool isPhraseLatency) = 0;
     virtual void SendSpeechEventMessage(std::string&& payload) = 0;
@@ -952,7 +937,7 @@ public:
     virtual void FireAdapterResult_KeywordResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload, bool isAccepted) = 0;
     virtual void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
     virtual void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, ResultPayload_Type payload) = 0;
-    virtual void FireAdapterResult_ActivityReceived(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) = 0;
+    virtual void FireAdapterResult_ActivityReceived(ISpxRecoEngineAdapter* adapter, std::string activity, std::shared_ptr<ISpxAudioOutput> audio) = 0;
     virtual void AdapterEndOfDictation(ISpxRecoEngineAdapter* adapter, uint64_t offset, uint64_t duration) = 0;
     virtual void FireConnectedEvent() = 0;
     virtual void FireDisconnectedEvent() = 0;
@@ -1020,7 +1005,7 @@ public:
     virtual std::shared_ptr<ISpxConnectionEventArgs> CreateConnectionEventArgs(const std::wstring& sessionId) = 0;
     virtual std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, uint64_t offset) = 0;
     virtual std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
-    virtual std::shared_ptr<ISpxActivityEventArgs> CreateActivityEventArgs(std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio) = 0;
+    virtual std::shared_ptr<ISpxActivityEventArgs> CreateActivityEventArgs(std::string activity, std::shared_ptr<ISpxAudioOutput> audio) = 0;
 };
 
 class ISpxRecognizerSite : public ISpxInterfaceBaseFor<ISpxRecognizerSite>

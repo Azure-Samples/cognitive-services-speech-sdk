@@ -72,10 +72,10 @@ CSpxAsyncOp<void> CSpxDialogServiceConnector::DisconnectAsync()
     return CSpxAsyncOp<void>{ taskFuture, AOS_Started};
 }
 
-CSpxAsyncOp<std::string> CSpxDialogServiceConnector::SendActivityAsync(std::shared_ptr<ISpxActivity> activity)
+CSpxAsyncOp<std::string> CSpxDialogServiceConnector::SendActivityAsync(std::string activity)
 {
     SetRecoMode(g_recoModeInteractive);
-    return m_defaultSession->SendActivityAsync(activity);
+    return m_defaultSession->SendActivityAsync(std::move(activity));
 }
 
 void CSpxDialogServiceConnector::SetRecoMode(const char* modeToSet)
@@ -142,12 +142,12 @@ void CSpxDialogServiceConnector::FireSpeechEndDetected(const std::wstring& sessi
     FireRecoEvent(&SpeechEndDetected, sessionId, nullptr, offset);
 }
 
-void CSpxDialogServiceConnector::FireActivityReceived(const std::wstring& sessionId, std::shared_ptr<ISpxActivity> activity, std::shared_ptr<ISpxAudioOutput> audio)
+void CSpxDialogServiceConnector::FireActivityReceived(const std::wstring& sessionId, std::string activity, std::shared_ptr<ISpxAudioOutput> audio)
 {
     UNUSED(sessionId);
     SPX_DBG_ASSERT(GetSite());
     auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
-    auto activityEvent = factory->CreateActivityEventArgs(activity, audio);
+    auto activityEvent = factory->CreateActivityEventArgs(std::move(activity), audio);
     ActivityReceived.Signal(activityEvent);
 }
 

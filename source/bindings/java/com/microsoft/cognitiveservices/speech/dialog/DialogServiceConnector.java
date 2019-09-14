@@ -99,11 +99,11 @@ public class DialogServiceConnector implements Closeable {
      * @param activity Activity to be sent.
      * @return A task representing the asynchronous operation that sends an activity to the backing dialog.
      */
-    public Future<String> sendActivityAsync(final Activity activity) {
+    public Future<String> sendActivityAsync(final String activity) {
         Contracts.throwIfNull(activity, "activity");
         return executorService.submit(new java.util.concurrent.Callable<String>() {
             public String call() {
-                return dialogServiceConnectorImpl.SendActivityAsync(activity.getImpl()).Get();
+                return dialogServiceConnectorImpl.SendActivityAsync(activity).Get();
             }
         });
     }

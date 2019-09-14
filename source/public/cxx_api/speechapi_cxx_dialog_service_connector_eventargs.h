@@ -8,7 +8,6 @@
 #include <memory>
 #include <vector>
 
-#include <speechapi_cxx_activity.h>
 #include <speechapi_cxx_audio_stream.h>
 
 namespace Microsoft {
@@ -34,12 +33,14 @@ public:
     /// <summary>
     /// Gets the activity associated with the event.
     /// </summary>
-    /// <returns>The activity.</returns>
-    inline std::shared_ptr<Activity> GetActivity() const
+    /// <returns>The serialized activity activity.</returns>
+    inline std::string GetActivity() const
     {
-        SPXACTIVITYJSONHANDLE h_act{ SPXHANDLE_INVALID };
-        SPX_THROW_ON_FAIL(::dialog_service_connector_activity_received_event_get_activity(m_handle, &h_act));
-        return std::shared_ptr<Activity>{new Activity{ h_act }};
+        size_t size;
+        SPX_THROW_ON_FAIL(::dialog_service_connector_activity_received_event_get_activity_size(m_handle, &size));
+        auto ptr = std::make_unique<char[]>(size + 1);
+        SPX_THROW_ON_FAIL(::dialog_service_connector_activity_received_event_get_activity(m_handle, ptr.get(), size + 1));
+        return std::string{ ptr.get() };
     }
 
     /// <summary>
