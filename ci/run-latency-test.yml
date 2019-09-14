@@ -25,7 +25,7 @@ steps:
       python3 -m pip install ${pathToWheel}
     fi
   displayName: Install Cognitive Service Speech SDK Python package.
-  condition: and(succeeded(), contains(variables['Agent.Name'], 'Hosted Ubuntu'), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), eq(${{ parameters.runLatencyTests }}, 'true'))
+  condition: and(succeeded(), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), eq(${{ parameters.runLatencyTests }}, 'true'))
 # this test should only run on the Linux Ubuntu Agent pool, so that the latency data produced is from datacenter "westus" to "westus2".
 - bash: |
     # intentionally not using set -e because it should never fail a build due to latency tests, this is only for PowerBI telemetry data.
@@ -46,7 +46,7 @@ steps:
     done
     exit 0
   displayName: Run service latency tests.
-  condition: and(succeeded(), contains(variables['Agent.Name'], 'Hosted Ubuntu'), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), eq(${{ parameters.runLatencyTests }}, 'true'))
+  condition: and(succeeded(), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), eq(${{ parameters.runLatencyTests }}, 'true'))
 # archive latency test logs for later review.
 - task: PublishBuildArtifacts@1
   displayName: Archive Latency Test Logs
@@ -54,4 +54,4 @@ steps:
     PathtoPublish: './templogs/'
     ArtifactName: LatencyLogsPython${{ parameters.PythonVersion }}
     publishLocation: Container
-  condition: and(succeeded(), contains(variables['Agent.Name'], 'Hosted Ubuntu'), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), eq(${{ parameters.runLatencyTests }}, 'true'))
+  condition: and(succeeded(), eq(variables['SPEECHSDK_RUN_TESTS'], 'true'), eq(${{ parameters.runLatencyTests }}, 'true'))
