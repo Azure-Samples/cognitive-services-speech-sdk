@@ -614,6 +614,12 @@ jobs:
       args: './ci/nuget/carbon_os.nuspec $(Build.Repository.LocalPath) $(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\WindowsOS true'
     displayName: Create OS NuGet
     condition: and(succeeded(), eq(variables['HAS_OS_BUILD'], 'true'))
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    inputs:
+      type: FilePath
+      scriptPath: './ci/nuget/pack.sh'
+      args: './ci/nuget/carbon_xamarin_ios.nuspec $(Build.Repository.LocalPath) $(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\Windows'
+    displayName: Create public NuGet for Xamarin iOS
   # We could / should generate this elsewhere? Doesn't only apply to Windows + NuGet anymore...
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     inputs:

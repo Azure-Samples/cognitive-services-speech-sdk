@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.CognitiveServices.Speech.Xamarin.iOS</id>
+    <version>$Version$</version>
+    <title>Microsoft Cognitive Services Speech SDK for Xamarin iOS</title>
+    <authors>Microsoft</authors>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
+    <projectUrl>https://aka.ms/csspeech</projectUrl>
+    <licenseUrl>https://aka.ms/csspeech/license201809</licenseUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <summary>Microsoft Cognitive Services Speech SDK for Xamarin iOS</summary>
+    <description>
+      This NuGet package provides native and managed libraries for Xamarin iOS with bitcode enabled.
+      Documentation is available at https://aka.ms/csspeech.
+    </description>
+    <tags>Microsoft Speech Cognitive Services native C++ C# .NET .NETStandard</tags>
+    <releaseNotes>
+      See https://aka.ms/csspeech/whatsnew.
+    </releaseNotes>
+    <dependencies />
+  </metadata>
+  <files>
+    <!-- target and property files -->
+    <file src="build\Xamarin.iOS\Microsoft.CognitiveServices.Speech.Xamarin.iOS.targets" target="build\Xamarin.iOS\Microsoft.CognitiveServices.Speech.Xamarin.iOS.targets" />
+
+    <!-- .NET standard dlls for iOS -->
+    <file src="$WindowsDropDir$\x64\Release\public\lib\IOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\Xamarin.iOS\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\IOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\Xamarin.iOS\Microsoft.CognitiveServices.Speech.csharp.xml" />
+
+    <!-- iOS native library for Xamarin -->
+    <file src="$iOSDropDir$\Release\libMicrosoft.CognitiveServices.Speech.core.bitcode.a" target="build\Xamarin.iOS\libMicrosoft.CognitiveServices.Speech.core.bitcode.a" />
+
+    <!-- Redistributable notice -->
+    <file src="$RedistDir$\REDIST.txt" target="build\REDIST.txt" />
+  </files>
+</package>
