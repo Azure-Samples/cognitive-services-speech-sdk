@@ -77,7 +77,7 @@ for flavor in Release; do # no Debug for now
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/Android/libs/Microsoft.CognitiveServices.Speech.csharp.dll
 
   cp --verbose --preserve \
-    "$DROP_DIR"/iOS/$flavor/libMicrosoft.CognitiveServices.Speech.core.a \
+    "$DROP_DIR"/iOS/$flavor/libMicrosoft.CognitiveServices.Speech.core.bitcode.a \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/iOS/libMicrosoft.CognitiveServices.Speech.core.a
 
   cp --verbose --preserve \
