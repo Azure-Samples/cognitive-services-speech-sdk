@@ -8,15 +8,15 @@ This sample demonstrates how to use Speech SDK for Universal Windows Platform (U
 
 ## Prerequisites
 
+* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * Speech SDK version 1.7.0 or later.
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working microphone.
 * [Microsoft Visual Studio 2019](https://www.visualstudio.com/), Community Edition or higher is preferred.
 * [Xamarin installation to Visual Studio](https://docs.microsoft.com/xamarin/get-started/installation/?pivots=windows).
 * [Xamarin Android installation on Windows](https://docs.microsoft.com/xamarin/android/get-started/installation/windows).
-* To target Android: an Android device (ARM32/64, x86; API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
 * [Xamarin iOS installation on Windows](https://docs.microsoft.com/xamarin/ios/get-started/installation/windows/?pivots=windows).
+* To target Android: an Android device (ARM32/64, x86; API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
 * To target iOS: an iOS device (ARM64) or an iOS simulator (x64) [enabled for development](https://docs.microsoft.com/xamarin/ios/get-started/installation/device-provisioning/) with a working microphone.
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * For Windows ARM64 build support, install the [optional build tools, and Windows 10 SDK for ARM/ARM64](https://blogs.windows.com/buildingapps/2018/11/15/official-support-for-windows-10-on-arm-development/).
 
 ## Prepare the sample
@@ -30,7 +30,8 @@ This sample demonstrates how to use Speech SDK for Universal Windows Platform (U
   * helloworld.Android - project which contains Android specific customizations
   * helloworld.iOS - project which contains iOS specific customizations
   * helloworld.UWP - project which contains UWP specific customizations
-* For each project, ensure the project references or dependencies contain reference to Microsoft.CognitiveServices.Speech nuget package. In case it is not referenced, then go to under `Tools -> Nuget Package Manager -> Manage Nuget Packages For Solution` and install the latest version of Speech SDK for each project.
+* For each project, ensure the project references or dependencies contain reference to `Microsoft.CognitiveServices.Speech` nuget package. In case it is not referenced, then go to under `Tools -> Nuget Package Manager -> Manage Nuget Packages For Solution` and install the latest version of Speech SDK for each project.
+  > Note: `Microsoft.CognitiveServices.Speech` nuget package contains bitcode disabled iOS binary. If you need bitcode enabled iOS binary then use `Microsoft.CognitiveServices.Speech.Xamarin.iOS` nuget for the iOS project.
 * Edit the `MainPage.xaml.cs` source under the main helloworld project:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.

@@ -1,6 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <NativeReference Include="$(MSBuildThisFileDirectory)\libMicrosoft.CognitiveServices.Speech.core.bitcode.a">
+    <NativeReference Include="$(MSBuildThisFileDirectory)\libMicrosoft.CognitiveServices.Speech.core.a">
       <Kind>Static</Kind>
       <ForceLoad>True</ForceLoad>
       <IsCxx>True</IsCxx>
