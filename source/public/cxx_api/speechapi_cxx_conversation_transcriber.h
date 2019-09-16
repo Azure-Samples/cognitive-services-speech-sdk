@@ -112,22 +112,45 @@ public:
 
     /// <summary>
     /// Asynchronously stops a conversation transcribing.
+    /// Added in version 1.7.0.
     /// </summary>
+    /// <param name="resourceHandling">A enum value that specifies how the service handles allocated resources after stopping transcription.</param>
     /// <returns>An empty future.</returns>
-    std::future<void> StopTranscribingAsync()
+    std::future<void> StopTranscribingAsync(ResourceHandling  resourceHandling = ResourceHandling::KeepResources)
     {
-        return StopContinuousRecognitionAsync();
+        auto keepAlive = this->shared_from_this();
+        auto future = std::async(std::launch::async, [keepAlive, this, resourceHandling]() -> void {
+            SPX_INIT_HR(hr);
+            SPX_THROW_ON_FAIL(hr = recognizer_async_handle_release(m_hasyncStopContinuous)); // close any unfinished previous attempt
+
+            SPX_EXITFN_ON_FAIL(hr = set_conversation_resources_to_destroy_on_recognizer_stop(m_hreco, resourceHandling == Conversation::ResourceHandling::DestroyResources));
+
+            SPX_EXITFN_ON_FAIL(hr = recognizer_stop_continuous_recognition_async(m_hreco, &m_hasyncStopContinuous));
+            SPX_EXITFN_ON_FAIL(hr = recognizer_stop_continuous_recognition_async_wait_for(m_hasyncStopContinuous, UINT32_MAX));
+
+        SPX_EXITFN_CLEANUP:
+            auto releaseHr = recognizer_async_handle_release(m_hasyncStopContinuous);
+            SPX_REPORT_ON_FAIL(releaseHr);
+            m_hasyncStopContinuous = SPXHANDLE_INVALID;
+
+            SPX_THROW_ON_FAIL(hr);
+        });
+
+        return future;
     }
 
     /// <summary>
-    /// Asynchronously ends a conversation.
+    /// Asynchronously ends a conversation. This triggers service to destroy allocated resources.
+    ///
+    /// Note: This is kept for the backward compatible.
     /// </summary>
+    /// <param name="resourceHandling">A enum value that specifies how the service handles allocated resources after stopping transcription.</param>
     /// <returns>An empty future.</returns>
-    std::future<void> EndConversationAsync()
+    std::future<void> EndConversationAsync(ResourceHandling  resourceHandling = ResourceHandling::KeepResources)
     {
         auto keepAlive = this->shared_from_this();
-        auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
-            SPX_THROW_ON_FAIL(conversation_transcriber_end_conversation(m_hreco));
+        auto future = std::async(std::launch::async, [keepAlive, this, resourceHandling]() -> void {
+            SPX_THROW_ON_FAIL(conversation_transcriber_end_conversation(m_hreco, resourceHandling == Conversation::ResourceHandling::DestroyResources));
         });
         return future;
     }

@@ -216,6 +216,8 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
 
         /// <summary>
         /// Stops conversation transcribing.
+        /// Note: the service will keep allocated resources after stopping conversation transcribing.
+        /// If the resources should be destroyed, please use <see cref="StopTranscribingAsync(ResourceHandling)"/>.
         /// </summary>
         /// <returns>A task representing the asynchronous operation that stops the recognition.</returns>
         /// <remarks>This is used to pause the conversation. The client can start the conversation again by calling StartTranscribingAsync.</remarks>
@@ -223,22 +225,32 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         {
             return Task.Run(() =>
             {
-                base.DoAsyncRecognitionAction(StopContinuousRecognition);
+                base.DoAsyncRecognitionAction(StopTranscribingWithResourceHandlingKeep);
             });
         }
 
         /// <summary>
-        /// End a conversation.
+        /// Stops conversation transcribing.
         /// </summary>
-        ///
-        /// <returns>A task representing the asynchronous operation that ends the recognition.</returns>
-        /// <remarks>This is used to communicate to the service to shutdown the conversation in the service.</remarks>
-        public Task EndConversationAsync()
+        /// <param name="resourceHandling">A enum value that specifies how the service handles allocated resource after stopping transcription.</param>
+        /// <returns>A task representing the asynchronous operation that stops the recognition.</returns>
+        /// <remarks>This is used to pause the conversation. The client can start the conversation again by calling StartTranscribingAsync.</remarks>
+        public Task StopTranscribingAsync(ResourceHandling resourceHandling)
         {
             return Task.Run(() =>
             {
-                ThrowIfNull(recoHandle);
-                ThrowIfFail(Internal.ConversationTranscriber.conversation_transcriber_end_conversation(recoHandle));
+                if (resourceHandling == ResourceHandling.DestroyResources)
+                {
+                    base.DoAsyncRecognitionAction(StopTranscribingWithResourceHandlingDestroy);
+                }
+                else if (resourceHandling == ResourceHandling.KeepResources)
+                {
+                    base.DoAsyncRecognitionAction(StopTranscribingWithResourceHandlingKeep);
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException("Invalid resource handling type:" + resourceHandling);
+                }
             });
         }
 
@@ -338,6 +350,16 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
             canceledCallbackDelegate = null;
 
             base.Dispose(disposing);
+        }
+
+        internal void StopTranscribingWithResourceHandlingDestroy()
+        {
+            StopTranscribing(true);
+        }
+
+        internal void StopTranscribingWithResourceHandlingKeep()
+        {
+            StopTranscribing(false);
         }
 
         private Internal.CallbackFunctionDelegate recognizingCallbackDelegate;

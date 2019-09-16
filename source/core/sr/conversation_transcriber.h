@@ -26,6 +26,9 @@ public:
 
     struct CSpxVoiceSignature
     {
+        CSpxVoiceSignature() : Version(-1), Tag(std::string{}), Data(std::string{})
+        {}
+
         int Version;
         std::string Tag;
         std::string Data;
@@ -37,7 +40,7 @@ public:
         {
             if (participant == nullptr)
             {
-                ThrowInvalidArgumentException("participant point is null");
+                ThrowInvalidArgumentException("participant pointer is null");
             }
             id = participant->GetId();
             preferred_language = participant->GetPreferredLanguage();
@@ -109,8 +112,9 @@ public:
     void UpdateParticipants(bool add, std::vector<ParticipantPtr>&& participants) override;
     void SetConversationId(const std::string& id) override;
     void GetConversationId(std::string& id) override;
-    void EndConversation() override;
-    std::string GetSpeechEventPayload(bool atStartAudioPumping) override;
+    void EndConversation(bool destroy) override;
+    std::string GetSpeechEventPayload(MeetingState state) override;
+    void HttpSendEndMeetingRequest() override;
 
 private:
     static constexpr int m_max_number_of_participants = 50;
@@ -120,14 +124,13 @@ private:
         NONE,
         ADD_PARTICIPANT,
         REMOVE_PARTICIPANT,
-        END_CONVERSATION
     };
 
-    std::string CreateSpeechEventPayload(bool rightBeforeAudioPumping);
+    std::string CreateSpeechEventPayload(MeetingState state);
     void UpdateParticipantInternal(bool add, const std::string& id, const std::string& preferred_language = {}, const std::string& voice_signature = {});
     void UpdateParticipantsInternal(bool add, std::vector<ParticipantPtr>&& participants);
     void SanityCheckParticipants(const std::string& id, const Participant& person);
-    void SendSpeehEventMessageInternal();
+    void SendSpeechEventMessageInternal();
 
     void StartUpdateParticipants();
     void DoneUpdateParticipants();
@@ -135,7 +138,6 @@ private:
     void SetRecoMode();
     int GetMaxAllowedParticipants();
 
-    void HttpSendEndMeetingRequest();
     void HttpAddQueryParams(HttpRequest& request);
     void HttpAddHeaders(HttpRequest& request);
 
@@ -149,6 +151,7 @@ private:
     std::shared_ptr<ISpxThreadService>  m_threadService;
     std::string m_subscriptionKey;
     std::string m_endpoint;
+    bool m_sentEndMeeting;
 
     static auto constexpr m_iCalUid = "iCalUid";
     static auto constexpr m_callId = "callId";

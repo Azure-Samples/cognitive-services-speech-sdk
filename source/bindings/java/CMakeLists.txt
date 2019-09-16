@@ -135,6 +135,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/IntentRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/IntentRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/IntentTrigger.java
+    ${CMAKE_SWIG_OUTDIR}/ResourceHandling.java
     ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberCanceledEventListener.java
     ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberCanceledEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberEventListener.java
@@ -279,6 +280,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/ProfanityOption.java
 
     ${PACKAGE_DIR}/conversation/Participant.java
+    ${PACKAGE_DIR}/conversation/ResourceHandling.java
     ${PACKAGE_DIR}/conversation/ConversationTranscriptionResult.java
     ${PACKAGE_DIR}/conversation/ConversationTranscriptionEventArgs.java
     ${PACKAGE_DIR}/conversation/ConversationTranscriptionCanceledEventArgs.java

@@ -19,9 +19,6 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR conversation_transcriber_set_conversation_id(InteropSafeHandle hreco, IntPtr pszText);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Auto)]
-        public static extern SPXHR conversation_transcriber_end_conversation(InteropSafeHandle recoHandle);
-
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Auto)]
         public static extern SPXHR conversation_transcriber_update_participant(InteropSafeHandle recoHandle, bool add, InteropSafeHandle participant);
         
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Auto)]

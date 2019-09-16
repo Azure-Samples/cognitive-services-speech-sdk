@@ -65,6 +65,7 @@ public:
     CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() override;
     CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;
     CSpxAsyncOp<void> StopContinuousRecognitionAsync() override;
+    void DestroyConversationResources(bool destroy) override;
 
     CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) override;
     CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;

@@ -115,7 +115,7 @@ SPXAPI conversation_transcriber_get_conversation_id(SPXRECOHANDLE hreco, char* i
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI conversation_transcriber_end_conversation(SPXRECOHANDLE hreco)
+SPXAPI conversation_transcriber_end_conversation(SPXRECOHANDLE hreco, bool destroy)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -125,8 +125,7 @@ SPXAPI conversation_transcriber_end_conversation(SPXRECOHANDLE hreco)
         auto conversationTranscriber = SpxQueryInterface<ISpxConversationTranscriber>(recognizer);
         SPX_IFTRUE_THROW_HR(conversationTranscriber == nullptr, SPXERR_INVALID_ARG);
 
-        conversationTranscriber->EndConversation();
+        conversationTranscriber->EndConversation(destroy);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
-
 }

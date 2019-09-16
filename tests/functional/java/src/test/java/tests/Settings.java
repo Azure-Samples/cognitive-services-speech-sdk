@@ -39,7 +39,7 @@ public class Settings {
     public static String ConversationTranscriptionPPEKey = "<<YOUR_CONVERSATION_TRANSCRIPTION_PPE_KEY>>";
     public static String ConversationTranscriptionPRODKey = "<<YOUR_CONVERSATION_TRANSCRIPTION_PROD_KEY>>";
     public static String SpeechRegionForConversationTranscription = "centralus";
-    
+
     private static SpeechConfig config;
 
     private static Boolean isSettingsInitialized = false;

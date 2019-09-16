@@ -301,6 +301,18 @@ SPXAPI recognizer_stop_continuous_recognition_async(SPXRECOHANDLE hreco, SPXASYN
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI set_conversation_resources_to_destroy_on_recognizer_stop(SPXRECOHANDLE hreco, bool destroy)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        auto recognizer = (*recohandles)[hreco];
+
+        recognizer->DestroyConversationResources(destroy);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 SPXAPI recognizer_stop_continuous_recognition_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds)
 {
     SPXAPI_INIT_HR_TRY(hr)

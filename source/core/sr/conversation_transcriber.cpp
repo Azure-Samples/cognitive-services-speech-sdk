@@ -53,6 +53,7 @@ void CSpxConversationTranscriber::Init()
 
     m_subscriptionKey = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), "");
     m_endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
+    m_sentEndMeeting = false;
 
     SetRecoMode();
 }
@@ -76,11 +77,18 @@ void CSpxConversationTranscriber::Term()
     BaseType::Term();
 }
 
-void CSpxConversationTranscriber::EndConversation()
+void CSpxConversationTranscriber::EndConversation(bool destroy)
 {
     auto keepAlive = SpxSharedPtrFromThis<ISpxConversationTranscriber>(this);
     std::packaged_task<void()> task([=]() {
-        HttpSendEndMeetingRequest();
+        if (destroy)
+        {
+            HttpSendEndMeetingRequest();
+        }
+        else
+        {
+            SPX_DBG_TRACE_INFO("EndConversation did not trigger a HTTP request due to destroy is %s.", destroy ? "true" : "false");
+        }
     });
     m_threadService->ExecuteSync(move(task));
 }
@@ -140,9 +148,9 @@ void CSpxConversationTranscriber::GetConversationId(std::string& id)
     m_threadService->ExecuteSync(move(task));
 }
 
-std::string  CSpxConversationTranscriber::GetSpeechEventPayload(bool atStartPumping)
+std::string  CSpxConversationTranscriber::GetSpeechEventPayload(ISpxConversationTranscriber::MeetingState state)
 {
-    return CreateSpeechEventPayload(atStartPumping);
+    return CreateSpeechEventPayload(state);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +163,7 @@ void CSpxConversationTranscriber::StartUpdateParticipants()
 
 void CSpxConversationTranscriber::DoneUpdateParticipants()
 {
-    SendSpeehEventMessageInternal();
+    SendSpeechEventMessageInternal();
 
     if (m_action == ActionType::ADD_PARTICIPANT)
     {
@@ -170,14 +178,14 @@ void CSpxConversationTranscriber::DoneUpdateParticipants()
     }
 }
 
-void CSpxConversationTranscriber::SendSpeehEventMessageInternal()
+void CSpxConversationTranscriber::SendSpeechEventMessageInternal()
 {
     auto default_session = GetDefaultSession();
     if (default_session)
     {
         if (default_session->IsStreaming())
         {
-            auto payload = CreateSpeechEventPayload(false); // not starting
+            auto payload = CreateSpeechEventPayload(MeetingState::GOING);
 
             try
             {
@@ -287,7 +295,7 @@ int CSpxConversationTranscriber::GetMaxAllowedParticipants()
             SPX_TRACE_WARNING("Invalid maximum number of participants set. Defaulting to %d", m_max_number_of_participants);
         }
     }
-    //Incase of any error in parsing max allowed participants, We are defaulting to m_max_number_of_participants which is 50
+    //In case of any error in parsing max allowed participants, We are defaulting to m_max_number_of_participants which is 50
     if (max_allowed_participants <= 0)
     {
         max_allowed_participants = m_max_number_of_participants;
@@ -305,7 +313,7 @@ void to_json(json& j, const CSpxConversationTranscriber::Participant& p)
     j = json{ {"id", p.id}, {"preferredLanguage", p.preferred_language},  {"voice", p.voice} };
 }
 
-std::string CSpxConversationTranscriber::CreateSpeechEventPayload(bool atStartAudioPumping)
+std::string CSpxConversationTranscriber::CreateSpeechEventPayload(MeetingState state)
 {
     if (m_conversation_id.empty())
     {
@@ -318,25 +326,38 @@ std::string CSpxConversationTranscriber::CreateSpeechEventPayload(bool atStartAu
 
     std::string name;
 
-    if (atStartAudioPumping)
+    switch (state)
     {
-        name = "start";
-    }
-    else if (m_action == ActionType::ADD_PARTICIPANT)
-    {
-        name = "join";
-    }
-    else if (m_action == ActionType::END_CONVERSATION)
-    {
-        name = "end";
-    }
-    else
-    {
-        name = "leave";
+        case MeetingState::START:
+            name = "start";
+            m_sentEndMeeting = false;
+            break;
+
+        case MeetingState::END:
+            name = "end";
+            break;
+
+        case MeetingState::GOING:
+            if (m_action == ActionType::ADD_PARTICIPANT)
+            {
+                name = "join";
+            }
+            else if (m_action == ActionType::REMOVE_PARTICIPANT)
+            {
+                name = "leave";
+            }
+            else
+            {
+                ThrowLogicError("The participant is not joining or leaving a meeting! " + std::to_string((int)m_action));
+            }
+            break;
+
+        default:
+            ThrowLogicError("Unsupported Meeting state " + std::to_string((int)state));
     }
 
     speech_event["name"] = name;
-    speech_event["meeting"]["attendees"] = atStartAudioPumping? m_participants_so_far: m_current_participants;
+    speech_event["meeting"]["attendees"] = state  == MeetingState::START ? m_participants_so_far: m_current_participants;
 
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
@@ -427,6 +448,14 @@ void CSpxConversationTranscriber::HttpAddQueryParams(HttpRequest& request)
 
 void CSpxConversationTranscriber::HttpSendEndMeetingRequest()
 {
+    if (m_sentEndMeeting)
+    {
+        std::string message = "Already sent an end meeting request to service for meeting id ";
+        message += m_conversation_id;
+        ThrowRuntimeError(message);
+        return;
+    }
+
     try
     {
         // the host name and path are parsed from the endpoint. The path has /meetings appended to it.
@@ -440,7 +469,6 @@ void CSpxConversationTranscriber::HttpSendEndMeetingRequest()
         std::unique_ptr<HttpResponse> response = request.SendRequest(HTTPAPI_REQUEST_DELETE);
         // throws HttpException in the case of errors. You can also use IsSuccess(), or GetStatusCode() if you don't want exceptions
         response->EnsureSuccess();
-        std::string json = response->ReadContentAsString();
     }
     catch (HttpException& e)
     {
@@ -451,6 +479,8 @@ void CSpxConversationTranscriber::HttpSendEndMeetingRequest()
     {
         throw;
     }
+    SPX_TRACE_INFO("Sent a HTTP DELETE request to destroy the meeting resources in service.");
+    m_sentEndMeeting = true;
 }
 
 }}}} // Microsoft::CognitiveServices::Speech::Impl

@@ -710,4 +710,24 @@ enum class ServicePropertyChannel
     UriQueryParameter = 0
 };
 
+namespace Conversation {
+
+    /// <summary>
+    /// Defines how the service handles allocated resource after the conversation transcriber is stopped.
+    /// Added in version 1.7.0.
+    /// </summary>
+    enum class ResourceHandling
+    {
+        /// <summary>
+        /// The service destroys allocated resources, such as adapted language models.
+        /// </summary>
+        DestroyResources = 0,
+
+        /// <summary>
+        /// The service keeps allocated resources.
+        /// </summary>
+        KeepResources = 1
+    };
+}
+
 } } } // Microsoft::CognitiveServices::Speech

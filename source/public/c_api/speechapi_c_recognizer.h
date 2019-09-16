@@ -36,6 +36,7 @@ SPXAPI recognizer_start_continuous_recognition_async(SPXRECOHANDLE hreco, SPXASY
 SPXAPI recognizer_start_continuous_recognition_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds);
 
 SPXAPI recognizer_stop_continuous_recognition(SPXRECOHANDLE hreco);
+SPXAPI set_conversation_resources_to_destroy_on_recognizer_stop(SPXRECOHANDLE hreco, bool destroy);
 SPXAPI recognizer_stop_continuous_recognition_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
 SPXAPI recognizer_stop_continuous_recognition_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds);
 

@@ -105,6 +105,7 @@ public:
     CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() override;
     CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;
     CSpxAsyncOp<void> StopContinuousRecognitionAsync() override;
+    void DestroyConversationResources(bool destroy) override;
 
     CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) override;
     CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
@@ -296,6 +297,7 @@ private:
     void SetThrottleVariables(const SPXWAVEFORMATEX* format);
 
     void UpdateAdapterResult_JsonResult(std::shared_ptr<ISpxRecognitionResult> result);
+    void DestroyMeeting();
 
 private:
 
@@ -384,6 +386,7 @@ private:
 
     uint64_t m_bytesTransited;
 
+    bool m_destroyMeetingResources;
     std::shared_ptr<CSpxThreadService> m_threadService;
 
     struct Operation

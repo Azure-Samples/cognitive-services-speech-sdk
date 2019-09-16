@@ -513,7 +513,7 @@ TEST_CASE("conversation_online_1_channel_file", "[api][cxx]")
     StartMeetingAndVerifyResult(recognizer.get(), p, move(result), weather.m_utterance);
 }
 
-TEST_CASE("conversation_online_end_meeting", "[api][cxx]")
+TEST_CASE("conversation_online_end_meeting_destroy_resources", "[api][cxx]")
 {
     auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
 
@@ -537,9 +537,78 @@ TEST_CASE("conversation_online_end_meeting", "[api][cxx]")
     INFO(myId);
     recognizer->SetConversationId(myId);
 
-    StartMeetingAndVerifyResult(recognizer.get(), p, move(result), weather.m_utterance);
+    // add the speaker1 to usp
+    recognizer->AddParticipant(p);
+
+    recognizer->StartTranscribingAsync().get();
+
+    WaitForResult(result->ready.get_future(), 10min);
+
+    REQUIRE_NOTHROW(recognizer->StopTranscribingAsync(ResourceHandling::DestroyResources).get());
+    SPXTEST_REQUIRE(!result->phrases.empty());
+    auto text = GetText(result->phrases);
+    INFO(text);
+    SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, weather.m_utterance));
+}
+
+TEST_CASE("conversation_online_end_meeting_keep_resources", "[api][cxx]")
+{
+    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
+
+    weather.UpdateFullFilename(Config::InputDir);
+    auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
+
+    auto result = make_shared<RecoPhrases>();
+    ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
+    auto p = Participant::From("one@example.com", "en-us");
+
+    auto myId = PAL::CreateGuidWithDashesUTF8();
+    INFO(myId);
+    recognizer->SetConversationId(myId);
+
+    // add the speaker1 to usp
+    recognizer->AddParticipant(p);
+
+    recognizer->StartTranscribingAsync().get();
+
+    WaitForResult(result->ready.get_future(), 10min);
+
+    REQUIRE_NOTHROW(recognizer->StopTranscribingAsync().get());
+    SPXTEST_REQUIRE(!result->phrases.empty());
+    auto text = GetText(result->phrases);
+    INFO(text);
+    SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, weather.m_utterance));
+}
+
+TEST_CASE("conversation_online_end_meeting", "[api][cxx]")
+{
+    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
+
+    weather.UpdateFullFilename(Config::InputDir);
+    auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto recognizer = ConversationTranscriber::FromConfig(config, audioInput);
+
+    auto result = make_shared<RecoPhrases>();
+    ConnectCallbacks<ConversationTranscriber, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>(recognizer.get(), result);
+    auto p = Participant::From("one@example.com", "en-us");
+
+    auto myId = PAL::CreateGuidWithDashesUTF8();
+    INFO(myId);
+    recognizer->SetConversationId(myId);
+
+    // add the speaker1 to usp
+    recognizer->AddParticipant(p);
+
+    recognizer->StartTranscribingAsync().get();
+
+    WaitForResult(result->ready.get_future(), 10min);
 
     REQUIRE_NOTHROW(recognizer->EndConversationAsync().get());
+    SPXTEST_REQUIRE(!result->phrases.empty());
+    auto text = GetText(result->phrases);
+    INFO(text);
+    SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, weather.m_utterance));
 }
 #if 0
 TEST_CASE("conversation_online_microphone", "[api][cxx]")

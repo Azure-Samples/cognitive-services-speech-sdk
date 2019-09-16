@@ -292,7 +292,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning)]
-        public async Task ConversationPushStream()
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task ConversationPushStream(bool destroyResource)
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
@@ -381,7 +383,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         // Use Task.WaitAny to keep the task rooted.
                         Task.WaitAny(new[] { stopRecognition.Task });
 
-                        await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
+                        await conversationTranscriber.StopTranscribingAsync(destroyResource ? ResourceHandling.DestroyResources : ResourceHandling.KeepResources).ConfigureAwait(false);
                         Assert.IsFalse(string.IsNullOrEmpty(recoResult));
                     }
                 }
@@ -389,7 +391,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task ConversationPullStreamWithEnrollment()
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task ConversationPullStreamWithEnrollment(bool destroyResource)
         {
             var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
             var stopRecognition = new TaskCompletionSource<int>();
@@ -470,7 +474,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     // Use Task.WaitAny to keep the task rooted.
                     Task.WaitAny(new[] { stopRecognition.Task });
 
-                    await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
+                    await conversationTranscriber.StopTranscribingAsync(destroyResource ? ResourceHandling.DestroyResources : ResourceHandling.KeepResources).ConfigureAwait(false);
                     Assert.IsTrue(bGotReco);
                     Assert.IsTrue(speakers.Contains("Katie"));
                     Assert.IsTrue(speakers.Contains("Steve"));

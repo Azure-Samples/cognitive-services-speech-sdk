@@ -203,7 +203,7 @@ protected:
             SPX_EXITFN_ON_FAIL(hr = recognizer_stop_continuous_recognition_async(m_hreco, &m_hasyncStopContinuous));
             SPX_EXITFN_ON_FAIL(hr = recognizer_stop_continuous_recognition_async_wait_for(m_hasyncStopContinuous, UINT32_MAX));
 
-            SPX_EXITFN_CLEANUP:
+        SPX_EXITFN_CLEANUP:
             auto releaseHr = recognizer_async_handle_release(m_hasyncStopContinuous);
             SPX_REPORT_ON_FAIL(releaseHr);
             m_hasyncStopContinuous = SPXHANDLE_INVALID;
@@ -212,7 +212,7 @@ protected:
         });
 
         return future;
-    };
+    }
 
     std::future<void> StartKeywordRecognitionAsyncInternal(std::shared_ptr<KeywordRecognitionModel> model)
     {

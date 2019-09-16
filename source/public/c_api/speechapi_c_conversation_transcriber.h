@@ -8,7 +8,12 @@
 #pragma once
 #include <speechapi_c_common.h>
 
-SPXAPI conversation_transcriber_end_conversation(SPXRECOHANDLE hreco);
+typedef enum
+{
+    ConversationTranscriber_ResourceHandling_DestroyResources = 0,
+    ConversationTranscriber_ResourceHandling_KeepResources = 1
+} SpeechConfig_ResourceHandling;
+SPXAPI conversation_transcriber_end_conversation(SPXRECOHANDLE hreco, bool destroy);
 SPXAPI conversation_transcriber_update_participant_by_user_id(SPXRECOHANDLE hreco, bool add, const char* userId);
 SPXAPI conversation_transcriber_update_participant_by_user(SPXRECOHANDLE hreco, bool add, SPXUSERHANDLE huser);
 SPXAPI conversation_transcriber_update_participant(SPXRECOHANDLE hreco, bool add, SPXPARTICIPANTHANDLE hparticipant);

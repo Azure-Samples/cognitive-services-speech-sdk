@@ -206,8 +206,10 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
     }
 
     /**
-     * Stops conversation transcribing.
-     * @return A task representing the asynchronous operation that stops the transcription.
+     *  Stops conversation transcribing.
+     *  Note: the service will destroy allocated resources after stopping conversation transcribing.
+     *  If the resources should not be destroyed, please use <see cref="StopTranscribingAsync(ResourceHandling)"/>.
+     *  @returns A task representing the asynchronous operation that stops the recognition.
      */
     public Future<Void> stopTranscribingAsync() {
         final ConversationTranscriber thisReco = this;
@@ -221,15 +223,19 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
     }
 
     /**
-     * Ends conversation session.
-     * @return A task representing the asynchronous operation that ends the conversation.
+     *  Stops conversation transcribing.
+     *  Added in version 1.7.0.
+     *  @param resourceHandling A enum value that specifies how the service handles allocated resources after stopping transcription.
+     *  @returns A task representing the asynchronous operation that stops the recognition.
      */
-    public Future<Void> endConversationAsync() {
+    public Future<Void> stopTranscribingAsync(ResourceHandling resourceHandling)
+    {
         final ConversationTranscriber thisReco = this;
+        final ResourceHandling resourceHandlingForLambda = resourceHandling;
 
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
-                Runnable runnable = new Runnable() { public void run() { transcriberImpl.EndConversationAsync(); }};
+                Runnable runnable = new Runnable() { public void run() { transcriberImpl.StopTranscribingAsync(resourceHandlingForLambda.getValue()); }};
                 thisReco.doAsyncRecognitionAction(runnable);
                 return null;
         }});

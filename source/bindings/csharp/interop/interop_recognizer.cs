@@ -50,16 +50,13 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR recognizer_recognize_once_async_wait_for(SPXASYNCHANDLE asyncHandle, UInt32 milliseconds, out SPXRESULTHANDLE phresult);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_start_continuous_recognition(SPXRECOHANDLE recoHandle);
-
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR recognizer_start_continuous_recognition_async(InteropSafeHandle recoHandle, out SPXASYNCHANDLE asyncHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR recognizer_start_continuous_recognition_async_wait_for(SPXASYNCHANDLE asyncHandle, UInt32 milliseconds);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_stop_continuous_recognition(SPXRECOHANDLE recoHandle);
+        public static extern SPXHR set_conversation_resources_to_destroy_on_recognizer_stop(InteropSafeHandle recoHandle, bool destroyResource);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR recognizer_stop_continuous_recognition_async(InteropSafeHandle recoHandle, out SPXASYNCHANDLE asyncHandle);

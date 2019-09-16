@@ -152,6 +152,11 @@ CSpxAsyncOp<void> CSpxRecognizer::StopContinuousRecognitionAsync()
     return m_defaultSession->StopContinuousRecognitionAsync();
 }
 
+void CSpxRecognizer::DestroyConversationResources(bool destroy)
+{
+    return m_defaultSession->DestroyConversationResources(destroy);
+}
+
 CSpxAsyncOp<void> CSpxRecognizer::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)
 {
     const char* recoModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);

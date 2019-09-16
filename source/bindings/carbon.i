@@ -234,15 +234,15 @@
         return FutureWrapper<void>(std::move(future));
     }
 
-    FutureWrapper<void> StopTranscribingAsync()
+    FutureWrapper<void> StopTranscribingAsync(ResourceHandling resourceHandling = ResourceHandling::KeepResources)
     {
-        auto future = ($self)->StopTranscribingAsync();
+        auto future = ($self)->StopTranscribingAsync(resourceHandling);
         return FutureWrapper<void>(std::move(future));
     }
 
-    FutureWrapper<void> EndConversationAsync()
+    FutureWrapper<void> EndConversationAsync(ResourceHandling resourceHandling = ResourceHandling::KeepResources)
     {
-        auto future = ($self)->EndConversationAsync();
+        auto future = ($self)->EndConversationAsync(resourceHandling);
         return FutureWrapper<void>(std::move(future));
     }
 }

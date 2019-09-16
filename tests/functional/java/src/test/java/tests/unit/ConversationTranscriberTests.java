@@ -19,11 +19,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.microsoft.cognitiveservices.speech.Recognizer;
+import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.conversation.ConversationTranscriber;
 import com.microsoft.cognitiveservices.speech.conversation.Participant;
 import com.microsoft.cognitiveservices.speech.conversation.User;
+import com.microsoft.cognitiveservices.speech.conversation.ResourceHandling;
 
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -43,7 +45,7 @@ public class ConversationTranscriberTests {
     static public void setUpBeforeClass() throws Exception {
         String operatingSystem = ("" + System.getProperty("os.name")).toLowerCase();
         System.out.println("Current operation system: " + operatingSystem);
-        boolean isMac = operatingSystem.contains("mac") || operatingSystem.contains("darwin"); 
+        boolean isMac = operatingSystem.contains("mac") || operatingSystem.contains("darwin");
         org.junit.Assume.assumeFalse(isMac);
         Settings.LoadSettings();
         inroomEndpoint = Settings.ConversationTranscriptionEndpoint + "/multiaudio";
@@ -185,7 +187,16 @@ public class ConversationTranscriberTests {
     }
 
     @Test
-    public void testStartAndStopConversationTranscribingAsync() throws InterruptedException, ExecutionException, TimeoutException {
+     public void testStartAndStopConversationTranscribingAsyncDestroyResources() throws InterruptedException, ExecutionException, TimeoutException {
+        testStartAndStopConversationTranscribingAsyncInternal(true);
+    }
+
+    @Test
+    public void testStartAndStopConversationTranscribingAsyncKeepResources() throws InterruptedException, ExecutionException, TimeoutException {
+        testStartAndStopConversationTranscribingAsyncInternal(false);
+    }
+
+    public void testStartAndStopConversationTranscribingAsyncInternal(boolean destroyResource) throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(inroomEndpoint), Settings.ConversationTranscriptionPPEKey);
         assertNotNull(s);
 
@@ -201,7 +212,7 @@ public class ConversationTranscriberTests {
 
         t.addParticipant("xyz@example.com");
 
-        String result = getFirstTranscriberResult(t);
+        String result = getFirstTranscriberResult(t, destroyResource);
         assertTrue(result != "");
 
         t.close();
@@ -209,6 +220,14 @@ public class ConversationTranscriberTests {
     }
 
     private String getFirstTranscriberResult(ConversationTranscriber t) throws InterruptedException, ExecutionException, TimeoutException {
+        return getFirstTranscriberResultInternal(t, true, true);
+    }
+
+    private String getFirstTranscriberResult(ConversationTranscriber t, boolean destroyResource) throws InterruptedException, ExecutionException, TimeoutException {
+        return getFirstTranscriberResultInternal(t, false, destroyResource);
+    }
+
+    private String getFirstTranscriberResultInternal(ConversationTranscriber t, boolean useDefaultStopTranscribing, boolean destroyResource) throws InterruptedException, ExecutionException, TimeoutException {
         String result;
         final ArrayList<String> rEvents = new ArrayList<>();
 
@@ -219,6 +238,14 @@ public class ConversationTranscriberTests {
         t.recognized.addEventListener((o, e) -> {
             rEvents.add(e.getResult().getText());
             System.out.println("Conversation transcriber recognized:" + e.toString());
+        });
+
+        t.canceled.addEventListener((o, e) -> {
+            if (e.getReason() != CancellationReason.EndOfStream)
+            {
+                rEvents.add("Canceled event:" + e.toString());
+                System.out.println("Conversation transcriber canceled:" + e.toString());
+            }
         });
 
         Future<?> future = t.startTranscribingAsync();
@@ -239,8 +266,17 @@ public class ConversationTranscriberTests {
 
         assertTrue(1 <= rEvents.size());
         result = rEvents.get(0);
+        System.out.println("Result:" + result);
+        assertFalse(result.contains("Canceled event:"));
 
-        future = t.stopTranscribingAsync();
+        if (useDefaultStopTranscribing)
+        {
+            future = t.stopTranscribingAsync();
+        }
+        else
+        {
+            future = t.stopTranscribingAsync(destroyResource ? ResourceHandling.DestroyResources  : ResourceHandling.KeepResources);
+        }
         assertNotNull(future);
 
         // Wait for max 30 seconds

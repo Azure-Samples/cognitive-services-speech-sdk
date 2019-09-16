@@ -12,7 +12,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-static constexpr char versioName[] = "Version";
+static constexpr char versionName[] = "Version";
 static constexpr char tagName[] = "Tag";
 static constexpr char dataName[] = "Data";
 
@@ -38,8 +38,14 @@ void CSpxParticipant::SetVoiceSignature(std::string&& voiceSignature)
         return;
     }
     // parse throws exception when voiceSignature is ill-formated.
-    auto j = nlohmann::json::parse(voiceSignature);
-    if (j.find(versioName) == j.end())
+    auto j = nlohmann::json::parse(voiceSignature, nullptr, false);
+    if (j.is_discarded() || !j.is_object())
+    {
+        std::string message = "Voice signature does not parse as JSON object: " + voiceSignature;
+        ThrowInvalidArgumentException(message);
+    }
+
+    if (j.find(versionName) == j.end())
     {
         ThrowInvalidArgumentException("Could not find Version in voice signature!");
     }
