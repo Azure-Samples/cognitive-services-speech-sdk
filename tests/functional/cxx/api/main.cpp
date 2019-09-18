@@ -3,6 +3,9 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #define CATCH_CONFIG_RUNNER
 #include "test_utils.h"
 
@@ -39,14 +42,24 @@ int main(int argc, char* argv[])
     // The catch2 test adapter runs a Discovery phase and we shouldn't attemp io during this phase
     if (!checkForDiscovery(argc, argv))
     {
-        ConfigSettings::LoadFromJsonFile(argv[0]);
+        std::string rootPath(argv[0]);
+        std::replace(rootPath.begin(), rootPath.end(), '\\', '/');
+        std::string rootPathOnly = rootPath.substr(0, rootPath.find_last_of('/') + 1);
+
+        ConfigSettings::LoadFromJsonFile(rootPathOnly);
+
+        Config::InputDir = rootPathOnly + "input";
+
+        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "main", __LINE__, 0, "Setting InputDir to %s", Config::InputDir.c_str());
     }
 
     // Let Catch (using Clara) parse the command line
     int returnCode = parse_cli_args(session, argc, argv);
 
     if (returnCode != 0) // Indicates a command line error
+    {
         return returnCode;
+    }
 
     return session.run();
 }

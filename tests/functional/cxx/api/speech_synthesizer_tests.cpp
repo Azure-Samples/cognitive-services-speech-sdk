@@ -787,7 +787,7 @@ TEST_CASE("Speak output in streams before done from event synthesis started - US
     auto result3 = future3.get(); /* "{{{text3}}}" synthesis has completed */
 }
 
-TEST_CASE("Speak output in streams before done from method start speaking text async - USP", "[api][cxx]")
+TEST_CASE("Speak output in streams before method start speaking text async - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr); /* nullptr indicates to do nothing with synthesizer audio by default */

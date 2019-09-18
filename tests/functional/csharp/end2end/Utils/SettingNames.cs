@@ -2,9 +2,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 {
     static class SettingNames
     {
-        public static string InRoomAudioEndPoint => "InRoomAudioEndPoint";
-        public static string OnlineAudioEndPoint => "OnlineAudioEndPoint";
-        public static string EndPoint => "EndPoint";
+        public static string InRoomAudioEndpoint => "InRoomAudioEndpoint";
+        public static string OnlineAudioEndpoint => "OnlineAudioEndpoint";
+        public static string Endpoint => "Endpoint";
         public static string InputDir => "InputDir";
         public static string DeploymentId => "DeploymentId";
         public static string LanguageUnderstandingSubscriptionKey => "LanguageUnderstandingSubscriptionKey";

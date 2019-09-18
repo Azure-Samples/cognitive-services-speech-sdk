@@ -64,12 +64,28 @@ namespace Config
     EXTERN std::string InputDir;
     EXTERN std::string DialogRegion;
     EXTERN std::string DialogBotSecret;
-    EXTERN std::string InroomEndpoint;
-    EXTERN std::string OnlineEndpoint;
+    EXTERN std::string InRoomAudioEndpoint;
+    EXTERN std::string OnlineAudioEndpoint;
     EXTERN std::string OfflineModelPathRoot;
     EXTERN std::string OfflineModelLanguage;
     EXTERN bool DoDiscover;
 }
+
+#define UNIFIED_SPEECH_SUBSCRIPTION_KEY "UnifiedSpeechSubscriptionKey"
+#define LANGUAGE_UNDERSTANDING_SUBSCRIPTION_KEY "LanguageUnderstandingSubscriptionKey"
+#define DIALOG_SUBSCRIPTION_KEY "DialogSubscriptionKey"
+#define CONVERSATION_TRANSCRIPTION_SUBSCRIPTION_KEY "ConversationTranscriptionPPEKey"
+
+#define CONVERSATION_TRANSCRIPTION_ENDPOINT "ConversationTranscriptionEndpoint"
+#define REGION "Region"
+#define LANGUAGE_UNDERSTANDING_SERVICE_REGION "LanguageUnderstandingServiceRegion"
+#define LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID "LanguageUnderstandingHomeAutomationAppId"
+#define SPEECH_REGION_FOR_CONVERSATION_TRANSCRIPTION "SpeechRegionForConversationTranscription"
+#define IN_ROOM_AUDIO_ENDPOINT "InRoomAudioEndpoint"
+#define ONLINE_AUDIO_ENDPOINT "OnlineAudioEndpoint"
+#define INPUT_DIR "InputDir"
+#define DIALOG_FUNCTIONAL_TEST_BOT "DialogFunctionalTestBot"
+#define DIALOG_REGION "DialogRegion"
 
 inline bool exists(const std::string& name) {
     return std::ifstream(name.c_str()).good();
@@ -77,6 +93,18 @@ inline bool exists(const std::string& name) {
 
 inline std::ifstream get_stream(const std::string& name) {
     return std::ifstream(name.c_str(), std::ifstream::binary);
+}
+
+inline void GetKeyValue(const char* key, std::string &value, nlohmann::json &data, const char* file, int line)
+{
+    try
+    {
+        value = data.at(key).get<std::string>();
+    }
+    catch (nlohmann::json::type_error& e)
+    {
+        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, file, "LoadFromJsonFile", line, 0, "Error: exception in AT, %s.", e.what());
+    }
 }
 
 class StringComparisions {
@@ -136,35 +164,31 @@ private:
     }
 
 public:
-    static void LoadFromJsonFile(const char* rootPathString)
+    static void LoadFromJsonFile(std::string rootPathString)
     {
-        std::string rootPath(rootPathString);
-        std::replace(rootPath.begin(), rootPath.end(), '\\', '/');
-        std::string rootPathOnly = rootPath.substr(0, rootPath.find_last_of('/') + 1);
+        std::string testSettingsPath = rootPathString.append(TEST_SETTINGS_FILE);
+        SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_INFO, __FILE__, "LoadFromJsonFile", __LINE__, 0, "Attempting to read file at %s", testSettingsPath.c_str());
 
-        nlohmann::json data = getJson(rootPathOnly + TEST_SETTINGS_FILE);
+        nlohmann::json data = getJson(testSettingsPath);
 
         if (data != nullptr)
         {
-            Keys::Speech = data.at("UnifiedSpeechSubscriptionKey").get<std::string>();
-            Keys::LUIS = data.at("LanguageUnderstandingSubscriptionKey").get<std::string>();
-            Keys::Dialog = data.at("DialogSubscriptionKey").get<std::string>();
-            Keys::ConversationTranscriber = data.at("ConversationTranscriptionSubscriptionKey").get<std::string>();
-
-            Config::Endpoint = data.at("EndPoint").get<std::string>();
-            Config::Region = data.at("Region").get<std::string>();
-            Config::LuisRegion = data.at("LanguageUnderstandingServiceRegion").get<std::string>();
-            Config::LuisAppId = data.at("LanguageUnderstandingHomeAutomationAppId").get<std::string>();
-            Config::DialogRegion = data.at("SpeechRegionForConversationTranscription").get<std::string>();
-            Config::InroomEndpoint = data.at("InRoomAudioEndPoint").get<std::string>();
-            Config::OnlineEndpoint = data.at("OnlineAudioEndPoint").get<std::string>();
-
-            Config::InputDir = data.at("InputDir").get<std::string>();
-
-            if (Config::InputDir.length() != 0)
-            {
-                Config::InputDir = rootPathOnly + Config::InputDir;
-            }
+            GetKeyValue(UNIFIED_SPEECH_SUBSCRIPTION_KEY, Keys::Speech, data, __FILE__, __LINE__);
+            GetKeyValue(LANGUAGE_UNDERSTANDING_SUBSCRIPTION_KEY, Keys::LUIS, data, __FILE__, __LINE__);
+            GetKeyValue(DIALOG_SUBSCRIPTION_KEY, Keys::Dialog, data, __FILE__, __LINE__);
+            GetKeyValue(DIALOG_FUNCTIONAL_TEST_BOT, Config::DialogBotSecret, data, __FILE__, __LINE__);
+            GetKeyValue(CONVERSATION_TRANSCRIPTION_SUBSCRIPTION_KEY, Keys::ConversationTranscriber, data, __FILE__, __LINE__);
+            GetKeyValue(DIALOG_REGION, Config::DialogRegion, data, __FILE__, __LINE__),
+            GetKeyValue(REGION, Config::Region, data, __FILE__, __LINE__);
+            GetKeyValue(LANGUAGE_UNDERSTANDING_SERVICE_REGION, Config::LuisRegion, data, __FILE__, __LINE__);
+            GetKeyValue(LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID, Config::LuisAppId, data, __FILE__, __LINE__);
+            GetKeyValue(IN_ROOM_AUDIO_ENDPOINT, Config::InRoomAudioEndpoint, data, __FILE__, __LINE__);
+            GetKeyValue(ONLINE_AUDIO_ENDPOINT, Config::OnlineAudioEndpoint, data, __FILE__, __LINE__);
+            GetKeyValue(INPUT_DIR, Config::InputDir, data, __FILE__, __LINE__);
+        }
+        else
+        {
+            SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, __FILE__, "LoadFromJsonFile", __LINE__, 0, "JSON could not be loaded from %s", testSettingsPath.c_str());
         }
     }
 };
@@ -218,11 +242,11 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Config::LuisAppId, "LuisAppId")
         ["--luisAppId"]
     ("The language understanding app id to be used intent recognition tests")
-        | Opt(Config::InroomEndpoint, "InroomEndpoint")
-        ["--InroomEndpoint"]
+        | Opt(Config::InRoomAudioEndpoint, "InRoomAudioEndpoint")
+        ["--InRoomAudioEndpoint"]
     ("The endpoint that in-room tests in intelligent meeting recognizer talks to")
-        | Opt(Config::OnlineEndpoint, "OnlineEndpoint")
-        ["--OnlineEndpoint"]
+        | Opt(Config::OnlineAudioEndpoint, "OnlineAudioEndpoint")
+        ["--OnlineAudioEndpoint"]
     ("The endpoint that on-line tests in intelligent meeting recognizer talks to")
         | Opt(Keys::ConversationTranscriber, "ConversationTranscriber")
         ["--keyConversationTranscriberPPE"]

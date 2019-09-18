@@ -73,17 +73,5 @@ runCatchSuite \
   240 \
   "$PATTERN" \
   "$TEST_CODE" \
-    --keySpeech "$SPEECHSDK_SPEECH_KEY" \
-    --region "$SPEECHSDK_SPEECH_REGION" \
-    --keyLUIS "$SPEECHSDK_LUIS_KEY" \
-    --regionIdLUIS "$SPEECHSDK_LUIS_REGION" \
-    --luisAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-    --InroomEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-    --OnlineEndpoint "$SPEECHSDK_PRINCETON_ONLINE_ENDPOINT" \
-    --inputDir "$SPEECHSDK_INPUTDIR" \
-    --keyDialog "$SPEECHSDK_BOT_SUBSCRIPTION" \
-    --dialogRegionId "$SPEECHSDK_BOT_REGION" \
-    --dialogBotSecret "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
-    --keyConversationTranscriberPPE "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
     --offlineModelPathRoot="$OFFLINE_MODEL_PATH_ROOT" \
-    --offlineModelLanguage="$OFFLINE_MODEL_LANGUAGE" \
+    --offlineModelLanguage="$OFFLINE_MODEL_LANGUAGE"

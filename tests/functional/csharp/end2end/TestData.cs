@@ -354,7 +354,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public static class OfflineUnidec
         {
-            public static string LocalModelPathRoot = Path.Combine(AudioDir, "../../../external/unidec/Unidec.Model/model");
+            public static string LocalModelPathRoot = Path.Combine(AudioDir, "../../../../../external/unidec/Unidec.Model/model");
             public static string LocalModelLanguage = "en-US";
         }
     }

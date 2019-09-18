@@ -18,11 +18,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         private TestContext _testContext { get; }
 
-        private static string _inRoomAudioEndPoint;
-        public static string InRoomAudioEndPoint => _inRoomAudioEndPoint;
+        private static string _inRoomAudioEndpoint;
+        public static string InRoomAudioEndpoint => _inRoomAudioEndpoint;
 
-        private static string _onlineAudioEndPoint;
-        public static string OnlineAudioEndPoint => _onlineAudioEndPoint;
+        private static string _onlineAudioEndpoint;
+        public static string OnlineAudioEndpoint => _onlineAudioEndpoint;
 
         private static string _inputDir;
         public static string InputDir => _inputDir;
@@ -74,45 +74,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             _testContext = testContext;
 
             InitializeFromJson();
-            InitializeFromRunsettings();
             TestData.AudioDir = Path.Combine(InputDir, "audio");
             TestData.KwsDir = Path.Combine(InputDir, "kws");
             Console.WriteLine("region: " + Region);
             Console.WriteLine("input directory: " + InputDir);
-        }
-
-        private void ResolveConfigValue(object input, ref string configParamToUpdate, string configParamName)
-        {
-            string value = input as string;
-
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                configParamToUpdate = value;
-            }
-
-            // Disabled for now, until all conflicting names are reconciled
-            //if(string.IsNullOrWhiteSpace(configParamToUpdate))
-            //{
-            //    throw new InvalidOperationException(configParamName + " was null/empty");
-            //}
-        }
-
-        private void InitializeFromRunsettings()
-        {
-            ResolveConfigValue(_testContext.Properties[SettingNames.InputDir], ref _inputDir, nameof(InputDir));
-            ResolveConfigValue(_testContext.Properties[SettingNames.Region], ref _region, nameof(Region));
-            ResolveConfigValue(_testContext.Properties[SettingNames.DeploymentId], ref _deploymentId, nameof(DeploymentId));
-            ResolveConfigValue(_testContext.Properties[SettingNames.ConversationTranscriptionEndpoint], ref _conversationTranscriptionEndpoint, nameof(ConversationTranscriptionEndpoint));
-            ResolveConfigValue(_testContext.Properties[SettingNames.ConversationTranscriptionPPEKey], ref _conversationTranscriptionPPEKey, nameof(ConversationTranscriptionPPEKey));
-            ResolveConfigValue(_testContext.Properties[SettingNames.ConversationTranscriptionPRODKey], ref _conversationTranscriptionPRODKey, nameof(ConversationTranscriptionPRODKey));
-            ResolveConfigValue(_testContext.Properties[SettingNames.UnifiedSpeechSubscriptionKey], ref _unifiedSpeechSubscriptionKey, nameof(UnifiedSpeechSubscriptionKey));
-            ResolveConfigValue(_testContext.Properties[SettingNames.LanguageUnderstandingSubscriptionKey], ref _languageUnderstandingSubscriptionKey, nameof(LanguageUnderstandingSubscriptionKey));
-            ResolveConfigValue(_testContext.Properties[SettingNames.LanguageUnderstandingHomeAutomationAppId], ref _languageUnderstandingHomeAutomationAppId, nameof(LanguageUnderstandingHomeAutomationAppId));
-            ResolveConfigValue(_testContext.Properties[SettingNames.LanguageUnderstandingServiceRegion], ref _languageUnderstandingServiceRegion, nameof(LanguageUnderstandingServiceRegion));
-            ResolveConfigValue(_testContext.Properties[SettingNames.DialogSubscriptionKey], ref _dialogSubscriptionKey, nameof(DialogSubscriptionKey));
-            ResolveConfigValue(_testContext.Properties[SettingNames.DialogFunctionalTestBot], ref _dialogFunctionalTestBot, nameof(DialogFunctionalTestBot));
-            ResolveConfigValue(_testContext.Properties[SettingNames.DialogRegion], ref _dialogRegion, nameof(DialogRegion));
-            ResolveConfigValue(_testContext.Properties[SettingNames.SpeechRegionForConversationTranscription], ref _speechRegionForConversationTranscription, nameof(SpeechRegionForConversationTranscription));
         }
 
         private static void InitializeFromJson()
@@ -135,8 +100,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 if (configSettings != null)
                 {
-                    _inRoomAudioEndPoint = configSettings[SettingNames.InRoomAudioEndPoint];
-                    _onlineAudioEndPoint = configSettings[SettingNames.OnlineAudioEndPoint];
+                    _inRoomAudioEndpoint = configSettings[SettingNames.InRoomAudioEndpoint];
+                    _onlineAudioEndpoint = configSettings[SettingNames.OnlineAudioEndpoint];
                     _inputDir = configSettings[SettingNames.InputDir];
                     _region = configSettings[SettingNames.Region];
                     _deploymentId = configSettings[SettingNames.DeploymentId];
@@ -157,6 +122,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     _dialogFunctionalTestBot = configSettings[SettingNames.DialogFunctionalTestBot];
                     _dialogRegion = configSettings[SettingNames.DialogRegion];
                 }
+            }
+            else
+            {
+                Console.WriteLine($"test.settings.json file not found searched: {InputDir}");
+                Console.WriteLine($"Current working directory: {Directory.GetCurrentDirectory()}");
             }
         }
 

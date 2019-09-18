@@ -25,7 +25,5 @@ runCatchSuite \
   "$T" \
   240 \
   "" \
-  "$TEST_CODE" \
-    --keySpeech "$SPEECHSDK_SPEECH_KEY" \
-    --region "$SPEECHSDK_SPEECH_REGION" \
-    --inputDir "$SPEECHSDK_INPUTDIR"
+  "$TEST_CODE"
+

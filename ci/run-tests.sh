@@ -129,6 +129,26 @@ VARS="$(perl "$SCRIPT_DIR/"evaluate-test-config.pl $verbose_switch --format bash
 
 eval -- "$VARS"
 
+perl $SCRIPT_DIR/generateTestSettingsJson.pl \
+    --outputDirectory $binaryDir \
+    --SPEECHSDK_SPEECH_KEY $SPEECHSDK_SPEECH_KEY \
+    --SPEECHSDK_SPEECH_REGION $SPEECHSDK_SPEECH_REGION \
+    --SPEECHSDK_SPEECH_ENDPOINTID $SPEECHSDK_SPEECH_ENDPOINTID_ENUS \
+    --LanguageUnderstandingSubscriptionKey $SPEECHSDK_LUIS_KEY \
+    --LanguageUnderstandingServiceRegion $SPEECHSDK_LUIS_REGION \
+    --LanguageUnderstandingHomeAutomationAppId $SPEECHSDK_LUIS_HOMEAUTOMATION_APPID \
+    --DialogRegion $SPEECHSDK_BOT_REGION \
+    --DialogSubscriptionKey $SPEECHSDK_BOT_SUBSCRIPTION \
+    --DialogFunctionalTestBot $SPEECHSDK_BOT_FUNCTIONALTESTBOT \
+    --ConversationTranscriptionEndpoint $SPEECHSDK_PRINCETON_INROOM_ENDPOINT \
+    --ConversationTranscriptionPPEKey $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY \
+    --ConversationTranscriptionPRODKey $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY \
+    --SpeechRegionForConversationTranscription $SPEECHSDK_PRINCETON_REGION \
+    --InRoomAudioEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
+    --OnlineAudioEndpoint "$SPEECHSDK_PRINCETON_ONLINE_ENDPOINT"
+
+cp -R tests/input $binaryDir
+
 cmdTimeout=
 [[ $(type -t timeout) != file ]] || cmdTimeout=timeout
 [[ $(type -t gtimeout) != file ]] || cmdTimeout=gtimeout
@@ -187,4 +207,3 @@ for testfile in "${testsToRun[@]}"; do
 done
 echo Pass '(including skip)' $pass / $total.
 ((pass == total))
-

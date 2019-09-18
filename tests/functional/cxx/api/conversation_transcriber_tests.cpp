@@ -19,7 +19,7 @@ using namespace Microsoft::CognitiveServices::Speech::Audio;
 
 TEST_CASE("conversation_voice_signature", "[api][cxx]")
 {
-    auto audioEndpoint = Config::InroomEndpoint;
+    auto audioEndpoint = Config::InRoomAudioEndpoint;
     audioEndpoint += "/multiaudio";
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
 
@@ -79,7 +79,7 @@ TEST_CASE("conversation_voice_signature", "[api][cxx]")
 
 TEST_CASE("conversation_id", "[api][cxx]")
 {
-    auto audioEndpoint = Config::InroomEndpoint;
+    auto audioEndpoint = Config::InRoomAudioEndpoint;
     audioEndpoint += "/multiaudio";
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
     katieSteve.UpdateFullFilename(Config::InputDir);
@@ -115,7 +115,7 @@ TEST_CASE("conversation_create_participant", "[api][cxx]")
 
 TEST_CASE("conversation_add_while_pumping", "[api][cxx]")
 {
-    auto audioEndpoint = Config::InroomEndpoint;
+    auto audioEndpoint = Config::InRoomAudioEndpoint;
     audioEndpoint += "/multiaudio";
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
 
@@ -165,7 +165,7 @@ TEST_CASE("conversation_bad_connection", "[api][cxx]")
 
 TEST_CASE("conversation_inroom_8_channel_file", "[api][cxx]")
 {
-    auto audioEndpoint = Config::InroomEndpoint;
+    auto audioEndpoint = Config::InRoomAudioEndpoint;
     audioEndpoint += "/multiaudio";
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
 
@@ -183,7 +183,7 @@ TEST_CASE("conversation_inroom_8_channel_file", "[api][cxx]")
 }
 TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
 {
-    auto audioEndpoint = Config::InroomEndpoint;
+    auto audioEndpoint = Config::InRoomAudioEndpoint;
     audioEndpoint += "/multiaudio";
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
 
@@ -360,7 +360,7 @@ TEST_CASE("conversation_inroom_8_channel_audio_pull", "[api][cxx]")
 
 TEST_CASE("conversation_inroom_8_channel_audio_push", "[api][cxx]")
 {
-    auto audioEndpoint = Config::InroomEndpoint;
+    auto audioEndpoint = Config::InRoomAudioEndpoint;
     audioEndpoint += "/multiaudio";
     auto config = SpeechConfig::FromEndpoint(audioEndpoint, Keys::ConversationTranscriber);
 
@@ -422,9 +422,9 @@ TEST_CASE("conversation_inroom_8_channel_audio_push", "[api][cxx]")
 
 TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
 {
-    REQUIRE(!Config::OnlineEndpoint.empty());
+    REQUIRE(!Config::OnlineAudioEndpoint.empty());
     REQUIRE(!Keys::ConversationTranscriber.empty());
-    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
+    auto config = SpeechConfig::FromEndpoint(Config::OnlineAudioEndpoint, Keys::ConversationTranscriber);
 
     weather.UpdateFullFilename(Config::InputDir);
     auto fs = OpenWaveFile(weather.m_inputDataFilename);
@@ -497,7 +497,7 @@ TEST_CASE("conversation_online_pull_stream", "[api][cxx][transcriber]")
 
 TEST_CASE("conversation_online_1_channel_file", "[api][cxx]")
 {
-    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
+    auto config = SpeechConfig::FromEndpoint(Config::OnlineAudioEndpoint, Keys::ConversationTranscriber);
 
     weather.UpdateFullFilename(Config::InputDir);
     auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
@@ -515,7 +515,7 @@ TEST_CASE("conversation_online_1_channel_file", "[api][cxx]")
 
 TEST_CASE("conversation_online_end_meeting_destroy_resources", "[api][cxx]")
 {
-    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
+    auto config = SpeechConfig::FromEndpoint(Config::OnlineAudioEndpoint, Keys::ConversationTranscriber);
 
     weather.UpdateFullFilename(Config::InputDir);
     auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
@@ -553,7 +553,7 @@ TEST_CASE("conversation_online_end_meeting_destroy_resources", "[api][cxx]")
 
 TEST_CASE("conversation_online_end_meeting_keep_resources", "[api][cxx]")
 {
-    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
+    auto config = SpeechConfig::FromEndpoint(Config::OnlineAudioEndpoint, Keys::ConversationTranscriber);
 
     weather.UpdateFullFilename(Config::InputDir);
     auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
@@ -583,7 +583,7 @@ TEST_CASE("conversation_online_end_meeting_keep_resources", "[api][cxx]")
 
 TEST_CASE("conversation_online_end_meeting", "[api][cxx]")
 {
-    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::ConversationTranscriber);
+    auto config = SpeechConfig::FromEndpoint(Config::OnlineAudioEndpoint, Keys::ConversationTranscriber);
 
     weather.UpdateFullFilename(Config::InputDir);
     auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
@@ -613,7 +613,7 @@ TEST_CASE("conversation_online_end_meeting", "[api][cxx]")
 #if 0
 TEST_CASE("conversation_online_microphone", "[api][cxx]")
 {
-    auto config = SpeechConfig::FromEndpoint(Config::OnlineEndpoint, Keys::Speech);
+    auto config = SpeechConfig::FromEndpoint(Config::OnlineAudioEndpoint, Keys::Speech);
     auto recognizer = ConversationTranscriber::FromConfig(config);
 
     auto result = make_shared<RecoPhrases>();

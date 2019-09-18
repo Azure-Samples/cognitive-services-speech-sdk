@@ -797,29 +797,6 @@ jobs:
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
       # dotnet test does not allow to supply TestRunParameters from command-line?!
-      perl -pi - \
-        UnifiedSpeechSubscriptionKey "$SPEECHSDK_SPEECH_KEY" \
-        Region "$SPEECHSDK_SPEECH_REGION" \
-        DeploymentId "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS" \
-        InputDir /test/tests/input/ \
-        LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
-        LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
-        LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-        DialogRegion "$SPEECHSDK_BOT_REGION" \
-        DialogSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
-        DialogFunctionalTestBot "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
-        ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-        ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
-        ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
-        SpeechRegionForConversationTranscription "$SPEECHSDK_PRINCETON_REGION" \
-        tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
-        BEGIN {
-          %A = splice(@ARGV, 0, $#ARGV);
-          $keysRe = "(?:\\b" . (join "\\b|\\b", keys %A) . "\\b)";
-          $keysRe = qr/$keysRe/;
-        }
-        s/(<Parameter name="($keysRe)" value=")([^"]*)/$1.$A{$2}/ge
-      SCRIPT
       patchSamplesFromTestConfig public_samples/quickstart/csharp-dotnetcore \
         ci/test-config.json \
         -D luis-key=$(luis-westus-s0-201809-key1) \
@@ -849,6 +826,26 @@ jobs:
       cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/private/lib/libcarbon-tts-mock.so" private_lib
       cp --verbose "$(System.ArtifactsDirectory)/In/Linux/Linux-x64/Release/public/lib/libMicrosoft.CognitiveServices.Speech.core.so" private_lib
 
+      mkdir -p "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0"
+      perl ci/generateTestSettingsJson.pl\
+          --OutputDirectory "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0" \
+          --SPEECHSDK_SPEECH_KEY "$SPEECHSDK_SPEECH_KEY" \
+          --SPEECHSDK_SPEECH_REGION "$SPEECHSDK_SPEECH_REGION" \
+          --SPEECHSDK_SPEECH_ENDPOINTID "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS" \
+          --LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
+          --LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
+          --LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
+          --DialogRegion "$SPEECHSDK_BOT_REGION" \
+          --DialogSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
+          --DialogFunctionalTestBot "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
+          --ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
+          --ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
+          --ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+          --SpeechRegionForConversationTranscription "$SPEECHSDK_PRINCETON_REGION" \
+          --InRoomAudioEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
+          --OnlineAudioEndpoint "$SPEECHSDK_PRINCETON_ONLINE_ENDPOINT"
+      #
+      cp -r tests/input tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
         # Run the unit tests (skip non-Ubuntu 16.04 in dev builds)
@@ -930,37 +927,36 @@ jobs:
         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
         -D long-running=false)
-      # dotnet test does not allow to supply TestRunParameters from command-line?!
-      perl -pi - \
-        UnifiedSpeechSubscriptionKey "$SPEECHSDK_SPEECH_KEY" \
-        Region "$SPEECHSDK_SPEECH_REGION" \
-        DeploymentId "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS" \
-        InputDir ${PWD}/tests/input/ \
-        LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
-        LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
-        LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-        DialogRegion "$SPEECHSDK_BOT_REGION" \
-        DialogSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
-        DialogFunctionalTestBot "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
-        ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-        ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
-        ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
-        SpeechRegionForConversationTranscription "$SPEECHSDK_PRINCETON_REGION" \
-        tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
-        BEGIN {
-          %A = splice(@ARGV, 0, $#ARGV);
-          $keysRe = "(?:\\b" . (join "\\b|\\b", keys %A) . "\\b)";
-          $keysRe = qr/$keysRe/;
-        }
-        s/(<Parameter name="($keysRe)" value=")([^"]*)/$1.$A{$2}/ge
-      SCRIPT
       exitCode=0
       mkdir localnuget
       nugetsource=${PWD}/localnuget
       cp -v "$(System.ArtifactsDirectory)/In/Windows/"Microsoft.CognitiveServices.Speech.*.nupkg localnuget
       #
+      mkdir -p "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0"
+      perl ci/generateTestSettingsJson.pl \
+        --OutputDirectory "tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0" \
+        --SPEECHSDK_SPEECH_KEY "$SPEECHSDK_SPEECH_KEY" \
+        --SPEECHSDK_SPEECH_REGION "$SPEECHSDK_SPEECH_REGION" \
+        --SPEECHSDK_SPEECH_ENDPOINTID "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS" \
+        --LanguageUnderstandingSubscriptionKey "$SPEECHSDK_LUIS_KEY" \
+        --LanguageUnderstandingServiceRegion "$SPEECHSDK_LUIS_REGION" \
+        --LanguageUnderstandingHomeAutomationAppId "$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
+        --DialogRegion "$SPEECHSDK_BOT_REGION" \
+        --DialogSubscriptionKey "$SPEECHSDK_BOT_SUBSCRIPTION" \
+        --DialogFunctionalTestBot "$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
+        --ConversationTranscriptionEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
+        --ConversationTranscriptionPPEKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
+        --ConversationTranscriptionPRODKey "$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
+        --SpeechRegionForConversationTranscription "$SPEECHSDK_PRINCETON_REGION" \
+        --InRoomAudioEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
+        --OnlineAudioEndpoint "$SPEECHSDK_PRINCETON_ONLINE_ENDPOINT"
+      #
+      echo "Nuget package listing"
+      cp -r tests/input tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
+
       cd tests/functional/csharp/end2end
       dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source ${nugetsource} Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
+
       # set +e to allow captureing exit codes and retry loop, rather than blindly exiting the bash shell on error.
       set +e
       for retry in {0..3}; do
