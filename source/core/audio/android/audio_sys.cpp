@@ -358,10 +358,17 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
             STRING_delete(audioData->deviceName);
         }
 
-        Lock_Deinit(audioData->outputCanceledLock);
-        Lock_Deinit(audioData->audioBufferLock);
+        if (audioData->outputCanceledLock) 
+        {
+            Lock_Deinit(audioData->outputCanceledLock);
+        }
+
+        if (audioData->audioBufferLock) 
+        {
+            Lock_Deinit(audioData->audioBufferLock);
+        }
+
         sem_destroy(&audioData->audioFramesAvailable);
-        delete_sl_engine(audioData);
 
         // destroy buffer queue audio player object, and invalidate all associated interfaces
         if (audioData->playerObjectItf != nullptr) {
@@ -386,9 +393,10 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
         if (audioData->stopLock != nullptr)
         {
             Unlock(audioData->stopLock);
+            Lock_Deinit(audioData->stopLock);
         }
-        Lock_Deinit(audioData->stopLock);
 
+        delete_sl_engine(audioData);
         free(audioData);
     }
 }

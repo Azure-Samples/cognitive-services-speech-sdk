@@ -164,30 +164,32 @@ public class SpeechSynthesizerTests {
 
     @Test
     public void testSynthesizerOutputToFile() throws InterruptedException, ExecutionException {
+        File outputFile = new File(System.getProperty("java.io.tmpdir"), "output.wav");
+        String outputFilePath = outputFile.getAbsolutePath();
         SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(speechConfig);
 
-        AudioConfig fileConfig = AudioConfig.fromWavFileOutput("wavefile.wav");
+        AudioConfig fileConfig = AudioConfig.fromWavFileOutput(outputFilePath);
         assertNotNull(fileConfig);
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, fileConfig);
         assertNotNull(synthesizer);
-        SpeechSynthesisResult result1 = synthesizer.SpeakTextAsync("{{{text1}}}").get(); // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}""
+        SpeechSynthesisResult result1 = synthesizer.SpeakTextAsync("{{{text1}}}").get(); // outputFile now contains synthesized audio for "{{{text1}}}""
         result1.close();
-        synthesizer.close(); // "{{{wavefile.wav}}}" is now closed
+        synthesizer.close(); // outputFile is now closed
 
-        long waveSize1 = (new File("wavefile.wav")).length();
+        long waveSize1 = outputFile.length();
         assertTrue(waveSize1 > EMPTY_WAVE_FILE_SIZE);
 
         synthesizer = new SpeechSynthesizer(speechConfig, fileConfig);
         assertNotNull(synthesizer);
-        result1 = synthesizer.SpeakTextAsync("{{{text1}}}").get(); // "{{{wavefile.wav}}}" now contains synthesized audio for "{{{text1}}}""
+        result1 = synthesizer.SpeakTextAsync("{{{text1}}}").get(); // outputFile now contains synthesized audio for "{{{text1}}}""
         result1.close();
-        SpeechSynthesisResult result2 = synthesizer.SpeakTextAsync("{{{text2}}}").get(); // "{{{wavefile.wav}}}" now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}"
+        SpeechSynthesisResult result2 = synthesizer.SpeakTextAsync("{{{text2}}}").get(); // outputFile now contains synthesized audio for both "{{{text1}}}"" and "{{{text2}}}"
         result2.close();
-        synthesizer.close(); // "{{{wavefile.wav}}}" is now closed
+        synthesizer.close(); // outputFile is now closed
 
-        long waveSize2 = (new File("wavefile.wav")).length();
+        long waveSize2 = outputFile.length();
         assertTrue(waveSize2 > waveSize1);
 
         fileConfig.close();
@@ -209,8 +211,8 @@ public class SpeechSynthesizerTests {
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, streamConfig);
         assertNotNull(synthesizer);
 
-        SpeechSynthesisResult result1 = synthesizer.SpeakTextAsync("{{{text1}}}").get(); // "{{{text1}}}" has completed rendering to pullstream
-        SpeechSynthesisResult result2 = synthesizer.SpeakTextAsync("{{{text2}}}").get(); // "{{{text2}}}" has completed rendering to pullstream
+        SpeechSynthesisResult result1 = synthesizer.SpeakTextAsync("{{{text1}}}").get(); // "{{{text1}}}" has completed rendering to push stream
+        SpeechSynthesisResult result2 = synthesizer.SpeakTextAsync("{{{text2}}}").get(); // "{{{text2}}}" has completed rendering to push stream
 
         result1.close();
         result2.close();
@@ -531,7 +533,7 @@ public class SpeechSynthesizerTests {
         String ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>您好，<break time='50ms'/>我是来自Microsoft的中文声音。</voice></speak>";
 
         int expectedWordCount = 8; // Both above plain text and SSML are expected to be separated to 8 words
-        long[] expectedAudioOffsets = { 500000, 7443750, 9175625, 10585000, 15096875, 22924375, 25213125, 28760000 };
+        long[] expectedAudioOffsets = { 500000, 7443750, 9175620, 10585000, 15096880, 22924380, 25213120, 28760000 };
         long[] expectedTextOffsets = { 0, 3, 4, 5, 7, 16, 17, 19 };
         long[] expectedSsmlOffsets = { 251, 274, 275, 276, 278, 287, 288, 290 };
         long[] expectedWordLengths = { 2, 1, 1, 2, 9, 1, 2, 2 };

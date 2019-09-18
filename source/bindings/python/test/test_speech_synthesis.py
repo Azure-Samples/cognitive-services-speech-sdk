@@ -436,7 +436,7 @@ def test_speech_synthesizer_check_word_boundary_events(subscription, speech_regi
     plain_text = "您好，我是来自Microsoft的中文声音。"
     ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>您好，<break time='50ms'/>我是来自Microsoft的中文声音。</voice></speak>"
 
-    expected_audio_offsets = [500000, 7443750, 9175625, 10585000, 15096875, 22924375, 25213125, 28760000]
+    expected_audio_offsets = [500000, 7443750, 9175620, 10585000, 15096880, 22924380, 25213120, 28760000]
     expected_text_offsets = [0, 3, 4, 5, 7, 16, 17, 19]
     expected_ssml_offsets = [251, 274, 275, 276, 278, 287, 288, 290]
     expected_word_lengths = [2, 1, 1, 2, 9, 1, 2, 2]

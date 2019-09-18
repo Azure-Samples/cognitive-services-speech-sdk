@@ -393,6 +393,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
+        [Ignore("Temporarily Disabled because enrolment service is broken, see bug #2027717")]
         public async Task ConversationPullStreamWithEnrollment(bool destroyResource)
         {
             var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);

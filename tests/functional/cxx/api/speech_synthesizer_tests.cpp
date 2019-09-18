@@ -23,7 +23,7 @@ using namespace TTS;
 //           (a) Output device rendering (e.g. AudioConfig::FromDefaultSpeakerOutput())
 //               NOTE: The audio data isn't "technically" available to the developer customer
 //                     in this "output device" configuration, but it is "available" to the
-//                     end user customer by being rendering automatically on behalf of the 
+//                     end user customer by being rendering automatically on behalf of the
 //                     developer customer.
 //
 //           (b) Audio file output (e.g. AudioConfig::FromWavFileOutput(filename))
@@ -57,7 +57,7 @@ using namespace TTS;
 //           (b) result = synthesizer->SpeakTextAsync("{{{text}}}").get()
 //           (c) result = synthesizer->SpeakSsmlAsync("{{{ssml}}}").get()
 //
-//           After obtaining a result of this kind, result->GetAudioLength() bytes of data will be available 
+//           After obtaining a result of this kind, result->GetAudioLength() bytes of data will be available
 //           using result->GetAudioData() (std::shared_ptr<std::vector<uint8_t>>.
 //
 //       (3) AUDIO CHUNK - You can obtain audio data for each individual chunk of synthesized audio data via
@@ -66,7 +66,7 @@ using namespace TTS;
 //           SpeechSynthesisResults of this kind can be obtained by connecting to the Synthesizing event:
 //           synthesizer->Synthesizing += [](const SpeechSynthesisEventArgs& e), via e.Result
 //
-//           After obtaining a result of this kind, result->GetAudioLength() bytes of data will be available 
+//           After obtaining a result of this kind, result->GetAudioLength() bytes of data will be available
 //           using result->GetAudioData() (which is of type std::shared_ptr<std::vector<uint8_t>>).
 //
 //       (4) AUDIO DATA STREAM - You can obtain an AudioDataStream object representing a single SPEAK
@@ -890,7 +890,7 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx]")
     std::string plainText = "您好，我是来自Microsoft的中文声音。";
     std::string ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>您好，<break time='50ms'/>我是来自Microsoft的中文声音。</voice></speak>";
 
-    uint64_t expectedAudioOffsets[8] = { 500000, 7443750, 9175625, 10585000, 15096875, 22924375, 25213125, 28760000 };
+    uint64_t expectedAudioOffsets[8] = { 500000, 7443750, 9175620, 10585000, 15096880, 22924380, 25213120, 28760000 };
     uint32_t expectedTextOffsets[8] = { 0, 3, 4, 5, 7, 16, 17, 19 };
     uint32_t expectedSsmlOffsets[8] = { 251, 274, 275, 276, 278, 287, 288, 290 };
     uint32_t expectedWordLengths[8] = { 2, 1, 1, 2, 9, 1, 2, 2 };

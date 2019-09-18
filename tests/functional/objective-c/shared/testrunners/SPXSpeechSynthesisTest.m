@@ -371,7 +371,7 @@
     SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:nil];
     NSString* plainText = @"您好，我是来自Microsoft的中文声音。";
     NSString* ssml = @"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>您好，<break time='50ms'/>我是来自Microsoft的中文声音。</voice></speak>";
-    NSUInteger expectedAudioOffsets[8] = { 500000, 7443750, 9175625, 10585000, 15096875, 22924375, 25213125, 28760000 };
+    NSUInteger expectedAudioOffsets[8] = { 500000, 7443750, 9175620, 10585000, 15096880, 22924380, 25213120, 28760000 };
     NSUInteger expectedTextOffsets[8] = { 0, 3, 4, 5, 7, 16, 17, 19 };
     NSUInteger expectedWordLengths[8] = { 2, 1, 1, 2, 9, 1, 2, 2 };
     NSUInteger* expectedAudioOffsetsPtr = expectedAudioOffsets;
@@ -381,7 +381,7 @@
 
     [synthesizer addSynthesisWordBoundaryEventHandler: ^ (SPXSpeechSynthesizer *synthesizer, SPXSpeechSynthesisWordBoundaryEventArgs *eventArgs) {
         XCTAssertLessThan(currentIndex, 8, @"Incorrect count of word boundary events.");
-        XCTAssertEqualWithAccuracy(expectedAudioOffsetsPtr[currentIndex], eventArgs.audioOffset, 0.1, @"Audio offset mismatch on word #%lu.", currentIndex + 1);
+        XCTAssertEqualWithAccuracy(expectedAudioOffsetsPtr[currentIndex], eventArgs.audioOffset, 100, @"Audio offset mismatch on word #%lu.", currentIndex + 1);
         XCTAssertEqualWithAccuracy(expectedTextOffsetsPtr[currentIndex], eventArgs.textOffset, 0.1, @"Text offset mismatch on word #%lu.", currentIndex + 1);
         XCTAssertEqualWithAccuracy(expectedWordLengthsPtr[currentIndex], eventArgs.wordLength, 0.1, @"Word length mismatch on word #%lu.", currentIndex + 1);
         currentIndex++;
