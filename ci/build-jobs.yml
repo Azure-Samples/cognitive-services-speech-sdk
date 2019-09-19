@@ -1256,6 +1256,7 @@ jobs:
   - script: |
       @REM Note: Ignoring errors
       setlocal enabledelayedexpansion
+      @echo Downloading AppCenter test results from "%SPEECHSDK_TEST_APPCENTERUPLOAD%".
       "C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy\AzCopy.exe" ^
         /Source:%SPEECHSDK_TEST_APPCENTERUPLOAD% ^
         /Dest:appcentertestresults ^
@@ -1266,6 +1267,13 @@ jobs:
     displayName: Download test results from Azure Blob Storage
     env:
       sastoken: $(SPEECHSDK_SASTOKEN)
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: AppCenter Test Log Files.'
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
+    inputs:
+      PathtoPublish: 'appcentertestresults'
+      ArtifactName: AppCenterTestLogs
+      publishLocation: Container      
   # TODO would be nice to know how many logs to expect. But it seems would have to parse appcenter cli output for this.
   - task: PublishTestResults@2
     inputs:
