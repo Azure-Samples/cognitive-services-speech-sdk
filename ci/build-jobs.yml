@@ -616,6 +616,17 @@ jobs:
     condition: and(succeeded(), eq(variables['HAS_OS_BUILD'], 'true'))
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     inputs:
+      type: InlineScript
+      script: |
+         set -e -x -o pipefail
+         # Delete artifacts which are not needed for Xamarin.iOS nuget
+         rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In\Android\*")"
+         rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In\macOS\*")"
+         rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In\Linux\*")"
+         rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In\WindowsUwp\*")"
+    displayName: 'Free disk space for Xamarin iOS nuget creation'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    inputs:
       type: FilePath
       scriptPath: './ci/nuget/pack.sh'
       args: './ci/nuget/carbon_xamarin_ios.nuspec $(Build.Repository.LocalPath) $(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\Windows'
