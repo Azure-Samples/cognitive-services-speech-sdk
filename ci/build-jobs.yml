@@ -555,44 +555,29 @@ jobs:
     name: Hosted VS2017
   timeoutInMinutes: 30
   steps:
+  - checkout: self
+    fetchDepth: 2
+    submodules: false
+    lfs: false
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading Windows public artifacts'
+    displayName: Downloading artifacts
     inputs:
-      artifactName: Windows
       downloadPath: $(System.ArtifactsDirectory)\In
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading Windows OS artifacts'
-    inputs:
-      artifactName: WindowsOS
-      downloadPath: $(System.ArtifactsDirectory)\In
-    condition: and(succeeded(), eq(variables['HAS_OS_BUILD'], 'true'))
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading Linux artifacts'
-    inputs:
-      artifactName: Linux
-      downloadPath: $(System.ArtifactsDirectory)\In
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading WindowsUwp artifacts'
-    inputs:
-      artifactName: WindowsUwp
-      downloadPath: $(System.ArtifactsDirectory)\In
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading OSX artifacts'
-    inputs:
-      artifactName: macOS
-      downloadPath: $(System.ArtifactsDirectory)\In
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading Android artifacts'
-    inputs:
-      artifactName: Android
-      downloadPath: $(System.ArtifactsDirectory)\In
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Downloading IOS artifacts'
-    inputs:
-      artifactName: IOS
-      downloadPath: $(System.ArtifactsDirectory)\In
+      downloadType: specific
+      itemPattern: |
+        @(Android|Linux|Windows|WindowsOS|WindowsUwp)/*/Release/**
+        @(iOS|macOS)/Release/**
+        !**/libunstripped*/**
+        !**/*.dSYM.zip
+  - powershell: |
+      Get-WmiObject Win32_Volume |
+        Format-Table `
+          driveletter,
+          @{Label = "freespacegb"; Expression = {$_.freespace / 1gb}},
+          @{Label = "capacitygb"; Expression = {$_.capacity / 1gb}}
+    displayName: Get disk space
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
@@ -614,17 +599,6 @@ jobs:
       args: './ci/nuget/carbon_os.nuspec $(Build.Repository.LocalPath) $(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\WindowsOS true'
     displayName: Create OS NuGet
     condition: and(succeeded(), eq(variables['HAS_OS_BUILD'], 'true'))
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    inputs:
-      type: InlineScript
-      script: |
-         set -e -x -o pipefail
-         # Delete artifacts which are not needed for Xamarin.iOS nuget
-         rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In\Android\*")"
-         rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In\macOS\*")"
-         rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In\Linux\*")"
-         rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In\WindowsUwp\*")"
-    displayName: 'Free disk space for Xamarin iOS nuget creation'
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     inputs:
       type: FilePath
@@ -1284,7 +1258,7 @@ jobs:
     inputs:
       PathtoPublish: 'appcentertestresults'
       ArtifactName: AppCenterTestLogs
-      publishLocation: Container      
+      publishLocation: Container
   # TODO would be nice to know how many logs to expect. But it seems would have to parse appcenter cli output for this.
   - task: PublishTestResults@2
     inputs:
