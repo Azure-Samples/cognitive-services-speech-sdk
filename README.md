@@ -164,6 +164,9 @@ Samples for using the Speech Service REST API (no Speech SDK installation requir
 | ---                                     | --- |
 | [Batch transcription](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/)  | Demonstrates usage of batch transcription from different programming languages |
 
+## Sample data for Custom Speech
+- [Sample data for Custom Speech](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/sampledata/customspeech)
+
 ## Resources
 
 - [Microsoft Cognitive Services Speech Service and SDK Documentation](https://aka.ms/csspeech)
