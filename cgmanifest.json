@@ -186,7 +186,7 @@
     // public_samples/samples/unity/speechrecognizer/Assets/SpeechSDKSample/Scripts/JSONParser.cs
     // OSS request: https://ossmsft.visualstudio.com/_oss?requestId=1727486&_a=progress
     // IP Scan: https://dev.azure.com/ossmsft/Reviews/_workitems/edit/29672
-    // Usage: TinyJSON is used and shipped as a code snippet in this sample.
+    // Usage: TinyJSON is used and shipped as a code snippet in Speech SDK public samples.
     // It is used to parse the JSON response from the speech service.
     {
       "component": {

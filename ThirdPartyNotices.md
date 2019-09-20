@@ -382,7 +382,7 @@ The Cognitive Services Client Speech SDK is using sample code from the 'Android 
 
 
 
-The Cognitive Services Client Speech SDK is using 'Tiny Json', obtained from https://github.com/zanders3/json. It is licensed under the [MIT License](https://github.com/zanders3/json/blob/master/LICENSE):
+The Cognitive Services Client Speech SDK Samples use 'Tiny Json', obtained from https://github.com/zanders3/json. It is licensed under the [MIT License](https://github.com/zanders3/json/blob/master/LICENSE):
 
 The MIT License (MIT)
 
