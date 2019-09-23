@@ -40,8 +40,9 @@ pip install requests
 The sample code itself is [main.py](python-client/main.py) and can be run using Python 3.5 or higher.
 You will need to adapt the following information to run the sample:
 
-1. Your subscription key. This must a subscription key for the same region you [downloaded the client](#download-and-install-the-api-client-library) for; it won't work for any other region.
+1. Your subscription key and region.
 1. The URI of an audio recording in blob storage.
 1. (Optional:) The model IDs of both an adapted acoustic and language model, if you want to use a custom model.
 
 You can use a development environment like PyCharm to edit, debug, and execute the sample.
+

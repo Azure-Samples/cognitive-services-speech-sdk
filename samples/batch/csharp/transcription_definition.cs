@@ -44,7 +44,7 @@ namespace BatchClient
             string locale,
             Uri recordingsUrl)
         {
-            return TranscriptionDefinition.Create(name, description, locale, recordingsUrl, null);
+            return TranscriptionDefinition.Create(name, description, locale, recordingsUrl, new ModelIdentity[0]);
         }
 
         public static TranscriptionDefinition Create(
