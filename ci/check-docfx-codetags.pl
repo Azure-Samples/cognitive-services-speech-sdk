@@ -84,6 +84,7 @@ BEGIN {
       quickstart/swift-macos/helloworld/helloworld/AppDelegate.swift#code
       quickstart/swift-macos/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
       quickstart/text-to-speech/cpp-linux/helloworld.cpp#code
+      quickstart/text-to-speech/cpp-macos/helloworld.cpp#code
       quickstart/text-to-speech/cpp-windows/helloworld/helloworld.cpp#code
       quickstart/text-to-speech/csharp-dotnet-windows/helloworld/Program.cs#code
       quickstart/text-to-speech/csharp-dotnetcore/helloworld/Program.cs#code

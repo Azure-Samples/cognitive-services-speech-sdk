@@ -80,6 +80,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | ---------- | -------- | ----------- |
 | [Quickstart C++ for Linux](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp-linux/) | Linux | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart C++ for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp-windows/) | Windows  | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart C++ for macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp-macos/) | macOS |  | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart C# .NET for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart C# .NET Core](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp-dotnetcore/) | Windows, Linux, macOS | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart C# UWP for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp-uwp/) | Windows | Demonstrates one-shot speech recognition from a microphone. |
@@ -116,6 +117,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | ---------- | -------- | ----------- |
 | [Quickstart C++ for Linux](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/cpp-linux/) | Linux | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C++ for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/cpp-windows/) | Windows  | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart C++ for macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/cpp-macos) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C# .NET for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C# UWP for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/csharp-uwp/) | Windows | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C# .NET Core](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/csharp-dotnetcore/) | Windows, Linux | Demonstrates one-shot speech synthesis to the default speaker. |

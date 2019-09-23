@@ -2235,7 +2235,14 @@ jobs:
           cd public_samples/quickstart/cpp-macos
           make SPEECHSDK_ROOT='$(Build.Repository.LocalPath)/xcode-build-output'
           [[ -f helloworld ]]
-        displayName: "Build quickstart"
+        displayName: "Build STT C++ quickstart"
+        condition: succeededOrFailed()
+      - bash: |
+          set -u -x -e -o pipefail
+          cd public_samples/quickstart/text-to-speech/cpp-macos
+          make SPEECHSDK_ROOT='$(Build.Repository.LocalPath)/xcode-build-output'
+          [[ -f helloworld ]]
+        displayName: "Build TTS C++ quickstart"
         condition: succeededOrFailed()
 
 - template: objectivec-unit-tests.yml
