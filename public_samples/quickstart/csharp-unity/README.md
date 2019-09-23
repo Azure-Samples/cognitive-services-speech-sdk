@@ -19,7 +19,7 @@ This sample demonstrates how to recognize speech in [Unity](https://unity3d.com/
 * For Windows ARM64 support, install the [optional build tools, and Windows 10 SDK for ARM/ARM64](https://blogs.windows.com/buildingapps/2018/11/15/official-support-for-windows-10-on-arm-development/)
 * Access to your computer's microphone.
 * To target Android: an Android device (ARM32/64, x86; API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
-* To target iOS: an iOS device (ARM64) [enabled for development](https://docs.microsoft.com/xamarin/ios/get-started/installation/device-provisioning/) with a working microphone.
+* To target iOS: an iOS device (ARM64) [enabled for development](https://learn.unity.com/tutorial/building-for-mobile) with a working microphone.
 
 ## Download the Speech SDK for Unity and the sample code
 
@@ -136,7 +136,7 @@ Start by running it in the Unity Editor (first option), then explore other optio
 * After the build has completed, open created Xcode project with your Xcode editor.
 * In Xcode, under **Targets** > **Unity-Phone** > **General**, check that `Identity` and `Signing` matches with your provisioning profile.
   > Note: Bitcode is enabled in the iOS plugin.
-* Connect your [developer-enabled](https://docs.microsoft.com/xamarin/ios/get-started/installation/device-provisioning/) iOS device to your Mac via USB and select that as a target in Xcode.
+* Connect your [developer-enabled](https://learn.unity.com/tutorial/building-for-mobile) iOS device to your Mac via USB and select that as a target in Xcode.
 * In Xcode, build and run the solution using `Play` button.
   * When you see the prompt asking for microphone permission, agree to it.
   * Then, click the button and speak an English phrase or sentence into your device's microphone. Your speech is transmitted to the Speech service and transcribed to text, which appears in the window.
