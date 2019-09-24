@@ -19,7 +19,7 @@
     
         // open the file and push it to the push stream.
         fs.createReadStream(filename).on('data', function(arrayBuffer) {
-            pushStream.write(arrayBuffer.buffer);
+            pushStream.write(arrayBuffer.slice());
         }).on('end', function() {
             pushStream.close();
         });

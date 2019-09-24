@@ -57,7 +57,7 @@ public class Main {
             }
 
             reco.close();
-            
+
             System.exit(exitCode);
         } catch (Exception ex) {
             System.out.println("Unexpected exception: " + ex.getMessage());

@@ -18,13 +18,15 @@ static void* OpenCompressedFile(const std::string& compressedFileName)
 
 static void closeStream(void* fp)
 {
-    fclose((FILE*)fp);
+    if (fp != NULL)
+    {
+        fclose((FILE*)fp);
+    }
 }
 
 static int ReadCompressedBinaryData(void *stream, uint8_t *ptr, uint32_t bufSize)
 {
     FILE* compressedStreamfptr = (FILE*)stream;
-
     if (compressedStreamfptr != NULL && !feof(compressedStreamfptr))
     {
         return fread(ptr, 1, bufSize, compressedStreamfptr);
@@ -40,6 +42,14 @@ void recognizeSpeech(const std::string& compressedFileName)
     std::shared_ptr<SpeechRecognizer> recognizer;
     std::shared_ptr<PullAudioInputStream> pullAudioStream;
 
+    void *compressedFilePtr = OpenCompressedFile(compressedFileName);
+
+    if (compressedFilePtr == NULL)
+    {
+        std::cout << "Error: Input file doesn't exist" << std::endl;
+        return;
+    }
+
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
@@ -54,6 +64,18 @@ void recognizeSpeech(const std::string& compressedFileName)
     {
         inputFormat = AudioStreamContainerFormat::OGG_OPUS;
     }
+    else if (compressedFileName.find(".alaw") == (compressedFileName.size() - 5))
+    {
+        inputFormat = AudioStreamContainerFormat::ALAW;
+    }
+    else if (compressedFileName.find(".mulaw") == (compressedFileName.size() - 6))
+    {
+        inputFormat = AudioStreamContainerFormat::MULAW;
+    }
+    else if (compressedFileName.find(".flac") == (compressedFileName.size() - 5))
+    {
+        inputFormat = AudioStreamContainerFormat::FLAC;
+    }
     else
     {
         std::cout << "Only Opus and MP3 input files are currently supported" << std::endl;
@@ -62,7 +84,7 @@ void recognizeSpeech(const std::string& compressedFileName)
 
     pullAudioStream = AudioInputStream::CreatePullStream(
         AudioStreamFormat::GetCompressedFormat(inputFormat),
-        OpenCompressedFile(compressedFileName),
+        compressedFilePtr,
         ReadCompressedBinaryData,
         closeStream
     );

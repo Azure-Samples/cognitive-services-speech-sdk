@@ -119,6 +119,14 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart C# .NET for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/csharp-dotnet-windows/) | Windows | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C# UWP for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/csharp-uwp/) | Windows | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart C# .NET Core](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/csharp-dotnetcore/) | Windows, Linux | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart for C# Unity (Windows or Android)](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/csharp-unity/) | Windows, Android | Demonstrates one-shot speech synthesis to a synthesis result and then rendering to the default speaker. |
+| [Quickstart for Android](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/java-android/) | Android | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart Java JRE](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/java-jre/) | Windows, Linux, macOS | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart Python](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/python/) | Windows, Linux, macOS | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart Objective-C](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/objectivec-ios/) | iOS | Demonstrates one-shot speech synthesis to a synthesis result and then rendering to the default speaker. |
+| [Quickstart Swift](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/swift-ios/) | iOS | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart Objective-C](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/objectivec-macos/) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart Swift](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/text-to-speech/swift-macos/) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
 
 ### Voice-first virtual assistants quickstarts
 
@@ -141,8 +149,8 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [C++ Speech Recognition from MP3/Opus file (Linux only)](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/cpp/linux/compressed-audio-input/)        | Linux    | Demonstrates speech recognition from an MP3/Opus file |
 | [C# Console app for .NET Framework on Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/dotnet-windows/console/)                     | Windows  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
 | [C# Console app for .NET Core (Windows or Linux)](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/dotnetcore/console/)                      | Windows, Linux, macOS  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
-| [Java Console app for JRE](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/java/jre/console/)                                                      | Windows, Linux, macOS | Demonstrates speech recognition, intent recognition, and translation |
-| [Python Console app](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/python/console/)                                                              | Windows, Linux, macOS  | Demonstrates speech recognition, intent recognition, and translation |
+| [Java Console app for JRE](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/java/jre/console/)                                                      | Windows, Linux, macOS | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
+| [Python Console app](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/python/console/)                                                              | Windows, Linux, macOS  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
 | [Speech-to-text WPF sample for .NET Framework on Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/dotnet-windows/speechtotext-wpf/) | Windows  | Demonstrates speech recognition |
 | [Translation WPF sample for .NET Framework on Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/dotnet-windows/translation-wpf/)     | Windows  | Demonstrates translation |
 | [Speech-to-text UWP sample](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/uwp/speechtotext-uwp/)                                          | Windows  | Demonstrates speech recognition |
@@ -152,11 +160,10 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Speech recognition and translation sample using JavaScript and Node.js](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/js/node/)                 | Node.js  | Demonstrates speech recognition, intent recognition, and translation |
 | [Speech recognition sample for iOS using a connection object](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/objective-c/ios/README.md#connection-object-sample)  | iOS      | Demonstrates speech recognition |
 | [Extended speech recognition sample for iOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/objective-c/ios/README.md#example-app-with-various-samples)           | iOS      | Demonstrates speech recognition using streams etc.|
+| [Speech synthesis sample for iOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/objective-c/ios/README.md#example-app-with-various-samples)           | iOS      | Demonstrates speech synthesis using streams etc.|
 | [C# UWP DialogServiceConnector sample for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/uwp/virtualassistant-uwp/) | Windows | Demonstrates speech recognition through the DialogServiceConnector and receiving activity responses. |
 | [C# Unity sample for Windows or Android](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/unity/speechrecognizer/) | Windows, Android |  Demonstrates speech recognition, intent recognition, and translation for Unity |
 | [C# Unity SpeechBotConnector sample for Windows or Android](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/unity/VirtualAssistantPreview/) | Windows, Android | Demonstrates speech recognition through the SpeechBotConnector and receiving activity responses. |
-
-
 
 Samples for using the Speech Service REST API (no Speech SDK installation required):
 
