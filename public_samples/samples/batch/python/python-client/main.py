@@ -1,4 +1,9 @@
-from __future__ import print_function
+#!/usr/bin/env python
+# coding: utf-8
+
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+
 from typing import List
 
 import logging
@@ -10,10 +15,9 @@ import swagger_client as cris_client
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format="%(message)s")
 
-SUBSCRIPTION_KEY = "<your subscription key>"
-
-HOST_NAME = "<your region>.cris.ai"
-PORT = 443
+# Your subscription key and region for the speech service
+SUBSCRIPTION_KEY = "YourSubscriptionKey"
+SERVICE_REGION = "YourServiceRegion"
 
 NAME = "Simple transcription"
 DESCRIPTION = "Simple transcription description"
@@ -32,6 +36,7 @@ def transcribe():
     # configure API key authorization: subscription_key
     configuration = cris_client.Configuration()
     configuration.api_key['Ocp-Apim-Subscription-Key'] = SUBSCRIPTION_KEY
+    configuration.host = "https://{}.cris.ai".format(SERVICE_REGION)
 
     # create the client object and authenticate
     client = cris_client.ApiClient(configuration)
@@ -53,9 +58,11 @@ def transcribe():
             # ignore swagger error on empty response message body: https://github.com/swagger-api/swagger-core/issues/2446
             pass
 
-    logging.info("Creating transcriptions.")
-
     # Use base models for transcription. Comment this block if you are using a custom model.
+    # Note: you can specify additional transcription properties by passing a
+    # dictionary in the properties parameter. See
+    # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription
+    # for supported parameters.
     transcription_definition = cris_client.TranscriptionDefinition(
         name=NAME, description=DESCRIPTION, locale=LOCALE, recordings_url=RECORDINGS_BLOB_URI
     )
@@ -77,19 +84,22 @@ def transcribe():
     # get the transcription Id from the location URI
     created_transcription: str = transcription_location.split('/')[-1]
 
+    logging.info("Created new transcription with id {}".format(created_transcription))
+
     logging.info("Checking status.")
 
     completed = False
-    running, not_started = 0, 0
 
     while not completed:
+        running, not_started = 0, 0
+
         # get all transcriptions for the user
         transcriptions: List[cris_client.Transcription] = transcription_api.get_transcriptions()
 
         # for each transcription in the list we check the status
         for transcription in transcriptions:
             if transcription.status in ("Failed", "Succeeded"):
-                # we check to see if it was one of the transcriptions we created from this client
+                # we check to see if it was the transcription we created from this client
                 if created_transcription != transcription.id:
                     continue
 
@@ -102,6 +112,7 @@ def transcribe():
                     logging.info(results.content.decode("utf-8"))
                 else:
                     logging.info("Transcription failed :{}.".format(transcription.status_message))
+                    break
             elif transcription.status == "Running":
                 running += 1
             elif transcription.status == "NotStarted":

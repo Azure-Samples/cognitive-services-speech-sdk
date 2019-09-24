@@ -28,7 +28,7 @@ This sample demonstrates various forms of speech recognition, intent recognition
   pip install azure-cognitiveservices-speech
   ```
   in a terminal.
-* [Download the sample code to your development PC.](../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](../../../README.md#get-the-samples)
 * To tailor the sample to your configuration, use search and replace across the whole sample directory to update the following strings:
 
   * `YourSubscriptionKey`: replace with your subscription key.
