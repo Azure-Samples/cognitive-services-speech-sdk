@@ -112,8 +112,7 @@ def transcribe():
                     logging.info(results.content.decode("utf-8"))
                 else:
                     logging.info("Transcription failed :{}.".format(transcription.status_message))
-
-                break
+                    break
             elif transcription.status == "Running":
                 running += 1
             elif transcription.status == "NotStarted":

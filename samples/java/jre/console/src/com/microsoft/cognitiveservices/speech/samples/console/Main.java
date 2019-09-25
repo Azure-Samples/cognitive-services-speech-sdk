@@ -27,6 +27,17 @@ public class Main {
         System.out.println("C. Intent continuous recognition using events with file.");
         System.out.println("D. Speech continuous recognition using events with a PushStream.");
         System.out.println("E. Speech continuous recognition using events with file and Phrase List.");
+        System.out.println("F. Speech synthesis to speaker output.");
+        System.out.println("G. Speech synthesis with specified language.");
+        System.out.println("H. Speech synthesis with specified voice.");
+        System.out.println("I. Speech synthesis to wave file.");
+        System.out.println("J. Speech synthesis to mp3 file.");
+        System.out.println("K. Speech synthesis to pull audio output stream.");
+        System.out.println("L. Speech synthesis to push audio output stream.");
+        System.out.println("M. Speech synthesis to result.");
+        System.out.println("N. Speech synthesis to audio data stream.");
+        System.out.println("O. Speech synthesis events.");
+        System.out.println("P. Speech synthesis word boundary event.");
 
         System.out.print(prompt);
 
@@ -77,11 +88,45 @@ public class Main {
                     break;
                 case "e":
                     SpeechRecognitionSamples.continuousRecognitionWithFileWithPhraseListAsync();
+                    break;
+                case "f":
+                    SpeechSynthesisSamples.synthesisToSpeakerAsync();
+                    break;
+                case "g":
+                    SpeechSynthesisSamples.synthesisWithLanguageAsync();
+                    break;
+                case "h":
+                    SpeechSynthesisSamples.synthesisWithVoiceAsync();
+                    break;
+                case "i":
+                    SpeechSynthesisSamples.synthesisToWaveFileAsync();
+                    break;
+                case "j":
+                    SpeechSynthesisSamples.synthesisToMp3FileAsync();
+                    break;
+                case "k":
+                    SpeechSynthesisSamples.synthesisToPullAudioOutputStreamAsync();
+                    break;
+                case "l":
+                    SpeechSynthesisSamples.synthesisToPushAudioOutputStreamAsync();
+                    break;
+                case "m":
+                    SpeechSynthesisSamples.synthesisToResultAsync();
+                    break;
+                case "n":
+                    SpeechSynthesisSamples.synthesisToAudioDataStreamAsync();
+                    break;
+                case "o":
+                    SpeechSynthesisSamples.synthesisEventsAsync();
+                    break;
+                case "p":
+                    SpeechSynthesisSamples.synthesisWordBoundaryEventAsync();
+                    break;
                 case "0":
                     System.out.println("Exiting...");
                     break;
                 }
-                System.out.println("\nRecognition done. " + prompt);
+                System.out.println("\nExecution done. " + prompt);
             } while (!x.equals("0"));
 
             System.out.println("Finishing demo.");

@@ -10,6 +10,7 @@ proguard-rules.pro text
 
 *.appxmanifest text
 *.asset text
+*.axml text
 *.bat text
 *.config text
 *.cpp text
@@ -52,6 +53,7 @@ proguard-rules.pro text
 
 # Binary extensions:
 *.jar binary
+*.mp3 binary
 *.pfx binary
 *.png binary
 *.wav binary

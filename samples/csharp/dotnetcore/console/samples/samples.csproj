@@ -12,6 +12,7 @@
     <Compile Include="..\..\..\sharedcontent\console\speech_recognition_samples.cs" Link="speech_recognition_samples.cs" />
     <Compile Include="..\..\..\sharedcontent\console\speech_recognition_with_token_sample.cs" Link="speech_recognition_with_token_sample.cs" />
     <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_samples.cs" Link="speech_synthesis_samples.cs" />
+    <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_with_token_sample.cs" Link="speech_synthesis_with_token_sample.cs" />
     <Compile Include="..\..\..\sharedcontent\console\translation_samples.cs" Link="translation_samples.cs" />
   </ItemGroup>
 
@@ -26,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.6.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.7.0" />
   </ItemGroup>
 
 </Project>
