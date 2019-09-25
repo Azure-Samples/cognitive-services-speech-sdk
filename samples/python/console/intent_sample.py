@@ -3,6 +3,9 @@
 
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+"""
+Intent recognition samples for the Microsoft Cognitive Services Speech SDK
+"""
 
 import time
 
@@ -188,7 +191,7 @@ def recognize_intent_once_async_from_mic():
 
 
 def recognize_intent_continuous():
-    """performs one-shot intent recognition from input from an audio file"""
+    """performs continuous intent recognition from input from an audio file"""
     # <IntentContinuousRecognitionWithFile>
     intent_config = speechsdk.SpeechConfig(subscription=intent_key, region=intent_service_region)
     audio_config = speechsdk.audio.AudioConfig(filename=lampfilename)

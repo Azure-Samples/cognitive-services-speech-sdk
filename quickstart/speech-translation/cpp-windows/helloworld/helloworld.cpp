@@ -3,8 +3,8 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-// <code>
 #include "pch.h"
+// <code>
 #include <iostream>
 #include <vector>
 #include <speechapi_cxx.h>

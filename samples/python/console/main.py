@@ -7,6 +7,7 @@
 import speech_sample
 import intent_sample
 import translation_sample
+import speech_synthesis_sample
 
 from collections import OrderedDict
 import platform
@@ -33,6 +34,18 @@ samples = OrderedDict([
         translation_sample.translation_once_from_mic,
         translation_sample.translation_once_from_file,
         translation_sample.translation_continuous,
+    ]), (speech_synthesis_sample, [
+        speech_synthesis_sample.speech_synthesis_to_speaker,
+        speech_synthesis_sample.speech_synthesis_with_language,
+        speech_synthesis_sample.speech_synthesis_with_voice,
+        speech_synthesis_sample.speech_synthesis_to_wave_file,
+        speech_synthesis_sample.speech_synthesis_to_mp3_file,
+        speech_synthesis_sample.speech_synthesis_to_pull_audio_output_stream,
+        speech_synthesis_sample.speech_synthesis_to_push_audio_output_stream,
+        speech_synthesis_sample.speech_synthesis_to_result,
+        speech_synthesis_sample.speech_synthesis_to_audio_data_stream,
+        speech_synthesis_sample.speech_synthesis_events,
+        speech_synthesis_sample.speech_synthesis_word_boundary_event,
     ])
 ])
 
@@ -41,7 +54,7 @@ def select():
     print('select sample module, {} to abort'.format(eofkey))
     modules = list(samples.keys())
     for i, module in enumerate(modules):
-        print(i, module.__name__)
+        print("{}: {}\n\t{}".format(i, module.__name__, module.__doc__.strip()))
 
     try:
         num = int(input())
@@ -54,7 +67,7 @@ def select():
 
     print('select sample function, {} to abort'.format(eofkey))
     for i, fun in enumerate(samples[selected_module]):
-        print(i, fun.__name__)
+        print("{}: {}\n\t{}".format(i, fun.__name__, fun.__doc__))
 
     try:
         num = int(input())
