@@ -2409,7 +2409,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' CheckSignatures '))
   pool:
     name: Hosted VS2017
-  timeoutInMinutes: 10
+  timeoutInMinutes: 60
   steps:
   - task: NuGetToolInstaller@0
     displayName: 'NuGet Installer'
