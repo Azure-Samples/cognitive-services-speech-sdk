@@ -1,8 +1,6 @@
 //
 // Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
-//
-// speech_translation_config.h: Implementation declarations for CSpxSpeechConfig C++ class
+// See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
 #pragma once
@@ -12,27 +10,33 @@
 #include "service_helpers.h"
 #include "property_bag_impl.h"
 #include "ispxinterfaces.h"
-#include "speech_config.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-class CSpxSpeechTranslationConfig : public CSpxSpeechConfig, public ISpxSpeechTranslationConfig
+class CSpxAutoDetectSourceLangConfig :
+    public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
+    public ISpxServiceProvider,
+    public ISpxGenericSite,
+    public ISpxPropertyBagImpl,
+    public ISpxAutoDetectSourceLangConfig
 {
 public:
-    CSpxSpeechTranslationConfig() {}
+    CSpxAutoDetectSourceLangConfig() {}
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
-        SPX_INTERFACE_MAP_ENTRY(ISpxSpeechConfig)
-        SPX_INTERFACE_MAP_ENTRY(ISpxSpeechTranslationConfig)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAutoDetectSourceLangConfig)
         SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
     SPX_INTERFACE_MAP_END()
+
+    // --- ISpxAutoDetectSourceLangConfig ---
+    virtual void InitFromLanguages(const char* languages) override;
 
     // --- IServiceProvider
     SPX_SERVICE_MAP_BEGIN()
@@ -40,12 +44,9 @@ public:
         SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
     SPX_SERVICE_MAP_END()
 
-    // --- ISpxSpeechTranslationConfig
-    virtual void AddTargetLanguage(const std::string& lang) override;
-    virtual void RemoveTargetLanguage(const std::string& lang) override;
-
 private:
-    DISABLE_COPY_AND_MOVE(CSpxSpeechTranslationConfig);
+    bool m_init{ false };
+    DISABLE_COPY_AND_MOVE(CSpxAutoDetectSourceLangConfig);
 };
 
 }}}} // Microsoft::CognitiveServices::Speech::Impl

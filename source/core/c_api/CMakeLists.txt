@@ -46,6 +46,7 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_synthesizer.cpp"
     "${SRC_DIR}/speechapi_c_user.cpp"
     "${SRC_DIR}/speechapi_c_participant.cpp"
+    "${SRC_DIR}/speechapi_c_auto_detect_source_lang_config.cpp"
     "${SRC_DIR}/stdafx.cpp"
     )
 

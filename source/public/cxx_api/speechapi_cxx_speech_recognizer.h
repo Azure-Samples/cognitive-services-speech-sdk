@@ -19,6 +19,7 @@
 #include <speechapi_cxx_properties.h>
 #include <speechapi_cxx_speech_config.h>
 #include <speechapi_cxx_audio_stream.h>
+#include <speechapi_cxx_auto_detect_source_lang_config.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -36,6 +37,16 @@ public:
     using BaseType = AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>;
 
     /// <summary>
+    /// Create a speech recognizer from a speech config
+    /// </summary>
+    /// <param name="speechconfig">Speech configuration.</param>
+    /// <returns>A smart pointer wrapped speech recognizer pointer.</returns>
+    static std::shared_ptr<SpeechRecognizer> FromConfig(std::shared_ptr<SpeechConfig> speechconfig, std::nullptr_t)
+    {
+        return FromConfig(speechconfig, ( std::shared_ptr<AutoDetectSourceLanguageConfig>)nullptr, nullptr);
+    }
+
+    /// <summary>
     /// Create a speech recognizer from a speech config and audio config.
     /// </summary>
     /// <param name="speechconfig">Speech configuration.</param>
@@ -43,10 +54,26 @@ public:
     /// <returns>A smart pointer wrapped speech recognizer pointer.</returns>
     static std::shared_ptr<SpeechRecognizer> FromConfig(std::shared_ptr<SpeechConfig> speechconfig, std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
     {
+        return FromConfig(speechconfig, ( std::shared_ptr<AutoDetectSourceLanguageConfig>)nullptr, audioInput);
+    }
+
+    /// <summary>
+    /// Create a speech recognizer from a speech config, auto detection source language config and audio config
+    /// </summary>
+    /// <param name="speechconfig">Speech configuration.</param>
+    /// <param name="autoDetectSourceLangConfig">Auto detection source language config.</param>
+    /// <param name="audioInput">Audio configuration.</param>
+    /// <returns>A smart pointer wrapped speech recognizer pointer.</returns>
+    static std::shared_ptr<SpeechRecognizer> FromConfig(
+        std::shared_ptr<SpeechConfig> speechconfig,
+        std::shared_ptr<AutoDetectSourceLanguageConfig> autoDetectSourceLangConfig,
+        std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
+    {
         SPXRECOHANDLE hreco;
-        SPX_THROW_ON_FAIL(::recognizer_create_speech_recognizer_from_config(
+        SPX_THROW_ON_FAIL(::recognizer_create_speech_recognizer_from_auto_detect_source_lang_config(
             &hreco,
-            HandleOrInvalid<SPXAUDIOCONFIGHANDLE,SpeechConfig>(speechconfig),
+            HandleOrInvalid<SPXSPEECHCONFIGHANDLE, SpeechConfig>(speechconfig),
+            HandleOrInvalid<SPXAUTODETECTSOURCELANGCONFIGHANDLE, AutoDetectSourceLanguageConfig>(autoDetectSourceLangConfig),
             HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(audioInput)));
         return std::make_shared<SpeechRecognizer>(hreco);
     }

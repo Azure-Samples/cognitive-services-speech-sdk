@@ -50,6 +50,8 @@ enum  PropertyId
     SpeechServiceConnection_EndSilenceTimeoutMs = 3201,
     SpeechServiceConnection_EnableAudioLogging = 3202,
 
+    SpeechServiceConnection_AutoDetectSourceLanguages = 3300,
+
     SpeechServiceResponse_RequestDetailedResultTrueFalse = 4000,
     SpeechServiceResponse_RequestProfanityFilterTrueFalse = 4001,
     SpeechServiceResponse_ProfanityOption = 4002,
