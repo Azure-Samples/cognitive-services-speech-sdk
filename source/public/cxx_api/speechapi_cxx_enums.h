@@ -198,12 +198,6 @@ enum class PropertyId
     SpeechServiceConnection_EnableAudioLogging = 3202,
 
     /// <summary>
-    /// The auto detect source languages
-    /// Added in version 1.8.0
-    /// </summary>
-    SpeechServiceConnection_AutoDetectSourceLanguages = 3300,
-
-    /// <summary>
     /// The requested Cognitive Services Speech Service response output format (simple or detailed). Under normal circumstances, you shouldn't have
     /// to use this property directly.
     /// Instead use <see cref="SpeechConfig::SetOutputFormat"/>.

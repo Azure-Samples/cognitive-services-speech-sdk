@@ -1833,16 +1833,3 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
         SPXTEST_REQUIRE(detailedResult.find("Corrections") != string::npos);
     }
 }
-
-TEST_CASE("Verify auto detect source language config", "[api][cxx]")
-{
-    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    weather.UpdateFullFilename(Config::InputDir);
-    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
-    auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
-    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
-    std::shared_ptr<AutoDetectSourceLanguageConfig> autoDetectSourceLanguageConfig;
-    autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE", "fr-FR" });
-    auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), autoDetectSourceLanguageConfig, audioConfig);
-    SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages) == "en-US,de-DE,fr-FR");
-}

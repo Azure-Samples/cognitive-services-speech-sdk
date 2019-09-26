@@ -43,7 +43,6 @@
 #include <speechapi_cxx_translation_eventargs.h>
 #include <speechapi_cxx_speech_translation_config.h>
 #include <speechapi_cxx_translation_recognizer.h>
-#include <speechapi_cxx_auto_detect_source_lang_config.h>
 
 #include <speechapi_cxx_grammar.h>
 #include <speechapi_cxx_grammar_phrase.h>

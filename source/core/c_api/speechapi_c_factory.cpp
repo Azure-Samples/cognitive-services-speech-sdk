@@ -16,7 +16,6 @@
 #include "mock_controller.h"
 #include "property_id_2_name_map.h"
 #include "speechapi_c_speech_config.h"
-#include "speechapi_c_auto_detect_source_lang_config.h"
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
@@ -33,15 +32,8 @@ std::shared_ptr<ISpxAudioConfig> AudioConfigFromHandleOrEmptyIfInvalid(SPXAUDIOC
         : nullptr;
 }
 
-std::shared_ptr<ISpxAutoDetectSourceLangConfig> AutoDetectSourceLangConfigFromHandleOrEmptyIfInvalid(SPXAUTODETECTSOURCELANGCONFIGHANDLE hautoDetectSourceLangConfig)
-{
-    return auto_detect_source_lang_config_is_handle_valid(hautoDetectSourceLangConfig)
-        ? CSpxSharedPtrHandleTableManager::GetPtr<ISpxAutoDetectSourceLangConfig, SPXAUTODETECTSOURCELANGCONFIGHANDLE>(hautoDetectSourceLangConfig)
-        : nullptr;
-}
-
 template<typename FactoryMethod>
-auto create_from_config(SPXHANDLE hspeechconfig, SPXHANDLE haudioConfig, SPXAUTODETECTSOURCELANGCONFIGHANDLE hautoDetectSourceLangConfig, FactoryMethod fm)
+auto create_from_config(SPXHANDLE config_handle, SPXHANDLE audio_config_handle, FactoryMethod fm)
 {
     auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
     SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
@@ -49,7 +41,7 @@ auto create_from_config(SPXHANDLE hspeechconfig, SPXHANDLE haudioConfig, SPXAUTO
     // get the input parameters from the hspeechconfig
     auto config_handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
 
-    auto config = (*config_handles)[hspeechconfig];
+    auto config = (*config_handles)[config_handle];
     auto config_property_bag = SpxQueryInterface<ISpxNamedProperties>(config);
     auto factory_property_bag = SpxQueryInterface<ISpxNamedProperties>(factory);
 
@@ -59,20 +51,12 @@ auto create_from_config(SPXHANDLE hspeechconfig, SPXHANDLE haudioConfig, SPXAUTO
         factory_property_bag->Copy(config_property_bag.get());
     }
 
-    auto audio_input = AudioConfigFromHandleOrEmptyIfInvalid(haudioConfig);
+    auto audio_input = AudioConfigFromHandleOrEmptyIfInvalid(audio_config_handle);
     // copy the audio input properties into the factory, if any.
     auto audio_input_properties = SpxQueryInterface<ISpxNamedProperties>(audio_input);
     if (audio_input_properties != nullptr)
     {
         factory_property_bag->Copy(audio_input_properties.get());
-    }
-
-    auto auto_detect_source_lang_config = AutoDetectSourceLangConfigFromHandleOrEmptyIfInvalid(hautoDetectSourceLangConfig);
-    // copy the auto detect source language config properties into the factory, if any.
-    auto auto_detect_source_lang_config_properties = SpxQueryInterface<ISpxNamedProperties>(auto_detect_source_lang_config);
-    if (auto_detect_source_lang_config_properties != nullptr)
-    {
-        factory_property_bag->Copy(auto_detect_source_lang_config_properties.get());
     }
 
     return ((*factory).*fm)(audio_input);
@@ -88,27 +72,7 @@ SPXAPI recognizer_create_speech_recognizer_from_config(SPXRECOHANDLE* phreco, SP
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phreco = SPXHANDLE_INVALID;
-        auto recognizer = create_from_config(hspeechconfig, SPXHANDLE_INVALID, haudioInput, &ISpxSpeechApiFactory::CreateSpeechRecognizerFromConfig);
-
-        // track the reco handle
-        auto recohandles  = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        *phreco = recohandles->TrackHandle(recognizer);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI recognizer_create_speech_recognizer_from_auto_detect_source_lang_config(SPXRECOHANDLE* phreco, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUTODETECTSOURCELANGCONFIGHANDLE hautoDetectSourceLangConfig, SPXAUDIOCONFIGHANDLE haudioInput)
-{
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phreco == nullptr);
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(hspeechconfig));
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !auto_detect_source_lang_config_is_handle_valid(hautoDetectSourceLangConfig));
-
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        *phreco = SPXHANDLE_INVALID;
-        auto recognizer = create_from_config(hspeechconfig, haudioInput, hautoDetectSourceLangConfig, &ISpxSpeechApiFactory::CreateSpeechRecognizerFromConfig);
+        auto recognizer = create_from_config(hspeechconfig, haudioInput, &ISpxSpeechApiFactory::CreateSpeechRecognizerFromConfig);
 
         // track the reco handle
         auto recohandles  = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
@@ -135,7 +99,7 @@ SPXAPI dialog_service_connector_create_dialog_service_connector_from_config(SPXR
         auto enableKeywordVerification = config_property_bag->GetStringValue(KeywordConfig_EnableKeywordVerification, "true");
         config_property_bag->SetStringValue(KeywordConfig_EnableKeywordVerification, enableKeywordVerification.c_str());
 
-        auto connector = create_from_config(h_dialog_service_config, h_audio_input, SPXHANDLE_INVALID, &ISpxSpeechApiFactory::CreateDialogServiceConnectorFromConfig);
+        auto connector = create_from_config(h_dialog_service_config, h_audio_input, &ISpxSpeechApiFactory::CreateDialogServiceConnectorFromConfig);
 
         // track the handle
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxDialogServiceConnector, SPXRECOHANDLE>();
@@ -195,7 +159,7 @@ SPXAPI recognizer_create_intent_recognizer_from_config(SPXRECOHANDLE* phreco, SP
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phreco = SPXHANDLE_INVALID;
-        auto recognizer = create_from_config(hspeechconfig, haudioInput, SPXHANDLE_INVALID, &ISpxSpeechApiFactory::CreateIntentRecognizerFromConfig);
+        auto recognizer = create_from_config(hspeechconfig, haudioInput, &ISpxSpeechApiFactory::CreateIntentRecognizerFromConfig);
 
         // track the reco handle
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();

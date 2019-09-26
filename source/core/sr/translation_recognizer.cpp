@@ -11,7 +11,6 @@
 #include "site_helpers.h"
 #include "string_utils.h"
 #include "speech_translation_config.h"
-#include "language_list_utils.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -42,7 +41,7 @@ void CSpxTranslationRecognizer::AddTargetLanguage(const std::string& lang)
     }
 
     auto targetLanguages = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
-    CSpxLanguageListUtils::AddLangToList(lang, targetLanguages);
+    CSpxSpeechTranslationConfig::AddLangToList(lang, targetLanguages);
     SPX_DBG_TRACE_INFO("%s: Add target languages during recognition: %s", __FUNCTION__, targetLanguages.c_str());
     properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages), targetLanguages.c_str());
     UpdateTargetLanguages(targetLanguages);
@@ -57,7 +56,7 @@ void CSpxTranslationRecognizer::RemoveTargetLanguage(const std::string& lang)
     }
 
     auto targetLanguages = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
-    CSpxLanguageListUtils::RemoveLangFromList(lang, targetLanguages);
+    CSpxSpeechTranslationConfig::RemoveLangFromList(lang, targetLanguages);
 
     if (targetLanguages.empty())
     {

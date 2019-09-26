@@ -192,7 +192,6 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/SpeechTranslationConfig.java
-    ${CMAKE_SWIG_OUTDIR}/AutoDetectSourceLanguageConfig.java
 
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizerBase.java

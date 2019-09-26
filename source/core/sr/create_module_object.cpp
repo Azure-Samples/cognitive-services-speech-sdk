@@ -33,7 +33,6 @@
 #include "class_language_model.h"
 #include "speech_config.h"
 #include "speech_translation_config.h"
-#include "auto_detect_source_lang_config.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -70,7 +69,6 @@ SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* i
     SPX_FACTORY_MAP_ENTRY(CSpxClassLanguageModel, ISpxClassLanguageModel);
     SPX_FACTORY_MAP_ENTRY(CSpxSpeechConfig, ISpxSpeechConfig);
     SPX_FACTORY_MAP_ENTRY(CSpxSpeechTranslationConfig, ISpxSpeechConfig);
-    SPX_FACTORY_MAP_ENTRY(CSpxAutoDetectSourceLangConfig, ISpxAutoDetectSourceLangConfig);
     SPX_FACTORY_MAP_END();
 }
 
