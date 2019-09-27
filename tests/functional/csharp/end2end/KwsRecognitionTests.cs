@@ -714,7 +714,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         }
                         else
                         {
-                            if (!e.Result.Text.Contains("what"))
+                            if (!e.Result.Text.Contains("weather"))
                                 error = "text did not contain what";
                         }
                     }
@@ -957,7 +957,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         }
                         else
                         {
-                            if (!e.Result.Text.Contains("what"))
+                            if (!e.Result.Text.Contains("weather"))
                                 error = "text does not contain what - " + e.Result.Text;
                         }
                     }
@@ -1216,7 +1216,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         }
                         else
                         {
-                            if (!e.Result.Text.Contains("what"))
+                            if (!e.Result.Text.Contains("weather"))
                             {
                                 error = "text did not contain what - " + e.Result.Text;
                             }

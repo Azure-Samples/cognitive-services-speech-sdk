@@ -22,7 +22,21 @@ fi
 callFind=find
 [[ $(type -t gfind) != file ]] || callFind=gfind
 
-readarray -t PROJECTS < <(${callFind} "$SAMPLES_DIR" -name pom.xml -printf '%h\n')
+# We were using process substitution before for find/readarray, which started failing.
+# Possibly related to https://github.com/git-for-windows/git/issues/2291, although
+# we could not correlate with the software running on the hosted agents.
+PROJECTS_FILE=$(mktemp proj-XXXXXX)
+on_exit() {
+  local exit_code=$?
+  rm -f "$PROJECTS_FILE"
+  printf "Exiting with exit code %s\n" $exit_code
+  exit $exit_code
+}
+trap on_exit EXIT
+
+${callFind} "$SAMPLES_DIR" -name pom.xml -printf '%h\n' > "$PROJECTS_FILE"
+
+readarray -t PROJECTS < "$PROJECTS_FILE"
 
 for dir in "${PROJECTS[@]}"; do
   echo $dir

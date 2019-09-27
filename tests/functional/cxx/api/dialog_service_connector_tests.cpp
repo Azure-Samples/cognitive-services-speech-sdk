@@ -366,7 +366,7 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
     {
         turnOnLamp.UpdateFullFilename(Config::InputDir);
         REQUIRE(exists(turnOnLamp.m_inputDataFilename));
-        auto config = DialogServiceConfigForTests(false);
+        auto config = DialogServiceConfigForTests();
         auto audioConfig = AudioConfig::FromWavFileInput(turnOnLamp.m_inputDataFilename);
 
         test_runner runner{ config, audioConfig };
@@ -473,7 +473,7 @@ TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connec
                     { "type", TEST_ACTIVITY_TYPE },
                     { "text", activity_text }
                 };
-                auto activity = act.dump();                
+                auto activity = act.dump();
                 auto f2 = connector.SendActivityAsync(activity);
                 return std::async([f1 = std::move(f1), f2 = std::move(f2)]()
                 {
@@ -491,7 +491,7 @@ TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connec
     }
 }
 
-TEST_CASE("Dialog Service Connector SpeechCommands", "[api][cxx][dialog_service_connector][tahiti]")
+TEST_CASE("Dialog Service Connector SpeechCommands", "[api][cxx][dialog_service_connector][tahiti][!hide]")
 {
     SECTION("Send/receive activities.")
     {
@@ -518,7 +518,7 @@ TEST_CASE("Dialog Service Connector SpeechCommands", "[api][cxx][dialog_service_
                         { "type", TEST_ACTIVITY_TYPE },
                         { "text", activity_text }
                 };
-                auto activity = act.dump();                
+                auto activity = act.dump();
                 return connector.SendActivityAsync(activity);
             },
             20s, 3);

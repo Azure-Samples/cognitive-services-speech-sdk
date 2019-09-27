@@ -20,7 +20,21 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 set -u -e -o pipefail
 
-readarray -t PROJECTS < <(find "$SAMPLES_DIR" -name gradlew.bat -printf '%h\n')
+# We were using process substitution before for find/readarray, which started failing.
+# Possibly related to https://github.com/git-for-windows/git/issues/2291, although
+# we could not correlate with the software running on the hosted agents.
+PROJECTS_FILE=$(mktemp proj-XXXXXX)
+on_exit() {
+  local exit_code=$?
+  rm -f "$PROJECTS_FILE"
+  printf "Exiting with exit code %s\n" $exit_code
+  exit $exit_code
+}
+trap on_exit EXIT
+
+find "$SAMPLES_DIR" -name gradlew.bat -printf '%h\n' > "$PROJECTS_FILE"
+
+readarray -t PROJECTS < "$PROJECTS_FILE"
 
 # Allowing for a few number of (global) retries to accomodate for downloads
 # failures (filling up the package cache).

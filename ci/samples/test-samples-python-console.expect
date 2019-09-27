@@ -145,7 +145,7 @@ foreach scenario [list \
 
             expect {
               -re "RECOGNIZED: SpeechRecognitionEventArgs\\(session_id=\[0-9a-fA-F]*, result=SpeechRecognitionResult\\(result_id=\[0-9a-fA-F]*, text=\"(.*)\", reason=ResultReason\\.RecognizedSpeech\\)\\)\r\n" {
-                assertTextEqual testFailures "reco text" $kwsWeatherText $expect_out(1,string)
+                assertTextNormalizedEqual testFailures "reco text" $kwsWeatherText $expect_out(1,string)
                 break
               }
               "CANCELED: Reason=" {

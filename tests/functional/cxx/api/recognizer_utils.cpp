@@ -187,7 +187,7 @@ void DoContinuousReco(SpeechRecognizer* recognizer, PushAudioInputStream* pushSt
     WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopContinuousRecognitionAsync().get();
     SPXTEST_REQUIRE(!result->phrases.empty());
-    SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
+    SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->phrases[0].Text, weather.m_utterance));
 }
 
 void DoKWS(SpeechRecognizer* recognizer, PushAudioInputStream* pushStream)
@@ -202,7 +202,7 @@ void DoKWS(SpeechRecognizer* recognizer, PushAudioInputStream* pushStream)
     WaitForResult(res->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopKeywordRecognitionAsync().get();
     SPXTEST_REQUIRE(!res->phrases.empty());
-    SPXTEST_REQUIRE(res->phrases[0].Text == cortana.m_utterance);
+    SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(res->phrases[0].Text, cortana.m_utterance));
 }
 
 auto createCallbacksMap() -> std::map<Callbacks, atomic_int>

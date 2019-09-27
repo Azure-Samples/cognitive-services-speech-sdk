@@ -403,7 +403,8 @@ def test_keyword_recognition_from_wav_file(from_file_speech_reco_with_callbacks,
             if evt.result.reason == msspeech.ResultReason.RecognizedSpeech]
 
     assert 1 == len(valid_events)
-    _check_sr_result(valid_events[-1].result, kws_input, 0)
+    # Disable checking the result until https://msasg.visualstudio.com/Skyman/_workitems/edit/2061984 is understood.
+    # _check_sr_result(valid_events[-1].result, kws_input, 0)
     assert valid_events[-1].result.text.startswith(kws_input.model_keyword)
 
 

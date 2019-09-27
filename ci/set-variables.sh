@@ -133,15 +133,18 @@ if $IN_VSTS; then
     # reference. (refs/heads/X -> origin/X)
     targetBranch="${SYSTEM_PULLREQUEST_TARGETBRANCH/#refs\/heads\//origin\/}"
 
-    # If the change is in Markdown files only, we mark it for a lightweight build.
-    [[ -n $(git diff --name-only "$targetBranch.." -- ':!*.md') ]] || {
-      echo This PR is only touching Markdown files!
-      PR_MARKDOWN_ONLY=true
-    }
+    # N.B. make sure to catch and silently ignore git errors.
+    if mergeParent=$(git rev-parse HEAD^1); then
+      # If the change is in Markdown files only, we mark it for a lightweight build.
+      if nameDiff=$(git diff --name-only "$mergeParent.." -- ':!*.md') && [[ -z $nameDiff ]]; then
+        echo This PR is only touching Markdown files!
+        PR_MARKDOWN_ONLY=true
+      fi
 
-    # TODO detect other things for more light-weight build, e.g.,
-    # public_samples/-only changes could skip core tests.
-    # [[ -n $(git diff --name-only "$targetBranch.." -- ':!public_samples/') ]] || ...
+      # TODO detect other things for more light-weight build, e.g.,
+      # public_samples/-only changes could skip core tests:
+      # nameDiff=$(git diff --name-only "$mergeParent.." -- ':!public_samples/') && [[ -z $nameDiff ]]
+    fi
 
   else
     _BUILD_COMMIT=

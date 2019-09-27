@@ -92,7 +92,7 @@ foreach scenario [list \
 
                 expect {
                   -re "RECOGNIZED: Text=(\[^\r]*)\r\n" {
-                    assertTextEqual testFailures "reco text" $kwsWeatherText $expect_out(1,string)
+                    assertTextNormalizedEqual testFailures "reco text" $kwsWeatherText $expect_out(1,string)
                     break
                   }
                   "CANCELED: Reason=" {
