@@ -14,6 +14,7 @@ namespace helloworld
     {
         public static async Task RecognizeSpeechAsync()
         {
+// <object_create>
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
@@ -21,6 +22,7 @@ namespace helloworld
             // Creates a speech recognizer.
             using (var recognizer = new SpeechRecognizer(config))
             {
+//</object_create>
                 Console.WriteLine("Say something...");
 
                 // Starts speech recognition, and returns after a single utterance is recognized. The end of a
