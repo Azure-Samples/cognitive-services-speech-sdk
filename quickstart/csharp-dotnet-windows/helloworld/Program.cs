@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-// <code>
+// <base_code>
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
@@ -14,6 +14,7 @@ namespace helloworld
     {
         public static async Task RecognizeSpeechAsync()
         {
+// </base_code>
 // <object_create>
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
@@ -31,8 +32,10 @@ namespace helloworld
                 // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
                 // shot recognition like command or query. 
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+//<reco_once>               
                 var result = await recognizer.RecognizeOnceAsync();
-
+//</reco_once>
+//<results>
                 // Checks result.
                 if (result.Reason == ResultReason.RecognizedSpeech)
                 {
@@ -54,7 +57,9 @@ namespace helloworld
                         Console.WriteLine($"CANCELED: Did you update the subscription info?");
                     }
                 }
+//</results>
             }
+// <base_code>            
         }
 
         static void Main()
@@ -65,4 +70,4 @@ namespace helloworld
         }
     }
 }
-// </code>
+// </base_code>
