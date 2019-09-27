@@ -4,14 +4,14 @@ This sample demonstrates how to recognize speech for custom voice-first virtual 
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-virtual-assistant-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
 
 > **Note:**
-> the Speech SDK for the JRE currently supports only the Windows x64 platform, macOS 10.13 or later, and Linux (Ubuntu 16.04 x64, Ubuntu 18.04 x64, Debian 9 x64).
+> the Speech SDK for the JRE currently supports only the Windows x64 platform, macOS 10.13 or later, and Linux x64 and ARM64 (Ubuntu 16.04, Ubuntu 18.04, Debian 9).
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows x64, Ubuntu 16.04/18.04 x64) capable to run Eclipse, with a working microphone.
+* A PC (Windows x64, Ubuntu 16.04/18.04 on x64 or ARM64) capable to run Eclipse,[<sup>[1]</sup>](#footnote1) with a working microphone.
 * 64-bit JRE/JDK for Java 8.
-* Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.
+* Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.[<sup>[1]</sup>](#footnote1)
 * A pre-configured bot created using Bot Framework version 4.2 or above. See [here for steps on how to create a bot](https://blog.botframework.com/2018/05/07/build-a-microsoft-bot-framework-bot-with-the-bot-builder-sdk-v4/). The bot would need to subscribe to the new "Direct Line Speech" channel to receive voice inputs.
 * On Ubuntu 16.04 or 18.04, run the following commands for the installation of required packages:
 
@@ -25,6 +25,8 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
   sudo apt-get update
   sudo apt-get install libssl1.0.2 libasound2
   ```
+
+<small><a name="footnote1">1</a>. This sample has not been verified with Eclipse on ARM64.</small>
 
 ## Build the sample
 

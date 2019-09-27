@@ -12,19 +12,50 @@
             <url>https://csspeechstorage.blob.core.windows.net/maven/</url>
         </repository>
     </repositories>
+    <!-- <dependencies> -->
     <dependencies>
         <dependency> 
             <groupId>com.microsoft.cognitiveservices.speech</groupId> 
             <artifactId>client-sdk</artifactId>
-            <version>1.6.0</version> 
+            <version>1.7.0</version> 
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.5</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.bot.builder</groupId>
+            <artifactId>botbuilder</artifactId>
+            <version>4.0.0-a0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.9.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+            <version>2.9.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.63</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>27.1-jre</version>
+        </dependency>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>7.0.1</version>
+        </dependency>
     </dependencies>
+    <!-- </dependencies> -->
     <build>
         <sourceDirectory>src</sourceDirectory>
         <plugins>

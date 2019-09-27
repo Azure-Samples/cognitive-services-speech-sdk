@@ -58,7 +58,7 @@ namespace helloworld
         static void Main()
         {
             RecognizeSpeechAsync().Wait();
-            Console.WriteLine("Please press a key to continue.");
+            Console.WriteLine("Please press <Return> to continue.");
             Console.ReadLine();
         }
     }
