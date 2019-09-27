@@ -3,6 +3,9 @@
 
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+"""
+Speech synthesis samples for the Microsoft Cognitive Services Speech SDK
+"""
 
 try:
     import azure.cognitiveservices.speech as speechsdk
