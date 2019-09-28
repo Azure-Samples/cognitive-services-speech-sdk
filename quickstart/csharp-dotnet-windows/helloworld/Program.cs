@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-// <base_code>
+// <base_code1>
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
@@ -14,7 +14,7 @@ namespace helloworld
     {
         public static async Task RecognizeSpeechAsync()
         {
-// </base_code>
+// </base_code1>
 // <object_create>
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
@@ -59,7 +59,7 @@ namespace helloworld
                 }
 //</results>
             }
-// <base_code>            
+// <base_code2>            
         }
 
         static void Main()
@@ -70,4 +70,4 @@ namespace helloworld
         }
     }
 }
-// </base_code>
+// </base_code2>
