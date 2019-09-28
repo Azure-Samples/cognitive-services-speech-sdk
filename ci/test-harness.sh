@@ -197,7 +197,24 @@ function runCatchSuite {
   shift 7
 
   testCases=()
-  readarray -t testCases < <("$1" --list-test-names-only "$pattern" | tr -d \\r)
+
+# readarray -t testCases < <("$1" --list-test-names-only "$pattern" | tr -d \\r)
+# We were using process substitution before for find/readarray, which started failing.
+# Possibly related to https://github.com/git-for-windows/git/issues/2291, although
+# we could not correlate with the software running on the hosted agents.
+TESTCASE_FILE=$(mktemp proj-XXXXXX)
+on_exit() {
+  local exit_code=$?
+  rm -f "$TESTCASE_FILE"
+  printf "Exiting with exit code %s\n" $exit_code
+  exit $exit_code
+}
+trap on_exit EXIT
+
+"$1" --list-test-names-only "$pattern" | tr -d \\r > "$TESTCASE_FILE"
+
+readarray -t testCases < "$TESTCASE_FILE"
+
   [[ ${#testCases[@]} != 0 ]] || {
     echo Failed to discover any test cases.
     return 1
