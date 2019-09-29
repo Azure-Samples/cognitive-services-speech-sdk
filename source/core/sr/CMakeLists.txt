@@ -51,6 +51,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/speech_translation_config.h"
     "${SRC_DIR}/language_list_utils.h"
     "${SRC_DIR}/auto_detect_source_lang_config.h"
+    "${SRC_DIR}/source_lang_config.h"
     )
 
 set(SOURCES
@@ -86,6 +87,7 @@ set(SOURCES
     "${SRC_DIR}/speech_translation_config.cpp"
     "${SRC_DIR}/language_list_utils.cpp"
     "${SRC_DIR}/auto_detect_source_lang_config.cpp"
+    "${SRC_DIR}/source_lang_config.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

@@ -1263,6 +1263,15 @@ public:
     virtual void InitFromLanguages(const char* languages) = 0;
 };
 
+class ISpxSourceLanguageConfig : public ISpxInterfaceBaseFor<ISpxSourceLanguageConfig>
+{
+public:
+    virtual void InitFromLanguage(const char* language) = 0;
+    virtual void InitFromLanguageAndEndpointId(const char* language, const char* endpointId) = 0;
+    virtual std::string GetLanguage() = 0;
+    virtual std::string GetEndpointId() = 0;
+};
+
 class ISpxThreadService : public ISpxInterfaceBaseFor<ISpxThreadService>
 {
 public:

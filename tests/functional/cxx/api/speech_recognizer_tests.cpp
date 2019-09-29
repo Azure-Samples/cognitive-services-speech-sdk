@@ -1839,10 +1839,37 @@ TEST_CASE("Verify auto detect source language config", "[api][cxx]")
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     weather.UpdateFullFilename(Config::InputDir);
     SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
-    auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
     auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
     std::shared_ptr<AutoDetectSourceLanguageConfig> autoDetectSourceLanguageConfig;
     autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE", "fr-FR" });
     auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), autoDetectSourceLanguageConfig, audioConfig);
     SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages) == "en-US,de-DE,fr-FR");
+}
+
+TEST_CASE("Verify source language config", "[api][cxx]")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    weather.UpdateFullFilename(Config::InputDir);
+    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    SPXTEST_SECTION("source language")
+    {
+        auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), "zh-CN", audioConfig);
+        SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_RecoLanguage) == "zh-CN");
+    }
+
+    SPXTEST_SECTION("source language config")
+    {
+        auto sourceLanguageConfig = SourceLanguageConfig::FromLanguage("de-DE");
+        auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), sourceLanguageConfig, audioConfig);
+        SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_RecoLanguage) == "de-DE");
+    }
+
+    SPXTEST_SECTION("source language config with custom endpoint id")
+    {
+        auto sourceLanguageConfig = SourceLanguageConfig::FromLanguageAndEndpointId("de-DE", "CustomId");
+        auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), sourceLanguageConfig, audioConfig);
+        SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_RecoLanguage) == "de-DE");
+        SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_EndpointId) == "CustomId");
+    }
 }

@@ -39,7 +39,7 @@ SPXAPI_(bool) auto_detect_source_lang_config_is_handle_valid(SPXAUTODETECTSOURCE
     return Handle_IsValid<SPXAUTODETECTSOURCELANGCONFIGHANDLE, ISpxAutoDetectSourceLangConfig>(hconfig);
 }
 
-SPXAPI auto_detect_source_config_release(SPXAUTODETECTSOURCELANGCONFIGHANDLE hconfig)
+SPXAPI auto_detect_source_lang_config_release(SPXAUTODETECTSOURCELANGCONFIGHANDLE hconfig)
 {
     return Handle_Close<SPXAUTODETECTSOURCELANGCONFIGHANDLE, ISpxAutoDetectSourceLangConfig>(hconfig);
 }

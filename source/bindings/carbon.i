@@ -88,6 +88,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConnector)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig)
+%shared_ptr(Microsoft::CognitiveServices::Speech::SourceLanguageConfig)
 %shared_ptr(std::vector<uint8_t>)
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioConfig)
@@ -146,6 +147,7 @@
 %ignore operator SPXPARTICIPANTHANDLE;
 %ignore operator SPXSUSERHANDLE;
 %ignore operator SPXAUTODETECTSOURCELANGCONFIGHANDLE;
+%ignore operator SPXSOURCELANGCONFIGHANDLE;
 
 %ignore *::PropertyId;
 
@@ -171,6 +173,7 @@
 %include <speechapi_cxx_speech_translation_config.h>
 %include <speechapi_cxx_dialog_service_config.h>
 %include <speechapi_cxx_auto_detect_source_lang_config.h>
+%include <speechapi_cxx_source_lang_config.h>
 
 // %extend need to come first, before the %ignore for the same method (RecognizeOnceAsync, etc.)
 %extend Microsoft::CognitiveServices::Speech::SpeechRecognizer {

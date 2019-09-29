@@ -21,6 +21,7 @@ namespace Speech {
 
 /// <summary>
 /// Class that defines auto detection source configuration
+/// Added in 1.8.0
 /// </summary>
 class AutoDetectSourceLanguageConfig
 {
@@ -60,7 +61,7 @@ public:
     /// </summary>
     virtual ~AutoDetectSourceLanguageConfig()
     {
-        speech_config_release(m_hconfig);
+        auto_detect_source_lang_config_release(m_hconfig);
         property_bag_release(m_propertybag);
     }
 
