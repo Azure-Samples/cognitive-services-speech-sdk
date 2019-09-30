@@ -1165,7 +1165,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod][Ignore("Temporarily Disabled because of race condition on second keyword detection, see bug #1849546")]
+        [TestMethod]
+        [Ignore("Temporarily Disabled because of race condition on second keyword detection, see bug #1849546")]
         public async Task TestTranslationKeywordspotterComputerFound2DifferentUtterances()
         {
             var count = 0;
@@ -1248,5 +1249,118 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StopKeywordRecognitionAsync().ConfigureAwait(false);
             }
         }
+
+        #region Dispose Timing Tests
+        // Tests that start recognition in various modes and for different events allow the recognizer to fall out of scope and be disposed
+        // mid recognition
+
+        [TestMethod]
+        public async Task CloseOnSessonStart()
+        {
+            var str = TestData.Kws.Computer.AudioFile;
+            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
+            ManualResetEvent disposeEvent = new ManualResetEvent(false);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                recognizer.SessionStarted += (sender, e) =>
+                {
+                    disposeEvent.Set();
+                };
+
+                var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
+                await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
+
+                disposeEvent.WaitOne();
+            }
+        }
+
+        [TestMethod]
+        public async Task CloseOnRecognizing()
+        {
+            var str = TestData.Kws.Computer.AudioFile;
+            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
+            ManualResetEvent disposeEvent = new ManualResetEvent(false);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                recognizer.Recognizing += (sender, e) =>
+                {
+                    disposeEvent.Set();
+                };
+
+                var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
+                await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
+
+                disposeEvent.WaitOne();
+            }
+        }
+
+        [TestMethod]
+        public async Task CloseOnRecognized()
+        {
+            var str = TestData.Kws.Computer.AudioFile;
+            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
+            ManualResetEvent disposeEvent = new ManualResetEvent(false);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                recognizer.Recognized += (sender, e) =>
+                {
+                    disposeEvent.Set();
+                };
+
+                var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
+                await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
+
+                disposeEvent.WaitOne();
+            }
+        }
+
+        [TestMethod]
+        public async Task CloseOnSpeechStart()
+        {
+            var str = TestData.Kws.Computer.AudioFile;
+            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
+            ManualResetEvent disposeEvent = new ManualResetEvent(false);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                recognizer.SpeechStartDetected += (sender, e) =>
+                {
+                    disposeEvent.Set();
+                };
+
+                var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
+                await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
+
+                disposeEvent.WaitOne();
+            }
+        }
+
+        [TestMethod]
+        public async Task CloseOnConnected()
+        {
+            var str = TestData.Kws.Computer.AudioFile;
+            var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
+            ManualResetEvent disposeEvent = new ManualResetEvent(false);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var connection = Connection.FromRecognizer(recognizer);
+
+                connection.Connected += (sender, e) =>
+                {
+                    disposeEvent.Set();
+                };
+
+                var model = KeywordRecognitionModel.FromFile(TestData.Kws.Computer.ModelFile);
+                await recognizer.StartKeywordRecognitionAsync(model).ConfigureAwait(false);
+
+                disposeEvent.WaitOne();
+            }
+        }
+
+        #endregion
     }
 }

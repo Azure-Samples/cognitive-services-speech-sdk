@@ -21,7 +21,20 @@ SPXAPI_(bool) recognizer_handle_is_valid(SPXRECOHANDLE hreco)
 
 SPXAPI recognizer_handle_release(SPXRECOHANDLE hreco)
 {
+    // Before releasing the handle, make sure speech is stopped.
+    // If we get to a place where > 1 higher level object has and needs to
+    // close a handle, this method should revert to a simple close and
+    // we'll need to figure out where to ensure speech is stopped before the
+    // last handle it closed. Today we have a 1:1 mapping between the higher
+    // level objects and the lower ones.
+
+    SPX_INIT_HR(hr);
+
+    hr = recognizer_stop_continuous_recognition(hreco);
+    SPX_REPORT_ON_FAIL(hr);
+
     return Handle_Close<SPXRECOHANDLE, ISpxRecognizer>(hreco);
+
 }
 
 SPXAPI_(bool) recognizer_async_handle_is_valid(SPXASYNCHANDLE hasync)

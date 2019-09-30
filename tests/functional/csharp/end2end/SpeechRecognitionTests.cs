@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech;
@@ -1374,5 +1374,111 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        #region Dispose Timing Tests
+        // Tests that start recognition in various modes and for different events allow the recognizer to fall out of scope and be disposed
+        // mid recognition
+
+        [TestMethod]
+        public async Task CloseOnSessonStart()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+
+            ManualResetEvent disposeEvent = new ManualResetEvent(false);
+        
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                recognizer.SessionStarted += (sender, e) =>
+                {
+                    disposeEvent.Set();
+                };
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                disposeEvent.WaitOne();
+            }
+        }
+
+        [TestMethod]
+        public async Task CloseOnRecognizing()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+
+            ManualResetEvent disposeEvent = new ManualResetEvent(false);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                recognizer.Recognizing += (sender, e) =>
+                {
+                    disposeEvent.Set();
+                };
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                disposeEvent.WaitOne();
+            }
+        }
+
+        [TestMethod]
+        public async Task CloseOnRecognized()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+
+            ManualResetEvent disposeEvent = new ManualResetEvent(false);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                recognizer.Recognized += (sender, e) =>
+                {
+                    disposeEvent.Set();
+                };
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                disposeEvent.WaitOne();
+            }
+        }
+
+        [TestMethod]
+        public async Task CloseOnSpeechStart()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+
+            ManualResetEvent disposeEvent = new ManualResetEvent(false);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                recognizer.SpeechStartDetected += (sender, e) =>
+                {
+                    disposeEvent.Set();
+                };
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                disposeEvent.WaitOne();
+            }
+        }
+
+        [TestMethod]
+        public async Task CloseOnConnected()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+
+            ManualResetEvent disposeEvent = new ManualResetEvent(false);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                var connection = Connection.FromRecognizer(recognizer);
+
+                connection.Connected += (sender, e) =>
+                {
+                    disposeEvent.Set();
+                };
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                disposeEvent.WaitOne();
+            }
+        }
+        #endregion
     }
 }

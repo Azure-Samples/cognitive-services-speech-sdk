@@ -319,8 +319,6 @@ public class IntentRecognizerTests {
     // -----------------------------------------------------------------------
     // ---
     // -----------------------------------------------------------------------
-
-    @Ignore("test unstable")
     @Test
     public void testStartContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -344,7 +342,6 @@ public class IntentRecognizerTests {
         s.close();
     }
 
-    @Ignore("test unstable")
     @Test
     public void testStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
