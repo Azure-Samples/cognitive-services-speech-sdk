@@ -277,8 +277,6 @@ TEST_CASE("Test JSON Generation", "[context_json]")
     {
         adapterTest.SetEndpointType(USP::EndpointType::Translation);
         auto properties = session->GetPropertiesPtr();
-        auto recoMode = g_recoModeConversation;
-        properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), recoMode);
 
         vector<string> autoDetectSourceLangs{ "en-us", "zh-CN" };
         // Added some spaces and tabs in source languages, to verify our code can remove them correctly
@@ -303,12 +301,11 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         session->SetTargetLanguages(adapterTest.Join(toLangs));
 
         json phraseDetectionJson;
-        phraseDetectionJson["mode"] = recoMode;
         phraseDetectionJson["onSuccess"]["action"] = "Translate";
         phraseDetectionJson["onInterim"]["action"] = "Translate";
         expectedJson["phraseDetection"] = phraseDetectionJson;
-        expectedJson["phraseOutput"]["interimResults"][recoMode]["resultType"] = "None";
-        expectedJson["phraseOutput"]["phraseResults"][recoMode]["resultType"] = "None";
+        expectedJson["phraseOutput"]["interimResults"]["resultType"] = "None";
+        expectedJson["phraseOutput"]["phraseResults"]["resultType"] = "None";
 
         json translationJson;
         translationJson["targetLanguages"] = json(toLangs);
@@ -328,6 +325,32 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         expectedJson["translation"]["onSuccess"]["action"] = "Synthesize";
         expectedJson["synthesis"]["defaultVoices"] = json(std::move(voiceNameMap));
         contextJson = adapterTest.GetSpeechContextJson();
+        REQUIRE(contextJson == expectedJson);
+    }
+
+    SPXTEST_SECTION("Test SR NewEndpoint Json")
+    {
+        adapterTest.SetEndpointType(USP::EndpointType::Speech);
+        session->SetTargetLanguages("");
+        auto properties = session->GetPropertiesPtr();
+
+        vector<string> autoDetectSourceLangs{ "en-us", "zh-CN" };
+        // Added some spaces and tabs in source languages, to verify our code can remove them correctly
+        properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), "    en-  us    ,    zh- CN    ");
+        json languageIdJson;
+        languageIdJson["languages"] = json(autoDetectSourceLangs);
+        languageIdJson["onUnknown"]["action"] = "None";
+        languageIdJson["onSuccess"]["action"] = "Recognize";
+        expectedJson["languageId"] = languageIdJson;
+
+        json phraseDetectionJson;
+        phraseDetectionJson["onSuccess"]["action"] = "None";
+        phraseDetectionJson["onInterim"]["action"] = "None";
+        expectedJson["phraseDetection"] = phraseDetectionJson;
+        expectedJson["phraseOutput"]["interimResults"]["resultType"] = "Auto";
+        expectedJson["phraseOutput"]["phraseResults"]["resultType"] = "Always";
+
+        auto contextJson = adapterTest.GetSpeechContextJson();
         REQUIRE(contextJson == expectedJson);
     }
 }

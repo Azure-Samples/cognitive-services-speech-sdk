@@ -204,8 +204,8 @@ private:
     nlohmann::json GetSpeechContextJson();
     nlohmann::json GetKeywordDetectionJson();
     nlohmann::json GetLanguageIdJson();
-    nlohmann::json GetPhraseDetectionJson(const std::string& recoMode, bool doTranslation);
-    nlohmann::json GetPhraseOutputJson(const std::string& recoMode, bool needSpeechMessages);
+    nlohmann::json GetPhraseDetectionJson(bool doTranslation);
+    nlohmann::json GetPhraseOutputJson(bool needSpeechMessages);
     nlohmann::json GetTranslationJson(std::vector<std::string>&& targetLangs, bool synthesis);
     nlohmann::json GetSynthesisJson(std::unordered_map<std::string, std::string>&& voiceNameMap);
 

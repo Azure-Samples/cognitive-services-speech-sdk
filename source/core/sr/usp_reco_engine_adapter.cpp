@@ -1991,14 +1991,13 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
     if (isLanguageIdSupported
         && properties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages)))
     {
-        string recoMode = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode));
         auto languageIdJson = GetLanguageIdJson();
         if (!languageIdJson.empty())
         {
             contextJson["languageId"] = languageIdJson;
         }
-        contextJson["phraseDetection"] = GetPhraseDetectionJson(recoMode, m_endpointType == USP::EndpointType::Translation);
-        contextJson["phraseOutput"] = GetPhraseOutputJson(recoMode, m_endpointType == USP::EndpointType::Speech);
+        contextJson["phraseDetection"] = GetPhraseDetectionJson(m_endpointType == USP::EndpointType::Translation);
+        contextJson["phraseOutput"] = GetPhraseOutputJson(m_endpointType == USP::EndpointType::Speech);
         if (m_endpointType == USP::EndpointType::Translation) {
             unordered_map<string, string> voiceNameMap;
             if (!toLangsVector.empty())
@@ -2334,23 +2333,20 @@ json CSpxUspRecoEngineAdapter::GetLanguageIdJson()
     return langDetectionJson;
 }
 
-json CSpxUspRecoEngineAdapter::GetPhraseDetectionJson(const string& recoMode, bool doTranslation)
+json CSpxUspRecoEngineAdapter::GetPhraseDetectionJson(bool doTranslation)
 {
     json phraseDetectionJson;
-    SPX_DBG_ASSERT(!recoMode.empty());
-    phraseDetectionJson["mode"] = recoMode;
     auto action = doTranslation ? "Translate" : "None";
     phraseDetectionJson["onSuccess"]["action"] = action;
     phraseDetectionJson["onInterim"]["action"] = action;
     return phraseDetectionJson;
 }
 
-json CSpxUspRecoEngineAdapter::GetPhraseOutputJson(const string& recoMode, bool needSpeechMessages)
+json CSpxUspRecoEngineAdapter::GetPhraseOutputJson(bool needSpeechMessages)
 {
     json phraseOutputJson;
-    SPX_DBG_ASSERT(!recoMode.empty());
-    phraseOutputJson["interimResults"][recoMode]["resultType"] = needSpeechMessages ? "Auto" : "None";
-    phraseOutputJson["phraseResults"][recoMode]["resultType"] = needSpeechMessages ? "Always" : "None";
+    phraseOutputJson["interimResults"]["resultType"] = needSpeechMessages ? "Auto" : "None";
+    phraseOutputJson["phraseResults"]["resultType"] = needSpeechMessages ? "Always" : "None";
     return phraseOutputJson;
 }
 
