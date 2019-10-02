@@ -69,3 +69,5 @@
 #include <speechapi_cxx_conversation_transcription_result.h>
 #include <speechapi_cxx_user.h>
 #include <speechapi_cxx_participant.h>
+
+#include <speechapi_cxx_auto_detect_source_lang_result.h>

@@ -1873,3 +1873,18 @@ TEST_CASE("Verify source language config", "[api][cxx]")
         SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_EndpointId) == "CustomId");
     }
 }
+
+TEST_CASE("Verify auto detect source language result from speech recognition result", "[api][cxx]") {
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    weather.UpdateFullFilename(Config::InputDir);
+    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), audioConfig);
+    auto result = recognizer->RecognizeOnceAsync().get();
+    SPXTEST_REQUIRE(result != nullptr);
+    auto autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult::FromResult(result);
+    SPXTEST_REQUIRE(autoDetectSourceLanguageResult != nullptr);
+
+    // As this is non LID scenario,  the language should be empty
+    SPXTEST_REQUIRE(autoDetectSourceLanguageResult->Language == "");
+}

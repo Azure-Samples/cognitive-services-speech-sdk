@@ -203,6 +203,11 @@ enum class PropertyId
     /// </summary>
     SpeechServiceConnection_AutoDetectSourceLanguages = 3300,
 
+    /// The auto detect source language result
+    /// Added in version 1.8.0
+    /// </summary>
+    SpeechServiceConnection_AutoDetectSourceLanguageResult = 3301,
+
     /// <summary>
     /// The requested Cognitive Services Speech Service response output format (simple or detailed). Under normal circumstances, you shouldn't have
     /// to use this property directly.

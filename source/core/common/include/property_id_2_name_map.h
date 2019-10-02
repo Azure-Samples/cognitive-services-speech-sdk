@@ -42,6 +42,7 @@ constexpr const char* GetPropertyName(const PropertyId id)
     case PropertyId::SpeechServiceConnection_EndSilenceTimeoutMs: return "SPEECH-EndSilenceTimeoutMs";
     case PropertyId::SpeechServiceConnection_EnableAudioLogging: return "SPEECH-EnableAudioLogging";
     case PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages: return "Auto-Detect-Source-Languages";
+    case PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult: return "Auto-Detecte-Source-Languag-Result";
     case PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse: return "SpeechServiceResponse_RequestDetailedResultTrueFalse";
     case PropertyId::SpeechServiceResponse_RequestProfanityFilterTrueFalse: return "SpeechServiceResponse_RequestProfanityFilterTrueFalse";
     case PropertyId::SpeechServiceResponse_ProfanityOption: return "SpeechServiceResponse_ProfanityOption";

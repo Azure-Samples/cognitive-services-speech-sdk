@@ -282,7 +282,7 @@ TEST_CASE("Test JSON Generation", "[context_json]")
 
         vector<string> autoDetectSourceLangs{ "en-us", "zh-CN" };
         // Added some spaces and tabs in source languages, to verify our code can remove them correctly
-        properties->SetStringValue("Auto-Detect-Source-Languages", "    en-  us    ,    zh- CN    ");
+        properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), "    en-  us    ,    zh- CN    ");
         json languageIdJson;
         languageIdJson["languages"] = json(autoDetectSourceLangs);
         languageIdJson["onUnknown"]["action"] = "None";

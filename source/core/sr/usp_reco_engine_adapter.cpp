@@ -1431,7 +1431,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
                 namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
                 if (!message.language.empty())
                 {
-                    namedProperties->SetStringValue("AutoDetectedSrcLanguage", message.language.c_str());
+                    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult), message.language.c_str());
                 }
 
                 // Update our result to be a "TranslationText" result.
@@ -1504,7 +1504,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
                 namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
                 if (!message.language.empty())
                 {
-                    namedProperties->SetStringValue("AutoDetectedSrcLanguage", message.language.c_str());
+                    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult), message.language.c_str());
                 }
 
                 // Update our result to be an "TranslationText" result.
@@ -1983,40 +1983,45 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
         contextJson["translationcontext"]["to"] = json(toLangsVector);
     }
 
-    // New translation endpoint will need below json content.
-    // Currently it is only used for language id feature
-    if (m_endpointType == USP::EndpointType::Translation
-        && properties->HasStringValue("Auto-Detect-Source-Languages"))
+    // Language id feature need below speech context
+    // Currently only 1P new translation endpoint and 3P speech endpoint support it
+    // 1P users use this through FromEndpointAPI by hitting a specific endpoint
+    // 3P users use this from SpeechRecongizer FromConfig API
+    bool isLanguageIdSupported = m_endpointType == USP::EndpointType::Translation || m_endpointType == USP::EndpointType::Speech;
+    if (isLanguageIdSupported
+        && properties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages)))
     {
         string recoMode = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode));
-        unordered_map<string, string> voiceNameMap;
-        if (!toLangsVector.empty())
-        {
-            for (const string& lang : toLangsVector)
-            {
-                string voiceNamePoperty = lang + GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice);
-                auto voiceName = properties->GetStringValue(voiceNamePoperty.c_str());
-                if (!voiceName.empty())
-                {
-                    voiceNameMap[lang] = voiceName;
-                }
-            }
-        }
-
-        bool doSynthesis = !voiceNameMap.empty();
         auto languageIdJson = GetLanguageIdJson();
         if (!languageIdJson.empty())
         {
             contextJson["languageId"] = languageIdJson;
         }
-        contextJson["phraseDetection"] = GetPhraseDetectionJson(recoMode);
-        contextJson["phraseOutput"] = GetPhraseOutputJson(recoMode, false);
-        contextJson["translation"] = GetTranslationJson(move(toLangsVector), doSynthesis);
-        if (doSynthesis)
-        {
-            contextJson["synthesis"] = GetSynthesisJson(move(voiceNameMap));
-        }
+        contextJson["phraseDetection"] = GetPhraseDetectionJson(recoMode, m_endpointType == USP::EndpointType::Translation);
+        contextJson["phraseOutput"] = GetPhraseOutputJson(recoMode, m_endpointType == USP::EndpointType::Speech);
+        if (m_endpointType == USP::EndpointType::Translation) {
+            unordered_map<string, string> voiceNameMap;
+            if (!toLangsVector.empty())
+            {
+                for (const string& lang : toLangsVector)
+                {
+                    string voiceNamePoperty = lang + GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice);
+                    auto voiceName = properties->GetStringValue(voiceNamePoperty.c_str());
+                    if (!voiceName.empty())
+                    {
+                        voiceNameMap[lang] = voiceName;
+                    }
+                }
+            }
 
+            bool doSynthesis = !voiceNameMap.empty();
+            contextJson["translation"] = GetTranslationJson(move(toLangsVector), doSynthesis);
+            if (doSynthesis)
+            {
+                contextJson["synthesis"] = GetSynthesisJson(move(voiceNameMap));
+            }
+        }
+    
         SPX_DBG_TRACE_VERBOSE("Speech context with LID scenario %s.", contextJson.dump().c_str());
     }
 
@@ -2164,6 +2169,11 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
         {
             CreateConversationResult(result, message.speaker);
         }
+
+        if (!message.language.empty())
+        {
+            namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult), message.language.c_str());
+        }
         site->FireAdapterResult_FinalResult(this, message.offset, result);
     });
 }
@@ -2309,7 +2319,7 @@ json CSpxUspRecoEngineAdapter::GetLanguageIdJson()
 {
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
-    string sourceLanguages = properties->GetStringValue("Auto-Detect-Source-Languages");
+    string sourceLanguages = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages));
     // remove spaces in the string
     // cannot use remove_if as build failure in Android
     sourceLanguages.erase(remove(sourceLanguages.begin(), sourceLanguages.end(), ' '), sourceLanguages.end());
@@ -2324,13 +2334,14 @@ json CSpxUspRecoEngineAdapter::GetLanguageIdJson()
     return langDetectionJson;
 }
 
-json CSpxUspRecoEngineAdapter::GetPhraseDetectionJson(const string& recoMode)
+json CSpxUspRecoEngineAdapter::GetPhraseDetectionJson(const string& recoMode, bool doTranslation)
 {
     json phraseDetectionJson;
     SPX_DBG_ASSERT(!recoMode.empty());
     phraseDetectionJson["mode"] = recoMode;
-    phraseDetectionJson["onSuccess"]["action"] = "Translate";
-    phraseDetectionJson["onInterim"]["action"] = "Translate";
+    auto action = doTranslation ? "Translate" : "None";
+    phraseDetectionJson["onSuccess"]["action"] = action;
+    phraseDetectionJson["onInterim"]["action"] = action;
     return phraseDetectionJson;
 }
 

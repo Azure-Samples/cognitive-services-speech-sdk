@@ -51,6 +51,7 @@ enum  PropertyId
     SpeechServiceConnection_EnableAudioLogging = 3202,
 
     SpeechServiceConnection_AutoDetectSourceLanguages = 3300,
+    SpeechServiceConnection_AutoDetectSourceLanguageResult = 3301,
 
     SpeechServiceResponse_RequestDetailedResultTrueFalse = 4000,
     SpeechServiceResponse_RequestProfanityFilterTrueFalse = 4001,
