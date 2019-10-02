@@ -89,7 +89,7 @@ public class SampleRecognizeIntent implements Runnable {
             content.add(recognitionResult.getText());
             content.add(" [intent: " + intentName + "]");
 
-            System.out.println(String.join("\n", content));
+            System.out.println(content.toString() + "\n");
 
             reco.close();
             config.close();
