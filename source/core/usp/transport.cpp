@@ -723,6 +723,12 @@ std::unique_ptr<TransportRequest> usp::TransportRequestCreate(const std::string&
         request->ws.WSHandle = uws_client_create(cfg.hostname, cfg.port, cfg.resource_name, useSSL, &wsProto, 1);
     }
 
+    if (!request->ws.WSHandle)
+    {
+        LogError("NULL Web socket client handle");
+        return nullptr;
+    }
+
 #ifdef SPEECHSDK_USE_OPENSSL
     int tls_version = OPTION_TLS_VERSION_1_2;
     uws_client_set_option(request->ws.WSHandle, OPTION_TLS_VERSION, &tls_version);
