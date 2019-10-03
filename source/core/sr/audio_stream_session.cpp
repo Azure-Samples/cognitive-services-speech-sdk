@@ -83,12 +83,12 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_destroyMeetingResources(false),
     m_interactionId{ PAL::CreateGuidWithDashesUTF8(), PAL::CreateGuidWithDashesUTF8() }
 {
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::CSpxAudioStreamSession", (void*)this);
 }
 
 CSpxAudioStreamSession::~CSpxAudioStreamSession()
 {
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::~CSpxAudioStreamSession", (void*)this);
     SPX_DBG_ASSERT(m_kwsAdapter == nullptr);
     SPX_DBG_ASSERT(m_recoAdapter == nullptr);
     SPX_DBG_ASSERT(m_luAdapter == nullptr);
@@ -96,6 +96,8 @@ CSpxAudioStreamSession::~CSpxAudioStreamSession()
 
 void CSpxAudioStreamSession::Init()
 {
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Init:... ", (void*)this);
+
     // NOTE: Due to current ownership model, and our late-into-the-cycle changes for SpeechConfig objects
     // the CSpxAudioStreamSession is sited to the CSpxApiFactory. This ApiFactory is not held by the
     // dev user at or above the CAPI. Thus ... we must hold it alive in order for the properties to be
@@ -111,19 +113,22 @@ void CSpxAudioStreamSession::Init()
 void CSpxAudioStreamSession::Term()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-
-    // Stopping all threads.
-    m_threadService->Term();
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Term:... ", (void*)this);
 
     // No other threads after this point can access internal structures,
     // so it is safe to clean them up.
     // Let's check to see if we're still processing audio ...
-    if (ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
+    // We can be here in some extreme cases where the StartPump did not complete yet so we are waiting for that case.
+
+    // The pump start was called in both of these states so we force the issue and stop it regardless if the transition to processing was complete 
+    if (ChangeState(SessionState::WaitForPumpSetFormatStart, SessionState::StoppingPump)
+        || ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
     {
         // We're terminating, and we were still processing audio ... So ... Let's shut down the pump
-        SPX_DBG_TRACE_VERBOSE("%s: Now StoppingPump ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Term: Now StoppingPump ...", (void*)this);
         if (m_audioPump)
         {
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Term: StopPump[%p]", (void*)this, (void*)m_audioPump.get());
             m_audioPump->StopPump();
         }
 
@@ -132,6 +137,13 @@ void CSpxAudioStreamSession::Term()
             m_codecAdapter->Close();
         }
     }
+    else 
+    {
+        SPX_DBG_TRACE_ERROR("[%p]CSpxAudioStreamSession::Term: **NOT CALLED** StopPump[%p] - state: %d", (void*)this, (void*)m_audioPump.get(), (int)m_sessionState);
+    }
+
+    // Stopping all threads.
+    m_threadService->Term();
 
     // Make sure there is nobody waiting on a single shot.
     CancelPendingSingleShot();
@@ -153,7 +165,7 @@ void CSpxAudioStreamSession::Term()
 
 void CSpxAudioStreamSession::CancelPendingSingleShot()
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::CancelPendingSingleShot", (void*)this);
 
     // Make sure there is nobody waiting on a single shot.
     if (m_singleShotInFlight &&
@@ -223,11 +235,12 @@ void CSpxAudioStreamSession::InitFromMicrophone()
 {
     SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
     SPX_DBG_ASSERT(IsKind(RecognitionKind::Idle) && IsState(SessionState::Idle));
-    SPX_DBG_TRACE_VERBOSE("%s: Now Idle ...", __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::InitFromMicrophone: Now Idle", (void*)this);
 
     // Create the microphone pump
     auto site = SpxSiteFromThis(this);
     m_audioPump = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxInteractiveMicrophone", site);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::InitFromMicrophone: Pump from microphone:[%p]", (void*)this, (void*)m_audioPump.get());
 
     SetStringValue(GetPropertyName(PropertyId::AudioConfig_AudioSource), g_audioSourceMicrophone);
     SetAudioConfigurationInProperties();
@@ -328,30 +341,30 @@ void CSpxAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
 {
     auto format = pformat ? make_shared<SPXWAVEFORMATEX>(*pformat) : nullptr;
     auto task = CreateTask([this, format]() {
-        SPX_DBG_TRACE_VERBOSE("SetFormat: format %s nullptr", format == nullptr ? "==" : "!=");
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::SetFormat: format %s nullptr", (void*)this, format == nullptr ? "==" : "!=");
 
         if (format != nullptr && ChangeState(SessionState::WaitForPumpSetFormatStart, SessionState::ProcessingAudio))
         {
             // The pump started successfully, we have a live running session now!
-            SPX_DBG_TRACE_VERBOSE("SetFormat: Now ProcessingAudio ...");
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::SetFormat: Now ProcessingAudio ...", (void*)this);
             InformAdapterSetFormatStarting(format.get());
         }
         else if (format == nullptr && ChangeState(SessionState::StoppingPump, SessionState::WaitForAdapterCompletedSetFormatStop))
         {
             // Our stop pump request has been satisfied... Let's wait for the adapter to finish...
-            SPX_DBG_TRACE_VERBOSE("SetFormat: Now WaitForAdapterCompletedSetFormatStop (from StoppingPump)...");
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::SetFormat: Now WaitForAdapterCompletedSetFormatStop (from StoppingPump)...", (void*)this);
             InformAdapterSetFormatStopping(SessionState::StoppingPump);
         }
         else if (format == nullptr && ChangeState(SessionState::ProcessingAudio, SessionState::ProcessingAudioLeftovers))
         {
             // The pump stopped itself... That's possible when WAV files reach EOS. Let's wait for the adapter to finish...
-            SPX_DBG_TRACE_VERBOSE("SetFormat: Have seen the end of the stream on the client, processing audio leftovers ...");
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::SetFormat: Have seen the end of the stream on the client, processing audio leftovers ...", (void*)this);
 
             // Currently there are no sufficient tests for KWS, so we preserve the old logic,
             // For single shot and continuous we are processing the last pieces of data without indicating the end of the stream.
             if (!m_audioBuffer->NonAcknowledgedSizeInBytes() || (m_recoKind != RecognitionKind::SingleShot && m_recoKind != RecognitionKind::Continuous))
             {
-                SPX_DBG_TRACE_VERBOSE("SetFormat: Now WaitForAdapterCompletedSetFormatStop (from ProcessingAudio) ...");
+                SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::SetFormat: Now WaitForAdapterCompletedSetFormatStop (from ProcessingAudio) ...", (void*)this);
 
                 ChangeState(SessionState::ProcessingAudioLeftovers, SessionState::WaitForAdapterCompletedSetFormatStop);
                 InformAdapterSetFormatStopping(SessionState::ProcessingAudio);
@@ -362,7 +375,7 @@ void CSpxAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
         {
             // The pump stopped itself, probably due to the end of stream.
             // Wait until the hot swap is done before taking action.
-            SPX_DBG_TRACE_VERBOSE("SetFormat: AudioPump thread has stopped!");
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::SetFormat: AudioPump thread has stopped!", (void*)this);
             m_audioPumpStoppedBeforeHotSwap = true;
         }
         else
@@ -604,6 +617,7 @@ void CSpxAudioStreamSession::CloseConnection()
 void CSpxAudioStreamSession::WaitForIdle(std::chrono::milliseconds timeout)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::WaitForIdle: Timeout happened during waiting for Idle", (void*)this);
     unique_lock<mutex> lock(m_stateMutex);
     auto success = m_cv.wait_for(lock, timeout, [&]
     {
@@ -611,7 +625,7 @@ void CSpxAudioStreamSession::WaitForIdle(std::chrono::milliseconds timeout)
     });
     if (!success)
     {
-        SPX_DBG_TRACE_WARNING("%s: Timeout happened during waiting for Idle", __FUNCTION__);
+        SPX_DBG_TRACE_WARNING("[%p]CSpxAudioStreamSession::WaitForIdle: Timeout happened during waiting for Idle", (void*)this);
     }
 }
 
@@ -820,10 +834,11 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StopRecognitionAsync(RecognitionKind s
 void CSpxAudioStreamSession::StartRecognizing(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartRecognizing", (void*)this);
 
     if (startKind == RecognitionKind::Keyword && IsKind(RecognitionKind::Keyword) && (model->GetFileName() == m_kwsModel->GetFileName()))
     {
-        SPX_DBG_TRACE_VERBOSE("%s: Already recognizing keyword, ignoring call...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartRecognizing: Already recognizing keyword, ignoring call...", (void*)this);
         return;
     }
 
@@ -835,7 +850,7 @@ void CSpxAudioStreamSession::StartRecognizing(RecognitionKind startKind, std::sh
     if (ChangeState(RecognitionKind::Idle, SessionState::Idle, startKind, SessionState::WaitForPumpSetFormatStart))
     {
         // We're starting from idle!! Let's get the Audio Pump running
-        SPX_DBG_TRACE_VERBOSE("%s: Now WaitForPumpSetFormatStart ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartRecognizing:  Now WaitForPumpSetFormatStart ...", (void*)this);
 
         // Make sure we drop left overs of the previous recognition
         // if the source does not need reliability guarantees.
@@ -848,29 +863,29 @@ void CSpxAudioStreamSession::StartRecognizing(RecognitionKind startKind, std::sh
     else if (ChangeState(RecognitionKind::Keyword, SessionState::ProcessingAudio, startKind, SessionState::HotSwapPaused))
     {
         // We're moving from Keyword/ProcessingAudio to startKind/Paused...
-        SPX_DBG_TRACE_VERBOSE("%s: Now Paused ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartRecognizing: Now Paused ...", (void*)this);
 
         HotSwapAdaptersWhilePaused(startKind, model);
     }
     else if (m_resetRecoAdapter != nullptr && startKind == RecognitionKind::Continuous &&
             ChangeState(RecognitionKind::Continuous, SessionState::ProcessingAudio, RecognitionKind::Continuous, SessionState::HotSwapPaused))
     {
-        SPX_DBG_TRACE_WARNING("%s: Resetting adapter via HotSwap (ProcessingAudio -> HotSwapPaused) ... attempting to stay in continuous mode!!! ...", __FUNCTION__);
+        SPX_DBG_TRACE_WARNING("[%p]CSpxAudioStreamSession::StartRecognizing: Resetting adapter via HotSwap (ProcessingAudio -> HotSwapPaused) ... attempting to stay in continuous mode!!! ...", (void*)this);
 
         HotSwapAdaptersWhilePaused(startKind, model);
 
-        SPX_DBG_TRACE_WARNING("%s: Simulating GetSite()->AdapterCompletedSetFormatStop() ...", __FUNCTION__);
+        SPX_DBG_TRACE_WARNING("[%p]CSpxAudioStreamSession::StartRecognizing: Simulating GetSite()->AdapterCompletedSetFormatStop() ...", (void*)this);
         AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Speech);
     }
     else if (m_resetRecoAdapter != nullptr && startKind == RecognitionKind::Continuous &&
         ChangeState(RecognitionKind::Continuous, SessionState::ProcessingAudioLeftovers, RecognitionKind::Continuous, SessionState::HotSwapPaused))
     {
-        SPX_DBG_TRACE_WARNING("%s: Resetting adapter via HotSwap (ProcessingAudioLeftovers -> HotSwapPaused) ... attempting to stay in continuous mode!!! ...", __FUNCTION__);
+        SPX_DBG_TRACE_WARNING("[%p]CSpxAudioStreamSession::StartRecognizing: Resetting adapter via HotSwap (ProcessingAudioLeftovers -> HotSwapPaused) ... attempting to stay in continuous mode!!! ...", (void*)this);
 
         HotSwapAdaptersWhilePaused(startKind, model);
 
         // Change back and replay the leftovers.
-        SPX_DBG_TRACE_WARNING("%s: Resending audio leftovers ...", __FUNCTION__);
+        SPX_DBG_TRACE_WARNING("[%p]CSpxAudioStreamSession::StartRecognizing: Resending audio leftovers ...", (void*)this);
         ChangeState(SessionState::HotSwapPaused, SessionState::ProcessingAudioLeftovers);
         while (ProcessNextAudio())
         {}
@@ -879,13 +894,13 @@ void CSpxAudioStreamSession::StartRecognizing(RecognitionKind startKind, std::sh
     {
         // We're already doing something other than keyword spotting, but, someone wants to change/update the keyword ...
         // So ... let's update it
-        SPX_DBG_TRACE_VERBOSE("%s: Changing keyword ... nothing else...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartRecognizing: Changing keyword ... nothing else...", (void*)this);
         m_kwsModel = model;
     }
     else
     {
         // All other state transitions are invalid when attempting to start recognizing...
-        SPX_TRACE_ERROR("%s: Unexpected/Invalid State Transition: recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, m_sessionState);
+        SPX_TRACE_ERROR("[%p]CSpxAudioStreamSession::StartRecognizing: Unexpected/Invalid State Transition: recoKind %d; sessionState %d", (void*)this, m_recoKind, m_sessionState);
         SPX_THROW_HR(SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION);
     }
 }
@@ -893,6 +908,8 @@ void CSpxAudioStreamSession::StartRecognizing(RecognitionKind startKind, std::sh
 void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing ...", (void*)this);
+
     SPX_DBG_ASSERT(stopKind != RecognitionKind::Idle);
 
     DestroyMeeting();
@@ -901,7 +918,7 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
     {
         // We've got a keyword, we're not trying to stop keyword spotting, and we're currently procesing audio...
         // So ... We should hot swap over to the keyword spotter (which will stop the current adapter doing whatever its doing)
-        SPX_DBG_TRACE_VERBOSE("%s: Now Keyword/Paused ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Now Keyword/Paused ...", (void*)this);
 
         HotSwapAdaptersWhilePaused(RecognitionKind::Keyword, m_kwsModel);
         if (stopKind == RecognitionKind::KwsSingleShot || stopKind == RecognitionKind::SingleShot)
@@ -914,12 +931,12 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
     {
         // We're actually keyword spotting right now, and we've been asked to stop doing that...
         // So ... Let's clear our keyword (since we're not spotting, we don't need it anymore)
-        SPX_DBG_TRACE_VERBOSE("%s: Changing keyword to '' ... nothing else...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Changing keyword to '' ... nothing else...", (void*)this);
         m_kwsModel.reset();
 
         // And we'll stop the pump
-        SPX_DBG_TRACE_VERBOSE("%s: Now StoppingPump ...", __FUNCTION__);
         auto audioPump = m_audioPump;
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Now StoppingPump[%p] ...", (void*)this, (void*)audioPump.get());
         if (audioPump)
         {
             audioPump->StopPump();
@@ -934,13 +951,13 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
     {
         // We've been asked to stop keyword spotting, but we're not keyword spotting right now ...
         // So ... Let's just clear the keyword
-        SPX_DBG_TRACE_VERBOSE("%s: Changing keyword to '' ... nothing else...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Changing keyword to '' ... nothing else...", (void*)this);
         m_kwsModel.reset();
     }
     else if (stopKind == RecognitionKind::KwsSingleShot && !IsKind(RecognitionKind::KwsSingleShot))
     {
         // We've been asked to stop KwsSingleShot, but we've already stopped that, and have switched back to Keyword, or Idle
-        SPX_DBG_TRACE_VERBOSE("%s: Already stopped KwsSingleShot ... recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, m_sessionState);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Already stopped KwsSingleShot ... recoKind %d; sessionState %d", (void*)this, m_recoKind, m_sessionState);
     }
     else if (stopKind == RecognitionKind::KwsSingleShot && IsKind(RecognitionKind::KwsSingleShot) &&
              ChangeState(stopKind, SessionState::ProcessingAudio, stopKind, SessionState::WaitForAdapterCompletedSetFormatStop))
@@ -948,21 +965,23 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
         // TODO: RobCh: Is this ever called?!! How does it not get eaten by the first if statement above?!!
 
         // We're going to wait for done ... (which will flip us back to wherever we need to go...)
-        SPX_DBG_TRACE_VERBOSE("%s: Now KwsSingleShot/WaitForAdapterCompletedSetFormatStop ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Now KwsSingleShot/WaitForAdapterCompletedSetFormatStop ...", (void*)this);
     }
     else if (ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
     {
         // We've been asked to stop whatever it is we're doing, while we're actively processing audio ...
         // So ... Let's stop the pump
-        SPX_DBG_TRACE_VERBOSE("%s: Now StoppingPump ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: We've been asked to stop whatever it is we're doing, while we're actively processing audio ...", (void*)this);
+
         auto audioPump = m_audioPump;
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Now StoppingPump[%p] ...", (void*)this, (void*)audioPump.get());
         if (audioPump)
         {
             audioPump->StopPump();
         }
         else
         {
-            SPX_DBG_TRACE_VERBOSE("%s: Pump has already been released", __FUNCTION__);
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Pump has already been released", (void*)this);
         }
         if (m_codecAdapter)
         {
@@ -973,28 +992,28 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
     else if (IsState(SessionState::WaitForAdapterCompletedSetFormatStop))
     {
         // If we're already in the WaitForAdapterCompletedSetFormatStop state... That's fine ... We'll eventually transit to Idle once AdapterCompletedSetFormatStop() is called...
-        SPX_DBG_TRACE_VERBOSE("%s: Now (still) WaitForAdapterCompletedSetFormatStop ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Now (still) WaitForAdapterCompletedSetFormatStop ...", (void*)this);
     }
     else if (IsState(SessionState::ProcessingAudioLeftovers))
     {
         // If we're already in the ProcessingAudioLeftovers state... That's fine ... We'll eventually transit to Idle once AdapterCompletedSetFormatStop() is called
         // and we processed all data.
-        SPX_DBG_TRACE_VERBOSE("%s: Now (still) ProcessingAudioLeftovers ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Now (still) ProcessingAudioLeftovers ...", (void*)this);
     }
     else if (IsKind(RecognitionKind::Idle) && IsState(SessionState::Idle))
     {
         // If we're already in the idle state... Awesome!!!
-        SPX_DBG_TRACE_VERBOSE("%s: Now Idle/Idle ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Now Idle/Idle already...", (void*)this);
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: Unexpected State: recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, m_sessionState);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StopRecognizing: Unexpected State: recoKind %d; sessionState %d", (void*)this, m_recoKind, m_sessionState);
     }
 }
 
 void CSpxAudioStreamSession::WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionResult> result)
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::WaitForRecognition_Complete: ...", (void*)this);
 
     FireResultEvent(GetSessionId(), result);
 
@@ -1010,7 +1029,7 @@ void CSpxAudioStreamSession::WaitForRecognition_Complete(std::shared_ptr<ISpxRec
 
 void CSpxAudioStreamSession::FireSessionStartedEvent()
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireSessionStartedEvent: ...", (void*)this);
     std::wstring sessionIdOverride;
     /* For dialog service connector, we replace session id with the interaction id that's going to be send in the context message. */
     if (IsRecognizerType<ISpxDialogServiceConnector>())
@@ -1018,15 +1037,16 @@ void CSpxAudioStreamSession::FireSessionStartedEvent()
         sessionIdOverride = PAL::ToWString(PeekNextInteractionId(InteractionIdPurpose::Speech));
     }
 
-    SPX_DBG_TRACE_VERBOSE("Firing SessionStarted event: SessionId: %ls", m_sessionId.c_str());
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireSessionStartedEvent: Firing SessionStarted event: SessionId: %ls", (void*)this, m_sessionId.c_str());
+
     FireEvent(EventType::SessionStart, nullptr, sessionIdOverride.empty() ? nullptr : sessionIdOverride.c_str());
     m_fireEndOfStreamAtSessionStop = true;
 }
 
 void CSpxAudioStreamSession::FireSessionStoppedEvent()
 {
-    SPX_DBG_TRACE_FUNCTION();
-    SPX_DBG_TRACE_VERBOSE("Firing SessionStopped event: SessionId: %ls", m_sessionId.c_str());
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireSessionStoppedEvent: Firing SessionStopped event: SessionId: %ls", (void*)this, m_sessionId.c_str());
+
     EnsureFireResultEvent();
 
     FireEvent(EventType::SessionStop);
@@ -1034,28 +1054,28 @@ void CSpxAudioStreamSession::FireSessionStoppedEvent()
 
 void CSpxAudioStreamSession::FireConnectedEvent()
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireConnectedEvent", (void*)this);
 
     FireEvent(EventType::Connected);
 }
 
 void CSpxAudioStreamSession::FireDisconnectedEvent()
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireDisconnectedEvent", (void*)this);
 
     FireEvent(EventType::Disconnected);
 }
 
 void CSpxAudioStreamSession::FireSpeechStartDetectedEvent(uint64_t offset)
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireSpeechStartDetectedEvent", (void*)this);
 
     FireEvent(EventType::SpeechStart, nullptr, nullptr, offset);
 }
 
 void CSpxAudioStreamSession::FireSpeechEndDetectedEvent(uint64_t offset)
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireSpeechEndDetectedEvent", (void*)this);
 
     FireEvent(EventType::SpeechEnd, nullptr, nullptr, offset);
 }
@@ -1063,24 +1083,25 @@ void CSpxAudioStreamSession::FireSpeechEndDetectedEvent(uint64_t offset)
 void CSpxAudioStreamSession::EnsureFireResultEvent()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::EnsureFireResultEvent", (void*)this);
 
-     if (m_singleShotInFlight || (m_fireEndOfStreamAtSessionStop && m_sawEndOfStream))
-     {
-         SPX_DBG_TRACE_VERBOSE("%s: Getting ready to fire ResultReason::Canceled result (sawEos=%d, fireEos=%d)", __FUNCTION__, m_sawEndOfStream, m_fireEndOfStreamAtSessionStop);
+    if (m_singleShotInFlight || (m_fireEndOfStreamAtSessionStop && m_sawEndOfStream))
+    {
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::EnsureFireResultEvent: Getting ready to fire ResultReason::Canceled result (sawEos=%d, fireEos=%d)", (void*)this, m_sawEndOfStream, m_fireEndOfStreamAtSessionStop);
 
-         auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
-         auto result = (m_fireEndOfStreamAtSessionStop && m_sawEndOfStream)
-            ? factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::EndOfStream, CancellationErrorCode::NoError, nullptr, 0, 0)
-            : factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::Error, CancellationErrorCode::ServiceTimeout, L"Timeout: no recognition result received.", 0, 0);
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
+        auto result = (m_fireEndOfStreamAtSessionStop && m_sawEndOfStream)
+        ? factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::EndOfStream, CancellationErrorCode::NoError, nullptr, 0, 0)
+        : factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::Error, CancellationErrorCode::ServiceTimeout, L"Timeout: no recognition result received.", 0, 0);
 
-         WaitForRecognition_Complete(result);
-         m_fireEndOfStreamAtSessionStop = false;
-     }
+        WaitForRecognition_Complete(result);
+        m_fireEndOfStreamAtSessionStop = false;
+    }
 }
 
 void CSpxAudioStreamSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireResultEvent", (void*)this);
 
     auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
 
@@ -1093,7 +1114,7 @@ void CSpxAudioStreamSession::FireResultEvent(const std::wstring& sessionId, std:
 
     if (result->GetReason() == ResultReason::Canceled)
     {
-        SPX_DBG_TRACE_VERBOSE("Firing RecoResultEvent(Canceled): SessionId: %ls", m_sessionId.c_str());
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::FireResultEvent: Firing RecoResultEvent(Canceled): SessionId: %ls", (void*)this, m_sessionId.c_str());
     }
 
     FireEvent(EventType::RecoResultEvent, result, const_cast<wchar_t*>(sessionId.c_str()));
@@ -1198,7 +1219,8 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
 {
     UNUSED(adapter);
 
-    SPX_DBG_TRACE_VERBOSE("Keyword detected!! Starting KwsSingleShot recognition... offset=%" PRIu64 "; size=%d", offset, audioChunk->size);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::KeywordDetected: Keyword detected!! Starting KwsSingleShot recognition... offset=%" PRIu64 "; size=%d", (void*)this, offset, audioChunk->size);
+
     SPX_ASSERT_WITH_MESSAGE(m_threadService->IsOnServiceThread(), "called on wrong thread, must be thread service managed thread.");
 
     // Report that we have a keyword candidate
@@ -1222,7 +1244,7 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
     if (ChangeState(RecognitionKind::Keyword, SessionState::ProcessingAudio, RecognitionKind::KwsSingleShot, SessionState::HotSwapPaused))
     {
         // We've been told a keyword was recognized... Stash the audio, and start KwsSingleShot recognition!!
-        SPX_DBG_TRACE_VERBOSE("%s: Now KwsSingleShot/Paused ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::KeywordDetected: Now KwsSingleShot/Paused ...", (void*)this);
 
         m_spottedKeyword = audioChunk;
         HotSwapToKwsSingleShotWhilePaused(spottedKeywordResult);
@@ -1325,7 +1347,7 @@ void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapte
         m_currentTurnGlobalOffset = m_audioBuffer->GetAbsoluteOffset();
         bufferedBytes = m_audioBuffer->StashedSizeInBytes();
     }
-    SPX_DBG_TRACE_VERBOSE("m_currentTurnGlobalOffset=%" PRIu64 ", previousTurnGlobalOffset=%" PRIu64 " bufferedBytes=%" PRIu64, m_currentTurnGlobalOffset, previousTurnGlobalOffset, bufferedBytes);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterStoppedTurn: m_currentTurnGlobalOffset=%" PRIu64 ", previousTurnGlobalOffset=%" PRIu64 " bufferedBytes=%" PRIu64, (void*)this, m_currentTurnGlobalOffset, previousTurnGlobalOffset, bufferedBytes);
 
     auto bIsConversationTranscriber = IsRecognizerType<ISpxConversationTranscriber>();
 
@@ -1347,7 +1369,7 @@ void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapte
             // turn.
             if (!bufferedBytes || m_currentTurnGlobalOffset == previousTurnGlobalOffset || bIsConversationTranscriber)
             {
-                SPX_DBG_TRACE_WARNING_IF(m_currentTurnGlobalOffset == previousTurnGlobalOffset, "%s: Dropping %d bytes due to no progress in the last turn", __FUNCTION__, (int)bufferedBytes);
+                SPX_DBG_TRACE_WARNING_IF(m_currentTurnGlobalOffset == previousTurnGlobalOffset, "[%p]CSpxAudioStreamSession::AdapterStoppedTurn: Dropping %d bytes due to no progress in the last turn", (void*)this, (int)bufferedBytes);
                 ChangeState(SessionState::ProcessingAudioLeftovers, SessionState::WaitForAdapterCompletedSetFormatStop);
                 EncounteredEndOfStream();
             }
@@ -1371,14 +1393,14 @@ void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapte
     if (IsState(SessionState::WaitForAdapterCompletedSetFormatStop))
     {
         // We are waiting for the adapter to confirm it got the SetFormat(nullptr), but we haven't sent the request yet...
-        SPX_DBG_TRACE_VERBOSE("%s: Still WaitForAdapterCompletedSetFormatStop, calling ->SetFormat(nullptr) ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterStoppedTurn: Still WaitForAdapterCompletedSetFormatStop, calling ->SetFormat(nullptr) ...", (void*)this);
         InformAdapterSetFormatStopping(SessionState::WaitForAdapterCompletedSetFormatStop);
     }
     else if (m_adapterAudioMuted && IsState(SessionState::ProcessingAudio) &&
              IsKind(m_turnEndStopKind) &&  m_turnEndStopKind != RecognitionKind::Idle)
     {
         // The adapter previously requested to stop processing audio ... We can now safely stop recognizing...
-        SPX_DBG_TRACE_VERBOSE("%s: ->StopRecognizing(%d) ...", __FUNCTION__, m_turnEndStopKind);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterStoppedTurn: ->StopRecognizing(%d) ...", (void*)this, m_turnEndStopKind);
         auto stopKind = m_turnEndStopKind;
         m_turnEndStopKind = RecognitionKind::Idle;
         StopRecognizing(stopKind);
@@ -2076,7 +2098,7 @@ std::string CSpxAudioStreamSession::SpeechRegionFromIntentRegion(const std::stri
 
 void CSpxAudioStreamSession::InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> model)
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::InitKwsEngineAdapter ...", (void*)this);
 
     m_kwsModel = model;
 
@@ -2116,11 +2138,14 @@ void CSpxAudioStreamSession::InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> 
 
 void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused(std::shared_ptr<ISpxRecognitionResult> spottedKeywordResult)
 {
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused ...", (void*)this);
+
     // We need to do all this work on a background thread, because we can't guarantee it's safe
     // to spend any significant amount of time blocking this the KWS or Audio threads...
     auto task = CreateTask([=]() mutable {
 
         SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused kicked-off THREAD started ***", "*** CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused kicked-off THREAD stopped ***");
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused:  Task", (void*)this);
 
         // Keep track of the fact that we have a thread pending waiting to hear
         // what the final recognition result is, and then start/stop recognizing...
@@ -2138,13 +2163,14 @@ void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused(std::shared_ptr<I
         SPX_DBG_ASSERT(IsKind(RecognitionKind::KwsSingleShot) && IsState(SessionState::HotSwapPaused));
         this->HotSwapAdaptersWhilePaused(RecognitionKind::KwsSingleShot);
 
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused - Task: m_audioPumpStoppedBeforeHotSwap %s", (void*)this, m_audioPumpStoppedBeforeHotSwap ? "true": "false");
         if (m_audioPumpStoppedBeforeHotSwap == true)
         {
             m_audioPumpStoppedBeforeHotSwap = false;
 
             // Process the buffered audio leftovers
             SPX_DBG_ASSERT(IsState(SessionState::ProcessingAudio));
-            SPX_DBG_TRACE_VERBOSE("Processing audio leftovers after hot swap");
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused:  Task - Processing audio leftovers after hot swap", (void*)this);
 
             ChangeState(SessionState::ProcessingAudio, SessionState::ProcessingAudioLeftovers);
             while (ProcessNextAudio())
@@ -2174,6 +2200,8 @@ void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused(std::shared_ptr<I
 
 void CSpxAudioStreamSession::Ensure16kHzSampleRate()
 {
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::Ensure16kHzSampleRate:  Pump: %p", (void*)this, (void*)m_audioPump.get());
+
     if (m_audioPump)
     {
         auto cbFormat = m_audioPump->GetFormat(nullptr, 0);
@@ -2212,6 +2240,7 @@ void CSpxAudioStreamSession::DestroyMeeting()
 void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartAudioPump:  RecognitionKind %d | m_audioPump [%p]", (void*)this, (int)startKind, (void*)m_audioPump.get());
     SPX_DBG_ASSERT(IsState(SessionState::WaitForPumpSetFormatStart));
 
     // Tell everyone we're starting...
@@ -2233,7 +2262,7 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     if (!m_audioPump)
     {
         // The session was terminated, exiting.
-        SPX_DBG_TRACE_VERBOSE("Audio pump was shutdown, exiting...");
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartAudioPump: Audio pump was shutdown, exiting...", (void*)this);
         return;
     }
 
@@ -2269,6 +2298,8 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     auto pISpxAudioProcessor = ptr->shared_from_this();
 
     auto audioPump = m_audioPump;
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::StartAudioPump: Starting pump[%p]...", (void*)this, (void*)audioPump.get());
+
     if (audioPump)
     {
         audioPump->StartPump(pISpxAudioProcessor);
@@ -2279,13 +2310,14 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
 void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::HotSwapAdaptersWhilePaused: ...", (void*)this);
     SPX_DBG_ASSERT(IsKind(startKind) && IsState(SessionState::HotSwapPaused));
 
     auto oldAudioProcessor = m_audioProcessor;
     if (!m_audioPump)
     {
         // The session was terminated, exiting.
-        SPX_DBG_TRACE_VERBOSE("Audio pump was shutdown, exiting...");
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::HotSwapAdaptersWhilePaused: Audio pump was shutdown, exiting...", (void*)this);
         return;
     }
 
@@ -2406,7 +2438,7 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
     {
         if (m_audioProcessor)
         {
-            SPX_DBG_TRACE_VERBOSE("%s: ProcessingAudio - Send zero size audio.", __FUNCTION__);
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::InformAdapterSetFormatStoppingProcessingAudio - Send zero size audio.", (void*)this);
             m_audioProcessor->ProcessAudio(std::make_shared<DataChunk>(nullptr, 0));
         }
     }
@@ -2414,7 +2446,7 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
     if (!m_expectAdapterStartedTurn && !m_expectAdapterStoppedTurn)
     {
         // Then we can finally tell it we're done, by sending a nullptr SPXWAVEFORMAT
-        SPX_DBG_TRACE_VERBOSE("%s: SetFormat(nullptr)", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::InformAdapterSetFormatStoppingSetFormat(nullptr)", (void*)this);
         if (m_audioProcessor)
         {
             m_audioProcessor->SetFormat(nullptr);
@@ -2437,18 +2469,19 @@ void CSpxAudioStreamSession::EncounteredEndOfStream()
 void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio doneAdapter)
 {
     SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::AdapterCompletedSetFormatStop kicked-off THREAD started ***", "*** CSpxAudioStreamSession::AdapterCompletedSetFormatStop kicked-off THREAD stopped ***");
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterCompletedSetFormatStop: kicked-off THREAD started ***", (void*)this);
 
     if (ChangeState(RecognitionKind::KwsSingleShot, SessionState::WaitForAdapterCompletedSetFormatStop, RecognitionKind::Keyword, SessionState::ProcessingAudio))
     {
-        SPX_DBG_TRACE_VERBOSE("KwsSingleShot Waiting for done ... Done!! Switching back to Keyword/Processing");
-        SPX_DBG_TRACE_VERBOSE("%s: Now Keyword/ProcessingAudio ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterCompletedSetFormatStop: KwsSingleShot Waiting for done ... Done!! Switching back to Keyword/Processing", (void*)this);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterCompletedSetFormatStop: Now Keyword/ProcessingAudio ...", (void*)this);
 
         FireSessionStoppedEvent();
     }
     else if (ChangeState(SessionState::HotSwapPaused, SessionState::ProcessingAudio))
     {
-        SPX_DBG_TRACE_VERBOSE("Previous Adapter is done processing audio ... resuming Processing with the new adapter...");
-        SPX_DBG_TRACE_VERBOSE("%s: Now ProcessingAudio ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterCompletedSetFormatStop: Previous Adapter is done processing audio ... resuming Processing with the new adapter...", (void*)this);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterCompletedSetFormatStop: Now ProcessingAudio ...", (void*)this);
 
         if (doneAdapter == AdapterDoneProcessingAudio::Keyword && (IsKind(RecognitionKind::KwsSingleShot) || IsKind(RecognitionKind::SingleShot)))
         {
@@ -2467,7 +2500,8 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
             if (m_kwsModel != nullptr && ChangeState(SessionState::Idle, RecognitionKind::Keyword, SessionState::WaitForPumpSetFormatStart))
             {
                 // Go ahead re-start the pump
-                SPX_DBG_TRACE_VERBOSE("%s: Now WaitForPumpSetFormatStart ...", __FUNCTION__);
+                SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterCompletedSetFormatStop: Restart the keyword spotter - Now WaitForPumpSetFormatStart ...", (void*)this);
+
                 StartAudioPump(RecognitionKind::Keyword, m_kwsModel);
             }
         }
@@ -2481,7 +2515,7 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: Is this OK? doneAdapter=%d; sessionState=%d **************************", __FUNCTION__, doneAdapter, m_sessionState);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::AdapterCompletedSetFormatStop:  Is this OK? doneAdapter=%d; sessionState=%d **************************", (void*)this, doneAdapter, m_sessionState);
     }
 }
 
@@ -2512,7 +2546,7 @@ bool CSpxAudioStreamSession::ChangeState(RecognitionKind recoKindFrom, SessionSt
     // Check to see if the Audio StreamState and RecognitionKind match...
     if (m_sessionState == sessionStateFrom && m_recoKind == recoKindFrom)
     {
-        SPX_DBG_TRACE_VERBOSE("%s; recoKind/sessionState: %d/%d => %d/%d", __FUNCTION__, recoKindFrom, sessionStateFrom, recoKindTo, sessionStateTo);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::ChangeState: recoKind/sessionState: %d/%d => %d/%d", (void*)this, recoKindFrom, sessionStateFrom, recoKindTo, sessionStateTo);
 
         // Protecting only the write access because m_cv is waiting,
         // all changes to the state can still happen only on the background thread.
@@ -2522,7 +2556,7 @@ bool CSpxAudioStreamSession::ChangeState(RecognitionKind recoKindFrom, SessionSt
         m_cv.notify_all();
         return true;
     }
-    SPX_DBG_TRACE_VERBOSE("%s; recoKind/sessionState: %d/%d != %d/%d", __FUNCTION__, recoKindFrom, sessionStateFrom, m_recoKind, m_sessionState);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::ChangeState:  recoKind/sessionState: %d/%d != %d/%d", (void*)this, recoKindFrom, sessionStateFrom, m_recoKind, m_sessionState);
 
     return false;
 }

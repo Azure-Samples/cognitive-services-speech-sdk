@@ -24,10 +24,12 @@ CSpxAudioPump::CSpxAudioPump() :
     m_state(State::NoInput),
     m_stateRequested(State::NoInput)
 {
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::CSpxAudioPump", (void*)this);
 }
 
 CSpxAudioPump::~CSpxAudioPump()
 {
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::~CSpxAudioPump", (void*)this);
 }
 
 void CSpxAudioPump::SetReader(std::shared_ptr<ISpxAudioStreamReader> reader)
@@ -67,6 +69,7 @@ void CSpxAudioPump::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProc
         "in the enumeration); unless someone adds a new state and doesn't change this code. This assert "
         "guards in DBG for that possibility.");
 
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::StartPump():", (void*)this);
     m_stateRequested = State::Processing;
 
     auto pump = ((ISpxAudioPump*)this);
@@ -89,15 +92,16 @@ void CSpxAudioPump::PausePump()
 void CSpxAudioPump::StopPump()
 {
     SPX_DBG_TRACE_SCOPE("CSpxAudioPump::StopPump() ...", "CSpxAudioPump::StopPump ... Done!");
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::StopPump():", (void*)this);
 
     std::unique_lock<std::mutex> lock(m_mutex);
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::StopPump() ... mutex LOCKED");
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::StopPump() ... mutex LOCKED", (void*)this);
 
     switch (m_state)
     {
     case State::NoInput:
     case State::Idle:
-        SPX_DBG_TRACE_VERBOSE("%s when we're already in State::Idle or State::NoInput state", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::StopPump(): when we're already in State::Idle or State::NoInput state", (void*)this);
         break;
 
     case State::Paused:
@@ -124,7 +128,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
         SPX_DBG_TRACE_SCOPE("*** AudioPump THREAD started! ***", "*** AudioPump THREAD stopped! ***");
 
         // Get the format from the reader and give it to the processor
-        SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): getting format from reader...");
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): getting format from reader... ", (void*)this);
 
         SPX_TRACE_ERROR_IF(m_reader == nullptr, "CSpxAudioPump::PumpThread(): m_reader == nullptr !!! Unexpected !!");
         auto cbFormat = m_reader->GetFormat(nullptr, 0);
@@ -139,7 +143,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
         pISpxAudioProcessor->SetFormat(waveformat.get());
 
         // Calculate size of the buffer to read from the reader and send to the processor; and allocate it
-        SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): allocating our first buffer");
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): allocating our first buffer", (void*)this);
         SPX_TRACE_ERROR_IF(waveformat == nullptr, "CSpxAudioPump::PumpThread(): waveformat == nullptr !!! Unexpected !!");
         SPX_IFTRUE_THROW_HR(waveformat->wBitsPerSample % 8 != 0, SPXERR_UNSUPPORTED_FORMAT); // we only support 8bit multiples for sample size
         auto bytesPerSample = waveformat->wBitsPerSample / 8;
@@ -158,7 +162,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
             // If we actually need to change the state, do so, and signal to waiters that we did
             if (m_stateRequested != m_state)
             {
-                SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(), checkAndChangeState: changing states as requested: %d => %d", m_state, m_stateRequested);
+                SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(), checkAndChangeState: changing states as requested: %d => %d", (void*)this, m_state, m_stateRequested);
                 m_state = m_stateRequested;
                 m_cv.notify_all();
             }
@@ -175,7 +179,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
         };
 
         // Continue to loop while we're in the 'Processing' state...
-        SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): starting loop ...");
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): starting loop ...", (void*)this);
         while (checkAndChangeState())
         {
             // Ensure we have an unencumbered data buffer to use for this Read/ProcessAudio iteration
@@ -186,7 +190,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
 
             // Read audio buffer, and send it to the processor
             auto cbRead = m_reader->Read(data.get(), bytesPerFrame);
-            SPX_DBG_TRACE_VERBOSE("............ audio pump: sending audio buffer size %u", cbRead);
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): sending audio buffer size %u", (void*)this, cbRead);
             std::string capturedTime, userId;
             if (cbRead != 0)
             {
@@ -199,29 +203,30 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
             // If we didn't read any data, move to the 'Idle' state
             if (cbRead == 0)
             {
-                SPX_DBG_TRACE_INFO("m_reader->Read() read ZERO (0) bytes... Indicating end of stream based input.");
+                SPX_DBG_TRACE_INFO("[%p]CSpxAudioPump::PumpThread(): m_reader->Read() read ZERO (0) bytes... Indicating end of stream based input.", (void*)this);
                 std::unique_lock<std::mutex> lock(m_mutex);
                 m_stateRequested = State::Idle;
             }
         }
 
         // Let the Processor know we're done for now...
-        SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): exited while loop, pre-SetFormat(nullptr)");
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): exited while loop, pre-SetFormat(nullptr)", (void*)this);
         pISpxAudioProcessor->SetFormat(nullptr);
-        SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): exited while loop, post-SetFormat(nullptr)");
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): exited while loop, post-SetFormat(nullptr)", (void*)this);
         return;
     }
     catch (const std::exception& e)
     {
-        SPX_DBG_TRACE_ERROR("exception caught during pumping, %s", e.what());
+        SPX_DBG_TRACE_ERROR("[%p]CSpxAudioPump::PumpThread(): exception caught during pumping, %s", (void*)this, e.what());
         SPX_DBG_ASSERT(GetSite() != nullptr);
         InvokeOnSite([msg = e.what()](const SitePtr& site)
         {
             site->Error(msg);
         });
     }
-    catch (...)
+    catch (SPXHR& hrError)
     {
+        SPX_DBG_TRACE_ERROR("exception caught during pumping, %p", reinterpret_cast<void*>(hrError));
         SPX_DBG_ASSERT(GetSite() != nullptr);
         InvokeOnSite([&](const SitePtr& site)
         {
@@ -230,32 +235,32 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
     }
 
     std::unique_lock<std::mutex> lock(m_mutex);
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(), exception happened, changing states as requested: %d => %d", m_state, State::Idle);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): , exception happened, changing states as requested: %d => %d", (void*)this, m_state, State::Idle);
     m_state = State::Idle;
     m_cv.notify_all();
 }
 
 void CSpxAudioPump::WaitForPumpStart(std::unique_lock<std::mutex>& lock)
 {
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpStart() ... pre m_cv.wait_for()");
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::WaitForPumpStart() ... pre m_cv.wait_for()", (void*)this);
     if (!m_cv.wait_for(lock, std::chrono::milliseconds(m_waitMsStartPumpRequestTimeout), [&] { return m_state == State::Processing || m_stateRequested != State::Processing; }))
     {
-        SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpStart() timeout waiting on a state");
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::WaitForPumpStart(): timeout waiting on a state", (void*)this);
     }
 
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpStart() ... post m_cv.wait_for(); state=%d (requestedState=%d)", m_state, m_stateRequested);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::WaitForPumpStart() ... post m_cv.wait_for(); state=%d (requestedState=%d)", (void*)this, m_state, m_stateRequested);
 }
 
 void CSpxAudioPump::WaitForPumpIdle(std::unique_lock<std::mutex>& lock)
 {
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpIdle() ... pre m_cv.wait_for()");
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::WaitForPumpIdle() ... pre m_cv.wait_for()", (void*)this);
     if (!m_cv.wait_for(lock, std::chrono::milliseconds(m_waitMsStopPumpRequestTimeout), [&] { return m_state == State::Idle || m_stateRequested != State::Idle; }))
     {
-        SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpIdle() timeout waiting on a state");
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::WaitForPumpIdle() timeout waiting on a state", (void*)this);
     }
 
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpIdle() ... post m_cv.wait_for(); state=%d (requestedState=%d)", m_state, m_stateRequested);
-    SPX_DBG_TRACE_WARNING_IF(m_state != State::Idle, "CSpxAudioPump::WaitForPumpIdle(): Unexpected: state != State::Idle; state=%d", m_state);
+    SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::WaitForPumpIdle() ... post m_cv.wait_for(); state=%d (requestedState=%d)", (void*)this, m_state, m_stateRequested);
+    SPX_DBG_TRACE_WARNING_IF(m_state != State::Idle, "[%p]CSpxAudioPump::WaitForPumpIdle(): Unexpected: state != State::Idle; state=%d", (void*)this, m_state);
 }
 
 std::string CSpxAudioPump::GetPropertyValue(const std::string& key) const
