@@ -37,6 +37,7 @@ public:
 
     // --- ISpxAutoDetectSourceLangConfig ---
     virtual void InitFromLanguages(const char* languages) override;
+    virtual void AddSourceLanguageConfig(std::shared_ptr<ISpxSourceLanguageConfig> sourceLanguageConfigs) override;
 
     // --- IServiceProvider
     SPX_SERVICE_MAP_BEGIN()

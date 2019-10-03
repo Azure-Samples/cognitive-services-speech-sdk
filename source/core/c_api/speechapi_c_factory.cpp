@@ -80,6 +80,11 @@ auto create_from_config(SPXHANDLE hspeechconfig, SPXHANDLE hautoDetectSourceLang
     auto auto_detect_source_lang_config_properties = SpxQueryInterface<ISpxNamedProperties>(auto_detect_source_lang_config);
     if (auto_detect_source_lang_config_properties != nullptr)
     {
+        if (config_property_bag != nullptr && config_property_bag->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId)))
+        {
+            ThrowInvalidArgumentException("EndpointId on SpeechConfig is unsupported for auto detection source language scenario."
+                "Please set per language endpointId through SourceLanguageConfig and use it to construct AutoDetectSourceLanguageConfig.");
+        }
         factory_property_bag->Copy(auto_detect_source_lang_config_properties.get());
     }
 

@@ -22,4 +22,19 @@ void CSpxAutoDetectSourceLangConfig::InitFromLanguages(const char* languages)
     m_init = true;
     SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), languages);
 }
+
+void CSpxAutoDetectSourceLangConfig::AddSourceLanguageConfig(std::shared_ptr<ISpxSourceLanguageConfig> sourceLanguageConfig)
+{
+    std::string languageList = GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), "");
+    auto language = sourceLanguageConfig->GetLanguage();
+    CSpxLanguageListUtils::AddLangToList(language, languageList);
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), languageList.c_str());
+    SPX_DBG_TRACE_INFO("%s: auto detected source languages: %s", __FUNCTION__, languageList.c_str());
+    auto endpointId = sourceLanguageConfig->GetEndpointId();
+    if (!endpointId.empty())
+    {
+        std::string endpointIdProperty = language + (string)GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId);
+        SetStringValue(endpointIdProperty.c_str(), endpointId.c_str());
+    }
+}
 } } } } // Microsoft::CognitiveServices::Speech::Impl

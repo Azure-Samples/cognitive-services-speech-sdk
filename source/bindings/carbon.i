@@ -87,8 +87,8 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechSynthesizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConnector)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConfig)
-%shared_ptr(Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SourceLanguageConfig)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig)
 %shared_ptr(std::vector<uint8_t>)
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioConfig)
@@ -158,6 +158,7 @@
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechSynthesisResult> SpeechSynthesisResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionResult> ConversationTranscriberResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Conversation::Participant> ParticipantPtr;
+    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::SourceLanguageConfig> SourceLanguageConfigPtr;
 %}
 
 %template(SpeechRecognitionResultPtrFuture) FutureWrapper<SpeechRecognitionResultPtr>;
@@ -167,13 +168,13 @@
 %template(StringFuture) FutureWrapper<std::string>;
 %template(VoidFuture) FutureWrapper<void>;
 %template(ConversationTranscriberResultPtrFuture) FutureWrapper<ConversationTranscriberResultPtr>;
-
+%template(SourceLanguageConfigPtrVector) std::vector<SourceLanguageConfigPtr>;
 
 %include <speechapi_cxx_speech_config.h>
 %include <speechapi_cxx_speech_translation_config.h>
 %include <speechapi_cxx_dialog_service_config.h>
-%include <speechapi_cxx_auto_detect_source_lang_config.h>
 %include <speechapi_cxx_source_lang_config.h>
+%include <speechapi_cxx_auto_detect_source_lang_config.h>
 
 // %extend need to come first, before the %ignore for the same method (RecognizeOnceAsync, etc.)
 %extend Microsoft::CognitiveServices::Speech::SpeechRecognizer {

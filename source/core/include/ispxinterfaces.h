@@ -1257,12 +1257,6 @@ public:
     virtual void RemoveTargetLanguage(const std::string& lang) = 0;
 };
 
-class ISpxAutoDetectSourceLangConfig : public ISpxInterfaceBaseFor<ISpxAutoDetectSourceLangConfig>
-{
-public:
-    virtual void InitFromLanguages(const char* languages) = 0;
-};
-
 class ISpxSourceLanguageConfig : public ISpxInterfaceBaseFor<ISpxSourceLanguageConfig>
 {
 public:
@@ -1270,6 +1264,13 @@ public:
     virtual void InitFromLanguageAndEndpointId(const char* language, const char* endpointId) = 0;
     virtual std::string GetLanguage() = 0;
     virtual std::string GetEndpointId() = 0;
+};
+
+class ISpxAutoDetectSourceLangConfig : public ISpxInterfaceBaseFor<ISpxAutoDetectSourceLangConfig>
+{
+public:
+    virtual void InitFromLanguages(const char* languages) = 0;
+    virtual void AddSourceLanguageConfig(std::shared_ptr<ISpxSourceLanguageConfig> sourceLanguageConfig) = 0;
 };
 
 class ISpxThreadService : public ISpxInterfaceBaseFor<ISpxThreadService>

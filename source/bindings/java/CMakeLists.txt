@@ -243,6 +243,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/StringVector.java
     ${CMAKE_SWIG_OUTDIR}/UInt8Vector.java
     ${CMAKE_SWIG_OUTDIR}/User.java
+    ${CMAKE_SWIG_OUTDIR}/SourceLanguageConfigPtrVector.java
 )
 
 set_source_files_properties(${SWIG_JAVA_SOURCES} PROPERTIES GENERATED TRUE)

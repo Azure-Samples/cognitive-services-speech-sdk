@@ -13,6 +13,7 @@
 #include <speechapi_cxx_utils.h>
 #include "speechapi_c_common.h"
 #include "speechapi_c_auto_detect_source_lang_config.h"
+#include "speechapi_cxx_source_lang_config.h"
 #include <stdarg.h>
 
 namespace Microsoft {
@@ -51,7 +52,35 @@ public:
             isFirst = false;
             languagesStr += Utils::ToUTF8(language);
         }
-        SPX_THROW_ON_FAIL(auto_detect_source_lang_config_from_languages(&hconfig, languagesStr.c_str()));
+        SPX_THROW_ON_FAIL(create_auto_detect_source_lang_config_from_languages(&hconfig, languagesStr.c_str()));
+        auto ptr = new AutoDetectSourceLanguageConfig(hconfig);
+        return std::shared_ptr<AutoDetectSourceLanguageConfig>(ptr);
+    }
+
+    /// <summary>
+    /// Creates an instance of the AutoDetectSourceLanguageConfig with a list of source language config
+    /// </summary>
+    /// <param name="configList">The list of source languages config</param>
+    /// <returns>A shared pointer to the new AutoDetectSourceLanguageConfig instance.</returns>
+    static std::shared_ptr<AutoDetectSourceLanguageConfig> FromSourceLanguageConfigs(std::vector<std::shared_ptr<Microsoft::CognitiveServices::Speech::SourceLanguageConfig>> configList)
+    {
+        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, configList.size() == 0);
+        SPXAUTODETECTSOURCELANGCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
+
+        bool isFirst = true;
+        for (const auto& config : configList)
+        {
+           SPX_THROW_HR_IF(SPXERR_INVALID_ARG, config == nullptr);
+           if (isFirst)
+           {
+               SPX_THROW_ON_FAIL(create_auto_detect_source_lang_config_from_source_lang_config(&hconfig, Utils::HandleOrInvalid<SPXSOURCELANGCONFIGHANDLE, SourceLanguageConfig>(config)));
+               isFirst = false;
+           }
+           else
+           {
+               SPX_THROW_ON_FAIL(add_source_lang_config_to_auto_detect_source_lang_config(hconfig, Utils::HandleOrInvalid<SPXSOURCELANGCONFIGHANDLE, SourceLanguageConfig>(config)));
+           }
+        }
         auto ptr = new AutoDetectSourceLanguageConfig(hconfig);
         return std::shared_ptr<AutoDetectSourceLanguageConfig>(ptr);
     }

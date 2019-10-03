@@ -49,7 +49,7 @@ public:
     /// <param name="language">The source language</param>
     /// <param name="endpointId">The custom endpoint id</param>
     /// <returns>A shared pointer to the new SourceLanguageConfig instance.</returns>
-    static std::shared_ptr<SourceLanguageConfig> FromLanguageAndEndpointId(const SPXSTRING& language, const SPXSTRING& endpointId)
+    static std::shared_ptr<SourceLanguageConfig> FromLanguage(const SPXSTRING& language, const SPXSTRING& endpointId)
     {
         SPXSOURCELANGCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
         SPX_THROW_ON_FAIL(source_lang_config_from_language_and_endpointId(&hconfig, language.c_str(), endpointId.c_str()));

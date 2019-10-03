@@ -16,42 +16,86 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-SPXAPI auto_detect_source_lang_config_from_languages(SPXAUTODETECTSOURCELANGCONFIGHANDLE* hconfig, const char* languages)
+SPXAPI create_auto_detect_source_lang_config_from_languages(SPXAUTODETECTSOURCELANGCONFIGHANDLE* hAutoDetectSourceLanguageconfig, const char* languages)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, languages == nullptr || !(*languages));
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hconfig == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hAutoDetectSourceLanguageconfig == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        *hconfig = SPXHANDLE_INVALID;
+        *hAutoDetectSourceLanguageconfig = SPXHANDLE_INVALID;
 
         auto autoDetectSourceLangConfig = SpxCreateObjectWithSite<ISpxAutoDetectSourceLangConfig>("CSpxAutoDetectSourceLangConfig", SpxGetRootSite());
         autoDetectSourceLangConfig->InitFromLanguages(languages);
 
         auto autoDetectSourceLangConfigs = CSpxSharedPtrHandleTableManager::Get<ISpxAutoDetectSourceLangConfig, SPXAUTODETECTSOURCELANGCONFIGHANDLE>();
-        *hconfig = autoDetectSourceLangConfigs->TrackHandle(autoDetectSourceLangConfig);
+        *hAutoDetectSourceLanguageconfig = autoDetectSourceLangConfigs->TrackHandle(autoDetectSourceLangConfig);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) auto_detect_source_lang_config_is_handle_valid(SPXAUTODETECTSOURCELANGCONFIGHANDLE hconfig)
+SPXAPI create_auto_detect_source_lang_config_from_source_lang_config(SPXAUTODETECTSOURCELANGCONFIGHANDLE* hAutoDetectSourceLanguageconfig, SPXSOURCELANGCONFIGHANDLE hSourceLanguageConfig)
 {
-    return Handle_IsValid<SPXAUTODETECTSOURCELANGCONFIGHANDLE, ISpxAutoDetectSourceLangConfig>(hconfig);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hSourceLanguageConfig == SPXHANDLE_INVALID);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hAutoDetectSourceLanguageconfig == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *hAutoDetectSourceLanguageconfig = SPXHANDLE_INVALID;
+
+        auto autoDetectSourceLangConfig = SpxCreateObjectWithSite<ISpxAutoDetectSourceLangConfig>("CSpxAutoDetectSourceLangConfig", SpxGetRootSite());
+        auto sourceLangConfigs = CSpxSharedPtrHandleTableManager::Get<ISpxSourceLanguageConfig, SPXSOURCELANGCONFIGHANDLE>();
+        auto sourceLangConfigPtr = (*sourceLangConfigs)[hSourceLanguageConfig];
+        auto sourceLangaugeConfig = SpxQueryInterface<ISpxSourceLanguageConfig>(sourceLangConfigPtr);
+        SPX_IFTRUE_THROW_HR(sourceLangaugeConfig == nullptr, SPXERR_INVALID_ARG);
+        
+        autoDetectSourceLangConfig->AddSourceLanguageConfig(sourceLangaugeConfig);
+
+         auto autoDetectSourceLangConfigs = CSpxSharedPtrHandleTableManager::Get<ISpxAutoDetectSourceLangConfig, SPXAUTODETECTSOURCELANGCONFIGHANDLE>();
+        *hAutoDetectSourceLanguageconfig = autoDetectSourceLangConfigs->TrackHandle(autoDetectSourceLangConfig);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI auto_detect_source_lang_config_release(SPXAUTODETECTSOURCELANGCONFIGHANDLE hconfig)
+SPXAPI add_source_lang_config_to_auto_detect_source_lang_config(SPXAUTODETECTSOURCELANGCONFIGHANDLE hAutoDetectSourceLanguageconfig, SPXSOURCELANGCONFIGHANDLE hSourceLanguageConfig)
 {
-    return Handle_Close<SPXAUTODETECTSOURCELANGCONFIGHANDLE, ISpxAutoDetectSourceLangConfig>(hconfig);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hSourceLanguageConfig == SPXHANDLE_INVALID);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hAutoDetectSourceLanguageconfig == SPXHANDLE_INVALID);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto sourceLangConfigs = CSpxSharedPtrHandleTableManager::Get<ISpxSourceLanguageConfig, SPXSOURCELANGCONFIGHANDLE>();
+        auto sourceLangConfigPtr = (*sourceLangConfigs)[hSourceLanguageConfig];
+        auto sourceLanguageConfig = SpxQueryInterface<ISpxSourceLanguageConfig>(sourceLangConfigPtr);
+        SPX_IFTRUE_THROW_HR(sourceLanguageConfig == nullptr, SPXERR_INVALID_ARG);
+
+        auto autoDetectSourceLangConfigs = CSpxSharedPtrHandleTableManager::Get<ISpxAutoDetectSourceLangConfig, SPXAUTODETECTSOURCELANGCONFIGHANDLE>();
+        auto autoDetectSourceLangConfigPtr = (*autoDetectSourceLangConfigs)[hAutoDetectSourceLanguageconfig];
+        auto autoDetectSourceLangConfig = SpxQueryInterface<ISpxAutoDetectSourceLangConfig>(autoDetectSourceLangConfigPtr);
+
+        autoDetectSourceLangConfig->AddSourceLanguageConfig(sourceLanguageConfig);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI auto_detect_source_lang_config_get_property_bag(SPXAUTODETECTSOURCELANGCONFIGHANDLE hconfig, SPXPROPERTYBAGHANDLE* hpropbag)
+SPXAPI_(bool) auto_detect_source_lang_config_is_handle_valid(SPXAUTODETECTSOURCELANGCONFIGHANDLE hAutoDetectSourceLanguageconfig)
+{
+    return Handle_IsValid<SPXAUTODETECTSOURCELANGCONFIGHANDLE, ISpxAutoDetectSourceLangConfig>(hAutoDetectSourceLanguageconfig);
+}
+
+SPXAPI auto_detect_source_lang_config_release(SPXAUTODETECTSOURCELANGCONFIGHANDLE hAutoDetectSourceLanguageconfig)
+{
+    return Handle_Close<SPXAUTODETECTSOURCELANGCONFIGHANDLE, ISpxAutoDetectSourceLangConfig>(hAutoDetectSourceLanguageconfig);
+}
+
+SPXAPI auto_detect_source_lang_config_get_property_bag(SPXAUTODETECTSOURCELANGCONFIGHANDLE hAutoDetectSourceLanguageconfig, SPXPROPERTYBAGHANDLE* hpropbag)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto configs = CSpxSharedPtrHandleTableManager::Get<ISpxAutoDetectSourceLangConfig, SPXAUTODETECTSOURCELANGCONFIGHANDLE>();
-        auto config = (*configs)[hconfig];
+        auto config = (*configs)[hAutoDetectSourceLanguageconfig];
 
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(config);
 
