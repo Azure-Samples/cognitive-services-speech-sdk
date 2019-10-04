@@ -16,42 +16,191 @@ namespace Speech {
 namespace Dialog {
 
 /// <summary>
-/// Class that defines configurations for the dialog service connector object.
+/// Class that defines base configurations for the dialog service connector object.
 /// </summary>
-class DialogServiceConfig final: public SpeechConfig
+class DialogServiceConfig
 {
+protected:
     /*! \cond PROTECTED */
-    inline explicit DialogServiceConfig(SPXSPEECHCONFIGHANDLE h_config) : SpeechConfig{ h_config }
+    inline explicit DialogServiceConfig(SPXSPEECHCONFIGHANDLE h_config) : m_config{ h_config }
     {
     }
+    SpeechConfig m_config;
     /*! \endcond */
+
 public:
     /// <summary>
-    /// Creates a dialog service config instance with the specified bot secret.
+    /// Internal operator used to get underlying handle value.
     /// </summary>
-    /// <param name="secretKey">Speech channel bot secret key.</param>
-    /// <param name="subscription">Subscription key associated with the bot</param>
-    /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-    /// <returns>A shared pointer to the new dialog service config.</returns>
-    inline static std::shared_ptr<DialogServiceConfig> FromBotSecret(const SPXSTRING& secretKey, const SPXSTRING& subscription, const SPXSTRING& region)
+    /// <returns>A handle.</returns>
+    explicit operator SPXSPEECHCONFIGHANDLE() const { return static_cast<SPXSPEECHCONFIGHANDLE>(m_config); }
+
+    /// <summary>
+    /// Sets a property value by name.
+    /// </summary>
+    /// <param name="name">The property name.</param>
+    /// <param name="value">The property value.</param>
+    void SetProperty(const SPXSTRING& name, const SPXSTRING& value)
     {
-        SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(dialog_service_config_from_bot_secret(&h_config, Utils::ToUTF8(secretKey).c_str(), Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
-        return std::shared_ptr<DialogServiceConfig>{ new DialogServiceConfig(h_config) };
+        m_config.SetProperty(name, value);
     }
 
     /// <summary>
-    /// Creates a dialog service config instance with the specified Speech Commands application id.
+    /// Sets a property value by ID.
     /// </summary>
-    /// <param name="appId">Speech Commands application id.</param>
-    /// <param name="subscription">Subscription key associated with the dialog.</param>
+    /// <param name="id">The property id.</param>
+    /// <param name="value">The property value.</param>
+    void SetProperty(PropertyId id, const SPXSTRING& value)
+    {
+        m_config.SetProperty(id, value);
+    }
+
+    /// <summary>
+    /// Gets a property value by name.
+    /// </summary>
+    /// <param name="name">The parameter name.</param>
+    /// <returns>The property value.</returns>
+    SPXSTRING GetProperty(const SPXSTRING& name) const
+    {
+        return m_config.GetProperty(name);
+    }
+
+    /// <summary>
+    /// Gets a property value by ID.
+    /// </summary>
+    /// <param name="id">The parameter id.</param>
+    /// <returns>The property value.</returns>
+    SPXSTRING GetProperty(PropertyId id) const
+    {
+        return m_config.GetProperty(id);
+    }
+
+     /// <summary>
+    /// Sets a property value that will be passed to service using the specified channel.
+    /// </summary>
+    /// <param name="name">The property name.</param>
+    /// <param name="value">The property value.</param>
+    /// <param name="channel">The channel used to pass the specified property to service.</param>
+    void SetServiceProperty(const SPXSTRING& name, const SPXSTRING& value, ServicePropertyChannel channel)
+    {
+        m_config.SetServiceProperty(name, value, channel);
+    }
+
+
+    /// <summary>
+    /// Sets proxy configuration
+    ///
+    /// Note: Proxy functionality is not available on macOS. This function will have no effect on this platform.
+    /// </summary>
+    /// <param name="proxyHostName">The host name of the proxy server, without the protocol scheme (http://)</param>
+    /// <param name="proxyPort">The port number of the proxy server</param>
+    /// <param name="proxyUserName">The user name of the proxy server</param>
+    /// <param name="proxyPassword">The password of the proxy server</param>
+    void SetProxy(const SPXSTRING& proxyHostName, uint32_t proxyPort, const SPXSTRING& proxyUserName = SPXSTRING(), const SPXSTRING& proxyPassword = SPXSTRING())
+    {
+        m_config.SetProxy(proxyHostName, proxyPort, proxyUserName, proxyPassword);
+    }
+
+    /// <summary>
+    /// Set the input language to the connector.
+    /// </summary>
+    /// <param name="lang">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+    void SetLanguage(const SPXSTRING& lang)
+    {
+        SetProperty(PropertyId::SpeechServiceConnection_RecoLanguage, lang);
+    }
+
+    /// <summary>
+    /// Gets the input language to the connector.
+    /// The language is specified in BCP-47 format.
+    /// </summary>
+    /// <returns>The connetor language.</returns>
+    SPXSTRING GetLanguage() const
+    {
+        return GetProperty(PropertyId::SpeechServiceConnection_RecoLanguage);
+    }
+
+};
+
+/// <summary>
+/// Class that defines configurations for the dialog service connector object for using a Bot Framework backend.
+/// </summary>
+class BotFrameworkConfig final : public DialogServiceConfig
+{
+public:
+    /// <summary>
+    /// Creates a bot framework service config instance with the specified subscription key and region.
+    /// </summary>
+    /// <param name="subscription">Subscription key associated with the bot</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-    /// <returns>A shared pointer to the new dialog service config.</returns>
-    inline static std::shared_ptr<DialogServiceConfig> FromSpeechCommandsAppId(const SPXSTRING& appId, const SPXSTRING& subscription, const SPXSTRING& region)
+    /// <returns>A shared pointer to the new bot framework config.</returns>
+    inline static std::shared_ptr<BotFrameworkConfig> FromSubscription(const SPXSTRING& subscription, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(dialog_service_config_from_speech_commands_app_id(&h_config, Utils::ToUTF8(appId).c_str(), Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
-        return std::shared_ptr<DialogServiceConfig>{ new DialogServiceConfig(h_config) };
+        SPX_THROW_ON_FAIL(bot_framework_config_from_subscription(&h_config, Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
+        return std::shared_ptr<BotFrameworkConfig>{ new BotFrameworkConfig(h_config) };
+    }
+
+    /// <summary>
+    /// Creates a bot framework service config instance with the specified authorization token and region.
+    /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+    /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+    /// As configuration values are copied when creating a new connector, the new token value will not apply to connectors that have already been created.
+    /// For connectors that have been created before, you need to set authorization token of the corresponding connector
+    /// to refresh the token. Otherwise, the connectors will encounter errors during operation.
+    /// </summary>
+    /// <param name="authToken">The authorization token.</param>
+    /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+    /// <returns>A shared pointer to the new bot framework config.</returns>
+    inline static std::shared_ptr<BotFrameworkConfig> FromAuthorizationToken(const SPXSTRING& authToken, const SPXSTRING& region)
+    {
+        SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(bot_framework_config_from_authorization_token(&h_config, Utils::ToUTF8(authToken).c_str(), Utils::ToUTF8(region).c_str()));
+        return std::shared_ptr<BotFrameworkConfig>{ new BotFrameworkConfig(h_config) };
+    }
+private:
+    inline explicit BotFrameworkConfig(SPXSPEECHCONFIGHANDLE h_config): DialogServiceConfig{ h_config }
+    {
+    }
+};
+
+/// <summary>
+/// Class that defines configurations for the dialog service connector object for using a SpeechCommands backend.
+/// </summary>
+class SpeechCommandsConfig: public DialogServiceConfig
+{
+public:
+    /// <summary>
+    /// Creates a speech commands config instance with the specified application id, subscription key and region.
+    /// </summary>
+    /// <param name="appId">Speech Commands application id.</param>
+    /// <param name="subscription">Subscription key associated with the bot</param>
+    /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+    /// <returns>A shared pointer to the new bot framework config.</returns>
+    inline static std::shared_ptr<SpeechCommandsConfig> FromSubscription(const SPXSTRING& appId, const SPXSTRING& subscription, const SPXSTRING& region)
+    {
+        SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(speech_commands_config_from_subscription(&h_config, Utils::ToUTF8(appId).c_str(), Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
+        return std::shared_ptr<SpeechCommandsConfig>{ new SpeechCommandsConfig(h_config) };
+    }
+
+    /// <summary>
+    /// Creates a speech commands config instance with the specified application id authorization token and region.
+    /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+    /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+    /// As configuration values are copied when creating a new connector, the new token value will not apply to connectors that have already been created.
+    /// For connectors that have been created before, you need to set authorization token of the corresponding connector
+    /// to refresh the token. Otherwise, the connectors will encounter errors during operation.
+    /// </summary>
+    /// <param name="appId">Speech Commands application id.</param>
+    /// <param name="authToken">The authorization token.</param>
+    /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
+    /// <returns>A shared pointer to the new bot framework config.</returns>
+    inline static std::shared_ptr<SpeechCommandsConfig> FromAuthorizationToken(const SPXSTRING& appId, const SPXSTRING& authToken, const SPXSTRING& region)
+    {
+        SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(speech_commands_config_from_authorization_token(&h_config, Utils::ToUTF8(appId).c_str(), Utils::ToUTF8(authToken).c_str(), Utils::ToUTF8(region).c_str()));
+        return std::shared_ptr<SpeechCommandsConfig>{ new SpeechCommandsConfig(h_config) };
     }
 
     /// <summary>
@@ -72,41 +221,10 @@ public:
         return GetProperty(PropertyId::Conversation_ApplicationId);
     }
 
-    /// <summary>
-    /// Sets the connection initial silence timeout.
-    /// </summary>
-    /// <param name="connectionInitialSilenceTimeout">Connection initial silence timeout.</param>
-    inline void SetInitialSilenceTimeout(const SPXSTRING& connectionInitialSilenceTimeout)
+private:
+    inline explicit SpeechCommandsConfig(SPXSPEECHCONFIGHANDLE h_config): DialogServiceConfig{ h_config }
     {
-        SetProperty(PropertyId::Conversation_Initial_Silence_Timeout, connectionInitialSilenceTimeout);
     }
-
-    /// <summary>
-    /// Gets the connection initial silence timeout.
-    /// </summary>
-    /// <returns>Initial silence timeout.</returns>
-    inline SPXSTRING GetInitialSilenceTimeout() const
-    {
-        return GetProperty(PropertyId::Conversation_Initial_Silence_Timeout);
-    }
-
-    /// <summary>
-    /// Sets the audio format that is returned by text to speech during a reply from the backing dialog.
-    /// </summary>
-    /// <param name="audioFormat">The audio format to return.</param>
-    inline void SetTextToSpeechAudioFormat(const SPXSTRING& audioFormat)
-    {
-        SetProperty(PropertyId::SpeechServiceConnection_SynthOutputFormat, audioFormat);
-    }
-
-    /// <summary>
-    /// Gets the audio format that is returned by text to speech during a reply from the backing dialog.
-    /// </summary>
-    /// <returns>The audio format.</returns>
-    inline SPXSTRING GetTextToSpeechAudioFormat() const
-    {
-        return GetProperty(PropertyId::SpeechServiceConnection_SynthOutputFormat);
-    }
-
 };
+
 } } } }

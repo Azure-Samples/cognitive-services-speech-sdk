@@ -517,29 +517,29 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
 
         internal delegate IntPtr GetRecognizerFromConfigDelegate(out IntPtr phreco, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
-        internal static InteropSafeHandle FromConfig(GetRecognizerFromConfigDelegate fromConfig, SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
+        internal static InteropSafeHandle FromConfig(GetRecognizerFromConfigDelegate fromConfig, DialogServiceConfig dialogConfig, Audio.AudioConfig audioConfig)
         {
-            if (speechConfig == null) throw new ArgumentNullException(nameof(speechConfig));
+            if (dialogConfig == null) throw new ArgumentNullException(nameof(dialogConfig));
             if (audioConfig == null) throw new ArgumentNullException(nameof(audioConfig));
 
             IntPtr recoHandlePtr = IntPtr.Zero;
-            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, audioConfig.configHandle));
+            ThrowIfFail(fromConfig(out recoHandlePtr, dialogConfig.configHandle, audioConfig.configHandle));
             InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.DialogServiceConnector.dialog_service_connector_handle_release);
-            GC.KeepAlive(speechConfig);
+            GC.KeepAlive(dialogConfig);
             GC.KeepAlive(audioConfig);
             return recoHandle;
         }
 
-        internal static InteropSafeHandle FromConfig(GetRecognizerFromConfigDelegate fromConfig, SpeechConfig speechConfig)
+        internal static InteropSafeHandle FromConfig(GetRecognizerFromConfigDelegate fromConfig, DialogServiceConfig dialogConfig)
         {
-            if (speechConfig == null) throw new ArgumentNullException(nameof(speechConfig));
+            if (dialogConfig == null) throw new ArgumentNullException(nameof(dialogConfig));
 
             IntPtr recoHandlePtr = IntPtr.Zero;
             IntPtr audioConfigPtr = IntPtr.Zero;
             InteropSafeHandle audioConfigHandle = new InteropSafeHandle(audioConfigPtr, null);
-            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, audioConfigHandle));
+            ThrowIfFail(fromConfig(out recoHandlePtr, dialogConfig.configHandle, audioConfigHandle));
             InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.DialogServiceConnector.dialog_service_connector_handle_release);
-            GC.KeepAlive(speechConfig);
+            GC.KeepAlive(dialogConfig);
             return recoHandle;
         }
 

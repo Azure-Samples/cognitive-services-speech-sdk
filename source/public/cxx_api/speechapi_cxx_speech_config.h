@@ -17,18 +17,21 @@ namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 
+namespace Dialog { class DialogServiceConfig; }
+
 /// <summary>
 /// Class that defines configurations for speech / intent recognition, or speech synthesis.
 /// </summary>
 class SpeechConfig
 {
 public:
+    friend Dialog::DialogServiceConfig;
     /// <summary>
     /// Internal operator used to get underlying handle value.
     /// </summary>
     /// <returns>A handle.</returns>
     explicit operator SPXSPEECHCONFIGHANDLE() const { return m_hconfig; }
-    
+
     /// <summary>
     /// Creates an instance of the speech config with specified subscription key and region.
     /// </summary>

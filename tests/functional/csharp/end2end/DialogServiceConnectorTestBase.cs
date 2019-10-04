@@ -33,8 +33,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestInitialize]
         public void BaseTestInit()
         {
-            dialogServiceConfig = DialogServiceConfig.FromBotSecret(botSecret, subscriptionKey, region);
-            dialogServiceConfig.SpeechRecognitionLanguage = "en-us";
+            dialogServiceConfig = BotFrameworkConfig.FromSubscription(subscriptionKey, region);
+            dialogServiceConfig.SetProperty(PropertyId.Conversation_ApplicationId, botSecret);
+            dialogServiceConfig.Language = "en-us";
             dialogServiceConfig.SetProperty("Conversation_Communication_Type", "AutoReply");
         }
     }

@@ -87,6 +87,8 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechSynthesizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConnector)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConfig)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::BotFrameworkConfig)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::SpeechCommandsConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SourceLanguageConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig)
 %shared_ptr(std::vector<uint8_t>)

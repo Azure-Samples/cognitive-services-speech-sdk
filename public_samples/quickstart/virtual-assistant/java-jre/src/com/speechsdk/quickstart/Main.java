@@ -10,6 +10,7 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.microsoft.bot.schema.models.Activity;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioOutputStream;
+import com.microsoft.cognitiveservices.speech.dialog.BotFrameworkConfig;
 import com.microsoft.cognitiveservices.speech.dialog.DialogServiceConfig;
 import com.microsoft.cognitiveservices.speech.dialog.DialogServiceConnector;
 import org.apache.commons.lang3.StringUtils;
@@ -44,16 +45,14 @@ public class Main {
         // subscription key, and service region.
         //
         // Note: In preview, the Direct Line Speech channel currently supports only the `westus2` region.
-        final String channelSecret = "YourChannelSecret";
         final String subscriptionKey = "YourSubscriptionKey";
         final String region = "YourServiceRegion";
 
-        assert !channelSecret.equals("YourChannelSecret") : "Replace the string \"YourChannelSecret\" with your speech channel secret.";
         assert !subscriptionKey.equals("YourSubscriptionKey") : "Replace the string \"YourSubscriptionKey\" with your speech subscription key.";
         assert !region.equals("YourServiceRegion") : "Replace the string \"YourServiceRegion\" with your service region.";
 
         // Create a DialogServiceConfig instance from channel secret, subscription key and region
-        final DialogServiceConfig dialogServiceConfig = DialogServiceConfig.fromBotSecret(channelSecret, subscriptionKey, region);
+        final DialogServiceConfig dialogServiceConfig = BotFrameworkConfig.fromSubscription(subscriptionKey, region);
         if (dialogServiceConfig == null) {
             log.error("DialogServiceConfig should not be null");
         }

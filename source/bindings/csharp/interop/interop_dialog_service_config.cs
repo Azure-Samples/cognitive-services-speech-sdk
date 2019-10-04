@@ -14,15 +14,25 @@ namespace Microsoft.CognitiveServices.Speech.Dialog.Internal
     internal static class DialogServiceConfig
     {
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-        public static extern SPXHR dialog_service_config_from_bot_secret(out SPXCONNECTORCONFIGHANDLE config,
-            [MarshalAs(UnmanagedType.LPStr)] string secret_key,
+        public static extern SPXHR bot_framework_config_from_subscription(out SPXCONNECTORCONFIGHANDLE config,
             [MarshalAs(UnmanagedType.LPStr)] string subscription,
             [MarshalAs(UnmanagedType.LPStr)] string region);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-        public static extern SPXHR dialog_service_config_from_speech_commands_app_id(out SPXCONNECTORCONFIGHANDLE config,
+        public static extern SPXHR bot_framework_config_from_authorization_token(out SPXCONNECTORCONFIGHANDLE config,
+            [MarshalAs(UnmanagedType.LPStr)] string auth_token,
+            [MarshalAs(UnmanagedType.LPStr)] string region);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR speech_commands_config_from_subscription(out SPXCONNECTORCONFIGHANDLE config,
             [MarshalAs(UnmanagedType.LPStr)] string app_id,
             [MarshalAs(UnmanagedType.LPStr)] string subscription,
+            [MarshalAs(UnmanagedType.LPStr)] string region);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR speech_commands_config_from_authorization_token(out SPXCONNECTORCONFIGHANDLE config,
+            [MarshalAs(UnmanagedType.LPStr)] string app_id,
+            [MarshalAs(UnmanagedType.LPStr)] string auth_token,
             [MarshalAs(UnmanagedType.LPStr)] string region);
     }
 }

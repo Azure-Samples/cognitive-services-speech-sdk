@@ -5,8 +5,10 @@
 
 package tests.endtoend;
 
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.dialog.DialogServiceConfig;
+import com.microsoft.cognitiveservices.speech.dialog.BotFrameworkConfig;
 import com.microsoft.cognitiveservices.speech.dialog.DialogServiceConnector;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -58,9 +60,10 @@ public class VirtualAssistantTests {
     @Before
     public void setUp() {
         // Bot secret is not required when using AutoReply connection type
-        final DialogServiceConfig dialogServiceConfig = DialogServiceConfig.fromBotSecret(SpeechChannelSecretForVirtualAssistant, SpeechSubscriptionKeyForVirtualAssistant, SpeechRegionForVirtualAssistant);
+        final DialogServiceConfig dialogServiceConfig = BotFrameworkConfig.fromSubscription(SpeechSubscriptionKeyForVirtualAssistant, SpeechRegionForVirtualAssistant);
+        dialogServiceConfig.setProperty(PropertyId.Conversation_ApplicationId, SpeechChannelSecretForVirtualAssistant);
         dialogServiceConfig.setProperty(COMMUNICATION_TYPE_STRING, AUTO_REPLY_CONNECTION_TYPE);
-        dialogServiceConfig.setSpeechRecognitionLanguage(EN_US);
+        dialogServiceConfig.setLanguage(EN_US);
 
         // For tests we are using the wav file. For manual testing use fromDefaultMicrophone.
         final AudioConfig audioConfig = AudioConfig.fromWavFileInput(WavFile);

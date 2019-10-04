@@ -15,7 +15,6 @@ import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.SessionEventArgs;
-import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionEventArgs;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionCanceledEventArgs;
 import com.microsoft.cognitiveservices.speech.translation.TranslationSynthesisEventArgs;
@@ -34,7 +33,7 @@ public class DialogServiceConnector implements Closeable {
     static {
         // trigger loading of native library
         try {
-            Class.forName(SpeechConfig.class.getName());
+            Class.forName(DialogServiceConfig.class.getName());
         }
         catch (ClassNotFoundException ex) {
             throw new IllegalStateException(ex);

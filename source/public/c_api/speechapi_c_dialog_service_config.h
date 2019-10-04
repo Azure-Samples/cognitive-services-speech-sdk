@@ -8,5 +8,8 @@
 
 #include <speechapi_c_common.h>
 
-SPXAPI dialog_service_config_from_bot_secret(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char* secret_key, const char *subscription, const char* region);
-SPXAPI dialog_service_config_from_speech_commands_app_id(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char* app_id, const char *subscription, const char* region);
+SPXAPI bot_framework_config_from_subscription(SPXSPEECHCONFIGHANDLE* ph_config, const char* subscription, const char* region);
+SPXAPI bot_framework_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* ph_config, const char* auth_token, const char* region);
+
+SPXAPI speech_commands_config_from_subscription(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char* app_id, const char *subscription, const char* region);
+SPXAPI speech_commands_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char* app_id, const char *auth_token, const char* region);
