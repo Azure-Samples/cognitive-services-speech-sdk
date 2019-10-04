@@ -68,7 +68,9 @@ public final class AudioConfig
      */
     public static com.microsoft.cognitiveservices.speech.audio.AudioConfig fromStreamInput(PullAudioInputStreamCallback callback) {
         PullAudioInputStream pullStream = PullAudioInputStream.create(callback);
-        return new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromStreamInput(pullStream.getStreamImpl()), pullStream);
+        AudioConfig config =  new AudioConfig(com.microsoft.cognitiveservices.speech.internal.AudioConfig.FromStreamInput(pullStream.getStreamImpl()), pullStream);
+        config.closeKeepAliveOnClose = true;
+        return config;
     }
 
     /**
@@ -104,6 +106,11 @@ public final class AudioConfig
      * Explicitly frees any external resource attached to the object
      */
     public void close() {
+        if(this._inputStreamKeepAlive != null && this.closeKeepAliveOnClose)
+        {
+            this._inputStreamKeepAlive.close();
+        }
+
         if (this._configImpl != null) {
             this._configImpl.delete();
         }
@@ -143,6 +150,8 @@ public final class AudioConfig
     public com.microsoft.cognitiveservices.speech.internal.AudioConfig getConfigImpl() {
         return this._configImpl;
     }
+
+    private boolean closeKeepAliveOnClose = false;
 
     /*! \endcond */
 }

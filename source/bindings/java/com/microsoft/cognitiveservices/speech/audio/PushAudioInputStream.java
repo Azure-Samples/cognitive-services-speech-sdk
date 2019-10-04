@@ -58,6 +58,7 @@ public final class PushAudioInputStream extends com.microsoft.cognitiveservices.
     public void close() {
         if (this._pushStreamImpl != null) {
             this._pushStreamImpl.Close();
+            this._pushStreamImpl.delete();
         }
         this._pushStreamImpl = null;
     }
