@@ -1870,7 +1870,11 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
             /* We drop the audio, this is the point that we would need to play with if we were to recover the lost turn */
             m_audioBuffer->Drop();
         }
-        //Bug 1757042  weixu todo sessionstate should go back to idle.
+        else if ((m_recoKind == RecognitionKind::Keyword || m_recoKind == RecognitionKind::KwsSingleShot) && CancellationReason::Error == payload->Reason())
+        {
+            // Audio buffers shall be dropped if keyword recognition is cancelled with an error to prevent extra keyword detections in the stopping phase.
+            m_audioBuffer->Drop();
+        }
     }
 }
 
