@@ -1975,12 +1975,10 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
 
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
-    string toLanguages = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
-    vector<string> toLangsVector;
-    if (!toLanguages.empty())
+    auto toLanguages = GetLanguages(PropertyId::SpeechServiceConnection_TranslationToLanguages);
+    if (toLanguages.size() > 0 )
     {
-        toLangsVector = PAL::split(toLanguages, CommaDelim);
-        contextJson["translationcontext"]["to"] = json(toLangsVector);
+        contextJson["translationcontext"]["to"] = json(toLanguages);
     }
 
     // Language id feature need below speech context
@@ -1991,30 +1989,20 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
     if (isLanguageIdSupported
         && properties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages)))
     {
-        auto languageIdJson = GetLanguageIdJson();
-        if (!languageIdJson.empty())
+        auto sourceLanguages = GetLanguages(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages);
+        std::unordered_map<string, string> languageToEndpointIdMap;
+        if (sourceLanguages.size() > 0)
         {
-            contextJson["languageId"] = languageIdJson;
+            languageToEndpointIdMap = GetPerLanguageSetting(sourceLanguages, PropertyId::SpeechServiceConnection_EndpointId);
+            contextJson["languageId"] = GetLanguageIdJson(move(sourceLanguages));
         }
-        contextJson["phraseDetection"] = GetPhraseDetectionJson(m_endpointType == USP::EndpointType::Translation);
+        contextJson["phraseDetection"] = GetPhraseDetectionJson(m_endpointType == USP::EndpointType::Translation, move(languageToEndpointIdMap));
         contextJson["phraseOutput"] = GetPhraseOutputJson(m_endpointType == USP::EndpointType::Speech);
-        if (m_endpointType == USP::EndpointType::Translation) {
-            unordered_map<string, string> voiceNameMap;
-            if (!toLangsVector.empty())
-            {
-                for (const string& lang : toLangsVector)
-                {
-                    string voiceNamePoperty = lang + GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice);
-                    auto voiceName = properties->GetStringValue(voiceNamePoperty.c_str());
-                    if (!voiceName.empty())
-                    {
-                        voiceNameMap[lang] = voiceName;
-                    }
-                }
-            }
-
+        if (m_endpointType == USP::EndpointType::Translation)
+        {
+            auto voiceNameMap = GetPerLanguageSetting(toLanguages, PropertyId::SpeechServiceConnection_TranslationVoice);
             bool doSynthesis = !voiceNameMap.empty();
-            contextJson["translation"] = GetTranslationJson(move(toLangsVector), doSynthesis);
+            contextJson["translation"] = GetTranslationJson(move(toLanguages), doSynthesis);
             if (doSynthesis)
             {
                 contextJson["synthesis"] = GetSynthesisJson(move(voiceNameMap));
@@ -2314,31 +2302,34 @@ std::pair<std::string, std::string> CSpxUspRecoEngineAdapter::GetLeftRightContex
     return {leftContext, rightContext};
 }
 
-json CSpxUspRecoEngineAdapter::GetLanguageIdJson()
+json CSpxUspRecoEngineAdapter::GetLanguageIdJson(std::vector<std::string> sourceLanguages)
 {
-    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
-    string sourceLanguages = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages));
-    // remove spaces in the string
-    // cannot use remove_if as build failure in Android
-    sourceLanguages.erase(remove(sourceLanguages.begin(), sourceLanguages.end(), ' '), sourceLanguages.end());
     json langDetectionJson;
-    if (!sourceLanguages.empty())
-    {
-        auto langVector = PAL::split(sourceLanguages, CommaDelim);
-        langDetectionJson["languages"] = json(langVector);
-        langDetectionJson["onSuccess"]["action"] = "Recognize";
-        langDetectionJson["onUnknown"]["action"] = "None";
-    }
+    langDetectionJson["languages"] = json(move(sourceLanguages));
+    langDetectionJson["onSuccess"]["action"] = "Recognize";
+    langDetectionJson["onUnknown"]["action"] = "None";
     return langDetectionJson;
 }
 
-json CSpxUspRecoEngineAdapter::GetPhraseDetectionJson(bool doTranslation)
+json CSpxUspRecoEngineAdapter::GetPhraseDetectionJson(bool doTranslation, unordered_map<string, string> languageToEndpointIdMap)
 {
     json phraseDetectionJson;
     auto action = doTranslation ? "Translate" : "None";
     phraseDetectionJson["onSuccess"]["action"] = action;
     phraseDetectionJson["onInterim"]["action"] = action;
+    if (!languageToEndpointIdMap.empty())
+    {
+        json customModels = json::array();
+        for (const auto& pair: languageToEndpointIdMap)
+        {
+            json perLanguageEndpointId;
+            perLanguageEndpointId["language"] = pair.first;
+            perLanguageEndpointId["endpoint"] = pair.second;
+            customModels.push_back(move(perLanguageEndpointId));
+        }
+        phraseDetectionJson["customModels"] = std::move(customModels);
+    }
+
     return phraseDetectionJson;
 }
 
@@ -2364,6 +2355,35 @@ json CSpxUspRecoEngineAdapter::GetSynthesisJson(unordered_map<string, string>&& 
     json synthesisJson;
     synthesisJson["defaultVoices"] = json(move(voiceNameMap));
     return synthesisJson;
+}
+
+vector<string> CSpxUspRecoEngineAdapter::GetLanguages(PropertyId propertyId)
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+    string languages = properties->GetStringValue(GetPropertyName(propertyId));
+    if (!languages.empty())
+    {
+        return PAL::split(languages, CommaDelim);
+    }
+    return {};
+}
+
+unordered_map<string, string> CSpxUspRecoEngineAdapter::GetPerLanguageSetting(const vector<string>& languages, PropertyId propertyId)
+{
+    unordered_map<string, string> languageSettingMap;
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+    for (const string& language : languages)
+    {
+        string perLanguageSettingProperty = language + GetPropertyName(propertyId);
+        auto perLanguageSettingPropertyValue = properties->GetStringValue(perLanguageSettingProperty.c_str());
+        if (!perLanguageSettingPropertyValue.empty())
+        {
+            languageSettingMap[language] = perLanguageSettingPropertyValue;
+        }
+    }
+    return languageSettingMap;
 }
 
 CSpxStringMap CSpxUspRecoEngineAdapter::GetParametersFromUser(std::string&& path)

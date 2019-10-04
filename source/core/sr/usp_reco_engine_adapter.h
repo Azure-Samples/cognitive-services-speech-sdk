@@ -203,12 +203,13 @@ private:
     nlohmann::json GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key, const std::string& region);
     nlohmann::json GetSpeechContextJson();
     nlohmann::json GetKeywordDetectionJson();
-    nlohmann::json GetLanguageIdJson();
-    nlohmann::json GetPhraseDetectionJson(bool doTranslation);
+    nlohmann::json GetLanguageIdJson(std::vector<std::string> sourceLanguages);
+    nlohmann::json GetPhraseDetectionJson(bool doTranslation, std::unordered_map<std::string, std::string> languageToEndpointIdMap);
     nlohmann::json GetPhraseOutputJson(bool needSpeechMessages);
     nlohmann::json GetTranslationJson(std::vector<std::string>&& targetLangs, bool synthesis);
     nlohmann::json GetSynthesisJson(std::unordered_map<std::string, std::string>&& voiceNameMap);
-
+    std::vector<std::string> GetLanguages(PropertyId propertyId);
+    std::unordered_map<std::string, std::string> GetPerLanguageSetting(const std::vector<std::string>& languages, PropertyId propertyId);
     void FireActivityResult(std::string activity, std::shared_ptr<ISpxAudioOutput> audio);
     void FireFinalResultNow(const USP::SpeechPhraseMsg& message, const std::string& luisJson = "");
     void FireFinalResultLater(const USP::SpeechPhraseMsg& message);

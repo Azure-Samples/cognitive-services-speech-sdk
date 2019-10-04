@@ -279,8 +279,7 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         auto properties = session->GetPropertiesPtr();
 
         vector<string> autoDetectSourceLangs{ "en-us", "zh-CN" };
-        // Added some spaces and tabs in source languages, to verify our code can remove them correctly
-        properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), "    en-  us    ,    zh- CN    ");
+        properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), "en-us,zh-CN");
         json languageIdJson;
         languageIdJson["languages"] = json(autoDetectSourceLangs);
         languageIdJson["onUnknown"]["action"] = "None";
@@ -334,11 +333,23 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         session->SetTargetLanguages("");
         auto properties = session->GetPropertiesPtr();
 
-        vector<string> autoDetectSourceLangs{ "en-us", "zh-CN" };
-        // Added some spaces and tabs in source languages, to verify our code can remove them correctly
-        properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), "    en-  us    ,    zh- CN    ");
+        unordered_map<string, string> languageToEndpointIdMap
+        {
+               {"de-DE", "CustomEndpoint1" },
+               {"fr-FR", "CustomEndpoint2" }
+        };
+        vector<string> sourceLangs;
+        for (auto& pair : languageToEndpointIdMap)
+        {
+            sourceLangs.push_back(pair.first);
+        }
+        sourceLangs.push_back("en-US");
+        properties->SetStringValue(
+            GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages),
+            adapterTest.Join(sourceLangs).c_str());
+
         json languageIdJson;
-        languageIdJson["languages"] = json(autoDetectSourceLangs);
+        languageIdJson["languages"] = json(sourceLangs);
         languageIdJson["onUnknown"]["action"] = "None";
         languageIdJson["onSuccess"]["action"] = "Recognize";
         expectedJson["languageId"] = languageIdJson;
@@ -351,6 +362,25 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         expectedJson["phraseOutput"]["phraseResults"]["resultType"] = "Always";
 
         auto contextJson = adapterTest.GetSpeechContextJson();
+        REQUIRE(contextJson == expectedJson);
+
+        for (auto& pair : languageToEndpointIdMap)
+        {
+            string endPointIdProperty = pair.first + GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId);
+            properties->SetStringValue(endPointIdProperty.c_str(), pair.second.c_str());
+        }
+
+        json customModelsJson = json::array();
+        json deJson;
+        deJson["endpoint"] = "CustomEndpoint1";
+        deJson["language"] = "de-DE";
+        customModelsJson.push_back(move(deJson));
+        json frJson;
+        frJson["endpoint"] = "CustomEndpoint2";
+        frJson["language"] = "fr-FR";
+        customModelsJson.push_back(move(frJson));
+        expectedJson["phraseDetection"]["customModels"] = move(customModelsJson);
+        contextJson = adapterTest.GetSpeechContextJson();
         REQUIRE(contextJson == expectedJson);
     }
 }
