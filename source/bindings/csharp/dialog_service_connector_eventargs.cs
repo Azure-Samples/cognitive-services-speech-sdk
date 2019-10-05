@@ -25,9 +25,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
 
             uint size = 0;
             ThrowIfFail(Internal.ActivityReceivedEventArgs.dialog_service_connector_activity_received_event_get_activity_size(eventHandle, out size));
-            var buffer = new StringBuilder((int)(size + 1));
-            ThrowIfFail(Internal.ActivityReceivedEventArgs.dialog_service_connector_activity_received_event_get_activity(eventHandle, buffer, size + 1));
-            Activity = buffer.ToString();
+            size += 1;
+            Activity = I.SpxFactory.GetDataFromHandleUsingDelegate(Internal.ActivityReceivedEventArgs.dialog_service_connector_activity_received_event_get_activity, eventHandle, (int)size + 1);
 
             HasAudio = Internal.ActivityReceivedEventArgs.dialog_service_connector_activity_received_event_has_audio(eventHandle);
             if (HasAudio)
