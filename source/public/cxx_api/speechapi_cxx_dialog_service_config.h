@@ -30,6 +30,11 @@ protected:
 
 public:
     /// <summary>
+    /// Default destructor.
+    /// </summary>
+    virtual ~DialogServiceConfig() = default;
+
+    /// <summary>
     /// Internal operator used to get underlying handle value.
     /// </summary>
     /// <returns>A handle.</returns>
