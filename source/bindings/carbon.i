@@ -388,10 +388,10 @@
         return FutureWrapper<std::string>(std::move(future));
     }
 
-    FutureWrapper<void> ListenOnceAsync()
+    FutureWrapper<SpeechRecognitionResultPtr> ListenOnceAsync()
     {
         auto future = ($self)->ListenOnceAsync();
-        return FutureWrapper<void>(std::move(future));
+        return FutureWrapper<SpeechRecognitionResultPtr>(std::move(future));
     }
 
     FutureWrapper<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model)

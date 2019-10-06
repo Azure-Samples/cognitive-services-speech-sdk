@@ -11,6 +11,9 @@
 SPXAPI_(bool) dialog_service_connector_handle_is_valid(SPXRECOHANDLE h_connector);
 SPXAPI dialog_service_connector_handle_release(SPXRECOHANDLE h_connector);
 
+SPXAPI_(bool) dialog_service_connector_async_handle_is_valid(SPXASYNCHANDLE h_async);
+SPXAPI dialog_service_connector_async_handle_release(SPXASYNCHANDLE h_async);
+
 SPXAPI_(bool) dialog_service_connector_async_void_handle_is_valid(SPXASYNCHANDLE h_async);
 SPXAPI dialog_service_connector_async_void_handle_release(SPXASYNCHANDLE h_async);
 
@@ -43,9 +46,9 @@ SPXAPI dialog_service_connector_stop_keyword_recognition(SPXRECOHANDLE h_connect
 SPXAPI dialog_service_connector_stop_keyword_recognition_async(SPXRECOHANDLE h_connector, SPXASYNCHANDLE* p_async);
 SPXAPI dialog_service_connector_stop_keyword_recognition_async_wait_for(SPXASYNCHANDLE h_async, uint32_t milliseconds);
 
-SPXAPI dialog_service_connector_listen_once(SPXRECOHANDLE h_connector);
+SPXAPI dialog_service_connector_listen_once(SPXRECOHANDLE h_connector, SPXRESULTHANDLE* p_result);
 SPXAPI dialog_service_connector_listen_once_async(SPXRECOHANDLE h_connector, SPXASYNCHANDLE* p_async);
-SPXAPI dialog_service_connector_listen_once_async_wait_for(SPXASYNCHANDLE h_async, uint32_t milliseconds);
+SPXAPI dialog_service_connector_listen_once_async_wait_for(SPXASYNCHANDLE h_async, uint32_t milliseconds, SPXRESULTHANDLE* p_result);
 
 typedef void(*PSESSION_CALLBACK_FUNC)(SPXRECOHANDLE h_connector, SPXEVENTHANDLE h_event, void* pv_context);
 

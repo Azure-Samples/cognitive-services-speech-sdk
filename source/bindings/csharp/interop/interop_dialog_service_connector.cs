@@ -13,6 +13,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog.Internal
     using SPXKEYWORDHANDLE = System.IntPtr;
     using SPXEVENTHANDLE = System.IntPtr;
     using SPXACTIVITYHANDLE = System.IntPtr;
+    using SPXRESULTHANDLE = System.IntPtr;
     using Speech.Internal;
 
     internal static class DialogServiceConnector
@@ -32,7 +33,7 @@ namespace Microsoft.CognitiveServices.Speech.Dialog.Internal
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR dialog_service_connector_stop_keyword_recognition(InteropSafeHandle connectorHandle);
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR dialog_service_connector_listen_once(InteropSafeHandle connectorHandle);
+        public static extern SPXHR dialog_service_connector_listen_once(InteropSafeHandle connectorHandle, out SPXRESULTHANDLE result);
 
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]

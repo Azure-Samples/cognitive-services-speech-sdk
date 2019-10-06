@@ -25,6 +25,16 @@ SPXAPI dialog_service_connector_handle_release(SPXRECOHANDLE h_connector)
     return Handle_Close<SPXRECOHANDLE, ISpxDialogServiceConnector>(h_connector);
 }
 
+SPXAPI_(bool) dialog_service_connector_async_handle_is_valid(SPXASYNCHANDLE h_async)
+{
+    return Handle_IsValid<SPXASYNCHANDLE, CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>>>(h_async);
+}
+
+SPXAPI dialog_service_connector_async_handle_release(SPXASYNCHANDLE h_async)
+{
+    return Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>>>(h_async);
+}
+
 SPXAPI_(bool) dialog_service_connector_async_void_handle_is_valid(SPXASYNCHANDLE h_async)
 {
     return Handle_IsValid<SPXASYNCHANDLE, CSpxAsyncOp<void>>(h_async);
@@ -363,15 +373,20 @@ SPXAPI dialog_service_connector_stop_keyword_recognition_async_wait_for(SPXASYNC
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI dialog_service_connector_listen_once(SPXRECOHANDLE h_connector)
+SPXAPI dialog_service_connector_listen_once(SPXRECOHANDLE h_connector, SPXRESULTHANDLE* ph_result)
 {
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxDialogServiceConnector, SPXRECOHANDLE>();
-        auto connector = (*handles)[h_connector];
-        connector->ListenOnceAsync().Future.get();
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_result == nullptr);
+    *ph_result = SPXHANDLE_INVALID;
+
+    SPXASYNCHANDLE h_async = SPXHANDLE_INVALID;
+
+    SPX_RETURN_ON_FAIL(dialog_service_connector_listen_once_async(h_connector, &h_async));
+
+    SPX_RETURN_ON_FAIL(dialog_service_connector_listen_once_async_wait_for(h_async, UINT32_MAX, ph_result));
+
+    SPX_REPORT_ON_FAIL(dialog_service_connector_async_handle_release(h_async));
+
+    return SPX_NOERROR;
 }
 
 SPXAPI dialog_service_connector_listen_once_async(SPXRECOHANDLE h_connector, SPXASYNCHANDLE* p_async)
@@ -385,11 +400,22 @@ SPXAPI dialog_service_connector_listen_once_async(SPXRECOHANDLE h_connector, SPX
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI dialog_service_connector_listen_once_async_wait_for(SPXASYNCHANDLE h_async, uint32_t milliseconds)
+SPXAPI dialog_service_connector_listen_once_async_wait_for(SPXASYNCHANDLE h_async, uint32_t milliseconds, SPXRESULTHANDLE* ph_result)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_result == nullptr);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
+        *ph_result = SPXHANDLE_INVALID;
+
         auto result = wait_for_async_op<std::shared_ptr<ISpxRecognitionResult>>(h_async, milliseconds);
+
+        SPX_RETURN_ON_FAIL(std::get<0>(result));
+
+        auto result_handles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+
+        *ph_result = result_handles->TrackHandle(std::get<1>(result));
+
         return std::get<0>(result);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);

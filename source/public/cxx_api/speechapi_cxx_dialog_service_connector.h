@@ -145,12 +145,17 @@ public:
     /// Starts a listening session that will terminate after the first utterance.
     /// </summary>
     /// <returns>An asynchronous operation that starts the operation.</returns>
-    std::future<void> ListenOnceAsync()
+    std::future<std::shared_ptr<SpeechRecognitionResult>> ListenOnceAsync()
     {
         auto keep_alive = this->shared_from_this();
         return std::async(std::launch::async, [keep_alive, this]()
         {
-            SPX_THROW_ON_FAIL(dialog_service_connector_listen_once(m_handle));
+            SPX_INIT_HR(hr);
+
+            SPXRECOHANDLE h_result = SPXHANDLE_INVALID;
+            SPX_THROW_ON_FAIL(dialog_service_connector_listen_once(m_handle, &h_result));
+
+            return std::make_shared<SpeechRecognitionResult>(h_result);
         });
     }
 

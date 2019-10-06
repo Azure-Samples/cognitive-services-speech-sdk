@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.SessionEventArgs;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionEventArgs;
@@ -107,15 +108,23 @@ public class DialogServiceConnector implements Closeable {
         });
     }
 
+    /* This class exists only to sidestep the package protected restriction on the Result constructor */
+    private class DialogSpeechRecognitionResult extends SpeechRecognitionResult
+    {
+        DialogSpeechRecognitionResult(com.microsoft.cognitiveservices.speech.internal.RecognitionResult result)
+        {
+            super(result);
+        }
+    }
+
     /**
      * Starts a listening session that will terminate after the first utterance.
      * @return A task representing the asynchronous operation that starts a one shot listening session.
      */
-    public Future<Void> listenOnceAsync() {
-        return executorService.submit(new java.util.concurrent.Callable<Void>() {
-            public Void call() {
-                dialogServiceConnectorImpl.ListenOnceAsync().Get();
-                return null;
+    public Future<SpeechRecognitionResult> listenOnceAsync() {
+        return executorService.submit(new java.util.concurrent.Callable<SpeechRecognitionResult>() {
+            public SpeechRecognitionResult  call() {
+                return new DialogSpeechRecognitionResult(dialogServiceConnectorImpl.ListenOnceAsync().Get());
             }
         });
     }

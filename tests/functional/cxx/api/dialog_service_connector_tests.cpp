@@ -356,7 +356,7 @@ TEST_CASE("Dialog Service Connector basics", "[api][cxx][dialog_service_connecto
         runner.add_activity_received_test(verifyActivityReceived);
         runner.add_canceled_test(verifyCanceledSpeech);
 
-        auto result = runner.run<void>(
+        auto result = runner.run<std::shared_ptr<SpeechRecognitionResult>>(
             [](DialogServiceConnector& connector)
             {
                 return connector.ListenOnceAsync();

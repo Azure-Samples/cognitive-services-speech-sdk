@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Internal;
 using Microsoft.CognitiveServices.Speech.Translation;
+using Microsoft.CognitiveServices.Speech;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
 namespace Microsoft.CognitiveServices.Speech.Dialog
@@ -503,15 +504,17 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
         /// <summary>
         /// Starts a listening session that will terminate after the first utterance.
         /// </summary>
-        /// <returns>An asynchronous operation that starts the operation.</returns>
-        public Task ListenOnceAsync()
+        /// <returns>An asynchronous operation that starts the operation.  The task returns a value of <see cref="SpeechRecognitionResult"/>.</returns>
+        public Task<SpeechRecognitionResult> ListenOnceAsync()
         {
             AssertNotDisposed();
 
             return Task.Run(() =>
             {
+                IntPtr h_result = IntPtr.Zero;
                 ThrowIfNull(dialogServiceConnectorHandle, "Invalid connector handle");
-                ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_listen_once(dialogServiceConnectorHandle));
+                ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_listen_once(dialogServiceConnectorHandle, out h_result));
+                return new SpeechRecognitionResult(h_result);
             });
         }
 
