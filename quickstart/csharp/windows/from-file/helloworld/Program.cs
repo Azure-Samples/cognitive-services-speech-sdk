@@ -6,6 +6,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 
 namespace helloworld
 {
@@ -15,7 +16,8 @@ namespace helloworld
         {
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            using (var recognizer = new SpeechRecognizer(config))
+            using (var audioConfig = AudioConfig.FromWavFileInput(@"YourFilePath"))
+            using (var recognizer = new SpeechRecognizer(config, audioConfig))
             {
                 var result = await recognizer.RecognizeOnceAsync();
 
