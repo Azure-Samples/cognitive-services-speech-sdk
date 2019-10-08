@@ -195,7 +195,9 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/SpeechTranslationConfig.java
     ${CMAKE_SWIG_OUTDIR}/AutoDetectSourceLanguageConfig.java
+    ${CMAKE_SWIG_OUTDIR}/AutoDetectSourceLanguageResult.java
     ${CMAKE_SWIG_OUTDIR}/SourceLanguageConfig.java
+    ${CMAKE_SWIG_OUTDIR}/SourceLanguageConfigPtrVector.java
 
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizerBase.java
@@ -245,7 +247,6 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/StringVector.java
     ${CMAKE_SWIG_OUTDIR}/UInt8Vector.java
     ${CMAKE_SWIG_OUTDIR}/User.java
-    ${CMAKE_SWIG_OUTDIR}/SourceLanguageConfigPtrVector.java
 )
 
 set_source_files_properties(${SWIG_JAVA_SOURCES} PROPERTIES GENERATED TRUE)
@@ -283,6 +284,9 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/SpeechRecognitionCanceledEventArgs.java
     ${PACKAGE_DIR}/SpeechRecognizer.java
     ${PACKAGE_DIR}/ProfanityOption.java
+    ${PACKAGE_DIR}/AutoDetectSourceLanguageConfig.java
+    ${PACKAGE_DIR}/AutoDetectSourceLanguageResult.java
+    ${PACKAGE_DIR}/SourceLanguageConfig.java
 
     ${PACKAGE_DIR}/conversation/Participant.java
     ${PACKAGE_DIR}/conversation/ResourceHandling.java

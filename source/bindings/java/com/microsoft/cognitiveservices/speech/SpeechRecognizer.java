@@ -66,6 +66,105 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     /**
+     * Initializes a new instance of Speech Recognizer.
+     * @param speechConfig speech configuration.
+     * @param autoDetectSourceLangConfig the configuration for auto detecting source language
+     */
+    public SpeechRecognizer(SpeechConfig speechConfig, AutoDetectSourceLanguageConfig autoDetectSourceLangConfig) {
+        super(null);
+
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        Contracts.throwIfNull(autoDetectSourceLangConfig, "autoDetectSourceLangConfig");
+        this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), autoDetectSourceLangConfig.getImpl());
+        initialize();
+    }
+
+    /**
+     * Initializes a new instance of Speech Recognizer.
+     * @param speechConfig speech configuration.
+     * @param autoDetectSourceLangConfig the configuration for auto detecting source language
+     * @param audioConfig audio configuration.
+     */
+    public SpeechRecognizer(SpeechConfig speechConfig, AutoDetectSourceLanguageConfig autoDetectSourceLangConfig, AudioConfig audioConfig) {
+        super(audioConfig);
+
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        Contracts.throwIfNull(autoDetectSourceLangConfig, "autoDetectSourceLangConfig");
+        if (audioConfig == null) {
+            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), autoDetectSourceLangConfig.getImpl());
+        } else {
+            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), autoDetectSourceLangConfig.getImpl(), audioConfig.getConfigImpl());
+        }
+        initialize();
+    }
+
+    /**
+     * Initializes a new instance of Speech Recognizer.
+     * @param speechConfig speech configuration.
+     * @param sourceLanguageConfig the configuration for source language
+     */
+    public SpeechRecognizer(SpeechConfig speechConfig, SourceLanguageConfig sourceLanguageConfig) {
+        super(null);
+
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        Contracts.throwIfNull(sourceLanguageConfig, "sourceLanguageConfig");
+        this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), sourceLanguageConfig.getImpl());
+        initialize();
+    }
+
+    /**
+     * Initializes a new instance of Speech Recognizer.
+     * @param speechConfig speech configuration.
+     * @param sourceLanguageConfig the configuration for source language
+     * @param audioConfig audio configuration.
+     */
+    public SpeechRecognizer(SpeechConfig speechConfig, SourceLanguageConfig sourceLanguageConfig, AudioConfig audioConfig) {
+        super(audioConfig);
+
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        Contracts.throwIfNull(sourceLanguageConfig, "sourceLanguageConfig");
+        if (audioConfig == null) {
+            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), sourceLanguageConfig.getImpl());
+        } else {
+            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), sourceLanguageConfig.getImpl(), audioConfig.getConfigImpl());
+        }
+        initialize();
+    }
+
+        /**
+     * Initializes a new instance of Speech Recognizer.
+     * @param speechConfig speech configuration.
+     * @param sourceLanguage the recognition source language
+     */
+    public SpeechRecognizer(SpeechConfig speechConfig, String sourceLanguage) {
+        super(null);
+
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        Contracts.throwIfIllegalLanguage(sourceLanguage, "invalid language value");
+        this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), sourceLanguage);
+        initialize();
+    }
+
+    /**
+     * Initializes a new instance of Speech Recognizer.
+     * @param speechConfig speech configuration.
+     * @param sourceLanguage the recognition source language
+     * @param audioConfig audio configuration.
+     */
+    public SpeechRecognizer(SpeechConfig speechConfig, String sourceLanguage, AudioConfig audioConfig) {
+        super(audioConfig);
+
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        Contracts.throwIfIllegalLanguage(sourceLanguage, "invalid language value");
+        if (audioConfig == null) {
+            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), sourceLanguage);
+        } else {
+            this.recoImpl = com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), sourceLanguage, audioConfig.getConfigImpl());
+        }
+        initialize();
+    }
+
+    /**
      * Gets the endpoint ID of a customized speech model that is used for speech recognition.
      * @return the endpoint ID of a customized speech model that is used for speech recognition.
      */

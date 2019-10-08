@@ -53,6 +53,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult, Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs, Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult, Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs, Microsoft::CognitiveServices::Speech::SpeechRecognitionCanceledEventArgs>::PrivatePropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechRecognizer)
+
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriber)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriptionResult)
@@ -91,6 +92,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Dialog::SpeechCommandsConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SourceLanguageConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageConfig)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AutoDetectSourceLanguageResult)
 %shared_ptr(std::vector<uint8_t>)
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioConfig)
@@ -579,6 +581,7 @@
 
 %include <speechapi_cxx_speech_recognition_result.h>
 %include <speechapi_cxx_speech_recognition_eventargs.h>
+%include <speechapi_cxx_auto_detect_source_lang_result.h>
 
 #ifdef SWIGPYTHON
 #elif defined(SWIGJAVA)

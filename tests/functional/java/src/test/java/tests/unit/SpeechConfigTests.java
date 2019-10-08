@@ -221,7 +221,7 @@ public class SpeechConfigTests {
     public void testCreateSpeechRecognizerNullAudioConfig() {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         // null audio config will use default mic.
-        SpeechRecognizer r = new SpeechRecognizer(s, null);
+        SpeechRecognizer r = new SpeechRecognizer(s);
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
         r.close();

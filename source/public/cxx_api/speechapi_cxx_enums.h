@@ -203,6 +203,7 @@ enum class PropertyId
     /// </summary>
     SpeechServiceConnection_AutoDetectSourceLanguages = 3300,
 
+    /// <summary>
     /// The auto detect source language result
     /// Added in version 1.8.0
     /// </summary>

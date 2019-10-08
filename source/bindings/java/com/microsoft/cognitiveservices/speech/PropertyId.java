@@ -298,6 +298,18 @@ public enum PropertyId {
     Conversation_From_Id ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_From_Id),
 
     /**
+     *  The auto detect source languages
+     * Added in version 1.8.0.
+     */
+    SpeechServiceConnection_AutoDetectSourceLanguages ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguages),
+
+    /**
+     * The auto detect source language result
+     * Added in version 1.8.0.
+     */
+    SpeechServiceConnection_AutoDetectSourceLanguageResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult),
+
+    /**
      * The user id associated to data buffer written by client when using Pull/Push audio mode streams.
      * Added in version 1.5.0.
      */

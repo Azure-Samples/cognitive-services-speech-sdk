@@ -6,7 +6,9 @@
 package tests.unit;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -23,6 +25,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.rules.ExpectedException;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
@@ -36,6 +40,9 @@ import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.OutputFormat;
 import com.microsoft.cognitiveservices.speech.Connection;
 import com.microsoft.cognitiveservices.speech.ProfanityOption;
+import com.microsoft.cognitiveservices.speech.SourceLanguageConfig;
+import com.microsoft.cognitiveservices.speech.AutoDetectSourceLanguageConfig;
+import com.microsoft.cognitiveservices.speech.AutoDetectSourceLanguageResult;
 
 import tests.Settings;
 import tests.TestHelper;
@@ -1369,5 +1376,95 @@ public class SpeechRecognizerTests {
 
         r.close();
         s.close();
+    }
+
+    @Test
+    public void verfiyLanguageIdDetection() throws InterruptedException, ExecutionException, TimeoutException {
+
+        String endpoint = "wss://northeurope.sr.speech.microsoft.com/speech/translation/interactive/mstranslator/v1?language=en-US";
+        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(URI.create(endpoint), Settings.SpeechSubscriptionKey);
+        assertNotNull(speechConfig);
+        List<SourceLanguageConfig> sourceLanguageConfigs = new ArrayList<SourceLanguageConfig>();
+        sourceLanguageConfigs.add(SourceLanguageConfig.fromLanguage("en-US"));
+        sourceLanguageConfigs.add(SourceLanguageConfig.fromLanguage("zh-CN"));
+        AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromSourceLanguageConfigs(sourceLanguageConfigs);
+        assertNotNull(autoDetectSourceLanguageConfig);
+
+        SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, AudioConfig.fromWavFileInput(Settings.WavFile));
+        assertNotNull(recognizer);
+        assertNotNull(recognizer.getRecoImpl());
+        assertTrue(recognizer instanceof Recognizer);
+        Future<SpeechRecognitionResult> future = recognizer.recognizeOnceAsync();
+        // Wait for max 30 seconds
+        SpeechRecognitionResult result = future.get(30, TimeUnit.SECONDS);
+
+        assertFalse("future is canceled.", future.isCancelled());
+        assertTrue("future is not done.", future.isDone());
+        assertNotNull("future is null.", future);
+
+        assertNotNull(result);
+        TestHelper.OutputResult(result);
+        assertEquals(ResultReason.RecognizedSpeech, result.getReason());
+        AutoDetectSourceLanguageResult autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult.fromResult(result);
+        assertEquals("en-US", autoDetectSourceLanguageResult.getLanguage());
+
+        recognizer.close();
+        speechConfig.close();
+        result.close();
+        for (SourceLanguageConfig sourceLanguageConfig : sourceLanguageConfigs)
+        {
+            sourceLanguageConfig.close();
+        }
+        autoDetectSourceLanguageConfig.close();
+    }
+
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
+ 
+    @Test
+    public void verifySetEndpointIdNotAllowedForLanguageId() throws ExecutionException {
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        assertNotNull(speechConfig);
+        speechConfig.setEndpointId("customEndpoint");
+        AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromLanguages(Arrays.asList("en-US", "de-DE"));
+
+        exceptionRule.expect(RuntimeException.class);
+        exceptionRule.expectMessage("Invalid argument exception: EndpointId on SpeechConfig is unsupported for auto detection source language scenario. Please set per language endpointId through SourceLanguageConfig and use it to construct AutoDetectSourceLanguageConfig.");
+        SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, AudioConfig.fromWavFileInput(Settings.WavFile));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void verifyNullSourceLanguageConfig()  throws ExecutionException {
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        assertNotNull(speechConfig);
+        SourceLanguageConfig sourceLanguageConfig = null;
+        SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, sourceLanguageConfig, AudioConfig.fromWavFileInput(Settings.WavFile));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void verifyNullSourceLanguageConfigForAutoDetectSourceLanguageConfig()  throws ExecutionException {
+        AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromLanguages(null);
+    }
+
+    @Test
+    public void verifyAutoDetectSourceLanguageConfig() throws InterruptedException, ExecutionException, TimeoutException {
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        assertNotNull(speechConfig);
+        
+        List sourceLanguageConfigs = new ArrayList<SourceLanguageConfig>();
+        String customEndpoint1 = "6264ab43-c854-4d9f-84fc-5f33621935f3";
+        String customEndpoint2 = "6264ab43-c854-4d9f-84fc-5f33621935f7";
+        sourceLanguageConfigs.add(SourceLanguageConfig.fromLanguage("en-US", customEndpoint1));
+        sourceLanguageConfigs.add(SourceLanguageConfig.fromLanguage("zh-CN", customEndpoint2));
+        AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromSourceLanguageConfigs(sourceLanguageConfigs);
+        assertNotNull(autoDetectSourceLanguageConfig);
+
+        SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, AudioConfig.fromWavFileInput(Settings.WavFile));
+        assertNotNull(recognizer);
+        assertNotNull(recognizer.getRecoImpl());
+        assertTrue(recognizer instanceof Recognizer);
+        assertEquals(customEndpoint1, recognizer.getProperties().getProperty("en-USSPEECH-ModelId"));
+        assertEquals(customEndpoint2, recognizer.getProperties().getProperty("zh-CNSPEECH-ModelId"));
+        assertEquals("en-US,zh-CN", recognizer.getProperties().getProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguages));
     }
 }
