@@ -1289,7 +1289,7 @@ std::list<std::string> CSpxAudioStreamSession::GetListenForList()
         ThrowRuntimeError("GetListenForList: Recognizer is already destroyed, cannot continue.");
     }
     // Get the listen for list from the recognizer(s)
-    auto grammarlist = SpxQueryInterface<ISpxGrammarList>(recognizer);
+    auto grammarlist = SpxQueryInterface<ISpxGrammar>(recognizer);
     auto listenForList = grammarlist->GetListenForList();
 
     // If we also have an lu adapter...

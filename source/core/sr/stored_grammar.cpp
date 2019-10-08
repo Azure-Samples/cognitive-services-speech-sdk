@@ -9,12 +9,15 @@ namespace Impl {
 void CSpxStoredGrammar::InitStoredGrammar(const wchar_t* id)
 {
     SPX_IFTRUE_THROW_HR(!m_id.empty(), SPXERR_ALREADY_INITIALIZED);
-    m_id = id;
+    m_id = PAL::ToString(id);
 }
 
-std::wstring CSpxStoredGrammar::GetStorageId() const
+std::list<std::string> CSpxStoredGrammar::GetListenForList()
 {
-    return m_id;
+    auto retVal = std::list<std::string>();
+    retVal.push_front(m_id);
+
+    return retVal;
 }
 
 }}}} // Microsoft::CognitiveServices::Speech::Impl

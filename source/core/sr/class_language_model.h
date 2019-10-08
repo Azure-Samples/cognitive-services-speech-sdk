@@ -26,7 +26,7 @@ public:
 
     // ISpxClassLanguageModel
     void InitClassLanguageModel(const wchar_t *id) override;
-    void AssignClass(const wchar_t *className, std::shared_ptr<ISpxStoredGrammar> grammar) override;
+    void AssignClass(const wchar_t *className, std::shared_ptr<ISpxGrammar> grammar) override;
 
     // ISpxGrammar
     std::list<std::string> GetListenForList() override;
@@ -36,7 +36,7 @@ private:
     DISABLE_COPY_AND_MOVE(CSpxClassLanguageModel);
 
     std::wstring m_id;
-    std::list<std::pair<std::wstring, std::shared_ptr<ISpxStoredGrammar>>> m_referencedGrammars;
+    std::list<std::pair<std::wstring, std::shared_ptr<ISpxGrammar>>> m_referencedGrammars;
 };
 
 }}}} // Microsoft::CognitiveServices::Speech::Impl

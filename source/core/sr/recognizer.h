@@ -21,6 +21,7 @@ class CSpxRecognizer :
     public ISpxObjectWithSiteInitImpl<ISpxRecognizerSite>,
     public ISpxPropertyBagImpl,
     public ISpxGrammarList,
+    public ISpxGrammar,
     public ISpxMessageParamFromUser,
     public ISpxGetUspMessageParamsFromUser,
     public ISpxConnectionFromRecognizer,
@@ -40,6 +41,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxGrammarList)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGrammar)
         SPX_INTERFACE_MAP_ENTRY(ISpxMessageParamFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxGetUspMessageParamsFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxConnectionFromRecognizer)
@@ -55,6 +57,8 @@ public:
     // --- ISpxGrammarList
     std::shared_ptr<ISpxGrammar> GetPhraseListGrammar(const wchar_t* name) override;
     void AddGrammar(std::shared_ptr<ISpxGrammar> grammar) override;
+
+    // --- ISpxGrammar
     std::list<std::string> GetListenForList() override;
 
     // --- ISpxRecognizer

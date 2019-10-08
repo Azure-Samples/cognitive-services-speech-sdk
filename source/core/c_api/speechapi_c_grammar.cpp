@@ -111,7 +111,10 @@ SPXAPI grammar_create_from_storage_id(SPXGRAMMARHANDLE *hgrammar, const char *id
         
         grammar->InitStoredGrammar(PAL::ToWString(id).c_str());
 
-        *hgrammar = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxStoredGrammar, SPXGRAMMARHANDLE>(grammar);
+        auto g = SpxQueryInterface<ISpxGrammar>(grammar);
+        SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, g == nullptr);
+
+        *hgrammar = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxGrammar, SPXGRAMMARHANDLE>(g);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -128,9 +131,10 @@ SPXAPI grammar_list_from_recognizer(SPXGRAMMARHANDLE *hgrammarlist, SPXRECOHANDL
         auto reco = CSpxSharedPtrHandleTableManager::GetPtr<ISpxRecognizer, SPXRECOHANDLE>(hreco);
         SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, reco == nullptr);
 
-        auto grammarlist = SpxQueryInterface<ISpxGrammarList>(reco);
+        auto grammarlist = SpxQueryInterface<ISpxGrammar>(reco);
+        SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, grammarlist == nullptr);
 
-        *hgrammarlist = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxGrammarList, SPXGRAMMARHANDLE>(grammarlist);
+        *hgrammarlist = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxGrammar, SPXGRAMMARHANDLE>(grammarlist);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -142,7 +146,10 @@ SPXAPI grammar_list_add_grammar(SPXGRAMMARHANDLE hgrammarlist, SPXGRAMMARHANDLE 
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto gl = CSpxSharedPtrHandleTableManager::GetPtr<ISpxGrammarList, SPXGRAMMARHANDLE>(hgrammarlist);
+        auto glg = CSpxSharedPtrHandleTableManager::GetPtr<ISpxGrammar, SPXGRAMMARHANDLE>(hgrammarlist);
+        SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, glg == nullptr);
+
+        auto gl = SpxQueryInterface<ISpxGrammarList>(glg);
         SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, gl == nullptr);
 
         auto grammar = CSpxSharedPtrHandleTableManager::GetPtr<ISpxGrammar, SPXGRAMMARHANDLE>(hgrammar);
@@ -188,7 +195,7 @@ SPXAPI class_language_model_assign_class(SPXGRAMMARHANDLE hclm, const char *clas
         auto clm = SpxQueryInterface<ISpxClassLanguageModel>(g);
         SPX_RETURN_HR_IF(SPXERR_RUNTIME_ERROR, clm == nullptr);
 
-        auto grammar = CSpxSharedPtrHandleTableManager::GetPtr<ISpxStoredGrammar, SPXGRAMMARHANDLE>(hgrammar);
+        auto grammar = CSpxSharedPtrHandleTableManager::GetPtr<ISpxGrammar, SPXGRAMMARHANDLE>(hgrammar);
         SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, grammar == nullptr);
 
         clm->AssignClass(PAL::ToWString(classname).c_str(), grammar);

@@ -1124,7 +1124,6 @@ class ISpxStoredGrammar : public ISpxInterfaceBaseFor<ISpxStoredGrammar>
 {
 public:
     virtual void InitStoredGrammar(const wchar_t* id) = 0;
-    virtual std::wstring GetStorageId() const = 0;
 };
 
 class ISpxClassLanguageModel : public ISpxInterfaceBaseFor<ISpxClassLanguageModel>
@@ -1132,7 +1131,7 @@ class ISpxClassLanguageModel : public ISpxInterfaceBaseFor<ISpxClassLanguageMode
 public:
 
     virtual void InitClassLanguageModel(const wchar_t* id) = 0;
-    virtual void AssignClass(const wchar_t* className, std::shared_ptr<ISpxStoredGrammar> grammar) = 0;
+    virtual void AssignClass(const wchar_t* className, std::shared_ptr<ISpxGrammar> grammar) = 0;
 };
 
 class ISpxGrammarList : public ISpxInterfaceBaseFor<ISpxGrammarList>
@@ -1141,7 +1140,6 @@ public:
 
     virtual std::shared_ptr<ISpxGrammar> GetPhraseListGrammar(const wchar_t* name) = 0;
     virtual void AddGrammar(std::shared_ptr<ISpxGrammar> grammar) = 0;
-    virtual std::list<std::string> GetListenForList() = 0;
 };
 
 class ISpxLanguageUnderstandingModel : public ISpxInterfaceBaseFor<ISpxLanguageUnderstandingModel>

@@ -13,7 +13,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-class CSpxStoredGrammar : public ISpxStoredGrammar
+class CSpxStoredGrammar : public ISpxStoredGrammar, public ISpxGrammar
 {
 public:
 
@@ -21,16 +21,17 @@ public:
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxStoredGrammar)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGrammar)
     SPX_INTERFACE_MAP_END()
 
     void InitStoredGrammar(const wchar_t *id) override;
-    std::wstring GetStorageId() const override;
+    std::list<std::string> GetListenForList() override;
 
 private:
 
     DISABLE_COPY_AND_MOVE(CSpxStoredGrammar);
 
-    std::wstring m_id;
+    std::string m_id;
 };
 
 }}}} // Microsoft::CognitiveServices::Speech::Impl

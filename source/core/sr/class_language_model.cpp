@@ -12,12 +12,12 @@ void CSpxClassLanguageModel::InitClassLanguageModel(const wchar_t* id)
     m_id = id;
 }
 
-void CSpxClassLanguageModel::AssignClass(const wchar_t *className, std::shared_ptr<ISpxStoredGrammar> grammar)
+void CSpxClassLanguageModel::AssignClass(const wchar_t *className, std::shared_ptr<ISpxGrammar> grammar)
 {
     SPX_IFTRUE_THROW_HR(!className, SPXERR_INVALID_ARG);
     SPX_IFTRUE_THROW_HR(!grammar, SPXERR_INVALID_ARG);
 
-    m_referencedGrammars.push_back(std::pair<std::wstring, std::shared_ptr<ISpxStoredGrammar>>(className, grammar));
+    m_referencedGrammars.push_back(std::pair<std::wstring, std::shared_ptr<ISpxGrammar>>(className, grammar));
 }
 
 std::list<std::string> CSpxClassLanguageModel::GetListenForList()
@@ -29,7 +29,10 @@ std::list<std::string> CSpxClassLanguageModel::GetListenForList()
 
     for (auto classReference : m_referencedGrammars)
     {
-        retVal.push_back("{" + PAL::ToString(m_id) + ":" + PAL::ToString(classReference.first) + "/" + PAL::ToString(classReference.second->GetStorageId()) + "}");
+        for (auto grammar : classReference.second->GetListenForList())
+        {
+            retVal.push_back("{" + PAL::ToString(m_id) + ":" + PAL::ToString(classReference.first) + "/" + grammar + "}");
+        }
     }
 
     return retVal;
