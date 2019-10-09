@@ -151,7 +151,7 @@ namespace helloworld
             connector = new DialogServiceConnector(botConfig);
 
             // ActivityReceived is the main way your bot will communicate with the client and uses bot framework activities
-            connector.ActivityReceived += async (sender, activityReceivedEventArgs) =>
+            connector.ActivityReceived +=  (sender, activityReceivedEventArgs) =>
             {
                 NotifyUser($"Activity received, hasAudio={activityReceivedEventArgs.HasAudio} activity={activityReceivedEventArgs.Activity}");
 
