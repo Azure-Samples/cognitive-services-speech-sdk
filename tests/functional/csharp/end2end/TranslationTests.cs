@@ -822,10 +822,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 var result = await recognizer.RecognizeOnceAsync();
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                Assert.IsTrue(result.Text.Length > 0);
-                Assert.IsTrue(result.Translations[Language.DE].Length > 0);
-                Assert.IsTrue(result.Translations[Language.FR].Length > 0);
-                Assert.IsTrue(result.Translations[Language.ES].Length > 0);
+                Assert.IsTrue(result.Text.Length > 0, $"result.Text.Length({result.Text.Length}) !> 0");
+                Assert.IsTrue(result.Translations[Language.DE].Length > 0, "result.Translations[Language.DE].Length !> 0");
+                Assert.IsTrue(result.Translations[Language.FR].Length > 0, "result.Translations[Language.FR].Length !> 0");
+                Assert.IsTrue(result.Translations[Language.ES].Length > 0, "result.Translations[Language.ES].Length !> 0");
 
                 recognizer.RemoveTargetLanguage(Language.DE);
                 recognizer.RemoveTargetLanguage(Language.ES);
@@ -838,9 +838,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 result = await recognizer.RecognizeOnceAsync();
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                Assert.IsTrue(result.Text.Length > 0);
-                Assert.IsTrue(result.Translations[Language.FR].Length > 0);
-                Assert.IsTrue(result.Translations[Language.ZH].Length > 0);
+                Assert.IsTrue(result.Text.Length > 0, "result.Text.Length !> 0");
+                Assert.IsTrue(result.Translations[Language.FR].Length > 0, $"result.Translations[Language.FR].Length({result.Translations[Language.FR].Length}) !> 0");
+                Assert.IsTrue(result.Translations[Language.ZH].Length > 0, $"result.Translations[Language.ZH].Length({result.Translations[Language.ZH].Length}) !> 0");
                 Assert.IsFalse(result.Translations.ContainsKey(Language.ES));
                 Assert.IsFalse(result.Translations.ContainsKey(Language.DE));
             }
@@ -926,32 +926,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(300)));
                 await recognizer.StopContinuousRecognitionAsync();
 
-                Console.WriteLine($"recognizedResults.Count:{recognizedResults.Count}, translatedResultsDe.Count:{translatedResultsDe.Count}, translatedResultsEs.Count:{translatedResultsEs.Count}, translatedResultsFr.Count:{translatedResultsFr.Count}");
-                Console.WriteLine("German translation:");
-                foreach (string translation in translatedResultsDe)
-                {
-                    Console.WriteLine(translation);
-                }
-
-                Console.WriteLine("Spanish translation:");
-                foreach (string translation in translatedResultsEs)
-                {
-                    Console.WriteLine(translation);
-                }
-
-                Console.WriteLine("French translation:");
-                foreach (string translation in translatedResultsFr)
-                {
-                    Console.WriteLine(translation);
-                }
-
-                Assert.IsTrue(recognizedResults.Count > 0);
-                Assert.IsTrue(recognizedResults.Count == translatedResultsDe.Count);
-                Assert.IsTrue(translatedResultsDe.Count > translatedResultsEs.Count);
-                Assert.IsTrue(translatedResultsDe.Count > translatedResultsFr.Count);
-                Assert.IsTrue(translatedResultsFr.Count > 0);
-                Assert.IsTrue(translatedResultsEs.Count > 0);
-                Assert.IsTrue(errorResults.Count == 0);
+                Assert.AreEqual(recognizedResults.Count, translatedResultsDe.Count, $"recognized English count {recognizedResults.Count} not equal to translated German count {translatedResultsDe.Count}");
+                Assert.AreEqual(errorResults.Count, 0, $"errorResults count {errorResults.Count} not equal 0");
+                Assert.IsTrue(recognizedResults.Count > 0, $"recognizedResults.Count({recognizedResults.Count}) not equal to zero.");
+                Assert.IsTrue(translatedResultsFr.Count > 0, $"translatedResultsFr.Count({translatedResultsFr.Count}) !> zero.");
+                Assert.IsTrue(translatedResultsEs.Count > 0, $"translatedResultsEs.Count({translatedResultsEs.Count}) !> zero.");
+                Assert.IsTrue(translatedResultsFr.Count < translatedResultsDe.Count, $"translatedResultsFr.Count({translatedResultsFr.Count}) !< translatedResultsDe.Count({translatedResultsDe.Count})");
+                Assert.IsTrue(translatedResultsEs.Count < translatedResultsDe.Count, $"translatedResultsEs.Count({translatedResultsEs.Count}) !< translatedResultsDe.Count({translatedResultsDe.Count})");
             }
         }
     }
