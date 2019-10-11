@@ -884,18 +884,25 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         recognizedResults.Add(e.Result.Text);
                         translatedResultsDe.Add(e.Result.Translations[Language.DE]);
-                        if (e.Result.Translations.ContainsKey(Language.ES))
-                        {
-                            translatedResultsEs.Add(e.Result.Translations[Language.ES]);
-                        }
                         if (e.Result.Translations.ContainsKey(Language.FR))
                         {
                             translatedResultsFr.Add(e.Result.Translations[Language.FR]);
+
+                            if (!e.Result.Translations.ContainsKey(Language.ES))
+                            {
+                                recognizer.AddTargetLanguage(Language.ES);
+                            }
                         }
                         else
                         {
                             recognizer.AddTargetLanguage(Language.FR);
                         }
+
+                        if (e.Result.Translations.ContainsKey(Language.ES))
+                        {
+                            translatedResultsEs.Add(e.Result.Translations[Language.ES]);
+                        }
+
                     }
                     else if (e.Result.Reason == ResultReason.RecognizedSpeech)
                     {
@@ -916,10 +923,27 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
 
                 await recognizer.StartContinuousRecognitionAsync();
-                await Task.Delay(20000).ConfigureAwait(false);
-                recognizer.AddTargetLanguage(Language.ES);
                 await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(300)));
                 await recognizer.StopContinuousRecognitionAsync();
+
+                Console.WriteLine($"recognizedResults.Count:{recognizedResults.Count}, translatedResultsDe.Count:{translatedResultsDe.Count}, translatedResultsEs.Count:{translatedResultsEs.Count}, translatedResultsFr.Count:{translatedResultsFr.Count}");
+                Console.WriteLine("German translation:");
+                foreach (string translation in translatedResultsDe)
+                {
+                    Console.WriteLine(translation);
+                }
+
+                Console.WriteLine("Spanish translation:");
+                foreach (string translation in translatedResultsEs)
+                {
+                    Console.WriteLine(translation);
+                }
+
+                Console.WriteLine("French translation:");
+                foreach (string translation in translatedResultsFr)
+                {
+                    Console.WriteLine(translation);
+                }
 
                 Assert.IsTrue(recognizedResults.Count > 0);
                 Assert.IsTrue(recognizedResults.Count == translatedResultsDe.Count);

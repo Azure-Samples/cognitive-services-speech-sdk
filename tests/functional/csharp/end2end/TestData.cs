@@ -22,7 +22,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 public static readonly string AudioFile = Path.Combine(KwsDir, "kws_whatstheweatherlike.wav");
                 public static readonly string AudioFile2x = Path.Combine(KwsDir, "kws_whatstheweatherlike_x2.wav");
-                public static readonly string Utterance= "Computer what's the weather like?";
+                public static readonly string Utterance = "Computer what's the weather like?";
             }
             public static class Computer2
             {
@@ -115,28 +115,27 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string AudioFile = Path.Combine(AudioDir, "Margarita-44100.wav");
                 public static readonly string[] Utterance =
                 {
-                    "And we all know and Love, a margarita and if you're anything like me, you probably had your fair share and if you have youve probably noticed that margaritas can vary from incredible 2?",
-                    "Yeah, so I'm going to show you how to make one of those incredibly fresh and Delicious Margaritas. There are 3 key steps you need to follow first."
+                    "we all know and Love, a margarita and if you're anything like me, you probably had your fair share and if you have youve probably noticed that margaritas can vary from incredible too",
+                    "so I'm going to show you how to make one of those incredibly fresh and Delicious Margaritas. There are 3 key steps you need to follow 1st."
 
                 };
             }
 
             public static class Batman
             {
-                public static readonly string AudioFile = Path.Combine(AudioDir,"batman.wav");
+                public static readonly string AudioFile = Path.Combine(AudioDir, "batman.wav");
                 // This is expected results using StartContinuousRecognitionAsync() which uses conversation mode.
                 // The result using RecognizeOnceAsync() might be slightly different, since it uses interactive mode.
                 public static readonly string[] Utterances =
                 {
-                    "Skills and abilities Batman has no inherent super powers, he relies on his own scientific knowledge detective skills and athletic prowess.",
-                    "In the stories Batman is regarded as one of the world's greatest detective if not the world's greatest crime solver. Batman has been repeatedly described as having genius level intellect. One of the greatest martial artists in the DC universe.",
-                    "And having peak human physical conditioning he has traveled the world, acquiring the skills needed to aid his cruceta grants crime.",
+                    "Skills and abilities Batman has no inherent super powers, he relies on his own scientific knowledge detective skills and athletic prowess in the stories. Batman is regarded as one of the world's greatest detective if not the world's greatest crime solver. Batman has been repeatedly described as having genius level intellect. One of the greatest martial artists in the DC universe.",
+                    "And having peak human physical conditioning, he has traveled the world, acquiring the skills needed to aid his cruceta grants crime.",
                     "His knowledge and expertise in almost every discipline known to man is nearly unparalleled by any other character in the universe.",
-                    "Batman's inexhaustible wealth allows him to access advanced technology as a proficient scientists use able to use and modify those technologies to his advantage.",
+                    "Batman's inexhaustible wealth allows him to access advanced technology as a proficient scientist is able to use and modify those technologies to his advantage.",
                     "Batman describes Superman as the most dangerous man on Earth able to defeat a team of super powered extraterrestrials by himself in order to rescue his imprisoned teammates.",
                     "In the 1st storyline, Superman also considers Batman to be one of the most brilliant minds on the planet.",
                     "Batman has the ability to function under great physical pain and withstand mind control. He is a master of disguise multilingual and an expert in espionage, often gathering information under different identity's.",
-                    "Batman's Karate Judo and jujitsu training has made him a math are master of stealth an escape, allowing allowing him to appear and disappear at Will and to break free.",
+                    "Batman's Karate Judo and jujitsu training has made him a math master of stealth an escape, allowing too much allowing him to appear and disappear at Will and to break free."
                 };
 
                 public static readonly string[] UtterancesInteractive =
@@ -155,8 +154,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 // Normalization for translation may be different.
                 public static readonly string[] UtterancesTranslation =
                 {
-                    "Skills and abilities Batman has no inherent super powers. He relies on his own scientific knowledge detective skills and athletic prowess.",
-                    "In the stories batman is regarded as one of the world's greatest detective if not the world's greatest crime solver Batman has been repeatedly described as having genius level intellect. One of the greatest martial artists in the DC universe.",
+                    "Skills and abilities Batman has no inherent super powers. He relies on his own scientific knowledge detective skills and athletic prowess in the stories Batman is regarded as one of the world's greatest detective if not the world's Greatest Crime Solver Batman has been repeatedly described as having genius. Level intellect. One of the greatest martial artists in the DC universe.",
                     "And having peak human physical conditioning use traveled the world acquiring the skills needed to aid his cruceta grants crime.",
                     "His knowledge and expertise in almost every discipline known to man is nearly unparalleled by any other character in the universe.",
                     "Batman's inexhaustible wealth allows him to access advanced technology as a proficient scientists use able to use and modify those technologies to his advantage.",

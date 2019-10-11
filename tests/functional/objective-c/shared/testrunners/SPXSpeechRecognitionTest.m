@@ -15,7 +15,7 @@
     [super setUp];
     timeoutInSeconds = 20.;
     margaritaFileName = @"Margarita-44100";
-    margaritaTextEnglish = @"And.  We all know and Love, a margarita and if you're anything like me, you probably had your fair share and if you have. You've probably noticed that margaritas? Can vary from incredible too. So I'm going to show you? How to make one of those incredibly fresh and Delicious Margaritas. There are 3 key steps you need to follow 1st.";
+    margaritaTextEnglish = @"we all know and Love, a margarita and if you're anything like me, you probably had your fair share and if you have youve probably noticed that margaritas can vary from incredible too so I'm going to show you how to make one of those incredibly fresh and Delicious Margaritas. There are 3 key steps you need to follow 1st.";
 
     weatherFileName = @"whatstheweatherlike";
     weatherTextEnglish = @"What's the weather like?";
