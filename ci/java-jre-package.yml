@@ -50,7 +50,7 @@ jobs:
       downloadPath: $(System.ArtifactsDirectory)/In
   - bash: |
       ./ci/jre/build-jar.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/In ${{ parameters.macArtifactName }}
-  # Note: doc says "The file extension should match the selected archive type." - so we are renaming afterwards
+    # Note: doc says "The file extension should match the selected archive type." - so we are renaming afterwards
   - task: ArchiveFiles@2
     inputs:
       rootFolderOrFile: './ci/jre/jar'
@@ -78,45 +78,49 @@ jobs:
       ./ci/run-maven.sh public_samples "$(MavenRoot)"
     displayName: Build Maven-based samples
   - bash: |
-       set -x -e
-       eval $(perl ci/evaluate-test-config.pl --verbose --format bash-variable --input ci/test-config.json \
-         -D luis-key=$(luis-westus-s0-201809-key1) \
-         -D speech-key=$(NorthEuropeKeySkyman) \
-         -D virtualassistant-region=$(DialogRegion) \
-         -D virtualassistant-subscription=$(DialogSubscriptionKey) \
-         -D virtualassistant-testbot=$(DialogFunctionalTestBot) \
-         -D conversationtranscriber-ppe-key=$(ConverstationTranscriptionKeyWestUS220190509) \
-         -D conversationtranscriber-prod-key=$(ConverstationTranscriptionKeyCentralUS20190509) \
-         -D long-running=false)
-       . ci/functions.sh
-       # set +e to allow capturing exit codes
-       set +e
-       for retry in {0..3}; do
+      set -x -e
+      . ci/functions.sh
+      perl ci/generateTestSettingsJson.pl \
+        --OutputDirectory "./" \
+        --SPEECHSDK_SPEECH_KEY $(NorthEuropeKeySkyman) \
+        --SPEECHSDK_SPEECH_REGION "northeurope" \
+        --SPEECHSDK_SPEECH_ENDPOINTID "$SPEECHSDK_SPEECH_ENDPOINTID_ENUS" \
+        --LanguageUnderstandingSubscriptionKey $(luis-westus-s0-201809-key1) \
+        --LanguageUnderstandingServiceRegion "westus" \
+        --LanguageUnderstandingHomeAutomationAppId "b687b851-56c5-4d31-816f-35a741a3f0be" \
+        --DialogRegion $(DialogRegion) \
+        --DialogSubscriptionKey $(DialogSubscriptionKey) \
+        --DialogFunctionalTestBot $(DialogFunctionalTestBot) \
+        --ConversationTranscriptionEndpoint "wss://transcribe.princetonppe.customspeech.ai/speech/recognition" \
+        --ConversationTranscriptionPPEKey $(ConverstationTranscriptionKeyWestUS220190509) \
+        --ConversationTranscriptionPRODKey $(ConverstationTranscriptionKeyCentralUS20190509) \
+        --SpeechRegionForConversationTranscription "$SPEECHSDK_PRINCETON_REGION" \
+        --InRoomAudioEndpoint "wss://transcribe.princetonppe.customspeech.ai/speech/recognition" \
+        --OnlineAudioEndpoint "wss://westus2.online.princetondev.customspeech.ai/recognition/onlinemeeting/v1" \
+        --WavFile "whatstheweatherlike.wav" \
+        --Keyword "Computer" \
+        --KeywordModel "kws.table" \
+        --TwoSpeakersAudio "katiesteve.wav" \
+        --TwoSpeakersAudioUtterance "Good morning Steve." \
+        --TurnOnTheLampAudio "TurnOnTheLamp.wav" \
+        --TurnOnTheLampAudioUtterance "Turn on the lamp." \
+        --SerializedSpeechActivityFile "activityWithSpeech.json" \
+        --LongRunning "false"
+      cp -r tests/input ./
+      # set +e to allow capturing exit codes
+      set +e
+      for retry in {0..3}; do
          java \
            -cp $(printf "%s;" \
              "$(MavenPackageDirWindows)/$(ArtifactBasename).jar" \
              "$(Build.ArtifactStagingDirectory)/In/Windows/x64/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" \
              "external/junit/junit-4.12.jar" \
-             "external/junit/hamcrest-core-1.3.jar") \
-           -DSpeechSubscriptionKey="$SPEECHSDK_SPEECH_KEY" \
-           -DSpeechRegion="$SPEECHSDK_SPEECH_REGION" \
-           -DLuisSubscriptionKey=$(luis-westus-s0-201809-key1) \
-           -DLuisRegion="$SPEECHSDK_LUIS_REGION" \
-           -DLuisAppId="$SPEECHSDK_LUIS_HOMEAUTOMATION_APPID" \
-           -DAudioInputDirectory=tests/input/audio \
-           -DWaveFile=tests/input/audio/whatstheweatherlike.wav \
-           -DKeyword=Computer \
-           -DKeywordModel=/data/keyword/kws.table \
-           -DTestOutputFilename=test-java-unittests-package-$retry.xml \
-           -DSpeechSubscriptionKeyForVirtualAssistant="$SPEECHSDK_BOT_SUBSCRIPTION" \
-           -DSpeechRegionForVirtualAssistant="$SPEECHSDK_BOT_REGION" \
-           -DSpeechChannelSecretForVirtualAssistant="$SPEECHSDK_BOT_FUNCTIONALTESTBOT" \
-           -DConversationTranscriptionEndpoint="$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-           -DConversationTranscriptionPPEKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PPE_KEY" \
-           -DConversationTranscriptionPRODKey="$SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY" \
-           -DSpeechRegionForConversationTranscription="$SPEECHSDK_PRINCETON_REGION" \
-           tests.runner.Runner \
-           tests.AllTests
+             "external/junit/hamcrest-core-1.3.jar" \
+             "external/json/javax.json-1.1.jar" \
+             "external/json/javax.json-api-1.0.jar") \
+             -DTestOutputFilename=test-java-unittests-package-$retry.xml \
+             tests.runner.Runner \
+             tests.AllTests
          exitCode=$?
          if [[ $exitCode == 0 ]]; then
            echo "Test suite passed, RetryCount( $retry )"
@@ -126,9 +130,9 @@ jobs:
            vsts_logissue warning "Test suite failed during retry( $retry )."
            sleep 2s
          fi
-       done
-       set -e
-       exit ${exitCode}
+      done
+      set -e
+      exit ${exitCode}
     displayName: Run unit test
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     continueOnError: ${{ parameters.continueOnTestFailure }}
@@ -144,4 +148,3 @@ jobs:
       publishLocation: Container
     displayName: 'Publish .jar'
     condition: succeededOrFailed()
-

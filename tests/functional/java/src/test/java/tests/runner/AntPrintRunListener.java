@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 
+import tests.Settings;
+
 public class AntPrintRunListener extends RunListener {
     private PrintStream outputStream;
 

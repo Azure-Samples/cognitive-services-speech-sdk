@@ -32,7 +32,7 @@ public class SampleRecognizeIntentTest {
 
         test.run();
         assertNotNull(test.getResult()); // we got the final result
-        assertEquals(Settings.TurnOnTheLampUtterance, test.getResult().getText());
+        assertEquals(Settings.TurnOnTheLampAudioUtterance, test.getResult().getText());
         assertEquals("1", test.getIntentId());
         assertEquals("HomeAutomation.TurnOn", test.getIntentName());
 

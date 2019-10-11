@@ -145,8 +145,16 @@ perl $SCRIPT_DIR/generateTestSettingsJson.pl \
     --ConversationTranscriptionPRODKey $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY \
     --SpeechRegionForConversationTranscription $SPEECHSDK_PRINCETON_REGION \
     --InRoomAudioEndpoint "$SPEECHSDK_PRINCETON_INROOM_ENDPOINT" \
-    --OnlineAudioEndpoint "$SPEECHSDK_PRINCETON_ONLINE_ENDPOINT"
-
+    --OnlineAudioEndpoint "$SPEECHSDK_PRINCETON_ONLINE_ENDPOINT" \
+    --WavFile "tests/input/audio/whatstheweatherlike.wav" \
+    --Keyword "Computer" \
+    --KeywordModel "/data/keyword/kws.table" \
+    --TwoSpeakersAudio "katiesteve.wav" \
+    --TwoSpeakersAudioUtterance "" \
+    --TurnOnTheLampAudio "TurnOnTheLamp.wav" \
+    --TurnOnTheLampAudioUtterance "" \
+    --SerializedSpeechActivityFile "activityWithSpeech.json" \
+    --LongRunning "false"
 cp -R tests/input $binaryDir
 
 cmdTimeout=

@@ -37,7 +37,9 @@ set -x
 #     "$BUILD_DIR/lib/com.microsoft.cognitiveservices.speech.jar" \
 #     "$TEST_CODE" \
 #     "$SPEECH_SDK_EXTERNAL/junit/junit-4.12.jar" \
-#     "$SPEECH_SDK_EXTERNAL/junit/hamcrest-core-1.3.jar" ) \
+#     "$SPEECH_SDK_EXTERNAL/junit/hamcrest-core-1.3.jar" \
+#     "$SPEECH_SDK_EXTERNAL/json/javax.json-api-1.0.jar" \
+#     "$SPEECH_SDK_EXTERNAL/json/javax.json-1.1.jar" ) \ 
 #   -DSpeechSubscriptionKey=$SPEECHSDK_SPEECH_KEY \
 #   -DSpeechRegion=$SPEECHSDK_SPEECH_REGION \
 #   -DLuisRegion=$SPEECHSDK_LUIS_REGION \
