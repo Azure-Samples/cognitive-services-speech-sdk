@@ -24,7 +24,10 @@ namespace TTS
 
     shared_ptr<SpeechConfig> UspSpeechConfig()
     {
-        return SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        auto endpoint = "wss://" + Config::Region + ".tts.speech.microsoft.com/cognitiveservices/websocket/v1";
+        endpoint += "?TrafficType=Test";
+        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        return config;
     }
 
     shared_ptr<SpeechConfig> MockSpeechConfig()

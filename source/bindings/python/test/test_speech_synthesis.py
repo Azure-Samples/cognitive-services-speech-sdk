@@ -12,7 +12,8 @@ from .utils import _TestCallback
 
 from .test_events import _check_events
 
-from .tts_utils import (_PushAudioOutputStreamTestCallback,
+from .tts_utils import (_create_speech_config,
+                    _PushAudioOutputStreamTestCallback,
                     _do_something_with_audio_in_push_stream,
                     _do_something_with_audio_in_pull_stream,
                     _do_something_with_audio_in_pull_stream_in_background,
@@ -30,7 +31,7 @@ from .tts_utils import (_PushAudioOutputStreamTestCallback,
 
 
 def test_speech_synthesizer_defaults(subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
 
     synthesizer = msspeech.SpeechSynthesizer(config)
 
@@ -41,7 +42,7 @@ def test_speech_synthesizer_defaults(subscription, speech_region):
 
 
 def test_speech_synthesizer_explicitly_use_default_speakers(subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
 
     device_config = msspeech.audio.AudioOutputConfig(use_default_speaker=True)
     synthesizer = msspeech.SpeechSynthesizer(config, device_config)
@@ -53,7 +54,7 @@ def test_speech_synthesizer_explicitly_use_default_speakers(subscription, speech
 
 
 def test_speech_synthesizer_pick_language(subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
     config.speech_synthesis_language = "en-GB"
 
     synthesizer = msspeech.SpeechSynthesizer(config)
@@ -65,7 +66,7 @@ def test_speech_synthesizer_pick_language(subscription, speech_region):
 
 
 def test_speech_synthesizer_pick_voice(subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
     config.speech_synthesis_voice_name = "Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)"
 
     synthesizer = msspeech.SpeechSynthesizer(config)
@@ -77,7 +78,7 @@ def test_speech_synthesizer_pick_voice(subscription, speech_region):
 
 
 def test_speech_synthesizer_synthesizer_output_to_file(subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
     file_config = msspeech.audio.AudioOutputConfig(filename="wavefile.wav")
 
     synthesizer = msspeech.SpeechSynthesizer(config, file_config)
@@ -112,7 +113,7 @@ def test_speech_synthesizer_synthesizer_output_to_file(subscription, speech_regi
 
 
 def test_speech_synthesizer_synthesizer_output_to_mp3_file(subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
     file_config = msspeech.audio.AudioOutputConfig(filename="audiofile.wav")
 
     synthesizer = msspeech.SpeechSynthesizer(config, file_config)
@@ -149,7 +150,7 @@ def test_speech_synthesizer_synthesizer_output_to_mp3_file(subscription, speech_
 
 
 def test_speech_synthesizer_synthesizer_output_to_push_stream(subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
 
     stream_callback = _PushAudioOutputStreamTestCallback()
     push_stream = msspeech.audio.PushAudioOutputStream(stream_callback)
@@ -175,7 +176,7 @@ def test_speech_synthesizer_synthesizer_output_to_push_stream(subscription, spee
 
 def test_speech_synthesizer_synthesizer_output_to_pull_stream_use_after_synthesis_completed(
     subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
 
     pull_stream = msspeech.audio.PullAudioOutputStream()
     stream_config = msspeech.audio.AudioOutputConfig(stream=pull_stream)
@@ -200,7 +201,7 @@ def test_speech_synthesizer_synthesizer_output_to_pull_stream_use_after_synthesi
 
 def test_speech_synthesizer_synthesizer_output_to_pull_stream_start_using_before_done_synthesizing(
     subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
 
     pull_stream = msspeech.audio.PullAudioOutputStream()
 
@@ -227,7 +228,7 @@ def test_speech_synthesizer_synthesizer_output_to_pull_stream_start_using_before
 
 
 def test_speech_synthesizer_speak_out_in_results(subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
     # None(null) indicates to do nothing with synthesizer audio by default
     synthesizer = msspeech.SpeechSynthesizer(config, None)
 
@@ -250,7 +251,7 @@ def test_speech_synthesizer_speak_out_in_results(subscription, speech_region):
 
 def test_speech_synthesizer_speak_output_in_chunks_in_event_synthesizing(
     subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
     synthesizer = msspeech.SpeechSynthesizer(config, None)
     # None(null) indicates to do nothing with synthesizer audio by default
 
@@ -268,7 +269,7 @@ def test_speech_synthesizer_speak_output_in_chunks_in_event_synthesizing(
 
 
 def test_speech_synthesizer_speak_output_in_streams(subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
      # None(null) indicates to do nothing with synthesizer audio by default
     synthesizer = msspeech.SpeechSynthesizer(config, None)
 
@@ -293,7 +294,7 @@ def test_speech_synthesizer_speak_output_in_streams(subscription, speech_region)
 
 def test_speech_synthesizer_speak_output_in_streams_before_done_from_event_synthesis_started(
     subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
     # None(null) indicates to do nothing with synthesizer audio by default
     synthesizer = msspeech.SpeechSynthesizer(config, None)
 
@@ -317,7 +318,7 @@ def test_speech_synthesizer_speak_output_in_streams_before_done_from_event_synth
 
 def test_speech_synthesizer_speak_output_in_streams_before_done_from_method_start_speaking_text_async(
     subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
     # None(null) indicates to do nothing with synthesizer audio by default
     synthesizer = msspeech.SpeechSynthesizer(config, None)
 
@@ -344,7 +345,7 @@ def test_speech_synthesizer_speak_output_in_streams_before_done_from_method_star
 
 
 def test_speech_synthesizer_speak_output_in_streams_before_done_queued(subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
     # None(null) indicates to do nothing with synthesizer audio by default
     synthesizer = msspeech.SpeechSynthesizer(config, None)
 
@@ -392,7 +393,7 @@ def test_speech_synthesizer_speak_output_in_streams_before_done_queued(subscript
 
 def test_speech_synthesizer_speak_output_in_streams_with_all_data_get_on_synthesis_started_result(
     subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
     # None(null) indicates to do nothing with synthesizer audio by default
     synthesizer = msspeech.SpeechSynthesizer(config, None)
 
@@ -428,7 +429,7 @@ def test_speech_synthesizer_speak_output_in_streams_with_all_data_get_on_synthes
 
 
 def test_speech_synthesizer_check_word_boundary_events(subscription, speech_region):
-    config = msspeech.SpeechConfig(subscription=subscription, region=speech_region)
+    config = _create_speech_config(subscription, speech_region)
     config.speech_synthesis_voice_name = "Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)"
     # None(null) indicates to do nothing with synthesizer audio by default
     synthesizer = msspeech.SpeechSynthesizer(config, None)

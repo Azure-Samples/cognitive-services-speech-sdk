@@ -41,7 +41,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var endpoint = $"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1";
             restConfig = SpeechConfig.FromEndpoint(new Uri(endpoint), subscriptionKey);
-            uspConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
+            var uspEndpoint = $"wss://{region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?TrafficType=Test";
+            uspConfig = SpeechConfig.FromEndpoint(new Uri(uspEndpoint), subscriptionKey);
             mockConfig = SpeechConfig.FromSubscription("None", "None");
             mockConfig.SetProperty("CARBON-INTERNAL-UseTtsEngine-Mock", "true");
         }

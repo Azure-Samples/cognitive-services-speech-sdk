@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -89,9 +90,8 @@ public class SpeechSynthesizerTests {
     // -----------------------------------------------------------------------
 
     @Test
-    public void testSynthesisDefaults() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testSynthesisDefaults() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig);
         assertNotNull(synthesizer);
@@ -106,9 +106,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testExplicitlyUseDefaultSpeakers() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testExplicitlyUseDefaultSpeakers() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         AudioConfig deviceConfig = AudioConfig.fromDefaultSpeakerOutput();
         assertNotNull(deviceConfig);
@@ -127,9 +126,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testPickLanguage() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testPickLanguage() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
         speechConfig.setSpeechSynthesisLanguage("en-GB");
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig);
@@ -145,9 +143,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testPickVoice() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testPickVoice() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
         speechConfig.setSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (en-GB, HazelRUS)");
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig);
@@ -163,11 +160,10 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testSynthesizerOutputToFile() throws InterruptedException, ExecutionException {
+    public void testSynthesizerOutputToFile() throws URISyntaxException, InterruptedException, ExecutionException {
         File outputFile = new File(System.getProperty("java.io.tmpdir"), "output.wav");
         String outputFilePath = outputFile.getAbsolutePath();
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         AudioConfig fileConfig = AudioConfig.fromWavFileOutput(outputFilePath);
         assertNotNull(fileConfig);
@@ -197,9 +193,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testSynthesizerOutputToPushStream() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testSynthesizerOutputToPushStream() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         PushAudioOutputStreamTestCallback callback = new PushAudioOutputStreamTestCallback();
         PushAudioOutputStream stream = AudioOutputStream.createPushStream(callback);
@@ -223,9 +218,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testSynthesizerOutputToPullStreamUseAfterSynthesisCompleted() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testSynthesizerOutputToPullStreamUseAfterSynthesisCompleted() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         PullAudioOutputStream stream = AudioOutputStream.createPullStream();
         assertNotNull(stream);
@@ -251,9 +245,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testSynthesizerOutputToPullStreamStartUsingBeforeDoneSynthesizing() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testSynthesizerOutputToPullStreamStartUsingBeforeDoneSynthesizing() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         PullAudioOutputStream stream = AudioOutputStream.createPullStream();
         assertNotNull(stream);
@@ -281,9 +274,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testSpeakOutInResults() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testSpeakOutInResults() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null); // null indicates to do nothing with synthesizer audio by default
         assertNotNull(synthesizer);
@@ -311,9 +303,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testSpeakOutputInChunksInEventSynthesizing() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testSpeakOutputInChunksInEventSynthesizing() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null); // null indicates to do nothing with synthesizer audio by default
         assertNotNull(synthesizer);
@@ -339,9 +330,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testSpeakOutputInStreams() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testSpeakOutputInStreams() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null); // null indicates to do nothing with synthesizer audio by default
         assertNotNull(synthesizer);
@@ -369,9 +359,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testSpeakOutputInStreamsBeforeDoneFromEventSynthesisStarted() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testSpeakOutputInStreamsBeforeDoneFromEventSynthesisStarted() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null); // null indicates to do nothing with synthesizer audio by default
         assertNotNull(synthesizer);
@@ -414,9 +403,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testSpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingTextAsync() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testSpeakOutputInStreamsBeforeDoneFromMethodStartSpeakingTextAsync() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null); // null indicates to do nothing with synthesizer audio by default
         assertNotNull(synthesizer);
@@ -449,9 +437,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testSpeakOutputInStreamsBeforeDoneQueued() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testSpeakOutputInStreamsBeforeDoneQueued() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null); // null indicates to do nothing with synthesizer audio by default
         assertNotNull(synthesizer);
@@ -488,7 +475,7 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testSpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResult() throws InterruptedException, ExecutionException {
+    public void testSpeakOutputInStreamsWithAllDataGetOnSynthesisStartedResult() throws URISyntaxException, InterruptedException, ExecutionException {
         SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(speechConfig);
 
@@ -520,9 +507,8 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testSpeakOutputWithWordBoundaryEvents() throws InterruptedException, ExecutionException {
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(speechConfig);
+    public void testSpeakOutputWithWordBoundaryEvents() throws URISyntaxException, InterruptedException, ExecutionException {
+        SpeechConfig speechConfig = CreateSpeechConfig();
 
         speechConfig.setSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
 
@@ -580,7 +566,7 @@ public class SpeechSynthesizerTests {
     }
 
     @Test
-    public void testAuthorizationToken() throws InterruptedException, ExecutionException, IOException {
+    public void testAuthorizationToken() throws URISyntaxException, InterruptedException, ExecutionException, IOException {
         SpeechConfig speechConfig = SpeechConfig.fromAuthorizationToken("InvalidToken", Settings.SpeechRegion);
         assertNotNull(speechConfig);
 
@@ -1177,6 +1163,14 @@ public class SpeechSynthesizerTests {
         speechConfig.close();
     }
 
+    private SpeechConfig CreateSpeechConfig() throws URISyntaxException {
+        String endpoint = String.format("wss://%s.tts.speech.microsoft.com/cognitiveservices/websocket/v1?TrafficType=Test", Settings.SpeechRegion);
+        URI endpointUri =  new URI(endpoint);
+        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(endpointUri, Settings.SpeechSubscriptionKey);
+        assertNotNull(speechConfig);
+        return speechConfig;
+    }
+
     private void DoSomethingWithAudioInPullStream(PullAudioOutputStream stream) {
         DoSomethingWithAudioInPullStream(stream, null);
     }
@@ -1187,7 +1181,7 @@ public class SpeechSynthesizerTests {
         int totalSize = 0;
         int filledSize = 0;
 
-        while ((filledSize = (int)stream.read(buffer)) > 0) { // blocks until atleast 1024 bytes are available
+        while ((filledSize = (int)stream.read(buffer)) > 0) { // blocks until at least 1024 bytes are available
             // do something with buffer
             totalSize += filledSize;
 
@@ -1253,7 +1247,7 @@ public class SpeechSynthesizerTests {
         int totalSize = 0;
         int filledSize = 0;
 
-        while ((filledSize = (int)stream.readData(buffer)) > 0) { // blocks until atleast 1024 bytes are available
+        while ((filledSize = (int)stream.readData(buffer)) > 0) { // blocks until at least 1024 bytes are available
             // do something with buffer
             totalSize += (int)filledSize;
 

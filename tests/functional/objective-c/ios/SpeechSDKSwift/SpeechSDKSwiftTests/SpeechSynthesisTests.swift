@@ -15,7 +15,8 @@ class SpeechSynthesisEndToEndTests: XCTestCase {
         super.setUp()
         speechKey = ProcessInfo.processInfo.environment["subscriptionKey"]
         serviceRegion = ProcessInfo.processInfo.environment["serviceRegion"]
-        self.speechConfig = try! SPXSpeechConfiguration(subscription:self.speechKey, region:self.serviceRegion)
+        let endpoint = String(format:"wss://%@.tts.speech.microsoft.com/cognitiveservices/websocket/v1?TrafficType=Test", arguments:[self.serviceRegion])
+        self.speechConfig = try! SPXSpeechConfiguration(endpoint:endpoint, subscription:self.speechKey)
     }
     
     func testSynthesisOutputToResult() {

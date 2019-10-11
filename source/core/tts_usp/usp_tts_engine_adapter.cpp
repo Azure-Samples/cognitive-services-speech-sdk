@@ -443,7 +443,7 @@ void CSpxUspTtsEngineAdapter::OnAudioOutputChunk(const USP::AudioOutputChunkMsg&
     });
 
     std::unique_lock<std::mutex> lock(m_mutex);
-    m_uspState = UspState::ReceivingData;    
+    m_uspState = UspState::ReceivingData;
     auto originalSize = m_currentReceivedData.size();
     m_currentReceivedData.resize(originalSize + message.audioLength);
     memcpy(m_currentReceivedData.data() + originalSize, message.audioBuffer, message.audioLength);

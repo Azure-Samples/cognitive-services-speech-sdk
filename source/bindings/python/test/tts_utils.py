@@ -30,6 +30,10 @@ class _PushAudioOutputStreamTestCallback(msspeech.audio.PushAudioOutputStreamCal
     def get_audio_size(self) -> int:
         return len(self._audio_data)
 
+def _create_speech_config(subscription, speech_region):
+    endpoint = 'wss://{}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?TrafficType=Test'.format(speech_region)
+    config = msspeech.SpeechConfig(subscription=subscription, endpoint=endpoint)
+    return config
 
 def _do_something_with_audio_in_push_stream(callback, canceled):
     if not canceled:
@@ -86,7 +90,7 @@ def _do_something_with_audio_in_data_stream(stream, after_synthesis_done):
         # do something with audio buffer
         total_size += filled_size
         filled_size = stream.read_data(audio_buffer)
-        # blocks until atleast 1024 bytes are available
+        # blocks until at least 1024 bytes are available
 
     if msspeech.StreamStatus.Canceled != stream.status:
         assert total_size > 0
