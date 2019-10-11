@@ -253,6 +253,13 @@ public:
     virtual void AddService(const char* serviceName, std::shared_ptr<ISpxInterfaceBase> service) = 0;
 };
 
+template <class I, class ...Is>
+class ISpxNotifyMeSP : public ISpxInterfaceBaseFor<ISpxNotifyMeSP<I, Is...>>
+{
+public:
+
+    virtual void NotifyMe(const std::shared_ptr<I>&, const std::shared_ptr<Is>& ...) = 0;
+};
 
 #pragma pack (push, 1)
 struct SPXWAVEFORMAT
@@ -281,6 +288,51 @@ inline SpxWAVEFORMATEX_Type SpxAllocWAVEFORMATEX(size_t sizeInBytes)
 {
     return SpxAllocSharedBuffer<SPXWAVEFORMATEX>(sizeInBytes);
 }
+
+inline SpxWAVEFORMATEX_Type SpxCopyWAVEFORMATEX(const SPXWAVEFORMATEX* format)
+{
+    SPX_IFTRUE_RETURN_X(format == nullptr, nullptr);
+
+    auto size = sizeof(SPXWAVEFORMATEX) + format->cbSize;
+    auto copy = SpxAllocWAVEFORMATEX(size);
+    memcpy(copy.get(), format, size);
+
+    return copy;
+}
+
+inline SpxWAVEFORMATEX_Type SpxCopyWAVEFORMATEX(const SPXWAVEFORMATEX& format)
+{
+    return SpxCopyWAVEFORMATEX(&format);
+}
+
+inline SpxWAVEFORMATEX_Type SpxCopyWAVEFORMATEX(const SpxWAVEFORMATEX_Type& format)
+{
+    return SpxCopyWAVEFORMATEX(format.get());
+}
+
+inline uint16_t SpxCopyWAVEFORMATEX(SpxWAVEFORMATEX_Type source, SPXWAVEFORMATEX* dest, uint16_t destSize)
+{
+    auto sourceSize = uint16_t(sizeof(SPXWAVEFORMATEX) + source->cbSize);
+    if (dest != nullptr)
+    {
+        auto copySize = std::min(destSize, sourceSize);
+        memcpy(dest, source.get(), copySize);
+        return copySize;
+    }
+    return sourceSize;
+}
+
+#define SPX_DBG_TRACE_VERBOSE_WAVEFORMAT(format) \
+    SPX_DBG_TRACE_VERBOSE_IF(format == nullptr, "%s - format == nullptr", __FUNCTION__); \
+    SPX_DBG_TRACE_VERBOSE_IF(format != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d", \
+        __FUNCTION__, \
+        format->wFormatTag == WAVE_FORMAT_PCM ? "PCM" : std::to_string(format->wFormatTag).c_str(), \
+        format->nChannels, \
+        format->nSamplesPerSec, \
+        format->nAvgBytesPerSec, \
+        format->nBlockAlign, \
+        format->wBitsPerSample, \
+        format->cbSize);
 
 using SpxSharedAudioBuffer_Type = SpxSharedUint8Buffer_Type;
 inline SpxSharedAudioBuffer_Type SpxAllocSharedAudioBuffer(size_t sizeInBytes)
@@ -347,6 +399,26 @@ public:
     virtual SPXSTRING GetProperty(PropertyId propertyId) { UNUSED(propertyId); return ""; }
 
     virtual void Close() = 0;
+};
+
+class ISpxAudioStreamReaderFactory : public ISpxInterfaceBaseFor<ISpxAudioStreamReaderFactory>
+{
+public:
+    virtual std::shared_ptr<ISpxAudioStreamReader> CreateReader() = 0;
+};
+
+class ISpxSingleToManyStreamReaderAdapter : public ISpxInterfaceBaseFor<ISpxSingleToManyStreamReaderAdapter>
+{
+public:
+    // The singleton is expected to implement ISpxAudioStreamReader and ISpxObjectInit so it can be reopened
+    virtual void SetSingletonReader(std::shared_ptr<ISpxAudioStreamReader> singletonReader) = 0;
+};
+
+class ISpxSingleToManyStreamReaderAdapterSite : public ISpxInterfaceBaseFor<ISpxSingleToManyStreamReaderAdapterSite>
+{
+public:
+    virtual void ReconnectClient(long clientId) = 0;
+    virtual void DisconnectClient(long clientId) = 0;
 };
 
 class ISpxAudioStreamWriter : public ISpxInterfaceBaseFor<ISpxAudioStreamWriter>
@@ -428,6 +500,74 @@ public:
 
     virtual void SetFormat(const SPXWAVEFORMATEX* pformat) = 0;
     virtual void ProcessAudio(const DataChunkPtr& audioChunk) = 0;
+};
+
+class ISpxReadWriteBufferInit : public ISpxInterfaceBaseFor<ISpxReadWriteBufferInit>
+{
+public:
+
+    virtual size_t SetSize(size_t size) = 0;
+    virtual void SetInitPos(uint64_t pos) = 0;
+
+    virtual void SetName(const std::string& name) = 0;
+
+    virtual void Term() = 0;
+};
+
+class ISpxReadWriteBuffer : public ISpxInterfaceBaseFor<ISpxReadWriteBuffer>
+{
+public:
+
+    virtual size_t GetSize() const = 0;
+    virtual uint64_t GetInitPos() const = 0;
+    virtual std::string GetName() const = 0;
+
+    virtual void Write(const void* data, size_t dataSizeInBytes, size_t* bytesWritten = nullptr) = 0;
+    virtual uint64_t GetWritePos() const = 0;
+
+    virtual void Read(void* data, size_t dataSizeInBytes, size_t* bytesRead = nullptr) = 0;
+    virtual uint64_t GetReadPos() const = 0;
+    virtual uint64_t ResetReadPos() = 0;
+
+    virtual void ReadAtBytePos(uint64_t pos, void* data, size_t dataSizeInBytes, size_t* bytesRead = nullptr) = 0;
+
+    virtual std::shared_ptr<uint8_t> ReadShared(size_t dataSizeInBytes, size_t* bytesRead = nullptr) = 0;
+    virtual std::shared_ptr<uint8_t> ReadSharedAtBytePos(uint64_t pos, size_t dataSizeInBytes, size_t* bytesRead = nullptr) = 0;
+
+    template <class T>
+    std::shared_ptr<T> ReadShared(size_t dataSizeInBytes, size_t* bytesRead = nullptr)
+    {
+        auto shared = ReadShared(dataSizeInBytes, bytesRead);
+        return SpxReinterpretPointerCast<T>(shared);
+    }
+
+    template <class T>
+    std::shared_ptr<T> ReadSharedAtBytePos(uint64_t pos, size_t dataSizeInBytes, size_t* bytesRead = nullptr)
+    {
+        auto shared = ReadSharedAtBytePos(pos, dataSizeInBytes, bytesRead);
+        return SpxReinterpretPointerCast<T>(shared);
+    }
+
+    uint64_t GetBytesReadReady() { return GetWritePos() - GetReadPos(); }
+
+    // TODO: more checks on pos
+    uint64_t GetBytesReadReadyAtPos(uint64_t pos) { return GetWritePos() - pos; }
+
+};
+
+class ISpxReadWriteItemBuffer : public ISpxInterfaceBaseFor<ISpxReadWriteItemBuffer>
+{
+public:
+
+    virtual size_t GetItemSize() const = 0;
+
+    virtual void WriteItems(const void* itemData, size_t itemCount, size_t* itemsWritten = nullptr) = 0;
+    virtual uint64_t GetItemWritePos() const = 0;
+
+    virtual void ReadItems(void* itemData, size_t itemCount, size_t* itemsRead = nullptr) = 0;
+    virtual uint64_t GetItemReadPos() const = 0;
+
+    virtual void ReadItemsAtPos(uint64_t itemPos, void* itemData, size_t itemCount, size_t* itemsRead = nullptr) = 0;
 };
 
 class ISpxAudioPump : public ISpxInterfaceBaseFor<ISpxAudioPump>
@@ -856,6 +996,73 @@ public:
     virtual void InitFromFile(const wchar_t* pszFileName) = 0;
     virtual void InitFromMicrophone() = 0;
     virtual void InitFromStream(std::shared_ptr<ISpxAudioStream> stream) = 0;
+};
+
+class ISpxAudioSource : public ISpxInterfaceBaseFor<ISpxAudioSource>
+{
+public:
+
+    enum State { Idle = 0, Started = 1, DataAvailable = 2, EndOfStream = 3 };
+    virtual State GetState() const = 0;
+};
+
+class ISpxAudioSourceInit : public ISpxInterfaceBaseFor<ISpxAudioSourceInit>
+{
+public:
+
+    virtual void InitFromMicrophone() = 0;
+    virtual void InitFromFile(const wchar_t* pszFileName) = 0;
+    virtual void InitFromStream(std::shared_ptr<ISpxAudioStream> stream) = 0;
+};
+
+class ISpxAudioSourceBufferData : public ISpxInterfaceBaseFor<ISpxAudioSourceBufferData>
+{
+public:
+
+    virtual uint64_t GetOffset() = 0;
+
+    virtual uint32_t Read(uint8_t* buffer, uint32_t size) = 0;
+    virtual uint32_t ReadAt(uint64_t offset, uint8_t* buffer, uint32_t size) = 0;
+
+    virtual uint64_t GetBytesDead() = 0;
+    virtual uint64_t GetBytesRead() = 0;
+    virtual uint64_t GetBytesReady() = 0;
+    virtual uint64_t GetBytesReadyMax() = 0;
+};
+
+class ISpxAudioSourceBufferDataWriter : public ISpxInterfaceBaseFor<ISpxAudioSourceBufferDataWriter>
+{
+public:
+
+    virtual void Write(uint8_t* buffer, uint32_t size) = 0;
+};
+
+class ISpxAudioSourceBufferProperties : public ISpxInterfaceBaseFor<ISpxAudioSourceBufferProperties>
+{
+public:
+
+    using PropertyOffset_Type = uint64_t;
+    using PropertyName_Type = std::shared_ptr<const char>;
+    using PropertyValue_Type = std::shared_ptr<const char>;
+    using FoundPropertyData_Type = std::tuple<PropertyOffset_Type, PropertyName_Type, PropertyValue_Type>;
+
+    virtual void SetBufferProperty(const char* name, const char* value) = 0;
+
+    virtual PropertyValue_Type GetBufferProperty(const char* name, const char* defaultValue = nullptr) = 0;
+    virtual PropertyValue_Type GetBufferProperty(const char* name, PropertyOffset_Type offset, int direction = -1, PropertyOffset_Type * foundAtOffset = nullptr) = 0;
+
+    virtual std::list<FoundPropertyData_Type> GetBufferProperties(const char* name, PropertyOffset_Type begin, PropertyOffset_Type end) = 0;
+    virtual std::list<FoundPropertyData_Type> GetBufferProperties(PropertyOffset_Type begin, PropertyOffset_Type end) = 0;
+};
+
+#define ISpxAudioProcessorNotifyMe ISpxNotifyMeSP<ISpxAudioProcessor>
+
+// #define ISpxAudioSourceNotifyMe ISpxNotifyMeSP<ISpxAudioSource, ISpxAudioSourceBufferData>
+class ISpxAudioSourceNotifyMe : public ISpxInterfaceBaseFor<ISpxAudioSourceNotifyMe>
+{
+public:
+
+    virtual void NotifyMe(const std::shared_ptr<ISpxAudioSource>& source, const std::shared_ptr<ISpxAudioSourceBufferData>& data) = 0;
 };
 
 class ISpxSessionFromRecognizer : public ISpxInterfaceBaseFor<ISpxSessionFromRecognizer>

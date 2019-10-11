@@ -47,7 +47,7 @@ inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::sh
     }
     else
     {
-        SPX_DBG_TRACE_VERBOSE_IF(site != nullptr && objectWithSite == nullptr, "%s: Attempted SetSite, objectWithSite==nullptr", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE_IF(site != nullptr && objectWithSite == nullptr, "%s: Attempted SetSite(%s), objectWithSite==nullptr", __FUNCTION__, className);
         SPX_DBG_TRACE_WARNING_IF(site == nullptr && objectWithSite != nullptr, "%s: Object Expects Site; No Site provided! UNEXPECTED!", __FUNCTION__);
         SPX_IFTRUE_THROW_HR(site == nullptr && objectWithSite != nullptr, SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
     }

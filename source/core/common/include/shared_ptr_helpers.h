@@ -39,5 +39,16 @@ inline SpxSharedUint8Buffer_Type SpxAllocSharedUint8Buffer(size_t sizeInBytes)
     return SpxAllocSharedBuffer<uint8_t>(sizeInBytes);
 }
 
+//
+// Replace with reinterpret_pointer_cast when we move every compiler to C++17
+//
+template <class _Ty1, class _Ty2>
+std::shared_ptr<_Ty1> SpxReinterpretPointerCast(const std::shared_ptr<_Ty2>& _Other) noexcept
+{
+    // reinterpret_cast for shared_ptr that properly respects the reference count control block
+    const auto _Ptr = reinterpret_cast<typename std::shared_ptr<_Ty1>::element_type*>(_Other.get());
+    return std::shared_ptr<_Ty1>(_Other, _Ptr);
+}
+
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

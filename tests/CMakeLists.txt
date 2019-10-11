@@ -16,6 +16,7 @@ set(TEST_HEADERS "${TEST_INCLUDE}/test_utils.h")
 set(TEST_LIBS)
 
 if(NOT ANDROID)
+  add_subdirectory("${SRC_DIR}/unit-tests")
   add_subdirectory("${SRC_DIR}/functional/cxx/core")
   add_subdirectory("${SRC_DIR}/functional/cxx/api")
   add_subdirectory("${SRC_DIR}/functional/cxx/uspclientconsole")

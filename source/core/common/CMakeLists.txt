@@ -22,6 +22,7 @@ set(HEADERS
     "${INC_DIR}/handle_table.h"
     "${INC_DIR}/mock_controller.h"
     "${INC_DIR}/property_bag_impl.h"
+    "${INC_DIR}/object_init_impl.h"
     "${INC_DIR}/resource_manager.h"
     "${INC_DIR}/service_helpers.h"
     "${INC_DIR}/service_provider_impl.h"

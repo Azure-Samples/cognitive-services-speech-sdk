@@ -295,3 +295,8 @@ typedef uintptr_t SPXHR;
 #define SPXERR_UNSUPPORTED_API_ERROR  __SPX_ERRCODE_FAILED(0x02B)
 
 
+/// <summary>
+/// The ring buffer is unavailable.
+/// Added in version 1.8.0.
+/// </summary>
+#define SPXERR_RINGBUFFER_DATA_UNAVAILABLE  __SPX_ERRCODE_FAILED(0x02C)

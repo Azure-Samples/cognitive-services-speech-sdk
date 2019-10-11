@@ -381,6 +381,47 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, bool enableD
 #define SPX_IFFAILED_RETURN_HR(hr)                  SPX_RETURN_ON_FAIL(hr)
 #define SPX_IFFAILED_RETURN_HR_IFNOT(hr, hrNot)     SPX_RETURN_ON_FAIL_IF_NOT(hr, hrNot)
 
+#define SPX_IFTRUE(cond, expr) \
+    do {                                                        \
+        int fCondT = (cond);                                    \
+        if (fCondT) {                                           \
+            expr;                                               \
+    } } while (0)
+
+#define SPX_IFFALSE(cond, expr) \
+    do {                                                        \
+        int fCondF = (cond);                                    \
+        if (!fCondF) {                                          \
+            expr;                                               \
+    } } while (0)
+
+#define SPX_IFTRUE_RETURN_X(cond, expr) \
+    do {                                                        \
+        int fCondT = (cond);                                    \
+        if (fCondT) {                                           \
+            return expr;                                        \
+    } } while (0)
+
+#define SPX_IFFALSE_RETURN_X(cond, expr) \
+    do {                                                        \
+        int fCondF = (cond);                                    \
+        if (!fCondF) {                                          \
+            return expr;                                        \
+    } } while (0)
+
+#define SPX_IFTRUE_RETURN(cond) \
+    do {                                                        \
+        int fCondT = (cond);                                    \
+        if (fCondT) {                                           \
+            return;                                             \
+    } } while (0)
+
+#define SPX_IFFALSE_RETURN(cond) \
+    do {                                                        \
+        int fCondF = (cond);                                    \
+        if (!fCondF) {                                          \
+            return;                                             \
+    } } while (0)
 
 //---------------------------------------------------------------------------
 
