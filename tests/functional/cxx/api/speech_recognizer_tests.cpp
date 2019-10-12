@@ -1834,7 +1834,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
     }
 }
 
-TEST_CASE("Verify auto detect source language config", "[api][cxx]")
+TEST_CASE("Verify auto detect source language config in SpeechRecognizer", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     weather.UpdateFullFilename(Config::InputDir);
@@ -1843,28 +1843,26 @@ TEST_CASE("Verify auto detect source language config", "[api][cxx]")
 
     SPXTEST_SECTION("auto detect source language config with a vector of string parameters")
     {
-        auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE", "fr-FR" });
+        auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE" });
         auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), autoDetectSourceLanguageConfig, audioConfig);
-        SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages) == "en-US,de-DE,fr-FR");
+        SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages) == "en-US,de-DE");
     }
 
     SPXTEST_SECTION("auto detect source language config with source language config")
     {
         std::vector<std::shared_ptr<SourceLanguageConfig>> sourceLanguageConfigs;
         sourceLanguageConfigs.push_back(SourceLanguageConfig::FromLanguage("en-US"));
-        sourceLanguageConfigs.push_back(SourceLanguageConfig::FromLanguage("zh-CN", "CustomId1"));
         sourceLanguageConfigs.push_back(SourceLanguageConfig::FromLanguage("fr-FR", "CustomId2"));
         auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromSourceLanguageConfigs(sourceLanguageConfigs);
         auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), autoDetectSourceLanguageConfig, audioConfig);
-        SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages) == "en-US,zh-CN,fr-FR");
+        SPXTEST_REQUIRE(recognizer->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages) == "en-US,fr-FR");
         SPXTEST_REQUIRE(recognizer->Properties.GetProperty("en-USSPEECH-ModelId") == "");
-        SPXTEST_REQUIRE(recognizer->Properties.GetProperty("zh-CNSPEECH-ModelId") == "CustomId1");
         SPXTEST_REQUIRE(recognizer->Properties.GetProperty("fr-FRSPEECH-ModelId") == "CustomId2");
     }
 
     SPXTEST_SECTION("auto detect source language scenario doesn't support single endpointId setting")
     {
-        auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE", "fr-FR" });
+        auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "de-DE", "fr-FR" });
         auto speechConfig = CurrentSpeechConfig();
         speechConfig->SetEndpointId("CustomEndpoint1");
         REQUIRE_THROWS_WITH(SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig),
@@ -1872,7 +1870,7 @@ TEST_CASE("Verify auto detect source language config", "[api][cxx]")
     }
 }
 
-TEST_CASE("Verify source language config", "[api][cxx]")
+TEST_CASE("Verify source language config in SpeechRecognizer", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     weather.UpdateFullFilename(Config::InputDir);
@@ -1905,12 +1903,156 @@ TEST_CASE("Verify auto detect source language result from speech recognition res
     weather.UpdateFullFilename(Config::InputDir);
     SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
     auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
-    auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), audioConfig);
-    auto result = recognizer->RecognizeOnceAsync().get();
-    SPXTEST_REQUIRE(result != nullptr);
-    auto autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult::FromResult(result);
-    SPXTEST_REQUIRE(autoDetectSourceLanguageResult != nullptr);
+    auto expectedLanguage = "";
+    std::shared_ptr<SpeechRecognitionResult> speechRecognitionResult;
+    ResultReason expectedReason = ResultReason::RecognizedSpeech;
+    // TODO: remove this after 3P sevice supports LID, below is 1P service endpoint
+    auto endpointUrl = "wss://northeurope.sr.speech.microsoft.com/speech/translation/interactive/mstranslator/v1?language=en-US";
 
-    // As this is non LID scenario,  the language should be empty
-    SPXTEST_REQUIRE(autoDetectSourceLanguageResult->Language == "");
+    SPXTEST_SECTION("Non Language Id Scenario")
+    {
+        auto sourceLanguageConfig = SourceLanguageConfig::FromLanguage("en-US");
+        auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig(), sourceLanguageConfig, audioConfig);
+        speechRecognitionResult = recognizer->RecognizeOnceAsync().get();
+    }
+
+    SPXTEST_SECTION("Language Id Scenario")
+    {
+        auto speechConfig = SpeechConfig::FromEndpoint(endpointUrl, Keys::Speech);
+        auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE" });
+        auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
+        speechRecognitionResult = recognizer->RecognizeOnceAsync().get();
+        expectedLanguage = "en-US";
+    }
+
+    SPXTEST_SECTION("Language Id with Invalid source languages")
+    {
+        auto speechConfig = SpeechConfig::FromEndpoint(endpointUrl, Keys::Speech);
+        auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "notrecognized" });
+        auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
+        speechRecognitionResult = recognizer->RecognizeOnceAsync().get();
+        REQUIRE(speechRecognitionResult != nullptr);
+        expectedReason = ResultReason::Canceled;
+        auto cancellation = CancellationDetails::FromResult(speechRecognitionResult);
+        REQUIRE(cancellation->Reason == CancellationReason::Error);
+        REQUIRE(cancellation->ErrorDetails.find("Language Identification doesn't support notrecognized") != string::npos);
+    }
+
+    SPXTEST_SECTION("Language Id Scenario From Multiple SourceLanguageConfig")
+    {
+        auto speechConfig = SpeechConfig::FromEndpoint(endpointUrl, Keys::Speech);
+        std::vector<std::shared_ptr<SourceLanguageConfig>> sourceLanguageConfigs;
+        sourceLanguageConfigs.push_back(SourceLanguageConfig::FromLanguage("zh-CN"));
+        sourceLanguageConfigs.push_back(SourceLanguageConfig::FromLanguage("en-US"));
+        auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromSourceLanguageConfigs(move(sourceLanguageConfigs));
+        auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
+        speechRecognitionResult = recognizer->RecognizeOnceAsync().get();
+        expectedLanguage = "en-US";
+    }
+
+    SPXTEST_REQUIRE(speechRecognitionResult != nullptr);
+    auto autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult::FromResult(speechRecognitionResult);
+    SPXTEST_REQUIRE(autoDetectSourceLanguageResult != nullptr);
+    SPXTEST_REQUIRE(speechRecognitionResult->Reason == expectedReason);
+    SPXTEST_REQUIRE(autoDetectSourceLanguageResult->Language == expectedLanguage);
+}
+
+TEST_CASE("Verify language id detection for continous speech recognition", "[api][cxx]") {
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    callTheFirstOne.UpdateFullFilename(Config::InputDir);
+    SPXTEST_REQUIRE(exists(callTheFirstOne.m_inputDataFilename));
+    auto audioConfig = AudioConfig::FromWavFileInput(callTheFirstOne.m_inputDataFilename);
+    // TODO: remove this after 3P sevice supports LID, below is 1P service endpoint
+    auto endpointUrl = "wss://northeurope.sr.speech.microsoft.com/speech/translation/conversation/mstranslator/v1?language=en-US";
+    auto speechConfig = SpeechConfig::FromEndpoint(endpointUrl, Keys::Speech);
+    auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "de-DE", "fr-FR" });
+    auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
+
+    promise<void> complete;
+    shared_future<void> readyFuture(complete.get_future());
+    vector<string> recognizingResults;
+    vector<string> recognizedResults;
+    vector<string> translatedResults;
+    vector<string> errorResults;
+    recognizer->Recognizing.DisconnectAll();
+    recognizer->Recognizing.Connect([&recognizingResults, &errorResults, &complete, &readyFuture](const SpeechRecognitionEventArgs& e)
+    {
+        if (e.Result->Reason == ResultReason::RecognizingSpeech)
+        {
+            recognizingResults.push_back(e.Result->Text);
+            // TODO, after https://dev.azure.com/msasg/Bing_and_IPG/_workitems/edit/2072303 is fixed, verify the language detection result here
+        }
+        else
+        {
+            SPX_TRACE_VERBOSE("cxx_api_Test Recognizing failed: Reason:%d.", e.Result->Reason);
+            errorResults.push_back("Recognizing error. Reason = " + std::to_string((int)e.Result->Reason));
+            if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+            {
+                complete.set_value();
+            }
+        }
+    });
+
+    recognizer->Recognized.DisconnectAll();
+    recognizer->Recognized.Connect([&recognizedResults, &errorResults, &complete, &readyFuture](const SpeechRecognitionEventArgs& e)
+    {
+        if (e.Result->Reason == ResultReason::RecognizedSpeech)
+        {
+            recognizedResults.push_back(e.Result->Text);
+            auto languageDetectionResult = AutoDetectSourceLanguageResult::FromResult(e.Result);
+            if (languageDetectionResult->Language != "de-DE")
+            {
+                errorResults.push_back("Language detection failed, detection result is " + languageDetectionResult->Language);
+            }
+        }
+        else
+        {
+            SPX_TRACE_VERBOSE("cxx_api_Test Recognized failed: Reason:%d.", e.Result->Reason);
+            errorResults.push_back("Recognized error. Reason = " + std::to_string((int)e.Result->Reason));
+
+            if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+            {
+                complete.set_value();
+            }
+        }
+    });
+
+    recognizer->Canceled.DisconnectAll();
+    recognizer->Canceled.Connect([&errorResults, &complete, &readyFuture](const SpeechRecognitionCanceledEventArgs& e)
+    {
+        if (e.Reason == CancellationReason::EndOfStream)
+        {
+            SPX_TRACE_VERBOSE("cxx_api_Test CANCELED: Reach the end of the file.");
+        }
+        else
+        {
+            auto error = !e.ErrorDetails.empty() ? e.ErrorDetails : "Errors!";
+            SPX_TRACE_VERBOSE("cxx_api_Test CANCELED: ErrorCode=%d, ErrorDetails=%s", (int)e.ErrorCode, e.ErrorDetails.c_str());
+            errorResults.push_back(error);
+            if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+            {
+                complete.set_value();
+            }
+        }
+    });
+
+    recognizer->SessionStopped.DisconnectAll();
+    recognizer->SessionStopped.Connect([&complete, &readyFuture](const SessionEventArgs& e)
+    {
+        SPX_TRACE_VERBOSE("cxx_api_Test SessionStopped: session id %s", e.SessionId.c_str());
+        if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+        {
+            complete.set_value();
+        }
+    });
+
+    recognizer->StartContinuousRecognitionAsync().get();
+    auto status = readyFuture.wait_for(WAIT_FOR_RECO_RESULT_TIME);
+    REQUIRE(status == future_status::ready);
+    recognizer->StopContinuousRecognitionAsync().get();
+
+    REQUIRE(errorResults.size() == 0);
+    REQUIRE(recognizingResults.size() > 0);
+    REQUIRE(recognizedResults.size() > 0);
+    REQUIRE(recognizedResults[0] == callTheFirstOne.m_utterance);
 }

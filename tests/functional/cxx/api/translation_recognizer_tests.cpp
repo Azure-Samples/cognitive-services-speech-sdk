@@ -7,16 +7,67 @@
 #include "test_utils.h"
 #include "file_utils.h"
 #include "recognizer_utils.h"
+#include "property_id_2_name_map.h"
 
-static shared_ptr<TranslationRecognizer> CreateTranslationRecognizer(const string& filename, const string from, vector<string> to)
+std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfigWithLanguageId(
+    const string& mode,
+    const string& from,
+    const vector<string>& to,
+    string defaultLanguage = "",
+    const vector<string>& voiceNames = {})
 {
-    auto audioInput = AudioConfig::FromWavFileInput(filename);
-    auto config = CurrentTranslationConfig();
-    config->SetSpeechRecognitionLanguage(from);
+    if (defaultLanguage.empty())
+    {
+        defaultLanguage = PAL::split(from, CommaDelim)[0];
+    }
+    
+    auto endPoint = "wss://northeurope.sr.speech.microsoft.com/speech/translation/" + mode + "/mstranslator/v1?language=" + defaultLanguage;
+    auto config = SpeechTranslationConfig::FromEndpoint(endPoint, Keys::Speech);
+    config->SetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages, from);
     for (auto item : to)
     {
         config->AddTargetLanguage(item);
     }
+    if (voiceNames.size() > 0)
+    {
+        for (size_t i = 0; i < voiceNames.size(); i++)
+        {
+            auto propertyName = to[i] + GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice); 
+            config->SetProperty(propertyName, voiceNames[i]);
+        }
+    }
+
+    return config;
+}
+
+std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfig(
+    const string& from,
+    const vector<string>& to)
+{
+     auto config = CurrentTranslationConfig();
+     config->SetSpeechRecognitionLanguage(from);
+     for (auto item : to)
+     {
+         config->AddTargetLanguage(item);
+     }
+     return config;
+}
+
+static shared_ptr<TranslationRecognizer> CreateTranslationRecognizer(
+    const string& filename,
+    const string& from,
+    const vector<string>& to)
+{
+    auto audioInput = AudioConfig::FromWavFileInput(filename);
+    auto config = CreateTranslationConfig(from, to);
+    return TranslationRecognizer::FromConfig(config, audioInput);
+}
+
+static shared_ptr<TranslationRecognizer> CreateTranslationRecognizer(
+    const string& filename,
+    std::shared_ptr<SpeechTranslationConfig> config)
+{
+    auto audioInput = AudioConfig::FromWavFileInput(filename);
     return TranslationRecognizer::FromConfig(config, audioInput);
 }
 
@@ -40,72 +91,73 @@ TEST_CASE("Translation", "[api][cxx]")
         vector<string> recognizedResults;
         vector<string> translatedResults;
         vector<string> errorResults;
-
+        
         auto recognizer = CreateTranslationRecognizer(weather.m_inputDataFilename, "en-US", { "de" });
 
         recognizer->Recognizing.DisconnectAll();
         recognizer->Recognizing.Connect([&recognizingResults, &translatingResults](const TranslationRecognitionEventArgs& e)
-        {
-            if (e.Result->Reason == ResultReason::TranslatingSpeech)
             {
-                recognizingResults.push_back(e.Result->Text);
-                translatingResults.push_back(e.Result->Translations.at("de"));
-            }
-        });
+                if (e.Result->Reason == ResultReason::TranslatingSpeech)
+                {
+                    recognizingResults.push_back(e.Result->Text);
+                    translatingResults.push_back(e.Result->Translations.at("de"));
+                }
+            });
 
         recognizer->Recognized.DisconnectAll();
         recognizer->Recognized.Connect([&recognizedResults, &translatedResults, &errorResults, &complete, &readyFuture](const TranslationRecognitionEventArgs& e)
-        {
-            if (e.Result->Reason == ResultReason::TranslatedSpeech)
             {
-                recognizedResults.push_back(e.Result->Text);
-                translatedResults.push_back(e.Result->Translations.at("de"));
-            }
-            else
-            {
-                if (e.Result->Reason == ResultReason::RecognizedSpeech)
+                if (e.Result->Reason == ResultReason::TranslatedSpeech)
                 {
-                    SPX_TRACE_VERBOSE("cxx_api_Test Only speech is recognized, but no translation.");
-                    errorResults.push_back("RecognizedSpeech Only");
+                    recognizedResults.push_back(e.Result->Text);
+                    translatedResults.push_back(e.Result->Translations.at("de"));
                 }
                 else
                 {
-                    SPX_TRACE_VERBOSE("cxx_api_Test Recognized failed: Reason:%d.", e.Result->Reason);
-                    errorResults.push_back("Recognized error.");
+                    if (e.Result->Reason == ResultReason::RecognizedSpeech)
+                    {
+                        SPX_TRACE_VERBOSE("cxx_api_Test Only speech is recognized, but no translation.");
+                        errorResults.push_back("RecognizedSpeech Only");
+                    }
+                    else
+                    {
+                        SPX_TRACE_VERBOSE("cxx_api_Test Recognized failed: Reason:%d. json: %s", e.Result->Reason, e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult).c_str());
+                        errorResults.push_back("Recognized error.");
+                    }
+                    if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+                    {
+                        complete.set_value();
+                    }
                 }
-                if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
-                {
-                    complete.set_value();
-                }
-            }
-        });
+            });
         recognizer->Canceled.DisconnectAll();
         recognizer->Canceled.Connect([&errorResults, &complete, &readyFuture](const TranslationRecognitionCanceledEventArgs& e)
-        {
-            if (e.Reason == CancellationReason::EndOfStream)
             {
-                SPX_TRACE_VERBOSE("CXX_API_TEST CANCELED: Reach the end of the file.");
-            }
-            else
+                if (e.Reason == CancellationReason::EndOfStream)
+                {
+                    SPX_TRACE_VERBOSE("CXX_API_TEST CANCELED: Reach the end of the file.");
+                }
+                else
+                {
+                    auto error = !e.ErrorDetails.empty() ? e.ErrorDetails : "Errors!";
+                    SPX_TRACE_VERBOSE("CXX_API_TEST CANCELED: ErrorCode=%d, ErrorDetails=%s", (int)e.ErrorCode, e.ErrorDetails.c_str());
+                    errorResults.push_back(error);
+                    if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+                    {
+                        complete.set_value();
+                    }
+                }
+            });
+        
+        recognizer->SessionStopped.DisconnectAll();
+        recognizer->SessionStopped.Connect([&complete, &readyFuture](const SessionEventArgs& e)
             {
-                auto error = !e.ErrorDetails.empty() ? e.ErrorDetails : "Errors!";
-                SPX_TRACE_VERBOSE("CXX_API_TEST CANCELED: ErrorCode=%d, ErrorDetails=%s", (int)e.ErrorCode, e.ErrorDetails.c_str());
-                errorResults.push_back(error);
+                SPX_TRACE_VERBOSE("CXX_API_TEST SessionStopped: session id %s", e.SessionId.c_str());
                 if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
                 {
                     complete.set_value();
                 }
-            }
-        });
-        recognizer->SessionStopped.DisconnectAll();
-        recognizer->SessionStopped.Connect([&complete, &readyFuture](const SessionEventArgs& e)
-        {
-            SPX_TRACE_VERBOSE("CXX_API_TEST SessionStopped: session id %s", e.SessionId.c_str());
-            if (readyFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
-            {
-                complete.set_value();
-            }
-        });
+            });
 
         recognizer->StartContinuousRecognitionAsync().get();
         auto status = readyFuture.wait_for(WAIT_FOR_RECO_RESULT_TIME);
@@ -123,13 +175,33 @@ TEST_CASE("Translation", "[api][cxx]")
 
     SPXTEST_SECTION("TranslationOnce")
     {
-        auto recognizer = CreateTranslationRecognizer(weather.m_inputDataFilename, "en-US", { "de" });
+        string expectedLanguageDetected;
+        string expectedTargetLanguage;
+        shared_ptr<TranslationRecognizer> recognizer;
+
+        SPXTEST_SECTION("Without Language Id")
+        {
+            recognizer = CreateTranslationRecognizer(weather.m_inputDataFilename, "en-US", { "de" });
+            expectedTargetLanguage = "de";
+        }
+
+        SPXTEST_SECTION("With Language Id")
+        {
+            auto config = CreateTranslationConfigWithLanguageId(
+                "interactive",
+                "en-US,de-DE",
+                { "en-US" , "de-DE" });
+            recognizer = CreateTranslationRecognizer(weather.m_inputDataFilename, config);
+            expectedLanguageDetected = "en-US";
+            expectedTargetLanguage = "de-DE";
+        }
 
         auto result = recognizer->RecognizeOnceAsync().get();
         REQUIRE(result != nullptr);
         REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
         REQUIRE(!result->Text.compare(weather.m_utterance));
-        REQUIRE(!result->Translations.at("de").compare(weatherGerman.m_utterance));
+        REQUIRE(!result->Translations.at(expectedTargetLanguage).compare(weatherGerman.m_utterance));
+        REQUIRE(result->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult) == expectedLanguageDetected);
     }
 
     SPXTEST_SECTION("Change languages in config, before turn and after turn.")
@@ -304,4 +376,3 @@ TEST_CASE("Translation", "[api][cxx]")
         REQUIRE(errorResults.size() == 0);
     }
 }
-

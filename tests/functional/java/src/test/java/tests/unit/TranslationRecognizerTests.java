@@ -883,4 +883,142 @@ public class TranslationRecognizerTests {
         s.close();
     }
 
+    @Test
+    public void testRecognizeOnceAsyncWithLanguageId() throws InterruptedException, ExecutionException, TimeoutException {
+        testRecognizeWithLanguageId(true /*testRecognizeAsync*/);
+    }
+
+    @Test
+    public void testRecognizeOnceContinouslyWithLanguageId() throws InterruptedException, ExecutionException, TimeoutException {
+        testRecognizeWithLanguageId(false /*testRecognizeAsync*/);
+    }
+
+    private void testRecognizeWithLanguageId(boolean testRecognizeAsync) throws InterruptedException, ExecutionException, TimeoutException {
+        String mode = testRecognizeAsync ? "interactive" : "conversation";
+        String endpointUrl = "wss://northeurope.sr.speech.microsoft.com/speech/translation/" + mode + "/mstranslator/v1?language=en-US";
+        SpeechTranslationConfig configFromEndpoint = SpeechTranslationConfig.fromEndpoint(URI.create(endpointUrl), Settings.SpeechSubscriptionKey);
+        assertNotNull(configFromEndpoint);
+        String autoDetectSrcLanguageProperty = "Auto-Detect-Source-Languages";
+        String sourceLanguages = "en-US,de-DE";
+        configFromEndpoint.setProperty(autoDetectSrcLanguageProperty, sourceLanguages);
+        configFromEndpoint.setProperty("en-USTRANSLATION-Voice", "Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)");
+        configFromEndpoint.setProperty("de-DETRANSLATION-Voice", "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)");
+        configFromEndpoint.addTargetLanguage("en-US");
+        configFromEndpoint.addTargetLanguage("de-DE");
+
+        TranslationRecognizer recognizer = new TranslationRecognizer(configFromEndpoint, AudioConfig.fromWavFileInput(Settings.WavFile));
+        Connection connection = Connection.fromRecognizer(recognizer);
+        assertNotNull(recognizer);
+        assertNotNull(recognizer.getRecoImpl());
+        assertTrue(recognizer instanceof Recognizer);
+
+        AtomicInteger connectedEventCount = new AtomicInteger(0);
+        AtomicInteger disconnectedEventCount = new AtomicInteger(0);
+        AtomicInteger sessionStoppedCount = new AtomicInteger(0);
+        AtomicInteger synthesizingCompleteEventCount = new AtomicInteger(0);
+        AtomicBoolean synthesizingFailed = new AtomicBoolean(false);
+        AtomicInteger audioLength = new AtomicInteger(0);
+        final ArrayList<TranslationRecognitionResult> recognizedResults = new ArrayList<>();
+        final ArrayList<TranslationRecognitionResult> recognizingResults = new ArrayList<>();
+
+        connection.connected.addEventListener((o, connectionEventArgs) -> {
+            connectedEventCount.getAndIncrement();
+        });
+
+        connection.disconnected.addEventListener((o, connectionEventArgs) -> {
+            disconnectedEventCount.getAndIncrement();
+        });
+
+        recognizer.sessionStopped.addEventListener((o, SessionEventArgs) -> {
+            sessionStoppedCount.getAndIncrement();
+        });
+
+        recognizer.synthesizing.addEventListener((o, e) -> {
+            ResultReason reason = e.getResult().getReason();
+            if (reason == ResultReason.SynthesizingAudio)
+            {
+                audioLength.getAndAdd(e.getResult().getAudio().length);
+            }
+            else if (reason == ResultReason.SynthesizingAudioCompleted)
+            {
+                synthesizingCompleteEventCount.getAndIncrement();
+            }
+            else
+            {
+                synthesizingFailed.getAndSet(true);
+            }
+        });
+
+        recognizer.recognizing.addEventListener((o, e) -> {
+            recognizingResults.add(e.getResult());
+        });
+
+        if (testRecognizeAsync)
+        {
+            Future<TranslationRecognitionResult> future = recognizer.recognizeOnceAsync();
+            // Wait for max 30 seconds
+            TranslationRecognitionResult result = future.get(30, TimeUnit.SECONDS);
+            recognizedResults.add(result);
+        }
+        else
+        {
+            recognizer.recognized.addEventListener((o, e) -> {
+                    recognizedResults.add(e.getResult());
+                });
+
+            Future<?> startRecognizefuture = recognizer.startContinuousRecognitionAsync();
+            // Wait for max 30 seconds
+            startRecognizefuture.get(30, TimeUnit.SECONDS);
+            System.out.println("Start continuous recognition, waiting for final result.");
+        }
+
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) && (sessionStoppedCount.get() == 0)) {
+            Thread.sleep(200);
+        }
+
+        if (!testRecognizeAsync)
+        {
+            System.out.println("Stop recognition.");
+            Future<?> stopRecognizefuture = recognizer.stopContinuousRecognitionAsync();
+            assertNotNull("stopRecognizefuture is null.", stopRecognizefuture);
+            // Wait for max 30 seconds
+            stopRecognizefuture.get(30, TimeUnit.SECONDS);
+            assertFalse("stopRecognizefuture is canceled.", stopRecognizefuture.isCancelled());
+            assertTrue("stopRecognizefuture is not done.", stopRecognizefuture.isDone());
+        }
+
+        assertEquals(1, recognizedResults.size());
+        TranslationRecognitionResult recognizedResult = recognizedResults.get(0);
+        assertNotNull(recognizedResult);
+        TestHelper.OutputResult(recognizedResult);
+        assertTrue(ResultReason.TranslatedSpeech == recognizedResult.getReason());
+        assertEquals("What's the weather like?", recognizedResult.getText());
+
+        assertNotNull(recognizedResult.getProperties());
+        assertEquals("en-US", recognizedResult.getProperties().getProperty("Auto-Detect-Source-Language-Result"));
+        assertEquals(1, recognizedResult.getTranslations().size());
+        assertEquals("Wie ist das Wetter?", recognizedResult.getTranslations().get("de-DE")); // translated text
+        recognizedResult.close();
+        assertTrue(recognizingResults.size() > 0);
+        for (TranslationRecognitionResult recognizingResult : recognizingResults)
+        {
+            assertNotNull(recognizingResult);
+            TestHelper.OutputResult(recognizingResult);
+            assertTrue(ResultReason.TranslatingSpeech == recognizingResult.getReason());
+            assertNotNull(recognizingResult.getProperties());
+            assertEquals("en-US", recognizingResult.getProperties().getProperty("Auto-Detect-Source-Language-Result"));
+            assertEquals(1, recognizingResult.getTranslations().size());
+            recognizingResult.close();
+        }
+
+        assertTrue(audioLength.get() > 0);
+        assertEquals(1, synthesizingCompleteEventCount.get());
+        assertEquals(false, synthesizingFailed.get());
+
+        connection.closeConnection();
+        connection.close();
+        TestHelper.AssertConnectionCountMatching(connectedEventCount.get(), disconnectedEventCount.get());
+        configFromEndpoint.close();
+    }
 }
