@@ -197,6 +197,36 @@
           "downloadUrl": "https://github.com/zanders3/json"
         }
       }
+    },
+    // Location:
+    // external/json/json-1.1.jar
+    // OSS request: none yet
+    // IP Scan: none yet
+    // Usage: Internal only
+    {
+      "component": {
+        "type": "other",
+        "other": {
+          "name": "javax.json-1.1.jar",
+          "version": "1.1",
+          "downloadUrl": "https://repo1.maven.org/maven2/org/glassfish/javax.json/1.1/javax.json-1.1.jar"
+        }
+      }
+    },
+    // Location:
+    // external/json/json-api-1.0.jar
+    // OSS request: none yet
+    // IP Scan: none yet
+    // Usage: Internal only
+    {
+      "component": {
+        "type": "other",
+        "other": {
+          "name": "javax.json-api-1.0.jar",
+          "version": "1.0",
+          "downloadUrl": "http://central.maven.org/maven2/javax/json/javax.json-api/1.0/javax.json-api-1.0.jar"
+        }
+      }
     }
   ]
 }

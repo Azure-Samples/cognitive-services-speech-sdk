@@ -73,10 +73,8 @@ public class Settings {
         String settingsFilePath = cwd + "/test.settings.json";
         File settingsFile = new File(settingsFilePath);
 
-        FileInputStream fileInputStream;
 
-        try {
-            fileInputStream = new FileInputStream(settingsFile);
+        try (FileInputStream fileInputStream = new FileInputStream(settingsFile)) {
             javax.json.JsonReader jsonReader = javax.json.Json.createReader(fileInputStream);
 
             JsonObject json = jsonReader.readObject();
