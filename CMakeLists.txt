@@ -215,6 +215,9 @@ if(MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /WX")
   # disable precompiled headers (for now) to allow build in IDE environment
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Y-")
+  
+  # enable multiprocessor optimizations
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 
   # The code below are changes for the version that is included in the Windows OS. In the OS we don't want to dynamically depend on
   # vcruntime*.dll so we create a version of the library that is statically linked agains the UCRT.
