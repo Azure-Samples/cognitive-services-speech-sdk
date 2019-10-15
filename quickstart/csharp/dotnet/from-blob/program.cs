@@ -16,7 +16,6 @@ namespace BatchClient
 {
     class Program
     {
-        // <batchdefinition>
         // Replace with your subscription key
         private const string SubscriptionKey = "key";
 
@@ -33,8 +32,6 @@ namespace BatchClient
         private const string Description = "Simple transcription description";
 
         private const string speechToTextBasePath = "api/speechtotext/v2.0/";
-
-        // </batchdefinition>
 
         static void Main(string[] args)
         {
@@ -82,7 +79,6 @@ namespace BatchClient
             // check for the status of our transcriptions periodically
             while (!completed)
             {
-                // <batchstatus>
                 // get all transcriptions for the user
                 using (var response = await client.GetAsync(transcriptionLocation.AbsolutePath).ConfigureAwait(false))
                 {
