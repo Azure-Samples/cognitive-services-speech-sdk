@@ -57,3 +57,4 @@ proguard-rules.pro text
 *.pfx binary
 *.png binary
 *.wav binary
+*.zip binary

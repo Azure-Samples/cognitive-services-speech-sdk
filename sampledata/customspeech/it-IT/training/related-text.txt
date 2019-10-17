@@ -1,0 +1,27 @@
+﻿Contenuti come dati, modelli, test ed endpoint sono organizzati in progetti nel portale di riconoscimento vocale personalizzato. Ogni progetto è specifico per un dominio e un paese/lingua. Ad esempio, è possibile creare un progetto per i Call Center che usano la lingua inglese nella Stati Uniti. Per creare il primo progetto, selezionare la voce vocale /personalizzata, quindi fare clic su nuovo progetto. Seguire le istruzioni fornite dalla procedura guidata per creare il progetto. Dopo aver creato un progetto, verranno visualizzate quattro schede: Dati, test, Traininge distribuzione. Usare i collegamenti forniti nei passaggi successivi per informazioni su come usare ogni scheda.
+Riconoscimento vocale personalizzato offre strumenti che consentono di esaminare visivamente la qualità del riconoscimento di un modello confrontando i dati audio con il risultato del riconoscimento corrispondente. Dal portale di riconoscimento vocale personalizzatoè possibile riprodurre l'audio caricato e determinare se il risultato del riconoscimento fornito è corretto. Questo strumento consente di ispezionare rapidamente la qualità del modello di sintesi vocale di Microsoft o di un modello personalizzato sottoposto a training senza dover trascrivere dati audio. 
+In questo documento si apprenderà come misurare quantitativamente la qualità del modello di sintesi vocale di Microsoft o del modello personalizzato. Per il test dell'accuratezza sono necessari dati di trascrizione audio e con etichetta umana. è necessario fornire da 30 minuti a 5 ore di audio rappresentativo.
+Che cos'è la frequenza degli errori di parola?
+Lo standard di settore per misurare l'accuratezza del modello è la frequenza degli errori di Word (WER). WER conta il numero di parole non corrette identificate durante il riconoscimento, quindi divide in base al numero totale di parole fornite nella trascrizione con etichetta umana. Infine, tale numero viene moltiplicato per il 100% per calcolare il WER.
+Formula WER
+Le parole identificate in modo errato rientrano in tre categorie:
+Inserimento (I): Parole erroneamente aggiunte nella trascrizione di ipotesi
+Eliminazione (D): Parole non rilevate nella trascrizione dell'ipotesi
+Sostituzioni: Parole sostituite tra riferimento ed ipotesi
+Di seguito è riportato un esempio:
+Esempio di parole erroneamente identificate
+Risolvere gli errori e migliorare WER
+È possibile usare il WER dai risultati del riconoscimento del computer per valutare la qualità del modello usato con l'app, lo strumento o il prodotto. Un WER del 5%-10% è considerato una qualità ottima ed è pronto per l'uso. Un WER del 20% è accettabile, tuttavia è opportuno prendere in considerazione una formazione aggiuntiva. Un numero di messaggi pari al 30% indica una scarsa qualità e richiede la personalizzazione e la formazione.
+Il modo in cui vengono distribuiti gli errori è importante. Quando vengono rilevati molti errori di eliminazione, è in genere dovuto a un livello di attendibilità del segnale audio debole. Per risolvere questo problema, è necessario raccogliere i dati audio più vicino all'origine. Gli errori di inserimento indicano che l'audio è stato registrato in un ambiente rumoroso ed è possibile che sia presente l'area interattiva, causando problemi di riconoscimento. Gli errori di sostituzione vengono spesso rilevati quando un campione insufficiente di termini specifici del dominio è stato fornito come trascrizioni con etichetta umana o testo correlato.
+Analizzando i singoli file è possibile determinare il tipo di errore e gli errori che sono univoci per un file specifico. La comprensione dei problemi a livello di file consentirà di individuare i miglioramenti.
+Creare un test
+Se si vuole testare la qualità del modello di base di sintesi vocale di Microsoft o di un modello personalizzato che è stato sottoposto a training, è possibile confrontare due modelli affiancati per valutare l'accuratezza. Il confronto include i risultati di WER e il riconoscimento. In genere, un modello personalizzato viene confrontato con il modello di base di Microsoft.
+Per valutare i modelli side-by-Side:
+Accedere al portale di riconoscimento vocale personalizzato.
+Passare a riconoscimento vocale > Riconoscimento vocale personalizzato > test.
+Fare clic su Aggiungi test.
+Selezionare valuta accuratezza. Assegnare al test un nome, una descrizione e selezionare il set di dati di trascrizione audio + con etichetta umana.
+Selezionare fino a due modelli che si desidera testare.
+Fare clic su Create(Crea).
+Una volta creato correttamente il test, è possibile confrontare i risultati affiancati.
+Questa pagina di dettaglio elenca tutte le espressioni del set di dati, indicando i risultati del riconoscimento dei due modelli insieme alla trascrizione dal set di dati inviato. Per esaminare il confronto affiancato, è possibile abilitare o disabilitare vari tipi di errore, tra cui inserimento, eliminazione e sostituzione.
