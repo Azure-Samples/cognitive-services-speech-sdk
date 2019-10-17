@@ -1847,6 +1847,13 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
             m_resetRecoAdapter = m_recoAdapter;
             SPX_DBG_TRACE_VERBOSE("%s: Reset adapter at the next recognition. Session is in idle state, ignore error events.", __FUNCTION__);
         }
+        /* Since for DialogServiceConnector errors when Idle are not a rarity we want to report it*/
+        if (IsRecognizerType<ISpxDialogServiceConnector>())
+        {
+            auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
+            auto error = factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, payload->Reason(), payload->ErrorCode(), PAL::ToWString(payload->Info()).c_str(), 0, 0);
+            FireResultEvent(GetSessionId(), error);
+        }
     }
     // If it is a transport error and the connection was successfully before, we retry in continuous mode.
     // Otherwise report the error to the user, so that he can recreate a recognizer.
@@ -1863,7 +1870,7 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
         auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
         auto error = factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, payload->Reason(), payload->ErrorCode(), PAL::ToWString(payload->Info()).c_str(), 0, 0);
         WaitForRecognition_Complete(error);
-        if (IsRecognizerType<ISpxDialogServiceConnector>() && IsState(SessionState::ProcessingAudio))
+        if (IsRecognizerType<ISpxDialogServiceConnector>())
         {
             /* For a DialogServiceConnector we raise a cancellation error but we set the session so we can keep using it. */
             m_resetRecoAdapter = m_recoAdapter;
