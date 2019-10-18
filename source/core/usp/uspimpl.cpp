@@ -259,10 +259,10 @@ string Connection::Impl::ConstructConnectionUrl() const
                 resource = endpoint::dialog::resourcePath::botFramework;
                 version = endpoint::dialog::version::botFramework;
             }
-            else if (m_config.m_dialogBackend == Client::DialogBackend::SpeechCommands)
+            else if (m_config.m_dialogBackend == Client::DialogBackend::CustomCommands)
             {
-                resource = endpoint::dialog::resourcePath::speechCommands;
-                version = endpoint::dialog::version::speechCommands;
+                resource = endpoint::dialog::resourcePath::customCommands;
+                version = endpoint::dialog::version::customCommands;
             }
             else
             {
@@ -438,7 +438,7 @@ void Connection::Impl::Connect()
     if (!authStr.empty())
     {
         const char* headerName = m_config.m_dialogBackend == Client::DialogBackend::BotFramework ? headers::dialogDLSSecret :
-                                 m_config.m_dialogBackend == Client::DialogBackend::SpeechCommands ? headers::dialogCommandsAppId :
+                                 m_config.m_dialogBackend == Client::DialogBackend::CustomCommands ? headers::dialogCommandsAppId :
                                  nullptr;
 
         if (headerName != nullptr)

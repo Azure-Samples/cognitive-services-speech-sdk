@@ -161,49 +161,49 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
     }
 
     /// <summary>
-    /// Class that defines configurations for the dialog service connector object for using a SpeechCommands backend.
+    /// Class that defines configurations for the dialog service connector object for using a CustomCommands backend.
     /// </summary>
-    public sealed class SpeechCommandsConfig: DialogServiceConfig
+    public sealed class CustomCommandsConfig: DialogServiceConfig
     {
-        private SpeechCommandsConfig(IntPtr handle): base(handle)
+        private CustomCommandsConfig(IntPtr handle): base(handle)
         {
         }
 
         /// <summary>
-        /// Creates an instance of the dialog service config with the specified Speech Commands application id, subscription and region.
+        /// Creates an instance of the dialog service config with the specified Custom Commands application id, subscription and region.
         /// </summary>
-        /// <param name="applicationId">Speech Commands application id.</param>
+        /// <param name="applicationId">Custom Commands application id.</param>
         /// <param name="subscription">Subscription key associated with the application.</param>
         /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-        /// <returns>A new speech commands config.</returns>
-        public static SpeechCommandsConfig FromSubscription(string applicationId, string subscription, string region)
+        /// <returns>A new Custom Commands config.</returns>
+        public static CustomCommandsConfig FromSubscription(string applicationId, string subscription, string region)
         {
             IntPtr configHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.DialogServiceConfig.speech_commands_config_from_subscription(out configHandle, applicationId, subscription, region));
-            return new SpeechCommandsConfig(configHandle);
+            ThrowIfFail(Internal.DialogServiceConfig.custom_commands_config_from_subscription(out configHandle, applicationId, subscription, region));
+            return new CustomCommandsConfig(configHandle);
         }
 
         /// <summary>
-        /// Creates an instance of the dialog service config with the specified Speech Commands application id, authorization token and region.
+        /// Creates an instance of the dialog service config with the specified Custom Commands application id, authorization token and region.
         /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
         /// expires, the caller needs to refresh it by calling this setter with a new valid token.
         /// As configuration values are copied when creating a new recognizer, the new token value will not apply to recognizers that have already been created.
         /// For recognizers that have been created before, you need to set authorization token of the corresponding recognizer
         /// to refresh the token. Otherwise, the recognizers will encounter errors during recognition.
         /// </summary>
-        /// <param name="applicationId">Speech Commands application id.</param>
+        /// <param name="applicationId">Custom Commands application id.</param>
         /// <param name="authorizationToken">The authorization token associated with the application.</param>
         /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-        /// <returns>A new speech commands config.</returns>
-        public static SpeechCommandsConfig FromAuthorizationToken(string applicationId, string authorizationToken, string region)
+        /// <returns>A new Custom Commands config.</returns>
+        public static CustomCommandsConfig FromAuthorizationToken(string applicationId, string authorizationToken, string region)
         {
             IntPtr configHandle = IntPtr.Zero;
-            ThrowIfFail(Internal.DialogServiceConfig.speech_commands_config_from_authorization_token(out configHandle, applicationId, authorizationToken, region));
-            return new SpeechCommandsConfig(configHandle);
+            ThrowIfFail(Internal.DialogServiceConfig.custom_commands_config_from_authorization_token(out configHandle, applicationId, authorizationToken, region));
+            return new CustomCommandsConfig(configHandle);
         }
 
         /// <summary>
-        /// Speech commands application identifier.
+        /// Custom Commands application identifier.
         /// </summary>
         public string ApplicationId
         {

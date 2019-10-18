@@ -65,7 +65,7 @@ SPXAPI bot_framework_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* ph_d
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI speech_commands_config_from_subscription(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char* app_id, const char *subscription, const char* region)
+SPXAPI custom_commands_config_from_subscription(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char* app_id, const char *subscription, const char* region)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_dialog_service_config == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, app_id == nullptr);
@@ -84,14 +84,14 @@ SPXAPI speech_commands_config_from_subscription(SPXSPEECHCONFIGHANDLE* ph_dialog
         auto properties = SpxQueryInterface<ISpxNamedProperties>(config);
 
         properties->SetStringValue(GetPropertyName(PropertyId::Conversation_ApplicationId), app_id);
-        properties->SetStringValue(GetPropertyName(PropertyId::Conversation_DialogType), g_dialogType_SpeechCommands);
+        properties->SetStringValue(GetPropertyName(PropertyId::Conversation_DialogType), g_dialogType_CustomCommands);
 
         *ph_dialog_service_config = config_handles->TrackHandle(config);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI speech_commands_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char* app_id, const char *auth_token, const char* region)
+SPXAPI custom_commands_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* ph_dialog_service_config, const char* app_id, const char *auth_token, const char* region)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, ph_dialog_service_config == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, app_id == nullptr);
@@ -110,7 +110,7 @@ SPXAPI speech_commands_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* ph
         auto properties = SpxQueryInterface<ISpxNamedProperties>(config);
 
         properties->SetStringValue(GetPropertyName(PropertyId::Conversation_ApplicationId), app_id);
-        properties->SetStringValue(GetPropertyName(PropertyId::Conversation_DialogType), g_dialogType_SpeechCommands);
+        properties->SetStringValue(GetPropertyName(PropertyId::Conversation_DialogType), g_dialogType_CustomCommands);
 
         *ph_dialog_service_config = config_handles->TrackHandle(config);
     }

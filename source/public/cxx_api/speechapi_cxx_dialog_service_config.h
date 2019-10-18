@@ -170,42 +170,42 @@ private:
 };
 
 /// <summary>
-/// Class that defines configurations for the dialog service connector object for using a SpeechCommands backend.
+/// Class that defines configurations for the dialog service connector object for using a CustomCommands backend.
 /// </summary>
-class SpeechCommandsConfig: public DialogServiceConfig
+class CustomCommandsConfig: public DialogServiceConfig
 {
 public:
     /// <summary>
-    /// Creates a speech commands config instance with the specified application id, subscription key and region.
+    /// Creates a Custom Commands config instance with the specified application id, subscription key and region.
     /// </summary>
-    /// <param name="appId">Speech Commands application id.</param>
+    /// <param name="appId">Custom Commands application id.</param>
     /// <param name="subscription">Subscription key associated with the bot</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
     /// <returns>A shared pointer to the new bot framework config.</returns>
-    inline static std::shared_ptr<SpeechCommandsConfig> FromSubscription(const SPXSTRING& appId, const SPXSTRING& subscription, const SPXSTRING& region)
+    inline static std::shared_ptr<CustomCommandsConfig> FromSubscription(const SPXSTRING& appId, const SPXSTRING& subscription, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_commands_config_from_subscription(&h_config, Utils::ToUTF8(appId).c_str(), Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
-        return std::shared_ptr<SpeechCommandsConfig>{ new SpeechCommandsConfig(h_config) };
+        SPX_THROW_ON_FAIL(custom_commands_config_from_subscription(&h_config, Utils::ToUTF8(appId).c_str(), Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
+        return std::shared_ptr<CustomCommandsConfig>{ new CustomCommandsConfig(h_config) };
     }
 
     /// <summary>
-    /// Creates a speech commands config instance with the specified application id authorization token and region.
+    /// Creates a Custom Commands config instance with the specified application id authorization token and region.
     /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
     /// expires, the caller needs to refresh it by calling this setter with a new valid token.
     /// As configuration values are copied when creating a new connector, the new token value will not apply to connectors that have already been created.
     /// For connectors that have been created before, you need to set authorization token of the corresponding connector
     /// to refresh the token. Otherwise, the connectors will encounter errors during operation.
     /// </summary>
-    /// <param name="appId">Speech Commands application id.</param>
+    /// <param name="appId">Custom Commands application id.</param>
     /// <param name="authToken">The authorization token.</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
     /// <returns>A shared pointer to the new bot framework config.</returns>
-    inline static std::shared_ptr<SpeechCommandsConfig> FromAuthorizationToken(const SPXSTRING& appId, const SPXSTRING& authToken, const SPXSTRING& region)
+    inline static std::shared_ptr<CustomCommandsConfig> FromAuthorizationToken(const SPXSTRING& appId, const SPXSTRING& authToken, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE h_config = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_commands_config_from_authorization_token(&h_config, Utils::ToUTF8(appId).c_str(), Utils::ToUTF8(authToken).c_str(), Utils::ToUTF8(region).c_str()));
-        return std::shared_ptr<SpeechCommandsConfig>{ new SpeechCommandsConfig(h_config) };
+        SPX_THROW_ON_FAIL(custom_commands_config_from_authorization_token(&h_config, Utils::ToUTF8(appId).c_str(), Utils::ToUTF8(authToken).c_str(), Utils::ToUTF8(region).c_str()));
+        return std::shared_ptr<CustomCommandsConfig>{ new CustomCommandsConfig(h_config) };
     }
 
     /// <summary>
@@ -227,7 +227,7 @@ public:
     }
 
 private:
-    inline explicit SpeechCommandsConfig(SPXSPEECHCONFIGHANDLE h_config): DialogServiceConfig{ h_config }
+    inline explicit CustomCommandsConfig(SPXSPEECHCONFIGHANDLE h_config): DialogServiceConfig{ h_config }
     {
     }
 };

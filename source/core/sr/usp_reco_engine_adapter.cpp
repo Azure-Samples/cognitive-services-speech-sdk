@@ -493,9 +493,9 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointDialog(const std::shared_pt
     {
         dialogBackend = USP::Client::DialogBackend::BotFramework;
     }
-    else if (dialogType == g_dialogType_SpeechCommands)
+    else if (dialogType == g_dialogType_CustomCommands)
     {
-        dialogBackend = USP::Client::DialogBackend::SpeechCommands;
+        dialogBackend = USP::Client::DialogBackend::CustomCommands;
     }
     else
     {
@@ -934,7 +934,7 @@ void CSpxUspRecoEngineAdapter::SetAgentConfigMessage(const ISpxNamedProperties& 
             agentConfigJson["botInfo"]["fromId"] = fromId;
         }
     }
-    else if (dialogType == g_dialogType_SpeechCommands)
+    else if (dialogType == g_dialogType_CustomCommands)
     {
         auto language = properties.GetStringValue(recoLanguage);
         if (!language.empty())
@@ -2008,7 +2008,7 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
                 contextJson["synthesis"] = GetSynthesisJson(move(voiceNameMap));
             }
         }
-    
+
         SPX_DBG_TRACE_VERBOSE("Speech context with LID scenario %s.", contextJson.dump().c_str());
     }
 

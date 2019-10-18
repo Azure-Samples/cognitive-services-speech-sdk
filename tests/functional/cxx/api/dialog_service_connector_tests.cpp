@@ -39,7 +39,7 @@ std::shared_ptr<DialogServiceConfig> DialogServiceConfigForTests(bool isBot = tr
     }
     else
     {
-        config = SpeechCommandsConfig::FromSubscription(Config::DialogBotSecret, Keys::Dialog, Config::DialogRegion);
+        config = CustomCommandsConfig::FromSubscription(Config::DialogBotSecret, Keys::Dialog, Config::DialogRegion);
     }
     config->SetLanguage("en-us");
     config->SetProperty("Conversation_Communication_Type", "AutoReply");
@@ -498,7 +498,7 @@ TEST_CASE("Dialog Service Connector extended", "[api][cxx][dialog_service_connec
     }
 }
 
-TEST_CASE("Dialog Service Connector SpeechCommands", "[api][cxx][dialog_service_connector][tahiti][!hide]")
+TEST_CASE("Dialog Service Connector CustomCommands", "[api][cxx][dialog_service_connector][tahiti][!hide]")
 {
     SECTION("Send/receive activities.")
     {

@@ -120,7 +120,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/BaseRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/DialogServiceConfig.java
     ${CMAKE_SWIG_OUTDIR}/BotFrameworkConfig.java
-    ${CMAKE_SWIG_OUTDIR}/SpeechCommandsConfig.java
+    ${CMAKE_SWIG_OUTDIR}/CustomCommandsConfig.java
     ${CMAKE_SWIG_OUTDIR}/PropertyId.java
     ${CMAKE_SWIG_OUTDIR}/carbon_java.java
     ${CMAKE_SWIG_OUTDIR}/carbon_javaJNI.java
@@ -322,7 +322,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/dialog/ActivityReceivedEventArgs.java
     ${PACKAGE_DIR}/dialog/DialogServiceConfig.java
     ${PACKAGE_DIR}/dialog/BotFrameworkConfig.java
-    ${PACKAGE_DIR}/dialog/SpeechCommandsConfig.java
+    ${PACKAGE_DIR}/dialog/CustomCommandsConfig.java
     ${PACKAGE_DIR}/dialog/DialogServiceConnector.java
 
     ${PACKAGE_DIR}/intent/IntentRecognitionResult.java

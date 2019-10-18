@@ -349,7 +349,7 @@ public:
     {
         NotSet = 0,
         BotFramework,
-        SpeechCommands
+        CustomCommands
     };
     /**
      * Sets the dialog backend to connect to.
@@ -500,7 +500,7 @@ namespace endpoint
         namespace resourcePath
         {
             constexpr auto botFramework = "";
-            constexpr auto speechCommands = "/commands";
+            constexpr auto customCommands = "/commands";
         }
 
         constexpr auto suffix = "/api";
@@ -508,7 +508,7 @@ namespace endpoint
         namespace version
         {
             constexpr auto botFramework = "/v3";
-            constexpr auto speechCommands = "/v1";
+            constexpr auto customCommands = "/v1";
         }
 
         const std::vector<std::string> queryParameters = { langQueryParam };
