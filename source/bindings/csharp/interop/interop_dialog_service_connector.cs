@@ -14,10 +14,14 @@ namespace Microsoft.CognitiveServices.Speech.Dialog.Internal
     using SPXEVENTHANDLE = System.IntPtr;
     using SPXACTIVITYHANDLE = System.IntPtr;
     using SPXRESULTHANDLE = System.IntPtr;
+    using SPXPROPERTYBAGHANDLE = System.IntPtr;
     using Speech.Internal;
 
     internal static class DialogServiceConnector
     {
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR dialog_service_connector_get_property_bag(InteropSafeHandle connectorHandle, out SPXPROPERTYBAGHANDLE propertyBag);
+
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR dialog_service_connector_handle_release(SPXCONNECTORHANDLE connectorHandle);
 

@@ -26,6 +26,8 @@ SPXAPI dialog_service_connector_async_reco_result_handle_release(SPXASYNCHANDLE 
 SPXAPI_(bool) dialog_service_connector_activity_received_event_handle_is_valid(SPXEVENTHANDLE h_event);
 SPXAPI dialog_service_connector_activity_received_event_release(SPXEVENTHANDLE h_event);
 
+SPXAPI dialog_service_connector_get_property_bag(SPXRECOHANDLE h_connector, SPXPROPERTYBAGHANDLE* h_prop_bag);
+
 SPXAPI dialog_service_connector_connect(SPXRECOHANDLE h_connector);
 SPXAPI dialog_service_connector_connect_async(SPXRECOHANDLE h_connector, SPXASYNCHANDLE* p_async);
 SPXAPI dialog_service_connector_connect_async_wait_for(SPXASYNCHANDLE h_async, uint32_t milliseconds);

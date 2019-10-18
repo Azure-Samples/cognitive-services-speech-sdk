@@ -6,10 +6,11 @@
 //
 
 #pragma once
+#include <type_traits>
+
 #include "spxcore_common.h"
 #include "shared_ptr_helpers.h"
 #include "string_utils.h"
-
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -20,9 +21,9 @@ namespace Impl {
 // SERVICE_MAP_* macros...
 //
 //      Carbon implementation uses the QueryService pattern in many locations. As such, many objects
-//      need to implement ISpxServiceProvider's QueryService method. In almost all cases, this is 
+//      need to implement ISpxServiceProvider's QueryService method. In almost all cases, this is
 //      the same type of function, where it compares the input parameters with the interfaces/services
-//      that this service provider can support. Once it finds one that it supports, it returns the 
+//      that this service provider can support. Once it finds one that it supports, it returns the
 //      appropriate interface pointer wrapped in a std::shared_ptr.
 //
 //      SPX_SERVICE_MAP_BEGIN()      - Logically starts the declaration/definition the map
@@ -118,5 +119,14 @@ inline std::shared_ptr<I> SpxQueryService(std::shared_ptr<T> serviceProvider)
     return SpxQueryService<I>(serviceProvider, PAL::GetTypeName<I>().c_str());
 }
 
+template <typename I, typename T, typename F>
+inline void InvokeOnServiceIfAvailable(std::shared_ptr<T> serviceProvider, F fn)
+{
+    auto ptr = SpxQueryService<I>(serviceProvider);
+    if (ptr)
+    {
+        fn(*ptr);
+    }
+}
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -12,6 +12,7 @@
 #include "event_helpers.h"
 #include "handle_helpers.h"
 #include "string_utils.h"
+#include "service_helpers.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
@@ -73,6 +74,24 @@ SPXAPI_(bool) dialog_service_connector_activity_received_event_handle_is_valid(S
 SPXAPI dialog_service_connector_activity_received_event_release(SPXEVENTHANDLE h_event)
 {
     return Handle_Close<SPXEVENTHANDLE, ISpxActivityEventArgs>(h_event);
+}
+
+SPXAPI dialog_service_connector_get_property_bag(SPXRECOHANDLE h_connector, SPXPROPERTYBAGHANDLE* h_prop_bag)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, h_prop_bag == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !dialog_service_connector_handle_is_valid(h_connector));
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxDialogServiceConnector, SPXRECOHANDLE>();
+        auto connector = (*handles)[h_connector];
+
+        auto properties = SpxQueryService<ISpxNamedProperties>(connector);
+
+        auto prop_handle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
+        *h_prop_bag = prop_handle->TrackHandle(properties);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 template<typename Fn, typename... Args>

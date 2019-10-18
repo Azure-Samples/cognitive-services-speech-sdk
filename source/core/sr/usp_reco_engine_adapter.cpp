@@ -487,6 +487,9 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointDialog(const std::shared_pt
 
     SetUspQueryParameters(USP::endpoint::dialog::queryParameters, properties, client);
 
+    /* Set conversation id if present */
+    m_dialogConversationId = properties->GetStringValue(GetPropertyName(PropertyId::Converation_Conversation_Id));
+
     auto dialogType = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_DialogType));
     USP::Client::DialogBackend dialogBackend{ USP::Client::DialogBackend::NotSet };
     if (dialogType == g_dialogType_BotFramework)
@@ -1767,7 +1770,12 @@ void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
             auto responseMessage = json::parse(message);
             if (!responseMessage["conversationId"].is_null())
             {
+                /* Update conversation id */
                 m_dialogConversationId = responseMessage["conversationId"].get<std::string>();
+                InvokeOnServiceIfAvailable<ISpxNamedProperties>(GetSite(), [&](ISpxNamedProperties& properties)
+                {
+                    properties.SetStringValue(GetPropertyName(PropertyId::Converation_Conversation_Id), m_dialogConversationId.c_str());
+                });
             }
             auto it = m_request_session_map.find(msg.requestId);
             if (it != m_request_session_map.end())

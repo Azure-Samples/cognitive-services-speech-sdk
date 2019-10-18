@@ -160,6 +160,28 @@ public:
     }
 
     /// <summary>
+    /// Sets the authorization token that will be used for connecting to the service.
+    /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+    /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+    /// Otherwise, the connector will encounter errors during its operation.
+    /// </summary>
+    /// <param name="token">The authorization token.</param>
+    void SetAuthorizationToken(const SPXSTRING& token)
+    {
+        Properties.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);
+    }
+
+    /// <summary>
+    /// Gets the authorization token.
+    /// </summary>
+    /// <returns>Authorization token</returns>
+    SPXSTRING GetAuthorizationToken()
+    {
+        return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, SPXSTRING());
+    }
+
+
+    /// <summary>
     /// Signal for events containing speech recognition results.
     /// </summary>
     EventSignal<const SpeechRecognitionEventArgs&> Recognized;
@@ -317,6 +339,20 @@ private:
         }
     }
 
+    class PrivatePropertyCollection : public PropertyCollection
+    {
+    public:
+        PrivatePropertyCollection(SPXRECOHANDLE h_connector) :
+            PropertyCollection(
+                [=](){
+                SPXPROPERTYBAGHANDLE h_prop_bag = SPXHANDLE_INVALID;
+                dialog_service_connector_get_property_bag(h_connector, &h_prop_bag);
+                return h_prop_bag;
+            }())
+        {
+        }
+    };
+
     inline explicit DialogServiceConnector(SPXRECOHANDLE handle) :
         Recognized{ Callback<SpeechRecognitionEventArgs>(&DialogServiceConnector::RecognizerEventConnectionChanged),
                     Callback<SpeechRecognitionEventArgs>(&DialogServiceConnector::RecognizerEventConnectionChanged), false },
@@ -330,12 +366,20 @@ private:
                   Callback<SpeechRecognitionCanceledEventArgs>(&DialogServiceConnector::CanceledEventConnectionChanged), false },
         ActivityReceived{ Callback<ActivityReceivedEventArgs>(&DialogServiceConnector::ActivityReceivedConnectionChanged),
                           Callback<ActivityReceivedEventArgs>(&DialogServiceConnector::ActivityReceivedConnectionChanged), false },
-        m_handle{ handle }
+        m_handle{ handle },
+        m_properties{ handle },
+        Properties{ m_properties }
     {
     }
 
     SPXRECOHANDLE m_handle;
+    PrivatePropertyCollection m_properties;
     /*! \endcond */
+public:
+    /// <summary>
+    /// A collection or properties and their values defined for this <see cref="DialogServiceConnector"/>.
+    /// </summary>
+    PropertyCollection& Properties;
 };
 
 } } } }

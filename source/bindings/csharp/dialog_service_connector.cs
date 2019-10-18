@@ -197,6 +197,10 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             recognizingCallbackDelegate = FireEvent_Recognizing;
             canceledCallbackDelegate = FireEvent_Canceled;
             activityReceivedCallbackDelegate = FireEvent_ActivityReceived;
+
+            IntPtr propertyHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.DialogServiceConnector.dialog_service_connector_get_property_bag(dialogServiceConnectorHandle, out propertyHandle));
+            Properties = new PropertyCollection(propertyHandle);
         }
 
         ~DialogServiceConnector()
@@ -204,6 +208,36 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             isDisposing = true;
             Dispose(false);
         }
+
+        /// <summary>
+        /// Gets/sets authorization token used to communicate with the service.
+        /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+        /// expires, the caller needs to refresh it by calling this setter with a new valid token.
+        /// Otherwise, the recognizer will encounter errors during recognition.
+        /// </summary>
+        public string AuthorizationToken
+        {
+            get
+            {
+                return Properties.GetProperty(PropertyId.SpeechServiceAuthorization_Token);
+            }
+
+            set
+            {
+                if(value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                Properties.SetProperty(PropertyId.SpeechServiceAuthorization_Token, value);
+            }
+        }
+
+        /// <summary>
+        /// The collection of properties and their values defined for this <see cref="DialogServiceConnector"/>.
+        /// Note: The property collection is only valid until the recognizer owning this Properties is disposed or finalized.
+        /// </summary>
+        public PropertyCollection Properties { get; internal set; }
 
         /// <summary>
         /// Dispose of associated resources.
@@ -240,6 +274,8 @@ namespace Microsoft.CognitiveServices.Speech.Dialog
             if (disposing)
             {
                 dialogServiceConnectorHandle.Dispose();
+                // This will make Properties unaccessible.
+                Properties.Close();
             }
 
             sessionStartedCallbackDelegate = null;

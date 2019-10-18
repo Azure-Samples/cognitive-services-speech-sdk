@@ -297,6 +297,12 @@ namespace Microsoft.CognitiveServices.Speech
         Conversation_From_Id = Internal.PropertyId.Conversation_From_Id,
 
         /// <summary>
+        /// ConversationId for the session.
+        /// Added in version 1.8.0.
+        /// </summary>
+        Conversation_Conversation_Id = Internal.PropertyId.Converation_Conversation_Id,
+
+        /// <summary>
         /// The user id associated to data buffer written by client when using Pull/Push audio mode streams.
         /// Added in version 1.5.0.
         /// </summary>

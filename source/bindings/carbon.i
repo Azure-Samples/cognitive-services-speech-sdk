@@ -536,6 +536,7 @@
 %immutable Microsoft::CognitiveServices::Speech::AudioDataStream::Properties;
 %immutable Microsoft::CognitiveServices::Speech::Conversation::ConversationTranscriber::Properties;
 %immutable Microsoft::CognitiveServices::Speech::Participant::Properties;
+%immutable Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConnector::Properties;
 
 %include <speechapi_cxx_properties.h>
 

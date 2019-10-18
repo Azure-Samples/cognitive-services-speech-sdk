@@ -18,7 +18,7 @@ import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.SessionEventArgs;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionEventArgs;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionCanceledEventArgs;
-import com.microsoft.cognitiveservices.speech.translation.TranslationSynthesisEventArgs;
+import com.microsoft.cognitiveservices.speech.PropertyCollection;
 
 /**
  * Class that defines a DialogServiceConnector.
@@ -67,6 +67,36 @@ public class DialogServiceConnector implements Closeable {
 
         initialize();
     }
+
+    /**
+     * Sets the authorization token used to communicate with the service.
+     * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token expires,
+     * the caller needs to refresh it by calling this setter with a new valid token.
+     * Otherwise, the recognizer will encounter errors during recognition.
+     * @param token Authorization token.
+     */
+    public void setAuthorizationToken(String token) {
+        Contracts.throwIfNullOrWhitespace(token, "token");
+        dialogServiceConnectorImpl.SetAuthorizationToken(token);
+    }
+
+    /**
+     * Gets the authorization token used to communicate with the service.
+     * @return Authorization token.
+     */
+    public String getAuthorizationToken() {
+        return dialogServiceConnectorImpl.GetAuthorizationToken();
+    }
+
+     /**
+     * The collection or properties and their values defined for this DialogServiceConnector.
+     * @return The collection or properties and their values defined for this DialogServiceConnector.
+     */
+    public PropertyCollection getProperties() {
+        return _Parameters;
+    }
+
+    private com.microsoft.cognitiveservices.speech.PropertyCollection _Parameters;
 
     /**
      * Connects with the service.
@@ -245,6 +275,8 @@ public class DialogServiceConnector implements Closeable {
                 dialogServiceConnectorImpl.getActivityReceived().AddEventListener(activityReceivedHandler);
             }
         });
+
+        _Parameters = new PrivatePropertyCollection(dialogServiceConnectorImpl.getProperties());
     }
 
     /**
@@ -258,6 +290,12 @@ public class DialogServiceConnector implements Closeable {
     private SessionEventHandlerImpl sessionStoppedHandler;
     private CanceledEventHandlerImpl canceledHandler;
     private ActivityReceivedEventHandlerImpl activityReceivedHandler;
+
+    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
+        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
+            super(collection);
+        }
+    }
 
     private class RecoEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventListener {
 

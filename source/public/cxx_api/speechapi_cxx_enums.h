@@ -362,6 +362,12 @@ enum class PropertyId
     Conversation_From_Id = 10003,
 
     /// <summary>
+    /// ConversationId for the session.
+    /// Added in version 1.8.0.
+    /// </summary>
+    Converation_Conversation_Id = 10004,
+
+    /// <summary>
     /// The time stamp associated to data buffer written by client when using Pull/Push audio input streams.
     /// The time stamp is a 64-bit value with a resolution of 90 kHz. It is the same as the presentation timestamp in an MPEG transport stream. See https://en.wikipedia.org/wiki/Presentation_timestamp
     /// Added in version 1.5.0.

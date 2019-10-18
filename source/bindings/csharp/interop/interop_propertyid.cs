@@ -59,6 +59,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         Conversation_DialogType = 10001,
         Conversation_Initial_Silence_Timeout = 10002,
         Conversation_From_Id = 10003,
+        Converation_Conversation_Id = 10004,
         DataBuffer_TimeStamp = 11001,
         DataBuffer_UserId = 11002
     }

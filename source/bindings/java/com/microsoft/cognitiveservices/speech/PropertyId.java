@@ -298,6 +298,12 @@ public enum PropertyId {
     Conversation_From_Id ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_From_Id),
 
     /**
+     * ConversationId for the session.
+     * Added in version 1.8.0.
+     */
+    Converation_Conversation_Id ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Converation_Conversation_Id),
+
+    /**
      *  The auto detect source languages
      * Added in version 1.8.0.
      */
