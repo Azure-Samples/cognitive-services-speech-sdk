@@ -1230,6 +1230,11 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
             {
                 CreateConversationResult(result, message.speaker);
             }
+
+            if (!message.language.empty())
+            {
+                namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult), message.language.c_str());
+            }
             site->FireAdapterResult_Intermediate(this, message.offset, result);
         });
     }
@@ -1320,6 +1325,10 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
             if (!message.speaker.empty())
             {
                 CreateConversationResult(result, message.speaker);
+            }
+            if (!message.language.empty())
+            {
+                namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult), message.language.c_str());
             }
             site->FireAdapterResult_Intermediate(this, message.offset, result);
         });

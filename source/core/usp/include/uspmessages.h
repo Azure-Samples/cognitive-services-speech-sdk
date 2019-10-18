@@ -194,12 +194,20 @@ struct SpeechHypothesisMsg : public SpeechMsg
 */
 struct SpeechFragmentMsg : public SpeechMsg
 {
-    SpeechFragmentMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& text, std::wstring&& speaker = L"") :
+    SpeechFragmentMsg(
+        std::wstring&& content,
+        OffsetType offset,
+        DurationType duration,
+        std::wstring&& text,
+        std::wstring&& speaker = L"",
+        std::string language="") :
         SpeechMsg(std::move(content), offset, duration, std::move(speaker)),
-        text(std::move(text))
+        text(std::move(text)),
+        language(std::move(language))
     {}
 
     std::wstring text;
+    std::string language;
 };
 
 /**

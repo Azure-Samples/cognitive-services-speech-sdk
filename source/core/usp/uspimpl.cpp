@@ -938,6 +938,26 @@ static ConfidenceLevel ToConfidenceLevel(const string& str)
     return ConfidenceLevel::InvalidMessage;
 }
 
+static string RetrievePrimaryLanguage(const nlohmann::json& json, string messagePath)
+{
+    string language;
+    auto primaryLanguageJson = json.find(json_properties::primaryLanguage);
+    if (primaryLanguageJson != json.end())
+    {
+        language = primaryLanguageJson->at(json_properties::lang).get<string>();
+        if (language.empty())
+        {
+            PROTOCOL_VIOLATION("Invalid %s message, with primaryLanguage section but no language value. json = %s.", messagePath.c_str(), primaryLanguageJson->dump().c_str());
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("Got language %s from %s message.", language.c_str(), messagePath.c_str());
+        }
+    }
+
+    return language;
+}
+
 static SpeechHypothesisMsg RetrieveSpeechResult(const nlohmann::json& json)
 {
     auto offset = json.at(json_properties::offset).get<OffsetType>();
@@ -948,20 +968,7 @@ static SpeechHypothesisMsg RetrieveSpeechResult(const nlohmann::json& json)
     {
         text = json.at(json_properties::text).get<string>();
     }
-    string language;
-    auto primaryLanguageJson = json.find(json_properties::primaryLanguage);
-    if (primaryLanguageJson != json.end())
-    {
-        language = primaryLanguageJson->at(json_properties::lang).get<string>();
-        if (language.empty())
-        {
-            PROTOCOL_VIOLATION("Invalid speech hypothesis message, with primaryLanguage section but no language value. json = %s.", primaryLanguageJson->dump().c_str());
-        }
-        else
-        {
-            SPX_DBG_TRACE_VERBOSE("Got language %s from speech hypothesis message.", language.c_str());
-        }
-    }
+    string language = RetrievePrimaryLanguage(json, "speech.hypothesis");
     return SpeechHypothesisMsg(PAL::ToWString(json.dump()), offset, duration, PAL::ToWString(text), L"", move(language));
 }
 
@@ -1198,6 +1205,7 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
             {
                 speaker = json[json_properties::speaker].get<string>();
             }
+            auto language = RetrievePrimaryLanguage(json, path);
             if (path == path::speechHypothesis)
             {
                 connection->Invoke([&] {
@@ -1205,7 +1213,8 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                                                    offset,
                                                    duration,
                                                    PAL::ToWString(text),
-                                                   PAL::ToWString(speaker)});
+                                                   PAL::ToWString(speaker),
+                                                   move(language)});
                 });
             }
             else
@@ -1215,7 +1224,8 @@ void Connection::Impl::OnTransportData(TransportResponse *response, void *contex
                                                  offset,
                                                  duration,
                                                  PAL::ToWString(text),
-                                                 PAL::ToWString(speaker)});
+                                                 PAL::ToWString(speaker),
+                                                 move(language)});
                 });
             }
         }

@@ -1935,8 +1935,7 @@ TEST_CASE("Verify auto detect source language result from speech recognition res
         expectedReason = ResultReason::Canceled;
         auto cancellation = CancellationDetails::FromResult(speechRecognitionResult);
         REQUIRE(cancellation->Reason == CancellationReason::Error);
-        // TODO: uncomment this after service fixes the behavior
-        // REQUIRE(cancellation->ErrorDetails.find("Language Identification doesn't support notrecognized") != string::npos);
+        REQUIRE(cancellation->ErrorDetails.find("Language Identification doesn't support notrecognized") != string::npos);
     }
 
     SPXTEST_SECTION("Language Id Scenario From Multiple SourceLanguageConfig")
@@ -1981,7 +1980,11 @@ TEST_CASE("Verify language id detection for continous speech recognition", "[api
         if (e.Result->Reason == ResultReason::RecognizingSpeech)
         {
             recognizingResults.push_back(e.Result->Text);
-            // TODO, after https://dev.azure.com/msasg/Bing_and_IPG/_workitems/edit/2072303 is fixed, verify the language detection result here
+            auto languageDetectionResult = AutoDetectSourceLanguageResult::FromResult(e.Result);
+            if (languageDetectionResult->Language != "de-DE")
+            {
+                errorResults.push_back("Language detection failed, detection result is " + languageDetectionResult->Language);
+            }
         }
         else
         {
