@@ -10,13 +10,13 @@ include_directories("${COMMON}/include") # for PAL utils
 
 set(HEADERS)
 
-set(HEADERS_PRIVATE 
+set(HEADERS_PRIVATE
     "${SRC_DIR}/carbon_test_console.h"
     "${SRC_DIR}/carbonx_pal.h"
     "${SRC_DIR}/stdafx.h"
 )
 
-set(SOURCES 
+set(SOURCES
     "${SRC_DIR}/carbon_test_console.cpp"
     "${SRC_DIR}/channel9.cpp"
     "${SRC_DIR}/hello_world.cpp"
@@ -47,12 +47,12 @@ source_group("Source Files" FILES ${SOURCES})
 source_group("Speech C API headers" FILES ${SPEECH_C_API_HEADERS})
 source_group("Speech CXX API headers" FILES ${SPEECH_CXX_API_HEADERS})
 
-add_executable(carbonx 
+add_executable(carbonx
     ${SPEECH_C_API_HEADERS} ${SPEECH_CXX_API_HEADERS}
     ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES}
     )
 # common is needed for PAL etc
-target_link_libraries(carbonx common ${SPEECHSDK_CORE_LIBRARY})
+target_link_libraries(carbonx common pal ${SPEECHSDK_CORE_LIBRARY})
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
 if(use_openssl)

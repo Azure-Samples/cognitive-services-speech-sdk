@@ -7,6 +7,7 @@ include_directories(${INC_DIR})
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
+include_directories("${PAL}/include")
 include_directories("${USP}/include")
 include_directories("${CARBON_EXTERNAL}/json")
 
@@ -53,7 +54,6 @@ set(HEADERS_PRIVATE
     "${INC_DIR}/azure_c_shared_utility_buffer_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_httpapi_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_httpapiex_wrapper.h"
-    "${INC_DIR}/azure_c_shared_utility_uniqueid_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_strings_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_xlogging_wrapper.h"
     )
@@ -114,7 +114,7 @@ set_target_properties(common PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(common factory ${AZURE_SHARED_LIB})
+target_link_libraries(common pal factory)
 
 if(WIN32)
     target_link_libraries(common Dbghelp.lib)

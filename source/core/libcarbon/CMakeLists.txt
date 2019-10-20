@@ -77,6 +77,7 @@ if(ANDROID)
     PRIVATE usp
     PRIVATE common
     PRIVATE factory
+    PRIVATE pal
     PRIVATE z) # libz
 else()
   target_link_libraries(${PROJECT_NAME}

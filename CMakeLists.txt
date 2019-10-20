@@ -351,6 +351,7 @@ file(GLOB SPEECH_C_API_HEADERS "${CARBON_C_API}/*.h")
 file(GLOB SPEECH_CXX_API_HEADERS "${CARBON_CXX_API}/*.h")
 
 # individual components
+set(PAL "${CARBON_CORE}/pal")
 set(COMMON "${CARBON_CORE}/common")
 set(FACTORY "${CARBON_CORE}/factory")
 set(SR "${CARBON_CORE}/sr")
@@ -402,6 +403,7 @@ if(EXTENSION_CODEC_ENABLED)
   endif()
 endif()
 
+add_subdirectory(${PAL})
 add_subdirectory(${COMMON})
 add_subdirectory(${FACTORY})
 add_subdirectory(${AUDIO})
