@@ -8,10 +8,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import javax.json.Json;
+
 import javax.json.JsonObject;
-import javax.json.JsonReader;
-import java.io.PrintStream;
 
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
@@ -73,7 +71,6 @@ public class Settings {
         String settingsFilePath = cwd + "/test.settings.json";
         File settingsFile = new File(settingsFilePath);
 
-
         try (FileInputStream fileInputStream = new FileInputStream(settingsFile)) {
             javax.json.JsonReader jsonReader = javax.json.Json.createReader(fileInputStream);
 
@@ -88,13 +85,12 @@ public class Settings {
             InputDirectory = json.getString("InputDir", InputDirectory);
             AudioInputDirectory = InputDirectory + "/audio/";
 
-            WavFile = AudioInputDirectory + json.getString("WaveFile", WavFile);
-            TwoSpeakersAudio = AudioInputDirectory + json.getString("TwoSpeakersAudio", TwoSpeakersAudio);
+            WavFile = json.getString("WaveFile", WavFile);
+            TwoSpeakersAudio = json.getString("TwoSpeakersAudio", TwoSpeakersAudio);
             TwoSpeakersAudioUtterance = json.getString("TwoSpeakersAudioUtterance", TwoSpeakersAudioUtterance);
-            TurnOnTheLampAudio = AudioInputDirectory + json.getString("TurnOnTheLampAudio", TurnOnTheLampAudio);
+            TurnOnTheLampAudio = json.getString("TurnOnTheLampAudio", TurnOnTheLampAudio);
             TurnOnTheLampAudioUtterance = json.getString("TurnOnTheLampAudioUtterance", TurnOnTheLampAudioUtterance);
-            SerializedSpeechActivityFile = AudioInputDirectory
-                    + json.getString("SerializedSpeechActivityFile", SerializedSpeechActivityFile);
+            SerializedSpeechActivityFile = json.getString("SerializedSpeechActivityFile", SerializedSpeechActivityFile);
 
             SpeechSubscriptionKeyForVirtualAssistant = json.getString("DialogSubscriptionKey",
                     SpeechSubscriptionKeyForVirtualAssistant);
@@ -119,15 +115,13 @@ public class Settings {
             KeywordModel = InputDirectory + "/kws/" + Keyword + "/" + json.getString("KeywordModel", KeywordModel);
         } catch (Exception exception) {
             displayException(exception);
-            isSettingsInitialized = false;
         }
-
-        isSettingsInitialized = true;
     }
 
     public static void LoadSettings() {
-        LoadSettingsJson();
-        if(!isSettingsInitialized) {
+        if(!isSettingsInitialized)
+        {
+            LoadSettingsJson();
             LoadSettingsProperties();
         }
     }

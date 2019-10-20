@@ -325,18 +325,18 @@ public class IntentRecognizerTests {
         assertNotNull(s);
 
         IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
-        assertNotNull(r);
-        assertNotNull(r.getRecoImpl());
-        assertTrue(r instanceof Recognizer);
+        assertNotNull("Failed to create IntentRecognizer", r);
+        assertNotNull("RecoImpl not found", r.getRecoImpl());
+        assertTrue("r is not of type Recognizer", r instanceof Recognizer);
 
         Future<?> future = r.startContinuousRecognitionAsync();
-        assertNotNull(future);
+        assertNotNull("Failed to start continuous recognition", future);
 
         // Wait for max 30 seconds
         future.get(30, TimeUnit.SECONDS);
 
-        assertFalse(future.isCancelled());
-        assertTrue(future.isDone());
+        assertFalse("Recognition was cancelled", future.isCancelled());
+        assertTrue("Recognition did not complete correctly", future.isDone());
 
         r.close();
         s.close();

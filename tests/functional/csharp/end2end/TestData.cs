@@ -260,7 +260,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string RemovedUtterance = "";
                 public static readonly string RawUtterance = "Fuck Fuck Fuck Fuck Fuck.";
                 public static readonly string MaskedUtteranceTranslation = "****";
-                public static readonly string RemovedUtteranceTranslation = ".";
+                public static readonly string RemovedUtteranceTranslation = "";
                 public static readonly string RawUtteranceTranslation = "Fuck.";
                 public static readonly string TaggedUtteranceTranslation = "<profanity>fuck</profanity>";
             }

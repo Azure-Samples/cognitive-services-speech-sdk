@@ -107,6 +107,7 @@ jobs:
         --SerializedSpeechActivityFile "activityWithSpeech.json" \
         --LongRunning "false"
       cp -r tests/input ./
+      ls -al
       # set +e to allow capturing exit codes
       set +e
       for retry in {0..3}; do
