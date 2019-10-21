@@ -94,10 +94,10 @@ class SegmentResult {
 
 public class Main {
 
-	private static String region = "region";
-	private static String subscriptionKey = "key";
+	private static String region = "YourServiceRegion";
+	private static String subscriptionKey = "YourSubscriptionKey";
 	private static String Locale = "en-US";
-	private static String RecordingsBlobUri = "SAS URL";
+	private static String RecordingsBlobUri = "YourFileUrl";
 	private static String Name = "Simple transcription";
 	private static String Description = "Simple transcription description";
 

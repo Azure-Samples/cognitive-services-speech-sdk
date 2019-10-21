@@ -17,15 +17,15 @@ namespace BatchClient
     class Program
     {
         // Replace with your subscription key
-        private const string SubscriptionKey = "key";
+        private const string SubscriptionKey = "YourSubscriptionKey";
 
         // Update with your service region
-        private const string Region = "region";
+        private const string Region = "YourServiceRegion";
         private const int Port = 443;
 
         // recordings and locale
         private const string Locale = "en-US";
-        private const string RecordingsBlobUri = "SAS URI";
+        private const string RecordingsBlobUri = "YourFileUrl";
 
         //name and description
         private const string Name = "Simple transcription";
