@@ -44,20 +44,6 @@ def transcribe():
     # create an instance of the transcription api class
     transcription_api = cris_client.CustomSpeechTranscriptionsApi(api_client=client)
 
-    # get all transcriptions for the subscription
-    transcriptions: List[cris_client.Transcription] = transcription_api.get_transcriptions()
-
-    logging.info("Deleting all existing completed transcriptions.")
-
-    # delete all pre-existing completed transcriptions
-    # if transcriptions are still running or not started, they will not be deleted
-    for transcription in transcriptions:
-        try:
-            transcription_api.delete_transcription(transcription.id)
-        except ValueError:
-            # ignore swagger error on empty response message body: https://github.com/swagger-api/swagger-core/issues/2446
-            pass
-
     # Use base models for transcription. Comment this block if you are using a custom model.
     # Note: you can specify additional transcription properties by passing a
     # dictionary in the properties parameter. See
