@@ -1327,3 +1327,18 @@ TEST_CASE("Speak output in streams with all data get since synthesizing result -
 
     CheckAudioInDataStream(stream, expectedAudioData);
 }
+
+TEST_CASE("Custom text-to-speech endpoints", "[api][cxx]")
+{
+    SPXTEST_SECTION("Invalid url from portal")
+    {
+        const auto endpoint = "https://northeurope.api.cognitive.microsoft.com/sts/v1.0/issueToken";
+        auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
+        auto synthesizer = SpeechSynthesizer::FromConfig(config);
+
+        auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
+        SPXTEST_REQUIRE(result->GetAudioLength() > 0);
+    }
+}

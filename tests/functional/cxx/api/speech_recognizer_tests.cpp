@@ -2060,3 +2060,24 @@ TEST_CASE("Verify language id detection for continous speech recognition", "[api
     REQUIRE(recognizedResults.size() > 0);
     REQUIRE(recognizedResults[0] == callTheFirstOne.m_utterance);
 }
+
+TEST_CASE("Custom speech-to-text endpoints", "[api][cxx]")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    weather.UpdateFullFilename(Config::InputDir);
+    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+
+    SPXTEST_SECTION("Invalid url from portal")
+    {
+        const auto speechEndpoint = "https://northeurope.api.cognitive.microsoft.com/sts/v1.0/issueToken";
+        auto config = SpeechConfig::FromEndpoint(speechEndpoint, Keys::Speech);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, weather.m_utterance));
+    }
+}

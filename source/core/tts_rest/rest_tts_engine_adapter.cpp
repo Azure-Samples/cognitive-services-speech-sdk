@@ -11,6 +11,7 @@
 #include "create_object_helpers.h"
 #include "guid_utils.h"
 #include "http_utils.h"
+#include "endpoint_utils.h"
 #include "handle_table.h"
 #include "service_helpers.h"
 #include "shared_ptr_helpers.h"
@@ -58,6 +59,24 @@ void CSpxRestTtsEngineAdapter::Init()
     std::string endpoint = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
     std::string region = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), "");
     std::string subscriptionKey = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), "");
+
+    // Check for invalid use of auth token service endpoint
+
+    bool isTokenServiceEndpoint = false;
+    std::string endpointRegion;
+
+    std::tie(isTokenServiceEndpoint, endpointRegion) =
+        EndpointUtils::IsTokenServiceEndpoint(endpoint);
+
+    if (isTokenServiceEndpoint)
+    {
+        // Ignore the custom endpoint and use defaults except for region
+        if (!endpointRegion.empty())
+        {
+            region = endpointRegion;
+        }
+        endpoint.clear();
+    }
 
     if (!endpoint.empty() && !CSpxSynthesisHelper::IsCustomVoiceEndpoint(endpoint) && !CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint))
     {

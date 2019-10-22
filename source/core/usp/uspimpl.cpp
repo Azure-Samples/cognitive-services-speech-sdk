@@ -35,6 +35,7 @@
 
 #include "string_utils.h"
 #include "guid_utils.h"
+#include "endpoint_utils.h"
 
 #include "json.h"
 
@@ -212,14 +213,44 @@ string Connection::Impl::EncodeParameterString(const string& parameter) const
 string Connection::Impl::ConstructConnectionUrl() const
 {
     auto recoMode = static_cast<underlying_type_t<RecognitionMode>>(m_config.m_recoMode);
+    auto region = m_config.m_region;
+    auto intentRegion = m_config.m_intentRegion;
     ostringstream oss;
     bool customEndpoint = false;
 
     // Using customized endpoint if it is defined.
     if (!m_config.m_customEndpointUrl.empty())
     {
+        // Check for invalid use of auth token service endpoint
+
+        bool isTokenServiceEndpoint = false;
+        std::string endpointRegion;
+
+        std::tie(isTokenServiceEndpoint, endpointRegion) =
+            EndpointUtils::IsTokenServiceEndpoint(m_config.m_customEndpointUrl);
+
+        if (isTokenServiceEndpoint)
+        {
+            if (!endpointRegion.empty())
+            {
+                // Use only the region, defaults for the rest
+                region = endpointRegion;
+
+                // As of this writing, there are more speech regions than intent
+                // regions and they cannot be perfectly matched, so this doesn't
+                // work right 100% of the time which cannot be helped.
+                intentRegion = region;
+            }
+        }
+        else
+        {
+            customEndpoint = true;
+        }
+    }
+
+    if (customEndpoint)
+    {
         oss << m_config.m_customEndpointUrl;
-        customEndpoint = true;
     }
     else
     {
@@ -227,14 +258,14 @@ string Connection::Impl::ConstructConnectionUrl() const
         switch (m_config.m_endpointType)
         {
         case EndpointType::Speech:
-            oss << m_config.m_region
+            oss << region
                 << endpoint::unifiedspeech::hostnameSuffix
                 << endpoint::unifiedspeech::pathPrefix
                 << g_recoModeStrings[recoMode]
                 << endpoint::unifiedspeech::pathSuffix;
             break;
         case EndpointType::Translation:
-            oss << m_config.m_region
+            oss << region
                 << endpoint::translation::hostnameSuffix
                 << endpoint::translation::path;
             break;
@@ -245,7 +276,7 @@ string Connection::Impl::ConstructConnectionUrl() const
             }
             oss << endpoint::luis::hostname
                 << endpoint::luis::pathPrefix1
-                << m_config.m_intentRegion
+                << intentRegion
                 << endpoint::luis::pathPrefix2
                 << g_recoModeStrings[recoMode]
                 << endpoint::luis::pathSuffix;
@@ -270,7 +301,7 @@ string Connection::Impl::ConstructConnectionUrl() const
             }
 
             /* This will generate an url of the form wss://<region>.convai.speech.microsoft.com/<backend>/api/<version> */
-            oss << m_config.m_region
+            oss << region
                 << endpoint::dialog::url
                 << resource
                 << endpoint::dialog::suffix
@@ -279,13 +310,13 @@ string Connection::Impl::ConstructConnectionUrl() const
         }
         case EndpointType::ConversationTranscriptionService:
             oss << endpoint::conversationTranscriber::pathPrefix1
-                << m_config.m_region
+                << region
                 << endpoint::conversationTranscriber::hostname
                 << endpoint::conversationTranscriber::pathPrefix2
                 << endpoint::conversationTranscriber::pathSuffixMultiAudio;
             break;
         case EndpointType::SpeechSynthesis:
-            oss << m_config.m_region
+            oss << region
                 << endpoint::speechSynthesis::hostnameSuffix
                 << endpoint::speechSynthesis::path;
             break;
