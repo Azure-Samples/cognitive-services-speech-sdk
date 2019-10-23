@@ -508,7 +508,7 @@ void SpeechRecognitionWithSourceLanguageAutoDetection()
 {
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto speechConfig = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
      // Currently this feature only supports 2 languages
      // Replace the languages with your languages in BCP-47 format, e.g. fr-FR.
@@ -517,7 +517,7 @@ void SpeechRecognitionWithSourceLanguageAutoDetection()
 
      // The recognizer uses microphone,  to use file or stream as audio input, just construct the audioInput and pass to FromConfig API as the 3rd parameter.
      // Ex: auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioInput);
-     auto recognizer = SpeechRecognizer::FromConfig(config, autoDetectSourceLanguageConfig);
+     auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig);
      cout << "Say something in either English or German...\n";
 
     // Starts speech recognition, and returns after a single utterance is recognized. The end of a
