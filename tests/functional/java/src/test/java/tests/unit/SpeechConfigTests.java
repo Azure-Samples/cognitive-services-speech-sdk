@@ -274,8 +274,7 @@ public class SpeechConfigTests {
     @Test
     public void testCreateSpeechRecognizerWithLanguageSuccess() {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        s.setSpeechRecognitionLanguage("en-EN");
-        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+        SpeechRecognizer r = new SpeechRecognizer(s, "en-EN", AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         r.close();

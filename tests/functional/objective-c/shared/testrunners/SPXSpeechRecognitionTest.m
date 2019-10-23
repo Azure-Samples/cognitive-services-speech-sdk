@@ -863,13 +863,13 @@
     [self pushStream];
 }
 
-- (void)testContinuousRecognitionMargarita {
-    targetFileName = margaritaFileName;
-    targetTranscription = margaritaTextEnglish;
-    sampleRate = 44100;
-    [self speechInit];
-    [self pushStream];
-}
+//- (void)testContinuousRecognitionMargarita {
+//    targetFileName = margaritaFileName;
+//    targetTranscription = margaritaTextEnglish;
+//    sampleRate = 44100;
+//    [self speechInit];
+//    [self pushStream];
+//}
 
 - (void)pushStream {
     [self.speechRecognizer startContinuousRecognition];

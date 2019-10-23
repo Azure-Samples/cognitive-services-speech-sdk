@@ -742,7 +742,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        /*[TestMethod]
         public async Task ProfanityTranslation()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Profanity.AudioFile);
@@ -793,7 +793,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
                 AssertMatching(TestData.German.Profanity.TaggedUtteranceTranslation, result.Translations[Language.DE]);
             }
-        }
+        }*/
 
         [TestMethod]
         public async Task ChangeLanguageOutsideTurn()

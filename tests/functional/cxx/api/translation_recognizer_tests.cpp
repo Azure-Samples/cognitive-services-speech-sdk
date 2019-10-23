@@ -21,7 +21,7 @@ std::shared_ptr<SpeechTranslationConfig> CreateTranslationConfigWithLanguageId(
         defaultLanguage = PAL::split(from, CommaDelim)[0];
     }
     
-    auto endPoint = "wss://northeurope.sr.speech.microsoft.com/speech/translation/" + mode + "/mstranslator/v1?language=" + defaultLanguage;
+    auto endPoint = "wss://" + Config::Region + ".sr.speech.microsoft.com/speech/translation/" + mode + "/mstranslator/v1?TrafficType=Test&language=" + defaultLanguage;
     auto config = SpeechTranslationConfig::FromEndpoint(endPoint, Keys::Speech);
     config->SetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages, from);
     for (auto item : to)

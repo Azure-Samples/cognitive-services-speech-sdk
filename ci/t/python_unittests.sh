@@ -150,7 +150,7 @@ else
       hostedtoolsPath=C:/hostedtoolcache/windows
       ;;
     OSX)
-      hostedtoolsPath=/Users/vsts/hostedtoolcache
+      hostedtoolsPath=/Users/runner/hostedtoolcache
       ;;
     *)
       exitWithError "Unexpected platform: $PLATFORM.\n"

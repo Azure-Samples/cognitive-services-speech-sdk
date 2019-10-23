@@ -7,7 +7,7 @@ steps:
     pythonMajorMinorVersions=(3.7 3.6 3.5)
     . ci/functions.sh
     if [[ $(SPEECHSDK_TARGET_PLATFORM) == OSX-x64 ]]; then
-      hostedtoolsPath=/Users/vsts/hostedtoolcache
+      hostedtoolsPath=/Users/runner/hostedtoolcache
       extraCmakeArgs="--plat-name=macosx-10.12-x86_64"
     else
       hostedtoolsPath=/opt/hostedtoolcache
