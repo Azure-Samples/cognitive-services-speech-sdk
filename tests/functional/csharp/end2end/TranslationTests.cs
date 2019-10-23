@@ -757,9 +757,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
                 Assert.IsFalse(result.Text.Contains(TestData.English.Profanity.RawUtteranceTranslation));
                 Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
-                // The service seems to have changed, and is now sending an empty string back rather than '.'
-                // Leaving commented out text in case they change back 10/18/2019 - Remove me after > 2 weeks
-                Assert.IsTrue(string.IsNullOrEmpty(result.Translations[Language.DE]));
                 //AssertMatching(TestData.German.Profanity.RemovedUtteranceTranslation, result.Translations[Language.DE]);
             }
 
@@ -770,7 +767,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
                 Assert.AreEqual(TestData.English.Profanity.MaskedUtteranceTranslation, result.Text);
                 Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
-                AssertMatching(TestData.German.Profanity.MaskedUtteranceTranslation, result.Translations[Language.DE]);
+                //AssertMatching(TestData.German.Profanity.MaskedUtteranceTranslation, result.Translations[Language.DE]);
             }
 
             config.SetProfanity(ProfanityOption.Raw);
@@ -780,7 +777,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
                 AssertMatching(TestData.English.Profanity.RawUtteranceTranslation, result.Text);
                 Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
-                AssertMatching(TestData.German.Profanity.RawUtteranceTranslation, result.Translations[Language.DE]);
+                //AssertMatching(TestData.German.Profanity.RawUtteranceTranslation, result.Translations[Language.DE]);
             }
 
             config.SetProfanity(ProfanityOption.Masked);
@@ -791,7 +788,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
                 AssertMatching(TestData.English.Profanity.TaggedUtteranceTranslation.ToLower(), result.Text.ToLower());
                 Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
-                AssertMatching(TestData.German.Profanity.TaggedUtteranceTranslation, result.Translations[Language.DE]);
+                //AssertMatching(TestData.German.Profanity.TaggedUtteranceTranslation, result.Translations[Language.DE]);
             }
         }*/
 
