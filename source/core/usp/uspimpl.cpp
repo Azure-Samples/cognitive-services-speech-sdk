@@ -683,11 +683,11 @@ string Connection::Impl::UpdateRequestId(const MessageType messageType)
         break;
 
     default:
-        std::ostringstream os;
-        os << "Not supported message type " << (int)messageType;
-        ThrowLogicError(os.str());
+        requestId = CreateRequestId();
+        break;
     }
 
+    LogInfo("Create requestId %s for messageType %d", requestId.c_str(), static_cast<int>(messageType));
     return requestId;
 }
 
