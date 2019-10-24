@@ -238,6 +238,7 @@ SPXAPI recognizer_start_continuous_recognition_async(SPXRECOHANDLE hreco, SPXASY
 
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto recognizer = (*recohandles)[hreco];
+        SPX_IFTRUE_THROW_HR(recognizer == nullptr, SPXERR_INVALID_ARG);
 
         auto asyncop = recognizer->StartContinuousRecognitionAsync();
         auto ptr = std::make_shared<CSpxAsyncOp<void>>(std::move(asyncop));
@@ -254,6 +255,7 @@ SPXAPI recognizer_start_continuous_recognition_async_wait_for(SPXASYNCHANDLE has
     {
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
         auto asyncop = (*asynchandles)[hasync];
+        SPX_IFTRUE_THROW_HR(asyncop == nullptr, SPXERR_INVALID_ARG);
 
         hr = SPXERR_TIMEOUT;
         auto completed = asyncop->WaitFor(milliseconds);
@@ -310,18 +312,6 @@ SPXAPI recognizer_stop_continuous_recognition_async(SPXRECOHANDLE hreco, SPXASYN
 
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
         *phasync = asynchandles->TrackHandle(ptr);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI set_conversation_resources_to_destroy_on_recognizer_stop(SPXRECOHANDLE hreco, bool destroy)
-{
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto recognizer = (*recohandles)[hreco];
-
-        recognizer->DestroyConversationResources(destroy);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

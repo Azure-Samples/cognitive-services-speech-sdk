@@ -28,6 +28,7 @@ set(SOURCES
     "${SRC_DIR}/translation_recognizer_tests.cpp"
     "${SRC_DIR}/dialog_service_connector_tests.cpp"
     "${SRC_DIR}/language_config_tests.cpp"
+    "${SRC_DIR}/conversation_tests.cpp"
     )
 
 if(BUILD_UNIDEC)

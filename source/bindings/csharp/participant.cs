@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using Microsoft.CognitiveServices.Speech.Internal;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
-namespace Microsoft.CognitiveServices.Speech.Conversation
+namespace Microsoft.CognitiveServices.Speech.Transcription
 {
     /// <summary>
     /// Represents a participant in a conversation.

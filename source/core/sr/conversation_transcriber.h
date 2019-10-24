@@ -14,69 +14,13 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-class HttpResponse;
-class HttpRequest;
-
 class CSpxConversationTranscriber :
     public CSpxRecognizer,
-    public ISpxConversationTranscriber
+    public ISpxConversationTranscriber,
+    public ISpxGetAudioConfig
 {
 public:
     using BaseType = CSpxRecognizer;
-
-    struct CSpxVoiceSignature
-    {
-        CSpxVoiceSignature() : Version(-1), Tag(std::string{}), Data(std::string{})
-        {}
-
-        int Version;
-        std::string Tag;
-        std::string Data;
-    };
-
-    struct Participant
-    {
-        Participant(const ISpxParticipant* participant)
-        {
-            if (participant == nullptr)
-            {
-                ThrowInvalidArgumentException("participant pointer is null");
-            }
-            id = participant->GetId();
-            preferred_language = participant->GetPreferredLanguage();
-            auto voice_raw_string = participant->GetVoiceSignature();
-            ParseVoiceSignature(voice_raw_string);
-        }
-
-        Participant(const std::string& id, const std::string& language, const std::string& voice_raw_string)
-            :id{ id }, preferred_language{ language }
-        {
-            ParseVoiceSignature(voice_raw_string);
-        }
-
-        void ParseVoiceSignature(const std::string& voice_raw_string)
-        {
-            if (!voice_raw_string.empty())
-            {
-                try
-                {
-                    auto voice_json = nlohmann::json::parse(voice_raw_string);
-                    voice.Version = voice_json["Version"].get<int>();
-                    voice.Tag = voice_json["Tag"].get<std::string>();
-                    voice.Data = voice_json["Data"].get<std::string>();
-                }
-                catch (nlohmann::json::parse_error& e)
-                {
-                    std::string message = "Voice signature format is invalid, " + std::string(e.what());
-                    ThrowInvalidArgumentException(message);
-                }
-            }
-        }
-
-        std::string id;
-        std::string preferred_language;
-        CSpxVoiceSignature voice;
-    };
 
     CSpxConversationTranscriber();
     virtual ~CSpxConversationTranscriber();
@@ -95,6 +39,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxMessageParamFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxGetUspMessageParamsFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxConversationTranscriber)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGetAudioConfig)
     SPX_INTERFACE_MAP_END()
 
       // --- ISpxObjectInit
@@ -108,54 +53,36 @@ public:
     SPX_SERVICE_MAP_END()
 
     // --- ISpxConversationTranscriber
-    void UpdateParticipant(bool add, const std::string& userId) override;
-    void UpdateParticipant(bool add, const std::string& userId, std::shared_ptr<ISpxParticipant> participant) override;
-    void UpdateParticipants(bool add, std::vector<ParticipantPtr>&& participants) override;
-    void SetConversationId(const std::string& id) override;
-    void GetConversationId(std::string& id) override;
-    void EndConversation(bool destroy) override;
-    std::string GetSpeechEventPayload(MeetingState state) override;
-    void HttpSendEndMeetingRequest() override;
+    virtual void Init(std::weak_ptr<ISpxAudioConfig> audio_config) override;
+    virtual void JoinConversation(std::weak_ptr<ISpxConversation> conversation) override;
+    virtual void LeaveConversation() override;
 
-private:
-    static constexpr int m_max_number_of_participants = 50;
+    // -- ISpxGetAudioConfig
+    virtual std::shared_ptr<ISpxAudioConfig> GetAudioConfig() override;
 
-    enum class ActionType
-    {
-        NONE,
-        ADD_PARTICIPANT,
-        REMOVE_PARTICIPANT,
-    };
+    // -- ISpxRecognizerEvents
+    void FireSessionStarted(const std::wstring& sessionId) override;
+    void FireSessionStopped(const std::wstring& sessionId) override;
 
-    std::string CreateSpeechEventPayload(MeetingState state);
-    void UpdateParticipantInternal(bool add, const std::string& id, const std::string& preferred_language = {}, const std::string& voice_signature = {});
-    void UpdateParticipantsInternal(bool add, std::vector<ParticipantPtr>&& participants);
-    void SanityCheckParticipants(const std::string& id, const Participant& person);
-    void SendSpeechEventMessageInternal();
+    void FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset) override;
+    void FireSpeechEndDetected(const std::wstring& sessionId, uint64_t offset) override;
 
-    void StartUpdateParticipants();
-    void DoneUpdateParticipants();
+    void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
-    void SetRecoMode();
-    int GetMaxAllowedParticipants();
-
-    void HttpAddQueryParams(HttpRequest& request);
-    void HttpAddHeaders(HttpRequest& request);
+    // --- ISpxRecognizer
+    CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;
 
 private:
 
-    std::vector<Participant> m_current_participants;
-    std::vector<Participant> m_participants_so_far;
-    std::string m_conversation_id;
-    ActionType m_action;
+    std::shared_ptr<ISpxRecognizerSite> CheckAndGetSite();
+    void CheckSite(const ISpxRecognizerSite * site);
+    void FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* pevent, const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result, uint64_t offset = 0);
 
-    std::shared_ptr<ISpxThreadService>  m_threadService;
-    std::string m_subscriptionKey;
-    std::string m_endpoint;
-    bool m_sentEndMeeting;
+    std::weak_ptr<ISpxAudioConfig> m_audioInput;
+    std::weak_ptr<ISpxConversation> m_conversation;
 
-    static auto constexpr m_iCalUid = "iCalUid";
-    static auto constexpr m_callId = "callId";
+    // Flag indicating participants have left conversation. If it is true, no events are sending out to outside.
+    std::atomic<bool> m_has_participant{ false };
 
     DISABLE_COPY_AND_MOVE(CSpxConversationTranscriber);
 };

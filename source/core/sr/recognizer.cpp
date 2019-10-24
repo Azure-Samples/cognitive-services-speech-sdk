@@ -149,12 +149,18 @@ CSpxAsyncOp<void> CSpxRecognizer::StartContinuousRecognitionAsync()
 
 CSpxAsyncOp<void> CSpxRecognizer::StopContinuousRecognitionAsync()
 {
-    return m_defaultSession->StopContinuousRecognitionAsync();
-}
-
-void CSpxRecognizer::DestroyConversationResources(bool destroy)
-{
-    return m_defaultSession->DestroyConversationResources(destroy);
+    if (m_defaultSession)
+    {
+       return m_defaultSession->StopContinuousRecognitionAsync();
+    }
+    else
+    {
+        // in some error cases, m_defaultSession is empty. Return AOS_Error.
+        std::promise<void> void_promise;
+        void_promise.set_exception(std::make_exception_ptr(std::runtime_error("The default session is a nullptr.")));
+        std::shared_future<void> void_future = void_promise.get_future().share();
+        return CSpxAsyncOp<void>(void_future, AOS_Error);
+    }
 }
 
 CSpxAsyncOp<void> CSpxRecognizer::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)

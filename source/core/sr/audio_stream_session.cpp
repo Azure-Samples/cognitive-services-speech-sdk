@@ -80,7 +80,6 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_lastErrorGlobalOffset{ 0 },
     m_currentTurnGlobalOffset{ 0 },
     m_bytesTransited(0),
-    m_destroyMeetingResources(false),
     m_interactionId{ PAL::CreateGuidWithDashesUTF8(), PAL::CreateGuidWithDashesUTF8() }
 {
     SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::CSpxAudioStreamSession", (void*)this);
@@ -120,7 +119,7 @@ void CSpxAudioStreamSession::Term()
     // Let's check to see if we're still processing audio ...
     // We can be here in some extreme cases where the StartPump did not complete yet so we are waiting for that case.
 
-    // The pump start was called in both of these states so we force the issue and stop it regardless if the transition to processing was complete 
+    // The pump start was called in both of these states so we force the issue and stop it regardless if the transition to processing was complete
     if (ChangeState(SessionState::WaitForPumpSetFormatStart, SessionState::StoppingPump)
         || ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
     {
@@ -137,7 +136,7 @@ void CSpxAudioStreamSession::Term()
             m_codecAdapter->Close();
         }
     }
-    else 
+    else
     {
         SPX_DBG_TRACE_ERROR("[%p]CSpxAudioStreamSession::Term: **NOT CALLED** StopPump[%p] - state: %d", (void*)this, (void*)m_audioPump.get(), (int)m_sessionState);
     }
@@ -558,6 +557,14 @@ void CSpxAudioStreamSession::AddRecognizer(std::shared_ptr<ISpxRecognizer> recog
     m_recognizers.push_back(recognizer);
 }
 
+void CSpxAudioStreamSession::SetConversation(std::shared_ptr<ISpxConversation> conversation)
+{
+    SPX_DBG_TRACE_FUNCTION();
+
+    unique_lock<mutex> lock(m_conversationLock);
+    m_conversation = conversation;
+}
+
 void CSpxAudioStreamSession::RemoveRecognizer(ISpxRecognizer* recognizer)
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -649,7 +656,7 @@ CSpxAsyncOp<std::string> CSpxAudioStreamSession::SendActivityAsync(std::string a
         auto interaction_id = PAL::CreateGuidWithDashesUTF8();
 
         auto task = CreateTask([&]() {
-            auto message_payload = nlohmann::json::parse(activity);            
+            auto message_payload = nlohmann::json::parse(activity);
             nlohmann::json message = {
                 { "version", "0.5"},
                 { "context", {
@@ -748,19 +755,6 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StartContinuousRecognitionAsync()
 CSpxAsyncOp<void> CSpxAudioStreamSession::StopContinuousRecognitionAsync()
 {
     return StopRecognitionAsync(RecognitionKind::Continuous);
-}
-
-void CSpxAudioStreamSession::DestroyConversationResources(bool destroy)
-{
-    SPX_DBG_TRACE_FUNCTION();
-
-    auto keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
-
-    std::packaged_task<void()> task([this, keepAlive, destroy]() {
-        m_destroyMeetingResources = destroy;
-        SPX_DBG_TRACE_VERBOSE("Set the destroy m_destroyMeetingResources to %s", m_destroyMeetingResources ? "true" : "false");
-    });
-    m_threadService->ExecuteSync(move(task));
 }
 
 CSpxAsyncOp<void> CSpxAudioStreamSession::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)
@@ -906,7 +900,6 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
 
     SPX_DBG_ASSERT(stopKind != RecognitionKind::Idle);
 
-    DestroyMeeting();
     if (m_kwsModel != nullptr && stopKind != RecognitionKind::Keyword && IsState(SessionState::ProcessingAudio) &&
         ChangeState(stopKind, SessionState::ProcessingAudio, RecognitionKind::Keyword, SessionState::HotSwapPaused))
     {
@@ -2222,26 +2215,6 @@ void CSpxAudioStreamSession::Ensure16kHzSampleRate()
     }
 }
 
-void CSpxAudioStreamSession::DestroyMeeting()
-{
-    SPX_DBG_TRACE_INFO("%s: m_destroyMeetingResources:%s.", __FUNCTION__, m_destroyMeetingResources ? "true" : "false");
-    if (IsRecognizerType<ISpxConversationTranscriber>() && m_destroyMeetingResources)
-    {
-        std::shared_ptr<ISpxRecognizer> recognizer;
-        {
-            std::unique_lock<std::mutex> lock{ m_recognizersLock };
-            SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
-            recognizer = m_recognizers.front().lock();
-        }
-        auto ct = SpxQueryInterface<ISpxConversationTranscriber>(recognizer);
-        if (ct != nullptr)
-        {
-            SPX_DBG_TRACE_INFO("%s: Send a HTTP message to service to destroy meeting resources.", __FUNCTION__);
-            ct->HttpSendEndMeetingRequest();
-        }
-    }
-}
-
 void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -2711,21 +2684,15 @@ std::string CSpxAudioStreamSession::GetSpeechEventPayload(bool startMeeting)
 
     if (IsRecognizerType<ISpxConversationTranscriber>())
     {
-        std::shared_ptr<ISpxRecognizer> recognizer;
+        std::shared_ptr<ISpxConversation> conversation;
         {
-            std::unique_lock<std::mutex> lock{ m_recognizersLock };
-            SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
-            recognizer = m_recognizers.front().lock();
+            std::unique_lock<std::mutex> lock{ m_conversationLock };
+            conversation = m_conversation.lock();
         }
-        // when starting a cts meeting, reset the destroy flag
-        if (startMeeting)
+
+        if (conversation != nullptr)
         {
-            m_destroyMeetingResources = false;
-        }
-        auto ct = SpxQueryInterface<ISpxConversationTranscriber>(recognizer);
-        if (ct != nullptr)
-        {
-            payload = ct->GetSpeechEventPayload(startMeeting ? ISpxConversationTranscriber::MeetingState::START : ISpxConversationTranscriber::MeetingState::END);
+            payload = conversation->GetSpeechEventPayload(startMeeting ? ISpxConversation::MeetingState::START : ISpxConversation::MeetingState::END);
         }
     }
     return payload;

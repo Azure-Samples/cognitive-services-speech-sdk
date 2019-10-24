@@ -6,7 +6,7 @@ using System;
 using System.Globalization;
 using Microsoft.CognitiveServices.Speech.Internal;
 
-namespace Microsoft.CognitiveServices.Speech.Conversation
+namespace Microsoft.CognitiveServices.Speech.Transcription
 {
     /// <summary>
     /// Class that defines the result of conversation transcriber.

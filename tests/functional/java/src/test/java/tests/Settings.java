@@ -26,7 +26,7 @@ public class Settings {
     public static String InputDirectory = ".";
     public static String WavFile = "whatstheweatherlike.wav";
     public static String TwoSpeakersAudio = "katiesteve.wav";
-    public static String TwoSpeakersAudioUtterance = "Good morning Steve.";
+    public static String TwoSpeakersAudioUtterance = "good morning steve";
     public static String TurnOnTheLampAudio = "TurnOnTheLamp.wav";
     public static String TurnOnTheLampAudioUtterance = "Turn on the lamp.";
 

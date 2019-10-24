@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Audio;
-using Microsoft.CognitiveServices.Speech.Conversation;
+using Microsoft.CognitiveServices.Speech.Transcription;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MicrosoftSpeechSDKSamples;
 using Newtonsoft.Json;
@@ -88,14 +88,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void ConversationIdWithChinese()
         {
-            var config = SpeechConfig.FromSubscription(subscriptionKey, region);
+            var config = CreateCTSInRoomSpeechConfig();
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
-            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
+            string myConversationId = "的";
+            using (var conversation = new Conversation(config, myConversationId))
             {
                 //the UTF8 decoding of 的 is \xe7\x9a\x84, which will be shown in the debugger in the C++ side.
-                string myConversationId = "的";
-                conversationTranscriber.ConversationId = myConversationId;
-                var gotId = conversationTranscriber.ConversationId;
+                var gotId = conversation.ConversationId;
                 Assert.AreEqual(myConversationId, gotId);
             }
         }
@@ -103,13 +102,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void ConversationIdWithAnsiOnly()
         {
-            var config = SpeechConfig.FromSubscription(subscriptionKey, region);
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
-            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
+            var config = CreateCTSInRoomSpeechConfig();
+            string myConversationId = "123 456";
+            using (var conversation = new Conversation(config, myConversationId))
             {
-                string myConversationId = "123 456";
-                conversationTranscriber.ConversationId = myConversationId;
-                var gotId = conversationTranscriber.ConversationId;
+                var gotId = conversation.ConversationId;
                 Assert.AreEqual(myConversationId, gotId);
             }
         }
@@ -205,100 +202,108 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationAddParticipant()
         {
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
-
+            var config = CreateCTSInRoomSpeechConfig();
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
-            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
+            var meetingId = Guid.NewGuid().ToString();
+            using (var conversation = new Conversation(config, meetingId))
             {
-                conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
+                using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
+                {
+                    await conversationTranscriber.JoinConversationAsync(conversation);
 
-                conversationTranscriber.AddParticipant("OneUserByUserId");
+                    await conversation.AddParticipantAsync("OneUserByUserId");
 
-                var user = User.FromUserId("CreateUserFromId and then add it");
-                conversationTranscriber.AddParticipant(user);
+                    var user = User.FromUserId("CreateUserFromId and then add it");
+                    await conversation.AddParticipantAsync(user);
 
-                // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-                string voice = voiceSignatureKatie;
-                var participant = Participant.From("userIdForParticipant", "en-us", voice);
-                conversationTranscriber.AddParticipant(participant);
+                    // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
+                    string voice = voiceSignatureKatie;
+                    var participant = Participant.From("userIdForParticipant", "en-us", voice);
+                    await conversation.AddParticipantAsync(participant);
 
-                var result = await helper.GetFirstRecognizerResult(conversationTranscriber);
-                AssertMatching(TestData.English.TranscriberAudioData.Utterance, result);
+                    var result = await helper.GetRecognizerResult(conversationTranscriber, meetingId);
+                    Assert.IsTrue(helper.FindTheRef(result, TestData.English.TranscriberAudioData.Utterance));
+                }
             }
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationAddParticipantFromSubscription()
         {
-            //var config = SpeechConfig.FromSubscription(conversationTranscriptionPRODKey, speechRegionForConversationTranscription);
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
+            var config = SpeechConfig.FromSubscription(conversationTranscriptionPRODKey, speechRegionForConversationTranscription);
+            config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
             config.SetProperty(PropertyId.Speech_LogFilename, "carbon.log");
+
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
-            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
+            var meetingID = Guid.NewGuid().ToString();
+            using (var conversation = new Conversation(config, meetingID))
             {
-                conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
-                string meetingID = conversationTranscriber.ConversationId;
+                using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
+                {
+                    await conversationTranscriber.JoinConversationAsync(conversation);
 
-                conversationTranscriber.AddParticipant("OneUserByUserId");
+                    await conversation.AddParticipantAsync("OneUserByUserId");
 
-                var user = User.FromUserId("CreateUserFromId and then add it");
-                conversationTranscriber.AddParticipant(user);
+                    var user = User.FromUserId("CreateUserFromId and then add it");
+                    await conversation.AddParticipantAsync(user);
 
-                // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-                string voice = voiceSignatureKatie;
-                var participant = Participant.From("userIdForParticipant", "en-us", voice);
-                conversationTranscriber.AddParticipant(participant);
+                    // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
+                    string voice = voiceSignatureKatie;
+                    var participant = Participant.From("userIdForParticipant", "en-us", voice);
+                    await conversation.AddParticipantAsync(participant);
 
-                var result = await helper.GetFirstRecognizerResult(conversationTranscriber);
-                Assert.IsTrue(result != string.Empty, "Result object was empty for MeetingID=" + meetingID);
+                    var result = await helper.GetRecognizerResult(conversationTranscriber, meetingID);
+                    Assert.IsTrue(helper.FindTheRef(result, TestData.English.TranscriberAudioData.Utterance));
+                }
             }
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationRemoveParticipant()
         {
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
+            var config = CreateCTSInRoomSpeechConfig();
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
-            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
+            var meetingID = Guid.NewGuid().ToString();
+            using (var conversation = new Conversation(config, meetingID))
             {
-                conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
-                bool exception = false;
-                try
+                using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
                 {
-                    conversationTranscriber.RemoveParticipant("NoneExist");
+                    await conversationTranscriber.JoinConversationAsync(conversation);
+
+                    bool exception = false;
+                    try
+                    {
+                        await conversation.RemoveParticipantAsync("NoneExist");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Got Exception: " + ex.Message.ToString());
+                        exception = true;
+                    }
+                    Assert.AreEqual(exception, true);
+
+                    await conversation.AddParticipantAsync("OneUserByUserId");
+                    await conversation.RemoveParticipantAsync("OneUserByUserId");
+
+                    var user = User.FromUserId("user object created from User.FromUserId");
+                    await conversation.AddParticipantAsync(user);
+                    await conversation.RemoveParticipantAsync(user);
+
+                    // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
+                    var participant = Participant.From("userIdForParticipant", "en-us", voiceSignatureKatie);
+                    await conversation.AddParticipantAsync(participant);
+                    await conversation.RemoveParticipantAsync(participant);
+
+                    var result = await helper.GetRecognizerResult(conversationTranscriber, meetingID);
+                    Assert.IsTrue(helper.FindTheRef(result, TestData.English.TranscriberAudioData.Utterance));
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Got Exception: " + ex.Message.ToString());
-                    exception = true;
-                }
-                Assert.AreEqual(exception, true);
-
-                conversationTranscriber.AddParticipant("OneUserByUserId");
-                conversationTranscriber.RemoveParticipant("OneUserByUserId");
-
-                var user = User.FromUserId("user object created from User.FromUserId");
-                conversationTranscriber.AddParticipant(user);
-                conversationTranscriber.RemoveParticipant(user);
-
-                // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-                var participant = Participant.From("userIdForParticipant", "en-us", voiceSignatureKatie);
-                conversationTranscriber.AddParticipant(participant);
-                conversationTranscriber.RemoveParticipant(participant);
-
-                var result = await helper.GetFirstRecognizerResult(conversationTranscriber);
-                AssertMatching(TestData.English.TranscriberAudioData.Utterance, result);
             }
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning)]
-        [DataRow(true)]
-        [DataRow(false)]
-        public async Task ConversationPushStream(bool destroyResource)
+        public async Task ConversationPushStream()
         {
-            // Creates an instance of a speech config with specified subscription key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
+            var config = CreateCTSInRoomSpeechConfig();
             var stopRecognition = new TaskCompletionSource<int>();
             string recoResult = string.Empty;
 
@@ -306,26 +311,133 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 using (var audioInput = AudioConfig.FromStreamInput(pushStream))
                 {
-                    using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
+                    var meetingID = Guid.NewGuid().ToString();
+                    using (var conversation = new Conversation(config, meetingID))
                     {
-                        conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
+                        conversation.Properties.SetProperty("iCalUid", "040000008200E00074C5B7101A82E008000000001003D722197CD4010000000000000000100000009E970FDF583F9D4FB999E607891A2F66");
 
-                        conversationTranscriber.AddParticipant("xyz@example.com");
-
-                        conversationTranscriber.Recognizing += (s, e) =>
+                        using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
                         {
-                            Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                            await conversation.AddParticipantAsync("xyz@example.com");
+
+                            conversationTranscriber.Transcribing += (s, e) =>
+                            {
+                                Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                            };
+
+                            conversationTranscriber.Transcribed += (s, e) =>
+                            {
+                                if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                                {
+                                    Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                                    if (string.IsNullOrEmpty(recoResult))
+                                    {
+                                        recoResult = e.Result.Text;
+                                    }
+                                }
+                                else if (e.Result.Reason == ResultReason.NoMatch)
+                                {
+                                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                                }
+                            };
+
+                            conversationTranscriber.Canceled += (s, e) =>
+                            {
+                                Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                                if (e.Reason == CancellationReason.Error)
+                                {
+                                    Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                                    Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                                }
+
+                                stopRecognition.TrySetResult(0);
+                            };
+
+                            conversationTranscriber.SessionStarted += (s, e) =>
+                            {
+                                Console.WriteLine("\nSession started event.");
+                            };
+
+                            conversationTranscriber.SessionStopped += (s, e) =>
+                            {
+                                Console.WriteLine("\nSession stopped event.");
+                                Console.WriteLine("\nStop recognition.");
+                                stopRecognition.TrySetResult(0);
+                            };
+
+                            await conversationTranscriber.JoinConversationAsync(conversation);
+
+                            // Starts continuous recognition. Uses StopTranscribingAsync() to stop transcribing.
+                            await conversationTranscriber.StartTranscribingAsync().ConfigureAwait(false);
+
+                            // open and read the wave file and push the buffers into the recognizer
+                            using (var reader = Util.CreateWavReader(TestData.English.TranscriberAudioData.TwoSpeakersAudio))
+                            {
+                                byte[] buffer = new byte[3200];
+                                while (true)
+                                {
+                                    var readSamples = reader.Read(buffer, (uint)buffer.Length);
+                                    if (readSamples == 0)
+                                    {
+                                        break;
+                                    }
+                                    pushStream.Write(buffer, readSamples);
+                                    pushStream.SetProperty(PropertyId.ConversationTranscribingService_DataBufferTimeStamp, "fakeTimeStamp");
+                                    pushStream.SetProperty("DataChunk_SpeakerId", "fakeSpeakerId");
+                                }
+                            }
+                            pushStream.Close();
+
+                            // Waits for completion.
+                            // Use Task.WaitAny to keep the task rooted.
+                            Task.WaitAny(new[] { stopRecognition.Task });
+
+                            await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
+                            Assert.IsFalse(string.IsNullOrEmpty(recoResult));
+                        }
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        [Ignore("Temporarily Disabled because enrollment service is broken, see bug #2027717")]
+        public async Task ConversationPullStreamWithEnrollment()
+        {
+            var config = CreateCTSInRoomSpeechConfig();
+
+            var stopRecognition = new TaskCompletionSource<int>();
+            List<string> speakers = new List<string>();
+            bool bGotReco = false;
+
+            var voiceSignature = CreateVoiceSignatureFromVoiceSample(TestData.English.TranscriberAudioData.KatieVoice);
+            var signatureKatie = JsonConvert.SerializeObject(voiceSignature.Result.Signature);
+            voiceSignature = CreateVoiceSignatureFromVoiceSample(TestData.English.TranscriberAudioData.SteveVoice);
+            var signatureSteve = JsonConvert.SerializeObject(voiceSignature.Result.Signature);
+
+            using (var audioInput = Util.OpenWavFile(TestData.English.TranscriberAudioData.TwoSpeakersAudio))
+            {
+                var meetingID = Guid.NewGuid().ToString();
+                using (var conversation = new Conversation(config, meetingID))
+                {
+                    using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
+                    {
+                        conversationTranscriber.Transcribing += (s, e) =>
+                        {
+                            Console.WriteLine($"RECOGNIZING: Text={e.Result.Text} SpeakerId={e.Result.UserId}");
                         };
 
-                        conversationTranscriber.Recognized += (s, e) =>
+                        conversationTranscriber.Transcribed += (s, e) =>
                         {
                             if (e.Result.Reason == ResultReason.RecognizedSpeech)
                             {
-                                Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
-                                if (string.IsNullOrEmpty(recoResult))
+                                Console.WriteLine($"RECOGNIZED: Text={e.Result.Text} SpeakerId={e.Result.UserId}");
+                                if (!speakers.Contains(e.Result.UserId) && e.Result.UserId != "Unidentified")
                                 {
-                                    recoResult = e.Result.Text;
+                                    speakers.Add(e.Result.UserId);
                                 }
+                                bGotReco = true;
                             }
                             else if (e.Result.Reason == ResultReason.NoMatch)
                             {
@@ -341,9 +453,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                             {
                                 Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
                                 Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                                Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                                stopRecognition.TrySetResult(0);
                             }
-
-                            stopRecognition.TrySetResult(0);
                         };
 
                         conversationTranscriber.SessionStarted += (s, e) =>
@@ -358,127 +470,31 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                             stopRecognition.TrySetResult(0);
                         };
 
+                        // Sets a conversation Id.
+
+
+                        // Add participants to the conversation.
+                        // Voice signature needs to be in the following format:
+                        // { "Version": <Numeric value>, "Tag": "string", "Data": "string" }
+                        var speakerA = Participant.From("Katie", "en-us", signatureKatie);
+                        var speakerB = Participant.From("Steve", "en-us", signatureSteve);
+                        await conversation.AddParticipantAsync(speakerA);
+                        await conversation.AddParticipantAsync(speakerB);
+
+                        await conversationTranscriber.JoinConversationAsync(conversation);
                         // Starts continuous recognition. Uses StopTranscribingAsync() to stop transcribing.
                         await conversationTranscriber.StartTranscribingAsync().ConfigureAwait(false);
-
-                        // open and read the wave file and push the buffers into the recognizer
-                        using (var reader = Util.CreateWavReader(TestData.English.TranscriberAudioData.TwoSpeakersAudio))
-                        {
-                            byte[] buffer = new byte[3200];
-                            while (true)
-                            {
-                                var readSamples = reader.Read(buffer, (uint)buffer.Length);
-                                if (readSamples == 0)
-                                {
-                                    break;
-                                }
-                                pushStream.Write(buffer, readSamples);
-                                pushStream.SetProperty(PropertyId.ConversationTranscribingService_DataBufferTimeStamp, "fakeTimeStamp");
-                                pushStream.SetProperty("DataChunk_SpeakerId", "fakeSpeakerId");
-                            }
-                        }
-                        pushStream.Close();
 
                         // Waits for completion.
                         // Use Task.WaitAny to keep the task rooted.
                         Task.WaitAny(new[] { stopRecognition.Task });
 
-                        await conversationTranscriber.StopTranscribingAsync(destroyResource ? ResourceHandling.DestroyResources : ResourceHandling.KeepResources).ConfigureAwait(false);
-                        Assert.IsFalse(string.IsNullOrEmpty(recoResult));
+                        await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
+
+                        Assert.IsTrue(bGotReco);
+                        Assert.IsTrue(speakers.Contains("Katie"));
+                        Assert.IsTrue(speakers.Contains("Steve"));
                     }
-                }
-            }
-        }
-
-        [TestMethod]
-        [DataRow(true)]
-        [DataRow(false)]
-        [Ignore("Temporarily Disabled because enrolment service is broken, see bug #2027717")]
-        public async Task ConversationPullStreamWithEnrollment(bool destroyResource)
-        {
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
-            var stopRecognition = new TaskCompletionSource<int>();
-            List<string> speakers = new List<string>();
-            bool bGotReco = false;
-
-            var voiceSignature = CreateVoiceSignatureFromVoiceSample(TestData.English.TranscriberAudioData.KatieVoice);
-            var signatureKatie = JsonConvert.SerializeObject(voiceSignature.Result.Signature);
-            voiceSignature = CreateVoiceSignatureFromVoiceSample(TestData.English.TranscriberAudioData.SteveVoice);
-            var signatureSteve = JsonConvert.SerializeObject(voiceSignature.Result.Signature);
-
-            using (var audioInput = Util.OpenWavFile(TestData.English.TranscriberAudioData.TwoSpeakersAudio))
-            {
-                using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
-                {
-                    conversationTranscriber.Recognizing += (s, e) =>
-                    {
-                        Console.WriteLine($"RECOGNIZING: Text={e.Result.Text} SpeakerId={e.Result.UserId}");
-                    };
-
-                    conversationTranscriber.Recognized += (s, e) =>
-                    {
-                        if (e.Result.Reason == ResultReason.RecognizedSpeech)
-                        {
-                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text} SpeakerId={e.Result.UserId}");
-                            if (!speakers.Contains(e.Result.UserId) && e.Result.UserId != "Unidentified")
-                            {
-                                speakers.Add(e.Result.UserId);
-                            }
-                            bGotReco = true;
-                        }
-                        else if (e.Result.Reason == ResultReason.NoMatch)
-                        {
-                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
-                        }
-                    };
-
-                    conversationTranscriber.Canceled += (s, e) =>
-                    {
-                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
-
-                        if (e.Reason == CancellationReason.Error)
-                        {
-                            Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
-                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
-                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
-                            stopRecognition.TrySetResult(0);
-                        }
-                    };
-
-                    conversationTranscriber.SessionStarted += (s, e) =>
-                    {
-                        Console.WriteLine("\nSession started event.");
-                    };
-
-                    conversationTranscriber.SessionStopped += (s, e) =>
-                    {
-                        Console.WriteLine("\nSession stopped event.");
-                        Console.WriteLine("\nStop recognition.");
-                        stopRecognition.TrySetResult(0);
-                    };
-
-                    // Sets a conversation Id.
-                    conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
-
-                    // Add participants to the conversation.
-                    // Voice signature needs to be in the following format:
-                    // { "Version": <Numeric value>, "Tag": "string", "Data": "string" }
-                    var speakerA = Participant.From("Katie", "en-us", signatureKatie);
-                    var speakerB = Participant.From("Steve", "en-us", signatureSteve);
-                    conversationTranscriber.AddParticipant(speakerA);
-                    conversationTranscriber.AddParticipant(speakerB);
-
-                    // Starts continuous recognition. Uses StopTranscribingAsync() to stop transcribing.
-                    await conversationTranscriber.StartTranscribingAsync().ConfigureAwait(false);
-
-                    // Waits for completion.
-                    // Use Task.WaitAny to keep the task rooted.
-                    Task.WaitAny(new[] { stopRecognition.Task });
-
-                    await conversationTranscriber.StopTranscribingAsync(destroyResource ? ResourceHandling.DestroyResources : ResourceHandling.KeepResources).ConfigureAwait(false);
-                    Assert.IsTrue(bGotReco);
-                    Assert.IsTrue(speakers.Contains("Katie"));
-                    Assert.IsTrue(speakers.Contains("Steve"));
                 }
             }
         }
@@ -486,20 +502,25 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task ConversationDefaultLanguageAndDetailedOutput()
         {
-            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
+            var config = CreateCTSInRoomSpeechConfig();
             config.OutputFormat = OutputFormat.Detailed;
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
-            using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(config, audioInput)))
+            var meetingID = Guid.NewGuid().ToString();
+            using (var conversation = new Conversation(config, meetingID))
             {
-                var recoLanguage = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
-                Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
+                using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
+                {
+                    await conversationTranscriber.JoinConversationAsync(conversation);
+                    var recoLanguage = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
+                    Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should not be set here. RecoLanguage: " + recoLanguage);
 
-                conversationTranscriber.ConversationId = Guid.NewGuid().ToString();
-                await helper.CompleteContinuousRecognition(conversationTranscriber);
-                var connectionUrl = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
-                // Currently we do not have endpoint ready that supports detailed conversation transcription, so we only check connection URL for now.
-                Assert.IsTrue(connectionUrl.Contains("format=detailed"), "mismatch initialSilencetimeout in " + connectionUrl);
-                Assert.IsTrue(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
+
+                    await helper.CompleteContinuousRecognition(conversationTranscriber, meetingID);
+                    var connectionUrl = conversationTranscriber.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
+                    // Currently we do not have endpoint ready that supports detailed conversation transcription, so we only check connection URL for now.
+                    Assert.IsTrue(connectionUrl.Contains("format=detailed"), "mismatch initialSilencetimeout in " + connectionUrl);
+                    Assert.IsTrue(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
+                }
             }
         }
 
@@ -522,6 +543,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Console.WriteLine($"CreateVoiceSignatureFromVoiceSample: Service Response jsonData={jsonData}");
             var result = JsonConvert.DeserializeObject<VoiceSignature>(jsonData);
             return result;
+        }
+
+        private SpeechConfig CreateCTSInRoomSpeechConfig()
+        {
+            var config = SpeechConfig.FromEndpoint(new Uri(conversationTranscriptionMultiAudioEndpoint), conversationTranscriptionPPEKey);
+            config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+            return config;
         }
     }
 }

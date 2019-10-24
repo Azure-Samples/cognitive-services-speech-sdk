@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-package com.microsoft.cognitiveservices.speech.conversation;
+package com.microsoft.cognitiveservices.speech.transcription;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
@@ -29,7 +29,7 @@ public final class User
      * @param userId user's Id.
      * @return
      */
-    public static com.microsoft.cognitiveservices.speech.conversation.User fromUserId(String userId) {
+    public static com.microsoft.cognitiveservices.speech.transcription.User fromUserId(String userId) {
         return new User(com.microsoft.cognitiveservices.speech.internal.User.FromUserId(userId));
     }
 

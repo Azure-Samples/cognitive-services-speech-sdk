@@ -1,7 +1,7 @@
 {
   "Endpoint": "",
   "TurnOnTheLampAudio": "TurnOnTheLamp.wav",
-  "TwoSpeakersAudioUtterance": "Good morning Steve.",
+  "TwoSpeakersAudioUtterance": "good morning steve",
   "DialogRegion": "",
   "ConversationTranscriptionPRODKey": "",
   "TwoSpeakersAudio": "katiesteve.wav",

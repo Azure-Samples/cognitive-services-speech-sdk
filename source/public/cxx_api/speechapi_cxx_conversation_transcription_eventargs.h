@@ -16,7 +16,7 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-namespace Conversation {
+namespace Transcription {
 
 /// <summary>
 /// Class for conversation transcriber event arguments.
@@ -167,4 +167,4 @@ private:
 };
 
 
-} } } }  // Microsoft::CognitiveServices::Speech::Conversation
+} } } }  // Microsoft::CognitiveServices::Speech::Transcription

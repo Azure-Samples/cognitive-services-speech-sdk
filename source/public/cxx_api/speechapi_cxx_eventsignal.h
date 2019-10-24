@@ -22,6 +22,7 @@ namespace Speech {
 class Connection;
 namespace Translation { class TranslationRecognizer; }
 namespace Dialog { class DialogServiceConnector; }
+namespace Transcription { class ConversationTranscriber; }
 
 /*! \cond PRIVATE */
 
@@ -216,6 +217,9 @@ private:
     friend class ::Microsoft::CognitiveServices::Speech::Impl::ISpxRecognizerEvents;
     friend class ::Microsoft::CognitiveServices::Speech::Impl::ISpxDialogServiceConnectorEvents;
     friend class ::Microsoft::CognitiveServices::Speech::Connection;
+    friend class ::Microsoft::CognitiveServices::Speech::Transcription::ConversationTranscriber;
+
+
     template <class, class, class> friend class AsyncRecognizer;
     friend class SpeechSynthesizer;
 

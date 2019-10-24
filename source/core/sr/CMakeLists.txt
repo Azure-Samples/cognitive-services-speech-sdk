@@ -43,6 +43,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/audio_buffer.h"
     "${SRC_DIR}/thread_service.h"
     "${SRC_DIR}/conversation_transcriber.h"
+    "${SRC_DIR}/conversation.h"
     "${SRC_DIR}/user.h"
     "${SRC_DIR}/participant.h"
     "${SRC_DIR}/stored_grammar.h"
@@ -52,6 +53,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/language_list_utils.h"
     "${SRC_DIR}/auto_detect_source_lang_config.h"
     "${SRC_DIR}/source_lang_config.h"
+    "${SRC_DIR}/participants_mgr.h"
     )
 
 set(SOURCES
@@ -79,6 +81,7 @@ set(SOURCES
     "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/thread_service.cpp"
     "${SRC_DIR}/conversation_transcriber.cpp"
+    "${SRC_DIR}/conversation.cpp"
     "${SRC_DIR}/user.cpp"
     "${SRC_DIR}/participant.cpp"
     "${SRC_DIR}/stored_grammar.cpp"
@@ -88,6 +91,7 @@ set(SOURCES
     "${SRC_DIR}/language_list_utils.cpp"
     "${SRC_DIR}/auto_detect_source_lang_config.cpp"
     "${SRC_DIR}/source_lang_config.cpp"
+    "${SRC_DIR}/participants_mgr.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

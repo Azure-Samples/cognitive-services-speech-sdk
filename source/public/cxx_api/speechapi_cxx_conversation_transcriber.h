@@ -14,91 +14,73 @@
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_string_helpers.h>
 #include <speechapi_c.h>
-#include <speechapi_cxx_recognition_async_recognizer.h>
+#include <speechapi_cxx_conversation.h>
 #include <speechapi_cxx_conversation_transcription_result.h>
 #include <speechapi_cxx_conversation_transcription_eventargs.h>
 #include <speechapi_cxx_properties.h>
 #include <speechapi_cxx_speech_config.h>
 #include <speechapi_cxx_audio_stream.h>
-
-#include <speechapi_cxx_user.h>
-#include <speechapi_cxx_participant.h>
-
+#include <speechapi_cxx_utils.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-namespace Conversation {
+namespace Transcription {
 
 class Session;
-constexpr size_t MAX_CONVERSATION_ID_LEN = 1024;
+
 /// <summary>
 /// Class for conversation transcriber.
 /// Note: This is only available on the Cognitive Services Speech Devices SDK to optimize the experience for multi-microphone devices.
 /// Added in version 1.5.0.
 /// </summary>
-class ConversationTranscriber : public AsyncRecognizer<ConversationTranscriptionResult, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>
+class ConversationTranscriber : public Recognizer
 {
 public:
 
-    using BaseType = AsyncRecognizer<ConversationTranscriptionResult, ConversationTranscriptionEventArgs, ConversationTranscriptionCanceledEventArgs>;
-
     /// <summary>
-    /// Create a conversation transcriber from a speech config and audio config.
+    /// Create a conversation transcriber from an audio config.
     /// </summary>
-    /// <param name="speechconfig">Speech configuration.</param>
     /// <param name="audioInput">Audio configuration.</param>
     /// <returns>A smart pointer wrapped conversation transcriber pointer.</returns>
-    static std::shared_ptr<ConversationTranscriber> FromConfig(std::shared_ptr<SpeechConfig> speechconfig, std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
+    static std::shared_ptr<ConversationTranscriber> FromConfig(std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
     {
-        SPXRECOHANDLE hreco;
-        SPX_THROW_ON_FAIL(::recognizer_create_conversation_transcriber_from_config(
-            &hreco,
-            HandleOrInvalid<SPXSPEECHCONFIGHANDLE,SpeechConfig>(speechconfig),
-            HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(audioInput)));
+        SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(::recognizer_create_conversation_transcriber_from_config( &hreco,
+            Utils::HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(audioInput)));
+
         return std::make_shared<ConversationTranscriber>(hreco);
     }
 
     /// <summary>
-    /// Internal constructor. Creates a new instance using the provided handle.
+    /// Join a conversation.
     /// </summary>
-    /// <param name="hreco">Recognizer handle.</param>
-    explicit ConversationTranscriber(SPXRECOHANDLE hreco) : BaseType(hreco), Properties(m_properties)
+    /// <param name="conversation">A smart pointer of the conversation to be joined.</param>
+    /// <returns>An empty future.</returns>
+    std::future<void> JoinConversationAsync(std::shared_ptr<Conversation> conversation)
     {
-        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        auto keepAlive = this->shared_from_this();
+        auto future = std::async(std::launch::async, [keepAlive, this, conversation]() -> void {
+            SPX_THROW_ON_FAIL(::recognizer_join_conversation(Utils::HandleOrInvalid<SPXCONVERSATIONHANDLE, Conversation>(conversation), m_hreco));
+        });
+
+        return future;
     }
 
     /// <summary>
-    /// Destructor.
+    /// Leave a conversation.
+    ///
+    /// Note: After leaving a conversation, no transcribing or transcribed events will be sent to end users. End users need to join a conversation to get the events again.
     /// </summary>
-    ~ConversationTranscriber()
+    /// <returns>An empty future.</returns>
+    std::future<void> LeaveConversationAsync()
     {
-        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-        TermRecognizer();
-    }
+        auto keepAlive = this->shared_from_this();
+        auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
+            SPX_THROW_ON_FAIL(::recognizer_leave_conversation(m_hreco));
+        });
 
-    /// <summary>
-    /// Set the id of a conversation.
-    /// </summary>
-    /// <param name="conversationId">A conversation id.</param>
-    /// <returns>void.</returns>
-    void SetConversationId(const SPXSTRING& conversationId)
-    {
-        SPX_THROW_ON_FAIL(conversation_transcriber_set_conversation_id(m_hreco, Utils::ToUTF8(conversationId.c_str())));
-    }
-
-    /// <summary>
-    /// Get the id of a conversation.
-    /// </summary>
-    /// <returns>A conversation id.</returns>
-    SPXSTRING GetConversationId()
-    {
-        char id[MAX_CONVERSATION_ID_LEN+1];
-        std::memset(id, 0, MAX_CONVERSATION_ID_LEN);
-
-        SPX_THROW_ON_FAIL(conversation_transcriber_get_conversation_id(m_hreco, id, MAX_CONVERSATION_ID_LEN));
-
-        return id;
+        return future;
     }
 
     /// <summary>
@@ -107,23 +89,38 @@ public:
     /// <returns>An empty future.</returns>
     std::future<void> StartTranscribingAsync()
     {
-        return StartContinuousRecognitionAsync();
+        auto keepAlive = this->shared_from_this();
+        auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
+            SPX_INIT_HR(hr);
+            SPX_THROW_ON_FAIL(hr = recognizer_async_handle_release(m_hasyncStartContinuous)); // close any unfinished previous attempt
+
+            SPX_EXITFN_ON_FAIL(hr = recognizer_start_continuous_recognition_async(m_hreco, &m_hasyncStartContinuous));
+            SPX_EXITFN_ON_FAIL(hr = recognizer_start_continuous_recognition_async_wait_for(m_hasyncStartContinuous, UINT32_MAX));
+
+        SPX_EXITFN_CLEANUP:
+            auto releaseHr = recognizer_async_handle_release(m_hasyncStartContinuous);
+            SPX_REPORT_ON_FAIL(releaseHr);
+            m_hasyncStartContinuous = SPXHANDLE_INVALID;
+
+            SPX_THROW_ON_FAIL(hr);
+        });
+
+        return future;
     }
 
     /// <summary>
     /// Asynchronously stops a conversation transcribing.
-    /// Added in version 1.7.0.
     /// </summary>
-    /// <param name="resourceHandling">A enum value that specifies how the service handles allocated resources after stopping transcription.</param>
     /// <returns>An empty future.</returns>
-    std::future<void> StopTranscribingAsync(ResourceHandling  resourceHandling = ResourceHandling::KeepResources)
+    std::future<void> StopTranscribingAsync()
     {
         auto keepAlive = this->shared_from_this();
-        auto future = std::async(std::launch::async, [keepAlive, this, resourceHandling]() -> void {
+        auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
+
+            SPX_THROW_ON_FAIL(::recognizer_leave_conversation(m_hreco));
+
             SPX_INIT_HR(hr);
             SPX_THROW_ON_FAIL(hr = recognizer_async_handle_release(m_hasyncStopContinuous)); // close any unfinished previous attempt
-
-            SPX_EXITFN_ON_FAIL(hr = set_conversation_resources_to_destroy_on_recognizer_stop(m_hreco, resourceHandling == Conversation::ResourceHandling::DestroyResources));
 
             SPX_EXITFN_ON_FAIL(hr = recognizer_stop_continuous_recognition_async(m_hreco, &m_hasyncStopContinuous));
             SPX_EXITFN_ON_FAIL(hr = recognizer_stop_continuous_recognition_async_wait_for(m_hasyncStopContinuous, UINT32_MAX));
@@ -140,93 +137,72 @@ public:
     }
 
     /// <summary>
-    /// Asynchronously ends a conversation. This triggers service to destroy allocated resources.
-    ///
-    /// Note: This is kept for the backward compatible.
+    /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    /// <param name="resourceHandling">A enum value that specifies how the service handles allocated resources after stopping transcription.</param>
-    /// <returns>An empty future.</returns>
-    std::future<void> EndConversationAsync(ResourceHandling  resourceHandling = ResourceHandling::KeepResources)
+    /// <param name="hreco">Recognizer handle.</param>
+    explicit ConversationTranscriber(SPXRECOHANDLE hreco) throw() :
+        Recognizer(hreco),
+        SessionStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback(), false),
+        SessionStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback(), false),
+        SpeechStartDetected(GetRecognitionEventConnectionsChangedCallback(), GetRecognitionEventConnectionsChangedCallback(), false),
+        SpeechEndDetected(GetRecognitionEventConnectionsChangedCallback(), GetRecognitionEventConnectionsChangedCallback(), false),
+        Transcribing(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback(), false),
+        Transcribed(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback(), false),
+        Canceled(GetRecoCanceledEventConnectionsChangedCallback(), GetRecoCanceledEventConnectionsChangedCallback(), false),
+        m_hasyncStartContinuous(SPXHANDLE_INVALID),
+        m_hasyncStopContinuous(SPXHANDLE_INVALID),
+        m_properties(hreco),
+        Properties(m_properties)
     {
-        auto keepAlive = this->shared_from_this();
-        auto future = std::async(std::launch::async, [keepAlive, this, resourceHandling]() -> void {
-            SPX_THROW_ON_FAIL(conversation_transcriber_end_conversation(m_hreco, resourceHandling == Conversation::ResourceHandling::DestroyResources));
-        });
-        return future;
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }
 
     /// <summary>
-    /// Add a participant to a conversation using the user's id.
-    ///
-    // Note: The returned participant can be used to remove. If the client changes the participant's attributes,
-    // the changed attributes are passed on to the service only when the participant is added again.
-    //
+    /// Destructor.
     /// </summary>
-    /// <param name="userId">A user id.</param>
-    /// <returns>a shared smart pointer of the participant.</returns>
-    std::shared_ptr<Participant> AddParticipant(const SPXSTRING& userId)
+    ~ConversationTranscriber()
     {
-        const auto participant = Participant::From(userId);
-        SPX_THROW_ON_FAIL(conversation_transcriber_update_participant(m_hreco, true, (SPXPARTICIPANTHANDLE)(*participant)));
-        return participant;
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        TermRecognizer();
     }
 
     /// <summary>
-    /// Add a participant to a conversation using the User object.
+    /// Signal for events indicating the start of a recognition session (operation).
     /// </summary>
-    /// <param name="user">A shared smart pointer to a User object.</param>
-    /// <returns>The passed in User object.</returns>
-    std::shared_ptr<User> AddParticipant(const std::shared_ptr<User>& user)
-    {
-        SPX_THROW_ON_FAIL(conversation_transcriber_update_participant_by_user(m_hreco, true, (SPXUSERHANDLE)(*user)));
-        return user;
-    }
+    EventSignal<const SessionEventArgs&> SessionStarted;
 
     /// <summary>
-    /// Add a participant to a conversation using the participant object
+    /// Signal for events indicating the end of a recognition session (operation).
     /// </summary>
-    /// <param name="participant">A shared smart pointer to a participant object.</param>
-    /// <returns>void.</returns>
-    std::shared_ptr<Participant> AddParticipant(const std::shared_ptr<Participant>& participant)
-    {
-        SPX_THROW_ON_FAIL(conversation_transcriber_update_participant(m_hreco, true, (SPXPARTICIPANTHANDLE)(*participant)));
-        return participant;
-    }
+    EventSignal<const SessionEventArgs&> SessionStopped;
 
     /// <summary>
-    /// Remove a participant from a conversation using the participant object
+    /// Signal for events indicating the start of speech.
     /// </summary>
-    /// <param name="participant">A shared smart pointer of a participant object.</param>
-    /// <returns>void.</returns>
-    void RemoveParticipant(const std::shared_ptr<Participant>& participant)
-    {
-        SPX_THROW_ON_FAIL(conversation_transcriber_update_participant(m_hreco, false, SPXPARTICIPANTHANDLE(*participant)));
-    }
+    EventSignal<const RecognitionEventArgs&> SpeechStartDetected;
 
     /// <summary>
-    /// Remove a participant from a conversation using the User object
+    /// Signal for events indicating the end of speech.
     /// </summary>
-    /// <param name="user">A smart pointer of a User.</param>
-    /// <returns>void.</returns>
-    void RemoveParticipant(const std::shared_ptr<User>& user)
-    {
-        SPX_THROW_ON_FAIL(conversation_transcriber_update_participant_by_user(m_hreco, false, SPXUSERHANDLE(*user)));
-    }
+    EventSignal<const RecognitionEventArgs&> SpeechEndDetected;
 
     /// <summary>
-    /// Remove a participant from a conversation using a user id object
+    /// Signal for events containing intermediate recognition results.
     /// </summary>
-    /// <param name="userId">A user id.</param>
-    /// <returns>void.</returns>
-    void RemoveParticipant(const SPXSTRING& userId)
-    {
-        SPX_THROW_ON_FAIL(conversation_transcriber_update_participant_by_user_id(m_hreco, false, Utils::ToUTF8(userId.c_str())));
-    }
+    EventSignal<const ConversationTranscriptionEventArgs&> Transcribing;
 
     /// <summary>
-    /// A collection or properties and their values defined for this <see cref="ConversationTranscriber"/>.
+    /// Signal for events containing final recognition results.
+    /// (indicating a successful recognition attempt).
     /// </summary>
-    PropertyCollection& Properties;
+    EventSignal<const ConversationTranscriptionEventArgs&> Transcribed;
+
+    /// <summary>
+    /// Signal for events containing canceled recognition results
+    /// (indicating a recognition attempt that was canceled as a result or a direct cancellation request
+    /// or, alternatively, a transport or protocol failure).
+    /// </summary>
+    EventSignal<const ConversationTranscriptionCanceledEventArgs&> Canceled;
 
     /// <summary>
     /// Sets the authorization token that will be used for connecting the server.
@@ -247,69 +223,247 @@ public:
     }
 
 protected:
-    /// <summary>
-    /// Asynchronously initiates continuous speech recognition operation.
-    /// </summary>
-    /// <returns>An empty future.</returns>
-    std::future<void> StartContinuousRecognitionAsync() override
-    {
-        return BaseType::StartContinuousRecognitionAsyncInternal();
-    }
+
+    /*! \cond PROTECTED */
 
     /// <summary>
-    /// Asynchronously terminates ongoing continuous speech recognition operation.
+    /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    /// <returns>An empty future.</returns>
-    std::future<void> StopContinuousRecognitionAsync() override
+    /// <param name="hreco">Recognizer handle.</param>
+    virtual void TermRecognizer() override
     {
-        return BaseType::StopContinuousRecognitionAsyncInternal();
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+        // Disconnect the event signals in reverse construction order
+        Canceled.DisconnectAll();
+        Transcribed.DisconnectAll();
+        Transcribing.DisconnectAll();
+        SpeechEndDetected.DisconnectAll();
+        SpeechStartDetected.DisconnectAll();
+        SessionStopped.DisconnectAll();
+        SessionStarted.DisconnectAll();
+
+        // Close the async handles we have open for Recognize, StartContinuous, and StopContinuous
+        for (auto handle : { &m_hasyncStartContinuous, &m_hasyncStopContinuous })
+        {
+            if (*handle != SPXHANDLE_INVALID && ::recognizer_async_handle_is_valid(*handle))
+            {
+                ::recognizer_async_handle_release(*handle);
+                *handle = SPXHANDLE_INVALID;
+            }
+        }
+
+        // Ask the base to term
+        Recognizer::TermRecognizer();
     }
 
-    /// <summary>
-    /// Asynchronously initiates keyword recognition operation.
-    /// </summary>
-    /// Note: Key word spotting functionality is only available on the Cognitive Services Device SDK.This functionality is currently not included in the SDK itself.    /// <param name="model">Specifies the keyword model to be used.</param>
-    /// <returns>An empty future.</returns>
-    std::future<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model) override
+    void RecoEventConnectionsChanged(const EventSignal<const ConversationTranscriptionEventArgs&>& recoEvent)
     {
-        std::future<void> result;
-        UNUSED(model);
-        SPX_THROW_ON_FAIL(SPXERR_UNSUPPORTED_API_ERROR);
-        return result;
+        if (m_hreco != SPXHANDLE_INVALID)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8p", __FUNCTION__, (void*)m_hreco);
+            SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
+
+            if (&recoEvent == &Transcribing)
+            {
+                recognizer_recognizing_set_callback(m_hreco, Transcribing.IsConnected() ? FireEvent_Transcribing : nullptr, this);
+            }
+            else if (&recoEvent == &Transcribed)
+            {
+                recognizer_recognized_set_callback(m_hreco, Transcribed.IsConnected() ? FireEvent_Transcribed : nullptr, this);
+            }
+        }
     }
 
-    /// <summary>
-    /// Asynchronously terminates keyword recognition operation.
-    /// </summary>
-    /// Note: Key word spotting functionality is only available on the Cognitive Services Device SDK.This functionality is currently not included in the SDK itself.
-    /// <returns>An empty future.</returns>
-    std::future<void> StopKeywordRecognitionAsync() override
+    static void FireEvent_Transcribing(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
-        std::future<void> result;
-        SPX_THROW_ON_FAIL(SPXERR_UNSUPPORTED_API_ERROR);
-        return result;
+        UNUSED(hreco);
+        std::unique_ptr<ConversationTranscriptionEventArgs> recoEvent{ new ConversationTranscriptionEventArgs(hevent) };
+
+        auto pThis = static_cast<ConversationTranscriber*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
+        pThis->Transcribing.Signal(*recoEvent.get());
     }
 
-    /// <summary>
-    /// Performs speech recognition in a non-blocking (asynchronous) mode.
-    /// Note: RecognizeOnceAsync() returns when the first utterance has been recognized,
-    /// so it is suitable only for single shot recognition like command or query.
-    /// For long-running recognition, use StartContinuousRecognitionAsync() instead.
-    /// </summary>
-    /// <returns>Future containing result value (a shared pointer to ConversationTranscriber)
-    /// of the asynchronous speech recognition.
-    /// </returns>
-    std::future<std::shared_ptr<ConversationTranscriptionResult>> RecognizeOnceAsync() override
+    static void FireEvent_Transcribed(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
-       std::future<std::shared_ptr<ConversationTranscriptionResult>> result;
-       SPX_THROW_ON_FAIL(SPXERR_UNSUPPORTED_API_ERROR);
+        UNUSED(hreco);
+        std::unique_ptr<ConversationTranscriptionEventArgs> recoEvent{ new ConversationTranscriptionEventArgs(hevent) };
 
-       return result;
+        auto pThis = static_cast<ConversationTranscriber*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
+        pThis->Transcribed.Signal(*recoEvent.get());
     }
+
+    void RecoCanceledEventConnectionsChanged(const EventSignal<const ConversationTranscriptionCanceledEventArgs&>& recoEvent)
+    {
+        if (m_hreco != SPXHANDLE_INVALID)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8p", __FUNCTION__, (void*)m_hreco);
+            SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
+
+            if (&recoEvent == &Canceled)
+            {
+                recognizer_canceled_set_callback(m_hreco, Canceled.IsConnected() ? FireEvent_Canceled : nullptr, this);
+            }
+        }
+    }
+
+    static void FireEvent_Canceled(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        UNUSED(hreco);
+
+        auto ptr = new ConversationTranscriptionCanceledEventArgs(hevent);
+        std::shared_ptr<ConversationTranscriptionCanceledEventArgs> recoEvent(ptr);
+
+        auto pThis = static_cast<ConversationTranscriber*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
+        pThis->Canceled.Signal(*ptr);
+    }
+
+    void SessionEventConnectionsChanged(const EventSignal<const SessionEventArgs&>& sessionEvent)
+    {
+        if (m_hreco != SPXHANDLE_INVALID)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8p", __FUNCTION__, (void*)m_hreco);
+            SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
+
+            if (&sessionEvent == &SessionStarted)
+            {
+                recognizer_session_started_set_callback(m_hreco, SessionStarted.IsConnected() ? FireEvent_SessionStarted : nullptr, this);
+            }
+            else if (&sessionEvent == &SessionStopped)
+            {
+                recognizer_session_stopped_set_callback(m_hreco, SessionStopped.IsConnected() ? FireEvent_SessionStopped : nullptr, this);
+            }
+        }
+    }
+
+    static void FireEvent_SessionStarted(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        UNUSED(hreco);
+        std::unique_ptr<SessionEventArgs> sessionEvent{ new SessionEventArgs(hevent) };
+
+        auto pThis = static_cast<ConversationTranscriber*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
+        pThis->SessionStarted.Signal(*sessionEvent.get());
+
+        // SessionEventArgs doesn't hold hevent, and thus can't release it properly ... release it here
+        SPX_DBG_ASSERT(recognizer_event_handle_is_valid(hevent));
+        recognizer_event_handle_release(hevent);
+    }
+
+    static void FireEvent_SessionStopped(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        UNUSED(hreco);
+        std::unique_ptr<SessionEventArgs> sessionEvent{ new SessionEventArgs(hevent) };
+
+        auto pThis = static_cast<ConversationTranscriber*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
+        pThis->SessionStopped.Signal(*sessionEvent.get());
+
+        // SessionEventArgs doesn't hold hevent, and thus can't release it properly ... release it here
+        SPX_DBG_ASSERT(recognizer_event_handle_is_valid(hevent));
+        recognizer_event_handle_release(hevent);
+    }
+
+    void RecognitionEventConnectionsChanged(const EventSignal<const RecognitionEventArgs&>& recognitionEvent)
+    {
+        if (m_hreco != SPXHANDLE_INVALID)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8p", __FUNCTION__, (void*)m_hreco);
+            SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
+
+            if (&recognitionEvent == &SpeechStartDetected)
+            {
+                recognizer_speech_start_detected_set_callback(m_hreco, SpeechStartDetected.IsConnected() ? FireEvent_SpeechStartDetected : nullptr, this);
+            }
+            else if (&recognitionEvent == &SpeechEndDetected)
+            {
+                recognizer_speech_end_detected_set_callback(m_hreco, SpeechEndDetected.IsConnected() ? FireEvent_SpeechEndDetected : nullptr, this);
+            }
+        }
+    }
+
+    static void FireEvent_SpeechStartDetected(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        UNUSED(hreco);
+        std::unique_ptr<RecognitionEventArgs> recoEvent{ new RecognitionEventArgs(hevent) };
+
+        auto pThis = static_cast<ConversationTranscriber*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
+        pThis->SpeechStartDetected.Signal(*recoEvent.get());
+
+        // RecognitionEventArgs doesn't hold hevent, and thus can't release it properly ... release it here
+        SPX_DBG_ASSERT(recognizer_event_handle_is_valid(hevent));
+        recognizer_event_handle_release(hevent);
+    }
+
+    static void FireEvent_SpeechEndDetected(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        UNUSED(hreco);
+        std::unique_ptr<RecognitionEventArgs> recoEvent{ new RecognitionEventArgs(hevent) };
+
+        auto pThis = static_cast<ConversationTranscriber*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
+        pThis->SpeechEndDetected.Signal(*recoEvent.get());
+
+        // RecognitionEventArgs doesn't hold hevent, and thus can't release it properly ... release it here
+        SPX_DBG_ASSERT(recognizer_event_handle_is_valid(hevent));
+        recognizer_event_handle_release(hevent);
+    }
+
+    /*! \endcond */
 
 private:
+
+    SPXASYNCHANDLE m_hasyncStartContinuous;
+    SPXASYNCHANDLE m_hasyncStopContinuous;
+
     DISABLE_DEFAULT_CTORS(ConversationTranscriber);
     friend class Microsoft::CognitiveServices::Speech::Session;
+
+    class PrivatePropertyCollection : public PropertyCollection
+    {
+    public:
+        PrivatePropertyCollection(SPXRECOHANDLE hreco) :
+            PropertyCollection(
+                [=]() {
+            SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
+            recognizer_get_property_bag(hreco, &hpropbag);
+            return hpropbag;
+        }())
+        {
+        }
+    };
+
+    PrivatePropertyCollection m_properties;
+
+    inline std::function<void(const EventSignal<const SessionEventArgs&>&)> GetSessionEventConnectionsChangedCallback()
+    {
+        return [=](const EventSignal<const SessionEventArgs&>& sessionEvent) { this->SessionEventConnectionsChanged(sessionEvent); };
+    }
+
+    inline std::function<void(const EventSignal<const ConversationTranscriptionEventArgs&>&)> GetRecoEventConnectionsChangedCallback()
+    {
+        return [=](const EventSignal<const ConversationTranscriptionEventArgs&>& recoEvent) { this->RecoEventConnectionsChanged(recoEvent); };
+    }
+
+    inline std::function<void(const EventSignal<const ConversationTranscriptionCanceledEventArgs&>&)> GetRecoCanceledEventConnectionsChangedCallback()
+    {
+        return [=](const EventSignal<const ConversationTranscriptionCanceledEventArgs&>& recoEvent) { this->RecoCanceledEventConnectionsChanged(recoEvent); };
+    }
+
+    inline std::function<void(const EventSignal<const RecognitionEventArgs&>&)> GetRecognitionEventConnectionsChangedCallback()
+    {
+        return [=](const EventSignal<const RecognitionEventArgs&>& recoEvent) { this->RecognitionEventConnectionsChanged(recoEvent); };
+    }
+
+public:
+    /// <summary>
+    /// A collection or properties and their values defined for this <see cref="ConversationTranscriber"/>.
+    /// </summary>
+    PropertyCollection& Properties;
 };
 
-} } } } // Microsoft::CognitiveServices::Speech::Conversation
+} } } } // Microsoft::CognitiveServices::Speech::Transcription

@@ -23,7 +23,7 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_audio_stream.cpp"
     "${SRC_DIR}/speechapi_c_audio_stream_format.cpp"
     "${SRC_DIR}/speechapi_c_conversation_transcription_result.cpp"
-    "${SRC_DIR}/speechapi_c_conversation_transcriber.cpp"
+    "${SRC_DIR}/speechapi_c_conversation.cpp"
     "${SRC_DIR}/speechapi_c_error.cpp"
     "${SRC_DIR}/speechapi_c_intent_recognizer.cpp"
     "${SRC_DIR}/speechapi_c_intent_result.cpp"

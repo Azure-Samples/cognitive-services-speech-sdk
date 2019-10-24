@@ -13,7 +13,7 @@ using System.IO;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using Microsoft.CognitiveServices.Speech.Conversation;
+    using Microsoft.CognitiveServices.Speech.Transcription;
 
     sealed class ConversationTranscriberTestsHelper
     {
@@ -25,7 +25,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             taskCompletionSource = new TaskCompletionSource<int>();
         }
 
-        public async Task CompleteContinuousRecognition(ConversationTranscriber recognizer)
+        public async Task CompleteContinuousRecognition(ConversationTranscriber recognizer, string conversationId)
         {
             recognizer.SessionStopped += (s, e) =>
             {
@@ -47,14 +47,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             if (!string.IsNullOrEmpty(canceled))
             {
-                Assert.Fail($"Recognition Canceled(meetingID={recognizer.ConversationId}): {canceled}");
+                Assert.Fail($"Recognition Canceled(meetingID={conversationId}): {canceled}");
             }
         }
+        public bool FindTheRef(List<string> phrases, string reference)
+        {
+            foreach( string phrase in phrases)
+            {
+                var candidate = SpeechRecognitionTestsHelper.Normalize(phrase);
+                reference = SpeechRecognitionTestsHelper.Normalize(reference);
+                return candidate == reference;
+            }
+            return false;
+        }
 
-        public async Task<string> GetFirstRecognizerResult(ConversationTranscriber recognizer)
+        public async Task<List<string>> GetRecognizerResult(ConversationTranscriber recognizer, string conversationId)
         {
             List<string> recognizedText = new List<string>();
-            recognizer.Recognized += (s, e) =>
+            recognizer.Transcribed += (s, e) =>
             {
                 Console.WriteLine($"Received result '{e.ToString()}'");
                 if (e.Result.Text.Length > 0)
@@ -63,15 +73,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
             };
 
-            recognizer.Recognizing += (s, e) =>
+            recognizer.Transcribing += (s, e) =>
             {
                 Console.WriteLine($"Received result '{e.ToString()}'");
             };
 
-            await CompleteContinuousRecognition(recognizer);
+            await CompleteContinuousRecognition(recognizer, conversationId);
 
             recognizer.Dispose();
-            return recognizedText.Count > 0 ? recognizedText[0] : string.Empty;
+            return recognizedText;
         }
 
         public static ConversationTranscriber TrackSessionId(ConversationTranscriber recognizer)

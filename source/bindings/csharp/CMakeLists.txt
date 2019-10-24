@@ -30,7 +30,7 @@ if (WIN32)
       COMMAND ${CMAKE_MAKE_PROGRAM} /p:Configuration=$<CONFIGURATION>IOS "${CSHARP_PROJECT_PATH}.csproj"
       COMMAND del /S /Q obj
       COMMENT "Building external C# project")
-    add_dependencies(${CSHARP_LIB_CUSTOM} ${SPEECHSDK_CORE_LIBRARY}) 
+    add_dependencies(${CSHARP_LIB_CUSTOM} ${SPEECHSDK_CORE_LIBRARY})
     enable_language(CSharp)
     add_library(${CSHARP_LIB} SHARED IMPORTED GLOBAL)
     add_dependencies(${CSHARP_LIB} ${CSHARP_LIB_CUSTOM})
@@ -71,7 +71,7 @@ elseif(APPLE)
       message(WARNING "Cannot find dotnet command line tool")
   else()
     add_custom_target(nuget-restore
-        COMMAND ${DOTNET} restore --packages ${CMAKE_BINARY_DIR}/packages ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.csproj 
+        COMMAND ${DOTNET} restore --packages ${CMAKE_BINARY_DIR}/packages ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.csproj
     )
     SET(NUGET_RESTORE
       nuget-restore)

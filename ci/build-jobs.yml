@@ -965,7 +965,7 @@ jobs:
         --Keyword "Computer" \
         --KeywordModel "/data/keyword/kws.table" \
         --TwoSpeakersAudio "katiesteve.wav" \
-        --TwoSpeakersAudioUtterance "Good morning Steve." \
+        --TwoSpeakersAudioUtterance "good morning steve" \
         --TurnOnTheLampAudio "TurnOnTheLamp.wav" \
         --TurnOnTheLampAudioUtterance "Turn on the lamp." \
         --SerializedSpeechActivityFile "activityWithSpeech.json" \

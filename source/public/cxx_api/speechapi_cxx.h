@@ -64,6 +64,7 @@
 #include <speechapi_cxx_speech_synthesis_word_boundary_eventargs.h>
 #include <speechapi_cxx_speech_synthesizer.h>
 
+#include <speechapi_cxx_conversation.h>
 #include <speechapi_cxx_conversation_transcriber.h>
 #include <speechapi_cxx_conversation_transcription_eventargs.h>
 #include <speechapi_cxx_conversation_transcription_result.h>

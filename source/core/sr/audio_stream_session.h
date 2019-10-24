@@ -91,6 +91,7 @@ public:
     SPX_SERVICE_MAP_ENTRY(ISpxRecoResultFactory)
     SPX_SERVICE_MAP_ENTRY(ISpxEventArgsFactory)
     SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
+    SPX_SERVICE_MAP_ENTRY(ISpxSession)
     SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
     SPX_SERVICE_MAP_ENTRY_FUNC(InternalQueryService)
     SPX_SERVICE_MAP_END()
@@ -105,7 +106,6 @@ public:
     CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() override;
     CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;
     CSpxAsyncOp<void> StopContinuousRecognitionAsync() override;
-    void DestroyConversationResources(bool destroy) override;
 
     CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) override;
     CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
@@ -120,6 +120,8 @@ public:
     void SendNetworkMessage(std::string&& path, std::string&& payload) override;
 
     bool IsStreaming() override;
+
+    void SetConversation(std::shared_ptr<ISpxConversation> conversation) override;
 
     // --- ISpxKwsEngineAdapterSite
     void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint64_t duration, double confidence, const std::string& keyword, const DataChunkPtr& audioChunk) override;
@@ -297,7 +299,6 @@ private:
     void SetThrottleVariables(const SPXWAVEFORMATEX* format);
 
     void UpdateAdapterResult_JsonResult(std::shared_ptr<ISpxRecognitionResult> result);
-    void DestroyMeeting();
 
 private:
 
@@ -379,13 +380,15 @@ private:
     std::list<std::weak_ptr<ISpxRecognizer>> m_recognizers;
     mutable std::mutex m_recognizersLock;
 
+    std::weak_ptr<ISpxConversation> m_conversation;
+    mutable std::mutex m_conversationLock;
+
     bool m_isReliableDelivery;
     uint64_t m_lastErrorGlobalOffset;
     uint64_t m_currentTurnGlobalOffset;
 
     uint64_t m_bytesTransited;
 
-    bool m_destroyMeetingResources;
     std::shared_ptr<CSpxThreadService> m_threadService;
 
     struct Operation

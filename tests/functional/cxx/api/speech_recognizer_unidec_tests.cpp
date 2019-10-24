@@ -7,22 +7,6 @@
 #include "file_utils.h"
 #include "recognizer_utils.h"
 
-bool MatchText(std::string& text, const std::string& ref)
-{
-    auto lowercaseText = text;
-    transform(lowercaseText.begin(), lowercaseText.end(), lowercaseText.begin(), [](unsigned char c) ->char { return (char)::tolower(c); });
-
-    auto lowercaseRef = ref;
-    transform(lowercaseRef.begin(), lowercaseRef.end(), lowercaseRef.begin(), [](unsigned char c) ->char { return (char)::tolower(c); });
-
-    if (lowercaseText.find(lowercaseRef) != string::npos)
-    {
-        return true;
-    }
-
-    return false;
-}
-
 TEST_CASE("Offline continuous recognition using file input", "[api][cxx][unidec]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -44,7 +28,7 @@ TEST_CASE("Offline continuous recognition using file input", "[api][cxx][unidec]
             auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
             auto result = make_shared<RecoPhrases>();
 
-            ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+            ConnectCallbacks(recognizer.get(), result);
             recognizer->StartContinuousRecognitionAsync().get();
 
             WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
@@ -77,7 +61,7 @@ TEST_CASE("Offline continuous recognition using file input fails", "[.][api][cxx
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
         auto result = make_shared<RecoPhrases>();
 
-        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        ConnectCallbacks(recognizer.get(), result);
         recognizer->StartContinuousRecognitionAsync().get();
 
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
@@ -142,7 +126,7 @@ TEST_CASE("Offline continuous recognition using push stream input", "[api][cxx][
             auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
             auto result = make_shared<RecoPhrases>();
 
-            ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+            ConnectCallbacks(recognizer.get(), result);
             PushData(pushStream.get(), weather.m_inputDataFilename);
             recognizer->StartContinuousRecognitionAsync().get();
 
@@ -180,7 +164,7 @@ TEST_CASE("Offline continuous recognition using push stream input fails", "[.][a
         {
             auto result = make_shared<RecoPhrases>();
 
-            ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+            ConnectCallbacks(recognizer.get(), result);
             PushData(pushStream.get(), weather.m_inputDataFilename);
             recognizer->StartContinuousRecognitionAsync().get();
 
@@ -244,7 +228,7 @@ TEST_CASE("Offline continuous recognition using pull stream input", "[api][cxx][
             auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
             auto result = make_shared<RecoPhrases>();
 
-            ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+            ConnectCallbacks(recognizer.get(), result);
             recognizer->StartContinuousRecognitionAsync().get();
 
             WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
@@ -305,7 +289,7 @@ TEST_CASE("Offline recognition with KWS", "[api][cxx][unidec]")
         {
             auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
             auto result = make_shared<RecoPhrases>();
-            ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+            ConnectCallbacks(recognizer.get(), result);
             PushData(pushStream.get(), kwvAccept.m_inputDataFilename);
 
             recognizer->StartKeywordRecognitionAsync(model).get();
@@ -342,7 +326,7 @@ TEST_CASE("Offline recognition with KWS fails", "[.][api][cxx][unidec]")
         for (int i = 0; i < 2; i++)
         {
             auto result = make_shared<RecoPhrases>();
-            ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+            ConnectCallbacks(recognizer.get(), result);
 
             recognizer->StartKeywordRecognitionAsync(model).get();
             WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);

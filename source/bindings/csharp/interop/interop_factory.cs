@@ -14,6 +14,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXRECOHANDLE = System.IntPtr;
     using SPXSYNTHHANDLE = System.IntPtr;
     using SPXCONNECTORHANDLE = System.IntPtr;
+    using SPXCONVERSATIONHANDLE = System.IntPtr;
 
     internal static class Import
     {
@@ -116,8 +117,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR dialog_service_connector_create_dialog_service_connector_from_config(out SPXCONNECTORHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR conversation_create_from_config(out SPXCONVERSATIONHANDLE recoHandle, InteropSafeHandle speechconfig, IntPtr id);
+
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR recognizer_create_conversation_transcriber_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
+        public static extern SPXHR recognizer_create_conversation_transcriber_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle audioInput);
 
     }
 }

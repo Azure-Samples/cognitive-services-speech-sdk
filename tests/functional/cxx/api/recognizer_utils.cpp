@@ -30,7 +30,7 @@ TestData kwvAccept { "/kws/kws_whatstheweatherlike.wav", "Computer what's the we
 TestData kwvAccept2x { "/kws/kws_whatstheweatherlike_x2.wav", "Computer what's the weather like?" };
 TestData kwvReject { "/kws/kws_whatshouldIcallyou.wav", "Hey Computer what should I call you?" };
 TestData kwvMultiturn { "/kws/kws_whatstheweatherlike_turnontheradio.wav", "Computer what's the weather like? Turn on the radio." };
-TestData katieSteve{ "/audio/katiesteve.wav", "Good morning Katie." };
+TestData katieSteve{ "/audio/katiesteve.wav", "Good morning Steve" };
 
 std::shared_ptr<SpeechConfig> CurrentSpeechConfig()
 {
@@ -181,7 +181,7 @@ void PushData(PushAudioInputStream* pushStream, const string& filename, bool com
 void DoContinuousReco(SpeechRecognizer* recognizer, PushAudioInputStream* pushStream)
 {
     auto result = make_shared<RecoPhrases>();
-    ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer, result);
+    ConnectCallbacks(recognizer, result);
     PushData(pushStream, weather.m_inputDataFilename);
     recognizer->StartContinuousRecognitionAsync().get();
     WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
@@ -195,7 +195,7 @@ void DoKWS(SpeechRecognizer* recognizer, PushAudioInputStream* pushStream)
     auto res = make_shared<RecoPhrases>();
     cortana.UpdateFullFilename(Config::InputDir);
 
-    ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer, res);
+    ConnectCallbacks(recognizer, res);
     PushData(pushStream, cortana.m_inputDataFilename);
     auto model = KeywordRecognitionModel::FromFile(Config::InputDir + "/kws/Computer/kws.table");
     recognizer->StartKeywordRecognitionAsync(model).get();
@@ -457,20 +457,21 @@ std::shared_ptr<VideoConfig> CreateVideoPush(std::shared_ptr<PushVideoInputStrea
 }
 #endif
 
-void StartMeetingAndVerifyResult(ConversationTranscriber* recognizer, const shared_ptr<Participant>& participant, RecoPhrasesPtr&& result, const string& ref)
+ std::string PumpAudioAndWaitForResult(ConversationTranscriber* recognizer, RecoPhrasesPtr result)
 {
-    // add the speaker1 to usp
-    recognizer->AddParticipant(participant);
-
     recognizer->StartTranscribingAsync().get();
 
     WaitForResult(result->ready.get_future(), 10min);
 
     recognizer->StopTranscribingAsync().get();
-    SPXTEST_REQUIRE(!result->phrases.empty());
-    auto text = GetText(result->phrases);
-    INFO(text);
-    SPXTEST_REQUIRE(VerifyText(result->phrases[0].Text, ref));
+    if (!result->phrases.empty())
+    {
+        return GetText(result->phrases);
+    }
+    else
+    {
+        return std::string{ };
+    }
 }
 
 void CreateVoiceSignatures(std::string* katieVoiceSignature, std::string* steveVoiceSignature)
@@ -489,33 +490,6 @@ void CreateVoiceSignatures(std::string* katieVoiceSignature, std::string* steveV
     )";
 }
 
-bool VerifyText(std::string& text, const std::string& ref)
-{
-    auto lowercaseText = text;
-    transform(lowercaseText.begin(), lowercaseText.end(), lowercaseText.begin(), [](unsigned char c) ->char { return (char)::tolower(c); });
-
-    auto lowercaseRef = ref;
-    transform(lowercaseRef.begin(), lowercaseRef.end(), lowercaseRef.begin(), [](unsigned char c) ->char { return (char)::tolower(c); });
-
-    // found the match
-    if (text.find(ref) != string::npos)
-    {
-        return true;
-    }
-    else if (lowercaseText.find(lowercaseRef) != string::npos)
-    {
-        return true;
-    }
-    //or different but no errors is OK too.
-    else if (text.find("WebSocket Upgrade failed") != std::string::npos ||
-        text.find("Connection was closed by the remote host") != std::string::npos
-        )
-    {
-        return false;
-    }
-
-    return true;
-}
 std::string GetUserId(const ConversationTranscriptionResult* ctr)
 {
     return ctr ? ctr->UserId : string{};
@@ -564,13 +538,42 @@ uint64_t VerifySpeaker(const RecoResultVector& phrases_in, const std::wstring& w
 
     return offset;
 }
+// the ref must be the first in time.
+bool FindTheRef(RecoResultVector phrases, const std::string& reference)
+{
+    sort(begin(phrases), end(phrases), [](const RecoPhrase& lhs, const RecoPhrase& rhs) { return lhs.Offset < rhs.Offset; });
+    int index = 0;
+    for (auto& phrase : phrases)
+    {
+        // there are empty strings coming from CTSInRoom service.
+        if (phrase.Text.empty())
+        {
+            continue;
+        }
+        auto& text = phrase.Text;
+        auto ref = reference;
+
+        // remove punctuation
+        text.erase(std::remove_if(text.begin(), text.end(), [](unsigned char x) { return std::ispunct(x) ; }), text.end());
+
+        index++;
+        transform(text.begin(), text.end(), text.begin(), [](char c) ->char { return std::tolower(c, std::locale("")); });
+        transform(ref.begin(), ref.end(), ref.begin(), [](char c) ->char { return std::tolower(c, std::locale("")); });
+        if (text == ref)
+        {
+            break;
+        }
+    }
+    // the ref must be the first non-empty one after sorting the phrases in offset.
+    return index == 1;
+}
 
 std::string GetText(const RecoResultVector& phrases)
 {
     ostringstream os;
     for (const auto& phrase : phrases)
     {
-        os << "Recognized Text '" << phrase.Text << "' UserId '" << phrase.UserId << "'" << endl;
+        os << "Recognized Text: '" << phrase.Text << "' UserId: '" << phrase.UserId << "' "  << "offset: " << phrase.Offset << endl;
     }
     return os.str();
 }
@@ -586,4 +589,52 @@ std::string CreateTimestamp()
     os << duration.count();
 
     return os.str();
+}
+
+bool MatchText(std::string& text, const std::string& ref)
+{
+    auto lowercaseText = text;
+    transform(lowercaseText.begin(), lowercaseText.end(), lowercaseText.begin(), [](unsigned char c) ->char { return (char)::tolower(c); });
+
+    auto lowercaseRef = ref;
+    transform(lowercaseRef.begin(), lowercaseRef.end(), lowercaseRef.begin(), [](unsigned char c) ->char { return (char)::tolower(c); });
+
+    if (lowercaseText.find(lowercaseRef) != string::npos)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+void ConnectCallbacks(SpeechRecognizer* sr, RecoPhrasesPtr result)
+{
+    if (sr == nullptr || result == nullptr)
+    {
+        return;
+    }
+    auto callback = ParseRecogEvents<SpeechRecognitionEventArgs>(result);
+    sr->Recognizing.DisconnectAll();
+    sr->Recognizing.Connect(callback);
+
+    sr->Recognized.DisconnectAll();
+    sr->Recognized.Connect(callback);
+
+    ConnectNonRecoEvents<SpeechRecognizer, SpeechRecognitionCanceledEventArgs>(sr, result);
+}
+
+void ConnectCallbacks(ConversationTranscriber* ct, RecoPhrasesPtr result)
+{
+    if (ct == nullptr || result == nullptr)
+    {
+        return;
+    }
+    auto callback = ParseRecogEvents<ConversationTranscriptionEventArgs>(result);
+    ct->Transcribing.DisconnectAll();
+    ct->Transcribing.Connect(callback);
+
+    ct->Transcribed.DisconnectAll();
+    ct->Transcribed.Connect(callback);
+
+    ConnectNonRecoEvents<ConversationTranscriber, ConversationTranscriptionCanceledEventArgs>(ct, result);
 }

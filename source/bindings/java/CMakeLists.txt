@@ -142,12 +142,15 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberCanceledEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberEventListener.java
     ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberEventSignal.java
-    ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberResultPtrFuture.java
     ${CMAKE_SWIG_OUTDIR}/ConversationTranscriber.java
+    ${CMAKE_SWIG_OUTDIR}/Conversation.java
     ${CMAKE_SWIG_OUTDIR}/ConversationTranscriberRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/ConversationTranscriptionResult.java
     ${CMAKE_SWIG_OUTDIR}/ConversationTranscriptionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/ConversationTranscriptionCanceledEventArgs.java
+    ${CMAKE_SWIG_OUTDIR}/ConversationPtrFuture.java
+    ${CMAKE_SWIG_OUTDIR}/ParticipantPtrFuture.java
+    ${CMAKE_SWIG_OUTDIR}/UserPtrFuture.java
     ${CMAKE_SWIG_OUTDIR}/KeywordRecognitionModel.java
     ${CMAKE_SWIG_OUTDIR}/LanguageUnderstandingModel.java
     ${CMAKE_SWIG_OUTDIR}/OutputFormat.java
@@ -241,6 +244,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXGRAMMARHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXPARTICIPANTHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXUSERHANDLE.java
+    ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXCONVERSATIONHANDLE.java
 
     ${CMAKE_SWIG_OUTDIR}/VoidFuture.java
     ${CMAKE_SWIG_OUTDIR}/StringFuture.java
@@ -288,13 +292,12 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/AutoDetectSourceLanguageResult.java
     ${PACKAGE_DIR}/SourceLanguageConfig.java
 
-    ${PACKAGE_DIR}/conversation/Participant.java
-    ${PACKAGE_DIR}/conversation/ResourceHandling.java
-    ${PACKAGE_DIR}/conversation/ConversationTranscriptionResult.java
-    ${PACKAGE_DIR}/conversation/ConversationTranscriptionEventArgs.java
-    ${PACKAGE_DIR}/conversation/ConversationTranscriptionCanceledEventArgs.java
-    ${PACKAGE_DIR}/conversation/ConversationTranscriber.java
-    ${PACKAGE_DIR}/conversation/User.java
+    ${PACKAGE_DIR}/transcription/Participant.java
+    ${PACKAGE_DIR}/transcription/ConversationTranscriptionResult.java
+    ${PACKAGE_DIR}/transcription/ConversationTranscriptionEventArgs.java
+    ${PACKAGE_DIR}/transcription/ConversationTranscriptionCanceledEventArgs.java
+    ${PACKAGE_DIR}/transcription/ConversationTranscriber.java
+    ${PACKAGE_DIR}/transcription/User.java
 
     ${PACKAGE_DIR}/AudioDataStream.java
     ${PACKAGE_DIR}/SpeechSynthesisEventArgs.java

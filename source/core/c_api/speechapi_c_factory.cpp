@@ -276,16 +276,18 @@ SPXAPI synthesizer_create_speech_synthesizer_from_config(SPXSYNTHHANDLE* phsynth
 }
 
 
-SPXAPI recognizer_create_conversation_transcriber_from_config(SPXRECOHANDLE* phreco, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioInput)
+SPXAPI conversation_create_from_config(SPXCONVERSATIONHANDLE* pconversation, SPXSPEECHCONFIGHANDLE hspeechconfig, const char* id)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phreco == nullptr);
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(hspeechconfig));
-
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, pconversation == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(hspeechconfig));
+    // id is optional
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, id == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        *phreco = SPXHANDLE_INVALID;
+        *pconversation = SPXHANDLE_INVALID;
 
         // get the input parameters from the hspeechconfig
         auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
@@ -301,19 +303,101 @@ SPXAPI recognizer_create_conversation_transcriber_from_config(SPXRECOHANDLE* phr
             fbag->Copy(speechconfig_propertybag.get());
         }
 
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
-        auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
-        // copy the audio input properties into the factory, if any.
+        auto conversation = factory->CreateConversationFromConfig(id);
+
+        // track the conversation handle
+        auto coversationhandles = CSpxSharedPtrHandleTableManager::Get<ISpxConversation, SPXCONVERSATIONHANDLE>();
+        *pconversation = coversationhandles->TrackHandle(conversation);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI recognizer_create_conversation_transcriber_from_config(SPXRECOHANDLE* phreco, SPXAUDIOCONFIGHANDLE haudioinput)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phreco == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phreco = SPXHANDLE_INVALID;
+
+        auto conversation_transcriber = SpxCreateObject<ISpxRecognizer>("CSpxConversationTranscriber", SpxGetRootSite());
+
+        // copy the audio input properties into the conversation transcriber
+        auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioinput);
         auto audioInput_propertybag = SpxQueryInterface<ISpxNamedProperties>(audioInput);
+        auto propertybag_cts = SpxQueryInterface<ISpxNamedProperties>(conversation_transcriber);
         if (audioInput_propertybag != nullptr)
         {
-            fbag->Copy(audioInput_propertybag.get());
+            propertybag_cts->Copy(audioInput_propertybag.get());
         }
-        auto recognizer = factory->CreateConversationTranscriberFromConfig(audioInput);
 
-        // track the reco handle
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        *phreco = recohandles->TrackHandle(recognizer);
+        auto conversation_transcriber_init = SpxQueryInterface<ISpxConversationTranscriber>(conversation_transcriber);
+        SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, conversation_transcriber_init == nullptr);
+        conversation_transcriber_init->Init(audioInput);
+
+        // track the conversation transcriber handle
+        auto transcribers = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = transcribers->TrackHandle(conversation_transcriber);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI recognizer_join_conversation(SPXCONVERSATIONHANDLE hconv, SPXRECOHANDLE hreco)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hreco == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hconv == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto convhandles = CSpxSharedPtrHandleTableManager::Get<ISpxConversation, SPXCONVERSATIONHANDLE>();
+        auto conversation = (*convhandles)[hconv];
+
+        auto transcribers = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        auto conversation_transcriber = (*transcribers)[hreco];
+
+        auto factory = SpxQueryService<ISpxSpeechApiFactory>(conversation);
+        SPX_IFTRUE_THROW_HR(factory == nullptr, SPXERR_RUNTIME_ERROR);
+
+        auto session = SpxQueryService<ISpxSession>(conversation);
+        SPX_IFTRUE_THROW_HR(session == nullptr, SPXERR_RUNTIME_ERROR);
+
+        auto session_as_site = SpxQueryInterface<ISpxGenericSite>(session); //ISpxRecognizerSite
+
+        auto conversation_transcriber_set_site = SpxQueryInterface<ISpxObjectWithSite>(conversation_transcriber);
+        conversation_transcriber_set_site->SetSite(session_as_site);
+
+        // hook audio input to session
+        auto audio_input = SpxQueryInterface<ISpxGetAudioConfig>(conversation_transcriber);
+        factory->InitSessionFromAudioInputConfig(session, audio_input->GetAudioConfig());
+
+        // hook conversation to conversation transcriber, so that I can get the participant list later
+        auto transcriber_ptr = SpxQueryInterface<ISpxConversationTranscriber>(conversation_transcriber);
+        transcriber_ptr->JoinConversation(conversation);
+
+        // hook the transcriber to session
+        session->AddRecognizer(conversation_transcriber);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI recognizer_leave_conversation(SPXRECOHANDLE hreco)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hreco == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto transcribers = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        auto conversation_transcriber = (*transcribers)[hreco];
+
+        auto cts = SpxQueryInterface<ISpxConversationTranscriber>(conversation_transcriber);
+        // leave conversation, set site to null
+        cts->LeaveConversation();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

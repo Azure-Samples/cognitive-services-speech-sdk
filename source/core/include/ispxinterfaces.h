@@ -691,7 +691,6 @@ public:
     virtual CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() = 0;
     virtual CSpxAsyncOp<void> StartContinuousRecognitionAsync() = 0;
     virtual CSpxAsyncOp<void> StopContinuousRecognitionAsync() = 0;
-    virtual void DestroyConversationResources(bool destroy) = 0;
 
     virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
     virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
@@ -962,6 +961,28 @@ public:
     WordBoundaryEvent_Type WordBoundary;
 };
 
+
+class ISpxConversation : public ISpxInterfaceBaseFor< ISpxConversation>
+{
+public:
+
+    enum class MeetingState
+    {
+        START,
+        ONGOING,
+        END
+    };
+
+    virtual void UpdateParticipant(bool add, const std::string& userId) = 0;
+    virtual void UpdateParticipant(bool add, const std::string& userId, std::shared_ptr<ISpxParticipant> participant) = 0;
+    virtual void UpdateParticipants(bool add, std::vector<ParticipantPtr>&& participants) = 0;
+    virtual void SetConversationId(const std::string& id) = 0;
+    virtual void GetConversationId(std::string& id) = 0;
+    virtual std::string GetSpeechEventPayload(MeetingState state) = 0;
+    virtual void HttpSendEndMeetingRequest() = 0;
+};
+
+
 class ISpxSession : public ISpxInterfaceBaseFor<ISpxSession>
 {
 public:
@@ -974,7 +995,6 @@ public:
     virtual CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() = 0;
     virtual CSpxAsyncOp<void> StartContinuousRecognitionAsync() = 0;
     virtual CSpxAsyncOp<void> StopContinuousRecognitionAsync() = 0;
-    virtual void DestroyConversationResources(bool destroy) = 0;
 
     virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
     virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
@@ -988,6 +1008,7 @@ public:
     virtual void SendSpeechEventMessage(std::string&& payload) = 0;
     virtual void SendNetworkMessage(std::string&& path, std::string&& payload) = 0;
 
+    virtual void SetConversation(std::shared_ptr<ISpxConversation> conversation) = 0;
 };
 
 class ISpxAudioStreamSessionInit : public ISpxInterfaceBaseFor<ISpxAudioStreamSessionInit>
@@ -1230,7 +1251,8 @@ public:
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxDialogServiceConnector> CreateDialogServiceConnectorFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateConversationTranscriberFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
+    virtual std::shared_ptr<ISpxConversation> CreateConversationFromConfig(const char* id) = 0;
+    virtual void InitSessionFromAudioInputConfig(std::shared_ptr<ISpxSession> session, std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
 };
 
 class ISpxSpeechSynthesisApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechSynthesisApiFactory>
@@ -1395,25 +1417,18 @@ public:
     // TODO: RobCh: Add additional methods required...
 };
 
-class ISpxConversationTranscriber : public ISpxInterfaceBaseFor< ISpxConversationTranscriber>
+class ISpxConversationTranscriber : public ISpxInterfaceBaseFor<ISpxConversationTranscriber>
 {
 public:
+    virtual void JoinConversation(std::weak_ptr<ISpxConversation> conversation) = 0;
+    virtual void LeaveConversation() = 0;
+    virtual void Init(std::weak_ptr<ISpxAudioConfig> audio_config) = 0;
+};
 
-    enum class MeetingState
-    {
-        START,
-        GOING,
-        END
-    };
-
-    virtual void UpdateParticipant(bool add, const std::string& userId) = 0;
-    virtual void UpdateParticipant(bool add, const std::string& userId, std::shared_ptr<ISpxParticipant> participant) = 0;
-    virtual void UpdateParticipants(bool add, std::vector<ParticipantPtr>&& participants) = 0;
-    virtual void SetConversationId(const std::string& id) = 0;
-    virtual void GetConversationId(std::string& id) = 0;
-    virtual void EndConversation(bool destroy) = 0;
-    virtual std::string GetSpeechEventPayload(MeetingState state) = 0;
-    virtual void HttpSendEndMeetingRequest() = 0;
+class ISpxGetAudioConfig : public ISpxInterfaceBaseFor<ISpxGetAudioConfig>
+{
+public:
+    virtual std::shared_ptr<ISpxAudioConfig> GetAudioConfig() = 0;
 };
 
 class ISpxSpeechEventPayloadProvider : public ISpxInterfaceBaseFor<ISpxSpeechEventPayloadProvider>

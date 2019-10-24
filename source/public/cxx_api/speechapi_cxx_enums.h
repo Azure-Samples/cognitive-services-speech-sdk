@@ -728,7 +728,7 @@ enum class ServicePropertyChannel
     UriQueryParameter = 0
 };
 
-namespace Conversation {
+namespace Transcription {
 
     /// <summary>
     /// Defines how the service handles allocated resource after the conversation transcriber is stopped.

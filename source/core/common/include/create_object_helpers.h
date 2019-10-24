@@ -30,6 +30,7 @@ template <class I>
 inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_ptr<ISpxGenericSite> site)
 {
     // create the object
+
     auto factory = SpxQueryService<ISpxObjectFactory>(site);
     if (factory == nullptr)
     {
@@ -53,6 +54,20 @@ inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::sh
     }
 
     return ptr;
+}
+
+template <class I>
+inline std::shared_ptr<I> SpxCreateObject(const char* className, std::shared_ptr<ISpxGenericSite> site)
+{
+    // create the object
+    auto factory = SpxQueryService<ISpxObjectFactory>(site);
+    if (factory == nullptr)
+    {
+        SPX_DBG_TRACE_ERROR("site does not support ISpxObjectFactory");
+        SPX_THROW_HR(SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
+        return nullptr;
+    }
+    return factory->CreateObject<I>(className);
 }
 
 template <class T>

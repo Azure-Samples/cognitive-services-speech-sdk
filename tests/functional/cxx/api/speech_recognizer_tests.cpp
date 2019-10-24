@@ -19,7 +19,7 @@ static void DoRecoFromCompressedPushStreamHelper(TestData fileName, std::shared_
 {
     auto result = make_shared<RecoPhrases>();
 
-    ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+    ConnectCallbacks(recognizer.get(), result);
     recognizer->StartContinuousRecognitionAsync().get();
     PushData(pushStream.get(), fileName.m_inputDataFilename, true);
     WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
@@ -56,7 +56,7 @@ static void DoRecoFromCompressedPullStreamHelper(std::shared_ptr<SpeechRecognize
 {
     auto result = make_shared<RecoPhrases>();
 
-    ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+    ConnectCallbacks(recognizer.get(), result);
     recognizer->StartContinuousRecognitionAsync().get();
     WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
     recognizer->StopContinuousRecognitionAsync().get();
@@ -189,7 +189,7 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
     SPXTEST_SECTION("continuous and once")
     {
         auto result = make_shared<RecoPhrases>();
-        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        ConnectCallbacks(recognizer.get(), result);
         recognizer->StartContinuousRecognitionAsync().get();
         PushData(pushStream.get(), weather.m_inputDataFilename);
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
@@ -212,7 +212,7 @@ TEST_CASE("continuousRecognitionAsync using push stream", "[api][cxx]")
         for (int i = 0; i < loop; i++)
         {
             auto result = make_shared<RecoPhrases>();
-            ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+            ConnectCallbacks(recognizer.get(), result);
             // TODO: move PushData() after StartContinuousRecongtion
             // after fixing the bug Bug 1506194: PushStream Improvement, endOfStream
             PushData(pushStream.get(), weather.m_inputDataFilename);
@@ -256,7 +256,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         auto result = make_shared<RecoPhrases>();
         recognizer->StartContinuousRecognitionAsync().get();
 
-        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        ConnectCallbacks(recognizer.get(), result);
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
         recognizer->StopContinuousRecognitionAsync().get();
         SPXTEST_REQUIRE(!result->phrases.empty());
@@ -268,7 +268,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         auto result = make_shared<RecoPhrases>();
         recognizer->StartContinuousRecognitionAsync().get();
 
-        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        ConnectCallbacks(recognizer.get(), result);
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
         SPXTEST_REQUIRE(!result->phrases.empty());
         SPXTEST_REQUIRE(result->phrases[0].Text == weather.m_utterance);
@@ -279,7 +279,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         auto recognizer2 = CreateRecognizers<SpeechRecognizer>(batman.m_inputDataFilename);
 
         auto result = make_shared<RecoPhrases>();
-        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer2.get(), result);
+        ConnectCallbacks(recognizer2.get(), result);
 
         recognizer2->StartContinuousRecognitionAsync().get();
         REQUIRE_THROWS_WITH(recognizer2->StartContinuousRecognitionAsync().get(), Catch::Contains("SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION"));
@@ -291,7 +291,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         promise<string> result;
         recognizer->StartContinuousRecognitionAsync().get();
 
-        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        ConnectCallbacks(recognizer.get(), result);
         recognizer->StopContinuousRecognitionAsync().get();
 
         // the recognizer should be idle after stop.
@@ -303,7 +303,7 @@ TEST_CASE("ContinuousRecognitionAsync using file input", "[api][cxx]")
         promise<string> result;
         recognizer->StartContinuousRecognitionAsync().get();
 
-        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        ConnectCallbacks(recognizer.get(), result);
 
         // wait for 500 ms and stop recognition.
         // hopefully, we cut the audio session while pumping data.
@@ -1720,7 +1720,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
         connection->SendMessageAsync("event", data).get();
 
         auto result = make_shared<RecoPhrases>();
-        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        ConnectCallbacks(recognizer.get(), result);
         recognizer->StartContinuousRecognitionAsync().get();
         PushData(pushStream.get(), weather.m_inputDataFilename);
         WaitForResult(result->ready.get_future(), 60s);
@@ -1761,7 +1761,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
         connection->SetMessageProperty("speech.config", "application", data);
 
         auto result = make_shared<RecoPhrases>();
-        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        ConnectCallbacks(recognizer.get(), result);
         recognizer->StartContinuousRecognitionAsync().get();
         PushData(pushStream.get(), weather.m_inputDataFilename);
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
@@ -1788,7 +1788,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
         recognizer->Properties.SetProperty("DictationInsertionPointRight", "This is up to 100 characters of text that follows the insertion point.");
 
         auto result = make_shared<RecoPhrases>();
-        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        ConnectCallbacks(recognizer.get(), result);
         recognizer->StartContinuousRecognitionAsync().get();
         PushData(pushStream.get(), weather.m_inputDataFilename);
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);
@@ -1819,7 +1819,7 @@ TEST_CASE("Dictation Corrections", "[api][cxx]")
         recognizer->Properties.SetProperty("DictationInsertionPointRight", "");
 
         auto result = make_shared<RecoPhrases>();
-        ConnectCallbacks<SpeechRecognizer, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>(recognizer.get(), result);
+        ConnectCallbacks(recognizer.get(), result);
         recognizer->StartContinuousRecognitionAsync().get();
         PushData(pushStream.get(), weather.m_inputDataFilename);
         WaitForResult(result->ready.get_future(), WAIT_FOR_RECO_RESULT_TIME);

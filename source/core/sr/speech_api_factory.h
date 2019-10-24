@@ -51,11 +51,14 @@ public:
     std::shared_ptr<ISpxDialogServiceConnector> CreateDialogServiceConnectorFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) override;
     std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) override;
     std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) override;
-    std::shared_ptr<ISpxRecognizer> CreateConversationTranscriberFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput) override;
+
+    std::shared_ptr<ISpxConversation> CreateConversationFromConfig(const char* id) override;
+    void InitSessionFromAudioInputConfig(std::shared_ptr<ISpxSession> session, std::shared_ptr<ISpxAudioConfig> audioInput) override;
 
     // --- IServiceProvider
     SPX_SERVICE_MAP_BEGIN()
     SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
+    SPX_SERVICE_MAP_ENTRY(ISpxSpeechApiFactory)
     SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
     SPX_SERVICE_MAP_END()
 
@@ -72,7 +75,7 @@ private:
     std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfigInternal(
         std::shared_ptr<ISpxAudioConfig> audioInput);
 
-    void InitSessionFromAudioInputConfig(std::shared_ptr<ISpxSession> session, std::shared_ptr<ISpxAudioConfig> audioInput);
+    std::shared_ptr<ISpxRecognizer>  CreateRecogizer(std::shared_ptr<ISpxSession> session, std::shared_ptr<ISpxAudioConfig> audioInput, const char * recognizerName);
 };
 
 

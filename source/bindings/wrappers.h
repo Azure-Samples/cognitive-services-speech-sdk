@@ -22,7 +22,7 @@ public:
     {
         if (m_future->valid())
         {
-            return m_future->get(); 
+            return m_future->get();
         }
         throw std::future_error(std::future_errc::no_state);
     }
@@ -42,7 +42,7 @@ public:
 
     virtual ~CallbackWrapper() = default;
 
-    std::function<void(T eventArgs)> GetFunction() 
+    std::function<void(T eventArgs)> GetFunction()
     {
 #if defined(SWIGJAVA) || defined(SWIGCSHARP)
         return std::bind(&CallbackWrapper::Execute, this, std::placeholders::_1);

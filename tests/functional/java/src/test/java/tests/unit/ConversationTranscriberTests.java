@@ -17,15 +17,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
-import com.microsoft.cognitiveservices.speech.conversation.ConversationTranscriber;
-import com.microsoft.cognitiveservices.speech.conversation.Participant;
-import com.microsoft.cognitiveservices.speech.conversation.User;
-import com.microsoft.cognitiveservices.speech.conversation.ResourceHandling;
+import com.microsoft.cognitiveservices.speech.transcription.ConversationTranscriber;
+import com.microsoft.cognitiveservices.speech.transcription.Participant;
+import com.microsoft.cognitiveservices.speech.transcription.User;
+import com.microsoft.cognitiveservices.speech.transcription.Conversation;
 
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -35,6 +36,7 @@ import tests.Settings;
 
 public class ConversationTranscriberTests {
     private static String inroomEndpoint = "";
+    private static String onlineEndpoint = "";
 
     // Copy the Signature value from the Response body after calling the RESTFUL API at https://signature.centralus.cts.speech.microsoft.com
     // Voice signature format example: { "Version": <Numeric value>, "Tag": "string", "Data": "string" }
@@ -49,6 +51,7 @@ public class ConversationTranscriberTests {
         org.junit.Assume.assumeFalse(isMac);
         Settings.LoadSettings();
         inroomEndpoint = Settings.ConversationTranscriptionEndpoint + "/multiaudio";
+        onlineEndpoint = "wss://westus2.online.princetondev.customspeech.ai/recognition/onlinemeeting/v1";
     }
 
     // -----------------------------------------------------------------------
@@ -66,15 +69,13 @@ public class ConversationTranscriberTests {
     public void testConversationIdWithAnsiOnly() {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
-
-        ConversationTranscriber t = new ConversationTranscriber(s, AudioConfig.fromWavFileInput(Settings.TwoSpeakersAudio));
-        assertNotNull(t);
-        assertNotNull(t.getTranscriberImpl());
-        assertTrue(t instanceof Recognizer);
-
         String myConversationId = "123 456";
-        t.setConversationId(myConversationId);
-        String gotId = t.getConversationId();
+
+        Conversation conversation = CreateConversation(s, myConversationId);
+        assertNotNull(conversation);
+        assertNotNull(conversation.getConversationImpl());
+
+        String gotId = conversation.getConversationId();
         assertEquals(myConversationId, gotId);
     }
 
@@ -102,7 +103,7 @@ public class ConversationTranscriberTests {
         // Set invalid voice signature.
         exception = false;
         try {
-            a.setVoiceSignature("1.1, 2.2");
+            a.setVoiceSignature("1.1, 2.2. expecting throwing an exception here");
         }
         catch (Exception ex) {
             System.out.println("Got Exception in setVoiceSignature:" + ex.toString());
@@ -111,7 +112,6 @@ public class ConversationTranscriberTests {
         assertEquals(exception, true);
     }
 
-    @Ignore
     @Test
     public void testConversationAddParticipant() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(inroomEndpoint), Settings.ConversationTranscriptionPPEKey);
@@ -120,29 +120,52 @@ public class ConversationTranscriberTests {
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.TwoSpeakersAudio);
         assertNotNull(ais);
 
-        ConversationTranscriber t = new ConversationTranscriber(s, AudioConfig.fromStreamInput(ais));
-        assertNotNull(t);
-        assertNotNull(t.getTranscriberImpl());
-        assertTrue(t instanceof Recognizer);
+        String conversationId = "test_from_cts_add_participant_in_java";
 
-        t.setConversationId("TestCreatingParticipantByUserClass");
-        t.addParticipant("OneUserByUserId");
+        Conversation conversation = CreateConversation(s, conversationId);
+        assertNotNull(conversation);
+        assertNotNull(conversation.getConversationImpl());
+
+        ConversationTranscriber ct = new ConversationTranscriber(AudioConfig.fromStreamInput(ais));
+        assertNotNull(ct);
+        assertNotNull(ct.getTranscriberImpl());
+        assertTrue(ct instanceof Recognizer);
+
+        // Wait for join the conversation for max 30 seconds
+        Future<?> future = ct.joinConversationAsync(conversation);
+        assertNotNull(future);
+        future.get(30, TimeUnit.SECONDS);
+
+        Future<?> add_future = conversation.addParticipantAsync("OneUserByUserId");
+        assertNotNull(add_future);
+        future.get(30, TimeUnit.SECONDS);
 
         User user = User.fromUserId("CreateUserFromId and then add it ");
-        t.addParticipant(user);
+        conversation.addParticipantAsync(user).get();
 
         // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
         Participant participant = Participant.from("userIdForParticipant", "en-us", voiceSignatureKatie);
-        t.addParticipant(participant);
+        conversation.addParticipantAsync(participant);
 
-        String result = getFirstTranscriberResult(t);
-        assertEquals(Settings.TwoSpeakersAudioUtterance, result);
+        boolean found = false;
+        ArrayList<String> phrases = getTranscriberResult(ct);
+        for( String phrase: phrases) {
+          System.out.println("phrase comes back from CTS is '" + phrase + "'");
+          String cleanedPhrase = phrase.replaceAll("[^a-zA-Z0-9 ]", "");
+          String reference = Settings.TwoSpeakersAudioUtterance.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase();
+          System.out.println("cleaned version of Settings.TwoSpeakersAudioUtterance is '" + reference + "'");
+          if(cleanedPhrase.toLowerCase().startsWith(reference) )  {
+              found = true;
+              break;
+           }
+        }
+        System.out.println("found is " + found);
+        assertEquals(found, true);
 
-        t.close();
-        t.close();
+        ct.close();
+        conversation.close();        
     }
 
-    @Ignore
     @Test
     public void testRemoveParticipant() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(inroomEndpoint), Settings.ConversationTranscriptionPPEKey);
@@ -151,15 +174,25 @@ public class ConversationTranscriberTests {
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.TwoSpeakersAudio);
         assertNotNull(ais);
 
-        ConversationTranscriber t = new ConversationTranscriber(s, AudioConfig.fromStreamInput(ais));
-        assertNotNull(t);
-        assertNotNull(t.getTranscriberImpl());
-        assertTrue(t instanceof Recognizer);
+        String conversationId = "test_from_cts_remove_participant_in_java";
 
-        t.setConversationId("TestCreatingParticipantByUserClass");
+        Conversation conversation = CreateConversation(s, conversationId);
+        assertNotNull(conversation);
+        assertNotNull(conversation.getConversationImpl());
+
+        ConversationTranscriber ct = new ConversationTranscriber(AudioConfig.fromStreamInput(ais));
+        assertNotNull(ct);
+        assertNotNull(ct.getTranscriberImpl());
+        assertTrue(ct instanceof Recognizer);
+
+        // Wait for join the conversation for max 30 seconds
+        Future<?> future = ct.joinConversationAsync(conversation);
+        assertNotNull(future);
+        future.get(30, TimeUnit.SECONDS);
+
         Boolean exception = false;
         try {
-            t.removeParticipant("NoneExist");
+            conversation.removeParticipantAsync("NoneExist_AnExceptionIsExpected").get();
         }
         catch (Exception ex) {
             System.out.println("Got Exception in removeParticipant:" + ex.toString());
@@ -167,125 +200,150 @@ public class ConversationTranscriberTests {
         }
         assertEquals(exception, true);
 
-        t.addParticipant("OneUserByUserId");
-        t.removeParticipant("OneUserByUserId");
+        conversation.addParticipantAsync("OneUserByUserId").get();
+        conversation.removeParticipantAsync("OneUserByUserId").get();
 
         User user = User.fromUserId("User object created from User.FromUserId");
-        t.addParticipant(user);
-        t.removeParticipant(user);
+        conversation.addParticipantAsync(user).get();
 
-        // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-        Participant participant = Participant.from("userIdForParticipant", "en-us", voiceSignatureKatie);
-        t.addParticipant(participant);
-        t.removeParticipant(participant);
+        boolean found = false;
+        ArrayList<String> phrases = getTranscriberResult(ct);
+        for( String phrase: phrases) {
+          System.out.println("phrase comes back from CTS is '" + phrase + "'");
+          String cleanedPhrase = phrase.replaceAll("[^a-zA-Z0-9 ]", "");
+          String reference = Settings.TwoSpeakersAudioUtterance.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase();
+          System.out.println("cleaned version of Settings.TwoSpeakersAudioUtterance is '" + reference + "'");
+          if(cleanedPhrase.toLowerCase().startsWith(reference) )  {
+              found = true;
+              break;
+           }
+        }
+        System.out.println("found is " + found);
+        assertEquals(found, true);
 
-        String result = getFirstTranscriberResult(t);
-        assertEquals(Settings.TwoSpeakersAudioUtterance, result);
-
-        t.close();
-        t.close();
+        ct.close();
+        conversation.close();
     }
 
-    @Ignore("TODO: ignore this to make app center test pass before 1.7.0 release.")
+    /* We knew Android http delete for some reason does not work.
+     * Under Windows, I got a 500 error as well.
+     */
+    @Ignore
     @Test
-     public void testStartAndStopConversationTranscribingAsyncDestroyResources() throws InterruptedException, ExecutionException, TimeoutException {
-        testStartAndStopConversationTranscribingAsyncInternal(true);
-    }
-
-    @Test
-    public void testStartAndStopConversationTranscribingAsyncKeepResources() throws InterruptedException, ExecutionException, TimeoutException {
-        testStartAndStopConversationTranscribingAsyncInternal(false);
-    }
-
-    public void testStartAndStopConversationTranscribingAsyncInternal(boolean destroyResource) throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(inroomEndpoint), Settings.ConversationTranscriptionPPEKey);
+    public void testEndConversation() throws InterruptedException, ExecutionException, TimeoutException {
+        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create(onlineEndpoint), Settings.ConversationTranscriptionPPEKey);
         assertNotNull(s);
+        s.setProperty("iCalUid", "040000008200E00074C5B7101A82E008000000001003D722197CD4010000000000000000100000009E970FDF583F9D4FB999E607891A2F66");
 
-        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.TwoSpeakersAudio);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
 
-        ConversationTranscriber t = new ConversationTranscriber(s, AudioConfig.fromStreamInput(ais));
-        assertNotNull(t);
-        assertNotNull(t.getTranscriberImpl());
-        assertTrue(t instanceof Recognizer);
+        String conversationId = "test_from_end_conversation_in_java";
 
-        t.setConversationId("ConversationPullStreamTest");
+        Conversation conversation = CreateConversation(s, conversationId);
+        assertNotNull(conversation);
+        assertNotNull(conversation.getConversationImpl());
 
-        t.addParticipant("xyz@example.com");
+        ConversationTranscriber ct = new ConversationTranscriber(AudioConfig.fromStreamInput(ais));
+        assertNotNull(ct);
+        assertNotNull(ct.getTranscriberImpl());
+        assertTrue(ct instanceof Recognizer);
 
-        String result = getFirstTranscriberResult(t, destroyResource);
-        assertTrue(result != "");
+        // Wait for join the conversation for max 30 seconds
+        Future<?> future = ct.joinConversationAsync(conversation);
+        assertNotNull(future);
+        future.get(30, TimeUnit.SECONDS);
 
-        t.close();
-        s.close();
+        conversation.addParticipantAsync("UserFromEndConversationTest").get();
+
+        boolean found = false;
+        ArrayList<String> phrases = getTranscriberResult(ct);
+        for( String phrase: phrases) {
+          System.out.println("phrase comes back from CTS is '" + phrase + "'");
+          if(phrase.toLowerCase().startsWith("what's the weather like") )  {
+              found = true;
+           }
+        }
+        assertEquals(found, true);
+
+        boolean exception = false;
+        try {
+            conversation.endConversationAsync().get();
+        }
+        catch(Exception ex){
+            exception = true;
+        }
+        assertEquals(exception, false);
+
+        // the second time, it throws an exception.
+        exception = false;
+        try {
+            conversation.endConversationAsync().get();
+        }
+        catch(Exception ex){
+            exception = true;
+        }
+        assertEquals(exception, true);
+
+        ct.close();
+        conversation.close();
     }
 
-    private String getFirstTranscriberResult(ConversationTranscriber t) throws InterruptedException, ExecutionException, TimeoutException {
-        return getFirstTranscriberResultInternal(t, true, true);
-    }
-
-    private String getFirstTranscriberResult(ConversationTranscriber t, boolean destroyResource) throws InterruptedException, ExecutionException, TimeoutException {
-        return getFirstTranscriberResultInternal(t, false, destroyResource);
-    }
-
-    private String getFirstTranscriberResultInternal(ConversationTranscriber t, boolean useDefaultStopTranscribing, boolean destroyResource) throws InterruptedException, ExecutionException, TimeoutException {
+    private ArrayList<String> getTranscriberResult(ConversationTranscriber ct) throws InterruptedException, ExecutionException, TimeoutException {
         String result;
-        final ArrayList<String> rEvents = new ArrayList<>();
+        final ArrayList<String> phrases = new ArrayList<>();
 
-        t.recognizing.addEventListener((o, e) -> {
-            System.out.println("Conversation transcriber recognizing:" + e.toString());
+        AtomicBoolean allDone = new AtomicBoolean(false);
+
+        ct.transcribing.addEventListener((o, e) -> {
+            //System.out.println("Conversation transcriber transcibing:" + e.toString());
         });
 
-        t.recognized.addEventListener((o, e) -> {
-            rEvents.add(e.getResult().getText());
-            System.out.println("Conversation transcriber recognized:" + e.toString());
+        ct.transcribed.addEventListener((o, e) -> {
+            phrases.add(e.getResult().getText());
+            System.out.println("Conversation transcriber transcribed:" + e.toString());
         });
 
-        t.canceled.addEventListener((o, e) -> {
+        // SDK does not send out sessionstopped when there is an error.
+        ct.canceled.addEventListener((o, e) -> {
             if (e.getReason() != CancellationReason.EndOfStream)
             {
-                rEvents.add("Canceled event:" + e.toString());
+                allDone.set(true);
                 System.out.println("Conversation transcriber canceled:" + e.toString());
             }
         });
 
-        Future<?> future = t.startTranscribingAsync();
-        assertNotNull(future);
+        ct.sessionStopped.addEventListener((o, e) -> {
+            allDone.set(true);
+            System.out.println("Conversation transcriber stopped:" + e.toString());
+        });
 
-        // Wait for max 30 seconds
-        future.get(30, TimeUnit.SECONDS);
+        ct.startTranscribingAsync().get();
 
-        assertFalse(future.isCancelled());
-        assertTrue(future.isDone());
-
-        // wait until we get at least on final result
+        // wait for 300 seconds for sessionStopped or cancelled, othewise we time out
+        int timeoutInMillis = 300000;
         long now = System.currentTimeMillis();
-        while(((System.currentTimeMillis() - now) < 30000) &&
-                (rEvents.isEmpty())) {
+        while(((System.currentTimeMillis() - now) < timeoutInMillis) && (allDone.get() == false ) ) {
             Thread.sleep(200);
         }
 
-        assertTrue(1 <= rEvents.size());
-        result = rEvents.get(0);
-        System.out.println("Result:" + result);
-        assertFalse(result.contains("Canceled event:"));
+        if( allDone.get() == false) {
+            System.out.println("timeout!" + timeoutInMillis);
+    }
 
-        if (useDefaultStopTranscribing)
-        {
-            future = t.stopTranscribingAsync();
-        }
-        else
-        {
-            future = t.stopTranscribingAsync(destroyResource ? ResourceHandling.DestroyResources  : ResourceHandling.KeepResources);
-        }
-        assertNotNull(future);
+        ct.stopTranscribingAsync().get();
+        return phrases;
+    }
 
-        // Wait for max 30 seconds
-        future.get(30, TimeUnit.SECONDS);
+    private Conversation CreateConversation(SpeechConfig speech_config, String id) {
+        assertNotNull(speech_config);
 
-        assertFalse(future.isCancelled());
-        assertTrue(future.isDone());
+        speech_config.setProperty("ConversationTranscriptionInRoomAndOnline", "true");
 
-        return result;
+        Conversation conversation = new Conversation(speech_config, id);
+        assertNotNull(conversation);
+        assertNotNull(conversation.getConversationImpl());
+
+        return conversation;
     }
 }

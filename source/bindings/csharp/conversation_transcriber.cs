@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using Microsoft.CognitiveServices.Speech.Internal;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
-namespace Microsoft.CognitiveServices.Speech.Conversation
+namespace Microsoft.CognitiveServices.Speech.Transcription
 {
     /// <summary>
     /// Perform conversation transcribing on the speech input. It returns recognized text and speaker id.
@@ -23,9 +23,9 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         private event EventHandler<ConversationTranscriptionCanceledEventArgs> _Canceled;
 
         /// <summary>
-        /// The event <see cref="Recognizing"/> signals that an intermediate recognition result is received.
+        /// The event <see cref="Transcribing"/> signals that an intermediate transcription result is received.
         /// </summary>
-        public event EventHandler<ConversationTranscriptionEventArgs> Recognizing
+        public event EventHandler<ConversationTranscriptionEventArgs> Transcribing
         {
             add
             {
@@ -46,9 +46,9 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         }
 
         /// <summary>
-        /// The event <see cref="Recognized"/> signals that a final recognition result is received.
+        /// The event <see cref="Transcribed"/> signals that a final transcription result is received.
         /// </summary>
-        public event EventHandler<ConversationTranscriptionEventArgs> Recognized
+        public event EventHandler<ConversationTranscriptionEventArgs> Transcribed
         {
             add
             {
@@ -92,22 +92,75 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         }
 
         /// <summary>
-        /// Creates a new instance of ConversationTranscriber.
+        /// Creates a new instance of Conversation Transcriber.
         /// </summary>
-        /// <param name="speechConfig">Speech configuration</param>
-        public ConversationTranscriber(SpeechConfig speechConfig)
-            :this(FromConfig(SpxFactory.recognizer_create_conversation_transcriber_from_config, speechConfig))
+        public ConversationTranscriber()
+            :this(FromConfig(SpxFactory.recognizer_create_conversation_transcriber_from_config))
         {
         }
 
         /// <summary>
         /// Creates a new instance of ConversationTranscriber.
         /// </summary>
-        /// <param name="speechConfig">Speech configuration</param>
         /// <param name="audioConfig">Audio configuration</param>
-        public ConversationTranscriber(SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
-            : this(FromConfig(SpxFactory.recognizer_create_conversation_transcriber_from_config, speechConfig, audioConfig))
+        public ConversationTranscriber(Audio.AudioConfig audioConfig)
+            : this(FromConfig(SpxFactory.recognizer_create_conversation_transcriber_from_config, audioConfig))
         {
+        }
+
+        internal delegate IntPtr GetTranscriberFromConfigDelegate(out IntPtr phreco, InteropSafeHandle audioInput);
+
+        internal static InteropSafeHandle FromConfig(GetTranscriberFromConfigDelegate fromConfig, Audio.AudioConfig audioConfig)
+        {
+            if (audioConfig == null) throw new ArgumentNullException(nameof(audioConfig));
+
+            IntPtr recoHandlePtr = IntPtr.Zero;
+            ThrowIfFail(fromConfig(out recoHandlePtr, audioConfig.configHandle));
+            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
+            GC.KeepAlive(audioConfig);
+            return recoHandle;
+        }
+
+        internal static InteropSafeHandle FromConfig(GetTranscriberFromConfigDelegate fromConfig )
+        {
+
+            IntPtr recoHandlePtr = IntPtr.Zero;
+            IntPtr audioConfigPtr = IntPtr.Zero;
+            InteropSafeHandle audioConfigHandle = new InteropSafeHandle(audioConfigPtr, null);
+            ThrowIfFail(fromConfig(out recoHandlePtr, audioConfigHandle));
+            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
+            return recoHandle;
+        }
+
+        /// <summary>
+        /// Join a conversation.
+        /// </summary>
+        /// <param name="conversation">The conversation to be joined.</param>
+        /// <returns>An asynchronous operation representing joining a conversation.</returns>
+        public Task JoinConversationAsync(Conversation conversation)
+        {
+            return Task.Run(() =>
+            {
+                base.DoAsyncRecognitionAction(() =>
+                {
+                    ThrowIfFail(Internal.Recognizer.recognizer_join_conversation(conversation.conversationHandle, recoHandle));
+                });
+            });
+        }
+
+        /// <summary>
+        /// Leave a conversation.
+        /// </summary>
+        /// <returns>An asynchronous operation representing leaving a conversation.</returns>
+        public Task LeaveConversationAsync()
+        {
+            return Task.Run(() =>
+            {
+                base.DoAsyncRecognitionAction(() =>
+                {
+                    ThrowIfFail(Internal.Recognizer.recognizer_leave_conversation(recoHandle));
+                });
+            });
         }
 
         internal ConversationTranscriber(InteropSafeHandle  recoHandle) : base(recoHandle)
@@ -121,31 +174,6 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
             IntPtr propertyHandle = IntPtr.Zero;
             ThrowIfFail(Internal.Recognizer.recognizer_get_property_bag(recoHandle, out propertyHandle));
             Properties = new PropertyCollection(propertyHandle);
-        }
-
-        /// <summary>
-        /// Gets/sets the conversation id.
-        /// </summary>
-        public string ConversationId
-        {
-            get
-            {
-                ThrowIfNull(recoHandle);
-                return SpxFactory.GetDataFromHandleUsingDelegate(Internal.ConversationTranscriber.conversation_transcriber_get_conversation_id, recoHandle, maxCharCount);
-            }
-            set
-            {
-                ThrowIfNull(recoHandle);
-                IntPtr nativePtr = Utf8StringMarshaler.MarshalManagedToNative(value);
-                try
-                {
-                    ThrowIfFail(Internal.ConversationTranscriber.conversation_transcriber_set_conversation_id(recoHandle, nativePtr));
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(nativePtr);
-                }
-            }
         }
 
         /// <summary>
@@ -216,8 +244,6 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
 
         /// <summary>
         /// Stops conversation transcribing.
-        /// Note: the service will keep allocated resources after stopping conversation transcribing.
-        /// If the resources should be destroyed, please use <see cref="StopTranscribingAsync(ResourceHandling)"/>.
         /// </summary>
         /// <returns>A task representing the asynchronous operation that stops the recognition.</returns>
         /// <remarks>This is used to pause the conversation. The client can start the conversation again by calling StartTranscribingAsync.</remarks>
@@ -225,99 +251,8 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
         {
             return Task.Run(() =>
             {
-                base.DoAsyncRecognitionAction(StopTranscribingWithResourceHandlingKeep);
+                base.DoAsyncRecognitionAction(StopContinuousRecognition);
             });
-        }
-
-        /// <summary>
-        /// Stops conversation transcribing.
-        /// </summary>
-        /// <param name="resourceHandling">A enum value that specifies how the service handles allocated resource after stopping transcription.</param>
-        /// <returns>A task representing the asynchronous operation that stops the recognition.</returns>
-        /// <remarks>This is used to pause the conversation. The client can start the conversation again by calling StartTranscribingAsync.</remarks>
-        public Task StopTranscribingAsync(ResourceHandling resourceHandling)
-        {
-            return Task.Run(() =>
-            {
-                if (resourceHandling == ResourceHandling.DestroyResources)
-                {
-                    base.DoAsyncRecognitionAction(StopTranscribingWithResourceHandlingDestroy);
-                }
-                else if (resourceHandling == ResourceHandling.KeepResources)
-                {
-                    base.DoAsyncRecognitionAction(StopTranscribingWithResourceHandlingKeep);
-                }
-                else
-                {
-                    throw new ArgumentOutOfRangeException("Invalid resource handling type:" + resourceHandling);
-                }
-            });
-        }
-
-        /// <summary>
-        /// Add a participant to a conversation using the user's id.
-        ///
-        /// Note: The returned participants can be used to remove. If the client changes the participant's attributes,
-        /// the changed attributes are passed on to the service only when the participants is added again.
-        ///
-        /// </summary>
-        /// <param name="userId">A user id.</param>
-        /// <returns>A Participant object.</returns>
-        public Participant AddParticipant(string userId)
-        {
-            var participant = Participant.From(userId, "", null);
-            ThrowIfFail(Internal.ConversationTranscriber.conversation_transcriber_update_participant(recoHandle, true, participant.participantHandle));
-            return participant;
-        }
-
-        /// <summary>
-        /// Add a participant to a conversation using the User object.
-        /// </summary>
-        /// <param name="user">A User object.</param>
-        public void AddParticipant(User user)
-        {
-            ThrowIfNull(recoHandle);
-            ThrowIfFail(Internal.ConversationTranscriber.conversation_transcriber_update_participant_by_user(recoHandle, true, user.userHandle));
-        }
-
-        /// <summary>
-        /// Add a participant to a conversation using the Participant object
-        /// </summary>
-        /// <param name="participant">A Participant object.</param>
-        public void AddParticipant(Participant participant)
-        {
-            ThrowIfNull(recoHandle);
-            ThrowIfFail(Internal.ConversationTranscriber.conversation_transcriber_update_participant(recoHandle, true, participant.participantHandle));
-        }
-
-        /// <summary>
-        /// Remove a participant in a conversation using the Participant object
-        /// </summary>
-        /// <param name="participant">A Participant object.</param>
-        public void RemoveParticipant(Participant participant)
-        {
-            ThrowIfNull(recoHandle);
-            ThrowIfFail(Internal.ConversationTranscriber.conversation_transcriber_update_participant(recoHandle, false, participant.participantHandle));
-        }
-
-        /// <summary>
-        /// Remove a participant in a conversation using the User object
-        /// </summary>
-        /// <param name="user">A User object.</param>
-        public void RemoveParticipant(User user)
-        {
-            ThrowIfNull(recoHandle);
-            ThrowIfFail(Internal.ConversationTranscriber.conversation_transcriber_update_participant_by_user(recoHandle, false, user.userHandle));
-        }
-
-        /// <summary>
-        /// Remove a participant from a conversation using a user id object
-        /// </summary>
-        /// <param name="userId">A user id.</param>
-        public void RemoveParticipant(string userId)
-        {
-            ThrowIfNull(recoHandle);
-            ThrowIfFail(Internal.ConversationTranscriber.conversation_transcriber_update_participant_by_user_id(recoHandle, false, userId));
         }
 
         protected override void Dispose(bool disposing)
@@ -352,23 +287,9 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
             base.Dispose(disposing);
         }
 
-        internal void StopTranscribingWithResourceHandlingDestroy()
-        {
-            StopTranscribing(true);
-        }
-
-        internal void StopTranscribingWithResourceHandlingKeep()
-        {
-            StopTranscribing(false);
-        }
-
         private Internal.CallbackFunctionDelegate recognizingCallbackDelegate;
         private Internal.CallbackFunctionDelegate recognizedCallbackDelegate;
         private Internal.CallbackFunctionDelegate canceledCallbackDelegate;
-
-        private const Int32 maxCharCount = 1024;
-
-        // Defines a private methods to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
 
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_Recognizing(IntPtr hreco, IntPtr hevent, IntPtr pvContext)
@@ -388,6 +309,8 @@ namespace Microsoft.CognitiveServices.Speech.Conversation
                 LogError(Internal.SpxError.InvalidHandle);
             }
         }
+
+        // Defines a private methods to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
 
         [MonoPInvokeCallback(typeof(CallbackFunctionDelegate))]
         private static void FireEvent_Recognized(IntPtr hreco, IntPtr hevent, IntPtr pvContext)

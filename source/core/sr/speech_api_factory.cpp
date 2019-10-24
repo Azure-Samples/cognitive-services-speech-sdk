@@ -38,9 +38,29 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognize
     return CreateTranslationRecognizerFromConfigInternal(audioInput);
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateConversationTranscriberFromConfig(std::shared_ptr<ISpxAudioConfig> audioInput)
+
+std::shared_ptr<ISpxConversation> CSpxSpeechApiFactory::CreateConversationFromConfig(const char* id)
 {
-    return CreateRecognizerFromConfigInternal("CSpxAudioStreamSession", "CSpxConversationTranscriber", audioInput);
+    // Create the session
+    auto factoryAsSite = SpxSiteFromThis(this);
+    auto session = SpxCreateObjectWithSite<ISpxSession>("CSpxAudioStreamSession", factoryAsSite);
+    try
+    {
+        // create conversation
+        auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
+        auto conversation = SpxCreateObjectWithSite<ISpxConversation>("CSpxConversation", sessionAsSite);
+        conversation->SetConversationId(id);
+
+        session->SetConversation(conversation);
+
+        return conversation;
+    }
+    catch (...)
+    {
+        SpxTermAndClearNothrow(session);
+
+        throw;
+    }
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerFromConfigInternal(
@@ -52,6 +72,11 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerFromConfig
     auto factoryAsSite = SpxSiteFromThis(this);
     auto session = SpxCreateObjectWithSite<ISpxSession>(sessionClassName, factoryAsSite);
 
+    return CreateRecogizer(session, audioInput, recognizerClassName);
+}
+
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecogizer(std::shared_ptr<ISpxSession> session, std::shared_ptr<ISpxAudioConfig> audioInput, const char * recognizerClassName)
+{
     try
     {
         // Initialize the session

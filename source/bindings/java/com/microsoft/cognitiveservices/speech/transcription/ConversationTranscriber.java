@@ -2,19 +2,17 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-package com.microsoft.cognitiveservices.speech.conversation;
+package com.microsoft.cognitiveservices.speech.transcription;
 
 import java.util.concurrent.Future;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
-import com.microsoft.cognitiveservices.speech.conversation.ConversationTranscriptionCanceledEventArgs;
+import com.microsoft.cognitiveservices.speech.transcription.ConversationTranscriptionCanceledEventArgs;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.OutputFormat;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
-import com.microsoft.cognitiveservices.speech.conversation.Participant;
-import com.microsoft.cognitiveservices.speech.conversation.User;
 
 /**
  * Performs conversation transcribing for audio input streams, and gets transcribed text and user id as a result.
@@ -24,14 +22,14 @@ import com.microsoft.cognitiveservices.speech.conversation.User;
 public final class ConversationTranscriber extends com.microsoft.cognitiveservices.speech.Recognizer
 {
     /**
-     * The event recognizing signals that an intermediate recognition result is received.
+     * The event transcribing signals that an intermediate recognition result is received.
      */
-    final public EventHandlerImpl<ConversationTranscriptionEventArgs> recognizing = new EventHandlerImpl<ConversationTranscriptionEventArgs>();
+    final public EventHandlerImpl<ConversationTranscriptionEventArgs> transcribing = new EventHandlerImpl<ConversationTranscriptionEventArgs>();
 
     /**
-     * The event recognized signals that a final recognition result is received.
+     * The event transcribed signals that a final recognition result is received.
      */
-    final public EventHandlerImpl<ConversationTranscriptionEventArgs> recognized = new EventHandlerImpl<ConversationTranscriptionEventArgs>();
+    final public EventHandlerImpl<ConversationTranscriptionEventArgs> transcribed = new EventHandlerImpl<ConversationTranscriptionEventArgs>();
 
     /**
      * The event canceled signals that the recognition was canceled.
@@ -40,123 +38,27 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
 
     /**
      * Initializes a new instance of Conversation Transcriber.
-     * @param speechConfig speech configuration.
      */
-    public ConversationTranscriber(SpeechConfig speechConfig) {
+    public ConversationTranscriber() {
         super(null);
 
-        Contracts.throwIfNull(speechConfig, "speechConfig");
-        this.transcriberImpl = com.microsoft.cognitiveservices.speech.internal.ConversationTranscriber.FromConfig(speechConfig.getImpl());
+        this.transcriberImpl = com.microsoft.cognitiveservices.speech.internal.ConversationTranscriber.FromConfig();
         initialize();
     }
 
     /**
      * Initializes a new instance of Conversation Transcriber.
-     * @param speechConfig speech configuration.
      * @param audioConfig audio configuration.
      */
-    public ConversationTranscriber(SpeechConfig speechConfig, AudioConfig audioConfig) {
+    public ConversationTranscriber(AudioConfig audioConfig) {
         super(audioConfig);
 
-        Contracts.throwIfNull(speechConfig, "speechConfig");
         if (audioConfig == null) {
-            this.transcriberImpl = com.microsoft.cognitiveservices.speech.internal.ConversationTranscriber.FromConfig(speechConfig.getImpl());
+            this.transcriberImpl = com.microsoft.cognitiveservices.speech.internal.ConversationTranscriber.FromConfig();
         } else {
-            this.transcriberImpl = com.microsoft.cognitiveservices.speech.internal.ConversationTranscriber.FromConfig(speechConfig.getImpl(), audioConfig.getConfigImpl());
+            this.transcriberImpl = com.microsoft.cognitiveservices.speech.internal.ConversationTranscriber.FromConfig(audioConfig.getConfigImpl());
         }
         initialize();
-    }
-
-    /**
-     * Gets the conversation ID of a conversation transcriber session.
-     * @return the conversation ID of a conversation transcribing session.
-     */
-    public String getConversationId() {
-        return transcriberImpl.GetConversationId();
-    }
-
-    /**
-     * Sets the conversation ID for a conversation transcriber session.
-     * @param conversationId conversation id.
-     */
-    public void setConversationId(String conversationId) {
-        Contracts.throwIfNullOrWhitespace(conversationId, "conversationId");
-        transcriberImpl.SetConversationId(conversationId);
-    }
-
-    /**
-     * Add a participant to conversation using userId.
-     * @param userId user id.
-     * @return Participant object.
-     */
-    public Participant addParticipant(String userId) {
-        Contracts.throwIfNullOrWhitespace(userId, "userId");
-        return new Participant(transcriberImpl.AddParticipant(userId));
-    }
-
-    /**
-     * Add a participant to conversation using User object.
-     * @param user user object.
-     */
-    public void addParticipant(User user) {
-        Contracts.throwIfNull(user, "user");
-        transcriberImpl.AddParticipant(user.getUserImpl());
-    }
-
-    /**
-     * Add a participant to conversation using Participant object.
-     * @param participant participant object.
-     */
-    public void addParticipant(Participant participant) {
-        Contracts.throwIfNull(participant, "participant");
-        transcriberImpl.AddParticipant(participant.getParticipantImpl());
-    }
-
-    /**
-     * Remove a participant from conversation using Participant object.
-     * @param participant participant object.
-     */
-    public void removeParticipant(Participant participant) {
-        Contracts.throwIfNull(participant, "participant");
-        transcriberImpl.RemoveParticipant(participant.getParticipantImpl());
-    }
-
-    /**
-     * Remove a participant from conversation using User object.
-     * @param user user object.
-     */
-    public void removeParticipant(User user) {
-        Contracts.throwIfNull(user, "user");
-        transcriberImpl.RemoveParticipant(user.getUserImpl());
-    }
-
-    /**
-     * Remove a participant from conversation using User id.
-     * @param userId user's id.
-     */
-    public void removeParticipant(String userId) {
-        Contracts.throwIfNullOrWhitespace(userId, "userId");
-        transcriberImpl.RemoveParticipant(userId);
-    }
-
-    /**
-     * Sets the authorization token used to communicate with the service.
-     * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token expires,
-     * the caller needs to refresh it by calling this setter with a new valid token.
-     * Otherwise, the recognizer will encounter errors during recognition.
-     * @param token Authorization token.
-     */
-    public void setAuthorizationToken(String token) {
-        Contracts.throwIfNullOrWhitespace(token, "token");
-        transcriberImpl.SetAuthorizationToken(token);
-    }
-
-    /**
-     * Gets the authorization token used to communicate with the service.
-     * @return Authorization token.
-     */
-    public String getAuthorizationToken() {
-        return transcriberImpl.GetAuthorizationToken();
     }
 
     /**
@@ -189,6 +91,41 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
 
     private com.microsoft.cognitiveservices.speech.PropertyCollection _Parameters;
 
+     /**
+     *  Join a conversation.
+     *  A conversation transcriber must join a conversation before transcribing audio.
+     * @param conversation the conversation to be joined.
+     * @return A task representing the asynchronous operation that joins a conversation.
+     */
+    public Future<Void> joinConversationAsync(Conversation conversation) {
+        final ConversationTranscriber thisReco = this;
+        final Conversation thisConv = conversation;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { transcriberImpl.JoinConversationAsync(thisConv.getConversationImpl()); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+                return null;
+        }});
+    }
+
+     /**
+     *  Leave a conversation.
+     *  After leaving a conversation, no transcribing and transcribed events will be sent out.
+     *
+     * @return A task representing the asynchronous operation that leaves a conversation.
+     */
+    public Future<Void> leaveConversationAsync() {
+        final ConversationTranscriber thisReco = this;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
+            public Void call() {
+                Runnable runnable = new Runnable() { public void run() { transcriberImpl.LeaveConversationAsync(); }};
+                thisReco.doAsyncRecognitionAction(runnable);
+                return null;
+        }});
+    }
+
     /**
      * Starts conversation transcribing on a continuous audio stream, until stopTranscribingAsync() is called.
      * User must subscribe to events to receive transcription results.
@@ -207,9 +144,8 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
 
     /**
      *  Stops conversation transcribing.
-     *  Note: the service will destroy allocated resources after stopping conversation transcribing.
-     *  If the resources should not be destroyed, please use <see cref="StopTranscribingAsync(ResourceHandling)"/>.
-     *  @returns A task representing the asynchronous operation that stops the recognition.
+     *
+     *  @returns A task representing the asynchronous operation that stops the transcription.
      */
     public Future<Void> stopTranscribingAsync() {
         final ConversationTranscriber thisReco = this;
@@ -217,25 +153,6 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
         return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
             public Void call() {
                 Runnable runnable = new Runnable() { public void run() { transcriberImpl.StopTranscribingAsync(); }};
-                thisReco.doAsyncRecognitionAction(runnable);
-                return null;
-        }});
-    }
-
-    /**
-     *  Stops conversation transcribing.
-     *  Added in version 1.7.0.
-     *  @param resourceHandling A enum value that specifies how the service handles allocated resources after stopping transcription.
-     *  @returns A task representing the asynchronous operation that stops the recognition.
-     */
-    public Future<Void> stopTranscribingAsync(ResourceHandling resourceHandling)
-    {
-        final ConversationTranscriber thisReco = this;
-        final ResourceHandling resourceHandlingForLambda = resourceHandling;
-
-        return s_executorService.submit(new java.util.concurrent.Callable<Void>() {
-            public Void call() {
-                Runnable runnable = new Runnable() { public void run() { transcriberImpl.StopTranscribingAsync(resourceHandlingForLambda.getValue()); }};
                 thisReco.doAsyncRecognitionAction(runnable);
                 return null;
         }});
@@ -251,10 +168,10 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
         }
 
         if (disposing) {
-            if (this.recognizing.isUpdateNotificationOnConnectedFired())
-                transcriberImpl.getRecognizing().RemoveEventListener(recognizingHandler);
-            if (this.recognized.isUpdateNotificationOnConnectedFired())
-                transcriberImpl.getRecognized().RemoveEventListener(recognizedHandler);
+            if (this.transcribing.isUpdateNotificationOnConnectedFired())
+                transcriberImpl.getTranscribing().RemoveEventListener(transcribingHandler);
+            if (this.transcribed.isUpdateNotificationOnConnectedFired())
+                transcriberImpl.getTranscribed().RemoveEventListener(recognizedHandler);
             if (this.canceled.isUpdateNotificationOnConnectedFired())
                 transcriberImpl.getCanceled().RemoveEventListener(errorHandler);
             if (this.sessionStarted.isUpdateNotificationOnConnectedFired())
@@ -266,7 +183,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
             if (this.speechEndDetected.isUpdateNotificationOnConnectedFired())
                 transcriberImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
 
-            recognizingHandler.delete();
+            transcribingHandler.delete();
             recognizedHandler.delete();
             errorHandler.delete();
             transcriberImpl.delete();
@@ -299,21 +216,21 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
 
         final ConversationTranscriber _this = this;
 
-        recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
-        this.recognizing.updateNotificationOnConnected(new Runnable(){
+        transcribingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
+        this.transcribing.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
                 _conversationTranscriberObjects.add(_this);
-                transcriberImpl.getRecognizing().AddEventListener(recognizingHandler);
+                transcriberImpl.getTranscribing().AddEventListener(transcribingHandler);
             }
         });
 
         recognizedHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ true);
-        this.recognized.updateNotificationOnConnected(new Runnable(){
+        this.transcribed.updateNotificationOnConnected(new Runnable(){
             @Override
             public void run() {
                 _conversationTranscriberObjects.add(_this);
-                transcriberImpl.getRecognized().AddEventListener(recognizedHandler);
+                transcriberImpl.getTranscribed().AddEventListener(recognizedHandler);
             }
         });
 
@@ -362,7 +279,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
     }
 
     private com.microsoft.cognitiveservices.speech.internal.ConversationTranscriber transcriberImpl;
-    private ResultHandlerImpl recognizingHandler;
+    private ResultHandlerImpl transcribingHandler;
     private ResultHandlerImpl recognizedHandler;
     private CanceledHandlerImpl errorHandler;
     private boolean disposed = false;
@@ -376,11 +293,11 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
     // Defines a private class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class ResultHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.ConversationTranscriberEventListener {
 
-        ResultHandlerImpl(ConversationTranscriber transcriber, boolean isRecognizedHandler) {
+        ResultHandlerImpl(ConversationTranscriber transcriber, boolean isTranscribedHandler) {
             Contracts.throwIfNull(transcriber, "transcriber");
 
             this.transcriber = transcriber;
-            this.isRecognizedHandler = isRecognizedHandler;
+            this.isRecognizedHandler = isTranscribedHandler;
         }
 
         @Override
@@ -392,7 +309,7 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
             }
 
             ConversationTranscriptionEventArgs resultEventArg = new ConversationTranscriptionEventArgs(eventArgs);
-            EventHandlerImpl<ConversationTranscriptionEventArgs> handler = isRecognizedHandler ? transcriber.recognized : transcriber.recognizing;
+            EventHandlerImpl<ConversationTranscriptionEventArgs> handler = isRecognizedHandler ? transcriber.transcribed : transcriber.transcribing;
             if (handler != null) {
                 handler.fireEvent(this.transcriber, resultEventArg);
             }
@@ -427,5 +344,4 @@ public final class ConversationTranscriber extends com.microsoft.cognitiveservic
 
         private ConversationTranscriber transcriber;
     }
-
 }

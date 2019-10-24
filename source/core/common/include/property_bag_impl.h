@@ -104,7 +104,7 @@ private:
         constexpr auto authTokenName = GetPropertyName(PropertyId::SpeechServiceAuthorization_Token);
         constexpr auto proxyPassName = GetPropertyName(PropertyId::SpeechServiceConnection_ProxyPassword);
         constexpr auto proxyUserName = GetPropertyName(PropertyId::SpeechServiceConnection_ProxyUserName);
-        constexpr auto applicationId = GetPropertyName(PropertyId::Conversation_ApplicationId);        
+        constexpr auto applicationId = GetPropertyName(PropertyId::Conversation_ApplicationId);
 
         // hide property value for: subscription key, authorization token, conversation secret key/dialog id, proxy password and proxy username
         if (name == subKeyName || name == authTokenName || name == applicationId)

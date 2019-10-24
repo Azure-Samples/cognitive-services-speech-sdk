@@ -6,7 +6,7 @@ using System;
 using System.Globalization;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
-namespace Microsoft.CognitiveServices.Speech.Conversation
+namespace Microsoft.CognitiveServices.Speech.Transcription
 {
     /// <summary>
     /// Class that defines conversation transcriber event arguments.

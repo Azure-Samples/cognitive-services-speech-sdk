@@ -16,7 +16,7 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-namespace Conversation {
+namespace Transcription {
 
 /// <summary>
 /// Represents the result of a conversation transcriber.
@@ -72,4 +72,4 @@ private:
 };
 
 
-} } } }  // Microsoft::CognitiveServices::Speech::Conversation
+} } } }  // Microsoft::CognitiveServices::Speech::Transcription

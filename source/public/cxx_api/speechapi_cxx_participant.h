@@ -12,7 +12,7 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-namespace Conversation {
+namespace Transcription {
 
 /// <summary>
 /// Represents a participant in a conversation.
@@ -20,29 +20,6 @@ namespace Conversation {
 /// </summary>
 class Participant
 {
-private:
-
-    /*! \cond PRIVATE */
-
-    class PrivatePropertyCollection : public PropertyCollection
-    {
-    public:
-        PrivatePropertyCollection(SPXPARTICIPANTHANDLE hparticipant) :
-            PropertyCollection(
-                [=]() {
-            SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
-            participant_get_property_bag(hparticipant, &hpropbag);
-            return hpropbag;
-        }())
-        {
-        }
-    };
-
-    PrivatePropertyCollection m_properties;
-
-    /*! \endcond */
-
-
 public:
 
     /// <summary>
@@ -100,10 +77,34 @@ public:
         SPX_THROW_ON_FAIL(participant_set_voice_signature(m_hparticipant, Utils::ToUTF8(voiceSignature.c_str())));
     }
 
+private:
+
+    /*! \cond PRIVATE */
+
+    class PrivatePropertyCollection : public PropertyCollection
+    {
+    public:
+        PrivatePropertyCollection(SPXPARTICIPANTHANDLE hparticipant) :
+            PropertyCollection(
+                [=]() {
+            SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
+            participant_get_property_bag(hparticipant, &hpropbag);
+            return hpropbag;
+        }())
+        {
+        }
+    };
+
+    PrivatePropertyCollection m_properties;
+
+    /*! \endcond */
+
+public:
+
     /// <summary>
     /// Collection of additional participant properties.
     /// </summary>
-    const PropertyCollection& Properties;
+    PropertyCollection& Properties;
 
 private:
     DISABLE_COPY_AND_MOVE(Participant);

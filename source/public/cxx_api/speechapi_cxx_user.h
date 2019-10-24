@@ -12,7 +12,7 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-namespace Conversation {
+namespace Transcription {
 
 constexpr size_t MAX_USER_ID_LEN = 1024;
 

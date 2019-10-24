@@ -15,6 +15,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXPROPERTYBAGHANDLE = System.IntPtr;
     using SPXKEYWORDHANDLE = System.IntPtr;
     using SPXEVENTHANDLE = System.IntPtr;
+    using SPXCONVERSATIONHANDLE = System.IntPtr;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void CallbackFunctionDelegate(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, IntPtr context);
@@ -120,5 +121,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR translator_remove_target_language(InteropSafeHandle recoHandle, [MarshalAs(UnmanagedType.LPStr)] string language);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR recognizer_join_conversation(InteropSafeHandle convhandle, InteropSafeHandle recoHandle);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR recognizer_leave_conversation(InteropSafeHandle recoHandle);
     }
 }

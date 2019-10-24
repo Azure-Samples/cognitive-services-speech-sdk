@@ -20,7 +20,7 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 using namespace Microsoft::CognitiveServices::Speech;
-using namespace Microsoft::CognitiveServices::Speech::Conversation;
+using namespace Microsoft::CognitiveServices::Speech::Transcription;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Intent;
 using namespace Microsoft::CognitiveServices::Speech::Translation;
@@ -128,19 +128,42 @@ map<Callbacks, atomic_int> createCallbacksMap();
 
 std::string GetUserId(const ConversationTranscriptionResult* ctr);
 std::string GetUserId(const SpeechRecognitionResult* ctr);
-template<typename RecogType, typename EventArgType, typename CancelArgType>
-void ConnectCallbacks(RecogType* recognizer, RecoPhrasesPtr result)
+
+template<typename T>
+auto ParseCancelledEvents(RecoPhrasesPtr result)
 {
-    if (recognizer == nullptr || result == nullptr)
+    return [result](const T& e)
     {
-        return;
-    }
-    recognizer->Recognizing.DisconnectAll();
-    recognizer->Recognizing.Connect([result](const EventArgType& e)
+        string error;
+        switch (e.Reason)
+        {
+        case CancellationReason::EndOfStream:
+            SPX_TRACE_VERBOSE("CXX_API_TEST CANCELED: Reach the end of the file.");
+            break;
+
+        case CancellationReason::Error:
+            error = !e.ErrorDetails.empty() ? e.ErrorDetails : "Errors!";
+            SPX_TRACE_VERBOSE("CXX_API_TEST CANCELED: ErrorCode=%d, ErrorDetails=%s", (int)e.ErrorCode, e.ErrorDetails.c_str());
+            result->phrases.push_back(RecoPhrase{ error });
+            result->ready.set_value();
+            break;
+
+        default:
+            SPX_TRACE_VERBOSE("CXX_API_TEST unknown Reason!");
+            result->phrases.push_back(RecoPhrase{ "unknown Reason!" });
+            result->ready.set_value();
+        }
+    };
+}
+
+template<typename T>
+auto ParseRecogEvents(RecoPhrasesPtr result)
+{
+    return [result](const T& e)
     {
+        auto userId = GetUserId(e.Result.get());
         if (e.Result->Reason == ResultReason::RecognizingSpeech)
         {
-            auto userId = GetUserId(e.Result.get());
             ostringstream os;
             os << "Text= " << e.Result->Text
                 << " Offset= " << e.Result->Offset()
@@ -149,13 +172,7 @@ void ConnectCallbacks(RecogType* recognizer, RecoPhrasesPtr result)
 
             SPX_TRACE_VERBOSE("CXX_API_TEST RECOGNIZING: %s", os.str().c_str());
         }
-    });
-
-    recognizer->Recognized.DisconnectAll();
-    recognizer->Recognized.Connect([result](const EventArgType& e)
-    {
-        auto userId = GetUserId(e.Result.get());
-        if (e.Result->Reason == ResultReason::RecognizedSpeech)
+        else if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
             ostringstream os;
             auto json = e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
@@ -186,45 +203,38 @@ void ConnectCallbacks(RecogType* recognizer, RecoPhrasesPtr result)
             default:
                 result->phrases.push_back(RecoPhrase{ UNKNOWN_REASON });
             }
-            result->ready.set_value();
         }
-    });
-    recognizer->Canceled.DisconnectAll();
-    recognizer->Canceled.Connect([result](const CancelArgType& e)
+    };
+}
+
+template <typename RecognizerType, typename CanceledArgType>
+void ConnectNonRecoEvents(RecognizerType* sr, RecoPhrasesPtr result)
+{
+    if (sr == nullptr || result == nullptr)
     {
-        string error;
-        switch (e.Reason)
-        {
-        case CancellationReason::EndOfStream:
-            SPX_TRACE_VERBOSE("CXX_API_TEST CANCELED: Reach the end of the file.");
-            break;
+        return;
+    }
 
-        case CancellationReason::Error:
-            error = !e.ErrorDetails.empty() ? e.ErrorDetails : "Errors!";
-            SPX_TRACE_VERBOSE("CXX_API_TEST CANCELED: ErrorCode=%d, ErrorDetails=%s", (int)e.ErrorCode, e.ErrorDetails.c_str());
-            result->phrases.push_back(RecoPhrase{ error });
-            result->ready.set_value();
-            break;
+    auto cancalled_callback = ParseCancelledEvents<CanceledArgType>(result);
+    sr->Canceled.DisconnectAll();
+    sr->Canceled.Connect(cancalled_callback);
 
-        default:
-            SPX_TRACE_VERBOSE("CXX_API_TEST unknown Reason!");
-            result->phrases.push_back(RecoPhrase{ "unknown Reason!" });
-            result->ready.set_value();
-        }
-    });
-    recognizer->SessionStopped.DisconnectAll();
-    recognizer->SessionStopped.Connect([result](const SessionEventArgs& e)
+    sr->SessionStopped.DisconnectAll();
+    sr->SessionStopped.Connect([result](const SessionEventArgs& e)
     {
         SPX_TRACE_VERBOSE("CXX_API_TEST SessionStopped: session id %s", e.SessionId.c_str());
         result->ready.set_value();
     });
 
-    recognizer->SessionStarted.DisconnectAll();
-    recognizer->SessionStarted.Connect([result](const SessionEventArgs& e)
+    sr->SessionStarted.DisconnectAll();
+    sr->SessionStarted.Connect([result](const SessionEventArgs& e)
     {
         SPX_TRACE_VERBOSE("CXX_API_TEST SessionStarted: session id %s", e.SessionId.c_str());
     });
 }
+
+void ConnectCallbacks(ConversationTranscriber* ct, RecoPhrasesPtr result);
+void ConnectCallbacks(SpeechRecognizer* sr, RecoPhrasesPtr result);
 
 class RecordedDataReader
 {
@@ -251,15 +261,16 @@ private:
     std::string m_type;
 };
 
-bool VerifyText(std::string& text, const std::string& ref = string{});
+bool MatchText(std::string& text, const std::string& ref);
 std::shared_ptr<AudioConfig> CreateAudioPullSingleChannel(std::shared_ptr<PullAudioInputStream>& pullStream);
 std::shared_ptr<AudioConfig> CreateAudioPushUsingKatieSteveFile(std::shared_ptr<PushAudioInputStream>& pushAudio);
 std::shared_ptr<AudioConfig> CreateAudioPullUsingKatieSteveFile(std::shared_ptr<PullAudioInputStream>& pullAudio);
 std::shared_ptr<AudioConfig> CreateAudioPullFromRecordedFile(std::shared_ptr<PullAudioInputStream>& pullAudio);
-void StartMeetingAndVerifyResult(ConversationTranscriber* recognizer, const std::shared_ptr<Participant>&  participant, RecoPhrasesPtr&& result, const string& ref = string{});
+std::string PumpAudioAndWaitForResult(ConversationTranscriber* recognizer,RecoPhrasesPtr result);
 void CreateVoiceSignatures(std::string* katieVoiceSignature, std::string* steveVoiceSignature);
 bool VerifyTextAndSpeaker(const RecoResultVector& phrases, const std::string& text, const std::string& speakerId);
 std::string GetText(const RecoResultVector& phrases);
 using My90kHzDuration = std::chrono::duration<double, std::ratio<1, 90000>>;
 std::string CreateTimestamp();
 uint64_t VerifySpeaker(const RecoResultVector& phrases, const std::wstring& speakerId);
+bool FindTheRef(RecoResultVector phrases, const std::string& reference);
