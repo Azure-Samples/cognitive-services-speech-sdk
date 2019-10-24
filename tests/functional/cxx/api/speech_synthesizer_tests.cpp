@@ -930,6 +930,18 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx]")
 
     synthesizer->SpeakSsmlAsync(ssml);
     SPXTEST_REQUIRE(order > 0);
+
+    synthesizer->WordBoundary.DisconnectAll();
+
+    ssml = "<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xmlns:mstts='https://www.w3.org/2001/mstts' xml:lang='zh-CN'><voice xml:lang='zh-CN' xml:gender='Male' name='Microsoft Server Speech Text to Speech Voice (zh-CN, Kangkang, Apollo)' xmlns=''><prosody rate='0%'><mstts:express-as type='normal'>在前途大会上，淮阳王张卬（下江兵）第一个表达了对前途的看衰和绿林诸大佬商议说 “赤眉和邓禹随时都会杀过来，咱们在这混不下去了！与其被人家赶走，不如现在就抢掠长安，逃回南阳，如果实在混不下去了，大不了咱们就再上山落草为寇！”</mstts:express-as></prosody></voice></speak>";
+    order = 0;
+    synthesizer->WordBoundary += [&order](const SpeechSynthesisWordBoundaryEventArgs& e) {
+        SPXTEST_REQUIRE(e.TextOffset > 300);
+        ++order;
+    };
+
+    synthesizer->SpeakSsmlAsync(ssml);
+    SPXTEST_REQUIRE(order > 0);
 }
 
 TEST_CASE("Synthesis with invalid voice - USP", "[api][cxx]")
