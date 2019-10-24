@@ -360,10 +360,9 @@ private:
     // of 30 seconds to generate a speech segment. To be on the safe side, similar to the old SDK we buffer for 1 minute.
     seconds m_maxBufferedBeforeOverflow = seconds(60);
     milliseconds m_maxTransmittedInFastLane = milliseconds(5000);
-    constexpr static milliseconds MaxBufferedBeforeSimulateRealtime = milliseconds(500);
-    constexpr static int SimulateRealtimePercentage = 50;
+    
+    unsigned long m_simulateRealtimePercentage = 200;
     uint64_t m_maxFastLaneSizeBytes = 16000 * 2 * 5;
-    uint64_t m_maxBufferedSizeBeforeThrottleBytes = 16000;
     uint32_t m_avgBytesPerSecond = 16000 * 2;
 
     // The minimum time that before the next audio frame should be processed.

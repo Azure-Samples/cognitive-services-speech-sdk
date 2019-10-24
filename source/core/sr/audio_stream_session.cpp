@@ -11,6 +11,7 @@
 #include <list>
 #include <memory>
 #include <inttypes.h>
+#include <limits.h>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -57,7 +58,6 @@ using namespace std::chrono_literals;
 
 using json = nlohmann::json;
 
-constexpr std::chrono::milliseconds CSpxAudioStreamSession::MaxBufferedBeforeSimulateRealtime;
 seconds CSpxAudioStreamSession::StopRecognitionTimeout = 10s;
 
 atomic<int64_t> CSpxAudioStreamSession::Operation::OperationId;
@@ -389,7 +389,6 @@ void CSpxAudioStreamSession::SetFormat(const SPXWAVEFORMATEX* pformat)
 
 void CSpxAudioStreamSession::ProcessAudio(const DataChunkPtr& audioChunk)
 {
-    SPX_DBG_TRACE_ERROR_IF(MaxBufferedBeforeSimulateRealtime > m_maxBufferedBeforeOverflow, "Buffer size triggering real time data consumption cannot be bigger than overflow limit");
     SPX_DBG_TRACE_INFO("Received audio chunk: time: %s, size:%d.", PAL::GetTimeInString(audioChunk->receivedTime).c_str(), audioChunk->size);
 
     SlowDownThreadIfNecessary(audioChunk->size);
@@ -443,24 +442,19 @@ void CSpxAudioStreamSession::ProcessAudio(const DataChunkPtr& audioChunk)
 void CSpxAudioStreamSession::SlowDownThreadIfNecessary(uint32_t dataSize)
 {
     // Slowdown the thread anytime we have sent more than 5 seconds of audio.
-    // Also, if there is more than 500ms of unsent audio in the buffer, double the slowdown rate.
 
-    uint8_t slowdownRate = 0;
+    unsigned long slowdownRate = UINT_MAX;
     m_bytesTransited += dataSize;
 
     auto buffer = m_audioBuffer;
 
     if (m_bytesTransited >= m_maxFastLaneSizeBytes)
     {
-        slowdownRate = SimulateRealtimePercentage;
+        slowdownRate = m_simulateRealtimePercentage;
     }
-
-    if (buffer && buffer->StashedSizeInBytes() > m_maxBufferedSizeBeforeThrottleBytes)
-    {
-        slowdownRate += SimulateRealtimePercentage;
-    }
-
-    auto currentPacketAudioDelay = std::chrono::milliseconds((dataSize * 1000 / m_avgBytesPerSecond) * slowdownRate / 100);
+    
+    // The amount of time we should ensure current audio packet takes to process.
+    auto currentPacketAudioDelay = std::chrono::milliseconds((long)((dataSize * 1000 / m_avgBytesPerSecond) * (1 / (slowdownRate / 100.0))));
 
     // Calculate how long we need to delay the current thread.
     // This is the delta between the current time, and the previously calculated next audio time if > 0.
@@ -2422,10 +2416,11 @@ void CSpxAudioStreamSession::SetThrottleVariables(const SPXWAVEFORMATEX* format)
     m_maxBufferedBeforeOverflow = seconds(stoi(properties->GetStringValue("SPEECH-MaxBufferSizeSeconds", maxBufferDefault)));
     m_maxTransmittedInFastLane = milliseconds(stoi(properties->GetStringValue("SPEECH-TransmitLengthBeforThrottleMs", "5000")));
 
-    m_maxFastLaneSizeBytes = (format->nAvgBytesPerSec / 1000) * m_maxTransmittedInFastLane.count();
-    m_maxBufferedSizeBeforeThrottleBytes = (format->nAvgBytesPerSec / 1000) * MaxBufferedBeforeSimulateRealtime.count();
     m_avgBytesPerSecond = format->nAvgBytesPerSec;
-    SPX_DBG_TRACE_VERBOSE("%s: FastLane size %" PRIu64 " MaxBuffered Unthrottled: %" PRIu64, __FUNCTION__, m_maxFastLaneSizeBytes, m_maxBufferedSizeBeforeThrottleBytes);
+    m_maxFastLaneSizeBytes = (m_avgBytesPerSecond / 1000) * m_maxTransmittedInFastLane.count();
+    m_simulateRealtimePercentage = stoul(properties->GetStringValue("SPEECH-AudioThrottleAsPercentageOfRealTime", "200").c_str());
+
+    SPX_DBG_TRACE_VERBOSE("%s: FastLane size %" PRIu64 " Throttle Max Speed: %lu", __FUNCTION__, m_maxFastLaneSizeBytes, m_simulateRealtimePercentage);
 
     // While this could be set once, if logging is enabled in a retail build the constructor isn't logged.
     if (std::ratio_greater<std::chrono::steady_clock::period, std::milli>::value)
