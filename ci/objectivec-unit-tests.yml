@@ -79,14 +79,14 @@ jobs:
         - ${{ if eq(parameters['jobName'], 'IosUnitTests') }}:
           - bash: |
               set -e -o pipefail -x
-              PROJECT_DIR=public_samples/quickstart/swift-ios/helloworld/
+              PROJECT_DIR=public_samples/quickstart/swift/ios/from-microphone/helloworld/
               ci/samples/build-quickstart-swift.sh "${PROJECT_DIR}" '$(Build.Repository.LocalPath)/xcode-build-output' "$(OutputDirectory)/logs" ios-swift-quickstart $(BuildPlatform)
             condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
             displayName: "Test building STT Swift quickstart on iOS"
             continueOnError: ${{ parameters.continueOnTestFailure }}
           - bash: |
               set -e -o pipefail -x
-              PROJECT_DIR=public_samples/quickstart/text-to-speech/swift-ios/helloworld/
+              PROJECT_DIR=public_samples/quickstart/swift/ios/text-to-speech/helloworld/
               ci/samples/build-quickstart-swift.sh "${PROJECT_DIR}" '$(Build.Repository.LocalPath)/xcode-build-output' "$(OutputDirectory)/logs" ios-swift-tts-quickstart $(BuildPlatform)
             condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
             displayName: "Test building TTS Swift quickstart on iOS"
@@ -94,14 +94,14 @@ jobs:
         - ${{ if eq(parameters['jobName'], 'macOsUnitTests') }}:
           - bash: |
               set -e -o pipefail -x
-              PROJECT_DIR=public_samples/quickstart/swift-macos/helloworld/
+              PROJECT_DIR=public_samples/quickstart/swift/macos/from-microphone/helloworld/
               ci/samples/build-quickstart-swift.sh "${PROJECT_DIR}" '$(Build.Repository.LocalPath)/xcode-build-output' "$(OutputDirectory)/logs" ios-swift-quickstart $(BuildPlatform)
             condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
             displayName: "Test building STT Swift quickstart on macOS"
             continueOnError: ${{ parameters.continueOnTestFailure }}
           - bash: |
               set -e -o pipefail -x
-              PROJECT_DIR=public_samples/quickstart/text-to-speech/swift-macos/helloworld/
+              PROJECT_DIR=public_samples/quickstart/swift/macos/text-to-speech/helloworld/
               ci/samples/build-quickstart-swift.sh "${PROJECT_DIR}" '$(Build.Repository.LocalPath)/xcode-build-output' "$(OutputDirectory)/logs" ios-swift-tts-quickstart $(BuildPlatform)
             condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
             displayName: "Test building TTS Swift quickstart on macOS"

@@ -31,17 +31,17 @@ BEGIN {
   #
   # IMPORTANT - before updating this list talk to wolfma/zhouwang/mahilleb.
   @expectedFiles = map qw(
-    quickstart/java-android/app/src/main/res/layout/activity_main.xml
-    quickstart/js-browser/token.php
-    quickstart/objectivec-ios/helloworld/helloworld/Base.lproj/Main.storyboard
-    quickstart/objectivec-macos/helloworld/Podfile
-    quickstart/swift-ios/helloworld/Podfile
-    quickstart/swift-macos/helloworld/Podfile
-    quickstart/text-to-speech/java-android/app/src/main/res/layout/activity_main.xml
-    quickstart/text-to-speech/objectivec-ios/helloworld/Podfile
-    quickstart/text-to-speech/objectivec-macos/helloworld/Podfile
-    quickstart/text-to-speech/swift-ios/helloworld/Podfile
-    quickstart/text-to-speech/swift-macos/helloworld/Podfile
+    quickstart/java/android/from-microphone/app/src/main/res/layout/activity_main.xml
+    quickstart/js/browser/token.php
+    quickstart/objectivec/ios/from-microphone/helloworld/helloworld/Base.lproj/Main.storyboard
+    quickstart/objectivec/macos/from-microphone/helloworld/Podfile
+    quickstart/swift/ios/from-microphone/helloworld/Podfile
+    quickstart/swift/macos/from-microphone/helloworld/Podfile
+    quickstart/java/android/text-to-speech/app/src/main/res/layout/activity_main.xml
+    quickstart/objectivec/ios/text-to-speech/helloworld/Podfile
+    quickstart/objectivec/macos/text-to-speech/helloworld/Podfile
+    quickstart/swift/ios/text-to-speech/helloworld/Podfile
+    quickstart/swift/macos/text-to-speech/helloworld/Podfile
   );
 
   my @expectedTags;
@@ -52,62 +52,66 @@ BEGIN {
     # Sorted list of files + tags that are referenced (included) from azure-docs
     # IMPORTANT - before updating this list talk to wolfma/zhouwang/mahilleb.
     @expectedTags = map { m/^([^#]+)#([^#]+)$/ or die "misconfigured $_\n"; (lc $1) . "#$2"  } qw(
-      quickstart/cpp-linux/helloworld.cpp#code
-      quickstart/cpp-macos/helloworld.cpp#code
-      quickstart/cpp-windows/helloworld/helloworld.cpp#code
-      quickstart/csharp-dotnet-windows/helloworld/Program.cs#code
-      quickstart/csharp-dotnetcore/helloworld/Program.cs#code
-      quickstart/csharp-unity/Assets/Scripts/HelloWorld.cs#code
-      quickstart/csharp-uwp/helloworld/MainPage.xaml#StackPanel
-      quickstart/csharp-uwp/helloworld/MainPage.xaml.cs#code
-      quickstart/java-android/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
-      quickstart/java-jre/pom.xml#dependencies
-      quickstart/java-jre/pom.xml#repositories
-      quickstart/java-jre/src/speechsdk/quickstart/Main.java#code
-      quickstart/js-browser/index.html#authorizationfunction
-      quickstart/js-browser/index.html#quickstartcode
-      quickstart/js-browser/index.html#speechsdkref
-      quickstart/js-browser/index.html#uidiv
-      quickstart/js-node/index.js#code
-      quickstart/objectivec-ios/helloworld/helloworld/ViewController.m#code
-      quickstart/objectivec-macos/helloworld/helloworld/AppDelegate.m#code
-      quickstart/python/quickstart.py#code
-      quickstart/speech-translation/cpp-windows/helloworld/helloworld.cpp#code
-      quickstart/speech-translation/csharp-dotnet-windows/helloworld/Program.cs#code
-      quickstart/speech-translation/csharp-dotnetcore/helloworld/Program.cs#code
-      quickstart/speech-translation/csharp-uwp/helloworld/MainPage.xaml#StackPanel
-      quickstart/speech-translation/csharp-uwp/helloworld/MainPage.xaml.cs#code
-      quickstart/speech-translation/java-jre/src/speechsdk/quickstart/Main.java#code
-      quickstart/swift-ios/helloworld/helloworld/AppDelegate.swift#code
-      quickstart/swift-ios/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
-      quickstart/swift-ios/helloworld/helloworld/ViewController.swift#code
-      quickstart/swift-macos/helloworld/helloworld/AppDelegate.swift#code
-      quickstart/swift-macos/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
-      quickstart/text-to-speech/cpp-linux/helloworld.cpp#code
-      quickstart/text-to-speech/cpp-macos/helloworld.cpp#code
-      quickstart/text-to-speech/cpp-windows/helloworld/helloworld.cpp#code
-      quickstart/text-to-speech/csharp-dotnet-windows/helloworld/Program.cs#code
-      quickstart/text-to-speech/csharp-dotnetcore/helloworld/Program.cs#code
-      quickstart/text-to-speech/csharp-unity/Assets/Scripts/HelloWorld.cs#code
-      quickstart/text-to-speech/csharp-uwp/helloworld/MainPage.xaml#StackPanel
-      quickstart/text-to-speech/csharp-uwp/helloworld/MainPage.xaml.cs#code
-      quickstart/text-to-speech/java-android/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
-      quickstart/text-to-speech/java-android/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/SpeakerStream.java#code
-      quickstart/text-to-speech/java-jre/pom.xml#dependencies
-      quickstart/text-to-speech/java-jre/pom.xml#repositories
-      quickstart/text-to-speech/java-jre/src/speechsdk/quickstart/Main.java#code
-      quickstart/text-to-speech/objectivec-ios/helloworld/helloworld/AppDelegate.m#code
-      quickstart/text-to-speech/objectivec-ios/helloworld/helloworld/ViewController.m#code
-      quickstart/text-to-speech/objectivec-macos/helloworld/helloworld/AppDelegate.m#code
-      quickstart/text-to-speech/python/quickstart.py#code
-      quickstart/text-to-speech/swift-ios/helloworld/helloworld/AppDelegate.swift#code
-      quickstart/text-to-speech/swift-ios/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
-      quickstart/text-to-speech/swift-ios/helloworld/helloworld/ViewController.swift#code
-      quickstart/text-to-speech/swift-macos/helloworld/helloworld/AppDelegate.swift#code
-      quickstart/text-to-speech/swift-macos/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
-      quickstart/virtual-assistant/java-jre/pom.xml#dependencies
-      quickstart/virtual-assistant/java-jre/src/com/speechsdk/quickstart/ActivityAudioStream.java#code
-      quickstart/virtual-assistant/java-jre/src/com/speechsdk/quickstart/Main.java#code
+      quickstart/cpp/linux/from-microphone/helloworld.cpp#code
+      quickstart/cpp/linux/text-to-speech/helloworld.cpp#code
+      quickstart/cpp/macos/from-microphone/helloworld.cpp#code
+      quickstart/cpp/macos/text-to-speech/helloworld.cpp#code
+      quickstart/cpp/windows/from-file/helloworld/helloworld.cpp#code
+      quickstart/cpp/windows/from-microphone/helloworld/helloworld.cpp#code
+      quickstart/cpp/windows/intent-recognition/helloworld/helloworld.cpp#code
+      quickstart/cpp/windows/text-to-speech/helloworld/helloworld.cpp#code
+      quickstart/cpp/windows/translate-speech-to-text/helloworld/helloworld.cpp#code
+      quickstart/csharp/dotnet/from-microphone/helloworld/Program.cs#code
+      quickstart/csharp/dotnet/intent-recognition/helloworld/Program.cs#code
+      quickstart/csharp/dotnet/text-to-speech/helloworld/Program.cs#code
+      quickstart/csharp/dotnet/translate-speech-to-text/helloworld/Program.cs#code
+      quickstart/csharp/dotnetcore/from-microphone/helloworld/Program.cs#code
+      quickstart/csharp/dotnetcore/text-to-speech/helloworld/Program.cs#code
+      quickstart/csharp/dotnetcore/translate-speech-to-text/helloworld/Program.cs#code
+      quickstart/csharp/unity/from-microphone/Assets/Scripts/HelloWorld.cs#code
+      quickstart/csharp/unity/text-to-speech/Assets/Scripts/HelloWorld.cs#code
+      quickstart/csharp/uwp/from-microphone/helloworld/MainPage.xaml#StackPanel
+      quickstart/csharp/uwp/from-microphone/helloworld/MainPage.xaml.cs#code
+      quickstart/csharp/uwp/text-to-speech/helloworld/MainPage.xaml#StackPanel
+      quickstart/csharp/uwp/text-to-speech/helloworld/MainPage.xaml.cs#code
+      quickstart/csharp/uwp/translate-speech-to-text/helloworld/MainPage.xaml#StackPanel
+      quickstart/csharp/uwp/translate-speech-to-text/helloworld/MainPage.xaml.cs#code
+      quickstart/java/android/from-microphone/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
+      quickstart/java/android/text-to-speech/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/MainActivity.java#code
+      quickstart/java/android/text-to-speech/app/src/main/java/com/microsoft/cognitiveservices/speech/samples/quickstart/SpeakerStream.java#code
+      quickstart/java/jre/from-microphone/pom.xml#dependencies
+      quickstart/java/jre/from-microphone/pom.xml#repositories
+      quickstart/java/jre/intent-recognition/pom.xml#dependencies
+      quickstart/java/jre/intent-recognition/pom.xml#repositories
+      quickstart/java/jre/from-microphone/src/speechsdk/quickstart/Main.java#code
+      quickstart/java/jre/intent-recognition/src/speechsdk/quickstart/Main.java#code
+      quickstart/java/jre/text-to-speech/pom.xml#dependencies
+      quickstart/java/jre/text-to-speech/pom.xml#repositories
+      quickstart/java/jre/text-to-speech/src/speechsdk/quickstart/Main.java#code
+      quickstart/java/jre/translate-speech-to-text/src/speechsdk/quickstart/Main.java#code
+      quickstart/java/jre/virtual-assistant/pom.xml#dependencies
+      quickstart/java/jre/virtual-assistant/src/com/speechsdk/quickstart/ActivityAudioStream.java#code
+      quickstart/java/jre/virtual-assistant/src/com/speechsdk/quickstart/Main.java#code
+      quickstart/javascript/browser/index.html#authorizationfunction
+      quickstart/javascript/browser/index.html#quickstartcode
+      quickstart/javascript/browser/index.html#speechsdkref
+      quickstart/javascript/browser/index.html#uidiv
+      quickstart/javascript/node/index.js#code
+      quickstart/objectivec/ios/from-microphone/helloworld/helloworld/ViewController.m#code
+      quickstart/objectivec/ios/text-to-speech/helloworld/helloworld/AppDelegate.m#code
+      quickstart/objectivec/ios/text-to-speech/helloworld/helloworld/ViewController.m#code
+      quickstart/objectivec/macos/from-microphone/helloworld/helloworld/AppDelegate.m#code
+      quickstart/objectivec/macos/text-to-speech/helloworld/helloworld/AppDelegate.m#code
+      quickstart/python/from-microphone/quickstart.py#code
+      quickstart/python/text-to-speech/quickstart.py#code
+      quickstart/swift/ios/from-microphone/helloworld/helloworld/AppDelegate.swift#code
+      quickstart/swift/ios/from-microphone/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
+      quickstart/swift/ios/from-microphone/helloworld/helloworld/ViewController.swift#code
+      quickstart/swift/ios/text-to-speech/helloworld/helloworld/AppDelegate.swift#code
+      quickstart/swift/ios/text-to-speech/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
+      quickstart/swift/ios/text-to-speech/helloworld/helloworld/ViewController.swift#code
+      quickstart/swift/macos/from-microphone/helloworld/helloworld/AppDelegate.swift#code
+      quickstart/swift/macos/from-microphone/helloworld/helloworld/MicrosoftCognitiveServicesSpeech-Bridging-Header.h#code
       samples/batch/csharp/program.cs#batchdefinition
       samples/batch/csharp/program.cs#batchstatus
       samples/cpp/windows/console/samples/intent_recognition_samples.cpp#IntentContinuousRecognitionWithFile
@@ -181,7 +185,6 @@ if ($ARGV ne $oldargv) {
     $e = $c_e;
   }
 }
-
 if (defined $m) {
   if (m/$s/) {
     warn "DocFx codetags: nested tag $1 not supported in file $ARGV, line $.\n";

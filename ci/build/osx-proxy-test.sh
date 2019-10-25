@@ -75,23 +75,23 @@ test_java_quickstart() {
                 String contents = new String(Files.readAllBytes(Paths.get("'${HOME}'/.mitmproxy/mitmproxy-ca-cert.pem")));\
                 config.setProperty("OPENSSL_SINGLE_TRUSTED_CERT", contents);\
                 config.setProperty("OPENSSL_SINGLE_TRUSTED_CERT_CRL_CHECK", "false");' \
-        public_samples/quickstart/java-jre/src/speechsdk/quickstart/Main.java
+        public_samples/quickstart/java/jre/from-microphone/src/speechsdk/quickstart/Main.java
 
     # run recognition from file in quickstart
     sed -i '' '/import com\.microsoft\.cognitiveservices\.speech\.\*;/a\
         import java.nio.file.*;\
         import com.microsoft.cognitiveservices.speech.audio.*;' \
-        public_samples/quickstart/java-jre/src/speechsdk/quickstart/Main.java
+        public_samples/quickstart/java/jre/from-microphone/src/speechsdk/quickstart/Main.java
     sed -i '' '/SpeechRecognizer/s/.*/\
                 AudioConfig audioInput = AudioConfig.fromWavFileInput("tests\/input\/audio\/whatstheweatherlike.wav");\
                 SpeechRecognizer reco = new SpeechRecognizer(config, audioInput);\
-        /' public_samples/quickstart/java-jre/src/speechsdk/quickstart/Main.java
+        /' public_samples/quickstart/java/jre/from-microphone/src/speechsdk/quickstart/Main.java
 
     # build quickstart
-    ci/run-maven.sh public_samples/quickstart/java-jre ${MAVENROOT}
+    ci/run-maven.sh public_samples/quickstart/java/jre/from-microphone ${MAVENROOT}
 
     # run modified quickstart
-    java -cp public_samples/quickstart/java-jre/target/quickstart-eclipse-1.0.0-SNAPSHOT.jar:${JAVA_SDK} speechsdk.quickstart.Main | tee quickstart.log
+    java -cp public_samples/quickstart/java/jre/from-microphone/target/quickstart-eclipse-1.0.0-SNAPSHOT.jar:${JAVA_SDK} speechsdk.quickstart.Main | tee quickstart.log
 
     cat java-quickstart.log
     # check proxy was actually used

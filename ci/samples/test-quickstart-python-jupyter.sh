@@ -15,4 +15,4 @@ WHEEL_DIR="${2?$USAGE}"
 
 exec "$SCRIPT_DIR/test-python.sh" "$IMAGE_TAG" "$WHEEL_DIR" \
   ./ci/samples/quickstart-e2e.expect tests/input/audio/whatstheweatherlike.wav "What's the weather like?" \
-    jupyter nbconvert --to notebook --execute public_samples/quickstart/python/quickstart.ipynb --stdout
+    jupyter nbconvert --to notebook --execute public_samples/quickstart/python/from-microphone/quickstart.ipynb --stdout

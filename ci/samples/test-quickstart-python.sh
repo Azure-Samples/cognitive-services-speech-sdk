@@ -15,4 +15,4 @@ WHEEL_DIR="${2?$USAGE}"
 
 exec "$SCRIPT_DIR/test-python.sh" "$IMAGE_TAG" "$WHEEL_DIR" \
   ./ci/samples/quickstart-e2e.expect tests/input/audio/whatstheweatherlike.wav "What's the weather like?" \
-    python3 public_samples/quickstart/python/quickstart.py
+    python3 public_samples/quickstart/python/from-microphone/quickstart.py

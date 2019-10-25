@@ -22,4 +22,4 @@ docker run --rm \
   "$IMAGE_TAG" \
   ./ci/samples/wrap-pulseaudio.sh \
     ./ci/samples/quickstart-e2e.expect tests/input/audio/whatstheweatherlike.wav "What's the weather like?" \
-      java -cp public_samples/quickstart/java-jre/target/quickstart-eclipse-1.0.0-SNAPSHOT.jar:"$SDK_JAR_REL" speechsdk.quickstart.Main
+      java -cp public_samples/quickstart/java/jre/from-microphone/target/quickstart-eclipse-1.0.0-SNAPSHOT.jar:"$SDK_JAR_REL" speechsdk.quickstart.Main

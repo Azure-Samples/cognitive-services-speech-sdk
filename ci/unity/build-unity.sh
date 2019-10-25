@@ -26,7 +26,7 @@ for flavor in Release; do # no Debug for now
   [[ -d $UNITY_DIR ]] && rm -rf "$UNITY_DIR"
 
   # Copy unity sample code, which is required in order to -exportPackage command would work
-  cp -r "$SCRIPT_DIR/../../public_samples/quickstart/csharp-unity" "$UNITY_DIR"
+  cp -r "$SCRIPT_DIR/../../public_samples/quickstart/csharp/unity/from-microphone" "$UNITY_DIR"
 
   # Copy required meta information from template (e.g., library settings)
   cp -r "$SCRIPT_DIR/SpeechSDK-template" "$UNITY_DIR/Assets/SpeechSDK"
