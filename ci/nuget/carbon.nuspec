@@ -41,6 +41,12 @@
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.core.lib" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.core.dll" />
 
+    <file src="$WindowsUWPDropDir$\ARM\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\win10-ARM\Release\Microsoft.CognitiveServices.Speech.core.lib" />
+    <file src="$WindowsUWPDropDir$\ARM\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\win10-ARM\Release\Microsoft.CognitiveServices.Speech.core.dll" />
+
+    <file src="$WindowsUWPDropDir$\ARM64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\win10-ARM64\Release\Microsoft.CognitiveServices.Speech.core.lib" />
+    <file src="$WindowsUWPDropDir$\ARM64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\win10-ARM64\Release\Microsoft.CognitiveServices.Speech.core.dll" />
+
     <!-- Native dll for plug-ins (no .lib) -->
     <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
