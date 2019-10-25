@@ -56,4 +56,5 @@ proguard-rules.pro text
 *.mp3 binary
 *.pfx binary
 *.png binary
+*.table binary
 *.wav binary
