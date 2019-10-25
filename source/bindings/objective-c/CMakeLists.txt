@@ -87,6 +87,12 @@ if(EXTENSION_CODEC_ENABLED)
     )
 endif()
 
+if(EXTENSION_KWS_ENABLED)
+  target_link_libraries(${PROJECT_NAME}
+    PRIVATE kws_factory
+    )
+endif()
+
 set_target_properties(${PROJECT_NAME}
     PROPERTIES BUILD_RPATH "@loader_path;@executable_path/Frameworks"
     )

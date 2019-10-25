@@ -20,6 +20,9 @@ namespace Impl {
 #ifdef STATIC_CODEC_EXTENSION
 SPX_EXTERN_C void* Codec_CreateModuleObject(const char* className, const char* interfaceName);
 #endif
+#ifdef STATIC_KWS_EXTENSION
+SPX_EXTERN_C void* SDKKWS_CreateModuleObject(const char* className, const char* interfaceName);
+#endif
 SPX_EXTERN_C void* AudioLib_CreateModuleObject(const char* className, const char* interfaceName);
 SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* interfaceName);
 SPX_EXTERN_C void* TTSLib_CreateModuleObject(const char* className, const char* interfaceName);
@@ -30,6 +33,9 @@ SPX_EXTERN_C void* PrimaryCarbon_CreateModuleObject(const char* className, const
     SPX_FACTORY_MAP_BEGIN();
 #ifdef STATIC_CODEC_EXTENSION
     SPX_FACTORY_MAP_ENTRY_FUNC(Codec_CreateModuleObject);
+#endif
+#ifdef STATIC_KWS_EXTENSION
+    SPX_FACTORY_MAP_ENTRY_FUNC(SDKKWS_CreateModuleObject);
 #endif
     SPX_FACTORY_MAP_ENTRY_FUNC(AudioLib_CreateModuleObject);
     SPX_FACTORY_MAP_ENTRY_FUNC(SRLib_CreateModuleObject);

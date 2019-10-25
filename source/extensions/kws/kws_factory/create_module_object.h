@@ -22,7 +22,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-void* SDKKWS_CreateModuleObject(const char* className, const char* interfaceName);
+SPX_EXTERN_C void* SDKKWS_CreateModuleObject(const char* className, const char* interfaceName);
 
 
 }}}}

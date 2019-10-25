@@ -586,6 +586,7 @@ jobs:
       itemPattern: |
         @(Android|Linux|Windows|WindowsOS|WindowsUwp)/*/Release/**
         @(iOS|macOS)/Release/**
+        @(iOS|macOS)/Debug/**
         !**/libunstripped*/**
         !**/*.dSYM.zip
   - powershell: |
@@ -1066,8 +1067,8 @@ jobs:
         vsts_setvar SPEECHSDK_TARGET_PLATFORM Android-$(BuildPlatform)
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
         vsts_setvar GST_BUILD_CONFIGURATION "$(ANDROID_GST)\$(GstBuildPlatform)"
-        # Note: KWS currently only for ARM32.
-        if [[ $(BuildPlatform) = arm32 ]]; then
+        # Note: KWS currently only for ARM.
+        if [[ $(BuildPlatform) =~ arm* ]]; then
           # N.B. this is built but not shipped via AAR.
           vsts_setvar SPEECHSDK_ENABLE_KWS true
         else
@@ -1899,9 +1900,14 @@ jobs:
       vsts_setvar SPEECHSDK_TARGET_PLATFORM $(BuildPlatform)-x64 &&
       vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
       vsts_setvar SPEECHSDK_ENABLE_CODEC true
+      vsts_setvar SPEECHSDK_ENABLE_KWS true
     displayName: Set iOS target platform
   - bash: ./ci/set-variables.sh
     displayName: Set variables
+  - template: get-kws-artifact.yml
+    parameters:
+      enableVariable: SPEECHSDK_ENABLE_KWS
+      os: iOS
   - task: DownloadBuildArtifacts@0
     displayName: Download GStreamer artifact
     inputs:
@@ -1938,16 +1944,8 @@ jobs:
       fi
     displayName: Build GStreamer wrapper
   - bash: |
-      mkdir build_ios_simulator32 && cd build_ios_simulator32 &&
-      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x86 -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" ..
-    displayName: Generate makefiles for iOS simulator (32bit)
-  - bash: |
-      cd build_ios_simulator32 &&
-      cmake --build . -- -j4
-    displayName: CMake build for iOS simulator (32bit)
-  - bash: |
       mkdir build_ios_simulator64 && cd build_ios_simulator64 &&
-      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x64 -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" ..
+      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOSSIMULATOR-x64 -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" -DEXTENSION_KWS_ENABLED="$(SPEECHSDK_ENABLE_KWS)" ..
     displayName: Generate makefiles for iOS simulator (64bit)
   - bash: |
       cd build_ios_simulator64 &&
@@ -1955,7 +1953,7 @@ jobs:
     displayName: CMake build for iOS simulator (64bit)
   - bash: |
       mkdir build_ios_device && cd build_ios_device &&
-      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-all -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" ..
+      cmake $(JointCmakeArgs) -DSPEECHSDK_TARGET_PLATFORM=IOS-all -DEXTENSION_CODEC_ENABLED="$(SPEECHSDK_ENABLE_CODEC)" -DEXTENSION_KWS_ENABLED="$(SPEECHSDK_ENABLE_KWS)" ..
     displayName: Generate makefiles for iOS device
   - bash: |
       cd build_ios_device &&
@@ -1968,7 +1966,13 @@ jobs:
       mkdir -p $(OutputDirectory)
       cp -R "build_ios_device/lib/$(FrameworkName).framework" "$(OutputDirectory)"
       lipo -create -output "$(OutputDirectory)"/$(FrameworkName).framework/$(FrameworkName) \
-        "build_ios_"{device,simulator32,simulator64}"/lib/$(FrameworkName).framework/$(FrameworkName)"
+        "build_ios_"{device,simulator64}"/lib/$(FrameworkName).framework/$(FrameworkName)"
+
+      if [[ $(SPEECHSDK_ENABLE_KWS) == true ]]; then
+        cp $(Build.SourcesDirectory)/external/KWS/iOS_arm64_Release/targets/CortanaSDK/libkwsapi.a "build_ios_device/lib"
+        cp $(Build.SourcesDirectory)/external/KWS/iOS_x64_Release/targets/CortanaSDK/libkwsapi.a "build_ios_simulator64/lib"
+      fi
+
       # create output static library with bitcode stripped out.
       link_ios_static_library "$(OutputDirectory)" "build_ios_device/lib" "$(StaticLibraryName)_device.a"
       link_ios_static_library "$(OutputDirectory)" "build_ios_simulator64/lib" "$(StaticLibraryName)_sim64.a"
@@ -1981,7 +1985,7 @@ jobs:
   - bash: |
       set -u -e -o pipefail -x
       . ci/apple/apple-functions.sh
-      combine_dsym_bundles "$(OutputDirectory)" "build_ios_"{device,simulator32,simulator64}"/lib/$(FrameworkName).framework/$(FrameworkName)"
+      combine_dsym_bundles "$(OutputDirectory)" "build_ios_"{device,simulator64}"/lib/$(FrameworkName).framework/$(FrameworkName)"
     condition: and(succeeded(), in(variables['BuildConfiguration'], 'Debug', 'Release'))
     displayName: Create debug symbols
   - bash: |

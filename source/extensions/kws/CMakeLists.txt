@@ -2,6 +2,9 @@ project(speechsdk_kws)
 
 set(SDKKWS_SUPPORTED_TARGETS
   "Android-arm32"
+  "Android-arm64"
+  "IOS-all"
+  "IOSSIMULATOR-x64"
   "Linux-arm64"
   "Linux-x86"
   "Linux-x64"

@@ -44,7 +44,7 @@ public:
     const char*  m_detectionBuffer;
 
     double       m_lastConfidence;
-    const char  *m_lastKeyword;
+    std::string  m_lastKeyword;
 
     SpxWAVEFORMATEX_Type m_format;
     uint64_t m_cbAudioProcessed;
@@ -308,7 +308,7 @@ void CSpxSdkKwsEngineAdapter::FireKeywordDetectedEvent(const DataChunkPtr& audio
 
     // convert byte offsets to ticks of 100nsec
     auto confidence = p_impl->m_lastConfidence;
-    std::string keyword = p_impl->m_lastKeyword ? p_impl->m_lastKeyword : "";
+    std::string keyword = p_impl->m_lastKeyword;
 
     // Remove special characters from the keyword
     // TODO: move this logic to the actual keyword detector
@@ -410,7 +410,7 @@ void CSpxSdkKwsEngineAdapter::CycleAudioDumpFile()
                                  "m_endSampleOffsetInBytes offset out of bounds?!");
 
         pimpl->m_lastConfidence = pStatus->confidence;
-        pimpl->m_lastKeyword = pStatus->keyword;
+        pimpl->m_lastKeyword = pStatus->keyword ? std::string(pStatus->keyword) : "";
 
         // set the flag
         pimpl->m_keywordDetected = true;

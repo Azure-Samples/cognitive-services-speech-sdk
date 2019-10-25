@@ -48,3 +48,6 @@ if (EXTENSION_CODEC_ENABLED AND STATIC_CODEC_EXTENSION)
   target_link_libraries(${PROJECT_NAME} codec)
 endif()
 
+if(EXTENSION_KWS_ENABLED AND STATIC_KWS_EXTENSION)
+  target_link_libraries(${PROJECT_NAME} kws_factory)
+endif()

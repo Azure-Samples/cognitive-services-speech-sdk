@@ -16,21 +16,22 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-void* SDKKWS_CreateModuleObject(const char* className, const char* interfaceName)
+SPX_EXTERN_C void* SDKKWS_CreateModuleObject(const char* className, const char* interfaceName)
 {
-    SPX_DBG_TRACE_VERBOSE("Creating object via %s: %s as %s", __FUNCTION__, className, interfaceName);
+    SPX_DBG_TRACE_VERBOSE("SDKKWS_CreateModuleObject Creating object via %s: %s as %s", __FUNCTION__, className, interfaceName);
 
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY(CSpxSdkKwsEngineAdapter, ISpxKwsEngineAdapter);
     SPX_FACTORY_MAP_END();
 }
 
+#ifndef STATIC_KWS_EXTENSION
 SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY_FUNC(SDKKWS_CreateModuleObject);
     SPX_FACTORY_MAP_END();
 }
-
+#endif
 
 }}}}

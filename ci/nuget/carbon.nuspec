@@ -57,13 +57,15 @@
     <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.core.dll" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.core.dll" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
-    <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
     <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
+    <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
     <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x64\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win-x64\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
     <file src="$WindowsUwpDropDir$\arm\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win10-arm\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsUwpDropDir$\arm\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win10-arm\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
     <file src="$WindowsUwpDropDir$\arm64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win10-arm64\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
-    <file src="$WindowsUwpDropDir$\arm\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll"   target="runtimes\win10-arm\native\uap\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
-    <file src="$WindowsUwpDropDir$\arm64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win10-arm64\native\uap\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
+    <file src="$WindowsUwpDropDir$\arm64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win10-arm64\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
 
     <!-- .NET standard dlls, built on Windows, used on Linux -->
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
@@ -96,6 +98,8 @@
     <file src="$AndroidDropDir$\Android-arm64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="build\monoandroid\libs\arm64-v8a\libMicrosoft.CognitiveServices.Speech.core.so" />
     <file src="$AndroidDropDir$\Android-arm32\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="build\monoandroid\libs\armeabi-v7a\libMicrosoft.CognitiveServices.Speech.core.so" />
     <file src="$AndroidDropDir$\Android-x86\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="build\monoandroid\libs\x86\libMicrosoft.CognitiveServices.Speech.core.so" />
+    <file src="$AndroidDropDir$\Android-arm64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.kws.so" target="build\monoandroid\libs\arm64-v8a\libMicrosoft.CognitiveServices.Speech.extension.kws.so" />
+    <file src="$AndroidDropDir$\Android-arm32\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.kws.so" target="build\monoandroid\libs\armeabi-v7a\libMicrosoft.CognitiveServices.Speech.extension.kws.so" />
 
     <!-- iOS native library for Xamarin -->
     <file src="$iOSDropDir$\Release\libMicrosoft.CognitiveServices.Speech.core.a" target="build\Xamarin.iOS\libMicrosoft.CognitiveServices.Speech.core.a" />
