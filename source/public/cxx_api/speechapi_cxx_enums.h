@@ -44,7 +44,7 @@ enum class PropertyId
     /// The Cognitive Services Speech Service region. Under normal circumstances, you shouldn't have to
     /// use this property directly.
     /// Instead, use <see cref="SpeechConfig::FromSubscription"/>, <see cref="SpeechConfig::FromEndpoint"/>,
-    /// <see cref="SpeechConfig::FromAuthorizationToken"/>.
+    /// <see cref="SpeechConfig::FromHost"/>, <see cref="SpeechConfig::FromAuthorizationToken"/>.
     /// </summary>
     SpeechServiceConnection_Region = 1002,
 
@@ -69,6 +69,13 @@ enum class PropertyId
     /// NOTE: The endpoint id is available in the Custom Speech Portal, listed under Endpoint Details.
     /// </summary>
     SpeechServiceConnection_EndpointId = 1005,
+
+    /// <summary>
+    /// The Cognitive Services Speech Service host (url). Under normal circumstances, you shouldn't
+    /// have to use this property directly.
+    /// Instead, use <see cref="SpeechConfig::FromHost"/>.
+    /// </summary>
+    SpeechServiceConnection_Host = 1006,
 
     /// <summary>
     /// The host name of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,

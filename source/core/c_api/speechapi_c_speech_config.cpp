@@ -69,6 +69,25 @@ SPXAPI speech_config_from_endpoint_internal(SPXSPEECHCONFIGHANDLE* hconfig, cons
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI speech_config_from_host_internal(SPXSPEECHCONFIGHANDLE* hconfig, const char* host, const char* subscription, const char* classname)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, host == nullptr || !(*host));
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hconfig == nullptr);
+    // subscription can be null.
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *hconfig = SPXHANDLE_INVALID;
+
+        auto config = SpxCreateObjectWithSite<ISpxSpeechConfig>(classname, SpxGetRootSite());
+        config->InitFromHost(host, subscription);
+
+        auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
+        *hconfig = confighandles->TrackHandle(config);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 SPXAPI_(bool) speech_config_is_handle_valid(SPXSPEECHCONFIGHANDLE hconfig)
 {
     return Handle_IsValid<SPXSPEECHCONFIGHANDLE, ISpxSpeechConfig>(hconfig);
@@ -87,6 +106,11 @@ SPXAPI speech_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* hconfig, co
 SPXAPI speech_config_from_endpoint(SPXSPEECHCONFIGHANDLE* hconfig, const char* endpoint, const char* subscription)
 {
     return speech_config_from_endpoint_internal(hconfig, endpoint, subscription, "CSpxSpeechConfig");
+}
+
+SPXAPI speech_config_from_host(SPXSPEECHCONFIGHANDLE* hconfig, const char* host, const char* subscription)
+{
+    return speech_config_from_host_internal(hconfig, host, subscription, "CSpxSpeechConfig");
 }
 
 SPXAPI speech_config_release(SPXSPEECHCONFIGHANDLE hconfig)

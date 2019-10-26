@@ -110,6 +110,46 @@ public final class SpeechTranslationConfig extends SpeechConfig implements Close
     }
 
     /**
+     * Creates an instance of the speech translation config with specified host and subscription key.
+     * This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+     * For services with a non-standard resource path or no path at all, use fromEndpoint instead.
+     * Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+     * Note: To use an authorization token with fromHost, use fromHost(java.net.URI),
+     * and then call setAuthorizationToken() on the created SpeechTranslationConfig instance.
+     * Note: Added in version 1.8.0.
+     * @param host The service host to connect to. Format is "protocol://host:port" where ":port" is optional.
+     * @param subscriptionKey The subscription key.
+     * @return A SpeechTranslationConfig instance.
+     */
+    public static SpeechTranslationConfig fromHost(java.net.URI host, String subscriptionKey) {
+        Contracts.throwIfNull(host, "host");
+        if(subscriptionKey == null) {
+            throw new NullPointerException("subscriptionKey");
+        }
+
+        return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromHost(host.toString(), subscriptionKey));
+    }
+
+    /**
+     * Creates an instance of the speech translation config with specified host.
+     * This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+     * For services with a non-standard resource path or no path at all, use fromEndpoint instead.
+     * Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+     * Note: If the host requires a subscription key for authentication, use fromHost(java.net.URI, String) to pass
+     * the subscription key as parameter.
+     * To use an authorization token with fromHost, use this method to create a SpeechTranslationConfig instance, and then
+     * call setAuthorizationToken() on the created SpeechTranslationConfig instance.
+     * Note: Added in version 1.8.0.
+     * @param host The service host to connect to. Format is "protocol://host:port" where ":port" is optional.
+     * @return A SpeechTranslationConfig instance.
+     */
+    public static SpeechTranslationConfig fromHost(java.net.URI host) {
+        Contracts.throwIfNull(host, "host");
+
+        return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromHost(host.toString()));
+    }
+
+    /**
      * Adds a (text) target language for translation.
      * @param value the language identifier in BCP-47 format.
      */

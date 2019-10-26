@@ -266,6 +266,15 @@ public:
     }
 
     /**
+     * Sets the URL of the service host. It should contain "protocol://host:port" where ":port" is optional.
+     */
+    Client& SetHostUrl(const std::string& hostUrl)
+    {
+        m_customHostUrl = hostUrl;
+        return *this;
+    }
+
+    /**
      * Sets the query parameters provided by users.
      */
     Client& SetUserDefinedQueryParameters(const std::string& queryParameters)
@@ -378,6 +387,7 @@ private:
     EndpointType m_endpointType;
     RecognitionMode m_recoMode;
     std::string m_customEndpointUrl;
+    std::string m_customHostUrl;
     std::string m_region;
     std::string m_userDefinedQueryParameters;
     std::unordered_map<std::string, std::string> m_queryParameters;

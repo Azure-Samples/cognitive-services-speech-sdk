@@ -21,7 +21,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public static string subscriptionKey, region;
         public SpeechConfig restConfig;
+        public SpeechConfig restHostConfig;
         public SpeechConfig uspConfig;
+        public SpeechConfig uspHostConfig;
         public SpeechConfig mockConfig;
 
         private static Config _config;
@@ -41,8 +43,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var endpoint = $"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1";
             restConfig = SpeechConfig.FromEndpoint(new Uri(endpoint), subscriptionKey);
+            var restHost = $"https://{region}.tts.speech.microsoft.com";
+            restHostConfig = SpeechConfig.FromHost(new Uri(restHost), subscriptionKey);
             var uspEndpoint = $"wss://{region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?TrafficType=Test";
             uspConfig = SpeechConfig.FromEndpoint(new Uri(uspEndpoint), subscriptionKey);
+            var uspHost = $"wss://{region}.tts.speech.microsoft.com";
+            uspHostConfig = SpeechConfig.FromHost(new Uri(uspHost), subscriptionKey);
             mockConfig = SpeechConfig.FromSubscription("None", "None");
             mockConfig.SetProperty("CARBON-INTERNAL-UseTtsEngine-Mock", "true");
         }

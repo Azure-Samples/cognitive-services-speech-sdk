@@ -40,6 +40,7 @@ public:
     // --- ISpxSpeechConfig ---
     void InitAuthorizationToken(const char* authToken, const char* region) override;
     void InitFromEndpoint(const char* endpoint, const char* subscription) override;
+    void InitFromHost(const char* host, const char* subscription) override;
     void InitFromSubscription(const char* subscription, const char* region) override;
     void SetServiceProperty(std::string name, std::string, ServicePropertyChannel channel) override;
     void SetProfanity(ProfanityOption profanity) override;

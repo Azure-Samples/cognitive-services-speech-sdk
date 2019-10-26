@@ -94,6 +94,45 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
+        /// Creates an instance of the speech translation config with specified host and subscription key.
+        /// This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+        /// For services with a non-standard resource path or no path at all, use FromEndpoint instead.
+        /// Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+        /// Note: To use an authorization token with FromHost, use FromHost(System.Uri),
+        /// and then set the AuthorizationToken property on the created SpeechTranslationConfig instance.
+        /// Note: Added in version 1.8.0.
+        /// </summary>
+        /// <param name="host">The service host to connect to. Format is "protocol://host:port" where ":port" is optional.</param>
+        /// <param name="subscriptionKey">The subscription key.</param>
+        /// <returns>A SpeechTranslationConfig instance.</returns>
+        public new static SpeechTranslationConfig FromHost(Uri host, string subscriptionKey)
+        {
+            IntPtr config = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechTranslationConfig.speech_translation_config_from_host(out config, Uri.EscapeUriString(host.ToString()), subscriptionKey));
+            return new SpeechTranslationConfig(config);
+        }
+
+        /// <summary>
+        /// Creates an instance of the speech translation config with specified host.
+        /// This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+        /// For services with a non-standard resource path or no path at all, use FromEndpoint instead.
+        /// Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+        /// Note: If the host requires a subscription key for authentication, use FromHost(System.Uri, string) to pass
+        /// the subscription key as parameter.
+        /// To use an authorization token with FromHost, please use this method to create a SpeechTranslationConfig instance, and then
+        /// set the AuthorizationToken property on the created SpeechTranslationConfig instance.
+        /// Note: Added in version 1.8.0.
+        /// </summary>
+        /// <param name="host">The service host to connect to. Format is "protocol://host:port" where ":port" is optional.</param>
+        /// <returns>A SpeechTranslationConfig instance.</returns>
+        public new static SpeechTranslationConfig FromHost(Uri host)
+        {
+            IntPtr config = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechTranslationConfig.speech_translation_config_from_host(out config, Uri.EscapeUriString(host.ToString()), null));
+            return new SpeechTranslationConfig(config);
+        }
+
+        /// <summary>
         /// Gets a collection of languages to translate to.
         /// </summary>
         public ReadOnlyCollection<string> TargetLanguages

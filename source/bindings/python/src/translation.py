@@ -20,11 +20,14 @@ class SpeechTranslationConfig(SpeechConfig):
 
     - from subscription: pass a subscription key and a region
     - from endpoint: pass a subscription key and an endpoint
+    - from host: pass a subscription key and a host address
     - from authorization token: pass an authorization token and a region
 
     :param subscription: The subscription key.
     :param region: The region name (see the `region page <https://aka.ms/csspeech/region>`_).
     :param endpoint: The service endpoint to connect to.
+    :param host: The service host to connect to. Standard resource path will be assumed. Format
+        is "protocol://host:port" where ":port" is optional.
     :param auth_token: The authorization token.
     :param speech_recognition_language: The input language to the speech recognition. The language
         is specified in BCP-47 format.
@@ -33,10 +36,10 @@ class SpeechTranslationConfig(SpeechConfig):
     """
 
     def __init__(self, subscription: OptionalStr = None, region: OptionalStr = None,
-                 endpoint: OptionalStr = None, auth_token: OptionalStr = None,
+                 endpoint: OptionalStr = None, host: OptionalStr = None, auth_token: OptionalStr = None,
                  target_languages: Iterable[str] = None, voice_name: str = '',
                  speech_recognition_language: str = ''):
-        self._impl = self._get_impl(impl.SpeechTranslationConfig, subscription, region, endpoint,
+        self._impl = self._get_impl(impl.SpeechTranslationConfig, subscription, region, endpoint, host,
                 auth_token, speech_recognition_language)
 
         if target_languages:

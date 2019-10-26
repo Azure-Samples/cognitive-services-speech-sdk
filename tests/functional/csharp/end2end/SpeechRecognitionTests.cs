@@ -1374,6 +1374,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [TestMethod]
+        public async Task TestSpeechConfigFromHost()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.hostConfig, audioInput)))
+            {
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertFuzzyMatching(TestData.English.Weather.Utterance, result.Text);
+            }
+        }
+
         #region Dispose Timing Tests
         // Tests that start recognition in various modes and for different events allow the recognizer to fall out of scope and be disposed
         // mid recognition

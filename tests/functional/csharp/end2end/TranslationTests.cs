@@ -26,6 +26,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         private static string deploymentId;
         private static string endpointInString;
         private static Uri endpointUrl;
+        private static string hostInString;
+        private static Uri hostUrl;
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
@@ -35,6 +37,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             deploymentId = Config.DeploymentId;
             endpointInString = String.Format("wss://{0}.s2s.speech.microsoft.com/speech/translation/cognitiveservices/v1", region);
             endpointUrl = new Uri(endpointInString);
+            hostInString = String.Format("wss://{0}.s2s.speech.microsoft.com", region);
+            hostUrl = new Uri(hostInString);
         }
 
         [TestInitialize]
@@ -933,6 +937,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.IsTrue(translatedResultsEs.Count > 0, $"translatedResultsEs.Count({translatedResultsEs.Count}) !> zero.");
                 Assert.IsTrue(translatedResultsFr.Count < translatedResultsDe.Count, $"translatedResultsFr.Count({translatedResultsFr.Count}) !< translatedResultsDe.Count({translatedResultsDe.Count})");
                 Assert.IsTrue(translatedResultsEs.Count < translatedResultsDe.Count, $"translatedResultsEs.Count({translatedResultsEs.Count}) !< translatedResultsDe.Count({translatedResultsDe.Count})");
+            }
+        }
+
+        [TestMethod]
+        public async Task TestTranslationConfigFromHost()
+        {
+            var config = SpeechTranslationConfig.FromHost(new Uri(hostInString), subscriptionKey);
+            config.SpeechRecognitionLanguage = Language.EN;
+            config.AddTargetLanguage(Language.DE);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+
+            using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
+            {
+                var result = await translationRecognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
+                Assert.AreEqual(TestData.English.Weather.Utterance, result.Text);
+                Assert.AreEqual(1, result.Translations.Count);
+                AssertMatching(TestData.German.Weather.Utterance, result.Translations[Language.DE]);
+                // Default output format is simple.
+                AssertDetailedOutput(result, false);
             }
         }
     }

@@ -176,11 +176,13 @@ from typing import Optional
 %rename ("_from_result") Microsoft::CognitiveServices::Speech::NoMatchDetails::FromResult;
 %rename ("_from_authorization_token") Microsoft::CognitiveServices::Speech::SpeechConfig::FromAuthorizationToken;
 %rename ("_from_endpoint") Microsoft::CognitiveServices::Speech::SpeechConfig::FromEndpoint;
+%rename ("_from_host") Microsoft::CognitiveServices::Speech::SpeechConfig::FromHost;
 %rename ("_from_subscription") Microsoft::CognitiveServices::Speech::SpeechConfig::FromSubscription;
 %rename ("_from_config") Microsoft::CognitiveServices::Speech::SpeechRecognizer::FromConfig;
 %rename ("_from_config") Microsoft::CognitiveServices::Speech::SpeechSynthesizer::FromConfig;
 %rename ("_from_authorization_token") Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig::FromAuthorizationToken;
 %rename ("_from_endpoint") Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig::FromEndpoint;
+%rename ("_from_host") Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig::FromHost;
 %rename ("_from_subscription") Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig::FromSubscription;
 %rename ("_from_config") Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::FromConfig;
 %rename ("from_recognizer") Microsoft::CognitiveServices::Speech::PhraseListGrammar::FromRecognizer;

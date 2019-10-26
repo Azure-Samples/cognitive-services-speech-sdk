@@ -114,6 +114,49 @@ public:
     }
 
     /// <summary>
+    /// Creates an instance of the speech config with specified host and subscription.
+    /// This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+    /// For services with a non-standard resource path or no path at all, use FromEndpoint instead.
+    /// Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+    /// Note: To use an authorization token with FromHost, use FromHost(const SPXSTRING&),
+    /// and then call SetAuthorizationToken() on the created SpeechConfig instance.
+    /// Note: Added in version 1.8.0.
+    /// </summary>
+    /// <param name="host">The service host to connect to. Format is "protocol://host:port" where ":port" is optional.</param>
+    /// <param name="subscription">The subscription key.</param>
+    /// <returns>A shared pointer to the new speech config instance.</returns>
+    static std::shared_ptr<SpeechConfig> FromHost(const SPXSTRING& host, const SPXSTRING& subscription)
+    {
+        SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(speech_config_from_host(&hconfig, Utils::ToUTF8(host).c_str(), Utils::ToUTF8(subscription).c_str()));
+
+        auto ptr = new SpeechConfig(hconfig);
+        return std::shared_ptr<SpeechConfig>(ptr);
+    }
+
+    /// <summary>
+    /// Creates an instance of SpeechConfig with specified host.
+    /// This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+    /// For services with a non-standard resource path or no path at all, use FromEndpoint instead.
+    /// Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+    /// Note: If the host requires a subscription key for authentication, use FromHost(const SPXSTRING&, const SPXSTRING&) to pass
+    /// the subscription key as parameter.
+    /// To use an authorization token with FromHost, use this method to create a SpeechConfig instance, and then
+    /// call SetAuthorizationToken() on the created SpeechConfig instance.
+    /// Note: Added in version 1.8.0.
+    /// </summary>
+    /// <param name="host">The service host URI to connect to. Format is "protocol://host:port" where ":port" is optional.</param>
+    /// <returns>A shared pointer to the new speech config instance.</returns>
+    static std::shared_ptr<SpeechConfig> FromHost(const SPXSTRING& host)
+    {
+        SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(speech_config_from_host(&hconfig, Utils::ToUTF8(host).c_str(), nullptr));
+
+        auto ptr = new SpeechConfig(hconfig);
+        return std::shared_ptr<SpeechConfig>(ptr);
+    }
+
+    /// <summary>
     /// Set the input language to the speech recognizer.
     /// </summary>
     /// <param name="lang">Specifies the name of spoken language to be recognized in BCP-47 format.</param>

@@ -56,26 +56,61 @@ void CSpxRestTtsEngineAdapter::Init()
 
     // Initialize authentication related information
 
-    std::string endpoint = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
+    std::string endpointUrl = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
+    std::string hostUrl = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Host), "");
+    std::string endpoint;
     std::string region = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), "");
     std::string subscriptionKey = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), "");
 
-    // Check for invalid use of auth token service endpoint
-
-    bool isTokenServiceEndpoint = false;
-    std::string endpointRegion;
-
-    std::tie(isTokenServiceEndpoint, endpointRegion) =
-        EndpointUtils::IsTokenServiceEndpoint(endpoint);
-
-    if (isTokenServiceEndpoint)
+    // Use custom endpoint if available and valid
+    if (!endpointUrl.empty())
     {
-        // Ignore the custom endpoint and use defaults except for region
-        if (!endpointRegion.empty())
+        // Check for invalid use of auth token service endpoint
+
+        bool isTokenServiceEndpoint = false;
+        std::string endpointRegion;
+
+        std::tie(isTokenServiceEndpoint, endpointRegion) =
+            EndpointUtils::IsTokenServiceEndpoint(endpointUrl);
+
+        if (isTokenServiceEndpoint)
         {
-            region = endpointRegion;
+            // Ignore the custom endpoint and use defaults except for region
+            if (!endpointRegion.empty())
+            {
+                region = endpointRegion;
+            }
         }
-        endpoint.clear();
+        else
+        {
+            endpoint = endpointUrl;
+        }
+    }
+
+    // Use custom host if available and there was no custom endpoint
+    if (endpoint.empty() && !hostUrl.empty())
+    {
+        Url url = HttpUtils::ParseUrl(hostUrl);
+        
+        // Check FromHost restrictions
+        if (!url.path.empty())
+        {
+            ThrowInvalidArgumentException("Resource path is not allowed in the host URI.");
+        }
+        if (!url.query.empty())
+        {
+            ThrowInvalidArgumentException("Query parameters are not allowed in the host URI.");
+        }
+
+        // Construct the full endpoint address
+
+        std::ostringstream oss;
+
+        oss << (url.secure ? HTTPS_PROTOCOL : HTTP_PROTOCOL)
+            << url.host << ':' << url.port
+            << TTS_COGNITIVE_SERVICE_URL_PATH;
+
+        endpoint = oss.str();
     }
 
     if (!endpoint.empty() && !CSpxSynthesisHelper::IsCustomVoiceEndpoint(endpoint) && !CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint))

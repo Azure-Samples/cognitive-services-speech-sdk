@@ -17,6 +17,7 @@ def pytest_addoption(parser):
     parser.addoption("--luis-subscription")
     parser.addoption("--luis-region")
     parser.addoption("--endpoint", help="Specify an endpoint. Currently only used for speech reco.")
+    parser.addoption("--host", help="Specify a host. Format is protocol://host:port where :port is optional.")
     parser.addoption("--language-understanding-app-id")
     parser.addoption('--no-use-default-microphone', action='store_true', dest="no_use_default_microphone",
                      default=False, help="disable tests that require a default microphone")
@@ -49,11 +50,18 @@ def endpoint(request):
 
 
 @pytest.fixture
-def default_speech_auth(subscription, speech_region, endpoint):
-    # if an endpoint is given, it overrides the set region
-    region = speech_region if not endpoint else None
+def host(request):
+    """specify a host. If given, it overrides the region settings for speech recognizers."""
+    return request.config.getoption("--host")
+
+
+@pytest.fixture
+def default_speech_auth(subscription, speech_region, endpoint, host):
+    # if an endpoint or a host is given, it overrides the set region
+    region = speech_region if not endpoint and not host else None
 
     return {'endpoint': endpoint,
+            'host': host,
             'subscription': subscription,
             'region': region}
 
@@ -200,7 +208,8 @@ def from_file_speech_reco_with_callbacks(speech_input: SpeechInput, kws_input: K
         speech_config = msspeech.SpeechConfig(
             subscription=kwargs.get('subscription', default_speech_auth['subscription']),
             region=kwargs.get('speech_region', default_speech_auth['region']),
-            endpoint=kwargs.get('endpoint', default_speech_auth['endpoint']))
+            endpoint=kwargs.get('endpoint', default_speech_auth['endpoint']),
+            host=kwargs.get('host', default_speech_auth['host']))
 
         reco = msspeech.SpeechRecognizer(speech_config, audio_config)
         callbacks = setup_callback_handle(reco)
@@ -226,7 +235,8 @@ def from_file_translation_reco_with_callbacks(subscription: str, speech_input: S
         translation_config = msspeech.translation.SpeechTranslationConfig(
             subscription=kwargs.get('subscription', subscription),
             region=kwargs.get('speech_region', speech_region),
-            endpoint=kwargs.get('endpoint', None))
+            endpoint=kwargs.get('endpoint', None),
+            host=kwargs.get('host', None))
 
         translation_config.speech_recognition_language = speech_input.input_language
         for language in speech_input.translations:
@@ -258,7 +268,8 @@ def from_file_intent_reco_with_callbacks(luis_subscription: str, intent_input: I
         speech_config = msspeech.SpeechConfig(
             subscription=kwargs.get('subscription', luis_subscription),
             region=kwargs.get('luis_region', luis_region),
-            endpoint=kwargs.get('endpoint', None))
+            endpoint=kwargs.get('endpoint', None),
+            host=kwargs.get('host', None))
 
         reco = msspeech.intent.IntentRecognizer(speech_config, audio_config)
 

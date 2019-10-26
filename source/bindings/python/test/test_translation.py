@@ -82,6 +82,18 @@ def test_set_service_property(subscription, speech_input, speech_region):
     _check_translation_result(result, speech_input, 0, target_languages=['de'])
 
 @pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
+def test_speech_translation_with_custom_host(subscription, speech_input, speech_region, default_speech_auth):
+    # use host if it has been specified
+    host = default_speech_auth['host'] or "wss://{}.s2s.speech.microsoft.com".format(speech_region)
+    config = msspeech.translation.SpeechTranslationConfig(subscription=subscription, host=host)
+    config.speech_recognition_language = 'en-us'
+    config.set_service_property(name='to', value='de', channel=msspeech.ServicePropertyChannel.UriQueryParameter)
+    audio_input = msspeech.AudioConfig(filename=speech_input.path)
+    translation_recognizer = msspeech.translation.TranslationRecognizer(config, audio_input)
+    result = translation_recognizer.recognize_once()
+    _check_translation_result(result, speech_input, 0, target_languages=['de'])
+
+@pytest.mark.parametrize('speech_input,', ['weather'], indirect=True)
 def test_change_target_languages(subscription, speech_input, speech_region):
     config = msspeech.translation.SpeechTranslationConfig(subscription=subscription, region=speech_region)
     config.speech_recognition_language = 'en-us'

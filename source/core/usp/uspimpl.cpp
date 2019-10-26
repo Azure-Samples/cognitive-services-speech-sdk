@@ -35,6 +35,7 @@
 
 #include "string_utils.h"
 #include "guid_utils.h"
+#include "http_utils.h"
 #include "endpoint_utils.h"
 
 #include "json.h"
@@ -217,6 +218,7 @@ string Connection::Impl::ConstructConnectionUrl() const
     auto intentRegion = m_config.m_intentRegion;
     ostringstream oss;
     bool customEndpoint = false;
+    bool customHost = false;
 
     // Using customized endpoint if it is defined.
     if (!m_config.m_customEndpointUrl.empty())
@@ -252,74 +254,119 @@ string Connection::Impl::ConstructConnectionUrl() const
     {
         oss << m_config.m_customEndpointUrl;
     }
+    else if (!m_config.m_customHostUrl.empty())
+    {
+        // Parse the custom host address
+        Url url = HttpUtils::ParseUrl(m_config.m_customHostUrl);
+        
+        if (!url.path.empty())
+        {
+            ThrowInvalidArgumentException("Resource path is not allowed in the host URI.");
+        }
+        if (!url.query.empty())
+        {
+            ThrowInvalidArgumentException("Query parameters are not allowed in the host URI.");
+        }
+        
+        oss << (url.secure ? WSS_PROTOCOL : WS_PROTOCOL) << url.host << ':' << url.port;
+        customHost = true;
+    }
     else
     {
         oss << endpoint::protocol;
+    }
+
+    if (!customEndpoint) // standard endpoint, or custom host with standard path
+    {
         switch (m_config.m_endpointType)
         {
         case EndpointType::Speech:
-            oss << region
-                << endpoint::unifiedspeech::hostnameSuffix
-                << endpoint::unifiedspeech::pathPrefix
+            if (!customHost)
+            {
+                oss << region
+                    << endpoint::unifiedspeech::hostnameSuffix;
+            }
+            oss << endpoint::unifiedspeech::pathPrefix
                 << g_recoModeStrings[recoMode]
                 << endpoint::unifiedspeech::pathSuffix;
             break;
+
         case EndpointType::Translation:
-            oss << region
-                << endpoint::translation::hostnameSuffix
-                << endpoint::translation::path;
+            if (!customHost)
+            {
+                oss << region
+                    << endpoint::translation::hostnameSuffix;
+            }
+            oss << endpoint::translation::path;
             break;
+
         case EndpointType::Intent:
+            if (!customHost)
+            {
+                oss << endpoint::luis::hostname;
+            }
             if (m_config.m_recoMode != USP::RecognitionMode::Interactive)
             {
                 ThrowInvalidArgumentException("Invalid reco mode for intent recognition.");
             }
-            oss << endpoint::luis::hostname
-                << endpoint::luis::pathPrefix1
+            oss << endpoint::luis::pathPrefix1
                 << intentRegion
                 << endpoint::luis::pathPrefix2
                 << g_recoModeStrings[recoMode]
                 << endpoint::luis::pathSuffix;
             break;
-        case EndpointType::Dialog:
-        {
-            const char* resource = nullptr;
-            const char* version = nullptr;
-            if (m_config.m_dialogBackend == Client::DialogBackend::BotFramework)
-            {
-                resource = endpoint::dialog::resourcePath::botFramework;
-                version = endpoint::dialog::version::botFramework;
-            }
-            else if (m_config.m_dialogBackend == Client::DialogBackend::CustomCommands)
-            {
-                resource = endpoint::dialog::resourcePath::customCommands;
-                version = endpoint::dialog::version::customCommands;
-            }
-            else
-            {
-                ThrowInvalidArgumentException("Invalid dialog backend.");
-            }
 
+        case EndpointType::Dialog:
             /* This will generate an url of the form wss://<region>.convai.speech.microsoft.com/<backend>/api/<version> */
-            oss << region
-                << endpoint::dialog::url
-                << resource
-                << endpoint::dialog::suffix
-                << version;
+            if (!customHost)
+            {
+                oss << region
+                    << endpoint::dialog::url;
+            }
+            { // must be enclosed in a block to avoid compiler errors about jumping past a declaration with an initializer
+                const char* resource = nullptr;
+                const char* version = nullptr;
+                if (m_config.m_dialogBackend == Client::DialogBackend::BotFramework)
+                {
+                    resource = endpoint::dialog::resourcePath::botFramework;
+                    version = endpoint::dialog::version::botFramework;
+                }
+                else if (m_config.m_dialogBackend == Client::DialogBackend::CustomCommands)
+                {
+                    resource = endpoint::dialog::resourcePath::customCommands;
+                    version = endpoint::dialog::version::customCommands;
+                }
+                else
+                {
+                    ThrowInvalidArgumentException("Invalid dialog backend.");
+                }
+
+                oss << resource
+                    << endpoint::dialog::suffix
+                    << version;
+            }
             break;
-        }
+
         case EndpointType::ConversationTranscriptionService:
-            oss << endpoint::conversationTranscriber::pathPrefix1
-                << region
-                << endpoint::conversationTranscriber::hostname
-                << endpoint::conversationTranscriber::pathPrefix2
+            if (!customHost)
+            {
+                oss << endpoint::conversationTranscriber::pathPrefix1
+                    << region
+                    << endpoint::conversationTranscriber::hostname;
+            }
+            oss << endpoint::conversationTranscriber::pathPrefix2
                 << endpoint::conversationTranscriber::pathSuffixMultiAudio;
             break;
+
         case EndpointType::SpeechSynthesis:
-            oss << region
-                << endpoint::speechSynthesis::hostnameSuffix
-                << endpoint::speechSynthesis::path;
+            if (!customHost)
+            {
+                oss << region
+                    << endpoint::speechSynthesis::hostnameSuffix;
+            }
+            oss << endpoint::speechSynthesis::path;
             break;
+
         default:
             ThrowInvalidArgumentException("Unknown endpoint type.");
         }
@@ -331,6 +378,9 @@ string Connection::Impl::ConstructConnectionUrl() const
         oss << queryParameterDelim << m_config.m_userDefinedQueryParameters;
         customEndpoint = true;
     }
+    // Note the use of customEndpoint in the code below for building query params
+    // - customEndpoint true:  FromEndpoint, or standard/FromHost with query parameters set by SetServiceProperty
+    // - customEndpoint false: not FromEndpoint (i.e. is standard/FromHost) and no user defined query parameters
 
     switch (m_config.m_endpointType)
     {

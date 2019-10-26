@@ -22,7 +22,8 @@ class EndpointUtils
 public:
     static std::pair<bool, std::string> IsTokenServiceEndpoint(const std::string& endpointStr)
     {
-        const std::regex tokenServiceEndpoint(R"(https://([^\.]+)\..+/issuetoken)"); // "https://<region>.<whatever>/issuetoken"
+        // Check for "https://<supposed region>.<whatever>/issuetoken" at the start
+        const std::regex tokenServiceEndpoint(R"(^https://([^\.]+)\..+/issuetoken)");
         std::smatch matches;
         bool isTokenServiceEndpoint = false;
         auto lowercaseText = endpointStr;
@@ -31,7 +32,7 @@ public:
         transform(lowercaseText.begin(), lowercaseText.end(), lowercaseText.begin(),
             [](unsigned char c) ->char { return (char)::tolower(c); });
 
-        if (std::regex_match(lowercaseText, matches, tokenServiceEndpoint))
+        if (std::regex_search(lowercaseText, matches, tokenServiceEndpoint))
         {
             isTokenServiceEndpoint = true;
             // The first match is the whole string; the second

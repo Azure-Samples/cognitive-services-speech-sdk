@@ -18,6 +18,7 @@ constexpr const char* GetPropertyName(const PropertyId id)
     {
     case PropertyId::SpeechServiceConnection_Key: return "SPEECH-SubscriptionKey";
     case PropertyId::SpeechServiceConnection_Endpoint: return "SPEECH-Endpoint";
+    case PropertyId::SpeechServiceConnection_Host: return "SPEECH-Host";
     case PropertyId::SpeechServiceConnection_Region: return "SPEECH-Region";
     case PropertyId::SpeechServiceAuthorization_Token: return "SPEECH-AuthToken";
     case PropertyId::SpeechServiceAuthorization_Type: return "SpeechServiceAuthorization_Type";

@@ -401,6 +401,17 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(const std::shared_ptr<ISpx
         m_customEndpoint = true;
         client.SetEndpointUrl(endpoint);
     }
+    else
+    {
+        // Set host url if this is provided
+        auto host = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Host));
+        if (!host.empty())
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: Using custom host: %s", __FUNCTION__, host.c_str());
+            m_customHost = true;
+            client.SetHostUrl(host);
+        }
+    }
 
     // set user defined query parameters if provided.
     auto userDefinedQueryParameters = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_UserDefinedQueryParameters));
@@ -658,7 +669,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspRegion(const std::shared_ptr<ISpxNa
 {
     auto region = isIntentRegion ? properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_IntentRegion))
         : properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region));
-    if (!m_customEndpoint)
+    if (!m_customEndpoint && !m_customHost)
     {
         SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_REGION);
         isIntentRegion ? client.SetIntentRegion(region) : client.SetRegion(region);
@@ -704,7 +715,8 @@ void CSpxUspRecoEngineAdapter::UpdateDefaultLanguage(const std::shared_ptr<ISpxN
     }
     // If no custom model is used, set the default language.
     if (properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId)).empty() &&
-        properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint)).find(USP::endpoint::deploymentIdQueryParam) == string::npos)
+        properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint)).find(USP::endpoint::deploymentIdQueryParam) == string::npos &&
+        properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Host)).find(USP::endpoint::deploymentIdQueryParam) == string::npos)
     {
         properties->SetStringValue(languageParameterName, s_defaultRecognitionLanguage);
     }

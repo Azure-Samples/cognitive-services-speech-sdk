@@ -549,6 +549,39 @@
     XCTAssertTrue([r.authorizationToken length] == 0);
 }
 
+- (void)testFromHostWithoutKeyAndToken {
+    NSString *weatherFileName = @"whatstheweatherlike";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+
+    NSString *host = [NSString stringWithFormat:@"wss://%@.stt.speech.microsoft.com", self.serviceRegion];
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    SPXSpeechConfiguration* speechConfig = [[SPXSpeechConfiguration alloc] initWithHost:host];
+    XCTAssertNotNil(speechConfig);
+
+    SPXSpeechRecognizer *r = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+    XCTAssertNotNil(r);
+    // We cannot really test whether recognizer works, since there is no non-container test host available which supports no authentication.
+    XCTAssertTrue([[r.properties getPropertyById:SPXSpeechServiceConnectionKey] length] == 0);
+    XCTAssertTrue([r.authorizationToken length] == 0);
+}
+
+- (void)testRecognitionFromHost {
+    NSString *weatherFileName = @"whatstheweatherlike";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    NSString *host = [NSString stringWithFormat:@"wss://%@.stt.speech.microsoft.com", self.serviceRegion];
+    
+    SPXAudioConfiguration *weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithHost:host subscription:self.speechKey];
+    XCTAssertNotNil(speechConfig);
+    [speechConfig setSpeechRecognitionLanguage:@"en-us"];
+    
+    SPXSpeechRecognizer *recognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+    SPXSpeechRecognitionResult *result = [recognizer recognizeOnce];
+    XCTAssertEqual(result.reason, SPXResultReason_RecognizedSpeech);
+}
+
 - (void)testSetServiceProperty {
     NSString *weatherFileName = @"whatstheweatherlike";
     NSString *weatherTextEnglish = @"What's the weather like?";

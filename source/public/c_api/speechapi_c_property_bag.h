@@ -25,6 +25,7 @@ enum  PropertyId
     SpeechServiceAuthorization_Token = 1003,
     SpeechServiceAuthorization_Type = 1004,
     SpeechServiceConnection_EndpointId = 1005,
+    SpeechServiceConnection_Host = 1006,
 
     SpeechServiceConnection_ProxyHostName = 1100,
     SpeechServiceConnection_ProxyPort = 1101,

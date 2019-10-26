@@ -159,6 +159,78 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
 - (nullable instancetype)initWithEndpoint:(nonnull NSString *)endpointUri error:(NSError * _Nullable * _Nullable)outError;
 
 /**
+ * Initializes speech translation configuration with specified host and subscription key.
+ * This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+ * For services with a non-standard resource path or no path at all, use initWithEndpoint instead.
+ *
+ * Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+ *
+ * Note: To use an authorization token, use initWithHost, and then set the authorizationToken property on the created SPXSpeechTranslationConfiguration instance.
+ *
+ * Added in version 1.8.0.
+ *
+ * @param hostUri The service host to connect to. Format is "protocol://host:port" where ":port" is optional.
+ * @param subscriptionKey The subscription key.
+ * @return An instance of speech translation configuration.
+ */
+- (nullable instancetype)initWithHost:(nonnull NSString *)hostUri subscription:(nonnull NSString *)subscriptionKey
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes speech translation configuration with specified host and subscription key.
+ * This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+ * For services with a non-standard resource path or no path at all, use initWithEndpoint instead.
+ *
+ * Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+ *
+ * Note: To use an authorization token, use initWithHost, and then set the authorizationToken property on the created SPXSpeechTranslationConfiguration instance.
+ *
+ * Added in version 1.8.0.
+ *
+ * @param hostUri The service host to connect to. Format is "protocol://host:port" where ":port" is optional.
+ * @param subscriptionKey The subscription key.
+ * @param outError Error information.
+ * @return An instance of speech translation configuration.
+ */
+- (nullable instancetype)initWithHost:(nonnull NSString *)hostUri subscription:(nonnull NSString *)subscriptionKey error:(NSError * _Nullable * _Nullable)outError;
+
+/**
+ * Initializes speech translation configuration with specified host.
+ * This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+ * For services with a non-standard resource path or no path at all, use initWithEndpoint instead.
+ *
+ * Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+ *
+ * Note: If the host requires a subscription key for authentication, use initWithHost:subscription: to pass the subscription key as parameter.
+ * To use an authorization token, use this method to create a SPXSpeechTranslationConfig instance, and then set the authorizationToken property on the created SPXSpeechTranslationConfiguration instance.
+ *
+ * Added in version 1.8.0.
+ *
+ * @param hostUri The service host to connect to. Format is "protocol://host:port" where ":port" is optional.
+ * @return An instance of speech translation configuration.
+ */
+- (nullable instancetype)initWithHost:(nonnull NSString *)hostUri
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Initializes speech translation configuration with specified host.
+ * This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+ * For services with a non-standard resource path or no path at all, use initWithEndpoint instead.
+ *
+ * Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+ *
+ * Note: If the host requires a subscription key for authentication, use initWithHost:subscription: to pass the subscription key as parameter.
+ * To use an authorization token, use this method to create a SPXSpeechTranslationConfig instance, and then set the authorizationToken property on the created SPXSpeechTranslationConfiguration instance.
+ *
+ * Added in version 1.8.0.
+ *
+ * @param hostUri The service host to connect to. Format is "protocol://host:port" where ":port" is optional.
+ * @param outError Error information.
+ * @return An instance of speech translation configuration.
+ */
+- (nullable instancetype)initWithHost:(nonnull NSString *)hostUri error:(NSError * _Nullable * _Nullable)outError;
+
+/**
  * Adds a target language for translation.
  *
  * @param lang the language identifier in BCP-47 format.

@@ -12,7 +12,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     public class RecognitionTestBase
     {
         public static string inputDir, subscriptionKey, region, conversationTranscriptionEndpoint, conversationTranscriptionPPEKey, conversationTranscriptionPRODKey, speechRegionForConversationTranscription;
-        public SpeechConfig defaultConfig, offlineConfig;
+        public SpeechConfig defaultConfig, hostConfig, offlineConfig;
         private static Config _config;
 
         public static void BaseClassInit(TestContext context)
@@ -38,6 +38,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void BaseTestInit()
         {
             defaultConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
+
+            var host = $"wss://{region}.stt.speech.microsoft.com";
+            hostConfig = SpeechConfig.FromHost(new Uri(host), subscriptionKey);
 
             offlineConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
             offlineConfig.SetProperty("CARBON-INTERNAL-UseRecoEngine-Unidec", "true");

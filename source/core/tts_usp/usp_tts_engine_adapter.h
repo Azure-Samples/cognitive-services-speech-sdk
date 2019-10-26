@@ -113,6 +113,7 @@ private:
     };
 
     std::string m_endpoint;
+    bool m_isCustomHost = false;
     std::shared_ptr<ISpxAudioOutput> m_audioOutput;
     std::shared_ptr<CSpxRestTtsAuthenticator> m_authenticator;
 

@@ -2072,11 +2072,101 @@ TEST_CASE("Custom speech-to-text endpoints", "[api][cxx]")
     weather.UpdateFullFilename(Config::InputDir);
     SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
     auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    string speechHost = "wss://" + Config::Region + ".stt.speech.microsoft.com";
+
+    SPXTEST_SECTION("Host only")
+    {
+        string host = speechHost;
+        auto config = SpeechConfig::FromHost(speechHost, Keys::Speech);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+    }
+
+    SPXTEST_SECTION("Host with root path") // parsed as empty path
+    {
+        string host = speechHost + "/";
+        auto config = SpeechConfig::FromHost(host, Keys::Speech);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+    }
+
+    SPXTEST_SECTION("Host with parameters") // not allowed
+    {
+        string host = speechHost + "?format=detailed";
+        auto config = SpeechConfig::FromHost(host, Keys::Speech);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
+
+        auto cancellation = CancellationDetails::FromResult(result);
+        SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
+        SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
+        CAPTURE(cancellation->ErrorDetails);
+        SPXTEST_REQUIRE(cancellation->ErrorDetails.find("Invalid argument exception: Query parameters are not allowed in the host URI.") != std::string::npos);
+    }
+
+    SPXTEST_SECTION("Host with non-root path") // not allowed
+    {
+        string host = speechHost + "/speech/recognition/interactive/cognitiveservices/v1";
+        auto config = SpeechConfig::FromHost(host, Keys::Speech);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
+
+        auto cancellation = CancellationDetails::FromResult(result);
+        SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
+        SPXTEST_REQUIRE(cancellation->ErrorCode == CancellationErrorCode::ConnectionFailure);
+        CAPTURE(cancellation->ErrorDetails);
+        SPXTEST_REQUIRE(cancellation->ErrorDetails.find("Invalid argument exception: Resource path is not allowed in the host URI.") != std::string::npos);
+    }
 
     SPXTEST_SECTION("Invalid url from portal")
     {
-        const auto speechEndpoint = "https://northeurope.api.cognitive.microsoft.com/sts/v1.0/issueToken";
+        const auto speechEndpoint = "https://" + Config::Region + ".api.cognitive.microsoft.com/sts/v1.0/issueToken";
         auto config = SpeechConfig::FromEndpoint(speechEndpoint, Keys::Speech);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, weather.m_utterance));
+    }
+}
+
+TEST_CASE("Local speech-to-text endpoints", "[.][api][cxx]") // for manual testing of speech service containers
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    weather.UpdateFullFilename(Config::InputDir);
+    SPXTEST_REQUIRE(exists(weather.m_inputDataFilename));
+    auto audioInput = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+
+    SPXTEST_SECTION("Host only")
+    {
+        string host = "ws://localhost:5000";
+        auto config = SpeechConfig::FromHost(host);
+        auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        SPXTEST_REQUIRE(StringComparisions::AssertFuzzyMatch(result->Text, weather.m_utterance));
+    }
+
+    SPXTEST_SECTION("Host with root path")
+    {
+        string host = "ws://localhost:5000/";
+        auto config = SpeechConfig::FromHost(host);
         auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
         auto result = recognizer->RecognizeOnceAsync().get();

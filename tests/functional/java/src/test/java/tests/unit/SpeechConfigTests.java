@@ -214,6 +214,55 @@ public class SpeechConfigTests {
     }
 
     // -----------------------------------------------------------------------
+    // --- FromHost tests
+    // -----------------------------------------------------------------------
+    @Test
+    public void testFromHostSuccess() {
+        SpeechConfig s = SpeechConfig.fromHost(URI.create("http://www.example.com"), "subscriptionkey");
+        assertNotNull(s);
+        s.close();
+    }
+
+    @Test
+    public void testFromHostWithoutKeyAndToken() {
+        String host = "wss://" + Settings.SpeechRegion + ".stt.speech.microsoft.com";
+        SpeechConfig sc = SpeechConfig.fromHost(URI.create(host));
+        SpeechRecognizer sr = new SpeechRecognizer(sc, AudioConfig.fromWavFileInput(Settings.WavFile));
+        // We cannot really test whether recognizer works, since there is no non-container test host available which supports no authentication.
+        assertTrue(sr.getProperties().getProperty(PropertyId.SpeechServiceAuthorization_Token).isEmpty());
+        assertTrue(sr.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
+
+        host = "wss://" + Settings.SpeechRegion + ".s2s.speech.microsoft.com";
+        SpeechTranslationConfig tc = SpeechTranslationConfig.fromHost(URI.create(host));
+        tc.setSpeechRecognitionLanguage("en-us");
+        tc.addTargetLanguage("de");
+        TranslationRecognizer tr = new TranslationRecognizer(tc, AudioConfig.fromWavFileInput(Settings.WavFile));
+        // We cannot really test whether recognizer works, since there is no non-container test host available which supports no authentication.
+        assertTrue(tr.getProperties().getProperty(PropertyId.SpeechServiceAuthorization_Token).isEmpty());
+        assertTrue(tr.getProperties().getProperty(PropertyId.SpeechServiceConnection_Key).isEmpty());
+        sr.close();
+        tc.close();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testFromHostNullHostNullKey() {
+        SpeechConfig s = SpeechConfig.fromHost(null, null);
+        s.close();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testFromHostNullHost() {
+        SpeechConfig s = SpeechConfig.fromHost(null, "subscriptionkey");
+        s.close();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testFromHostNullKey() {
+        SpeechConfig s = SpeechConfig.fromHost(URI.create("http://www.example.com"), null);
+        s.close();
+    }
+
+    // -----------------------------------------------------------------------
     // --- Null AudioConfig
     // -----------------------------------------------------------------------
     @Ignore("Tests fails if there is no mic on the test machine.")

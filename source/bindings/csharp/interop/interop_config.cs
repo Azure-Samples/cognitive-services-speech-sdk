@@ -58,6 +58,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             [MarshalAs(UnmanagedType.LPStr)] string endpoint,
             [MarshalAs(UnmanagedType.LPStr)] string subscription);
 
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR speech_config_from_host(out SPXSPEECHCONFIGHANDLE config,
+            [MarshalAs(UnmanagedType.LPStr)] string host,
+            [MarshalAs(UnmanagedType.LPStr)] string subscription);
+
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR speech_config_release(SPXSPEECHCONFIGHANDLE config);
 
@@ -93,6 +98,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         public static extern SPXHR speech_translation_config_from_endpoint(out SPXSPEECHCONFIGHANDLE config,
             [MarshalAs(UnmanagedType.LPStr)] string endpoint,
+            [MarshalAs(UnmanagedType.LPStr)] string subscription);
+        
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR speech_translation_config_from_host(out SPXSPEECHCONFIGHANDLE config,
+            [MarshalAs(UnmanagedType.LPStr)] string host,
             [MarshalAs(UnmanagedType.LPStr)] string subscription);
         
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]

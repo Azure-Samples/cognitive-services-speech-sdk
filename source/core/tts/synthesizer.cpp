@@ -571,7 +571,19 @@ void CSpxSynthesizer::InitializeTtsEngineAdapter()
 {
     // determine which type (or types) of tts engine adapters we should try creating...
     bool tryRest = false, tryUsp = false;
-    std::string endpoint = GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
+    std::string endpointUrl = GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
+    std::string hostUrl = GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Host), "");
+    std::string endpoint;
+
+    if (!endpointUrl.empty())
+    {
+        endpoint = endpointUrl;
+    }
+    else if (!hostUrl.empty())
+    {
+        endpoint = hostUrl;
+    }
+
     if (!endpoint.empty())
     {
         auto url = HttpUtils::ParseUrl(endpoint);

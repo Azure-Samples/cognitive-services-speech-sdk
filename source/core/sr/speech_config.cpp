@@ -37,6 +37,19 @@ void CSpxSpeechConfig::InitFromEndpoint(const char* endpoint, const char* subscr
     }
 }
 
+void CSpxSpeechConfig::InitFromHost(const char* host, const char* subscription)
+{
+    SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);
+    m_init = true;
+
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Host), host);
+
+    if (subscription != nullptr)
+    {
+        SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), subscription);
+    }
+}
+
 void CSpxSpeechConfig::InitFromSubscription(const char* subscription, const char* region)
 {
     SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);

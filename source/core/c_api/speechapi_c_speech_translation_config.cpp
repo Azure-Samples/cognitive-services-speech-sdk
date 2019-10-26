@@ -11,6 +11,7 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 SPXAPI speech_config_from_subscription_internal(SPXSPEECHCONFIGHANDLE* hconfig, const char* subscription, const char* region, const char* classname);
 SPXAPI speech_config_from_authorization_token_internal(SPXSPEECHCONFIGHANDLE* hconfig, const char* authToken, const char* region, const char* classname);
 SPXAPI speech_config_from_endpoint_internal(SPXSPEECHCONFIGHANDLE* hconfig, const char* endpoint, const char* subscription, const char* classname);
+SPXAPI speech_config_from_host_internal(SPXSPEECHCONFIGHANDLE* hconfig, const char* host, const char* subscription, const char* classname);
 
 SPXAPI speech_translation_config_from_subscription(SPXSPEECHCONFIGHANDLE* configHandle, const char* subscription, const char* region)
 {
@@ -25,6 +26,11 @@ SPXAPI speech_translation_config_from_authorization_token(SPXSPEECHCONFIGHANDLE*
 SPXAPI speech_translation_config_from_endpoint(SPXSPEECHCONFIGHANDLE* configHandle, const char* endpoint, const char* subscription)
 {
     return speech_config_from_endpoint_internal(configHandle, endpoint, subscription, "CSpxSpeechTranslationConfig");
+}
+
+SPXAPI speech_translation_config_from_host(SPXSPEECHCONFIGHANDLE* configHandle, const char* host, const char* subscription)
+{
+    return speech_config_from_host_internal(configHandle, host, subscription, "CSpxSpeechTranslationConfig");
 }
 
 SPXAPI speech_translation_config_add_target_language(SPXSPEECHCONFIGHANDLE configHandle, const char* language)

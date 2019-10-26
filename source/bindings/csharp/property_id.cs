@@ -31,7 +31,8 @@ namespace Microsoft.CognitiveServices.Speech
         /// The Cognitive Services Speech Service region. Under normal circumstances, you shouldn't have to
         /// use this property directly.
         /// Instead, use <see cref="SpeechConfig.FromSubscription"/>, <see cref="SpeechConfig.FromEndpoint(System.Uri, string)"/>,
-        /// <see cref="SpeechConfig.FromEndpoint(System.Uri)"/>, <see cref="SpeechConfig.FromAuthorizationToken"/>.
+        /// <see cref="SpeechConfig.FromEndpoint(System.Uri)"/>, <see cref="SpeechConfig.FromHost(System.Uri, string)"/>,
+        /// <see cref="SpeechConfig.FromHost(System.Uri)"/>, <see cref="SpeechConfig.FromAuthorizationToken"/>.
         /// </summary>
         SpeechServiceConnection_Region = Internal.PropertyId.SpeechServiceConnection_Region,
 
@@ -55,6 +56,13 @@ namespace Microsoft.CognitiveServices.Speech
         /// NOTE: The endpoint id is available in the Custom Speech Portal, listed under Endpoint Details.
         /// </summary>
         SpeechServiceConnection_EndpointId = Internal.PropertyId.SpeechServiceConnection_EndpointId,
+
+        /// <summary>
+        /// The Cognitive Services Speech Service host (url). Under normal circumstances, you shouldn't
+        /// have to use this property directly.
+        /// Instead, use <see cref="SpeechConfig.FromHost(System.Uri, string)"/>, or <see cref="SpeechConfig.FromHost(System.Uri)"/>.
+        /// </summary>
+        SpeechServiceConnection_Host = Internal.PropertyId.SpeechServiceConnection_Host,
 
         /// <summary>
         /// The host name of the proxy server used to connect to the Cognitive Services Speech Service. Under normal circumstances,

@@ -13,6 +13,7 @@ from .utils import _TestCallback
 from .test_events import _check_events
 
 from .tts_utils import (_create_speech_config,
+                    _create_speech_config_from_host,
                     _PushAudioOutputStreamTestCallback,
                     _do_something_with_audio_in_push_stream,
                     _do_something_with_audio_in_pull_stream,
@@ -509,4 +510,15 @@ def test_speech_synthesizer_speak_out_with_authorization_token(subscription, spe
         assert msspeech.ResultReason.SynthesizingAudioCompleted == result2.reason
         audio_data2 = result2.audio_data  # of type bytes
         _do_something_with_audio_in_vector(audio_data2)
+
+
+def test_speech_synthesizer_with_custom_host(subscription, speech_region):
+    config = _create_speech_config_from_host(subscription, speech_region)
+
+    synthesizer = msspeech.SpeechSynthesizer(config)
+
+    synthesizer.speak_text_async("{{{text1}}}").get()
+    # "{{{text1}}}" has now completed rendering to default speakers
+    synthesizer.speak_text_async("{{{text2}}}").get()
+    # "{{{text2}}}" has now completed rendering to default speakers
 

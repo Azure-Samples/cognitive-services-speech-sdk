@@ -376,3 +376,39 @@ TEST_CASE("Translation", "[api][cxx]")
         REQUIRE(errorResults.size() == 0);
     }
 }
+
+TEST_CASE("Custom translation endpoints", "[api][cxx]")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    callTheFirstOne.UpdateFullFilename(Config::InputDir);
+    SPXTEST_REQUIRE(exists(callTheFirstOne.m_inputDataFilename));
+    auto audioInput = AudioConfig::FromWavFileInput(callTheFirstOne.m_inputDataFilename);
+    string speechEndpoint = "wss://" + Config::Region + ".s2s.speech.microsoft.com";
+
+    SPXTEST_SECTION("Host only")
+    {
+        auto host = speechEndpoint;
+        auto config = SpeechTranslationConfig::FromHost(host, Keys::Speech);
+        config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
+        config->SetServiceProperty("from", "de-DE", ServicePropertyChannel::UriQueryParameter);
+        config->SetServiceProperty("to", "en", ServicePropertyChannel::UriQueryParameter);
+        auto recognizer = TranslationRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::TranslatedSpeech);
+    }
+
+    SPXTEST_SECTION("Host with parameters") // not allowed
+    {
+        auto host = speechEndpoint + "?from=de-DE&to=en";
+        auto config = SpeechTranslationConfig::FromHost(host, Keys::Speech);
+        config->SetServiceProperty("language", "de-DE", ServicePropertyChannel::UriQueryParameter);
+        auto recognizer = TranslationRecognizer::FromConfig(config, audioInput);
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
+    }
+}

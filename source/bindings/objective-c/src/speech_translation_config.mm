@@ -205,6 +205,102 @@
     return nil;
 }
 
+- (instancetype)initWithHost:(NSString *)hostUri subscription:(NSString *)subscriptionKey
+{
+    try {
+        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromHost([hostUri toSpxString], [subscriptionKey toSpxString]);
+        if (configImpl == nullptr)
+            return nil;
+        return [self initWithImpl:configImpl];
+    }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (...) {
+        NSLog(@"%@: Exception caught", NSStringFromSelector(_cmd));
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    return nil;
+}
+
+- (nullable instancetype)initWithHost:(nonnull NSString *)hostUri subscription:(nonnull NSString *)subscriptionKey error:(NSError * _Nullable * _Nullable)outError
+{
+    try {
+        self = [self initWithHost:hostUri subscription:subscriptionKey];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
+- (instancetype)initWithHost:(NSString *)hostUri
+{
+    try {
+        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromHost([hostUri toSpxString]);
+        if (configImpl == nullptr)
+            return nil;
+        return [self initWithImpl:configImpl];
+    }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (...) {
+        NSLog(@"%@: Exception caught", NSStringFromSelector(_cmd));
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime Exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    return nil;
+}
+
+- (nullable instancetype)initWithHost:(nonnull NSString *)hostUri error:(NSError * _Nullable * _Nullable)outError
+{
+    try {
+        self = [self initWithHost:hostUri];
+        return self;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return nil;
+}
+
 - (instancetype)initWithImpl:(std::shared_ptr<TranslationImpl::SpeechTranslationConfig>)translationConfigurationImpl
 {
     self = [super initWithImpl:translationConfigurationImpl];

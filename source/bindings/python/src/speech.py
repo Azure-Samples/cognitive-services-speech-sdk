@@ -34,20 +34,23 @@ class SpeechConfig():
 
     - from subscription: pass a subscription key and a region
     - from endpoint: pass an endpoint. Subscription key or authorization token are optional.
+    - from host: pass a host address. Subscription key or authorization token are optional.
     - from authorization token: pass an authorization token and a region
 
     :param subscription: The subscription key.
     :param region: The region name (see the `region page <https://aka.ms/csspeech/region>`_).
     :param endpoint: The service endpoint to connect to.
+    :param host: The service host to connect to. Standard resource path will be assumed. Format
+        is "protocol://host:port" where ":port" is optional.
     :param auth_token: The authorization token.
     :param speech_recognition_language: The input language to the speech recognition. The language
         is specified in BCP-47 format.
     """
     def __init__(self, subscription: OptionalStr = None, region: OptionalStr = None,
-            endpoint: OptionalStr = None, auth_token: OptionalStr = None,
+            endpoint: OptionalStr = None, host: OptionalStr = None, auth_token: OptionalStr = None,
             speech_recognition_language: str = ''):
 
-        self._impl = self._get_impl(impl.SpeechConfig, subscription, region, endpoint, auth_token,
+        self._impl = self._get_impl(impl.SpeechConfig, subscription, region, endpoint, host, auth_token,
                 speech_recognition_language)
 
     def get_property(self, property_id: PropertyId) -> str:
@@ -119,28 +122,28 @@ class SpeechConfig():
             impl._speech_py_impl.SpeechConfig_set_property(self._impl, property_name, value)
 
     @staticmethod
-    def _get_impl(config_type, subscription, region, endpoint, auth_token,
+    def _get_impl(config_type, subscription, region, endpoint, host, auth_token,
             speech_recognition_language):
-        if endpoint is not None:
+        if endpoint is not None or host is not None:
             if region is not None:
-                raise ValueError('cannot construct SpeechConfig with both region and endpoint information')
+                raise ValueError('cannot construct SpeechConfig with both region and endpoint or host information')
             if auth_token is not None:
-                raise ValueError('cannot specify both auth_token and endpoint when constructing SpeechConfig. Set authorization token separately after creating SpeechConfig.')
+                raise ValueError('cannot specify both auth_token and endpoint or host when constructing SpeechConfig. Set authorization token separately after creating SpeechConfig.')
 
         if region is not None and subscription is None and auth_token is None:
             raise ValueError('either subscription key or authorization token must be given along with a region')
 
-        if subscription is not None and endpoint is None and region is None:
-            raise ValueError('either endpoint or region must be given along with a subscription key')
+        if subscription is not None and endpoint is None and host is None and region is None:
+            raise ValueError('either endpoint, host, or region must be given along with a subscription key')
 
         generic_error_message = 'cannot construct SpeechConfig with the given arguments'
         _impl = None
         if region is not None and subscription is not None:
-            if endpoint is not None or auth_token is not None:
+            if endpoint is not None or host is not None or auth_token is not None:
                 raise ValueError(generic_error_message)
             _impl = config_type._from_subscription(subscription, region)
         elif region is not None and auth_token is not None:
-            if endpoint is not None or subscription is not None:
+            if endpoint is not None or host is not None or subscription is not None:
                 raise ValueError(generic_error_message)
             _impl = config_type._from_authorization_token(auth_token, region)
         elif endpoint is not None:
@@ -148,6 +151,11 @@ class SpeechConfig():
                 _impl = config_type._from_endpoint(endpoint, subscription)
             else:
                 _impl = config_type._from_endpoint(endpoint)
+        elif host is not None:
+            if subscription is not None:
+                _impl = config_type._from_host(host, subscription)
+            else:
+                _impl = config_type._from_host(host)
 
         if _impl is not None:
             _impl.set_speech_recognition_language(speech_recognition_language)

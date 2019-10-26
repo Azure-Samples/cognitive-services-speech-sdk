@@ -282,6 +282,7 @@ private:
     std::string m_speechConfig{};
     std::string m_agentConfig{};
     bool m_customEndpoint = false;
+    bool m_customHost = false;
     USP::EndpointType m_endpointType = USP::EndpointType::Speech;
 
     const bool m_allowUspResetAfterAudioByteCount = true;

@@ -58,9 +58,21 @@ void CSpxUspTtsEngineAdapter::Init()
 
     // Initialize authentication related information
 
-    std::string endpoint = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
+    std::string endpointUrl = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), "");
+    std::string hostUrl = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Host), "");
+    std::string endpoint;
     std::string region = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), "");
     std::string subscriptionKey = ISpxPropertyBagImpl::GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), "");
+
+    if (!endpointUrl.empty()) // use custom endpoint
+    {
+        endpoint = endpointUrl;
+    }
+    else if (!hostUrl.empty()) // or custom host
+    {
+        endpoint = hostUrl;    // parse further in USP ConstructConnectionUrl()
+        m_isCustomHost = true;
+    }
 
     if (!endpoint.empty() && !CSpxSynthesisHelper::IsCustomVoiceEndpoint(endpoint) && !CSpxSynthesisHelper::IsStandardVoiceEndpoint(endpoint))
     {
@@ -360,8 +372,16 @@ void CSpxUspTtsEngineAdapter::UspInitialize()
     // Create the usp client, which we'll configure and use to create the actual connection
     auto uspCallbacks = SpxCreateObjectWithSite<ISpxUspCallbacks>("CSpxUspCallbackWrapper", this);
     auto client = USP::Client(uspCallbacks, USP::EndpointType::SpeechSynthesis, PAL::CreateGuidWithoutDashes(), m_threadService)
-        .SetAuthentication(authData)
-        .SetEndpointUrl(m_endpoint);
+        .SetAuthentication(authData);
+
+    if (m_isCustomHost) // for FromHost specific handling
+    {
+        client.SetHostUrl(m_endpoint);
+    }
+    else
+    {
+        client.SetEndpointUrl(m_endpoint);
+    }
 
     // Set proxy
     if (!m_proxyHost.empty() && m_proxyPort > 0)

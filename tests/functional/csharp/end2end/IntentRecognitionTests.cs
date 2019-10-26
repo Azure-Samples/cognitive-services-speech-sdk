@@ -29,6 +29,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         private static string languageUnderstandingHomeAutomationAppId;
         private static string endpointInString;
         private static Uri endpointUrl;
+        private static string hostInString;
+        private static Uri hostUrl;
         private static Config _config;
 
         private SpeechConfig config;
@@ -44,6 +46,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var intentRegionInUrl = MapToIntentServiceRegion(languageUnderstandingServiceRegion);
             endpointInString = String.Format("wss://speech.platform.bing.com/speech/{0}/recognition/interactive/cognitiveservices/v1", intentRegionInUrl);
             endpointUrl = new Uri(endpointInString);
+            hostInString = String.Format("wss://speech.platform.bing.com");
+            hostUrl = new Uri(hostInString);
 
             var inputDir = Config.InputDir;
             TestData.AudioDir = Path.Combine(inputDir, "audio");
@@ -406,6 +410,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 Assert.IsTrue(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestIntentConfigFromHost()
+        {
+            var configFromHost = SpeechConfig.FromHost(hostUrl, languageUnderstandingSubscriptionKey);
+            configFromHost.SpeechRecognitionLanguage = Language.EN;
+            using (var recognizer = TrackSessionId(new IntentRecognizer(configFromHost, AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile))))
+            {
+                var phrase = TestData.English.HomeAutomation.TurnOn.Utterance;
+                var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
+                recognizer.AddAllIntents(model);
+
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedIntent, result.Reason);
             }
         }
 

@@ -31,7 +31,8 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
     /**
      * The Cognitive Services Speech Service region. Under normal circumstances, you shouldn't have to
      * use this property directly. 
-     * Instead, use SPXSpeechConfiguration.initWithEndpoint or SpeechConfiguration.initWithAuthorizationToken.
+     * Instead, use SPXSpeechConfiguration.initWithEndpoint, SPXSpeechConfiguration.initWithHost, or
+     * SPXSpeechConfiguration.initWithAuthorizationToken.
      */
     SPXSpeechServiceConnectionRegion = 1002,
 
@@ -57,6 +58,13 @@ typedef NS_ENUM(NSUInteger, SPXPropertyId)
      * NOTE: The endpoint id is available in the Custom Speech Portal, listed under Endpoint Details.
      */
     SPXSpeechServiceConnectionEndpointId = 1005,
+
+    /**
+     * The Cognitive Services Speech Service host (url). Under normal circumstances, you shouldn't
+     * have to use this property directly.
+     * Instead, use SPXSpeechConfiguration.initWithHost.
+     */
+    SPXSpeechServiceConnectionHost = 1006,
 
     /**
      * The host name of the proxy server. Not implemented yet.

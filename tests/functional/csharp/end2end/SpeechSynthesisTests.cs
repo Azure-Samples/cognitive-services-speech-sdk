@@ -1533,6 +1533,25 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [TestMethod]
+        public async Task TestSynthesisConfigFromHost()
+        {
+            using (var synthesizer = new SpeechSynthesizer(restHostConfig))
+            {
+                using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has now completed rendering to default speakers
+                {
+                    CheckResult(result1);
+                }
+            }
+            using (var synthesizer = new SpeechSynthesizer(uspHostConfig))
+            {
+                using (var result2 = await synthesizer.SpeakTextAsync("{{{text2}}}")) // "{{{text2}}}" has now completed rendering to default speakers
+                {
+                    CheckResult(result2);
+                }
+            }
+        }
+
         private void CheckResult(SpeechSynthesisResult result)
         {
             string cancellationDetails = string.Empty;

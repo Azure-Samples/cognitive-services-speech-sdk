@@ -362,6 +362,42 @@
     XCTAssertTrue([translationRecognizer.authorizationToken length] == 0);
 }
 
+- (void)testFromHostWithoutKeyAndToken {
+    NSString *weatherFileName = @"whatstheweatherlike";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    NSString *host = [NSString stringWithFormat:@"wss://%@.s2s.speech.microsoft.com", self.serviceRegion];
+
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    SPXSpeechTranslationConfiguration* translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithHost:host];
+    XCTAssertNotNil(translationConfig);
+    [translationConfig setSpeechRecognitionLanguage:@"en-us"];
+    [translationConfig addTargetLanguage:@"de-DE"];
+
+    SPXTranslationRecognizer *translationRecognizer = [[SPXTranslationRecognizer alloc] initWithSpeechTranslationConfiguration:translationConfig audioConfiguration:weatherAudioSource];
+    XCTAssertNotNil(translationRecognizer);
+    // We cannot really test whether recognizer works, since there is no non-container test host available which supports no authentication.
+    XCTAssertTrue([[translationRecognizer.properties getPropertyById:SPXSpeechServiceConnectionKey] length] == 0);
+    XCTAssertTrue([translationRecognizer.authorizationToken length] == 0);
+}
+
+- (void)testTranslationFromHost {
+    NSString *weatherFileName = @"whatstheweatherlike";
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *weatherFile = [bundle pathForResource: weatherFileName ofType:@"wav"];
+    NSString *host = [NSString stringWithFormat:@"wss://%@.s2s.speech.microsoft.com", self.serviceRegion];
+    
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    SPXSpeechTranslationConfiguration *translationConfig = [[SPXSpeechTranslationConfiguration alloc] initWithHost:host subscription:self.speechKey];
+    XCTAssertNotNil(translationConfig);
+    [translationConfig setSpeechRecognitionLanguage:@"en-us"];
+    [translationConfig addTargetLanguage:@"de"];
+
+    SPXTranslationRecognizer *translationRecognizer = [[SPXTranslationRecognizer alloc] initWithSpeechTranslationConfiguration:translationConfig audioConfiguration:weatherAudioSource];
+    SPXTranslationRecognitionResult *result = [translationRecognizer recognizeOnce];
+    XCTAssertEqual(result.reason, SPXResultReason_TranslatedSpeech);
+}
+
 - (void)testSetServicePropertyTranslation {
     NSString *weatherFileName = @"whatstheweatherlike";
     NSString *weatherTextEnglish = @"What's the weather like?";

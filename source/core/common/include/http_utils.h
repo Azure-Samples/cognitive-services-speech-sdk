@@ -167,17 +167,13 @@ public:
                     // The length from 'path' up to the first occurrence of either 'query_delimiter' or '\0' shall be stored in 'path_length'
                     auto path_length = StringToken_GetLength(token);
 
-                    // If the path component is present and 'http_url->path' ends up being NULL, the function shall fail
-                    // If the path component is present and 'http_url->path_length' ends up being zero, the function shall fail
-                    if (path == NULL || path_length == 0)
-                    {
-                        ThrowRuntimeError("Failed parsing http url path");
-                    }
-                    else
+                    if (path != NULL && path_length > 0)
                     {
                         url.path = std::string(path, path_length);
-                        path_parsed = true;
                     }
+                    // else it's the root path '/' and url.path is empty
+
+                    path_parsed = true;
                 }
                 // Next if the 'query_delimiter' occurs the following pointer address shall be stored in 'query'
                 else if (previous_delimiter == query_delimiter && current_delimiter == NULL && host_parsed && !query_parsed)

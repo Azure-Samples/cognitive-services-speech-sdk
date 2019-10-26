@@ -1342,14 +1342,80 @@ TEST_CASE("Speak output in streams with all data get since synthesizing result -
 
 TEST_CASE("Custom text-to-speech endpoints", "[api][cxx]")
 {
-    SPXTEST_SECTION("Invalid url from portal")
+    string speechHost = Config::Region + ".tts.speech.microsoft.com";
+    string speechHostRest = "https://" + speechHost;
+    string speechHostUsp  = "wss://" + speechHost;
+
+    SPXTEST_SECTION("Host only - REST")
     {
-        const auto endpoint = "https://northeurope.api.cognitive.microsoft.com/sts/v1.0/issueToken";
+        auto config = SpeechConfig::FromHost(speechHostRest, Keys::Speech);
+        auto synthesizer = SpeechSynthesizer::FromConfig(config);
+
+        auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
+        SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
+        SPXTEST_REQUIRE(result->GetAudioLength() > 0);
+    }
+
+    SPXTEST_SECTION("Host only - USP")
+    {
+        auto config = SpeechConfig::FromHost(speechHostUsp, Keys::Speech);
+        auto synthesizer = SpeechSynthesizer::FromConfig(config);
+
+        auto result = synthesizer->SpeakTextAsync("{{{text2}}}").get();
+        SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
+        SPXTEST_REQUIRE(result->GetAudioLength() > 0);
+    }
+
+    SPXTEST_SECTION("Host with path - REST") // not allowed
+    {
+        const auto host = speechHostRest + "/cognitiveservices/v1";
+        auto config = SpeechConfig::FromHost(host, Keys::Speech);
+        REQUIRE_THROWS(SpeechSynthesizer::FromConfig(config));
+    }
+
+    SPXTEST_SECTION("Host with path - USP") // not allowed
+    {
+        const auto host = speechHostUsp + "/cognitiveservices/websocket/v1";
+        auto config = SpeechConfig::FromHost(host, Keys::Speech);
+        auto synthesizer = SpeechSynthesizer::FromConfig(config);
+
+        auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
+        SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
+    }
+
+    SPXTEST_SECTION("Invalid url from portal") // test the REST code path
+    {
+        const auto endpoint = "https://" + Config::Region + ".api.cognitive.microsoft.com/sts/v1.0/issueToken";
         auto config = SpeechConfig::FromEndpoint(endpoint, Keys::Speech);
         auto synthesizer = SpeechSynthesizer::FromConfig(config);
 
         auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
         SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
+        SPXTEST_REQUIRE(result->GetAudioLength() > 0);
+    }
+}
+
+TEST_CASE("Local text-to-speech endpoints", "[.][api][cxx]") // for manual testing of speech service containers
+{
+    SPXTEST_SECTION("Host only")
+    {
+        const auto endpoint = "http://localhost:5000";
+        auto config = SpeechConfig::FromHost(endpoint);
+        auto synthesizer = SpeechSynthesizer::FromConfig(config);
+
+        auto result = synthesizer->SpeakTextAsync("{{{text1}}}").get();
+        SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
+        SPXTEST_REQUIRE(result->GetAudioLength() > 0);
+    }
+
+    SPXTEST_SECTION("Host with root path")
+    {
+        const auto endpoint = "http://localhost:5000/";
+        auto config = SpeechConfig::FromHost(endpoint);
+        auto synthesizer = SpeechSynthesizer::FromConfig(config);
+
+        auto result = synthesizer->SpeakTextAsync("{{{text2}}}").get();
         SPXTEST_REQUIRE(result->Reason == ResultReason::SynthesizingAudioCompleted);
         SPXTEST_REQUIRE(result->GetAudioLength() > 0);
     }

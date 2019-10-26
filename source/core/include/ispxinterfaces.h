@@ -1467,6 +1467,7 @@ class ISpxSpeechConfig : public ISpxInterfaceBaseFor<ISpxSpeechConfig>
 public:
     virtual void InitFromSubscription(const char * subscription, const char* region) = 0;
     virtual void InitFromEndpoint(const char * endpoint, const char* subscription) = 0;
+    virtual void InitFromHost(const char * host, const char* subscription) = 0;
     virtual void InitAuthorizationToken(const char * authToken, const char * region) = 0;
     virtual void SetServiceProperty(std::string name, std::string value, ServicePropertyChannel channel) = 0;
     virtual void SetProfanity(ProfanityOption profanity) = 0;

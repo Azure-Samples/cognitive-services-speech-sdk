@@ -93,6 +93,45 @@ public:
     }
 
     /// <summary>
+    /// Creates an instance of the speech translation config with specified host and subscription.
+    /// This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+    /// For services with a non-standard resource path or no path at all, use FromEndpoint instead.
+    /// Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+    /// Note: To use an authorization token with FromHost, use FromHost(const SPXSTRING&),
+    /// and then call SetAuthorizationToken() on the created SpeechTranslationConfig instance.
+    /// Note: Added in version 1.8.0.
+    /// </summary>
+    /// <param name="host">The service host to connect to. Format is "protocol://host:port" where ":port" is optional.</param>
+    /// <param name="subscription">The subscription key.</param>
+    /// <returns>Shared pointer to the new SpeechTranslationConfig instance.</returns>
+    static std::shared_ptr<SpeechTranslationConfig> FromHost(const SPXSTRING& host, const SPXSTRING& subscription)
+    {
+        SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(speech_translation_config_from_host(&hconfig, Utils::ToUTF8(host).c_str(), Utils::ToUTF8(subscription).c_str()));
+        return std::shared_ptr<SpeechTranslationConfig>(new SpeechTranslationConfig(hconfig));
+    }
+
+    /// <summary>
+    /// Creates an instance of the speech translation config with specified host.
+    /// This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+    /// For services with a non-standard resource path or no path at all, use FromEndpoint instead.
+    /// Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+    /// Note: If the host requires a subscription key for authentication, use FromHost(const SPXSTRING&, const SPXSTRING&) to pass
+    /// the subscription key as parameter.
+    /// To use an authorization token with FromHost, use this method to create a SpeechTranslationConfig instance, and then
+    /// call SetAuthorizationToken() on the created SpeechTranslationConfig instance.
+    /// Note: Added in version 1.8.0.
+    /// </summary>
+    /// <param name="host">The service host to connect to. Format is "protocol://host:port" where ":port" is optional.</param>
+    /// <returns>A shared pointer to the new SpeechTranslationConfig instance.</returns>
+    static std::shared_ptr<SpeechTranslationConfig> FromHost(const SPXSTRING& host)
+    {
+        SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(speech_translation_config_from_host(&hconfig, Utils::ToUTF8(host).c_str(), nullptr));
+        return std::shared_ptr<SpeechTranslationConfig>(new SpeechTranslationConfig(hconfig));
+    }
+
+    /// <summary>
     /// Adds a target language for translation.
     /// </summary>
     /// <param name="language">Translation target language to add.</param>

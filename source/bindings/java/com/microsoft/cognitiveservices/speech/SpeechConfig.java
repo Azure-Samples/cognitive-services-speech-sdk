@@ -162,6 +162,46 @@ public class SpeechConfig implements Closeable {
     }
 
     /**
+     * Creates an instance of the speech config with specified host and subscription key.
+     * This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+     * For services with a non-standard resource path or no path at all, use fromEndpoint instead.
+     * Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+     * Note: To use an authorization token with fromHost, use fromHost(java.net.URI),
+     * and then call setAuthorizationToken() on the created SpeechConfig instance.
+     * Note: Added in version 1.8.0.
+     * @param host The service host to connect to. Format is "protocol://host:port" where ":port" is optional.
+     * @param subscriptionKey The subscription key.
+     * @return A speech config instance.
+     */
+    public static SpeechConfig fromHost(java.net.URI host, String subscriptionKey) {
+        Contracts.throwIfNull(host, "host");
+        if(subscriptionKey == null) {
+            throw new NullPointerException("subscriptionKey");
+        }
+
+        return new SpeechConfig(com.microsoft.cognitiveservices.speech.internal.SpeechConfig.FromHost(host.toString(), subscriptionKey));
+    }
+
+    /**
+     * Creates an instance of the speech config with specified host.
+     * This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+     * For services with a non-standard resource path or no path at all, use fromEndpoint instead.
+     * Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+     * Note: If the host requires a subscription key for authentication, use fromHost(java.net.URI, String) to pass
+     * the subscription key as parameter.
+     * To use an authorization token with fromHost, use this method to create a SpeechConfig instance, and then
+     * call setAuthorizationToken() on the created SpeechConfig instance.
+     * Note: Added in version 1.8.0.
+     * @param host The service host to connect to. Format is "protocol://host:port" where ":port" is optional.
+     * @return A speech config instance.
+     */
+    public static SpeechConfig fromHost(java.net.URI host) {
+        Contracts.throwIfNull(host, "host");
+
+        return new SpeechConfig(com.microsoft.cognitiveservices.speech.internal.SpeechConfig.FromHost(host.toString()));
+    }
+
+    /**
      * Sets the authorization token.
      * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
      * expires, the caller needs to refresh it by calling this setter with a new valid token.

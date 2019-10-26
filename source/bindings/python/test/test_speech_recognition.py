@@ -71,6 +71,31 @@ def test_speech_recognition_with_custom_endpoint(speech_input, default_speech_au
     assert msspeech.NoMatchReason.InitialSilenceTimeout == result.no_match_details.reason
 
 
+@pytest.mark.parametrize('speech_input,', ['silencehello'], indirect=True)
+def test_speech_recognition_with_custom_host(speech_input, default_speech_auth, speech_region):
+    from azure.cognitiveservices.speech import PropertyId
+    initial_silence_timeout_ms = 1000
+    # use host if it has been specified
+    host = default_speech_auth['host'] or "wss://{}.stt.speech.microsoft.com".format(speech_region)
+
+    speech_config = msspeech.SpeechConfig(subscription=default_speech_auth['subscription'],
+            host=host)
+    # host address cannot include query parameters
+    speech_config.set_property(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs,
+            str(initial_silence_timeout_ms))
+
+    audio_config = msspeech.audio.AudioConfig(filename=speech_input.path)
+    # Creates a speech recognizer using a file as audio input.
+    # The default language is "en-us".
+    reco = msspeech.SpeechRecognizer(speech_config, audio_config)
+
+    future = reco.recognize_once_async()
+    result = future.get()
+
+    assert msspeech.ResultReason.NoMatch == result.reason
+    assert msspeech.NoMatchReason.InitialSilenceTimeout == result.no_match_details.reason
+
+
 @pytest.mark.xfail(reason='flaky')
 @pytest.mark.parametrize('speech_input,', ['batman'], indirect=True)
 def test_recognize_once_multiple(from_file_speech_reco_with_callbacks, speech_input):
@@ -132,6 +157,13 @@ def test_speech_config_default_constructor(config_type):
     assert "" == speech_config.region
     assert "someendpoint" == speech_config.get_property(msspeech.PropertyId.SpeechServiceConnection_Endpoint)
 
+    # from_host and subscription
+    speech_config = config_type(host="somehost", subscription="somesubscription")
+    assert speech_config
+    assert "somesubscription" == speech_config.subscription_key
+    assert "" == speech_config.region
+    assert "somehost" == speech_config.get_property(msspeech.PropertyId.SpeechServiceConnection_Host)
+
     # from_subscription, with language
     speech_config = config_type(subscription="somesubscription", region="someregion",
                                 speech_recognition_language='zh-CN')
@@ -142,7 +174,7 @@ def test_speech_config_default_constructor(config_type):
 
     # check correct error messages
     with pytest.raises(ValueError,
-            match='either endpoint or region must be given along with a subscription key'):
+            match='either endpoint, host, or region must be given along with a subscription key'):
         speech_config = config_type(subscription="somesubscription")
 
     with pytest.raises(ValueError,
@@ -150,15 +182,15 @@ def test_speech_config_default_constructor(config_type):
         speech_config = config_type(region="someregion")
 
     with pytest.raises(ValueError,
-            match='either endpoint or region must be given along with a subscription key'):
+            match='either endpoint, host, or region must be given along with a subscription key'):
         speech_config = config_type(subscription="somesubscription")
 
     with pytest.raises(ValueError,
-            match='cannot construct SpeechConfig with both region and endpoint information'):
+            match='cannot construct SpeechConfig with both region and endpoint or host information'):
         speech_config = config_type(endpoint="someendpoint", region="someregion")
 
     with pytest.raises(ValueError,
-            match='cannot construct SpeechConfig with both region and endpoint information'):
+            match='cannot construct SpeechConfig with both region and endpoint or host information'):
         speech_config = config_type(endpoint="someendpoint", region="someregion",
             subscription="somesubscription")
 
@@ -168,18 +200,20 @@ def test_speech_config_default_constructor(config_type):
     # check that all nonsupported construction methods raise
     from itertools import product
     endpoint_id = msspeech.PropertyId.SpeechServiceConnection_Endpoint
-    for subscription, region, endpoint, auth_token in product((None, "somekey"),
+    for subscription, region, endpoint, host, auth_token in product((None, "somekey"),
             (None, "someregion"),
             (None, "someendpoint"),
+            (None, "somehost"),
             (None, "sometoken")):
-        if ((subscription and region and not endpoint and not auth_token) or
-                (subscription and not region and endpoint and not auth_token) or
-                (not subscription and not region and endpoint and not auth_token) or
-                (not subscription and region and not endpoint and auth_token)):
+        if ((subscription and region and not endpoint and not host and not auth_token) or
+                (subscription and not region and (endpoint or host) and not auth_token) or
+                (not subscription and not region and (endpoint or host) and not auth_token) or
+                (not subscription and region and not endpoint and not host and auth_token)):
 
             speech_config = config_type(subscription=subscription,
                     region=region,
                     endpoint=endpoint,
+                    host=host,
                     auth_token=auth_token)
             assert speech_config
             assert speech_config.region == (region or '')
@@ -192,6 +226,7 @@ def test_speech_config_default_constructor(config_type):
                 speech_config = config_type(subscription=subscription,
                         region=region,
                         endpoint=endpoint,
+                        host=host,
                         auth_token=auth_token)
 
 

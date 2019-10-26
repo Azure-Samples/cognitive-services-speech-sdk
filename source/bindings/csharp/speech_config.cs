@@ -104,6 +104,45 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
+        /// Creates an instance of the speech config with specified host and subscription key.
+        /// This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+        /// For services with a non-standard resource path or no path at all, use FromEndpoint instead.
+        /// Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+        /// Note: To use an authorization token with FromHost, use FromHost(System.Uri),
+        /// and then set the AuthorizationToken property on the created SpeechConfig instance.
+        /// Note: Added in version 1.8.0.
+        /// </summary>
+        /// <param name="host">The service host to connect to. Format is "protocol://host:port" where ":port" is optional.</param>
+        /// <param name="subscriptionKey">The subscription key.</param>
+        /// <returns>A speech config instance.</returns>
+        public static SpeechConfig FromHost(Uri host, string subscriptionKey)
+        {
+            IntPtr speechConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechConfig.speech_config_from_host(out speechConfigHandle, Uri.EscapeUriString(host.ToString()), subscriptionKey));
+            return new SpeechConfig(speechConfigHandle);
+        }
+
+        /// <summary>
+        /// Creates an instance of the speech config with specified host.
+        /// This method is intended only for users who use a non-default service host. Standard resource path will be assumed.
+        /// For services with a non-standard resource path or no path at all, use FromEndpoint instead.
+        /// Note: Query parameters are not allowed in the host URI and must be set by other APIs.
+        /// Note: If the host requires a subscription key for authentication, use FromHost(System.Uri, string) to pass
+        /// the subscription key as parameter.
+        /// To use an authorization token with FromHost, use this method to create a SpeechConfig instance, and then
+        /// set the AuthorizationToken property on the created SpeechConfig instance.
+        /// Note: Added in version 1.8.0.
+        /// </summary>
+        /// <param name="host">The service host to connect to. Format is "protocol://host:port" where ":port" is optional.</param>
+        /// <returns>A speech config instance.</returns>
+        public static SpeechConfig FromHost(Uri host)
+        {
+            IntPtr speechConfigHandle = IntPtr.Zero;
+            ThrowIfFail(Internal.SpeechConfig.speech_config_from_host(out speechConfigHandle, Uri.EscapeUriString(host.ToString()), null));
+            return new SpeechConfig(speechConfigHandle);
+        }
+
+        /// <summary>
         /// Subscription key.
         /// </summary>
         public string SubscriptionKey

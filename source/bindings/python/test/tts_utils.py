@@ -35,6 +35,11 @@ def _create_speech_config(subscription, speech_region):
     config = msspeech.SpeechConfig(subscription=subscription, endpoint=endpoint)
     return config
 
+def _create_speech_config_from_host(subscription, speech_region):
+    host = 'https://{}.tts.speech.microsoft.com'.format(speech_region)
+    config = msspeech.SpeechConfig(subscription=subscription, host=host)
+    return config
+
 def _do_something_with_audio_in_push_stream(callback, canceled):
     if not canceled:
         assert callback.get_audio_size() > 0

@@ -286,7 +286,7 @@ DocstringForPropertyId = """
 
       The Cognitive Services Speech Service region. Under normal circumstances,
       you shouldn't have to use this property directly. Instead, construct a
-      :py:class:`.SpeechConfig` instance from a subscription key, an endpoint
+      :py:class:`.SpeechConfig` instance from a subscription key, an endpoint, a host,
       or an authorization token.
 
     .. py:attribute:: SpeechServiceAuthorization_Token
@@ -312,6 +312,12 @@ DocstringForPropertyId = """
 
         The endpoint id is available in the Custom Speech Portal, listed under
         Endpoint Details.
+
+    .. py:attribute:: SpeechServiceConnection_Host
+
+      The Cognitive Services Speech Service host (url). Under normal
+      circumstances, you shouldn't have to use this property directly. Instead,
+      construct a :py:class:`.SpeechConfig` instance.
 
     .. py:attribute:: SpeechServiceConnection_ProxyHostName
 
