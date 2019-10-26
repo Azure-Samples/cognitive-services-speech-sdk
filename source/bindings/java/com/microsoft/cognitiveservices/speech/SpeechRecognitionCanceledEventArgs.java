@@ -23,8 +23,7 @@ public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionE
 
         Contracts.throwIfNull(arg, "arg");
         this._eventArgImpl = arg;
-        this._Result = new SpeechRecognitionResult(arg.GetResult());
-
+        
         this._SessionId = arg.getSessionId();
         Contracts.throwIfNull(this._SessionId, "SessionId");
 
