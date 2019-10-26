@@ -31,7 +31,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
     SPX_INTERFACE_MAP_END()
 
-    CSpxSequenceGeneratorAudioStreamReader() = default;
+    CSpxSequenceGeneratorAudioStreamReader();
 
     void UseSequentialBufferedData(uint32_t bufferSize);
     uint32_t GetUseSequentialBufferedData();
@@ -62,12 +62,17 @@ private:
     CSpxSequenceGeneratorAudioStreamReader& operator=(CSpxSequenceGeneratorAudioStreamReader&&) = delete;
     CSpxSequenceGeneratorAudioStreamReader& operator=(const CSpxSequenceGeneratorAudioStreamReader&) = delete;
 
+    std::random_device m_rd{};
+    std::mt19937 m_gen{ m_rd() };
+    std::unique_ptr<std::normal_distribution<>> m_normalRand;
+
     bool m_initialized { false };
     uint8_t m_simulateRealtimePercentage = 0;     // 0 == as fast as possible; 100 == real time; 200 == 2x slower than real time
     std::unique_ptr<uint8_t[]> m_buffer;
     uint32_t m_bufferSize = 0;
     uint32_t m_seqDataValue = 0;
     uint32_t m_bufferSizeRemained = 0;
+    SpxWAVEFORMATEX_Type m_format{0};
 
     uint32_t ReadSequentialBufferedData(uint8_t* pbuffer, uint32_t cbBuffer);
     uint32_t ReadNulldData(uint8_t* pbuffer, uint32_t cbBuffer);

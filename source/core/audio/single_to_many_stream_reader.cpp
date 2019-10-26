@@ -94,8 +94,10 @@ void CSpxSingleToManyStreamReader::Term()
 void CSpxSingleToManyStreamReader::InitBufferDataFromSite()
 {
     m_bufferData = SpxQueryService<ISpxAudioSourceBufferData>(GetSite(), "AudioSourceBufferData");
-    m_bufferOffset = m_bufferData->GetOffset();
     SPX_DBG_ASSERT(m_bufferData != nullptr);
+
+    m_bufferOffset = m_bufferData->GetNewMultiReaderOffset();
+    SPX_DBG_TRACE_VERBOSE("CSpxSingleToManyStreamReader(%ld)::InitBufferDataFromSite - offset %" PRIu64 "", m_id, m_bufferOffset);
 }
 
 void CSpxSingleToManyStreamReader::ResetBufferData()

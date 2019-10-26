@@ -23,9 +23,27 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+CSpxSequenceGeneratorAudioStreamReader::CSpxSequenceGeneratorAudioStreamReader()
+{
+    // allocate space for EX structure
+    auto cbAllocate = sizeof(SPXWAVEFORMATEX); // allocate space for EX structure, no matter what
+    m_format = SpxAllocWAVEFORMATEX(cbAllocate);
+    m_format->wFormatTag = WAVE_FORMAT_PCM;
+    m_format->nChannels = 1;
+    m_format->nSamplesPerSec = 16000;
+    m_format->nAvgBytesPerSec = 16000 * 2;
+    m_format->nBlockAlign = 2;
+    m_format->wBitsPerSample = 16;
+    m_format->cbSize = 0;
+
+
+    
+}
+
 void CSpxSequenceGeneratorAudioStreamReader::SetRealTimeThrottlePercentage(uint8_t percentage)
 {
     m_simulateRealtimePercentage = percentage;
+    m_normalRand = std::make_unique<std::normal_distribution<>>(m_format->nAvgBytesPerSec, m_format->nAvgBytesPerSec * 0.2);
 }
 
 uint8_t CSpxSequenceGeneratorAudioStreamReader::GetRealTimeThrottlePercentage()
@@ -35,21 +53,12 @@ uint8_t CSpxSequenceGeneratorAudioStreamReader::GetRealTimeThrottlePercentage()
 
 uint16_t CSpxSequenceGeneratorAudioStreamReader::GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat)
 {
-    uint16_t cbFormatRequired = sizeof(SPXWAVEFORMATEX);
+    uint16_t cbFormatRequired = sizeof(SPXWAVEFORMATEX) + m_format->cbSize;
 
     if (pformat != nullptr) // Calling with GetFormat(nullptr, ???) is valid; we don't copy bits, only return sizeof block required
     {
-        SPXWAVEFORMATEX format;
-        format.wFormatTag = WAVE_FORMAT_PCM;
-        format.nChannels = 1;
-        format.nSamplesPerSec = 16000;
-        format.nAvgBytesPerSec = 16000 * 2;
-        format.nBlockAlign = 2;
-        format.wBitsPerSample = 16;
-        format.cbSize = 0;
-
         size_t cb = std::min(cbFormat, cbFormatRequired);
-        std::memcpy(pformat, &format, cb);
+        std::memcpy(pformat, m_format.get(), cb);
     }
 
     return cbFormatRequired;
@@ -59,8 +68,9 @@ uint32_t CSpxSequenceGeneratorAudioStreamReader::Read(uint8_t* pbuffer, uint32_t
 {
     if (m_simulateRealtimePercentage > 0)
     {
-        auto nAvgBytesPerSec = 16000 * 2;
-        auto milliseconds = cbBuffer * 1000 / nAvgBytesPerSec * m_simulateRealtimePercentage / 100;
+        auto nAvgBytesPerSec = std::round((*m_normalRand)(m_gen));
+        auto milliseconds = (uint32_t)(cbBuffer * 1000 / nAvgBytesPerSec * m_simulateRealtimePercentage / 100);
+
         std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
     }
 

@@ -49,6 +49,7 @@ public:
 
     // --- ISpxAudioSourceBufferData (overrides)
     uint64_t GetOffset() override;
+    uint64_t GetNewMultiReaderOffset() override;
 
     uint32_t Read(uint8_t* buffer, uint32_t size) override;
     uint32_t ReadAt(uint64_t offset, uint8_t* buffer, uint32_t size) override;
@@ -68,8 +69,9 @@ private:
     void EnsureInitRingBuffer();
     void TermRingBuffer();
 
-    uint64_t GetAudioSourceBufferDataSize();
+    size_t GetAudioSourceBufferDataSize();
     uint64_t GetAudioSourceBufferDataInitPos();
+    bool GetAudioSourceBufferAllowOverflow();
     uint64_t GetDefaultAudioSourceBufferDataSize();
 
     CSpxReadWriteBufferDelegateHelper<> m_ringBuffer;

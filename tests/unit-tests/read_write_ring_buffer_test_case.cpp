@@ -116,6 +116,49 @@ TEST_CASE("CSpxReadWriteRingBuffer Basics", "[ringbuffer]")
        }
     }
 
+    SPXTEST_WHEN("overflow allowed")
+    {
+        auto name = "TestCase: ReadWriteRingBuffer oveflow allowed";
+        REQUIRE_NOTHROW(rb->SetName(name));
+        SPXTEST_REQUIRE(rb->GetName() == name);
+
+        REQUIRE_NOTHROW(rb->SetSize(size));
+        SPXTEST_REQUIRE(size == rb->GetSize());
+        REQUIRE_NOTHROW(rb->AllowOverflow(true));
+
+        REQUIRE(rb->GetWritePos() == 0);
+        REQUIRE(rb->GetReadPos() == 0);
+
+        auto write = SpxQueryInterface<ISpxReadWriteBuffer>(rb);
+
+        // The buffer is full
+        REQUIRE_NOTHROW(rb->Write(data, size));
+        REQUIRE(rb->GetWritePos() == size);
+        REQUIRE(rb->GetReadPos() == 0);
+
+        auto read = new uint8_t[size];
+
+        auto pos = rb->GetReadPos();
+        // This does not move the read pointer forward
+        REQUIRE_NOTHROW(rb->ReadAtBytePos(pos, read, size));
+        pos += size;
+
+        auto write1 = new uint8_t[1];
+        write1[0] = (uint8_t)0xef;
+
+        // Write 1 character should succeed
+        REQUIRE_NOTHROW(rb->Write(write1, 1));
+        REQUIRE(rb->GetReadPos() == 1);
+
+        // We should be able to read 1 and find the value
+        REQUIRE_NOTHROW(rb->ReadAtBytePos(pos, read, 1));
+        REQUIRE(write1[0] == read[0]);
+
+        // Trying to read 2 should throw
+        REQUIRE_THROWS(rb->ReadAtBytePos(pos, read, 2));
+        REQUIRE_NOTHROW(rb->ReadAtBytePos(rb->GetReadPos(), read, size));
+    }
+
     SPXTEST_WHEN("initialized at 1025")
     {
         auto name = "TestCase: ReadWriteRingBuffer Basics 1025";
@@ -240,6 +283,37 @@ TEST_CASE("BlockingReadWriteRingBuffer Basics", "[ringbuffer]")
         REQUIRE(readSize == size);
         SPXTEST_REQUIRE(memcmp(data.get(), read.get(), readSize) == 0);
         REQUIRE_NOTHROW(future.get());
+    }
+
+    SPXTEST_WHEN("Unblock ReadAtBytePos with Write 0 bytes")
+    {
+        auto writingFuture = std::async([&]() {
+            writeDataFunc();
+            });
+        std::unique_ptr<uint8_t[]> readData{ new uint8_t[size] };
+        size_t readSize = 0;
+        uint64_t pos = 0;
+
+        SPX_TRACE_INFO("Reading at pos: %" PRIu64 "\n", pos);
+
+        auto blockingRead = std::async([&]()
+        {
+            // Try to read double the size
+            rb->ReadAtBytePos(pos, readData.get(), size * 2, &readSize);
+        }
+        );
+
+        REQUIRE_NOTHROW(writingFuture.get());
+
+        std::this_thread::sleep_for(2000ms);
+
+        // Unblock reading thread
+        rb->Write(nullptr, 0);
+
+        REQUIRE_NOTHROW(blockingRead.get());
+
+        REQUIRE(readSize == size);
+        SPXTEST_REQUIRE(memcmp(data.get(), readData.get(), readSize) == 0);
     }
 
 

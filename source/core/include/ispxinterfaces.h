@@ -508,6 +508,7 @@ public:
 
     virtual size_t SetSize(size_t size) = 0;
     virtual void SetInitPos(uint64_t pos) = 0;
+    virtual void AllowOverflow(bool allow) = 0;
 
     virtual void SetName(const std::string& name) = 0;
 
@@ -1041,6 +1042,7 @@ class ISpxAudioSourceBufferData : public ISpxInterfaceBaseFor<ISpxAudioSourceBuf
 public:
 
     virtual uint64_t GetOffset() = 0;
+    virtual uint64_t GetNewMultiReaderOffset() = 0;
 
     virtual uint32_t Read(uint8_t* buffer, uint32_t size) = 0;
     virtual uint32_t ReadAt(uint64_t offset, uint8_t* buffer, uint32_t size) = 0;

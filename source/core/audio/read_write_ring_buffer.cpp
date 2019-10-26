@@ -79,6 +79,7 @@ namespace Impl {
 /// <remarks>No object locking required.</remarks>
 CSpxReadWriteRingBuffer::CSpxReadWriteRingBuffer() :
     m_ringSize(0),
+    m_allowOverflow{false},
     m_initPos(0),
     m_writePos(0),
     m_readPos(0),
@@ -121,6 +122,16 @@ void CSpxReadWriteRingBuffer::SetInitPos(uint64_t pos)
     m_initPos = pos;
     SetSizeInternal(m_ringSize);
 }
+
+/// <summary>
+/// ISpxReadWriteBufferInit::AllowOverflow - Allows the buffer to overflow so old data will be discarded
+/// </summary>
+/// <remarks>LOCK REQUIRED to guard multithreaded access; ThrowsException if already initialized. </remarks>
+void CSpxReadWriteRingBuffer::AllowOverflow(bool allow)
+{
+    m_allowOverflow = allow;
+}
+
 
 /// <summary>
 /// ISpxReadWriteBufferInit::SetName - Sets "Name" for this ring buffer; sometimes useful for debugging purposes.
@@ -371,8 +382,20 @@ void CSpxReadWriteRingBuffer::EnsureSpaceToWrite(size_t *bytesToWrite, const siz
     size_t bytesCanWrite = m_ringSize - (size_t)(m_writePos - m_readPos);
     if (*bytesToWrite > bytesCanWrite)
     {
-        SPX_IFTRUE_THROW_HR(bytesActuallyWritten == nullptr, SPXERR_BUFFER_TOO_SMALL);
-        *bytesToWrite = bytesCanWrite;
+        if (!m_allowOverflow)
+        {
+            SPX_IFTRUE_THROW_HR(bytesActuallyWritten == nullptr, SPXERR_BUFFER_TOO_SMALL);
+            *bytesToWrite = bytesCanWrite;
+        }
+        else
+        {
+            // We drop the old data to allow for the write to happen.
+            UpdateReadPosition(*bytesToWrite - bytesCanWrite);
+
+            // Make sure the condition came through at this time
+            SPX_DBG_ASSERT(*bytesToWrite <= m_ringSize - (size_t)(m_writePos - m_readPos));
+            // Move m_readPos ahead so the buffer can accomodate the value to write. 
+        }
     }
 }
 
@@ -482,10 +505,19 @@ void CSpxReadWriteRingBuffer::InternalReadFromRing(void* data, size_t bytesToRea
 {
     // Read from the ring buffer
     InternalReadFromRingPtr(data, bytesToRead, bytesActuallyRead, m_readPtr);
+    UpdateReadPosition(bytesToRead);
+}
 
+/// <summary>
+/// CSpxReadWriteRingBuffer::UpdateReadPosition - update the current ReadPos/ReadPtr appropriately
+/// after reading data from the SlidingWindow at the current ReadPos/ReadPtr or after overflow.
+/// </summary>
+/// <remarks>NO LOCK REQUIRED - always called from methods that have already acquired lock.</remarks>
+void CSpxReadWriteRingBuffer::UpdateReadPosition(size_t bytesRead)
+{
     // Update our read position and pointer
-    m_readPos += bytesToRead;
-    m_readPtr += bytesToRead;
+    m_readPos += bytesRead;
+    m_readPtr += bytesRead;
 
     // If our read pointer wraps... fix it...
     if (m_readPtr >= m_ptr2)

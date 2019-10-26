@@ -71,8 +71,10 @@ private:
 
     State m_state;
     State m_stateRequested;
-    const int m_waitMsStartPumpRequestTimeout = 100;
-    const int m_waitMsStopPumpRequestTimeout = 100;
+
+    // Set timeouts to double the frame size in milliseconds
+    const int m_waitMsStartPumpRequestTimeout = 200;
+    const int m_waitMsStopPumpRequestTimeout = 200;
 
     std::thread m_thread;
 };

@@ -28,6 +28,9 @@ CSpxAudioSourceBufferData::CSpxAudioSourceBufferData()
 
 CSpxAudioSourceBufferData::~CSpxAudioSourceBufferData()
 {
+    // The buffer is shared between writers and readers, trying to call Term from either side breaks the
+    // ref counting pattern especially since readers may linger owning the buffer longer.
+    TermRingBuffer();
     SPX_DBG_ASSERT(m_ringBuffer.IsClear());
 }
 
@@ -44,6 +47,13 @@ void CSpxAudioSourceBufferData::Term()
 uint64_t CSpxAudioSourceBufferData::GetOffset()
 {
     return m_bytesDead + m_bytesRead;
+}
+
+uint64_t CSpxAudioSourceBufferData::GetNewMultiReaderOffset()
+{
+    EnsureInitRingBuffer();
+    auto writePos = m_ringBuffer.DelegateGetWritePos();
+    return writePos;
 }
 
 uint32_t CSpxAudioSourceBufferData::Read(uint8_t* buffer, uint32_t size)
@@ -106,7 +116,8 @@ void CSpxAudioSourceBufferData::EnsureInitRingBuffer()
 
     auto init = SpxCreateObjectWithSite<ISpxReadWriteBufferInit>("CSpxBlockingReadWriteRingBuffer", this);
     init->SetName("AudioSourceBufferData");
-    init->SetSize((size_t)GetAudioSourceBufferDataSize());
+    init->AllowOverflow(GetAudioSourceBufferAllowOverflow());
+    init->SetSize(GetAudioSourceBufferDataSize());
     init->SetInitPos(GetAudioSourceBufferDataInitPos());
 
     auto rwb = SpxQueryInterface<ISpxReadWriteBuffer>(init);
@@ -125,11 +136,18 @@ void CSpxAudioSourceBufferData::TermRingBuffer()
     SPX_DBG_ASSERT(m_ringBuffer.IsClear());
 }
 
-uint64_t CSpxAudioSourceBufferData::GetAudioSourceBufferDataSize()
+size_t CSpxAudioSourceBufferData::GetAudioSourceBufferDataSize()
 {
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     auto size = properties->GetStringValue("AudioSourceBufferDataSizeInBytes", std::to_string(GetDefaultAudioSourceBufferDataSize()).c_str());
-    return std::stoul(size.c_str());
+    return (size_t)std::stoul(size.c_str());
+}
+
+bool CSpxAudioSourceBufferData::GetAudioSourceBufferAllowOverflow()
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    auto bufferAllowOverflow = properties->GetStringValue("AudioSourceBufferAllowOverflow", "false");
+    return (PAL::stricmp(bufferAllowOverflow.c_str(), "true") == 0 || PAL::stricmp(bufferAllowOverflow.c_str(), "1") == 0);
 }
 
 uint64_t CSpxAudioSourceBufferData::GetDefaultAudioSourceBufferDataSize()

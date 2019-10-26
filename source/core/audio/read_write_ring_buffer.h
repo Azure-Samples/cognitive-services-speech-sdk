@@ -38,6 +38,7 @@ public:
     // --- ISpxReadWriteBufferInit
     size_t SetSize(size_t size) override;
     void SetInitPos(uint64_t pos) override;
+    void AllowOverflow(bool allow) override;
     void SetName(const std::string& name) override;
     void Term() override;
 
@@ -78,6 +79,7 @@ private:
 
     void InternalReadFromRing(void* data, size_t bytesToRead, size_t* bytesActuallyRead);
     void InternalReadFromRingPtr(void* data, size_t bytesToRead, size_t* bytesActuallyRead, void* ptr);
+    void UpdateReadPosition(size_t bytesRead);
 
 private:
 
@@ -86,6 +88,7 @@ private:
     size_t m_ringSize;
     std::string m_ringName;
 
+    bool m_allowOverflow;
     uint64_t m_initPos;
     uint64_t m_writePos;
     uint64_t m_readPos;

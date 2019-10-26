@@ -22,7 +22,8 @@ class CSpxSingleToManyStreamReaderAdapter :
     public ISpxSingleToManyStreamReaderAdapterSite,
     public ISpxAudioPumpSite,
     public ISpxGenericSite,
-    public ISpxServiceProvider
+    public ISpxServiceProvider,
+    public ISpxPropertyBagImpl
 {
     public:
         CSpxSingleToManyStreamReaderAdapter();
@@ -36,11 +37,12 @@ class CSpxSingleToManyStreamReaderAdapter :
             SPX_INTERFACE_MAP_ENTRY(ISpxAudioPumpSite)
             SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
             SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
+            SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_END()
 
         // --- IServiceProvider
         SPX_SERVICE_MAP_BEGIN()
-        // SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
+        SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
         SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
         SPX_SERVICE_MAP_ENTRY_FUNC(QueryServiceAudioSourceBuffer)
         SPX_SERVICE_MAP_ENTRY_OBJECT(ISpxAudioSourceBufferData, GetAudioSourceBuffer())
@@ -90,6 +92,8 @@ class CSpxSingleToManyStreamReaderAdapter :
         void EnsureAudioStreamStarted();
         void ClosePumpAndStream();
         void InitializeServices();
+        void InitAudioProcessing();
+        void ResetAudioProcessing();
         std::shared_ptr<ISpxInterfaceBase> QueryServiceAudioSourceBuffer(const char* serviceName);
         std::shared_ptr<ISpxAudioSourceBufferData> InitAudioSourceBuffer();
         std::shared_ptr<ISpxAudioSourceBufferData> GetAudioSourceBuffer();

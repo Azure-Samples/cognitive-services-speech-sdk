@@ -126,6 +126,23 @@ TEST_CASE("Demux audio stream adapter is properly functioning", "[core][demux ad
         auto readBytes = demuxReader->Read(buffer, 10);
         REQUIRE(readBytes == 10);
         REQUIRE(ValidateBufferSequence(buffer, readBytes));
+
+        uint8_t buffer2[10];
+        auto demuxReader2 = audioReaderFactory->CreateReader();
+        auto readBytes2 = demuxReader2->Read(buffer2, 10);
+        REQUIRE(readBytes2 == 10);
+        REQUIRE(ValidateBufferSequence(buffer2, readBytes2));
+        demuxReader->Close();
+        demuxReader2->Close();
+    }
+
+    SECTION("Create one reader after the other and close them")
+    {
+        auto demuxReader = audioReaderFactory->CreateReader();
+        uint8_t buffer[10];
+        auto readBytes = demuxReader->Read(buffer, 10);
+        REQUIRE(readBytes == 10);
+        REQUIRE(ValidateBufferSequence(buffer, readBytes));
         demuxReader->Close();
         demuxReader.reset();
 
@@ -136,15 +153,63 @@ TEST_CASE("Demux audio stream adapter is properly functioning", "[core][demux ad
         demuxReader->Close();
     }
 
+    return;
+}
+
+TEST_CASE("Demux audio stream adapter stress and multithreaed", "[core][demux adapter]")
+{
+    const uint32_t c_SequentialBufferSize = 500;
+
+    std::shared_ptr<ISpxGenericSite> rootSite;
+    // try to get the root site by reaching out to the resource manager first as that is the item to have. 
+    INFO("Try to reach the root site from the site at hand by finding the resource manager on a given site")
+    {
+        auto objectFactory = SpxQueryService<ISpxObjectFactory>(SpxGetRootSite());
+        rootSite = SpxQueryInterface<ISpxGenericSite>(objectFactory);
+    }
+
+    auto demuxAudioReaderAdapter = SpxCreateObjectWithSite<ISpxSingleToManyStreamReaderAdapter>("CSpxSingleToManyStreamReaderAdapter", rootSite);
+
+    auto singletonMockAudioReader = std::make_shared<CSpxSequenceGeneratorAudioStreamReader>();
+    singletonMockAudioReader->UseSequentialBufferedData(c_SequentialBufferSize);
+    singletonMockAudioReader->SetRealTimeThrottlePercentage(100);
+
+    auto singletonAudioReaderInit = SpxQueryInterface<ISpxObjectWithSite>(singletonMockAudioReader);
+    singletonAudioReaderInit->SetSite(SpxGetRootSite());
+
+    auto mockAudioReader = SpxQueryInterface<ISpxAudioStreamReader>(singletonMockAudioReader);
+    demuxAudioReaderAdapter->SetSingletonReader(mockAudioReader);
+
+    auto audioReaderFactory = SpxQueryInterface<ISpxAudioStreamReaderFactory>(demuxAudioReaderAdapter);
+
+    SECTION("Create many readers and close them")
+    {
+        const int c_iterationCount = 100;
+        for (int i = 0; i < c_iterationCount; i++)
+        {
+            auto demuxReader = audioReaderFactory->CreateReader();
+            uint8_t buffer[10];
+            auto readBytes = demuxReader->Read(buffer, 10);
+
+            // Validate 1 in 10
+            if ((i % 10) == 0)
+            {
+                REQUIRE(readBytes == 10);
+                REQUIRE(ValidateBufferSequence(buffer, readBytes));
+            }
+            demuxReader->Close();
+        }
+    }
+
 
     SECTION("Parallel run with 4 readers created dynamically")
     {
-        int iterationCountPerTask = 20;
+        int iterationCountPerTask = 150;
         auto taskAction = [&iterationCountPerTask, &audioReaderFactory](string taskName)
         {
             // not particularely important just little larger than the pump buffer
             const int c_bufferSize = 3203;
-            const int c_totalReadCount = 400;
+            const int c_totalReadCount = 5;
             std::shared_ptr<ISpxAudioStreamReader> reader;
             for (int i = 0; i < iterationCountPerTask; i++)
             {
@@ -172,7 +237,7 @@ TEST_CASE("Demux audio stream adapter is properly functioning", "[core][demux ad
                     reader = audioReaderFactory->CreateReader();
                 }
 
-                ReadStreamAndValidateIsInSequence(reader,c_bufferSize, c_totalReadCount, &lastReadValue);
+                ReadStreamAndValidateIsInSequence(reader, c_bufferSize, c_totalReadCount, &lastReadValue);
             }
 
             if (reader != nullptr)

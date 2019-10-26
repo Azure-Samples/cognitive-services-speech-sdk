@@ -55,13 +55,13 @@ namespace Impl {
 
 CSpxSingleToManyStreamReaderAdapter::CSpxSingleToManyStreamReaderAdapter()
 {
-    SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReaderAdapter::CSpxSingleToManyStreamReaderAdapter");
+    SPX_DBG_TRACE_VERBOSE("CSpxSingleToManyStreamReaderAdapter::CSpxSingleToManyStreamReaderAdapter");
     m_clientCount = 0;
 }
 
 CSpxSingleToManyStreamReaderAdapter::~CSpxSingleToManyStreamReaderAdapter()
 {
-    SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReaderAdapter::~CSpxSingleToManyStreamReaderAdapter");
+    SPX_DBG_TRACE_VERBOSE("CSpxSingleToManyStreamReaderAdapter::~CSpxSingleToManyStreamReaderAdapter");
     SPX_ASSERT(m_clientCount == 0);
     Term();
 }
@@ -70,8 +70,6 @@ void CSpxSingleToManyStreamReaderAdapter::Term()
 {
     ClosePumpAndStream();
     m_sourceSingletonStreamReader.reset();
-    auto bufferDataInit = SpxQueryInterface<ISpxObjectInit>(m_bufferData);
-    bufferDataInit->Term();
 }
 
 void CSpxSingleToManyStreamReaderAdapter::SetSingletonReader(std::shared_ptr<ISpxAudioStreamReader> singletonReader)
@@ -90,6 +88,10 @@ void CSpxSingleToManyStreamReaderAdapter::SetSingletonReader(std::shared_ptr<ISp
 void CSpxSingleToManyStreamReaderAdapter::InitializeServices()
 {
     SPX_DBG_TRACE_VERBOSE("CSpxSingleToManyStreamReaderAdapter::InitializeServices");
+
+    // We can set "AudioSourceBufferDataSizeInBytes" and "AudioSourceBufferAllowOverflow" for the ring buffer
+    SetStringValue("AudioSourceBufferAllowOverflow", "true");
+    
     // Create an audio pump, and set the reader
     auto pumpInit = SpxCreateObjectWithSite<ISpxAudioPumpInit>("CSpxAudioPump", this);
     pumpInit->SetReader(m_sourceSingletonStreamReader);
@@ -103,11 +105,21 @@ void CSpxSingleToManyStreamReaderAdapter::InitializeServices()
 
     // This object retrieves the buffer and properties through the site. 
     m_audioProcessorBufferWriter = SpxCreateObjectWithSite<ISpxAudioProcessor>("CSpxAudioProcessorWriteToAudioSourceBuffer", this);
+}
 
-    // Various query service try to get the buffer info, we will make sure we have it set early. 
+void CSpxSingleToManyStreamReaderAdapter::InitAudioProcessing()
+{
+    // Various query service try to get the buffer info, we will make sure we have it set early. We create a new buffer every time we start anew.
     InitAudioSourceBuffer();
     InitBufferProperties();
 }
+
+void CSpxSingleToManyStreamReaderAdapter::ResetAudioProcessing()
+{
+    m_bufferData.reset();
+    m_bufferProperties.reset();
+}
+
 
 void CSpxSingleToManyStreamReaderAdapter::EnsureAudioStreamStarted()
 {
@@ -124,10 +136,11 @@ void CSpxSingleToManyStreamReaderAdapter::EnsureAudioStreamStarted()
 
     if (!m_audioStarted)
     {
+        InitAudioProcessing();
         m_singletonAudioPump->StartPump(m_audioProcessorBufferWriter);
         m_audioStarted = true;
 
-        SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReaderAdapter::EnsureInitSourceStreamReader: PumpStarted on singleton reader %p", (void*)m_sourceSingletonStreamReader.get());
+        SPX_DBG_TRACE_VERBOSE("CSpxSingleToManyStreamReaderAdapter::EnsureInitSourceStreamReader: PumpStarted on singleton reader %p", (void*)m_sourceSingletonStreamReader.get());
     }
 }
 
@@ -139,6 +152,7 @@ void CSpxSingleToManyStreamReaderAdapter::ClosePumpAndStream()
 
         SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReaderAdapter::ClosePumpAndStream: Closing the singleton: %p", (void*)m_sourceSingletonStreamReader.get());
         m_sourceSingletonStreamReader->Close();
+        ResetAudioProcessing();
 
         // TODO: Not used
         m_sourceStreamReaderInitNeeded = true;

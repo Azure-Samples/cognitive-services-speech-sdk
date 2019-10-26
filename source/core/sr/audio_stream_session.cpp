@@ -471,7 +471,7 @@ void CSpxAudioStreamSession::SlowDownThreadIfNecessary(uint32_t dataSize)
 
     if (delayInterval.count() > 0)
     {
-        SPX_DBG_TRACE_VERBOSE("%s - Stashing ... sleeping for %llu ms", __FUNCTION__, delayInterval.count());
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::SlowDownThreadIfNecessary: Stashing ... sleeping for %llu ms", (void*)this, delayInterval.count());
         std::this_thread::sleep_for(delayInterval);
     }
 
@@ -499,7 +499,7 @@ bool CSpxAudioStreamSession::ProcessNextAudio()
 
         if (!buffer || !processor)
         {
-            SPX_DBG_TRACE_VERBOSE("%s: Session has been shutdown while processing was in flight, buffer/processor has already been destroyed", __FUNCTION__);
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::ProcessNextAudio: Session has been shutdown while processing was in flight, buffer/processor has already been destroyed", (void*)this);
             return false;
         }
 
@@ -523,23 +523,23 @@ bool CSpxAudioStreamSession::ProcessNextAudio()
         }
         else
         {
-            SPX_DBG_TRACE_VERBOSE("%s: no audio buffer in the m_audioBuffer.", __FUNCTION__);
+            SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::ProcessNextAudio: no audio buffer in the m_audioBuffer.", (void*)this);
         }
     }
     else if (m_sessionState == SessionState::HotSwapPaused || m_adapterAudioMuted)
     {
         // Don't process this data, if we're paused, it has been buffered...
-        SPX_DBG_TRACE_VERBOSE("%s: Saving for later ... sessionState %d; adapterRequestedIdle %s", __FUNCTION__, m_sessionState, m_adapterAudioMuted ? "true" : "false");
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::ProcessNextAudio Saving for later ... sessionState %d; adapterRequestedIdle %s", (void*)this, m_sessionState, m_adapterAudioMuted ? "true" : "false");
     }
     else if (m_sessionState == SessionState::StoppingPump)
     {
         // Don't process this data if we're actively stopping, it is buffered and
         // we will process it if the source is resilient...
-        SPX_DBG_TRACE_VERBOSE("%s: Stopping pump, not processing data", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioStreamSession::ProcessNextAudio: Stopping pump, not processing data", (void*)this);
     }
     else
     {
-        SPX_DBG_TRACE_WARNING("%s: Unexpected SessionState: recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, m_sessionState);
+        SPX_DBG_TRACE_WARNING("[%p]CSpxAudioStreamSession::ProcessNextAudio: Unexpected SessionState: recoKind %d; sessionState %d", (void*)this, m_recoKind, m_sessionState);
     }
     return false;
 }
