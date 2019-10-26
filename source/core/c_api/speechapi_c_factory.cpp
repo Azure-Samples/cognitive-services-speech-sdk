@@ -18,6 +18,7 @@
 #include "speechapi_c_speech_config.h"
 #include "speechapi_c_auto_detect_source_lang_config.h"
 #include "speechapi_c_source_lang_config.h"
+#include "memory_utils.h"
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
@@ -60,6 +61,8 @@ auto create_from_config(SPXHANDLE hspeechconfig, SPXHANDLE hautoDetectSourceLang
     auto config = (*config_handles)[hspeechconfig];
     auto config_property_bag = SpxQueryInterface<ISpxNamedProperties>(config);
     auto factory_property_bag = SpxQueryInterface<ISpxNamedProperties>(factory);
+
+    Memory::CheckObjectCount(hspeechconfig);
 
     //copy the properties from the speech config into the factory
     if (config_property_bag != nullptr)
@@ -166,6 +169,8 @@ SPXAPI dialog_service_connector_create_dialog_service_connector_from_config(SPXR
     {
         *ph_dialog_service_connector = SPXHANDLE_INVALID;
 
+        Memory::CheckObjectCount(h_dialog_service_config);
+
         // Enable keyword verification for dialog service connector by default
         auto config_handles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
         auto config = (*config_handles)[h_dialog_service_config];
@@ -193,6 +198,8 @@ SPXAPI recognizer_create_translation_recognizer_from_config(SPXRECOHANDLE* phrec
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phreco = SPXHANDLE_INVALID;
+
+        Memory::CheckObjectCount(hspeechconfig);
 
         std::shared_ptr<ISpxRecognizer> recognizer;
 
@@ -232,6 +239,8 @@ SPXAPI recognizer_create_intent_recognizer_from_config(SPXRECOHANDLE* phreco, SP
 
     SPXAPI_INIT_HR_TRY(hr)
     {
+        Memory::CheckObjectCount(hspeechconfig);
+
         *phreco = SPXHANDLE_INVALID;
         auto recognizer = create_from_config(hspeechconfig, SPXHANDLE_INVALID, SPXHANDLE_INVALID, haudioInput, &ISpxSpeechApiFactory::CreateIntentRecognizerFromConfig);
 
@@ -252,6 +261,8 @@ SPXAPI synthesizer_create_speech_synthesizer_from_config(SPXSYNTHHANDLE* phsynth
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phsynth = SPXHANDLE_INVALID;
+
+        Memory::CheckObjectCount(hspeechconfig);
 
         // get the speech synthesis related parameters from the hspeechconfig
         auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
@@ -288,6 +299,8 @@ SPXAPI conversation_create_from_config(SPXCONVERSATIONHANDLE* pconversation, SPX
     SPXAPI_INIT_HR_TRY(hr)
     {
         *pconversation = SPXHANDLE_INVALID;
+
+        Memory::CheckObjectCount(hspeechconfig);
 
         // get the input parameters from the hspeechconfig
         auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();

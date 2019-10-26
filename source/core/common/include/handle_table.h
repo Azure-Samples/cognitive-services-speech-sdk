@@ -6,13 +6,16 @@
 //
 
 #pragma once
+#include <atomic>
 #include <functional>
 #include <list>
 #include <map>
 #include <memory>
 #include <unordered_map>
+#include <platform.h>
 #include <spxdebug.h>
 #include <mutex>
+#include "debug_utils.h"
 
 #ifdef _MSC_VER
 #include <shared_mutex>
@@ -24,14 +27,49 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+// Class to count the number of handles a CSpxHandleTable instance is tracking
+class CSpxHandleCounter
+{
+public:
+    CSpxHandleCounter(std::string name)
+    {
+        this->name = name;
+        size = 0;
+    }
+
+    size_t Increment()
+    {
+        return ++size;
+    }
+
+    size_t Decrement()
+    {
+        return --size;
+    }
+
+    size_t Count()
+    {
+        return size;
+    }
+
+    std::string Name()
+    {
+        return this->name;
+    }
+
+private:
+    std::atomic_size_t size;
+    std::string name;
+};
 
 template <class T, class Handle>
 class CSpxHandleTable
 {
 public:
 
-    CSpxHandleTable()
+    CSpxHandleTable(std::shared_ptr<CSpxHandleCounter> counter)
     {
+        m_counter = counter;
     }
 
     ~CSpxHandleTable()
@@ -49,8 +87,9 @@ public:
         if (ptr != nullptr)
         {
             handle = reinterpret_cast<Handle>(ptr);
-            SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8p, ptr=0x%8p", __FUNCTION__, (void*)handle, (void*)ptr);
+            SPX_DBG_TRACE_VERBOSE_IF(1, "%s type=%s handle=0x%8p, ptr=0x%8p, total=%zu", __FUNCTION__, PAL::GetTypeName<T>().c_str(), (void*)handle, (void*)ptr, m_ptrMap.size() + 1);
 
+            m_counter->Increment();
             m_handleMap.emplace(handle, t);
             m_ptrMap.emplace(ptr, handle);
         }
@@ -98,10 +137,11 @@ public:
                 auto sharedPtr = iterHandleMap->second;
                 auto iterPtrMap = m_ptrMap.find(sharedPtr.get());
 
-                SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8p, ptr=0x%8p", __FUNCTION__, (void*)handle, (void*)sharedPtr.get());
+                SPX_DBG_TRACE_VERBOSE_IF(1, "%s type=%s handle=0x%8p, ptr=0x%8p, total=%zu", __FUNCTION__, PAL::GetTypeName<T>().c_str(), (void*)handle, (void*)sharedPtr.get(), m_ptrMap.size() -1 );
 
                 m_handleMap.erase(iterHandleMap);
                 m_ptrMap.erase(iterPtrMap);
+                m_counter->Decrement();
 
                 // If the "sharedPtr" ends up being the very last reference to the "T" object
                 // the scope exit will cause T's dtor to be called, which in turn could, potentially
@@ -128,10 +168,11 @@ public:
                 auto iterHandleMap = m_handleMap.find(handle);
                 auto sharedPtr = iterHandleMap->second;
 
-                SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8x, ptr=0x%8p", __FUNCTION__, handle, (void*)sharedPtr.get());
+                SPX_DBG_TRACE_VERBOSE_IF(1, "%s type=%s handle=0x%8x, ptr=0x%8p, total=%zu", __FUNCTION__, PAL::GetTypeName<T>().c_str(), handle, (void*)sharedPtr.get(), m_ptrMap.size() -1 );
 
                 m_ptrMap.erase(iterPtrMap);
                 m_handleMap.erase(iterHandleMap);
+                m_counter->Decrement();
 
                 // If the "sharedPtr" ends up being the very last reference to the "T" object
                 // the scope exit will cause T's dtor to be called, which in turn could, potentially
@@ -170,6 +211,7 @@ private:
     ReadWriteMutex_Type m_mutex;
     std::unordered_multimap<Handle, std::shared_ptr<T>> m_handleMap;
     std::unordered_multimap<T*, Handle> m_ptrMap;
+    std::shared_ptr<CSpxHandleCounter> m_counter;
 };
 
 class CSpxSharedPtrHandleTableManager
@@ -184,7 +226,10 @@ public:
 
         if (s_tables->find(name) == s_tables->end())
         {
-            auto ht = std::make_shared<CSpxHandleTable<T, Handle>>();
+            auto counter = std::make_shared<CSpxHandleCounter>(PAL::GetTypeName<T>());
+            s_counters->push_front(counter);
+
+            auto ht = std::make_shared<CSpxHandleTable<T, Handle>>(counter);
             s_tables->emplace(name, ht.get());
 
             auto fn = [ht]() { ht->Term(); };
@@ -231,6 +276,30 @@ public:
         s_termFns->clear();
     }
 
+    static size_t GetTotalTrackedObjectCount()
+    {
+        std::unique_lock<std::mutex> lock(s_mutex);
+        size_t objCount = 0;
+
+        for (const auto &counter : *s_counters) {
+            objCount += counter->Count();
+        }
+
+        return objCount;
+    }
+
+    static std::string GetHandleCountByType()
+    {
+        std::unique_lock<std::mutex> lock(s_mutex);
+        std::string ret;
+
+        for (auto it = s_counters->begin(); it != s_counters->end(); ++it) {
+            auto counter = it->get();
+            ret += counter->Name() + " " + std::to_string(counter->Count()) + "\r\n";
+        }
+
+        return ret;
+    }
 
 private:
 
@@ -242,7 +311,7 @@ private:
     // TODO: replace const char* with std::type_index?
     static std::unique_ptr<std::map<const char*, void*>> s_tables;
     static deleted_unique_ptr<std::list<std::function<void(void)>>> s_termFns;
+    static std::unique_ptr<std::list<std::shared_ptr<CSpxHandleCounter>>> s_counters;
 };
-
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

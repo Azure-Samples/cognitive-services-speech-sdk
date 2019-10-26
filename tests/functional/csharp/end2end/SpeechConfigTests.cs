@@ -530,5 +530,27 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [TestMethod]
+        public void ObjectErrorThreshold()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+
+            using (var recognizer1 = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            using (var recognizer2 = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            using (var recognizer3 = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            using (var recognizer4 = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            using (var recognizer5 = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            using (var recognizer6 = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            using (var recognizer7 = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            using (var recognizer8 = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            using (var recognizer9 = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            using (var recognizer10 = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                this.defaultConfig.SetProperty("SPEECH-ObjectCountErrorThreshold", "10");
+
+                Assert.ThrowsException<ApplicationException>(() => { new SpeechRecognizer(this.defaultConfig, audioInput); }, "Was able to create a recognizer when over object limit");
+
+            }
+        }
     }
 }

@@ -47,6 +47,7 @@ set(HEADERS
     "${INC_DIR}/http_exception.h"
     "${INC_DIR}/http_request.h"
     "${INC_DIR}/http_response.h"
+    "${INC_DIR}/memory_utils.h"
     )
 
 set(HEADERS_PRIVATE
@@ -74,6 +75,7 @@ set(SOURCES
     "${SRC_DIR}/http_exception.cpp"
     "${SRC_DIR}/http_request.cpp"
     "${SRC_DIR}/http_response.cpp"
+    "${SRC_DIR}/memory_utils.cpp"
     )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")

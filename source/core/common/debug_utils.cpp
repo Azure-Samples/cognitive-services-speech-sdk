@@ -59,7 +59,6 @@ static _Unwind_Reason_Code AndroidUnwindCallback(struct _Unwind_Context* context
 #include <cxxabi.h>
 #endif
 
-
 namespace Debug {
 
 // What follows was lifted from CNTK (see ExceptionWithCallStack.cpp).
@@ -304,5 +303,5 @@ void HookSignalHandlers()
 
     std::set_terminate(SignalHandler);
 }
-
+ 
 }

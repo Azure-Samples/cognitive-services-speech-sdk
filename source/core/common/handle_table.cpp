@@ -20,6 +20,7 @@ using termFnList = std::list<std::function<void(void)>>;
 std::mutex CSpxSharedPtrHandleTableManager::s_mutex;
 
 std::unique_ptr<typeMap> CSpxSharedPtrHandleTableManager::s_tables = std::make_unique<typeMap>();
+std::unique_ptr<std::list<std::shared_ptr<CSpxHandleCounter>>> CSpxSharedPtrHandleTableManager::s_counters = std::make_unique<std::list<std::shared_ptr<CSpxHandleCounter>>>();
 
 // On linux, this static member is destroyed before LibUnload (marked as __attribute__((destructor))).
 // Using a deleter instead to clean everything up before shutting down.
