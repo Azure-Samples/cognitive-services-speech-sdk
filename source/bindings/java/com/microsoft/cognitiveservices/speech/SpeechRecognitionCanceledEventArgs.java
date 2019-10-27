@@ -65,7 +65,7 @@ public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionE
     @Override
     public String toString() {
         return "SessionId:" + _SessionId +
-                " ResultId:" + _Result.getResultId() +
+                " ResultId:" + getResult().getResultId() +
                 " CancellationReason:" + _cancellationReason  +
                 " CancellationErrorCode:" + _errorCode +
                 " Error details:<" + _errorDetails;
@@ -74,7 +74,6 @@ public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionE
     @SuppressWarnings("unused")
     private com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventArgs _eventArgImpl;
     private String _SessionId;
-    private SpeechRecognitionResult _Result;
     private CancellationReason _cancellationReason;
     private CancellationErrorCode _errorCode;
     private String _errorDetails;
