@@ -1300,7 +1300,6 @@ void CSpxUspRecoEngineAdapter::OnSpeechKeywordDetected(const USP::SpeechKeywordD
 void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Speech.Fragment message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message.offset, message.duration, message.text.c_str());
-    SPX_DBG_ASSERT(!m_isInteractiveMode);
 
     bool sendIntermediate = false;
 
