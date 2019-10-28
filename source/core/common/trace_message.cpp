@@ -11,10 +11,12 @@
 #include "trace_message.h"
 #include "file_utils.h"
 #include "file_logger.h"
+#include "exception.h"
 #include <chrono>
 #include <stdio.h>
 #include <stdarg.h>
 #include <sstream>
+#include <iostream>
 
 // Note: in case of android, log to logcat
 #if defined(ANDROID) || defined(__ANDROID__)
@@ -84,7 +86,6 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* fileN
         format += "\n";
     }
 
-#ifdef SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
     va_list argptrDbg;
 #ifdef _MSC_VER
     // Avoid warnings:
@@ -94,7 +95,9 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* fileN
 #endif
     va_copy(argptrDbg, argptr);
     char sz[4096];
-    vsprintf_s(sz, 4096, format.c_str(), argptrDbg);
+    vsnprintf(sz, 4096, format.c_str(), argptrDbg);
+
+#ifdef SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
     OutputDebugStringA(sz);
 #endif // SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
 
@@ -124,20 +127,20 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* fileN
 
     if (logToConsole)
     {
-        __android_log_vprint(androidPrio, "SpeechSDK", format.c_str(), argptrConsole);
+        __android_log_write(androidPrio, "SpeechSDK", sz);
     }
     if (logToFile)
     {
-        FileLogger::Instance().LogToFile(std::move(format), argptr);
+        FileLogger::Instance().LogToFile(std::move(sz));
     }
 #else
     if (logToConsole)
     {
-        vfprintf(stderr, format.c_str(), argptrConsole);
+        fprintf(stderr, "%s", sz);
     }
     if (logToFile)
     {
-        FileLogger::Instance().LogToFile(std::move(format), argptr);
+        FileLogger::Instance().LogToFile(std::move(sz));
     }
 #endif
 
@@ -194,57 +197,4 @@ void SpxConsoleLogger_Log(LOG_CATEGORY log_category, const char* file, const cha
     }
 
     va_end(args);
-}
-
-void FileLogger::SetFilename(std::string&& name)
-{
-    std::lock_guard<std::mutex> lock(mtx);
-    // if user tries to change a filename, throw error
-    if (!filename.empty() && name != filename)
-    {
-        SPX_THROW_HR(SPXERR_ALREADY_INITIALIZED);
-    }
-    // if user sets the same filename again, do nothing
-    if (file != nullptr)
-    {
-        return;
-    }
-
-    errno_t err = PAL::fopen_s(&file, name.c_str(), "w");
-    SPX_IFFALSE_THROW_HR(err == 0, SPXERR_FILE_OPEN_FAILED);
-    filename = name;
-}
-
-std::string FileLogger::GetFilename()
-{
-    return filename;
-}
-
-bool FileLogger::IsFileLoggingEnabled()
-{
-    return file != nullptr;
-}
-
-void FileLogger::CloseFile()
-{
-    if (file != nullptr)
-    {
-        fclose(file);
-        file = nullptr;
-    }
-}
-
-void FileLogger::LogToFile(std::string&& format, va_list argptr)
-{
-    if (file != nullptr)
-    {
-        vfprintf(file, format.c_str(), argptr);
-        fflush(file);
-    }
-}
-
-FileLogger& FileLogger::Instance()
-{
-    static FileLogger instance;
-    return instance;
 }

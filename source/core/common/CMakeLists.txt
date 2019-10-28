@@ -60,6 +60,7 @@ set(HEADERS_PRIVATE
     )
 
 set(SOURCES
+    "${SRC_DIR}/file_logger.cpp"
     "${SRC_DIR}/exception.cpp"
     "${SRC_DIR}/handle_table.cpp"
     "${SRC_DIR}/mock_controller.cpp"

@@ -547,35 +547,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ApplicationException), "Cannot change log filename after the first recognizer has been created.")]
-        public void SetAndRenameLogFilename()
-        {
-            var toLanguages = new List<string>() { Language.DE };
-            var config = this.translationHelper.GetConfig(Language.EN, toLanguages, "");
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-
-            var logFilename = "test_filename.txt";
-            var logFilename2 = "test_filename2.txt";
-            config.SetProperty(PropertyId.Speech_LogFilename, logFilename);
-            Assert.AreEqual(logFilename, config.GetProperty(PropertyId.Speech_LogFilename));
-            var recognizer = new TranslationRecognizer(config, audioInput);
-            Assert.IsTrue(File.Exists(logFilename), "log file must exist when recognizer is created");
-
-            config.SetProperty(PropertyId.Speech_LogFilename, logFilename2);
-            Assert.AreEqual(logFilename2, config.GetProperty(PropertyId.Speech_LogFilename));
-            Assert.IsFalse(File.Exists(logFilename2), "No log file with this name should exist.");
-
-            try
-            {
-                var recognizer2 = new TranslationRecognizer(config, audioInput);
-            }
-            finally
-            {
-                Assert.IsTrue(new FileInfo(logFilename).Length > 0, "log file must contain logs after recognizer created");
-            }
-        }
-
-        [TestMethod]
         public void SetLogFilename()
         {
             var toLanguages = new List<string>() { Language.DE };

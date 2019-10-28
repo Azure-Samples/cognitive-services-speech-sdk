@@ -64,7 +64,6 @@ public class PropertyCollection implements Closeable {
      */
     public void setProperty(String name, String value) {
         Contracts.throwIfNullOrWhitespace(name, "name");
-        Contracts.throwIfNull(value, "value");
         collectionImpl.SetProperty(name, value);
     }
 

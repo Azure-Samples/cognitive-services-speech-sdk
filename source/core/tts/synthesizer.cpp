@@ -456,11 +456,7 @@ std::shared_ptr<ISpxNamedProperties> CSpxSynthesizer::GetParentProperties() cons
 
 void CSpxSynthesizer::CheckLogFilename()
 {
-    auto filename = GetStringValue(GetPropertyName(PropertyId::Speech_LogFilename), "");
-    if (!filename.empty())
-    {
-        FileLogger::Instance().SetFilename(std::move(filename));
-    }
+    FileLogger::Instance().SetFileOptions(GetParentProperties());
 }
 
 void CSpxSynthesizer::PushRequestIntoQueue(const std::wstring requestId)

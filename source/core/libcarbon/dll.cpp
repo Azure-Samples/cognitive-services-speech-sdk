@@ -16,7 +16,6 @@ TRACELOGGING_DECLARE_PROVIDER(tracingEventProvider);
 
 #include "stdafx.h"
 #include "debug_utils.h"
-#include "file_logger.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 

@@ -252,13 +252,8 @@ std::shared_ptr<ISpxNamedProperties> CSpxDialogServiceConnector::GetParentProper
 void CSpxDialogServiceConnector::CheckLogFilename()
 {
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
-    auto filename = namedProperties->GetStringValue(GetPropertyName(PropertyId::Speech_LogFilename), "");
-    if (!filename.empty())
-    {
-        FileLogger::Instance().SetFilename(std::move(filename));
-    }
+    FileLogger::Instance().SetFileOptions(namedProperties);
 }
-
 CSpxAsyncOp<void> CSpxDialogServiceConnector::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)
 {
     const char* recoModePropertyName = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);

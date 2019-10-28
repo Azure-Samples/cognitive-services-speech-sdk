@@ -1400,7 +1400,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
 
             ManualResetEvent disposeEvent = new ManualResetEvent(false);
-        
+
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 recognizer.SessionStarted += (sender, e) =>
