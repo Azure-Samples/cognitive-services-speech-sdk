@@ -437,6 +437,7 @@ namespace endpoint
     const std::string profanityRemoved = "removed";
     const std::string profanityRaw = "raw";
 
+
     namespace unifiedspeech
     {
         const std::string hostnameSuffix = ".stt.speech.microsoft.com";
@@ -521,7 +522,9 @@ namespace endpoint
             constexpr auto customCommands = "/v1";
         }
 
-        const std::vector<std::string> queryParameters = { langQueryParam };
+        const std::string customVoiceDeploymentIdsQueryParam = "voiceDeploymentId=";
+
+        const std::vector<std::string> queryParameters = { langQueryParam, customVoiceDeploymentIdsQueryParam };
     }
 
     namespace conversationTranscriber

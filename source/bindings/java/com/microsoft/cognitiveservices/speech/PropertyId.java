@@ -308,7 +308,13 @@ public enum PropertyId {
      * ConversationId for the session.
      * Added in version 1.8.0.
      */
-    Converation_Conversation_Id ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Converation_Conversation_Id),
+    Converation_Conversation_Id ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_Conversation_Id),
+
+    /**
+     * Comma separated list of custom voice deployment ids.
+     * Added in version 1.8.0.
+     */
+    Conversation_Custom_Voice_Deployment_Ids ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_Custom_Voice_Deployment_Ids ),
 
     /**
      *  The auto detect source languages

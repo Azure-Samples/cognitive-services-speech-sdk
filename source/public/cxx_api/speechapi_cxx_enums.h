@@ -372,7 +372,13 @@ enum class PropertyId
     /// ConversationId for the session.
     /// Added in version 1.8.0.
     /// </summary>
-    Converation_Conversation_Id = 10004,
+    Conversation_Conversation_Id = 10004,
+
+    /// <summary>
+    /// Comma separated list of custom voice deployment ids.
+    /// Added in version 1.8.0.
+    /// </summary>
+    Conversation_Custom_Voice_Deployment_Ids = 10005,
 
     /// <summary>
     /// The time stamp associated to data buffer written by client when using Pull/Push audio input streams.

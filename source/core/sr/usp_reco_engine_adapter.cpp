@@ -499,7 +499,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpointDialog(const std::shared_pt
     SetUspQueryParameters(USP::endpoint::dialog::queryParameters, properties, client);
 
     /* Set conversation id if present */
-    m_dialogConversationId = properties->GetStringValue(GetPropertyName(PropertyId::Converation_Conversation_Id));
+    m_dialogConversationId = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_Conversation_Id));
 
     auto dialogType = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_DialogType));
     USP::Client::DialogBackend dialogBackend{ USP::Client::DialogBackend::NotSet };
@@ -600,6 +600,8 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspQueryParameters(const vector<string
         { USP::endpoint::translation::voiceQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice), PropertyValueType::StringProperty}},
 
         { USP::endpoint::translation::stableTranslationQueryParam, { GetPropertyName(PropertyId::SpeechServiceResponse_TranslationRequestStablePartialResult), PropertyValueType::BoolProperty}},
+
+        { USP::endpoint::dialog::customVoiceDeploymentIdsQueryParam, { GetPropertyName(PropertyId::Conversation_Custom_Voice_Deployment_Ids), PropertyValueType::StringProperty } }
     };
 
     for (auto queryParamName : allowedParameterList)
@@ -1794,7 +1796,7 @@ void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
                 m_dialogConversationId = responseMessage["conversationId"].get<std::string>();
                 InvokeOnServiceIfAvailable<ISpxNamedProperties>(GetSite(), [&](ISpxNamedProperties& properties)
                 {
-                    properties.SetStringValue(GetPropertyName(PropertyId::Converation_Conversation_Id), m_dialogConversationId.c_str());
+                    properties.SetStringValue(GetPropertyName(PropertyId::Conversation_Conversation_Id), m_dialogConversationId.c_str());
                 });
             }
             auto it = m_request_session_map.find(msg.requestId);
