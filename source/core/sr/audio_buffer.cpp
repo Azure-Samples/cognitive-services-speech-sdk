@@ -284,19 +284,21 @@ namespace Impl {
 
         uint64_t remainingInTicks = 0;
         system_clock::time_point audioTimestamp;
-        if (index >= queueSize)
+        if (queueSize != 0)
         {
-            audioTimestamp = m_audioBuffers.back()->receivedTime;
-            SPX_DBG_ASSERT_WITH_MESSAGE(bytes > 0, "Reach end of queue, but no bytes left.");
-            SPX_DBG_TRACE_WARNING("%s: Offset exceeds what is available in the buffer %d. No timestamp can be retrieved, using oldest available timestamp %s.",
+            if (index >= queueSize)
+            {
+                audioTimestamp = m_audioBuffers.back()->receivedTime;
+                SPX_DBG_ASSERT_WITH_MESSAGE(bytes > 0, "Reach end of queue, but no bytes left.");
+                SPX_DBG_TRACE_WARNING("%s: Offset exceeds what is available in the buffer %d. No timestamp can be retrieved, using oldest available timestamp %s.",
                     __FUNCTION__, (int)bytes, PAL::GetTimeInString(audioTimestamp).c_str());
+            }
+            else
+            {
+                audioTimestamp = m_audioBuffers[index]->receivedTime;
+                remainingInTicks = BytesToDurationInTicks(chunkBytes - bytes);
+            }
         }
-        else
-        {
-            audioTimestamp = m_audioBuffers[index]->receivedTime;
-            remainingInTicks = BytesToDurationInTicks(chunkBytes - bytes);
-        }
-
         return std::make_shared<ProcessedAudioTimestamp>(audioTimestamp, remainingInTicks);
     }
 
