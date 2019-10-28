@@ -229,6 +229,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 $"'{actual}' (actual) is not a member of '{expectedString}' (expected)");
         }
 
+        public static void AssertIfNotContains(string result, string substring)
+        {
+            Assert.IsTrue(result.Contains(substring), $"Error: '{result}' does not contain expected substring '{substring}'");
+        }
+        public static void AssertIfContains(string result, string substring)
+        {
+            Assert.IsFalse(result.Contains(substring), $"Error: '{result}' contain unexpected substring '{substring}'");
+        }
         public static void AssertMatching(string expectedText, string actualText)
         {
             Assert.IsFalse(actualText.Length == 0, $"Actual text should not be empty, expected '{expectedText}'");
@@ -409,6 +417,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.IsTrue(detailedRecognitionNormalizedForm.Length > 0);
             Assert.IsTrue(detailedRecognitionLexicalForm.Length > 0);
             Assert.IsTrue(detailedRecognitionMaskedForm.Length > 0);
+        }
+
+        public static void WarnIfContains(string result, string substring)
+        {
+            if (result.Contains(substring))
+            {
+                Console.WriteLine($"Warning: '{result}' does not contain expected substring '{substring}'");
+            }
+        }
+        public static void WarnIfNotContains(string result, string substring)
+        {
+            if (result.Contains(substring))
+            {
+                Console.WriteLine($"Warning: '{result}' is missing expected substring '{substring}'");
+            }
         }
     }
 }

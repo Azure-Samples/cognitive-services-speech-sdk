@@ -83,10 +83,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             public static class Profanity
             {
-                public static readonly string MaskedUtteranceTranslation = "******.";
-                public static readonly string RemovedUtteranceTranslation = ".";
-                public static readonly string RawUtteranceTranslation = "ficken.";
-                public static readonly string TaggedUtteranceTranslation = "<profanity>ficken</profanity>.";
+                public static readonly string MaskedUtterancePattern = "****";
+                public static readonly string MaskedUtteranceTranslation = "Was bedeutet das Wort ****?";
+                public static readonly string RemovedUtteranceTranslation = "Was bedeutet das Wort";
+                public static readonly string RawUtteranceTranslation = "fick";
+                public static readonly string TaggedUtteranceTranslation = "<profanity>fick</profanity>";
             }
         }
 
@@ -255,14 +256,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             public static class Profanity
             {
-                public static readonly string AudioFile = Path.Combine(AudioDir, "profanity.wav");
-                public static readonly string MaskedUtterance = "************ ************";
-                public static readonly string RemovedUtterance = "";
-                public static readonly string RawUtterance = "FuckFuckFuck FuckFuckFuck.";
-                public static readonly string MaskedUtteranceTranslation = "************";
+                public static readonly string AudioFile = Path.Combine(AudioDir, "WTFProfanity.wav");
+                public static readonly string EnglishWord = "fuck";
+                public static readonly string MaskedPattern = "****";
+                public static readonly string MaskedUtterance = "What does the word **** mean?";
+                public static readonly string RemovedUtterance = "What does the word  mean?";
+                public static readonly string RawUtterance = "What does the word fuck mean?";
+                public static readonly string MaskedUtteranceTranslation = "What does the word **** mean?";
                 public static readonly string RemovedUtteranceTranslation = "";
-                public static readonly string RawUtteranceTranslation = "Fuck.";
+                public static readonly string RawUtteranceTranslation = "What does the word fuck mean?";
                 public static readonly string TaggedUtteranceTranslation = "<profanity>fuck</profanity>";
+                
             }
 
             public static class Punctuation

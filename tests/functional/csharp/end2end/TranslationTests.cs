@@ -746,7 +746,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        /*[TestMethod]
+        [TestMethod]
         public async Task ProfanityTranslation()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Profanity.AudioFile);
@@ -759,9 +759,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                Assert.IsFalse(result.Text.Contains(TestData.English.Profanity.RawUtteranceTranslation));
+                Assert.IsFalse(result.Text.Contains(TestData.English.Profanity.EnglishWord));
                 Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
-                //AssertMatching(TestData.German.Profanity.RemovedUtteranceTranslation, result.Translations[Language.DE]);
+                Assert.IsFalse(string.IsNullOrEmpty(result.Translations[Language.DE]));
+                WarnIfNotContains(result.Translations[Language.DE], TestData.German.Profanity.RemovedUtteranceTranslation);
             }
 
             config.SetProfanity(ProfanityOption.Masked);
@@ -769,9 +770,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                Assert.AreEqual(TestData.English.Profanity.MaskedUtteranceTranslation, result.Text);
+                AssertIfNotContains(result.Text, TestData.English.Profanity.MaskedPattern);
+                WarnIfNotContains(result.Text, TestData.English.Profanity.MaskedUtteranceTranslation);
                 Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
-                //AssertMatching(TestData.German.Profanity.MaskedUtteranceTranslation, result.Translations[Language.DE]);
+                AssertIfNotContains(result.Translations[Language.DE], TestData.German.Profanity.MaskedUtterancePattern);
+                WarnIfNotContains(result.Translations[Language.DE], TestData.German.Profanity.MaskedUtteranceTranslation);
             }
 
             config.SetProfanity(ProfanityOption.Raw);
@@ -781,7 +784,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
                 AssertMatching(TestData.English.Profanity.RawUtteranceTranslation, result.Text);
                 Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
-                //AssertMatching(TestData.German.Profanity.RawUtteranceTranslation, result.Translations[Language.DE]);
+                // this is the RAW output, so the RawUtteranceTranslation should be there.
+                AssertIfNotContains(result.Translations[Language.DE], TestData.German.Profanity.RawUtteranceTranslation);
             }
 
             config.SetProfanity(ProfanityOption.Masked);
@@ -790,11 +794,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                AssertMatching(TestData.English.Profanity.TaggedUtteranceTranslation.ToLower(), result.Text.ToLower());
+                AssertIfNotContains(result.Text.ToLower(), TestData.English.Profanity.TaggedUtteranceTranslation.ToLower());
                 Assert.AreEqual(1, result.Translations.Count, AssertOutput.WrongTranslatedUtterancesCount);
-                //AssertMatching(TestData.German.Profanity.TaggedUtteranceTranslation, result.Translations[Language.DE]);
+                AssertIfNotContains(result.Translations[Language.DE], TestData.German.Profanity.TaggedUtteranceTranslation);
             }
-        }*/
+        }
 
         [TestMethod]
         public async Task ChangeLanguageOutsideTurn()
