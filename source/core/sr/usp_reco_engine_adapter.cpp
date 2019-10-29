@@ -916,8 +916,9 @@ void CSpxUspRecoEngineAdapter::SetAgentConfigMessage(const ISpxNamedProperties& 
     agentConfigJson["version"] = 0.2;
 
     auto connectionId = properties.GetStringValue(dialogConnectionId);
+    auto dialogType = properties.GetStringValue(dialogBackendType);
 
-    if (connectionId.empty())
+    if (connectionId.empty() && (dialogType == g_dialogType_CustomCommands))
     {
         SPX_THROW_HR(SPXERR_INVALID_ARG);
     }
@@ -942,7 +943,6 @@ void CSpxUspRecoEngineAdapter::SetAgentConfigMessage(const ISpxNamedProperties& 
         agentConfigJson["botInfo"]["conversationId"] = m_dialogConversationId;
     }
 
-    auto dialogType = properties.GetStringValue(dialogBackendType);
     if (dialogType == g_dialogType_BotFramework)
     {
         auto fromId = properties.GetStringValue(dialogFromId);
