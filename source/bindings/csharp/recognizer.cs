@@ -360,7 +360,6 @@ namespace Microsoft.CognitiveServices.Speech
                 ThrowIfFail(Internal.Recognizer.recognizer_async_handle_release(asyncStopContinuousHandle));
             }
             ThrowIfNull(recoHandle, "Invalid recognizer handle");
-            ThrowIfFail(Internal.Recognizer.set_conversation_resources_to_destroy_on_recognizer_stop(recoHandle, destroyResource));
             ThrowIfFail(Internal.Recognizer.recognizer_stop_continuous_recognition_async(recoHandle, out asyncStopContinuousHandle));
             ThrowIfFail(Internal.Recognizer.recognizer_stop_continuous_recognition_async_wait_for(asyncStopContinuousHandle, UInt32.MaxValue));
             ThrowIfFail(Internal.Recognizer.recognizer_async_handle_release(asyncStopContinuousHandle));
