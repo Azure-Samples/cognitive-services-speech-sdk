@@ -39,6 +39,7 @@ set_target_properties (pal PROPERTIES
 )
 
 if (SPEECHSDK_OS STREQUAL "Android")
+    target_link_libraries(pal ${AZURE_SHARED_LIB})
 else()
     target_link_libraries(pal ${AZURE_SHARED_LIB})
 endif()

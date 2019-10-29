@@ -27,12 +27,17 @@ JNIEXPORT void JNI_OnUnload(JavaVM*, void*)
     g_vm = nullptr;
 }
 
+JavaVM* GetVM() noexcept
+{
+    return g_vm;
+}
+
 JNIEnvironment::JNIEnvironment(JavaVM* vm)
 {
     JNIEnv* e;
     if (vm->AttachCurrentThread(&e, nullptr) != JNI_OK)
     {
-        throw std::runtime_error{ "Cannot initialized JNI Environment." };
+        throw std::runtime_error{ "Cannot initialize JNI Environment." };
     }
     env = e;
 }
