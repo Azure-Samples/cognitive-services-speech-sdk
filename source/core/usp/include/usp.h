@@ -445,7 +445,7 @@ namespace endpoint
         const std::string pathSuffix = "/cognitiveservices/v1";
 
         const std::string postprocessingQueryParam = "postprocessing=";
-
+        const std::string lidEnabledQueryParam = "lidEnabled=";
         const std::vector<std::string> queryParameters = {
             langQueryParam,
             deploymentIdQueryParam,
@@ -457,8 +457,9 @@ namespace endpoint
             wordLevelTimestampsQueryParam,
             profanityQueryParam,
             stableIntermediateThresholdQueryParam,
-            postprocessingQueryParam
+            postprocessingQueryParam,
 
+            lidEnabledQueryParam
         };
     }
 

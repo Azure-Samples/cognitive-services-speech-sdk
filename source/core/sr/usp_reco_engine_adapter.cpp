@@ -595,6 +595,8 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspQueryParameters(const vector<string
 
         { USP::endpoint::unifiedspeech::postprocessingQueryParam, { GetPropertyName(PropertyId::SpeechServiceResponse_PostProcessingOption), PropertyValueType::StringProperty}},
 
+        { USP::endpoint::unifiedspeech::lidEnabledQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages), PropertyValueType::StringProperty}},
+
         { USP::endpoint::translation::fromQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), PropertyValueType::StringProperty}},
         { USP::endpoint::translation::toQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages), PropertyValueType::StringProperty}},
         { USP::endpoint::translation::voiceQueryParam, { GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice), PropertyValueType::StringProperty}},
@@ -660,7 +662,14 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspQueryParameters(const vector<string
 
         if (setValue)
         {
-            client.SetQueryParameter(queryParamName, propertyValueStr);
+            if( queryParamName == USP::endpoint::unifiedspeech::lidEnabledQueryParam)
+            {
+                client.SetQueryParameter(queryParamName, TrueString);
+            }
+            else
+            {
+                client.SetQueryParameter(queryParamName, propertyValueStr);
+            }
         }
     }
 
