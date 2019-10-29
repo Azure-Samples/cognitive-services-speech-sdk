@@ -717,8 +717,7 @@ void CSpxUspRecoEngineAdapter::UpdateDefaultLanguage(const std::shared_ptr<ISpxN
     }
     // If no custom model is used, set the default language.
     if (properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId)).empty() &&
-        properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint)).find(USP::endpoint::deploymentIdQueryParam) == string::npos &&
-        properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Host)).find(USP::endpoint::deploymentIdQueryParam) == string::npos)
+        properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint)).find(USP::endpoint::deploymentIdQueryParam) == string::npos)
     {
         properties->SetStringValue(languageParameterName, s_defaultRecognitionLanguage);
     }

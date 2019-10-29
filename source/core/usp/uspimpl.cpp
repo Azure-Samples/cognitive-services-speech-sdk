@@ -379,8 +379,8 @@ string Connection::Impl::ConstructConnectionUrl() const
         customEndpoint = true;
     }
     // Note the use of customEndpoint in the code below for building query params
-    // - customEndpoint true:  FromEndpoint, or standard/FromHost with query parameters set by SetServiceProperty
-    // - customEndpoint false: not FromEndpoint (i.e. is standard/FromHost) and no user defined query parameters
+    // - customEndpoint true:  endpoint is specified by FromEndpoint, or m_config.m_userDefinedQueryParameters is non-empty
+    // - customEndpoint false: endpoint is not specified by FromEndpoint and m_config.m_userDefinedQueryParameters is empty
 
     switch (m_config.m_endpointType)
     {
