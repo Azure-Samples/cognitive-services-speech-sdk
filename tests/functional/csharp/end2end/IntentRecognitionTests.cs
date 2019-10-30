@@ -414,6 +414,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore("This is failing intermitantly with Websocket upgrade failure.")]
         public async Task TestIntentConfigFromHost()
         {
             var configFromHost = SpeechConfig.FromHost(hostUrl, languageUnderstandingSubscriptionKey);

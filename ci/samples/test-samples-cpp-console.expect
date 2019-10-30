@@ -56,7 +56,6 @@ spawn {*}$cmd
 
 set scenarioList [list \
   SpeechRecognitionUsingCustomizedModel \
-  SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat \
   SpeechRecognitionWithMicrophone \
 ]
 if {$tcl_platform(wordSize) == 8} {
