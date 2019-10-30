@@ -22,7 +22,7 @@ variables:
         },
         {
           "parameterName": "Timestamp",
-          "parameterValue": "-tsa http://sha256timestamp.ws.symantec.com/sha256/timestamp"
+          "parameterValue": "-tsa http://sha256timestamp.ws.digicert.com/sha256/timestamp"
         }
         ],
         "toolName": "sign",
