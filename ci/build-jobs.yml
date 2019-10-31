@@ -976,6 +976,8 @@ jobs:
       artifactName: Windows
       downloadPath: $(System.ArtifactsDirectory)/In
       itemPattern: '**/*.nupkg'
+  - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
+    displayName: Select XCode Version 10.3
   - bash: |
       set -u -e -x -o pipefail
       . ci/functions.sh
@@ -1602,6 +1604,8 @@ jobs:
     displayName: Install modern bash
   - bash: brew install findutils
     displayName: Install findutils for maven script
+  - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
+    displayName: Select XCode Version 10.3
   - bash: |
       set -e -o pipefail
       . ci/functions.sh
@@ -1862,7 +1866,7 @@ jobs:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDrop '))
   pool:
     name: Hosted Ubuntu 1604
-  timeoutInMinutes: 90
+  timeoutInMinutes: 120
   steps:
   - bash: |
       set -x -e -o pipefail
@@ -1958,6 +1962,7 @@ jobs:
     displayName: Build and test quickstarts
     condition: eq(variables['SPEECHSDK_RUN_TESTS'], 'true')
     continueOnError: ${{ parameters.continueOnTestFailure }}
+    timeoutInMinutes: 90
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Linux Release Drop'
     inputs:
@@ -1992,6 +1997,8 @@ jobs:
   # Update bash really early so it will be picked up by "bash" steps.
   - bash: brew config && brew install bash coreutils
     displayName: Install modern bash and coreutils
+  - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
+    displayName: Select XCode Version 10.3
   - bash: |
       xcodebuild -version
     displayName: 'Log Xcode version'
@@ -2173,6 +2180,8 @@ jobs:
     inputs:
       artifactName: iOS
       itemPattern: '**/*.zip'
+  - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
+    displayName: Select XCode Version 10.3
   - bash: |
       xcodebuild -version
     displayName: 'Log Xcode version'
@@ -2405,6 +2414,8 @@ jobs:
   # Update bash really early so it will be picked up by "bash" steps.
   - bash: brew config && brew install bash
     displayName: Install modern bash
+  - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
+    displayName: Select XCode Version 10.3
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - bash: |

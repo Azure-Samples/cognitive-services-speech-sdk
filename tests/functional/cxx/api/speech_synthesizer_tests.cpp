@@ -881,7 +881,7 @@ TEST_CASE("Speak output in streams with all data get on synthesis started result
     DoSomethingWithAudioInDataStream(stream, true); /* the stream should be with AllData status */
 }
 
-TEST_CASE("Check word boundary events - USP", "[api][cxx]")
+TEST_CASE("Check word boundary events - USP", "[api][cxx][!hide]")
 {
     auto config = UspSpeechConfig();
     config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
@@ -890,7 +890,7 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx]")
     std::string plainText = "您好，我是来自Microsoft的中文声音。";
     std::string ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>您好，<break time='50ms'/>我是来自Microsoft的中文声音。</voice></speak>";
 
-    uint64_t expectedAudioOffsets[8] = { 500000, 7443750, 9175620, 10585000, 15096880, 22924380, 25213120, 28760000 };
+    uint64_t expectedAudioOffsets[8] = { 500000, 6964380, 8839380, 10525619, 14774380, 23987500, 26077500, 30366880 };
     uint32_t expectedTextOffsets[8] = { 0, 3, 4, 5, 7, 16, 17, 19 };
     uint32_t expectedSsmlOffsets[8] = { 251, 274, 275, 276, 278, 287, 288, 290 };
     uint32_t expectedWordLengths[8] = { 2, 1, 1, 2, 9, 1, 2, 2 };

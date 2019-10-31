@@ -34,6 +34,8 @@ jobs:
   steps:
   - bash: brew config && brew install bash coreutils
     displayName: Install modern bash and coreutils
+  - bash: sudo xcode-select -s /Applications/Xcode_10.3.app/Contents/Developer
+    displayName: Select XCode Version 10.3
   - bash: ./ci/set-variables.sh
     displayName: Set variables
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0

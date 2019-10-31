@@ -931,7 +931,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 string plainText = "您好，我是来自Microsoft的中文声音。";
                 string ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>您好，<break time='50ms'/>我是来自Microsoft的中文声音。</voice></speak>";
 
-                UInt64[] expectedAudioOffsets = { 500000, 7443750, 9175620, 10585000, 15096880, 22924380, 25213120, 28760000 };
+                UInt64[] expectedAudioOffsets = { 500000, 6964380, 8839380, 10525619, 14774380, 23987500, 26077500, 30366880 };
                 UInt32[] expectedTextOffsets = { 0, 3, 4, 5, 7, 16, 17, 19 };
                 UInt32[] expectedSsmlOffsets = { 251, 274, 275, 276, 278, 287, 288, 290 };
                 UInt32[] expectedWordLengths = { 2, 1, 1, 2, 9, 1, 2, 2 };
