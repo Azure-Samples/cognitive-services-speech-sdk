@@ -81,9 +81,16 @@ public:
     void UpdateParticipant(bool add, const std::string& userId, std::shared_ptr<ISpxParticipant> participant) override;
     void UpdateParticipants(bool add, std::vector<ParticipantPtr>&& participants) override;
     void SetConversationId(const std::string& id) override;
-    void GetConversationId(std::string& id) override;
+    const std::string GetConversationId() const override;
     std::string GetSpeechEventPayload(MeetingState state) override;
-    void HttpSendEndMeetingRequest() override;
+    virtual void EndConversation() override;
+    virtual void CreateConversation(const std::string &) override;
+
+    virtual void DeleteConversation() override { ThrowWithCallstack(SPXERR_UNSUPPORTED_API_ERROR); }
+    virtual void StartConversation() override { ThrowWithCallstack(SPXERR_UNSUPPORTED_API_ERROR); }
+    virtual void SetLockConversation(bool) override { ThrowWithCallstack(SPXERR_UNSUPPORTED_API_ERROR); }
+    virtual void SetMuteAllParticipants(bool) override { ThrowWithCallstack(SPXERR_UNSUPPORTED_API_ERROR); }
+    virtual void SetMuteParticipant(bool, const std::string &) override { ThrowWithCallstack(SPXERR_UNSUPPORTED_API_ERROR); }
 
     virtual std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
 
@@ -106,7 +113,6 @@ private:
     void StartUpdateParticipants();
     void DoneUpdateParticipants();
 
-    void SetRecoMode();
     int GetMaxAllowedParticipants();
 
     void HttpAddQueryParams(HttpRequest& request);

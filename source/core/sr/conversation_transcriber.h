@@ -17,7 +17,7 @@ namespace Impl {
 class CSpxConversationTranscriber :
     public CSpxRecognizer,
     public ISpxConversationTranscriber,
-    public ISpxGetAudioConfig
+    public ISpxObjectWithAudioConfig
 {
 public:
     using BaseType = CSpxRecognizer;
@@ -39,7 +39,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxMessageParamFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxGetUspMessageParamsFromUser)
         SPX_INTERFACE_MAP_ENTRY(ISpxConversationTranscriber)
-        SPX_INTERFACE_MAP_ENTRY(ISpxGetAudioConfig)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithAudioConfig)
     SPX_INTERFACE_MAP_END()
 
       // --- ISpxObjectInit
@@ -53,11 +53,11 @@ public:
     SPX_SERVICE_MAP_END()
 
     // --- ISpxConversationTranscriber
-    virtual void Init(std::weak_ptr<ISpxAudioConfig> audio_config) override;
     virtual void JoinConversation(std::weak_ptr<ISpxConversation> conversation) override;
     virtual void LeaveConversation() override;
 
-    // -- ISpxGetAudioConfig
+    // -- ISpxObjectWithAudioConfig
+    virtual void SetAudioConfig(std::weak_ptr<ISpxAudioConfig> audio_config) override;
     virtual std::shared_ptr<ISpxAudioConfig> GetAudioConfig() override;
 
     // -- ISpxRecognizerEvents

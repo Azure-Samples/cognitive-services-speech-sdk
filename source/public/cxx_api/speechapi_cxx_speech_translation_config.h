@@ -12,6 +12,7 @@
 #include <speechapi_cxx_string_helpers.h>
 #include "speechapi_c_common.h"
 #include "speechapi_c_speech_config.h"
+#include "speechapi_c_speech_translation_config.h"
 
 namespace Microsoft {
 namespace CognitiveServices {

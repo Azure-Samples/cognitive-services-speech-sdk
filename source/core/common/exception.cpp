@@ -62,8 +62,11 @@ namespace Impl {
             _MAP_ENTRY(SPXERR_GSTREAMER_INTERNAL_ERROR)
             _MAP_ENTRY(SPXERR_CONTAINER_FORMAT_NOT_SUPPORTED_ERROR)
             _MAP_ENTRY(SPXERR_GSTREAMER_NOT_FOUND_ERROR)
-            _MAP_ENTRY(SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE)
             _MAP_ENTRY(SPXERR_UNSUPPORTED_API_ERROR)
+            _MAP_ENTRY(SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE)
+            _MAP_ENTRY(SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE)
+            _MAP_ENTRY(SPXERR_CANCELED)
+
 #undef _MAP_ENTRY
         }
 
@@ -125,6 +128,19 @@ namespace Impl {
     SPXHR StoreException(ExceptionWithCallStack&& ex)
     {
         auto errorHandles = CSpxSharedPtrHandleTableManager::Get<ExceptionWithCallStack, SPXERRORHANDLE>();
+
+        // NOTE: In some cases, the exception passed here has already been tracked with a handle. If we
+        //       don't check, we end up with a double wrapped exception and a leaked handle.
+        auto errorCode = ex.GetErrorCode();
+        if (errorCode != SPXERR_UNHANDLED_EXCEPTION)
+        {
+            auto possibleHandle = reinterpret_cast<SPXERRORHANDLE>(errorCode);
+            if (errorHandles->IsTracked(possibleHandle))
+            {
+                return errorCode;
+            }
+        }
+        
         std::shared_ptr<ExceptionWithCallStack> handle(new ExceptionWithCallStack(std::move(ex)));
         return reinterpret_cast<SPXHR>(errorHandles->TrackHandle(handle));
     }

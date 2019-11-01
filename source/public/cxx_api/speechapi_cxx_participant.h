@@ -7,6 +7,7 @@
 
 #pragma once
 #include <speechapi_c.h>
+#include <speechapi_c_conversation_translator.h>
 #include <speechapi_cxx_properties.h>
 
 namespace Microsoft {
@@ -20,8 +21,16 @@ namespace Transcription {
 /// </summary>
 class Participant
 {
-public:
+private:
+    SPXPARTICIPANTHANDLE m_hparticipant;
+    SPXSTRING m_avatar;
+    SPXSTRING m_id;
+    SPXSTRING m_displayName;
+    bool m_isTts;
+    bool m_isMuted;
+    bool m_isHost;
 
+public:
     /// <summary>
     /// Create a participant using user id, her/his preferred language and her/his voice signature.
     /// If voice signature is empty then user will not be identified.
@@ -42,15 +51,60 @@ public:
     /// </summary>
     /// <param name="hparticipant">participant handle.</param>
     explicit Participant(SPXPARTICIPANTHANDLE hparticipant = SPXHANDLE_INVALID) :
+        m_hparticipant(hparticipant),
+        m_avatar(),
+        m_id(),
+        m_displayName(),
+        m_isTts(false),
+        m_isMuted(false),
+        m_isHost(false),
+        Id(m_id),
+        Avatar(m_avatar),
+        DisplayName(m_displayName),
+        IsUsingTts(m_isTts),
+        IsMuted(m_isMuted),
+        IsHost(m_isHost),
         m_properties(hparticipant),
-        Properties(m_properties),
-        m_hparticipant(hparticipant)
-    {}
+        Properties(m_properties)
+    {
+        LoadConversationParticipantProperties(hparticipant);
+    }
 
     /// <summary>
     /// Virtual destructor.
     /// </summary>
     virtual ~Participant() { participant_release_handle(m_hparticipant); }
+
+    /// <summary>
+    /// Get the identifier for the participant.
+    /// </summary>
+    const SPXSTRING& Id;
+
+    /// <summary>
+    /// Gets the colour of the user's avatar as an HTML hex string (e.g. FF0000 for red).
+    /// </summary>
+    const SPXSTRING& Avatar;
+
+    /// <summary>
+    /// The participant's display name. Please note that there may be more than one participant
+    /// with the same name. You can use the Id property to tell them apart.
+    /// </summary>
+    const SPXSTRING& DisplayName;
+
+    /// <summary>
+    /// Gets whether or not the participant is using Text To Speech (TTS).
+    /// </summary>
+    const bool& IsUsingTts;
+
+    /// <summary>
+    /// Gets whether or not this participant is muted.
+    /// </summary>
+    const bool& IsMuted;
+
+    /// <summary>
+    /// Gets whether or not this participant is the host.
+    /// </summary>
+    const bool& IsHost;
 
     /// <summary>
     /// Internal operator used to get underlying handle value.
@@ -81,6 +135,8 @@ private:
 
     /*! \cond PRIVATE */
 
+    DISABLE_COPY_AND_MOVE(Participant);
+
     class PrivatePropertyCollection : public PropertyCollection
     {
     public:
@@ -96,6 +152,61 @@ private:
     };
 
     PrivatePropertyCollection m_properties;
+    
+    SPXSTRING TryLoadString(SPXEVENTHANDLE hevent, SPXHR(SPXAPI_CALLTYPE * func)(SPXEVENTHANDLE, char*, uint32_t *))
+    {
+        std::unique_ptr<char[]> psz;
+        try
+        {
+            // query the string length
+            uint32_t length = 0;
+
+            // don't use SPX_THROW_ON_FAIL since that creates a handle for exceptions that will leak
+            // since we don't care about them.
+            SPXHR hr = func(hevent, nullptr, &length);
+            if (SPX_FAILED(hr) || length == 0)
+            {
+                return SPXSTRING{};
+            }
+
+            psz = std::unique_ptr<char[]>(new char[length]);
+            hr = func(hevent, psz.get(), &length);
+            if (SPX_FAILED(hr))
+            {
+                return SPXSTRING{};
+            }
+
+            return Utils::ToSPXString(psz.get());
+        }
+        catch (...)
+        {
+            // ignore errors since not all participants have the properties we need
+            return SPXSTRING{};
+        }
+    }
+
+    void LoadConversationParticipantProperties(SPXPARTICIPANTHANDLE hParticipant)
+    {
+        m_id = TryLoadString(hParticipant, conversation_translator_participant_get_id);
+        m_avatar = TryLoadString(hParticipant, conversation_translator_participant_get_avatar);
+        m_displayName = TryLoadString(hParticipant, conversation_translator_participant_get_displayname);
+
+        bool val;
+        if (SPX_SUCCEEDED(conversation_translator_participant_get_is_using_tts(hParticipant, &val)))
+        {
+            m_isTts = val;
+        }
+
+        if (SPX_SUCCEEDED(conversation_translator_participant_get_is_muted(hParticipant, &val)))
+        {
+            m_isMuted = val;
+        }
+
+        if (SPX_SUCCEEDED(conversation_translator_participant_get_is_host(hParticipant, &val)))
+        {
+            m_isHost = val;
+        }
+    }
 
     /*! \endcond */
 
@@ -105,11 +216,6 @@ public:
     /// Collection of additional participant properties.
     /// </summary>
     PropertyCollection& Properties;
-
-private:
-    DISABLE_COPY_AND_MOVE(Participant);
-
-    SPXPARTICIPANTHANDLE m_hparticipant;
 };
 
 }}}}

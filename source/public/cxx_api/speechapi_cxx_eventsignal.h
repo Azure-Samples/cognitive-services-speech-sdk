@@ -20,9 +20,11 @@ namespace Speech {
 
 // Forward declaration for friends.
 class Connection;
+template<class, class, class> class AsyncRecognizer;
+class SpeechSynthesizer;
 namespace Translation { class TranslationRecognizer; }
 namespace Dialog { class DialogServiceConnector; }
-namespace Transcription { class ConversationTranscriber; }
+namespace Transcription { class ConversationTranscriber; class ConversationTranslator; }
 
 /*! \cond PRIVATE */
 
@@ -78,6 +80,11 @@ public:
     /// Callback type that is used for signalling the event to connected clients.
     /// </summary>
     using CallbackFunction = std::function<void(T eventArgs)>;
+
+    /// <summary>
+    /// The argument type for the callback event
+    /// </summary>
+    using CallbackArgument = T;
 
     /// <summary>
     /// Addition assignment operator overload.
@@ -218,16 +225,25 @@ private:
     friend class ::Microsoft::CognitiveServices::Speech::Impl::ISpxDialogServiceConnectorEvents;
     friend class ::Microsoft::CognitiveServices::Speech::Connection;
     friend class ::Microsoft::CognitiveServices::Speech::Transcription::ConversationTranscriber;
-
-
-    template <class, class, class> friend class AsyncRecognizer;
-    friend class SpeechSynthesizer;
+    friend class ::Microsoft::CognitiveServices::Speech::Transcription::ConversationTranslator;
+    template <class, class, class> friend class ::Microsoft::CognitiveServices::Speech::AsyncRecognizer;
+    friend class ::Microsoft::CognitiveServices::Speech::SpeechSynthesizer;
 
     /// <summary>
     /// Type for callbacks used when any client connects to the signal (the number of connected clients changes from zero to one) or
     /// the last client disconnects from the signal (the number of connected clients changes from one to zero).
     /// </summary>
     using NotifyCallback_Type = std::function<void(EventSignal<T>&)>;
+
+    /// <summary>
+    /// Constructor.
+    /// <summary>
+    /// <param name="connectedAndDisconnected">Callback to invoke if the number of connected clients changes from zero to one, or one to zero</param>
+    /// <param name="disconnectUnderLock">Flag indicating whether disconnect callback should be called under lock.</param>
+    EventSignal(NotifyCallback_Type connectedAndDisconnected, bool disconnectUnderLock = false) :
+        EventSignal(connectedAndDisconnected, connectedAndDisconnected, disconnectUnderLock)
+    {
+    }
 
     /// <summary>
     /// Constructor.

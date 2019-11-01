@@ -5,6 +5,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
@@ -14,6 +15,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static string inputDir, subscriptionKey, region, conversationTranscriptionEndpoint, conversationTranscriptionPPEKey, conversationTranscriptionPRODKey, speechRegionForConversationTranscription;
         public SpeechConfig defaultConfig, hostConfig, offlineConfig;
         private static Config _config;
+
+        public TestContext TestContext { get; set; }
 
         public static void BaseClassInit(TestContext context)
         {
@@ -48,6 +51,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             offlineConfig.SetProperty("CARBON-INTERNAL-SPEECH-RecoLocalModelLanguage", TestData.OfflineUnidec.LocalModelLanguage);
             // Uncomment below to enable logs
             //offlineConfig.SetProperty(PropertyId.Speech_LogFilename, "logfile-" + DateTime.Now.ToString("HH-mm-ss") + ".txt");
+        }
+
+        protected void WriteLine(string msg, [CallerMemberName] string caller = null, [CallerLineNumber] int line = 0, [CallerFilePath] string file = null)
+        {
+            string logMessage = $"({DateTime.UtcNow.ToString("yyyy-MM-dd HH::mm::ss.ff")}) [{Path.GetFileName(file)}:{caller}:{line}] {msg}";
+            TestContext.WriteLine(logMessage);
+        }
+
+        protected void DumpLine(string msg)
+        {
+            TestContext.WriteLine(msg);
         }
     }
 }

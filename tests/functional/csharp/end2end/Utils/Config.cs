@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Security.Principal;
 using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
@@ -69,6 +68,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         private static string _dialogRegion;
         public static string DialogRegion => _dialogRegion;
 
+        public static string Endpoint { get; private set; }
+        public static string ConversationTranslatorSubscriptionKey { get; private set; }
+        public static string ConversationTranslatorRegion { get; private set; }
+        public static string ConversationTranslatorHost { get; private set; }
+        public static string ConversationTranslatorSpeechEndpoint { get; private set; }
+        public static string ConversationTranslatorClientId { get; private set; }
+
         public Config(TestContext testContext)
         {
             _testContext = testContext;
@@ -121,6 +127,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     _dialogSubscriptionKey = configSettings[SettingNames.DialogSubscriptionKey];
                     _dialogFunctionalTestBot = configSettings[SettingNames.DialogFunctionalTestBot];
                     _dialogRegion = configSettings[SettingNames.DialogRegion];
+
+                    Endpoint = configSettings[SettingNames.Endpoint];
+                    ConversationTranslatorSubscriptionKey = configSettings[nameof(ConversationTranslatorSubscriptionKey)];
+                    ConversationTranslatorRegion = configSettings[nameof(ConversationTranslatorRegion)];
+                    ConversationTranslatorHost = configSettings[nameof(ConversationTranslatorHost)];
+                    ConversationTranslatorSpeechEndpoint = configSettings[nameof(ConversationTranslatorSpeechEndpoint)];
+                    ConversationTranslatorClientId = configSettings[nameof(ConversationTranslatorClientId)];
                 }
             }
             else

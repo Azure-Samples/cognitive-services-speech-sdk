@@ -66,7 +66,7 @@ public class ConversationTranscriberTests {
     }
 
     @Test
-    public void testConversationIdWithAnsiOnly() {
+    public void testConversationIdWithAnsiOnly() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
         String myConversationId = "123 456";
@@ -335,12 +335,12 @@ public class ConversationTranscriberTests {
         return phrases;
     }
 
-    private Conversation CreateConversation(SpeechConfig speech_config, String id) {
+    private Conversation CreateConversation(SpeechConfig speech_config, String id) throws InterruptedException, ExecutionException, TimeoutException {
         assertNotNull(speech_config);
 
         speech_config.setProperty("ConversationTranscriptionInRoomAndOnline", "true");
 
-        Conversation conversation = new Conversation(speech_config, id);
+        Conversation conversation = Conversation.createConversationAsync(speech_config, id).get();
         assertNotNull(conversation);
         assertNotNull(conversation.getConversationImpl());
 

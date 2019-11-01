@@ -1,9 +1,9 @@
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 
 using System;
-using System.Runtime.InteropServices;
 using Microsoft.CognitiveServices.Speech.Internal;
 using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 
@@ -11,9 +11,9 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
 {
     /// <summary>
     /// Represents a participant in a conversation.
-    /// Added in version 1.5.0
+    /// Changed in version 1.8.0
     /// </summary>
-    public sealed class Participant
+    public sealed class Participant : DisposableBase
     {
         /// <summary>
         /// Creates a Participant using user id, her/his preferred language and her/his voice signature.
@@ -26,16 +26,24 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         public static Participant From(string userId, string preferredLanguage, string voiceSignature)
         {
             IntPtr participantPtr = IntPtr.Zero;
-            IntPtr userIdPtr = Utf8StringMarshaler.MarshalManagedToNative(userId);
             try
             {
-                ThrowIfFail(Internal.Participant.participant_create_handle(out participantPtr, userIdPtr, preferredLanguage, voiceSignature));
+                using (var userIdPtr = new Utf8StringHandle(userId))
+                {
+                    ThrowIfFail(Internal.Participant.participant_create_handle(out participantPtr, userIdPtr, preferredLanguage, voiceSignature));
+                }
+
+                return new Participant(participantPtr);
             }
-            finally
+            catch
             {
-                Marshal.FreeHGlobal(userIdPtr);
+                if (participantPtr != IntPtr.Zero)
+                {
+                    LogErrorIfFail(Internal.Participant.participant_release_handle(participantPtr));
+                }
+
+                throw;
             }
-            return new Participant(participantPtr);
         }
 
         /// <summary>
@@ -43,13 +51,55 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         /// </summary>
         internal Participant(IntPtr participantPtr)
         {
-            ThrowIfNull(participantPtr);
-            participantHandle = new InteropSafeHandle(participantPtr, Internal.Participant.participant_release_handle);
+            if (participantPtr == null)
+            {
+                throw new ArgumentNullException(nameof(participantPtr));
+            }
+
+            ParticipantHandle = new InteropSafeHandle(participantPtr, Internal.Participant.participant_release_handle);
 
             IntPtr propbagPtr = IntPtr.Zero;
-            ThrowIfFail(Internal.Participant.participant_get_property_bag(participantHandle, out propbagPtr));
+            ThrowIfFail(Internal.Participant.participant_get_property_bag(ParticipantHandle, out propbagPtr));
             Properties = new PropertyCollection(propbagPtr);
+
+            Id = TryGetString(Internal.ConversationTranslator.conversation_translator_participant_get_id);
+            Avatar = TryGetString(Internal.ConversationTranslator.conversation_translator_participant_get_avatar);
+            DisplayName = TryGetString(Internal.ConversationTranslator.conversation_translator_participant_get_displayname);
+            IsMuted = TryGetValue(Internal.ConversationTranslator.conversation_translator_participant_get_is_muted);
+            IsUsingTts = TryGetValue(Internal.ConversationTranslator.conversation_translator_participant_get_is_using_tts);
+            IsHost = TryGetValue(Internal.ConversationTranslator.conversation_translator_participant_get_is_host);
         }
+
+        /// <summary>
+        /// The unique identifier for the participant.
+        /// </summary>
+        public string Id { get; }
+
+        /// <summary>
+        /// Gets the colour of the user's avatar as an HTML hex string (e.g. FF0000 for red).
+        /// </summary>
+        public string Avatar { get; }
+
+        /// <summary>
+        /// The participant's display name. Please note that there may be more than one participant
+        /// with the same name. You can use <see cref="Id"/> property to tell them apart.
+        /// </summary>
+        public string DisplayName { get; }
+
+        /// <summary>
+        /// Gets whether or not this participant is muted.
+        /// </summary>
+        public bool IsMuted { get; }
+
+        /// <summary>
+        /// Gets whether or not the participant is using Text To Speech (TTS).
+        /// </summary>
+        public bool IsUsingTts { get; }
+
+        /// <summary>
+        /// Gets whether or not this participant is the host.
+        /// </summary>
+        public bool IsHost { get; }
 
         /// <summary>
         /// The participant's preferred spoken language.
@@ -58,8 +108,9 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         {
             set
             {
-                ThrowIfNull(participantHandle);
-                ThrowIfFail(Internal.Participant.participant_set_preferred_langugage(participantHandle, value));
+                CheckDisposed();
+                ThrowIfNull(ParticipantHandle);
+                ThrowIfFail(Internal.Participant.participant_set_preferred_langugage(ParticipantHandle, value));
             }
         }
 
@@ -71,9 +122,10 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         {
             set
             {
-                ThrowIfNull(participantHandle);
+                CheckDisposed();
+                ThrowIfNull(ParticipantHandle);
                 var size = (value != null) ? value.Length : 0;
-                ThrowIfFail(Internal.Participant.participant_set_voice_signature(participantHandle, value, size));
+                ThrowIfFail(Internal.Participant.participant_set_voice_signature(ParticipantHandle, value, size));
             }
         }
 
@@ -82,7 +134,49 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
         /// </summary>
         public PropertyCollection Properties { get; set; }
 
-        // Hold the reference.
-        internal InteropSafeHandle participantHandle;
+        /// <summary>
+        /// Gets the native handle.
+        /// </summary>
+        internal InteropSafeHandle ParticipantHandle { get; }
+
+        /// <summary>
+        /// Disposes of the object.
+        /// </summary>
+        /// <param name="disposeManaged">True to dispose managed resources.</param>
+        protected override void Dispose(bool disposeManaged)
+        {
+            if (disposeManaged)
+            {
+                ParticipantHandle?.Dispose();
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "Don't care about exceptions here")]
+        private string TryGetString(Internal.ConversationTranslator.NativeReadString<InteropSafeHandle> nativeMethod)
+        {
+            try
+            {
+                return Internal.ConversationTranslator.GetString(ParticipantHandle, nativeMethod);
+            }
+            catch
+            {
+                // don't care about errors for now since not all participants will have these properties
+                return null;
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031", Justification = "Don't care about exceptions here")]
+        private bool TryGetValue(Internal.ConversationTranslator.NativeReadValue<InteropSafeHandle, bool> nativeMethod)
+        {
+            try
+            {
+                return Internal.ConversationTranslator.GetValue<bool>(ParticipantHandle, nativeMethod);
+            }
+            catch
+            {
+                // don't care about errors for now since not all participants will have these properties
+                return false;
+            }
+        }
     }
 }

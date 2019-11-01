@@ -30,21 +30,46 @@ public final class Conversation implements Closeable
     /**
      * Initializes a new instance of Conversation.
      * @param speechConfig speech configuration.
+     * @return A task representing the asynchronous operation that creates a conversation.
      */
-    public Conversation(SpeechConfig speechConfig) {
-        String conversationId = "";
-        this.conversationImpl = com.microsoft.cognitiveservices.speech.internal.Conversation.CreateConversationAsync(speechConfig.getImpl(), conversationId).Get();
-        initialize();
-    }
+    public static Future<Conversation> createConversationAsync(SpeechConfig speechConfig) {
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        final String finalConversationId = "";
+        final SpeechConfig finalSpeechConfig = speechConfig;
 
+        return s_executorService.submit(new java.util.concurrent.Callable<Conversation>() {
+            public Conversation call() {
+                com.microsoft.cognitiveservices.speech.internal.Conversation impl = 
+                    com.microsoft.cognitiveservices.speech.internal.Conversation.CreateConversationAsync(finalSpeechConfig.getImpl(), finalConversationId)
+                    .Get();
+                    
+                return new Conversation(impl);
+            }
+        });
+    }
+    
     /**
      * Initializes a new instance of Conversation.
      * @param speechConfig speech configuration.
      * @param conversationId a unqiue identification of your conversation.
+     * @return A task representing the asynchronous operation that creates a conversation.
      */
-    public Conversation(SpeechConfig speechConfig, String conversationId) {
-        this.conversationImpl = com.microsoft.cognitiveservices.speech.internal.Conversation.CreateConversationAsync(speechConfig.getImpl(), conversationId).Get();
-        initialize();
+    public static Future<Conversation> createConversationAsync(SpeechConfig speechConfig, String conversationId) {
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        Contracts.throwIfNull(conversationId, "conversationId");
+        
+        final String finalConversationId = conversationId;
+        final SpeechConfig finalSpeechConfig = speechConfig;
+
+        return s_executorService.submit(new java.util.concurrent.Callable<Conversation>() {
+            public Conversation call() {
+                com.microsoft.cognitiveservices.speech.internal.Conversation impl = 
+                    com.microsoft.cognitiveservices.speech.internal.Conversation.CreateConversationAsync(finalSpeechConfig.getImpl(), finalConversationId)
+                    .Get();
+                    
+                return new Conversation(impl);
+            }
+        });
     }
 
     /**

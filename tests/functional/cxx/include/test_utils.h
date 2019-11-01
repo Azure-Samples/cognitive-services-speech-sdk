@@ -6,6 +6,7 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
 #include <random>
 #include <signal.h>
 #include <fstream>
@@ -28,6 +29,7 @@
 #include "string_utils.h"
 #include "debug_utils.h"
 #include "json.h"
+#include "exception.h"
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -53,6 +55,7 @@ namespace Keys
     EXTERN std::string LUIS;
     EXTERN std::string Dialog;
     EXTERN std::string ConversationTranscriber;
+    EXTERN std::string ConversationTranslator;
 }
 
 namespace Config
@@ -68,6 +71,10 @@ namespace Config
     EXTERN std::string OnlineAudioEndpoint;
     EXTERN std::string OfflineModelPathRoot;
     EXTERN std::string OfflineModelLanguage;
+    EXTERN std::string ConversationTranslatorRegion;
+    EXTERN std::string ConversationTranslatorHost;
+    EXTERN std::string ConversationTranslatorSpeechEndpoint;
+    EXTERN std::string ConversationTranslatorClientId;
     EXTERN bool DoDiscover;
 }
 
@@ -75,6 +82,7 @@ namespace Config
 #define LANGUAGE_UNDERSTANDING_SUBSCRIPTION_KEY "LanguageUnderstandingSubscriptionKey"
 #define DIALOG_SUBSCRIPTION_KEY "DialogSubscriptionKey"
 #define CONVERSATION_TRANSCRIPTION_SUBSCRIPTION_KEY "ConversationTranscriptionPPEKey"
+#define CONVERSATION_TRANSLATOR_SUBSCRIPTION_KEY "ConversationTranslatorSubscriptionKey"
 
 #define CONVERSATION_TRANSCRIPTION_ENDPOINT "ConversationTranscriptionEndpoint"
 #define REGION "Region"
@@ -86,6 +94,10 @@ namespace Config
 #define INPUT_DIR "InputDir"
 #define DIALOG_FUNCTIONAL_TEST_BOT "DialogFunctionalTestBot"
 #define DIALOG_REGION "DialogRegion"
+#define CONVERSATION_TRANSLATOR_REGION "ConversationTranslatorRegion"
+#define CONVERSATION_TRANSLATOR_HOST "ConversationTranslatorHost"
+#define CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT "ConversationTranslatorSpeechEndpoint"
+#define CONVERSATION_TRANSLATOR_CLIENTID "ConversationTranslatorClientId"
 
 inline bool exists(const std::string& name) {
     return std::ifstream(name.c_str()).good();
@@ -105,6 +117,39 @@ inline void GetKeyValue(const char* key, std::string &value, nlohmann::json &dat
     {
         SpxConsoleLogger_Log(LOG_CATEGORY::AZ_LOG_ERROR, file, "LoadFromJsonFile", line, 0, "Error: exception in AT, %s.", e.what());
     }
+}
+
+/// <summary>
+/// Helper class to match ExceptionWithCallStack for testing using Catch framework
+/// </summary>
+class ExceptionWithCallStackMatcher : public Catch::MatcherBase<std::exception>
+{
+private:
+    std::string m_expectedString;
+
+public:
+    ExceptionWithCallStackMatcher(SPXHR hr)
+        : m_expectedString(Microsoft::CognitiveServices::Speech::Impl::stringify(hr))
+    {
+    }
+
+    bool match(const std::exception& ex) const override
+    {
+        size_t pos = std::string(ex.what()).find(m_expectedString, 0);
+        return pos != std::string::npos;
+    }
+
+    virtual std::string describe() const override
+    {
+        std::ostringstream ss;
+        ss << "Exception with HR " << m_expectedString;
+        return ss.str();
+    }
+};
+
+inline ExceptionWithCallStackMatcher HasHR(SPXHR hr)
+{
+    return ExceptionWithCallStackMatcher(hr);
 }
 
 class StringComparisions {
@@ -185,6 +230,12 @@ public:
             GetKeyValue(IN_ROOM_AUDIO_ENDPOINT, Config::InRoomAudioEndpoint, data, __FILE__, __LINE__);
             GetKeyValue(ONLINE_AUDIO_ENDPOINT, Config::OnlineAudioEndpoint, data, __FILE__, __LINE__);
             GetKeyValue(INPUT_DIR, Config::InputDir, data, __FILE__, __LINE__);
+            
+            GetKeyValue(CONVERSATION_TRANSLATOR_SUBSCRIPTION_KEY, Keys::ConversationTranslator, data, __FILE__, __LINE__);
+            GetKeyValue(CONVERSATION_TRANSLATOR_REGION, Config::ConversationTranslatorRegion, data, __FILE__, __LINE__);
+            GetKeyValue(CONVERSATION_TRANSLATOR_HOST, Config::ConversationTranslatorHost, data, __FILE__, __LINE__);
+            GetKeyValue(CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT, Config::ConversationTranslatorSpeechEndpoint, data, __FILE__, __LINE__);
+            GetKeyValue(CONVERSATION_TRANSLATOR_CLIENTID, Config::ConversationTranslatorClientId, data, __FILE__, __LINE__);
         }
         else
         {
@@ -222,53 +273,68 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     auto cli
         = session.cli() // Get Catch's composite command line parser
         | Opt(Keys::Speech, "SpeechSubscriptionKey") // bind variable to a new option, with a hint string
-        ["--keySpeech"]    // the option names it will respond to
-    ("The subscription key for speech")
+          ["--keySpeech"]    // the option names it will respond to
+          ("The subscription key for speech")
         | Opt(Keys::LUIS, "LuisSubscriptionKey")
-        ["--keyLUIS"]
-    ("The subscription key for language understanding")
+          ["--keyLUIS"]
+          ("The subscription key for language understanding")
         | Opt(Keys::Dialog, "keyDialog")
-        ["--keyDialog"]
-    ("The subscription key for the Speech Channel")
+          ["--keyDialog"]
+          ("The subscription key for the Speech Channel")
         | Opt(Config::Endpoint, "endpoint")
-        ["--endpoint"]
-    ("The endpoint url to test against.")
+          ["--endpoint"]
+          ("The endpoint url to test against.")
         | Opt(Config::Region, "Region")
-        ["--region"]
-    ("The region id to be used for subscription and authorization requests")
+          ["--region"]
+          ("The region id to be used for subscription and authorization requests")
         | Opt(Config::LuisRegion, "LuisRegionId")
-        ["--regionIdLUIS"]
-    ("The region id to be used for language understanding subscription and authorization requests")
+          ["--regionIdLUIS"]
+          ("The region id to be used for language understanding subscription and authorization requests")
         | Opt(Config::LuisAppId, "LuisAppId")
-        ["--luisAppId"]
-    ("The language understanding app id to be used intent recognition tests")
+          ["--luisAppId"]
+          ("The language understanding app id to be used intent recognition tests")
         | Opt(Config::InRoomAudioEndpoint, "InRoomAudioEndpoint")
-        ["--InRoomAudioEndpoint"]
-    ("The endpoint that in-room tests in intelligent meeting recognizer talks to")
+          ["--InRoomAudioEndpoint"]
+          ("The endpoint that in-room tests in intelligent meeting recognizer talks to")
         | Opt(Config::OnlineAudioEndpoint, "OnlineAudioEndpoint")
-        ["--OnlineAudioEndpoint"]
-    ("The endpoint that on-line tests in intelligent meeting recognizer talks to")
+          ["--OnlineAudioEndpoint"]
+          ("The endpoint that on-line tests in intelligent meeting recognizer talks to")
         | Opt(Keys::ConversationTranscriber, "ConversationTranscriber")
-        ["--keyConversationTranscriberPPE"]
-    ("The conversation transcriber key")
+          ["--keyConversationTranscriberPPE"]
+          ("The conversation transcriber key")
         | Opt(Config::InputDir, "InputDir")
-        ["--inputDir"]
-    ("The directory where test input files are placed")
+          ["--inputDir"]
+          ("The directory where test input files are placed")
         | Opt(Config::DialogRegion, "DialogRegion")
-        ["--dialogRegionId"]
-    ("The region id to be used for the Speech Channel Service")
+          ["--dialogRegionId"]
+          ("The region id to be used for the Speech Channel Service")
         | Opt(Config::DialogBotSecret, "DialogBotSecret")
-        ["--dialogBotSecret"]
-    ("Secret for the functional test bot")
+          ["--dialogBotSecret"]
+          ("Secret for the functional test bot")
         | Opt(Config::OfflineModelPathRoot, "OfflineModelPathRoot")
-        ["--offlineModelPathRoot"]
-    ("The root path under which offline speech recognition models are located.")
+          ["--offlineModelPathRoot"]
+          ("The root path under which offline speech recognition models are located.")
         | Opt(Config::OfflineModelLanguage, "OfflineModelLanguage")
-        ["--offlineModelLanguage"]
-    ("The language code of the offline speech recognition model used in tests.")
+          ["--offlineModelLanguage"]
+          ("The language code of the offline speech recognition model used in tests.")
         | Opt(Config::DoDiscover)
-        ["--discovery"]
-    ("Perform VS Test Adaptor discovery");
+          ["--discovery"]
+          ("Perform VS Test Adaptor discovery")
+        | Opt(Keys::ConversationTranslator, "ConversationTranslatorSubscriptionKey")
+          ["--keyConversationTranslator"]
+          ("The subscription key to use for the conversation translator service")
+        | Opt(Config::ConversationTranslatorHost, "ConversationTranslatorHost")
+          ["--conversationTranslatorHost"]
+          ("The conversation host to use")
+        | Opt(Config::ConversationTranslatorRegion, "ConversationTranslatorRegion")
+          ["--conversationTranslatorRegion"]
+          ("The conversation region to use")
+        | Opt(Config::ConversationTranslatorSpeechEndpoint, "ConversationTranslatorSpeechEndpoint")
+          ["--conversationTranslatorEndpoint"]
+          ("The speech endpoint to use for the conversation translator")
+        | Opt(Config::ConversationTranslatorClientId, "ConversationTranslatorClientId")
+          ["--conversationTranslatorClientId"]
+          ("The client ID to use for the conversation translator")
     ;
 
     // Now pass the new composite back to Catch so it uses that
@@ -295,3 +361,11 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     SPX_TRACE_INFO("SPXTEST_REQUIRE('%s'): %s(%d):", __SPX_EXPR_AS_STRING(expr), __FILE__, __LINE__); \
     SPX_TRACE_ERROR_IF(!(expr), "SPXTEST_REQUIRE('%s') FAILED: %s(%d):", __SPX_EXPR_AS_STRING(expr), __FILE__, __LINE__); \
     REQUIRE(expr)
+
+#define SPXTEST_REQUIRE_NOTHROW( ... ) \
+    SPX_TRACE_INFO("SPXTEST_REQUIRE_NOTHROW('%s'): %s(%d):", __SPX_EXPR_AS_STRING(__VA_ARGS__), __FILE__, __LINE__); \
+    REQUIRE_NOTHROW(__VA_ARGS__)
+
+#define SPXTEST_REQUIRE_THAT(arg, matcher) \
+    SPX_TRACE_INFO("SPXTEST_REQUIRE_THAT('%s', '%s'): %s(%d):", __SPX_EXPR_AS_STRING(arg), __SPX_EXPR_AS_STRING(matcher), __FILE__, __LINE__); \
+    REQUIRE_THAT(arg, matcher)

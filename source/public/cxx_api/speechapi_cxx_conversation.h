@@ -72,7 +72,9 @@ public:
     ~Conversation()
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-        conversation_release_handle(m_hconversation);
+
+        ::conversation_release_handle(m_hconversation);
+        m_hconversation = SPXHANDLE_INVALID;
     }
 
     /// <summary>
@@ -96,9 +98,8 @@ public:
     /// <summary>
     /// Add a participant to a conversation using the user's id.
     ///
-    // Note: The returned participant can be used to remove. If the client changes the participant's attributes,
-    // the changed attributes are passed on to the service only when the participant is added again.
-    //
+    /// Note: The returned participant can be used to remove. If the client changes the participant's attributes,
+    /// the changed attributes are passed on to the service only when the participant is added again.
     /// </summary>
     /// <param name="userId">A user id.</param>
     /// <returns>a shared smart pointer of the participant.</returns>
@@ -186,16 +187,12 @@ public:
     }
 
     /// <summary>
-    /// End Conversation.
+    /// Ends the current conversation.
     /// </summary>
     /// <returns>An empty future.</returns>
     std::future<void> EndConversationAsync()
     {
-        auto keepAlive = this->shared_from_this();
-        auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
-            SPX_THROW_ON_FAIL(conversation_end_conversation(m_hconversation));
-        });
-        return future;
+        return RunAsync(::conversation_end_conversation);
     }
 
     /// <summary>
@@ -216,14 +213,88 @@ public:
         return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, SPXSTRING());
     }
 
-    /******************************************************************************************
+    /// <summary>
+    /// Start the conversation.
+    /// </summary>
+    /// <returns>An empty future.</returns>
+    std::future<void> StartConversationAsync()
+    {
+        return RunAsync(::conversation_start_conversation);
+    }
 
-    Ralph,
+    /// <summary>
+    /// Deletes the conversation. Any participants that are still part of the converation
+    /// will be ejected after this call.
+    /// </summary>
+    /// <returns>An empty future.</returns>
+    std::future<void> DeleteConversationAsync()
+    {
+        return RunAsync(::conversation_delete_conversation);
+    }
 
-    You can add your APIs here.
+    /// <summary>
+    /// Locks the conversation. After this no new participants will be able to join.
+    /// </summary>
+    /// <returns>An empty future.</returns>
+    std::future<void> LockConversationAsync()
+    {
+        return RunAsync(::conversation_lock_conversation);
+    }
 
+    /// <summary>
+    /// Unlocks the conversation.
+    /// </summary>
+    /// <returns>An empty future.</returns>
+    std::future<void> UnlockConversationAsync()
+    {
+        return RunAsync(::conversation_unlock_conversation);
+    }
 
-    ******************************************************************************************/
+    /// <summary>
+    /// Mutes all participants except for the host. This prevents others from generating
+    /// transcriptions, or sending text messages.
+    /// </summary>
+    /// <returns>An empty future.</returns>
+    std::future<void> MuteAllParticipantsAsync()
+    {
+        return RunAsync(::conversation_mute_all_participants);
+    }
+
+    /// <summary>
+    /// Allows other participants to generate transcriptions, or send text messages.
+    /// </summary>
+    /// <returns>An empty future.</returns>
+    std::future<void> UnmuteAllParticipantsAsync()
+    {
+        return RunAsync(::conversation_unmute_all_participants);
+    }
+
+    /// <summary>
+    /// Mutes a particular participant. This will prevent them generating new transcriptions,
+    /// or sending text messages.
+    /// </summary>
+    /// <param name="participantId">The identifier for the participant.</param>
+    /// <returns>An empty future.</returns>
+    std::future<void> MuteParticipantAsync(const SPXSTRING& participantId)
+    {
+        return RunAsync([participantId = Utils::ToUTF8(participantId)](auto handle)
+        {
+            return ::conversation_mute_participant(handle, participantId.c_str());
+        });
+    }
+
+    /// <summary>
+    /// Unmutes a particular participant.
+    /// </summary>
+    /// <param name="participantId">The identifier for the participant.</param>
+    /// <returns>An empty future.</returns>
+    std::future<void> UnmuteParticipantAsync(const SPXSTRING& participantId)
+    {
+        return RunAsync([participantId = Utils::ToUTF8(participantId)](auto handle)
+        {
+            return ::conversation_unmute_participant(handle, participantId.c_str());
+        });
+    }
 
 private:
 
@@ -247,6 +318,15 @@ private:
 
     PrivatePropertyCollection m_properties;
 
+    inline std::future<void> RunAsync(std::function<SPXHR(SPXCONVERSATIONHANDLE)> func)
+    {
+        auto keepalive = this->shared_from_this();
+        return std::async(std::launch::async, [keepalive, this, func]()
+        {
+            SPX_THROW_ON_FAIL(func(m_hconversation));
+        });
+    }
+
     /*! \endcond */
 
 public:
@@ -254,7 +334,6 @@ public:
     /// A collection or properties and their values defined for this <see cref="Conversation"/>.
     /// </summary>
     PropertyCollection& Properties;
-
 
 };
 

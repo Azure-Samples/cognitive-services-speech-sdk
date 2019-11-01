@@ -8,6 +8,7 @@
 #pragma once
 #include <string>
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_session_eventargs.h>
 
 
 namespace Microsoft {

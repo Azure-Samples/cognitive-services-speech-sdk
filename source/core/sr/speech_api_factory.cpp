@@ -49,7 +49,9 @@ std::shared_ptr<ISpxConversation> CSpxSpeechApiFactory::CreateConversationFromCo
         // create conversation
         auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
         auto conversation = SpxCreateObjectWithSite<ISpxConversation>("CSpxConversation", sessionAsSite);
+
         conversation->SetConversationId(id);
+        conversation->CreateConversation();
 
         session->SetConversation(conversation);
 

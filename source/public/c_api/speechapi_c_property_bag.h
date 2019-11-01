@@ -13,6 +13,7 @@ SPXAPI property_bag_set_string(SPXPROPERTYBAGHANDLE hpropbag, int id, const char
 SPXAPI__(const char*) property_bag_get_string(SPXPROPERTYBAGHANDLE hpropbag, int id, const char* name, const char* defaultValue);
 SPXAPI property_bag_free_string(const char* value);
 SPXAPI property_bag_release(SPXPROPERTYBAGHANDLE hpropbag);
+SPXAPI property_bag_copy(SPXPROPERTYBAGHANDLE hfrom, SPXPROPERTYBAGHANDLE hto);
 
 // NOTE: Currently this enum is duplicated with C++ side,
 // because SWIG cannot properly resolve conditional compilation.
@@ -89,5 +90,12 @@ enum  PropertyId
     DataBuffer_TimeStamp = 11001,
     DataBuffer_UserId = 11002
 };
+
+typedef enum _ParticipantChangedReason
+{
+    JoinedConversation,
+    LeftConversation,
+    Updated
+} ParticipantChangedReason;
 #endif
 

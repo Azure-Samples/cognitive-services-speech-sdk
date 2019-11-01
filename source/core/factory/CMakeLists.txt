@@ -41,5 +41,5 @@ set_target_properties (factory PROPERTIES
     FOLDER core
 )
 
-target_link_libraries(factory sr tts audio usp tts_rest tts_usp ${CMAKE_DL_LIBS})
+target_link_libraries(factory sr tts audio usp tts_rest tts_usp conversation_translation ${CMAKE_DL_LIBS})
 

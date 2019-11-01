@@ -105,7 +105,7 @@ void CSpxUspRecoEngineAdapter::OpenConnection(bool singleShot)
     if (countIntent == 1)
     {
         // The connection to service for IntentRecognizer is depending on the Intent model being used,
-        // so it is not possbile to set up the connection now.
+        // so it is not possible to set up the connection now.
         SPX_DBG_TRACE_INFO("%s: Skip setting up connection in advance for intent recognizer.", __FUNCTION__);
         SPX_THROW_HR(SPXERR_CHANGE_CONNECTION_STATUS_NOT_ALLOWED);
         return;
@@ -123,6 +123,7 @@ void CSpxUspRecoEngineAdapter::OpenConnection(bool singleShot)
     {
         recoModeToSet = g_recoModeInteractive;
     }
+
     // Set reco mode.
     if (currentRecoMode.empty())
     {
@@ -703,6 +704,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(const std::shared_pt
     auto uspAuthToken = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token));
     auto uspRpsToken = properties->GetStringValue("SPEECH-RpsToken");
     auto uspDialogApplicationId = properties->GetStringValue(GetPropertyName(PropertyId::Conversation_ApplicationId));
+    auto uspConversationToken = properties->GetStringValue("ConversationTranslator_Token");
 
     std::array<std::string, static_cast<size_t>(USP::AuthenticationType::SIZE_AUTHENTICATION_TYPE)> authData;
 
@@ -711,6 +713,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(const std::shared_pt
     authData[static_cast<size_t>(USP::AuthenticationType::AuthorizationToken)] = std::move(uspAuthToken);
     authData[static_cast<size_t>(USP::AuthenticationType::SearchDelegationRPSToken)] = std::move(uspRpsToken);
     authData[static_cast<size_t>(USP::AuthenticationType::DialogApplicationId)] = std::move(uspDialogApplicationId);
+    authData[static_cast<size_t>(USP::AuthenticationType::ConversationToken)] = std::move(uspConversationToken);
 
     return client.SetAuthentication(authData);
 }

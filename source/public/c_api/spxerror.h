@@ -281,6 +281,17 @@ typedef uintptr_t SPXHR;
 /// </summary>
 #define SPXERR_INVALID_LANGUAGE  __SPX_ERRCODE_FAILED(0x02A)
 
+/// <summary>
+/// The API is not applicable.
+/// Added in version 1.5.0.
+/// </summary>
+#define SPXERR_UNSUPPORTED_API_ERROR  __SPX_ERRCODE_FAILED(0x02B)
+
+/// <summary>
+/// The ring buffer is unavailable.
+/// Added in version 1.8.0.
+/// </summary>
+#define SPXERR_RINGBUFFER_DATA_UNAVAILABLE  __SPX_ERRCODE_FAILED(0x02C)
 
 /// <summary>
 /// An unexpected error was encountered when trying to access the Conversation site.
@@ -289,14 +300,13 @@ typedef uintptr_t SPXHR;
 #define SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE  __SPX_ERRCODE_FAILED(0x030)
 
 /// <summary>
-/// The API is not applicable.
-/// Added in version 1.5.0.
-/// </summary>
-#define SPXERR_UNSUPPORTED_API_ERROR  __SPX_ERRCODE_FAILED(0x02B)
-
-
-/// <summary>
-/// The ring buffer is unavailable.
+/// An unexpected error was encountered when trying to access the Conversation site.
 /// Added in version 1.8.0.
 /// </summary>
-#define SPXERR_RINGBUFFER_DATA_UNAVAILABLE  __SPX_ERRCODE_FAILED(0x02C)
+#define SPXERR_UNEXPECTED_CONVERSATION_TRANSLATOR_SITE_FAILURE  __SPX_ERRCODE_FAILED(0x031)
+
+/// <summary>
+/// An asynchronous operation was canceled before it was executed.
+/// Added in version 1.8.0.
+/// </summary>
+#define SPXERR_CANCELED  __SPX_ERRCODE_FAILED(0x032)

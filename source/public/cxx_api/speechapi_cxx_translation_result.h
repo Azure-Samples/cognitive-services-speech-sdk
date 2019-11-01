@@ -24,8 +24,7 @@ namespace Translation {
 /// <summary>
 /// Defines the translation text result.
 /// </summary>
-
-class TranslationRecognitionResult final : public RecognitionResult
+class TranslationRecognitionResult : public RecognitionResult
 {
 private:
 

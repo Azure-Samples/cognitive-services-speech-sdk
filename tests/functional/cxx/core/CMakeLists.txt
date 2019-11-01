@@ -26,7 +26,7 @@ source_group("Source Files" FILES ${SOURCES})
 source_group("Header Files" FILES ${TEST_HEADERS})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
-target_link_libraries(${PROJECT_NAME} usp sr common audio ${TEST_LIBS})
+target_link_libraries(${PROJECT_NAME} usp sr common audio conversation_translation ${TEST_LIBS})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})

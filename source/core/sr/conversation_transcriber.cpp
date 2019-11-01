@@ -55,7 +55,7 @@ void CSpxConversationTranscriber::Term()
 {
 
 }
-void CSpxConversationTranscriber::Init(std::weak_ptr<ISpxAudioConfig> audio_config)
+void CSpxConversationTranscriber::SetAudioConfig(std::weak_ptr<ISpxAudioConfig> audio_config)
 {
     m_audioInput = audio_config;
 }

@@ -513,6 +513,8 @@ SPXAPI recognizer_session_event_get_session_id(SPXEVENTHANDLE hevent, char* pszS
         auto recoHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
         auto sessionHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
         auto connectionHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConnectionEventArgs, SPXEVENTHANDLE>();
+        auto conversationHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxConversationEventArgs, SPXEVENTHANDLE>();
+
         std::shared_ptr<ISpxSessionEventArgs> recoEvent;
         if (recoHandleTable->IsTracked(hevent))
         {
@@ -521,6 +523,10 @@ SPXAPI recognizer_session_event_get_session_id(SPXEVENTHANDLE hevent, char* pszS
         else if (connectionHandleTable->IsTracked(hevent))
         {
             recoEvent = (*connectionHandleTable)[hevent];
+        }
+        else if (conversationHandleTable->IsTracked(hevent))
+        {
+            recoEvent = (*conversationHandleTable)[hevent];
         }
         else
         {

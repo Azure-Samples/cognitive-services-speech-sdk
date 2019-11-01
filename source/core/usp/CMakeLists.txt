@@ -14,6 +14,9 @@ set(HEADERS
     "${INC_DIR}/usp.h"
     "${INC_DIR}/usperror.h"
     "${INC_DIR}/uspmessages.h"
+    "${INC_DIR}/WebSocketParams.h"
+    "${INC_DIR}/IWebSocket.h"
+    "${INC_DIR}/WebSocket.h"
     )
 
 set(HEADERS_PRIVATE
@@ -35,6 +38,8 @@ set(SOURCES
     "${SRC_DIR}/usp.cpp"
     "${SRC_DIR}/uspimpl.cpp"
     "${SRC_DIR}/stdafx.cpp"
+    "${SRC_DIR}/WebSocketParams.cpp"
+    "${SRC_DIR}/WebSocket.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

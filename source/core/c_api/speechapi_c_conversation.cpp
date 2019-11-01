@@ -11,12 +11,11 @@
 #include "string_utils.h"
 #include <cstring>
 
-
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-SPXAPI conversation_release_handle(SPXCONVERSATIONHANDLE hconv)
+static inline std::shared_ptr<ISpxConversation> GetConversation(SPXCONVERSATIONHANDLE hconv)
 {
-    return Handle_Close<SPXCONVERSATIONHANDLE, ISpxConversation>(hconv);
+    return GetInstance<ISpxConversation>(hconv);
 }
 
 SPXAPI conversation_update_participant_by_user_id(SPXCONVERSATIONHANDLE hconv, bool add, const char* userId)
@@ -91,8 +90,7 @@ SPXAPI conversation_get_conversation_id(SPXCONVERSATIONHANDLE hconv, char* id, s
 
         SPX_IFTRUE_THROW_HR(conversation == nullptr, SPXERR_INVALID_ARG);
 
-        std::string idStr;
-        conversation->GetConversationId(idStr);
+        std::string idStr = conversation->GetConversationId();
         SPX_IFTRUE_THROW_HR(idStr.length() >= id_size, SPXERR_INVALID_ARG);
         std::memcpy(id, idStr.c_str(), idStr.length() + 1);
     }
@@ -103,14 +101,9 @@ SPXAPI conversation_end_conversation(SPXCONVERSATIONHANDLE hconv)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto convhandles = CSpxSharedPtrHandleTableManager::Get<ISpxConversation, SPXCONVERSATIONHANDLE>();
-        auto conversation = (*convhandles)[hconv];
-        SPX_IFTRUE_THROW_HR(conversation == nullptr, SPXERR_INVALID_ARG);
-
-        conversation->HttpSendEndMeetingRequest();
+        GetConversation(hconv)->EndConversation();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
-
 }
 
 SPXAPI conversation_get_property_bag(SPXCONVERSATIONHANDLE hconv, SPXPROPERTYBAGHANDLE* phpropbag)
@@ -129,4 +122,94 @@ SPXAPI conversation_get_property_bag(SPXCONVERSATIONHANDLE hconv, SPXPROPERTYBAG
         *phpropbag = baghandle->TrackHandle(namedProperties);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI conversation_start_conversation(SPXCONVERSATIONHANDLE hconv)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        GetConversation(hconv)->StartConversation();
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI conversation_delete_conversation(SPXCONVERSATIONHANDLE hconv)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        GetConversation(hconv)->DeleteConversation();
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI conversation_lock_conversation(SPXCONVERSATIONHANDLE hconv)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        GetConversation(hconv)->SetLockConversation(true);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI conversation_unlock_conversation(SPXCONVERSATIONHANDLE hconv)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        GetConversation(hconv)->SetLockConversation(false);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI conversation_mute_all_participants(SPXCONVERSATIONHANDLE hconv)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        GetConversation(hconv)->SetMuteAllParticipants(true);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI conversation_unmute_all_participants(SPXCONVERSATIONHANDLE hconv)
+{
+     SPXAPI_INIT_HR_TRY(hr)
+    {
+        GetConversation(hconv)->SetMuteAllParticipants(false);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI conversation_mute_participant(SPXCONVERSATIONHANDLE hconv, const char * participantId)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, participantId == nullptr);
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        GetConversation(hconv)->SetMuteParticipant(true, participantId);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI conversation_unmute_participant(SPXCONVERSATIONHANDLE hconv, const char * participantId)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, participantId == nullptr);
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        GetConversation(hconv)->SetMuteParticipant(false, participantId);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI conversation_release_handle(SPXHANDLE handle)
+{
+    if (handle == SPXHANDLE_INVALID)
+    {
+        return SPX_NOERROR;
+    }
+    else if (Handle_IsValid<SPXCONVERSATIONHANDLE, ISpxConversation>(handle))
+    {
+        return Handle_Close<SPXCONVERSATIONHANDLE, ISpxConversation>(handle);
+    }
+    else
+    {
+        return SPXERR_INVALID_HANDLE;
+    }
 }

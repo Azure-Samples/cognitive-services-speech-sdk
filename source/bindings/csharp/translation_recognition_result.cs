@@ -13,9 +13,9 @@ using static Microsoft.CognitiveServices.Speech.Internal.SpxExceptionThrower;
 namespace Microsoft.CognitiveServices.Speech.Translation
 {
     /// <summary>
-    /// Defines tranlsation result.
+    /// Defines a translation result.
     /// </summary>
-    public sealed class TranslationRecognitionResult : RecognitionResult
+    public class TranslationRecognitionResult : RecognitionResult
     {
         internal TranslationRecognitionResult(IntPtr resultPtr) : base(resultPtr)
         {

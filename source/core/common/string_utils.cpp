@@ -205,4 +205,126 @@ std::u16string ToU16String(const std::wstring& string)
     return dest;
 }
 
+#if WIN32
+    #define strtok_reentrant(str, delimiters, context) strtok_s(str, delimiters, context)
+#else
+    #define strtok_reentrant(str, delimiters, context) strtok_r(str, delimiters, context)
+#endif
+
+    static std::string TransformString(const std::string& value, char(*transformer)(char, const std::locale&))
+    {
+        if (value.empty())
+        {
+            return value;
+        }
+
+        std::string transformed(value);
+        std::transform(
+            transformed.begin(),
+            transformed.end(),
+            transformed.begin(),
+            [transformer](char c) { return transformer(c, std::locale::classic()); });
+        return transformed;
+    }
+
+    std::string StringUtils::ToUpper(const std::string & value)
+    {
+        return TransformString(value, std::toupper);
+    }
+
+    std::string StringUtils::ToLower(const std::string & value)
+    {
+        return TransformString(value, std::tolower);
+    }
+
+    std::vector<std::string> StringUtils::Tokenize(const char *str, const size_t len, const char *delim)
+    {
+        std::vector<std::string> tokens;
+
+        std::unique_ptr<char[]> copy(new char[len + 1]);
+        if (copy == nullptr)
+        {
+            return tokens;
+        }
+
+        memcpy(copy.get(), str, len);
+        copy[len] = '\0';
+
+        char *ptr = nullptr;
+
+        for (char *tkn = strtok_reentrant(copy.get(), delim, &ptr)
+            ; tkn != nullptr
+            ; tkn = strtok_reentrant(nullptr, delim, &ptr))
+        {
+            tokens.push_back(tkn);
+        }
+
+        return tokens;
+    }
+
+    std::vector<std::string> StringUtils::Tokenize(const std::string& str, const char *delim)
+    {
+        return Tokenize(str.c_str(), str.length(), delim);
+    }
+
+    std::string StringUtils::PascalCaseToSnakeCase(const std::string & pascal)
+    {
+        std::string snake_case;
+        snake_case.reserve(static_cast<size_t>(pascal.length() * 1.2));
+
+        bool first = true;
+        for (size_t i = 0; i < pascal.length(); i++, first = false)
+        {
+            int c = static_cast<int>(pascal[i]);
+            if (isupper(c))
+            {
+                if (!first)
+                {
+                    snake_case += "_";
+                }
+
+                snake_case += static_cast<char>(tolower(c));
+            }
+            else
+            {
+                snake_case += static_cast<char>(c);
+            }
+        }
+
+        return snake_case;
+    }
+
+    std::string StringUtils::SnakeCaseToPascalCase(const std::string & snake_case)
+    {
+        std::string pascal(snake_case);
+
+        bool capitaliseNext = true;
+        size_t o = 0;
+        for (size_t i = 0; i < snake_case.length() && o < snake_case.length(); i++)
+        {
+            char c = snake_case[i];
+
+            if (c == '_')
+            {
+                capitaliseNext = true;
+                continue;
+            }
+
+            if (capitaliseNext)
+            {
+                pascal[o++] = static_cast<char>(toupper(c));
+                capitaliseNext = false;
+            }
+            else
+            {
+                pascal[o++] = c;
+            }
+        }
+
+        // the new string may be shorter than the previous one so let's resize it
+        pascal.resize(o);
+        return pascal;
+    }
+
 } // PAL
+

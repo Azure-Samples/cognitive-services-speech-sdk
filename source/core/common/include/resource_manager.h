@@ -21,7 +21,7 @@
 //      interface (e.g. ISpxServiceProvider). Using that interface, it can obtain other services that the site may not provide
 //      directly itself. 
 //
-//      For example: If one object is a "student" object, it might be given a "teacher" site object, thru which it can satisfies all
+//      For example: If one object is a "student" object, it might be given a "teacher" site object, through which it can satisfy all
 //      its needs in its day at school (running in the system). The teacher, by contract, may support specific interfaces, such as
 //      "I Answer Math Questions". The "student" strongly suspects that the "teacher" supports that interface, and thus can easily
 //      "cast" the "teacher" to the necessary "interface" (e.g. by student raising their hand, aka QueryInterface in COM, and 
@@ -102,7 +102,7 @@ public:
 
     // NOTE:  This GetObjectFactory() method SHOULD NOT be used by functions/methods other than the 
     //        SpxCreateObjectWithSite() method. If you are an object running in the "Carbon" system
-    //        and you ned to create an object, either use SpxCreateObjectWithSite() with your site
+    //        and you need to create an object, either use SpxCreateObjectWithSite() with your site
     //        or call your site-specific creation/initialization method, or obtain the object
     //        factory yourself (via SpxQueryService()), and call CreateObject() yourself. 
     //

@@ -19,7 +19,7 @@
 
 #include "speechapi_cxx.h"
 
-#include <json.hpp>
+#include <json.h>
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;

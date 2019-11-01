@@ -13,6 +13,7 @@
 
 TestData weather {"/audio/whatstheweatherlike.wav", "What's the weather like?" };
 TestData weatherGerman { "", "Wie ist das Wetter?" };
+TestData weatherInChinese { "/audio/weatherInChinese.wav", "天气." };
 TestData weathermp3{ "/audio/whatstheweatherlike.mp3", "What's the weather like?" };
 TestData weatheropus{ "/audio/whatstheweatherlike.opus", "What's the weather like?" };
 TestData weatheralaw{ "/audio/whatstheweatherlike.alaw", "What's the weather like?" };

@@ -76,6 +76,7 @@ if(ANDROID)
     PRIVATE audio
     PRIVATE usp
     PRIVATE common
+    PRIVATE conversation_translation
     PRIVATE factory
     PRIVATE pal
     PRIVATE z) # libz
@@ -83,6 +84,8 @@ else()
   target_link_libraries(${PROJECT_NAME}
     PRIVATE common
     PRIVATE factory
+    PRIVATE conversation_translation
+    PRIVATE usp
     )
 endif()
 

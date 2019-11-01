@@ -481,7 +481,36 @@ enum class ResultReason
     /// Indicates the speech synthesis is now started
     /// Added in version 1.4.0
     /// </summary>
-    SynthesizingAudioStarted = 12
+    SynthesizingAudioStarted = 12,
+
+    /// <summary>
+    /// Indicates the transcription result contains hypothesis text and its translation(s) for
+    /// other participants in the conversation.
+    /// Added in version 1.8.0
+    /// </summary>
+    TranslatingParticipantSpeech = 13,
+
+    /// <summary>
+    /// Indicates the transcription result contains final text and corresponding translation(s)
+    /// for other participants in the conversation. Speech Recognition and Translation are now
+    /// complete for this phrase.
+    /// Added in version 1.8.0
+    /// </summary>
+    TranslatedParticipantSpeech = 14,
+
+    /// <summary>
+    /// Indicates the transcription result contains the instant message and corresponding
+    /// translation(s).
+    /// Added in version 1.8.0
+    /// </summary>
+    TranslatedInstantMessage = 15,
+
+    /// <summary>
+    /// Indicates the transcription result contains the instant message for other participants
+    /// in the conversation and corresponding translation(s).
+    /// Added in version 1.8.0
+    /// </summary>
+    TranslatedParticipantInstantMessage = 16
 };
 
 /// <summary>
@@ -741,8 +770,8 @@ enum class ServicePropertyChannel
     UriQueryParameter = 0
 };
 
-namespace Transcription {
-
+namespace Transcription
+{
     /// <summary>
     /// Defines how the service handles allocated resource after the conversation transcriber is stopped.
     /// Added in version 1.7.0.
@@ -758,6 +787,29 @@ namespace Transcription {
         /// The service keeps allocated resources.
         /// </summary>
         KeepResources = 1
+    };
+
+    /// <summary>
+    /// Why the participant changed event was raised
+    /// Added in version 1.8.0
+    /// </summary>
+    enum class ParticipantChangedReason
+    {
+        /// <summary>
+        /// Participant has joined the conversation
+        /// </summary>
+        JoinedConversation,
+
+        /// <summary>
+        /// Participant has left the conversation. This could be voluntary, or involuntary
+        /// (e.g. they are experiencing networking issues)
+        /// </summary>
+        LeftConversation,
+
+        /// <summary>
+        /// The participants' state has changed (e.g. they became muted, changed their nickname)
+        /// </summary>
+        Updated
     };
 }
 

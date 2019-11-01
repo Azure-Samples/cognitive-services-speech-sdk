@@ -26,7 +26,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Auto)]
         public static extern SPXHR conversation_get_conversation_id(InteropSafeHandle convHandle, IntPtr conversationIdPtr, UInt32 size);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Auto)]
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR conversation_end_conversation(InteropSafeHandle convHandle);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
@@ -34,5 +34,29 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR conversation_release_handle(SPXCONVERSATIONHANDLE convHandle);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR conversation_start_conversation(InteropSafeHandle convHandle);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR conversation_delete_conversation(InteropSafeHandle convHandle);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR conversation_lock_conversation(InteropSafeHandle convHandle);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR conversation_unlock_conversation(InteropSafeHandle convHandle);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR conversation_mute_all_participants(InteropSafeHandle convHandle);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR conversation_unmute_all_participants(InteropSafeHandle convHandle);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR conversation_mute_participant(InteropSafeHandle convHandle, Utf8StringHandle participantId);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR conversation_unmute_participant(InteropSafeHandle convHandle, Utf8StringHandle participantId);
     }
 }

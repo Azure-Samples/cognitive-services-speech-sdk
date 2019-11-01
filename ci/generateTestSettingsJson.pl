@@ -112,7 +112,12 @@ my %jsonData = ("InputDir" => $INPUT_DIRECTORY,
             "SerializedSpeechActivityFile" => $SPEECHSDK_SERIALIZED_SPEECH_ACTIVITY_FILE,
             "Keyword" => $SPEECHSDK_KEYWORD,
             "KeywordModel" => $SPEECHSDK_KEYWORD_MODEL,
-            "LongRunning" => $SPEECHSDK_LONG_RUNNING);
+            "LongRunning" => $SPEECHSDK_LONG_RUNNING,
+            "ConversationTranslatorSubscriptionKey" => $SPEECHSDK_BOT_SUBSCRIPTION,
+            "ConversationTranslatorRegion" => $SPEECHSDK_BOT_REGION,
+            "ConversationTranslatorHost" => '',
+            "ConversationTranslatorSpeechEndpoint" => '',
+            "ConversationTranslatorClientId" => 'D5253FF2-C6B4-4A72-852A-22F8007EC9E8');
 
 open my $fh, ">", "$OUTPUT_DIRECTORY/test.settings.json" or die "Can't open the file $OUTPUT_DIRECTORY/test.settings.json";
 print $fh encode_json(\%jsonData);

@@ -8,6 +8,8 @@
 
 #define CATCH_CONFIG_RUNNER
 #include "test_utils.h"
+#include "test_PAL.h"
+#include <azure_c_shared_utility_platform_wrapper.h>
 
 #if defined(_MSC_VER) && defined(_DEBUG)
 // in case of asserts in debug mode, print the message into stderr and throw exception
@@ -39,7 +41,7 @@ int main(int argc, char* argv[])
 
     Catch::Session session; // There must be exactly one instance
 
-    // The catch2 test adapter runs a Discovery phase and we shouldn't attemp io during this phase
+    // The catch2 test adapter runs a Discovery phase and we shouldn't attempt io during this phase
     if (!checkForDiscovery(argc, argv))
     {
         std::string rootPath(argv[0]);
@@ -59,6 +61,14 @@ int main(int argc, char* argv[])
     if (returnCode != 0) // Indicates a command line error
     {
         return returnCode;
+    }
+
+    // check if we have a system proxy set and use that. This is useful during development
+    TEST_PAL_Proxy_Info proxyStruct;
+    if (TEST_PAL_Get_Default_Proxy(proxyStruct))
+    {
+        std::string proxyString = proxyStruct.host + ":" + std::to_string(proxyStruct.port);
+        platform_set_http_proxy(proxyString.c_str(), nullptr);
     }
 
     return session.run();

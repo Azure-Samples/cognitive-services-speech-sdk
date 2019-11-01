@@ -24,11 +24,11 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR participant_set_voice_signature(InteropSafeHandle participant,
             [MarshalAs(UnmanagedType.LPStr)] string value, int size);
 
-        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Auto)]
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         public static extern SPXHR participant_create_handle(out SPXPARTICIPANTHANDLE participant,
-            IntPtr userId,
-            [MarshalAs(UnmanagedType.LPStr)] string preferredLanguage,
-            [MarshalAs(UnmanagedType.LPStr)] string voice);
+            Utf8StringHandle userId,
+            string preferredLanguage,
+            string voice);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR participant_release_handle(SPXPARTICIPANTHANDLE participant);

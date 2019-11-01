@@ -102,3 +102,18 @@ SPXAPI property_bag_set_string(SPXPROPERTYBAGHANDLE hpropbag, int id, const char
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI property_bag_copy(SPXPROPERTYBAGHANDLE hfrom, SPXPROPERTYBAGHANDLE hto)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, hfrom == SPXHANDLE_INVALID);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_HANDLE, hto == SPXHANDLE_INVALID);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto fromProperties = property_bag_from_handle(hfrom);
+        auto toProperties = property_bag_from_handle(hto);
+
+        toProperties->Copy(fromProperties.get());
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+

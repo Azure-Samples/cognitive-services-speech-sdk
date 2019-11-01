@@ -105,3 +105,6 @@ tests/functional/java/target/
 tests/functional/java/.classpath
 tests/functional/java/.project
 tests/functional/java/.settings/
+tests/**/obj
+tests/**/objd
+tests/**/bin

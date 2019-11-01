@@ -14,12 +14,11 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-class HttpResponse;
-class HttpRequest;
 
 
 class CSpxConversation :
     public ISpxConversation,
+    public ISpxConversationWithImpl,
     public ISpxServiceProvider,
     public ISpxNamedProperties,
     public ISpxObjectWithSiteInitImpl<ISpxRecognizerSite>  // needs getDefaultSession
@@ -32,6 +31,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
         SPX_INTERFACE_MAP_ENTRY(ISpxConversation)
+        SPX_INTERFACE_MAP_ENTRY(ISpxConversationWithImpl)
    SPX_INTERFACE_MAP_END()
 
     CSpxConversation();
@@ -53,9 +53,19 @@ public:
     void UpdateParticipant(bool add, const std::string& userId, std::shared_ptr<ISpxParticipant> participant) override;
     void UpdateParticipants(bool add, std::vector<ParticipantPtr>&& participants) override;
     void SetConversationId(const std::string& id) override;
-    void GetConversationId(std::string& id) override;
+    const std::string GetConversationId() const override;
     std::string GetSpeechEventPayload(MeetingState state) override;
-    void HttpSendEndMeetingRequest() override;
+
+    virtual void CreateConversation(const std::string & nickname = "") override;
+    virtual void DeleteConversation() override;
+    virtual void StartConversation() override;
+    virtual void EndConversation() override;
+    virtual void SetLockConversation(bool lock) override;
+    virtual void SetMuteAllParticipants(bool mute) override;
+    virtual void SetMuteParticipant(bool mute, const std::string &) override;
+
+    // --- ISpxConversationWithImpl
+    virtual std::shared_ptr<ISpxConversation> GetConversationImpl() override { return m_impl; }
 
     // --- ISpxNamedProperties
     std::string GetStringValue(const char* name, const char* defaultValue = "") const override;
@@ -71,7 +81,7 @@ private:
     std::shared_ptr<ISpxConversation> m_impl;
 
     void SetRecoMode();
-    void ValidateImpl();
+    void ValidateImpl() const;
 
     DISABLE_COPY_AND_MOVE(CSpxConversation);
 };

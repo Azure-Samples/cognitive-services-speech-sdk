@@ -25,5 +25,10 @@
   "ConversationTranscriptionPPEKey": "",
   "OnlineAudioEndpoint": "wss://westus2.online.princetondev.customspeech.ai/recognition/onlinemeeting/v1",
   "LanguageUnderstandingServiceRegion": "westus",
+  "ConversationTranslatorSubscriptionKey": "",
+  "ConversationTranslatorRegion": "",
+  "ConversationTranslatorHost": "",
+  "ConversationTranslatorSpeechEndpoint": "",
+  "ConversationTranslatorClientId": "",
   "InputDir": "./input"
 }

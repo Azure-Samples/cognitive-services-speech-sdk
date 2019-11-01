@@ -16,6 +16,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+constexpr auto NOT_SET_VALUE = "!!<<NOT SET>!!";
 
 CSpxRecognizer::CSpxRecognizer() :
     ISpxRecognizerEvents(nullptr, nullptr),
@@ -358,6 +359,20 @@ void CSpxRecognizer::OnIsEnabledChanged()
 void CSpxRecognizer::CheckLogFilename()
 {
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
+    if (namedProperties == nullptr)
+    {
+        return;
+    }
+
+    auto logFile = namedProperties->GetStringValue(GetPropertyName(PropertyId::Speech_LogFilename), NOT_SET_VALUE);
+    auto& logger = FileLogger::Instance();
+
+    // are we already logging? If named properties doesn't explicitly set logging, let's not turn it off here
+    if (logger.IsFileLoggingEnabled() && logFile == NOT_SET_VALUE)
+    {
+        return;
+    }
+
     FileLogger::Instance().SetFileOptions(namedProperties);
 }
 

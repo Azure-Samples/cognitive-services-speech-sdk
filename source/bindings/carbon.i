@@ -291,6 +291,54 @@
         auto future = ($self)->EndConversationAsync();
         return FutureWrapper<void>(std::move(future));
     }
+
+    FutureWrapper<void> StartConversationAsync()
+    {
+        auto future = ($self)->StartConversationAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> DeleteConversationAsync()
+    {
+        auto future = ($self)->DeleteConversationAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> LockConversationAsync()
+    {
+        auto future = ($self)->LockConversationAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> UnlockConversationAsync()
+    {
+        auto future = ($self)->UnlockConversationAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> MuteAllParticipantsAsync()
+    {
+        auto future = ($self)->MuteAllParticipantsAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> UnmuteAllParticipantsAsync()
+    {
+        auto future = ($self)->UnmuteAllParticipantsAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> MuteParticipantAsync(const SPXSTRING& participantId)
+    {
+        auto future = ($self)->MuteParticipantAsync(participantId);
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> UnmuteParticipantAsync(const SPXSTRING& participantId)
+    {
+        auto future = ($self)->UnmuteParticipantAsync(participantId);
+        return FutureWrapper<void>(std::move(future));
+    }
 }
 
 %extend Microsoft::CognitiveServices::Speech::Transcription::ConversationTranscriber {
@@ -582,6 +630,15 @@
 %ignore RemoveParticipantAsync;
 %ignore EndConversationAsync;
 %ignore CreateConversationAsync;
+%ignore EndConversationAsync;
+%ignore StartConversationAsync;
+%ignore DeleteConversationAsync;
+%ignore LockConversationAsync;
+%ignore UnlockConversationAsync;
+%ignore MuteAllParticipantsAsync;
+%ignore UnmuteAllParticipantsAsync;
+%ignore MuteParticipantAsync;
+%ignore UnmuteParticipantAsync;
 
 %ignore Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConnector::ConnectAsync;
 %ignore Microsoft::CognitiveServices::Speech::Dialog::DialogServiceConnector::DisconnectAsync;

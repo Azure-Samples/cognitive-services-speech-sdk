@@ -107,7 +107,7 @@ static int populate_proxy_config(HTTP_PROXY_IO_CONFIG* const proxy_config)
     return 0;
 }
 
-HTTP_HANDLE HTTPAPI_CreateConnection_With_Platform_Proxy(const char* hostName)
+HTTP_HANDLE HTTPAPI_CreateConnection_With_Platform_Proxy(const char* hostName, int port, bool isSecure)
 {
     HTTP_PROXY_IO_CONFIG proxy_config;
     HTTP_HANDLE handle;
@@ -117,8 +117,8 @@ HTTP_HANDLE HTTPAPI_CreateConnection_With_Platform_Proxy(const char* hostName)
     {
         handle = HTTPAPI_CreateConnection_Advanced(
             hostName,
-            443,
-            true,
+            port,
+            isSecure,
             proxy_config.proxy_hostname,
             proxy_config.proxy_port,
             proxy_config.username,

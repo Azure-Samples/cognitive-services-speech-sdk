@@ -84,7 +84,7 @@ struct Callbacks
 
     /**
     * A callback function that will be invoked when an error occurs in handling communication with service.
-    * transport - indicates if the error was origniated on transport, not USP layer.
+    * transport - indicates if the error was originated on transport, not USP layer.
     */
     virtual void OnError(bool /*transport*/, ErrorCode /*errorCode*/, const std::string& /*errorMessage*/) {}
 
@@ -132,7 +132,7 @@ enum class RecognitionMode : unsigned int { Interactive = 0, Conversation = 1, D
 
 enum class OutputFormat : unsigned int { Simple = 0, Detailed = 1 };
 
-enum class AuthenticationType: size_t { SubscriptionKey = 0, AuthorizationToken, SearchDelegationRPSToken, DialogApplicationId, SIZE_AUTHENTICATION_TYPE };
+enum class AuthenticationType: size_t { SubscriptionKey = 0, AuthorizationToken, SearchDelegationRPSToken, DialogApplicationId, ConversationToken, SIZE_AUTHENTICATION_TYPE };
 
 enum class MessageType { Config, Context, Agent, AgentContext, SpeechEvent, Event, Ssml, Unknown};
 

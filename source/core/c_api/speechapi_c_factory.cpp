@@ -19,6 +19,7 @@
 #include "speechapi_c_auto_detect_source_lang_config.h"
 #include "speechapi_c_source_lang_config.h"
 #include "memory_utils.h"
+#include "ISpxConversationInterfaces.h"
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
@@ -286,7 +287,6 @@ SPXAPI synthesizer_create_speech_synthesizer_from_config(SPXSYNTHHANDLE* phsynth
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-
 SPXAPI conversation_create_from_config(SPXCONVERSATIONHANDLE* pconversation, SPXSPEECHCONFIGHANDLE hspeechconfig, const char* id)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -346,9 +346,9 @@ SPXAPI recognizer_create_conversation_transcriber_from_config(SPXRECOHANDLE* phr
             propertybag_cts->Copy(audioInput_propertybag.get());
         }
 
-        auto conversation_transcriber_init = SpxQueryInterface<ISpxConversationTranscriber>(conversation_transcriber);
+        auto conversation_transcriber_init = SpxQueryInterface<ISpxObjectWithAudioConfig>(conversation_transcriber);
         SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, conversation_transcriber_init == nullptr);
-        conversation_transcriber_init->Init(audioInput);
+        conversation_transcriber_init->SetAudioConfig(audioInput);
 
         // track the conversation transcriber handle
         auto transcribers = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
@@ -384,7 +384,7 @@ SPXAPI recognizer_join_conversation(SPXCONVERSATIONHANDLE hconv, SPXRECOHANDLE h
         conversation_transcriber_set_site->SetSite(session_as_site);
 
         // hook audio input to session
-        auto audio_input = SpxQueryInterface<ISpxGetAudioConfig>(conversation_transcriber);
+        auto audio_input = SpxQueryInterface<ISpxObjectWithAudioConfig>(conversation_transcriber);
         factory->InitSessionFromAudioInputConfig(session, audio_input->GetAudioConfig());
 
         // hook conversation to conversation transcriber, so that I can get the participant list later
@@ -411,6 +411,43 @@ SPXAPI recognizer_leave_conversation(SPXRECOHANDLE hreco)
         auto cts = SpxQueryInterface<ISpxConversationTranscriber>(conversation_transcriber);
         // leave conversation, set site to null
         cts->LeaveConversation();
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI conversation_translator_create_from_config(SPXCONVERSATIONTRANSLATORHANDLE * phandle, SPXAUDIOCONFIGHANDLE haudioinput)
+{
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phandle == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phandle = SPXHANDLE_INVALID;
+
+        auto conversation_translator = SpxCreateObject<ConversationTranslation::ISpxConversationTranslator>(
+            "CSpxConversationTranslator", SpxGetRootSite());
+
+        // copy the audio input properties into the conversation transcriber
+        auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioinput);
+        auto audioInput_propertybag = SpxQueryInterface<ISpxNamedProperties>(audioInput);
+        auto propertybag_cts = SpxQueryInterface<ISpxNamedProperties>(conversation_translator);
+        if (audioInput_propertybag != nullptr)
+        {
+            propertybag_cts->Copy(audioInput_propertybag.get());
+        }
+
+        auto has_audio_config = SpxQueryInterface<ISpxObjectWithAudioConfig>(conversation_translator);
+        SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, has_audio_config == nullptr);
+        has_audio_config->SetAudioConfig(audioInput);
+
+        // NOTE:
+        // Don't initialise the conversation translator here. We need the site from the conversation
+        // object (the audio stream instance) which will be passed as part of the join call.
+
+        // track the conversation translator handle
+        auto translators = CSpxSharedPtrHandleTableManager::Get<ConversationTranslation::ISpxConversationTranslator, SPXCONVERSATIONTRANSLATORHANDLE>();
+        *phandle = translators->TrackHandle(conversation_translator);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

@@ -368,6 +368,7 @@ set(C_API "${CARBON_CORE}/c_api")
 set(AUDIO "${CARBON_CORE}/audio")
 set(USP "${CARBON_CORE}/usp")
 set(MOCK "${CARBON_CORE}/mock")
+set(CONVERSATION_TRANSLATION "${CARBON_CORE}/conversation_translation")
 
 # Enable Unidec build with 'cmake -DEXTENSION_UNIDEC_ENABLED=true'
 if(EXTENSION_UNIDEC_ENABLED AND
@@ -419,6 +420,7 @@ add_subdirectory(${TTS})
 add_subdirectory(${TTS_MOCK})
 add_subdirectory(${TTS_REST})
 add_subdirectory(${TTS_USP})
+add_subdirectory(${CONVERSATION_TRANSLATION})
 
 add_subdirectory(${MOCK})
 

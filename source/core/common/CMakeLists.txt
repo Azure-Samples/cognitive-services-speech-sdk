@@ -48,6 +48,8 @@ set(HEADERS
     "${INC_DIR}/http_request.h"
     "${INC_DIR}/http_response.h"
     "${INC_DIR}/memory_utils.h"
+    "${INC_DIR}/http_utils.h"
+    "${INC_DIR}/event.h"
     )
 
 set(HEADERS_PRIVATE
@@ -57,6 +59,7 @@ set(HEADERS_PRIVATE
     "${INC_DIR}/azure_c_shared_utility_httpapiex_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_strings_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_xlogging_wrapper.h"
+    "${INC_DIR}/azure_c_shared_utility_macro_utils.h"
     )
 
 set(SOURCES
@@ -76,6 +79,7 @@ set(SOURCES
     "${SRC_DIR}/http_exception.cpp"
     "${SRC_DIR}/http_request.cpp"
     "${SRC_DIR}/http_response.cpp"
+    "${SRC_DIR}/http_utils.cpp"
     "${SRC_DIR}/memory_utils.cpp"
     )
 

@@ -30,7 +30,9 @@ extern "C" {
  *          platform_set_http_proxy method, that will be used here.
  *          Otherwise no proxy will be used
  *
- * @param   hostName    Name of the host.
+ * @param   hostName    The name of the host.
+ * @param   port        The port on the host to connect to.
+ * @param   isSecure    Whether or not this is a secure connection.
  *
  *          This function returns a handle to the newly created connection.
  *          You can use the handle in subsequent calls to execute specific
@@ -39,7 +41,7 @@ extern "C" {
  * @return  A @c HTTP_HANDLE to the newly created connection or @c NULL in
  *          case an error occurs.
  */
-MOCKABLE_FUNCTION(, HTTP_HANDLE, HTTPAPI_CreateConnection_With_Platform_Proxy, const char*, hostName);
+MOCKABLE_FUNCTION(, HTTP_HANDLE, HTTPAPI_CreateConnection_With_Platform_Proxy, const char*, hostName, int, port, bool, isSecure);
 
 #ifdef __cplusplus
 }

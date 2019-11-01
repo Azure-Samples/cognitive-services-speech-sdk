@@ -168,6 +168,10 @@ private:
     bool ToBool(const char* psz);
 
     std::string BoolToString(bool f);
+    std::string ToString(ResultReason reason);
+    std::string ToString(CancellationReason reason);
+    std::string ToString(CancellationErrorCode error);
+    std::string ToString(NoMatchReason reason);
     std::string ToString(const SpeechRecognitionEventArgs& e);
     std::string ToString(const IntentRecognitionEventArgs& e);
     std::string ToString(const TranslationRecognitionEventArgs& e);

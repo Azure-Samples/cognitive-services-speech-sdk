@@ -531,6 +531,15 @@ void Connection::Impl::Connect()
             }
         }
     }
+    authStr = m_config.m_authData[static_cast<size_t>(AuthenticationType::ConversationToken)];
+    if (!authStr.empty())
+    {
+        LogInfo("Adding conversation token.");
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::capitoConversationToken, authStr.c_str()) != 0)
+        {
+            ThrowRuntimeError("Failed to set the conversation token header.");
+        }
+    }
 
     if (m_config.m_endpointType == EndpointType::Dialog)
     {

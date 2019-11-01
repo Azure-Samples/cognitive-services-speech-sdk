@@ -41,10 +41,13 @@ void CSpxConversation::Init()
     std::shared_ptr<ISpxRecognizerSite> site = GetSite();
     SPX_IFTRUE_THROW_HR(site == nullptr, SPXERR_UNINITIALIZED);
 
+    auto genericSite = site->QueryInterface<ISpxGenericSite>();
+    SPX_IFTRUE_THROW_HR(genericSite == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
+
     auto thread_service = SpxQueryService<ISpxThreadService>(site);
     SPX_IFTRUE_THROW_HR(thread_service == nullptr, SPXERR_UNEXPECTED_CONVERSATION_SITE_FAILURE);
 
-    m_keepSessionAlive = GetSite();
+    m_keepSessionAlive = site;
 
     // Initialize websocket platform
     Microsoft::CognitiveServices::Speech::USP::PlatformInit(nullptr, 0, nullptr, nullptr);
@@ -58,11 +61,10 @@ void CSpxConversation::Init()
         m_impl = std::make_shared<CSpxParticipantMgrImpl>(thread_service, m_keepSessionAlive);
         SPX_DBG_TRACE_INFO("Created a CSpxParticipantMgrImpl for manager participants in a meeting.");
     }
-
-    // default, translator
-    if (m_impl == nullptr)
+    else
     {
-
+        m_impl = SpxCreateObjectWithSite<ISpxConversation>("CSpxConversationImpl", genericSite);
+        SPX_DBG_TRACE_INFO("Created a CSpxParticipantMgrImpl for the conversation translator service.");
     }
 
     SPX_DBG_ASSERT(m_impl != nullptr);
@@ -100,6 +102,16 @@ void CSpxConversation::SetRecoMode()
 
 void CSpxConversation::Term()
 {
+    if (m_impl != nullptr)
+    {
+        auto objectInit = m_impl->QueryInterface<ISpxObjectInit>();
+        if (objectInit != nullptr)
+        {
+            objectInit->Term();
+        }
+
+        m_impl = nullptr;
+    }
 }
 
 void CSpxConversation::UpdateParticipant(bool add, const std::string& userId, std::shared_ptr<ISpxParticipant> participant)
@@ -126,10 +138,10 @@ void CSpxConversation::SetConversationId(const std::string& id)
     m_impl->SetConversationId(id);
 }
 
-void CSpxConversation::GetConversationId(std::string& id)
+const std::string CSpxConversation::GetConversationId() const
 {
     ValidateImpl();
-    m_impl->GetConversationId(id);
+    return m_impl->GetConversationId();
 }
 
 std::string  CSpxConversation::GetSpeechEventPayload(ISpxConversation::MeetingState state)
@@ -138,18 +150,46 @@ std::string  CSpxConversation::GetSpeechEventPayload(ISpxConversation::MeetingSt
     return m_impl->GetSpeechEventPayload(state);
 }
 
-void CSpxConversation::HttpSendEndMeetingRequest()
+void CSpxConversation::CreateConversation(const std::string & nickname)
 {
     ValidateImpl();
-    m_impl->HttpSendEndMeetingRequest();
+    m_impl->CreateConversation(nickname);
 }
 
-void CSpxConversation::ValidateImpl()
+void CSpxConversation::DeleteConversation()
 {
-    if (m_impl == nullptr)
-    {
-        ThrowRuntimeError("Call update participant without initializing the impl!");
-    }
+    ValidateImpl();
+    m_impl->DeleteConversation();
+}
+
+void CSpxConversation::StartConversation()
+{
+    ValidateImpl();
+    m_impl->StartConversation();
+}
+
+void CSpxConversation::EndConversation()
+{
+    ValidateImpl();
+    m_impl->EndConversation();
+}
+
+void CSpxConversation::SetLockConversation(bool lock)
+{
+    ValidateImpl();
+    m_impl->SetLockConversation(lock);
+}
+
+void CSpxConversation::SetMuteAllParticipants(bool mute)
+{
+    ValidateImpl();
+    m_impl->SetMuteAllParticipants(mute);
+}
+
+void CSpxConversation::SetMuteParticipant(bool mute, const std::string & participantId)
+{
+    ValidateImpl();
+    m_impl->SetMuteParticipant(mute, participantId);
 }
 
 void CSpxConversation::SetStringValue(const char * name, const char * value)
@@ -188,5 +228,13 @@ std::string CSpxConversation::GetStringValue(const char* name, const char* defau
         return properties->GetStringValue(name, defaultValue);
     }
     return defaultValue;
+}
+
+void CSpxConversation::ValidateImpl() const
+{
+    if (m_impl == nullptr)
+    {
+        ThrowRuntimeError("Called CSpxConversation method without initializing the impl!");
+    }
 }
 }}}} // Microsoft::CognitiveServices::Speech::Impl

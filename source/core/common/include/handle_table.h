@@ -191,6 +191,13 @@ public:
         SPX_DBG_TRACE_VERBOSE_IF(m_ptrMap.size() == 0, "%s: ZERO handles 'leaked'", __FUNCTION__);
         SPX_DBG_TRACE_WARNING_IF(m_ptrMap.size() >= 1, "%s: non-zero handles 'leaked'", __FUNCTION__);
 
+#if _DEBUG
+        for (const auto& entry : m_handleMap)
+        {
+            SPX_DBG_TRACE_WARNING("LEAKED HANDLE: 0x%8p,     LEAKED POINTER: 0x%8p", (void *)entry.first, (void *)entry.second.get());
+        }
+#endif
+
         WriteLock_Type lock(m_mutex);
         m_handleMap.clear();
         m_ptrMap.clear();

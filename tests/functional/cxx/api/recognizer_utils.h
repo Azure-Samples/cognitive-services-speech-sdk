@@ -57,6 +57,7 @@ struct TestData
 // declare the test data here
 extern TestData weather;
 extern TestData weatherGerman;
+extern TestData weatherInChinese;
 extern TestData weathermp3;
 extern TestData weatheropus;
 extern TestData weatherflac;

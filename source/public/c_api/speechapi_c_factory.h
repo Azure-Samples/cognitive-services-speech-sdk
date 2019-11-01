@@ -16,3 +16,4 @@ SPXAPI dialog_service_connector_create_dialog_service_connector_from_config(SPXR
 SPXAPI recognizer_create_conversation_transcriber_from_config(SPXRECOHANDLE* phreco, SPXAUDIOCONFIGHANDLE haudioInput);
 SPXAPI recognizer_join_conversation(SPXCONVERSATIONHANDLE hconv, SPXRECOHANDLE hreco);
 SPXAPI recognizer_leave_conversation(SPXRECOHANDLE hreco);
+SPXAPI transcriber_get_participants_list(SPXRECOHANDLE hreco, SPXPARTICIPANTHANDLE* participants, int size);

@@ -6,7 +6,7 @@ package com.microsoft.cognitiveservices.speech;
 
 /**
  * Defines property ids.
- * Changed in version 1.7.0.
+ * Changed in version 1.8.0.
  */
 public enum PropertyId {
 
@@ -308,7 +308,7 @@ public enum PropertyId {
      * ConversationId for the session.
      * Added in version 1.8.0.
      */
-    Converation_Conversation_Id ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_Conversation_Id),
+    Conversation_Conversation_Id ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Conversation_Conversation_Id),
 
     /**
      * Comma separated list of custom voice deployment ids.

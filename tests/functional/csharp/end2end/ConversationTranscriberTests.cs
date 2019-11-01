@@ -86,12 +86,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public void ConversationIdWithChinese()
+        public async Task ConversationIdWithChinese()
         {
             var config = CreateCTSInRoomSpeechConfig();
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             string myConversationId = "的";
-            using (var conversation = new Conversation(config, myConversationId))
+            using (var conversation = await Conversation.CreateConversationAsync(config, myConversationId))
             {
                 //the UTF8 decoding of 的 is \xe7\x9a\x84, which will be shown in the debugger in the C++ side.
                 var gotId = conversation.ConversationId;
@@ -100,11 +100,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public void ConversationIdWithAnsiOnly()
+        public async Task ConversationIdWithAnsiOnly()
         {
             var config = CreateCTSInRoomSpeechConfig();
             string myConversationId = "123 456";
-            using (var conversation = new Conversation(config, myConversationId))
+            using (var conversation = await Conversation.CreateConversationAsync(config, myConversationId))
             {
                 var gotId = conversation.ConversationId;
                 Assert.AreEqual(myConversationId, gotId);
@@ -205,7 +205,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var config = CreateCTSInRoomSpeechConfig();
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             var meetingId = Guid.NewGuid().ToString();
-            using (var conversation = new Conversation(config, meetingId))
+            using (var conversation = await Conversation.CreateConversationAsync(config, meetingId))
             {
                 using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
                 {
@@ -236,7 +236,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             var meetingID = Guid.NewGuid().ToString();
-            using (var conversation = new Conversation(config, meetingID))
+            using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
             {
                 using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
                 {
@@ -264,7 +264,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var config = CreateCTSInRoomSpeechConfig();
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             var meetingID = Guid.NewGuid().ToString();
-            using (var conversation = new Conversation(config, meetingID))
+            using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
             {
                 using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
                 {
@@ -312,7 +312,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 using (var audioInput = AudioConfig.FromStreamInput(pushStream))
                 {
                     var meetingID = Guid.NewGuid().ToString();
-                    using (var conversation = new Conversation(config, meetingID))
+                    using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
                     {
                         conversation.Properties.SetProperty("iCalUid", "040000008200E00074C5B7101A82E008000000001003D722197CD4010000000000000000100000009E970FDF583F9D4FB999E607891A2F66");
 
@@ -419,7 +419,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var audioInput = Util.OpenWavFile(TestData.English.TranscriberAudioData.TwoSpeakersAudio))
             {
                 var meetingID = Guid.NewGuid().ToString();
-                using (var conversation = new Conversation(config, meetingID))
+                using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
                 {
                     using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
                     {
@@ -506,7 +506,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.OutputFormat = OutputFormat.Detailed;
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
             var meetingID = Guid.NewGuid().ToString();
-            using (var conversation = new Conversation(config, meetingID))
+            using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
             {
                 using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
                 {

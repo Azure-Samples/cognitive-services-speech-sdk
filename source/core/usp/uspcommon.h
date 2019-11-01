@@ -72,6 +72,7 @@ namespace USP {
         constexpr auto region = "Ocp-Apim-Subscription-Region";
         constexpr auto dialogDLSSecret = "X-DLS-Secret";
         constexpr auto dialogCommandsAppId = "X-CommandsAppId";
+        constexpr auto capitoConversationToken = "X-CapitoToken";
     }
 
     namespace json_properties {

@@ -7,6 +7,7 @@
 #include <sstream>
 #include <azure_c_shared_utility_urlencode_wrapper.h>
 #include "httpapi_platform_proxy.h"
+#include "http_utils.h"
 #include "http_request.h"
 #include "http_response.h"
 
@@ -19,51 +20,35 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-    static std::string UrlEncode(const std::string& value)
+    HttpRequest::HttpRequest(const std::string& host, int port, bool isSecure) :
+        m_secure(isSecure),
+        m_host(host),
+        m_port(port),
+        m_path(),
+        m_query(),
+        m_proxyHost(),
+        m_proxyPort(),
+        m_proxyUsername(),
+        m_proxyPassword(),
+        m_handle(),
+        m_requestHeaders()
     {
-        STRING_HANDLE string = nullptr;
-        std::string encoded;
-        try
-        {
-            string = URL_EncodeString(value.data());
-            encoded = std::string(STRING_c_str(string));
-        }
-        catch (...)
-        {
-            // ignore
-        }
-
-        STRING_delete(string);
-        return encoded;
-    }
-
-    HttpRequest::HttpRequest(const std::string& host)
-        : m_host(host),
-        m_path(std::string()),
-        m_query(std::map<std::string, std::vector<std::string>>()),
-        m_handle(HTTPAPI_CreateConnection_With_Platform_Proxy(host.data())),
-        m_requestHeaders(HTTPHeaders_Alloc())
-    {
+        ValidatePort(port);
         if (host.empty())
         {
-            Term();
             throw std::invalid_argument("You cannot specify an empty host");
         }
-        else if (!m_requestHeaders || !m_handle)
+
+        m_requestHeaders = HTTPHeaders_Alloc();
+        if (m_requestHeaders == nullptr)
         {
-            Term();
             throw std::bad_alloc();
         }
-
+        
         SetRequestHeader("Host", m_host);
     }
 
     HttpRequest::~HttpRequest()
-    {
-        Term();
-    }
-
-    void HttpRequest::Term()
     {
         if (m_handle)
         {
@@ -88,14 +73,37 @@ namespace Impl {
         m_path = path;
     }
 
-    void HttpRequest::AddQueryParameter(const std::string & key, const std::string & value)
+    void HttpRequest::AddQueryParameter(const std::string & name, const std::string & value)
     {
-        m_query[key].push_back(value);
+        if (name.empty())
+        {
+            throw std::invalid_argument("Query parameter name cannot be empty");
+        }
+
+        m_query[name].push_back(value);
     }
 
-    void HttpRequest::SetRequestHeader(const std::string & key, const std::string & value)
+    void HttpRequest::SetRequestHeader(const std::string & name, const std::string & value)
     {
-        HTTPHeaders_AddHeaderNameValuePair(m_requestHeaders, key.data(), value.data());
+        if (name.empty())
+        {
+            throw std::invalid_argument("Request header name cannot be empty");
+        }
+
+        HTTPHeaders_AddHeaderNameValuePair(m_requestHeaders, name.data(), value.data());
+    }
+
+    void HttpRequest::SetProxy(const std::string & host, int port, const std::string & username, const std::string & password)
+    {
+        if (false == host.empty())
+        {
+            ValidatePort(port);
+        }
+
+        m_proxyHost = host;
+        m_proxyPort = port;
+        m_proxyUsername = username;
+        m_proxyPassword = password;
     }
 
     std::unique_ptr<HttpResponse> HttpRequest::SendRequest(HTTPAPI_REQUEST_TYPE type, const void *content, size_t contentSize)
@@ -113,7 +121,7 @@ namespace Impl {
 
             for (auto const& kvp : m_query)
             {
-                std::string encodedKey = UrlEncode(kvp.first);
+                std::string encodedKey = HttpUtils::UrlEscape(kvp.first);
 
                 const std::vector<std::string> &values = kvp.second;
                 for (const std::string &value : values)
@@ -129,8 +137,32 @@ namespace Impl {
 
                     httpPath += encodedKey;
                     httpPath += "=";
-                    httpPath += UrlEncode(value);
+                    httpPath += HttpUtils::UrlEscape(value);
                 }
+            }
+        }
+
+        if (m_handle == nullptr)
+        {
+            if (m_proxyHost.empty())
+            {
+                m_handle = HTTPAPI_CreateConnection_With_Platform_Proxy(m_host.c_str(), m_port, m_secure);
+            }
+            else
+            {
+                m_handle = HTTPAPI_CreateConnection_Advanced(
+                    m_host.c_str(),
+                    m_port,
+                    m_secure,
+                    m_proxyHost.c_str(),
+                    m_proxyPort,
+                    m_proxyUsername.c_str(),
+                    m_proxyPassword.c_str());
+            }
+
+            if (m_handle == nullptr)
+            {
+                throw std::runtime_error("Creating the HTTP request failed");
             }
         }
 
@@ -161,6 +193,12 @@ namespace Impl {
         }
 
         return response;
+    }
+
+    void HttpRequest::ValidatePort(int port)
+    {
+        if (false == HttpUtils::IsValidPort(port))
+            throw std::invalid_argument("The port is not valid. (0 < port <= 65535)");
     }
 
 } } } }

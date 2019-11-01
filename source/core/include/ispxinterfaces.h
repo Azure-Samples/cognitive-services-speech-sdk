@@ -67,6 +67,11 @@ protected:
     {
         return base_type::shared_from_this();
     }
+
+    std::shared_ptr<const ISpxInterfaceBase> shared_from_this() const
+    {
+        return base_type::shared_from_this();
+    }
 };
 
 template <class I>
@@ -106,6 +111,11 @@ public:
         return result;
     }
 
+    std::shared_ptr<const T> shared_from_this() const
+    {
+        std::shared_ptr<const T> result(base_type::shared_from_this(), static_cast<const T*>(this));
+        return result;
+    }
 
 private:
     typedef ISpxInterfaceBase base_type;
@@ -804,7 +814,7 @@ public:
 };
 
 class ISpxConnectionEventArgs :
-    public ISpxSessionEventArgs,
+    public virtual ISpxSessionEventArgs,
     public ISpxInterfaceBaseFor<ISpxConnectionEventArgs>
 {
 };
@@ -815,8 +825,18 @@ public:
     virtual void Init(const std::wstring& sessionId) = 0;
 };
 
+/// <summary>
+/// Interface for miscellaneous conversation related event arguments (e.g. expiration, participants
+/// changed, etc...)
+/// </summary>
+class ISpxConversationEventArgs :
+    public virtual ISpxSessionEventArgs,
+    public virtual ISpxInterfaceBaseFor<ISpxConversationEventArgs>
+{
+};
+
 class ISpxRecognitionEventArgs :
-    public ISpxSessionEventArgs,
+    public virtual ISpxSessionEventArgs,
     public ISpxInterfaceBaseFor<ISpxRecognitionEventArgs>
 {
 public:
@@ -969,7 +989,7 @@ public:
 };
 
 
-class ISpxConversation : public ISpxInterfaceBaseFor< ISpxConversation>
+class ISpxConversation : public ISpxInterfaceBaseFor<ISpxConversation>
 {
 public:
 
@@ -984,9 +1004,23 @@ public:
     virtual void UpdateParticipant(bool add, const std::string& userId, std::shared_ptr<ISpxParticipant> participant) = 0;
     virtual void UpdateParticipants(bool add, std::vector<ParticipantPtr>&& participants) = 0;
     virtual void SetConversationId(const std::string& id) = 0;
-    virtual void GetConversationId(std::string& id) = 0;
+    virtual const std::string GetConversationId() const = 0;
     virtual std::string GetSpeechEventPayload(MeetingState state) = 0;
-    virtual void HttpSendEndMeetingRequest() = 0;
+    virtual void EndConversation() = 0;
+
+    virtual void CreateConversation(const std::string& nickname = "") = 0;
+    virtual void DeleteConversation() = 0;
+    virtual void StartConversation() = 0;
+    virtual void SetLockConversation(bool locked) = 0;
+    virtual void SetMuteAllParticipants(bool mute) = 0;
+    virtual void SetMuteParticipant(bool mute, const std::string& participantId) = 0;
+};
+
+
+class ISpxConversationWithImpl : public ISpxInterfaceBaseFor<ISpxConversationWithImpl>
+{
+public:
+    virtual std::shared_ptr<ISpxConversation> GetConversationImpl() = 0;
 };
 
 
@@ -1430,12 +1464,12 @@ class ISpxConversationTranscriber : public ISpxInterfaceBaseFor<ISpxConversation
 public:
     virtual void JoinConversation(std::weak_ptr<ISpxConversation> conversation) = 0;
     virtual void LeaveConversation() = 0;
-    virtual void Init(std::weak_ptr<ISpxAudioConfig> audio_config) = 0;
 };
 
-class ISpxGetAudioConfig : public ISpxInterfaceBaseFor<ISpxGetAudioConfig>
+class ISpxObjectWithAudioConfig : public ISpxInterfaceBaseFor<ISpxObjectWithAudioConfig>
 {
 public:
+    virtual void SetAudioConfig(std::weak_ptr<ISpxAudioConfig> audioConfig) = 0;
     virtual std::shared_ptr<ISpxAudioConfig> GetAudioConfig() = 0;
 };
 

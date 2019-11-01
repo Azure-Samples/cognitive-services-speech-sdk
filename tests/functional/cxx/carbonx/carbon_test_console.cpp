@@ -1369,7 +1369,7 @@ std::string CarbonTestConsole::BoolToString(bool f)
     return PAL::BoolToString(f);
 }
 
-std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
+std::string CarbonTestConsole::ToString(ResultReason reason)
 {
     static_assert(0 == (int)ResultReason::NoMatch, "ResultReason::* enum values changed!");
     static_assert(1 == (int)ResultReason::Canceled, "ResultReason::* enum values changed!");
@@ -1384,27 +1384,12 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
     static_assert(10 == (int)ResultReason::RecognizingKeyword, "ResultReason::* enum values changed!");
     static_assert(11 == (int)ResultReason::RecognizedKeyword, "ResultReason::* enum values changed!");
     static_assert(12 == (int)ResultReason::SynthesizingAudioStarted, "ResultReason::* enum values changed!");
+    static_assert(13 == (int)ResultReason::TranslatingParticipantSpeech, "ResultReason::* enum values changed!");
+    static_assert(14 == (int)ResultReason::TranslatedParticipantSpeech, "ResultReason::* enum values changed!");
+    static_assert(15 == (int)ResultReason::TranslatedInstantMessage, "ResultReason::* enum values changed!");
+    static_assert(16 == (int)ResultReason::TranslatedParticipantInstantMessage, "ResultReason::* enum values changed!");
 
-    static_assert(1 == (int)CancellationReason::Error, "CancellationReason::* enum values changed!");
-    static_assert(2 == (int)CancellationReason::EndOfStream, "CancellationReason::* enum values changed!");
-
-    static_assert(0 == (int)CancellationErrorCode::NoError, "CancellationErrorCode::* enum values changed!");
-    static_assert(1 == (int)CancellationErrorCode::AuthenticationFailure, "CancellationErrorCode::* enum values changed!");
-    static_assert(2 == (int)CancellationErrorCode::BadRequest, "CancellationErrorCode::* enum values changed!");
-    static_assert(3 == (int)CancellationErrorCode::TooManyRequests, "CancellationErrorCode::* enum values changed!");
-    static_assert(4 == (int)CancellationErrorCode::Forbidden, "CancellationErrorCode::* enum values changed!");
-    static_assert(5 == (int)CancellationErrorCode::ConnectionFailure, "CancellationErrorCode::* enum values changed!");
-    static_assert(6 == (int)CancellationErrorCode::ServiceTimeout, "CancellationErrorCode::* enum values changed!");
-    static_assert(7 == (int)CancellationErrorCode::ServiceError, "CancellationErrorCode::* enum values changed!");
-    static_assert(8 == (int)CancellationErrorCode::ServiceUnavailable, "CancellationErrorCode::* enum values changed!");
-    static_assert(9 == (int)CancellationErrorCode::RuntimeError, "CancellationErrorCode::* enum values changed!");
-
-    static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
-    static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
-    static_assert(3 == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason::* enum values changed!");
-    static_assert(4 == (int)NoMatchReason::KeywordNotRecognized, "NoMatchReason::* enum values changed!");
-
-    std::string reasons[] = {
+    static std::string reasons[] = {
         "NoMatch",
         "Canceled",
         "RecognizingSpeech",
@@ -1417,16 +1402,68 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
         "SynthesizingAudioCompleted",
         "RecognizingKeyword",
         "RecognizedKeyword",
-        "SynthesizingAudioStarted"
+        "SynthesizingAudioStarted",
+        "TranslatingParticipantSpeech",
+        "TranslatedParticipantSpeech",
+        "TranslatedInstantMessage",
+        "TranslatedParticipantInstantMessage"
     };
 
-    std::string reasonsCanceled[] = {
+    return reasons[(int)reason];
+}
+
+std::string CarbonTestConsole::ToString(CancellationReason reason)
+{
+    static_assert(1 == (int)CancellationReason::Error, "CancellationReason::* enum values changed!");
+    static_assert(2 == (int)CancellationReason::EndOfStream, "CancellationReason::* enum values changed!");
+
+    static std::string reasonsCanceled[] = {
         "",
         "Error",
         "EndOfStream",
     };
 
-    std::string noMatchReasons[] = {
+    return reasonsCanceled[(int)reason];
+}
+
+std::string CarbonTestConsole::ToString(CancellationErrorCode error)
+{
+    static_assert(0 == (int)CancellationErrorCode::NoError, "CancellationErrorCode::* enum values changed!");
+    static_assert(1 == (int)CancellationErrorCode::AuthenticationFailure, "CancellationErrorCode::* enum values changed!");
+    static_assert(2 == (int)CancellationErrorCode::BadRequest, "CancellationErrorCode::* enum values changed!");
+    static_assert(3 == (int)CancellationErrorCode::TooManyRequests, "CancellationErrorCode::* enum values changed!");
+    static_assert(4 == (int)CancellationErrorCode::Forbidden, "CancellationErrorCode::* enum values changed!");
+    static_assert(5 == (int)CancellationErrorCode::ConnectionFailure, "CancellationErrorCode::* enum values changed!");
+    static_assert(6 == (int)CancellationErrorCode::ServiceTimeout, "CancellationErrorCode::* enum values changed!");
+    static_assert(7 == (int)CancellationErrorCode::ServiceError, "CancellationErrorCode::* enum values changed!");
+    static_assert(8 == (int)CancellationErrorCode::ServiceUnavailable, "CancellationErrorCode::* enum values changed!");
+    static_assert(9 == (int)CancellationErrorCode::RuntimeError, "CancellationErrorCode::* enum values changed!");
+
+    static std::string errors[]
+    {
+        "NoError",
+        "AuthenticationFailure",
+        "BadRequest",
+        "TooManyRequests",
+        "Forbidden",
+        "ConnectionFailure",
+        "ServiceTimeout",
+        "ServiceError",
+        "ServiceUnavailable",
+        "RuntimeError"
+    };
+
+    return errors[(int)error];
+}
+
+std::string CarbonTestConsole::ToString(NoMatchReason reason)
+{
+    static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
+    static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
+    static_assert(3 == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason::* enum values changed!");
+    static_assert(4 == (int)NoMatchReason::KeywordNotRecognized, "NoMatchReason::* enum values changed!");
+
+    static std::string noMatchReasons[] = {
         "",
         "NotRecognized",
         "InitialSilenceTimeout",
@@ -1434,21 +1471,26 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
         "KeywordNotRecognized"
     };
 
+    return noMatchReasons[(int)reason];
+}
+
+std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
+{
     std::string str;
     str += "SpeechRecognitionEventArgs = { \n";
     str += "  SessionId = '" + e.SessionId + "'\n";
     str += "  Result = {\n";
     str += "    ResultId = '" + e.Result->ResultId + "'\n";
-    str += "    Reason = ResultReason::" + reasons[(int)e.Result->Reason] + "\n";
+    str += "    Reason = ResultReason::" + ToString(e.Result->Reason) + "\n";
     if (e.Result->Reason == ResultReason::NoMatch)
     {
         auto noMatch = NoMatchDetails::FromResult(e.Result);
-        str += "    NoMatchReason = NoMatchReason::" + noMatchReasons[(int)noMatch->Reason] + "\n";
+        str += "    NoMatchReason = NoMatchReason::" + ToString(noMatch->Reason) + "\n";
     }
     if (e.Result->Reason == ResultReason::Canceled)
     {
         auto cancellation = CancellationDetails::FromResult(e.Result);
-        str += "    CancellationReason = CancellationReason::" + reasonsCanceled[(int)cancellation->Reason] + "\n";
+        str += "    CancellationReason = CancellationReason::" + ToString(cancellation->Reason) + "\n";
         if (!cancellation->ErrorDetails.empty())
         {
             str += "    ErrorDetails = '" + cancellation->ErrorDetails + "'\n";
@@ -1463,70 +1505,21 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
 
 std::string CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
 {
-    static_assert(0 == (int)ResultReason::NoMatch, "ResultReason::* enum values changed!");
-    static_assert(1 == (int)ResultReason::Canceled, "ResultReason::* enum values changed!");
-    static_assert(2 == (int)ResultReason::RecognizingSpeech, "ResultReason::* enum values changed!");
-    static_assert(3 == (int)ResultReason::RecognizedSpeech, "ResultReason::* enum values changed!");
-    static_assert(4 == (int)ResultReason::RecognizingIntent, "ResultReason::* enum values changed!");
-    static_assert(5 == (int)ResultReason::RecognizedIntent, "ResultReason::* enum values changed!");
-    static_assert(6 == (int)ResultReason::TranslatingSpeech, "ResultReason::* enum values changed!");
-    static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
-    static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
-    static_assert(9 == (int)ResultReason::SynthesizingAudioCompleted, "ResultReason::* enum values changed!");
-    static_assert(10 == (int)ResultReason::RecognizingKeyword, "ResultReason::* enum values changed!");
-    static_assert(11 == (int)ResultReason::RecognizedKeyword, "ResultReason::* enum values changed!");
-    static_assert(12 == (int)ResultReason::SynthesizingAudioStarted, "ResultReason::* enum values changed!");
-
-    static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
-    static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
-    static_assert(3 == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason::* enum values changed!");
-    static_assert(4 == (int)NoMatchReason::KeywordNotRecognized, "NoMatchReason::* enum values changed!");
-
-    std::string reasons[] = {
-        "NoMatch",
-        "Canceled",
-        "RecognizingSpeech",
-        "RecognizedSpeech",
-        "RecognizingIntent",
-        "RecognizedIntent",
-        "TranslatingSpeech",
-        "TranslatedSpeech",
-        "SynthesizingAudio",
-        "SynthesizingAudioCompleted",
-        "RecognizingKeyword",
-        "RecognizedKeyword",
-        "SynthesizingAudioStarted"
-    };
-
-    std::string reasonsCanceled[] = {
-        "",
-        "Error",
-        "EndOfStream",
-    };
-
-    std::string noMatchReasons[] = {
-        "",
-        "NotRecognized",
-        "InitialSilenceTimeout",
-        "InitialBabbleTimeout",
-        "KeywordNotRecognized"
-    };
-
     std::string str;
     str += "IntentRecognitionEventArgs = { \n";
     str += "  SessionId = '" + e.SessionId + "'\n";
     str += "  Result = {\n";
     str += "    ResultId = '" + e.Result->ResultId + "'\n";
-    str += "    Reason = ResultReason::" + reasons[(int)e.Result->Reason] + "\n";
+    str += "    Reason = ResultReason::" + ToString(e.Result->Reason) + "\n";
     if (e.Result->Reason == ResultReason::NoMatch)
     {
         auto noMatch = NoMatchDetails::FromResult(e.Result);
-        str += "    NoMatchReason = NoMatchReason::" + noMatchReasons[(int)noMatch->Reason] + "\n";
+        str += "    NoMatchReason = NoMatchReason::" + ToString(noMatch->Reason) + "\n";
     }
     if (e.Result->Reason == ResultReason::Canceled)
     {
         auto cancellation = CancellationDetails::FromResult(e.Result);
-        str += "    CancellationReason = CancellationReason::" + reasonsCanceled[(int)cancellation->Reason] + "\n";
+        str += "    CancellationReason = CancellationReason::" + ToString(cancellation->Reason) + "\n";
         if (!cancellation->ErrorDetails.empty())
         {
             str += "    ErrorDetails = '" + cancellation->ErrorDetails + "'\n";
@@ -1541,54 +1534,6 @@ std::string CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
 
 std::string CarbonTestConsole::ToString(const TranslationRecognitionEventArgs& e)
 {
-    static_assert(0 == (int)ResultReason::NoMatch, "ResultReason::* enum values changed!");
-    static_assert(1 == (int)ResultReason::Canceled, "ResultReason::* enum values changed!");
-    static_assert(2 == (int)ResultReason::RecognizingSpeech, "ResultReason::* enum values changed!");
-    static_assert(3 == (int)ResultReason::RecognizedSpeech, "ResultReason::* enum values changed!");
-    static_assert(4 == (int)ResultReason::RecognizingIntent, "ResultReason::* enum values changed!");
-    static_assert(5 == (int)ResultReason::RecognizedIntent, "ResultReason::* enum values changed!");
-    static_assert(6 == (int)ResultReason::TranslatingSpeech, "ResultReason::* enum values changed!");
-    static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
-    static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
-    static_assert(9 == (int)ResultReason::SynthesizingAudioCompleted, "ResultReason::* enum values changed!");
-    static_assert(10 == (int)ResultReason::RecognizingKeyword, "ResultReason::* enum values changed!");
-    static_assert(11 == (int)ResultReason::RecognizedKeyword, "ResultReason::* enum values changed!");
-    static_assert(12 == (int)ResultReason::SynthesizingAudioStarted, "ResultReason::* enum values changed!");
-
-    static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
-    static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
-    static_assert(3 == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason::* enum values changed!");
-    static_assert(4 == (int)NoMatchReason::KeywordNotRecognized, "NoMatchReason::* enum values changed!");
-
-    std::string reasons[] = {
-        "NoMatch",
-        "Canceled",
-        "RecognizingSpeech",
-        "RecognizedSpeech",
-        "RecognizingIntent",
-        "RecognizedIntent",
-        "TranslatingSpeech",
-        "TranslatedSpeech",
-        "SynthesizingAudio",
-        "SynthesizingAudioCompleted",
-        "RecognizingKeyword",
-        "RecognizedKeyword",
-        "SynthesizingAudioStarted"
-    };
-    std::string reasonsCanceled[] = {
-        "",
-        "Error",
-        "EndOfStream",
-    };
-
-    std::string noMatchReasons[] = {
-        "",
-        "NotRecognized",
-        "InitialSilenceTimeout",
-        "InitialBabbleTimeout",
-        "KeywordNotRecognized"
-    };
-
     std::string str;
     str += "TranslationEventArgs<TranslationRecognitionResult> = { \n";
     str += "  SessionId = '" + e.SessionId + "'\n";
@@ -1598,12 +1543,12 @@ std::string CarbonTestConsole::ToString(const TranslationRecognitionEventArgs& e
     if (e.Result->Reason == ResultReason::NoMatch)
     {
         auto noMatch = NoMatchDetails::FromResult(e.Result);
-        str += "    NoMatchReason = NoMatchReason::" + noMatchReasons[(int)noMatch->Reason] + "\n";
+        str += "    NoMatchReason = NoMatchReason::" + ToString(noMatch->Reason)+ "\n";
     }
     if (e.Result->Reason == ResultReason::Canceled)
     {
         auto cancellation = CancellationDetails::FromResult(e.Result);
-        str += "    CancellationReason = CancellationReason::" + reasonsCanceled[(int)cancellation->Reason] + "\n";
+        str += "    CancellationReason = CancellationReason::" + ToString(cancellation->Reason) + "\n";
         if (!cancellation->ErrorDetails.empty())
         {
             str += "    ErrorDetails = '" + cancellation->ErrorDetails + "'\n";

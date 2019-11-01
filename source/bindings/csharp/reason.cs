@@ -79,6 +79,35 @@ namespace Microsoft.CognitiveServices.Speech
         /// Indicates the speech synthesis is now started.
         /// Added in version 1.4.0
         /// </summary>
-        SynthesizingAudioStarted = 12
+        SynthesizingAudioStarted = 12,
+
+        /// <summary>
+        /// Indicates the transcription result contains hypothesis text and its translation(s) for
+        /// other participants in the conversation.
+        /// Added in version 1.8.0
+        /// </summary>
+        TranslatingParticipantSpeech = 13,
+
+        /// <summary>
+        /// Indicates the transcription result contains final text and corresponding translation(s)
+        /// for other participants in the conversation. Speech Recognition and Translation are now
+        /// complete for this phrase.
+        /// Added in version 1.8.0
+        /// </summary>
+        TranslatedParticipantSpeech = 14,
+
+        /// <summary>
+        /// Indicates the transcription result contains the instant message and corresponding
+        /// translation(s).
+        /// Added in version 1.8.0
+        /// </summary>
+        TranslatedInstantMessage = 15,
+
+        /// <summary>
+        /// Indicates the transcription result contains the instant message for other participants
+        /// in the conversation and corresponding translation(s).
+        /// Added in version 1.8.0
+        /// </summary>
+        TranslatedParticipantInstantMessage = 16
     }
 }

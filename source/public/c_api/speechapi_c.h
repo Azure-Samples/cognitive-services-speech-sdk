@@ -35,3 +35,4 @@
 #include <speechapi_c_conversation_transcription_result.h>
 #include <speechapi_c_user.h>
 #include <speechapi_c_participant.h>
+#include <speechapi_c_conversation_translator.h>

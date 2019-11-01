@@ -15,6 +15,8 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+    constexpr size_t MAX_SERVICE_ERROR_RESPONSE_LENGTH = 2048;
+
     HttpResponse::HttpResponse()
         : m_statusCode(0), m_responseHeaders(HTTPHeaders_Alloc()), m_buffer(BUFFER_new())
     {
@@ -54,7 +56,30 @@ namespace Impl {
     {
         if (!IsSuccess())
         {
-            throw HttpException(m_statusCode);
+            std::string errorMessage;
+
+            // let's try to read the response from the service if there is any and include it in the exception message
+            try
+            {
+                std::ostringstream oss;
+                oss << "HTTP " << m_statusCode << ": " << ReadContentAsString(&MAX_SERVICE_ERROR_RESPONSE_LENGTH);
+                errorMessage = oss.str();
+
+                SPX_TRACE_ERROR("HTTP request failed: '%s'", errorMessage.c_str());
+            }
+            catch (...)
+            {
+                // ignore errors. Just return the HTTP status code
+            }
+
+            if (errorMessage.empty())
+            {
+                throw HttpException(m_statusCode);
+            }
+            else
+            {
+                throw HttpException(HTTPAPI_RESULT::HTTPAPI_OK, m_statusCode, errorMessage);
+            }
         }
     }
 
@@ -70,6 +95,11 @@ namespace Impl {
 
     std::string HttpResponse::ReadContentAsString()
     {
+        return ReadContentAsString(nullptr);
+    }
+
+    std::string HttpResponse::ReadContentAsString(const size_t * length)
+    {
         unsigned char *ptr = BUFFER_u_char(m_buffer);
         if (ptr == nullptr)
         {
@@ -77,6 +107,15 @@ namespace Impl {
         }
 
         size_t size = BUFFER_length(m_buffer);
+        if (size == 0)
+        {
+            return std::string();
+        }
+        else if (length != nullptr && size > *length)
+        {
+            size = *length; // WARNING: This may break UTF8 character sequences!
+        }
+
         return std::string((const char*)ptr, size);
     }
 

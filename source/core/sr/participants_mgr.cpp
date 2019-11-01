@@ -102,14 +102,17 @@ void CSpxParticipantMgrImpl::SetConversationId(const std::string& id)
     m_threadService->ExecuteSync(move(task));
 }
 
-void CSpxParticipantMgrImpl::GetConversationId(std::string& id)
+const std::string CSpxParticipantMgrImpl::GetConversationId() const
 {
-    auto keepAlive = SpxSharedPtrFromThis<ISpxConversation>(this);
-    std::packaged_task<void()> task([keepAlive = keepAlive, &conversation_id = m_conversation_id, &id = id]() mutable {
-        id = conversation_id;
+    auto keepAlive = ISpxInterfaceBase::shared_from_this();
+    std::string id;
+    std::packaged_task<void()> task([keepAlive = keepAlive, this, &id]() {
+        id = m_conversation_id;
         SPX_DBG_TRACE_INFO("id inside task is %s", id.c_str());
     });
     m_threadService->ExecuteSync(move(task));
+
+    return id;
 }
 
 void CSpxParticipantMgrImpl::GetQueryParams()
@@ -122,37 +125,38 @@ void CSpxParticipantMgrImpl::GetQueryParams()
     SPX_DBG_TRACE_INFO("Retrieved calendar id as %s and call id as %s", m_calendar_uid_value.c_str(), m_call_id_value.c_str());
 }
 
-void CSpxParticipantMgrImpl::HttpSendEndMeetingRequest()
+
+void CSpxParticipantMgrImpl::EndConversation()
 {
     auto keepAlive = SpxSharedPtrFromThis<ISpxConversation>(this);
-    std::packaged_task<void()> task([keepAlive, this]()  {
+    std::packaged_task<void()> task([keepAlive, this]()
+    {
+        SPX_TRACE_INFO("Going to send a HTTP DELETE request.");
+        try
+        {
+            GetQueryParams();
+            // the host name and path are parsed from the endpoint. The path has /meetings appended to it.
+            auto url = HttpUtils::ParseUrl(m_endpoint);
+            HttpRequest  request(url.host);
+            auto pathStartWithForwardSlash = "/" + url.path + "/meetings";
+            request.SetPath(pathStartWithForwardSlash);
 
-    SPX_TRACE_INFO("Going to send a HTTP DELETE request.");
-    try
-    {
-        GetQueryParams();
-        // the host name and path are parsed from the endpoint. The path has /meetings appended to it.
-        auto url = HttpUtils::ParseUrl(m_endpoint);
-        HttpRequest  request(url.host);
-        auto pathStartWithForwardSlash = "/" + url.path + "/meetings";
-        request.SetPath(pathStartWithForwardSlash);
-
-        HttpAddHeaders(request);
-        HttpAddQueryParams(request);
-        std::unique_ptr<HttpResponse> response = request.SendRequest(HTTPAPI_REQUEST_DELETE);
-        // throws HttpException in the case of errors. You can also use IsSuccess(), or GetStatusCode() if you don't want exceptions
-        response->EnsureSuccess();
-    }
-    catch (HttpException& e)
-    {
-        std::string message = "Error in send end meeting request." + std::to_string(e.statusCode());
-        ThrowRuntimeError(message);
-    }
-    catch (...)
-    {
-        throw;
-    }
-    SPX_TRACE_INFO("Sent a HTTP DELETE request to destroy the meeting resources in service.");
+            HttpAddHeaders(request);
+            HttpAddQueryParams(request);
+            std::unique_ptr<HttpResponse> response = request.SendRequest(HTTPAPI_REQUEST_DELETE);
+            // throws HttpException in the case of errors. You can also use IsSuccess(), or GetStatusCode() if you don't want exceptions
+            response->EnsureSuccess();
+        }
+        catch (HttpException& e)
+        {
+            std::string message = "Error in send end meeting request." + std::to_string(e.statusCode());
+            ThrowRuntimeError(message);
+        }
+        catch (...)
+        {
+            throw;
+        }
+        SPX_TRACE_INFO("Sent a HTTP DELETE request to destroy the meeting resources in service.");
     });
 
     m_threadService->ExecuteSync(std::move(task));
@@ -162,6 +166,11 @@ void CSpxParticipantMgrImpl::HttpSendEndMeetingRequest()
 std::string CSpxParticipantMgrImpl::GetSpeechEventPayload(ISpxConversation::MeetingState state)
 {
     return CreateSpeechEventPayload(state);
+}
+
+void CognitiveServices::Speech::Impl::CSpxParticipantMgrImpl::CreateConversation(const std::string &)
+{
+    // nothing to do here
 }
 
 void CSpxParticipantMgrImpl::StartUpdateParticipants()
