@@ -417,8 +417,14 @@ public:
 class ISpxSingleToManyStreamReaderAdapterSite : public ISpxInterfaceBaseFor<ISpxSingleToManyStreamReaderAdapterSite>
 {
 public:
-    virtual void ReconnectClient(long clientId) = 0;
+    virtual void ReconnectClient(long clientId, std::shared_ptr<ISpxAudioStreamReader>&& reader) = 0;
     virtual void DisconnectClient(long clientId) = 0;
+};
+
+class ISpxSetErrorInfo : public ISpxInterfaceBaseFor<ISpxSetErrorInfo>
+{
+public:
+    virtual void SetError(const std::string& error) = 0;
 };
 
 class ISpxAudioStreamWriter : public ISpxInterfaceBaseFor<ISpxAudioStreamWriter>

@@ -18,7 +18,8 @@ namespace Impl {
 class CSpxSingleToManyStreamReader :
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxAudioStream,
-    public ISpxAudioStreamReader
+    public ISpxAudioStreamReader,
+    public ISpxSetErrorInfo
 {
     public:
         CSpxSingleToManyStreamReader(long id, SpxWAVEFORMATEX_Type sourceFormat);
@@ -27,6 +28,7 @@ class CSpxSingleToManyStreamReader :
         SPX_INTERFACE_MAP_BEGIN()
             SPX_INTERFACE_MAP_ENTRY(ISpxAudioStream)
             SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamReader)
+            SPX_INTERFACE_MAP_ENTRY(ISpxSetErrorInfo)
             SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
             SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_END()
@@ -40,15 +42,20 @@ class CSpxSingleToManyStreamReader :
         virtual void Init() override;
         virtual void Term() override;
 
+        // ISpxSetErrorInfo
+        virtual void SetError(const std::string& error) override;
+
     private:
         long m_id;
         SpxWAVEFORMATEX_Type m_sourceFormat;
         bool m_streamOpened;
         std::shared_ptr<ISpxAudioSourceBufferData> m_bufferData;
         uint64_t m_bufferOffset {0};
+        std::string m_lastError;
 
         void InitBufferDataFromSite();
         void ResetBufferData();
+        bool IsDownstreamError();
 };
 
 }}}}

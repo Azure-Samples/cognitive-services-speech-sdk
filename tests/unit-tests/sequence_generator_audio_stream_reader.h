@@ -35,6 +35,8 @@ public:
 
     void UseSequentialBufferedData(uint32_t bufferSize);
     uint32_t GetUseSequentialBufferedData();
+    void ThrowNextRead();
+
 
     // --- ISpxAudioStreamCanBeThrottled ---
     void SetRealTimeThrottlePercentage(uint8_t percentage);
@@ -72,6 +74,8 @@ private:
     uint32_t m_bufferSize = 0;
     uint32_t m_seqDataValue = 0;
     uint32_t m_bufferSizeRemained = 0;
+    bool m_throwNextRead {false};
+    uint64_t m_totalDataRead = 0;
     SpxWAVEFORMATEX_Type m_format{0};
 
     uint32_t ReadSequentialBufferedData(uint8_t* pbuffer, uint32_t cbBuffer);

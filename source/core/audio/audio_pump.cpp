@@ -130,6 +130,7 @@ ISpxAudioPump::State CSpxAudioPump::GetState()
 
 void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor)
 {
+    bool processorFormatSet{ false };
     try
     {
         // make sure, we release the reference only after the last operation we did.
@@ -151,6 +152,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
         SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): setting format on processor...");
         SPX_TRACE_ERROR_IF(pISpxAudioProcessor == nullptr, "CSpxAudioPump::PumpThread(): pISpxAudioProcessor == nullptr !!! Unexpected !!");
         pISpxAudioProcessor->SetFormat(waveformat.get());
+        processorFormatSet = true;
 
         // Calculate size of the buffer to read from the reader and send to the processor; and allocate it
         SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): allocating our first buffer", (void*)this);
@@ -236,6 +238,9 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
 
         // Let the Processor know we're done for now...
         SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): exited while loop, pre-SetFormat(nullptr)", (void*)this);
+
+        // if SetFormat(nullptr) throws we do not call it again
+        processorFormatSet = false;
         pISpxAudioProcessor->SetFormat(nullptr);
         SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): exited while loop, post-SetFormat(nullptr)", (void*)this);
         return;
@@ -251,12 +256,31 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
     }
     catch (SPXHR& hrError)
     {
-        SPX_DBG_TRACE_ERROR("exception caught during pumping, %p", reinterpret_cast<void*>(hrError));
+        SPX_DBG_TRACE_ERROR("[%p]CSpxAudioPump::PumpThread(): exception caught during pumping, SPXHR: %p", (void*)this, reinterpret_cast<void*>(hrError));
         SPX_DBG_ASSERT(GetSite() != nullptr);
         InvokeOnSite([&](const SitePtr& site)
         {
             site->Error("Error: unexpected exception in PumpThread");
         });
+    }
+
+    if (processorFormatSet)
+    {
+        SPX_DBG_TRACE_VERBOSE("[%p]CSpxAudioPump::PumpThread(): exited while loop with exception, pre-SetFormat(nullptr)", (void*)this);
+        // catch and ignore errors, we are already on error path
+        try
+        {
+            pISpxAudioProcessor->SetFormat(nullptr);
+        }
+        catch (const std::exception& e)
+        {
+            SPX_DBG_TRACE_ERROR("[%p]CSpxAudioPump::PumpThread(): pISpxAudioProcessor->SetFormat(nullptr) thrown exception, %s", (void*)this, e.what());
+        }
+        catch (SPXHR& hrError)
+        {
+            SPX_DBG_TRACE_ERROR("[%p]CSpxAudioPump::PumpThread(): pISpxAudioProcessor->SetFormat(nullptr) thrown error: %p", (void*)this, reinterpret_cast<void*>(hrError));
+        }
+        processorFormatSet = false;
     }
 
     std::unique_lock<std::mutex> lock(m_mutex);

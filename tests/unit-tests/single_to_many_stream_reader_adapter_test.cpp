@@ -153,6 +153,52 @@ TEST_CASE("Demux audio stream adapter is properly functioning", "[core][demux ad
         demuxReader->Close();
     }
 
+    SECTION("Exception gets propagated to 1 client")
+    {
+        auto demuxReader = audioReaderFactory->CreateReader();
+        const int size = 3200 * 2;
+        uint8_t buffer[size];
+        auto readBytes = demuxReader->Read(buffer, size / 2);
+        singletonMockAudioReader->ThrowNextRead();
+
+        REQUIRE(readBytes == (size / 2));
+        REQUIRE(ValidateBufferSequence(buffer, readBytes));
+        REQUIRE_THROWS(demuxReader->Read(buffer, size));
+
+        auto demuxReaderAfter = audioReaderFactory->CreateReader();
+        REQUIRE_NOTHROW(readBytes = demuxReaderAfter->Read(buffer, size));
+        REQUIRE(readBytes == size);
+        REQUIRE(ValidateBufferSequence(buffer, readBytes));
+
+        demuxReader->Close();
+        demuxReaderAfter->Close();
+    }
+
+    SECTION("Exception gets propagated to 2 clients")
+    {
+        auto demuxReader1 = audioReaderFactory->CreateReader();
+        auto demuxReader2 = audioReaderFactory->CreateReader();
+        const int size = 3200 * 2;
+        uint8_t buffer[size];
+        auto readBytes = demuxReader1->Read(buffer, size / 2);
+        singletonMockAudioReader->ThrowNextRead();
+
+        REQUIRE(readBytes == (size / 2));
+        REQUIRE(ValidateBufferSequence(buffer, readBytes));
+        REQUIRE_THROWS(demuxReader1->Read(buffer, size));
+        REQUIRE_THROWS(demuxReader2->Read(buffer, size));
+
+        auto demuxReaderAfter = audioReaderFactory->CreateReader();
+        REQUIRE_NOTHROW(readBytes = demuxReaderAfter->Read(buffer, size));
+        REQUIRE(readBytes == size);
+        REQUIRE(ValidateBufferSequence(buffer, readBytes));
+
+        demuxReader1->Close();
+        demuxReader2->Close();
+        demuxReaderAfter->Close();
+    }
+
+
     return;
 }
 
@@ -269,5 +315,6 @@ TEST_CASE("Demux audio stream adapter stress and multithreaed", "[core][demux ad
         th3.join();
         th4.join();
     }
+
     return;
 }

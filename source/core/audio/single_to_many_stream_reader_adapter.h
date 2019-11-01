@@ -54,7 +54,7 @@ class CSpxSingleToManyStreamReaderAdapter :
         virtual void SetSingletonReader(std::shared_ptr<ISpxAudioStreamReader> singletonReader) override;
 
         // ISpxSingleToManyStreamReaderAdapterSite
-        virtual void ReconnectClient(long clientId) override;
+        virtual void ReconnectClient(long clientId, std::shared_ptr<ISpxAudioStreamReader>&& reader) override;
         virtual void DisconnectClient(long clientId) override;
 
         // ISpxAudioStreamReaderFactory
@@ -100,6 +100,9 @@ class CSpxSingleToManyStreamReaderAdapter :
         std::shared_ptr<ISpxAudioSourceBufferProperties> GetBufferProperties();
         std::shared_ptr<ISpxAudioSourceBufferProperties> InitBufferProperties();
         void TermAudioSourceBuffer();
+        void HandleDownstreamError(const std::string& error);
+
+        std::map<long, std::shared_ptr<ISpxAudioStreamReader>> m_readersMap;
 };
 
 }}}}

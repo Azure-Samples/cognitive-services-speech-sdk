@@ -24,6 +24,10 @@ CSpxSingleToManyStreamReader::~CSpxSingleToManyStreamReader()
     SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReader(%ld)::dctor", m_id);
 }
 
+void CSpxSingleToManyStreamReader::SetError(const std::string& error)
+{
+    m_lastError = error;
+}
 
 uint16_t CSpxSingleToManyStreamReader::GetFormat(SPXWAVEFORMATEX* pFormat, uint16_t cbFormat)
 {
@@ -45,11 +49,17 @@ uint32_t CSpxSingleToManyStreamReader::Read(uint8_t* pBuffer, uint32_t cbBuffer)
 
     auto bytesRead = m_bufferData->ReadAt(m_bufferOffset, pBuffer, cbBuffer);
     m_bufferOffset += bytesRead;
+    if (IsDownstreamError())
+    {
+        ThrowRuntimeError(m_lastError);
+    }
+
     return bytesRead;
 }
 
 void CSpxSingleToManyStreamReader::Close()
 {
+    m_lastError.clear();
     if (!m_streamOpened)
     {
         SPX_DBG_TRACE_ERROR("CSpxSingleToManyStreamReader(%ld)::Close - already closed", m_id);
@@ -63,7 +73,6 @@ void CSpxSingleToManyStreamReader::Close()
     auto site = GetSite();
     auto siteReaderAdapter = SpxQueryInterface<ISpxSingleToManyStreamReaderAdapterSite>(site);
     siteReaderAdapter->DisconnectClient(m_id);
-
     m_streamOpened = false;
 }
 
@@ -79,7 +88,7 @@ void CSpxSingleToManyStreamReader::Init()
     auto siteReader = SpxQueryInterface<ISpxSingleToManyStreamReaderAdapterSite>(site);
 
     // Make sure the adapter knows we are consumer again. 
-    siteReader->ReconnectClient(m_id);
+    siteReader->ReconnectClient(m_id, SpxSharedPtrFromThis<ISpxAudioStreamReader>(this));
     InitBufferDataFromSite();
 
     m_streamOpened = true;
@@ -105,5 +114,11 @@ void CSpxSingleToManyStreamReader::ResetBufferData()
     m_bufferData.reset();
     m_bufferOffset = 0;
 }
+
+bool CSpxSingleToManyStreamReader::IsDownstreamError()
+{
+    return m_lastError.length() > 0;
+}
+
 
 }}}}

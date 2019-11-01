@@ -19,6 +19,7 @@ namespace Impl {
 
 class CSpxAudioProcessorWriteToAudioSourceBuffer :
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
+    public ISpxSetErrorInfo,
     public ISpxAudioProcessorSimpleImpl
 {
 protected:
@@ -34,6 +35,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)
+        SPX_INTERFACE_MAP_ENTRY(ISpxSetErrorInfo)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectInit (overrides)
@@ -42,6 +44,11 @@ public:
     // --- ISpxAudioProcessor (overrides)
     void SetFormat(const SPXWAVEFORMATEX* format) override;
     void ProcessAudio(const DataChunkPtr& audioChunk) override;
+
+    // --- ISpxSetErrorInfo (override)
+
+    // SetFormat(nullptr) is not always called on error and the orchestrator above may want to reset this in case of error much earlier.
+    virtual void SetError(const std::string& error) override;
 
 private:
 

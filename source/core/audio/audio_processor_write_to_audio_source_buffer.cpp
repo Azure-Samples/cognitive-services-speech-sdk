@@ -53,6 +53,12 @@ void CSpxAudioProcessorWriteToAudioSourceBuffer::ProcessAudio(const DataChunkPtr
     NotifyTarget();
 }
 
+void CSpxAudioProcessorWriteToAudioSourceBuffer::SetError(const std::string&)
+{
+    InitFromSite(false);
+    NotifyTarget();
+}
+
 void CSpxAudioProcessorWriteToAudioSourceBuffer::InitFromSite(bool init)
 {
     if (!init && m_bufferData != nullptr)

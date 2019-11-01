@@ -35,9 +35,6 @@ CSpxSequenceGeneratorAudioStreamReader::CSpxSequenceGeneratorAudioStreamReader()
     m_format->nBlockAlign = 2;
     m_format->wBitsPerSample = 16;
     m_format->cbSize = 0;
-
-
-    
 }
 
 void CSpxSequenceGeneratorAudioStreamReader::SetRealTimeThrottlePercentage(uint8_t percentage)
@@ -50,6 +47,12 @@ uint8_t CSpxSequenceGeneratorAudioStreamReader::GetRealTimeThrottlePercentage()
 {
     return m_simulateRealtimePercentage;
 }
+
+void CSpxSequenceGeneratorAudioStreamReader::ThrowNextRead()
+{
+    m_throwNextRead = true;
+}
+
 
 uint16_t CSpxSequenceGeneratorAudioStreamReader::GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat)
 {
@@ -69,9 +72,17 @@ uint32_t CSpxSequenceGeneratorAudioStreamReader::Read(uint8_t* pbuffer, uint32_t
     if (m_simulateRealtimePercentage > 0)
     {
         auto nAvgBytesPerSec = std::round((*m_normalRand)(m_gen));
-        auto milliseconds = (uint32_t)(cbBuffer * 1000 / nAvgBytesPerSec * m_simulateRealtimePercentage / 100);
+        auto milliseconds = (uint32_t)((uint64_t)cbBuffer * 1000 / nAvgBytesPerSec * m_simulateRealtimePercentage / 100);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+    }
+
+    m_totalDataRead += cbBuffer;
+
+    if (m_throwNextRead)
+    {
+        m_throwNextRead = false;
+        ThrowRuntimeError("TEST: **** Stream reading exception ****");
     }
 
     if (GetUseSequentialBufferedData() > 0)
@@ -102,6 +113,7 @@ uint32_t CSpxSequenceGeneratorAudioStreamReader::GetUseSequentialBufferedData()
 {
     return m_bufferSize;
 }
+
 
 uint32_t CSpxSequenceGeneratorAudioStreamReader::ReadSequentialBufferedData(uint8_t* pbuffer, uint32_t cbBuffer)
 {

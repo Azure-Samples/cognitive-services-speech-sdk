@@ -63,6 +63,8 @@ CSpxSingleToManyStreamReaderAdapter::~CSpxSingleToManyStreamReaderAdapter()
 {
     SPX_DBG_TRACE_VERBOSE("CSpxSingleToManyStreamReaderAdapter::~CSpxSingleToManyStreamReaderAdapter");
     SPX_ASSERT(m_clientCount == 0);
+    SPX_ASSERT(m_readersMap.size() == 0);
+
     Term();
 }
 
@@ -160,23 +162,27 @@ void CSpxSingleToManyStreamReaderAdapter::ClosePumpAndStream()
     }
 }
 
-void CSpxSingleToManyStreamReaderAdapter::ReconnectClient(long clientId)
+void CSpxSingleToManyStreamReaderAdapter::ReconnectClient(long clientId, std::shared_ptr<ISpxAudioStreamReader>&& reader)
 {
     // Since the object is not going away at 0 we can't use InterlockedIncrement/Decrement here 
     std::lock_guard<std::mutex> lock(m_clientLifetimeLock);
     SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReaderAdapter::ReconnectClient: %d (client id: %ld)", m_clientCount, clientId);
+    m_readersMap.emplace(std::make_pair(clientId, reader));
     EnsureAudioStreamStarted();
     m_clientCount++;
+    SPX_ASSERT((size_t)m_clientCount == m_readersMap.size());
 }
 
 void CSpxSingleToManyStreamReaderAdapter::DisconnectClient(long clientId)
 {
     std::lock_guard<std::mutex> lock(m_clientLifetimeLock);
+    m_readersMap.erase(clientId);
 
     if (m_clientCount > 0)
     {
         m_clientCount--;
         SPX_DBG_TRACE_INFO("CSpxSingleToManyStreamReaderAdapter::DisconnectClient[%ld]: %d", clientId, m_clientCount);
+        SPX_ASSERT((size_t)m_clientCount == m_readersMap.size());
 
         if (m_clientCount == 0)
         {
@@ -222,6 +228,9 @@ void CSpxSingleToManyStreamReaderAdapter::Error(const std::string& error)
     if (!error.empty())
     {
         SPX_DBG_TRACE_ERROR("CSpxSingleToManyStreamReaderAdapter::Error: '%s'", error.c_str());
+
+        // We may need to get this on a separate thread if locks overlap.
+        HandleDownstreamError(error);
     }
 }
 
@@ -261,6 +270,25 @@ std::shared_ptr<ISpxAudioSourceBufferProperties> CSpxSingleToManyStreamReaderAda
 {
     SPX_DBG_ASSERT(m_bufferProperties != nullptr);
     return m_bufferProperties;
+}
+
+void CSpxSingleToManyStreamReaderAdapter::HandleDownstreamError(const std::string& error)
+{
+    std::lock_guard<std::mutex> lock(m_clientLifetimeLock);
+
+    // Provide the error to all the connected clients
+    for (auto crtReader : m_readersMap)
+    {
+        auto setErrorInfo = SpxQueryInterface<ISpxSetErrorInfo>(crtReader.second);
+        setErrorInfo->SetError(error);
+    }
+
+    // Inform the audio processor of the error it will unblock readers if any. 
+    auto processorErrorInfo = SpxQueryInterface<ISpxSetErrorInfo>(m_audioProcessorBufferWriter);
+    processorErrorInfo->SetError(error);
+
+    // We close the audio even if we have clients connected. 
+    ClosePumpAndStream();
 }
 
 void CSpxSingleToManyStreamReaderAdapter::TermAudioSourceBuffer()
