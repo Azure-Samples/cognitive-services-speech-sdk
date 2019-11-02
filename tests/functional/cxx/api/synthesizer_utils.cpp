@@ -318,4 +318,10 @@ namespace TTS
 
         return ss.str();
     }
+
+    std::wstring ToWString(const std::string& string)
+    {
+        std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+        return converter.from_bytes(string);
+    }
 }

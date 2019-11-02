@@ -174,6 +174,24 @@ TEST_CASE("Pick voice - REST", "[api][cxx]")
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
 }
 
+TEST_CASE("Synthesis using std::wstring - REST", "[api][cxx]")
+{
+    const auto config = RestSpeechConfig();
+    config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+    const auto text = ToWString("你好。");
+    const auto ssml = ToWString("<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>今天天气很好。</voice></speak>");
+
+    auto result1 = synthesizer->SpeakTextAsync(text).get();
+    auto result2 = synthesizer->SpeakSsml(ssml);
+
+    SPXTEST_REQUIRE(result1->Reason == ResultReason::SynthesizingAudioCompleted);
+    SPXTEST_REQUIRE(result1->GetAudioLength() > 0);
+
+    SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioCompleted);
+    SPXTEST_REQUIRE(result2->GetAudioLength() > 0);
+}
+
 TEST_CASE("Synthesizer output to file - REST", "[api][cxx]")
 {
     auto config = RestSpeechConfig();
@@ -582,6 +600,24 @@ TEST_CASE("Pick voice - USP", "[api][cxx]")
     synthesizer->SpeakTextAsync("{{{text2}}}"); /* "{{{text2}}}" has now completed rendering to default speakers */
 }
 
+TEST_CASE("Synthesis using std::wstring - USP", "[api][cxx]")
+{
+    const auto config = UspSpeechConfig();
+    config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+    const auto text = ToWString("你好。");
+    const auto ssml = ToWString("<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>今天天气很好。</voice></speak>");
+
+    auto result1 = synthesizer->SpeakTextAsync(text).get();
+    auto result2 = synthesizer->SpeakSsml(ssml);
+
+    SPXTEST_REQUIRE(result1->Reason == ResultReason::SynthesizingAudioCompleted);
+    SPXTEST_REQUIRE(result1->GetAudioLength() > 0);
+
+    SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioCompleted);
+    SPXTEST_REQUIRE(result2->GetAudioLength() > 0);
+}
+
 TEST_CASE("Synthesizer output to file - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
@@ -966,6 +1002,8 @@ TEST_CASE("Synthesis with invalid voice - USP", "[api][cxx]")
     SPXTEST_REQUIRE(synthesisCanceled);
 }
 
+/* Test cases based on mock TTS engine, with output audio content check */
+
 TEST_CASE("Synthesis Defaults - Mock", "[api][cxx]")
 {
     auto config = MockSpeechConfig();
@@ -1029,7 +1067,25 @@ TEST_CASE("Pick voice - Mock", "[api][cxx]")
     SPXTEST_REQUIRE(AreBinaryEqual(expectedAudioData2, result2->GetAudioData()));
 }
 
-/* Test cases based on mock TTS engine, with output audio content check */
+TEST_CASE("Synthesis using std::wstring - Mock", "[api][cxx]")
+{
+    const auto config = RestSpeechConfig();
+    config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+
+    const auto text_s = "你好。"s;
+    const auto ssml_s = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>今天天气很好。</voice></speak>"s;
+    const auto text_ws = ToWString(text_s);
+    const auto ssml_ws = ToWString(ssml_s);
+
+    auto result1_s = synthesizer->SpeakTextAsync(text_s).get();
+    auto result1_ws = synthesizer->SpeakText(text_ws);
+    SPXTEST_REQUIRE(AreBinaryEqual(result1_s->GetAudioData(), result1_ws->GetAudioData()));
+
+    auto result2_s = synthesizer->SpeakSsmlAsync(ssml_s).get();
+    auto result2_ws = synthesizer->SpeakSsml(ssml_ws);
+    SPXTEST_REQUIRE(AreBinaryEqual(result2_s->GetAudioData(), result2_ws->GetAudioData()));
+}
 
 TEST_CASE("Synthesizer output to file - Mock", "[api][cxx]")
 {

@@ -80,6 +80,8 @@ namespace TTS
 
     std::string XmlEncode(const std::string& text);
 
+    std::wstring ToWString(const std::string& string);
+
     class PushAudioOutputStreamTestCallback : public PushAudioOutputStreamCallback
     {
     public:
