@@ -1380,9 +1380,7 @@ public class SpeechRecognizerTests {
 
     @Test
     public void verfiyLanguageIdDetection() throws InterruptedException, ExecutionException, TimeoutException {
-
-        String endpoint = "wss://" + Settings.SpeechRegion + ".sr.speech.microsoft.com/speech/translation/interactive/mstranslator/v1?TrafficType=Test&language=en-US";
-        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(URI.create(endpoint), Settings.SpeechSubscriptionKey);
+        SpeechConfig speechConfig = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(speechConfig);
         List<SourceLanguageConfig> sourceLanguageConfigs = new ArrayList<SourceLanguageConfig>();
         sourceLanguageConfigs.add(SourceLanguageConfig.fromLanguage("en-US"));
