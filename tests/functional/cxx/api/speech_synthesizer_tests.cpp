@@ -917,7 +917,7 @@ TEST_CASE("Speak output in streams with all data get on synthesis started result
     DoSomethingWithAudioInDataStream(stream, true); /* the stream should be with AllData status */
 }
 
-TEST_CASE("Check word boundary events - USP", "[api][cxx][!hide]")
+TEST_CASE("Check word boundary events - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();
     config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
@@ -926,34 +926,42 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx][!hide]")
     std::string plainText = "您好，我是来自Microsoft的中文声音。";
     std::string ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>您好，<break time='50ms'/>我是来自Microsoft的中文声音。</voice></speak>";
 
-    uint64_t expectedAudioOffsets[8] = { 500000, 6964380, 8839380, 10525619, 14774380, 23987500, 26077500, 30366880 };
-    uint32_t expectedTextOffsets[8] = { 0, 3, 4, 5, 7, 16, 17, 19 };
-    uint32_t expectedSsmlOffsets[8] = { 251, 274, 275, 276, 278, 287, 288, 290 };
-    uint32_t expectedWordLengths[8] = { 2, 1, 1, 2, 9, 1, 2, 2 };
+    std::vector<uint32_t> expectedTextOffsets{ 0, 3, 4, 5, 7, 16, 17, 19 };
+    std::vector<uint32_t> expectedSsmlOffsets{ 251, 274, 275, 276, 278, 287, 288, 290 };
+    std::vector<uint32_t> expectedWordLengths{ 2, 1, 1, 2, 9, 1, 2, 2 };
 
-    int order = 0;
-    synthesizer->WordBoundary += [&order, expectedAudioOffsets, expectedTextOffsets, expectedWordLengths](const SpeechSynthesisWordBoundaryEventArgs& e) {
-        SPXTEST_REQUIRE(expectedAudioOffsets[order] == e.AudioOffset);
-        SPXTEST_REQUIRE(expectedTextOffsets[order] == e.TextOffset);
-        SPXTEST_REQUIRE(expectedWordLengths[order] == e.WordLength);
-        order++;
+    auto order = 0;
+    auto actualAudioOffsets = std::vector<uint64_t>();
+    auto actualTextOffsets = std::vector<uint32_t>();
+    auto actualWordLengths = std::vector<uint32_t>();
+    synthesizer->WordBoundary += [&actualAudioOffsets, &actualTextOffsets, &actualWordLengths](const SpeechSynthesisWordBoundaryEventArgs& e) {
+        actualAudioOffsets.push_back(e.AudioOffset);
+        actualTextOffsets.push_back(e.TextOffset);
+        actualWordLengths.push_back(e.WordLength);
     };
 
     synthesizer->SpeakTextAsync(plainText);
-    SPXTEST_REQUIRE(8 == order);
+
+    SPXTEST_REQUIRE(std::is_sorted(actualAudioOffsets.begin(), actualAudioOffsets.end()));
+    SPXTEST_REQUIRE(expectedTextOffsets == actualTextOffsets);
+    SPXTEST_REQUIRE(expectedWordLengths == actualWordLengths);
 
     synthesizer->WordBoundary.DisconnectAll();
 
-    order = 0;
-    synthesizer->WordBoundary += [&order, expectedSsmlOffsets, expectedWordLengths](const SpeechSynthesisWordBoundaryEventArgs& e) {
-        SPXTEST_REQUIRE(e.AudioOffset > 0);
-        SPXTEST_REQUIRE(expectedSsmlOffsets[order] == e.TextOffset);
-        SPXTEST_REQUIRE(expectedWordLengths[order] == e.WordLength);
-        order++;
+    actualAudioOffsets.clear();
+    auto actualSsmlOffsets = std::vector<uint32_t>();
+    actualWordLengths.clear();
+    synthesizer->WordBoundary += [&actualAudioOffsets, &actualSsmlOffsets, &actualWordLengths](const SpeechSynthesisWordBoundaryEventArgs& e) {
+        actualAudioOffsets.push_back(e.AudioOffset);
+        actualSsmlOffsets.push_back(e.TextOffset);
+        actualWordLengths.push_back(e.WordLength);
     };
 
     synthesizer->SpeakSsmlAsync(ssml);
-    SPXTEST_REQUIRE(8 == order);
+
+    SPXTEST_REQUIRE(std::is_sorted(actualAudioOffsets.begin(), actualAudioOffsets.end()));
+    SPXTEST_REQUIRE(expectedSsmlOffsets == actualSsmlOffsets);
+    SPXTEST_REQUIRE(expectedWordLengths == actualWordLengths);
 
     synthesizer->WordBoundary.DisconnectAll();
 
@@ -978,6 +986,36 @@ TEST_CASE("Check word boundary events - USP", "[api][cxx][!hide]")
 
     synthesizer->SpeakSsmlAsync(ssml);
     SPXTEST_REQUIRE(order > 0);
+}
+
+TEST_CASE("Check word boundary events - USP [manual]", "[manual][api][cxx]") // manual test for AudioOffset of Word Boundary events
+{
+    auto config = UspSpeechConfig();
+    config->SetSpeechSynthesisVoiceName("Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)");
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
+
+    std::string plainText = "您好，我是来自Microsoft的中文声音。";
+
+    std::vector<uint64_t> expectedAudioOffsets{ 500000, 6924380, 8799380, 10495619, 14748750, 23915620, 26092500, 30358750 };
+    std::vector<uint32_t> expectedTextOffsets{ 0, 3, 4, 5, 7, 16, 17, 19 };
+    std::vector<uint32_t> expectedWordLengths{ 2, 1, 1, 2, 9, 1, 2, 2 };
+
+    auto actualAudioOffsets = std::vector<uint64_t>();
+    auto actualTextOffsets = std::vector<uint32_t>();
+    auto actualWordLengths = std::vector<uint32_t>();
+    synthesizer->WordBoundary += [&actualAudioOffsets, &actualTextOffsets, &actualWordLengths](const SpeechSynthesisWordBoundaryEventArgs& e) {
+        actualAudioOffsets.push_back(e.AudioOffset);
+        actualTextOffsets.push_back(e.TextOffset);
+        actualWordLengths.push_back(e.WordLength);
+    };
+
+    synthesizer->SpeakTextAsync(plainText);
+
+    SPXTEST_REQUIRE(expectedAudioOffsets == actualAudioOffsets);
+    SPXTEST_REQUIRE(expectedTextOffsets == actualTextOffsets);
+    SPXTEST_REQUIRE(expectedWordLengths == actualWordLengths);
+
+    synthesizer->WordBoundary.DisconnectAll();
 }
 
 TEST_CASE("Synthesis with invalid voice - USP", "[api][cxx]")

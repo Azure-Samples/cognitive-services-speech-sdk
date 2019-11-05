@@ -27,8 +27,7 @@ from .tts_utils import (_create_speech_config,
                     _synthesis_canceled_counter,
                     _synthesis_started_event_check,
                     _synthesizing_event_check,
-                    _synthesis_word_boundary_event_check_plain_text,
-                    _synthesis_word_boundary_event_check_ssml)
+                    _synthesis_word_boundary_event_check)
 
 
 def test_speech_synthesizer_defaults(subscription, speech_region):
@@ -438,7 +437,6 @@ def test_speech_synthesizer_check_word_boundary_events(subscription, speech_regi
     plain_text = "您好，我是来自Microsoft的中文声音。"
     ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' xml:lang='zh-CN'><voice name='Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)'>您好，<break time='50ms'/>我是来自Microsoft的中文声音。</voice></speak>"
 
-    expected_audio_offsets = [500000, 6964380, 8839380, 10525619, 14774380, 23987500, 26077500, 30366880]
     expected_text_offsets = [0, 3, 4, 5, 7, 16, 17, 19]
     expected_ssml_offsets = [251, 274, 275, 276, 278, 287, 288, 290]
     expected_word_lengths = [2, 1, 1, 2, 9, 1, 2, 2]
@@ -447,9 +445,9 @@ def test_speech_synthesizer_check_word_boundary_events(subscription, speech_regi
 
     synthesis_word_boundary_check_plain_text_callback = _TestCallback(
         "In synthesis word boundary check plain text callback: {evt}",
-        event_checks=functools.partial(_synthesis_word_boundary_event_check_plain_text, counter=counter,
-        expected_audio_offsets=expected_audio_offsets,
-        expected_text_offsets = expected_text_offsets,
+        event_checks=functools.partial(_synthesis_word_boundary_event_check,
+        counter=counter,
+        expected_text_offsets=expected_text_offsets,
         expected_word_lengths=expected_word_lengths))
     synthesizer.synthesis_word_boundary.connect(synthesis_word_boundary_check_plain_text_callback)
     result = synthesizer.speak_text_async(plain_text).get()
@@ -461,9 +459,9 @@ def test_speech_synthesizer_check_word_boundary_events(subscription, speech_regi
 
     synthesis_word_boundary_check_ssml_callback = _TestCallback(
         "In synthesis word boundary check ssml callback: {evt}",
-        event_checks=functools.partial(_synthesis_word_boundary_event_check_ssml, counter=counter,
-        expected_audio_offsets=expected_audio_offsets,
-        expected_ssml_offsets = expected_ssml_offsets,
+        event_checks=functools.partial(_synthesis_word_boundary_event_check,
+        counter=counter,
+        expected_text_offsets=expected_ssml_offsets,
         expected_word_lengths=expected_word_lengths))
     synthesizer.synthesis_word_boundary.connect(synthesis_word_boundary_check_ssml_callback)
     result = synthesizer.speak_ssml_async(ssml).get()

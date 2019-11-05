@@ -138,19 +138,11 @@ def _synthesis_canceled_counter(e, counter):
         assert 1 == counter['_started_speak_requests']
 
 
-def _synthesis_word_boundary_event_check_plain_text(e, counter,
-    expected_audio_offsets, expected_text_offsets, expected_word_lengths):
-    assert expected_audio_offsets[counter['_word_boundary_events']] == e.audio_offset
-    assert expected_text_offsets[counter['_word_boundary_events']] == e.text_offset
-    assert expected_word_lengths[counter['_word_boundary_events']] == e.word_length
-
-    counter['_word_boundary_events'] += 1
-
-
-def _synthesis_word_boundary_event_check_ssml(e, counter,
-    expected_audio_offsets, expected_ssml_offsets, expected_word_lengths):
+def _synthesis_word_boundary_event_check(e, counter,
+    expected_text_offsets, expected_word_lengths):
+    assert counter['_word_boundary_events'] < len(expected_word_lengths)
     assert e.audio_offset > 0
-    assert expected_ssml_offsets[counter['_word_boundary_events']] == e.text_offset
+    assert expected_text_offsets[counter['_word_boundary_events']] == e.text_offset
     assert expected_word_lengths[counter['_word_boundary_events']] == e.word_length
 
     counter['_word_boundary_events'] += 1
