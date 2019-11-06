@@ -342,8 +342,27 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task GermanRecognition(bool usingPreConnection)
         {
-            this.defaultConfig.SpeechRecognitionLanguage = Language.DE_DE;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.DE_DE, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            {
+                using (var connection = Connection.FromRecognizer(recognizer))
+                {
+                    if (usingPreConnection)
+                    {
+                        connection.Open(false);
+                    }
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                    Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                    AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
+                }
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task GermanRecognitionWithSourceLangConfig(bool usingPreConnection)
+        {
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, SourceLanguageConfig.FromLanguage(Language.DE_DE), AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
                 {
@@ -363,9 +382,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task ContinuousGermanRecognition(bool usingPreConnection)
         {
-            this.defaultConfig.SpeechRecognitionLanguage = Language.DE_DE;
             var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.DE_DE, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
                 {
@@ -596,19 +614,23 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void TestGetters()
         {
-            this.defaultConfig.EndpointId = deploymentId;
             var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 Assert.IsTrue(string.IsNullOrEmpty(recognizer.SpeechRecognitionLanguage), $"No language should be set, is {recognizer.SpeechRecognitionLanguage}");
                 Assert.AreEqual(recognizer.SpeechRecognitionLanguage, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
+                Assert.AreEqual(OutputFormat.Simple, recognizer.OutputFormat);
+            }
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, SourceLanguageConfig.FromLanguage(Language.DE_DE, deploymentId), audioInput)))
+            {
+                Assert.AreEqual(Language.DE_DE, recognizer.SpeechRecognitionLanguage);
+                Assert.AreEqual(recognizer.SpeechRecognitionLanguage, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
                 Assert.AreEqual(deploymentId, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_EndpointId));
                 Assert.AreEqual(OutputFormat.Simple, recognizer.OutputFormat);
             }
 
-            this.defaultConfig.SpeechRecognitionLanguage = Language.DE_DE;
-            this.defaultConfig.EndpointId = string.Empty;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.DE_DE, audioInput)))
             {
                 Assert.AreEqual(Language.DE_DE, recognizer.SpeechRecognitionLanguage);
                 Assert.AreEqual(Language.DE_DE, recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
@@ -802,9 +824,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void CloseConnectionWithoutOpen()
         {
-            this.defaultConfig.SpeechRecognitionLanguage = Language.DE_DE;
             var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
-            var recognizer = new SpeechRecognizer(this.defaultConfig, audioInput);
+            var recognizer = new SpeechRecognizer(this.defaultConfig, Language.DE_DE, audioInput);
             using (var connection = Connection.FromRecognizer(recognizer))
             {
                 // Close the connection without opening it.
@@ -816,9 +837,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ExpectedException(typeof(ObjectDisposedException))]
         public async Task AsyncRecognitionAfterDisposingSpeechRecognizer()
         {
-            this.defaultConfig.SpeechRecognitionLanguage = Language.DE_DE;
             var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
-            var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput));
+            var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.DE_DE, audioInput));
             recognizer.Dispose();
             await recognizer.StartContinuousRecognitionAsync();
         }
@@ -827,9 +847,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ExpectedException(typeof(InvalidOperationException))]
         public void DisposingSpeechRecognizerWhileAsyncRecognition()
         {
-            this.defaultConfig.SpeechRecognitionLanguage = Language.EN;
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
-            var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput));
+            var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.EN, audioInput));
             recognizer = helper.GetSpeechRecognizingAsyncNotAwaited(recognizer);
         }
 
@@ -837,8 +856,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task FromEndpointGermanRecognition()
         {
             var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
-            configFromEndpoint.SpeechRecognitionLanguage = Language.DE_DE;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, Language.DE_DE, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
@@ -904,8 +922,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var endpointWithLang = endpointInString + "?language=de-de";
             var configFromEndpoint = SpeechConfig.FromEndpoint(new Uri(endpointWithLang), subscriptionKey);
             // The property should not overwrite the query parameter in url.
-            configFromEndpoint.SpeechRecognitionLanguage = Language.EN;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, Language.EN, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
@@ -959,9 +976,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task SetServicePropertyOverwrite()
         {
-            this.defaultConfig.SpeechRecognitionLanguage = "en-US";
             this.defaultConfig.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, "en-US", AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
@@ -1493,6 +1509,138 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
                 disposeEvent.WaitOne();
+            }
+        }
+        #endregion
+
+        #region LID Tests
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task LanguageIDRecognitionOnce(bool constructFromSourceLanguageConfig)
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
+            AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig;
+            if (constructFromSourceLanguageConfig)
+            {
+                autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromSourceLanguageConfigs(
+                    new SourceLanguageConfig[]
+                    {
+                        SourceLanguageConfig.FromLanguage(Language.CA_ES),
+                        SourceLanguageConfig.FromLanguage(Language.DE_DE),
+                    });
+            }
+            else
+            {
+                autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { Language.DE_DE, Language.CA_ES });
+            }
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, autoDetectSourceLanguageConfig, audioInput)))
+            {
+                List<string> recognizingText = new List<string>();
+                List<string> errors = new List<string>();
+                var lidInHypothesis = new HashSet<string>();
+                recognizer.Recognizing += (s, e) =>
+                {
+                    if (e.Result.Reason == ResultReason.RecognizingSpeech)
+                    {
+                        recognizingText.Add(e.Result.Text);
+                        var lidResult = AutoDetectSourceLanguageResult.FromResult(e.Result);
+                        if (lidResult == null)
+                        {
+                            errors.Add("Hypothesis has null language id result");
+                        }
+                        else
+                        {
+                            lidInHypothesis.Add(lidResult.Language);
+                        }
+                    }
+                    else
+                    {
+                        errors.Add("Unexpected result reason in hypothesis " + e.Result.Reason);
+                    }
+                };
+                var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
+                Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
+                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                var autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult.FromResult(result);
+                Assert.IsNotNull(autoDetectSourceLanguageResult);
+                Assert.AreEqual(Language.DE_DE, autoDetectSourceLanguageResult.Language);
+                Assert.AreEqual(0, errors.Count);
+                Assert.IsTrue(recognizingText.Count > 0);
+                Assert.AreEqual(1, lidInHypothesis.Count);
+                Assert.AreEqual(Language.DE_DE, lidInHypothesis.First());
+
+            }
+        }
+
+        [TestMethod]
+        public async Task LanguageIDRecognitionContinous()
+        {
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(
+                                                   this.defaultConfig,
+                                                   AutoDetectSourceLanguageConfig.FromLanguages(new string[] { Language.DE_DE, Language.CA_ES }),
+                                                   AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            {
+                List<string> recognizedText = new List<string>();
+                List<string> recognizingText = new List<string>();
+                List<string> errors = new List<string>();
+                var lidInHypothesis = new HashSet<string>();
+                var lidInFinal = new HashSet<string>();
+                recognizer.Recognizing += (s, e) =>
+                {
+                    if (e.Result.Reason == ResultReason.RecognizingSpeech)
+                    {
+                        recognizingText.Add(e.Result.Text);
+                        var lidResult = AutoDetectSourceLanguageResult.FromResult(e.Result);
+                        if (lidResult == null)
+                        {
+                            errors.Add("Hypothesis has null language id result");
+                        }
+                        else
+                        {
+                            lidInHypothesis.Add(lidResult.Language);
+                        }
+                    }
+                    else
+                    {
+                        errors.Add("Unexpected result reason in hypothesis " + e.Result.Reason);
+                    }
+                };
+
+                recognizer.Recognized += (s, e) =>
+                {
+                    if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                    {
+                        if (e.Result.Text.Length > 0)
+                        {
+                            recognizedText.Add(e.Result.Text);
+                        }
+                        var lidResult = AutoDetectSourceLanguageResult.FromResult(e.Result);
+                        if (lidResult == null)
+                        {
+                            errors.Add("Final result has null language id result");
+                        }
+                        else
+                        {
+                            lidInFinal.Add(lidResult.Language);
+                        }
+                    }
+                    else
+                    {
+                        errors.Add("Unexpected result reason in final result " + e.Result.Reason);
+                    }
+                };
+
+                await helper.CompleteContinuousRecognition(recognizer);
+
+                Assert.IsTrue(recognizingText.Count > 0);
+                Assert.IsTrue(recognizedText.Count > 0);
+                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, recognizedText[0]);
+                Assert.AreEqual(0, errors.Count);
+                Assert.AreEqual(1, lidInHypothesis.Count);
+                Assert.AreEqual(Language.DE_DE, lidInHypothesis.First());
+                Assert.AreEqual(1, lidInFinal.Count);
+                Assert.AreEqual(Language.DE_DE, lidInFinal.First());
             }
         }
         #endregion

@@ -106,6 +106,12 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR recognizer_create_speech_recognizer_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR recognizer_create_speech_recognizer_from_source_lang_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle sourceLangConfig, InteropSafeHandle audioInput);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR recognizer_create_speech_recognizer_from_auto_detect_source_lang_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle autoDetectSourceLangConfig, InteropSafeHandle audioInput);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR recognizer_create_translation_recognizer_from_config(out SPXRECOHANDLE recoHandle, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
 
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]

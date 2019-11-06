@@ -166,6 +166,78 @@ namespace Microsoft.CognitiveServices.Speech
             this.audioConfig = audioConfig;
         }
 
+        /// <summary>
+        /// Creates a new instance of SpeechRecognizer.
+        /// Added in 1.8.1
+        /// </summary>
+        /// <param name="speechConfig">Speech configuration</param>
+        /// <param name="language">The source language</param>
+        public SpeechRecognizer(SpeechConfig speechConfig, string language)
+            : this(speechConfig, language, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of SpeechRecognizer.
+        /// Added in 1.8.1
+        /// </summary>
+        /// <param name="speechConfig">Speech configuration</param>
+        /// <param name="language">The source language</param>
+        /// <param name="audioConfig">Audio configuration</param>
+        public SpeechRecognizer(SpeechConfig speechConfig, string language, Audio.AudioConfig audioConfig)
+            : this(speechConfig, SourceLanguageConfig.FromLanguage(language), audioConfig)
+        {
+            this.audioConfig = audioConfig;
+        }
+
+        /// <summary>
+        /// Creates a new instance of SpeechRecognizer.
+        /// Added in 1.8.1
+        /// </summary>
+        /// <param name="speechConfig">Speech configuration</param>
+        /// <param name="sourceLanguageConfig">The source language config</param>
+        public SpeechRecognizer(SpeechConfig speechConfig, SourceLanguageConfig sourceLanguageConfig)
+            : this(speechConfig, sourceLanguageConfig, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of SpeechRecognizer.
+        /// Added in 1.8.1
+        /// </summary>
+        /// <param name="speechConfig">Speech configuration</param>
+        /// <param name="sourceLanguageConfig">The source language config</param>
+        /// <param name="audioConfig">Audio configuration</param>
+        public SpeechRecognizer(SpeechConfig speechConfig, SourceLanguageConfig sourceLanguageConfig, Audio.AudioConfig audioConfig)
+            : this(FromConfig(SpxFactory.recognizer_create_speech_recognizer_from_source_lang_config, speechConfig, sourceLanguageConfig, audioConfig))
+        {
+            this.audioConfig = audioConfig;
+        }
+
+        /// <summary>
+        /// Creates a new instance of SpeechRecognizer.
+        /// Added in 1.8.1
+        /// </summary>
+        /// <param name="speechConfig">Speech configuration</param>
+        /// <param name="autoDetectSourceLanguageConfig">The auto detect source language config</param>
+        public SpeechRecognizer(SpeechConfig speechConfig, AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig)
+            : this(speechConfig, autoDetectSourceLanguageConfig, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of SpeechRecognizer.
+        /// Added in 1.8.1
+        /// </summary>
+        /// <param name="speechConfig">Speech configuration</param>
+        /// <param name="autoDetectSourceLanguageConfig">The auto detect source language config</param>
+        /// <param name="audioConfig">Audio configuration</param>
+        public SpeechRecognizer(SpeechConfig speechConfig, AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig, Audio.AudioConfig audioConfig)
+            : this(FromConfig(SpxFactory.recognizer_create_speech_recognizer_from_auto_detect_source_lang_config, speechConfig, autoDetectSourceLanguageConfig, audioConfig))
+        {
+            this.audioConfig = audioConfig;
+        }
+
         internal SpeechRecognizer(InteropSafeHandle recoHandle) : base(recoHandle)
         {
             ThrowIfNull(recoHandle, "Invalid recognizer handle");

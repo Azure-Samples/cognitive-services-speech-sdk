@@ -394,6 +394,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         internal delegate IntPtr GetRecognizerFromConfigDelegate(out IntPtr phreco, InteropSafeHandle speechconfig, InteropSafeHandle audioInput);
+        internal delegate IntPtr GetRecognizerFromConfigWithLanguageConfigDelegate(out IntPtr phreco, InteropSafeHandle speechconfig, InteropSafeHandle sourceLanguageConfig, InteropSafeHandle audioInput);
 
         internal static InteropSafeHandle FromConfig(GetRecognizerFromConfigDelegate fromConfig, SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
         {
@@ -419,6 +420,45 @@ namespace Microsoft.CognitiveServices.Speech
             InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
             GC.KeepAlive(speechConfig);
             return recoHandle;
+        }
+
+        internal static InteropSafeHandle FromConfig(GetRecognizerFromConfigWithLanguageConfigDelegate fromConfig, SpeechConfig speechConfig, SourceLanguageConfig sourceLanguageConfig, Audio.AudioConfig audioConfig)
+        {
+            if (speechConfig == null) throw new ArgumentNullException(nameof(speechConfig));
+            if (sourceLanguageConfig == null) throw new ArgumentNullException(nameof(sourceLanguageConfig));
+
+            IntPtr recoHandlePtr = IntPtr.Zero;
+            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, sourceLanguageConfig.configHandle, getAudioConfigHandle(audioConfig)));
+            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
+            GC.KeepAlive(speechConfig);
+            GC.KeepAlive(sourceLanguageConfig);
+            if (audioConfig != null)
+            {
+                GC.KeepAlive(audioConfig);
+            }
+            return recoHandle;
+        }
+
+        internal static InteropSafeHandle FromConfig(GetRecognizerFromConfigWithLanguageConfigDelegate fromConfig, SpeechConfig speechConfig, AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig, Audio.AudioConfig audioConfig)
+        {
+            if (speechConfig == null) throw new ArgumentNullException(nameof(speechConfig));
+            if (autoDetectSourceLanguageConfig == null) throw new ArgumentNullException(nameof(autoDetectSourceLanguageConfig));
+
+            IntPtr recoHandlePtr = IntPtr.Zero;
+            ThrowIfFail(fromConfig(out recoHandlePtr, speechConfig.configHandle, autoDetectSourceLanguageConfig.configHandle, getAudioConfigHandle(audioConfig)));
+            InteropSafeHandle recoHandle = new InteropSafeHandle(recoHandlePtr, Internal.Recognizer.recognizer_handle_release);
+            GC.KeepAlive(speechConfig);
+            GC.KeepAlive(autoDetectSourceLanguageConfig);
+            if (audioConfig != null)
+            {
+                GC.KeepAlive(audioConfig);
+            }
+            return recoHandle;
+        }
+
+        internal static InteropSafeHandle getAudioConfigHandle(Audio.AudioConfig audioConfig)
+        {
+            return audioConfig == null ? new InteropSafeHandle(IntPtr.Zero, null) : audioConfig.configHandle;
         }
     }
 }

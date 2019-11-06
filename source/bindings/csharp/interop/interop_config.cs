@@ -12,6 +12,8 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     using SPXAUDIOCONFIGHANDLE = System.IntPtr;
     using SPXSPEECHCONFIGHANDLE = System.IntPtr;
     using SPXPROPERTYBAGHANDLE = System.IntPtr;
+    using SPXSOURCELANGCONFIGHANDLE = System.IntPtr;
+    using SPXAUTODETECTSOURCELANGCONFIGHANDLE = System.IntPtr;
 
     internal static class AudioConfig
     {
@@ -99,20 +101,45 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         public static extern SPXHR speech_translation_config_from_endpoint(out SPXSPEECHCONFIGHANDLE config,
             [MarshalAs(UnmanagedType.LPStr)] string endpoint,
             [MarshalAs(UnmanagedType.LPStr)] string subscription);
-        
+
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         public static extern SPXHR speech_translation_config_from_host(out SPXSPEECHCONFIGHANDLE config,
             [MarshalAs(UnmanagedType.LPStr)] string host,
             [MarshalAs(UnmanagedType.LPStr)] string subscription);
-        
+
         [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
         public static extern SPXHR speech_translation_config_add_target_language(InteropSafeHandle config,
             [MarshalAs(UnmanagedType.LPStr)] string language);
 
-                 [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
-        public static extern SPXHR speech_translation_config_remove_target_language(InteropSafeHandle config,
-            [MarshalAs(UnmanagedType.LPStr)] string language);
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR speech_translation_config_remove_target_language(InteropSafeHandle config, [MarshalAs(UnmanagedType.LPStr)] string language);
+    }
 
- 
+    internal static class SourceLanguageConfig
+    {
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR source_lang_config_from_language(out SPXSOURCELANGCONFIGHANDLE hconfig, [MarshalAs(UnmanagedType.LPStr)] string language);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR source_lang_config_from_language_and_endpointId(out SPXSOURCELANGCONFIGHANDLE hconfig, [MarshalAs(UnmanagedType.LPStr)] string language, [MarshalAs(UnmanagedType.LPStr)] string endpointId);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR source_lang_config_release(SPXSOURCELANGCONFIGHANDLE hconfig);
+    }
+
+    internal static class AutoDetectSourceLanguageConfig
+    {
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        public static extern SPXHR create_auto_detect_source_lang_config_from_languages(out SPXAUTODETECTSOURCELANGCONFIGHANDLE hAutoDetectSourceLanguageconfig, [MarshalAs(UnmanagedType.LPStr)] string languages);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR create_auto_detect_source_lang_config_from_source_lang_config(out SPXAUTODETECTSOURCELANGCONFIGHANDLE hAutoDetectSourceLanguageconfig, InteropSafeHandle hSourceLanguageConfig);
+
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR add_source_lang_config_to_auto_detect_source_lang_config(SPXAUTODETECTSOURCELANGCONFIGHANDLE hAutoDetectSourceLanguageconfig, InteropSafeHandle hSourceLanguageConfig);
+
+        [DllImport(Import.NativeDllName, CallingConvention = CallingConvention.StdCall)]
+        public static extern SPXHR auto_detect_source_lang_config_release(SPXAUTODETECTSOURCELANGCONFIGHANDLE hAutoDetectSourceLanguageconfig);
     }
 }

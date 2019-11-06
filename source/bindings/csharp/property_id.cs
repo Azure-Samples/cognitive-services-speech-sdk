@@ -7,7 +7,7 @@ namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Defines speech property ids.
-    /// Changed in version 1.4.0.
+    /// Changed in version 1.8.1.
     /// </summary>
     public enum PropertyId
     {
@@ -183,6 +183,18 @@ namespace Microsoft.CognitiveServices.Speech
         /// Added in version 1.5.0
         /// </summary>
         SpeechServiceConnection_EnableAudioLogging = Internal.PropertyId.SpeechServiceConnection_EnableAudioLogging,
+
+        /// <summary>
+        /// The auto detect source languages
+        /// Added in version 1.8.1
+        /// </summary>
+        SpeechServiceConnection_AutoDetectSourceLanguages = Internal.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguages,
+
+        /// <summary>
+        /// The auto detect source language result
+        /// Added in version 1.8.1
+        /// </summary>
+        SpeechServiceConnection_AutoDetectSourceLanguageResult = Internal.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult,
 
         /// <summary>
         /// The requested Cognitive Services Speech Service response output format (simple or detailed). Under normal circumstances, you shouldn't have
