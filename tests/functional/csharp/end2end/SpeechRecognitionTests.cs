@@ -470,8 +470,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     AssertEqual(1, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
                     Assert.IsTrue(recognizedText.Count > 0, $"Invalid number of text messages {recognizedText.Count}");
 
-                    AssertMatching(TestData.English.Batman.Utterances[0], recognizedText[0]);
-                    AssertMatching(TestData.English.Batman.Utterances.Last(), recognizedText.Last());
+                    AssertFuzzyMatching(TestData.English.Batman.Utterances[0], recognizedText[0]);
+                    AssertFuzzyMatching(TestData.English.Batman.Utterances.Last(), recognizedText.Last());
 
                     Assert.IsTrue(string.IsNullOrEmpty(hypothesisLatencyError), $"hypothesisLatencyError: {hypothesisLatencyError}");
                     Assert.IsTrue(string.IsNullOrEmpty(phraseLatencyError), $"phraseLatencyError: {phraseLatencyError}");
