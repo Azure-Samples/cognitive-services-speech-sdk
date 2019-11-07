@@ -7,9 +7,23 @@
 #include <memory>
 #include <exception>
 
+#include <pthread.h>
+
 static JavaVM* g_vm = nullptr;
 
-thread_local std::shared_ptr<JNIEnvironment> t_env{ nullptr };
+pthread_key_t t_curr_env;
+
+static void detach_current_thread(void*)
+{
+    g_vm->DetachCurrentThread();
+}
+
+static JNIEnv* attach_current_thread()
+{
+    JNIEnv* env = NULL;
+    g_vm->AttachCurrentThread(&env, NULL);
+    return env;
+}
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*)
 {
@@ -19,6 +33,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*)
         return -1;
     }
     g_vm = vm;
+    pthread_key_create(&t_curr_env, detach_current_thread);
     return JNI_VERSION_1_6;
 }
 
@@ -32,33 +47,17 @@ JavaVM* GetVM() noexcept
     return g_vm;
 }
 
-JNIEnvironment::JNIEnvironment(JavaVM* vm)
-{
-    JNIEnv* e;
-    if (vm->AttachCurrentThread(&e, nullptr) != JNI_OK)
-    {
-        throw std::runtime_error{ "Cannot initialize JNI Environment." };
-    }
-    env = e;
-}
-
-JNIEnvironment::~JNIEnvironment()
-{
-    if (g_vm != nullptr)
-    {
-        g_vm->DetachCurrentThread();
-    }
-}
-
-std::shared_ptr<JNIEnvironment> GetEnvironment()
+JNIEnv* GetEnvironment()
 {
     if (g_vm == nullptr)
     {
         throw std::runtime_error { "Java environment not initialized" };
     }
-    if (t_env == nullptr)
+    JNIEnv* env = nullptr;
+    if ((env = (JNIEnv *)pthread_getspecific(t_curr_env)) == nullptr)
     {
-        t_env = std::make_shared<JNIEnvironment>(g_vm);
+        env = attach_current_thread();
+        pthread_setspecific(t_curr_env, env);
     }
-    return t_env;
+    return env;
 }
