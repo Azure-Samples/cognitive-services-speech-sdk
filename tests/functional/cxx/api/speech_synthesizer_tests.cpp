@@ -676,6 +676,30 @@ TEST_CASE("Synthesizer output to push stream - USP", "[api][cxx]")
     }
 }
 
+TEST_CASE("Push stream disposed before synthesizer - USP", "[api][cxx]")
+{
+    const auto config = UspSpeechConfig();
+    std::shared_ptr<AudioConfig> streamConfig;
+
+    {
+        const auto callback = std::make_shared<PushAudioOutputStreamTestCallback>();
+        const auto stream = AudioOutputStream::CreatePushStream(callback);
+        streamConfig = AudioConfig::FromStreamOutput(stream);
+    }
+
+    auto synthesizer = SpeechSynthesizer::FromConfig(config, streamConfig);
+
+    auto result1 = synthesizer->SpeakTextAsync("{{{text1}}}").get(); /* "{{{text1}}}" has completed rendering to pushstream */
+    auto result2 = synthesizer->SpeakTextAsync("{{{text2}}}").get(); /* "{{{text2}}}" has completed rendering to pushstream */
+
+    SPXTEST_REQUIRE(result1->Reason == ResultReason::SynthesizingAudioCompleted);
+    SPXTEST_REQUIRE(result1->GetAudioLength() > 0);
+
+    SPXTEST_REQUIRE(result2->Reason == ResultReason::SynthesizingAudioCompleted);
+    SPXTEST_REQUIRE(result2->GetAudioLength() > 0);
+
+}
+
 TEST_CASE("Synthesizer output to pull stream use after synthesis completed - USP", "[api][cxx]")
 {
     auto config = UspSpeechConfig();

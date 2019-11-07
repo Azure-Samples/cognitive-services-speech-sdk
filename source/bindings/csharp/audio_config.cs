@@ -208,5 +208,15 @@ namespace Microsoft.CognitiveServices.Speech.Audio
             streamKeepAlive = audioStream;
             disposeStream = ownStream;
         }
+
+        internal IDisposable MoveStreamOwnerShip()
+        {
+            if (disposeStream)
+            {
+                disposeStream = false;
+                return streamKeepAlive;
+            }
+            return null;
+        }
     }
 }

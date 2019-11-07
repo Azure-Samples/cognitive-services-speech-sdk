@@ -137,6 +137,7 @@ public:
         SPX_THROW_ON_FAIL(audio_config_create_audio_output_from_stream(&haudioConfig, GetOutputStreamHandle(stream)));
 
         auto config = new AudioConfig(haudioConfig);
+        config->m_outputStream = stream;
         return std::shared_ptr<AudioConfig>(config);
     }
 
@@ -229,6 +230,7 @@ private:
     SPXPROPERTYBAGHANDLE m_propertybag;
 
     std::shared_ptr<AudioInputStream> m_stream;
+    std::shared_ptr<AudioOutputStream> m_outputStream;
 };
 
 

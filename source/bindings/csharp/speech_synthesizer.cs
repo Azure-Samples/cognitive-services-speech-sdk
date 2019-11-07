@@ -17,6 +17,7 @@ namespace Microsoft.CognitiveServices.Speech
     /// Performs speech synthesis to speaker, file, or other audio output streams, and gets synthesized audio as result.
     /// Updated in version 1.7.0
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213", MessageId = "streamKeepAlive", Justification = "The audio stream is sometimes not owned, and should not be disposed.")]
     public sealed class SpeechSynthesizer : IDisposable
     {
         private event EventHandler<SpeechSynthesisEventArgs> _SynthesisStarted;
@@ -153,6 +154,8 @@ namespace Microsoft.CognitiveServices.Speech
         private object synthesizerLock = new object();
         private int activeAsyncSynthesisCounter = 0;
 
+        private IDisposable streamKeepAlive = null;
+
         private volatile bool disposed = false;
         private volatile bool isDisposing = false;
 
@@ -172,6 +175,7 @@ namespace Microsoft.CognitiveServices.Speech
         public SpeechSynthesizer(SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
             : this(FromConfig(speechConfig, audioConfig))
         {
+            streamKeepAlive = audioConfig?.MoveStreamOwnerShip();
         }
 
         internal SpeechSynthesizer(InteropSafeHandle synthHandle)
@@ -475,6 +479,8 @@ namespace Microsoft.CognitiveServices.Speech
             synthesisCompletedCallbackDelegate = null;
             synthesisCanceledCallbackDelegate = null;
             wordBoundaryCallbackDelegate = null;
+
+            streamKeepAlive?.Dispose();  // The Close() callback in stream is called during the disposing of synthHandle
 
             if (gch.IsAllocated)
             {

@@ -31,6 +31,8 @@ private:
     /// </summary>
     SPXSYNTHHANDLE m_hsynth;
 
+    std::shared_ptr<Audio::AudioConfig> m_audioConfig;
+
     /*! \cond PRIVATE */
 
     class PrivatePropertyCollection : public PropertyCollection
@@ -107,7 +109,9 @@ public:
 
         SPX_THROW_ON_FAIL(::synthesizer_create_speech_synthesizer_from_config(&hsynth, hspeechconfig, haudioconfig));
         auto ptr = new SpeechSynthesizer(hsynth);
-        return std::shared_ptr<SpeechSynthesizer>(ptr);
+        auto synthesizer = std::shared_ptr<SpeechSynthesizer>(ptr);
+        synthesizer->m_audioConfig = audioconfig;
+        return synthesizer;
     }
 
     /// <summary>

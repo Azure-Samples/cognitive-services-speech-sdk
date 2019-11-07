@@ -602,6 +602,25 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        public async Task SynthesizerOutputToPushStreamAfterAudioConfigDisposeUsp()
+        {
+            using (var callback = new PushAudioOutputStreamTestCallback())
+            {
+                var streamConfig = AudioConfig.FromStreamOutput(callback);
+                var synthesizer = new SpeechSynthesizer(uspConfig, streamConfig);
+                streamConfig.Dispose();
+                using (var result = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering to pushstream
+                {
+                    CheckResult(result);
+                }
+
+                synthesizer.Dispose();
+                var audioLength = callback.GetAudioLength();
+                Assert.IsTrue(audioLength > 0, $"The collected audio size should be greater than zero, but actually is {audioLength}.");
+            }
+        }
+
+        [TestMethod]
         public async Task SynthesizerOutputToPullStreamUseAfterSynthesisCompletedUsp()
         {
             using (var stream = AudioOutputStream.CreatePullStream())
@@ -1332,10 +1351,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var synthesizer = new SpeechSynthesizer(mockConfig, null)) // null indicates to do nothing with synthesizer audio by default
             {
-                var expectedAudioData = new List<byte[]>();
-                expectedAudioData.Add(BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice));
-                expectedAudioData.Add(BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice));
-                expectedAudioData.Add(BuildMockSynthesizedAudio("{{{text3}}}", DefaultLanguage, DefaultVoice));
+                var expectedAudioData = new List<byte[]>
+                {
+                    BuildMockSynthesizedAudio("{{{text1}}}", DefaultLanguage, DefaultVoice),
+                    BuildMockSynthesizedAudio("{{{text2}}}", DefaultLanguage, DefaultVoice),
+                    BuildMockSynthesizedAudio("{{{text3}}}", DefaultLanguage, DefaultVoice)
+                };
 
                 var futureList = new List<Task>();
                 var streamList = new List<AudioDataStream>();
@@ -1569,7 +1590,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         private void DoSomethingWithAudioInPullStream(PullAudioOutputStream stream, bool[] canceled, byte[] expectedData)
         {
-            byte[] audioData = new byte[0];
+            byte[] audioData = Array.Empty<byte>();
             byte[] buffer = new byte[1024];
             uint totalSize = 0;
             uint filledSize = 0;
@@ -1631,7 +1652,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         private void CheckAudioInDataStream(AudioDataStream stream, byte[] expectedData)
         {
-            byte[] audioData = new byte[0];
+            byte[] audioData = Array.Empty<byte>();
             byte[] buffer = new byte[1024];
             uint totalSize = 0;
             uint filledSize = 0;
@@ -1795,7 +1816,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var fileData = File.ReadAllBytes(waveFile);
             if (fileData.Length < EmptyWaveFileSize)
             {
-                return new byte[0];
+                return Array.Empty<byte>();
             }
 
             var waveData = new byte[fileData.Length - EmptyWaveFileSize];
@@ -1854,7 +1875,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public PushAudioOutputStreamTestCallback()
         {
-            audioData = new byte[0];
+            audioData = Array.Empty<byte>();
         }
 
         public override uint Write(byte[] dataBuffer)
