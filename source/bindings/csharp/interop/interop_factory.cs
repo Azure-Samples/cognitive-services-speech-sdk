@@ -44,7 +44,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
     internal sealed class InteropSafeHandle : SafeHandle
     {
         private HandleRelease releaseHandleFunc = null;
-        public InteropSafeHandle(IntPtr handle, HandleRelease releaseHandle) : base(handle, true)
+        public InteropSafeHandle(IntPtr handle, HandleRelease releaseHandle) : base(IntPtr.Zero, true)
         {
             releaseHandleFunc = releaseHandle;
             SetHandle(handle);
@@ -52,7 +52,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
 
         public override bool IsInvalid
         {
-            get { return handle == IntPtr.Zero; }
+            get { return handle == IntPtr.Zero || handle == new IntPtr(-1); }
         }
 
         protected override bool ReleaseHandle()

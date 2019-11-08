@@ -11,7 +11,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
 {
     /// <summary>
     /// Represents a participant in a conversation.
-    /// Changed in version 1.8.0
+    /// Changed in version 1.9.0
     /// </summary>
     public sealed class Participant : DisposableBase
     {

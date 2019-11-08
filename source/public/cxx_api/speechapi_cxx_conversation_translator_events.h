@@ -26,6 +26,7 @@ namespace Transcription {
 
     /// <summary>
     /// Helper class with additional methods
+    /// Added in 1.9.0
     /// </summary>
     class EventHelper
     {
@@ -63,7 +64,7 @@ namespace Transcription {
 
     /// <summary>
     /// Represents the result of a conversation translator recognition, or text message.
-    /// Added in 1.8.0
+    /// Added in 1.9.0
     /// </summary>
     class ConversationTranslationResult : public Translation::TranslationRecognitionResult, public EventHelper
     {
@@ -97,7 +98,7 @@ namespace Transcription {
 
     /// <summary>
     /// Event arguments for the ConversationExpiration event.
-    /// Added in 1.8.0
+    /// Added in 1.9.0
     /// </summary>
     class ConversationExpirationEventArgs : public SessionEventArgs, public EventHelper
     {
@@ -127,7 +128,7 @@ namespace Transcription {
 
     /// <summary>
     /// Event arguments for the ParticipantsChanged event.
-    /// Added in 1.8.0
+    /// Added in 1.9.0
     /// </summary>
     class ConversationParticipantsChangedEventArgs : public SessionEventArgs, public EventHelper
     {
@@ -192,7 +193,7 @@ namespace Transcription {
     /// Event arguments for the ConversationTranslator <see cref="ConversationTranslator::Transcribing"/>,
     /// <see cref="ConversationTranslator::Transcribed"/>, or <see cref="ConversationTranslator::TextMessageReceived"/>
     /// events.
-    /// Added in 1.8.0
+    /// Added in 1.9.0
     /// </summary>
     class ConversationTranslationEventArgs : public RecognitionEventArgs, public EventHelper
     {
@@ -243,7 +244,7 @@ namespace Transcription {
 
     /// <summary>
     /// Event arguments for the conversation translator canceled event.
-    /// Added in 1.8.0
+    /// Added in 1.9.0
     /// </summary>
     class ConversationTranslationCanceledEventArgs : public ConversationTranscriptionCanceledEventArgs
     {

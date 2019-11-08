@@ -40,7 +40,7 @@ if(BUILD_PYTHON OR BUILD_CSHARP OR BUILD_JAVA)
 
   if(BUILD_CSHARP AND
       NOT ANDROID AND
-      (WIN32 OR ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+      (WIN32 OR "${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
       )
     add_subdirectory(csharp)
   endif()

@@ -899,6 +899,9 @@ namespace USP {
     {
         LogInfo("%s: context=%p", __FUNCTION__, this);
 
+        m_open = false;
+        ChangeState(WebSocketState::CLOSED);
+
         // USP: Sends telemetry: MetricsTransportDropped();
 
         auto reason = static_cast<WebSocketDisconnectReason>(closeCode != nullptr ? *closeCode : -1);
@@ -914,6 +917,9 @@ namespace USP {
     void WebSocket::OnWebSocketError(WS_ERROR errorCode)
     {
         LogError("WS operation failed with error code=%d(%s)", errorCode, ENUM_TO_STRING(WS_ERROR, errorCode));
+
+        m_open = false;
+        ChangeState(WebSocketState::CLOSED);
 
         // USP: Sends telemetry: MetricsTransportDropped();
 

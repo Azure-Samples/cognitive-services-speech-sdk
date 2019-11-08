@@ -84,7 +84,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Indicates the transcription result contains hypothesis text and its translation(s) for
         /// other participants in the conversation.
-        /// Added in version 1.8.0
+        /// Added in version 1.9.0
         /// </summary>
         TranslatingParticipantSpeech = 13,
 
@@ -92,21 +92,21 @@ namespace Microsoft.CognitiveServices.Speech
         /// Indicates the transcription result contains final text and corresponding translation(s)
         /// for other participants in the conversation. Speech Recognition and Translation are now
         /// complete for this phrase.
-        /// Added in version 1.8.0
+        /// Added in version 1.9.0
         /// </summary>
         TranslatedParticipantSpeech = 14,
 
         /// <summary>
         /// Indicates the transcription result contains the instant message and corresponding
         /// translation(s).
-        /// Added in version 1.8.0
+        /// Added in version 1.9.0
         /// </summary>
         TranslatedInstantMessage = 15,
 
         /// <summary>
         /// Indicates the transcription result contains the instant message for other participants
         /// in the conversation and corresponding translation(s).
-        /// Added in version 1.8.0
+        /// Added in version 1.9.0
         /// </summary>
         TranslatedParticipantInstantMessage = 16
     }

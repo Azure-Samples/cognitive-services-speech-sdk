@@ -244,6 +244,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [TestMethod]
         public async Task ConversationTranslator_HostAudio()
         {
             string speechLang = "en-US";
@@ -290,10 +291,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             );
         }
 
+        [TestMethod]
         public async Task ConversationTranslator_JoinWithTranslation()
         {
-            bool validateTranslations = false; // set to true once all throttling fixes are live in prod
-
             string hostLang = "en-US";
             string hostName = "TheHost";
             var hostToLangs = new[] { "de" };
@@ -314,6 +314,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             SPX_TRACE_INFO("Creating host ConversationTranslator");
             var hostTranslator = new ConversationTranslator(audioConfig);
+            SPX_TRACE_INFO("Attaching event handlers");
             var hostEvents = new ConversationTranslatorCallbacks(hostTranslator);
             SPX_TRACE_INFO("Joining host");
             await hostTranslator.JoinConversationAsync(conversation, hostName);
@@ -368,21 +369,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 new ExpectedTranscription(bobId, TestData.Chinese.Weather.TranslationUtterance, bobLang),
                 new ExpectedTranscription(hostId, TestData.English.Weather.Utterance, hostLang)
             );
-
-            if (validateTranslations)
-            {
-                hostEvents.VerifyTranscriptions(hostId,
-                    new ExpectedTranscription(bobId, TestData.Chinese.Weather.TranslationUtterance, bobLang, 0, new TRANS() { { "en-US", "Weather." }, { "de", "wetter." } }),
-                    new ExpectedTranscription(hostId, TestData.English.Weather.Utterance, hostLang, 0, new TRANS() { { "de", "Wie ist das Wetter?" } })
-                );
-            }
-            else
-            {
-                hostEvents.VerifyTranscriptions(hostId,
-                    new ExpectedTranscription(bobId, TestData.Chinese.Weather.TranslationUtterance, bobLang),
-                    new ExpectedTranscription(hostId, TestData.English.Weather.Utterance, hostLang)
-                );
-            }
+            hostEvents.VerifyTranscriptions(hostId,
+                new ExpectedTranscription(bobId, TestData.Chinese.Weather.TranslationUtterance, bobLang, 0, new TRANS() { { "en-US", "Weather." }, { "de", "wetter." } }),
+                new ExpectedTranscription(hostId, TestData.English.Weather.Utterance, hostLang, 0, new TRANS() { { "de", "Wie ist das Wetter?" } })
+            );
         }
 
         [TestMethod]
@@ -583,9 +573,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public void SetParticipantConfig(ConversationTranslator convTrans)
         {
-            if (!string.IsNullOrWhiteSpace(Config.Endpoint))
+            if (!string.IsNullOrWhiteSpace(Config.ConversationTranslatorSpeechEndpoint))
             {
-                convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_Endpoint, Config.Endpoint);
+                convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_Endpoint, Config.ConversationTranslatorSpeechEndpoint);
             }
 
             convTrans.Properties.SetProperty(PropertyId.Speech_SessionId, $"IntegrationTest:{Guid.NewGuid().ToString()}");

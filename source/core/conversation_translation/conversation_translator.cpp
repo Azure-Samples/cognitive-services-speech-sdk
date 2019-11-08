@@ -249,7 +249,7 @@ namespace ConversationTranslation {
 
     void CSpxConversationTranslator::Init()
     {
-        SPX_DBG_TRACE_FUNCTION();
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
         ThreadingHelpers::Init();
 
         shared_ptr<ISpxRecognizerSite> site = GetSite();
@@ -637,28 +637,33 @@ namespace ConversationTranslation {
                     break;
 
                 case ConversationState::Opening:
-                case ConversationState::PartiallyOpen:
                     // Something went wrong and the conversation connection closed before it
                     // became open. Handle as an error
                     ToFailedState(false, errorCode, message);
                     break;
-                
+
+                case ConversationState::PartiallyOpen:
                 case ConversationState::Open:
                     // if the server requested the close, treat this as the client closing
                     // the connection
                     if (reason == USP::WebSocketDisconnectReason::Normal)
                     {
                         sendDisconnected = true;
-                        ChangeState(state, ConversationState::Closing);
+
+                        if (state == ConversationState::PartiallyOpen || !m_recognizerConnected)
+                        {
+                            sendStopped = true;
+                            ChangeState(state, ConversationState::Closed);
+                        }
+                        else
+                        {
+                            ChangeState(state, ConversationState::Closing);
+                        }
 
                         DisconnectTranslationRecognizer();
                     }
                     else
                     {
-                        // TODO ralphe: When retries are implemented, this should move you to the
-                        // partially open state. For now treat this as a failure
-                        /*sendDisconnected = true;
-                        ChangeState(state, ConversationState::PartiallyOpen);*/
                         ToFailedState(false, errorCode, message);
                     }
                     break;
@@ -952,7 +957,9 @@ namespace ConversationTranslation {
         }
         else
         {
-            As<ISpxRecognizer>(m_recognizer)->CloseConnection();
+            auto reco = As<ISpxRecognizer>(m_recognizer);
+            reco->StopContinuousRecognitionAsync().Future.get();
+            reco->CloseConnection();
         }
     }
 
@@ -1212,11 +1219,7 @@ namespace ConversationTranslation {
     {
         RunAsynchronously([this, args]()
         {
-            bool wasConnected = m_recognizerConnected.exchange(false);
-            if (false == wasConnected)
-            {
-                SPX_TRACE_WARNING("Got a recognizer connected event on 0x%p when the recognizer is already open. Possible logic bug.", P_FORMAT_POINTER(this));
-            }
+            m_recognizerConnected.exchange(true);
 
             bool sendConnected = false;
 
@@ -1432,6 +1435,8 @@ namespace ConversationTranslation {
             {
                 case CancellationReason::EndOfStream:
                 {
+                    m_recognizerConnected.exchange(false);
+
                     SPX_TRACE_INFO("Got an end of audio stream event from the recognizer on 0x%p", P_FORMAT_POINTER(this));
                     auto canceledResult = CreateShared<ConversationCancellationResult>(
                         GetParticipantId(),

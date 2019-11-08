@@ -12,7 +12,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
     /// <summary>
     /// Defines a payload for <see cref="ConversationTranslator.Transcribing"/>, and
     /// <see cref="ConversationTranslator.Transcribed"/> events.
-    /// Added in 1.8.0.
+    /// Added in 1.9.0.
     /// </summary>
     public class ConversationTranslationEventArgs : RecognitionEventArgs
     {
@@ -45,7 +45,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
 
     /// <summary>
     /// Defines a payload for the <see cref="ConversationTranslator.Canceled"/> event.
-    /// Added in 1.8.0.
+    /// Added in 1.9.0.
     /// </summary>
     public sealed class ConversationTranslationCanceledEventArgs : ConversationTranslationEventArgs
     {

@@ -17,7 +17,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
     /// A conversation translator that enables a connected experience where participants can use their
     /// own devices to see everyone else's recognitions and IMs in their own languages. Participants
     /// can also speak and send IMs to others.
-    /// Added in 1.8.0
+    /// Added in 1.9.0
     /// </summary>
     public sealed class ConversationTranslator : Internal.DisposableBase
     {
@@ -295,10 +295,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
                 Properties.Close();
             }
 
-            if (_nativeHandle != null)
-            {
-                _nativeHandle.Dispose();
-            }
+            _nativeHandle?.Dispose();
         }
 
         private static InteropSafeHandle Create(Audio.AudioConfig audioConfig, bool validateConfig)

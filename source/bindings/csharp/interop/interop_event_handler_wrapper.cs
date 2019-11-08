@@ -43,7 +43,7 @@ namespace Microsoft.CognitiveServices.Speech.Internal
         {
             _gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             _sender = sender;
-            _senderHandle = senderHandle;
+            _senderHandle = senderHandle ?? throw new ArgumentNullException(nameof(senderHandle));
             _nativeSetter = setter ?? throw new ArgumentNullException(nameof(setter));
         }
 
@@ -81,6 +81,10 @@ namespace Microsoft.CognitiveServices.Speech.Internal
                     SpxExceptionThrower.ThrowIfFail(_nativeSetter(_senderHandle, null, IntPtr.Zero));
                 }
             }
+
+            // Extend the lifetime of this to after the call to the native code to ensure
+            // the finalizer doesn't run unexpectedly
+            GC.KeepAlive(this);
         }
 
         /// <summary>
@@ -92,16 +96,27 @@ namespace Microsoft.CognitiveServices.Speech.Internal
             if (disposeManaged)
             {
                 _sender = null;
-                _senderHandle = null; // parent instance owns disposing this handle
+
+                if (!_senderHandle.IsInvalid && !_senderHandle.IsClosed)
+                {
+                    SpxExceptionThrower.LogErrorIfFail(_nativeSetter(_senderHandle, null, IntPtr.Zero));
+                }
+
+                _senderHandle = null;
+                _nativeSetter = null;
 
                 if (_gcHandle.IsAllocated)
                 {
                     _gcHandle.Free();
                 }
             }
-
-            SpxExceptionThrower.LogErrorIfFail(_nativeSetter(_senderHandle, null, IntPtr.Zero));
-            _nativeSetter = null;
+            else
+            {
+                if (!_senderHandle.IsInvalid && !_senderHandle.IsClosed)
+                {
+                    SpxExceptionThrower.LogErrorIfFail(_nativeSetter(_senderHandle, null, IntPtr.Zero));
+                }
+            }
         }
 
         /// <summary>

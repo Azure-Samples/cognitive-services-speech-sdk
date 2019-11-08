@@ -12,7 +12,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
 {
     /// <summary>
     /// Defines a conversation translation result.
-    /// Added in 1.8.0.
+    /// Added in 1.9.0.
     /// </summary>
     public class ConversationTranslationResult : Translation.TranslationRecognitionResult
     {

@@ -6,6 +6,7 @@
 #include "stdafx.h"
 #include <create_object_helpers.h>
 #include <http_utils.h>
+#include <http_exception.h>
 #include <string_utils.h>
 #include <thread_service.h>
 #include "conversation_impl.h"
@@ -113,7 +114,7 @@ namespace ConversationTranslation {
 
     void CSpxConversationImpl::Init()
     {
-        SPX_DBG_TRACE_FUNCTION();
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
         ThreadingHelpers::Init();
         
         std::shared_ptr<ISpxRecognizerSite> site = GetSite();
@@ -257,6 +258,12 @@ namespace ConversationTranslation {
             std::string roomPin = properties->GetStringValue(ConversationKeys::Conversation_RoomPin);
 
             m_args = make_unique<ConversationArgs>(m_manager->CreateOrJoin(create, m_conversationId, roomPin));
+
+            // set the region to match what the conversation translator service tells us to use when joining a room
+            if (GetString(properties, PropertyId::SpeechServiceConnection_Region) != m_args->CognitiveSpeechRegion)
+            {
+                properties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), m_args->CognitiveSpeechRegion.c_str());
+            }
         });
     }
 
@@ -363,7 +370,25 @@ namespace ConversationTranslation {
     {
         if (m_manager != nullptr && m_args != nullptr && !m_args->SessionToken.empty())
         {
-            m_manager->Leave(m_args->SessionToken);
+            try
+            {
+                m_manager->Leave(m_args->SessionToken);
+            }
+            catch (HttpException& ex)
+            {
+                if (ex.statusCode() == 404)
+                {
+                    // This response usually means the service has already deleted the room on your behalf.
+                    // This can happen for example if you are a participant and the host deletes the room.
+                    SPX_TRACE_INFO("Got a HTTP 404 response when trying to delete the conversation. Ignoring");
+                }
+                else
+                {
+                    SPX_TRACE_ERROR("Failed to delete the conversation. '%s'", ex.what());
+                    throw;
+                }
+            }
+
             m_args->SessionToken = "";
         }
     }

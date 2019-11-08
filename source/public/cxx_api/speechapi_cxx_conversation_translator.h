@@ -28,7 +28,7 @@ namespace Transcription {
     /// A conversation translator that enables a connected experience where participants can use their
     /// own devices to see everyone else's recognitions and IMs in their own languages. Participants
     /// can also speak and send IMs to others.
-    /// Added in 1.8.0
+    /// Added in 1.9.0
     /// </summary>
     class ConversationTranslator : public std::enable_shared_from_this<ConversationTranslator>
     {
@@ -367,8 +367,10 @@ namespace Transcription {
 
         static inline void FreeEventHandle(SPXEVENTHANDLE hEvt)
         {
-            SPX_DBG_ASSERT(::conversation_translator_event_handle_is_valid(hEvt));
-            ::conversation_translator_event_handle_release(hEvt);
+            if (::conversation_translator_event_handle_is_valid(hEvt))
+            {
+                ::conversation_translator_event_handle_release(hEvt);
+            }
         }
 
         template<typename T>

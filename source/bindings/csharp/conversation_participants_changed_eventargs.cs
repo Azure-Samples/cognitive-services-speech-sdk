@@ -12,7 +12,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
 {
     /// <summary>
     /// Why the participant changed event was raised
-    /// Added in version 1.8.0
+    /// Added in version 1.9.0
     /// </summary>
     public enum ParticipantChangedReason
     {
@@ -35,6 +35,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
 
     /// <summary>
     /// Defines a payload for the <see cref="ConversationTranslator.ParticipantsChanged" /> event.
+    /// Added in version 1.9.0
     /// </summary>
     public class ConversationParticipantsChangedEventArgs : SessionEventArgs
     {

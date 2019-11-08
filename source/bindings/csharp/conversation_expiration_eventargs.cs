@@ -10,7 +10,7 @@ namespace Microsoft.CognitiveServices.Speech.Transcription
 {
     /// <summary>
     /// Defines a payload for the <see cref="ConversationTranslator.ConversationExpiration"/> event.
-    /// Added in 1.8.0.
+    /// Added in 1.9.0.
     /// </summary>
     public class ConversationExpirationEventArgs : SessionEventArgs
     {

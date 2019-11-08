@@ -219,8 +219,6 @@ TEST_CASE("Conversation Translator Host Audio", "[api][cxx][conversation_transla
 
 TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_translator][cxx_conversation_translator][audio][join]")
 {
-    bool validateTranslations = false; // set to true once all throttling fixes are live in prod
-
     UseMocks(false);
     weather.UpdateFullFilename(Config::InputDir);
     weatherInChinese.UpdateFullFilename(Config::InputDir);
@@ -287,22 +285,11 @@ TEST_CASE("Join a conversation with translation", "[api][cxx][conversation_trans
         ExpectedTranscription(hostId, weather.m_utterance, hostLang)
     });
     
-    if (validateTranslations)
+    hostEvents.VerifyTranscriptions(hostId,
     {
-        hostEvents.VerifyTranscriptions(hostId,
-        {
-            ExpectedTranscription(bobId, weatherInChinese.m_utterance, bobLang, { { "en-US", "Weather." }, { "de", "wetter." } }),
-            ExpectedTranscription(hostId, weather.m_utterance, hostLang, { { "de", "Wie ist das Wetter?" } }),
-        });
-    }
-    else
-    {
-        hostEvents.VerifyTranscriptions(hostId,
-        {
-            ExpectedTranscription(bobId, weatherInChinese.m_utterance, bobLang),
-            ExpectedTranscription(hostId, weather.m_utterance, hostLang),
-        });
-    }
+        ExpectedTranscription(bobId, weatherInChinese.m_utterance, bobLang, { { "en-US", "Weather." }, { "de", "wetter." } }),
+        ExpectedTranscription(hostId, weather.m_utterance, hostLang, { { "de", "Wie ist das Wetter?" } }),
+    });
 }
 
 TEST_CASE("Host sends an instant message", "[api][cxx][conversation_translator][cxx_conversation_translator][im][host]")
@@ -398,6 +385,39 @@ TEST_CASE("Join locked room", "[api][cxx][conversation_translator][cxx_conversat
     
     host.Leave();
     host.VerifyBasicEvents(false);
+}
+
+TEST_CASE("ConversationTranslator Host disconnects room", "[api][cxx][conversation_translator][cxx_conversation_translator][host_disconnect]")
+{
+    UseMocks(false);
+    weather.UpdateFullFilename(Config::InputDir);
+    weatherInChinese.UpdateFullFilename(Config::InputDir);
+    REQUIRE(exists(weather.m_inputDataFilename));
+    REQUIRE(exists(weatherInChinese.m_inputDataFilename));
+
+    auto speechConfig = CreateConfig("en-US", {});
+    TestConversationParticipant host(speechConfig, "Host");
+    auto audioConfig = AudioConfig::FromWavFileInput(weather.m_inputDataFilename);
+    host.Join(audioConfig);
+
+    TestConversationParticipant alice("Alice", "zh-CN", host);
+    auto aliceAudioConfig = AudioConfig::FromWavFileInput(weatherInChinese.m_inputDataFilename);
+    SetParticipantConfig(aliceAudioConfig);
+    alice.Join(aliceAudioConfig);
+
+    host.StartAudio();
+    alice.StartAudio();
+
+    host.WaitForAudioToFinish();
+    alice.WaitForAudioToFinish();
+
+    host.StopAudio();
+    host.Leave(); // should cause Alice to become disconnected
+
+    this_thread::sleep_for(2s);
+    
+    host.VerifyBasicEvents(true);
+    alice.VerifyBasicEvents(true);
 }
 
 TEST_CASE("Conversation Translator call methods when not joined", "[api][cxx][conversation_translator][cxx_conversation_translator][not_joined]")
