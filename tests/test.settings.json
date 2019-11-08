@@ -30,5 +30,6 @@
   "ConversationTranslatorHost": "",
   "ConversationTranslatorSpeechEndpoint": "",
   "ConversationTranslatorClientId": "",
-  "InputDir": "./input"
+  "InputDir": "./input",
+  "Host": ""
 }

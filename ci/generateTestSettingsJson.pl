@@ -102,7 +102,7 @@ my %jsonData = ("InputDir" => $INPUT_DIRECTORY,
             "SpeechRegionForConversationTranscription" => $SPEECHSDK_PRINCETON_REGION,
             "InRoomAudioEndpoint" => $SPEECHSDK_PRINCETON_INROOM_ENDPOINT,
             "OnlineAudioEndpoint" => $SPEECHSDK_PRINCETON_ONLINE_ENDPOINT,
-            "Endpoint" => $SPEECHSDK_SPEECH_ENDPOINTID,
+            "Endpoint" => "",
             "ConversationTranscriptionSubscriptionKey" => $SPEECHSDK_PRINCETON_CONVERSATIONTRANSCRIBER_PROD_KEY,
             "WavFile" => $SPEECHSDK_WAVFILE,
             "TwoSpeakersAudio" => $SPEECHSDK_TWO_SPEAKERS_AUDIO,
@@ -117,7 +117,8 @@ my %jsonData = ("InputDir" => $INPUT_DIRECTORY,
             "ConversationTranslatorRegion" => $SPEECHSDK_BOT_REGION,
             "ConversationTranslatorHost" => '',
             "ConversationTranslatorSpeechEndpoint" => '',
-            "ConversationTranslatorClientId" => 'D5253FF2-C6B4-4A72-852A-22F8007EC9E8');
+            "ConversationTranslatorClientId" => 'D5253FF2-C6B4-4A72-852A-22F8007EC9E8',
+            "Host" => '');
 
 open my $fh, ">", "$OUTPUT_DIRECTORY/test.settings.json" or die "Can't open the file $OUTPUT_DIRECTORY/test.settings.json";
 print $fh encode_json(\%jsonData);

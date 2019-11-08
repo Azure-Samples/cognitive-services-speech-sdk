@@ -19,18 +19,13 @@ function runUnitTests {
   fi
 
   ${VIRTUALENV_PYTHON} -m pytest -v ${SCRIPT_DIR}/../source/bindings/python/test \
-      --inputdir $SPEECHSDK_INPUTDIR/audio \
-      --subscription $SPEECHSDK_SPEECH_KEY \
-      --speech-region $SPEECHSDK_SPEECH_REGION \
-      --luis-subscription $SPEECHSDK_LUIS_KEY \
-      --luis-region $SPEECHSDK_LUIS_REGION \
-      --language-understanding-app-id $SPEECHSDK_LUIS_HOMEAUTOMATION_APPID \
       --junitxml=test-$T-$PLATFORM-py${MAJORMINOR}.xml \
       "${extra_args[@]}"
 }
 
 
 function runPythonSampleSuite {
+  echo Running sample suite
   local usage testStateVarPrefix output platform redactStrings testsuiteName timeoutSeconds testCases
   usage="Usage: ${FUNCNAME[0]} <testStateVarPrefix> <output> <platform> <redactStrings> <testsuiteName> <timeoutSeconds> <command...>"
   testStateVarPrefix="${1?$usage}"

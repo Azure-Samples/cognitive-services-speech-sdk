@@ -155,7 +155,12 @@ perl $SCRIPT_DIR/generateTestSettingsJson.pl \
     --TurnOnTheLampAudioUtterance "" \
     --SerializedSpeechActivityFile "activityWithSpeech.json" \
     --LongRunning "false"
+
 cp -R tests/input $binaryDir
+
+# For Python, these entries need to be in the root
+cp $binaryDir/test.settings.json .
+cp -r tests/input .
 
 cmdTimeout=
 [[ $(type -t timeout) != file ]] || cmdTimeout=timeout
