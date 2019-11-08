@@ -85,6 +85,16 @@ namespace Impl {
             m_bufferStartOffsetInBytesAbsolute += chunkBytes;
         }
 
+        // If the last chunk has a 0 we are going to remove it as it affects subsequent calls to this. 
+        if (!m_audioBuffers.empty())
+        {
+            auto lastChunk = m_audioBuffers.back();
+            if (lastChunk->size == 0)
+            {
+                m_audioBuffers.pop_back();
+            }
+        }
+
         if (m_audioBuffers.empty())
         {
             if (m_totalSizeInBytes != 0)
