@@ -168,7 +168,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         /// <summary>
         /// Creates a new instance of SpeechRecognizer.
-        /// Added in 1.8.1
+        /// Added in 1.9.0
         /// </summary>
         /// <param name="speechConfig">Speech configuration</param>
         /// <param name="language">The source language</param>
@@ -179,7 +179,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         /// <summary>
         /// Creates a new instance of SpeechRecognizer.
-        /// Added in 1.8.1
+        /// Added in 1.9.0
         /// </summary>
         /// <param name="speechConfig">Speech configuration</param>
         /// <param name="language">The source language</param>
@@ -192,7 +192,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         /// <summary>
         /// Creates a new instance of SpeechRecognizer.
-        /// Added in 1.8.1
+        /// Added in 1.9.0
         /// </summary>
         /// <param name="speechConfig">Speech configuration</param>
         /// <param name="sourceLanguageConfig">The source language config</param>
@@ -203,7 +203,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         /// <summary>
         /// Creates a new instance of SpeechRecognizer.
-        /// Added in 1.8.1
+        /// Added in 1.9.0
         /// </summary>
         /// <param name="speechConfig">Speech configuration</param>
         /// <param name="sourceLanguageConfig">The source language config</param>
@@ -216,7 +216,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         /// <summary>
         /// Creates a new instance of SpeechRecognizer.
-        /// Added in 1.8.1
+        /// Added in 1.9.0
         /// </summary>
         /// <param name="speechConfig">Speech configuration</param>
         /// <param name="autoDetectSourceLanguageConfig">The auto detect source language config</param>
@@ -227,7 +227,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         /// <summary>
         /// Creates a new instance of SpeechRecognizer.
-        /// Added in 1.8.1
+        /// Added in 1.9.0
         /// </summary>
         /// <param name="speechConfig">Speech configuration</param>
         /// <param name="autoDetectSourceLanguageConfig">The auto detect source language config</param>

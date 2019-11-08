@@ -12,7 +12,7 @@ namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Auto Detect Source Language configuration.
-    /// Added in 1.8.1
+    /// Added in 1.9.0
     /// </summary>
     public class AutoDetectSourceLanguageConfig
     {
