@@ -52,15 +52,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 public static readonly string[] Utterances =
                 {
-                    "Fähigkeiten und Fähigkeiten Batman hat keine inhärenten Superkräfte. Er verlässt sich auf seine eigenen wissenschaftlichen Fähigkeiten Detektiv Fähigkeiten und sportliche Fähigkeiten.",
-                    "In den Geschichten batman gilt als einer der größten Detektiv der Welt, wenn nicht der größte Krimi-Solver der Welt Batman wurde wiederholt als genial Ebene Intellekt beschrieben. Einer der größten Kampfkünstler im DC-Universum.",
-                    "Und mit Spitzen-Menschen-Konditionierung. Er hat die Welt bereist und die Fähigkeiten erworben, die nötig sind, um seine Cruceta-Stipendien Verbrechen zu unterstützen.",
+                    "Fähigkeiten und Fähigkeiten Batman hat keine inhärenten Superkräfte. Er verlässt sich auf seine eigenen wissenschaftlichen Fähigkeiten Detektiv Fähigkeiten und athletische Fähigkeiten in den Geschichten Batman gilt als einer der größten Detektiv der Welt, wenn nicht die größte Verbrechen Solver Batman wurde wiederholt als genial beschrieben. Level-Intellekt. Einer der größten Kampfkünstler im DC-Universum.",
+                    "Und mit Spitzengebrauch durch menschliche körperliche Konditionierung reiste die Welt und erwarb die Fähigkeiten, die nötig waren, um seine Kreuzzugs-Grundkriminalität zu unterstützen.",
                     "Sein Wissen und seine Expertise in fast jeder Disziplin, die dem Menschen bekannt ist, ist fast unvergleichlich für jeden anderen Charakter im Universum.",
-                    "Batmans unerschöpflicher Reichtum ermöglicht es ihm, auf fortschrittliche Technologie zuzugreifen, da ein kompetenter Wissenschaftler diese Technologien zu seinem Vorteil nutzen und modifizieren kann.",
+                    "Batmans unerschöpflicher Reichtum ermöglicht es ihm, auf fortschrittliche Technologie zuzugreifen, da ein kompetenter Wissenschaftler in der Lage ist, diese Technologien zu seinem Vorteil zu nutzen und zu modifizieren.",
+                    "Batman beschreibt Superman als den gefährlichsten Mann der Welt, der in der Lage ist, ein Team von supermotorisierten Außerirdischen selbst zu besiegen, um seine eingesperrten Teamkollegen zu retten.",
                     "Batman beschreibt Superman als den gefährlichsten Mann der Welt, der in der Lage ist, ein Team von supermotorisierten Außerirdischen selbst zu besiegen, um seine inhaftierten Teamkollegen zu retten.",
                     "In der ersten Handlung betrachtet Superman auch Batman als einen der brillantesten Köpfe auf dem Planeten.",
                     "Batman hat die Fähigkeit, unter großen körperlichen Schmerzen zu funktionieren und der Kontrolle des Geistes standzuhalten. Er ist ein Meister der mehrsprachigen Verkleidung und ein Experte für Spionage, der oft Informationen unter verschiedenen Identitäten sammelt.",
-                    "Batmans Karate-Judo- und Jujitsu-Training hat ihn zu einem Mathe-Meister der Tarnung gemacht und ermöglicht es ihm, nach Belieben zu erscheinen und zu verschwinden und sich zu befreien.",
+                    "Batmans Karate-Judo- und Jujitsu-Training hat ihn zu einem Mathe-Meister der Tarnung gemacht und erlaubt ihm zu viel, so dass er nach Belieben erscheinen und verschwinden und sich befreien kann.",
                     ""
                 };
             }
@@ -131,13 +131,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string[] Utterances =
                 {
                     "Skills and abilities Batman has no inherent super powers, he relies on his own scientific knowledge detective skills and athletic prowess in the stories. Batman is regarded as one of the world's greatest detective if not the world's greatest crime solver. Batman has been repeatedly described as having genius level intellect. One of the greatest martial artists in the DC universe.",
-                    "And having peak human physical conditioning, he has traveled the world, acquiring the skills needed to aid his crusade grounds crime.",
+                    "And having peak human physical conditioning use traveled the world, acquiring the skills needed to aid his crusade grounds crime.",
                     "His knowledge and expertise in almost every discipline known to man is nearly unparalleled by any other character in the universe.",
                     "Batman's inexhaustible wealth allows him to access advanced technology as a proficient scientists is able to use and modify those technologies to his advantage.",
                     "Batman describes Superman as the most dangerous man on Earth able to defeat a team of super powered extraterrestrials by himself in order to rescue his imprison teammates.",
                     "In the 1st storyline, Superman also considers Batman to be one of the most brilliant minds on the planet.",
                     "Batman has the ability to function under great physical pain and withstand mind control. He is a master of disguise multilingual and an expert in espionage, often gathering information under different identity's.",
-                    "Batman's Karate Judo and jujitsu training has made him a math master of stealth an escape, allowing too much allowing him to appear and disappear at Will and to break free."
+                    "Batman's Karate Judo and jujitsu training has made him a math are master of stealth an escape, allowing too much allowing him to appear and disappear at Will and to break free."
                 };
 
                 public static readonly string[] UtterancesInteractive =
@@ -157,13 +157,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string[] UtterancesTranslation =
                 {
                     "Skills and abilities Batman has no inherent super powers. He relies on his own scientific knowledge detective skills and athletic prowess in the stories Batman is regarded as one of the world's greatest detective if not the world's Greatest Crime Solver Batman has been repeatedly described as having genius. Level intellect. One of the greatest martial artists in the DC universe.",
-                    "And having peak human physical conditioning he has traveled the world acquiring the skills needed to aid his crusade grounds crime.",
+                    "And having peak human physical conditioning use traveled the world acquiring the skills needed to aid his crusade grounds crime.",
                     "His knowledge and expertise in almost every discipline known to man is nearly unparalleled by any other character in the universe.",
-                    "Batman's inexhaustible wealth allows him to access advanced technology as a proficient scientists use able to use and modify those technologies to his advantage.",
-                    "Batman describes superman as the most dangerous man on earth able to defeat a team of super powered extraterrestrials by himself in order to rescue his imprison teammates.",
-                    "In the 1st storyline superman also considers batman to be one of the most brilliant minds on the planet.",
+                    "Batman's inexhaustible wealth allows him to access advanced technology as a proficient scientists is able to use and modify those technologies to his advantage.",
+                    "Batman describes Superman as the most dangerous man on earth able to defeat a team of super powered extraterrestrials by himself in order to rescue his imprison teammates.",
+                    "In the first storyline Superman also considers Batman to be one of the most brilliant minds on the planet.",
                     "Batman has the ability to function under great physical pain and withstand mind control. He is a master of disguise multilingual and an expert in espionage often gathering information under different identity's.",
-                    "Batman's karate judo and jujitsu training has made him a math are master of stealth an escape allowing him to appear and disappear at will and to break free.",
+                    "Batman's karate judo and jujitsu training has made him a math are master of stealth an escape allowing too much allowing him to appear and disappear at will and to break free.",
                 };
             }
 
