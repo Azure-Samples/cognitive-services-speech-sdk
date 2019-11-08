@@ -19,7 +19,6 @@ public class DialogServiceConnectorSample : MonoBehaviour
 {
     public string subscriptionKey;
     public string region;
-    public string connectionId;
 
     public Button listenOnceButton;
     public Text recognizedText;
@@ -116,7 +115,7 @@ public class DialogServiceConnectorSample : MonoBehaviour
 
         if (dialogServiceConnector == null)
         {
-            if (connectionId == string.Empty || subscriptionKey == string.Empty || region == string.Empty)
+            if (subscriptionKey == string.Empty || region == string.Empty)
             {
                 Debug.Log($"One or more input fields weren't provided. Check the fields in the Canvas object or in the script source");
                 throw new InvalidOperationException("DialogServiceConfig creation failed");
@@ -124,7 +123,7 @@ public class DialogServiceConnectorSample : MonoBehaviour
 
             // Creates an instance of a DialogServiceConfig with your bot connection ID, subscription key, and service region.
             // Replace in the editor on the Canvas object OR directly in the code, above in the member declarations
-            dialogServiceConfig = DialogServiceConfig.FromBotSecret(connectionId, subscriptionKey, region);
+            dialogServiceConfig = BotFrameworkConfig.FromSubscription(subscriptionKey, region);
             if (dialogServiceConfig == null)
             {
                 Debug.Log($"One or more input fields weren't provided. Check the fields in the Canvas object or in the script source");

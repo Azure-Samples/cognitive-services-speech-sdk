@@ -10,6 +10,6 @@
   "author": "Microsoft",
   "license": "MIT",
   "dependencies": {
-    "microsoft-cognitiveservices-speech-sdk": "^1.7.0"
+    "microsoft-cognitiveservices-speech-sdk": "^1.8.0"
   }
 }

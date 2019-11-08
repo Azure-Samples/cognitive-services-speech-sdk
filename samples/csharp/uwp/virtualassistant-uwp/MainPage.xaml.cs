@@ -76,7 +76,7 @@ namespace VirtualAssistantPreview
         {
             DialogServiceConfig dialogServiceConfig = null;
 
-            dialogServiceConfig = DialogServiceConfig.FromBotSecret(ConnectionIdTB.Text, SubscriptionTB.Text, RegionTB.Text);
+            dialogServiceConfig = BotFrameworkConfig.FromSubscription(SubscriptionTB.Text, RegionTB.Text);
 
             if (dialogServiceConnector != null)
             {
