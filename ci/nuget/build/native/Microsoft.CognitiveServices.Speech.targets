@@ -4,7 +4,7 @@
     <SpeechNativePlatform>$(Platform)</SpeechNativePlatform>
   </PropertyGroup>
   <Import Project="$(MSBuildThisFileDirectory)\..\Microsoft.CognitiveServices.Speech.props" />
-  <ItemDefinitionGroup>
+    <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(SpeechPackageRoot)build\native\include\cxx_api;$(SpeechPackageRoot)build\native\include\c_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -19,10 +19,10 @@
     <Reference Include="$(SpeechNativeLibDir)\Microsoft.CognitiveServices.Speech.core.winmd">
       <Implementation>Microsoft.CognitiveServices.Speech.core.uwp.dll</Implementation>
     </Reference>
-    <ReferenceCopyLocalPaths Include="$(SpeechNativeLibDir)\Microsoft.CognitiveServices.Speech.core.dll" />
-  </ItemGroup>  
+    <ReferenceCopyLocalPaths Include="$(SpeechNativeDllDir)\Microsoft.CognitiveServices.Speech.core.dll" />
+  </ItemGroup>
   <Target Name="SpeechRedistAfterBuild" AfterTargets="AfterBuild" >
-    <Copy SourceFiles="$(SpeechNativeLibDir)\Microsoft.CognitiveServices.Speech.core.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="$(SpeechNativeLibDir)\Microsoft.CognitiveServices.Speech.extension.kws.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(SpeechNativeDllDir)\Microsoft.CognitiveServices.Speech.core.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(SpeechNativeDllDir)\Microsoft.CognitiveServices.Speech.extension.kws.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

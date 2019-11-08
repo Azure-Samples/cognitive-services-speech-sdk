@@ -34,25 +34,24 @@
     <!-- C header files -->
     <file src="$WindowsDropDir$\Win32\Release\public\include\c_api\*" target="build\native\include\c_api\" />
 
-    <!-- Core Native dll and lib files -->
+    <!-- Core Native lib files -->
     <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.core.lib" />
-    <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.core.dll" />
-
+    
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.core.lib" />
-    <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.core.dll" />
+        
+    
+    <!-- uwp x86 and x64 versions-->
+    <file src="$WindowsUWPDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\uap\Win32\Release\Microsoft.CognitiveServices.Speech.core.lib" />   
 
-    <file src="$WindowsUWPDropDir$\ARM\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\ARM\Release\Microsoft.CognitiveServices.Speech.core.lib" />
-    <file src="$WindowsUWPDropDir$\ARM\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\ARM\Release\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsUWPDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\uap\x64\Release\Microsoft.CognitiveServices.Speech.core.lib" />
+    
+    <!-- uwp x86 and x64 ARM -->  
+    <file src="$WindowsUWPDropDir$\ARM\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\uap\ARM\Release\Microsoft.CognitiveServices.Speech.core.lib" />
+    
 
-    <file src="$WindowsUWPDropDir$\ARM64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\ARM64\Release\Microsoft.CognitiveServices.Speech.core.lib" />
-    <file src="$WindowsUWPDropDir$\ARM64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\ARM64\Release\Microsoft.CognitiveServices.Speech.core.dll" />
-
-    <!-- KWS Native dll for plug-ins (no .lib) -->
-    <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
-    <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
-    <file src="$WindowsUWPDropDir$\ARM\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="build\native\ARM\Release\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
-    <file src="$WindowsUWPDropDir$\ARM64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="build\native\ARM64\Release\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
-
+    <file src="$WindowsUWPDropDir$\ARM64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\uap\ARM64\Release\Microsoft.CognitiveServices.Speech.core.lib" />
+       
+    
     <!-- .NET dlls -->
     <file src="$WindowsDropDir$\Win32\Release\public\lib\net461\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\net461\Microsoft.CognitiveServices.Speech.csharp.dll" />
     <file src="$WindowsDropDir$\Win32\Release\public\lib\net461\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\net461\Microsoft.CognitiveServices.Speech.csharp.xml" />

@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <!-- N.B. SpeechNativePlatform is set by including project -->
+  <!-- N.B. SpeechNativePlatform is set in a .target file under Build folder -->
   <PropertyGroup>
-    <SpeechPackageRoot>$(MSBuildThisFileDirectory)..\</SpeechPackageRoot>
-    <SpeechNativeLibDir>$(SpeechPackageRoot)build\native\$(SpeechNativePlatform)\Release</SpeechNativeLibDir>
+    <SpeechPackageRoot >$(MSBuildThisFileDirectory)..\</SpeechPackageRoot>
+    <SpeechRuntimePath Condition="'$(Platform)' == 'ARM64'">win10-arm64</SpeechRuntimePath>
+    <SpeechRuntimePath Condition="'$(Platform)' == 'ARM'">win10-arm</SpeechRuntimePath>
+    <SpeechRuntimePath Condition="'$(Platform)' == 'x64'">win-x64</SpeechRuntimePath>
+    <SpeechRuntimePath Condition="'$(Platform)' == 'x86' OR '$(Platform)' == 'Win32'">win-x86</SpeechRuntimePath>
+    <SpeechNativeLibDir Condition="'$(TargetPlatformIdentifier)' != 'UAP'">$(SpeechPackageRoot)build\native\$(SpeechNativePlatform)\Release</SpeechNativeLibDir>
+    <SpeechNativeLibDir Condition="'$(TargetPlatformIdentifier)' == 'UAP'">$(SpeechPackageRoot)build\native\uap\$(SpeechNativePlatform)\Release</SpeechNativeLibDir>
+    <SpeechNativeDllDir Condition="'$(TargetPlatformIdentifier)' == 'UAP'">$(SpeechPackageRoot)runtimes\$(SpeechRuntimePath)\nativeassets\uap</SpeechNativeDllDir>
+    <SpeechNativeDllDir Condition="'$(TargetPlatformIdentifier)' != 'UAP'">$(SpeechPackageRoot)runtimes\$(SpeechRuntimePath)\native</SpeechNativeDllDir>  
   </PropertyGroup>
+  
   <PropertyGroup>
     <BuildDependsOn>
       SpeechPlatformCheck;
