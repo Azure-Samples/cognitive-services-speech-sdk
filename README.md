@@ -101,7 +101,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart Objective-C iOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/objectivec/ios/from-microphone) | iOS | Demonstrates one-shot speech recognition from a file with recorded speech. |
 | [Quickstart Swift iOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/swift/ios/from-microphone) | iOS | Demonstrates one-shot speech recognition from a microphone. |
 | [Quickstart Objective-C macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/objectivec/macos/from-microphone) | macOS | Demonstrates one-shot speech recognition from a microphone. |
-| [Quickstart Swift macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/swift/macOS/from-microphone) | macOS | Demonstrates one-shot speech recognition from a microphone. |
+| [Quickstart Swift macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/swift/macos/from-microphone) | macOS | Demonstrates one-shot speech recognition from a microphone. |
 
 ### Speech translation quickstarts
 
@@ -135,8 +135,8 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart Python](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/python/text-to-speech) | Windows, Linux, macOS | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart Objective-C iOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/objectivec/ios/text-to-speech) | iOS | Demonstrates one-shot speech synthesis to a synthesis result and then rendering to the default speaker. |
 | [Quickstart Swift iOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/swift/ios/text-to-speech) | iOS | Demonstrates one-shot speech synthesis to the default speaker. |
-| [Quickstart Objective-C macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/objectivec/macOS/text-to-speech) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
-| [Quickstart Swift macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/swift/macOS/text-to-speech) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart Objective-C macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/objectivec/macos/text-to-speech) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
+| [Quickstart Swift macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/swift/macos/text-to-speech) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
 
 ### Voice-first virtual assistants quickstarts
 
