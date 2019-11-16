@@ -565,8 +565,8 @@ bool FindTheRef(RecoResultVector phrases, const std::string& reference)
             break;
         }
     }
-    // the ref must be the first non-empty one after sorting the phrases in offset.
-    return index == 1;
+
+    return index >= 1;
 }
 
 std::string GetText(const RecoResultVector& phrases)
