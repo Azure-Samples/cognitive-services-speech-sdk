@@ -85,6 +85,24 @@
     [self checkResult:result2];
 }
 
+- (void)_testSynthesisWithMultiVoices{
+    SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:nil];
+    NSString *ssmlWithMultiVoices = @"<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xml:lang='en-US'>"
+                    "<voice  name='en-US-JessaRUS'>Good morning!</voice>"
+                    "<voice  name='en-US-BenjaminRUS'>Good morning to you too Jessa!</voice></speak>";
+    SPXSpeechSynthesisResult* result = [synthesizer speakSsml:ssmlWithMultiVoices];
+    [self checkResult:result];
+}
+
+- (void)_testSynthesisWithRecordedAudio{
+    SPXSpeechSynthesizer* synthesizer = [[SPXSpeechSynthesizer alloc]initWithSpeechConfiguration:self.speechConfig audioConfiguration:nil];
+    NSString *ssmlWithRecordedAudio = @"<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'>"
+                    "<voice name='Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)'>"
+                    "<audio src='https://speechprobesstorage.blob.core.windows.net/ttsaudios/pcm16.wav'/>text</voice></speak>";
+    SPXSpeechSynthesisResult* result = [synthesizer speakSsml:ssmlWithRecordedAudio];
+    [self checkResult:result];
+}
+
 - (void)_testSynthesisOutputToFile{
     NSString* fileName = @"wavefile.wav";
     SPXAudioConfiguration* fileConfig = [[SPXAudioConfiguration alloc] initWithWavFileInput:fileName];
@@ -467,6 +485,14 @@
     return [self _testPickVoice];
 }
 #endif
+
+- (void)testSynthesisWithMultiVoices {
+    return [self _testSynthesisWithMultiVoices];
+}
+
+- (void)testSynthesisWithRecordedAudio {
+    return [self _testSynthesisWithRecordedAudio];
+}
 
 - (void)testSynthesisOutputToFile {
     return [self _testSynthesisOutputToFile];

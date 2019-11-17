@@ -536,6 +536,36 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
             }
         }
+        
+        [TestMethod]
+        public async Task SynthesisWithMultiVoicesUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null))
+            {
+                var ssmlWithMultiVoices = @"<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xml:lang='en-US'>
+                    <voice  name='en-US-JessaRUS'>Good morning!</voice>
+                    <voice  name='en-US-BenjaminRUS'>Good morning to you too Jessa!</voice></speak>";
+                using (var result = await synthesizer.SpeakSsmlAsync(ssmlWithMultiVoices)) 
+                {
+                    CheckResult(result);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task SynthesisWithRecordedAudioUsp()
+        {
+            using (var synthesizer = new SpeechSynthesizer(uspConfig, null))
+            {
+                var ssmlWithRecordedAudio = @"<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' 
+                    xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, JessaRUS)'>
+                    <audio src='https://speechprobesstorage.blob.core.windows.net/ttsaudios/pcm16.wav'/>text</voice></speak>";
+                using (var result = await synthesizer.SpeakSsmlAsync(ssmlWithRecordedAudio)) 
+                {
+                    CheckResult(result);
+                }
+            }
+        }
 
         [TestMethod]
         public async Task SynthesizerOutputToFileUsp()

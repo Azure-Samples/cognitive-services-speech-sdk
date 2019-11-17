@@ -300,7 +300,7 @@ void CSpxUspTtsEngineAdapter::UspSendSynthesisContext(const std::string& request
     // Set synthesis context data.
     nlohmann::json synthesisContext;
     synthesisContext["synthesis"]["audio"]["outputFormat"] = GetOutputFormatString(m_audioOutput);
-    synthesisContext["synthesis"]["audio"]["metadataOptions"]["wordBoundaryEnabled"] = ISpxPropertyBagImpl::GetStringValue("SpeechServiceResponse_Synthesis_WordBoundaryEnabled", "true");
+    synthesisContext["synthesis"]["audio"]["metadataOptions"]["wordBoundaryEnabled"] = PAL::BoolToString(WordBoundaryEnabled());
     synthesisContext["synthesis"]["audio"]["metadataOptions"]["sentenceBoundaryEnabled"] = ISpxPropertyBagImpl::GetStringValue("SpeechServiceResponse_Synthesis_SentenceBoundaryEnabled", "false");
 
     UspSendMessage(messagePath, synthesisContext.dump(), USP::MessageType::Context, requestId);
@@ -547,6 +547,16 @@ std::string CSpxUspTtsEngineAdapter::GetOutputFormatString(std::shared_ptr<ISpxA
     }
 
     return formatString;
+}
+
+bool CSpxUspTtsEngineAdapter::WordBoundaryEnabled() const
+{
+    auto wordBoundaryEnabled = PAL::ToBool(ISpxPropertyBagImpl::GetStringValue("SpeechServiceResponse_Synthesis_WordBoundaryEnabled", "true"));
+
+    auto synthesizerEvents = SpxQueryInterface<ISpxSynthesizerEvents>(GetSite());
+    auto wordBoundaryConnected = synthesizerEvents->WordBoundary.IsConnected();
+
+    return wordBoundaryEnabled && wordBoundaryConnected;
 }
 
 bool CSpxUspTtsEngineAdapter::InSsmlTag(size_t currentPos, const std::wstring& ssml, size_t beginningPos)

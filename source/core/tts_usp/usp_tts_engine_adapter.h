@@ -97,6 +97,7 @@ private:
 
     SpxWAVEFORMATEX_Type GetOutputFormat(std::shared_ptr<ISpxAudioOutput> output, bool* hasHeader);
     std::string GetOutputFormatString(std::shared_ptr<ISpxAudioOutput> output);
+    bool WordBoundaryEnabled() const;
     static bool InSsmlTag(size_t currentPos, const std::wstring& ssml, size_t beginningPos);
     static CancellationErrorCode UspErrorCodeToCancellationErrorCode(USP::ErrorCode uspErrorCode);
 
