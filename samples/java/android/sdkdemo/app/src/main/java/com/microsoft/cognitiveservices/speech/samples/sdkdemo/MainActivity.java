@@ -4,6 +4,7 @@
 //
 package com.microsoft.cognitiveservices.speech.samples.sdkdemo;
 
+import android.content.res.AssetManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
@@ -41,9 +43,9 @@ public class MainActivity extends AppCompatActivity {
     //
 
     // Replace below with your own subscription key
-    private static final String SpeechSubscriptionKey = "YourSubscriptionKey";
+    private static final String SpeechSubscriptionKey = "<key>";
     // Replace below with your own service region (e.g., "westus").
-    private static final String SpeechRegion = "YourServiceRegion";
+    private static final String SpeechRegion = "westus2";
 
     //
     // Configuration for intent recognition
@@ -57,12 +59,18 @@ public class MainActivity extends AppCompatActivity {
     // Replace below with the application ID of your Language Understanding application
     private static final String LanguageUnderstandingAppId = "YourLanguageUnderstandingAppId";
 
+    private static String Keyword = "computer";
+    private static String KeywordModel = "computer.zip";
+
+
     private TextView recognizedTextView;
 
     private Button recognizeButton;
     private Button recognizeIntermediateButton;
     private Button recognizeContinuousButton;
     private Button recognizeIntentButton;
+    private Button recognizeKwsButton;
+    private Button recognizeKwsButton2;
 
     private MicrophoneStream microphoneStream;
     private MicrophoneStream createMicrophoneStream() {
@@ -86,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
         recognizeIntermediateButton = findViewById(R.id.buttonRecognizeIntermediate);
         recognizeContinuousButton = findViewById(R.id.buttonRecognizeContinuous);
         recognizeIntentButton = findViewById(R.id.buttonRecognizeIntent);
+        recognizeKwsButton = findViewById(R.id.buttonRecognizeKws);
+        recognizeKwsButton2 = findViewById(R.id.buttonRecognizeKws2);
 
         // Initialize SpeechSDK and request required permissions.
         try {
@@ -100,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
             Log.e("SpeechSDK", "could not init sdk, " + ex.toString());
             recognizedTextView.setText("Could not initialize: " + ex.toString());
         }
+
+        final AssetManager assets = this.getAssets();
 
         // create config
         final SpeechConfig speechConfig;
@@ -302,6 +314,148 @@ public class MainActivity extends AppCompatActivity {
                 displayException(ex);
             }
         });
+
+
+        ///////////////////////////////////////////////////
+        // recognize with Keyword 1
+        ///////////////////////////////////////////////////
+        recognizeKwsButton.setOnClickListener(view -> {
+            final String logTag = "kws";
+            final String delimiter = "\n";
+            final ArrayList<String> content = new ArrayList<>();
+            Log.i(logTag, "Started keyword function 1!");
+
+            disableButtons();
+            clearTextBox();
+            content.clear();
+            content.add("");
+            content.add("");
+
+            try {
+                // final AudioConfig audioInput = AudioConfig.fromDefaultMicrophoneInput();
+                final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
+                final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, audioInput);
+
+                reco.sessionStarted.addEventListener((o, sessionEventArgs) -> {
+                    Log.i(logTag, "got a session (" + sessionEventArgs.getSessionId() + ")event: sessionStarted");
+
+                    content.set(0, "KeywordModel `" + Keyword + "` detected");
+                    setRecognizedText(TextUtils.join(delimiter, content));
+
+                });
+
+                reco.sessionStopped.addEventListener((o, sessionEventArgs) -> Log.i(logTag, "got a session (" + sessionEventArgs.getSessionId() + ")event: sessionStopped"));
+
+                reco.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
+                    final String s = speechRecognitionResultEventArgs.getResult().getText();
+                    Log.i(logTag, "Intermediate result received: " + s);
+                    setRecognizedText(s);
+                });
+
+                final KeywordRecognitionModel keywordRecognitionModel = KeywordRecognitionModel.fromStream(assets.open(KeywordModel), Keyword, true);
+
+                final Future<Void> task = reco.startKeywordRecognitionAsync(keywordRecognitionModel);
+                setOnTaskCompletedListener(task, result -> {
+                    content.set(0, "say `" + Keyword + "`...");
+                    setRecognizedText(TextUtils.join(delimiter, content));
+                    reco.close();
+                    Log.i(logTag, "Recognizer returned: ");
+                    enableButtons();
+                });
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+                displayException(ex);
+            }
+        });
+
+        ///////////////////////////////////////////////////
+        // recognize keyword 2
+        ///////////////////////////////////////////////////
+        recognizeKwsButton2.setOnClickListener(new View.OnClickListener() {
+            private static final String logTag = "kws2";
+            private static final String delimiter = "\n";
+            private boolean continuousListeningStarted = false;
+            private SpeechRecognizer reco = null;
+            private AudioConfig audioInput = null;
+            private String buttonText = "";
+            private ArrayList<String> content = new ArrayList<>();
+
+            @Override
+            public void onClick(final View view) {
+                final Button clickedButton = (Button) view;
+                Log.i(logTag, "Started keyword function 2!");
+
+                disableButtons();
+                if (continuousListeningStarted) {
+                    if (reco != null) {
+                        final Future<Void> task = reco.stopKeywordRecognitionAsync();
+                        setOnTaskCompletedListener(task, result -> {
+                            Log.i(logTag, "Continuous recognition stopped.");
+                            MainActivity.this.runOnUiThread(() -> {
+                                clickedButton.setText(buttonText);
+                            });
+                            enableButtons();
+                            continuousListeningStarted = false;
+                        });
+                    } else {
+                        continuousListeningStarted = false;
+                    }
+
+                    return;
+                }
+
+                clearTextBox();
+
+                try {
+                    content.clear();
+
+                    // audioInput = AudioConfig.fromDefaultMicrophoneInput();
+                    audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
+                    reco = new SpeechRecognizer(speechConfig, audioInput);
+                    reco.sessionStarted.addEventListener((o, sessionEventArgs) -> {
+                        Log.i(logTag, "got a session (" + sessionEventArgs.getSessionId() + ")event: sessionStarted");
+
+                        content.set(0, "KeywordModel `" + Keyword + "` detected");
+                        setRecognizedText(TextUtils.join(delimiter, content));
+
+                    });
+
+                    reco.sessionStopped.addEventListener((o, sessionEventArgs) -> Log.i(logTag, "got a session (" + sessionEventArgs.getSessionId() + ")event: sessionStopped"));
+
+                    reco.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
+                        final String s = speechRecognitionResultEventArgs.getResult().getText();
+                        Log.i(logTag, "Intermediate result received: " + s);
+                        content.add(s);
+                        setRecognizedText(TextUtils.join(" ", content));
+                        content.remove(content.size() - 1);
+                    });
+
+                    reco.recognized.addEventListener((o, speechRecognitionResultEventArgs) -> {
+                        final String s = speechRecognitionResultEventArgs.getResult().getText();
+                        Log.i(logTag, "Final result received: " + s);
+                        content.add(s);
+                        setRecognizedText(TextUtils.join(" ", content));
+                    });
+
+                    final KeywordRecognitionModel keywordRecognitionModel = KeywordRecognitionModel.fromStream(assets.open(KeywordModel), Keyword, true);
+                    final Future<Void> task = reco.startKeywordRecognitionAsync(keywordRecognitionModel);
+                    setOnTaskCompletedListener(task, result -> {
+                        continuousListeningStarted = true;
+                        MainActivity.this.runOnUiThread(() -> {
+                            content.set(0, "say `" + Keyword + "`...");
+                            setRecognizedText(TextUtils.join(delimiter, content));
+                            buttonText = clickedButton.getText().toString();
+                            clickedButton.setText("Stop");
+                            clickedButton.setEnabled(true);
+                        });
+                    });
+                } catch (Exception ex) {
+                    System.out.println(ex.getMessage());
+                    displayException(ex);
+                }
+            }
+        });
+
     }
 
     private void displayException(Exception ex) {
