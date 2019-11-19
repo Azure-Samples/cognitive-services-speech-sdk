@@ -1869,6 +1869,10 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
             // Audio buffers shall be dropped if keyword recognition is cancelled with an error to prevent extra keyword detections in the stopping phase.
             m_audioBuffer->Drop();
         }
+
+        // We're not going to see a start or stop message. We're done. Canceled. 
+        m_expectAdapterStartedTurn = false;
+        m_expectAdapterStoppedTurn = false;
     }
 }
 

@@ -1644,5 +1644,35 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
         #endregion
+
+        [TestMethod]
+        public async void TestStopAfterErrorIsFast()
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+
+            var config = SpeechConfig.FromSubscription("BadKey", "westus2");
+
+            ManualResetEventSlim canceled = new ManualResetEventSlim(false);
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
+            {
+                recognizer.Canceled += (s,e)=>
+                {
+                    Assert.IsFalse(string.IsNullOrWhiteSpace(e.ErrorDetails));
+                    Assert.Equals(e.Reason, CancellationReason.Error);
+                    canceled.Set();
+                };
+                
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                Assert.IsTrue(canceled.Wait(TimeSpan.FromMinutes(1)));
+
+                var beforeStop = DateTime.UtcNow;
+                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                var afterStop = DateTime.UtcNow;
+
+                Assert.IsTrue(TimeSpan.FromMilliseconds(500) > afterStop - beforeStop);
+            }
+        }
     }
 }
