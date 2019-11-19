@@ -292,6 +292,7 @@ elseif(ANDROID)
   set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -z nocopyreloc -z relro -z now") # -Wl,-z,relro
   set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -z nocopyreloc -z relro -z now") # -Wl,-z,relro
 
+  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON) # -fPIC -fPIE
 
   # Include debug information in release builds
