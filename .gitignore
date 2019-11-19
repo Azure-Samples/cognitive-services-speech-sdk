@@ -105,6 +105,13 @@ tests/functional/java/target/
 tests/functional/java/.classpath
 tests/functional/java/.project
 tests/functional/java/.settings/
+/source/extensions/remoteconversation/java/.project
+/source/extensions/remoteconversation/java/.settings
+/source/extensions/remoteconversation/java/.classpath
+/source/extensions/remoteconversation/java/target/classes/com/microsoft/cognitiveservices/speech/remoteconversation
+/source/extensions/remoteconversation/java/target/maven-archiver
+/source/extensions/remoteconversation/java/target/maven-status/maven-compiler-plugin/compile/default-compile
+/source/extensions/remoteconversation/java/target
 tests/**/obj
 tests/**/objd
 tests/**/bin

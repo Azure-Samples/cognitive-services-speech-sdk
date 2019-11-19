@@ -227,6 +227,34 @@
           "downloadUrl": "http://central.maven.org/maven2/javax/json/javax.json-api/1.0/javax.json-api-1.0.jar"
         }
       }
+    },
+    // Location:
+    // OSS request: none yet
+    // IP Scan: none yet
+    // Usage: Downloaded by maven during build time
+    {
+      "component": {
+        "type": "git",
+        "other": {
+          "name": "azure-core-1.0.0.jar",
+          "version": "1.0",
+          "downloadUrl": "http://repo1.maven.org/maven2/com/azure/azure-core/1.0.0/azure-core-1.0.0.jar"
+        }
+      }
+    },
+    // Location:
+    // OSS request: none yet
+    // IP Scan: none yet
+    // Usage: Downloaded by maven during build time
+    {
+      "component": {
+        "type": "other",
+        "other": {
+          "name": "azure-core-http-netty-1.0.0.jar",
+          "version": "1.0",
+          "downloadUrl": "http://repo1.maven.org/maven2/com/azure/azure-core-http-netty/1.0.0/azure-core-http-netty-1.0.0.jar"
+        }
+      }
     }
   ]
 }

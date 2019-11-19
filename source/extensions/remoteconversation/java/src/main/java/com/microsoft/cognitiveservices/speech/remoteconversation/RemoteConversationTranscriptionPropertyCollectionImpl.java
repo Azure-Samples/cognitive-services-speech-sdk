@@ -2,26 +2,18 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-package com.microsoft.cognitiveservices.speech;
+package com.microsoft.cognitiveservices.speech.remoteconversation;
 
-import java.io.Closeable;
-import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.PropertyCollection;
 import com.microsoft.cognitiveservices.speech.PropertyId;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * Represents collection or properties and their values.
- */
-public class PropertyCollection implements Closeable {
-
-    /*! \cond PROTECTED */
-
-    protected PropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-        if(collection != null) {
-            collectionImpl = collection;
-        }
+class RemoteConversationTranscriptionPropertyCollectionImpl extends PropertyCollection {
+    public RemoteConversationTranscriptionPropertyCollectionImpl() {
+        super(null);
     }
-
-    /*! \endcond */
 
     /**
      * Returns the property value.
@@ -30,6 +22,7 @@ public class PropertyCollection implements Closeable {
      * @param name The property name.
      * @return value of the property.
      */
+    @Override
     public String getProperty(String name) {
         return getProperty(name, "");
     }
@@ -42,10 +35,15 @@ public class PropertyCollection implements Closeable {
      * @param defaultValue The default value which is returned if the property is not available in the collection.
      * @return value of the property.
      */
+    @Override
     public String getProperty(String name, String defaultValue) {
-        Contracts.throwIfNull(collectionImpl, "collection");
         Contracts.throwIfNullOrWhitespace(name, "name");
-        return collectionImpl.GetProperty(name, defaultValue);
+        if(localCollectionString.containsKey(name)) {
+            return localCollectionString.get(name);
+        }
+        else {
+            return defaultValue;
+        }
     }
 
     /**
@@ -54,9 +52,9 @@ public class PropertyCollection implements Closeable {
      * @param id The speech property id
      * @return The value of the property.
      */
+    @Override
     public String getProperty(PropertyId id) {
-        Contracts.throwIfNull(collectionImpl, "collection");
-        return collectionImpl.GetProperty(id.getValue());
+        return localCollectionPropertyId.get(id);
     }
 
     /**
@@ -65,10 +63,11 @@ public class PropertyCollection implements Closeable {
      * @param name The property name.
      * @param value The value of the property.
      */
+    @Override
     public void setProperty(String name, String value) {
-        Contracts.throwIfNull(collectionImpl, "collection");
         Contracts.throwIfNullOrWhitespace(name, "name");
-        collectionImpl.SetProperty(name, value);
+        Contracts.throwIfNull(value, "value");
+        localCollectionString.put(name,value);
     }
 
     /**
@@ -77,10 +76,10 @@ public class PropertyCollection implements Closeable {
      * @param id The property id
      * @param value The value of the parameter.
      */
+    @Override
     public void setProperty(PropertyId id, String value) {
-        Contracts.throwIfNull(collectionImpl, "collection");
         Contracts.throwIfNull(value, "value");
-        collectionImpl.SetProperty(id.getValue(), value);
+        localCollectionPropertyId.put(id, value);
     }
 
     /**
@@ -88,13 +87,8 @@ public class PropertyCollection implements Closeable {
      */
     @Override
     public void close() {
-
-        if (collectionImpl != null) {
-            collectionImpl.delete();
-        }
-
-        collectionImpl = null;
+        super.close();
     }
-
-    private com.microsoft.cognitiveservices.speech.internal.PropertyCollection collectionImpl;
+    private Map<String, String> localCollectionString = new HashMap<String, String>();
+    private Map<PropertyId, String> localCollectionPropertyId = new HashMap<PropertyId, String>();
 }

@@ -225,7 +225,7 @@ if $PR_MARKDOWN_ONLY; then
   # Run just Doxygen phase for PRs changing only Markdown.
   SPEECHSDK_BUILD_PHASES=" Doxygen "
 else
-  SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop macOSBuild macOSUnitTests IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest WindowsSdlBuild LinuxPythonOobeTest BuildPythonDocs UnityBuild "
+  SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsUwpBuild NuGet NuGetLinuxTest NuGetOsxTest LinuxBuild LinuxDockerBuild LinuxDrop macOSBuild macOSUnitTests IosBuild IosUnitTests AndroidBuild AndroidPackage Doxygen DocFX JavaJrePackage RemoteConversationTranscriberJavaBuild JavaJrePackageLinuxTest JavaJrePackageOsxUnitTest WindowsSdlBuild LinuxPythonOobeTest BuildPythonDocs UnityBuild "
 fi
 
 # Running tests is default

@@ -23,15 +23,15 @@ public class RecognitionResult {
     /*! \cond PROTECTED */
 
     protected RecognitionResult(com.microsoft.cognitiveservices.speech.internal.RecognitionResult result) {
-        Contracts.throwIfNull(result, "result");
-
-        this._resultImpl = result;
-        this.resultId = result.getResultId();
-        this.reason = ResultReason.values()[result.getReason().swigValue()];
-        this.text = result.getText();
-        this.duration = result.Duration();
-        this.offset = result.Offset();
-        this.properties = new PropertyCollection(result.getProperties());
+        if(result != null) {
+            this._resultImpl = result;
+            this.resultId = result.getResultId();
+            this.reason = ResultReason.values()[result.getReason().swigValue()];
+            this.text = result.getText();
+            this.duration = result.Duration();
+            this.offset = result.Offset();
+            this.properties = new PropertyCollection(result.getProperties());
+        }
     }
 
     /*! \endcond */
@@ -41,6 +41,7 @@ public class RecognitionResult {
      * @return Specifies the result identifier.
      */
     public String getResultId() {
+        Contracts.throwIfNull(this._resultImpl, "result");
         return this.resultId;
     }
 
@@ -49,6 +50,7 @@ public class RecognitionResult {
      * @return Specifies reason of the result.
      */
     public ResultReason getReason() {
+        Contracts.throwIfNull(this._resultImpl, "result");
         return this.reason;
     }
 
@@ -57,6 +59,7 @@ public class RecognitionResult {
      * @return Presents the recognized text in the result.
      */
     public String getText() {
+        Contracts.throwIfNull(this._resultImpl, "result");
         return this.text;
     }
 
@@ -65,6 +68,7 @@ public class RecognitionResult {
      * @return Duration of recognized speech in 100nsec increments.
      */
     public BigInteger getDuration() {
+        Contracts.throwIfNull(this._resultImpl, "result");
         return this.duration;
     }
 
@@ -73,6 +77,7 @@ public class RecognitionResult {
      * @return Offset of recognized speech in 100nsec increments.
      */
     public BigInteger getOffset() {
+        Contracts.throwIfNull(this._resultImpl, "result");
         return this.offset;
     }
 
@@ -81,6 +86,7 @@ public class RecognitionResult {
      * @return The set of properties exposed in the result.
      */
     public PropertyCollection getProperties() {
+        Contracts.throwIfNull(this._resultImpl, "result");
         return this.properties;
     }
 
@@ -104,6 +110,7 @@ public class RecognitionResult {
      * @return The implementation of the result.
      */
     public com.microsoft.cognitiveservices.speech.internal.RecognitionResult getResultImpl() {
+        Contracts.throwIfNull(this._resultImpl, "result");
         return this._resultImpl;
     }
 }
