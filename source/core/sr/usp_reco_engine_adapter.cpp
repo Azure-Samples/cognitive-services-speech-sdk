@@ -2031,22 +2031,26 @@ json CSpxUspRecoEngineAdapter::GetSpeechContextJson()
         && properties->HasStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages)))
     {
         auto sourceLanguages = GetLanguages(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages);
+        bool languageDetectionOnly = properties->GetStringValue("Auto-Detect-Source-Language-Only") == TrueString;
         std::unordered_map<string, string> languageToEndpointIdMap;
         if (sourceLanguages.size() > 0)
         {
             languageToEndpointIdMap = GetPerLanguageSetting(sourceLanguages, PropertyId::SpeechServiceConnection_EndpointId);
-            contextJson["languageId"] = GetLanguageIdJson(move(sourceLanguages));
+            auto onSuccessAction = languageDetectionOnly ? "None" : "Recognize";
+            contextJson["languageId"] = GetLanguageIdJson(move(sourceLanguages), onSuccessAction);
         }
-        contextJson["phraseDetection"] = GetPhraseDetectionJson(m_endpointType == USP::EndpointType::Translation, move(languageToEndpointIdMap));
-        contextJson["phraseOutput"] = GetPhraseOutputJson(m_endpointType == USP::EndpointType::Speech);
-        if (m_endpointType == USP::EndpointType::Translation)
-        {
-            auto voiceNameMap = GetPerLanguageSetting(toLanguages, PropertyId::SpeechServiceConnection_TranslationVoice);
-            bool doSynthesis = !voiceNameMap.empty();
-            contextJson["translation"] = GetTranslationJson(move(toLanguages), doSynthesis);
-            if (doSynthesis)
+        if (!languageDetectionOnly) {
+            contextJson["phraseDetection"] = GetPhraseDetectionJson(m_endpointType == USP::EndpointType::Translation, move(languageToEndpointIdMap));
+            contextJson["phraseOutput"] = GetPhraseOutputJson(m_endpointType == USP::EndpointType::Speech);
+            if (m_endpointType == USP::EndpointType::Translation)
             {
-                contextJson["synthesis"] = GetSynthesisJson(move(voiceNameMap));
+                auto voiceNameMap = GetPerLanguageSetting(toLanguages, PropertyId::SpeechServiceConnection_TranslationVoice);
+                bool doSynthesis = !voiceNameMap.empty();
+                contextJson["translation"] = GetTranslationJson(move(toLanguages), doSynthesis);
+                if (doSynthesis)
+                {
+                    contextJson["synthesis"] = GetSynthesisJson(move(voiceNameMap));
+                }
             }
         }
 
@@ -2343,11 +2347,11 @@ std::pair<std::string, std::string> CSpxUspRecoEngineAdapter::GetLeftRightContex
     return {leftContext, rightContext};
 }
 
-json CSpxUspRecoEngineAdapter::GetLanguageIdJson(std::vector<std::string> sourceLanguages)
+json CSpxUspRecoEngineAdapter::GetLanguageIdJson(std::vector<std::string> sourceLanguages, string onSuccessAction)
 {
     json langDetectionJson;
     langDetectionJson["languages"] = json(move(sourceLanguages));
-    langDetectionJson["onSuccess"]["action"] = "Recognize";
+    langDetectionJson["onSuccess"]["action"] = onSuccessAction.c_str();
     langDetectionJson["onUnknown"]["action"] = "None";
     return langDetectionJson;
 }

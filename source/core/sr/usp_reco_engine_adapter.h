@@ -203,7 +203,7 @@ private:
     nlohmann::json GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key, const std::string& region);
     nlohmann::json GetSpeechContextJson();
     nlohmann::json GetKeywordDetectionJson();
-    nlohmann::json GetLanguageIdJson(std::vector<std::string> sourceLanguages);
+    nlohmann::json GetLanguageIdJson(std::vector<std::string> sourceLanguages, std::string onSuccessAction);
     nlohmann::json GetPhraseDetectionJson(bool doTranslation, std::unordered_map<std::string, std::string> languageToEndpointIdMap);
     nlohmann::json GetPhraseOutputJson(bool needSpeechMessages);
     nlohmann::json GetTranslationJson(std::vector<std::string>&& targetLangs, bool synthesis);

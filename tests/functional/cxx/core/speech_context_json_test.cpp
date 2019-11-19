@@ -383,4 +383,25 @@ TEST_CASE("Test JSON Generation", "[context_json]")
         contextJson = adapterTest.GetSpeechContextJson();
         REQUIRE(contextJson == expectedJson);
     }
+
+    SPXTEST_SECTION("Test Language Detection Only Json")
+    {
+        adapterTest.SetEndpointType(USP::EndpointType::Speech);
+        auto properties = session->GetPropertiesPtr();
+        properties->SetStringValue("Auto-Detect-Source-Language-Only", "true");
+
+        vector<string> sourceLangs = { "de-DE", "fr-FR", "en-US" };
+        properties->SetStringValue(
+            GetPropertyName(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguages),
+            adapterTest.Join(sourceLangs).c_str());
+
+        json languageIdJson;
+        languageIdJson["languages"] = json(sourceLangs);
+        languageIdJson["onUnknown"]["action"] = "None";
+        languageIdJson["onSuccess"]["action"] = "None";
+        expectedJson["languageId"] = languageIdJson;
+
+        auto contextJson = adapterTest.GetSpeechContextJson();
+        REQUIRE(contextJson == expectedJson);
+    }
 }
