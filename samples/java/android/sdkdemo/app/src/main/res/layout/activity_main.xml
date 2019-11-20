@@ -32,32 +32,62 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/buttonRecognize" />
 
-    <Button
-        android:id="@+id/buttonRecognizeContinuous"
-        android:layout_width="336dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:text="Recognize continuously"
-        android:textAllCaps="false"
-        app:layout_constraintBottom_toTopOf="@+id/buttonRecognizeIntent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonRecognizeIntermediate" />
+  <Button
+      android:id="@+id/buttonRecognizeContinuous"
+      android:layout_width="336dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginBottom="8dp"
+      android:text="Recognize continuously"
+      android:textAllCaps="false"
+      app:layout_constraintBottom_toTopOf="@+id/buttonRecognizeIntent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.508"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/buttonRecognizeIntermediate" />
 
-    <Button
-        android:id="@+id/buttonRecognizeIntent"
-        android:layout_width="336dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:text="Recognize intent"
-        android:textAllCaps="false"
-        app:layout_constraintBottom_toTopOf="@+id/recognizedText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+  <Button
+      android:id="@+id/buttonRecognizeIntent"
+      android:layout_width="336dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginBottom="64dp"
+      android:text="Recognize intent"
+      android:textAllCaps="false"
+      app:layout_constraintBottom_toTopOf="@+id/buttonRecognizeKws"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.406"
+      app:layout_constraintStart_toStartOf="parent" />
+
+  <Button
+      android:id="@+id/buttonRecognizeKws"
+      android:layout_width="336dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginBottom="44dp"
+      android:text="Recognize Keyword 1"
+      android:textAllCaps="false"
+      app:layout_constraintBottom_toTopOf="@+id/buttonRecognizeKws2"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.661"
+      app:layout_constraintStart_toStartOf="parent" />
+
+  <Button
+      android:id="@+id/buttonRecognizeKws2"
+      android:layout_width="336dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginBottom="36dp"
+      android:text="Recognize Keyword 2"
+      android:textAllCaps="false"
+      app:layout_constraintBottom_toTopOf="@+id/recognizedText"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.491"
+      app:layout_constraintStart_toStartOf="parent" />
 
   <TextView
       android:id="@+id/recognizedText"
