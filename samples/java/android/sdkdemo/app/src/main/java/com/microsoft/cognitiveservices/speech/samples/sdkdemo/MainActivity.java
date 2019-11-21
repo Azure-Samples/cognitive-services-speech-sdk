@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
     private static String KeywordModel = "kws-computer.zip";
     private static boolean KeywordIsCompressed = true;
 
-
     private TextView recognizedTextView;
 
     private Button recognizeButton;
