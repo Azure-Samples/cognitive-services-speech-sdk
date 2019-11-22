@@ -54,32 +54,49 @@
     
     <!-- .NET dlls -->
     <file src="$WindowsDropDir$\Win32\Release\public\lib\net461\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\net461\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$WindowsDropDir$\Win32\Release\public\lib\net461\Microsoft.CognitiveServices.Speech.csharp.pdb" target="lib\net461\Microsoft.CognitiveServices.Speech.csharp.pdb" />
     <file src="$WindowsDropDir$\Win32\Release\public\lib\net461\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\net461\Microsoft.CognitiveServices.Speech.csharp.xml" />
     <file src="$WindowsDropDir$\Win32\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$WindowsDropDir$\Win32\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" target="lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" />
     <file src="$WindowsDropDir$\Win32\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
     <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\uap10.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" target="lib\uap10.0\Microsoft.CognitiveServices.Speech.csharp.pdb" />
     <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\uap10.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
 
     <!-- .NET standard Windows native dlls -->
     <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.pdb" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.core.pdb" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.pdb" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.core.pdb" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.pdb" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.extension.kws.pdb" />
     <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
+    <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.pdb" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.extension.kws.pdb" />
     <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.pdb" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.pdb" />
     <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
+    <file src="$WindowsUwpDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.pdb" target="runtimes\win-x86\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.kws.pdb" />
     <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x64\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.pdb" target="runtimes\win-x64\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.pdb" />
     <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win-x64\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
+    <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.pdb" target="runtimes\win-x64\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.kws.pdb" />
     <file src="$WindowsUwpDropDir$\arm\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win10-arm\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsUwpDropDir$\arm\Release\public\lib\Microsoft.CognitiveServices.Speech.core.pdb" target="runtimes\win10-arm\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.pdb" />
     <file src="$WindowsUwpDropDir$\arm\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win10-arm\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
+    <file src="$WindowsUwpDropDir$\arm\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.pdb" target="runtimes\win10-arm\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.kws.pdb" />
     <file src="$WindowsUwpDropDir$\arm64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win10-arm64\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.dll" />
+    <file src="$WindowsUwpDropDir$\arm64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.pdb" target="runtimes\win10-arm64\nativeassets\uap\Microsoft.CognitiveServices.Speech.core.pdb" />
     <file src="$WindowsUwpDropDir$\arm64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.dll" target="runtimes\win10-arm64\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.kws.dll" />
+    <file src="$WindowsUwpDropDir$\arm64\Release\public\lib\Microsoft.CognitiveServices.Speech.extension.kws.pdb" target="runtimes\win10-arm64\nativeassets\uap\Microsoft.CognitiveServices.Speech.extension.kws.pdb" />
 
     <!-- .NET standard dlls, built on Windows, used on Linux -->
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
 
     <!-- .NET standard dlls, built on Windows, used on Xamarin Android -->
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\monoandroid\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.pdb" target="lib\monoandroid\Microsoft.CognitiveServices.Speech.csharp.pdb" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\UnixOS\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\monoandroid\Microsoft.CognitiveServices.Speech.csharp.xml" />
 
     <!-- .NET standard Linux native dlls -->
