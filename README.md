@@ -138,9 +138,9 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart Objective-C macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/objectivec/macos/text-to-speech) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart Swift macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/swift/macos/text-to-speech) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
 
-### Voice-first virtual assistants quickstarts
+### Voice assistants quickstarts
 
-The following quickstarts demonstrate how to create a custom voice-first virtual assistant (Preview).
+The following quickstarts demonstrate how to create a custom voice assistant.
 The applications will connect to a previously authored bot configured to use the Direct Line Speech channel, send a voice request, and return a voice response activity (if configured).
 If you want to build these quickstarts from scratch, please follow the articles in the Quickstart section on our [documentation page](https://aka.ms/csspeech).
 
