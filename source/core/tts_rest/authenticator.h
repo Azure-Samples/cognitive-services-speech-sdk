@@ -27,9 +27,9 @@ public:
 
     Timer() : m_stopped(true), m_tryToStop(false) {}
 
-    ~Timer() {}
+    ~Timer() = default;
 
-    void Start(int intervalInMs, std::function<void()> task)
+    void Start(uint32_t intervalInMs, std::function<void()> task)
     {
         if (!m_stopped)
         {
@@ -38,30 +38,28 @@ public:
 
         m_thread = std::thread([this, intervalInMs, task]()
         {
-            task();
-
-            int checkTimes = intervalInMs / m_checkIntervalInMs;
-            int remainingMs = intervalInMs % m_checkIntervalInMs;
-
             while (!m_tryToStop)
             {
-                for (int i = 0; i < checkTimes; ++i)
                 {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(m_checkIntervalInMs));
-                    if (m_tryToStop)
+                    std::unique_lock<std::mutex> lock(m_mutex);
+                    task();
+                    m_lastRefreshTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::system_clock::now().time_since_epoch()).count();
+                    m_cv.notify_all();
+                }
+
+                while (!m_tryToStop)
+                {
+                    auto currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::system_clock::now().time_since_epoch()).count();
+                    auto timeSinceLastRefresh = currentTime - m_lastRefreshTime;
+                    if (timeSinceLastRefresh >= intervalInMs)
                     {
                         break;
                     }
-                }
 
-                if (!m_tryToStop)
-                {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(remainingMs));
-                }
-
-                if (!m_tryToStop)
-                {
-                    task();
+                    auto checkIntervalInMs = std::min(static_cast<int64_t>(m_checkIntervalInMs), static_cast<int64_t>(intervalInMs - timeSinceLastRefresh));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(checkIntervalInMs));
                 }
             }
 
@@ -69,6 +67,19 @@ public:
         });
 
         m_stopped = false;
+    }
+
+    void WaitUntilValid(uint32_t expirationTimeInMS)
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+#ifdef _DEBUG
+        while (!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&] { return IsValid(expirationTimeInMS); }))
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: waiting ...", __FUNCTION__);
+        }
+#else
+        m_cv.wait(lock, [&] { return IsValid(expirationTimeInMS); });
+#endif
     }
 
     void Expire()
@@ -91,14 +102,27 @@ public:
         }
     }
 
+private:
+
+    bool IsValid(uint32_t expirationTimeInMS) const
+    {
+        auto currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto timeSinceLastRefresh = currentTime - m_lastRefreshTime;
+        return timeSinceLastRefresh < expirationTimeInMS;
+    }
 
 private:
 
-    const int m_checkIntervalInMs = 20; // Check the status every 20ms in case the expire() method need to wait too long
+    const uint32_t m_checkIntervalInMs = 20; // Check the status every 20ms in case the expire() method need to wait too long
 
     std::thread m_thread;
     std::atomic<bool> m_stopped;
     std::atomic<bool> m_tryToStop;
+    std::atomic<int64_t> m_lastRefreshTime;  // milliseconds since epoch.
+
+    std::mutex m_mutex;
+    std::condition_variable m_cv;
 };
 
 
@@ -136,10 +160,7 @@ private:
     std::string m_proxyUsername;
     std::string m_proxyPassword;
     std::string m_accessToken;
-    std::atomic<bool> m_accessTokenInitialized{ false };
     Timer m_accessTokenRenewer;
-    std::mutex m_mutex;
-    std::condition_variable m_cv;
 };
 
 
