@@ -124,6 +124,7 @@
     <file src="$AndroidDropDir$\Android-x86\Release\public\lib\libMicrosoft.CognitiveServices.Speech.core.so" target="build\monoandroid\libs\x86\libMicrosoft.CognitiveServices.Speech.core.so" />
     <file src="$AndroidDropDir$\Android-arm64\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.kws.so" target="build\monoandroid\libs\arm64-v8a\libMicrosoft.CognitiveServices.Speech.extension.kws.so" />
     <file src="$AndroidDropDir$\Android-arm32\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.kws.so" target="build\monoandroid\libs\armeabi-v7a\libMicrosoft.CognitiveServices.Speech.extension.kws.so" />
+    <file src="$AndroidDropDir$\Android-x86\Release\public\lib\libMicrosoft.CognitiveServices.Speech.extension.kws.so" target="build\monoandroid\libs\x86\libMicrosoft.CognitiveServices.Speech.extension.kws.so" />
 
     <!-- iOS native library for Xamarin -->
     <file src="$iOSDropDir$\Release\libMicrosoft.CognitiveServices.Speech.core.a" target="build\Xamarin.iOS\libMicrosoft.CognitiveServices.Speech.core.a" />

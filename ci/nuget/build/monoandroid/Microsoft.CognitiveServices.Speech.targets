@@ -20,5 +20,9 @@
       <Abi>x86</Abi>
       <Link>libs\x86\libMicrosoft.CognitiveServices.Speech.core.so</Link>
     </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\libs\x86\libMicrosoft.CognitiveServices.Speech.extension.kws.so">
+      <Abi>x86</Abi>
+      <Link>libs\x86\libMicrosoft.CognitiveServices.Speech.extension.kws.so</Link>
+    </AndroidNativeLibrary>
   </ItemGroup>
 </Project>
