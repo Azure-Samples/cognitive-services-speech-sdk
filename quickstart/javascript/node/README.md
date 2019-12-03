@@ -12,7 +12,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 > Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-node).
 
-* [Download the sample code to your development PC.](../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Open a command prompt at the quickstart directory, and run `npm install` to install the dependencies of the quickstart.
   This will place the Speech SDK library in the `node_modules` directory.
 * Update the `index.js` file with your configuration:

@@ -10,7 +10,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Build the sample
 
-* [Download the sample code to your development PC.](../../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Download and extract the Speech SDK
   * **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
   * Run the following commands after replacing the string `/your/path` with a directory (absolute path) of your choice:

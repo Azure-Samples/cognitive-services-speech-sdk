@@ -9,7 +9,7 @@ This sample demonstrates how to create a iOS app in Objective-C using the Cognit
 
 ## Get the Code for the Sample App
 
-* [Download the sample code to your development PC.](../../../README.md#get-the-samples)
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
 
 ## Get the Speech SDK for iOS
 
