@@ -1,5 +1,6 @@
 .gitattributes text
 .gitignore text
+Podfile text
 
 .classpath text
 .project text
@@ -8,11 +9,14 @@ gradlew text
 proguard-rules.pro text
 
 *.appxmanifest text
+*.asset text
+*.axml text
 *.bat text
 *.config text
 *.cpp text
 *.cs text
 *.csproj text
+*.entitlements text
 *.gradle text
 *.h text
 *.html text
@@ -21,7 +25,9 @@ proguard-rules.pro text
 *.js text
 *.json text
 *.m text
+*.mat text
 *.md text
+*.meta text
 *.pbxproj text
 *.php text
 *.pl text
@@ -32,9 +38,13 @@ proguard-rules.pro text
 *.py text
 *.sln text
 *.storyboard text
+*.swift text
+*.txt text
+*.unity text
 *.vcxproj text
 *.vcxproj.filters text
 *.xaml text
+*.xib text
 *.xml text
 *.yml text
 
@@ -43,6 +53,8 @@ proguard-rules.pro text
 
 # Binary extensions:
 *.jar binary
+*.mp3 binary
 *.pfx binary
 *.png binary
+*.table binary
 *.wav binary

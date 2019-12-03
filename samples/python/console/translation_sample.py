@@ -3,6 +3,9 @@
 
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+"""
+Translation recognition samples for the Microsoft Cognitive Services Speech SDK
+"""
 
 import time
 
@@ -40,10 +43,12 @@ def translation_once_from_mic():
     recognizer = speechsdk.translation.TranslationRecognizer(
         translation_config=translation_config, audio_config=audio_config)
 
-    # Perform recognition. `recognize_once` blocks until an utterance has been recognized, after
-    # which recognition stops and a result is returned.  Thus, it is suitable only for single shot
-    # recognition like command or query.  For long-running recognition, use continuous recognitions
-    # instead.
+    # Starts translation, and returns after a single utterance is recognized. The end of a
+    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # seconds of audio is processed. It returns the recognized text as well as the translation.
+    # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
+    # shot recognition like command or query.
+    # For long-running multi-utterance recognition, use start_continuous_recognition() instead.
     result = recognizer.recognize_once()
 
     # Check the result
@@ -80,10 +85,12 @@ def translation_once_from_file():
     recognizer = speechsdk.translation.TranslationRecognizer(
         translation_config=translation_config, audio_config=audio_config)
 
-    # Perform recognition. `recognize_once` blocks until an utterance has been recognized, after
-    # which recognition stops and a result is returned.  Thus, it is suitable only for single shot
-    # recognition like command or query.  For long-running recognition, use continuous recognitions
-    # instead.
+    # Starts translation, and returns after a single utterance is recognized. The end of a
+    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # seconds of audio is processed. The task returns the recognition text as result.
+    # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
+    # shot recognition like command or query.
+    # For long-running multi-utterance recognition, use start_continuous_recognition() instead.
     result = recognizer.recognize_once()
 
     # Check the result
@@ -132,6 +139,8 @@ def translation_continuous():
         done = True
 
     # connect callback functions to the events fired by the recognizer
+    recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
     # event for intermediate results
     recognizer.recognizing.connect(lambda evt: result_callback('RECOGNIZING', evt))
     # event for final result

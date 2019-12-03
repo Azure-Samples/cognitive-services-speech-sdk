@@ -96,7 +96,22 @@
                                 <StackPanel Orientation="Vertical">
                                     <ComboBox  x:Name="regionComboBox"  Text="Select Region" Margin="10" AllowDrop="True" >
                                         <ComboBoxItem Tag="westus" IsSelected="true">westus</ComboBoxItem>
+                                        <ComboBoxItem Tag="westus2">westus2</ComboBoxItem>
+                                        <ComboBoxItem Tag="eastus">eastus</ComboBoxItem>
+                                        <ComboBoxItem Tag="eastus2">eastus2</ComboBoxItem>
+                                        <ComboBoxItem Tag="centralus">centralus</ComboBoxItem>
+                                        <ComboBoxItem Tag="northcentralus">northcentralus</ComboBoxItem>
+                                        <ComboBoxItem Tag="southcentralus">southcentralus</ComboBoxItem>
+                                        <ComboBoxItem Tag="canadacentral">canadacentral</ComboBoxItem>
+                                        <ComboBoxItem Tag="centralindia">centralindia</ComboBoxItem>
                                         <ComboBoxItem Tag="eastasia">eastasia</ComboBoxItem>
+                                        <ComboBoxItem Tag="southeastasia">southeastasia</ComboBoxItem>
+                                        <ComboBoxItem Tag="japaneast">japaneast</ComboBoxItem>
+                                        <ComboBoxItem Tag="koreacentral">koreacentral</ComboBoxItem>
+                                        <ComboBoxItem Tag="australiaeast">australiaeast</ComboBoxItem>
+                                        <ComboBoxItem Tag="westeurope">westeurope</ComboBoxItem>
+                                        <ComboBoxItem Tag="uksouth">uksouth</ComboBoxItem>
+                                        <ComboBoxItem Tag="francecentral">francecentral</ComboBoxItem>
                                         <ComboBoxItem Tag="northeurope">northeurope</ComboBoxItem>
                                     </ComboBox>
 
