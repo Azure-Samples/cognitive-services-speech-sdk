@@ -4,6 +4,7 @@
 import pytest
 import os
 import json
+import sys
 from collections import namedtuple
 from typing import Callable
 
@@ -31,15 +32,18 @@ def pytest_addoption(parser):
 @pytest.fixture
 def config_settings(request):
     fileName = os.path.abspath(os.path.join(os.getcwd(), "test.settings.json"))
-    with open(fileName) as data_file:
-        return json.load(data_file)
-
+    try:
+        with open(fileName) as data_file:
+            return json.load(data_file)
+    except:
+        return None
 
 @pytest.fixture
 def subscription(request, config_settings):
     subscription = request.config.getoption("--subscription")
     if subscription is None:
-        subscription = config_settings['UnifiedSpeechSubscriptionKey']
+        if config_settings is not None:
+            subscription = config_settings['UnifiedSpeechSubscriptionKey']
 
     return subscription
 
@@ -48,8 +52,9 @@ def subscription(request, config_settings):
 def luis_subscription(request, config_settings):
     luis_subscription = request.config.getoption("--luis-subscription")
     if luis_subscription is None:
-        luis_subscription = \
-            config_settings['LanguageUnderstandingSubscriptionKey']
+        if config_settings is not None:
+            luis_subscription = \
+                config_settings['LanguageUnderstandingSubscriptionKey']
 
     return luis_subscription
 
@@ -58,7 +63,8 @@ def luis_subscription(request, config_settings):
 def speech_region(request, config_settings):
     region = request.config.getoption("--speech-region")
     if region is None:
-        region = config_settings['Region']
+        if config_settings is not None:
+            region = config_settings['Region']
 
     if region == "":
         region = None
@@ -70,7 +76,8 @@ def speech_region(request, config_settings):
 def luis_region(request, config_settings):
     luis_region = request.config.getoption("--luis-region")
     if luis_region is None:
-        luis_region = config_settings['LanguageUnderstandingServiceRegion']
+        if config_settings is not None:
+            luis_region = config_settings['LanguageUnderstandingServiceRegion']
 
     return luis_region
 
@@ -80,7 +87,8 @@ def endpoint(request, config_settings):
     """specify an endpoint. If given, it overrides the region settings for speech recognizers."""
     endpoint = request.config.getoption("--endpoint")
     if endpoint is None:
-        endpoint = config_settings['Endpoint']
+        if config_settings is not None:
+            endpoint = config_settings['Endpoint']
 
     if endpoint == "":
         endpoint = None
@@ -94,7 +102,8 @@ def host(request, config_settings):
        region settings for speech recognizers."""
     host = request.config.getoption("--host")
     if host is None:
-        host = config_settings['Host']
+        if config_settings is not None:
+            host = config_settings['Host']
 
     if host == "":
         host = None
@@ -105,7 +114,6 @@ def host(request, config_settings):
 def default_speech_auth(subscription, speech_region, endpoint, host):
     # if an endpoint or a host is given, it overrides the set region
     region = speech_region if not endpoint and not host else None
-
     return {'endpoint': endpoint,
             'host': host,
             'subscription': subscription,
@@ -116,7 +124,8 @@ def default_speech_auth(subscription, speech_region, endpoint, host):
 def language_understanding_app_id(request, config_settings):
     language_understanding_app_id = request.config.getoption("--language-understanding-app-id")
     if language_understanding_app_id is None:
-        language_understanding_app_id = config_settings['LanguageUnderstandingHomeAutomationAppId']
+        if config_settings is not None:
+            language_understanding_app_id = config_settings['LanguageUnderstandingHomeAutomationAppId']
 
     return language_understanding_app_id
 
@@ -192,7 +201,8 @@ def speech_input(request, config_settings):
     inputdir = request.config.getoption("--inputdir")
 
     if inputdir is None:
-        inputdir = config_settings['InputDir']
+        if config_settings is not None:
+            inputdir = config_settings['InputDir']
 
     inputdir = os.path.abspath(os.path.join(os.getcwd(),
                                             inputdir.lstrip('./\\'),
@@ -230,7 +240,8 @@ def intent_input(request, config_settings):
     inputdir = request.config.getoption("--inputdir")
 
     if inputdir is None:
-        inputdir = config_settings['InputDir']
+        if config_settings is not None:
+            inputdir = config_settings['InputDir']
 
     inputdir = os.path.abspath(os.path.join(os.getcwd(),
                                inputdir.lstrip('./\\'),
@@ -263,7 +274,8 @@ def kws_input(request, config_settings):
     inputdir = request.config.getoption("--inputdir")
 
     if inputdir is None:
-        inputdir = config_settings['InputDir']
+        if config_settings is not None:
+            inputdir = config_settings['InputDir']
 
     try:
         args = dict(zip(KwsInput._fields, kws_input_data_raw[request.param]))
