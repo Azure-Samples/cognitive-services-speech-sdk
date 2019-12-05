@@ -53,6 +53,10 @@ for flavor in Release; do # no Debug for now
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/Android/libs/x86
 
   cp --verbose --preserve \
+    "$DROP_DIR"/Android/Android-x86/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.extension.kws.so \
+    "$UNITY_DIR"/Assets/SpeechSDK/Plugins/Android/libs/x86
+
+  cp --verbose --preserve \
     "$DROP_DIR"/WindowsUwp/Win32/$flavor/public/lib/Microsoft.CognitiveServices.Speech.core.dll \
     "$UNITY_DIR"/Assets/SpeechSDK/Plugins/WSA/x86
 
