@@ -82,4 +82,35 @@ NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
  */
 - (void)addDisconnectedEventHandler:(nonnull SPXConnectionEventHandler)eventHandler;
 
+/**
+ * Appends a parameter in a message to service.
+ * Added in version 1.9.0.
+ *
+ * @param path The path of the message.
+ * @param propertyName The propertyName of the message.
+ * @param propertyValue The propertyValue of the message as a json string.
+ */
+- (void)setMessageProperty:(nonnull NSString *)path propertyName:(nonnull NSString *)propertyName propertyValue:(nonnull NSString *)propertyValue;
+
+/**
+ * Send message to service.
+ * Added in version 1.9.0.
+ *
+ * @param path The path of the message.
+ * @param payload The payload of the message as a json string.
+ */
+- (void)sendMessage:(nonnull NSString *)path payload:(nonnull NSString *)payload
+NS_SWIFT_UNAVAILABLE("Use the method with Swift-compatible error handling.");
+
+/**
+ * Send message to service.
+ * Added in version 1.9.0.
+ *
+ * @param path The path of the message.
+ * @param payload The payload of the message as a json string.
+ * @return The boolean value indicating successful operation.
+ * @param outError error information.
+ */
+- (BOOL)sendMessage:(nonnull NSString *)path payload:(nonnull NSString *)payload error:(NSError * _Nullable * _Nullable)outError;
+
 @end

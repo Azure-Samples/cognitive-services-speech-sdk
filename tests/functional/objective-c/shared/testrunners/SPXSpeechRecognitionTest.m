@@ -29,18 +29,42 @@
     self.speechKey = [[[NSProcessInfo processInfo] environment] objectForKey:@"subscriptionKey"];
     self.serviceRegion = [[[NSProcessInfo processInfo] environment] objectForKey:@"serviceRegion"];
 
+    [self setAudioSource];
+
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
+    self.speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:self.audioConfig];
+    self.connection = [[SPXConnection alloc] initFromRecognizer:self.speechRecognizer];
+
+    [self setEventHandlers];
+}
+
+- (void)speechInitWithOfficeEndpoint {
+    self.speechKey = [[[NSProcessInfo processInfo] environment] objectForKey:@"subscriptionKey"];
+    self.serviceRegion = [[[NSProcessInfo processInfo] environment] objectForKey:@"serviceRegion"];
+
+    [self setAudioSource];
+
+    NSString *officeEndpointString = @"wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1";
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithEndpoint:officeEndpointString subscription:self.speechKey];
+    [speechConfig setServicePropertyTo:@"corrections" byName:@"format" usingChannel:SPXServicePropertyChannel_UriQueryParameter];
+    [speechConfig enableDictation];    
+    self.speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:self.audioConfig];
+    NSString *authToken = @"abc";
+    [self.speechRecognizer setAuthorizationToken:authToken];
+    self.connection = [[SPXConnection alloc] initFromRecognizer:self.speechRecognizer];
+
+    [self setEventHandlers];
+}
+
+- (void)setEventHandlers {
+
     result = [NSMutableDictionary new];
     [result setObject:@0 forKey:@"connectedCount"];
     [result setObject:@0 forKey:@"disconnectedCount"];
     [result setObject:@0 forKey:@"finalResultCount"];
     [result setObject:@0 forKey:@"sessionStoppedCount"];
     [result setObject:@"" forKey:@"finalText"];
-
-    [self setAudioSource];
-
-    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:self.speechKey region:self.serviceRegion];
-    self.speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:self.audioConfig];
-    self.connection = [[SPXConnection alloc] initFromRecognizer:self.speechRecognizer];
+    [result setObject:@"" forKey:@"jsonResult"];
 
     __unsafe_unretained typeof(self) weakSelf = self;
 
@@ -56,7 +80,9 @@
 
     [self.speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
         NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.offset, eventArgs.result.duration, eventArgs.result.resultId);
-        NSLog(@"Received JSON: %@", [eventArgs.result.properties getPropertyById:SPXSpeechServiceResponseJsonResult]);
+        NSString *jsonResult = [eventArgs.result.properties getPropertyById:SPXSpeechServiceResponseJsonResult];
+        NSLog(@"Received JSON: %@", jsonResult);
+        [weakSelf->result setObject:jsonResult forKey: @"jsonResult"];
         if ([[weakSelf->result valueForKey:@"finalText"] length] == 0)
         {
             [weakSelf->result setObject:eventArgs.result.text forKey: @"finalText"];
@@ -248,6 +274,101 @@
     [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
 }
 
+- (void)_testRecognizeAsyncWithSetMessageProperty {
+    [self speechInitWithOfficeEndpoint];
+    [self.connection open:NO];
+
+    NSPredicate *connectedCountPred = [NSPredicate predicateWithBlock: ^BOOL (id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings){
+        return [[evaluatedObject valueForKey:@"connectedCount"] isEqualToNumber:@1];
+    }];
+
+    // wait for connection
+    [self expectationForPredicate:connectedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+
+    NSString *path = @"speech.context";
+    NSString *propertyName = @"phraseDetection";
+    NSString *phraseDetectionPayload = @"{\"mode\": \"dictation\", \"grammarScenario\": \"Dictation_Office\",\"initialSilenceTimeout\": 2000,\"trailingSilenceTimeout\": 2000}";
+
+    [self.connection setMessageProperty:path propertyName:propertyName propertyValue:phraseDetectionPayload];
+
+    // trigger recognition
+    [self.speechRecognizer recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
+    }];
+
+    // wait for session stopped event result
+    [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+
+    // check results
+    NSString *jsonResult = [self->result valueForKey:@"jsonResult"];
+    XCTAssertTrue([jsonResult containsString:@"Corrections"]);
+    XCTAssertEqualObjects([self->result valueForKey:@"finalResultCount"], @1);
+    long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
+    long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
+    XCTAssertGreaterThan(connectedEventCount, 0);
+    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
+                  @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
+
+    [self.connection close];
+
+    NSPredicate *disconnectedCountPred = [NSPredicate predicateWithBlock: ^BOOL (id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings){
+        return [[evaluatedObject valueForKey:@"disconnectedCount"] compare:@0] == NSOrderedDescending;
+    }];
+
+    // wait for disconnect
+    [self expectationForPredicate:disconnectedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+}
+
+- (void)_testRecognizeAsyncWithSendMessage {
+    [self speechInitWithOfficeEndpoint];    
+    [self.connection open:NO];
+
+    NSPredicate *connectedCountPred = [NSPredicate predicateWithBlock: ^BOOL (id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings){
+        return [[evaluatedObject valueForKey:@"connectedCount"] isEqualToNumber:@1];
+    }];
+
+    // wait for connection
+    [self expectationForPredicate:connectedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+
+    NSString *event = @"event";
+    NSString *jsonPayload = @"{\"Id\":\"Corrections\",\"Name\":\"Telemetry\",\"ClientSessionId\":\"DADAAAC4-019C-4D23-9301-7FD619BE68AB\",\"CorrectionEvents\":[{\"PhraseId\":\"AEDC2194-019C-4D23-9301-7FD619BE68A9\",\"CorrectionId\":0,\"AlternateId\":1,\"TreatedInUX\":\"true\",\"TriggerType\":\"click\",\"EditType\":\"alternate\"},{\"PhraseId\":\"BEDC2194-019C-4D23-9301-7FD619BE68AA\",\"CorrectionId\":0,\"AlternateId\":2,\"TriggerType\":\"hover\",\"TreatedInUX\":\"false\",\"EditType\":\"alternate\"}]}";
+
+    NSError *err = nil;
+    BOOL success = [self.connection sendMessage:event payload:jsonPayload error:&err];
+    XCTAssertTrue(success);
+
+    // trigger recognition
+    [self.speechRecognizer recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *srresult) {
+    }];
+
+    // wait for session stopped event result
+    [self expectationForPredicate:sessionStoppedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+
+    // check result    
+    NSString *jsonResult = [self->result valueForKey:@"jsonResult"];
+    XCTAssertTrue([jsonResult containsString:@"Corrections"]);
+    XCTAssertEqualObjects([self->result valueForKey:@"finalResultCount"], @1);
+    long connectedEventCount = [[self->result valueForKey:@"connectedCount"] integerValue];
+    long disconnectedEventCount = [[self->result valueForKey:@"disconnectedCount"] integerValue];
+    XCTAssertGreaterThan(connectedEventCount, 0);
+    XCTAssertTrue(connectedEventCount == disconnectedEventCount + 1 || connectedEventCount == disconnectedEventCount,
+                  @"The connected event count (%ld) does not match the disconnected event count (%ld)", connectedEventCount, disconnectedEventCount);
+
+    [self.connection close];
+
+    NSPredicate *disconnectedCountPred = [NSPredicate predicateWithBlock: ^BOOL (id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings){
+        return [[evaluatedObject valueForKey:@"disconnectedCount"] compare:@0] == NSOrderedDescending;
+    }];
+
+    // wait for disconnect
+    [self expectationForPredicate:disconnectedCountPred evaluatedWithObject:result handler:nil];
+    [self waitForExpectationsWithTimeout:timeoutInSeconds handler:nil];
+}
+
 @end
 
 
@@ -268,6 +389,14 @@
 
 - (void) testRecognizeAsyncWithPreConnection {
     [self _testRecognizeAsyncWithPreConnection];
+}
+
+- (void) testRecognizeAsyncWithSetMessageProperty {
+    [self _testRecognizeAsyncWithSetMessageProperty];
+}
+
+- (void) testRecognizeAsyncWithSendMessage {
+    [self _testRecognizeAsyncWithSendMessage];
 }
 
 - (void) testContinuousRecognition {

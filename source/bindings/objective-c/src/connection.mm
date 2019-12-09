@@ -125,4 +125,68 @@
     });
 }
 
+- (void)setMessageProperty:(NSString *)path propertyName:(NSString *)propertyName propertyValue:(NSString *)propertyValue
+{
+    if (connectionHandle == nullptr) {
+        NSLog(@"connectionHandle handle is null");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"connectionHandle handle is null"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    connectionHandle->SetMessageProperty([path toSpxString], [propertyName toSpxString], [propertyValue toSpxString]);
+}
+
+- (void)sendMessage:(NSString *)path payload:(NSString *)payload
+{
+    if (connectionHandle == nullptr) {
+        NSLog(@"connectionHandle handle is null");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"connectionHandle handle is null"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+
+    try {
+        connectionHandle->SendMessageAsync([path toSpxString], [payload toSpxString]).get();
+    }
+    catch (const std::exception &e) {
+        NSLog(@"Exception caught in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (const SPXHR &hr) {
+        auto e = SpeechImpl::Impl::ExceptionWithCallStack(hr);
+        NSLog(@"Exception with error code in core: %s", e.what());
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:[NSString StringWithStdString:e.what()]
+                                                       userInfo:nil];
+        [exception raise];
+    }
+    catch (...) {
+        NSLog(@"Exception caught in sendMessage");
+        NSException *exception = [NSException exceptionWithName:@"SPXException"
+                                                         reason:@"Runtime exception"
+                                                       userInfo:nil];
+        [exception raise];
+    }
+}
+
+- (BOOL)sendMessage:(NSString *)path payload:(NSString *)payload error:(NSError * _Nullable * _Nullable)outError
+{
+    try {
+        [self sendMessage:path payload:payload];
+        return TRUE;
+    }
+    catch (NSException *exception) {
+        NSMutableDictionary *errorDict = [NSMutableDictionary dictionary];
+        [errorDict setObject:[NSString stringWithFormat:@"Error: %@", [exception reason]] forKey:NSLocalizedDescriptionKey];
+        *outError = [[NSError alloc] initWithDomain:@"SPXErrorDomain"
+                                               code:[Util getErrorNumberFromExceptionReason:[exception reason]] userInfo:errorDict];
+    }
+    return FALSE;
+}
+
 @end
