@@ -1,0 +1,13 @@
+
+*.lock
+.vs/
+[Dd]ebug/
+[Rr]elease/
+x64/
+build/
+!scripts/build/
+[Bb]in/
+[Oo]bj/
+[Ll]ib/
+packages/
+App_Data/
