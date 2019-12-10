@@ -58,6 +58,7 @@ std::string PAL::GenerateGUID()
         auto uuidStr = static_cast<jstring>(throw_if_null(env->CallObjectMethod(uuidObj, toString), "Problem calling \"UUID.toString()\""));
         auto uuidUTFStr = env->GetStringUTFChars(uuidStr, 0);
         std::string uuid{ uuidUTFStr };
+        env->DeleteLocalRef(uuidObj);
         env->ReleaseStringUTFChars(uuidStr, uuidUTFStr);
         return uuid;
     });
