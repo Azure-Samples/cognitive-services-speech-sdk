@@ -94,16 +94,15 @@ class NativeLibraryLoader {
                     String path = null;
                     try {
                         path = new File(ClassLoader.getSystemClassLoader().getResource(".").getPath()).getAbsolutePath();
+                        if (path != null) {
+                            for (String libName: externalNativeList) {
+                                copyLibraryFromPath(libName, path);
+                            }
+                        }
                     }
                     catch (Exception e) {
-                        // If nothing worked, throw exception
-                        throw new FileNotFoundException(
-                        String.format("Failed to get path to extract libraries to, because of error: %s", e.getMessage()));
-                    }
-                    if (path != null) {
-                        for (String libName: externalNativeList) {
-                            copyLibraryFromPath(libName, path);
-                        }
+                        System.err.println(
+                        String.format("Could not copy external Speech SDK libraries because of the following error: %s", e.getMessage()));
                     }
                 }
             }
