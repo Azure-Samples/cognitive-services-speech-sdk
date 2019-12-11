@@ -1645,8 +1645,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
         #endregion
 
-        [TestMethod]
-        public async void TestStopAfterErrorIsFast()
+        // [TestMethod]
+        public async Task TestStopAfterErrorIsFast()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
 
@@ -1656,13 +1656,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
             {
-                recognizer.Canceled += (s,e)=>
+                recognizer.Canceled += (s, e) =>
                 {
                     Assert.IsFalse(string.IsNullOrWhiteSpace(e.ErrorDetails));
                     Assert.Equals(e.Reason, CancellationReason.Error);
                     canceled.Set();
                 };
-                
+
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
                 Assert.IsTrue(canceled.Wait(TimeSpan.FromMinutes(1)));
@@ -1672,6 +1672,81 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var afterStop = DateTime.UtcNow;
 
                 Assert.IsTrue(TimeSpan.FromMilliseconds(500) > afterStop - beforeStop);
+            }
+        }
+
+        private class ContinuousFilePullStream : PullAudioInputStreamCallback
+        {
+            FileStream fs;
+            readonly object fsLock = new object();
+
+            public ContinuousFilePullStream(string fileName)
+            {
+                Console.WriteLine("Trying to open " + fileName);
+                fs = File.OpenRead(fileName);
+            }
+
+            public override int Read(byte[] dataBuffer, uint size)
+            {
+                lock (fsLock)
+                {
+                    if (fs == null)
+                    {
+                        return 0;
+                    }
+
+                    if (fs.Read(dataBuffer, 0, (int)size) < size)
+                    {
+                        // reset the file stream.
+                        fs.Seek(0, SeekOrigin.Begin);
+                    }
+                }
+
+                return dataBuffer.Length;
+            }
+
+            public override void Close()
+            {
+                lock (fsLock)
+                {
+                    fs.Dispose();
+                    fs = null;
+                }
+
+                base.Close();
+            }
+        }
+
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        public async Task WordLevelTimingsWorkForLongSpeech()
+        {
+            var audioInput = AudioConfig.FromStreamInput(new ContinuousFilePullStream(TestData.English.Batman.AudioFile));
+
+            ManualResetEvent recognizedEnough = new ManualResetEvent(false);
+
+            this.defaultConfig.RequestWordLevelTimestamps();
+
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
+            {
+                recognizer.Canceled += (s, e) =>
+                {
+                    Assert.IsFalse(string.IsNullOrWhiteSpace(e.ErrorDetails));
+                    Assert.Equals(e.Reason, CancellationReason.Error);
+                };
+
+                recognizer.Recognized += (s, e) =>
+                 {
+                     var best = e.Result.Best();
+
+                     if(e.Result.OffsetInTicks > int.MaxValue)
+                     {
+                         recognizedEnough.Set();
+                     }
+                 };
+
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                Assert.IsTrue(recognizedEnough.WaitOne(TimeSpan.FromMinutes(4)));
             }
         }
     }

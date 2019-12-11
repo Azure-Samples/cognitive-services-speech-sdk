@@ -91,7 +91,7 @@ namespace Microsoft.CognitiveServices.Speech
         internal WordLevelTimingResult()
         { }
 
-        internal WordLevelTimingResult(int duration, int offset, string word)
+        internal WordLevelTimingResult(int duration, long offset, string word)
         {
             this.Duration = duration;
             this.Offset = offset;
@@ -108,7 +108,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// Offset in ticks.
         /// </summary>
         [DataMember]
-        public int Offset { get; private set; }
+        public long Offset { get; private set; }
 
         /// <summary>
         /// Recognized word.
