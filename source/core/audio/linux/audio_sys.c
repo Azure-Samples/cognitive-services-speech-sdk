@@ -593,7 +593,7 @@ static int open_wave_data(AUDIO_SYS_DATA* audioData, snd_pcm_stream_t streamType
     return result;
 }
 
-AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
+AUDIO_SYS_HANDLE audio_input_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 {
     AUDIO_SYS_DATA* result;
 
@@ -634,12 +634,67 @@ AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
     // try to open the audio device
     if (init_alsa_pcm_device(&result->pcmHandle, SND_PCM_STREAM_CAPTURE, INPUT_FRAME_COUNT, result) != 0)
     {
-        LogError("Error opening audio device");
+        LogError("Error opening audio capture device");
         audio_destroy(result);
         result = NULL;
     }
 
     return result;
+}
+
+AUDIO_SYS_HANDLE audio_output_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
+{
+    AUDIO_SYS_DATA* result;
+
+    if (0 != strcmp(STRING_c_str(format->hDeviceName), ""))
+    {
+        LogError("specific audio output device is not supported now.");
+        return NULL;
+    }
+
+    result = (AUDIO_SYS_DATA*)malloc(sizeof(AUDIO_SYS_DATA));
+    if (result != NULL)
+    {
+        memset(result, 0, sizeof(AUDIO_SYS_DATA));
+        result->channels = format->nChannels;
+        result->sampleRate = format->nSamplesPerSec;
+        result->bitsPerSample = format->wBitsPerSample;
+        result->waveDataDirty = true;
+        result->current_output_state = AUDIO_STATE_STOPPED;
+        result->current_input_state = AUDIO_STATE_STOPPED;
+        result->lock = Lock_Init();
+        result->current_output_state = AUDIO_STATE_STOPPED;
+        result->current_input_state = AUDIO_STATE_STOPPED;
+        audio_set_options(result, AUDIO_OPTION_DEVICENAME, STRING_c_str(format->hDeviceName));
+    }
+
+    // try to open the audio playback device
+    if (init_alsa_pcm_device(&result->pcmHandle, SND_PCM_STREAM_PLAYBACK, OUTPUT_FRAME_COUNT, result) != 0)
+    {
+        LogError("Error opening audio playback device");
+        audio_destroy(result);
+        result = NULL;
+    }
+
+    return result;
+}
+
+AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
+{
+    switch (format->eDataFlow)
+    {
+    case AUDIO_CAPTURE:
+        return audio_input_create_with_parameters(format);
+        break;
+
+    case AUDIO_RENDER:
+        return audio_output_create_with_parameters(format);
+        break;
+
+    default:
+        LogError("Unknown audio data flow");
+        break;
+    }
 }
 
 void audio_destroy(AUDIO_SYS_HANDLE handle)
@@ -670,9 +725,16 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
             STRING_delete(audioData->hDeviceName);
         }
 
-        Lock_Deinit(audioData->lock);
-        Lock_Deinit(audioData->audioBufferLock);
-        sem_destroy(&audioData->audioFrameAvailable);
+        if (audioData->lock)
+        {
+            Lock_Deinit(audioData->lock);
+        }
+
+        if (audioData->audioBufferLock)
+        {
+            Lock_Deinit(audioData->audioBufferLock);
+            sem_destroy(&audioData->audioFrameAvailable);
+        }
 
         free(audioData->audioSamples);
         free(audioData->buffer);
@@ -956,7 +1018,6 @@ static int OutputWriteAsync(void *p)
         async->pfnComplete,
         async->pfnBufferUnderRun,
         async->pContext);
-    ThreadAPI_Join(async->output_thread, NULL);
     free(async);
     return 0;
 }

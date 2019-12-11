@@ -312,22 +312,20 @@ AUDIO_SYS_HANDLE audio_output_create_with_parameters(AUDIO_SETTINGS_HANDLE forma
 
 AUDIO_SYS_HANDLE audio_create_with_parameters(AUDIO_SETTINGS_HANDLE format)
 {
-    SPX_DBG_TRACE_VERBOSE("setting up AudioQueue");
+    switch (format->eDataFlow)
+    {
+    case AUDIO_CAPTURE:
+        return audio_input_create_with_parameters(format);
+        break;
 
-     switch (format->eDataFlow)
-        {
-        case AUDIO_CAPTURE:
-            return audio_input_create_with_parameters(format);
-            break;
+    case AUDIO_RENDER:
+        return audio_output_create_with_parameters(format);
+        break;
 
-        case AUDIO_RENDER:
-            return audio_output_create_with_parameters(format);
-            break;
-
-        default:
-            LogError("Unknown audio data flow");
-            break;
-        }
+    default:
+        LogError("Unknown audio data flow");
+        break;
+    }
 }
 
 void audio_destroy(AUDIO_SYS_HANDLE handle)
