@@ -1,0 +1,27 @@
+﻿Conteúdo como dados, modelos, testes e pontos de extremidade são organizados em projetos no portal de fala personalizada. Cada projeto é específico de um domínio e país/idioma. Por exemplo, você pode criar um projeto para centros de chamadas que usam o inglês no Estados Unidos. Para criar seu primeiro projeto, selecione a fala de fala para texto/Personalizadae clique em novo projeto. Siga as instruções fornecidas pelo Assistente para criar seu projeto. Depois de criar um projeto, você deverá ver quatro guias: Dados, teste, treinamentoe implantação. Use os links fornecidos nas próximas etapas para aprender a usar cada guia. 
+Fala Personalizada fornece ferramentas que permitem inspecionar visualmente a qualidade de reconhecimento de um modelo, comparando dados de áudio com o resultado de reconhecimento correspondente. No portal de fala personalizada, você pode reproduzir áudio carregado e determinar se o resultado de reconhecimento fornecido está correto. Essa ferramenta permite que você inspecione rapidamente a qualidade do modelo de fala-para-texto de linha de base da Microsoft ou de um modelo personalizado treinado sem precisar transcrever os dados de áudio.
+Neste documento, você aprenderá a medir de forma quantitativa a qualidade do modelo de fala-para-texto da Microsoft ou de seu modelo personalizado. Áudio e dados de transcrição com rótulo humano são necessários para testar a precisão e 30 minutos a 5 horas de áudio representativo devem ser fornecidos.
+O que é a taxa de erros do Word (WER)?
+O padrão do setor para medir a precisão do modelo é o WER ( taxa de erros do Word ). O WER conta o número de palavras incorretas identificadas durante o reconhecimento e divide pelo número total de palavras fornecidas na transcrição de rótulo humano. Por fim, esse número é multiplicado por 100% para calcular o WER.
+Fórmula do WER
+Palavras incorretamente identificadas se enquadram em três categorias:
+Inserção (I): Palavras que são adicionadas incorretamente à transcrição de hipótese
+Exclusão (D): Palavras que não são detectadas na transcrição da hipótese
+Substituição (ões): Palavras que foram substituídas entre referência e hipótese
+Veja um exemplo:
+Exemplo de palavras identificadas incorretamente
+Resolver erros e aprimorar o WER
+Você pode usar o WER nos resultados de reconhecimento do computador para avaliar a qualidade do modelo que você está usando com seu aplicativo, ferramenta ou produto. Um WER de 5% a 10% é considerado uma boa qualidade e está pronto para uso. Um WER de 20% é aceitável, mas talvez você queira considerar treinamento adicional. Um WER de 30% ou mais sinais de baixa qualidade e requer personalização e treinamento.
+A forma como os erros são distribuídos é importante. Quando muitos erros de exclusão são encontrados, isso geralmente ocorre devido à intensidade do sinal de áudio fraco. Para resolver esse problema, você precisará coletar dados de áudio mais perto da origem. Erros de inserção significam que o áudio foi registrado em um ambiente barulhento e crosstalk pode estar presente, causando problemas de reconhecimento. Erros de substituição geralmente são encontrados quando uma amostra insuficiente de termos específicos do domínio foi fornecida como transcrições com rótulo humano ou texto relacionado.
+Ao analisar arquivos individuais, você pode determinar quais tipos de erros existem e quais erros são exclusivos para um arquivo específico. Entender os problemas no nível de arquivo ajudará você a aprimorar as melhorias.
+Criar um teste
+Se você quiser testar a qualidade do modelo de linha de base de fala para texto da Microsoft ou de um modelo personalizado que você tenha treinado, você pode comparar dois modelos lado a lado para avaliar a precisão. A comparação inclui resultados de WER e de reconhecimento. Normalmente, um modelo personalizado é comparado com o modelo de linha de base da Microsoft.
+Para avaliar modelos lado a lado:
+Entre no portal de fala personalizada.
+Navegue até a > de fala para texto fala personalizada teste de > .
+Clique em Adicionar teste.
+Selecione avaliar exatidão. Dê ao teste um nome, uma descrição e selecione seu conjunto de testes de áudio e de transcrição com rótulo humano.
+Selecione até dois modelos que você gostaria de testar.
+Clique em Criar.
+Depois que o teste tiver sido criado com êxito, você poderá comparar os resultados lado a lado.
+Essa página de detalhes lista todos os declarações no conjunto de seus conjuntos de anotações, indicando os resultados de reconhecimento dos dois modelos junto com a transcrição do conjunto de resultados enviado. Para ajudar a inspecionar a comparação lado a lado, você pode alternar vários tipos de erro, incluindo inserção, exclusão e substituição. 

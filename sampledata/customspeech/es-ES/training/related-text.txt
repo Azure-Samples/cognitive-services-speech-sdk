@@ -1,0 +1,29 @@
+﻿El contenido, como datos, modelos, pruebas y puntos de conexión, se organiza en proyectos en el portal de Custom Speech. Cada proyecto es específico de un dominio y un país o idioma. Por ejemplo, puede crear un proyecto para centros de llamadas que usan el inglés en Estados Unidos. Para crear su primer proyecto, seleccione Speech-to-text/Custom speech (Conversión de voz a texto/Conversión de voz personalizada) y, a continuación, haga clic en New project (Nuevo proyecto). Siga las instrucciones del asistente para crear el proyecto. Después de crear el proyecto, verá cuatro pestañas: Datos, Pruebas, Entrenamiento e Implementación. Use los vínculos incluidos en Pasos siguientes para aprender a usar cada pestaña.
+Custom Speech proporciona herramientas que le permiten inspeccionar visualmente la calidad del reconocimiento de un modelo mediante la comparación de los datos de audio con el resultado de reconocimiento correspondiente. Desde el portal de Custom Speech, puede reproducir el audio cargado y determinar si el resultado de reconocimiento proporcionada es correcto. Esta herramienta le permite inspeccionar rápidamente la calidad del modelo de voz a texto de línea de base de Microsoft o de un modelo personalizado entrenado sin tener que transcribir los datos de audio.
+En este documento, aprenderá a medir cuantitativamente la calidad del modelo de conversión de texto a voz de Microsoft o su modelo personalizado. Para probar la voz se requieren datos de transcripción de con la etiqueta audio + humano, y se deben proporcionar entre 30 minutos y 5 horas de audio representativo.
+¿Qué es Word Error Rate (WER)?
+Es el estándar del sector para medir la precisión del modelo. WER cuenta el número de palabras incorrectas identificadas durante el reconocimiento y luego las divide entre el número total de palabras proporcionadas en la transcripción con la etiqueta humano. Por último, ese número se multiplica por 100 % para calcular la tasa WER.
+Fórmula de WER
+Las palabras identificadas incorrectamente pertenecen a tres categorías:
+Inserción (I): palabras que se agregan incorrectamente en la transcripción de hipótesis.
+Eliminación (D): palabras que no se detectan en la transcripción de hipótesis.
+Sustitución (S): palabras que se sustituyeron entre la referencia y la hipótesis.
+Este es un ejemplo:
+Ejemplo de palabras identificadas incorrectamente
+Resolución de errores y mejora de WER
+Puede usar WER a partir de los resultados de reconocimiento automático para evaluar la calidad del modelo que usa con su aplicación, herramienta o producto. Una tasa WER de entre un 5 y un 10 % se considera buena calidad y está listo para usarse. Una tasa WER de 20 % es aceptable, pero quizás considere la posibilidad de entrenamiento adicional. Una tasa WER de 30 % o más señala una calidad deficiente y la necesidad de personalización y entrenamiento.
+El modo en que se distribuyen los errores es importante. Si se encuentran muchos errores de eliminación, la causa suele ser la intensidad débil de señal de audio. Para resolver este problema, debe recopilar los datos de audio más cerca de la fuente. Los errores de inserción significan que el audio se grabó en un entorno ruidoso y pueden producirse interferencias, lo que ocasiona problemas de reconocimiento. Los errores de sustitución se encuentran a menudo cuando se ha proporcionado una muestra insuficiente de términos específicos del dominio como transcripciones con la etiqueta humano o texto relacionado.
+Al analizar archivos individuales, puede determinar qué tipo de errores existen y qué errores son específicos de un determinado archivo. Comprender los problemas en el nivel de archivo le ayudará a identificar las mejoras.
+Creación de una prueba
+Si quiere probar la calidad del modelo de línea de base de texto a voz de Microsoft o un modelo personalizado que haya entrenado, puede comparar dos modelos en paralelo para evaluar la precisión. La comparación incluye los resultados de reconocimiento y WER. Normalmente, un modelo personalizado se compara con el modelo de línea de base de Microsoft.
+Para evaluar los modelos en paralelo:
+Inicie sesión en el portal de Custom Speech.
+Vaya a Speech-to-text > Custom Speech > Testing (Conversión de voz a texto > Custom Speech > Pruebas).
+Haga clic en Add test (Agregar prueba).
+Seleccione Evaluate accuracy (Evaluar precisión). Proporcione a la prueba un nombre y una descripción, y seleccione el conjunto de datos de transcripción con la etiqueta audio + humano.
+Puede seleccionar hasta dos modelos para probar.
+Haga clic en Create(Crear).
+Después de que la prueba se ha creado correctamente, puede comparar los resultados en paralelo.
+Comparación en paralelo
+Una vez finalizada la prueba, que viene indicado por el cambio de estado a Succeeded (Correcto), encontrará un número de WER para ambos modelos incluidos en la prueba. Haga clic en el nombre de la prueba para ver la página de detalles de las pruebas. En esta página se muestran todas las expresiones del conjunto de datos y se indican los resultados del reconocimiento de los dos modelos al lado de la transcripción del conjunto de datos enviado. Con el fin de inspeccionar la comparación en paralelo, puede alternar los distintos tipos de error, como inserción, eliminación y sustitución. Al escuchar el audio y comparar los resultados del reconocimiento de cada columna, que muestra la transcripción con la etiqueta humano y los resultados de los dos modelos de voz a texto, puede decidir qué modelo satisface sus necesidades y dónde hacen falta entrenamiento y mejoras adicionales.
+Haga clic en el nombre de la prueba para ver la página de detalles de las pruebas. En esta página se muestran todas las expresiones del conjunto de datos y se indican los resultados del reconocimiento de los dos modelos al lado de la transcripción del conjunto de datos enviado. 

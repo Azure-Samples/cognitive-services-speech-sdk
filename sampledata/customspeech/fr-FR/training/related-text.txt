@@ -1,0 +1,27 @@
+﻿Le contenu que représentent les données, les modèles, les tests et les points de terminaison est organisé en projets sur le portail Custom Speech. Chaque projet est propre à un domaine et à un pays/langue. Par exemple, vous pouvez créer un projet pour des centres d’appel dont la langue est l’anglais des États-Unis. Pour créer votre premier projet, sélectionnez Speech-to-text/Custom speech, puis cliquez sur New Project. Suivez les instructions fournies par l’Assistant pour créer votre projet. Une fois le projet créé, vous devez disposer de quatre onglets: Data, Testing, Training et Deployment. Utilisez les liens fournis dans Étapes suivantes pour savoir comment utiliser chaque onglet.
+Custom Speech propose des outils qui vous permettent d’inspecter visuellement la qualité de la reconnaissance d’un modèle en comparant les données audio au résultat de la reconnaissance correspondante. À partir du portail Custom Speech, vous pouvez lire le contenu audio chargé et déterminer si le résultat proposé de la reconnaissance est correct. Cet outil vous permet d’inspecter rapidement la qualité du modèle de reconnaissance vocale de référence de Microsoft ou d’un modèle entraîné personnalisé sans qu’il soit nécessaire de transcrire des données audio.
+Dans ce document, vous allez apprendre à quantifier la qualité du modèle de reconnaissance vocale de Microsoft ou de votre modèle personnalisé. Des données de transcription audio et étiquetées à la main sont nécessaires pour tester la précision ; il faut également fournir entre 30 minutes et 5 heures d’audio représentatif.
+Qu’est-ce que le taux d'erreur de mots ?
+Le standard de mesure de la précision d’un modèle est le taux d’erreur de mots (WER, de l’anglais « Word Error Rate »). Il compte le nombre de mots incorrects identifiés lors de la reconnaissance, puis le divise par le nombre total de mots fournis dans la transcription étiquetée à la main. Enfin, ce nombre est multiplié par 100 % pour calculer le taux WER.
+Formule du taux WER
+Les mots mal identifiés se décomposent en trois catégories :
+Insertion (I) : mots ajoutés à tort à l’hypothèse de transcription
+Suppression (D) : mots non détectés dans l’hypothèse de transcription
+Substitution (S) : mots substitués entre la référence et l’hypothèse
+Voici un exemple :
+Exemple de mots mal identifiés
+Résoudre les erreurs et améliorer le taux WER
+Le taux WER peut être utilisé à partir des résultats de la reconnaissance automatique pour évaluer la qualité du modèle d’une application, d’un outil ou d’un produit. Un taux WER compris entre 5 et 10 % est considéré comme étant de bonne qualité et prêt à l’emploi. Un taux de 20 % est acceptable, mais un apprentissage supplémentaire est envisageable. Un taux supérieur ou égal à 30 % est signe de qualité médiocre et demande une personnalisation et un apprentissage.
+La distribution des erreurs est importante. La présence de nombreuses erreurs de suppression est généralement due à une puissance faible du signal audio. Pour résoudre ce problème, vous devrez collecter des données audio plus près de la source. Les erreurs d’insertion signifient que l’audio a été enregistré dans un environnement bruyant et qu’il y a un risque de diaphonie, ce qui pose des problèmes de reconnaissance. Les erreurs de substitution se rencontrent souvent lorsque l’échantillon de termes propres à un domaine fourni sous la forme de transcriptions étiquetées à la main ou de texte lié est insuffisant.
+En analysant les fichiers un par un, vous pouvez identifier les différents types d’erreurs, ainsi que les erreurs propres à un fichier donné. Il est essentiel de comprendre les problèmes au niveau du fichier pour fixer des objectifs d’amélioration.
+Créer un test
+Si vous souhaitez tester la qualité du modèle de reconnaissance vocale de référence de Microsoft ou d’un modèle personnalisé entraîné par vos soins, vous pouvez comparer deux modèles côte à côte pour évaluer la précision. La comparaison englobe le taux WER et les résultats de reconnaissance. On compare en général un modèle personnalisé avec le modèle de référence de Microsoft.
+Pour évaluer des modèles côte à côte :
+Connectez-vous au portail Custom Speech.
+Accédez à Speech-to-text > Custom Speech > Testing.
+Cliquez sur Ajouter un test.
+Sélectionnez Évaluer la précision. Donnez au test un nom et une description et sélectionnez votre jeu de données de transcription audio + étiquetées à la main.
+Sélectionnez jusqu'à deux modèles à tester.
+Cliquez sur Créer.
+Une fois votre test créé, vous pouvez comparer les résultats côte à côte.
+Elle liste tous les énoncés du jeu de données soumis, en indiquant les résultats de reconnaissance des deux modèles avec la transcription associée. Pour inspecter plus facilement la comparaison côte à côte, vous pouvez afficher les différents types d’erreurs (insertion, suppression et substitution).
