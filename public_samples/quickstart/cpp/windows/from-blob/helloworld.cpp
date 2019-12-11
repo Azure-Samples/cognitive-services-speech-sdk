@@ -301,7 +301,14 @@ void recognizeSpeech()
 
 int wmain()
 {
-    recognizeSpeech();
+    try
+    {
+        recognizeSpeech();
+    }
+    catch (exception e)
+    {
+        cout << e.what();
+    }
     cout << "Please press a key to continue.\n";
     cin.get();
     return 0;

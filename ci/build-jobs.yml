@@ -677,6 +677,9 @@ jobs:
   - bash: |
       ./ci/nuget/restore-from-local.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)/Windows")" public_samples
     displayName: 'Test - restore packages'
+  - bash: |
+      ls -R -a public_samples/quickstart/cpp/windows/from-blob
+    displayName: 'Test - Dump folder content'
   # Note: for now building any platform. In the future, should build all available.
   - task: VSBuild@1
     inputs:
