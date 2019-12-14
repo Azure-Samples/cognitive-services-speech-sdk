@@ -16,7 +16,7 @@ if dpkg -s $PACKAGES 1>/dev/null 2>/dev/null; then
   printf "Packages already installed, skipping.\n"
 else
   export DEBIAN_FRONTEND=noninteractive
-  apt-get update
+  apt-get update || true
   apt-get dist-upgrade --yes --quiet
   apt-get install --yes --quiet --no-install-recommends $PACKAGES
   apt-get autoremove --yes --quiet

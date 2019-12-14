@@ -17,7 +17,7 @@ fi
 case $SPEECHSDK_BUILD_AGENT_PLATFORM in
   Linux-x64)
 
-    sudo apt-get update
+    sudo apt-get update || true
     # https://github.com/Microsoft/vsts-agent-docker/blob/master/ubuntu/16.04/standard/Dockerfile pulls in libssl-dev 1.1 via ppa:ondrej/php.
     # Remove it first, and install the Xenial default one (1.0*)
     sudo apt-get remove --yes libssl-dev
@@ -40,7 +40,7 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
       # libstdc++.so.6 with GLIBCXX_3.4.22 is not available by default in
       # Ubuntu 16.04 LTS
       sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
-      sudo apt-get update
+      sudo apt-get update || true
       sudo apt-get install --yes libstdc++6
       
       # Install Unidec runtime and offline model packages

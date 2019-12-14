@@ -57,7 +57,7 @@ jobs:
       set -x -e -o pipefail
       # Emulation need only on non-Intel
       [[ $SPEECHSDK_TARGET_PLATFORM =~ ^(Linux|Debian9)-(x86|x64)$ ]] || {
-        sudo apt-get update
+        sudo apt-get update || true
         sudo apt-get install --yes binfmt-support qemu-user-static
       }
       . ci/functions.sh

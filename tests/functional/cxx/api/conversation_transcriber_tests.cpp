@@ -178,7 +178,7 @@ TEST_CASE("conversation add while pumping", "[api][cxx]")
     WaitForResult(result->ready.get_future(), 15min);
     auto text = GetText(result->phrases);
     INFO(text);
-    bool res = VerifyTextAndSpeaker(result->phrases, "ABC.", "Unidentified") || VerifyTextAndSpeaker(result->phrases, "ABC", "Unidentified");
+    bool res = VerifyTextAndSpeaker(result->phrases, "123.", "Unidentified") || VerifyTextAndSpeaker(result->phrases, "123", "Unidentified");
     SPXTEST_REQUIRE(res == true);
 }
 

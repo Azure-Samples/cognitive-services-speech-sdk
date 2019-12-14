@@ -1,5 +1,5 @@
 RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update --quiet
+    apt-get update --quiet || true
 
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install --quiet --yes --no-install-recommends \
@@ -14,7 +14,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
 ARG CMAKE_VERSION=3.12.4
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt-get update --quiet && \
+    apt-get update --quiet || true && \
     apt-get install --quiet --yes --no-install-recommends \
         wget \
         ca-certificates \

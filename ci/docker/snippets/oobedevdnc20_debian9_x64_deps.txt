@@ -1,6 +1,6 @@
 # Note: Microsoft package source is kept after this snippet.
 RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt-get update --quiet && \
+    apt-get update --quiet || true && \
     apt-get install --quiet --yes --no-install-recommends \
         apt-transport-https \
         ca-certificates \
@@ -9,7 +9,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
         && \
     wget --quiet --output-document=- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.asc.gpg && \
     wget --quiet --output-document=- https://packages.microsoft.com/config/debian/9/prod.list > /etc/apt/sources.list.d/microsoft-prod.list && \
-    apt-get update --quiet && \
+    apt-get update --quiet || true && \
     apt-get install --quiet --yes --no-install-recommends \
         dotnet-sdk-2.0.0 \
         && \
