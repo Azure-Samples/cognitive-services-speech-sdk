@@ -2,25 +2,25 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
+using Microsoft.CognitiveServices.Speech.Transcription;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using Microsoft.CognitiveServices.Speech.Audio;
-    using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
-    using Microsoft.CognitiveServices.Speech.Transcription;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Newtonsoft.Json;
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Linq;
-    using System.Net;
-    using System.Reflection;
-    using System.Runtime.CompilerServices;
-    using System.Text.RegularExpressions;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using static Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils.CatchUtils;
+    using static CatchUtils;
 
     public static class ConversationTranslatorExtensionMethods
     {
@@ -432,7 +432,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     public class TestConversationParticipant : Internal.DisposableBase
     {
         private SpeechConfig m_config;
-        private Action<ConversationTranslator> m_setConfig;
+        private Action<ConversationTranslator, bool> m_setConfig;
 
         public TestConversationParticipant(SpeechConfig config, string nickname)
         {
@@ -442,7 +442,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             IsHost = true;
         }
 
-        public TestConversationParticipant(string nickname, string lang, TestConversationParticipant other, Action<ConversationTranslator> setConfig)
+        public TestConversationParticipant(string nickname, string lang, TestConversationParticipant other, Action<ConversationTranslator, bool> setConfig)
         {
             ConversationId = other.Conversation.ConversationId;
             IsHost = false;
@@ -465,7 +465,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             if (audioConfig == null)
             {
                 // create one that points to an audio file to avoid mic errors in the CI tests
-                audioConfig = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+                audioConfig = AudioConfig.FromWavFileInput(Config.AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             }
 
             if (IsHost)
@@ -499,7 +499,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 SPX_TRACE_INFO(">> [{0}] Joining conversation '{1}'", Name, ConversationId);
                 await Translator.JoinConversationAsync(ConversationId, Name, Lang);
-                m_setConfig(Translator);
+                m_setConfig(Translator, true);
             }
         }
 

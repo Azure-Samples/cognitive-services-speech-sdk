@@ -4,18 +4,20 @@
 //
 
 using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.CognitiveServices.Speech.Transcription;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
-    using static Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils.CatchUtils;
-    using TRANS = System.Collections.Generic.Dictionary<string, string>;
+    using static CatchUtils;
+    using static Config;
+    using TRANS = Dictionary<string, string>;
 
     [TestClass]
     public class ConversationTranslatorTests : RecognitionTestBase
@@ -35,17 +37,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void Initialize()
         {
             WriteLine("Configuration values are:");
-            WriteLine($"\tSubscriptionKey: <{Config.UnifiedSpeechSubscriptionKey?.Length ?? -1}>");
-            WriteLine($"\tRegion:          <{Config.Region}>");
-            WriteLine($"\tEndpoint:        <{Config.Endpoint}>");
-            WriteLine($"\tConvTransHost:   <{Config.ConversationTranslatorHost}>");
-            WriteLine($"\tConvTransRegion: <{Config.ConversationTranslatorRegion}>");
-            WriteLine($"\tConvTransKey:    <{Config.ConversationTranslatorSubscriptionKey?.Length ?? -1}>");
+            WriteLine($"\tSubscriptionKey: <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key?.Length ?? -1}>");
+            WriteLine($"\tRegion:          <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Region}>");
+            WriteLine($"\tEndpoint:        <{DefaultSettingsMap[DefaultSettingKeys.ENDPOINT]}>");
+            WriteLine($"\tConvTransHost:   <{DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_HOST]}>");
+            WriteLine($"\tConvTransRegion: <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Region}>");
+            WriteLine($"\tConvTransKey:    <{SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Key?.Length ?? -1}>");
 
-            if (!string.IsNullOrWhiteSpace(Config.ConversationTranslatorHost))
+            if (!string.IsNullOrWhiteSpace(DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_HOST]))
             {
-                ManagementEndpoint = new Uri($"https://{Config.ConversationTranslatorHost}/capito/room");
-                WebSocketEndpoint = new Uri($"wss://{Config.ConversationTranslatorHost}/capito/translate");
+                ManagementEndpoint = new Uri($"https://{DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_HOST]}/capito/room");
+                WebSocketEndpoint = new Uri($"wss://{DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_HOST]}/capito/translate");
             }
 
             // start logging to a file. This will be read back and dumped to the trace logs at the end of the
@@ -102,7 +104,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task Conversation_WithoutTranslations()
         {
-            var speechConfig = CreateConfig("en-US");
+            var speechConfig = CreateConfig(Language.EN);
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
                 REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
@@ -114,7 +116,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task Conversation_WithTranslations()
         {
-            var speechConfig = CreateConfig("en-US", "fr");
+            var speechConfig = CreateConfig(Language.EN, Language.FR);
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
                 REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
@@ -127,7 +129,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task Conversation_Dispose()
         {
-            var speechConfig = CreateConfig("en-US", "fr", "ar");
+            var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
                 REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
@@ -140,7 +142,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task Conversation_DisposeAfterStart()
         {
-            var speechConfig = CreateConfig("en-US", "fr", "ar");
+            var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
                 REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
@@ -154,7 +156,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task Conversation_MethodsWhileNotStarted()
         {
-            var speechConfig = CreateConfig("en-US", "fr", "ar");
+            var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
             using (var conversation = await Conversation.CreateConversationAsync(speechConfig))
             {
                 REQUIRE(!string.IsNullOrWhiteSpace(conversation.ConversationId));
@@ -192,7 +194,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task Conversation_CallUnsupportedMethods()
         {
             WriteLine($"Checking methods on Conversation instance for the ConversationTranslator");
-            var speechConfig = CreateConfig("en-US", "fr", "ar");
+            var speechConfig = CreateConfig(Language.EN, Language.FR, "ar");
             using (var conv = await Conversation.CreateConversationAsync(speechConfig))
             {
                 WriteLine($"Created room {conv.ConversationId}");
@@ -200,7 +202,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 WriteLine($"Started room");
 
                 var user = User.FromUserId("userId");
-                var part = Participant.From("userId", "en-US", null);
+                var part = Participant.From("userId", Language.EN, null);
 
                 WriteLine($"Trying to add a user");
                 await conv.AddParticipantAsync(user).ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR");
@@ -223,7 +225,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 WriteLine($"Created room {conv.ConversationId}");
 
                 var user = User.FromUserId("userId");
-                var part = Participant.From("userId", "en-US", null);
+                var part = Participant.From("userId", Language.EN, null);
 
                 WriteLine($"Trying to start a conversation");
                 await conv.StartConversationAsync().ThrowsException<ApplicationException>("SPXERR_UNSUPPORTED_API_ERROR");
@@ -247,9 +249,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task ConversationTranslator_HostAudio()
         {
-            string speechLang = "en-US";
+            string speechLang = Language.EN;
             string hostname = "TheHost";
-            var toLangs = new[] { "fr", "de" };
+            var toLangs = new[] { Language.FR, Language.DE };
             var speechConfig = CreateConfig(speechLang, toLangs);
 
             SPX_TRACE_INFO("Creating conversation");
@@ -257,7 +259,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPX_TRACE_INFO($"Starting {conversation.ConversationId} conversation");
             await conversation.StartConversationAsync();
 
-            var audioConfig = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioConfig = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             SPX_TRACE_INFO("Creating ConversationTranslator");
             var conversationTranslator = new ConversationTranslator(audioConfig);
 
@@ -287,17 +289,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             string participantId;
             eventHandlers.VerifyBasicEvents(true, hostname, true, out participantId);
             eventHandlers.VerifyTranscriptions(participantId,
-                new ExpectedTranscription(participantId, TestData.English.Weather.Utterance, speechLang)
+                new ExpectedTranscription(participantId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, speechLang)
             );
         }
 
         [TestMethod]
         public async Task ConversationTranslator_JoinWithTranslation()
         {
-            string hostLang = "en-US";
+            string hostLang = Language.EN;
             string hostName = "TheHost";
-            var hostToLangs = new[] { "de" };
-            string bobLang = "zh-CN";
+            var hostToLangs = new[] { Language.DE };
+            string bobLang = Language.ZH_CN;
             string bobName = "Bob";
             string hostId;
             string bobId;
@@ -310,7 +312,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SPX_TRACE_INFO($"Starting host {conversation.ConversationId} conversation");
             await conversation.StartConversationAsync();
 
-            var audioConfig = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioConfig = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             SPX_TRACE_INFO("Creating host ConversationTranslator");
             var hostTranslator = new ConversationTranslator(audioConfig);
@@ -321,13 +323,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
 
             // Join room
-            var bobAudioConfig = AudioConfig.FromWavFileInput(TestData.Chinese.Weather.AudioFile);
+            var bobAudioConfig = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath());
             SPX_TRACE_INFO("Creating bob ConversationTranslator");
             var bobTranslator = new ConversationTranslator(bobAudioConfig);
             var bobEvents = new ConversationTranslatorCallbacks(bobTranslator);
             SPX_TRACE_INFO("Bob joining {0}", conversation.ConversationId);
             await bobTranslator.JoinConversationAsync(conversation.ConversationId, bobName, bobLang);
-            SetParticipantConfig(bobTranslator);
+            SetParticipantConfig(bobTranslator, false);
 
 
             // do audio playback
@@ -366,19 +368,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             bobEvents.VerifyBasicEvents(true, bobName, false, out bobId);
             hostEvents.VerifyBasicEvents(true, hostName, true, out hostId);
             bobEvents.VerifyTranscriptions(bobId,
-                new ExpectedTranscription(bobId, TestData.Chinese.Weather.TranslationUtterance, bobLang),
-                new ExpectedTranscription(hostId, TestData.English.Weather.Utterance, hostLang)
+                new ExpectedTranscription(bobId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.ZH_CN][0].Text, bobLang),
+                new ExpectedTranscription(hostId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, hostLang)
             );
             hostEvents.VerifyTranscriptions(hostId,
-                new ExpectedTranscription(bobId, TestData.Chinese.Weather.TranslationUtterance, bobLang, 0, new TRANS() { { "en-US", "Weather." }, { "de", "wetter." } }),
-                new ExpectedTranscription(hostId, TestData.English.Weather.Utterance, hostLang, 0, new TRANS() { { "de", "Wie ist das Wetter?" } })
+                new ExpectedTranscription(bobId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.ZH_CN][0].Text, bobLang, 0, new TRANS() { { Language.EN, "Weather." }, { Language.DE, "wetter." } }),
+                new ExpectedTranscription(hostId, AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, hostLang, 0, new TRANS() { { Language.DE, "Wie ist das Wetter?" } })
             );
         }
 
         [TestMethod]
         public async Task ConversationTranslator_HostSendsIm()
         {
-            var speechConfig = CreateConfig("en-US", "ja", "ar");
+            var speechConfig = CreateConfig(Language.EN, "ja", "ar");
             var host = new TestConversationParticipant(speechConfig, "Host");
 
             await host.JoinAsync(null);
@@ -399,12 +401,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task ConversationTranslator_HostAndParticipantSendIms()
         {
-            var speechConfig = CreateConfig("en-US");
+            var speechConfig = CreateConfig(Language.EN);
 
             var host = new TestConversationParticipant(speechConfig, "Host");
             await host.JoinAsync(null);
 
-            var alice = new TestConversationParticipant("Alice", "fr", host, SetParticipantConfig);
+            var alice = new TestConversationParticipant("Alice", Language.FR, host, SetParticipantConfig);
             await alice.JoinAsync(null);
 
             SPX_TRACE_INFO($">> [{host.Name}] Sends IM");
@@ -435,7 +437,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task ConversationTranslator_JoinLockedRoom()
         {
-            var speechConfig = CreateConfig("en-US");
+            var speechConfig = CreateConfig(Language.EN);
 
             var host = new TestConversationParticipant(speechConfig, "Host");
             await host.JoinAsync(null);
@@ -443,7 +445,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             await Task.Delay(1000);
 
-            var alice = new TestConversationParticipant("Alice", "fr", host, SetParticipantConfig);
+            var alice = new TestConversationParticipant("Alice", Language.FR, host, SetParticipantConfig);
 
             REQUIRE_THROWS_WITH(alice.JoinAsync(null), Catch.Contains("HTTP 400", Catch.CaseSensitive.No));
 
@@ -507,17 +509,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public SpeechTranslationConfig CreateConfig(string speechLang, params string[] translateTo)
         {
-            string key = new[] { Config.ConversationTranslatorSubscriptionKey, subscriptionKey }.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
-            string reg = new[] { Config.ConversationTranslatorRegion, region }.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+            string key = new[] { SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Key, subscriptionKey }.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+            string reg = new[] { SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Region, region }.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
 
             SpeechTranslationConfig config;
-            if (string.IsNullOrWhiteSpace(Config.ConversationTranslatorSpeechEndpoint))
+            if (string.IsNullOrWhiteSpace(DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]))
             {
                 config = SpeechTranslationConfig.FromSubscription(key, reg);
             }
             else
             {
-                config = SpeechTranslationConfig.FromEndpoint(new Uri(Config.ConversationTranslatorSpeechEndpoint), key);
+                config = SpeechTranslationConfig.FromEndpoint(new Uri(DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]), key);
             }
 
             config.SpeechRecognitionLanguage = speechLang;
@@ -547,19 +549,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 setter("ConversationTranslator_Endpoint", WebSocketEndpoint.ToString());
             }
 
-            if (!string.IsNullOrWhiteSpace(Config.ConversationTranslatorSubscriptionKey))
+            if (!string.IsNullOrWhiteSpace(SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Key))
             {
-                setter("ConversationTranslator_SubscriptionKey", Config.ConversationTranslatorSubscriptionKey);
+                setter("ConversationTranslator_SubscriptionKey", SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Key);
             }
 
-            if (!string.IsNullOrWhiteSpace(Config.ConversationTranslatorRegion))
+            if (!string.IsNullOrWhiteSpace(SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Region))
             {
-                setter("ConversationTranslator_Region", Config.ConversationTranslatorRegion);
+                setter("ConversationTranslator_Region", SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSLATOR].Region);
             }
 
-            if (!string.IsNullOrWhiteSpace(Config.ConversationTranslatorClientId))
+            if (!string.IsNullOrWhiteSpace(DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_CLIENTID]))
             {
-                setter("ConversationTranslator_ClientId", Config.ConversationTranslatorClientId);
+                setter("ConversationTranslator_ClientId", DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_CLIENTID]);
             }
 
             Uri proxy;
@@ -571,11 +573,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public void SetParticipantConfig(ConversationTranslator convTrans)
+        public void SetParticipantConfig(ConversationTranslator convTrans, bool setEndpoint)
         {
-            if (!string.IsNullOrWhiteSpace(Config.ConversationTranslatorSpeechEndpoint))
+            if (setEndpoint && !string.IsNullOrWhiteSpace(DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]))
             {
-                convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_Endpoint, Config.ConversationTranslatorSpeechEndpoint);
+                convTrans.Properties.SetProperty(PropertyId.SpeechServiceConnection_Endpoint, DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT]);
             }
 
             convTrans.Properties.SetProperty(PropertyId.Speech_SessionId, $"IntegrationTest:{Guid.NewGuid().ToString()}");

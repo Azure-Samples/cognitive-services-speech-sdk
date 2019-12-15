@@ -1065,6 +1065,13 @@ jobs:
           --SerializedSpeechActivityFile "activityWithSpeech.json" \
           --LongRunning "false"
       #
+      rm -f ./tests/test.subscriptions.regions.json
+      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+      cp tests/test.defaults.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
+      cp tests/test.audio.utterances.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
+      cp tests/test.subscriptions.regions.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
       cp -r tests/input tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
       ERRORS=0
       for i in $(DOCKER_IMAGES); do
@@ -1183,6 +1190,13 @@ jobs:
         --LongRunning "false"
       #
       echo "Nuget package listing"
+      rm -f ./tests/test.subscriptions.regions.json
+      cat > ./tests/test.subscriptions.regions.json <<HEREDOC
+        $(KEYS_AND_REGIONS)
+      HEREDOC
+      cp tests/test.defaults.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
+      cp tests/test.audio.utterances.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
+      cp tests/test.subscriptions.regions.json tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
       cp -r tests/input tests/functional/csharp/end2end/bin/Debug/netcoreapp2.0
 
       cd tests/functional/csharp/end2end

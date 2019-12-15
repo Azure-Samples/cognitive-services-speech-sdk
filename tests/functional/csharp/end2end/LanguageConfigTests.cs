@@ -2,20 +2,16 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
 using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using static Config;
-    using static SpeechRecognitionTestsHelper;
 
     [TestClass]
     public class LanguageConfigTests : RecognitionTestBase
@@ -33,7 +29,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void Initialize()
         {
             helper = new SpeechRecognitionTestsHelper();
-            audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
         }
 
         [TestMethod]

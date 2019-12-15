@@ -2,20 +2,20 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CognitiveServices.Speech.Audio;
-using Microsoft.CognitiveServices.Speech;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using System.IO;
     using static AssertHelpers;
+    using static Config;
     using static SpeechRecognitionTestsHelper;
 
     [TestClass]
@@ -31,7 +31,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static void TestClassinitialize(TestContext context)
         {
             BaseClassInit(context);
-            deploymentId = Config.DeploymentId;
+            deploymentId = DefaultSettingsMap[DefaultSettingKeys.DEPLOYMENT_ID];
             endpointInString = String.Format("wss://{0}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1", region);
             endpointUrl = new Uri(endpointInString);
             officeEndpointString = "wss://officespeech.platform.bing.com/speech/recognition/dictation/office/v1";
@@ -48,7 +48,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var token = "x";
             var config = SpeechConfig.FromAuthorizationToken(token, "westus");
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var speechRecognizer = new SpeechRecognizer(config, audioInput))
             {
                 Assert.AreEqual(token, speechRecognizer.AuthorizationToken);
@@ -65,18 +65,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var invalidToken = "InvalidToken";
             var configWithToken = SpeechConfig.FromAuthorizationToken(invalidToken, region);
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             using (var speechRecognizer = new SpeechRecognizer(configWithToken, audioInput))
             {
                 Assert.AreEqual(invalidToken, speechRecognizer.AuthorizationToken);
 
-                var newToken = await Config.GetToken(subscriptionKey, region);
+                var newToken = await GetToken(subscriptionKey, region);
                 speechRecognizer.AuthorizationToken = newToken;
                 SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
 
                 Assert.AreEqual(newToken, speechRecognizer.AuthorizationToken);
-                AssertMatching(TestData.English.Weather.Utterance, await helper.GetFirstRecognizerResult(speechRecognizer));
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, await helper.GetFirstRecognizerResult(speechRecognizer));
             }
         }
 
@@ -90,7 +90,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task DefaultLanguageAndOutputFormatRecognition()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
@@ -101,7 +101,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 Assert.IsTrue(connectionUrl.Contains("language=en-us"), "Incorrect default language (should be en-us) in " + connectionUrl);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 var bestResults = result.Best().ToArray();
                 Assert.AreEqual(0, bestResults.Length, "There should be no detailed result for default output format");
             }
@@ -112,7 +112,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task ValidBaselineRecognition(bool usingPreConnection)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -126,7 +126,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
                     Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "Duration == 0");
                     Assert.IsTrue(100000 < result.OffsetInTicks && result.OffsetInTicks < 700000, $"Offset value ${result.OffsetInTicks} seems incorrect");
-                    AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                    AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 }
             }
         }
@@ -136,7 +136,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task ContinuousValidBaselineRecognition(bool usingPreConnection)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -146,7 +146,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         connection.Open(true);
                     }
                     AssertMatching(
-                        TestData.English.Weather.Utterance,
+                        AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text,
                         await helper.GetFirstRecognizerResult(recognizer));
                 }
             }
@@ -158,7 +158,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ValidCustomRecognition(bool usingPreConnection)
         {
             this.defaultConfig.EndpointId = deploymentId;
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
@@ -170,7 +170,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         connection.Open(false);
                     }
                     var result = await helper.CompleteRecognizeOnceAsync(recognizer, connection).ConfigureAwait(false);
-                    AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                    AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                     AssertConnectionCountMatching(helper.ConnectedEventCount, helper.DisconnectedEventCount);
                     var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                     Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
@@ -184,7 +184,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ContinuousValidCustomRecognition(bool usingPreConnection)
         {
             this.defaultConfig.EndpointId = deploymentId;
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -193,7 +193,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         connection.Open(true);
                     }
-                    AssertMatching(TestData.English.Weather.Utterance,
+                    AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text,
                         await helper.GetFirstRecognizerResult(recognizer));
                 }
             }
@@ -253,7 +253,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task InvalidConnectionForContinuousRecognition()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -268,7 +268,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task InvalidConnectionForSingleShotRecognition()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -285,7 +285,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task InvalidOpenOrCloseDuringRecognition(bool testingOpen)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
@@ -326,7 +326,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task TestCloseConnection()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -342,7 +342,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task GermanRecognition(bool usingPreConnection)
         {
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.DE_DE, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.DE_DE, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
                 {
@@ -352,7 +352,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                     Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                    AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
+                    AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
                 }
             }
         }
@@ -362,7 +362,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task GermanRecognitionWithSourceLangConfig(bool usingPreConnection)
         {
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, SourceLanguageConfig.FromLanguage(Language.DE_DE), AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, SourceLanguageConfig.FromLanguage(Language.DE_DE), AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
                 {
@@ -372,7 +372,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                     Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                    AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
+                    AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
                 }
             }
         }
@@ -382,7 +382,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task ContinuousGermanRecognition(bool usingPreConnection)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.DE_DE, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -392,7 +392,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         connection.Open(true);
                     }
                     var result = await helper.GetFirstRecognizerResult(recognizer);
-                    AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result);
+                    AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result);
                 }
             }
         }
@@ -402,7 +402,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task ContinuousRecognitionOnLongFileInput(bool usingPreConnection)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -470,8 +470,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     AssertEqual(1, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
                     Assert.IsTrue(recognizedText.Count > 0, $"Invalid number of text messages {recognizedText.Count}");
 
-                    AssertFuzzyMatching(TestData.English.Batman.Utterances[0], recognizedText[0]);
-                    AssertFuzzyMatching(TestData.English.Batman.Utterances.Last(), recognizedText.Last());
+                    AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, recognizedText[0]);
+                    AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].Utterances[Language.EN].Last().Text, recognizedText.Last());
 
                     Assert.IsTrue(string.IsNullOrEmpty(hypothesisLatencyError), $"hypothesisLatencyError: {hypothesisLatencyError}");
                     Assert.IsTrue(string.IsNullOrEmpty(phraseLatencyError), $"phraseLatencyError: {phraseLatencyError}");
@@ -486,7 +486,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task SubscribeToManyEventHandlers(bool usingPreConnection)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -515,7 +515,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task UnsubscribeFromEventHandlers(bool usingPreConnection)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -544,7 +544,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task ResubscribeToEventHandlers(bool usingPreConnection)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -587,7 +587,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task ChangeSubscriptionDuringRecognition(bool usingPreConnection)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -614,7 +614,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void TestGetters()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 Assert.IsTrue(string.IsNullOrEmpty(recognizer.SpeechRecognitionLanguage), $"No language should be set, is {recognizer.SpeechRecognitionLanguage}");
@@ -653,7 +653,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task TestExceptionSwitchFromSingleShotToContinuous()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
@@ -665,7 +665,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task TestExceptionSwitchFromContinuousToSingleShot()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 recognizer.Canceled += (s, e) => { Console.WriteLine($"Recognition Canceled: {e.ToString()}"); };
@@ -679,7 +679,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task TestSingleShotTwice()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
@@ -710,7 +710,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TestStartStopManyTimes(bool usingPreConnection)
         {
             const int NumberOfIterations = 100;
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var connection = Connection.FromRecognizer(recognizer);
@@ -738,7 +738,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task TestContinuousRecognitionTwice(bool usingPreConnection)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -767,7 +767,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task TestInitialSilenceTimeout(bool usingPreConnection)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Silence.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SHORT_SILENCE].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -790,7 +790,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void TestPropertyCollectionWithoutRecognizer()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Silence.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SHORT_SILENCE].FilePath.GetRootRelativePath());
             PropertyCollection properties;
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
@@ -802,7 +802,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task TestContinuous44KHz()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Margarita.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.AUDIO_44_1KHZ].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 List<string> recognizedText = new List<string>();
@@ -817,14 +817,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await helper.CompleteContinuousRecognition(recognizer);
 
-                AssertFuzzyMatching(TestData.English.Margarita.Utterance, recognizedText.ToArray(), 5);
+                AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.AUDIO_44_1KHZ].Utterances[Language.EN].Select(x => x.Text).ToArray(), recognizedText.ToArray(), 5);
             }
         }
 
         [TestMethod]
         public void CloseConnectionWithoutOpen()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath());
             var recognizer = new SpeechRecognizer(this.defaultConfig, Language.DE_DE, audioInput);
             using (var connection = Connection.FromRecognizer(recognizer))
             {
@@ -837,7 +837,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ExpectedException(typeof(ObjectDisposedException))]
         public async Task AsyncRecognitionAfterDisposingSpeechRecognizer()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath());
             var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.DE_DE, audioInput));
             recognizer.Dispose();
             await recognizer.StartContinuousRecognitionAsync();
@@ -847,7 +847,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ExpectedException(typeof(InvalidOperationException))]
         public void DisposingSpeechRecognizerWhileAsyncRecognition()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.EN, audioInput));
             recognizer = helper.GetSpeechRecognizingAsyncNotAwaited(recognizer);
         }
@@ -856,11 +856,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task FromEndpointGermanRecognition()
         {
             var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, Language.DE_DE, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, Language.DE_DE, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
             }
         }
 
@@ -869,14 +869,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
             configFromEndpoint.EndpointId = deploymentId;
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, audioInput)))
             {
                 var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
                 Assert.IsTrue(String.IsNullOrEmpty(recoLanguage), "RecoLanguage should be empty. RecoLanguage: " + recoLanguage);
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
             }
@@ -887,7 +887,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var endpointWithDeploymentId = endpointInString + "?cid=" + deploymentId;
             var configFromEndpoint = SpeechConfig.FromEndpoint(new Uri(endpointWithDeploymentId), subscriptionKey);
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, audioInput)))
             {
                 var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
@@ -895,7 +895,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 Assert.IsFalse(connectionUrl.Contains("language="), "ConnectionUrl should not contain language: " + connectionUrl);
 
@@ -907,11 +907,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
             configFromEndpoint.OutputFormat = OutputFormat.Detailed;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 AssertDetailedResult(result);
             }
         }
@@ -922,11 +922,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var endpointWithLang = endpointInString + "?language=de-de";
             var configFromEndpoint = SpeechConfig.FromEndpoint(new Uri(endpointWithLang), subscriptionKey);
             // The property should not overwrite the query parameter in url.
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, Language.EN, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, Language.EN, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
             }
         }
 
@@ -937,12 +937,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var configFromEndpoint = SpeechConfig.FromEndpoint(new Uri(endpointWithDeploymentId), subscriptionKey);
             // The endpointId below is an invalid one.
             configFromEndpoint.EndpointId = "3a2ff182-b6ca-4888-a7d0-7a2de3141572";
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, audioInput)))
             {
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
             }
         }
 
@@ -952,11 +952,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var endpointWithOutputFormat = endpointInString + "?format=detailed";
             var configFromEndpoint = SpeechConfig.FromEndpoint(new Uri(endpointWithOutputFormat), subscriptionKey);
             configFromEndpoint.OutputFormat = OutputFormat.Simple;
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 AssertDetailedResult(result);
             }
         }
@@ -965,11 +965,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task SetServicePropertySingleSetting()
         {
             this.defaultConfig.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
             }
         }
 
@@ -977,11 +977,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task SetServicePropertyOverwrite()
         {
             this.defaultConfig.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, "en-US", AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, Language.EN, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
             }
         }
 
@@ -990,11 +990,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             this.defaultConfig.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
             this.defaultConfig.SetServiceProperty("format", "detailed", ServicePropertyChannel.UriQueryParameter);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
                 AssertDetailedResult(result);
             }
         }
@@ -1004,11 +1004,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, subscriptionKey);
             configFromEndpoint.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
             }
         }
 
@@ -1019,11 +1019,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var configFromEndpoint = SpeechConfig.FromEndpoint(new Uri(endpointWithOutputFormat), subscriptionKey);
             configFromEndpoint.OutputFormat = OutputFormat.Simple;
             configFromEndpoint.SetServiceProperty("language", "de-DE", ServicePropertyChannel.UriQueryParameter);
-            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new SpeechRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
                 AssertDetailedResult(result);
             }
         }
@@ -1041,7 +1041,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task DictationRecognition()
         {
             this.defaultConfig.EnableDictation();
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Punctuation.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_PUNCTUATION].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 List<string> recognizedText = new List<string>();
@@ -1058,7 +1058,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
                 Assert.AreEqual(1, recognizedText.Count, "The number of recognized texts is not 1, but " + recognizedText.Count);
-                AssertMatching(TestData.English.Punctuation.Utterance, recognizedText[0]);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_PUNCTUATION].Utterances[Language.EN][0].Text, recognizedText[0]);
             }
         }
 
@@ -1066,14 +1066,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task DictationRecognizeOnce()
         {
             this.defaultConfig.EnableDictation();
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Punctuation.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_PUNCTUATION].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 var connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 Assert.IsTrue(connectionUrl.Contains("speech/recognition/dictation/cognitiveservices"), "mismatch dictation mode in " + connectionUrl);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.English.Punctuation.Utterance, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_PUNCTUATION].Utterances[Language.EN][0].Text, result.Text);
             }
         }
 
@@ -1081,7 +1081,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task DictationAllowSwitchRecognizeOnceAndContinuous()
         {
             this.defaultConfig.EnableDictation();
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
@@ -1121,51 +1121,52 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task ProfanityMaskedRecognizeOnce()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Profanity.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].FilePath.GetRootRelativePath());
             this.defaultConfig.SetProfanity(ProfanityOption.Masked);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
                 Assert.IsFalse(String.IsNullOrEmpty(result.Text), "result.Text was null or empty.");
-                AssertIfContains(result.Text, TestData.English.Profanity.EnglishWord);
-                AssertIfNotContains(result.Text, TestData.English.Profanity.MaskedPattern);
-                AssertMatching(TestData.English.Profanity.MaskedUtterance, result.Text);
+                AssertIfContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityRaw);
+                AssertIfNotContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityMaskedPattern);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityMasked, result.Text);
             }
         }
 
+        // TODO: THESE PROFANITY TESTS DON'T MAKE SENSE NEED TO RE-EXAMINE
         [TestMethod]
         public async Task ProfanityRemovedRecognizeOnce()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Profanity.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].FilePath.GetRootRelativePath());
             this.defaultConfig.SetProfanity(ProfanityOption.Removed);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertIfContains(result.Text, TestData.English.Profanity.EnglishWord);
-                WarnIfNotContains(result.Text, TestData.English.Profanity.RemovedUtterance);
+                AssertIfContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].Text);
+                WarnIfNotContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANITY_SINGLE_UTTERANCE_ENGLISH_2].Utterances[Language.EN][0].ProfanityRemoved);
             }
         }
 
         [TestMethod]
         public async Task ProfanityRawRecognizeOnce()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Profanity.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1].FilePath.GetRootRelativePath());
             this.defaultConfig.SetProfanity(ProfanityOption.Raw);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertIfNotContains(result.Text, TestData.English.Profanity.EnglishWord);
-                WarnIfNotContains(result.Text, TestData.English.Profanity.RawUtterance);
+                AssertMatching(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1].Utterances[Language.EN][0].Text);
+                WarnIfNotContains(result.Text, AudioUtterancesMap[AudioUtteranceKeys.PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1].Utterances[Language.EN][0].ProfanityRaw);
             }
         }
 
         [TestMethod]
         public async Task DictationCorrectionsSetParameter()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             var config = SpeechConfig.FromEndpoint(new Uri(officeEndpointString), subscriptionKey);
             config.SetServiceProperty("format", "corrections", ServicePropertyChannel.UriQueryParameter);
             config.EnableDictation();
@@ -1188,7 +1189,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task DictationSendMessage()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             var config = SpeechConfig.FromEndpoint(new Uri(officeEndpointString), subscriptionKey);
             config.SetServiceProperty("format", "corrections", ServicePropertyChannel.UriQueryParameter);
             config.EnableDictation();
@@ -1231,7 +1232,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task DictationCorrectionsRecognizeOnce()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             var config = SpeechConfig.FromEndpoint(new Uri(officeEndpointString), subscriptionKey);
             config.SetServiceProperty("format", "corrections", ServicePropertyChannel.UriQueryParameter);
             config.EnableDictation();
@@ -1258,7 +1259,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task DictationCorrectionsContinuousRecognition()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             var config = SpeechConfig.FromEndpoint(new Uri(officeEndpointString), subscriptionKey);
             config.SetServiceProperty("format", "corrections", ServicePropertyChannel.UriQueryParameter);
             config.EnableDictation();
@@ -1301,13 +1302,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task WordLevelTiming()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, "true");
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason, $"Expected status: RecognizedSpeech, actual status: {result.Reason}");
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
                 var jsonResult = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
                 foreach (var detailedResult in result.Best())
                 {
@@ -1328,7 +1329,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task WordLevelOffsetInMultiTurn()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.WeatherMultiTurns.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].FilePath.GetRootRelativePath());
             this.defaultConfig.SetProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, "true");
             this.defaultConfig.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3000");
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
@@ -1369,7 +1370,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 long wordDuration = 0;
                 for (var i = 0; i < recognizedText.Count; i++)
                 {
-                    AssertMatching(TestData.English.WeatherMultiTurns.Utterances[i], recognizedText[i]);
+                    AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN][i].Text, recognizedText[i]);
                     Assert.IsTrue(utteranceOffsets[i] >= utteranceOffset + utteranceDuration, $"Utterance offset must be in ascending order. the previous offset {utteranceOffset}, the previous duration {utteranceDuration}, the current offset {utteranceOffsets[i]}.");
                     if (i >= 1)
                     {
@@ -1397,12 +1398,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task TestSpeechConfigFromHost()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.hostConfig, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertFuzzyMatching(TestData.English.Weather.Utterance, result.Text);
+                AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
             }
         }
 
@@ -1413,7 +1414,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task CloseOnSessonStart()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             ManualResetEvent disposeEvent = new ManualResetEvent(false);
 
@@ -1433,7 +1434,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task CloseOnRecognizing()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             ManualResetEvent disposeEvent = new ManualResetEvent(false);
 
@@ -1453,7 +1454,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task CloseOnRecognized()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             ManualResetEvent disposeEvent = new ManualResetEvent(false);
 
@@ -1473,7 +1474,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task CloseOnSpeechStart()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             ManualResetEvent disposeEvent = new ManualResetEvent(false);
 
@@ -1493,7 +1494,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task CloseOnConnected()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             ManualResetEvent disposeEvent = new ManualResetEvent(false);
 
@@ -1519,7 +1520,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(false)]
         public async Task LanguageIDRecognitionOnce(bool constructFromSourceLanguageConfig)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath());
             AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig;
             if (constructFromSourceLanguageConfig)
             {
@@ -1561,7 +1562,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
                 var result = await helper.CompleteRecognizeOnceAsync(recognizer).ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, result.Text);
                 var autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult.FromResult(result);
                 Assert.IsNotNull(autoDetectSourceLanguageResult);
                 Assert.AreEqual(Language.DE_DE, autoDetectSourceLanguageResult.Language);
@@ -1579,7 +1580,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(
                                                    this.defaultConfig,
                                                    AutoDetectSourceLanguageConfig.FromLanguages(new string[] { Language.DE_DE, Language.CA_ES }),
-                                                   AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+                                                   AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
                 List<string> recognizedText = new List<string>();
                 List<string> recognizingText = new List<string>();
@@ -1635,7 +1636,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 Assert.IsTrue(recognizingText.Count > 0);
                 Assert.IsTrue(recognizedText.Count > 0);
-                AssertFuzzyMatching(TestData.German.FirstOne.Utterance, recognizedText[0]);
+                AssertFuzzyMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text, recognizedText[0]);
                 Assert.AreEqual(0, errors.Count);
                 Assert.AreEqual(1, lidInHypothesis.Count);
                 Assert.AreEqual(Language.DE_DE, lidInHypothesis.First());
@@ -1645,10 +1646,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
         #endregion
 
-        // [TestMethod]
+        [TestMethod]
+        [Ignore]
         public async Task TestStopAfterErrorIsFast()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             var config = SpeechConfig.FromSubscription("BadKey", "westus2");
 
@@ -1720,7 +1722,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task WordLevelTimingsWorkForLongSpeech()
         {
-            var audioInput = AudioConfig.FromStreamInput(new ContinuousFilePullStream(TestData.English.Batman.AudioFile));
+            var audioInput = AudioConfig.FromStreamInput(new ContinuousFilePullStream(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath()));
 
             ManualResetEvent recognizedEnough = new ManualResetEvent(false);
 

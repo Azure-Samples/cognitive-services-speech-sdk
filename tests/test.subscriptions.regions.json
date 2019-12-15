@@ -1,0 +1,26 @@
+{
+  "UnifiedSpeechSubscription": {
+    "Key": "",
+    "Region": "westus"
+  },
+  "DialogSubscription": {
+    "Key": "",
+    "Region": "westus2"
+  },
+  "LanguageUnderstandingSubscription": {
+    "Key": "",
+    "Region": "westus"
+  },
+  "ConversationTranscriptionPRODSubscription": {
+    "Key": "",
+    "Region": "centralus"
+  },
+  "ConversationTranscriptionPPESubscription": {
+    "Key": "",
+    "Region": "westus2"
+  },
+  "ConversationTranslatorSubscription": {
+    "Key": "",
+    "Region": "westus2"
+  }
+}

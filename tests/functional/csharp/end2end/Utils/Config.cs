@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System;
@@ -11,138 +10,154 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
+namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 {
+    public struct SubscriptionRegion
+    {
+        public string Key { get; set; }
+        public string Region { get; set; }
+    }
+
+    public struct Utterance
+    {
+        public string Text { get; set; }
+        public string ProfanityRaw { get; set; }
+        public string ProfanityMasked { get; set; }
+        public string ProfanityMaskedPattern { get; set; }
+        public string ProfanityRemoved { get; set; }
+        public string ProfanityTagged { get; set; }
+        public int? AudioOffset { get; set; }
+        public int? AudioDuration { get; set; }
+        public int? TextOffset { get; set; }
+        public int? SsmlOffset { get; set; }
+    }
+
+    public struct AudioEntry
+    {
+        public string FilePath { get; set; }
+        public string NativeLanguage { get; set; }
+        public IDictionary<string, Utterance[]> Utterances { get; set; }
+    };
+
+    public struct SubscriptionsRegionsKeys
+    {
+        public static string UNIFIED_SPEECH_SUBSCRIPTION => "UnifiedSpeechSubscription";
+        public static string DIALOG_SUBSCRIPTION => "DialogSubscription";
+        public static string LANGUAGE_UNDERSTANDING_SUBSCRIPTION => "LanguageUnderstandingSubscription";
+        public static string CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION => "ConversationTranscriptionPRODSubscription";
+        public static string CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION => "ConversationTranscriptionPPESubscription";
+        public static string CONVERSATION_TRANSLATOR => "ConversationTranslatorSubscription";
+    }
+
+    // Default settings keys
+    public struct DefaultSettingKeys
+    {
+        public static string ENDPOINT => "Endpoint";
+        public static string DIALOG_FUNCTIONAL_TEST_BOT => "DialogFunctionalTestBot";
+        public static string LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID => "LanguageUnderstandingHomeAutomationAppId";
+        public static string INROOM_AUDIO_ENDPOINT => "InRoomAudioEndpoint";
+        public static string CONVERSATION_TRANSCRIPTION_ENDPOINT => "ConversationTranscriptionEndpoint";
+        public static string LONG_RUNNING => "LongRunning";
+        public static string DEPLOYMENT_ID => "DeploymentId";
+        public static string ONLINE_AUDIO_ENDPOINT => "OnlineAudioEndpoint";
+        public static string INPUT_DIR => "InputDir";
+        public static string CONVERSATION_TRANSLATOR_HOST => "ConversationTranslatorHost";
+        public static string CONVERSATION_TRANSLATOR_SPEECH_ENDPOINT => "ConversationTranslatorSpeechEndpoint";
+        public static string CONVERSATION_TRANSLATOR_CLIENTID => "ConversationTranslatorClientId";
+    }
+
+    // Audio file and utterances keys
+    public struct AudioUtteranceKeys
+    {
+        public static string SINGLE_UTTERANCE_ENGLISH => "SingleUtteranceEnglish";
+        public static string SINGLE_UTTERANCE_CHINESE => "SingleUtteranceChinese";
+        public static string SINGLE_UTTERANCE_MP3 => "SingleUtteranceMP3";
+        public static string SINGLE_UTTERANCE_OPUS => "SingleUtteranceOPUS";
+        public static string SINGLE_UTTERANCE_A_LAW => "SingleUtteranceALaw";
+        public static string SINGLE_UTTERANCE_MU_LAW => "SingleUtteranceMULaw";
+        public static string SINGLE_UTTERANCE_FLAC => "SingleUtteranceFLAC";
+        public static string SINGLE_UTTERANCE_3X => "SingleUtterance3x";
+        public static string SINGLE_UTTERANCE_MULTIPLE_TURNS => "SingleUtteranceMultipleTurns";
+        public static string SINGLE_UTTERANCE_CATALAN => "SingleUtteranceCatalan";
+        public static string MULTIPLE_UTTERANCE_ENGLISH => "MultipleUtteranceEnglish";
+        public static string AUDIO_44_1KHZ => "Audio441Khz";
+        public static string AUDIO_11_KHZ => "Audio11Khz";
+        public static string HEY_CORTANA => "HeyCortana";
+        public static string SINGLE_UTTERANCE_GERMAN => "SingleUtteranceGerman";
+        public static string INTENT_UTTERANCE => "IntentUtterance";
+        public static string AMBIGUOUS_SPEECH => "AmbiguousSpeech";
+        public static string COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1 => "ComputerKeywordWithSingleUtterance1"; // Used to be accept
+        public static string COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2 => "ComputerKeywordWithSingleUtterance2";
+        public static string COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2X => "ComputerKeywordWithSingleUtterance2x"; // Used to be acceptx2
+        public static string COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_3 => "ComputerKeywordWithSingleUtterance3";
+        public static string COMPUTER_KEYWORD_WITH_MULTIPLE_TURNS => "ComputerKeywordWithMultipleTurns";
+        public static string SECRET_KEYWORDS => "SecretKeywords";
+        public static string CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH => "ConversationBetweenTwoPersonsEnglish";
+        public static string PERSON_ENROLLMENT_ENGLISH_1 => "PersonEnrollmentEnglish1";
+        public static string PERSON_ENROLLMENT_ENGLISH_2 => "PersonEnrollmentEnglish2";
+        public static string SINGLE_UTTERANCE_WITH_SPECIAL_CHARACTER => "SingleUtteranceWithSpecialCharacter";
+        public static string SHORT_SILENCE => "ShortSilence";
+        public static string SINGLE_UTTERANCE_WITH_PUNCTUATION => "SingleUtteranceWithPunctuation";
+        public static string PROFANTITY_SINGLE_UTTERANCE_ENGLISH_1 => "ProfanitySingleUtteranceEnglish1";
+        public static string PROFANITY_SINGLE_UTTERANCE_ENGLISH_2 => "ProfanitySingleUtteranceEnglish2";
+    }
     internal class Config
     {
+        private static IDictionary<string, string> _defaultSettingsMap;
+        private static IDictionary<string, AudioEntry> _audioUtterancesMap;
+        private static IDictionary<string, SubscriptionRegion> _subscriptionsRegionsMap;
+
+        public static IDictionary<string, string> DefaultSettingsMap => _defaultSettingsMap;
+        public static IDictionary<string, AudioEntry> AudioUtterancesMap => _audioUtterancesMap;
+        public static IDictionary<string, SubscriptionRegion> SubscriptionsRegionsMap => _subscriptionsRegionsMap;
+
         private TestContext _testContext { get; }
-
-        private static string _inRoomAudioEndpoint;
-        public static string InRoomAudioEndpoint => _inRoomAudioEndpoint;
-
-        private static string _onlineAudioEndpoint;
-        public static string OnlineAudioEndpoint => _onlineAudioEndpoint;
-
-        private static string _inputDir;
-        public static string InputDir => _inputDir;
-
-        private static string _region;
-        public static string Region => _region;
-
-        private static string _deploymentId;
-        public static string DeploymentId => _deploymentId;
-
-        private static string _conversationTranscriptionSubscriptionKey;
-        public static string ConversationTranscriptionSubscriptionKey => _conversationTranscriptionSubscriptionKey;
-
-        private static string _speechRegionForConversationTranscription;
-        public static string SpeechRegionForConversationTranscription => _speechRegionForConversationTranscription;
-
-        private static string _conversationTranscriptionEndpoint;
-        public static string ConversationTranscriptionEndpoint => _conversationTranscriptionEndpoint;
-
-        private static string _conversationTranscriptionPPEKey;
-        public static string ConversationTranscriptionPPEKey => _conversationTranscriptionPPEKey;
-
-        private static string _conversationTranscriptionPRODKey;
-        public static string ConversationTranscriptionPRODKey => _conversationTranscriptionPRODKey;
-
-        private static string _unifiedSpeechSubscriptionKey;
-        public static string UnifiedSpeechSubscriptionKey => _unifiedSpeechSubscriptionKey;
-
-        private static string _languageUnderstandingSubscriptionKey;
-        public static string LanguageUnderstandingSubscriptionKey => _languageUnderstandingSubscriptionKey;
-
-        private static string _languageUnderstandingHomeAutomationAppId;
-        public static string LanguageUnderstandingHomeAutomationAppId => _languageUnderstandingHomeAutomationAppId;
-
-        private static string _languageUnderstandingServiceRegion;
-        public static string LanguageUnderstandingServiceRegion => _languageUnderstandingServiceRegion;
-
-        private static string _dialogSubscriptionKey;
-        public static string DialogSubscriptionKey => _dialogSubscriptionKey;
-
-        private static string _dialogFunctionalTestBot;
-        public static string DialogFunctionalTestBot => _dialogFunctionalTestBot;
-
-        private static string _dialogRegion;
-        public static string DialogRegion => _dialogRegion;
-
-        public static string Endpoint { get; private set; }
-        public static string ConversationTranslatorSubscriptionKey { get; private set; }
-        public static string ConversationTranslatorRegion { get; private set; }
-        public static string ConversationTranslatorHost { get; private set; }
-        public static string ConversationTranslatorSpeechEndpoint { get; private set; }
-        public static string ConversationTranslatorClientId { get; private set; }
 
         public Config(TestContext testContext)
         {
             _testContext = testContext;
 
             InitializeFromJson();
-            TestData.AudioDir = Path.Combine(InputDir, "audio");
-            TestData.KwsDir = Path.Combine(InputDir, "kws");
-            Console.WriteLine("region: " + Region);
-            Console.WriteLine("input directory: " + InputDir);
         }
 
         private static void InitializeFromJson()
         {
-            Dictionary<string, string> configSettings;
+            Deserialize("test.defaults.json", out _defaultSettingsMap);
+            Deserialize("test.audio.utterances.json", out _audioUtterancesMap);
+            Deserialize("test.subscriptions.regions.json", out _subscriptionsRegionsMap);
+        }
 
-            if (File.Exists("./test.settings.json"))
+        private static void Deserialize<T>(string filePath, out T data)
+        {
+            if (File.Exists(filePath))
             {
-                using (FileStream fileStream = new FileStream("./test.settings.json", FileMode.Open, FileAccess.Read))
+                using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
                     using (StreamReader streamReader = new StreamReader(fileStream))
                     {
                         using (JsonTextReader jsonTextReader = new JsonTextReader(streamReader))
                         {
                             JsonSerializer jsonSerializer = new JsonSerializer();
-                            configSettings = jsonSerializer.Deserialize<Dictionary<string, string>>(jsonTextReader);
+                            try
+                            {
+                                data = jsonSerializer.Deserialize<T>(jsonTextReader);
+                            }
+                            catch (JsonException jsonException)
+                            {
+                                Console.WriteLine($"Deserializing test.defaults.json threw an exception {jsonException.Message}");
+                                throw;
+                            }
                         }
                     }
-                }
-
-                if (configSettings != null)
-                {
-                    _inRoomAudioEndpoint = configSettings[SettingNames.InRoomAudioEndpoint];
-                    _onlineAudioEndpoint = configSettings[SettingNames.OnlineAudioEndpoint];
-                    _inputDir = configSettings[SettingNames.InputDir];
-                    _region = configSettings[SettingNames.Region];
-                    _deploymentId = configSettings[SettingNames.DeploymentId];
-
-                    _conversationTranscriptionSubscriptionKey = configSettings[SettingNames.ConversationTranscriptionSubscriptionKey];
-                    _speechRegionForConversationTranscription = configSettings[SettingNames.SpeechRegionForConversationTranscription];
-                    _conversationTranscriptionEndpoint = configSettings[SettingNames.ConversationTranscriptionEndpoint];
-                    _conversationTranscriptionPPEKey = configSettings[SettingNames.ConversationTranscriptionPPEKey];
-                    _conversationTranscriptionPRODKey = configSettings[SettingNames.ConversationTranscriptionPRODKey];
-
-                    _unifiedSpeechSubscriptionKey = configSettings[SettingNames.UnifiedSpeechSubscriptionKey];
-
-                    _languageUnderstandingSubscriptionKey = configSettings[SettingNames.LanguageUnderstandingSubscriptionKey];
-                    _languageUnderstandingHomeAutomationAppId = configSettings[SettingNames.LanguageUnderstandingHomeAutomationAppId];
-                    _languageUnderstandingServiceRegion = configSettings[SettingNames.LanguageUnderstandingServiceRegion];
-
-                    _dialogSubscriptionKey = configSettings[SettingNames.DialogSubscriptionKey];
-                    _dialogFunctionalTestBot = configSettings[SettingNames.DialogFunctionalTestBot];
-                    _dialogRegion = configSettings[SettingNames.DialogRegion];
-
-                    Endpoint = configSettings[SettingNames.Endpoint];
-                    ConversationTranslatorSubscriptionKey = configSettings[nameof(ConversationTranslatorSubscriptionKey)];
-                    ConversationTranslatorRegion = configSettings[nameof(ConversationTranslatorRegion)];
-                    ConversationTranslatorHost = configSettings[nameof(ConversationTranslatorHost)];
-                    ConversationTranslatorSpeechEndpoint = configSettings[nameof(ConversationTranslatorSpeechEndpoint)];
-                    ConversationTranslatorClientId = configSettings[nameof(ConversationTranslatorClientId)];
                 }
             }
             else
             {
-                Console.WriteLine($"test.settings.json file not found searched: {InputDir}");
+                Console.WriteLine($"test.defaults.json file not found searched: {DefaultSettingsMap[DefaultSettingKeys.INPUT_DIR]}");
                 Console.WriteLine($"Current working directory: {Directory.GetCurrentDirectory()}");
+                throw new InvalidOperationException($"json file {filePath} not found!");
             }
         }
-
         public static List<byte[]> GetByteArraysForFilesWithSamePrefix(string dir, string prefix)
         {
             List<byte[]> byteArrList = new List<byte[]>();

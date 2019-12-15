@@ -2,20 +2,22 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.CognitiveServices.Speech.Transcription;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MicrosoftSpeechSDKSamples;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static Config;
     using static ConversationTranscriberTestsHelper;
     using static SpeechRecognitionTestsHelper;
 
@@ -89,7 +91,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ConversationIdWithChinese()
         {
             var config = CreateCTSInRoomSpeechConfig();
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].FilePath.GetRootRelativePath());
             string myConversationId = "的";
             using (var conversation = await Conversation.CreateConversationAsync(config, myConversationId))
             {
@@ -203,7 +205,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ConversationAddParticipant()
         {
             var config = CreateCTSInRoomSpeechConfig();
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].FilePath.GetRootRelativePath());
             var meetingId = Guid.NewGuid().ToString();
             using (var conversation = await Conversation.CreateConversationAsync(config, meetingId))
             {
@@ -218,11 +220,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
                     string voice = voiceSignatureKatie;
-                    var participant = Participant.From("userIdForParticipant", "en-us", voice);
+                    var participant = Participant.From("userIdForParticipant", Language.EN, voice);
                     await conversation.AddParticipantAsync(participant);
 
                     var result = await helper.GetRecognizerResult(conversationTranscriber, meetingId);
-                    Assert.IsTrue(helper.FindTheRef(result, TestData.English.TranscriberAudioData.Utterance));
+                    Assert.IsTrue(helper.FindTheRef(result, AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances[Language.EN][0].Text));
                 }
             }
         }
@@ -230,11 +232,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ConversationAddParticipantFromSubscription()
         {
-            var config = SpeechConfig.FromSubscription(conversationTranscriptionPRODKey, speechRegionForConversationTranscription);
+            var config = SpeechConfig.FromSubscription(conversationTranscriptionPRODKey, conversationTranscriptionPRODRegion);
             config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
             config.SetProperty(PropertyId.Speech_LogFilename, "carbon.log");
 
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].FilePath.GetRootRelativePath());
             var meetingID = Guid.NewGuid().ToString();
             using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
             {
@@ -249,11 +251,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                     // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
                     string voice = voiceSignatureKatie;
-                    var participant = Participant.From("userIdForParticipant", "en-us", voice);
+                    var participant = Participant.From("userIdForParticipant", Language.EN, voice);
                     await conversation.AddParticipantAsync(participant);
 
                     var result = await helper.GetRecognizerResult(conversationTranscriber, meetingID);
-                    Assert.IsTrue(helper.FindTheRef(result, TestData.English.TranscriberAudioData.Utterance));
+                    Assert.IsTrue(helper.FindTheRef(result, AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances[Language.EN][0].Text));
                 }
             }
         }
@@ -262,7 +264,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ConversationRemoveParticipant()
         {
             var config = CreateCTSInRoomSpeechConfig();
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].FilePath.GetRootRelativePath());
             var meetingID = Guid.NewGuid().ToString();
             using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
             {
@@ -290,12 +292,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await conversation.RemoveParticipantAsync(user);
 
                     // Voice signature format as specified here https://aka.ms/cts/signaturegenservice
-                    var participant = Participant.From("userIdForParticipant", "en-us", voiceSignatureKatie);
+                    var participant = Participant.From("userIdForParticipant", Language.EN, voiceSignatureKatie);
                     await conversation.AddParticipantAsync(participant);
                     await conversation.RemoveParticipantAsync(participant);
 
                     var result = await helper.GetRecognizerResult(conversationTranscriber, meetingID);
-                    Assert.IsTrue(helper.FindTheRef(result, TestData.English.TranscriberAudioData.Utterance));
+                    Assert.IsTrue(helper.FindTheRef(result, AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].Utterances[Language.EN][0].Text));
                 }
             }
         }
@@ -372,7 +374,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                             await conversationTranscriber.StartTranscribingAsync().ConfigureAwait(false);
 
                             // open and read the wave file and push the buffers into the recognizer
-                            using (var reader = Util.CreateWavReader(TestData.English.TranscriberAudioData.TwoSpeakersAudio))
+                            using (var reader = Util.CreateWavReader(AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].FilePath.GetRootRelativePath()))
                             {
                                 byte[] buffer = new byte[3200];
                                 while (true)
@@ -411,12 +413,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             List<string> speakers = new List<string>();
             bool bGotReco = false;
 
-            var voiceSignature = CreateVoiceSignatureFromVoiceSample(TestData.English.TranscriberAudioData.KatieVoice);
+            var voiceSignature = CreateVoiceSignatureFromVoiceSample(AudioUtterancesMap[AudioUtteranceKeys.PERSON_ENROLLMENT_ENGLISH_1].FilePath.GetRootRelativePath());
             var signatureKatie = JsonConvert.SerializeObject(voiceSignature.Result.Signature);
-            voiceSignature = CreateVoiceSignatureFromVoiceSample(TestData.English.TranscriberAudioData.SteveVoice);
+            voiceSignature = CreateVoiceSignatureFromVoiceSample(AudioUtterancesMap[AudioUtteranceKeys.PERSON_ENROLLMENT_ENGLISH_2].FilePath.GetRootRelativePath());
             var signatureSteve = JsonConvert.SerializeObject(voiceSignature.Result.Signature);
 
-            using (var audioInput = Util.OpenWavFile(TestData.English.TranscriberAudioData.TwoSpeakersAudio))
+            using (var audioInput = Util.OpenWavFile(AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].FilePath.GetRootRelativePath()))
             {
                 var meetingID = Guid.NewGuid().ToString();
                 using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
@@ -476,8 +478,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         // Add participants to the conversation.
                         // Voice signature needs to be in the following format:
                         // { "Version": <Numeric value>, "Tag": "string", "Data": "string" }
-                        var speakerA = Participant.From("Katie", "en-us", signatureKatie);
-                        var speakerB = Participant.From("Steve", "en-us", signatureSteve);
+                        var speakerA = Participant.From("Katie", Language.EN, signatureKatie);
+                        var speakerB = Participant.From("Steve", Language.EN, signatureSteve);
                         await conversation.AddParticipantAsync(speakerA);
                         await conversation.AddParticipantAsync(speakerB);
 
@@ -504,7 +506,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var config = CreateCTSInRoomSpeechConfig();
             config.OutputFormat = OutputFormat.Detailed;
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TranscriberAudioData.TwoSpeakersAudio);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.CONVERSATION_BETWEEN_TWO_PERSONS_ENGLISH].FilePath.GetRootRelativePath());
             var meetingID = Guid.NewGuid().ToString();
             using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
             {
@@ -527,7 +529,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task CreateVoiceSignature()
         {
-            var result = await CreateVoiceSignatureFromVoiceSample(TestData.English.TranscriberAudioData.KatieVoice);
+            var result = await CreateVoiceSignatureFromVoiceSample(AudioUtterancesMap[AudioUtteranceKeys.PERSON_ENROLLMENT_ENGLISH_1].FilePath.GetRootRelativePath());
             Assert.IsTrue(result.Status == "OK", "Voice signature is not valid");
         }
 

@@ -2,27 +2,22 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Audio;
-
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using static AssertHelpers;
+    using static Config;
     using static SpeechRecognitionTestsHelper;
 
     [TestClass]
     public class SpeechRecognizerDynamicGrammarTests
     {
-        private static string inputDir;
-
-        private static string unifiedRegion, unifiedKey;
+        private static string unifiedRegion;
+        private static string unifiedKey;
 
         private SpeechConfig config;
         private static Config _config;
@@ -32,14 +27,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             _config = new Config(context);
 
-            inputDir = Config.InputDir;
-            TestData.AudioDir = Path.Combine(inputDir, "audio");
-
-            unifiedRegion = Config.Region;
-            unifiedKey = Config.UnifiedSpeechSubscriptionKey;
+            unifiedRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Region;
+            unifiedKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key;
 
             Console.WriteLine("unifiedRegion: " + unifiedRegion);
-            Console.WriteLine("input directory: " + inputDir);
+            Console.WriteLine("input directory: " + DefaultSettingsMap[DefaultSettingKeys.INPUT_DIR]);
         }
 
         [TestInitialize]
@@ -61,8 +53,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(true, 1, 2, 3, 0, 1)]
         public async Task TestPhraseListGrammar(bool usePhraseList, int addUnrelated1At, int addUnrelated2At, int addCorrectTextAt, int clearPhraseListAt, int expected)
         {
-            var defaultRecoText = TestData.English.DgiWreckANiceBeach.DefaultRecoText;
-            var correctRecoText = TestData.English.DgiWreckANiceBeach.CorrectRecoText;
+            var defaultRecoText = TestData.DgiWreckANiceBeach.DefaultRecoText;
+            var correctRecoText = AudioUtterancesMap[AudioUtteranceKeys.AMBIGUOUS_SPEECH].Utterances[Language.EN][0].Text;
             var recoTextExpected = (expected == 0) ? defaultRecoText : correctRecoText;
 
             var unrelatedPhrase1 = "This is a test of the emergency broadcast system.";
@@ -72,7 +64,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             while (true)
             {
-                var audioInput = AudioConfig.FromWavFileInput(TestData.English.DgiWreckANiceBeach.AudioFile);
+                var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.AMBIGUOUS_SPEECH].FilePath.GetRootRelativePath());
                 using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
                 {
                     PhraseListGrammar phraselist = usePhraseList
@@ -111,13 +103,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task TestPhraseListGrammarInChinese()
         {
-            var recoTextExpected = TestData.Chinese.Weather.Utterance;
+            var recoTextExpected = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CHINESE].Utterances[Language.ZH_CN][0].Text;
 
             var unrelatedPhrase1 = "你好"; // "Hello"
             var unrelatedPhrase2 = "键盘"; // "Keyboard"
 
             config.SpeechRecognitionLanguage = Language.ZH_CN;
-            var audioInput = AudioConfig.FromWavFileInput(TestData.Chinese.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_CHINESE].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 PhraseListGrammar phraselist = PhraseListGrammar.FromRecognizer(recognizer);

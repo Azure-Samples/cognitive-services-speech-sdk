@@ -1,0 +1,22 @@
+{
+  "Endpoint": "",
+  "DialogFunctionalTestBot": "ShtxObXGgNo.cwA.GZg.gJSTsKOdg1b-Qtb6-Mci7pOlHQBKUq-rhfMB3rtdy7A",
+  "LanguageUnderstandingHomeAutomationAppId": "b687b851-56c5-4d31-816f-35a741a3f0be",
+  "InRoomAudioEndpoint": "wss://transcribe.princetonppe.customspeech.ai/speech/recognition",
+  "ConversationTranscriptionEndpoint": "wss://transcribe.princetonppe.customspeech.ai/speech/recognition",
+  "LongRunning": "false",
+  "DeploymentId": "ec3432b2-8584-4736-865a-556213b9f6fd",
+  "OnlineAudioEndpoint": "wss://westus2.online.princetondev.customspeech.ai/recognition/onlinemeeting/v1",
+  "InputDir": "input",
+  "ConversationTranslatorHost": "",
+  "ConversationTranslatorSpeechEndpoint": "",
+  "ConversationTranslatorClientId": "D5253FF2-C6B4-4A72-852A-22F8007EC9E8",
+  "Host": "",
+  "SerializedSpeechActivityFile": "activityWithSpeech.json",
+  "Keyword": "Computer"
+}
+
+
+
+
+

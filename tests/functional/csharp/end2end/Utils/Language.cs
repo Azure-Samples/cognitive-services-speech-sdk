@@ -4,19 +4,19 @@
 //
 using System.Collections.Generic;
 
-namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
+namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 {
     sealed class Language
     {
-        public static readonly string EN = "en-US";
-        public static readonly string FR = "fr";
-        public static readonly string TR = "tr";
-        public static readonly string ES = "es";
-        public static readonly string DE = "de";
-        public static readonly string ZH = "zh-Hans";
-        public static readonly string DE_DE = "de-DE";
-        public static readonly string CA_ES = "ca-ES";
-        public static readonly string ZH_CN = "zh-CN";
+        public static string EN => "en-US";
+        public static string FR => "fr";
+        public static string TR => "tr";
+        public static string ES => "es";
+        public static string DE => "de";
+        public static string ZH => "zh-Hans";
+        public static string DE_DE => "de-DE";
+        public static string CA_ES => "ca-ES";
+        public static string ZH_CN => "zh-CN";
 
         // List of speech-to-text codes are copied from https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support [7 dec 2018]
         public static readonly string[] Speech2TextAll =

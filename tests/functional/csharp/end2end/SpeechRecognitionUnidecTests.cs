@@ -2,20 +2,15 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Audio;
-using Microsoft.CognitiveServices.Speech;
-
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using static AssertHelpers;
+    using static Config;
     using static SpeechRecognitionTestsHelper;
 
     [TestClass]
@@ -30,17 +25,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.OfflineUnidec)]
         public async Task OfflineUnidecRecognizeFromFileSingleShot()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.WeatherMultiTurns.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.offlineConfig, audioInput)))
             {
-                var numUtterances = TestData.English.WeatherMultiTurns.Utterances.Length;
+                var numUtterances = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN].Length;
 
                 for (var i = 0; i < numUtterances; i++)
                 {
                     var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                     Assert.AreEqual(ResultReason.RecognizedSpeech, result.Reason);
-                    Assert.IsTrue(TestData.English.WeatherMultiTurns.Utterances[i].IndexOf(result.Text, StringComparison.OrdinalIgnoreCase) >= 0,
-                        $"Utterance {i}: Expected '{TestData.English.WeatherMultiTurns.Utterances[i]}', actual '{result.Text}'");
+                    Assert.IsTrue(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN][i].Text.IndexOf(result.Text, StringComparison.OrdinalIgnoreCase) >= 0,
+                        $"Utterance {i}: Expected '{AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN][i]}', actual '{result.Text}'");
                 }
             }
         }
@@ -48,10 +43,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.OfflineUnidec)]
         public async Task OfflineUnidecRecognizeFromFileContinuous()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.WeatherMultiTurns.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.offlineConfig, audioInput)))
             {
-                var numUtterances = TestData.English.WeatherMultiTurns.Utterances.Length;
+                var numUtterances = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN].Length;
 
                 for (var i = 0; i < numUtterances; i++)
                 {
@@ -82,8 +77,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(5)));
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
 
-                    Assert.IsTrue(TestData.English.WeatherMultiTurns.Utterances[i].IndexOf(resultText, StringComparison.OrdinalIgnoreCase) >= 0,
-                        $"Utterance {i}: Expected '{TestData.English.WeatherMultiTurns.Utterances[i]}', actual '{resultText}'");
+                    Assert.IsTrue(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN][i].Text.IndexOf(resultText, StringComparison.OrdinalIgnoreCase) >= 0,
+                        $"Utterance {i}: Expected '{AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_MULTIPLE_TURNS].Utterances[Language.EN][i].Text}', actual '{resultText}'");
                 }
             }
         }
@@ -92,7 +87,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.offlineConfig, audioInput)))
@@ -142,7 +137,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromWavFileInput(str);
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.offlineConfig, audioInput)))

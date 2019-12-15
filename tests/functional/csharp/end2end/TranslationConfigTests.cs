@@ -2,20 +2,17 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using static TranslationTestsHelper;
+    using static Config;
     using static SpeechRecognitionTestsHelper;
+    using static TranslationTestsHelper;
 
     [TestClass]
     public sealed class TranslationConfigTests : RecognitionTestBase
@@ -78,13 +75,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.SetProperty(PropertyId.SpeechServiceResponse_PostProcessingOption, "TrueText");
 
             string connectionUrl;
-            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
-                AssertMatching(TestData.German.Weather.Utterance, result.Translations[Language.DE]);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.DE][0].Text, result.Translations[Language.DE]);
                 // Check no word-level timestamps included, but only detailed output.
                 var jsonResult = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
                 Assert.IsFalse(jsonResult.Contains("Words"), "Word-level timestamps not expected. Returned JSON: " + jsonResult);
@@ -118,13 +115,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.EnableDictation();
 
             string connectionUrl;
-            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
-                AssertMatching(TestData.German.Weather.Utterance, result.Translations[Language.DE]);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.DE][0].Text, result.Translations[Language.DE]);
                 var jsonResult = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
                 Assert.IsTrue(jsonResult.Contains("Words"), "No word-level timestamps. Returned JSON: " + jsonResult);
                 AssertDetailedOutput(result, true);
@@ -158,13 +155,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             config.SetProperty(PropertyId.SpeechServiceResponse_PostProcessingOption, "TrueText");
 
             string connectionUrl;
-            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile))))
+            using (var recognizer = TrackSessionId(new TranslationRecognizer(config, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath()))))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 connectionUrl = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_Url);
                 Assert.AreEqual(ResultReason.TranslatedSpeech, result.Reason);
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
-                AssertMatching(TestData.German.Weather.Utterance, result.Translations[Language.DE]);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.DE][0].Text, result.Translations[Language.DE]);
             }
             Assert.IsTrue(connectionUrl.Length > 0);
 

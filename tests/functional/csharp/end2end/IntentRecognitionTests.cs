@@ -2,23 +2,19 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Intent;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using System.Threading;
     using static AssertHelpers;
+    using static Config;
     using static SpeechRecognitionTestsHelper;
 
     [TestClass]
@@ -40,18 +36,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             _config = new Config(context);
 
-            languageUnderstandingSubscriptionKey = Config.LanguageUnderstandingSubscriptionKey;
-            languageUnderstandingServiceRegion = Config.LanguageUnderstandingServiceRegion;
-            languageUnderstandingHomeAutomationAppId = Config.LanguageUnderstandingHomeAutomationAppId;
+            languageUnderstandingSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Key;
+            languageUnderstandingServiceRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Region;
+            languageUnderstandingHomeAutomationAppId = DefaultSettingsMap[DefaultSettingKeys.LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID];
             var intentRegionInUrl = MapToIntentServiceRegion(languageUnderstandingServiceRegion);
             endpointInString = String.Format("wss://speech.platform.bing.com/speech/{0}/recognition/interactive/cognitiveservices/v1", intentRegionInUrl);
             endpointUrl = new Uri(endpointInString);
             hostInString = String.Format("wss://speech.platform.bing.com");
             hostUrl = new Uri(hostInString);
-
-            var inputDir = Config.InputDir;
-            TestData.AudioDir = Path.Combine(inputDir, "audio");
-            TestData.KwsDir = Path.Combine(inputDir, "kws");
         }
 
         [TestInitialize]
@@ -108,7 +100,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow("intent-name-that-doesnt-exist", "my-custom-intent-id-string", "")]
         public async Task RecognizeIntent(string intentName, string intentId, string expectedIntentId)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
@@ -135,7 +127,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     string.IsNullOrEmpty(expectedIntentId) ? ResultReason.RecognizedSpeech : ResultReason.RecognizedIntent,
                     result.Reason);
                 Assert.AreEqual(expectedIntentId, result.IntentId);
-                Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);
+                Assert.AreEqual(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text, result.Text);
                 var json = result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
                 Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
                 // TODO check JSON validity
@@ -145,7 +137,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task RecognizeIntentSpecialCharacters()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TStockValue.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_SPECIAL_CHARACTER].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
@@ -161,7 +153,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var token = "x";
             var config = SpeechConfig.FromAuthorizationToken(token, "westus");
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             using (var recognizer = new IntentRecognizer(config, audioInput))
             {
@@ -179,19 +171,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var invalidToken = "InvalidToken";
             var configWithToken = SpeechConfig.FromAuthorizationToken(invalidToken, languageUnderstandingServiceRegion);
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             using (var recognizer = TrackSessionId(new IntentRecognizer(configWithToken, audioInput)))
             {
                 Assert.AreEqual(invalidToken, recognizer.AuthorizationToken);
 
-                var newToken = await Config.GetToken(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
+                var newToken = await GetToken(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
                 recognizer.AuthorizationToken = newToken;
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(newToken, recognizer.AuthorizationToken);
-                AssertMatching(TestData.English.Weather.Utterance, result.Text);
+                AssertMatching(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].Utterances[Language.EN][0].Text, result.Text);
             }
         }
 
@@ -202,9 +194,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow(true, true)]
         public async Task RecognizeIntentSimplePhrase(bool matchingPhrase, bool singleArgument)
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].FilePath.GetRootRelativePath());
 
-            var phrase = matchingPhrase ? TestData.English.HomeAutomation.TurnOn.Utterance : "do not match this";
+            var phrase = matchingPhrase ? AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text : "do not match this";
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
                 var someId = "id1";
@@ -222,7 +214,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 //Assert.AreEqual(
                 //    string.IsNullOrEmpty(expectedId) ? ResultReason.RecognizedSpeech : ResultReason.RecognizedIntent,
                 //    result.Reason);
-                Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);
+                Assert.AreEqual(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text, result.Text);
                 Assert.AreEqual(expectedId, result.IntentId,
                     $"Unexpected intent ID for singleArgument={singleArgument} matchingPhrase={matchingPhrase}: is {result.IntentId}, expected {expectedId}");
             }
@@ -231,7 +223,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task IntentRecognizerConnectedEvent()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].FilePath.GetRootRelativePath());
             int connectedEventCount = 0;
             int disconnectedEventCount = 0;
             EventHandler<ConnectionEventArgs> myConnectedHandler = (s, e) =>
@@ -280,7 +272,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void IntentRecognizerUsingConnectionOpen()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
                 using (var connection = Connection.FromRecognizer(recognizer))
@@ -295,9 +287,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ExpectedException(typeof(ObjectDisposedException))]
         public async Task AsyncRecognitionAfterDisposingIntentRecognizer()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].FilePath.GetRootRelativePath());
             var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput));
-            recognizer.AddIntent(TestData.English.HomeAutomation.TurnOn.Utterance);
+            recognizer.AddIntent(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text);
             recognizer.Dispose();
             await recognizer.StartContinuousRecognitionAsync();
         }
@@ -306,9 +298,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ExpectedException(typeof(InvalidOperationException))]
         public void DisposingIntentRecognizerWhileAsyncRecognition()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].FilePath.GetRootRelativePath());
             var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput));
-            recognizer.AddIntent(TestData.English.HomeAutomation.TurnOn.Utterance);
+            recognizer.AddIntent(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text);
             recognizer = DoAsyncRecognitionNotAwaited(recognizer);
         }
 
@@ -317,9 +309,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var configFromEndpoint = SpeechConfig.FromEndpoint(endpointUrl, languageUnderstandingSubscriptionKey);
             configFromEndpoint.SpeechRecognitionLanguage = Language.EN;
-            using (var recognizer = TrackSessionId(new IntentRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile))))
+            using (var recognizer = TrackSessionId(new IntentRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].FilePath.GetRootRelativePath()))))
             {
-                var phrase = TestData.English.HomeAutomation.TurnOn.Utterance;
+                var phrase = AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text;
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
                 recognizer.AddAllIntents(model);
 
@@ -345,9 +337,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             configFromEndpoint.SpeechRecognitionLanguage = Language.DE_DE;
             // Although we set output format to simple, the intent recognizer will set it to detailed for checking intents.
             configFromEndpoint.OutputFormat = OutputFormat.Simple;
-            using (var recognizer = TrackSessionId(new IntentRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
+            using (var recognizer = TrackSessionId(new IntentRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].FilePath.GetRootRelativePath()))))
             {
-                var phrase = TestData.German.FirstOne.Utterance;
+                var phrase = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_GERMAN].Utterances[Language.DE][0].Text;
                 recognizer.AddIntent(phrase);
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
@@ -377,9 +369,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             configFromEndpoint.SpeechRecognitionLanguage = "Invalid-Language";
             configFromEndpoint.OutputFormat = OutputFormat.Simple;
 
-            using (var recognizer = TrackSessionId(new IntentRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile))))
+            using (var recognizer = TrackSessionId(new IntentRecognizer(configFromEndpoint, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].FilePath.GetRootRelativePath()))))
             {
-                var phrase = TestData.English.HomeAutomation.TurnOn.Utterance;
+                var phrase = AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text;
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
                 recognizer.AddAllIntents(model);
 
@@ -401,7 +393,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task RecognizeIntentDefaultLanguage()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.TStockValue.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_WITH_SPECIAL_CHARACTER].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
                 var recoLanguage = recognizer.Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
@@ -419,9 +411,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var configFromHost = SpeechConfig.FromHost(hostUrl, languageUnderstandingSubscriptionKey);
             configFromHost.SpeechRecognitionLanguage = Language.EN;
-            using (var recognizer = TrackSessionId(new IntentRecognizer(configFromHost, AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile))))
+            using (var recognizer = TrackSessionId(new IntentRecognizer(configFromHost, AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].FilePath.GetRootRelativePath()))))
             {
-                var phrase = TestData.English.HomeAutomation.TurnOn.Utterance;
+                var phrase = AudioUtterancesMap[AudioUtteranceKeys.INTENT_UTTERANCE].Utterances[Language.EN][0].Text;
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
                 recognizer.AddAllIntents(model);
 

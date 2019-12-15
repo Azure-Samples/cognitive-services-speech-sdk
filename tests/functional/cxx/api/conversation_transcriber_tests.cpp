@@ -178,6 +178,8 @@ TEST_CASE("conversation add while pumping", "[api][cxx]")
     WaitForResult(result->ready.get_future(), 15min);
     auto text = GetText(result->phrases);
     INFO(text);
+
+    // Changed verification string from 'ABC' to '123' per suggestion as work around from Sarah Lu
     bool res = VerifyTextAndSpeaker(result->phrases, "123.", "Unidentified") || VerifyTextAndSpeaker(result->phrases, "123", "Unidentified");
     SPXTEST_REQUIRE(res == true);
 }

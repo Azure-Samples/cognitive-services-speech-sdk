@@ -2,22 +2,19 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Microsoft.CognitiveServices.Speech.Intent;
-using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.CognitiveServices.Speech.Audio;
-
+using Microsoft.CognitiveServices.Speech.Intent;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
+using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using System.Threading;
-    using static AssertHelpers;
+    using static Config;
     using static SpeechRecognitionTestsHelper;
 
     // provides an input stream that does playback a file in "realtime", i.e.,
@@ -155,11 +152,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static void TestClassinitialize(TestContext context)
         {
             BaseClassInit(context);
-            deploymentId = Config.DeploymentId;
+            deploymentId = DefaultSettingsMap[DefaultSettingKeys.DEPLOYMENT_ID];
 
-            languageUnderstandingSubscriptionKey = Config.LanguageUnderstandingSubscriptionKey;
-            languageUnderstandingServiceRegion = Config.LanguageUnderstandingServiceRegion;
-            languageUnderstandingHomeAutomationAppId = Config.LanguageUnderstandingHomeAutomationAppId;
+            languageUnderstandingSubscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Key;
+            languageUnderstandingServiceRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.LANGUAGE_UNDERSTANDING_SUBSCRIPTION].Region;
+            languageUnderstandingHomeAutomationAppId = DefaultSettingsMap[DefaultSettingKeys.LANGUAGE_UNDERSTANDING_HOME_AUTOMATION_APP_ID];
         }
 
         [TestInitialize]
@@ -171,7 +168,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task TestSpeechSpeechKeywordspotterStartStop()
         {
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
@@ -189,7 +186,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task TestSpeechKeywordspotterNonExisting()
         {
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
@@ -220,7 +217,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
@@ -270,7 +267,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromWavFileInput(str);
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
@@ -324,7 +321,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var tcsFoundRecognized = -1;
             var error = String.Empty;
 
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
@@ -377,7 +374,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            var str = TestData.Kws.Secret.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.SECRET_KEYWORDS].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
@@ -429,7 +426,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             bool tcsSecret = false;
             bool tcsComputer = false;
 
-            var audioInputSecret = AudioConfig.FromStreamInput(PullAudioInputStream.CreatePullStream(new RealTimeMultiFileStream(TestData.Kws.Secret.AudioFile)));
+            var audioInputSecret = AudioConfig.FromStreamInput(AudioInputStream.CreatePullStream(new RealTimeMultiFileStream(AudioUtterancesMap[AudioUtteranceKeys.SECRET_KEYWORDS].FilePath.GetRootRelativePath())));
             var recognizerSecret = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInputSecret));
             {
                 recognizerSecret.Recognizing += (s, e) =>
@@ -466,7 +463,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
             }
 
-            var audioInputComputer = AudioConfig.FromStreamInput(PullAudioInputStream.CreatePullStream(new RealTimeMultiFileStream(TestData.Kws.Computer.AudioFile)));
+            var audioInputComputer = AudioConfig.FromStreamInput(AudioInputStream.CreatePullStream(new RealTimeMultiFileStream(AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath())));
             var recognizerComputer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInputComputer));
             {
                 recognizerComputer.Recognizing += (s, e) =>
@@ -528,7 +525,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var tcsComputer = false;
             var numCanceledCalled = 0;
 
-            var audioInputSecret = AudioConfig.FromWavFileInput(TestData.Kws.Secret.AudioFile);
+            var audioInputSecret = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SECRET_KEYWORDS].FilePath.GetRootRelativePath());
             var recognizerSecret = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInputSecret));
             {
                 recognizerSecret.Recognizing += (s, e) =>
@@ -563,7 +560,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
             }
 
-            var audioInputComputer = AudioConfig.FromWavFileInput(TestData.Kws.Computer.AudioFile);
+            var audioInputComputer = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath());
             var recognizerComputer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInputComputer));
             {
                 recognizerComputer.Recognizing += (s, e) =>
@@ -627,7 +624,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var tcs = new TaskCompletionSource<bool>();
             var count = 0;
 
-            var stream = new RealTimeMultiFileStream(TestData.Kws.Computer.AudioFile, TestData.Kws.Computer.AudioFile);
+            var stream = new RealTimeMultiFileStream(AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath(),
+                AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath());
 
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(stream));
 
@@ -684,7 +682,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var count = 0;
             var error = String.Empty;
 
-            var stream = new RealTimeMultiFileStream(TestData.Kws.Computer2.AudioFile1, TestData.Kws.Computer2.AudioFile2);
+            var stream = new RealTimeMultiFileStream(AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath(),
+                AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2].FilePath.GetRootRelativePath());
 
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(stream));
 
@@ -750,7 +749,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var tcs = new TaskCompletionSource<bool>();
             var tcsCanceled = new TaskCompletionSource<bool>();
 
-            var str = TestData.English.Weather.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
             var numCanceledCalled = 0;
 
@@ -800,7 +799,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task TestSpeechMockKeywordspotterStartStop()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
                 // TODO: use some explicit model file, not re-use the wave here
@@ -818,7 +817,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var config = SpeechConfig.FromSubscription(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
 
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
             using (var recognizer = new IntentRecognizer(config, audioInput))
@@ -847,7 +846,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var tcs = new TaskCompletionSource<bool>();
             var tcsCanceled = new TaskCompletionSource<bool>();
 
-            var str = TestData.English.Weather.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
             var numCanceledCalled = 0;
 
@@ -913,7 +912,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var tcsKeywordRecognized = 0;
             var config = SpeechConfig.FromSubscription(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
 
-            var stream = new RealTimeMultiFileStream(TestData.Kws.Computer2.AudioFile1, TestData.Kws.Computer2.AudioFile2);
+            var stream = new RealTimeMultiFileStream(AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath(),
+                AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2].FilePath.GetRootRelativePath());
 
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(stream));
 
@@ -995,7 +995,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var tcs = new TaskCompletionSource<bool>();
             var config = SpeechConfig.FromSubscription(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
 
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
             using (var recognizer = new IntentRecognizer(config, audioInput))
@@ -1051,13 +1051,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var tcs = new TaskCompletionSource<bool>();
             var tcsCanceled = new TaskCompletionSource<bool>();
 
-            var str = TestData.English.Weather.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
             var numCanceledCalled = 0;
 
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
-            config.SpeechRecognitionLanguage = "en-US";
-            config.AddTargetLanguage("de");
+            config.SpeechRecognitionLanguage = Language.EN;
+            config.AddTargetLanguage(Language.DE);
 
             using (var recognizer = new TranslationRecognizer(config, audioInput))
             {
@@ -1111,12 +1111,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
 
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
-            config.SpeechRecognitionLanguage = "en-US";
-            config.AddTargetLanguage("de");
+            config.SpeechRecognitionLanguage = Language.EN;
+            config.AddTargetLanguage(Language.DE);
 
             using (var recognizer = new TranslationRecognizer(config, audioInput))
             {
@@ -1166,20 +1166,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore("Temporarily Disabled because of race condition on second keyword detection, see bug #1849546")]
         public async Task TestTranslationKeywordspotterComputerFound2DifferentUtterances()
         {
             var count = 0;
             var tcs = new TaskCompletionSource<bool>();
             var error = String.Empty;
 
-            var stream = new RealTimeMultiFileStream(TestData.Kws.Computer2.AudioFile1, TestData.Kws.Computer2.AudioFile2);
+            var stream = new RealTimeMultiFileStream(AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath(),
+                AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_2].FilePath.GetRootRelativePath());
 
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(stream));
 
             var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
-            config.SpeechRecognitionLanguage = "en-US";
-            config.AddTargetLanguage("de");
+            config.SpeechRecognitionLanguage = Language.EN;
+            config.AddTargetLanguage(Language.DE);
 
             using (var recognizer = new TranslationRecognizer(config, audioInput))
             {
@@ -1257,7 +1257,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task CloseOnSessonStart()
         {
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
             ManualResetEvent disposeEvent = new ManualResetEvent(false);
 
@@ -1278,7 +1278,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task CloseOnRecognizing()
         {
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
             ManualResetEvent disposeEvent = new ManualResetEvent(false);
 
@@ -1299,7 +1299,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task CloseOnRecognized()
         {
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
             ManualResetEvent disposeEvent = new ManualResetEvent(false);
 
@@ -1320,7 +1320,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task CloseOnSpeechStart()
         {
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
             ManualResetEvent disposeEvent = new ManualResetEvent(false);
 
@@ -1341,7 +1341,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task CloseOnConnected()
         {
-            var str = TestData.Kws.Computer.AudioFile;
+            var str = AudioUtterancesMap[AudioUtteranceKeys.COMPUTER_KEYWORD_WITH_SINGLE_UTTERANCE_1].FilePath.GetRootRelativePath();
             var audioInput = AudioConfig.FromStreamInput(new PullAudioInputStream(new RealTimeAudioInputStream(str)));
             ManualResetEvent disposeEvent = new ManualResetEvent(false);
 

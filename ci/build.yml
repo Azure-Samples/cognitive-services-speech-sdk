@@ -88,6 +88,33 @@ variables:
         "operationSetCode": "MacAppDeveloperSign"
       }
     ]
+  KEYS_AND_REGIONS: |
+    {
+      "UnifiedSpeechSubscription": {
+        "Key": "$(NorthEuropeKeySkyMan)",
+        "Region": "northeurope"
+      },
+      "DialogSubscription": {
+        "Key": "$(DialogSubscriptionKey)",
+        "Region": "$(DialogRegion)"
+      },
+      "LanguageUnderstandingSubscription": {
+        "Key": "$(luis-westus-s0-201809-key1)",
+        "Region": "westus"
+      },
+      "ConversationTranscriptionPRODSubscription": {
+        "Key": "$(ConverstationTranscriptionKeyCentralUS20190509)",
+        "Region": "centralus"
+      },
+      "ConversationTranscriptionPPESubscription": {
+        "Key": "$(ConverstationTranscriptionKeyWestUS220190509)",
+        "Region": "westus"
+      },
+      "ConversationTranslatorSubscription": {
+        "Key": "$(DialogSubscriptionKey)",
+        "Region": "$(DialogRegion)"
+      }
+    }
   SPEECHSDK_MAVEN_ARTIFACT_ID: client-sdk
   SPEECHSDK_MAVEN_GROUP_ID: com.microsoft.cognitiveservices.speech
   SPEECHSDK_NUGET_VERSION: 4.6

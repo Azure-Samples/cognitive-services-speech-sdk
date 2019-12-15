@@ -5,10 +5,8 @@
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MicrosoftSpeechSDKSamples;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd

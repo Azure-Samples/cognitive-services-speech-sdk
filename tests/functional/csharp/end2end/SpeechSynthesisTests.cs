@@ -2,22 +2,19 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CognitiveServices.Speech.Audio;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using static AssertHelpers;
-    using static SpeechRecognitionTestsHelper;
+    using static Config;
 
     [TestClass]
     public class SpeechSynthesisTests : SynthesisTestBase
@@ -453,7 +450,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 Assert.AreEqual("InvalidToken", synthesizer.AuthorizationToken);
 
-                synthesizer.AuthorizationToken = await Config.GetToken(subscriptionKey, region);
+                synthesizer.AuthorizationToken = await GetToken(subscriptionKey, region);
 
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {
@@ -949,7 +946,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 Assert.AreEqual("InvalidToken", synthesizer.AuthorizationToken);
 
-                synthesizer.AuthorizationToken = await Config.GetToken(subscriptionKey, region);
+                synthesizer.AuthorizationToken = await GetToken(subscriptionKey, region);
 
                 using (var result1 = await synthesizer.SpeakTextAsync("{{{text1}}}")) // "{{{text1}}}" has completed rendering, and available in result1
                 {

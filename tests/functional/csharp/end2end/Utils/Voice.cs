@@ -4,7 +4,7 @@
 //
 using System.Collections.Generic;
 
-namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
+namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils
 {
     sealed class Voice
     {

@@ -2,19 +2,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using Microsoft.CognitiveServices.Speech.Transcription;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MicrosoftSpeechSDKSamples;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using System.IO;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using Microsoft.CognitiveServices.Speech.Transcription;
-
     sealed class ConversationTranscriberTestsHelper
     {
         private TaskCompletionSource<int> taskCompletionSource;

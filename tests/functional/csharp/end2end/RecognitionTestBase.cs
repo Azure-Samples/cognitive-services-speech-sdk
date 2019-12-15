@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
@@ -9,11 +10,21 @@ using System.Runtime.CompilerServices;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static Config;
+
     [TestClass]
     public class RecognitionTestBase
     {
-        public static string inputDir, subscriptionKey, region, conversationTranscriptionEndpoint, conversationTranscriptionPPEKey, conversationTranscriptionPRODKey, speechRegionForConversationTranscription;
-        public SpeechConfig defaultConfig, hostConfig, offlineConfig;
+        public static string subscriptionKey;
+        public static string region;
+        public static string conversationTranscriptionEndpoint;
+        public static string conversationTranscriptionPPEKey;
+        public static string conversationTranscriptionPPERegion;
+        public static string conversationTranscriptionPRODKey;
+        public static string conversationTranscriptionPRODRegion;
+        public SpeechConfig defaultConfig;
+        public SpeechConfig hostConfig;
+        public SpeechConfig offlineConfig;
         private static Config _config;
 
         public TestContext TestContext { get; set; }
@@ -22,19 +33,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             _config = new Config(context);
 
-            subscriptionKey = Config.UnifiedSpeechSubscriptionKey;
-            region = Config.Region;
-            inputDir = Config.InputDir;
-            conversationTranscriptionEndpoint = Config.ConversationTranscriptionEndpoint;
-            conversationTranscriptionPPEKey = Config.ConversationTranscriptionPPEKey;
-            conversationTranscriptionPRODKey = Config.ConversationTranscriptionPRODKey;
-            speechRegionForConversationTranscription = Config.SpeechRegionForConversationTranscription;
-
-            TestData.AudioDir = Path.Combine(inputDir, "audio");
-            TestData.KwsDir = Path.Combine(inputDir, "kws");
+            subscriptionKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Key;
+            region = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.UNIFIED_SPEECH_SUBSCRIPTION].Region;
+            conversationTranscriptionEndpoint = DefaultSettingsMap[DefaultSettingKeys.CONVERSATION_TRANSCRIPTION_ENDPOINT];
+            conversationTranscriptionPPEKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Key;
+            conversationTranscriptionPPERegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PPE_SUBSCRIPTION].Region;
+            conversationTranscriptionPRODKey = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Key;
+            conversationTranscriptionPRODRegion = SubscriptionsRegionsMap[SubscriptionsRegionsKeys.CONVERSATION_TRANSCRIPTION_PROD_SUBSCRIPTION].Region;
 
             Console.WriteLine("region: " + region);
-            Console.WriteLine("input directory: " + inputDir);
+            Console.WriteLine("input directory: " + DefaultSettingsMap[DefaultSettingKeys.INPUT_DIR]);
         }
 
         [TestInitialize]

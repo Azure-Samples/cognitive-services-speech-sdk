@@ -2,20 +2,18 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.Tests.EndToEnd.Utils;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CognitiveServices.Speech.Audio;
-using Microsoft.CognitiveServices.Speech;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
-    using static AssertHelpers;
+    using static Config;
     using static SpeechRecognitionTestsHelper;
 
     [TestClass]
@@ -39,7 +37,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void SwitchLogFileNames()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             var baseName = "logifile";
 
@@ -52,7 +50,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task StartAndStopLogging()
         {
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             var baseName = Path.GetTempFileName();
 
@@ -63,7 +61,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
             }
 
-            audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             long size = 0;
             FileInfo fi;
@@ -106,7 +104,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             ManualResetEvent stoppedEvent = new ManualResetEvent(false);
 
-            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.MULTIPLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
             var baseName = Path.GetTempFileName();
             File.Delete(baseName);
 
@@ -119,7 +117,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                 stoppedEvent.WaitOne();
             }
-            audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            audioInput = AudioConfig.FromWavFileInput(AudioUtterancesMap[AudioUtteranceKeys.SINGLE_UTTERANCE_ENGLISH].FilePath.GetRootRelativePath());
 
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.defaultConfig, audioInput)))
             {
